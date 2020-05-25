@@ -6,10 +6,11 @@ import { EnvUtil } from '@travetto/boot/src/env';
 import { color } from '@travetto/cli/src/color';
 import { CompletionConfig } from '@travetto/cli/src/types';
 
-import { handleFailure, CachedAppConfig } from './lib/util';
-import { AppListUtil } from './lib/app-list';
+import { handleFailure } from './lib/util';
+import { FindUtil } from './lib/find';
 import { RunUtil } from './lib/run';
 import { HelpUtil, AppCommand } from './lib/help';
+import { CachedAppConfig } from '../src/types';
 
 
 let listHelper: Function;
@@ -21,7 +22,7 @@ let apps: CachedAppConfig[];
  */
 export async function setup() {
   try {
-    apps = await AppListUtil.getList();
+    apps = (await FindUtil.getList()) || [];
     listHelper = HelpUtil.generateAppHelpList.bind(HelpUtil, apps, {});
   } catch (e) {
     console.error(e);
@@ -43,7 +44,7 @@ export function init() {
     .option('-e, --env [env]', 'Application environment (dev|prod|<any>)', 'dev')
     .option('-r, --root [root]', 'Application root, defaults to associated root by name')
     .option('-w, --watch [watch]', 'Run the application in watch mode, requires @travetto/watch (default: auto)', CliUtil.isBoolean)
-    .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [])
+    .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [] as string[])
     .action(async (app: string, args: string[], cmd: commander.Command & AppCommand) => {
 
       // Determine if watch was passed in
@@ -108,7 +109,7 @@ export function init() {
         if (err.message.startsWith('Invalid parameter')) {
           console.error(err.message);
           console.error();
-          console.error(`Usage: ${HelpUtil.getAppUsage((await AppListUtil.getByName(app))!)}`);
+          console.error(`Usage: ${HelpUtil.getAppUsage((await FindUtil.getByName(app))!)}`);
           process.exit(1);
         } else {
           handleFailure(err), 1;
@@ -122,7 +123,7 @@ export function init() {
  */
 export async function complete(c: CompletionConfig) {
   try {
-    apps = await AppListUtil.getList();
+    apps = await FindUtil.getList() || [];
     const env = ['prod', 'dev'];
     const bool = ['yes', 'no'];
     const profiles = fs.readdirSync(process.cwd())

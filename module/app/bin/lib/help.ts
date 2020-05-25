@@ -1,6 +1,6 @@
 import { color } from '@travetto/cli/src/color';
 import { RunUtil } from './run';
-import { CachedAppConfig } from './util';
+import { CachedAppConfig } from '../../src/types';
 
 export interface AppCommand {
   watchReal: boolean;

@@ -1,10 +1,3 @@
-import { ApplicationConfig } from '../../src/types';
-
-export interface CachedAppConfig extends ApplicationConfig {
-  appRoot: string;
-  generatedTime: number;
-}
-
 /**
  * Handle app execution failure, with ability to set exit codes
  */

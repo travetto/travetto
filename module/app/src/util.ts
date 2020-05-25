@@ -18,24 +18,30 @@ export class AppUtil {
     }
   }
 
+  /**
+   * Listen for a closeable item. Returns two methods:
+   * - wait (a promise result), and
+   * - close Terminates the closeable
+   * @param server
+   */
   static listenToCloseable(server: {
     close(cb?: Function): void;
     on(type: 'close', cb: Function): void;
   }): ApplicationHandle {
     return {
-      kill: () => new Promise(res => server.close(res)),
+      close: () => new Promise(res => server.close(res)),
       wait: () => new Promise(res => server.on('close', res))
     };
   }
 
   static isHandle(o: any): o is ApplicationHandle {
-    return o && ('wait' in o || 'kill' in o);
+    return o && ('wait' in o || 'close' in o);
   }
 
   static async processHandle(o: ApplicationHandle) {
     // If we got back an app listener
-    if ('kill' in o) {
-      ShutdownManager.onShutdown('app.handle', () => o.kill!()); // Tie shutdown into app kill
+    if ('close' in o) {
+      ShutdownManager.onShutdown('app.handle', () => o.close!()); // Tie shutdown into app kill
     }
     if ('wait' in o) { // Wait for close signal
       await o.wait!();

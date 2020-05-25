@@ -29,13 +29,21 @@ export interface ApplicationConfig<T = any> {
 }
 
 /**
+ * App config that has been cached
+ */
+export interface CachedAppConfig extends ApplicationConfig {
+  appRoot: string;
+  generatedTime: number;
+}
+
+/**
  * A pattern that can be used to manage the run state of an application
  */
 export interface ApplicationHandle {
   /**
-   * Can kill an application, if defined
+   * Can close an application, if defined
    */
-  kill?(): Promise<any>;
+  close?(): Promise<any>;
   /**
    * Can wait for an application if defined
    */
