@@ -23,6 +23,33 @@ export class $ApplicationRegistry {
   }
 
   /**
+   * Log app init
+   */
+  logInit(config: ApplicationConfig) {
+
+    // Log startup
+    console.log('Running application', config.name, config.filename);
+    console.log(`Configured`, util.inspect({
+      app: AppInfo,
+      env: Env.toJSON(),
+      config: Env.prod ? ConfigManager.getSecure() : ConfigManager.get()
+    }, false, 10, true));
+  }
+
+  /**
+   * Resolve parameters against the config
+   */
+  resolveParameters(config: ApplicationConfig, args: string[]) {
+    const appParams = config.params ?? [];
+    const typed = args.map((x, i) => appParams[i] === undefined ? x : AppUtil.enforceParamType(appParams[i], x));
+    const reqCount = appParams.filter(x => !x.optional).length;
+    if (typed.length < reqCount) {
+      throw new Error(`Invalid parameter count: received ${typed.length} but needed ${reqCount}`);
+    }
+    return typed;
+  }
+
+  /**
    * Runs the application, by name
    */
   async run(name: string, args: string[]) {
@@ -33,30 +60,16 @@ export class $ApplicationRegistry {
 
     // Fetch instance of app class
     const inst = await DependencyRegistry.getInstance(config.target);
+    const typed = this.resolveParameters(config, args);
 
-    // Log startup
-    console.log('Running application', name);
-    console.log(`Configured`, util.inspect({
-      app: AppInfo,
-      env: Env.toJSON(),
-      config: Env.prod ? ConfigManager.getSecure() : ConfigManager.get()
-    }, false, 10, true));
+    this.logInit(config);
 
-    // If run command exists on app
-    if (inst.run) {
-      const appParams = config.params ?? [];
-      const typed = args.map((x, i) => appParams[i] === undefined ? x : AppUtil.enforceParamType(appParams[i], x));
-      const reqCount = appParams.filter(x => !x.optional).length;
-      if (typed.length < reqCount) {
-        throw new Error(`Invalid parameter count: received ${typed.length} but needed ${reqCount}`);
-      }
-
-      const ret = await inst.run(...typed);
-      const target = ret ?? inst;
-      if (AppUtil.isHandle(target)) { // If response is a listener
-        await AppUtil.processHandle(target); // Wait for app to finish
-      }
+    const ret = await inst.run(...typed);
+    const target = ret ?? inst;
+    if (AppUtil.isHandle(target)) { // If response is a listener
+      await AppUtil.processHandle(target); // Wait for app to finish
     }
+
     if (!config.watchable) {
       setTimeout(() => process.exit(0), 10).unref(); // Kill if not already dead
     }

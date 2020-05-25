@@ -1,7 +1,5 @@
 import * as fs from 'fs';
 import * as util from 'util';
-
-import { AppCache } from '@travetto/boot/src/app-cache'; // Should not init the app, only load cache
 import { FsUtil } from '@travetto/boot/src/fs';
 
 import { CachedAppConfig, ApplicationConfig } from './types';
@@ -13,26 +11,7 @@ import { ApplicationRegistry } from './registry';
  */
 export class AppListUtil {
 
-  private static cacheConfig = 'app-cache.json';
   private static fsLstat = util.promisify(fs.lstat);
-
-  /**
-   * Find latest timestamp between creation and modification
-   */
-  static maxTime(stat: fs.Stats) {
-    return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
-  }
-
-  /**
-   * Read list
-   */
-  static readList() {
-    if (AppCache.hasEntry(this.cacheConfig)) {
-      return JSON.parse(AppCache.readEntry(this.cacheConfig)) as CachedAppConfig[];
-    } else {
-      return null;
-    }
-  }
 
   /**
    * Determine app root from filename
@@ -42,7 +21,8 @@ export class AppListUtil {
     const [first] = root.split('/');
     // If root is in node_modules or is 'src', default to local
     // * This supports apps being run from modules vs locally
-    return (first === 'node_modules' || first === 'src') ? '.' : first;
+    return (first === 'node_modules' || first === 'src') ? '.' :
+      root.split('/src')[0];
   }
 
   /**
@@ -56,7 +36,7 @@ export class AppListUtil {
       params: x.params,
       appRoot: this.determineRootFromFile(x.target.__file),
       name: x.name,
-      generatedTime: this.maxTime(await this.fsLstat(x.target.__file)),
+      generatedTime: FsUtil.maxTime(await this.fsLstat(x.target.__file)),
       filename: x.target.__file,
       id: x.target.__id
     } as CachedAppConfig;
@@ -73,37 +53,11 @@ export class AppListUtil {
         (a.appRoot === '.' ? -1 : 1));
   }
 
-  /**
-   * Store list of cached items
-   * @param items
-   */
-  static storeList(items: CachedAppConfig[]) {
-    AppCache.writeEntry(this.cacheConfig, JSON.stringify(items));
-  }
-
-  /**
-   * Request list of applications
-   */
-  static async verifyList(items: CachedAppConfig[]): Promise<CachedAppConfig[]> {
-    try {
-      for (const el of items) {
-        const elStat = (await this.fsLstat(el.filename).catch(e => { delete el.generatedTime; }));
-        // invalidate cache if changed
-        if (elStat && (!el.generatedTime || this.maxTime(elStat) > el.generatedTime)) {
-          throw new Error('Expired entry, data is stale');
-        }
-      }
-      return items;
-    } catch (e) {
-      AppCache.removeExpiredEntry(this.cacheConfig, true);
-      throw e;
-    }
-  }
 
   /**
    * Scan source code for apps
    */
-  static async scanForApps() {
+  static async buildList() {
 
     // Load app files
     ScanApp.findAppSourceFiles()

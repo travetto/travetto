@@ -2,11 +2,21 @@ import * as commander from 'commander';
 
 // Imported individually to prevent barrel import loading too much
 import { FsUtil } from '@travetto/boot/src/fs';
+import { EnvUtil } from '@travetto/boot/src/env';
 import { ExecUtil } from '@travetto/boot/src/exec';
 
 import { CompletionConfig } from './types';
 import { color } from './color';
 import { HelpUtil } from './help';
+
+type AppEnv = {
+  env?: string;
+  watch?: string | boolean;
+  app?: string;
+  plainLog?: boolean;
+  appRoots?: string[];
+  profiles?: string[];
+};
 
 /**
  * Common CLI Utilities
@@ -92,10 +102,35 @@ export class CliUtil {
   static showHelp(cmd: commander.Command, msg = '', code = msg === '' ? 0 : 1) {
 
     if (msg) {
-      console.error(color`${{ failure: msg }}\n`);
+      console!.error(color`${{ failure: msg }}\n`);
     }
 
     cmd.outputHelp(text => HelpUtil.getHelpText(text));
     process.exit(code);
+  }
+
+  /**
+   * Initialize the app environment
+   */
+  static initAppEnv({ env, watch, app, appRoots, profiles, plainLog }: AppEnv) {
+    if (env === undefined) {
+      process.env.TRV_ENV = env; // Preemptively set b/c env changes how we compile some things
+    }
+    // Set watch if passed in, as a default to the env vars, being in prod disables watch defaulting
+    if (watch !== undefined) {
+      process.env.TRV_WATCH = EnvUtil.get('TRV_WATCH',
+        (watch && !/^prod/i.test(EnvUtil.get('TRV_ENV', '')) ? `${watch}` : undefined));
+    }
+    if (app && app !== '.') {
+      (appRoots = appRoots ?? []).push(app);
+      (profiles = profiles ?? []).push(app.split('/')[1]);
+    }
+    if (plainLog) {
+      process.env.TRV_LOG_PLAIN = '1';
+    }
+    process.env.TRV_APP_ROOTS = [...(appRoots ?? []), ...EnvUtil.getList('TRV_APP_ROOTS')]
+      .map(x => x.trim()).filter(x => !!x).join(',');
+    process.env.TRV_PROFILES = [...(profiles ?? []), ...EnvUtil.getList('TRV_PROFILES')]
+      .map(x => x.trim()).filter(x => x && x !== '.').join(',');
   }
 }

@@ -1,10 +1,7 @@
 import { Class } from '@travetto/registry';
 
-import { ApplicationConfig, ApplicationParameter, ApplicationHandle } from './types';
+import { ApplicationConfig, ApplicationParameter, AppClass } from './types';
 import { ApplicationRegistry } from './registry';
-
-type OrProm<T> = T | Promise<T>;
-type AppClass = Class<{ run(...args: any[]): OrProm<ApplicationHandle | void | undefined> }>;
 
 export type AppDecorator = Partial<ApplicationConfig> & {
   paramMap?: {
@@ -27,7 +24,7 @@ export function Application(
   config?: AppDecorator,
   params?: (Partial<ApplicationParameter> & { name: string })[]
 ) {
-  return <T extends AppClass>(target: T) => {
+  return <T extends Class<AppClass>>(target: T) => {
     const out: Partial<ApplicationConfig> = config ?? {};
     const paramMap = config?.paramMap ?? {};
 

@@ -1,49 +1,98 @@
+import * as util from 'util';
+import * as fs from 'fs';
 import * as path from 'path';
+import { AppCache } from '@travetto/boot/src/app-cache';
+import { FsUtil } from '@travetto/boot/src/fs';
 import { ExecUtil } from '@travetto/boot/src/exec';
-import { CachedAppConfig } from '../../src/types';
-import { handleFailure } from './util';
+import type { CachedAppConfig } from '../../src/types';
 
 /**
  * Utilities to fetch list of applications
  */
 export class FindUtil {
 
+  private static fsLstat = util.promisify(fs.lstat);
+  private static cacheConfig = 'app-cache.json';
+
   /**
    * Compile code, and look for `@Application` annotations
    */
-  static async discover() {
+  static async findAll() {
     // Initialize up to compiler
+    const paths = ['.'];
+    try {
+      paths.push(
+        ...fs.readdirSync(FsUtil.resolveUnix(FsUtil.cwd, 'alt')).map(x => `alt/${x}`)
+      );
+    } catch { }
+
+    process.env.TRV_APP_ROOTS = paths.join(',');
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.init('compile-all');
 
     const { AppListUtil } = await import('../../src/list');
-    return AppListUtil.scanForApps();
+    return AppListUtil.buildList();
   }
 
-  static async getByName(name: string) {
+  static async findByName(name: string) {
     return (await this.getList())?.find(x => x.name === name);
+  }
+
+
+  /**
+   * Store list of cached items
+   * @param items
+   */
+  static storeList(items: CachedAppConfig[]) {
+    AppCache.writeEntry(this.cacheConfig, JSON.stringify(items));
+  }
+
+  /**
+   * Request list of applications
+   */
+  static async verifyList(items: CachedAppConfig[]): Promise<CachedAppConfig[]> {
+    try {
+      for (const el of items) {
+        const elStat = (await this.fsLstat(el.filename).catch(e => { delete el.generatedTime; }));
+        // invalidate cache if changed
+        if (elStat && (!el.generatedTime || FsUtil.maxTime(elStat) > el.generatedTime)) {
+          throw new Error('Expired entry, data is stale');
+        }
+      }
+      return items;
+    } catch (e) {
+      AppCache.removeExpiredEntry(this.cacheConfig, true);
+      throw e;
+    }
+  }
+
+  /**
+   * Read list
+   */
+  static async readList(): Promise<CachedAppConfig[] | undefined> {
+    if (AppCache.hasEntry(this.cacheConfig)) {
+      return JSON.parse(AppCache.readEntry(this.cacheConfig)) as CachedAppConfig[];
+    }
   }
 
   /**
    * Request list of applications
    */
   static async getList(): Promise<CachedAppConfig[] | undefined> {
-    const { AppListUtil } = await import('../../src/list');
-
-    if (AppListUtil.readList() === null) { // no list
+    if (!this.readList()) { // no list
       const text = (await ExecUtil.fork(path.resolve(__dirname, '..', 'find-apps'), [], {
         env: {
           DEBUG: '0',
           TRACE: '0'
         }
       }).result).stdout;
-      await AppListUtil.storeList(JSON.parse(text) as CachedAppConfig[]);
+      this.storeList(JSON.parse(text) as CachedAppConfig[]);
     }
 
-    const items = AppListUtil.readList();
+    const items = await this.readList();
     if (items) {
       try {
-        await AppListUtil.verifyList(items);
+        await this.verifyList(items);
       } catch (e) {
         if (e.message.includes('expired')) {
           return await this.getList();
@@ -52,17 +101,6 @@ export class FindUtil {
         }
       }
     }
-  }
-
-  /**
-   * Run discover code and return as JSON
-   */
-  static async discoverAsJson() {
-    try {
-      console.log(this.discover());
-    } catch (err) {
-      handleFailure(err, 1);
-      throw err;
-    }
+    return items;
   }
 }

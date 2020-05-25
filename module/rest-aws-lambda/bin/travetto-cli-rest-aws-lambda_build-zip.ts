@@ -20,7 +20,7 @@ export function init() {
 
       if (!cmd.workspace) {
         cmd.workspace = fs.mkdtempSync('lambda-');
-        console.log('Temp Workspace', cmd.workspace);
+        console!.log('Temp Workspace', cmd.workspace);
       }
 
       cmd.workspace = FsUtil.resolveUnix(FsUtil.cwd, cmd.workspace);
