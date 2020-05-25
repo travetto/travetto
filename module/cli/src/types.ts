@@ -1,5 +1,3 @@
-import * as commander from 'commander';
-
 /**
  * Completion interface
  */
@@ -16,13 +14,4 @@ export interface CompletionConfig {
       [key: string]: string[];
     };
   };
-}
-
-/**
- * CLI Plugin structure
- */
-export interface Plugin {
-  init(): commander.Command | Promise<commander.Command>;
-  complete(config: CompletionConfig): void | Promise<void>;
-  setup?(): Promise<any>;
 }

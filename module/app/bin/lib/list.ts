@@ -9,7 +9,7 @@ import type { CachedAppConfig } from '../../src/types';
 /**
  * Utilities to fetch list of applications
  */
-export class FindUtil {
+export class AppListManager {
 
   private static fsLstat = util.promisify(fs.lstat);
   private static cacheConfig = 'app-cache.json';
@@ -79,7 +79,7 @@ export class FindUtil {
    * Request list of applications
    */
   static async getList(): Promise<CachedAppConfig[] | undefined> {
-    if (!this.readList()) { // no list
+    if (!(await this.readList())) { // no list
       const text = (await ExecUtil.fork(path.resolve(__dirname, '..', 'find-apps'), [], {
         env: {
           DEBUG: '0',

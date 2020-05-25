@@ -1,15 +1,19 @@
 import * as commander from 'commander';
-import { CliUtil } from '@travetto/cli/src/util';
+import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 /**
  * Support for deploying the aws lambda
  */
-export function init() {
-  return CliUtil.program.command('rest-aws-lambda:deploy')
-    .action((config: string, cmd: commander.Command) => {
-      if (!config) {
-        CliUtil.showHelp(cmd);
-      }
+export class RestAwsLambdaDeployPlugin extends BasePlugin {
+  name = 'rest-aws-lambda:deploy';
+  init(cmd: commander.Command) {
+    return cmd;
+  }
+  action(config: string) {
+    if (!config) {
+      this.showHelp();
+    } else {
       console!.log('To be implemented...');
-    });
+    }
+  }
 }
