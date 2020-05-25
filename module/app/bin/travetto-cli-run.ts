@@ -55,11 +55,7 @@ export class AppRunPlugin extends BasePlugin {
         await RunUtil.run(app, ...args);
       }
     } catch (err) {
-      if (err.message.startsWith('Invalid parameter')) {
-        this.showHelp(err.message, `\nUsage: ${HelpUtil.getAppUsage((await AppListManager.findByName(app))!)}`);
-      } else {
-        throw err;
-      }
+      this.showHelp(err.message, `\nUsage: ${HelpUtil.getAppUsage((await AppListManager.findByName(app))!)}`);
     }
   }
 

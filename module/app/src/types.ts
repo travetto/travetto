@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import type { Class } from '@travetto/registry';
 
 type OrProm<T> = T | Promise<T>;
 

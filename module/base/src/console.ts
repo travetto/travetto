@@ -123,7 +123,7 @@ class $ConsoleManager {
   /**
    * Handle direct call in lieu of the console.* commands
    */
-  private invoke(payload: ConsolePayload, ...args: any[]) {
+  invoke(payload: ConsolePayload, ...args: any[]) {
     if (this.exclude.has(payload.level)) {
       return; // Do nothing
     }

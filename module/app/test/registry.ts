@@ -27,7 +27,7 @@ class CloseableApp implements ApplicationHandle {
     }
   }
 
-  async kill() {
+  async close() {
     this.running = false;
   }
 
@@ -62,9 +62,10 @@ export class RegistryTest {
     await wait(50);
     assert(!done);
     assert(app.running === true);
-    await app.kill();
+    await app.close();
     await all;
     assert(done);
+    // @ts-ignore
     assert(app.running === false);
   }
 }

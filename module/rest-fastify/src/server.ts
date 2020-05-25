@@ -69,7 +69,7 @@ export class FastifyRestServer extends RestServer<fastify.FastifyInstance> {
     await this.raw.listen(this.config.port, this.config.bindAddress);
     return {
       ...AppUtil.listenToCloseable(this.raw.server),
-      kill: this.raw.close.bind(this.raw)
+      close: this.raw.close.bind(this.raw)
     };
   }
 }
