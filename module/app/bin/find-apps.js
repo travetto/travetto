@@ -6,4 +6,5 @@ if (!('DEBUG' in process.env)) {
 }
 require('@travetto/boot/bin/init')
   .libRequire('@travetto/app/bin/lib/find')
-  .FindUtil.discoverAsJson();
+  .FindUtil.findAll()
+  .then(x => console.log(JSON.stringify(x)));

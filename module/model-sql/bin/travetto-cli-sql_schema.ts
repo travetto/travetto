@@ -12,15 +12,12 @@ export function init() {
     .option('-a, --app [app]', 'Application root to export, (default: .)')
     .option('-c, --clear [clear]', 'Whether or not to clear the database first (default: true)', CliUtil.isBoolean)
     .action(async (cmd: commander.Command) => {
-      process.env.TRV_ENV = 'prod';
-      process.env.TRV_APP_ROOTS = cmd.app ? `./${cmd.app}` : '';
-      process.env.TRV_PROFILE = cmd.app ?? '';
-      process.env.TRV_LOG_PLAIN = '1';
+      CliUtil.initAppEnv({ env: 'prod', app: cmd.app, plainLog: true });
 
       const clear = cmd.clear === undefined ? true : CliUtil.isTrue(cmd.clear);
 
       const { getSchemas } = await import('./lib');
-      console.log((await getSchemas(clear)).join('\n'));
+      console!.log((await getSchemas(clear)).join('\n'));
     });
 }
 

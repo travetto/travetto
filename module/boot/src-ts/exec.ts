@@ -174,8 +174,8 @@ export class ExecUtil {
   /**
    * Run a command relative to the current node executable.  Mimics how node's
    * fork operation is just spawn with the command set to `process.argv0`
-   * @param cmd The command to run
-   * @param args The command line argumetns to pass
+   * @param cmd The file to run
+   * @param args The command line arguments to pass
    * @param options The enhancement options
    */
   static fork(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {

@@ -39,7 +39,7 @@ class $Env {
       .toLowerCase();
     this.prod = this.env === 'prod';
 
-    this.profiles = new Set(EnvUtil.getList('TRV_PROFILE'));
+    this.profiles = new Set(EnvUtil.getList('TRV_PROFILES'));
     this.appRoots = this.computeAppRoots();
 
     this.debug = EnvUtil.isSet('DEBUG') ? !EnvUtil.isFalse('DEBUG') : !this.prod;

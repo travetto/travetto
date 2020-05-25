@@ -12,14 +12,12 @@ export function init() {
     .command('email:compile')
     .option('-w, --watch [watch]', 'Compile in watch mode, requires @travetto/watch (default: false)', CliUtil.isBoolean)
     .action(async (cmd: commander.Command) => {
-      // process.env.TRV_RESOURCE_ROOTS = `${process.env.TRV_RESOURCE_ROOTS || ''},${__dirname}/lib`;
-
       const { PhaseManager } = await import('@travetto/base');
       await PhaseManager.init();
 
       const { TemplateUtil } = await import('./lib/util');
       const count = (await TemplateUtil.compileAllToDisk()).length;
-      console.log(color`Successfully compiled ${{ param: count }} templates`);
+      console!.log(color`Successfully compiled ${{ param: count }} templates`);
 
       if (CliUtil.isTrue(cmd.watch)) {
         await TemplateUtil.watchCompile();

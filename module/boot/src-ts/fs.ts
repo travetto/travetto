@@ -159,4 +159,11 @@ export class FsUtil {
       }
     }
   }
+
+  /**
+   * Find latest timestamp between creation and modification
+   */
+  static maxTime(stat: fs.Stats) {
+    return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
+  }
 }

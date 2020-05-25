@@ -11,12 +11,9 @@ export function init() {
     .command('es:schema')
     .option('-a, --app [app]', 'Application to export, (default: .)')
     .action(async (cmd: commander.Command) => {
-      process.env.TRV_ENV = 'prod';
-      process.env.TRV_APP_ROOTS = cmd.app ? `./${cmd.app}` : '';
-      process.env.TRV_PROFILE = cmd.app ?? '';
-
+      CliUtil.initAppEnv({ env: 'prod', app: cmd.app, plainLog: true });
       const { getSchemas } = await import('./lib');
-      console.log(JSON.stringify(await getSchemas(), null, 2));
+      console!.log(JSON.stringify(await getSchemas(), null, 2));
     });
 }
 

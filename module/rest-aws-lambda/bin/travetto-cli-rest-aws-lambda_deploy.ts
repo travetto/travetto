@@ -10,6 +10,6 @@ export function init() {
       if (!config) {
         CliUtil.showHelp(cmd);
       }
-      console.log('To be implemented...');
+      console!.log('To be implemented...');
     });
 }

@@ -32,7 +32,7 @@ export function init() {
             tap.setNamespace(name);
             consumer.onEvent(JSON.parse(body));
           } catch {
-            console.error('Failed on', body);
+            console!.error('Failed on', body);
           }
         })
         .on('close', () => consumer.summarize());

@@ -17,10 +17,10 @@ export function init() {
         AppCache.clear(true);
 
         if (!cmd.quiet) {
-          console.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: AppCache.cacheDir }}`);
+          console!.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: AppCache.cacheDir }}`);
         }
       } catch (e) {
-        console.error(color`${{ failure: 'Failed' }} to delete temp dir ${{ path: AppCache.cacheDir }}`);
+        console!.error(color`${{ failure: 'Failed' }} to delete temp dir ${{ path: AppCache.cacheDir }}`);
       }
     });
 }

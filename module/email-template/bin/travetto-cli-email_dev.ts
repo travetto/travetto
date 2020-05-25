@@ -24,7 +24,7 @@ export function init() {
       const { DevServerUtil } = await import('./lib/server');
 
       const count = (await TemplateUtil.compileAllToDisk()).length;
-      console.log(color`Successfully compiled ${{ param: count }} templates`);
+      console!.log(color`Successfully compiled ${{ param: count }} templates`);
 
       const server = new WebServer({ handler: DevServerUtil, port: cmd.port, open: CliUtil.isTrue(cmd.open), reloadRate: cmd.reloadRate });
       const http = server.start();
