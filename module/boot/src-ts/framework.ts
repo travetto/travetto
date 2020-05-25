@@ -45,7 +45,7 @@ export class FrameworkUtil {
     if (pth.includes('@travetto')) {
       // Fetch current module's name
       // Handle self references
-      pth = pth.replace(/^(.*\/@travetto)\/([^/]+)(\/[^@]*)?$/g, (all, pre, name, rest) => {
+      pth = pth.replace(/^(.*\/?@travetto)\/([^/]+)(\/[^@]*)?$/g, (all, pre, name, rest) => {
         if (!(name in this.devCache)) {
           const base = `${FsUtil.cwd}/node_modules/@travetto/${name}`;
           this.devCache[name] = FsUtil.existsSync(base) ? base : `${pre}/${name}`;
