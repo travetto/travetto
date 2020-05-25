@@ -30,7 +30,12 @@ export class RunUtil {
     CliUtil.initAppEnv({ app: app.appRoot, watch: app.watchable });
 
     // Compile all code as needed
-    const { PhaseManager } = await import('@travetto/base');
+    const { PhaseManager, ConsoleManager } = await import('@travetto/base');
+
+    // Pause outputting
+    const events: [any, any][] = [];
+    ConsoleManager.set({ invoke(a, b) { events.push([a, b]); } });
+
     await PhaseManager.init('require-all');
 
     // Load app if in support folder
@@ -44,6 +49,12 @@ export class RunUtil {
 
     // And run
     const { ApplicationRegistry } = await import('../../src/registry');
+    await ApplicationRegistry.resolveParameters(app, sub);
+
+    // Output on success
+    ConsoleManager.clear();
+    events.forEach(([a, b]) => ConsoleManager.invoke(a, ...b));
+
     await ApplicationRegistry.run(name, sub);
   }
 }

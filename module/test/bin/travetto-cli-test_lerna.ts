@@ -32,7 +32,7 @@ export class TestLernaPlugin extends BasePlugin {
 
     readline.createInterface({ input: child.process.stdout!, output: process.stdout, terminal: false })
       .on('line', line => {
-        const [name, body] = line.match(/^(\S+)\s+(.*)\s*$/)!;
+        const [, name, body] = line.match(/^(\S+):\s+(.*)\s*$/)!;
         try {
           tap.setNamespace(name);
           consumer.onEvent(JSON.parse(body));

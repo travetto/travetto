@@ -1,8 +1,7 @@
 {
   "lerna": "3.2.1",
   "packages": [
-    "module/*",
-    "sample/*"
+    "module/*"
   ],
   "version": "independent"
 }
