@@ -1,8 +1,6 @@
 import * as os from 'os';
 import { CliUtil } from '@travetto/cli/src/util';
 import { CompletionConfig } from '@travetto/cli/src/types';
-import { ColorUtil } from '@travetto/boot';
-import { getTapConsumer } from './lib/consumer';
 
 /**
  * Launch test framework and execute tests
@@ -18,10 +16,6 @@ export function init() {
       const { runTests, load } = await import('./lib');
 
       await load();
-
-      if (cmd.format === 'tap' && ColorUtil.colorize) {
-        cmd.consumer = await getTapConsumer();
-      }
 
       if (cmd.mode === 'all') {
         if (args.length === 0) {

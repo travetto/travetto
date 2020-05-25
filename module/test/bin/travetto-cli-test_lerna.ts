@@ -1,7 +1,7 @@
 import * as os from 'os';
+import * as readline from 'readline';
 import { CliUtil } from '@travetto/cli/src/util';
 import { FsUtil, ExecUtil } from '@travetto/boot';
-import { getTapConsumer, eventStreamSource } from './lib/consumer';
 
 /**
  * Launch test framework for monorepo and execute tests
@@ -20,13 +20,22 @@ export function init() {
       ], { shell: true, quiet: true, cwd: FsUtil.resolveUnix(__dirname, '..', '..') });
 
       const { RunnableTestConsumer } = await import('../src/consumer/types/runnable');
-      const tap = await getTapConsumer();
+      const { TapEmitter } = await import('../src/consumer/types/tap');
+
+      const tap = new TapEmitter();
       const consumer = new RunnableTestConsumer(tap!);
 
-      eventStreamSource(child.process.stdout!, (name, ev) => {
-        tap.setNamespace(name);
-        consumer.onEvent(ev);
-      }, () => consumer.summarize());
+      readline.createInterface({ input: child.process.stdout!, output: process.stdout, terminal: false })
+        .on('line', line => {
+          const [name, body] = line.match(/^(\S+)\s+(.*)\s*$/)!;
+          try {
+            tap.setNamespace(name);
+            consumer.onEvent(JSON.parse(body));
+          } catch {
+            console.error('Failed on', body);
+          }
+        })
+        .on('close', () => consumer.summarize());
 
       await child.result.catch(() => { });
     });
