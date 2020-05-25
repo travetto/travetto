@@ -1,33 +1,33 @@
 import * as commander from 'commander';
-import { CliUtil } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
-import { CompletionConfig } from '@travetto/cli/src/types';
+import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 /**
  * `npx trv clean`
  *
  * Allows for cleaning of the cache dire
  */
-export function init() {
-  return CliUtil.program.command('clean')
-    .option('-q, --quiet', 'Quiet operation')
-    .action(async (cmd: commander.Command) => {
-      const { AppCache } = await import('../src/app-cache');
-      try {
-        AppCache.clear(true);
+export class BootCleanPlugin extends BasePlugin {
+  name = 'clean';
 
-        if (!cmd.quiet) {
-          console!.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: AppCache.cacheDir }}`);
-        }
-      } catch (e) {
-        console!.error(color`${{ failure: 'Failed' }} to delete temp dir ${{ path: AppCache.cacheDir }}`);
+  init(cmd: commander.Command) {
+    return cmd.option('-q, --quiet', 'Quiet operation');
+  }
+
+  async action() {
+    const { AppCache } = await import('../src/app-cache');
+    try {
+      AppCache.clear(true);
+
+      if (!this._cmd.quiet) {
+        console!.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: AppCache.cacheDir }}`);
       }
-    });
-}
+    } catch (e) {
+      console!.error(color`${{ failure: 'Failed' }} to delete temp dir ${{ path: AppCache.cacheDir }}`);
+    }
+  }
 
-export function complete(c: CompletionConfig) {
-  c.all.push('clean');
-  c.task.clean = {
-    '': ['--quiet']
-  };
+  complete() {
+    return { '': ['--quiet'] };
+  }
 }

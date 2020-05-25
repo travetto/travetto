@@ -58,9 +58,10 @@ export class $ApplicationRegistry {
       throw new InjectionError(`Application: ${name} does not exist`, 'notfound');
     }
 
+    const typed = this.resolveParameters(config, args);
+
     // Fetch instance of app class
     const inst = await DependencyRegistry.getInstance(config.target);
-    const typed = this.resolveParameters(config, args);
 
     this.logInit(config);
 
@@ -68,10 +69,8 @@ export class $ApplicationRegistry {
     const target = ret ?? inst;
     if (AppUtil.isHandle(target)) { // If response is a listener
       await AppUtil.processHandle(target); // Wait for app to finish
-    }
-
-    if (!config.watchable) {
-      setTimeout(() => process.exit(0), 10).unref(); // Kill if not already dead
+    } else if (config.watchable) {
+      setTimeout(() => process.exit(0), Number.MAX_SAFE_INTEGER / 10 ** 7);
     }
   }
 
