@@ -1,0 +1,154 @@
+{
+  "name": "travetto-plugin",
+  "displayName": "Travetto Plugin",
+  "description": "VS Code plugin for interacting with the Travetto framework ",
+  "version": "0.7.0",
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "vscode",
+    "real-time feedback",
+    "launching",
+    "debugging",
+    "travetto",
+    "typescript"
+  ],
+  "publisher": "arcsine",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/vscode-plugin.git"
+  },
+  "engines": {
+    "vscode": "^1.44.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "files": [
+    "src/"
+  ],
+  "devDependencies": {
+    "@types/node": "^12.0.0",
+    "vscode": "^1.1.37",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
+    "eslint": "^6.8.0"
+  },
+  "dependencies": {
+    "@travetto/boot": "^1.0.0-rc.0"
+  },
+  "activationEvents": [
+    "workspaceContains:node_modules/@travetto"
+  ],
+  "icon": "images/logo.png",
+  "galleryBanner": {
+    "color": "#c6cdd3",
+    "theme": "light"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "Travetto settings",
+      "properties": {
+        "travetto.modules": {
+          "type": "object"
+        },
+        "travetto.debug": {
+          "type": "boolean"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "travetto.boot.clean:run",
+        "title": "Clean",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.test.test:rerun",
+        "title": "Re-Run Tests",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.test.test:line",
+        "title": "Debug Test",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.app.run:new",
+        "title": "Run New App",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.app.run:recent",
+        "title": "Run Recent App",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.app.run:mostRecent",
+        "title": "Run Most Recent App",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.app.run:export",
+        "title": "Export App Launch",
+        "category": "Travetto"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "travetto.boot.clean:run",
+          "when": "travetto.boot"
+        },
+        {
+          "command": "travetto.test.test:line",
+          "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorIsOpen"
+        },
+        {
+          "command": "travetto.test.test:rerun",
+          "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorIsOpen"
+        },
+        {
+          "command": "travetto.app.run:new",
+          "when": "travetto.app"
+        },
+        {
+          "command": "travetto.app.run:recent",
+          "when": "travetto.app"
+        },
+        {
+          "command": "travetto.app.run:mostRecent",
+          "when": "travetto.app"
+        },
+        {
+          "command": "travetto.app.run:export",
+          "when": "travetto.app"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "travetto.test.test:line",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t",
+        "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorTextFocus"
+      },
+      {
+        "command": "travetto.test.test:rerun",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorFocus"
+      }
+    ]
+  }
+}
