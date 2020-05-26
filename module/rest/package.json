@@ -7,14 +7,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/app": "^1.0.0-beta.4",
-    "@travetto/di": "^1.0.0-beta.1",
+    "@travetto/app": "^1.0.0-rc.0",
+    "@travetto/di": "^1.0.0-rc.0",
     "@types/cookies": "^0.7.4",
     "@types/express-serve-static-core": "^4.17.7",
     "cookies": "^0.8.0"
   },
   "devDependencies": {
-    "@travetto/test": "^1.0.0-beta.1"
+    "@travetto/test": "^1.0.0-rc.0"
   },
   "optionalPeerDependencies": {
     "node-forge": "^0.9.1",
@@ -41,5 +41,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-beta.10"
+  "version": "1.0.0-rc.0"
 }

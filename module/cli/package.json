@@ -11,7 +11,7 @@
     "trv": "bin/travetto.js"
   },
   "dependencies": {
-    "@travetto/base": "^1.0.0-beta.1",
+    "@travetto/base": "^1.0.0-rc.0",
     "commander": "^5.1.0"
   },
   "description": "CLI infrastructure for travetto framework",
@@ -31,5 +31,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-beta.1"
+  "version": "1.0.0-rc.0"
 }
