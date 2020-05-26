@@ -34,4 +34,22 @@ c:
     lorem ipsum whadya think about them apples, huh? lorem ipsum whadya think about them apples, huh?
     huh?`.trim());
   }
+
+  @Test()
+  testQuoting() {
+    const out = Serializer.serialize({
+      name: '#Gerald'
+    });
+    assert(out.includes('name: "#Gerald"'));
+
+    const out2 = Serializer.serialize({
+      name: ''
+    });
+    assert(out2.includes(`name: ''`));
+
+    const out3 = Serializer.serialize({
+      name: undefined
+    });
+    assert(!out3.includes(`name`));
+  }
 }

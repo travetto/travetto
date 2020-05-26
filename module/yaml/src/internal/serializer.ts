@@ -10,12 +10,15 @@ export class Serializer {
    * Clean value, escaping as needed
    */
   static clean(key: string) {
-    if (/['"@ -:]/.test(key)) {
+    if (/[#'"@ \-:]/.test(key)) {
       return key.includes('"') ?
         `'${key.replace(/[']/g, '\\\'')}'` :
         `"${key.replace(/["]/g, '\\"')}"`;
+    } else if (!key) {
+      return `''`;
+    } else {
+      return key;
     }
-    return key;
   }
 
   /**
@@ -74,9 +77,13 @@ export class Serializer {
         throw new Error('Types are not supported');
       }
     } else if (Array.isArray(o)) {
-      out = o.map(el => `${prefix}-${this.serialize(el, indent, wordwrap, indentLevel + indent)}`).join('\n');
-      if (indentLevel > 0) {
-        out = `\n${out}`;
+      if (o.length) {
+        out = o.map(el => `${prefix}-${this.serialize(el, indent, wordwrap, indentLevel + indent)}`).join('\n');
+        if (indentLevel > 0) {
+          out = `\n${out}`;
+        }
+      } else {
+        out = ` []`;
       }
     } else if (typeof o === 'number' || typeof o === 'boolean' || o === null) {
       out = ` ${o}`;
@@ -86,11 +93,12 @@ export class Serializer {
       if (lines.length > 1) {
         out = [' >', ...lines.map(x => `${prefix}${x}`)].join('\n');
       } else {
-        out = ` ${lines[0]}`;
+        out = ` ${this.clean(lines[0])}`;
       }
     } else if (o !== undefined) {
       const fin = o;
       out = (Object.keys(fin) as (keyof typeof fin)[])
+        .filter(x => fin[x] !== undefined)
         .map(x => `${prefix}${this.clean(x)}:${this.serialize(fin[x], indent, wordwrap, indentLevel + indent)}`)
         .join('\n');
       if (indentLevel > 0) {
