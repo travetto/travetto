@@ -1,0 +1,43 @@
+<div class="documentation"><h1 id="cli" id="cli-support">CLI Support</h1>
+<app-section-header headerType="install">Primary</app-section-header>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> -g @travetto/cli</code></pre><p>The cli is the primary structure for interacting with the external requirements of the framework.  This can range from running tests, to running applications, to generating email templates. The main executable can be installed globally or locally.  If installed globally and locally, it will defer to the local installation for execution.</p>
+<p>As is the custom, modules are able to register their own cli extensions as scripts, whose name starts with <code class="inline">travetto-cli-</code>.  These scripts are then picked up at runtime and all available options are provided when viewing the help documentation.  The following are all the supported cli operations and the various settings they allow.</p>
+<h2 id="general">General</h2>
+<app-section-header headerType="terminal">General Usage</app-section-header>
+<pre><code class="language-bash">travetto --help
+<span class="token type">Usage</span>: travetto <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+<span class="token type">Options</span>:
+  <span class="token punctuation">..</span>.</code></pre><p>This will show all the available options/choices that are exposed given the currently installed modules.</p>
+<h2 id="base">Base</h2>
+<app-section-header headerType="terminal">Clean operation</app-section-header>
+<pre><code class="language-bash">travetto clean</code></pre><p>Clears <a class="module-link" routerLink="/docs/core" fragment="boot" null><code class="inline">Boot</code></a> compilation cache to handle any inconsistencies that may arise from checking timestamps for cache freshness.</p>
+<h2 id="compiler">Compiler</h2>
+<app-section-header headerType="terminal">Compiler usage</app-section-header>
+<pre><code class="language-bash">travetto compile
+  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>  <span class="token comment"># <span class="token type">Output</span> directory</span>
+  -r, --runtime-dir <span class="token punctuation">[</span>runtimeDir<span class="token punctuation">]</span>  <span class="token comment"># <span class="token type">Expected</span> root path during runtime</span></code></pre><p>This command line operation invokes the <a class="module-link" routerLink="/docs/core" fragment="compiler" null><code class="inline">Compiler</code></a> to pre-compile of all the application source code.  This is useful for production builds when startup performance is critical.</p>
+<h2 id="application">Application</h2>
+<app-section-header headerType="terminal">Run usage</app-section-header>
+<pre><code class="language-bash">travetto run <span class="token punctuation">[</span>application<span class="token punctuation">]</span>
+  -e, --env <span class="token punctuation">[</span>env<span class="token punctuation">]</span>  <span class="token comment"># <span class="token type">Application</span> environment</span>
+  -w, --watch <span class="token punctuation">[</span>watch<span class="token punctuation">]</span>  <span class="token comment"># <span class="token type">Run</span> the application in watch mode</span>
+  -p, --profile <span class="token punctuation">[</span>profile<span class="token punctuation">]</span>  <span class="token comment"># <span class="token type">Specify</span> additional application profiles</span></code></pre><p>The run command allows for invocation of <a class="module-link" routerLink="/docs/app"  null><code class="inline">Application</code></a>-based applications as defined by the <code class="decorator inline">@Application</code> decorator.  Additionally, the environment can manually be specified (dev, test, prod, e2e) as well as whether or not the application should be run in <code class="inline">watch</code> mode.</p>
+<h2 id="testing">Testing</h2>
+<app-section-header headerType="terminal">Test usage</app-section-header>
+<pre><code class="language-bash">travetto <span class="token function">test</span> <span class="token punctuation">[</span>regexes<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+  -f, --format <span class="token operator">&lt;</span>format<span class="token operator">></span>  <span class="token comment"># <span class="token type">Output</span> format for test results, valid formats are: tap (default), json, noop, exec, event</span>
+  -c, --concurrency <span class="token operator">&lt;</span>concurrency<span class="token operator">></span>  <span class="token comment"># <span class="token type">Number</span> of tests to run concurrently, defaults to number of CPUs - 1</span>
+  -m, --mode <span class="token operator">&lt;</span>mode<span class="token operator">></span>  <span class="token comment"># <span class="token type">Test</span> run mode: all (default), single</span></code></pre><p>The regexes are the patterns of tests you want to run, and all tests must be found under the <code class="inline">test/</code> folder.</p>
+<p>The test command is the only supported method for invoking the <a class="module-link" routerLink="/docs/test"  null><code class="inline">Test</code></a> module via the command line.  As stated in the test documentation, the primary output format is <code class="inline">tap</code>.  Additionally the code supports <code class="inline">json</code> and <code class="inline">event</code> as formats that can be consumed programmatically.  <code class="inline">exec</code> is used internally for sub-dividing tests to run concurrently, and communicate results over IPC.</p>
+<h2 id="email-templating">Email Templating</h2>
+<app-section-header headerType="terminal">Email template usage</app-section-header>
+<pre><code class="language-bash">travetto email-template</code></pre><p>This command is provided by <a class="module-link" routerLink="/docs/email" fragment="email-template" null><code class="inline">email-template</code></a>.  It will spin up a web server (port 3839) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline.  You would navigate to the path of an asset, e.g. <code class="path inline">http://localhost:3839/my-email.html</code>, to test and develop the file in <code class="path inline">&lt;root&gt;/resources/email/my-email.html</code>.  You can also change the extension to <code class="inline">.txt</code> to see the textual representation.</p>
+<p>Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.</p>
+<h2 id="swagger-client-generation">Swagger Client Generation</h2>
+<app-section-header headerType="terminal">Swagger usage</app-section-header>
+<pre><code class="language-bash">travetto swagger-client
+  -o, --output <span class="token punctuation">[</span>output<span class="token punctuation">]</span>  <span class="token comment"># <span class="token type">Output</span> folder, defaults to ./api-client</span>
+  -f, --format <span class="token punctuation">[</span>format<span class="token punctuation">]</span>  <span class="token comment"># <span class="token type">Client</span> format, defaults to 'typescript-angular'</span>
+  -a, --additional-properties <span class="token punctuation">[</span>props<span class="token punctuation">]</span>  <span class="token comment"># <span class="token type">Additional</span> format properties</span></code></pre><p>The command relies upon <code class="inline">swagger-codegen</code> to generate the output client code.  The command will run your application, in non-server mode, to collect all the routes and model information, to produce the <code class="inline">swagger.json</code>.  Once produced, the code will invoke <code class="inline">swagger-codegen</code> to produce the desired client code in the desired location.  </p>
+<p><strong>NOTE</strong> The <a class="module-link" routerLink="/docs/rest" fragment="swagger" null><code class="inline">Swagger</code></a> module supports generating the client in real-time while listening for changes to routes and models.</p>
+</div>

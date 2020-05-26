@@ -1,0 +1,29 @@
+<div class="documentation"><h2 id="compiler" id="compiler">Compiler</h2>
+<app-section-header headerType="install">Primary</app-section-header>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/compiler</code></pre><p>This module expands upon <a class="external-link" href="http://typescriptlang.org" target="_blank" null><code class="inline">typescript</code></a>, with supplemental functionality:</p>
+<ul>
+<li>Read <code class="inline">tsconfig.json</code> from the project directory to provide </li>
+<li>Supports on-the-fly compilation, nothing needs to be compiled ahead of time</li>
+<li>Enhanced AST transformations, and transformer registration<ul>
+<li>All AST transformations are single-file based, and runs without access to the <code class="inline">TypeChecker</code></li>
+</ul>
+</li>
+<li>Intelligent caching of source files to minimize recompilation</li>
+<li>Support for detecting changes in sources files at runtime</li>
+<li>Allows for hot-reloading of classes during development<ul>
+<li>Utilizes <code class="inline">es2015</code> <code class="inline language-typescript">Proxy</code>s to allow for swapping out implementation at runtime</li>
+</ul>
+</li>
+</ul>
+<p>Additionally, there is support for common AST transformation patterns to facilitate all the transformers used throughout the framework.<br>Transformations are defined by <code class="path inline">support/transformer.&lt;name&gt;.ts</code> as the filename. The schema for a transformer is:</p>
+<app-section-header headerType="code">Sample transformer, registration and execution</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomerTransformer</span> <span class="token punctuation">{{ '{' }}</span>
+  after<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'base'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  phase<span class="token punctuation">:</span> <span class="token string">'before'</span><span class="token operator">|</span><span class="token string">'after'</span><span class="token punctuation">,</span> <span class="token comment">// <span class="token type">The</span> phase as defined by <span class="token type">Typescript</span>'s AST processing</span>
+  <span class="token function-variable function">transformer</span><span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token parameter">context<span class="token punctuation">:</span> ts<span class="token punctuation">.</span>TransformationContext</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+     <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token parameter">file<span class="token punctuation">:</span> ts<span class="token punctuation">.</span>SourceFile</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+       <span class="token operator">...</span> modify source file <span class="token operator">...</span>
+       <span class="token keyword">return</span> file<span class="token punctuation">;</span>
+     <span class="token punctuation">{{ '}' }}</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre></div>

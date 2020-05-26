@@ -1,0 +1,56 @@
+<div class="documentation"><h1 id="vscode-plugin" id="vs-code-plugin">VS Code Plugin</h1>
+<p>The <a class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin" target="_blank" null><code class="inline">plugin</code></a> directly integrates with <a class="external-link" href="https://travettio.io" target="_blank" null>Travetto framework</a>, exposing the <a class="module-link" routerLink="/docs/cli"  null><code class="inline">cli</code></a> functionality.</p>
+<p>The currently supported features are:</p>
+<ul>
+<li>Real-time test evaluation and debugging</li>
+<li>Application launching with parameters</li>
+<li>Miscellaneous utilities</li>
+</ul>
+<h2 id="testing">Testing</h2>
+<p>The test related functionality relies upon the <a class="module-link" routerLink="/docs/test"  null><code class="inline">test</code></a> module being installed, and used to define tests (<code class="decorator inline">@Suite</code> and <code class="decorator inline">@Test</code>).</p>
+<h3 id="real-time-test-evaluation">Real-time test evaluation.</h3>
+<p>The real-time test functionality will re-evaluate your test code on save.  This means as you type and save, the test will run.  The test will provide feedback inline, using green to indicate success, red to indicate failure, and gray to indicate unknown.</p>
+<p><img src="/assets/vscode-plugin/real-time-testing.gif" alt="Real-time Testing"></p>
+<h4 id="supported-commands">Supported commands</h4>
+<p><code class="inline">Re-Run tests</code> to force a full re-run of all the tests in a given document</p>
+<h3 id="debugging-tests">Debugging tests</h3>
+<p>While working on a test, if you want to debug it, you can press running <code class="inline">command-shift-t</code> on OSX or <code class="inline">ctrl-shift-t</code> on win/linux.  This will start a debug session with the current<br>line activated as a breakpoint.  This allows you to seamlessly jump into a debug session while writing tests.</p>
+<p><img src="/assets/vscode-plugin/debug-single-test.gif" alt="Debugging Single Test"></p>
+<h4 id="supported-commands-1">Supported commands</h4>
+<p><code class="inline">Debug tests</code> to force a running all the tests in debug mode.  Will not establish a breakpoint, but will use any existing breakpoints.</p>
+<h2 id="application-launching">Application launching</h2>
+<p>While using the <a class="module-link" routerLink="/docs/di"  null><code class="inline">di</code></a>, a common pattern is to use <code class="decorator inline">@Application</code> annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated.</p>
+<p>The plugin exposes this functionality as a command, to allow you to debug these applications directly from vscode.  </p>
+<h3 id="running">Running</h3>
+<p><img src="/assets/vscode-plugin/run-workflow.gif" alt="Run Workflow"></p>
+<p>Launching relies upon the command <code class="inline">Run New Application</code>.  This will show you a list of the available entry points in the application, with the parameters they support.  Selecting an application will take you through the parameter flow to select inputs, and once all parameters are selected, your application will launch.  </p>
+<p>After running and selecting a configuration for an application, you can now access those configurations via <code class="inline">Run Recent Application</code>.  This allows you to execute a recent run that you can invoke immediately without prompting for inputs. If you find yourself running the same application multiple times, you can also invoke <code class="inline">Run Most Recent Application</code> to bypass application selection overall.</p>
+<h3 id="exporting-and-customizing">Exporting and Customizing</h3>
+<p><img src="/assets/vscode-plugin/run-export-workflow.gif" alt="Export Workflow"></p>
+<p>If at any point in time, you wish to modify the launch configuration of any application, you can execute the command <code class="inline">Export Application Launch</code>, and it will provide the same options as launch.  The only difference is that instead of running the application when it’s done, you will have a new launch config in your debug launch configs.  This option is now completely independent from the plugin and can be modified without issue.</p>
+<h4 id="commands">Commands</h4>
+<p><code class="inline">Run New Application</code> to launch a new application config<br><code class="inline">Run Recent Application</code> to launch a previously configured application<br><code class="inline">Run Most Recent Application</code> to launch the most recently run configured application<br><code class="inline">Export Application Launch</code> to export an application config</p>
+<h2 id="misc-utilities">Misc Utilities</h2>
+<p>Currently the supported commands are:</p>
+<p><code class="inline">Clean</code> to run the cli operation <code class="inline">travetto clean</code>.  This will purge the project’s cache, which is generally useful for things like npm installs.</p>
+<!-- Image of clean -->
+
+<div class="release-info">
+
+<h1 id="requirements">Requirements</h1>
+<ul>
+<li>You should have the <a class="external-link" href="https://travetto.io" target="_blank" null><code class="inline">Travetto framework</code></a> installed, version 0.5.0 and higher. </li>
+<li>Tests require the <a class="module-link" routerLink="/docs/test"  null><code class="inline">test</code></a> module to be installed.</li>
+<li>Application running requires the <a class="module-link" routerLink="/docs/di"  null><code class="inline">di</code></a> module to be installed.</li>
+</ul>
+<h1 id="known-issues">Known Issues</h1>
+<p>Calling out known issues can help limit users opening duplicate issues against your extension.</p>
+<h1 id="release-notes">Release Notes</h1>
+<h2 id="05x">0.5.x</h2>
+<ul>
+<li>Introduced application launching</li>
+<li>Resolved test stability issues</li>
+<li>Introduced clean functionality</li>
+</ul>
+</div>
+</div>

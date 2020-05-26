@@ -1,0 +1,18 @@
+<div class="documentation-links">
+  <div class="inner">
+    <h3>Pages</h3>
+    <ul>
+      <li [routerLinkActive]="['active']" *ngFor="let page of pages" class="{{page.path}}">
+        <a [routerLink]="'/docs/' + page.path">{{page.title}}</a>
+        <ul *ngIf="page.subs">
+          <li *ngFor="let subp of page.subs" [ngClass]="{active:hasFragment(subp.path)}">
+            <a [routerLink]="'/docs/' + page.path" [fragment]="subp.path">{{subp.title}}</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+<div class="router-outlet">
+  <router-outlet></router-outlet>
+</div>

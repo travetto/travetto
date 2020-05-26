@@ -1,0 +1,143 @@
+:host {
+  display: block;
+  max-width: 100% !important;
+  margin: 0 auto;
+}
+
+.header {
+  height: 400px;
+  width: 100%;
+  background-color: linear-gradient(rgba(0, 0, 0, .7), rgba(0, 0, 0, 0.7));
+  background-image: url(/assets/landing/bg.jpg);
+  background-size: auto 400px;
+  background-position: 50% 50%;
+  background-repeat: repeat-x;
+
+  div.mat-display-4 {
+    padding: 0;
+    margin: 0;
+    padding-top: 140px;
+  }
+
+  div.mat-display-3 {
+    margin-top: .5em;
+  }
+
+  div.mat-display-3,
+  div.mat-display-4 {
+    text-align: center;
+    color: white;
+    text-shadow: -1px -1px 10px rgba(0, 0, 0, .7),
+      1px -1px 10px rgba(0, 0, 0, .7),
+      -1px 1px 10px rgba(0, 0, 0, .7),
+      1px 1px 10px rgba(0, 0, 0, .7);
+  }
+}
+
+aside {
+  padding: 1em;
+  font-size: 16pt;
+  text-align: center;
+  background: rgba(0, 0, 0, .1);
+  p { 
+    width: 100%;
+    color: #333; 
+    margin: 0;
+    padding: 0 !important;
+    a {
+      color: #666;
+      font-weight: normal;
+    }
+  }
+}
+
+.content {
+  max-width: 1000px;
+  margin: 0 auto;
+  margin-top: 2em;
+}
+
+section {
+  min-height: 300px;
+  display: flex;
+  margin-top: 2em;
+  flex-direction: reverse;
+
+  div {
+    flex: 1.2 1.2 0;
+    justify-content: space-between;
+    padding-bottom: 1em;
+  }
+
+  img {
+    border-radius: 10px;
+    flex: 2 2 0;
+    background: #eee;
+    max-width: 600px;
+    width: 98%;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, .2);
+  }
+
+  div+img {
+    margin-left: 15px;
+  }
+
+  &:last-child {
+    margin-bottom: 2em;
+  }
+
+  &:nth-child(even) {
+    flex-direction: row-reverse;
+
+    div+img {
+      margin-left: 0px;
+      margin-right: 15px;
+    }
+  }
+}
+
+@media (max-width: 700px) {
+  .header {
+    height: 250px;
+
+    div.mat-display-4 {
+      font-size: 50px;
+      padding: 0;
+      margin: 0;
+      padding-top: 35px;
+    }
+
+    div.mat-display-3 {
+      font-size: 25px;
+    }
+  }
+
+  :host .content {
+    width: 100%;
+
+    h1,
+    h2,
+    p {
+      padding: 0 5px;
+      text-align: left;
+    }
+
+    section {
+      text-align: center;
+    }
+
+    img {
+      height: 300px;
+      display: inline-block;
+    }
+
+    div,
+    img {
+      margin: 0 !important;
+    }
+  }
+
+  section {
+    display: block;
+  }
+}

@@ -1,0 +1,13 @@
+<div class="documentation">
+  <article *ngFor="let post of posts">
+    <h2>
+      <small>
+        {{post.published | date }}
+      </small> {{post.title}}
+    </h2>
+    <div class="byline">
+      {{post.author.displayName}}
+    </div>
+    <div class="content" [innerHTML]="post.content"></div>
+  </article>
+</div>

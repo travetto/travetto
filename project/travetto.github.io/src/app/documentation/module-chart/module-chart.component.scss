@@ -1,0 +1,184 @@
+.common-lib {
+  background-color: lightcyan;
+}
+
+.lib {
+  background-color: lightblue;
+}
+
+.system {
+  background-color: #eee;
+}
+
+.core-comps {
+  background-color: lightgreen;
+}
+
+.external-comps {
+  background-color: pink;
+}
+
+.modules {
+  max-width: 900px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 10;
+  margin: 1em auto;
+
+  div {
+    border-radius: 5px;
+    display: block;
+    text-align: center;
+    min-width: 80px;
+    opacity: .8;
+    margin: 5px;
+    hyphens: auto;
+    transition: .5s opacity;
+    box-shadow: 1px 1px .3em -.1em black;
+
+    a {
+      color: #333;
+      font-size: 20pt;
+      line-height: 2em;
+      text-decoration: none;
+      display: block;
+    }
+
+    ul {
+      margin: 0;
+      padding: 0;
+    }
+
+    .sub {
+      & a {
+        font-size: 11pt;
+      }
+
+      display: inline-block;
+
+      padding-right: 1em;
+
+      &:last-of-type {
+        padding-right: 0em;
+      }
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+
+  .email,
+  .auth,
+  .asset,
+  .utils {
+    @extend .lib;
+  }
+
+  .core,
+  .config,
+  .base,
+  .app,
+  .di {
+    @extend .system;
+  }
+
+  .test,
+  .model,
+  .rest,
+  .schema {
+    @extend .core-comps;
+  }
+
+  .cli,
+  .generator-app,
+  .vscode-plugin {
+    @extend .external-comps;
+  }
+
+
+  .cli {
+    grid-row: 2;
+    grid-column: 5/span 2;
+  }
+
+  .vscode-plugin {
+    grid-row: 2;
+    grid-column: 3/span 2;
+  }
+
+  .generator-app {
+    grid-row: 2;
+    grid-column: 1/span 2;
+  }
+
+  .email {
+    grid-row: 3;
+    grid-column: 5/span 2;
+  }
+
+  .auth {
+    grid-row: 3;
+    grid-column: 3/span 2;
+  }
+
+  .model {
+    grid-row: 3;
+    grid-column: 1/span 2;
+  }
+
+  .asset {
+    grid-row: 4;
+    grid-column: 5/span 2;
+  }
+
+  .rest {
+    grid-row: 4;
+    grid-column: 3/span 2;
+  }
+
+  .schema {
+    grid-row: 4;
+    grid-column: 1/span 2;
+  }
+
+  .app {
+    grid-row: 5;
+    grid-column: 1/span 6;
+  }
+
+  .di {
+    grid-row: 6;
+    grid-column: 1/span 6;
+  }
+
+  .utils {
+    grid-row: 7;
+    grid-column: 4/span 3;
+  }
+
+  .test {
+    grid-row: 7;
+    grid-column: 1/span 3;
+  }
+
+  .core {
+    grid-row: 8;
+    grid-column: 1/span 6;
+  }
+
+  .config {
+    grid-row: 9;
+    grid-column: 1/span 6;
+  }
+
+  .base {
+    grid-row: 10;
+    grid-column: 1/span 6;
+  }
+}

@@ -1,0 +1,126 @@
+<div class="documentation"><h2 id="base" id="base">Base</h2>
+<app-section-header headerType="install">Primary</app-section-header>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/base</code></pre><p>Base is the foundation of all <code class="inline">travetto</code> applications.  It is intended to be a minimal application bootstrap, as well as support for commonly shared functionality. It has support for the following key areas:</p>
+<ul>
+<li>Environmental Information</li>
+<li>File Operations</li>
+<li>Resource Management</li>
+<li>Life-cycle Support</li>
+<li>Stacktrace Management </li>
+<li>General Utilities</li>
+</ul>
+<h3 id="environmental-information">Environmental Information</h3>
+<p>The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers as well. The information that is available is:</p>
+<ul>
+<li><code class="inline">prod</code>/<code class="inline">dev</code> - Run type flags.  These are mutually exclusive and are <code class="inline">boolean</code> flags.</li>
+<li><code class="inline">watch: boolean</code> - Does the current run support file watching.  Primarily used internally, but should be useful to indicate if the program will finish immediately or wait indefinitely.</li>
+<li><code class="inline">profiles: string[]</code> - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.</li>
+<li><code class="inline">debug</code>/<code class="inline">trace</code> - Simple logging flags.  These <code class="inline">boolean</code> flags will enable or disable logging at various levels. By default <code class="inline">debug</code> is on in <code class="inline">dev</code> or <code class="inline">e2e</code> mode, and nowhere else.  <code class="inline">trace</code> is always off by default.</li>
+<li><code class="inline">cwd: string</code> - The root of the current project, </li>
+<li><code class="inline">appRoots: string[]</code> - The file root paths for the application, the default set is the current project. Order matters with respect to resource resolution. All paths should be relative to the project base</li>
+</ul>
+<p>With respect to <code class="inline">process.env</code>, we specifically test for all uppercase, lowercase, and given case.  This allows us to test various patterns and catch flags that might be off due to casing.  That would mean that a key of <code class="inline">Enable_Feature</code> would be tested as:</p>
+<ul>
+<li><code class="inline">Enable_Feature</code></li>
+<li><code class="inline">ENABLE_FEATURE</code></li>
+<li><code class="inline">enable_feature</code></li>
+</ul>
+<h4 id="app-information">App Information</h4>
+<p>This basically exposes your <code class="inline">package.json</code> data as a typed data structure, useful for integrating package information into your application.</p>
+<h3 id="file-operations">File Operations</h3>
+<p>The framework does a fair amount of file system scanning to auto-load files.  It also needs to have knowledge of what files are available. The framework provides a simple and performant functionality for recursively finding files. This functionality leverages regular expressions in lieu of glob pattern matching (this is to minimize overall code complexity).</p>
+<p>A simple example of finding specific <code class="inline">.config</code> files in your codebase:</p>
+<app-section-header headerType="code">Looking for all .config files with the prefix defined by svc</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">function</span> <span class="token function">processServiceConfigs</span><span class="token punctuation">(</span><span class="token parameter">svc<span class="token punctuation">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">const</span> svcConfigs <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token type">ScanApp</span><span class="token punctuation">.</span><span class="token function">findFiles</span><span class="token punctuation">(</span><span class="token string">'.config'</span><span class="token punctuation">,</span> <span class="token parameter">file</span> <span class="token operator">=></span> path<span class="token punctuation">.</span><span class="token function">basename</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">startsWith</span><span class="token punctuation">(</span><span class="token template-string"><span class="token string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{ '{' }}</span>svc<span class="token interpolation-punctuation punctuation">{{ '}' }}</span></span><span class="token string">.`</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> conf <span class="token keyword">of</span> svcConfigs<span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token operator">...</span> <span class="token keyword">do</span> work
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p>The framework utilizes caching to enable these lookups to be repeated without performance impact.  In addition to file system scanning, the framework offers a simple file watching library.  The goal is to provide a substantially smaller footprint than <a class="external-link" href="https://github.com/shama/gaze" target="_blank" null><code class="inline">gaze</code></a> or <a class="external-link" href="https://github.com/paulmillr/chokidar" target="_blank" null><code class="inline">chokidar</code></a>.  Utilizing the patterns from the file scanning, you create a <code class="inline">Watcher</code> that either has files added manually, or has patterns added that will recursively look for files. </p>
+<app-section-header headerType="code">Example of watching for specific files</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">const</span> watcher <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Watcher</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>cwd<span class="token punctuation">:</span> <span class="token string">'base/path/to/...'</span><span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+watcher<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+  <span class="token string">'local.config'</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{{ '{' }}</span>
+    <span class="token function-variable function">testFile</span><span class="token punctuation">:</span> <span class="token parameter">x</span> <span class="token operator">=></span> x<span class="token punctuation">.</span><span class="token function">endsWith</span><span class="token punctuation">(</span><span class="token string">'.config'</span><span class="token punctuation">)</span> <span class="token operator">||</span> x<span class="token punctuation">.</span><span class="token function">endsWith</span><span class="token punctuation">(</span><span class="token string">'.config.json'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+watcher<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h3 id="application-resources">Application Resources</h3>
+<p>Resource management, loading of files, and other assets at runtime is a common pattern that the <code class="inline">ResourceManager</code> encapsulates.  It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.</p>
+<app-section-header headerType="code">Finding Image Resource</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">const</span> imagePath <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token type">ResourceManager</span><span class="token punctuation">.</span><span class="token function">findFirst</span><span class="token punctuation">(</span><span class="token string">'/images/asset.gif'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><app-section-header headerType="code">Finding All Image Resource</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">const</span> imagePaths <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token type">ResourceManager</span><span class="token punctuation">.</span><span class="token function">findAllByExtension</span><span class="token punctuation">(</span><span class="token string">'gif'</span><span class="token punctuation">,</span> <span class="token string">'images/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h3 id="lifecycle-support">Lifecycle Support</h3>
+<p>During the lifecycle of an application, there is a need to handle different phases of execution.  When executing a phase, the code will recursively find all <code class="inline">phase.&lt;phase&gt;.ts</code> files under <code class="inline">node_modules/@travetto</code>, and in the root of your project.  The format of each phase handler is comprised of five main elements:</p>
+<ul>
+<li>The phase of execution, which is defined by the file name <code class="inline">phase.&lt;phase&gt;.ts</code></li>
+<li>The key of the handler to be referenced for dependency management.</li>
+<li>The list of dependent handlers that the current handler depends on, if any.</li>
+<li>The list of handlers that should be dependent on the current handler, if any.</li>
+<li>The actual functionality to execute</li>
+</ul>
+<p>An example would be something like <code class="inline">phase.bootstrap.ts</code> in the <a class="module-link" routerLink="/docs/config"  null><code class="inline">Config</code></a> module.  </p>
+<app-section-header headerType="code">Sample phase bootstrap</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">const</span> init <span class="token operator">=</span> <span class="token punctuation">{{ '{' }}</span>
+  key<span class="token punctuation">:</span> <span class="token string">'config'</span><span class="token punctuation">,</span>
+  after<span class="token punctuation">:</span> <span class="token string">'base'</span><span class="token punctuation">,</span>
+  <span class="token function-variable function">action</span><span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">require</span><span class="token punctuation">(</span><span class="token string">'../src/service/config'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><h3 id="common-application-error-class">Common Application Error Class</h3>
+<p>While the framework is 100% compatible with standard <code class="inline">Error</code> instances, there are cases in which additional functionality is desired.  Within the framework we use <code class="inline">AppError</code> (or its derivatives) to represent framework errors.  This class is available for use in your own projects.  Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" routerLink="/docs/rest"  null><code class="inline">Rest</code></a> module and HTTP status codes).  </p>
+<p>The <code class="inline">AppError</code> takes in a message, and an optional payload and/or error classification.  The currently supported error classifications are:</p>
+<ul>
+<li><code class="inline">general</code> - General purpose errors</li>
+<li><code class="inline">system</code>  - Synonym for <code class="inline">general</code></li>
+<li><code class="inline">data</code> - Data format, content, etc are incorrect.  Generally correlated to bad input.</li>
+<li><code class="inline">permission</code> - Operation failed due to lack of permissions</li>
+<li><code class="inline">auth</code> - Operation failed due to lack of authentication</li>
+<li><code class="inline">missing</code> - Resource was not found when requested</li>
+<li><code class="inline">timeout</code> - Operation did not finish in a timely manner</li>
+<li><code class="inline">unavailable</code> - Resource was unresponsive</li>
+</ul>
+<h3 id="shutdown">Shutdown</h3>
+<p>Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown.  Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers.  The code overrides <code class="inline">process.exit</code> to properly handle <code class="inline">SIGKILL</code> and <code class="inline">SIGINT</code>, with a default threshold of 3 seconds.  In the advent of a <code class="inline">SIGTERM</code> signal, the code exits immediately without any cleanup.</p>
+<p>As a registered shutdown handler, you can do.</p>
+<app-section-header headerType="code">Registering a shutdown handler</app-section-header>
+<pre><code class="language-typescript"><span class="token type">Shutdown</span><span class="token punctuation">.</span><span class="token function">onShutdown</span><span class="token punctuation">(</span><span class="token string">'handler-name'</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token comment">// <span class="token type">Do</span> important work, the framework will wait until all async</span>
+  <span class="token comment">//   operations are completed before finishing shutdown</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span></code></pre><h3 id="stacktrace">Stacktrace</h3>
+<p>We integrate with <a class="external-link" href="https://trace.js.org/" target="_blank" null><code class="inline">trace.js</code></a> to handle asynchronous call stacks, and provide higher quality stack traces.  The stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  This is primarily used for development purposes, and is disabled by default in <code class="inline">prod</code>.  That means in a production environment you will get the full stacktrace, in all it’s glory.</p>
+<p>From a test scenario:</p>
+<app-section-header headerType="code">Tracking asynchronous behavior</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">function</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token function">inner1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token function">inner2</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+      <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token function">inner3</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Uh</span> oh'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span>
+
+<span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>Will produce the following stack trace:</p>
+<app-section-header headerType="terminal">Stack trace from async errors</app-section-header>
+<pre><code class="language-bash"><span class="token type">Error</span>: <span class="token type">Uh</span> oh
+    at <span class="token type">Timeout</span>.inner3 <span class="token punctuation">[</span>as _onTimeout<span class="token punctuation">]</span> <span class="token punctuation">(</span>./test/stack.js:6:23<span class="token punctuation">)</span>
+    at <span class="token type">Timeout</span>.inner2 <span class="token punctuation">[</span>as _onTimeout<span class="token punctuation">]</span> <span class="token punctuation">(</span>./test/stack.js:5:13<span class="token punctuation">)</span>
+    at <span class="token type">Timeout</span>.inner1 <span class="token punctuation">[</span>as _onTimeout<span class="token punctuation">]</span> <span class="token punctuation">(</span>./test/stack.js:4:9<span class="token punctuation">)</span>
+    at <span class="token type">Object</span>.load <span class="token punctuation">[</span>as .ts<span class="token punctuation">]</span> <span class="token punctuation">(</span>./bin/travetto.js:27:12<span class="token punctuation">)</span></code></pre><p>The needed functionality cannot be loaded until <code class="inline">init.action</code> executes, and so must be required only at that time.</p>
+<h3 id="util">Util</h3>
+<p>Simple functions for providing a minimal facsimile to <a class="external-link" href="https://lodash.com" target="_blank" null><code class="inline">lodash</code></a>, but without all the weight. Currently <code class="inline">util</code> only includes:</p>
+<ul>
+<li><code class="inline">isPrimitive(el: any)</code> determines if <code class="inline">el</code> is a <code class="inline">string</code>, <code class="inline">boolean</code>, <code class="inline">number</code> or <code class="inline">RegExp</code></li>
+<li><code class="inline">isPlainObject(obj: any)</code> determines if the obj is a simple object</li>
+<li><code class="inline">isFunction(o: any)</code> determines if <code class="inline">o</code> is a simple <code class="inline">Function</code></li>
+<li><code class="inline">isClass(o: any)</code> determines if <code class="inline">o</code> is a class constructor</li>
+<li><code class="inline">isSimple(a: any)</code> determines if <code class="inline">a</code> is a simple value</li>
+<li><code class="inline">deepAssign(a: any, b: any, mode?)</code> which allows for deep assignment of <code class="inline">b</code> onto <code class="inline">a</code>, the <code class="inline">mode</code> determines how aggressive the assignment is, and how flexible it is.  <code class="inline">mode</code> can have any of the following values:<ul>
+<li><code class="inline">loose</code>, which is the default is the most lenient.  It will not error out, and overwrites will always happen</li>
+<li><code class="inline">coerce</code>, will attempt to force values from <code class="inline">b</code> to fit the types of <code class="inline">a</code>, and if it can’t it will error out</li>
+<li><code class="inline">strict</code>, will error out if the types do not match  </li>
+</ul>
+</li>
+<li><code class="inline">throttle(fn, threshhold?: number)</code> produces a function that will execute <code class="inline">fn</code>, at most once per <code class="inline">threshold</code></li>
+</ul>
+</div>

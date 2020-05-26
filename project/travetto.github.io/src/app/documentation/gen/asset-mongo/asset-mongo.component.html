@@ -1,0 +1,20 @@
+<div class="documentation"><h2 id="asset-mongo" id="asset-mongo">Asset-Mongo</h2>
+<app-section-header headerType="install">Mongo provider</app-section-header>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/asset-mongo</code></pre><p>This provides a <a class="external-link" href="https://mongodb.com" target="_blank" null><code class="inline">mongodb</code></a> implementation of the <code class="inline">AssetSource</code> which is a backend for the <a class="module-link" routerLink="/docs/asset"  null><code class="inline">Asset</code></a> module.  </p>
+<app-section-header headerType="code">Mongo backend wiring</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">AppConfig</span> <span class="token punctuation">{{ '{' }}</span>
+  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">getSource</span><span class="token punctuation">(</span>cfg<span class="token punctuation">:</span> <span class="token type">AssetMongoConfig</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token type">AssetSource</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">AssetMongoSource</span><span class="token punctuation">(</span>cfg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p>There is a default configuration that you can easily use, with some sensible defaults. </p>
+<app-section-header headerType="code">Mongo configuration</app-section-header>
+<pre><code class="language-typescript">@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'asset.mongo'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AssetMongoConfig</span> <span class="token punctuation">{{ '{' }}</span>
+  hosts <span class="token operator">=</span> <span class="token string">'localhost'</span><span class="token punctuation">;</span>
+  schema <span class="token operator">=</span> <span class="token string">'app'</span><span class="token punctuation">;</span>
+  port <span class="token operator">=</span> <span class="token number">27017</span><span class="token punctuation">;</span>
+  options <span class="token operator">=</span> <span class="token punctuation">{{ '{' }}</span><span class="token punctuation">{{ '}' }}</span><span class="token punctuation">;</span>
+  <span class="token operator">...</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p>Additionally, you can see that the class is registered with the <code class="decorator inline">@Config</code> annotation, and so these values can be overridden using the standard<a class="module-link" routerLink="/docs/config"  null><code class="inline">Configuration</code></a> resolution paths. </p>
+</div>

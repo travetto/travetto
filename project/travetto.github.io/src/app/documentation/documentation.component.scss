@@ -1,0 +1,52 @@
+:host {
+  display: grid;
+  grid-template-areas:
+    "nav content";
+
+
+
+
+  grid-column-gap: 10px;
+  grid-template-columns: 300px 1fr;
+
+  .documentation-links {
+    grid-area: nav;
+  }
+
+  .router-outlet {
+    grid-area: content;
+    overflow: hidden;
+  }
+
+  li ul {
+    display: none;
+  }
+
+  li.active>ul {
+    display: block;
+  }
+
+  li.base,
+  li.asset {
+    border-top: 1px dotted #ccc;
+    padding-top: .5em;
+    margin-top: .25em;
+  }
+}
+
+@media (max-width: 700px) {
+  :host {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "nav"
+      "content";
+    max-width: 700px;
+    overflow: auto;
+  }
+
+  .documentation-links {
+    li {
+      border-top: none;
+    }
+  }
+}
