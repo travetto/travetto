@@ -1,0 +1,18 @@
+img[alt="Module Layout"] {
+  display: none;
+}
+
+h1 {
+  sub {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .documentation {
+    app-module-chart {
+      max-width: 700px;
+      overflow-x: auto;
+    }
+  }
+}

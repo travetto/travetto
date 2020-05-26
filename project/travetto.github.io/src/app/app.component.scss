@@ -1,0 +1,197 @@
+$HEADER-HEIGHT: 64px;
+$FOOTER-HEIGHT: 70px;
+$SMALL-HEADER-HEIGHT: 40px;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+:host [href=landing] {
+  mat-toolbar {
+    background: linear-gradient(180deg, rgba(76, 175, 80, 1) 0%, rgba(76, 175, 80, .8) 100%) !important;
+  }
+
+  .main-module /deep/>* {
+    padding-top: 0px;
+  }
+}
+
+.main-module /deep/>* {
+  padding-top: $HEADER-HEIGHT;
+
+  .documentation-links {
+    top: $HEADER-HEIGHT;
+  }
+}
+
+
+mat-toolbar {
+  height: $HEADER-HEIGHT;
+  position: fixed;
+  top: 0;
+  opacity: .9;
+  z-index: 100;
+
+  img.logo {
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+    margin-right: 5px;
+  }
+
+  span.name {
+    a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 0;
+      margin: 0;
+      font-weight: normal;
+    }
+
+    color: white;
+    font-family: "Julius Sans One",
+    sans-serif;
+    font-size: 32px;
+    font-weight: normal;
+    line-height: 32px;
+  }
+
+  span.spacer {
+    flex: 1 1 auto;
+  }
+
+  a {
+    color: white;
+    font-weight: bold;
+  }
+}
+
+
+footer {
+  display: flex;
+  height: $FOOTER-HEIGHT;
+  min-height: $FOOTER-HEIGHT;
+  font-family: "Source Sans Pro", sans-serif;
+
+  width: 100%;
+  background: linear-gradient(rgba(0, 0, 0, .7), rgba(0, 0, 0, 0.7)), url('/assets/landing/bg.jpg') center;
+  color: #eee;
+
+  div {
+    margin-top: $FOOTER-HEIGHT/4;
+  }
+
+  .copyright {
+    padding-left: 1em;
+    line-height: $FOOTER-HEIGHT/2;
+    height: $FOOTER-HEIGHT/2;
+  }
+
+  .spacer {
+    flex: 1 1 0;
+  }
+
+  .social {
+    >* {
+      line-height: $FOOTER-HEIGHT/2;
+      height: $FOOTER-HEIGHT/2;
+      display: inline-block;
+      margin-right: .5em;
+    }
+
+    a {
+      img {
+        filter: invert(100%);
+        vertical-align: middle;
+      }
+
+      width: $FOOTER-HEIGHT/2;
+    }
+  }
+}
+
+@media (min-width: 700px) {
+  :host {
+
+    .main-module /deep/>* {
+      min-height: calc(100vh - #{$FOOTER-HEIGHT + $HEADER-HEIGHT});
+
+      p {
+        margin-bottom: 0;
+        padding-bottom: 12px;
+      }
+    }
+
+    footer {
+      height: $FOOTER-HEIGHT;
+      min-height: $FOOTER-HEIGHT;
+    }
+  }
+}
+
+@media (max-width: 700px) {
+  :host {
+    mat-toolbar {
+      width: 100%;
+
+      [mat-button] {
+        min-width: 0;
+        font-size: 15px;
+      }
+
+      height: $SMALL-HEADER-HEIGHT;
+
+      .name {
+        font-size: 25px;
+      }
+
+      svg.logo {
+        display: none;
+      }
+
+      padding: 0px;
+      padding-left: 2px;
+
+      img.logo {
+        height: $SMALL-HEADER-HEIGHT - 4px;
+        width: auto;
+      }
+
+      a {
+        height: $SMALL-HEADER-HEIGHT;
+        line-height: $SMALL-HEADER-HEIGHT;
+      }
+
+      a[href="/landing"] {
+        display: none;
+      }
+
+      a[href="https://github.com/travetto"] {
+        display: none;
+      }
+    }
+
+    footer {
+      height: auto;
+      text-align: center;
+      display: block;
+      padding: 10px 0;
+
+      >div {
+        padding: 0;
+        margin: 0;
+      }
+    }
+  }
+}
+
+@media (max-width: 450px) {
+
+  :host mat-toolbar [mat-button],
+  :host mat-toolbar a {
+    font-size: 12px;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}

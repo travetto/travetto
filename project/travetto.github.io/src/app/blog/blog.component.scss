@@ -1,0 +1,55 @@
+:host {
+  margin: 0 auto;
+  display: block;
+  max-width: 800px !important;
+
+  .documentation {
+    max-width: 800px;
+    min-width: 0px;
+
+
+    article {
+      display: block;
+      padding: 0;
+      margin: 0;
+
+      & /deep/ {
+        div {
+          color: #333;
+        }
+
+        h2,
+        h3,
+        h4 {
+          color: black;
+        }
+
+        h4 {
+          font-size: 14pt;
+        }
+
+        .content {
+          line-height: 1.5em;
+          font-weight: 300;
+
+          .centered {
+            text-align: center;
+          }
+        }
+      }
+
+      h2 small {
+        line-height: 12pt;
+        display: inline-block;
+        font-size: 12pt;
+        font-weight: normal;
+      }
+
+      .byline {
+        color: #333;
+        font-size: 12pt;
+        margin-bottom: 1em;
+      }
+    }
+  }
+}

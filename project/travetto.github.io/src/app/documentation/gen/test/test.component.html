@@ -1,0 +1,102 @@
+<div class="documentation"><h1 id="test" id="test">Test</h1>
+<app-section-header headerType="install">Primary</app-section-header>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/test</code></pre><p>This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the following formats:</p>
+<ul>
+<li><a class="external-link" href="https://testanything.org/tap-version-13-specification.html" target="_blank" null><code class="inline">TAP 13</code></a>, default and human-readable</li>
+<li><code class="inline">JSON</code>, best for integrating with at a code level</li>
+<li><a class="external-link" href="https://en.wikipedia.org/wiki/XUnit" target="_blank" null><code class="inline">xUnit</code></a>, standard format for CI/CD systems e.g. Jenkins, Bamboo, etc.</li>
+</ul>
+<p><strong>NOTE</strong> All tests should be under the <code class="path inline">test/.*</code> folders.  The pattern for tests is defined as a regex and not standard globbing.</p>
+<h2 id="definition">Definition</h2>
+<p>A test suite is a collection of individual tests.  All test suites are classes with the <code class="decorator inline">@Suite</code> decorator. Tests are defined as methods on the suite class, using the <code class="decorator inline">@Test</code> decorator.  All tests intrinsically support <code class="inline">async</code>/<code class="inline">await</code>.  </p>
+<p>A simple example would be:</p>
+<app-section-header headerType="code">Example Test suite</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> assert <span class="token keyword">from</span> <span class="token string">'assert'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Suite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">SimpleTest</span> <span class="token punctuation">{{ '{' }}</span>
+
+  <span class="token keyword">private</span> complexService<span class="token punctuation">:</span> <span class="token type">ComplexService</span><span class="token punctuation">;</span>
+
+  @<span class="token meta">Test</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">test1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">let</span> val <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>complexService<span class="token punctuation">.</span><span class="token function">doLongOp</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">assert</span><span class="token punctuation">(</span>val <span class="token operator">===</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+
+  @<span class="token meta">Test</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token function">test2</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token function">assert</span><span class="token punctuation">(</span><span class="token regex">/abc/</span><span class="token punctuation">.</span><span class="token function">test</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><h2 id="assertions">Assertions</h2>
+<p>A common aspect of the tests themselves are the assertions that are made.  <code class="inline">Node</code> provides a built-in <a class="external-link" href="https://nodejs.org/api/assert.html" target="_blank" null><code class="inline">assert</code></a> library.  The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions.  For example:</p>
+<app-section-header headerType="code">Example assertion for deep comparison</app-section-header>
+<pre><code class="language-typescript"><span class="token function">assert</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>size<span class="token punctuation">:</span> <span class="token number">20</span><span class="token punctuation">,</span> address<span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span> state<span class="token punctuation">:</span> <span class="token string">'VA'</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">{{ '}' }}</span> <span class="token operator">===</span> <span class="token punctuation">{{ '{' }}</span><span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>would generate the error:</p>
+<app-section-header headerType="code">Sample structure of validation error</app-section-header>
+<pre><code class="language-typescript"><span class="token function">AssertionError</span><span class="token punctuation">(</span>
+  message<span class="token operator">=</span><span class="token string">"{{ '{' }}size: 20, address: {{ '{' }}state: 'VA' {{ '}' }}{{ '}' }} should deeply strictly equal {{ '{' }}{{ '}' }}"</span>
+<span class="token punctuation">)</span></code></pre><p>The equivalences for the assertion operations are:</p>
+<ul>
+<li><code class="inline">assert(a == b)</code> as <code class="inline">assert.equal(a, b)</code></li>
+<li><code class="inline">assert(a !== b)</code> as <code class="inline">assert.notEqual(a, b)</code></li>
+<li><code class="inline">assert(a === b)</code> as <code class="inline">assert.strictEqual(a, b)</code></li>
+<li><code class="inline">assert(a !== b)</code> as <code class="inline">assert.notStrictEqual(a, b)</code></li>
+<li><code class="inline">assert(a &gt;= b)</code> as <code class="inline">assert.greaterThanEqual(a, b)</code></li>
+<li><code class="inline">assert(a &gt; b)</code> as <code class="inline">assert.greaterThan(a, b)</code></li>
+<li><code class="inline">assert(a &lt;= b)</code> as <code class="inline">assert.lessThanEqual(a, b)</code></li>
+<li><code class="inline">assert(a &lt; b)</code> as <code class="inline">assert.lessThan(a, b)</code></li>
+<li><code class="inline">assert(a instanceof b)</code> as <code class="inline">assert.instanceOf(a, b)</code></li>
+<li><code class="inline">assert(a.includes(b))</code> as <code class="inline">assert.ok(a.includes(b))</code></li>
+<li><code class="path inline">assert(/a/.test(b))</code> as <code class="path inline">assert.ok(/a/.test(b))</code></li>
+</ul>
+<p>In addition to the standard operations, there is support for throwing/rejecting errors (or the inverse).  This is useful for testing error states or ensuring errors do not occur.  </p>
+<ul>
+<li><code class="inline">throws</code>/<code class="inline">doesNotThrow</code> is for catching synchronous rejections</li>
+</ul>
+<app-section-header headerType="code">Throws vs Does Not Throw</app-section-header>
+<pre><code class="language-typescript">assert<span class="token punctuation">.</span><span class="token function">throws</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+assert<span class="token punctuation">.</span><span class="token function">doesNotThrow</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">let</span> a <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><ul>
+<li><code class="inline">rejects</code>/<code class="inline">doesNotReject</code> is for catching asynchronous rejections</li>
+</ul>
+<app-section-header headerType="code">Reject vs Does Not Reject</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">await</span> assert<span class="token punctuation">.</span><span class="token function">rejects</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">await</span> assert<span class="token punctuation">.</span><span class="token function">doesNotReject</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">let</span> a <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>Additionally, the <code class="inline">throws</code>/<code class="inline">rejects</code> assertions take in a secondary parameter to allow for specification of the type of error expected.  This can be:</p>
+<ul>
+<li>A regular expression or string to match against the error’s message</li>
+<li>A class to ensure the returned error is an instance of the class passed in</li>
+<li>A function to allow for whatever custom verification of the error is needed</li>
+</ul>
+<app-section-header headerType="code">Example of different Error matching paradigms</app-section-header> 
+<pre><code class="language-typescript">assert<span class="token punctuation">.</span><span class="token function">throws</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Big</span> <span class="token type">Error</span>'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token string">'<span class="token type">Big</span> <span class="token type">Error</span>'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+assert<span class="token punctuation">.</span><span class="token function">throws</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Big</span> <span class="token type">Error</span>'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token regex">/B.*<span class="token type">Error</span>/</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+assert<span class="token punctuation">.</span><span class="token function">throws</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Big</span> <span class="token type">Error</span>'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token type">Error</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+assert<span class="token punctuation">.</span><span class="token function">throws</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Big</span> <span class="token type">Error</span>'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">err<span class="token punctuation">:</span> <span class="token builtin">any</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">return</span> err<span class="token punctuation">.</span>message<span class="token punctuation">.</span><span class="token function">startsWith</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Big</span>'</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> err<span class="token punctuation">.</span>message<span class="token punctuation">.</span>length <span class="token operator">></span> <span class="token number">4</span> <span class="token operator">?</span> undefined <span class="token punctuation">:</span> err<span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h2 id="running-tests">Running Tests</h2>
+<p>To run the tests you can either call the <a class="module-link" routerLink="/docs/cli"  null><code class="inline">cli</code></a> by invoking</p>
+<pre><code class="language-bash">$ npx trv <span class="token function">test</span></code></pre><p>or via the <a class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin" target="_blank" null>VSCode plugin</a>, which will provide even more functionality for real-time testing and debugging.</p>
+<h2 id="additional-considerations">Additional Considerations</h2>
+<p>During the test execution, a few things additionally happen that should be helpful.  The primary addition, is that all console output is captured, and will be exposed in the test output.  This allows for investigation at a later point in time by analyzing the output.  </p>
+<p>Like output, all promises are also intercepted.  This allows the code to ensure that all promises have been resolved before completing the test.  Any uncompleted promises will automatically trigger an error state and fail the test.</p>
+</div>

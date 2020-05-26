@@ -1,0 +1,21 @@
+<div class="documentation"><h2 id="cache" id="cache">Cache</h2>
+<app-section-header headerType="install">Primary</app-section-header>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/cache</code></pre><p>Provides a simple wrapper around <a class="external-link" href="https://github.com/isaacs/node-lru-cache" target="_blank" null><code class="inline">lru-cache</code></a> to provide standard caching constructs.  </p>
+<p><code class="decorator inline">@Cacheable</code> is a decorator that allows caching at class methods. The decorator will rewrite the method to cache on successful results. The decorator supports synchronous as well as asynchronous methods.</p>
+<app-section-header headerType="code">Using decorators to cache expensive async call</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">Worker</span> <span class="token punctuation">{{ '{' }}</span>
+
+  @<span class="token meta">Cacheable</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> max<span class="token punctuation">:</span> <span class="token number">1000</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">calculateExpensiveResult</span><span class="token punctuation">(</span><span class="token parameter">expression<span class="token punctuation">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">request</span><span class="token punctuation">(</span><span class="token template-string"><span class="token string">`https://google.com?q=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{ '{' }}</span>expression<span class="token interpolation-punctuation punctuation">{{ '}' }}</span></span><span class="token string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> value<span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p>The <code class="decorator inline">@Cacheable</code> decorator supports certain configurations:</p>
+<ul>
+<li><code class="inline">name</code> the name of the cache space</li>
+<li><code class="inline">dispose</code> the function to invoke on cache eviction</li>
+<li><code class="inline">keyFn</code> the function used to determine the cache key, defaults to all params serialized to a string</li>
+<li><code class="inline">max</code> the maximum number of elements that the cache will hold before eviction</li>
+<li><code class="inline">maxAge</code> the longest time an element is allowed to live before eviction.  Defaults to infinite.</li>
+</ul>
+</div>

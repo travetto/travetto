@@ -1,0 +1,29 @@
+<div class="documentation"><h2 id="rest-express" id="rest-express">Rest-Express</h2>
+<app-section-header headerType="install">Express Provider</app-section-header>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/rest-express</code></pre><p>The module is an <a class="external-link" href="https://expressjs.com/" target="_blank" null><code class="inline">express</code></a> implementation of a <a class="module-link" routerLink="/docs/rest"  null><code class="inline">RestApp</code></a>. A valid customization of the <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest-express/src/app.ts" target="_blank" null><code class="inline">RestApp</code></a> would look like:</p>
+<app-section-header headerType="code">Customizing an Express App</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleConfig</span> <span class="token punctuation">{{ '{' }}</span>
+
+ @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">customizer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token type">RestAppCustomizer</span><span class="token operator">&lt;</span>express<span class="token punctuation">.</span><span class="token type">Application</span><span class="token operator">></span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token punctuation">(</span><span class="token keyword">class</span> <span class="token class-name">extends</span> <span class="token type">RestAppCustomizer</span><span class="token operator">&lt;</span>express<span class="token punctuation">.</span><span class="token type">Application</span><span class="token operator">></span> <span class="token punctuation">{{ '{' }}</span>
+      <span class="token function">customize</span><span class="token punctuation">(</span><span class="token parameter">raw<span class="token punctuation">:</span> express<span class="token punctuation">.</span>Application</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+        <span class="token keyword">const</span> limiter <span class="token operator">=</span> <span class="token function">rateLimit</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>
+          windowMs<span class="token punctuation">:</span> <span class="token number">15</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">,</span> <span class="token comment">// 15 minutes</span>
+          max<span class="token punctuation">:</span> <span class="token number">100</span> <span class="token comment">// limit each IP to 100 requests per windowMs</span>
+        <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">//  apply to all requests</span>
+        raw<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>limiter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{ '}' }}</span>
+    <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><h3 id="default-stack">Default Stack</h3>
+<p>When working with <a class="external-link" href="https://expressjs.com" target="_blank" null><code class="inline">express</code></a> applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:</p>
+<ul>
+<li><code class="inline language-typescript">compression()</code></li>
+<li><code class="inline language-typescript">bodyParser.json()</code></li>
+<li><code class="inline language-typescript">bodyParser.urlencoded()</code></li>
+<li><code class="inline language-typescript">bodyParser.raw({{ '{' }} type: &#39;image/*&#39; {{ '}' }})</code></li>
+</ul>
+</div>

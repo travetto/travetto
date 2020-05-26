@@ -1,0 +1,38 @@
+<div class="documentation"><h2 id="registry" id="registry">Registry</h2>
+<app-section-header headerType="install">Primary</app-section-header>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/registry</code></pre><p>This module is the backbone for all “discovered” and “registered” behaviors within the framework. This is primarily used for building modules within the framework and not directly useful for application development.</p>
+<h3 id="flows">Flows</h3>
+<p>Registration, within the framework flows throw two main use cases:</p>
+<h4 id="initial-flow-primary">Initial Flow (Primary)</h4>
+<p>The primary flow occurs on initialization of the application. At that point, the module will:</p>
+<ol>
+<li>Initialize <code class="inline">RootRegistry</code> and will automatically register/load all relevant files</li>
+<li>As files are imported, decorators within the files will record various metadata relevant to the respective registries </li>
+<li>When all files are processed, the <code class="inline">RootRegistry</code> is finished, and it will signal to anything waiting on registered data that its free to use it.<br>This flow ensures all files are loaded and processed before application starts. A sample registry, pulled from the <a class="module-link" routerLink="/docs/model"  null><code class="inline">Model</code></a> module, looks like:</li>
+</ol>
+<app-section-header headerType="code">Custom Registry based on Metadata Registry</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> $<span class="token type">ModelRegistry</span> <span class="token keyword">extends</span> <span class="token class-name">MetadataRegistry</span><span class="token operator">&lt;</span><span class="token type">ModelOptions</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">>></span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token type">SchemaRegistry</span><span class="token punctuation">,</span> <span class="token type">DependencyRegistry</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+
+  <span class="token function">createPending</span><span class="token punctuation">(</span><span class="token parameter">cls<span class="token punctuation">:</span> Class</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{ '{' }}</span> <span class="token keyword">class</span><span class="token punctuation">:</span> cls <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+
+  onInstallFinalize<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">(</span>cls<span class="token punctuation">:</span> <span class="token type">Class</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>pending<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>cls<span class="token punctuation">.</span>__id<span class="token punctuation">)</span><span class="token operator">!</span> <span class="token keyword">as</span> <span class="token type">ModelOptions</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p>The registry is a <code class="inline">MetadataRegistry</code> that depends on the <code class="inline">SchemaRegistry</code> and the <code class="inline">DependencyRegistry</code>.</p>
+<h4 id="live-flow">Live Flow</h4>
+<p>At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries.</p>
+<p>As the <a class="module-link" routerLink="/docs/core" fragment="compiler" null><code class="inline">Compiler</code></a> notifies that a file has been changed and recompiled, the <code class="inline">RootRegistry</code> will pick it up, and process it accordingly.</p>
+<h3 id="supporting-metadata">Supporting Metadata</h3>
+<p>For the registries to work properly, metadata needs to be collected about files and classes to uniquely identify them, especially across file reloads for the live flow.  To achieve this, every <code class="inline">class</code> is decorated with additional fields.  The data that is added is:</p>
+<ul>
+<li><code class="inline">__filename</code> denotes the fully qualified path name of the class</li>
+<li><code class="inline">__id</code> represents a computed id that is tied to the file/class combination</li>
+<li><code class="inline">__hash</code> a quick and dirty hash of the contents of the class to be able to quickly determine if a class has changed or not</li>
+<li><code class="inline">__methodHashes</code> a map of hashes for each class method to be able to determine if the method contents have changed</li>
+</ul>
+</div>

@@ -1,0 +1,38 @@
+<div class="documentation"><h2 id="boot" id="boot">Boot</h2>
+<app-section-header headerType="install">Primary</app-section-header>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/boot</code></pre><p>Boot is basic environment  awareness coupled with typescript bootstrapping for <code class="inline">travetto</code> apps and libraries.  It has support for the following key areas:</p>
+<ul>
+<li>Environmental Information</li>
+<li>Cache Support</li>
+<li>File Operations</li>
+<li>Typescript bootstrapping</li>
+</ul>
+<h3 id="environmental-information">Environmental Information</h3>
+<p> The functionality we support for testing and retrieving environment information:</p>
+<ul>
+<li><code class="inline">hasProfile(p: string): boolean;</code> - Test whether or not a profile is active.</li>
+<li><code class="inline">isTrue(key: string): boolean;</code> - Test whether or not an environment flag is set and is true</li>
+<li><code class="inline">isFalse(key: string): boolean;</code> - Test whether or not an environment flag is set and is false</li>
+<li><code class="inline">get(key: string, def?: string): string;</code> - Retrieve an environmental value with a potential default</li>
+<li><code class="inline">getInt(key: string, def?: number): number;</code> - Retrieve an environmental value as a number</li>
+<li><code class="inline">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li>
+</ul>
+<h3 id="file-cache">File Cache</h3>
+<p>The framework uses a file cache to support it’s compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <code class="inline">AppCache</code> is the cache that is used specific to the framework, and is an instance of <code class="inline">FileCache</code>.  <code class="inline">FileCache</code> is the generic structure for supporting a file cache that invalidates on modification/creation changse.</p>
+<p>The class organization looks like:</p>
+<pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">FileCache</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span>cwd<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> cacheDir<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token function">writeEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> contents<span class="token punctuation">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token type">Buffer</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token function">readEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token function">removeExpiredEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> force<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token function">removeEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token function">hasEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token function">statEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> fs<span class="token punctuation">.</span><span class="token type">Stats</span><span class="token punctuation">;</span>
+  <span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p>Everything is based on absolute paths being passed in, and translated into cache specific files.  </p>
+<h3 id="registration">Registration</h3>
+<p>This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.</p>
+<h3 id="file-system-interaction">File System Interaction</h3>
+<p><code class="inline">FsUtil</code> provides some high level functionality (like recursive directory delete). </p>
+</div>

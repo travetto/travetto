@@ -1,0 +1,59 @@
+{
+  "name": "travetto.github.io",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build --prod",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
+    "gh-pages": "/bin/bash -c 'ng build --prod --base-href=https://travetto.dev; angular-cli-ghpages -b master'"
+  },
+  "author": {
+    "name": "Travetto Framework",
+    "email": "travetto.framework@gmail.com"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^7.2.11",
+    "@angular/cdk": "^7.2.11",
+    "@angular/common": "^7.2.11",
+    "@angular/compiler": "^7.2.11",
+    "@angular/core": "^7.2.11",
+    "@angular/forms": "^7.2.11",
+    "@angular/http": "^7.2.11",
+    "@angular/material": "^7.2.11",
+    "@angular/platform-browser": "^7.2.11",
+    "@angular/platform-browser-dynamic": "^7.2.11",
+    "@angular/router": "^7.2.11",
+    "@types/marked": "^0.6.3",
+    "core-js": "^2.0.0",
+    "rxjs": "^6.4.0",
+    "zone.js": "^0.9.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^0.13.6",
+    "@angular/cli": "^7.2.11",
+    "@angular/compiler-cli": "^7.2.11",
+    "@angular/language-service": "^7.2.11",
+    "@types/jasmine": "^3.3.12",
+    "@types/jasminewd2": "^2.0.6",
+    "@types/node": "^11.12.0",
+    "codelyzer": "^4.5.0",
+    "jasmine-core": "~3.3.0",
+    "jasmine-spec-reporter": "~4.2.1",
+    "karma": "^4.0.1",
+    "karma-chrome-launcher": "~2.2.0",
+    "karma-coverage-istanbul-reporter": "^2.0.5",
+    "karma-jasmine": "~2.0.1",
+    "karma-jasmine-html-reporter": "^1.4.0",
+    "marked": "^0.6.1",
+    "prismjs": "^1.16.0",
+    "protractor": "^6.0.0",
+    "ts-node": "~8.0.3",
+    "tslint": "~5.14.0",
+    "typescript": "3.2.4"
+  }
+}

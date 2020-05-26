@@ -1,0 +1,80 @@
+<div class="documentation"><h1 id="app" id="application">Application</h1>
+<app-section-header headerType="install">Primary</app-section-header>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/app</code></pre><p>The <a class="module-link" routerLink="/docs/core" fragment="base" null><code class="inline">Base</code></a> module provides a simplistic bootstrap to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, <code class="decorator inline">@Application</code> who’s job is to register entry points into the application, along with the associated metadata. </p>
+<p>With the application, the <code class="inline">run</code> method is the entry point that will be invoked post construction of the class. Building off of the <a class="module-link" routerLink="/docs/di"  null><code class="inline">Dependency Injection</code></a>, the <code class="decorator inline">@Application</code> is a synonym for <code class="decorator inline">@Injectable</code>, and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.</p>
+<p>For example:</p>
+<app-section-header headerType="code">Example of @Application target</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{ '{' }}</span> <span class="token type">Inject</span><span class="token punctuation">,</span> <span class="token type">Injectable</span> <span class="token punctuation">{{ '}' }}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{ '{' }}</span> <span class="token type">Application</span> <span class="token punctuation">{{ '}' }}</span> <span class="token keyword">from</span> <span class="token string">'../'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">Server</span> <span class="token punctuation">{{ '{' }}</span>
+  name <span class="token operator">=</span> <span class="token string">'roger'</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">async</span> <span class="token function">launch</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token operator">...</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span>
+
+@<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'simple'</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">SimpleApp</span> <span class="token punctuation">{{ '{' }}</span>
+
+  @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  server<span class="token punctuation">:</span> <span class="token type">Server</span>
+
+  <span class="token keyword">async</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>server<span class="token punctuation">.</span><span class="token function">launch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p>Additionally, the <code class="decorator inline">@Application</code> decorator exposes some additional functionality, which can be used to launch the application. </p>
+<h3 id="run-arguments"><code class="inline">.run()</code> Arguments</h3>
+<p>The arguments specified in the <code class="inline">run</code> method are extracted via code transformation, and are able to be bound when invoking the application.  Whether from the command line or a plugin, the parameters will be mapped to the inputs of <code class="inline">run</code>.  For instance:</p>
+<app-section-header headerType="code">Simple Entry Point with Parameters</app-section-header>
+<pre><code class="language-typescript">@<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'simple'</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">SimpleApp</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token parameter">domain<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> port <span class="token operator">=</span> <span class="token number">3000</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Launching</span>'</span><span class="token punctuation">,</span> domain<span class="token punctuation">,</span> <span class="token string">'on port'</span><span class="token punctuation">,</span> port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p>These command line invocation of <code class="inline">travetto run</code> would look like:</p>
+<app-section-header headerType="terminal">Sample CLI Output</app-section-header>
+<pre><code class="language-bash">$ travetto run
+<span class="token punctuation">..</span><span class="token punctuation">..</span>
+
+     ● <span class="token punctuation">[</span>e2e<span class="token punctuation">]</span> simple
+       ----------------------------------
+       usage: simple <span class="token punctuation">[</span>domain<span class="token punctuation">]</span> <span class="token punctuation">(</span>port<span class="token operator">=</span>3000<span class="token punctuation">)</span></code></pre><p>To invoke the <code class="inline">simple</code> application, you need to pass <code class="inline">domain</code> where port is optional with a default.</p>
+<app-section-header headerType="terminal">Invoke Simple</app-section-header>
+<pre><code class="language-bash">$ travetto run simple mydomain.biz 4000
+
+<span class="token punctuation">[</span>INFO<span class="token punctuation">]</span> <span class="token type">Launching</span> mydomain.biz on port 4000</code></pre><h3 id="type-checking">Type Checking</h3>
+<p>The parameters to <code class="inline">run</code> will be type checked, to ensure proper evaluation.</p>
+<app-section-header headerType="terminal">Invoke Simple with bad port</app-section-header>
+<pre><code class="language-bash">$ travetto run simple mydomain.biz orange
+usage: simple domain <span class="token punctuation">(</span>string<span class="token punctuation">)</span>, port<span class="token operator">=</span><span class="token punctuation">[</span>3000<span class="token punctuation">]</span> <span class="token punctuation">(</span>number<span class="token punctuation">)</span></code></pre><p>The types are inferred from the <code class="inline">.run()</code> method parameters, but can be overridden in the <code class="decorator inline">@Application</code> annotation to support customization. Only primitive types are supported:</p>
+<ul>
+<li><code class="inline">number</code> - Float or decimal</li>
+<li><code class="inline">string</code> - Default if no type is specified</li>
+<li><code class="inline">boolean</code> - true(yes/on/1) and false(no/off/0)</li>
+<li><code class="inline">union</code> - Type unions of the same type (<code class="inline">string_a|string_b</code> or <code class="inline">1|2|3|4</code>)</li>
+</ul>
+<p>Customizing the types is done by name, and allows for greater control:</p>
+<app-section-header headerType="code">Complex Entry Point with Customization</app-section-header>
+<pre><code class="language-typescript">@<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'complex'</span><span class="token punctuation">,</span> <span class="token punctuation">{{ '{' }}</span>
+  watchable<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  paramMap<span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span>
+    domain<span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span>
+      title<span class="token punctuation">:</span> <span class="token string">'<span class="token type">Domain</span> <span class="token type">Name</span>'</span><span class="token punctuation">,</span>
+      <span class="token keyword">type</span><span class="token punctuation">:</span> <span class="token string">'string'</span><span class="token punctuation">,</span>
+      subtype<span class="token punctuation">:</span> <span class="token string">'url'</span>
+    <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span>
+    port <span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span>
+      title<span class="token punctuation">:</span> <span class="token string">'<span class="token type">Server</span> <span class="token type">Port</span>'</span><span class="token punctuation">,</span>
+      def<span class="token punctuation">:</span> <span class="token number">3000</span>
+    <span class="token punctuation">{{ '}' }}</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">ComplexApp</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token parameter">domain<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> port<span class="token punctuation">:</span> <span class="token builtin">number</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Launching</span>'</span><span class="token punctuation">,</span> domain<span class="token punctuation">,</span> <span class="token string">'on port'</span><span class="token punctuation">,</span> port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{ '}' }}</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p><strong>Note</strong><br>The applications, by default, will not scan other application’s folders.  This means, if you have an application in the <code class="inline">e2e/</code> folder, all of the code in your <code class="inline">src/</code> folder will not be picked up automatically.  This defined under the assumption that each application is unique.  If you have an application that is an extension of the primary application (<code class="inline">src/</code>), you can specify the <code class="decorator inline">@Application</code> config property of <code class="inline">standalone</code> to be false.  This will now scan both folders to run your application.</p>
+</div>
