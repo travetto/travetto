@@ -32,10 +32,6 @@ export class RunUtil {
     // Compile all code as needed
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 
-    // Pause outputting
-    const events: [any, any][] = [];
-    ConsoleManager.set({ invoke(a, b) { events.push([a, b]); } });
-
     await PhaseManager.init('require-all');
 
     // Load app if in support folder
@@ -43,6 +39,10 @@ export class RunUtil {
       const mod = app.filename.replace(/.*node_modules\//, '');
       require(mod);
     }
+
+    // Pause outputting
+    const events: [any, any][] = [];
+    ConsoleManager.set({ invoke(a, b) { events.push([a, b]); } });
 
     // Finish registration
     await PhaseManager.initAfter('require-all');

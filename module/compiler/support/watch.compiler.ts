@@ -60,6 +60,8 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
         folders: ScanApp.findFolders({ rootPaths: this.appRoots, folder: 'src' }),
         listener: this,
       });
+
+      this.presenceManager.init();
     }
 
     reset() {

@@ -4,13 +4,13 @@ import { Suite, Test, BeforeAll, AfterAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { ModelSource } from '@travetto/model';
-import { BaseSQLModelTest } from '@travetto/model-sql/support/test.model-sql';
+// import { BaseSQLModelTest } from '@travetto/model-sql/support/test.model-sql';
 
 import { TodoService } from '../src/service';
 import { Todo } from '../src/model';
 
 @Suite()
-export class TodoTest extends BaseSQLModelTest {
+export class TodoTest {
 
   @BeforeAll()
   async init() {
