@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/asset": "^1.0.0-rc.0",
+    "@travetto/asset": "^1.0.0-rc.1",
     "aws-sdk": "^2.676.0"
   },
   "description": "AWS S3 backend for the travetto asset module",
@@ -27,5 +27,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.0"
+  "version": "1.0.0-rc.1"
 }
