@@ -72,7 +72,7 @@ class $Logger {
       ({ level: x }) => x === 'error' || x === 'warn' || x === 'fatal')
     );
 
-    ConsoleManager.set(this);
+    ConsoleManager.set(this, true); // Make default
   }
 
   /**

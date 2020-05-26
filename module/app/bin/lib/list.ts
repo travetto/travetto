@@ -94,7 +94,7 @@ export class AppListManager {
       try {
         await this.verifyList(items);
       } catch (e) {
-        if (e.message.includes('expired')) {
+        if (e.message.includes('Expired')) {
           return await this.getList();
         } else {
           throw e;

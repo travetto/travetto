@@ -144,8 +144,12 @@ class $ConsoleManager {
   /**
    * Set a new console state, works as a stack to allow for nesting
    */
-  set(cons: ConsoleState) {
-    this.states.unshift(cons);
+  set(cons: ConsoleState, replace = false) {
+    if (!replace) {
+      this.states.unshift(cons);
+    } else {
+      this.states[0] = cons;
+    }
     this.state = this.states[0];
   }
 
