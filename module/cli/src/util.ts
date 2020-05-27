@@ -90,14 +90,19 @@ export class CliUtil {
    * Initialize the app environment
    */
   static initAppEnv({ env, watch, app, appRoots, profiles, plainLog }: AppEnv) {
-    if (env !== undefined) {
-      process.env.TRV_ENV = env; // Preemptively set b/c env changes how we compile some things
+    env = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? ''; // Preemptively set b/c env changes how we compile some things
+    if (env) {
+      if (/^prod/i.test(env)) {
+        process.env.NODE_ENV = 'production';
+      }
+      process.env.TRV_ENV = env;
     }
     // Set watch if passed in, as a default to the env vars, being in prod disables watch defaulting
     if (watch !== undefined) {
-      process.env.TRV_WATCH = EnvUtil.get('TRV_WATCH',
-        (watch && !/^prod/i.test(EnvUtil.get('TRV_ENV', '')) ? `${watch}` : undefined));
+      watch = EnvUtil.isSet('TRV_WATCH') ? EnvUtil.isWatch() : (watch && !EnvUtil.isProd());
+      process.env.TRV_WATCH = `${watch}`;
     }
+
     if (app && app !== '.') {
       (appRoots = appRoots ?? []).push(app);
       (profiles = profiles ?? []).push(app.split('/')[1]);

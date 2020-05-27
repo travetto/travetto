@@ -16,11 +16,11 @@
     <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token type">SchemaRegistry</span><span class="token punctuation">,</span> <span class="token type">DependencyRegistry</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 
-  <span class="token function">createPending</span><span class="token punctuation">(</span><span class="token parameter">cls<span class="token punctuation">:</span> Class</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{ '{' }}</span> <span class="token keyword">class</span><span class="token punctuation">:</span> cls <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">;</span>
+  <span class="token function">createPending</span><span class="token punctuation">(</span><span class="token parameter">cls<span class="token operator">:</span> Class</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{ '{' }}</span> <span class="token keyword">class</span><span class="token operator">:</span> cls <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 
-  onInstallFinalize<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">(</span>cls<span class="token punctuation">:</span> <span class="token type">Class</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  onInstallFinalize<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> <span class="token type">Class</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>pending<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>cls<span class="token punctuation">.</span>__id<span class="token punctuation">)</span><span class="token operator">!</span> <span class="token keyword">as</span> <span class="token type">ModelOptions</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>The registry is a <code class="inline">MetadataRegistry</code> that depends on the <code class="inline">SchemaRegistry</code> and the <code class="inline">DependencyRegistry</code>.</p>
@@ -30,9 +30,10 @@
 <h3 id="supporting-metadata">Supporting Metadata</h3>
 <p>For the registries to work properly, metadata needs to be collected about files and classes to uniquely identify them, especially across file reloads for the live flow.  To achieve this, every <code class="inline">class</code> is decorated with additional fields.  The data that is added is:</p>
 <ul>
-<li><code class="inline">__filename</code> denotes the fully qualified path name of the class</li>
+<li><code class="inline">__file</code> denotes the fully qualified path name of the class</li>
 <li><code class="inline">__id</code> represents a computed id that is tied to the file/class combination</li>
 <li><code class="inline">__hash</code> a quick and dirty hash of the contents of the class to be able to quickly determine if a class has changed or not</li>
-<li><code class="inline">__methodHashes</code> a map of hashes for each class method to be able to determine if the method contents have changed</li>
+<li><code class="inline">__methods</code> a map of hashes for each class method to be able to determine if the method contents have changed</li>
+<li><code class="inline">__abstract</code> a flag to determine if the type is abstract or not.</li>
 </ul>
 </div>

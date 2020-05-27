@@ -18,9 +18,9 @@
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span>
 
-<span class="token keyword">const</span> <span class="token constant">CUSTOM2</span> <span class="token operator">=</span> <span class="token function">Symbol</span><span class="token punctuation">(</span><span class="token string">'custom2'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token constant">CUSTOM2</span> <span class="token operator">=</span> <span class="token type">Symbol</span><span class="token punctuation">.</span><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token string">'di-custom2'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> target<span class="token punctuation">:</span> <span class="token type">CustomService</span><span class="token punctuation">,</span> <span class="token builtin">symbol</span><span class="token punctuation">:</span> <span class="token constant">CUSTOM2</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
+@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> target<span class="token operator">:</span> <span class="token type">CustomService</span><span class="token punctuation">,</span> <span class="token builtin">symbol</span><span class="token operator">:</span> <span class="token constant">CUSTOM2</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">CustomService2</span> <span class="token keyword">extends</span> <span class="token class-name">CustomService</span> <span class="token punctuation">{{ '{' }}</span>
   <span class="token keyword">async</span> <span class="token function">coolOperation</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">await</span> <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">coolOperation</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -30,11 +30,11 @@
 
 <span class="token keyword">class</span> <span class="token class-name">Consumer</span> <span class="token punctuation">{{ '{' }}</span>
   @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token constant">CUSTOM2</span><span class="token punctuation">)</span> <span class="token comment">// <span class="token type">Pull</span> in specific service</span>
-  service<span class="token punctuation">:</span> <span class="token type">CustomService</span><span class="token punctuation">;</span>
+  service<span class="token operator">:</span> <span class="token type">CustomService</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>As you can see, the <code class="inline">target</code> field is also set, which indicates to the dependency registration process what <code class="inline">class</code> the injectable is compatible with.  Additionally, when using <code class="inline">abstract</code> classes, the parent <code class="inline">class</code> is always considered as a valid candidate type.</p>
 <app-section-header headerType="code">Example @Injectable with target via abstract class</app-section-header>
 <pre><code class="language-typescript"><span class="token keyword">abstract</span> <span class="token keyword">class</span> <span class="token class-name">BaseService</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">abstract</span> <span class="token function">work</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">abstract</span> <span class="token function">work</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span><span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span>
 
 @<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -46,7 +46,7 @@
 <app-section-header headerType="code">Example @InjectableFactory, return type defines target class</app-section-header>
 <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{ '{' }}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">initService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token type">CoolService</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">static</span> <span class="token function">initService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">CoolService</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">CoolService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>Given the <code class="inline">static</code> method <code class="inline">initService</code>, the function will be provided as a valid candidate for <code class="inline">CoolService</code>.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable. </p>
@@ -59,7 +59,7 @@
 <pre><code class="language-typescript">@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">CustomService</span> <span class="token punctuation">{{ '{' }}</span>
   @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">private</span> dependentService<span class="token punctuation">:</span> <span class="token type">DependentService</span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> dependentService<span class="token operator">:</span> <span class="token type">DependentService</span><span class="token punctuation">;</span>
 
   <span class="token keyword">async</span> <span class="token function">coolOperation</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>dependentService<span class="token punctuation">.</span><span class="token function">doWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -68,7 +68,7 @@
 <app-section-header headerType="code">Example @Injectable with dependencies in constructor</app-section-header>
 <pre><code class="language-typescript">@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">CustomService</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">constructor</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">private</span> dependentService<span class="token punctuation">:</span> DependentService</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span><span class="token punctuation">{{ '}' }}</span>
+  <span class="token keyword">constructor</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">private</span> dependentService<span class="token operator">:</span> DependentService</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span><span class="token punctuation">{{ '}' }}</span>
 
   <span class="token keyword">async</span> <span class="token function">coolOperation</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>dependentService<span class="token punctuation">.</span><span class="token function">doWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -77,7 +77,7 @@
 <app-section-header headerType="code">Example @InjectableFactory with parameters as dependencies</app-section-header>
 <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{ '{' }}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">initService</span><span class="token punctuation">(</span>dependentService<span class="token punctuation">:</span> <span class="token type">DependentService</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token type">CustomService</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">static</span> <span class="token function">initService</span><span class="token punctuation">(</span>dependentService<span class="token operator">:</span> <span class="token type">DependentService</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">CustomService</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">CustomService</span><span class="token punctuation">(</span>dependentService<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p><strong>NOTE</strong> If you are building modules for others to consume, often times it is desirable to have default implementations for contracts that can be overridden.  The <code class="decorator inline">@Inject</code> decorator takes a flag of <code class="inline">defaultIfMissing</code> and a class name, that it will use to satisfy the dependency if nothing else matches.  This would look like:</p>
@@ -86,24 +86,24 @@
 
 <span class="token punctuation">{{ '}' }}</span>
 
-@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> targets<span class="token punctuation">:</span> <span class="token type">SimpleContract</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
+@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> targets<span class="token operator">:</span> <span class="token type">SimpleContract</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">SimpleContract</span> <span class="token keyword">extends</span> <span class="token class-name">Contract</span> <span class="token punctuation">{{ '{' }}</span><span class="token punctuation">{{ '}' }}</span>
 
-@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> targets<span class="token punctuation">:</span> <span class="token type">ComplexContract</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
+@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> targets<span class="token operator">:</span> <span class="token type">ComplexContract</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">ComplexContract</span> <span class="token keyword">extends</span> <span class="token class-name">Contract</span> <span class="token punctuation">{{ '{' }}</span><span class="token punctuation">{{ '}' }}</span>
 
 @<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">ContractConsumer</span> <span class="token punctuation">{{ '{' }}</span>
   <span class="token comment">// <span class="token type">Will</span> default to <span class="token type">SimpleContract</span> if nothing else registered</span>
-  @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> defaultIfMissing<span class="token punctuation">:</span> <span class="token type">SimpleContract</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
-  contract<span class="token punctuation">:</span> <span class="token type">Contract</span><span class="token punctuation">;</span>
+  @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> defaultIfMissing<span class="token operator">:</span> <span class="token type">SimpleContract</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
+  contract<span class="token operator">:</span> <span class="token type">Contract</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span>
 
 
 <span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{ '{' }}</span>
   <span class="token comment">// <span class="token type">Complex</span> will be marked as the available Contract</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token function">getContract</span><span class="token punctuation">(</span>complex<span class="token punctuation">:</span> <span class="token type">ComplexContract</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token type">Contract</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token function">getContract</span><span class="token punctuation">(</span>complex<span class="token operator">:</span> <span class="token type">ComplexContract</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">Contract</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> complex<span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><h2 id="manual-invocation">Manual Invocation</h2>

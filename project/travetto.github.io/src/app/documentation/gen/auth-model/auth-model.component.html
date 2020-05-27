@@ -5,47 +5,47 @@
 <p>A registered identity extends the base concept of an identity, by adding in additional fields needed for local registration, specifically password management information.</p>
 <app-section-header headerType="code">Registered Identity, and a valid User model</app-section-header>
 <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">RegisteredIdentity</span> <span class="token keyword">extends</span> <span class="token class-name">Identity</span> <span class="token punctuation">{{ '{' }}</span>
-  hash<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  salt<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  resetToken<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  resetExpires<span class="token punctuation">:</span> <span class="token type">Date</span><span class="token punctuation">;</span>
-  password<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  hash<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  resetToken<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  resetExpires<span class="token operator">:</span> <span class="token type">Date</span><span class="token punctuation">;</span>
+  password<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span>
 
 @<span class="token meta">Model</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token keyword">extends</span> <span class="token class-name">BaseModel</span> <span class="token keyword">implements</span> <span class="token class-name">RegisteredIdentity</span> <span class="token punctuation">{{ '{' }}</span>
-  password<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  salt<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  hash<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  resetToken<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  resetExpires<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token type">Date</span><span class="token punctuation">;</span>
-  permissions<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  password<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  salt<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  hash<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  resetToken<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  resetExpires<span class="token operator">?</span><span class="token operator">:</span> <span class="token type">Date</span><span class="token punctuation">;</span>
+  permissions<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><h3 id="configuration">Configuration</h3>
 <p>Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogeonized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.</p>
-<app-section-header headerType="code">Principal Provider configuration</app-section-header>
+<app-section-header headerType="code">Principal Source configuration</app-section-header>
 <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">AuthConfig</span> <span class="token punctuation">{{ '{' }}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getModelPrincipalProvider</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token type">PrincipalProvider</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">new</span> <span class="token class-name">ModelPrincipalProvider</span><span class="token punctuation">(</span>
+  <span class="token keyword">static</span> <span class="token function">getModelPrincipalSource</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">PrincipalSource</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">new</span> <span class="token class-name">ModelPrincipalSource</span><span class="token punctuation">(</span>
       <span class="token type">User</span><span class="token punctuation">,</span>
-      <span class="token punctuation">(</span><span class="token parameter">u<span class="token punctuation">:</span>User</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>    <span class="token comment">// <span class="token type">This</span> converts <span class="token type">User</span> to a RegisteredIdentity</span>
-        provider<span class="token punctuation">:</span> <span class="token string">'model'</span><span class="token punctuation">,</span>
-        id<span class="token punctuation">:</span> u<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
-        permissions<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span>u<span class="token punctuation">.</span>permissions<span class="token punctuation">)</span><span class="token punctuation">,</span>
-        hash<span class="token punctuation">:</span> u<span class="token punctuation">.</span>hash<span class="token punctuation">,</span>
-        salt<span class="token punctuation">:</span> u<span class="token punctuation">.</span>salt<span class="token punctuation">,</span>
-        resetToken<span class="token punctuation">:</span> u<span class="token punctuation">.</span>resetToken<span class="token punctuation">,</span>
-        resetExpires<span class="token punctuation">:</span> u<span class="token punctuation">.</span>resetExpires<span class="token punctuation">,</span>
-        password<span class="token punctuation">:</span> u<span class="token punctuation">.</span>password<span class="token punctuation">,</span>
-        details<span class="token punctuation">:</span> u<span class="token punctuation">,</span>
+      <span class="token punctuation">(</span><span class="token parameter">u<span class="token operator">:</span>User</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>    <span class="token comment">// <span class="token type">This</span> converts <span class="token type">User</span> to a RegisteredIdentity</span>
+        provider<span class="token operator">:</span> <span class="token string">'model'</span><span class="token punctuation">,</span>
+        id<span class="token operator">:</span> u<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
+        permissions<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span>u<span class="token punctuation">.</span>permissions<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        hash<span class="token operator">:</span> u<span class="token punctuation">.</span>hash<span class="token punctuation">,</span>
+        salt<span class="token operator">:</span> u<span class="token punctuation">.</span>salt<span class="token punctuation">,</span>
+        resetToken<span class="token operator">:</span> u<span class="token punctuation">.</span>resetToken<span class="token punctuation">,</span>
+        resetExpires<span class="token operator">:</span> u<span class="token punctuation">.</span>resetExpires<span class="token punctuation">,</span>
+        password<span class="token operator">:</span> u<span class="token punctuation">.</span>password<span class="token punctuation">,</span>
+        details<span class="token operator">:</span> u<span class="token punctuation">,</span>
       <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-      <span class="token punctuation">(</span><span class="token parameter">u<span class="token punctuation">:</span>RegisteredIdentity</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token type">User</span><span class="token punctuation">.</span><span class="token keyword">from</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>   <span class="token comment">// <span class="token type">This</span> converts a <span class="token type">RegisteredIdentity</span> to a User</span>
-        id<span class="token punctuation">:</span> u<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
-        permissions<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token punctuation">(</span>u<span class="token punctuation">.</span>permissions<span class="token operator">||</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-        hash<span class="token punctuation">:</span> u<span class="token punctuation">.</span>hash<span class="token punctuation">,</span>
-        salt<span class="token punctuation">:</span> u<span class="token punctuation">.</span>salt<span class="token punctuation">,</span>
-        resetToken<span class="token punctuation">:</span> u<span class="token punctuation">.</span>resetToken<span class="token punctuation">,</span>
-        resetExpires<span class="token punctuation">:</span> u<span class="token punctuation">.</span>resetExpires<span class="token punctuation">,</span>
+      <span class="token punctuation">(</span><span class="token parameter">u<span class="token operator">:</span>RegisteredIdentity</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token type">User</span><span class="token punctuation">.</span><span class="token keyword">from</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>   <span class="token comment">// <span class="token type">This</span> converts a <span class="token type">RegisteredIdentity</span> to a User</span>
+        id<span class="token operator">:</span> u<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
+        permissions<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token punctuation">(</span>u<span class="token punctuation">.</span>permissions<span class="token operator">||</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+        hash<span class="token operator">:</span> u<span class="token punctuation">.</span>hash<span class="token punctuation">,</span>
+        salt<span class="token operator">:</span> u<span class="token punctuation">.</span>salt<span class="token punctuation">,</span>
+        resetToken<span class="token operator">:</span> u<span class="token punctuation">.</span>resetToken<span class="token punctuation">,</span>
+        resetExpires<span class="token operator">:</span> u<span class="token punctuation">.</span>resetExpires<span class="token punctuation">,</span>
       <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
@@ -55,9 +55,9 @@
   <span class="token operator">...</span>
 
   @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">private</span> auth<span class="token punctuation">:</span> <span class="token type">ModelPrincipalProvider</span><span class="token operator">&lt;</span><span class="token type">User</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> auth<span class="token operator">:</span> <span class="token type">ModelPrincipalSource</span><span class="token operator">&lt;</span><span class="token type">User</span><span class="token operator">></span><span class="token punctuation">;</span>
 
-  <span class="token keyword">async</span> <span class="token function">authenticate</span><span class="token punctuation">(</span><span class="token parameter">identity<span class="token punctuation">:</span> RegisteredIdentity</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">authenticate</span><span class="token punctuation">(</span><span class="token parameter">identity<span class="token operator">:</span> RegisteredIdentity</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">try</span> <span class="token punctuation">{{ '{' }}</span>
       <span class="token keyword">return</span> <span class="token keyword">await</span> svc<span class="token punctuation">.</span><span class="token function">authenticate</span><span class="token punctuation">(</span>identity<span class="token punctuation">.</span>id<span class="token operator">!</span><span class="token punctuation">,</span> identity<span class="token punctuation">.</span>password<span class="token operator">!</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{ '}' }}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>

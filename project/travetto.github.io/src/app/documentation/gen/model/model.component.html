@@ -7,32 +7,31 @@
 <app-section-header headerType="code">Extending BaseModel</app-section-header>
 <pre><code class="language-typescript">@<span class="token meta">Model</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token keyword">extends</span> <span class="token class-name">BaseModel</span> <span class="token punctuation">{{ '{' }}</span>
-  name<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  age<span class="token punctuation">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-  contact<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  age<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  contact<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>The <code class="inline">User</code> model is now ready to be used with the model services.</p>
 <h2 id="accessstorage">Access/Storage</h2>
 <p>The <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/model.ts" target="_blank" null><code class="inline">ModelService</code></a> is the foundation for all access to the storage layer, and provides a comprehensive set of functionality.  The service includes support for modifying individual records, bulk update/insert/delete, partial updates, finding records, and more.  This should be the expected set of functionality for storage and retrieval.</p>
 <app-section-header headerType="code">Using ModelService with the User model</app-section-header>
 <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">UserManager</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">private</span> service<span class="token punctuation">:</span> <span class="token type">ModelService</span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> service<span class="token operator">:</span> <span class="token type">ModelService</span><span class="token punctuation">;</span>
 
-  <span class="token keyword">async</span> <span class="token function">register</span><span class="token punctuation">(</span><span class="token parameter">user<span class="token punctuation">:</span> User</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">register</span><span class="token punctuation">(</span><span class="token parameter">user<span class="token operator">:</span> User</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">const</span> created <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">save</span><span class="token punctuation">(</span><span class="token type">User</span><span class="token punctuation">,</span> user<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token operator">...</span> send welcome email <span class="token operator">...</span>
     <span class="token keyword">return</span> created<span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 
-  <span class="token keyword">async</span> <span class="token function">bulkCreate</span><span class="token punctuation">(</span><span class="token parameter">users<span class="token punctuation">:</span> <span class="token type">User</span><span class="token punctuation">[</span><span class="token punctuation">]</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">bulkCreate</span><span class="token punctuation">(</span><span class="token parameter">users<span class="token operator">:</span> <span class="token type">User</span><span class="token punctuation">[</span><span class="token punctuation">]</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">bulkProcess</span><span class="token punctuation">(</span><span class="token type">User</span><span class="token punctuation">,</span> <span class="token punctuation">{{ '{' }}</span>
-      insert<span class="token punctuation">:</span> users
+      insert<span class="token operator">:</span> users
     <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token operator">...</span> notify administrator <span class="token keyword">of</span> completion <span class="token operator">...</span>
     <span class="token keyword">return</span> res<span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>The <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/model.ts" target="_blank" null><code class="inline">ModelService</code></a> itself relies upon a <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/source.ts" target="_blank" null><code class="inline">ModelSource</code></a> which is the driver for the storage layer.  </p>
 <p>During development, <code class="inline">ModelSource</code> supports the ability to respond to model changes in real-time, and to modify the underlying storage mechanism.  An example of this would be <code class="inline">elasticsearch</code> schemas being updated as fields are added or removed from the <code class="inline">Model</code> class.</p>
-<p>Additionally there is a class <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/class-model.ts" target="_blank" null><code class="inline">ClassModelService</code></a> that provides a wrapper around <code class="inline">ModelService</code> that is tied to a specific <code class="inline">Model</code> class.  This can be useful if you want to constrain the model access or if you have a high volume of function calls for the same model.</p>
 <h2 id="querying">Querying</h2>
 <p>One of the complexities of abstracting multiple storage mechanisms, is providing a consistent query language.  The query language the module uses is a derivation of <code class="inline">mongodb</code>‘s query language, with some restrictions, additions, and caveats. Additionally, given the nature of typescript, all queries are statically typed, and will catch type errors at compile time.</p>
 <h3 id="general-fields">General Fields</h3>
@@ -52,17 +51,17 @@
 <p>A sample query for <code class="inline">User</code>‘s might be:</p>
 <app-section-header headerType="code">Using the query structure for specific queries</app-section-header>
 <pre><code class="language-typescript"><span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">getAllByQuery</span><span class="token punctuation">(</span><span class="token type">User</span><span class="token punctuation">,</span> <span class="token punctuation">{{ '{' }}</span>
-  $and<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+  $and<span class="token operator">:</span> <span class="token punctuation">[</span>
     <span class="token punctuation">{{ '{' }}</span>
-      $not <span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span>
-        age <span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span>
-          $lt <span class="token punctuation">:</span> <span class="token number">35</span>
+      $not <span class="token operator">:</span> <span class="token punctuation">{{ '{' }}</span>
+        age <span class="token operator">:</span> <span class="token punctuation">{{ '{' }}</span>
+          $lt <span class="token operator">:</span> <span class="token number">35</span>
         <span class="token punctuation">{{ '}' }}</span>
       <span class="token punctuation">{{ '}' }}</span>
     <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span>
     <span class="token punctuation">{{ '{' }}</span>
-      contact <span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span>
-        $exists<span class="token punctuation">:</span> <span class="token boolean">true</span>
+      contact <span class="token operator">:</span> <span class="token punctuation">{{ '{' }}</span>
+        $exists<span class="token operator">:</span> <span class="token boolean">true</span>
       <span class="token punctuation">{{ '}' }}</span>
     <span class="token punctuation">{{ '}' }}</span>
   <span class="token punctuation">]</span>
@@ -84,7 +83,9 @@
 <app-section-header headerType="code">Query language with boolean checks and exists check</app-section-header>
 <pre><code class="language-sql"><span class="token operator">not</span> <span class="token punctuation">(</span>age <span class="token operator">&lt;</span> <span class="token number">35</span><span class="token punctuation">)</span> <span class="token operator">and</span> contact <span class="token operator">!=</span> <span class="token boolean">null</span></code></pre><p>A more complex query would look like:</p>
 <app-section-header headerType="code">Query language with more complex needs</app-section-header>
-<pre><code class="language-sql"><span class="token keyword">user</span><span class="token punctuation">.</span>role <span class="token operator">in</span> <span class="token punctuation">[</span><span class="token string">'admin'</span><span class="token punctuation">,</span> <span class="token string">'root'</span><span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span><span class="token keyword">user</span><span class="token punctuation">.</span>address<span class="token punctuation">.</span>state <span class="token operator">=</span><span class="token operator">=</span> <span class="token string">'VA'</span> <span class="token operator">||</span> <span class="token keyword">user</span><span class="token punctuation">.</span>address<span class="token punctuation">.</span>city <span class="token operator">=</span><span class="token operator">=</span> <span class="token string">'<span class="token type">Springfield</span>'</span><span class="token punctuation">)</span></code></pre>
+<pre><code class="language-sql"><span class="token keyword">user</span><span class="token punctuation">.</span>role <span class="token operator">in</span> <span class="token punctuation">[</span><span class="token string">'admin'</span><span class="token punctuation">,</span> <span class="token string">'root'</span><span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span><span class="token keyword">user</span><span class="token punctuation">.</span>address<span class="token punctuation">.</span>state <span class="token operator">=</span><span class="token operator">=</span> <span class="token string">'VA'</span> <span class="token operator">||</span> <span class="token keyword">user</span><span class="token punctuation">.</span>address<span class="token punctuation">.</span>city <span class="token operator">=</span><span class="token operator">=</span> <span class="token string">'<span class="token type">Springfield</span>'</span><span class="token punctuation">)</span></code></pre><h3 id="regular-expressions">Regular Expressions</h3>
+<p>When querying with regular expressions,patterns can be specified as <code class="inline">&#39;strings&#39;</code> or as <code class="path inline">/patterns/</code>.  The latter allows for the case insensitive modifier: <code class="path inline">/pattern/i</code>.  Supporting the insensitive flag is up to the underlying model implementation.</p>
+
       <app-model-elasticsearch></app-model-elasticsearch>
 
       <app-model-mongo></app-model-mongo>
@@ -98,39 +99,39 @@
 <pre><code class="language-typescript">@<span class="token meta">ModelController</span><span class="token punctuation">(</span><span class="token string">'/user'</span><span class="token punctuation">,</span> <span class="token type">User</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">UserController</span> <span class="token punctuation">{{ '{' }}</span>
   @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  source<span class="token punctuation">:</span> <span class="token type">ModelService</span><span class="token punctuation">;</span>
+  source<span class="token operator">:</span> <span class="token type">ModelService</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>is a shorthand that is equal to:</p>
 <app-section-header headerType="code">Comparable UserController, built manually</app-section-header>
 <pre><code class="language-typescript">@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/user'</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">UserController</span> <span class="token punctuation">{{ '{' }}</span>
 
   @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  source<span class="token punctuation">:</span> <span class="token type">ModelService</span><span class="token punctuation">;</span>
+  source<span class="token operator">:</span> <span class="token type">ModelService</span><span class="token punctuation">;</span>
 
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getAllUser</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">:</span>Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">getAllUser</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span>Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">getAllByQuery</span><span class="token punctuation">(</span><span class="token type">User</span><span class="token punctuation">,</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>req<span class="token punctuation">.</span>params<span class="token punctuation">.</span>q<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">':id'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getUser</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">:</span>Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">getUser</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span>Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">getById</span><span class="token punctuation">(</span><span class="token type">User</span><span class="token punctuation">,</span> req<span class="token punctuation">.</span>params<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 
   @<span class="token meta">Delete</span><span class="token punctuation">(</span><span class="token string">':id'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">deleteUser</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">:</span>Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">deleteUser</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span>Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">deleteById</span><span class="token punctuation">(</span><span class="token type">User</span><span class="token punctuation">,</span> req<span class="token punctuation">.</span>params<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 
   @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span>
   @<span class="token meta">SchemaBody</span><span class="token punctuation">(</span><span class="token type">User</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">saveUser</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">:</span><span class="token type">TypedBody</span><span class="token operator">&lt;</span><span class="token type">User</span><span class="token operator">></span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">saveUser</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span><span class="token type">TypedBody</span><span class="token operator">&lt;</span><span class="token type">User</span><span class="token operator">></span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">save</span><span class="token punctuation">(</span><span class="token type">User</span><span class="token punctuation">,</span> req<span class="token punctuation">.</span>body<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 
   @<span class="token meta">Put</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span>
   @<span class="token meta">SchemaBody</span><span class="token punctuation">(</span><span class="token type">User</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">updateUser</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">:</span><span class="token type">TypedBody</span><span class="token operator">&lt;</span><span class="token type">User</span><span class="token operator">></span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">updateUser</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span><span class="token type">TypedBody</span><span class="token operator">&lt;</span><span class="token type">User</span><span class="token operator">></span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span><span class="token type">User</span><span class="token punctuation">,</span> req<span class="token punctuation">.</span>body<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre></div>

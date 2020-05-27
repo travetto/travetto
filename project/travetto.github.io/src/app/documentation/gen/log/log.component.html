@@ -4,17 +4,17 @@
 <p>The debug/trace content can be filtered using the patterns from the <a class="external-link" href="https://www.npmjs.com/package/debug" target="_blank" null><code class="inline">debug</code></a>.  You can specify wild cards to only <code class="inline">DEBUG</code> or <code class="inline">TRACE</code> specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages. </p>
 <app-section-header headerType="terminal">Sample environment flags</app-section-header>
 <pre><code class="language-bash"><span class="token comment"># Debug</span>
-$ DEBUG<span class="token operator">=</span>-@trv:registry npx travetto run app
-$ DEBUG<span class="token operator">=</span>@trv:rest npx travetto run app
-$ DEBUG<span class="token operator">=</span>@trv:*,-@trv:model npx travetto run app
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>-@trv:registry npx travetto run app
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@trv:rest npx travetto run app
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@trv:*,-@trv:model npx travetto run app
 
 <span class="token comment"># Trace</span>
-$ TRACE<span class="token operator">=</span>-@trv:registry npx travetto run app
-$ TRACE<span class="token operator">=</span>@trv:rest npx travetto run app
-$ TRACE<span class="token operator">=</span>@trv:*,-@trv:model npx travetto run app
+$ <span class="token assign-left variable">TRACE</span><span class="token operator">=</span>-@trv:registry npx travetto run app
+$ <span class="token assign-left variable">TRACE</span><span class="token operator">=</span>@trv:rest npx travetto run app
+$ <span class="token assign-left variable">TRACE</span><span class="token operator">=</span>@trv:*,-@trv:model npx travetto run app
 
 <span class="token comment"># BOTH</span>
-$ DEBUG<span class="token operator">=</span>@trv:rest TRACE<span class="token operator">=</span>-@trv:registry npx travetto run app</code></pre><p>The supported operations are:</p>
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@trv:rest <span class="token assign-left variable">TRACE</span><span class="token operator">=</span>-@trv:registry npx travetto run app</code></pre><p>The supported operations are:</p>
 <ul>
 <li><code class="inline">console.fatal</code> which logs at the <code class="inline">FATAL</code> level</li>
 <li><code class="inline">console.error</code> which logs at the <code class="inline">ERROR</code> level</li>
@@ -58,7 +58,7 @@ $ DEBUG<span class="token operator">=</span>@trv:rest TRACE<span class="token op
 <app-section-header headerType="code">Various log levels</app-section-header>
 <pre><code class="language-typescript"><span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Hello</span> <span class="token type">World</span>'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Woah</span>!'</span><span class="token punctuation">,</span> <span class="token punctuation">{{ '{' }}</span> a<span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span> b<span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span> c<span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span> d<span class="token punctuation">:</span> <span class="token number">10</span> <span class="token punctuation">{{ '}' }}</span> <span class="token punctuation">{{ '}' }}</span> <span class="token punctuation">{{ '}' }}</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Woah</span>!'</span><span class="token punctuation">,</span> <span class="token punctuation">{{ '{' }}</span> a<span class="token operator">:</span> <span class="token punctuation">{{ '{' }}</span> b<span class="token operator">:</span> <span class="token punctuation">{{ '{' }}</span> c<span class="token operator">:</span> <span class="token punctuation">{{ '{' }}</span> d<span class="token operator">:</span> <span class="token number">10</span> <span class="token punctuation">{{ '}' }}</span> <span class="token punctuation">{{ '}' }}</span> <span class="token punctuation">{{ '}' }}</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Woah</span>!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
@@ -66,8 +66,8 @@ $ DEBUG<span class="token operator">=</span>@trv:rest TRACE<span class="token op
 
 <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">fatal</span><span class="token punctuation">(</span><span class="token string">'hi'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>The corresponding output would be</p>
 <app-section-header headerType="terminal">Logging output</app-section-header>
-<pre><code class="language-bash">2018-06-23T16:57:58 info  <span class="token punctuation">[</span>@app/test.simple:  5<span class="token punctuation">]</span> <span class="token type">Hello</span> <span class="token type">World</span>
-2018-06-23T16:57:58 info  <span class="token punctuation">[</span>@app/test.simple:  7<span class="token punctuation">]</span> <span class="token type">Woah</span><span class="token operator">!</span> <span class="token punctuation">{{ '{' }}</span> a: <span class="token punctuation">{{ '{' }}</span> b: <span class="token punctuation">{{ '{' }}</span> c: <span class="token punctuation">[</span><span class="token type">Object</span><span class="token punctuation">]</span> <span class="token punctuation">{{ '}' }}</span> <span class="token punctuation">{{ '}' }}</span> <span class="token punctuation">{{ '}' }}</span>
-2018-06-23T16:57:58 info  <span class="token punctuation">[</span>@app/test.simple:  9<span class="token punctuation">]</span> <span class="token type">Woah</span><span class="token operator">!</span>
-2018-06-23T16:57:58 debug <span class="token punctuation">[</span>@app/test.simple: 11<span class="token punctuation">]</span> <span class="token type">Test</span>
-2018-06-23T16:57:58 fatal <span class="token punctuation">[</span>@app/test.simple: 13<span class="token punctuation">]</span> hi</code></pre></div>
+<pre><code class="language-bash"><span class="token number">2018</span>-06-23T16:57:58 info  <span class="token punctuation">[</span>test/simple:  <span class="token number">5</span><span class="token punctuation">]</span> <span class="token type">Hello</span> <span class="token type">World</span>
+<span class="token number">2018</span>-06-23T16:57:58 info  <span class="token punctuation">[</span>test/simple:  <span class="token number">7</span><span class="token punctuation">]</span> <span class="token type">Woah</span><span class="token operator">!</span> <span class="token punctuation">{{ '{' }}</span> a: <span class="token punctuation">{{ '{' }}</span> b: <span class="token punctuation">{{ '{' }}</span> c: <span class="token punctuation">[</span><span class="token type">Object</span><span class="token punctuation">]</span> <span class="token punctuation">{{ '}' }}</span> <span class="token punctuation">{{ '}' }}</span> <span class="token punctuation">{{ '}' }}</span>
+<span class="token number">2018</span>-06-23T16:57:58 info  <span class="token punctuation">[</span>test/simple:  <span class="token number">9</span><span class="token punctuation">]</span> <span class="token type">Woah</span><span class="token operator">!</span>
+<span class="token number">2018</span>-06-23T16:57:58 debug <span class="token punctuation">[</span>test/simple: <span class="token number">11</span><span class="token punctuation">]</span> <span class="token type">Test</span>
+<span class="token number">2018</span>-06-23T16:57:58 fatal <span class="token punctuation">[</span>test/simple: <span class="token number">13</span><span class="token punctuation">]</span> hi</code></pre></div>

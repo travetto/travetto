@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import { getParent } from './util';
+import * as marked from 'marked';
+import * as Prism from 'prismjs';
 
-const marked = require('marked');
-
-const Prism = require('prismjs');
 require('prismjs/plugins/normalize-whitespace/prism-normalize-whitespace');
 require('prismjs/components/prism-typescript');
 require('prismjs/components/prism-javascript');
@@ -111,11 +110,10 @@ class MyRenderer extends marked.Renderer {
       } else {
         out = `<pre><code class="language-${lang}">${highlight(text, lang)}</code></pre>`;
       }
-      out = out.replace(/\b[A-Z][a-z]+([A-Z][a-z]*)*\b(?!<\/span)/g, (a) => {
-        return `<span class="token type">${a}</span>`;
-      });
+      out = out.replace(/\b[A-Z][a-z]+([A-Z][a-z]*)*\b(?!<\/span)/g, (a) =>
+        `<span class="token type">${a}</span>`);
     } else {
-      out = super.code(text, lang, escaped);
+      out = super.code(text, lang, !!escaped);
     }
     return out;
   }
@@ -128,9 +126,9 @@ const opts = {
 };
 
 export function render(markdownFile: string): string {
-  const content = fs.readFileSync(markdownFile).toString()
+  const content = fs.readFileSync(markdownFile, 'utf8')
     .replace(/Travetto:\s*/gi, '')
-    .replace(/```([^\n]*?)```/g, (a, c) => '`█' + c + '`');
+    .replace(/```([^\n]*?)```/g, (a, c) => `\`█${c}\``);
 
   let links = '';
 
@@ -149,5 +147,3 @@ export function render(markdownFile: string): string {
 
   return output;
 }
-
-

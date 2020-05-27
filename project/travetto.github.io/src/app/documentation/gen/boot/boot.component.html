@@ -6,33 +6,60 @@
 <li>Cache Support</li>
 <li>File Operations</li>
 <li>Typescript bootstrapping</li>
+<li>Process execution </li>
+<li>Stream Support</li>
 </ul>
 <h3 id="environmental-information">Environmental Information</h3>
-<p> The functionality we support for testing and retrieving environment information:</p>
+<p>The functionality we support for testing and retrieving environment information:</p>
 <ul>
-<li><code class="inline">hasProfile(p: string): boolean;</code> - Test whether or not a profile is active.</li>
 <li><code class="inline">isTrue(key: string): boolean;</code> - Test whether or not an environment flag is set and is true</li>
 <li><code class="inline">isFalse(key: string): boolean;</code> - Test whether or not an environment flag is set and is false</li>
+<li><code class="inline">isSet(key:string): boolean;</code> - Test whether or not an environment value is set (excludes: <code class="inline">null</code>, <code class="inline">&#39;&#39;</code>, and <code class="inline">undefined</code>)</li>
 <li><code class="inline">get(key: string, def?: string): string;</code> - Retrieve an environmental value with a potential default</li>
 <li><code class="inline">getInt(key: string, def?: number): number;</code> - Retrieve an environmental value as a number</li>
 <li><code class="inline">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li>
+<li><code class="inline">getTime(key: string, def: number):number</code> - Reads an environment variable as milliseconds, with support for <code class="inline">s</code>, <code class="inline">m</code>, and <code class="inline">h</code> suffixes to provide succinct time units.</li>
 </ul>
 <h3 id="file-cache">File Cache</h3>
-<p>The framework uses a file cache to support it’s compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <code class="inline">AppCache</code> is the cache that is used specific to the framework, and is an instance of <code class="inline">FileCache</code>.  <code class="inline">FileCache</code> is the generic structure for supporting a file cache that invalidates on modification/creation changse.</p>
+<p>The framework uses a file cache to support it’s compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <code class="inline">AppCache</code> is the cache that is used specific to the framework, and is an instance of <code class="inline">FileCache</code>.  <code class="inline">FileCache</code> is the generic structure for supporting a file cache that invalidates on modification/creation changes.</p>
 <p>The class organization looks like:</p>
 <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">FileCache</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">constructor</span><span class="token punctuation">(</span>cwd<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> cacheDir<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-  <span class="token function">writeEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> contents<span class="token punctuation">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token type">Buffer</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-  <span class="token function">readEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token function">removeExpiredEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> force<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-  <span class="token function">removeEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-  <span class="token function">hasEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token function">statEntry</span><span class="token punctuation">(</span>full<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> fs<span class="token punctuation">.</span><span class="token type">Stats</span><span class="token punctuation">;</span>
-  <span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span>cwd<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> cacheDir<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token function">writeEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> contents<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token type">Buffer</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token function">readEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token function">removeExpiredEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> force<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token function">removeEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token function">hasEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token function">statEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> fs<span class="token punctuation">.</span><span class="token type">Stats</span><span class="token punctuation">;</span>
+  <span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>Everything is based on absolute paths being passed in, and translated into cache specific files.  </p>
 <h3 id="registration">Registration</h3>
 <p>This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.</p>
 <h3 id="file-system-interaction">File System Interaction</h3>
 <p><code class="inline">FsUtil</code> provides some high level functionality (like recursive directory delete). </p>
+<h3 id="file-system-scanning">File System Scanning</h3>
+<p><code class="inline">ScanFs</code> provides a breadth-first search through the file system with the ability to track and collect files via patterns.</p>
+<h3 id="process-execution">Process Execution</h3>
+<p>Just like [<code class="inline">child_process</code>], the <code class="inline">ExecUtil</code> exposes <code class="inline language-typescript">spawn</code> and <code class="inline language-typescript">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="inline language-typescript">Promise</code> structure, that throws an error on an non-zero return status.</p>
+<p>A simple example would be</p>
+<app-section-header headerType="code">Running a directory listing via ls</app-section-header>
+<pre><code class="language-typescript"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">executeListing</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">const</span> <span class="token punctuation">{{ '{' }}</span> result <span class="token punctuation">{{ '}' }}</span> <span class="token operator">=</span> <span class="token type">ExecUtil</span><span class="token punctuation">.</span><span class="token function">spawn</span><span class="token punctuation">(</span><span class="token string">'ls'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">await</span> result<span class="token punctuation">;</span>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p>As you can see, the call returns not only the child process information, but the <code class="inline language-typescript">Promise</code> to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:</p>
+<ul>
+<li><code class="inline">timeout</code> as the number of milliseconds the process can run before terminating and throwing an error</li>
+<li><code class="inline">quiet</code> which suppresses all stdout/stderr output</li>
+<li><code class="inline">stdin</code> as a string, buffer or stream to provide input to the program you are running;</li>
+<li><code class="inline">timeoutKill</code> allows for registering functionality to execute when a process is force killed by timeout</li>
+</ul>
+<h3 id="stream-support">Stream Support</h3>
+<p>The <code class="inline">StreamUtil</code> class provides basic stream utilities for use within the framework:</p>
+<ul>
+<li><code class="inline">toBuffer(src: Readable | Buffer | string): Promise&lt;Buffer&gt;</code> for converting a stream/buffer/filepath to a Buffer.</li>
+<li><code class="inline">toReadable(src: Readable | Buffer | string):Promise&lt;Readable&gt;</code> for converting a stream/buffer/filepath to a Readable </li>
+<li><code class="inline">writeToFile(src: Readable, out: string):Promise&lt;void&gt;</code> will stream a readable into a file path, and wait for completion.</li>
+<li><code class="inline">waitForCompletion(src: Readable, finish:()=&gt;Promise&lt;any&gt;)</code> will ensure the stream remains open until the promise finish produces is satisfied.</li>
+</ul>
 </div>

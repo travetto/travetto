@@ -25,14 +25,6 @@ export class Transpiler {
   private hashes = new Map<string, number>();
   private program: ts.Program;
 
-  private get compilerOptions() {
-    return {
-      ...TranspileUtil.compilerOptions,
-      rootDir: FsUtil.cwd,
-      outDir: FsUtil.cwd
-    };
-  }
-
   constructor(
     /**
      * Cache for transpilation
@@ -99,7 +91,7 @@ export class Transpiler {
         return this.sources.get(fileName);
       },
       getDefaultLibLocation(this: Transpiler) {
-        return path.dirname(ts.getDefaultLibFilePath(this.compilerOptions));
+        return path.dirname(ts.getDefaultLibFilePath(TranspileUtil.compilerOptions));
       },
     };
     for (const [k, v] of Object.entries(host) as [(keyof ts.CompilerHost), any][]) {
@@ -123,7 +115,7 @@ export class Transpiler {
       }
       this.program = ts.createProgram({
         rootNames: [...this.rootNames],
-        options: this.compilerOptions,
+        options: TranspileUtil.compilerOptions,
         host: this.getHost(),
         oldProgram: this.program
       });

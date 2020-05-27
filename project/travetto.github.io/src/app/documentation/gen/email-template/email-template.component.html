@@ -1,6 +1,6 @@
 <div class="documentation"><h2 id="email-template" id="email-template">Email-Template</h2>
 <app-section-header headerType="install">Templating support for email module</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/email-template</code></pre><p>This is the primary templating email engine.  The templating process is built upon three primary ideas, with the final output being an <a class="external-link" href="https://github.com/zurb/inky" target="_blank" null><code class="inline">inky</code></a> rendered html/text email.  </p>
+<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> -D @travetto/email-template</code></pre><p>This is primarily a set of command line tools for compiling and developing templates.  The templating process is built upon three primary ideas, with the final output being an <a class="external-link" href="https://github.com/zurb/inky" target="_blank" null><code class="inline">inky</code></a> rendered html/text email.  </p>
 <h3 id="asset-management">Asset Management</h3>
 <p>The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying of asset paths, with the following paths (in order of precedence):</p>
 <ol>
@@ -8,36 +8,36 @@
 <li><code class="path inline">@travetto/email-template/resources</code></li>
 <li><code class="inline">foundation-emails/scss</code> (specifically for <code class="inline">sass</code> files)</li>
 </ol>
-<p>When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  All email <code class="inline">.html</code> files, are loaded automatically and can be referenced by individual file name.  E.g. <code class="path inline">/resources/email/receipt.html</code> can be referenced by the name <code class="inline">email/receipt</code>.</p>
+<p>When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process with convert <code class="inline">.tpl.html</code> files into <code class="inline">.compiled.html</code> and <code class="inline">.compiled.txt</code> suffixes to generate the html and text outputs respectively.  </p>
 <h3 id="template-compilation">Template Compilation</h3>
 <p>The general process is as follows:</p>
 <ol>
 <li>Load in a general wrapper for email, located at <code class="path inline">/resources/email/wrapper.html</code>.</li>
 <li>Load in the general stylings as <code class="inline">sass</code>, from <code class="path inline">/resources/email/app.scss</code>.</li>
-<li>Resolving all mustache partial templates, at <code class="path inline">/resources/email/**/*.html</code>.</li>
+<li>Resolving all mustache partial templates, at <code class="path inline">/resources/email/**/*.tpl.html</code>.</li>
 <li>Render the <code class="inline">inky</code> directives into the final <code class="inline">html</code> output.</li>
 <li>Inline and optimize all images for email transmission.</li>
 <li>Generate markdown version of email to support the alternate text format.</li>
-<li>Render the final output via the <code class="inline">mustache</code> templating process, interpolating the contextual data into the final output.</li>
 </ol>
 <h3 id="common-email-elements">Common Email Elements</h3>
-<p>In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. <code class="inline">{{ '{' }}{{ '{' }}{{ '{' }}&gt; email/common-element{{ '}' }}{{ '}' }}{{ '}' }}</code></p>
+<p>In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. <code class="inline">{{ '{' }}{{ '{' }}{{ '{' }}&gt; email/common-element {{ '}' }}{{ '}' }}{{ '}' }}</code></p>
 <h3 id="images">Images</h3>
 <p>When referencing an image from the <code class="inline">resources</code> folder in a template, e.g.</p>
 <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>/email/logo.png<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></code></pre><p>The image will be extracted out and embedded in the email as a multi part message.  This allows for compression and optimization of images as well as externalizing resources that may not be immediately public. </p>
 <h3 id="template-development">Template Development</h3>
 <p>The module provides <a class="module-link" routerLink="/docs/cli"  null><code class="inline">cli</code></a> support for email template development. Running </p>
 <p><strong>Shell: running template development environment</strong></p>
-<pre><code class="language-bash">$ npx trv email-template</code></pre><p>In the development environment, you can toggle between HTML and text views, as well as provide JSON context for the email to see how it would look with real data. This process supports live reload, and should help facilitate any email design work.</p>
+<pre><code class="language-bash">$ npx trv email:dev</code></pre><h3 id="template-compilation-1">Template Compilation</h3>
+<p>The module provides <a class="module-link" routerLink="/docs/cli"  null><code class="inline">cli</code></a> support for email template compilation also. Running </p>
+<p><strong>Shell: running template compilation</strong></p>
+<pre><code class="language-bash">$ npx trv email:compile</code></pre><p>Will convert all <code class="inline">.tpl.html</code> files into the appropriate <code class="inline">.compiled.html</code> and <code class="inline">.compiled.txt</code> files.  These will be used during the execution of the application.</p>
 <h3 id="supporting-libraries">Supporting Libraries</h3>
 <p>Templating emails is achieved through a combination of multiple libraries, specifically:</p>
 <ul>
 <li><a class="external-link" href="https://github.com/zurb/inky" target="_blank" null><code class="inline">inky</code></a> is a email rendering framework that aims to provide a standard set of constructs for building visually appealing emails.  The version of inky being used is a complete rewrite to optimize for size and performance.</li>
 <li><a class="external-link" href="https://github.com/sass/dart-sass" target="_blank" null><code class="inline">sass</code></a> used for sass compilation.</li>
 <li><a class="external-link" href="https://github.com/janl/mustache.js/" target="_blank" null><code class="inline">mustache</code></a> allows for interpolation of variables for personalized emails.</li>
-<li><a class="external-link" href="https://pngquant.org/" target="_blank" null><code class="inline">pngquant</code></a> is used to compress images on the fly for bandwidth optimizations. <code class="inline">pngquant</code> is not installed as a dependency, but relies upon either the binary being already installed, or spinning up a <code class="inline">docker</code> container to use as a way of executing the binary.</li>
 </ul>
-<p><strong>NOTE</strong> Many of the libraries were chosen due to size and number of overall dependencies.  Any performance issues are mitigated accordingly.</p>
 <h3 id="example">Example</h3>
 <p>A sample template could look like:</p>
 <app-section-header headerType="code">Example inky template with mustache support</app-section-header>
