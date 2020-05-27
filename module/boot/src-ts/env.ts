@@ -102,4 +102,18 @@ export class EnvUtil {
       return val === undefined ? false : val;
     }
   }
+
+  /**
+   * Determine if app is in prod mode or not
+   */
+  static isProd() {
+    return this.get('NODE_ENV') === 'production';
+  }
+
+  /**
+   * Is the app in watch mode?
+   */
+  static isWatch() {
+    return this.isTrue('TRV_WATCH');
+  }
 }

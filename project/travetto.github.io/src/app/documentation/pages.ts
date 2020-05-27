@@ -43,7 +43,7 @@ export const PAGES = [
   { path: 'model-sql', title: 'SQL' }
 ] },
   { path: 'rest', title: 'Rest', component: RestComponent, subs: [
-  { path: 'swagger', title: 'Swagger' },
+  { path: 'openapi', title: 'OpenAPI' },
   { path: 'rest-session', title: 'Session' },
   { path: 'rest-express', title: 'Express' },
   { path: 'rest-koa', title: 'Koa' },
@@ -63,11 +63,10 @@ export const PAGES = [
   { path: 'utils', title: 'App Utilities', component: UtilsComponent, subs: [
   { path: 'log', title: 'Log' },
   { path: 'cache', title: 'Cache' },
-  { path: 'exec', title: 'Exec' },
+  { path: 'command', title: 'Command' },
   { path: 'worker', title: 'Worker' },
-  { path: 'schedule', title: 'Schedule ' },
   { path: 'net', title: 'Net' },
-  { path: 'jwt', title: 'JWT' }
+  { path: 'watch', title: 'Watch' }
 ] },
   { path: 'asset', title: 'Asset', component: AssetComponent, subs: [
   { path: 'asset-mongo', title: 'Mongo' },
@@ -77,7 +76,8 @@ export const PAGES = [
   { path: 'auth', title: 'Auth', component: AuthComponent, subs: [
   { path: 'auth-model', title: 'Model' },
   { path: 'auth-rest', title: 'Rest' },
-  { path: 'auth-passport', title: 'Passport' }
+  { path: 'auth-passport', title: 'Passport' },
+  { path: 'jwt', title: 'JWT' }
 ] },
   { path: 'email', title: 'Email', component: EmailComponent, subs: [
   { path: 'email-template', title: 'Template' }

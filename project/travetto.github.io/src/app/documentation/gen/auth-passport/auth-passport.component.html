@@ -2,35 +2,35 @@
 <app-section-header headerType="install">Passport provider</app-section-header>
 <pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/auth-passport</code></pre><p>Within the node ecosystem, the most prevalent auth framework is <a class="external-link" href="http://passportjs.org" target="_blank" null><code class="inline">passport</code></a>.  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for <code class="inline">passport</code> baked in. Registering and configuring a <code class="inline">passport</code> strategy is fairly straightforward.</p>
 <app-section-header headerType="code">Sample Facebook/passport config</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token constant">FB_AUTH</span> <span class="token operator">=</span> <span class="token function">Symbol</span><span class="token punctuation">(</span><span class="token string">'facebook'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token constant">FB_AUTH</span> <span class="token operator">=</span> <span class="token type">Symbol</span><span class="token punctuation">.</span><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token string">'auth-facebook'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">FbUser</span> <span class="token punctuation">{{ '{' }}</span>
-  id<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  roles<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  roles<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AppConfig</span> <span class="token punctuation">{{ '{' }}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token constant">FB_AUTH</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">facebookPassport</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token type">IdentityProvider</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">PassportIdentityProvider</span><span class="token punctuation">(</span><span class="token string">'facebook'</span><span class="token punctuation">,</span>
+  <span class="token keyword">static</span> <span class="token function">facebookPassport</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">IdentitySource</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">PassportIdentitySource</span><span class="token punctuation">(</span><span class="token string">'facebook'</span><span class="token punctuation">,</span>
       <span class="token keyword">new</span> <span class="token class-name">FacebookStrategy</span><span class="token punctuation">(</span>
         <span class="token punctuation">{{ '{' }}</span>
-          clientID<span class="token punctuation">:</span> <span class="token string">'&lt;clientId>'</span><span class="token punctuation">,</span>
-          clientSecret<span class="token punctuation">:</span> <span class="token string">'&lt;clientSecret>'</span><span class="token punctuation">,</span>
-          callbackURL<span class="token punctuation">:</span> <span class="token string">'http://localhost:3000/auth/facebook/callback'</span><span class="token punctuation">,</span>
-          profileFields<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'id'</span><span class="token punctuation">,</span> <span class="token string">'displayName'</span><span class="token punctuation">,</span> <span class="token string">'photos'</span><span class="token punctuation">,</span> <span class="token string">'email'</span><span class="token punctuation">]</span>
+          clientID<span class="token operator">:</span> <span class="token string">'&lt;clientId>'</span><span class="token punctuation">,</span>
+          clientSecret<span class="token operator">:</span> <span class="token string">'&lt;clientSecret>'</span><span class="token punctuation">,</span>
+          callbackURL<span class="token operator">:</span> <span class="token string">'http://localhost:3000/auth/facebook/callback'</span><span class="token punctuation">,</span>
+          profileFields<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'id'</span><span class="token punctuation">,</span> <span class="token string">'displayName'</span><span class="token punctuation">,</span> <span class="token string">'photos'</span><span class="token punctuation">,</span> <span class="token string">'email'</span><span class="token punctuation">]</span>
         <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span>
         <span class="token punctuation">(</span><span class="token parameter">accessToken<span class="token punctuation">,</span> refreshToken<span class="token punctuation">,</span> profile<span class="token punctuation">,</span> cb</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
-          <span class="token keyword">return</span> <span class="token function">cb</span><span class="token punctuation">(</span>undefined<span class="token punctuation">,</span> profile<span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token keyword">return</span> <span class="token function">cb</span><span class="token punctuation">(</span><span class="token keyword">undefined</span><span class="token punctuation">,</span> profile<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token punctuation">{{ '}' }}</span>
       <span class="token punctuation">)</span><span class="token punctuation">,</span>
-      <span class="token punctuation">(</span><span class="token parameter">user<span class="token punctuation">:</span> FbUser</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>
-        id<span class="token punctuation">:</span> user<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
-        permissions<span class="token punctuation">:</span> user<span class="token punctuation">.</span>roles
+      <span class="token punctuation">(</span><span class="token parameter">user<span class="token operator">:</span> FbUser</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>
+        id<span class="token operator">:</span> user<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
+        permissions<span class="token operator">:</span> user<span class="token punctuation">.</span>roles
       <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>As you can see, <code class="inline language-typescript">PassportIdentityProvider</code> will take care of the majority of the work, and all that is required is:</p>
+<span class="token punctuation">{{ '}' }}</span></code></pre><p>As you can see, <code class="inline language-typescript">PassportIdentitySource</code> will take care of the majority of the work, and all that is required is:</p>
 <ul>
 <li>Provide the name of the strategy (should be unique)</li>
 <li>Provide the strategy instance. <strong>NOTE</strong> you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework</li>
@@ -55,7 +55,7 @@
 
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/self'</span><span class="token punctuation">)</span>
   @<span class="token meta">Authenticated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getSelf</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">:</span> Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">getSelf</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> req<span class="token punctuation">.</span>auth<span class="token punctuation">.</span>context<span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre></div>

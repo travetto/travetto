@@ -17,7 +17,7 @@ $ <span class="token function">npm</span> <span class="token function">install</
 <app-section-header headerType="code">Wiring up the SQL Model Source</app-section-header>
 <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Init</span> <span class="token punctuation">{{ '{' }}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getModelSource</span><span class="token punctuation">(</span>conf<span class="token punctuation">:</span> SQLModelConfig<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token type">ModelSource</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">static</span> <span class="token function">getModelSource</span><span class="token punctuation">(</span>conf<span class="token operator">:</span> SQLModelConfig<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">ModelSource</span> <span class="token punctuation">{{ '{' }}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">SQLModelSource</span><span class="token punctuation">(</span>conf<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>where the <code class="inline">SQLModelConfig</code> is defined by:</p>
@@ -28,5 +28,4 @@ $ <span class="token function">npm</span> <span class="token function">install</
   port <span class="token operator">=</span> <span class="token number">3306</span><span class="token punctuation">;</span>
   database <span class="token operator">=</span> <span class="token string">'app'</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>and can be overridden via environment variables or config files, as defined in <a class="module-link" routerLink="/docs/config"  null><code class="inline">Config</code></a>.</p>
-<p><strong>NOTE</strong> During testing, the source will automatically spin up an <code class="inline">MySQL</code> server via a <code class="inline">docker</code> container if you are not already running the service.</p>
 </div>

@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, ElementRef, Inject, HostBinding, HostListener, Host } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { Component, OnInit, Input, ElementRef, HostBinding } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-section-header',

@@ -4,13 +4,13 @@
 <app-section-header headerType="code">S3 backend wiring</app-section-header>
 <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">AppConfig</span> <span class="token punctuation">{{ '{' }}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getSource</span><span class="token punctuation">(</span>cfg<span class="token punctuation">:</span> AssetS3Config<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token type">AssetSource</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">AssetS3Source</span><span class="token punctuation">(</span>cfg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">getSource</span><span class="token punctuation">(</span>cfg<span class="token operator">:</span> S3AssetConfig<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">AssetSource</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">S3AssetSource</span><span class="token punctuation">(</span>cfg<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>There is a default configuration that you can easily use, with some sensible defaults.</p>
 <app-section-header headerType="code">S3 configuration</app-section-header>
-<pre><code class="language-typescript">@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'asset.s3'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AssetS3Config</span> <span class="token punctuation">{{ '{' }}</span>
+<pre><code class="language-typescript">@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'s3.asset'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">S3AssetConfig</span> <span class="token punctuation">{{ '{' }}</span>
   region <span class="token operator">=</span> <span class="token string">'us-east-1'</span><span class="token punctuation">;</span>
   base <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
 
@@ -19,7 +19,7 @@
 
   bucket <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
 
-  config<span class="token punctuation">:</span> aws<span class="token punctuation">.</span><span class="token constant">S3</span><span class="token punctuation">.</span><span class="token type">ClientConfiguration</span><span class="token punctuation">;</span>
+  config<span class="token operator">:</span> aws<span class="token punctuation">.</span><span class="token constant">S3</span><span class="token punctuation">.</span><span class="token type">ClientConfiguration</span><span class="token punctuation">;</span>
   <span class="token operator">...</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p><strong>NOTE</strong> Do not commit your <code class="inline">accessKeyId</code> or <code class="inline">secretAccessKey</code> values to your source repository, especially if it is public facing.  Not only is it a security risk, but Amazon will scan public repos, looking for keys, and if found will react swiftly.</p>
 <p>Additionally, you can see that the class is registered with the <code class="decorator inline">@Config</code> decorator, and so these values can be overridden using the standard<a class="module-link" routerLink="/docs/config"  null><code class="inline">Configuration</code></a> resolution paths.</p>

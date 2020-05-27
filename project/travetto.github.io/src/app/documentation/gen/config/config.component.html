@@ -8,14 +8,14 @@
 <h2 id="resolution">Resolution</h2>
 <p>Config loading follows a defined resolution path, below is the order in increasing specificity:</p>
 <ol>
-<li><code class="path inline">node_modules/@travetto/&lt;module&gt;/config/*.yml</code> - Load framework module configurations.  Defines general configuration that should be easily </li>
-<li><code class="path inline">config/*.yml</code> - Load local application configurations</li>
-<li><code class="path inline">resources/*.yml</code> - Load profile specific configurations as defined by the values in <code class="inline">process.env.PROFILE</code>, <code class="inline">process.env.ENV</code>.</li>
+<li><code class="path inline">resources/application.yml</code> - Load the default <code class="inline">application.yml</code> if available.</li>
+<li><code class="path inline">resources/*.yml</code> - Load profile specific configurations as defined by the values in <code class="inline">process.env.TRV_PROFILES</code></li>
+<li><code class="path inline">resources/{{ '{' }}env{{ '}' }}.yml</code> - Load environment specific profile configurations as defined by the values of <code class="inline">process.env.TRV_ENV</code>.</li>
 <li><code class="inline">process.env</code> - Read startup configuration from environment to allow for overriding any values. Because we are overriding a <a class="external-link" href="https://en.wikipedia.org/wiki/YAML" target="_blank" null><code class="inline">yaml</code></a> based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as <code class="inline">UPPER_SNAKE_CASE</code>. When reading from <code class="inline">process.env</code> we will map <code class="inline">UPPER_SNAKE_CASE</code> to <code class="inline">upper.snake.case</code>, and will attempt to match by case-insensitive name.</li>
 </ol>
 <h3 id="a-complete-example">A Complete Example</h3>
 <p>A more complete example setup would look like:</p>
-<app-section-header headerType="config">Config/database.yml</app-section-header>
+<app-section-header headerType="config">Resources/database.yml</app-section-header>
 <pre><code class="language-yaml"><span class="token key atrule">database</span><span class="token punctuation">:</span>
   <span class="token key atrule">host</span><span class="token punctuation">:</span> localhost
   <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">9423</span>
@@ -37,16 +37,16 @@
   <span class="token key atrule">creds</span><span class="token punctuation">:</span>
     <span class="token key atrule">user</span><span class="token punctuation">:</span> admin<span class="token punctuation">-</span>user
     <span class="token key atrule">password</span><span class="token punctuation">:</span> &lt;secret<span class="token punctuation">></span></code></pre><h2 id="consuming">Consuming</h2>
-<p>The <code class="inline">ConfigLoader</code> service provides direct access to all of the loaded configuration. For simplicity, a decorator, <code class="decorator inline">@Config</code> allows for classes to automatically be bound with config information on post construction. The decorator will install a <code class="inline">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matterns.</p>
+<p>The <code class="inline">ConfigManager</code> service provides direct access to all of the loaded configuration. For simplicity, a decorator, <code class="decorator inline">@Config</code> allows for classes to automatically be bound with config information on post construction. The decorator will install a <code class="inline">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.</p>
 <p>The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:</p>
 <app-section-header headerType="code">Database config object</app-section-header>
 <pre><code class="language-typescript">@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'database'</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">DBConfig</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">private</span> host<span class="token punctuation">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token keyword">private</span> port<span class="token punctuation">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> host<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> port<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
   <span class="token keyword">private</span> creds <span class="token operator">=</span> <span class="token punctuation">{{ '{' }}</span>
-    user<span class="token punctuation">:</span> <span class="token string">''</span><span class="token punctuation">,</span>
-    password<span class="token punctuation">:</span> <span class="token string">''</span>
+    user<span class="token operator">:</span> <span class="token string">''</span><span class="token punctuation">,</span>
+    password<span class="token operator">:</span> <span class="token string">''</span>
   <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre><p>And the corresponding config file:</p>
 <app-section-header headerType="config">Database config via yaml</app-section-header>
@@ -58,11 +58,11 @@
     <span class="token key atrule">password</span><span class="token punctuation">:</span> bobspw</code></pre><p>The instance of <code class="inline">DBConfig</code>  would be equivalent to:</p>
 <app-section-header headerType="config">Resolved database config as JSON</app-section-header>
 <pre><code class="language-js"><span class="token punctuation">{{ '{' }}</span>
-  host<span class="token punctuation">:</span> <span class="token string">'localhost'</span><span class="token punctuation">,</span>
-  port<span class="token punctuation">:</span> <span class="token number">9423</span><span class="token punctuation">,</span>
-  creds <span class="token punctuation">:</span> <span class="token punctuation">{{ '{' }}</span>
-    user<span class="token punctuation">:</span> <span class="token string">'bob'</span><span class="token punctuation">,</span>
-    password<span class="token punctuation">:</span> <span class="token string">'bobspw'</span>
+  host<span class="token operator">:</span> <span class="token string">'localhost'</span><span class="token punctuation">,</span>
+  port<span class="token operator">:</span> <span class="token number">9423</span><span class="token punctuation">,</span>
+  creds <span class="token operator">:</span> <span class="token punctuation">{{ '{' }}</span>
+    user<span class="token operator">:</span> <span class="token string">'bob'</span><span class="token punctuation">,</span>
+    password<span class="token operator">:</span> <span class="token string">'bobspw'</span>
   <span class="token punctuation">{{ '}' }}</span>
 <span class="token punctuation">{{ '}' }}</span></code></pre></div>
 

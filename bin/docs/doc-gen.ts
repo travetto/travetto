@@ -9,10 +9,10 @@ import { render } from './process-markdown';
 import { MAPPING, Mapping } from './mapping';
 import { getParent } from './util';
 
-const SELF = __dirname;
-const GHP_ROOT = path.dirname(SELF);
-const RELATED_ROOT = path.dirname(GHP_ROOT);
-const MOD_ROOT = fs.realpathSync(process.argv[2]);
+const ROOT = path.resolve(__dirname, '..', '..');
+const MOD_ROOT = path.resolve(ROOT, 'module');
+const PROJECT_ROOT = path.resolve(ROOT, 'project');
+const GHP_ROOT = path.resolve(PROJECT_ROOT, 'travetto.github.io');
 const DOC_ROOT = `${GHP_ROOT}/src/app/documentation`;
 
 interface Page {
@@ -22,10 +22,10 @@ interface Page {
   subs?: Page[];
 }
 
-const readLines = (f: string) => fs.readFileSync(f).toString().split('\n');
+const readLines = (f: string) => fs.readFileSync(f, 'utf8').split('\n');
 
 function writeContents(f: string, contents: string) {
-  const existing = fs.existsSync(f) ? fs.readFileSync(f).toString() : undefined;
+  const existing = fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : undefined;
 
   if (existing !== contents) {
     console.log('Updating', f);
@@ -34,7 +34,7 @@ function writeContents(f: string, contents: string) {
 }
 
 function markdowns(root: string) {
-  return cp.execSync(`find ${root} -name '*.md' | grep -v node_modules`).toString().split('\n').filter(x => !!x);
+  return cp.execSync(`find ${root} -name '*.md' | grep -v node_modules`, { encoding: 'utf8' }).split('\n').filter(x => !!x);
 }
 
 function compileModule(root: string, moduleConf: Mapping, sub?: string) {
@@ -184,18 +184,21 @@ function waitForChange() {
   const files = [...markdowns(`${GHP_ROOT}/src`), ...markdowns(MOD_ROOT)];
   cp.execSync(`inotifywait -e attrib,modify,move,create,delete ${files.join(' ')}`);
 }
-cp.execSync(`ln -sf ${RELATED_ROOT}/vscode-plugin/images ${GHP_ROOT}/src/assets/vscode-plugin`);
-cp.execSync(`ln -sf ${RELATED_ROOT}/vscode-plugin/README.md ${DOC_ROOT}/vscode-plugin/vscode-plugin.component.md`);
-cp.execSync(`ln -sf ${path.dirname(MOD_ROOT)}/sample/todo-app/README.md ${GHP_ROOT}/src/app/guide/guide.component.md`);
-cp.execSync(`ln -sf ${path.dirname(MOD_ROOT)}/README.md ${DOC_ROOT}/overview/overview.component.md`);
 
-if (process.argv[3] === 'watch') {
-  while (true) {
+export function run(mode: string) {
+  cp.execSync(`ln -sf ${PROJECT_ROOT}/vscode-plugin/images ${GHP_ROOT}/src/assets/vscode-plugin`);
+  cp.execSync(`ln -sf ${PROJECT_ROOT}/vscode-plugin/README.md ${DOC_ROOT}/vscode-plugin/vscode-plugin.component.md`);
+  cp.execSync(`ln -sf ${path.dirname(MOD_ROOT)}/sample/todo-app/README.md ${GHP_ROOT}/src/app/guide/guide.component.md`);
+  cp.execSync(`ln -sf ${path.dirname(MOD_ROOT)}/README.md ${DOC_ROOT}/overview/overview.component.md`);
+
+  if (mode === 'watch') {
+    for (; ;) {
+      renderDocs();
+      renderGuide();
+      waitForChange();
+    }
+  } else {
     renderDocs();
     renderGuide();
-    waitForChange();
   }
-} else {
-  renderDocs();
-  renderGuide();
 }

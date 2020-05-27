@@ -35,11 +35,8 @@ import { RestExpressComponent } from './gen/rest-express/rest-express.component'
 import { RestKoaComponent } from './gen/rest-koa/rest-koa.component';
 import { RestFastifyComponent } from './gen/rest-fastify/rest-fastify.component';
 import { RestAwsLambdaComponent } from './gen/rest-aws-lambda/rest-aws-lambda.component';
-import { SwaggerComponent } from './gen/swagger/swagger.component';
 import { TestComponent } from './gen/test/test.component';
 import { CacheComponent } from './gen/cache/cache.component';
-import { ExecComponent } from './gen/exec/exec.component';
-import { ScheduleComponent } from './gen/schedule/schedule.component';
 import { CliComponent } from './gen/cli/cli.component';
 import { GeneratorAppComponent } from './gen/generator-app/generator-app.component';
 import { NetComponent } from './gen/net/net.component';
@@ -52,6 +49,9 @@ import { RestSessionComponent } from './gen/rest-session/rest-session.component'
 import { BootComponent } from './gen/boot/boot.component';
 import { ModelSqlComponent } from './gen/model-sql/model-sql.component';
 import { AppComponent } from './gen/app/app.component';
+import { OpenapiComponent } from './gen/openapi/openapi.component';
+import { CommandComponent } from './gen/command/command.component';
+import { WatchComponent } from './gen/watch/watch.component';
 
 @NgModule({
   imports: [
@@ -101,11 +101,8 @@ import { AppComponent } from './gen/app/app.component';
     RestKoaComponent,
     RestFastifyComponent,
     RestAwsLambdaComponent,
-    SwaggerComponent,
     TestComponent,
     CacheComponent,
-    ExecComponent,
-    ScheduleComponent,
     CliComponent,
     GeneratorAppComponent,
     NetComponent,
@@ -116,7 +113,10 @@ import { AppComponent } from './gen/app/app.component';
     RestSessionComponent,
     BootComponent,
     ModelSqlComponent,
-    AppComponent
+    AppComponent,
+    OpenapiComponent,
+    CommandComponent,
+    WatchComponent
   ]
 })
 export class DocumentationModule { }

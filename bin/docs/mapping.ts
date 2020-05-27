@@ -38,7 +38,7 @@ export const MAPPING: Mapping[] = [
   {
     module: 'rest',
     children: [
-      { module: 'swagger' },
+      { module: 'openapi' },
       { module: 'rest-session' },
       { module: 'rest-express' },
       { module: 'rest-koa' },
@@ -69,11 +69,10 @@ export const MAPPING: Mapping[] = [
     children: [
       { module: 'log' },
       { module: 'cache' },
-      { module: 'exec' },
+      { module: 'command' },
       { module: 'worker' },
-      { module: 'schedule' },
       { module: 'net' },
-      { module: 'jwt' }
+      { module: 'watch' }
     ]
   },
   {
@@ -90,6 +89,7 @@ export const MAPPING: Mapping[] = [
       { module: 'auth-model' },
       { module: 'auth-rest' },
       { module: 'auth-passport' },
+      { module: 'jwt' }
     ]
   },
   {

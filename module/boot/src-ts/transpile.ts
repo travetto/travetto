@@ -106,7 +106,8 @@ export class TranspileUtil {
       this[OPTS] = {
         ...this.ts.parseJsonSourceFileConfigFileContent(json, this.ts.sys, FsUtil.cwd).options,
         rootDir: FsUtil.cwd,
-        outDir: FsUtil.cwd
+        outDir: FsUtil.cwd,
+        removeComments: EnvUtil.isProd()
       };
     }
     return this[OPTS];
@@ -176,7 +177,7 @@ export class TranspileUtil {
       err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${fileName}]` : `from ${fileName}`}`);
     }
 
-    if (EnvUtil.isTrue('TRV_WATCH') && !fileName.includes('/node_modules/')) {
+    if (EnvUtil.isWatch() && !fileName.includes('/node_modules/')) {
       console.debug(`Unable to ${phase} ${fileName}: stubbing out with error proxy.`, err.message);
       return this.getErrorModule(err.message);
     }
@@ -218,7 +219,7 @@ export class TranspileUtil {
 
     // Register source maps for cached files
     require('source-map-support').install({
-      emptyCacheBetweenOperations: EnvUtil.isTrue('TRV_WATCH'),
+      emptyCacheBetweenOperations: EnvUtil.isWatch(),
       retrieveFile: (p: string) => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined
     });
   }
