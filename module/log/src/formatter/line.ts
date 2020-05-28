@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { Env } from '@travetto/base';
+import { ConsoleManager } from '@travetto/base';
 import { FsUtil, ColorUtil } from '@travetto/boot';
 
 import { LogEvent, Formatter } from '../types';
@@ -28,6 +28,7 @@ export interface LineFormatterOpts {
   align?: boolean;
   level?: boolean;
   location?: boolean;
+  fullCategory?: boolean;
 }
 
 /**
@@ -37,7 +38,11 @@ export class LineFormatter implements Formatter {
   private opts: LineFormatterOpts;
 
   constructor(opts: LineFormatterOpts) {
-    this.opts = { colorize: true, timestamp: 'ms', align: true, level: true, location: true, ...opts };
+    this.opts = {
+      colorize: true, timestamp: 'ms', align: true, level: true, location: true,
+      fullCategory: true, // @line-if -$TRV_DEV
+      ...opts
+    };
   }
 
   /**
@@ -70,8 +75,11 @@ export class LineFormatter implements Formatter {
     }
 
     if (ev.file && opts.location) {
-      const ns = ev.category;
-      let loc = ev.line ? `${(!Env.trace && (Env.prod || ev.file.includes('node_modules'))) ? ev.category : ev.file.replace(FsUtil.cwd, '.')}:${ev.line}` : ns;
+      let ns = ev.category;
+      if (opts.fullCategory || !ev.file.includes('node_modules')) {
+        ns = ev.file.replace(FsUtil.cwd, '.');
+      }
+      let loc = ev.line ? `${ns}:${ev.line}` : ns;
       if (opts.colorize) {
         loc = STYLES.location(loc);
       }
@@ -89,8 +97,8 @@ export class LineFormatter implements Formatter {
       message = args.map((x: any) =>
         (typeof x === 'string' || x instanceof Error) ? x :
           util.inspect(x,
-            ev.level === 'trace',
-            (ev.level === 'debug' || ev.level === 'trace') ? 4 : 2,
+            ev.level === 'debug',
+            ev.level === 'debug' ? 4 : 2,
             opts.colorize !== false
           )
       ).join(' ');

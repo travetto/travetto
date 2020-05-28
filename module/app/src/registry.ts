@@ -1,5 +1,6 @@
 import * as util from 'util';
 
+import { EnvUtil } from '@travetto/boot';
 import { Env, AppInfo } from '@travetto/base';
 import { ConfigManager } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
@@ -32,7 +33,7 @@ export class $ApplicationRegistry {
     console.log(`Configured`, util.inspect({
       app: AppInfo,
       env: Env.toJSON(),
-      config: Env.prod ? ConfigManager.getSecure() : ConfigManager.get()
+      config: EnvUtil.isProd() ? ConfigManager.getSecure() : ConfigManager.get()
     }, false, 10, true));
   }
 

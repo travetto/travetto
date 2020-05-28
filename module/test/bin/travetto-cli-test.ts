@@ -23,6 +23,7 @@ export class TestPlugin extends BasePlugin {
     await load();
 
     const state: Partial<RunState> = {
+      args,
       mode: this._cmd.mode,
       concurrency: +this._cmd.concurrency,
       format: this._cmd.format

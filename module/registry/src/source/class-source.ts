@@ -81,7 +81,7 @@ export class ClassSource implements ChangeSource<Class> {
    * Flush all pending classes
    */
   handlePendingFileChanges() {
-    console.trace('Pending changes', PendingRegister.ordered);
+    console.debug('Pending changes', PendingRegister.ordered);
     for (const [file, classes] of PendingRegister.flush()) {
       this.handleFileChanges(file, classes);
     }
@@ -91,7 +91,7 @@ export class ClassSource implements ChangeSource<Class> {
    * Emit a change event
    */
   emit(e: ChangeEvent<Class>) {
-    console.trace('Emitting change', e.type, e.curr && e.curr.__id, e.prev && e.prev.__id);
+    console.debug('Emitting change', e.type, e.curr && e.curr.__id, e.prev && e.prev.__id);
     this.events.emit('change', e);
   }
 

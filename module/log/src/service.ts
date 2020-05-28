@@ -1,5 +1,5 @@
-import { ColorUtil } from '@travetto/boot';
-import { Env, ConsoleManager, LogLevel, ConsolePayload } from '@travetto/base';
+import { ColorUtil, EnvUtil } from '@travetto/boot';
+import { ConsoleManager, LogLevel, ConsolePayload } from '@travetto/base';
 
 import { LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
@@ -29,27 +29,18 @@ class $Logger {
   /**
    * Which log levels to exclude
    */
-  private exclude: Partial<Record<LogLevel, boolean>> = { debug: true, trace: true };
-  /**
-   * Which flags
-   */
-  private flags: { debug?: string, trace?: string };
+  private exclude: Partial<Record<LogLevel, boolean>> = { debug: true };
   /**
    * Initialize
    */
   init() {
-    this.flags = {
-      debug: LogUtil.readEnvVal('debug', !Env.prod ? '*' : ''),
-      trace: LogUtil.readEnvVal('trace'),
-    };
+    const debugFilter = LogUtil.readEnvVal('debug', !EnvUtil.isProd() ? '*' : '');
 
-    for (const k of ['debug', 'trace'] as ['debug', 'trace']) {
-      const filter = LogUtil.buildFilter(this.flags[k]);
-      if (filter !== LogUtil.falsehood) {
-        delete this.exclude[k];
-        if (filter !== LogUtil.truth) {
-          this.filters[k] = filter;
-        }
+    const filter = LogUtil.buildFilter(debugFilter);
+    if (filter !== LogUtil.falsehood) {
+      delete this.exclude.debug;
+      if (filter !== LogUtil.truth) {
+        this.filters.debug = filter;
       }
     }
 
@@ -63,7 +54,7 @@ class $Logger {
     this.listen(DEFAULT, LogUtil.buildListener(
       formatter,
       new ConsoleAppender({ method: 'log' }),
-      ({ level: x }) => x === 'info' || x === 'debug' || x === 'trace')
+      ({ level: x }) => x === 'info' || x === 'debug')
     );
 
     this.listen(DEFAULT, LogUtil.buildListener(

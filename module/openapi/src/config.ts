@@ -2,8 +2,8 @@ import * as path from 'path';
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
 
 import { Config } from '@travetto/config';
-import { FsUtil } from '@travetto/boot';
-import { AppInfo, Env } from '@travetto/base';
+import { FsUtil, EnvUtil } from '@travetto/boot';
+import { AppInfo } from '@travetto/base';
 
 /**
  * API Information, infers as much as possible from the package.json
@@ -45,7 +45,7 @@ export class ApiSpecConfig {
   /**
    * Should file be generated at runtime
    */
-  persist: boolean = !Env.prod;
+  persist: boolean = !EnvUtil.isProd();
   /**
    * Skip emitting all routes
    */

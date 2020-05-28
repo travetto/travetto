@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { ScanApp, Env } from '@travetto/base';
+import { ScanApp } from '@travetto/base';
 
 import {
   NodeTransformer, VisitorFactory, TransformerState, getTransformHandlers
@@ -41,19 +41,17 @@ export class TransformerManager {
       }
     }
 
-    if (Env.debug) { // Log loaded transformers
-      console.debug('Transformers',
-        ...this.transformers.map(x => {
-          const name = x.file.split(/[.]/).slice(1, -1).join('.');
-          const flags = [
-            ...(x.target ? [] : ['all']),
-            ...(x.before ? ['before'] : []),
-            ...(x.after ? ['after'] : [])
-          ];
-          return `\n\t[${x.type}] ${name} - ${flags.join(' ')}`;
-        })
-      );
-    }
+    console.debug('Transformers',
+      ...this.transformers.map(x => {
+        const name = x.file.split(/[.]/).slice(1, -1).join('.');
+        const flags = [
+          ...(x.target ? [] : ['all']),
+          ...(x.before ? ['before'] : []),
+          ...(x.after ? ['after'] : [])
+        ];
+        return `\n\t[${x.type}] ${name} - ${flags.join(' ')}`;
+      })
+    );
 
     // Prepare a new visitor factory with a given type checker
   }

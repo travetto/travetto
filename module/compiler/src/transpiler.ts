@@ -129,7 +129,7 @@ export class Transpiler {
    */
   private _transpile(fileName: string, force = false) {
     if (force || !this.cache.hasEntry(fileName)) {
-      console.trace('Emitting', fileName.replace(`${FsUtil.cwd}/`, ''));
+      console.debug('Emitting', fileName.replace(`${FsUtil.cwd}/`, ''));
 
       const prog = this.getProgram(fileName);
       const result = prog.emit(
@@ -175,7 +175,7 @@ export class Transpiler {
     // Let's see if they are really different
     const hash = SystemUtil.naiveHash(content);
     if (hash === this.hashes.get(fileName)) {
-      console.trace(`Contents Unchanged: ${fileName}`);
+      console.debug(`Contents Unchanged: ${fileName}`);
       return false;
     }
     return true;
@@ -218,7 +218,7 @@ export class Transpiler {
    */
   unload(fileName: string, unlink = true) {
     if (this.contents.has(fileName)) {
-      console.trace('Unloading', fileName.replace(FsUtil.cwd, ''), unlink);
+      console.debug('Unloading', fileName.replace(FsUtil.cwd, ''), unlink);
 
       this.cache.removeExpiredEntry(fileName, unlink);
 

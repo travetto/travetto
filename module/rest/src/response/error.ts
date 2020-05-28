@@ -1,11 +1,11 @@
 /// <reference path="./error.d.ts" />
-import { Env, AppError } from '@travetto/base';
+import { AppError } from '@travetto/base';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 
 import { Response } from '../types';
 
 /**
- * Render the error to the resposne objecet
+ * Render the error to the response object
  */
 Error.prototype.render = function (this: Error & { status?: number, statusCode?: number }, res: Response) {
   const status = this.status ??
@@ -14,8 +14,8 @@ Error.prototype.render = function (this: Error & { status?: number, statusCode?:
 
   res.status(status);
 
-  if (status === 500 && !Env.prod) {
-    console.error(this.stack);
+  if (status === 500) {
+    console.error(this);
   }
 
   const payload = this instanceof AppError ?

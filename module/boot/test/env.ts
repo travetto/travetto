@@ -119,4 +119,19 @@ export class EnvUtilTest {
     process.env.MAX_AGE = '5mh';
     assert(EnvUtil.getTime('max_age', 1000) === 1000);
   }
+
+  @Test()
+  verifyGetBoolean() {
+    assert(EnvUtil.getBoolean('bool') === undefined);
+    process.env.BOOL = '0';
+    assert(EnvUtil.getBoolean('bool') === false);
+    process.env.BOOL = 'off';
+    assert(EnvUtil.getBoolean('bool') === false);
+    process.env.BOOL = '';
+    assert(EnvUtil.getBoolean('bool') === undefined);
+    process.env.BOOL = '*';
+    assert(EnvUtil.getBoolean('bool') === true);
+    process.env.BOOL = '1';
+    assert(EnvUtil.getBoolean('bool') === true);
+  }
 }

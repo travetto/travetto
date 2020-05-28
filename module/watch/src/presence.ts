@@ -55,7 +55,7 @@ export class FilePresenceManager {
       return;
     }
 
-    console.trace('Watch', event, entry.file);
+    console.debug('Watch', event, entry.file);
     switch (event) {
       case 'added': {
         this.files.add(entry.file);

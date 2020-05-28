@@ -147,7 +147,7 @@ export class Watcher extends EventEmitter {
    */
   private registryEmit(type: string, payload?: any) {
     if (!this.suppress) {
-      console.trace('Watch Event', type, payload && payload.file);
+      console.debug('Watch Event', type, payload && payload.file);
       this.emit(type, payload);
     }
   }
@@ -161,7 +161,7 @@ export class Watcher extends EventEmitter {
     }
 
     try {
-      console.trace('Watching Directory', entry.file);
+      console.debug('Watching Directory', entry.file);
       const watcher = fs.watch(entry.file, throttle(() => {
         this.processDirectoryChange(entry);
       }, this.options.debounceDelay));
@@ -221,7 +221,7 @@ export class Watcher extends EventEmitter {
    */
   private unwatchFile(entry: ScanEntry) {
     if (this.pollers.has(entry.file)) {
-      console.trace('Unwatching File', entry.file);
+      console.debug('Unwatching File', entry.file);
 
       fs.unwatchFile(entry.file, this.pollers.get(entry.file)!);
       this.pollers.delete(entry.file);
@@ -233,7 +233,7 @@ export class Watcher extends EventEmitter {
    */
   private unwatchDirectory(entry: ScanEntry) {
     if (this.watchers.has(entry.file)) {
-      console.trace('Unwatching Directory', entry.file);
+      console.debug('Unwatching Directory', entry.file);
 
       for (const child of (entry.children ?? [])) {
         this.unwatch(child.file);

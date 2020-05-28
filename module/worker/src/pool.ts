@@ -96,7 +96,7 @@ export class WorkPool<X, T extends Worker<X>> {
    * Destroy the worker
    */
   async destroy(worker: T) {
-    console.trace(`[${process.pid}] Destroying ${worker.id}`);
+    console.debug(`[${process.pid}] Destroying ${worker.id}`);
     return worker.destroy();
   }
 
@@ -104,7 +104,7 @@ export class WorkPool<X, T extends Worker<X>> {
    * Free worker on completion
    */
   async release(worker: T) {
-    console.trace(`[${process.pid}] Releasing ${worker.id}`);
+    console.debug(`[${process.pid}] Releasing ${worker.id}`);
     try {
       if (worker.active) {
         if (worker.release) {

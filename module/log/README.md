@@ -8,7 +8,7 @@ $ npm install @travetto/log
 
 This module provides logging functionality relying up the built in `console` operations. This is achieved via AST transformations. The code is rewritten at compile time to transform the `console` operations into proper logging commands. In addition to the transformation, class name and line number are added to the log messages to provide additional context.
 
-The debug/trace content can be filtered using the patterns from the [`debug`](https://www.npmjs.com/package/debug).  You can specify wild cards to only `DEBUG` or `TRACE` specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages. 
+The debug/trace content can be filtered using the patterns from the [`debug`](https://www.npmjs.com/package/debug).  You can specify wild cards to only `DEBUG` specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages. 
 
 **Terminal: Sample environment flags**
 ```bash
@@ -16,14 +16,6 @@ The debug/trace content can be filtered using the patterns from the [`debug`](ht
 $ DEBUG=-@trv:registry npx travetto run app
 $ DEBUG=@trv:rest npx travetto run app
 $ DEBUG=@trv:*,-@trv:model npx travetto run app
-
-# Trace
-$ TRACE=-@trv:registry npx travetto run app
-$ TRACE=@trv:rest npx travetto run app
-$ TRACE=@trv:*,-@trv:model npx travetto run app
-
-# BOTH
-$ DEBUG=@trv:rest TRACE=-@trv:registry npx travetto run app
 ```
 
 The supported operations are:
@@ -32,10 +24,9 @@ The supported operations are:
 * `console.warn` which logs at the `WARN` level
 * `console.info` which logs at the `INFO` level
 * `console.debug` which logs at the `DEBUG` level
-* `console.trace` which logs at the `TRACE` level
 * `console.log` which logs at the `INFO` level
 
-**Note:** In production mode, all `console.debug` and `console.trace` invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.
+**Note:** In production mode, all `console.debug` invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.
 
 A sample of the transformation would be:
 

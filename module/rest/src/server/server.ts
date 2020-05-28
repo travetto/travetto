@@ -124,7 +124,7 @@ export abstract class RestServer<T = any> {
    * @param e The change event
    */
   async onControllerChange(e: ChangeEvent<Class>) {
-    console.trace('Registry event', e);
+    console.debug('Registry event', e);
     if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
       await this.unregisterController(e.prev);
     }

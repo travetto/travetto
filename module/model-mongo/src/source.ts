@@ -57,7 +57,7 @@ export class MongoModelSource extends ModelSource {
 
     const projected = MongoUtil.extractTypedWhereClause(cls, query.where ?? {});
 
-    console.trace('Query', query);
+    console.debug('Query', query);
 
     let cursor = col.find<U>(projected);
     if (query.select) {
@@ -135,7 +135,7 @@ export class MongoModelSource extends ModelSource {
     for (const idx of ModelRegistry.get(cls).indices) {
       const [first, ...rest] = idx.fields;
       rest.reduce((acc, f) => ({ ...acc, f }), first);
-      console.trace('Creating index', first, idx.options);
+      console.debug('Creating index', first, idx.options);
       promises.push(
         this.getCollection(cls)
           .then((col) => col.createIndex(first, idx.options)));
