@@ -38,7 +38,7 @@ export abstract class RestServer<T = any> {
    */
   info = {
     restProvider: this.constructor.name,
-    ...AppManifest
+    ...AppManifest.toJSON()
   };
 
   constructor() {
