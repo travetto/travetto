@@ -38,7 +38,7 @@ export interface ApplicationConfig<T extends AppClass = AppClass> {
  * App config that has been cached
  */
 export interface CachedAppConfig extends ApplicationConfig {
-  appRoot: string;
+  root: string;
   generatedTime: number;
 }
 

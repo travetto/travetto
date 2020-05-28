@@ -26,7 +26,7 @@ export class AppListManager {
       );
     } catch { }
 
-    process.env.TRV_APP_ROOTS = paths.join(',');
+    process.env.TRV_ROOTS = paths.join(',');
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.init('compile-all');
 

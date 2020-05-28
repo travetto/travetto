@@ -33,7 +33,7 @@ export class Transpiler {
     /**
      * App Root paths to load files for
      */
-    private appRoots: string[]
+    private roots: string[]
   ) {
     this.transformerManager = new TransformerManager();
   }
@@ -155,7 +155,7 @@ export class Transpiler {
    */
   init() {
     // Find all active app files
-    ScanApp.findAppSourceFiles({ appRoots: this.appRoots })
+    ScanApp.findAppSourceFiles({ roots: this.roots })
       .forEach(x => this.rootNames.add(x.file));
 
     this.transformerManager.init();

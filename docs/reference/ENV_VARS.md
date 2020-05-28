@@ -5,7 +5,7 @@ The common environment variables throughout the code base:
 ## General App
 * `TRV_ENV` = dev|prod|any       - Environment to deploy, listens to `NODE_ENV` if not `TRV_ENV` is not specified.
 * `TRV_PROFILES`=['application'] - Additional profiles to run app under
-* `TRV_APP_ROOTS` = ['.']        - The root of the application search space
+* `TRV_ROOTS` = ['.']            - The root of the application search space
 * `TRV_RESOURCE_ROOTS` = ['.']   - The root of resource searching
 * `TRV_WATCH` = 0|1              - Wether or not to run the program in watch mode
 
@@ -24,11 +24,11 @@ The common environment variables throughout the code base:
 
 ## Exec
 * `TRV_DOCKER_DISABLE` = 0|1     - Indicates if docker should even be considered when running a command service, defaults to `0`
-* `TRV_DOCKER_NS` =              - Defaults to undefined, but can be specified to ensure unique instantation
+* `TRV_DOCKER_NS` =              - Defaults to undefined, but can be specified to ensure unique instantiation
 
 ## Framework
 * `TRV_DEV` = 0|1                - If we are in development mode, 
 * `TRV_CACHE` = cwd              - The output directory for compilation, defaults to `.trv_cache` of the cwd
 * `TRV_SHUTDOWN_WAIT` = 2s       - The max time to wait for shutdown to finish after initial SIGINT, default `2s`
 
-Anything not prefixed with `TRV_`, is a standard envvar that we are leveraging
+Anything not prefixed with `TRV_`, is a standard env var that we are leveraging

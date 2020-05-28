@@ -26,9 +26,9 @@ class $Compiler {
     /**
      * This of paths to compile against
      */
-    protected readonly appRoots: string[] = AppManifest.appRoots
+    protected readonly roots: string[] = AppManifest.roots
   ) {
-    this.transpiler = new Transpiler(this.cache, this.appRoots);
+    this.transpiler = new Transpiler(this.cache, this.roots);
   }
 
   /**

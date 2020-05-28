@@ -27,7 +27,7 @@ export class RunUtil {
     }
 
     // Init env
-    CliUtil.initAppEnv({ app: app.appRoot, watch: app.watchable });
+    CliUtil.initAppEnv({ app: app.root, watch: app.watchable });
 
     // Compile all code as needed
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');

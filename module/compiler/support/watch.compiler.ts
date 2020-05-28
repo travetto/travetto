@@ -39,7 +39,7 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
         }
       });
 
-      // Update sourcemap support
+      // Update source map support
       require('source-map-support').install({
         retrieveFile: (p: string) => this.transpiler.getContents(p)
       });
@@ -54,10 +54,10 @@ export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
           !f.endsWith('.d.ts') &&
           f !== `${FsUtil.cwd}/index.ts`,
         cwd: FsUtil.cwd,
-        files: ScanApp.findFiles({ rootPaths: this.appRoots, folder: 'src' })
+        files: ScanApp.findFiles({ paths: this.roots, folder: 'src' })
           .filter(x => !(x.file in require.cache)) // Skip already imported files
           .map(x => x.file),
-        folders: ScanApp.findFolders({ rootPaths: this.appRoots, folder: 'src' }),
+        folders: ScanApp.findFolders({ paths: this.roots, folder: 'src' }),
         listener: this,
       });
 

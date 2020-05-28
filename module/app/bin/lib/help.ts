@@ -36,7 +36,7 @@ export class HelpUtil {
     for (const conf of confs) {
       const lines = [];
 
-      const root = conf.appRoot !== '.' ? color`[${{ subtitle: conf.appRoot }}] ` : '';
+      const root = conf.root !== '.' ? color`[${{ subtitle: conf.root }}] ` : '';
       const usage = this.getAppUsage(conf);
 
       const features = [];
