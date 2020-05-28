@@ -5,7 +5,7 @@ import { ConsoleManager } from '@travetto/base';
 import { TransformerState, OnCall, TransformUtil } from '@travetto/compiler/src/transform-support';
 
 /**
- * Allows for removal of debug/trace log messages depending on whether app is running
+ * Allows for removal of debug log messages depending on whether app is running
  * in prod mode.
  */
 export class LoggerTransformer {
