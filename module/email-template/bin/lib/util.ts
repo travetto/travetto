@@ -141,7 +141,7 @@ export class TemplateUtil {
       cwd: FsUtil.cwd,
       validFile: x => ext.test(x),
       folders: ResourceManager.getRelativePaths().map(x => `${x}/email`),  // Email folders only
-      files: ResourceManager.findAllByPatternSync(ext, '/email'),
+      files: ResourceManager.findAllByPatternSync(ext, 'email'),
       listener: {
         changed: async f => {
           if (/\/email\/.*[.](compiled|dev)[.]/.test(f)) {
