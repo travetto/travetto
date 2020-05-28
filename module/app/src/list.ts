@@ -34,7 +34,7 @@ export class AppListUtil {
       target: null as unknown,
       description: x.description,
       params: x.params,
-      appRoot: this.determineRootFromFile(x.target.__file),
+      root: this.determineRootFromFile(x.target.__file),
       name: x.name,
       generatedTime: FsUtil.maxTime(await this.fsLstat(x.target.__file)),
       filename: x.target.__file,
@@ -48,9 +48,9 @@ export class AppListUtil {
    */
   static async sortList(items: CachedAppConfig[]) {
     return items.sort((a, b) =>
-      a.appRoot === b.appRoot ?
+      a.root === b.root ?
         a.name.localeCompare(b.name) :
-        (a.appRoot === '.' ? -1 : 1));
+        (a.root === '.' ? -1 : 1));
   }
 
 

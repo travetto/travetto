@@ -10,7 +10,7 @@ type AppEnv = {
   watch?: string | boolean;
   app?: string;
   plainLog?: boolean;
-  appRoots?: string[];
+  roots?: string[];
   profiles?: string[];
 };
 
@@ -89,7 +89,7 @@ export class CliUtil {
   /**
    * Initialize the app environment
    */
-  static initAppEnv({ env, watch, app, appRoots, profiles, plainLog }: AppEnv) {
+  static initAppEnv({ env, watch, app, roots, profiles, plainLog }: AppEnv) {
     env = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? ''; // Preemptively set b/c env changes how we compile some things
     if (env) {
       if (/^prod/i.test(env)) {
@@ -104,13 +104,13 @@ export class CliUtil {
     }
 
     if (app && app !== '.') {
-      (appRoots = appRoots ?? []).push(app);
+      (roots = roots ?? []).push(app);
       (profiles = profiles ?? []).push(app.split('/')[1]);
     }
     if (plainLog) {
       process.env.TRV_LOG_PLAIN = '1';
     }
-    process.env.TRV_APP_ROOTS = [...(appRoots ?? []), ...EnvUtil.getList('TRV_APP_ROOTS')]
+    process.env.TRV_ROOTS = [...(roots ?? []), ...EnvUtil.getList('TRV_ROOTS')]
       .map(x => x.trim()).filter(x => !!x).join(',');
     process.env.TRV_PROFILES = [...(profiles ?? []), ...EnvUtil.getList('TRV_PROFILES')]
       .map(x => x.trim()).filter(x => x && x !== '.').join(',');

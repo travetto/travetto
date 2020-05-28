@@ -47,7 +47,7 @@ class $AppManifest {
   /**
    * Additional locations for the application search paths
    */
-  readonly appRoots: string[];
+  readonly roots: string[];
 
   /**
    * List of all resource roots
@@ -67,13 +67,13 @@ class $AppManifest {
 
     this.profileSet = new Set(this.profiles);
 
-    this.appRoots = [FsUtil.cwd, ...EnvUtil.getList('TRV_APP_ROOTS')]
+    this.roots = [FsUtil.cwd, ...EnvUtil.getList('TRV_ROOTS')]
       .filter(x => !!x)
       .map(x => FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, '.'))
       .filter((x, i, all) => i === 0 || x !== all[i - 1]); // De-dupe
 
     this.resourceRoots = [
-      ...this.appRoots,
+      ...this.roots,
       ...EnvUtil.getList('TRV_RESOURCE_ROOTS')
     ];
   }
@@ -84,7 +84,7 @@ class $AppManifest {
   toJSON() {
     return ([
       'travetto', 'name', 'version', 'license', 'description',
-      'author', 'env', 'profiles', 'appRoots', 'resourceRoots'
+      'author', 'env', 'profiles', 'roots', 'resourceRoots'
     ] as const)
       .reduce((acc, k) => {
         acc[k] = this[k];

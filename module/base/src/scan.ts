@@ -1,15 +1,14 @@
-import { ScanEntry, ScanFs, FsUtil, AppCache } from '@travetto/boot';
+import { ScanEntry, ScanFs, FsUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
-
-import { Env } from './env';
+import { AppManifest } from './manifest';
 
 type SimpleEntry = Pick<ScanEntry, 'module' | 'file'>;
 
 type FindConfig =
-  { folder?: string, filter?: Tester, rootPaths: string[] } |
-  { folder?: string, filter?: Tester, appRoots?: string[] };
+  { folder?: string, filter?: Tester, paths: string[] } |
+  { folder?: string, filter?: Tester, roots?: string[] };
 
-type AppFindConfig = { folder?: string, filter?: Tester, appRoots?: string[] };
+type AppFindConfig = { folder?: string, filter?: Tester, roots?: string[] };
 
 interface Tester {
   source: string;
@@ -110,22 +109,22 @@ export class ScanApp {
   }
 
   /**
-   * Finnd search keys
-   * @param appRoots App paths
+   * Find search keys
+   * @param roots App paths
    */
-  static getRootPaths(appRoots?: string[]) {
+  static getPaths(roots: string[]) {
     return [...this.index.keys()]
-      .filter(key => (key.startsWith('@travetto') && !this.modAppExclude.includes(key)) || (appRoots || Env.appRoots).includes(key));
+      .filter(key => (key.startsWith('@travetto') && !this.modAppExclude.includes(key)) || roots.includes(key));
   }
 
   /**
    * Find all folders for the given root paths
-   * @param rootPaths The root paths to check
+   * @param paths The root paths to check
    * @param folder The folder to check into
    */
   static findFolders(config: FindConfig) {
     const all: string[] = [];
-    const paths = 'rootPaths' in config ? config.rootPaths : this.getRootPaths(config.appRoots);
+    const paths = 'paths' in config ? config.paths : this.getPaths(config.roots || AppManifest.roots);
     for (const key of paths) {
       if (this.index.has(key)) {
         if (config.folder) {
@@ -141,13 +140,13 @@ export class ScanApp {
 
   /**
    * Find files from the index
-   * @param rootPaths The main application paths to check
+   * @param paths The main application paths to check
    * @param folder The folder to check into
    * @param filter The filter to determine if this is a valid support file
    */
   static findFiles(config: FindConfig) {
     const { filter, folder } = config;
-    const paths = 'rootPaths' in config ? config.rootPaths : this.getRootPaths(config.appRoots);
+    const paths = 'paths' in config ? config.paths : this.getPaths(config.roots || AppManifest.roots);
     const all: SimpleEntry[][] = [];
     const idx = this.index;
     for (const key of paths) {
@@ -178,16 +177,16 @@ export class ScanApp {
   }
 
   /**
-   * Find source files for a given set of rootPaths
-   * @param appRoots List of all app root paths
+   * Find source files for a given set of paths
+   * @param roots List of all app root paths
    */
-  static findAppSourceFiles(config: Pick<AppFindConfig, 'appRoots'> = {}) {
+  static findAppSourceFiles(config: Pick<AppFindConfig, 'roots'> = {}) {
     const all: SimpleEntry[][] = [
-      this.findFiles({ folder: 'src', appRoots: config.appRoots }),
+      this.findFiles({ folder: 'src', roots: config.roots }),
     ];
     for (const folder of this.mainAppFolders) {
       if (folder !== 'src') {
-        all.push(this.findFiles({ folder, rootPaths: config.appRoots || Env.appRoots }));
+        all.push(this.findFiles({ folder, paths: config.roots || AppManifest.roots }));
       }
     }
     return all.flat();

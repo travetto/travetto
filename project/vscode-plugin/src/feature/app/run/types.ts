@@ -8,7 +8,7 @@ export interface Application {
   filename: string;
   params: ParamConfig[];
   id: string;
-  appRoot: string;
+  root: string;
   description?: string;
   watchable?: boolean;
   env: string;
