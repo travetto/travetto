@@ -7,10 +7,10 @@ export const init = {
   after: ['base'],
   action: async () => {
     const { EnvUtil } = await import('@travetto/boot');
-    const { Env, ScanApp } = await import('@travetto/base');
+    const { AppManifest, ScanApp } = await import('@travetto/base');
 
     // Only apply if we are running tests
-    if (Env.env === 'test') {
+    if (AppManifest.hasProfile('test')) {
       // Allow test module to be searched
       ScanApp.modAppExclude.splice(ScanApp.modAppExclude.findIndex(x => x === 'test'), 1);
       // If watching, allow auto load of all tests

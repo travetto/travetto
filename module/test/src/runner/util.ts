@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 
-import { ShutdownManager, ScanApp, Env } from '@travetto/base';
+import { ShutdownManager, ScanApp, AppManifest } from '@travetto/base';
 
 /**
  * Simple Test Utilities
@@ -37,7 +37,7 @@ export class TestUtil {
    * Find all valid test files given the globs
    */
   static async getTests(globs: RegExp[]) {
-    const files = ScanApp.findFiles({ rootPaths: Env.appRoots, folder: 'test' })
+    const files = ScanApp.findFiles({ rootPaths: AppManifest.appRoots, folder: 'test' })
       .filter(f => globs.some(g => g.test(f.module)));
 
     const validFiles = files
