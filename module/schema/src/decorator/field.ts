@@ -53,7 +53,7 @@ export const Alias = (...aliases: string[]) => prop({ aliases });
 /**
  * Mark a field as required
  * @param active This determines if this field is required or not.
- * @param message The error message when a the constraint fials.
+ * @param message The error message when a the constraint fails.
  */
 export const Required = (active = true, message?: string) => prop({ required: { active, message } });
 /**
@@ -102,14 +102,14 @@ export const MinLength = (n: number, message?: string) => stringArrProp({ minlen
 export const MaxLength = (n: number, message?: string) => stringArrProp({ maxlength: { n, message } });
 
 /**
- * The minimum valume
+ * The minimum value
  * @param n The minimum value
  * @param message The message to show when the constraint fails
  */
 export const Min = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ min: { n, message } });
 
 /**
- * The maximum valume
+ * The maximum value
  * @param n The maximum value
  * @param message The message to show when the constraint fails
  */

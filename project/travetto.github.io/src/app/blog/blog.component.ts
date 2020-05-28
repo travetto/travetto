@@ -7,7 +7,7 @@ interface Post {
     displayName: string;
   };
   blog: {
-    id: string
+    id: string;
   };
   content: string;
   etag: string;

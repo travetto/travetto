@@ -4,7 +4,7 @@ import * as path from 'path';
 
 import { Test, Suite } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
-import { FsUtil, ExecUtil, StreamUtil } from '../src';
+import { ExecUtil, StreamUtil } from '../src';
 
 @Suite()
 export class ExecUtilTest {

@@ -77,11 +77,10 @@ class $ConsoleManager {
     global[this.key] = this.invoke.bind(this);
     this.exclude = new Set();
 
-    const debug = EnvUtil.getBoolean('DEBUG') ?? !EnvUtil.isProd();
-
-    if (!debug) {
+    if (!(EnvUtil.getBoolean('DEBUG') ?? !EnvUtil.isProd())) {
       this.exclude.add('debug');
     }
+
     this.set(wrap(console, this.defaultEnrich)); // Init to console
     TranspileUtil.addPreProcessor(this.instrument.bind(this)); // Register console manager
   }

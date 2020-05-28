@@ -32,7 +32,7 @@ class AudSignStringSuite {
   }
 
   @Test('should verify with a Regex "verify.audience" option')
-  async testregex() {
+  async testRegex() {
     assert(await jwt.verify(this.token, { payload: { aud: /^urn:f[o]{2}$/ } }));
   }
 
@@ -46,9 +46,9 @@ class AudSignStringSuite {
     assert(await jwt.verify(this.token, { payload: { aud: ['urn:no_match', /^urn:f[o]{2}$/] } }));
   }
 
-  @Test('invalid audiience')
+  @Test('invalid audience')
   @ShouldThrow(jwt.JWTError)
-  async testinvalidAud() {
+  async testInvalidAud() {
     await jwt.verify(this.token, { payload: { aud: 'urn:no-match' } });
   }
 
@@ -60,7 +60,7 @@ class AudSignStringSuite {
 
   @Test('should error on no match with a Regex "verify.audience" option')
   @ShouldThrow(jwt.JWTError)
-  async testInvalidRegx() {
+  async testInvalidRegex() {
     await jwt.verify(this.token, { payload: { aud: /^urn:no-match$/ } });
   }
 }

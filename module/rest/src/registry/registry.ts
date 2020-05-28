@@ -5,7 +5,7 @@ import { EndpointConfig, ControllerConfig, EndpointDecorator, ControllerDecorato
 import { Filter, RouteHandler, ParamConfig } from '../types';
 
 /**
- * Controller registery
+ * Controller registry
  */
 class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointConfig> {
 
@@ -55,7 +55,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   /**
-   * Regiseter the controller filter
+   * Register the controller filter
    * @param cls Controller class
    * @param fn The filter to call
    */
@@ -65,7 +65,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   /**
-   * Regiseter the controller filter
+   * Register the controller filter
    * @param cls Controller class
    * @param handler Route handler
    * @param fn The filter to call
@@ -76,7 +76,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   /**
-   * Regiseter the endpoing parameter
+   * Register the endpoint parameter
    * @param cls Controller class
    * @param handler Route handler
    * @param param The param config
@@ -106,7 +106,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
 
   /**
    * Merge descriptions
-   * @param src Root descriable (controller, endpoint)
+   * @param src Root describable (controller, endpoint)
    * @param dest Target (controller, endpoint)
    */
   mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>) {

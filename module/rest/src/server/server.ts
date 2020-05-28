@@ -77,7 +77,7 @@ export abstract class RestServer<T = any> {
    */
   abstract unregisterRoutes(key: string | symbol): Promise<void>;
   /**
-   * Start the listening proccess
+   * Start the listening process
    */
   abstract listen(): ApplicationHandle | Promise<ApplicationHandle>;
 
@@ -173,7 +173,7 @@ export abstract class RestServer<T = any> {
   }
 
   /**
-   * Remvoe the global listener
+   * Remove the global listener
    */
   async unregisterGlobal() {
     await this.unregisterRoutes(RestServer.GLOBAL);

@@ -7,7 +7,7 @@ import { ShutdownManager } from '@travetto/base';
 const fsWriteFile = util.promisify(fs.writeFile);
 
 /**
- * Simple docker wrapper for launching and interacting with a contianer
+ * Simple docker wrapper for launching and interacting with a container
  */
 export class DockerContainer {
 
@@ -20,7 +20,7 @@ export class DockerContainer {
   /** List of pending executions */
   private pendingExecutions = new Set<ExecutionState>();
 
-  /** Conainer name */
+  /** Container name */
   private container: string;
   /** Env variables to share */
   private env = new Map<string, string>();
@@ -41,7 +41,7 @@ export class DockerContainer {
 
   /** Entry point to launch */
   private entryPoint: string;
-  /** Does theh container take input */
+  /** Does the container take input */
   private interactive: boolean = false;
   /** Should we allocate a terminal for the container */
   private tty: boolean = false;
@@ -88,7 +88,7 @@ export class DockerContainer {
   }
 
   /**
-   * Force detroy of container when the app shuts down
+   * Force destroy of container when the app shuts down
    */
   forceDestroyOnShutdown() {
     ShutdownManager.onShutdown(this.container, () => this.forceDestroy());
@@ -386,7 +386,7 @@ export class DockerContainer {
   }
 
   /**
-   * Cleanup a coontainer, delete all temp volumes
+   * Cleanup a container, delete all temp volumes
    */
   async cleanup() {
     console.debug('Cleaning', this.image, this.container);

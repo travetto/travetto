@@ -24,7 +24,7 @@ export abstract class RestInterceptor {
   public applies?(route: RouteConfig, controller: Partial<ControllerConfig>): boolean;
 
   /**
-   * Actuall handle the request, response when applicable
+   * Actually handle the request, response when applicable
    * @param req Inbound request
    * @param res Outbound response
    * @param next

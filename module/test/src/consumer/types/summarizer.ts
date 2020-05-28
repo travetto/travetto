@@ -3,7 +3,7 @@ import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
 
 /**
- * Test Reuslt Collector, combines all results into a single Suite Result
+ * Test Result Collector, combines all results into a single Suite Result
  */
 export class TestResultsSummarizer implements TestConsumer {
 

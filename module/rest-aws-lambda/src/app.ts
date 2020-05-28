@@ -60,7 +60,7 @@ export class AwsLambdaRestServer extends RestServer<express.Application> {
   }
 
   /**
-   * Initiatlize handler
+   * Initialize handler
    */
   async init() {
     await super.init();
@@ -112,7 +112,7 @@ export class AwsLambdaRestServer extends RestServer<express.Application> {
   }
 
   /**
-   * Listen for the application toclose, don't wait up
+   * Listen for the application to close, don't wait up
    */
   listen() {
     return {

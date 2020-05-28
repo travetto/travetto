@@ -142,10 +142,10 @@ class VerifyExpirationSuite {
     try {
       await jwt.verify(token, options);
     } catch (err) {
-      // maxAge not exceded, but still expired
+      // maxAge not exceeded, but still expired
       assert(err instanceof jwt.JWTError);
       assert(err.message === 'Token is expired');
-      assert(+err.payload.expiredAt === 1437018800000);
+      assert(+err.payload!.expiredAt === 1437018800000);
     }
   }
 }

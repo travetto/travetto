@@ -17,7 +17,7 @@ const between = (fromDays: number, toDays: number) =>
   );
 
 /**
- * Provide a faker utilitiy for generating content
+ * Provide a faker utility for generating content
  */
 export class SchemaFakerUtil {
 
@@ -188,7 +188,7 @@ export class SchemaFakerUtil {
   }
 
   /**
-   * Generate a new intance of a class
+   * Generate a new instance of a class
    * @param cls The class to get an instance of
    * @param view The view to define specifically
    */

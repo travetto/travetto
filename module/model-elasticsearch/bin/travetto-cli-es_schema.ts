@@ -11,7 +11,6 @@ export class EsSchemaPlugin extends BasePlugin {
 
   init(cmd: commander.Command) {
     return cmd
-      .command(this.name)
       .option('-a, --app [app]', 'Application to export, (default: .)');
   }
 

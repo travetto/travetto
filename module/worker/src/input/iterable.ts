@@ -6,7 +6,7 @@ const hasAsyncItr = (o: any): o is AsyncIterable<any> => Symbol.asyncIterator in
 const hasItr = (o: any): o is Iterable<any> => Symbol.iterator in o;
 
 /**
- * Bassic input source given an iterable input
+ * Basic input source given an iterable input
  */
 export class IterableInputSource<X> implements InputSource<X> {
 

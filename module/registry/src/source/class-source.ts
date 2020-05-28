@@ -60,7 +60,7 @@ export class ClassSource implements ChangeSource<Class> {
     }
 
     /**
-     * Determine delta based on the various classes (if being added, removed or updatd)
+     * Determine delta based on the various classes (if being added, removed or updated)
      */
     for (const k of keys) {
       if (!next.has(k)) {

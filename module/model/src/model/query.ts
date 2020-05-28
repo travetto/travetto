@@ -41,7 +41,7 @@ export type Query<T> = QueryRaw<RetainFields<T>>;
  */
 export type PageableModelQuery<T> = PageableModelQueryRaw<RetainFields<T>>;
 /**
- * Standard query options (limit, offsset)
+ * Standard query options (limit, offset)
  */
 export type QueryOptions<T> = QueryOptionsRaw<RetainFields<T>>;
 /**

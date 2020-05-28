@@ -25,7 +25,7 @@ const IS_SELF_FILE = __filename.ᚕunix.replace(/.*(test\/.*)([.][tj]s)?$/, (__,
 const EXTRACT_FILE_MODULE = /^.*travetto[^/]*\/(?:module\/)?([^/]+)\/(?:src\/.*|support\/.*|index[.]ts)$/;
 
 /**
- * Child Worker for the Test Runner.  Recieves events as commands
+ * Child Worker for the Test Runner.  Receives events as commands
  * to run specific tests
  */
 export class TestChildWorker extends ChildCommChannel<RunEvent> {

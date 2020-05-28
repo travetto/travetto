@@ -17,7 +17,7 @@ export function watch(svc: Class<ModelService>) {
     // Listen for changes
     if (src.onChange || src.onSchemaChange) {
 
-      const { ModelRegistry } = await import('../src/registry');
+      const { ModelRegistry } = await import('../src/registry/registry');
       // If listening for model add/removes/updates
       if (src.onChange) {
         ModelRegistry.on(src.onChange.bind(src));

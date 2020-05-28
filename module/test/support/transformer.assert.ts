@@ -70,7 +70,7 @@ interface AssertState {
 type Args = ts.Expression[] | ts.NodeArray<ts.Expression>;
 
 /**
- * Asertion message
+ * Assertion message
  */
 type Message = ts.Expression | undefined;
 
@@ -175,7 +175,7 @@ export class AssertTransformer {
   }
 
   /**
-   * Convert `assert.(throws|rejects|doesNotThrow|doesNotReject)` to the approprate structure
+   * Convert `assert.(throws|rejects|doesNotThrow|doesNotReject)` to the appropriate structure
    */
   static doThrows(state: TransformerState & AssertState, node: ts.CallExpression, key: string, args: ts.Expression[]): ts.Node {
     const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);

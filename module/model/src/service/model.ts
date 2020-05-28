@@ -82,7 +82,7 @@ export class ModelService implements IModelSource {
   }
 
   /**
-   * Handle pre persitence for partial updates.
+   * Handle pre persistence for partial updates.
    */
   async prePersistPartial<T extends ModelCore>(cls: Class<T>, o: Partial<T>, view?: string) {
     if (!(o instanceof cls)) {
@@ -133,7 +133,7 @@ export class ModelService implements IModelSource {
 
   /**
    * Suggest a set of entities (allows for duplicates with as long as they have different ids)
-   * @param cls The model class to suggeset against
+   * @param cls The model class to suggest against
    * @param field The field to suggest against
    * @param prefix The field prefix to search on
    * @param query Additional query filtering
@@ -185,7 +185,7 @@ export class ModelService implements IModelSource {
   }
 
   /**
-   * Find the count of matching documetns by query.
+   * Find the count of matching documents by query.
    * @param cls The model class
    * @param query The query to count for
    */
@@ -210,7 +210,7 @@ export class ModelService implements IModelSource {
 
   /**
    * Save or update, upsert, for a document
-   * @param cls The mdoel class
+   * @param cls The model class
    * @param o The object to save
    * @param query The query to use to determine save vs update
    */
@@ -307,7 +307,7 @@ export class ModelService implements IModelSource {
   /**
    * Partial update single record, by id
    * @param cls The model class
-   * @param o The object, with an id, to udpate
+   * @param o The object, with an id, to update
    */
   async updatePartial<T extends ModelCore>(cls: Class<T>, o: Partial<T>) {
     if (!o.id) {
@@ -381,7 +381,7 @@ export class ModelService implements IModelSource {
   }
 
   /**
-   * Prepare the items for builk processing
+   * Prepare the items for bulk processing
    * @param cls The model class
    * @param items The items to bulk update/insert
    */

@@ -37,7 +37,7 @@ export class TapEmitter implements TestConsumer {
   }
 
   /**
-   * Output supplemental data (e.g. lgos)
+   * Output supplemental data (e.g. logs)
    */
   logMeta(obj: any) {
     let body = YamlUtil.serialize(obj);

@@ -6,7 +6,7 @@ import { RunState } from '../runner/types';
  */
 export class StandardWorker {
   /**
-   * Run stests
+   * Runs tests
    */
   static async run(opts: RunState) {
     try {

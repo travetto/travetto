@@ -251,7 +251,7 @@ export class SchemaValidator {
   }
 
   /**
-   * Validate partial, ignoring reuqired fields as they are partial
+   * Validate partial, ignoring required fields as they are partial
    *
    * @param o The value to validate
    * @param view The view to limit by

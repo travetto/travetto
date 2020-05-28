@@ -34,7 +34,7 @@ export class ParserTest {
   }
 
   @Test()
-  testInlinText() {
+  testInlineText() {
     const output = YamlUtil.parse(`
 - >
   a

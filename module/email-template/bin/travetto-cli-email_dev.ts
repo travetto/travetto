@@ -13,7 +13,6 @@ export class EmailDevPlugin extends BasePlugin {
 
   init(cmd: commander.Command) {
     return cmd
-      .command(this.name)
       .option('-p, --port [port]', 'Port to serve ui on', '3839')
       .option('-r, --reload-rate [reloadRate]', 'The rate to reload the UI at', '1000')
       .option('-o, --open [open]', 'Open the ui automatically on start', CliUtil.isBoolean, true);

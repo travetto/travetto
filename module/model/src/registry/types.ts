@@ -27,7 +27,7 @@ export class ModelOptions<T> {
    */
   class: Class<T>;
   /**
-   * Colleciton name
+   * Collection name
    */
   collection?: string;
   /**

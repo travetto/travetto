@@ -7,7 +7,7 @@ export interface Node<T = any> {
 export class TextNode implements Node<string> {
   constructor(public value: string) {
     const ch = value.charCodeAt(0);
-    if (ch === 0x22 /* dbl quote*/ || ch === 0x27 /* sngl quote */) {
+    if (ch === 0x22 /* dbl quote*/ || ch === 0x27 /* sgl quote */) {
       this.value = this.value.substring(1, this.value.length - 1).replace(new RegExp(`\\\\${value[0]}`, 'g'), value[0]);
     }
   }

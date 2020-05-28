@@ -17,7 +17,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
   }
 
   /**
-   * Get's channel unique identifier
+   * Gets channel unique identifier
    */
   get id() {
     return this.proc && this.proc.pid;

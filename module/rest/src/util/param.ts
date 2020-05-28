@@ -23,10 +23,10 @@ export class ParamUtil {
   }
 
   /**
-   * Register a new context providder
+   * Register a new context provider
    * @param finalType The class to check against
    * @param fnOrTypeOverride The Extraction class ofr type
-   * @param fn Optional fxtraction function
+   * @param fn Optional extraction function
    */
   static registerContext(finalType: Class, fnOrTypeOverride: ExtractFn | Class, fn?: ExtractFn) {
     if (fn) {

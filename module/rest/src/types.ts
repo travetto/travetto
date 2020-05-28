@@ -49,7 +49,7 @@ export interface ParamConfig {
    */
   resolve?: Filter;
   /**
-   * Default value fo rthe field
+   * Default value for the field
    */
   defaultValue?: any;
   /**

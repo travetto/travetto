@@ -42,6 +42,7 @@ export class TranspileUtilTest {
 
   @Test()
   resolveModToken() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { err, ...rest } = TranspileUtil.resolveToken('-fsa');
     assert(rest === {
       minus: true,
@@ -49,6 +50,7 @@ export class TranspileUtilTest {
       valid: true
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { err: err2, ...rest2 } = TranspileUtil.resolveToken('fsa');
     assert(rest2 === {
       minus: false,
@@ -56,6 +58,7 @@ export class TranspileUtilTest {
       valid: false
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { err: err3, ...rest3 } = TranspileUtil.resolveToken('-fs');
     assert(rest3 === {
       minus: true,
@@ -63,6 +66,7 @@ export class TranspileUtilTest {
       valid: false
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { err: err4, ...rest4 } = TranspileUtil.resolveToken('fs');
     assert(rest4 === {
       minus: false,

@@ -17,7 +17,7 @@ function hasType<T>(o: any): o is { type: Class<T> | string } {
 const getClass = <T>(o: T) => o.constructor as Class<T>;
 
 /**
- * Scheam registry for listening to changes
+ * Schema registry for listening to changes
  */
 export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
@@ -80,10 +80,10 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
   }
 
   /**
-   * Track changes to schemas, and track the dependent chagnes
+   * Track changes to schemas, and track the dependent changes
    * @param cls The root class of the hierarchy
    * @param curr The new class
-   * @param path The path within the object hierachy
+   * @param path The path within the object hierarchy
    */
   trackSchemaDependencies(cls: Class, curr: Class = cls, path: FieldConfig[] = []) {
     const config = this.get(curr);

@@ -88,7 +88,7 @@ export class Tokenizer {
   }
 
   /**
-   * Parse JSON subdocument as it is valid YAML
+   * Parse JSON sub-document as it is valid YAML
    */
   static readJSON(text: string, pos: number = 0, end: number = text.length) {
     const start = pos;

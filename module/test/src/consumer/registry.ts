@@ -11,7 +11,7 @@ export class TestConsumerRegistry {
   /**
    * Add a new consumer
    * @param type The consumer unique identifier
-   * @param cls The consuemr class
+   * @param cls The consumer class
    * @param isDefault Set as the default consumer
    */
   static add(type: string, cls: Class<TestConsumer>, isDefault = false) {
@@ -22,7 +22,7 @@ export class TestConsumerRegistry {
   }
 
   /**
-   * Retreive a registered consumer
+   * Retrieve a registered consumer
    * @param type The unique identifier
    */
   static get(type: string) {
