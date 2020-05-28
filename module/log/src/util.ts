@@ -92,7 +92,7 @@ export class LogUtil {
     } else if (exc.length) {
       return (x: string) => !excRe.test(x);
     } else {
-      return LogUtil.truth;
+      return this.truth;
     }
   }
 }
