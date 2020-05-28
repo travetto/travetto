@@ -1,7 +1,5 @@
 import { ChildProcess } from 'child_process';
 
-import { Env } from '@travetto/base';
-
 /**
  * Channel that represents communication between parent/child
  */
@@ -11,7 +9,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
 
   constructor(proc: T) {
     this.proc = proc;
-    console.trace(`[${this.id}] Constructed Execution`);
+    console.debug(`[${this.id}] Constructed Execution`);
   }
 
   private get parentId() {
@@ -36,9 +34,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
    * Send data to the parent
    */
   send(eventType: string, data?: any) {
-    if (Env.trace) {
-      console.trace(`[${this.parentId}] Sending [${this.id}] ${eventType}`);
-    }
+    console.debug(`[${this.parentId}] Sending [${this.id}] ${eventType}`);
     if (this.proc.send) {
       this.proc.send({ type: eventType, ...(data ?? {}) });
     } else {
@@ -101,9 +97,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
     };
 
     holder.fn = (e: U) => {
-      if (Env.trace) {
-        console.trace(`[${this.parentId}] Received [${this.id}] ${e.type}`);
-      }
+      console.debug(`[${this.parentId}] Received [${this.id}] ${e.type}`);
 
       let res;
       try {
@@ -126,7 +120,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
    */
   async destroy() {
     if (this.proc) {
-      console.trace(`[${this.parentId}] Killing [${this.id}]`);
+      console.debug(`[${this.parentId}] Killing [${this.id}]`);
     }
     this.release();
     delete this.proc;
@@ -137,7 +131,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
    */
   release() {
     if (this.proc) {
-      console.trace(`[${this.parentId}] Released [${this.id}]`);
+      console.debug(`[${this.parentId}] Released [${this.id}]`);
       this.proc.removeAllListeners('message');
     }
   }

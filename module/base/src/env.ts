@@ -13,21 +13,6 @@ class $Env {
   readonly env: string;
 
   /**
-   * If, and only if the `.env` property is equal to 'prod'
-   */
-  readonly prod: boolean;
-
-  /**
-   * Determines if the debug log level should be visible
-   */
-  readonly debug: boolean;
-
-  /**
-   * Determines if the trace log level should be visible
-   */
-  readonly trace: boolean;
-
-  /**
    * Additional locations for the application search paths
    */
   readonly appRoots: string[];
@@ -37,13 +22,9 @@ class $Env {
       .replace(/^production$/i, 'prod')
       .replace(/^development$/i, 'dev')
       .toLowerCase();
-    this.prod = this.env === 'prod';
 
     this.profiles = new Set(EnvUtil.getList('TRV_PROFILES'));
     this.appRoots = this.computeAppRoots();
-
-    this.debug = EnvUtil.isSet('DEBUG') ? !EnvUtil.isFalse('DEBUG') : !this.prod;
-    this.trace = EnvUtil.isSet('TRACE') && !EnvUtil.isFalse('TRACE');
   }
 
   private computeAppRoots() {
@@ -58,7 +39,7 @@ class $Env {
    * Generate to JSON
    */
   toJSON() {
-    return (['trace', 'debug', 'env', 'prod', 'profiles', 'appRoots'] as const)
+    return (['env', 'profiles', 'appRoots'] as const)
       .reduce((acc, k) => {
         acc[k] = this[k];
         return acc;

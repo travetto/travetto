@@ -1,13 +1,15 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 
-import { SessionEncoder } from './encoder/encoder';
+import { CacheSource, MemoryCacheSource } from '@travetto/cache';
+import { Util, AppError } from '@travetto/base';
+import { TRV_SESSION } from './internal/types';
+import { EnvUtil } from '@travetto/boot';
+
 import { Session } from './types';
 import { SessionConfig } from './config';
 import { CookieEncoder } from './encoder/cookie';
-import { CacheSource, MemoryCacheSource } from '@travetto/cache';
-import { Util, Env, AppError } from '@travetto/base';
-import { TRV_SESSION } from './internal/types';
+import { SessionEncoder } from './encoder/encoder';
 
 export const SESSION_CACHE = Symbol.for('@trv:session/cache');
 
@@ -36,10 +38,10 @@ export class RestSessionService {
   /**
    * Initialize store if none defined
    */
-  postContruct() {
+  postConstruct() {
     if (this.cacheSource === undefined) {
       this.cacheSource = new MemoryCacheSource<Session>();
-      if (!Env.prod) {
+      if (!EnvUtil.isProd()) {
         console.warn('MemoryCacheSource is not intended for production session use');
       } else {
         throw new AppError('MemoryCacheSource is not intended for production session use', 'general');

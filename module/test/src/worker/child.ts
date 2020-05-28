@@ -109,7 +109,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
     for (const file of Object.keys(require.cache).map(FsUtil.toUnix)) {
       if (this.isFileResettable(file)) {
-        console.trace(`[${process.pid}]`, 'Unloading', file);
+        console.debug(`[${process.pid}]`, 'Unloading', file);
         this.compiler.unload(file);
       }
     }

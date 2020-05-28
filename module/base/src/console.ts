@@ -2,9 +2,9 @@ import * as fs from 'fs';
 import { AppCache, EnvUtil, TranspileUtil } from '@travetto/boot';
 
 import { SystemUtil } from './internal/system';
-import { Env } from './env';
+import { StacktraceUtil } from './stacktrace';
 
-export type LogLevel = 'info' | 'trace' | 'warn' | 'debug' | 'error' | 'fatal';
+export type LogLevel = 'info' | 'warn' | 'debug' | 'error' | 'fatal';
 export type ConsolePayload = {
   line: number;
   file: string;
@@ -18,15 +18,14 @@ interface ConsoleState {
   processArgs?(payload: ConsolePayload, args: any[]): any[];
 }
 
-const CONSOLE_RE = /(\bconsole[.](debug|info|trace|warn|log|error|fatal)[(])|\n/g;
+const CONSOLE_RE = /(\bconsole[.](debug|info|warn|log|error|fatal)[(])|\n/g;
 
 
 function wrap(target: Console, enrich: boolean) {
   return {
     enrich,
     invoke(payload: ConsolePayload, args: any[]) {
-      const level = payload.level;
-      const op = level in target && level !== 'trace' ? level : (/error|warn|fatal/.test(payload.level) ? 'error' : 'log');
+      const op = /error|warn|fatal/.test(payload.level) ? 'error' : 'log';
       return target[op](...args);
     }
   };
@@ -39,27 +38,36 @@ function wrap(target: Console, enrich: boolean) {
  * Any console.log statements elsewhere will not be affected.
  */
 class $ConsoleManager {
+
   /**
    * Stack of nested states
    */
   private states: ConsoleState[] = [];
+
   /**
    * The current state
    */
   private state: ConsoleState;
 
   /**
-   * Should we enrich the console by deafault
+   * List of log levels to exclude
+   */
+  private readonly exclude = new Set<string>([]);
+
+  /**
+   * Full stack?
+   */
+  private readonly fullStack = EnvUtil.isProd();
+
+  /**
+   * Should we enrich the console by default
    */
   readonly defaultEnrich = !EnvUtil.isTrue('TRV_LOG_PLAIN');
+
   /**
    * Should the timestamp be included
    */
   readonly timestamp = EnvUtil.isValueOrFalse('TRV_LOG_TIME', ['s', 'ms'] as const, 'ms');
-  /**
-   * List of log levels to exlcude
-   */
-  readonly exclude = new Set<string>([]);
 
   /**
    * Unique key to use as a logger function
@@ -68,11 +76,11 @@ class $ConsoleManager {
     // @ts-expect-error
     global[this.key] = this.invoke.bind(this);
     this.exclude = new Set();
-    if (!Env.debug) {
+
+    const debug = EnvUtil.getBoolean('DEBUG') ?? !EnvUtil.isProd();
+
+    if (!debug) {
       this.exclude.add('debug');
-    }
-    if (!Env.trace) {
-      this.exclude.add('trace');
     }
     this.set(wrap(console, this.defaultEnrich)); // Init to console
     TranspileUtil.addPreProcessor(this.instrument.bind(this)); // Register console manager
@@ -179,6 +187,16 @@ class $ConsoleManager {
       this.states.shift();
       this.state = this.states[0];
     }
+  }
+
+  /**
+   * Format error for logging
+   * @param err Error to format
+   * @param mid supplemental text
+   */
+  formatError(err: Error, mid = '') {
+    const stack = this.fullStack ? err.stack! : StacktraceUtil.simplifyStack(err);
+    return `${err.message}\n${mid}${stack.substring(stack.indexOf('\n') + 1)}`;
   }
 }
 

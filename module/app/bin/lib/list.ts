@@ -81,10 +81,7 @@ export class AppListManager {
   static async getList(): Promise<CachedAppConfig[] | undefined> {
     if (!(await this.readList())) { // no list
       const text = (await ExecUtil.fork(path.resolve(__dirname, '..', 'find-apps'), [], {
-        env: {
-          DEBUG: '0',
-          TRACE: '0'
-        }
+        env: { DEBUG: '0' }
       }).result).stdout;
       this.storeList(JSON.parse(text) as CachedAppConfig[]);
     }

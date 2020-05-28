@@ -35,6 +35,14 @@ export class EnvUtil {
   }
 
   /**
+   * Get a key as a boolean value, false === false, undefined === undefined and everything else is true
+   * @param key
+   */
+  static getBoolean(key: string): boolean | undefined {
+    return this.isSet(key) && this.get(key) !== '' ? !this.isFalse(key) : undefined;
+  }
+
+  /**
    * Get time as milliseconds
    * @param k The environment key to search for
    * @param deTime The default time if the key isn't found
@@ -107,7 +115,7 @@ export class EnvUtil {
    * Determine if app is in prod mode or not
    */
   static isProd() {
-    return this.get('NODE_ENV') === 'production';
+    return /^prod/i.test(this.get('TRV_ENV', this.get('NODE_ENV', '')));
   }
 
   /**

@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 import { EsSchemaConfig } from './internal/types';
 
@@ -24,9 +24,9 @@ export class ElasticsearchModelConfig {
    */
   namespace = 'app';
   /**
-   * Auto-creaete, disabled in prod by default
+   * Auto-create, disabled in prod by default
    */
-  autoCreate = !Env.prod;
+  autoCreate = !EnvUtil.isProd();
   /**
    * Base schema config for elasticsearch
    */

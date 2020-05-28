@@ -12,7 +12,6 @@ export async function runTests(opts: RunState) {
 export async function load(env: any = {}, logToFile = false) {
   Object.assign(process.env, {
     DEBUG: process.env.DEBUG || '0',
-    TRACE: process.env.TRACE || '0',
     TRV_LOG_TIME: '0',
     TRV_WATCH: '0',
     TRV_ENV: 'test',

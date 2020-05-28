@@ -24,8 +24,8 @@ declare global {
     /**
      * Log at a fatal level
      * @param msg The message to log
-     * @param extra The addiitional parameters to log
+     * @param extra The additional parameters to log
      */
-    fatal: (msg?: string, ...extra: any[]) => void;
+    fatal(msg?: string, ...extra: any[]): void;
   }
 }

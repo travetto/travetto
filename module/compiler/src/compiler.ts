@@ -77,7 +77,7 @@ class $Compiler {
    * Notify of an add/remove/change event
    */
   notify(type: 'added' | 'removed' | 'changed', fileName: string) {
-    console.trace(`File ${type}`, fileName);
+    console.debug(`File ${type}`, fileName);
     this.emitter.emit(type, fileName);
   }
 
