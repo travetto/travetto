@@ -48,7 +48,7 @@ export interface OrderBy {
 }
 
 /**
- * Visitation inistance
+ * Visitation instance
  */
 export interface VisitInstanceNode<R> extends VisitNode<R> {
   value: any;

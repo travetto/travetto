@@ -18,7 +18,7 @@ export class SessionConfig {
    */
   renew = true;
   /**
-   * Should the sesion support rolling renewals
+   * Should the session support rolling renewals
    */
   rolling = false;
   /**

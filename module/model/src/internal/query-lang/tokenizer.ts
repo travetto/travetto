@@ -137,7 +137,7 @@ export class QueryLanguageTokenizer {
       // Read code as a number, more efficient
       const ch = text.charCodeAt(state.pos);
       switch (ch) {
-        // Handle puncation
+        // Handle punctuation
         case OPEN_PARENS: case CLOSE_PARENS: case OPEN_BRACKET: case CLOSE_BRACKET: case COMMA:
           this.flush(state);
           state.mode = 'punctuation';

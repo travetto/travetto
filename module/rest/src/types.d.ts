@@ -65,7 +65,7 @@ declare global {
        */
       body: any;
       /**
-       * The stream to pipe the requesat to.  Useful for file uploads.
+       * The stream to pipe the request to.  Useful for file uploads.
        * @param stream 
        */
       pipe(stream: NodeJS.WritableStream): any;
@@ -85,7 +85,7 @@ declare global {
      */
     interface Response {
       /**
-       * The underlying requet object
+       * The underlying request object
        */
       [TRV_ORIG]?: any;
       /**

@@ -31,7 +31,7 @@ export interface ValidationError {
 }
 
 /**
- * Validation rresult, will be used to create a validation error
+ * Validation result, will be used to create a validation error
  */
 export interface ValidationResult {
   /**

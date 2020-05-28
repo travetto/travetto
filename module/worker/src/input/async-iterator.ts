@@ -29,7 +29,7 @@ export class DynamicAsyncIterator<X> implements AsyncIterator<X> {
 
   /**
    * Queue next event to fire
-   * @param {boolean} immediate Determines if item(s) should be append or preppended to the queue
+   * @param {boolean} immediate Determines if item(s) should be append or prepended to the queue
    */
   add(item: X | X[], immediate = false) {
     item = Array.isArray(item) ? item : [item];

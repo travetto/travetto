@@ -15,7 +15,7 @@ export interface EndpointSimpleType {
 export type EndpointIOType = EndpointClassType | EndpointSimpleType;
 
 /**
- * Describable elementes
+ * Describable elements
  */
 export interface DescribableConfig {
   /**

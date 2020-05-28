@@ -119,7 +119,7 @@ export interface ICacheSource<T extends CacheEntry = CacheEntry> {
    */
   clear?(): OrProm<void> | void;
   /**
-   * Post construction hook, used for async initliazations
+   * Post construction hook, used for async initializations
    */
   postConstruct?(): OrProm<void>;
 
@@ -139,7 +139,7 @@ export interface ICacheSource<T extends CacheEntry = CacheEntry> {
   /**
    * Set item and mark expiry time with the provided config
    * @param config The cache config to resolve against
-   * @param entry The etnry to set
+   * @param entry The entry to set
    */
   setWithAge(config: CacheConfig, entry: Partial<T> & { data: any, key: string }): OrProm<T>;
 

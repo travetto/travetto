@@ -22,7 +22,7 @@ export function buildWorkManager(consumer: TestConsumer) {
         channel.listen(consumer.onEvent.bind(consumer)); // Connect the consumer with the event stream from the child
       },
       /**
-       * Senc child command to run tests
+       * Send child command to run tests
        */
       async execute(channel: ParentCommChannel, event: string | RunEvent) {
         // Listen for child to complete

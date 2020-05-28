@@ -57,7 +57,7 @@ export class $SchemaChangeListener extends EventEmitter {
    * Track a specific class for dependencies
    * @param src The target class
    * @param parent The parent class
-   * @param path The path within the object hierachy to arrive at the class
+   * @param path The path within the object hierarchy to arrive at the class
    * @param config The configuration or the class
    */
   trackSchemaDependency(src: Class, parent: Class, path: FieldConfig[], config: ClassConfig) {

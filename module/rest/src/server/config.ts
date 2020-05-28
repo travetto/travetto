@@ -41,7 +41,7 @@ export class RestConfig {
   baseUrl: string;
 
   /**
-   * Shoudl the app provide the global route for app info
+   * Should the app provide the global route for app info
    */
   defaultMessage = true;
 
@@ -63,7 +63,7 @@ export class RestConfig {
   } = { active: false };
 
   /**
-   * Redfine base url to be the full URL if not specified
+   * Redefine base url to be the full URL if not specified
    */
   postConstruct() {
     if (!this.bindAddress) {

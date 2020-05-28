@@ -77,7 +77,7 @@ export class ManagerTest {
   }
 
   @Test()
-  async verifyNotdefined() {
+  async verifyNotDefined() {
     const conf = new TestConfig();
     ConfigManager.bindTo(conf, 'model.mongo');
 

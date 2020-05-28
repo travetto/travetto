@@ -80,7 +80,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   /**
-   * Find collection name given a clas
+   * Find collection name given a class
    */
   getCollectionName(cls: Class) {
     return ModelRegistry.getBaseCollection(cls)!;
@@ -316,7 +316,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   /**
-   * Get the search object for a class, handling polymoropohism
+   * Get the search object for a class, handling polymorphism
    */
   getSearchObject<T>(cls: Class<T>, query: Query<T>): Search {
     const conf = ModelRegistry.get(cls);
@@ -511,7 +511,7 @@ export class ElasticsearchModelSource extends ModelSource {
   }
 
   /**
-   * Buidl the raw model filters, supporting polymorphism
+   * Build the raw model filters, supporting polymorphism
    */
   buildRawModelFilters<T extends ModelCore = ModelCore>(classes: Class<T>[]) {
     const types = classes.map(t => {

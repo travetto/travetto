@@ -17,7 +17,7 @@ class HS256Suite {
   }
 
   @Test('should be syntactically valid')
-  async testVavlid() {
+  async testValid() {
     assert(typeof this.token === 'string');
     assert(this.token.split('.').length === 3);
   }

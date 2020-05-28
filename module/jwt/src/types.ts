@@ -45,7 +45,7 @@ export interface Payload extends PayloadCore {
    */
   aud?: string | string[];
   /**
-   * Extra properteis on the payload
+   * Extra properties on the payload
    */
   [key: string]: string | number | string[] | object | undefined;
 }
@@ -111,7 +111,7 @@ export type VerifyOptions = {
   alg?: AlgType | AlgType[];
 
   /**
-   * Payload aducience to check
+   * Payload audience to check
    */
   payload?: {
     aud?: string | RegExp | (string | RegExp)[];

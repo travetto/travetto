@@ -15,7 +15,7 @@ export class SerializeInterceptor extends RestInterceptor {
 
   /**
    * Set outbound content type if not defined
-   * @param res Respponse
+   * @param res Response
    * @param type mime type
    */
   static setContentTypeIfUndefined(res: Response, type: string) {

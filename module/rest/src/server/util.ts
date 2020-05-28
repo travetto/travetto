@@ -1,7 +1,7 @@
 import { Response, Request } from '../types';
 
 /**
- * Base resposne object
+ * Base response object
  */
 abstract class BaseResponse implements Partial<Response> {
   /**

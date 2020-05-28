@@ -204,7 +204,7 @@ export class ScanFs {
    * Scan the framework for folder/files only the framework should care about
    * @param testFile The test to determine if a file is desired
    */
-  static scanFramework(testFile?: (x: string) => boolean) {
+  static scanFramework(testFile?: (x: string) => boolean, base = FsUtil.cwd) {
     return this.scanDirSync({
       testFile,
       testDir: x => // Ensure its a valid folder or module folder
@@ -213,6 +213,6 @@ export class ScanFs {
         (x.includes('@travetto')  // Is framework folder, include everything under it
           && !/node_modules[/][^@]/.test(x) // Excluding non framework node modules
         )
-    }, FsUtil.cwd);
+    }, base);
   }
 }

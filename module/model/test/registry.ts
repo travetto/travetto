@@ -5,6 +5,7 @@ import { ModelSource, Query, BulkResponse, ModelCore, ModelQuery, PageableModelQ
 import { BulkOp } from '../src/model/bulk';
 
 @Injectable({ target: ModelSource })
+// @ts-expect-error
 export class TestSource implements ModelSource {
   onChange(e: ChangeEvent<Class<any>>) {
     console.log('Changed model', e);

@@ -44,7 +44,7 @@ export class TestExecutor {
         }
       });
 
-    // Wait for all barriers to be satisifed
+    // Wait for all barriers to be satisfied
     return barrier.wait();
   }
 
@@ -241,7 +241,7 @@ export class TestExecutor {
           await this.executeSuite(consumer, suite);
         }
       }
-    } else if (params.test) { // If running a single tesst
+    } else if (params.test) { // If running a single test
       await this.executeSuiteTest(consumer, params.suite, params.test);
     } else { // Running the suite
       await this.executeSuite(consumer, params.suite);

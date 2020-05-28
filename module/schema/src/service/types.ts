@@ -6,7 +6,7 @@ export const ALL_VIEW = '__all';
 export type ClassList = Class | [Class];
 
 /**
- * Basic descriable configuration
+ * Basic describable configuration
  */
 export interface DescribableConfig {
   /**

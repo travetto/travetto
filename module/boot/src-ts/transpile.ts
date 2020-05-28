@@ -115,7 +115,7 @@ export class TranspileUtil {
 
   /**
    * Check transpilation errors
-   * @param fileName The naem of the file
+   * @param fileName The name of the file
    * @param diagnostics The diagnostic errors
    */
   static checkTranspileErrors(fileName: string, diagnostics: readonly any[]) {

@@ -17,43 +17,43 @@ function Endpoint(method: MethodOrAll, path: PathType = '/', extra: Partial<Endp
  */
 export const All = (path?: PathType) => Endpoint('all', path);
 /**
- * Registers GET requets
+ * Registers GET requests
  * @param path The path to route the request to
  * @augments trv/rest/Endpoint
  */
 export const Get = (path?: PathType) => Endpoint('get', path);
 /**
- * Registers POST requets
+ * Registers POST requests
  * @param path The path to route the request to
  * @augments trv/rest/Endpoint
  */
 export const Post = (path?: PathType) => Endpoint('post', path);
 /**
- * Registers PUT requets
+ * Registers PUT requests
  * @param path The path to route the request to
  * @augments trv/rest/Endpoint
  */
 export const Put = (path?: PathType) => Endpoint('put', path);
 /**
- * Registers PATCH requets
+ * Registers PATCH requests
  * @param path The path to route the request to
  * @augments trv/rest/Endpoint
  */
 export const Patch = (path?: PathType) => Endpoint('patch', path);
 /**
- * Registers DELETE requets
+ * Registers DELETE requests
  * @param path The path to route the request to
  * @augments trv/rest/Endpoint
  */
 export const Delete = (path?: PathType) => Endpoint('delete', path);
 /**
- * Registers HEAD requets
+ * Registers HEAD requests
  * @param path The path to route the request to
  * @augments trv/rest/Endpoint
  */
 export const Head = (path?: PathType) => Endpoint('head', path);
 /**
- * Registers OPTIONS requets
+ * Registers OPTIONS requests
  * @param path The path to route the request to
  * @augments trv/rest/Endpoint
  */

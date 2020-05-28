@@ -20,7 +20,7 @@ export class TestPhaseManager {
   constructor(private consumer: TestConsumer, private suite: SuiteConfig, private result: SuiteResult) { }
 
   /**
-   * Creeate the appropriate events when a suite has an error
+   * Create the appropriate events when a suite has an error
    */
   async triggerSuiteError(methodName: string, error: Error) {
     const bad = AssertUtil.generateSuiteError(this.suite, methodName, error);

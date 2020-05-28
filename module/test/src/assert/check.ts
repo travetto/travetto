@@ -111,7 +111,7 @@ export class AssertCheck {
       // Pushing on not error
       AssertCapture.add(assertion);
     } catch (e) {
-      // On error, produce the approprate error message
+      // On error, produce the appropriate error message
       if (e instanceof AssertionError) {
         if (!assertion.message) {
           assertion.message = (OP_MAPPING[fn] ?? `{state} be {expected}`);
@@ -129,7 +129,7 @@ export class AssertCheck {
 
   /**
    * Check a given error
-   * @param shouldThrow  Shoudl the test throw anything
+   * @param shouldThrow  Should the test throw anything
    * @param err The provided error
    */
   static checkError(shouldThrow: ThrowableError | undefined, err: Error | string | undefined): Error | undefined {
@@ -209,7 +209,7 @@ export class AssertCheck {
    * @param text Text of assertion
    * @param key Method to call
    * @param positive Is the test positive or negative
-   * @param action Aync function to run
+   * @param action Async function to run
    * @param shouldThrow Should this action reject
    * @param message Message to share on failure
    */

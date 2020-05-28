@@ -99,7 +99,9 @@ class UtilTests {
 
     assert.strictEqual(Util.deepAssign({ a: {} }, { a: { b: Test } }).a.b, Test);
 
+    // @ts-expect-error
     assert(Util.deepAssign({ a: { b: 5 } }, { a: null }).a === null);
+    // @ts-expect-error
     assert.deepEqual(Util.deepAssign({ a: { b: 5 } }, { a: undefined }).a, { b: 5 });
 
     assert(Util.deepAssign({ line: 20, file: 30 }, { description: undefined }).description === undefined);
@@ -116,17 +118,23 @@ class UtilTests {
   testCoerce() {
     assert(Util.deepAssign({ a: 1 }, { a: '5' }, 'coerce').a === 5);
     assert(Util.deepAssign({ a: '1' }, { a: 5 }, 'coerce').a === '5');
+    // @ts-expect-error
     assert(isNaN(Util.deepAssign({ a: 1 }, { a: true }, 'coerce').a));
+    // @ts-expect-error
     assert(Util.deepAssign({ a: true }, { a: null }, 'coerce').a === null);
+    // @ts-expect-error
     assert(Util.deepAssign({ a: true }, { a: null }, 'coerce').a === null);
   }
 
   @Test()
   testReplace() {
     assert(Util.deepAssign({ a: [1, 2, 3] }, { a: [1, 2] }, 'replace').a === [1, 2]);
+    // @ts-expect-error
     assert(Util.deepAssign({ a: [1, 2, 3] }, { a: undefined }, 'replace').a === undefined);
     assert(Util.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { c: [1, 2] } }, 'replace').a === { b: 5, c: [1, 2] });
+    // @ts-expect-error
     assert(Util.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.c === [1, 2]);
+    // @ts-expect-error
     assert(Util.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.b === undefined);
   }
 

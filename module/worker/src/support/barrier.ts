@@ -61,7 +61,7 @@ export class Barrier {
    */
   async wait(): Promise<Error | undefined> {
     let err: Error | undefined;
-    // Wait for all barriers to be satisifed
+    // Wait for all barriers to be satisfied
     while (this.barriers.size) {
       await Promise.race(this.barriers.values()).catch(e => err = err || e);
     }

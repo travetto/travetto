@@ -16,7 +16,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
   constructor(private target: TestConsumer) { }
 
   /**
-   * Sumamrize a given test suite using the new result and the historical
+   * Summarize a given test suite using the new result and the historical
    * state
    */
   summarizeSuite(test: TestResult): SuiteResult {

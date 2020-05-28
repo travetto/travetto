@@ -10,7 +10,7 @@ import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
 
 /**
- * Covnerting units to various radians
+ * Converting units to various radians
  */
 const RADIANS_TO: Record<DistanceUnit, number> = {
   km: 6378,

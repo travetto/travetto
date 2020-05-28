@@ -33,7 +33,7 @@ export class TypeUtil {
   };
 
   /**
-   * Get declared type of a given field, only for primtive types
+   * Get declared type of a given field, only for primitive types
    */
   static getDeclaredType(f: FieldConfig | Class): keyof typeof TypeUtil.OPERATORS | undefined {
     const type = 'type' in f ? f.type : f;
@@ -52,7 +52,7 @@ export class TypeUtil {
   }
 
   /**
-   * Get the actual type of a given field, only for primtive types
+   * Get the actual type of a given field, only for primitive types
    */
   static getActualType(v: any): string {
     const type = typeof v;

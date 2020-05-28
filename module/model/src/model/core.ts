@@ -7,7 +7,7 @@ export interface ModelCore {
    */
   id?: string;
   /**
-   * Tyep of model to save
+   * Type of model to save
    */
   type?: string;
   /**

@@ -41,7 +41,7 @@ export class Session<T = any> implements CacheEntry {
   readonly issuedAt: number;
 
   /**
-   * Epires at time
+   * Expires at time
    */
   expiresAt: number | undefined;
   /**
@@ -71,7 +71,7 @@ export class Session<T = any> implements CacheEntry {
       this.expiresAt = this.maxAge + Date.now();
     }
 
-    // Hash the sessiono as it stands
+    // Hash the session as it stands
     this.hash = SystemUtil.naiveHash(JSON.stringify(this));
   }
 

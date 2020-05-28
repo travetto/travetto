@@ -16,7 +16,7 @@ export abstract class Registry implements ChangeSource<Class> {
    */
   protected initialized: Promise<any>;
   /**
-   * Event emitter, to broadacst event changes
+   * Event emitter, to broadcast event changes
    */
   protected events = new EventEmitter();
   /**
@@ -113,7 +113,7 @@ export abstract class Registry implements ChangeSource<Class> {
   }
 
   /**
-   * When an uninstallation event occurs
+   * When an un-installation event occurs
    */
   onUninstall(cls: Class, e: ChangeEvent<Class>): void {
 

@@ -9,7 +9,7 @@
 	"name": "@travetto/mono-repo",
 	"license": "MIT",
 	"scripts": {
-		"lint": "npx eslint --ignore-pattern '**/node_modules/**' --ext .js --ext .ts .",
+		"lint": "npx eslint --ignore-pattern '**/node_modules/**' --ignore-pattern '**/*.spec.ts' --ignore-pattern '**/out/**' --ext .js --ext .ts .",
 		"init": "./bin/run.sh dev-init/index",
 		"prepublish": "cd module/boot; npm run prepublish",
 		"reinit": "rm -rf node_modules/; npm i; npm run init",

@@ -3,7 +3,7 @@ import { ClassSource } from '../source/class-source';
 import { Class, ChangeEvent } from '../types';
 
 /**
- * The root registry that controls alll registries
+ * The root registry that controls all registries
  */
 class $RootRegistry extends Registry {
   constructor() {

@@ -125,7 +125,7 @@ export class InjectableTransformer {
 
     // Extract config
     const injectArgs = node.parameters.map(x => InjectableTransformer.processDeclaration(state, x)!);
-    let injectConfig = TransformUtil.getPrimaryArgument<ts.Node>(dec);
+    let injectConfig = TransformUtil.getPrimaryArgument<ts.Expression>(dec);
 
     if (injectConfig && ts.isIdentifier(injectConfig)) {
       original = injectConfig; // Shift to original

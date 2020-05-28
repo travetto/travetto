@@ -112,10 +112,20 @@ export class EnvUtil {
   }
 
   /**
+   * Get the environment
+   */
+  static getEnv() {
+    return this.get('TRV_ENV', this.get('NODE_ENV', 'dev'))
+      .replace(/^production$/i, 'prod')
+      .replace(/^development$/i, 'dev')
+      .toLowerCase();
+  }
+
+  /**
    * Determine if app is in prod mode or not
    */
   static isProd() {
-    return /^prod/i.test(this.get('TRV_ENV', this.get('NODE_ENV', '')));
+    return this.getEnv() === 'prod';
   }
 
   /**

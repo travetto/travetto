@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, ScanFs } from '@travetto/boot';
 
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
 import { StyleUtil } from './style';
 import { ImageUtil } from './image';
+import { ScanApp } from '@travetto/base';
 
 const fsWriteFile = util.promisify(fs.writeFile);
 const fsReadFile = util.promisify(fs.readFile);
@@ -134,10 +135,13 @@ export class TemplateUtil {
     const { ResourceManager } = await import('@travetto/base');
     const { FilePresenceManager } = await import('@travetto/watch');
 
+    const ext = /[.](html|txt|scss|css|png|jpg|gif)$/;
+
     const watcher = new FilePresenceManager({
       cwd: FsUtil.cwd,
-      ext: /[.](html|txt|scss|css|png|jpg|gif)$/,
-      rootPaths: ResourceManager.getRelativePaths().map(x => `${x}/email`),  // Email folders only
+      validFile: x => ext.test(x),
+      folders: ResourceManager.getRelativePaths().map(x => `${x}/email`),  // Email folders only
+      files: ResourceManager.findAllByPatternSync(ext, '/email'),
       listener: {
         changed: async f => {
           if (/\/email\/.*[.](compiled|dev)[.]/.test(f)) {

@@ -38,11 +38,11 @@ export class MySQLDialect extends SQLDialect {
 
     // Word boundary
     this.regexWordBoundary = '([[:<:]]|[[:>:]])';
-    // Field maxlen
+    // Field maxlength
     this.idField.minlength = this.idField.maxlength = { n: this.KEY_LEN };
 
     /**
-     * Set string length limit bsaed on version
+     * Set string length limit based on version
      */
     if (/^5[.][56]/.test(this.config.version)) {
       this.DEFAULT_STRING_LEN = 191; // Mysql limitation with utf8 and keys

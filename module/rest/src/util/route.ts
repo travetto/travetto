@@ -28,7 +28,7 @@ export class RouteUtil {
 
   /**
    * Create a full route handler
-   * @param interceptors Intercpetors to apply
+   * @param interceptors Interceptors to apply
    * @param route The route/endpoint to call
    * @param router The controller to tie to
    */

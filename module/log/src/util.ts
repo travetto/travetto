@@ -47,7 +47,7 @@ export class LogUtil {
   }
 
   /**
-   * Convert filter into teset function for filtering
+   * Convert filter into test function for filtering
    */
   static buildFilter(v: string | undefined) {
     if (!v) {

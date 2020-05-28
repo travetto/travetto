@@ -6,7 +6,7 @@ import { ShutdownManager } from '@travetto/base';
 import { InputSource } from './input/types';
 
 /**
- * Worker defintion
+ * Worker definition
  */
 export interface Worker<X> {
   active: boolean;
@@ -29,7 +29,7 @@ export class WorkPool<X, T extends Worker<X>> {
    */
   private pool: gp.Pool<T>;
   /**
-   * Number of acquistions in process
+   * Number of acquisitions in process
    */
   private pendingAcquires = 0;
   /**
