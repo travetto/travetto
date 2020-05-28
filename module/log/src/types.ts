@@ -4,7 +4,6 @@ import { ConsolePayload } from '@travetto/base';
  * Log levels, numerically
  */
 export const LogLevels = {
-  trace: 0,
   debug: 1,
   info: 2,
   warn: 3,

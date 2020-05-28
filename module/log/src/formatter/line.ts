@@ -14,7 +14,6 @@ export const STYLES = {
   debug: ColorUtil.makeColorer('yellow'),
   warn: ColorUtil.makeColorer('magenta'),
   fatal: ColorUtil.makeColorer('cyan', 'inverse'),
-  trace: ColorUtil.makeColorer('white', 'faint'),
   timestamp: ColorUtil.makeColorer('white', 'bold'),
   location: ColorUtil.makeColorer('blue')
 };
