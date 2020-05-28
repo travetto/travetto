@@ -34,7 +34,7 @@ class $Logger {
    * Initialize
    */
   init() {
-    const debugFilter = LogUtil.readEnvVal('debug', !EnvUtil.isProd() ? '*' : '');
+    const debugFilter = LogUtil.readEnvVal('debug', !EnvUtil.isProd() ? 'src/*' : '');
 
     const filter = LogUtil.buildFilter(debugFilter);
     if (filter !== LogUtil.falsehood) {

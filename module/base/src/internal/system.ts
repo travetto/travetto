@@ -115,7 +115,7 @@ export class SystemUtil {
         }
       } else {
         const [ns1, ...rest] = mod.split(/\/+/);
-        ns = `${ns1}`;
+        ns = ns1;
         mod = rest.join('.');
       }
     }
