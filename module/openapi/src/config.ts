@@ -3,19 +3,19 @@ import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
 
 import { Config } from '@travetto/config';
 import { FsUtil, EnvUtil } from '@travetto/boot';
-import { AppInfo } from '@travetto/base';
+import { AppManifest } from '@travetto/base';
 
 /**
  * API Information, infers as much as possible from the package.json
  */
 @Config('api.info')
 export class ApiInfoConfig {
-  contact: ContactObject = AppInfo.author;
-  description: string = AppInfo.description;
-  license: LicenseObject = { name: AppInfo.license };
+  contact: ContactObject = AppManifest.author ?? {};
+  description: string = AppManifest.description;
+  license: LicenseObject = { name: AppManifest.license! };
   termsOfService?: string;
-  title: string = AppInfo.name;
-  version: string = AppInfo.version;
+  title: string = AppManifest.name;
+  version: string = AppManifest.version;
 }
 
 /**

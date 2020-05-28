@@ -1,4 +1,4 @@
-import { AppInfo } from '@travetto/base/src/app-info';
+import { AppManifest } from '@travetto/base/src/manifest';
 import { ControllerConfig } from '@travetto/rest';
 
 /**
@@ -11,7 +11,7 @@ export function template(controllers: ControllerConfig[], lambdaDir?: string) {
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Description: >-
-  Travetto Application deployment for ${AppInfo.name}
+  Travetto Application deployment for ${AppManifest.name}
 Resources:
 ${controllers.map(cont => `
   ${cont.class.name}:

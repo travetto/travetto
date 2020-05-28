@@ -1,11 +1,10 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { FsUtil, EnvUtil, ScanFs, ScanEntry } from '@travetto/boot';
-
-import { Env } from './env';
+import { FsUtil, ScanFs, ScanEntry } from '@travetto/boot';
 
 import { AppError } from './error';
+import { AppManifest } from './manifest';
 
 const fsReadFile = util.promisify(fs.readFile);
 
@@ -219,7 +218,4 @@ export class $ResourceManager {
   }
 }
 
-export const ResourceManager = new $ResourceManager([
-  ...Env.appRoots,
-  ...EnvUtil.getList('TRV_RESOURCE_ROOTS')
-]);
+export const ResourceManager = new $ResourceManager(AppManifest.resourceRoots);

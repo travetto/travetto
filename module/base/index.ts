@@ -1,7 +1,6 @@
 /// <reference path="./src/internal/global-types.d.ts" />
 
-export * from './src/app-info';
-export * from './src/env';
+export * from './src/manifest';
 export * from './src/stacktrace';
 export * from './src/error';
 export * from './src/console';

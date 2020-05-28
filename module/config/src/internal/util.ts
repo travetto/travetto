@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { ResourceManager, Util, Env } from '@travetto/base';
+import { ResourceManager, Util, AppManifest } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 type Prim = number | string | boolean | null;
@@ -20,14 +20,14 @@ export class ConfigUtil {
    * - env.yml
    */
   static fetchOrderedConfigs() {
+    const profileIndex = AppManifest.profiles.reduce((acc, k, v) => {
+      acc[k] = v;
+      return acc;
+    }, {} as Record<string, number>);
     return ResourceManager.findAllByPatternSync(/[.]ya?ml$/)
       .map(file => ({ file, profile: path.basename(file).replace(/[.]ya?ml$/, '') }))
-      .filter(({ profile }) => profile === 'application' || profile === Env.env || Env.hasProfile(profile))
-      .sort((a, b) =>
-        cmp(a.profile, b.profile, 'application', 1) || // application at top
-        cmp(a.profile, b.profile, Env.env, -1) || // Env at bottom
-        a.file.localeCompare(b.file) // Sort by file name
-      );
+      .filter(({ profile }) => profile in profileIndex)
+      .sort((a, b) => profileIndex[a.profile] - profileIndex[b.profile]);
   }
 
   /**

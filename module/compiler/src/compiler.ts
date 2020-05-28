@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 
 import { FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil } from '@travetto/boot';
-import { ScanApp, Env } from '@travetto/base';
+import { ScanApp, AppManifest } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
 import { Transpiler } from './transpiler';
@@ -26,7 +26,7 @@ class $Compiler {
     /**
      * This of paths to compile against
      */
-    protected readonly appRoots: string[] = Env.appRoots
+    protected readonly appRoots: string[] = AppManifest.appRoots
   ) {
     this.transpiler = new Transpiler(this.cache, this.appRoots);
   }

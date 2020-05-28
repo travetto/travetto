@@ -1,5 +1,5 @@
 import { ApplicationHandle } from '@travetto/app';
-import { AppInfo, AppError } from '@travetto/base';
+import { AppManifest, AppError } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { Class, ChangeEvent } from '@travetto/registry';
@@ -38,7 +38,7 @@ export abstract class RestServer<T = any> {
    */
   info = {
     restProvider: this.constructor.name,
-    ...AppInfo
+    ...AppManifest
   };
 
   constructor() {
