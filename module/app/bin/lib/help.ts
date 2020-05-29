@@ -1,13 +1,13 @@
 import { color } from '@travetto/cli/src/color';
 import { RunUtil } from './run';
-import { CachedAppConfig } from '../../src/types';
+import { ApplicationConfig } from '../../src/types';
 
 export class HelpUtil {
 
   /**
    * Convert single ApplicationConfig into a stylized entry
    */
-  static getAppUsage(app: CachedAppConfig) {
+  static getAppUsage(app: ApplicationConfig) {
     let usage = app.name;
 
     if (app.params) {
@@ -28,7 +28,7 @@ export class HelpUtil {
   /**
    * Generate list of all help entries
    */
-  static generateAppHelpList(confs: CachedAppConfig[] | undefined) {
+  static generateAppHelpList(confs: ApplicationConfig[] | undefined) {
     const choices = [];
     if (!confs || !confs.length) {
       return color`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
@@ -39,16 +39,7 @@ export class HelpUtil {
       const root = conf.root !== '.' ? color`[${{ subtitle: conf.root }}] ` : '';
       const usage = this.getAppUsage(conf);
 
-      const features = [];
-      let featureStr = '';
-      if (conf.watchable) {
-        features.push('{watch}');
-      }
-      if (features.length) {
-        featureStr = ` | ${features.join(' ')}`;
-      }
-
-      lines.push(color`${root}${{ identifier: conf.name }}${featureStr}`);
+      lines.push(color`${root}${{ identifier: conf.name }}`);
       if (conf.description) {
         lines.push(color`desc:  ${{ description: conf.description }}`);
       }
@@ -62,5 +53,4 @@ export class HelpUtil {
     }
     return choices.map(x => `   ● ${x}`).join('\n\n');
   }
-
 }

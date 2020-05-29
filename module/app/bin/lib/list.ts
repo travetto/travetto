@@ -1,10 +1,13 @@
 import * as util from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { CliUtil } from '@travetto/cli/src/util';
 import { AppCache } from '@travetto/boot/src/app-cache';
 import { FsUtil } from '@travetto/boot/src/fs';
 import { ExecUtil } from '@travetto/boot/src/exec';
-import type { CachedAppConfig } from '../../src/types';
+
+import type { ApplicationConfig } from '../../src/types';
 
 /**
  * Utilities to fetch list of applications
@@ -19,14 +22,15 @@ export class AppListManager {
    */
   static async findAll() {
     // Initialize up to compiler
-    const paths = ['.'];
+    const roots = ['.'];
     try {
-      paths.push(
+      roots.push(
         ...fs.readdirSync(FsUtil.resolveUnix(FsUtil.cwd, 'alt')).map(x => `alt/${x}`)
       );
     } catch { }
 
-    process.env.TRV_ROOTS = paths.join(',');
+    CliUtil.initAppEnv({ roots });
+
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.init('compile-all');
 
@@ -34,6 +38,10 @@ export class AppListManager {
     return AppListUtil.buildList();
   }
 
+  /**
+   * Find application by given name
+   * @param name
+   */
   static async findByName(name: string) {
     return (await this.getList())?.find(x => x.name === name);
   }
@@ -43,14 +51,15 @@ export class AppListManager {
    * Store list of cached items
    * @param items
    */
-  static storeList(items: CachedAppConfig[]) {
-    AppCache.writeEntry(this.cacheConfig, JSON.stringify(items));
+  static storeList(items: ApplicationConfig[]) {
+    const toStore = items.map(x => ({ ...x, target: undefined }));
+    AppCache.writeEntry(this.cacheConfig, JSON.stringify(toStore));
   }
 
   /**
    * Request list of applications
    */
-  static async verifyList(items: CachedAppConfig[]): Promise<CachedAppConfig[]> {
+  static async verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
     try {
       for (const el of items) {
         const elStat = (await this.fsLstat(el.filename).catch(e => { delete el.generatedTime; }));
@@ -69,21 +78,23 @@ export class AppListManager {
   /**
    * Read list
    */
-  static async readList(): Promise<CachedAppConfig[] | undefined> {
+  static async readList(): Promise<ApplicationConfig[] | undefined> {
     if (AppCache.hasEntry(this.cacheConfig)) {
-      return JSON.parse(AppCache.readEntry(this.cacheConfig)) as CachedAppConfig[];
+      return JSON.parse(AppCache.readEntry(this.cacheConfig)) as ApplicationConfig[];
     }
   }
 
   /**
    * Request list of applications
    */
-  static async getList(): Promise<CachedAppConfig[] | undefined> {
+  static async getList(): Promise<ApplicationConfig[] | undefined> {
     if (!(await this.readList())) { // no list
+      const done = CliUtil.waiting('Compiling...');
       const text = (await ExecUtil.fork(path.resolve(__dirname, '..', 'find-apps'), [], {
         env: { DEBUG: '0' }
       }).result).stdout;
-      this.storeList(JSON.parse(text) as CachedAppConfig[]);
+      this.storeList(JSON.parse(text) as ApplicationConfig[]);
+      done('Done');
     }
 
     const items = await this.readList();

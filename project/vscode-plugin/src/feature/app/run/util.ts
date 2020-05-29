@@ -15,11 +15,7 @@ export class AppSelectorUtil {
    * @param app
    */
   static buildAppDetail(app: AppChoice) {
-    const detail = [];
-    detail.push(app.description);
-    if (app.watchable) {
-      detail.push('{watch}');
-    }
+    const detail = [app.description];
     const out = detail.filter(x => !!x).join(' ').trim();
     return out ? `${'\u00A0'.repeat(4)}${out}` : out;
   }

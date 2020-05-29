@@ -1,4 +1,6 @@
+import * as fs from 'fs';
 import { Class } from '@travetto/registry';
+import { FsUtil } from '@travetto/boot';
 
 import { ApplicationConfig, ApplicationParameter, AppClass } from './types';
 import { ApplicationRegistry } from './registry';
@@ -29,11 +31,21 @@ export function Application(
     const paramMap = config?.paramMap ?? {};
 
     out.target = target;
+    out.filename = target.__file;
+    out.targetId = target.__id;
     out.name = name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-');
+    out.generatedTime = FsUtil.maxTime(fs.lstatSync(target.__file));
 
     if (params) {
       out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] ?? {}), name: x.name! }) as ApplicationParameter);
     }
+
+    const [, root, first] = target.__file.replace(`${FsUtil.cwd}/`, '').match(/^([^\/]+)\/([^\/]+)/)!;
+
+    // If root is in node_modules or is 'src', default to local
+    // * This supports apps being run from modules vs locally
+    out.root = (first === 'node_modules' || first === 'src') ? '.' :
+      root.split('/src')[0];
 
     ApplicationRegistry.register(out.name, out as ApplicationConfig);
     return target;

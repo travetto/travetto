@@ -41,6 +41,9 @@ export class AppUtil {
     return o && ('wait' in o || 'close' in o);
   }
 
+  /**
+   * Wait for a handle to finish, and close on shutdown
+   */
   static async processHandle(o: ApplicationHandle) {
     // If we got back an app listener
     if ('close' in o) {
@@ -49,5 +52,22 @@ export class AppUtil {
     if ('wait' in o) { // Wait for close signal
       await o.wait!();
     }
+  }
+
+  /**
+   * Build a waitable handle
+   */
+  static waitHandle(): ApplicationHandle {
+    let id: NodeJS.Timeout;
+    return {
+      wait: () => new Promise(r => {
+        id = setTimeout(r, Number.MAX_SAFE_INTEGER / 10 ** 7);
+      }),
+      close: () => {
+        if (id) {
+          clearTimeout(id);
+        }
+      }
+    };
   }
 }

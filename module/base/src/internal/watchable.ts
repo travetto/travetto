@@ -6,7 +6,7 @@ import { EnvUtil } from '@travetto/boot';
  */
 export function Watchable(mod: string): ClassDecorator {
   return (target: any) => {
-    if (EnvUtil.isTrue('TRV_WATCH')) {
+    if (EnvUtil.isWatch()) {
       try {
         require('@travetto/watch'); // Ensure watch is installed
       } catch {

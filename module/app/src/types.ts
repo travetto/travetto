@@ -27,19 +27,13 @@ export interface ApplicationParameter {
  */
 export interface ApplicationConfig<T extends AppClass = AppClass> {
   name: string; // App name
+  root: string; // App root location
   filename: string; // Location of file for app
   description?: string;
   params?: ApplicationParameter[]; // List of params
-  target: Class<T>; // The actual class of the app
-  watchable?: boolean; // Whether or not the app runs in watch mode by default
-}
-
-/**
- * App config that has been cached
- */
-export interface CachedAppConfig extends ApplicationConfig {
-  root: string;
-  generatedTime: number;
+  targetId: string; // The class id
+  target?: Class<T>; // The actual class of the app
+  generatedTime?: number;
 }
 
 /**
@@ -49,7 +43,7 @@ export interface ApplicationHandle {
   /**
    * Can close an application, if defined
    */
-  close?(): Promise<any>;
+  close?(): void | Promise<void>;
   /**
    * Can wait for an application if defined
    */
