@@ -1,6 +1,8 @@
 // @file-if redis
 import * as redis from 'redis';
 
+import { ShutdownManager } from '@travetto/base';
+
 import { CacheEntry } from '../types';
 import { CacheSource } from '../source/core';
 import { CacheSourceUtil } from '../source/util';
@@ -18,6 +20,7 @@ export class RedisCacheSource extends CacheSource {
 
   async postConstruct() {
     this.cl = new redis.RedisClient(this.config);
+    ShutdownManager.onShutdown(__filename, () => this.cl.quit());
   }
 
   toPromise<V>(fn: (cb: redis.Callback<V>) => void): Promise<V> {

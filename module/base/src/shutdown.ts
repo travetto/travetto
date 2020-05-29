@@ -1,5 +1,6 @@
 import { EnvUtil } from '@travetto/boot';
 import { Util } from './util';
+import { SystemUtil } from './internal/system';
 
 const ogExit = process.exit;
 
@@ -73,7 +74,7 @@ export class ShutdownManager {
     try {
       // If the err is not an exit code
       if (err && typeof err !== 'number') {
-        console.error(err);
+        console.warn(err);
       }
 
       // Get list of all pending listeners
@@ -124,6 +125,9 @@ export class ShutdownManager {
    * @param final If this should be run an attempt to shutdown or only on the final shutdown
    */
   static onShutdown(name: string, handler: Function, final = false) {
+    if (/[.][jt]s$/.test(name)) {
+      name = SystemUtil.computeModule(name);
+    }
     this.listeners.push({ name, handler, final });
   }
 
