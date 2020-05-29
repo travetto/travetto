@@ -47,7 +47,7 @@ export class AppUtil {
   static async processHandle(o: ApplicationHandle) {
     // If we got back an app listener
     if ('close' in o) {
-      ShutdownManager.onShutdown('app.handle', () => o.close!()); // Tie shutdown into app close
+      ShutdownManager.onShutdown(__filename, () => o.close!()); // Tie shutdown into app close
     }
     if ('wait' in o) { // Wait for close signal
       await o.wait!();

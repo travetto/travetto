@@ -1,5 +1,6 @@
 import * as mongo from 'mongodb';
 
+import { ShutdownManager } from '@travetto/base';
 import { AssetSource, Asset } from '@travetto/asset';
 import { Injectable } from '@travetto/di';
 
@@ -27,6 +28,8 @@ export class MongoAssetSource extends AssetSource {
       useUnifiedTopology: true
     });
     this.bucket = new mongo.GridFSBucket(this.mongoClient.db());
+
+    ShutdownManager.onShutdown(__filename, () => this.mongoClient.close());
   }
 
   async write(file: Asset): Promise<void> {

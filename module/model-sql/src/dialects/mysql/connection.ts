@@ -1,6 +1,7 @@
 // @file-if mysql
 import * as mysql from 'mysql';
 
+import { ShutdownManager } from '@travetto/base';
 import { AsyncContext } from '@travetto/context';
 import { ConnectionSupport } from '../../connection';
 import { SQLModelConfig } from '../../config';
@@ -33,6 +34,9 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
       typeCast: this.typeCast.bind(this),
       ...(this.config.options || {})
     });
+
+    // Close mysql
+    ShutdownManager.onShutdown(__filename, () => new Promise(r => this.pool.end(r)));
   }
 
   /**

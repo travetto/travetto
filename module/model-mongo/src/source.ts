@@ -13,7 +13,7 @@ import {
 } from '@travetto/model';
 
 import { Class } from '@travetto/registry';
-import { AppError } from '@travetto/base';
+import { AppError, ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
@@ -106,6 +106,7 @@ export class MongoModelSource extends ModelSource {
   async initClient() {
     this.client = await mongo.MongoClient.connect(this.config.url, this.config.clientOptions);
     this.db = this.client.db();
+    ShutdownManager.onShutdown(__filename, () => this.client.close());
   }
 
   /**

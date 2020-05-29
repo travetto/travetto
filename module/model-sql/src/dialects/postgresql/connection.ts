@@ -1,6 +1,7 @@
 // @file-if pg
 import * as pg from 'pg';
 
+import { ShutdownManager } from '@travetto/base';
 import { AsyncContext } from '@travetto/context';
 import { ConnectionSupport, withConnection, withTransaction } from '../../connection';
 import { SQLModelConfig } from '../../config';
@@ -38,6 +39,9 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
     } catch (err) {
       // swallow
     }
+
+    // Close postgres
+    ShutdownManager.onShutdown(__filename, () => this.pool.end());
   }
 
   public get asyncContext() {
