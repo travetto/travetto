@@ -1,13 +1,13 @@
-import { EnvUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
+import { AppManifest } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
+
 import { LogEvent, Formatter, Appender } from './types';
 
 /**
  * Logging utilities
  */
 export class LogUtil {
-
-  static truth = () => true;
-  static falsehood = () => false;
 
   /**
    * Produce an event listener
@@ -25,74 +25,56 @@ export class LogUtil {
   }
 
   /**
-   * Read environment variable to determine filter
+   * Build a filter element
    */
-  static readEnvVal(key: string, def: string = '') {
-    if (EnvUtil.isFalse(key)) {
-      return;
-    }
-    if (EnvUtil.isTrue(key)) {
-      return '*';
+  static buildFilterPart(p: string) {
+    const [, neg, prop] = p.match(/(-|[+])?(.*)/)!;
+    const cleaned = (/^.*:.*[^*]$/.test(prop) ? `${prop}*` : prop).replace(/([\/.])/g, a => `\\${a}`);
+    const key: 'exc' | 'inc' = neg ? 'exc' : 'inc';
+    const filter: string[] = [];
+
+    // Auto wildcard for modules
+    if (cleaned.startsWith('@app')) {
+      const [, sfx] = cleaned.match(/^@app(?::(.*)?)?$/)!;
+      for (const el of AppManifest.roots) {
+        const sub = SystemUtil.computeModule(FsUtil.resolveUnix(FsUtil.cwd, el, 'src'));
+        filter.push(`${sub}${sfx || ''}`);
+      }
+    } else {
+      filter.push(cleaned);
     }
 
-    let val = EnvUtil.get(key, def);
-    if (/,(@trv:)?[*],/.test(`,${val},`)) {
-      if (!val.includes(',-')) {
-        return '*';
-      } else {
-        val = val.replace('@trv:*', '*');
-      }
-    }
-    return val;
+    return { key, filter };
   }
 
   /**
    * Convert filter into test function for filtering
    */
-  static buildFilter(v: string | undefined) {
-    if (!v) {
-      return this.falsehood;
-    }
-    if (v === '*') {
-      return this.truth;
-    }
+  static buildFilter(v: string) {
+    const config = { inc: [] as string[], exc: [] as string[] };
+    const { inc, exc } = config;
 
-    const parts = v.split(',');
-    const [inc, exc] = parts.reduce(([i, e], p) => {
-      p = p.trim().replace(/[.]/g, '\\.');
-
-      // Auto wildcard for modules
-      if (p.includes('@') && !p.includes('/') && !p.endsWith('*')) { // TODO: Handle basic src/test folders now vs @app
-        p = `${p}/*`;
-      }
-
-      if (p.startsWith('-')) {
-        e.push(p.substring(1));
-      } else if (!i.length || i[0] !== '*') {
-        if (p === '*') {
-          i = ['*'];
-        } else {
-          i.push(p);
-        }
-      }
-      return [i, e];
-    }, [[], []] as string[][]);
-
-    if (inc[0] === '*') {
-      inc.shift(); // Empty list
+    for (const p of v.split(/\s*,\s*/)) {
+      const { key, filter } = this.buildFilterPart(p);
+      config[key].push(...filter);
     }
 
-    const incRe = new RegExp(`^(${inc.join('|').replace(/[*]/g, '.*')})$`);
-    const excRe = new RegExp(`^(${exc.join('|').replace(/[*]/g, '.*')})$`);
+    if (inc.includes('*')) {
+      inc.splice(0, inc.length);
+    } else if (inc.length === 0 && exc.length) { // If excluding and nothing included
+      const { key, filter } = this.buildFilterPart('@app');
+      config[key].push(...filter); // Listen to src by default if not explicit
+    }
+
+    const incRe = new RegExp(`^(${inc.join('|').replace(/[*]/g, '.*')})`);
+    const excRe = new RegExp(`^(${exc.join('|').replace(/[*]/g, '.*')})`);
 
     if (inc.length && exc.length) {
       return (x: string) => incRe.test(x) && !excRe.test(x);
     } else if (inc.length) {
-      return incRe.test.bind(incRe);
+      return (x: string) => incRe.test(x);
     } else if (exc.length) {
       return (x: string) => !excRe.test(x);
-    } else {
-      return this.truth;
     }
   }
 }

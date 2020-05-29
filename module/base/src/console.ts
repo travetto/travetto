@@ -77,7 +77,7 @@ class $ConsoleManager {
     global[this.key] = this.invoke.bind(this);
     this.exclude = new Set();
 
-    if (!(EnvUtil.getBoolean('DEBUG') ?? !EnvUtil.isProd())) {
+    if (!EnvUtil.getBoolean('DEBUG') ?? EnvUtil.isProd()) {
       this.exclude.add('debug');
     }
 

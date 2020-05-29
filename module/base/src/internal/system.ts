@@ -131,19 +131,4 @@ export class SystemUtil {
   static computeModuleClass(fileName: string, clsName: string) {
     return `${this.computeModule(fileName)}￮${clsName}`;
   }
-
-  /**
-   * Builds a regex to match prefix of any number of paths
-   * @param paths
-   */
-  static pathMatcher(paths: string[]) {
-    if (!paths.length) {
-      return /^$/;
-    } else {
-      const finalPaths = paths
-        .map(x => x.replace(/^[.]\/?/g, ''))
-        .map(x => x === '' ? x : `${x}/`);
-      return new RegExp(`^(${finalPaths.join('|')})`);
-    }
-  }
 }
