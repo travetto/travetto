@@ -58,7 +58,7 @@ export class AssertCheck {
       assertion.actual = args[0];
       assertion.message = args[1];
       assertion.expected = { toClean: () => positive ? 'truthy' : 'falsy' };
-      common.state = 'should';
+      common.state = 'should be';
       fn = assertion.operator = 'ok';
     } else if (fn === 'includes') {
       assertion.operator = fn;

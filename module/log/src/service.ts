@@ -34,12 +34,12 @@ class $Logger {
    * Initialize
    */
   init() {
-    const debugFilter = LogUtil.readEnvVal('debug', !EnvUtil.isProd() ? 'src/*' : '');
+    const debugFilter = EnvUtil.isTrue('DEBUG') ? '*' : EnvUtil.get('DEBUG', !EnvUtil.isProd() ? '@app' : '');
 
-    const filter = LogUtil.buildFilter(debugFilter);
-    if (filter !== LogUtil.falsehood) {
+    if (debugFilter) {
       delete this.exclude.debug;
-      if (filter !== LogUtil.truth) {
+      const filter = LogUtil.buildFilter(debugFilter);
+      if (filter) {
         this.filters.debug = filter;
       }
     }
