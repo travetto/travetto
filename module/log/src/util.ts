@@ -29,7 +29,7 @@ export class LogUtil {
    */
   static buildFilterPart(p: string) {
     const [, neg, prop] = p.match(/(-|[+])?(.*)/)!;
-    const cleaned = (/^.*:.*[^*]$/.test(prop) ? `${prop}*` : prop).replace(/([\/.])/g, a => `\\${a}`);
+    const cleaned = (/^.*:[^\/]*[^*]$/.test(prop) ? `${prop}/*` : prop).replace(/([\/.])/g, a => `\\${a}`);
     const key: 'exc' | 'inc' = neg ? 'exc' : 'inc';
     const filter: string[] = [];
 

@@ -13,6 +13,7 @@ The debug/trace content can be filtered using the patterns from the [`debug`](ht
 **Terminal: Sample environment flags**
 ```bash
 # Debug
+$ DEBUG=@app:*,-@trv:model npx travetto run app
 $ DEBUG=-@trv:registry npx travetto run app
 $ DEBUG=@trv:rest npx travetto run app
 $ DEBUG=@trv:*,-@trv:model npx travetto run app
