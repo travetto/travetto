@@ -29,7 +29,7 @@ export class ScanApp {
   /**
    * List of modules to not traverse into
    */
-  static modAppExclude: string[] = ['test', 'cli', 'boot', 'watch'];
+  static modAppExclude: string[] = ['@travetto/test', '@travetto/cli', '@travetto/boot'];
 
   /**
    * Compute index for a scan entry

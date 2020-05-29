@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as commander from 'commander';
 
-import { CliUtil } from '@travetto/cli/src/util';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
+import { CliUtil } from '@travetto/cli/src/util';
 
 import { AppListManager } from './lib/list';
 import { RunUtil } from './lib/run';
@@ -33,9 +33,8 @@ export class AppRunPlugin extends BasePlugin {
       .arguments('[application] [args...]')
       .allowUnknownOption()
       .option('-e, --env [env]', 'Application environment (dev|prod|<any>)', 'dev')
-      .option('-r, --root [root]', 'Application root, defaults to associated root by name')
-      .option('-w, --watch [watch]', 'Run the application in watch mode, requires @travetto/watch (default: auto)', CliUtil.isBoolean)
-      .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [] as string[]);
+      .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [] as string[])
+      .option('-r, --resource [resourcesRoots]', 'Specify additional resource root locations', (v, ls) => { ls.push(v); return ls; }, [] as string[]);
   }
 
   /**
@@ -51,11 +50,12 @@ export class AppRunPlugin extends BasePlugin {
         // Show help always exists when it's done
         this.showHelp(app ? `${app} is an unknown application` : 'You must specify an application to run');
       } else {
+        await CliUtil.initAppEnv({ ...this._cmd as any, watch: true });
         // Run otherwise
         await RunUtil.run(app, ...args);
       }
     } catch (err) {
-      this.showHelp(err.message, `\nUsage: ${HelpUtil.getAppUsage((await AppListManager.findByName(app))!)}`);
+      this.showHelp(err, `\nUsage: ${HelpUtil.getAppUsage((await AppListManager.findByName(app))!)}`);
     }
   }
 
@@ -66,20 +66,17 @@ export class AppRunPlugin extends BasePlugin {
   async complete() {
     const apps = await AppListManager.getList() || [];
     const env = ['prod', 'dev'];
-    const bool = ['yes', 'no'];
 
     const profiles = fs.readdirSync(process.cwd())
       .filter(x => x.endsWith('.yml'))
       .map(x => x.replace('.yml', ''));
 
     return {
-      '': apps.map(x => x.name).concat(['--env', '--watch', '--profile']),
+      '': apps.map(x => x.name).concat(['--env', '--profile']),
       '--env': env,
       '-e': env,
-      '--watch': bool,
-      '-w': bool,
-      '--profile': [...profiles, 'application'],
-      '-p': [...profiles, 'application'],
+      '--profile': profiles,
+      '-p': profiles,
     };
   }
 }

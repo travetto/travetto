@@ -6,7 +6,7 @@ class Element {
   name = 'roger';
 }
 
-@Application('test-eptest', { watchable: true })
+@Application('test-eptest')
 class EpTest {
 
   @Inject()

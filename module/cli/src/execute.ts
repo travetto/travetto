@@ -39,11 +39,12 @@ export class ExecutionManager {
 
     try {
       if (args.includes('-h') || args.includes('--help')) {
-        plugin.showHelp();
+        return plugin.showHelp();
+      } else {
+        commander.parse(args);
       }
-      commander.parse(args);
     } catch (err) {
-      return plugin.showHelp(err.message);
+      return plugin.showHelp(err);
     }
   }
 

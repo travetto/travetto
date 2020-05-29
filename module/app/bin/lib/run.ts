@@ -26,8 +26,12 @@ export class RunUtil {
       throw new Error(`'Unknown application ${name}`);
     }
 
-    // Init env
-    CliUtil.initAppEnv({ app: app.root, watch: app.watchable });
+    CliUtil.initAppEnv(
+      // If standard app, don't add root/profile
+      /^([.]|.*node_modules.*)/.test(app.root) ?
+        {} :
+        { roots: [app.root], profiles: [app.name] }
+    );
 
     // Compile all code as needed
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');

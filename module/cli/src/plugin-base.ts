@@ -28,8 +28,11 @@ export abstract class BasePlugin {
   /**
    * Render help with additional message or extra text
    */
-  async showHelp(message?: string, extra?: string) {
-    HelpUtil.showHelp(this._cmd, message, extra || await this.help());
+  async showHelp(err?: string | Error, extra?: string) {
+    if (err && typeof err !== 'string') {
+      err = err.message;
+    }
+    HelpUtil.showHelp(this._cmd, err, extra || await this.help());
   }
 
   /**

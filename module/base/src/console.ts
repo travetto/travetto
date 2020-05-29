@@ -20,7 +20,6 @@ interface ConsoleState {
 
 const CONSOLE_RE = /(\bconsole[.](debug|info|warn|log|error|fatal)[(])|\n/g;
 
-
 function wrap(target: Console, enrich: boolean) {
   return {
     enrich,

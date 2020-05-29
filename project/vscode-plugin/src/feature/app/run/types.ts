@@ -10,7 +10,6 @@ export interface Application {
   id: string;
   root: string;
   description?: string;
-  watchable?: boolean;
   env: string;
 }
 

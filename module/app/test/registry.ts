@@ -10,14 +10,14 @@ import { ApplicationHandle } from '../src/types';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
-@Application('test', { watchable: true })
+@Application('test')
 class TestApp {
   async run(age: number, optional?: 'a' | 'b') {
     console.log(age, optional);
   }
 }
 
-@Application('closeable', { watchable: true })
+@Application('closeable')
 class CloseableApp implements ApplicationHandle {
   running = false;
 

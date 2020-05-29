@@ -21,8 +21,10 @@ export class EnvUtil {
    * Read value as a comma-separated list
    * @param k The environment key to search for
    */
-  static getList(k: string) {
-    return (this.get(k) ?? '').split(/[, ]+/g).filter(x => !!x);
+  static getList(k: string, append?: string[]) {
+    return [...(this.get(k) ?? '').split(/[, ]+/g), ...(append ?? [])]
+      .map(x => x.trim())
+      .filter(x => !!x);
   }
 
   /**

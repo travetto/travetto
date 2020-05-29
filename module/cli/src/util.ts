@@ -1,3 +1,4 @@
+import * as readline from 'readline';
 // Imported individually to prevent barrel import loading too much
 import { FsUtil } from '@travetto/boot/src/fs';
 import { EnvUtil } from '@travetto/boot/src/env';
@@ -7,10 +8,9 @@ import { CompletionConfig } from './types';
 
 type AppEnv = {
   env?: string;
-  watch?: string | boolean;
-  app?: string;
-  plainLog?: boolean;
+  watch?: string;
   roots?: string[];
+  resourceRoots?: string[];
   profiles?: string[];
 };
 
@@ -89,30 +89,43 @@ export class CliUtil {
   /**
    * Initialize the app environment
    */
-  static initAppEnv({ env, watch, app, roots, profiles, plainLog }: AppEnv) {
-    env = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? ''; // Preemptively set b/c env changes how we compile some things
-    if (env) {
-      if (/^prod/i.test(env)) {
-        process.env.NODE_ENV = 'production';
-      }
-      process.env.TRV_ENV = env;
-    }
-    // Set watch if passed in, as a default to the env vars, being in prod disables watch defaulting
-    if (watch !== undefined) {
-      watch = EnvUtil.isSet('TRV_WATCH') ? EnvUtil.isWatch() : (watch && !EnvUtil.isProd());
-      process.env.TRV_WATCH = `${watch}`;
-    }
+  static initAppEnv({ env, watch, roots, resourceRoots, profiles }: AppEnv) {
+    env = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev'; // Preemptively set b/c env changes how we compile some things
+    process.env.TRV_ENV = env;
+    process.env.NODE_ENV = /^prod/i.test(env) ? 'production' : 'development';
+    process.env.TRV_WATCH = `${watch ? EnvUtil.getBoolean('TRV_WATCH') && !EnvUtil.isProd() : false}`;
+    process.env.TRV_ROOTS = EnvUtil.getList('TRV_ROOTS', roots).join(',');
+    process.env.TRV_RESOURCE_ROOTS = EnvUtil.getList('TRV_RESOURCE_ROOTS', resourceRoots).join(',');
+    process.env.TRV_PROFILES = EnvUtil.getList('TRV_PROFILES', profiles).join(',');
+  }
 
-    if (app && app !== '.') {
-      (roots = roots ?? []).push(app);
-      (profiles = profiles ?? []).push(app.split('/')[1]);
-    }
-    if (plainLog) {
-      process.env.TRV_LOG_PLAIN = '1';
-    }
-    process.env.TRV_ROOTS = [...(roots ?? []), ...EnvUtil.getList('TRV_ROOTS')]
-      .map(x => x.trim()).filter(x => !!x).join(',');
-    process.env.TRV_PROFILES = [...(profiles ?? []), ...EnvUtil.getList('TRV_PROFILES')]
-      .map(x => x.trim()).filter(x => x && x !== '.').join(',');
+  /**
+   * Waiting message with a callback to end
+   *
+   * @param message Message to share
+   * @param delay Delay duration
+   */
+  static waiting(message: string, delay = 100) {
+    const state = `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏`.split('');
+    let i = 0;
+    const tpl = `  ${message}`;
+    process.stdout.write(tpl);
+
+    const id = setInterval(function () {
+      readline.cursorTo(process.stdout, 0, undefined, () => {
+        process.stdout.write(state[i = (i + 1) % state.length]);
+        readline.cursorTo(process.stdout, tpl.length + 1);
+      });
+    }, delay);
+
+    return (text?: string) => {
+      readline.cursorTo(process.stdout, tpl.length + 1);
+      if (text) {
+        process.stdout.write(` ${text}\n`);
+      } else {
+        readline.clearLine(process.stdout, -1);
+      }
+      clearInterval(id);
+    };
   }
 }

@@ -4,7 +4,7 @@ import { RestServer } from '../src/server/server';
 /**
  * Default application entrypoint
  */
-@Application('rest', { watchable: true })
+@Application('rest')
 class EntryPoint {
   constructor(private server: RestServer) { }
   run() {
