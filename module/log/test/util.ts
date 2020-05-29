@@ -16,7 +16,14 @@ class UtilTest {
     filter = LogUtil.buildFilter('@app:*');
     assert(filter!('src/'));
 
+    filter = LogUtil.buildFilter('@app');
+    assert(filter!('src/'));
+
     filter = LogUtil.buildFilter('@app:sub/*');
+    assert(!filter!('src/sub'));
+    assert(filter!('src/sub/2'));
+
+    filter = LogUtil.buildFilter('@app:sub');
     assert(!filter!('src/sub'));
     assert(filter!('src/sub/2'));
 
