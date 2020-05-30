@@ -3,6 +3,8 @@ import * as Mod from 'module';
 import * as path from 'path';
 
 import { FsUtil } from './fs';
+import { ScanFs } from './scan';
+import { EnvUtil } from './env';
 
 type Module = {
   loaded?: boolean;
@@ -12,6 +14,8 @@ type Module = {
 } & Mod;
 
 const Module = Mod as any as Module;
+
+const isDev = EnvUtil.isTrue('TRV_DEV');
 
 /**
  * Framework specific utilities
@@ -24,11 +28,16 @@ export class FrameworkUtil {
   };
 
   /**
+   * Are we in dev mode?
+   */
+  static readonly devMode = isDev;
+
+  /**
    * Only called in Framework dev mode
    * @param pth The full path to translate
    * @param mod The module to check against
    */
-  static devResolve(pth: string, mod?: Module) {
+  static resolveDev(pth: string, mod?: Module) {
     if (mod) {
       try {
         pth = Module._resolveFilename!(pth, mod);
@@ -55,5 +64,28 @@ export class FrameworkUtil {
         .replace(/\/\/+/g, '/'); // De-dupe
     }
     return pth;
+  }
+
+  /**
+   * Standard path resolver
+   */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  static resolvePath = isDev ? FrameworkUtil.resolveDev.bind(FrameworkUtil) : (x: string) => x;
+
+  /**
+  * Scan the framework for folder/files only the framework should care about
+  * @param testFile The test to determine if a file is desired
+  */
+  static scan(testFile?: (x: string) => boolean, base = FsUtil.cwd) {
+    return ScanFs.scanDirSync({
+      testFile,
+      testDir: x => // Ensure its a valid folder or module folder
+        !x.includes('node_modules') || // All non-framework folders
+        x.endsWith('node_modules') || // Is first level node_modules
+        (x.includes('@travetto')  // Is framework folder, include everything under it
+          && !/node_modules[/][^@]/.test(x) // Excluding non framework node modules
+        ),
+      resolvePath: this.resolvePath
+    }, base);
   }
 }

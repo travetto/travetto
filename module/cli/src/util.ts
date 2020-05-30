@@ -97,6 +97,7 @@ export class CliUtil {
     process.env.TRV_ROOTS = EnvUtil.getList('TRV_ROOTS', roots).join(',');
     process.env.TRV_RESOURCE_ROOTS = EnvUtil.getList('TRV_RESOURCE_ROOTS', resourceRoots).join(',');
     process.env.TRV_PROFILES = EnvUtil.getList('TRV_PROFILES', profiles).join(',');
+    process.env.TRV_DEBUG = EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', EnvUtil.isProd() ? '0' : ''));
   }
 
   /**
@@ -105,25 +106,25 @@ export class CliUtil {
    * @param message Message to share
    * @param delay Delay duration
    */
-  static waiting(message: string, delay = 100) {
+  static waiting(message: string, delay = 100, stream = process.stderr) {
     const state = `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏`.split('');
     let i = 0;
     const tpl = `  ${message}`;
-    process.stdout.write(tpl);
+    stream.write(tpl);
 
     const id = setInterval(function () {
-      readline.cursorTo(process.stdout, 0, undefined, () => {
-        process.stdout.write(state[i = (i + 1) % state.length]);
-        readline.cursorTo(process.stdout, tpl.length + 1);
+      readline.cursorTo(stream, 0, undefined, () => {
+        stream.write(state[i = (i + 1) % state.length]);
+        readline.cursorTo(stream, tpl.length + 1);
       });
     }, delay);
 
     return (text?: string) => {
-      readline.cursorTo(process.stdout, tpl.length + 1);
+      readline.cursorTo(stream, tpl.length + 1);
       if (text) {
-        process.stdout.write(` ${text}\n`);
+        stream.write(` ${text}\n`);
       } else {
-        readline.clearLine(process.stdout, -1);
+        readline.clearLine(stream, -1);
       }
       clearInterval(id);
     };

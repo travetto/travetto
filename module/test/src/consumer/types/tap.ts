@@ -1,3 +1,4 @@
+import { ColorUtil } from '@travetto/boot';
 import { YamlUtil } from '@travetto/yaml';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 
@@ -6,7 +7,6 @@ import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 
 import { TestResultsEnhancer, COLOR_ENHANCER, DUMMY_ENHANCER } from '../enhancer';
-import { ColorUtil } from '@travetto/boot';
 
 /**
   * TAP Format consumer

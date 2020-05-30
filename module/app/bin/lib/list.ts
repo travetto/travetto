@@ -91,7 +91,7 @@ export class AppListManager {
     if (!(await this.readList())) { // no list
       const done = CliUtil.waiting('Compiling...');
       const text = (await ExecUtil.fork(path.resolve(__dirname, '..', 'find-apps'), [], {
-        env: { DEBUG: '0' }
+        env: { TRV_DEBUG: '0' }
       }).result).stdout;
       this.storeList(JSON.parse(text) as ApplicationConfig[]);
       done('Done');

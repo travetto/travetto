@@ -24,10 +24,6 @@ export class Workspace {
   static getDefaultEnv(extra: Record<string, string> = {}) {
     return {
       FORCE_COLOR: 'true',
-      ...(/travetto.*\/module\//.test(this.path) ? {
-        TRV_DEV: '1',
-        NODE_PRESERVE_SYMLINKS: '1'
-      } : {}),
       ...extra
     };
   }

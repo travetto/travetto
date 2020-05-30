@@ -73,16 +73,13 @@ export class ScanApp {
     if (this.__INDEX.size === 0) {
       this.__INDEX.set('.', { base: FsUtil.cwd, files: new Map() });
 
-      for (const el of ScanFs.scanFramework(x => !x.endsWith('.d.ts') && x.endsWith('.ts'))) {
+      for (const el of FrameworkUtil.scan(x => !x.endsWith('.d.ts') && x.endsWith('.ts'))) {
         const res = this.computeIndex(el);
         if (!res) {
           continue;
         }
 
         const { mod, sub } = res;
-
-        el.file = FrameworkUtil.devResolve(el.file); // @line-if $TRV_DEV
-        el.module = el.file.replace(`${FsUtil.cwd}/`, ''); // @line-if $TRV_DEV
 
         if (el.stats.isDirectory() || el.stats.isSymbolicLink()) {
           if (!this.__INDEX.has(mod)) {

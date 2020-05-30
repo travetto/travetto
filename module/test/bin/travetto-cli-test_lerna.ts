@@ -18,8 +18,6 @@ export class TestLernaPlugin extends BasePlugin {
     const child = ExecUtil.spawn('npx', [
       'lerna', '--no-sort', 'exec', '--no-bail',
       // '--concurrency', '1',
-      '--ignore', '@travetto/*-app', // @line-if $TRV_DEV
-      '--ignore', '@travetto/cli',  // @line-if $TRV_DEV
       '--stream', '--',
       'npx', 'trv', 'test', '-f', 'event', '-c', '2'
     ], { shell: true, quiet: true, cwd: FsUtil.resolveUnix(__dirname, '..', '..') });

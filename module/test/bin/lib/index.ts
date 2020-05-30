@@ -1,3 +1,4 @@
+import { EnvUtil } from '@travetto/boot';
 import { RunState } from '../../src/runner/types';
 
 /**
@@ -11,7 +12,7 @@ export async function runTests(opts: RunState) {
 
 export async function load(env: any = {}, logToFile = false) {
   Object.assign(process.env, {
-    DEBUG: process.env.DEBUG || '0',
+    TRV_DEBUG: process.env.TRV_DEBUG ?? process.env.DEBUG ?? '0',
     TRV_LOG_TIME: '0',
     TRV_ENV: 'test',
     TRV_RESOURCE_ROOTS: 'test',
@@ -45,7 +46,7 @@ export async function worker() {
 }
 
 export async function watchTests(format: string = 'tap') {
-  await load({ TRV_WATCH: 1, DEBUG: process.env.DEBUG ?? '0' });
+  await load({ TRV_WATCH: 1 });
 
   const { TestWatcher } = await import('../../src/runner/watcher');
   await TestWatcher.watch(format);

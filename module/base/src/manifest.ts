@@ -54,6 +54,14 @@ class $AppManifest {
    */
   readonly resourceRoots: string[];
 
+  /**
+   * Debug state
+   */
+  readonly debug: {
+    status?: boolean;
+    value?: string;
+  };
+
   constructor(pkgLoc: string) {
     try {
       const { version, name, license, author, description } = require(pkgLoc);
@@ -76,6 +84,13 @@ class $AppManifest {
       ...this.roots,
       ...EnvUtil.getList('TRV_RESOURCE_ROOTS')
     ];
+
+    // Compute the debug state
+    const status = EnvUtil.isSet('TRV_DEBUG') ? !EnvUtil.isFalse('TRV_DEBUG') : !EnvUtil.isProd();
+    this.debug = {
+      status,
+      value: (status ? EnvUtil.get('TRV_DEBUG') : '') || undefined
+    };
   }
 
   /**
@@ -84,7 +99,8 @@ class $AppManifest {
   toJSON() {
     return ([
       'travetto', 'name', 'version', 'license', 'description',
-      'author', 'env', 'profiles', 'roots', 'resourceRoots'
+      'author', 'env', 'profiles', 'roots', 'resourceRoots',
+      'debug'
     ] as const)
       .reduce((acc, k) => {
         acc[k] = this[k];
