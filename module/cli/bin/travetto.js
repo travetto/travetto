@@ -3,6 +3,7 @@
 const { FsUtil } = require('@travetto/boot/src/fs');
 const { ExecUtil } = require('@travetto/boot/src/exec');
 const { EnvUtil } = require('@travetto/boot/src/env');
+const { ColorUtil } = require('@travetto/boot/src/color');
 
 /**
  * Supporting local development
@@ -11,15 +12,21 @@ if (
   !EnvUtil.isSet('TRV_DEV') && // If not defined
   /\/travetto.*\/(module|sample)\//.test(FsUtil.cwd) // And in local module
 ) { // If in framework development mode
-
-  // Spawn the cli with needed flags
-  ExecUtil.fork(process.argv[1], process.argv.slice(2), {
-    stdio: [0, 1, 2],
-    shell: true,
-    exitOnComplete: true,
-    env: { NODE_PRESERVE_SYMLINKS: '1', TRV_DEV: '1', }
+  ExecUtil.worker(process.argv[1], process.argv.slice(2), {
+    stderr: false,
+    stdout: false,
+    stdin: true,
+    exitOnCompletion: true,
+    env: {
+      TRV_COLS: process.stdout.columns,
+      TRV_COLOR: ColorUtil.colorize,
+      NODE_PRESERVE_SYMLINKS: '1',
+      TRV_DEV: '1',
+    }
   });
   return;
+} else if (!process.stdout.columns && process.env.TRV_COLS) {
+  Object.defineProperty(process.stdout, 'columns', { value: +process.env.TRV_COLS });
 }
 
 /**

@@ -5,7 +5,7 @@ export const init = {
   key: 'require-all',
   after: ['compile-all'],
   action: async () => {
-    const { Compiler } = await import('@travetto/compiler');
+    const { Compiler } = await import('../src/compiler');
     for (const file of Compiler.getRootFiles()) {
       require(file); // Scan all files as compiler source root
     }
