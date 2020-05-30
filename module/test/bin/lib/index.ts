@@ -1,4 +1,4 @@
-import { EnvUtil } from '@travetto/boot';
+import { CliUtil } from '@travetto/cli/src/util';
 import { RunState } from '../../src/runner/types';
 
 /**
@@ -11,13 +11,9 @@ export async function runTests(opts: RunState) {
 }
 
 export async function load(env: any = {}, logToFile = false) {
-  Object.assign(process.env, {
-    TRV_DEBUG: process.env.TRV_DEBUG ?? process.env.DEBUG ?? '0',
-    TRV_LOG_TIME: '0',
-    TRV_ENV: 'test',
-    TRV_RESOURCE_ROOTS: 'test',
-    ...env
-  });
+  Object.assign(process.env, { ...env, TRV_LOG_TIME: '0' });
+  CliUtil.initAppEnv({ env: 'test', debug: '0', resourceRoots: ['test'] });
+
   const { PhaseManager, ConsoleManager } = await import('@travetto/base');
   if (logToFile) {
     ConsoleManager.setFile(`!test-worker.${process.pid}.log`, {

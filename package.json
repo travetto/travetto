@@ -27,7 +27,6 @@
 		"@types/nodemailer": "^6.4.0",
 		"@types/passport-facebook": "^2.1.9",
 		"@types/pg": "^7.14.3",
-		"@types/prismjs": "^1.16.1",
 		"@types/redis": "^2.8.20",
 		"@typescript-eslint/eslint-plugin": "^2.33.0",
 		"@typescript-eslint/parser": "^2.33.0",

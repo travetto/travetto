@@ -9,6 +9,7 @@ import { CompletionConfig } from './types';
 type AppEnv = {
   env?: string;
   watch?: string;
+  debug?: string;
   roots?: string[];
   resourceRoots?: string[];
   profiles?: string[];
@@ -89,7 +90,7 @@ export class CliUtil {
   /**
    * Initialize the app environment
    */
-  static initAppEnv({ env, watch, roots, resourceRoots, profiles }: AppEnv) {
+  static initAppEnv({ env, watch, roots, resourceRoots, profiles, debug }: AppEnv) {
     env = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev'; // Preemptively set b/c env changes how we compile some things
     process.env.TRV_ENV = env;
     process.env.NODE_ENV = /^prod/i.test(env) ? 'production' : 'development';
@@ -97,7 +98,7 @@ export class CliUtil {
     process.env.TRV_ROOTS = EnvUtil.getList('TRV_ROOTS', roots).join(',');
     process.env.TRV_RESOURCE_ROOTS = EnvUtil.getList('TRV_RESOURCE_ROOTS', resourceRoots).join(',');
     process.env.TRV_PROFILES = EnvUtil.getList('TRV_PROFILES', profiles).join(',');
-    process.env.TRV_DEBUG = EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', EnvUtil.isProd() ? '0' : ''));
+    process.env.TRV_DEBUG = EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', debug ?? (EnvUtil.isProd() ? '0' : '')));
   }
 
   /**

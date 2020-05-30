@@ -11,9 +11,6 @@
     "@travetto/schema": "^1.0.0-rc.1"
   },
   "description": "Datastore abstraction for CRUD operations with advanced query support.",
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-rc.1"
-  },
   "optionalPeerDependencies": {
     "@travetto/rest": "^1.0.0-beta.0"
   },

@@ -1,4 +1,4 @@
-import { ScanEntry, ScanFs, FsUtil } from '@travetto/boot';
+import { ScanEntry, FsUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { AppManifest } from './manifest';
 
@@ -25,11 +25,14 @@ export class ScanApp {
   /**
    * List of primary app folders to search
    */
-  static mainAppFolders: string[] = ['src'];
+  static mainAppFolders = new Set(['src']);
   /**
    * List of modules to not traverse into
    */
-  static modAppExclude: string[] = ['@travetto/test', '@travetto/cli', '@travetto/boot'];
+  static modAppExclude = new Set(
+    AppManifest.hasProfile('test') ?
+      ['@travetto/cli', '@travetto/boot'] :
+      ['@travetto/test', '@travetto/cli', '@travetto/boot']);
 
   /**
    * Compute index for a scan entry
@@ -111,7 +114,7 @@ export class ScanApp {
    */
   static getPaths(roots: string[]) {
     return [...this.index.keys()]
-      .filter(key => (key.startsWith('@travetto') && !this.modAppExclude.includes(key)) || roots.includes(key));
+      .filter(key => (key.startsWith('@travetto') && !this.modAppExclude.has(key)) || roots.includes(key));
   }
 
   /**

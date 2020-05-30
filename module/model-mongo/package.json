@@ -12,9 +12,6 @@
     "mongodb": "^3.5.7"
   },
   "description": "Mongo backing for the travetto model module.",
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-rc.1"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "mongo",
