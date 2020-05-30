@@ -2,7 +2,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as commander from 'commander';
 
-import { CliUtil } from '@travetto/cli/src/util';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { FsUtil } from '@travetto/boot/src/fs';
 import { ExecUtil } from '@travetto/boot/src/exec';
@@ -43,7 +42,7 @@ export class RestAwsLambdaBuildZipPlugin extends BasePlugin {
 
     fs.writeFileSync(`${workspace}/index.js`, `${dirVar}\n${lambda}`);
 
-    await CliUtil.dependOn('compile', ['-o', './cache', '-r', '/var/task'], workspace);
+    await ExecUtil.spawn('npx', ['trv', 'compile', '-o', './cache', '-r', '/var/task'], { cwd: workspace }).result;
 
     // Removing baggage
     FsUtil.unlinkRecursiveSync(`${workspace}/node_modules/typescript`);

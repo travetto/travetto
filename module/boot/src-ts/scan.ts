@@ -88,9 +88,9 @@ export class ScanFs {
 
     while (dirs.length) {
       const dir = dirs.shift()!;
-      for (const file of (await fsReaddir(dir.file))) {
+      inner: for (const file of (await fsReaddir(dir.file))) {
         if (file.startsWith('.')) {
-          continue;
+          continue inner;
         }
 
         let full = FsUtil.resolveUnix(dir.file, file);
@@ -102,12 +102,12 @@ export class ScanFs {
 
         if (this.isDir(subEntry)) {
           if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
-            if (subEntry.stats.isSymbolicLink()) {
+            if (subEntry.stats.isSymbolicLink() || subEntry.stats.isDirectory()) {
               const p = await fsRealpath(full);
               if (!visited.has(p)) {
                 visited.add(p);
               } else {
-                continue;
+                continue inner;
               }
             }
             out.push(subEntry);
@@ -170,7 +170,7 @@ export class ScanFs {
 
         if (this.isDir(subEntry)) {
           if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
-            if (subEntry.stats.isSymbolicLink()) {
+            if (subEntry.stats.isSymbolicLink() || subEntry.stats.isDirectory()) {
               const p = fs.realpathSync(full);
               if (!visited.has(p)) {
                 visited.add(p);

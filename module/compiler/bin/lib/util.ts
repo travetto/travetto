@@ -1,6 +1,4 @@
 import * as fs from 'fs';
-import { ExecUtil } from '@travetto/boot';
-import { color } from '@travetto/cli/src/color';
 
 export class CompileUtil {
   /**
@@ -16,16 +14,6 @@ export class CompileUtil {
         .replace(/[/][/]#.*$/, '') // Drop source maps
         .replace(new RegExp(FsUtil.cwd, 'g'), runtimeDir); // Rewrite paths
       fs.writeFileSync(file, contents, 'utf-8');
-    }
-  }
-
-  static async compile(path: string) {
-    //  Compile
-    try {
-      await ExecUtil.fork(`${__dirname}/../compile-target.js`);
-    } catch (err) {
-      console.error(color`${{ failure: 'Failed' }} to compile to ${{ path }}`, err);
-      process.exit(1);
     }
   }
 }

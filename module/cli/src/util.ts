@@ -19,23 +19,15 @@ type AppEnv = {
  * Common CLI Utilities
  */
 export class CliUtil {
+
+  static WAIT_STATE = `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏`.split('');
+
   static isBoolean(x: string) {
     return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);
   }
 
   static isTrue(x: string) {
     return /^(1|yes|on|true)$/i.test(x);
-  }
-
-  /**
-   * Allow the plugin to depend on another command by executing
-   *
-   * @param cmd The command to run
-   * @param args The args to pass in
-   * @param sCwd The root working directory
-   */
-  static async dependOn(cmd: string, args: string[] = [], sCwd: string = FsUtil.cwd) {
-    await ExecUtil.fork(cmd, args, { cwd: sCwd, shell: true }).result;
   }
 
   /**
@@ -102,32 +94,64 @@ export class CliUtil {
   }
 
   /**
+   * Rewrite a single line in the stream
+   * @param stream The stream to write
+   * @param text Text, if desired
+   * @param clear Should the entire line be cleared?
+   */
+  static async rewriteLine(stream: NodeJS.WritableStream, text?: string, clear = false) {
+    await new Promise(r => readline.cursorTo(stream, 0, undefined, () => {
+      if (clear) {
+        readline.clearLine(stream, 0);
+      }
+      if (text) {
+        stream.write(text);
+        readline.moveCursor(stream, 1, 0);
+      }
+      r();
+    }));
+  }
+
+  /**
    * Waiting message with a callback to end
    *
    * @param message Message to share
    * @param delay Delay duration
    */
-  static waiting(message: string, delay = 100, stream = process.stderr) {
-    const state = `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏`.split('');
-    let i = 0;
-    const tpl = `  ${message}`;
-    stream.write(tpl);
+  static async waiting(message: string, work: Promise<any>,
+    config: { completion?: string, delay?: number, stream?: NodeJS.WritableStream } = {}
+  ) {
+    const { stream, delay, completion } = { delay: 250, stream: process.stderr, ...config };
 
-    const id = setInterval(function () {
-      readline.cursorTo(stream, 0, undefined, () => {
-        stream.write(state[i = (i + 1) % state.length]);
-        readline.cursorTo(stream, tpl.length + 1);
-      });
-    }, delay);
+    const writeLine = this.rewriteLine.bind(this, stream);
+    const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-    return (text?: string) => {
-      readline.cursorTo(stream, tpl.length + 1);
-      if (text) {
-        stream.write(` ${text}\n`);
-      } else {
-        readline.clearLine(stream, -1);
-      }
-      clearInterval(id);
-    };
+    let i = -1;
+    let done = false;
+    work.finally(() => done = true);
+    await sleep(delay);
+    while (!done) {
+      await writeLine(`${this.WAIT_STATE[i = (i + 1) % this.WAIT_STATE.length]} ${message}`);
+      await sleep(100);
+    }
+
+    if (i === -1) {
+      return;
+    }
+
+    await writeLine(completion ? `${message} ${completion}\n` : '', true);
+  }
+
+  /**
+   * Trigger a compile
+   */
+  static compile(output?: string) {
+    return this.waiting('Compiling...',
+      ExecUtil.worker('@travetto/compiler/bin/compile-target', [], {
+        env: output ? { TRV_CACHE_DIR: output } : {},
+        stderr: true,
+        stdout: true
+      }).result
+    );
   }
 }

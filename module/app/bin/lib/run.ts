@@ -33,6 +33,8 @@ export class RunUtil {
         { roots: [app.root], profiles: [app.name] }
     );
 
+    await CliUtil.compile();
+
     // Compile all code as needed
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 

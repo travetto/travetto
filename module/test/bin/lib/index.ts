@@ -14,6 +14,8 @@ export async function load(env: any = {}, logToFile = false) {
   Object.assign(process.env, { ...env, TRV_LOG_TIME: '0' });
   CliUtil.initAppEnv({ env: 'test', debug: '0', resourceRoots: ['test'] });
 
+  await CliUtil.compile();
+
   const { PhaseManager, ConsoleManager } = await import('@travetto/base');
   if (logToFile) {
     ConsoleManager.setFile(`!test-worker.${process.pid}.log`, {

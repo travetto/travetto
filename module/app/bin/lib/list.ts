@@ -1,6 +1,5 @@
 import * as util from 'util';
 import * as fs from 'fs';
-import * as path from 'path';
 
 import { CliUtil } from '@travetto/cli/src/util';
 import { AppCache } from '@travetto/boot/src/app-cache';
@@ -32,10 +31,11 @@ export class AppListManager {
     CliUtil.initAppEnv({ roots });
 
     const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.init('compile-all');
+    await PhaseManager.init('compile-all'); // Compilation is pre done
 
     const { AppListUtil } = await import('../../src/list');
-    return AppListUtil.buildList();
+    const list = await AppListUtil.buildList();
+    ExecUtil.sendWorkerData(list.map(({ target, ...rest }) => rest));
   }
 
   /**
@@ -89,12 +89,10 @@ export class AppListManager {
    */
   static async getList(): Promise<ApplicationConfig[] | undefined> {
     if (!(await this.readList())) { // no list
-      const done = CliUtil.waiting('Compiling...');
-      const text = (await ExecUtil.fork(path.resolve(__dirname, '..', 'find-apps'), [], {
-        env: { TRV_DEBUG: '0' }
-      }).result).stdout;
-      this.storeList(JSON.parse(text) as ApplicationConfig[]);
-      done('Done');
+      await CliUtil.compile();
+
+      const { message } = ExecUtil.worker<ApplicationConfig[]>(FsUtil.resolveUnix(__dirname, '../find-apps'));
+      this.storeList(await message);
     }
 
     const items = await this.readList();

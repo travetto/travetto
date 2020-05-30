@@ -39,6 +39,14 @@ export class ExecUtilTest {
   }
 
   @Test()
+  async worker() {
+    const { message } = ExecUtil.worker(await ResourceManager.toAbsolutePath('worker.js'));
+    const result = await message;
+    assert(result === { a: 1, b: 2, c: new Set([1, 2, 3]) });
+  }
+
+
+  @Test()
   execSync() {
     const output = ExecUtil.execSync(`${process.argv0} ${ResourceManager.toAbsolutePathSync('test.js')}`);
     assert(output === 'Hello World');
