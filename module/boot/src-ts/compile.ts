@@ -109,16 +109,12 @@ export class CompileUtil {
     TranspileUtil.addPreProcessor((__, contents) =>
       `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`);
 
+    const resolve = FrameworkUtil.resolvePath;
+
     // Supports bootstrapping with framework resolution
-    if (!EnvUtil.isTrue('TRV_DEV')) {
-      this.libRequire = require;
-      Module._load = this.onModuleLoad.bind(this);
-      require.extensions[TranspileUtil.ext] = this.compile.bind(this);
-    } else {
-      this.libRequire = x => require(FrameworkUtil.devResolve(x));
-      Module._load = (req, p) => this.onModuleLoad(FrameworkUtil.devResolve(req, p), p);
-      require.extensions[TranspileUtil.ext] = (m, tsf) => this.compile(m, FrameworkUtil.devResolve(tsf));
-    }
+    this.libRequire = x => require(resolve(x));
+    Module._load = (req, p) => this.onModuleLoad(resolve(req, p), p);
+    require.extensions[TranspileUtil.ext] = (m, tsf) => this.compile(m, resolve(tsf));
 
     global.trvInit = this;
   }

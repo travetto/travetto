@@ -3,6 +3,7 @@ import { AppCache, EnvUtil, TranspileUtil } from '@travetto/boot';
 
 import { SystemUtil } from './internal/system';
 import { StacktraceUtil } from './stacktrace';
+import { AppManifest } from './manifest';
 
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error' | 'fatal';
 export type ConsolePayload = {
@@ -76,7 +77,7 @@ class $ConsoleManager {
     global[this.key] = this.invoke.bind(this);
     this.exclude = new Set();
 
-    if (!EnvUtil.getBoolean('DEBUG') ?? EnvUtil.isProd()) {
+    if (AppManifest.debug.status === false) {
       this.exclude.add('debug');
     }
 

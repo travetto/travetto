@@ -1,6 +1,5 @@
 import * as util from 'util';
 
-import { ConsoleManager } from '@travetto/base';
 import { FsUtil, ColorUtil } from '@travetto/boot';
 
 import { LogEvent, Formatter } from '../types';
@@ -39,7 +38,7 @@ export class LineFormatter implements Formatter {
   constructor(opts: LineFormatterOpts) {
     this.opts = {
       colorize: true, timestamp: 'ms', align: true, level: true, location: true,
-      fullCategory: true, // @line-if -$TRV_DEV
+      fullCategory: true,
       ...opts
     };
   }

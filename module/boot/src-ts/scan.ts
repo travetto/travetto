@@ -42,6 +42,12 @@ export interface ScanHandler {
    * @param entry The full entry
    */
   testDir?(relative: string, entry?: ScanEntry): boolean;
+
+  /**
+   * When encountering a path, allow for translation of final location
+   * @param fullPath The full path
+   */
+  resolvePath?(fullPath: string): string;
 }
 
 /**
@@ -87,7 +93,10 @@ export class ScanFs {
           continue;
         }
 
-        const full = FsUtil.resolveUnix(dir.file, file);
+        let full = FsUtil.resolveUnix(dir.file, file);
+        if (handler.resolvePath) {
+          full = handler.resolvePath(full);
+        }
         const stats = await fsLstat(full);
         const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
@@ -152,7 +161,10 @@ export class ScanFs {
           continue inner;
         }
 
-        const full = FsUtil.resolveUnix(dir.file, file);
+        let full = FsUtil.resolveUnix(dir.file, file);
+        if (handler.resolvePath) {
+          full = handler.resolvePath(full);
+        }
         const stats = fs.lstatSync(full);
         const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
@@ -198,21 +210,5 @@ export class ScanFs {
       }
     }
     return out;
-  }
-
-  /**
-   * Scan the framework for folder/files only the framework should care about
-   * @param testFile The test to determine if a file is desired
-   */
-  static scanFramework(testFile?: (x: string) => boolean, base = FsUtil.cwd) {
-    return this.scanDirSync({
-      testFile,
-      testDir: x => // Ensure its a valid folder or module folder
-        !x.includes('node_modules') || // All non-framework folders
-        x.endsWith('node_modules') || // Is first level node_modules
-        (x.includes('@travetto')  // Is framework folder, include everything under it
-          && !/node_modules[/][^@]/.test(x) // Excluding non framework node modules
-        )
-    }, base);
   }
 }

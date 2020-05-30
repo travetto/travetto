@@ -1,5 +1,5 @@
 import { ColorUtil, EnvUtil } from '@travetto/boot';
-import { ConsoleManager, LogLevel, ConsolePayload } from '@travetto/base';
+import { ConsoleManager, LogLevel, ConsolePayload, AppManifest } from '@travetto/base';
 
 import { LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
@@ -34,11 +34,9 @@ class $Logger {
    * Initialize
    */
   init() {
-    const debugFilter = EnvUtil.isTrue('DEBUG') ? '*' : EnvUtil.get('DEBUG', !EnvUtil.isProd() ? '@app' : '');
-
-    if (debugFilter) {
+    if (AppManifest.debug.status !== false) {
       delete this.exclude.debug;
-      const filter = LogUtil.buildFilter(debugFilter);
+      const filter = LogUtil.buildFilter(AppManifest.debug.value ?? '@app');
       if (filter) {
         this.filters.debug = filter;
       }

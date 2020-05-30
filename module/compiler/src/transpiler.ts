@@ -75,7 +75,7 @@ export class Transpiler {
   private getHost(): ts.CompilerHost {
     const host: ts.CompilerHost = {
       readFile: this.readFile,
-      realpath: x => FrameworkUtil.devResolve(x), // @line-if $TRV_DEV
+      realpath: FrameworkUtil.resolvePath,
       writeFile: this.writeFile,
       fileExists: this.fileExists,
       getDefaultLibFileName: ts.getDefaultLibFileName,

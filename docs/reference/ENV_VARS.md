@@ -10,8 +10,8 @@ The common environment variables throughout the code base:
 * `TRV_WATCH` = 0|1              - Wether or not to run the program in watch mode
 
 ## Logging 
-* `DEBUG` = 0|*                  - Outputs all console.debug messages, defaults to `*` in dev, and `off` in prod
-* `TRV_LOG_COLOR` = 0|1          - Suppress color output in all usages, defaults to `true` if tty is available.  Will respect `FORCE_COLOR` and `NO_COLOR` if passed in, secondary to the `TRV_LOG_COLOR` setting, if specified.
+* `TRV_DEBUG` = 0|*              - Outputs all console.debug messages, defaults to `*` in dev, and `off` in prod.  Will inherit from `DEBUG` if not specified.
+* `TRV_COLOR` = 0|1              - Suppress color output in all usages, defaults to `true` if tty is available.  Will respect `FORCE_COLOR` and `NO_COLOR` if passed in, secondary to the `TRV_COLOR` setting, if specified.
 * `TRV_LOG_PLAIN` = 0|1          - Determines whether or not to augment console log information, default is `0`
 * `TRV_LOG_TIME` = 0|ms|s        - Determines if we should log time when logging, defaults to `ms` 
 

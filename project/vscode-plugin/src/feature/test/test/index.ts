@@ -45,7 +45,7 @@ class TestRunnerFeature extends BaseFeature {
         file.replace(`${Workspace.path}${path.sep}`, ''),
         `${line + 1}`
       ],
-      env: Workspace.getDefaultEnv({ DEBUG: '1' })
+      env: Workspace.getDefaultEnv()
     }));
   }
 

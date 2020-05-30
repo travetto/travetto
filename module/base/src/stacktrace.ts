@@ -1,4 +1,5 @@
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, EnvUtil } from '@travetto/boot';
+import { FrameworkUtil } from '@travetto/boot/src/framework';
 
 /**
  * General tools for manipulating stack traces.
@@ -16,18 +17,24 @@ export class StacktraceUtil {
   /**
    * Initialize
    */
-  static initHandler() {
-    this.addStackFilters(
-      __filename.replace(/\.js$/, ''),
-      // 'timers.js',
-      'typescript.js',
-      'async_hooks',
-      '(native)',
-      'internal',
-      'tslib',
-      // '<anonymous>',
-      'source-map-support.js'
-    );
+  static init() {
+    if (EnvUtil.isProd()) {
+      return;
+    } else if (FrameworkUtil.devMode) {
+      Error.stackTraceLimit = 100; // Set stacktrace to high for local dev
+    } else {
+      this.addStackFilters(
+        __filename.replace(/\.js$/, ''),
+        // 'timers.js',
+        'typescript.js',
+        'async_hooks',
+        '(native)',
+        'internal',
+        'tslib',
+        // '<anonymous>',
+        'source-map-support.js'
+      );
+    }
   }
 
   /**
