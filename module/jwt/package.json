@@ -27,8 +27,5 @@
     "@travetto/base": "^1.0.0-rc.1",
     "@types/jws": "^3.2.2",
     "jws": "^4.0.0"
-  },
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-rc.1"
   }
 }

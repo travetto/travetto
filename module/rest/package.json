@@ -13,9 +13,6 @@
     "@types/express-serve-static-core": "^4.17.7",
     "cookies": "^0.8.0"
   },
-  "devDependencies": {
-    "@travetto/test": "^1.0.0-rc.1"
-  },
   "optionalPeerDependencies": {
     "node-forge": "^0.9.1",
     "@types/node-forge": "^0.9.3"
