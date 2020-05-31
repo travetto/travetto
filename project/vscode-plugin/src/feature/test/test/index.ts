@@ -89,29 +89,15 @@ class TestRunnerFeature extends BaseFeature {
    * @param doc
    */
   buildCodeLenses(doc: vscode.TextDocument) {
-    const out: vscode.CodeLens[] = [];
-    for (let i = 0; i < doc.lineCount; i++) {
-      const line = doc.lineAt(i);
-      if (line.text.includes('@Test')) {
-        // Find start of function
-        while (!/[{]\s*$/.test(doc.lineAt(i).text)) {
-          i += 1;
-        }
-
-        const cmd = {
-          range: line.range,
-          isResolved: true,
-          command: {
-            command: this.commandName('line'),
-            title: `Debug Test`,
-            arguments: [doc.fileName, i + 1, true]
-          }
-        };
-        // @ts-ignore
-        out.push(cmd);
+    return (this.consumer.getResults(doc)?.getListOfTests() || []).map(test => ({
+      range: doc.lineAt(test.start - 1).range,
+      isResolved: true,
+      command: {
+        command: this.commandName('line'),
+        title: `Debug Test`,
+        arguments: [doc.fileName, test.code, true]
       }
-    }
-    return out;
+    }) as vscode.CodeLens);
   }
 
   /**

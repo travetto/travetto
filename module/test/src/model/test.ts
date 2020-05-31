@@ -1,12 +1,12 @@
 import { Class } from '@travetto/registry/src/types';
-import { SuiteCore } from './common';
+import { TestCore } from './common';
 
 export type ThrowableError = string | RegExp | Function;
 
 /**
  * Specific configuration for a test
  */
-export interface TestConfig extends SuiteCore {
+export interface TestConfig extends TestCore {
   /**
    * The Class it's a part of
    */
@@ -78,7 +78,7 @@ export interface Assertion {
 /**
  * Test results
  */
-export interface TestResult extends SuiteCore {
+export interface TestResult extends TestCore {
   /**
    * The test's method name
    */

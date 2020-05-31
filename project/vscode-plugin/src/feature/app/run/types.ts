@@ -8,6 +8,8 @@ export interface Application {
   filename: string;
   params: ParamConfig[];
   id: string;
+  start: number;
+  codeStart: number;
   root: string;
   description?: string;
   env: string;

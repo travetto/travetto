@@ -30,6 +30,8 @@ export interface ApplicationConfig<T extends AppClass = AppClass> {
   root: string; // App root location
   filename: string; // Location of file for app
   description?: string;
+  start: number; // Start of app
+  codeStart: number; // The start of the code
   params?: ApplicationParameter[]; // List of params
   targetId: string; // The class id
   target?: Class<T>; // The actual class of the app

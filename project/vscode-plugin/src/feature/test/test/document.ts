@@ -36,6 +36,18 @@ export class DocumentResultsManager {
   constructor(private file: string) { }
 
   /**
+   * Get list of known tests
+   */
+  getListOfTests() {
+    return Object.values(this.results.test)
+      .map(v => ({
+        name: v.src.methodName,
+        start: v.src.lines.start,
+        code: v.src.lines.codeStart
+      }));
+  }
+
+  /**
    * Support a new editor for results updating
    * @param e
    */

@@ -18,13 +18,14 @@ export class AnnotationTransformer {
     // If we have a @Suite/@Test decorator
     if (dec && ts.isCallExpression(dec.expression)) {
       const args = [...(dec.expression.arguments ?? [])];
-      const n = TransformUtil.hasOriginal(node) ? node.original : node;
-      const start = ts.getLineAndCharacterOfPosition(state.source, n.getStart());
-      const end = ts.getLineAndCharacterOfPosition(state.source, n.getEnd());
+      const n = (TransformUtil.hasOriginal(node) ? node.original : node) as ts.MethodDeclaration;
 
       // Add line start/end information into the decorator
       dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
-        lines: { start: start.line + 1, end: end.line + 1 }
+        lines: {
+          ...TransformUtil.getRangeOf(state.source, n),
+          codeStart: TransformUtil.getRangeOf(state.source, n, 'body')?.start
+        }
       })]);
     }
     return node;
