@@ -14,10 +14,11 @@ export const color = ColorUtil.makeTemplate({
   path: ColorUtil.makeColorer('cyan'),
   success: ColorUtil.makeColorer('green', 'bold'),
   failure: ColorUtil.makeColorer('red', 'bold'),
-  param: ColorUtil.makeColorer('green', 'bold'),
-  type: ColorUtil.makeColorer('blue', 'bold'),
+  param: ColorUtil.makeColorer('green'),
+  type: ColorUtil.makeColorer('cyan'),
   description: ColorUtil.makeColorer('white', 'faint', 'bold'),
   title: ColorUtil.makeColorer('white', 'bold'),
   identifier: ColorUtil.makeColorer('blue', 'bold'),
-  subtitle: ColorUtil.makeColorer('white', 'faint')
+  subtitle: ColorUtil.makeColorer('white'),
+  subsubtitle: ColorUtil.makeColorer('white', 'faint')
 });
