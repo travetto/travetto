@@ -1,6 +1,7 @@
 import { color } from '@travetto/cli/src/color';
 import { RunUtil } from './run';
 import { ApplicationConfig } from '../../src/types';
+import { FsUtil } from '@travetto/boot';
 
 export class HelpUtil {
 
@@ -36,14 +37,11 @@ export class HelpUtil {
     for (const conf of confs) {
       const lines = [];
 
-      const root = conf.root !== '.' ? color`[${{ subtitle: conf.root }}] ` : '';
       const usage = this.getAppUsage(conf);
 
-      lines.push(color`${root}${{ identifier: conf.name }}`);
-      if (conf.description) {
-        lines.push(color`desc:  ${{ description: conf.description }}`);
-      }
-      lines.push(`usage: ${usage}`);
+      lines.push(color`${{ identifier: conf.name }} ${{ subtitle: conf.description }}`);
+      lines.push(color`${{ subsubtitle: 'usage' }}: ${usage}`);
+      lines.push(color`${{ subsubtitle: 'file' }}:  ${{ path: conf.filename.replace(`${FsUtil.cwd}/`, '') }}`);
 
       // eslint-disable-next-line no-control-regex
       const len = lines.reduce((acc, v) => Math.max(acc, v.replace(/\x1b\[\d+m/g, '').length), 0);

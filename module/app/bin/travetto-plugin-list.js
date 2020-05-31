@@ -1,6 +1,5 @@
-// Entry point for the VSCode plugin to execute
-//  all information is passed as env vars
+// Entry point for the direct execution
+process.env.TRV_DEBUG = process.env.TRV_DEBUG || '0';
 require('@travetto/boot/bin/init')
   .libRequire('@travetto/app/bin/lib/list')
-  .AppListManager.getList()
-  .then(x => console.log(JSON.stringify(x)));
+  .AppListManager.run(...process.argv.slice(2));

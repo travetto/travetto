@@ -1,5 +1,6 @@
 import * as util from 'util';
 import * as fs from 'fs';
+import { parentPort } from 'worker_threads';
 
 import { CliUtil } from '@travetto/cli/src/util';
 import { AppCache } from '@travetto/boot/src/app-cache';
@@ -16,26 +17,32 @@ export class AppListManager {
   private static fsLstat = util.promisify(fs.lstat);
   private static cacheConfig = 'app-cache.json';
 
-  /**
-   * Compile code, and look for `@Application` annotations
-   */
-  static async findAll() {
+  static getRoots() {
     // Initialize up to compiler
     const roots = ['.'];
     try {
-      roots.push(
-        ...fs.readdirSync(FsUtil.resolveUnix(FsUtil.cwd, 'alt')).map(x => `alt/${x}`)
-      );
+      roots.push(...fs.readdirSync(FsUtil.resolveUnix(FsUtil.cwd, 'alt')).map(x => `alt/${x}`));
     } catch { }
+    return roots;
+  }
 
-    CliUtil.initAppEnv({ roots });
+  /**
+   * Compile code, and look for `@Application` annotations
+   */
+  static async buildList() {
+    if (!parentPort) { // If top level, recurse
+      return CliUtil.waiting('Compiling', () =>
+        ExecUtil.worker<ApplicationConfig[]>(FsUtil.resolveUnix(__dirname, '../travetto-plugin-list'), ['build'])
+          .message
+      );
+    } else {
+      const { PhaseManager } = await import('@travetto/base');
+      await PhaseManager.init('compile-all'); // Compilation is pre done
 
-    const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.init('compile-all'); // Compilation is pre done
-
-    const { AppListUtil } = await import('../../src/list');
-    const list = await AppListUtil.buildList();
-    ExecUtil.sendWorkerData(list.map(({ target, ...rest }) => rest));
+      const { AppListUtil } = await import('../../src/list');
+      const list = await AppListUtil.buildList();
+      return list.map(({ target, ...rest }) => rest);
+    }
   }
 
   /**
@@ -89,10 +96,7 @@ export class AppListManager {
    */
   static async getList(): Promise<ApplicationConfig[] | undefined> {
     if (!(await this.readList())) { // no list
-      await CliUtil.compile();
-
-      const { message } = ExecUtil.worker<ApplicationConfig[]>(FsUtil.resolveUnix(__dirname, '../find-apps'));
-      this.storeList(await message);
+      this.storeList(await this.buildList());
     }
 
     const items = await this.readList();
@@ -108,5 +112,20 @@ export class AppListManager {
       }
     }
     return items;
+  }
+
+  /**
+   * Handles plugin response
+   */
+  static async run(mode?: string) {
+    CliUtil.initAppEnv({ roots: this.getRoots() });
+
+    let list: ApplicationConfig[];
+    if (mode === 'build') {
+      list = await this.buildList();
+    } else {
+      list = await this.getList() ?? [];
+    }
+    CliUtil.pluginResponse(list);
   }
 }

@@ -1,6 +1,6 @@
 import * as readline from 'readline';
+import { parentPort } from 'worker_threads';
 // Imported individually to prevent barrel import loading too much
-import { FsUtil } from '@travetto/boot/src/fs';
 import { EnvUtil } from '@travetto/boot/src/env';
 import { ExecUtil } from '@travetto/boot/src/exec';
 
@@ -14,6 +14,8 @@ type AppEnv = {
   resourceRoots?: string[];
   profiles?: string[];
 };
+
+const join = (items: string[]) => [...new Set(items)].join(',');
 
 /**
  * Common CLI Utilities
@@ -83,13 +85,12 @@ export class CliUtil {
    * Initialize the app environment
    */
   static initAppEnv({ env, watch, roots, resourceRoots, profiles, debug }: AppEnv) {
-    env = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev'; // Preemptively set b/c env changes how we compile some things
-    process.env.TRV_ENV = env;
-    process.env.NODE_ENV = /^prod/i.test(env) ? 'production' : 'development';
+    process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
+    process.env.NODE_ENV = EnvUtil.isProd() ? 'production' : 'development';
     process.env.TRV_WATCH = `${watch ? EnvUtil.getBoolean('TRV_WATCH') && !EnvUtil.isProd() : false}`;
-    process.env.TRV_ROOTS = EnvUtil.getList('TRV_ROOTS', roots).join(',');
-    process.env.TRV_RESOURCE_ROOTS = EnvUtil.getList('TRV_RESOURCE_ROOTS', resourceRoots).join(',');
-    process.env.TRV_PROFILES = EnvUtil.getList('TRV_PROFILES', profiles).join(',');
+    process.env.TRV_ROOTS = join(EnvUtil.getList('TRV_ROOTS', roots));
+    process.env.TRV_RESOURCE_ROOTS = join(EnvUtil.getList('TRV_RESOURCE_ROOTS', resourceRoots));
+    process.env.TRV_PROFILES = join(EnvUtil.getList('TRV_PROFILES', profiles));
     process.env.TRV_DEBUG = EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', debug ?? (EnvUtil.isProd() ? '0' : '')));
   }
 
@@ -118,7 +119,7 @@ export class CliUtil {
    * @param message Message to share
    * @param delay Delay duration
    */
-  static async waiting(message: string, work: Promise<any>,
+  static async waiting<T>(message: string, work: Promise<T> | (() => Promise<T>),
     config: { completion?: string, delay?: number, stream?: NodeJS.WritableStream } = {}
   ) {
     const { stream, delay, completion } = { delay: 250, stream: process.stderr, ...config };
@@ -126,20 +127,32 @@ export class CliUtil {
     const writeLine = this.rewriteLine.bind(this, stream);
     const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+    if (!('then' in work)) {
+      work = work();
+    }
+
     let i = -1;
     let done = false;
-    work.finally(() => done = true);
+    let value: T | undefined;
+    let err: Error | undefined;
+    work
+      .then(res => value = res)
+      .catch(e => err = e)
+      .finally(() => done = true);
     await sleep(delay);
     while (!done) {
       await writeLine(`${this.WAIT_STATE[i = (i + 1) % this.WAIT_STATE.length]} ${message}`);
       await sleep(100);
     }
 
-    if (i === -1) {
-      return;
+    if (i >= 0) {
+      await writeLine(completion ? `${message} ${completion}\n` : '', true);
     }
-
-    await writeLine(completion ? `${message} ${completion}\n` : '', true);
+    if (err) {
+      throw err;
+    } else {
+      return value!;
+    }
   }
 
   /**
@@ -148,10 +161,16 @@ export class CliUtil {
   static compile(output?: string) {
     return this.waiting('Compiling...',
       ExecUtil.worker('@travetto/compiler/bin/compile-target', [], {
-        env: output ? { TRV_CACHE_DIR: output } : {},
-        stderr: true,
-        stdout: true
+        env: output ? { TRV_CACHE_DIR: output } : {}
       }).result
     );
+  }
+
+  /**
+   * Return plugin data depending on how it has been called
+   */
+  static pluginResponse(obj: any) {
+    parentPort ? parentPort.postMessage(obj) : console.log(JSON.stringify(obj));
+    return obj;
   }
 }

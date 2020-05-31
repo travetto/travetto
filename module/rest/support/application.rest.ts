@@ -4,7 +4,9 @@ import { RestServer } from '../src/server/server';
 /**
  * Default application entrypoint
  */
-@Application('rest')
+@Application('rest', {
+  description: 'Default rest application entrypoint'
+})
 class EntryPoint {
   constructor(private server: RestServer) { }
   run() {

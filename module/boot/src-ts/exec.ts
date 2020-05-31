@@ -1,5 +1,5 @@
 import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
-import { Worker, WorkerOptions, parentPort } from 'worker_threads';
+import { Worker, WorkerOptions } from 'worker_threads';
 import { StreamUtil } from './stream';
 
 /**
@@ -191,11 +191,14 @@ export class ExecUtil {
    * @param args The arguments to pass in
    * @param options The worker options
    */
-  static worker<T = any>(file: string, args: string[] = [], options: WorkerOptions & { exitOnCompletion?: boolean } = {}) {
+  static worker<T = any>(file: string, args: string[] = [], options: WorkerOptions = {}) {
     if (!file.endsWith('.js')) {
       file = require.resolve(file);
     }
     const worker = new Worker(file, {
+      stderr: true,
+      stdout: true,
+      stdin: false,
       ...options,
       env: {
         ...process.env,
@@ -207,22 +210,12 @@ export class ExecUtil {
     });
 
     const result = new Promise<number>((res, rej) => worker.on('error', rej).on('exit', c => c > 0 ? rej(new Error(`${c}`)) : res(c)));
-    const message = new Promise<T>(r => worker.once('message', d => result.then(() => r(d))));
-
-    if (options.exitOnCompletion) {
-      worker.on('exit', c => process.exit(c));
-    }
+    const message = new Promise<T>((r, rej) => {
+      worker.once('message', d => result.then(() => r(d)));
+      result.catch(rej);
+    });
 
     return { worker, message, result };
-  }
-
-  /**
-   * Send data from worker to parent
-   * @param data Data to send
-   * @param channel Which channel to communicate on
-   */
-  static sendWorkerData(data: any) {
-    parentPort?.postMessage(data);
   }
 
   /**
