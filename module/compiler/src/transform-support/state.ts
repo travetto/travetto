@@ -25,9 +25,10 @@ export class TransformerState implements State {
    */
   getOrImport(type: res.ExternalType | ts.Node) {
     if ('getSourceFile' in type) {
+      const ogType = type;
       type = this.resolveType(type) as res.ExternalType;
       if (!res.isExternalType(type)) {
-        throw new Error('Unable to import non-external type');
+        throw new Error(`Unable to import non-external type: ${ogType.getText()}`);
       }
     }
     return this.imports.getOrImport(type);

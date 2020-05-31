@@ -61,7 +61,7 @@ export class TypeResolver {
   /**
    * Resolve the `ts.ObjectFlags`
    */
-  private getObjectFlags(type: ts.Type): ts.ObjectFlags {
+  getObjectFlags(type: ts.Type): ts.ObjectFlags {
     // @ts-ignore
     return ts.getObjectFlags(type);
   }
@@ -69,15 +69,89 @@ export class TypeResolver {
   /**
    * Fetch all type arguments for a give type
    */
-  private getAllTypeArguments(ref: ts.Type): readonly ts.Type[] {
-    // @ts-ignore
-    return this.tsChecker.getTypeArguments(ref);
+  getAllTypeArguments(ref: ts.Type): readonly ts.Type[] {
+    return this.tsChecker.getTypeArguments(ref as ts.TypeReference);
+  }
+
+  /**
+   * Resolve the return type for a method
+   */
+  getReturnType(node: ts.MethodDeclaration) {
+    let type = this.tsChecker.getTypeAtLocation(node);
+    if (type.isUnion()) { // Handle methods that are optional
+      type = type.types.find(x => !(x.flags & ts.TypeFlags.Undefined))!;
+    }
+    const [sig] = type.getCallSignatures();
+    return this.tsChecker.getReturnTypeOfSignature(sig);
+  }
+
+  /**
+   * Read JS Doc tags by name
+   */
+  readDocsTags(node: ts.Node, name: string): string[] {
+    return TransformUtil.readJSDocTags(this.tsChecker.getTypeAtLocation(node), name);
+  }
+
+  /**
+   * Get all declarations of a node
+   */
+  getDeclarations(node: ts.Node | ts.Type | ts.Symbol): ts.Declaration[] {
+    return TransformUtil.getDeclarations('getSourceFile' in node ? this.tsChecker.getTypeAtLocation(node) : node);
+  }
+
+  /**
+   * Get primary declaration of a node
+   */
+  getPrimaryDeclaration(node: ts.Node | ts.Symbol | ts.Type): ts.Declaration {
+    return TransformUtil.getPrimaryDeclaration(this.getDeclarations(node));
+  }
+
+  /**
+   * Get type as a string representation
+   * @param type
+   */
+  getTypeAsString(type: ts.Type) {
+    return this.tsChecker.typeToString(this.tsChecker.getApparentType(type)) || undefined;
+  }
+
+  /**
+   * Resolve simple literal types
+   * @param name Name of type
+   * @param type Actual type node
+   */
+  resolveSimpleLiteralType(name: keyof typeof GLOBAL_SIMPLE, type: ts.Type): res.LiteralType {
+    const cons = GLOBAL_SIMPLE[name];
+    // Determine type from literal value
+    const ret = isLiteralType(type) ? Util.coerceType(type.value, cons as typeof String, false) :
+      undefined;
+
+    return {
+      name: SIMPLE_NAMES[cons.name] ?? cons.name,
+      ctor: cons,
+      value: ret
+    };
+  }
+
+  /**
+   * Resolve complex literal types
+   * @param name Name of type
+   * @param type Actual type node
+   */
+  resolveComplexLiteralType(name: keyof typeof GLOBAL_COMPLEX, type: ts.Type): res.LiteralType {
+    const cons = GLOBAL_COMPLEX[name];
+    // Else handle complexity and resolve type arguments
+    console.debug('Complex cons', cons.name, this.getAllTypeArguments(type));
+    return {
+      name: cons.name,
+      ctor: cons,
+      typeArguments: this.getAllTypeArguments(type).map(t => this.resolveType(t))
+    };
   }
 
   /**
    * Resolve `res.LiteralType` from a `ts.Type`
    */
-  private resolveLiteralType(type: ts.Type): res.LiteralType | undefined {
+  resolveLiteralType(type: ts.Type): res.LiteralType | undefined {
     const flags = type.getFlags();
 
     // Handle void/undefined
@@ -87,38 +161,32 @@ export class TypeResolver {
       return { name: 'undefined', ctor: undefined };
     }
 
-    const name = this.tsChecker.typeToString(this.tsChecker.getApparentType(type)) ?? '';
-    const complexName = TransformUtil.getSymbolName(type);
+    const name = this.getTypeAsString(type) ?? '';
+    const complexName = TransformUtil.getSymbolName(type) ?? '';
 
-    const simpleCons = GLOBAL_SIMPLE[name as keyof typeof GLOBAL_SIMPLE];
-    const complexCons = GLOBAL_COMPLEX[complexName as keyof typeof GLOBAL_COMPLEX];
-
-    // If the literal is a simple type
-    if (simpleCons) {
-      // Determine type from literal value
-      const ret = isLiteralType(type) ? Util.coerceType(type.value, simpleCons as typeof String, false) :
-        undefined;
-
-      return {
-        name: SIMPLE_NAMES[simpleCons.name] ?? simpleCons.name,
-        ctor: simpleCons,
-        value: ret
-      };
-    } else if (complexCons) {
-      // Else handle complexity and resolve type arguments
-      console.debug('Complex cons', complexCons.name, this.getAllTypeArguments(type));
-      return {
-        name: complexCons.name,
-        ctor: complexCons,
-        typeArguments: this.getAllTypeArguments(type).map(t => this.resolveType(t))
-      };
+    if (name in GLOBAL_SIMPLE) {
+      return this.resolveSimpleLiteralType(name as keyof typeof GLOBAL_SIMPLE, type);
+    } else if (complexName in GLOBAL_COMPLEX) {
+      return this.resolveComplexLiteralType(complexName as keyof typeof GLOBAL_COMPLEX, type);
     }
+  }
+
+  /**
+   * Resolve `res.ExternalType` from `ts.Type`
+   */
+  resolveExternalType(type: ts.Type): res.ExternalType {
+    const decl = this.getPrimaryDeclaration(type);
+    const source = decl?.getSourceFile().fileName!;
+    const name = TransformUtil.getSymbolName(type);
+    const comments = TransformUtil.readJSDocs(type);
+
+    return { name, source, comment: comments.description };
   }
 
   /**
    * Resolve `res.ShapeType` from `ts.Type`
    */
-  private resolveShapeType(type: ts.Type, alias?: ts.Symbol): res.ShapeType {
+  resolveShapeType(type: ts.Type, alias?: ts.Symbol): res.ShapeType {
     const docs = TransformUtil.readJSDocs(type);
     const fields: Record<string, res.Type> = {};
     const name = TransformUtil.getSymbolName(alias ?? type);
@@ -135,21 +203,9 @@ export class TypeResolver {
   }
 
   /**
-   * Resolve `res.ExternalType` from `ts.Type`
-   */
-  private resolveExternalType(type: ts.Type): res.ExternalType {
-    const decl = this.getPrimaryDeclaration(type);
-    const source = decl?.getSourceFile().fileName!;
-    const name = TransformUtil.getSymbolName(type);
-    const comments = TransformUtil.readJSDocs(type);
-
-    return { name, source, comment: comments.description };
-  }
-
-  /**
    * Resolve `res.TupleType` from a `ts.Type`
    */
-  private resolveTupleType(type: ts.Type): res.TupleType {
+  resolveTupleType(type: ts.Type): res.TupleType {
     const ret = {
       tupleTypes: this.getAllTypeArguments(type).map(x => this.resolveType(x))
     };
@@ -160,7 +216,7 @@ export class TypeResolver {
   /**
    * Resolve a referenced `res.Type` from a `ts.Type`
    */
-  private resolveReferencedType(type: ts.Type) {
+  resolveReferencedType(type: ts.Type) {
     const obj = this.resolveExternalType(type);
 
     console.debug('External Type?', obj, type);
@@ -189,7 +245,7 @@ export class TypeResolver {
   /**
    * Resolve `res.Type` from a `ts.UnionType`
    */
-  private resolveUnionType(type: ts.UnionType): res.Type {
+  resolveUnionType(type: ts.UnionType): res.Type {
     const types = type.types;
     const undefinable = types.some(x => (x.getFlags() & ts.TypeFlags.Undefined));
     const nullable = types.some(x => x.getFlags() & ts.TypeFlags.Null);
@@ -224,24 +280,6 @@ export class TypeResolver {
     };
   }
 
-  /**
-   * Resolve the return type for a method
-   */
-  getReturnType(node: ts.MethodDeclaration) {
-    let type = this.tsChecker.getTypeAtLocation(node);
-    if (type.isUnion()) { // Handle methods that are optional
-      type = type.types.find(x => !(x.flags & ts.TypeFlags.Undefined))!;
-    }
-    const [sig] = type.getCallSignatures();
-    return this.tsChecker.getReturnTypeOfSignature(sig);
-  }
-
-  /**
-   * Read JS Doc tags by name
-   */
-  readDocsTags(node: ts.Node, name: string): string[] {
-    return TransformUtil.readJSDocTags(this.tsChecker.getTypeAtLocation(node), name);
-  }
 
   /**
    * Resolve a `res.Type` from a `ts.Type` or a `ts.Node`
@@ -298,19 +336,5 @@ export class TypeResolver {
 
     console.debug('Resolved Unknown Type', type);
     return { ...UNKNOWN_TYPE };
-  }
-
-  /**
-   * Get all declarations of a node
-   */
-  getDeclarations(node: ts.Node | ts.Type | ts.Symbol): ts.Declaration[] {
-    return TransformUtil.getDeclarations('getSourceFile' in node ? this.tsChecker.getTypeAtLocation(node) : node);
-  }
-
-  /**
-   * Get primary declaration of a node
-   */
-  getPrimaryDeclaration(node: ts.Node | ts.Symbol | ts.Type): ts.Declaration {
-    return TransformUtil.getPrimaryDeclaration(this.getDeclarations(node));
   }
 }

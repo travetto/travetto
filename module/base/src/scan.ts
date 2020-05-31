@@ -5,8 +5,8 @@ import { AppManifest } from './manifest';
 type SimpleEntry = Pick<ScanEntry, 'module' | 'file'>;
 
 type FindConfig =
-  { folder?: string, filter?: Tester, paths: string[] } |
-  { folder?: string, filter?: Tester, roots?: string[] };
+  { folder?: string, filter?: Tester, paths: string[], includeIndex?: boolean } |
+  { folder?: string, filter?: Tester, roots?: string[], includeIndex?: boolean };
 
 type AppFindConfig = { folder?: string, filter?: Tester, roots?: string[] };
 
@@ -146,30 +146,33 @@ export class ScanApp {
    */
   static findFiles(config: FindConfig) {
     const { filter, folder } = config;
+    if (folder === 'src') {
+      config.includeIndex = config.includeIndex ?? true;
+    }
     const paths = 'paths' in config ? config.paths : this.getPaths(config.roots || AppManifest.roots);
     const all: SimpleEntry[][] = [];
     const idx = this.index;
     for (const key of paths) {
       if (idx.has(key)) {
+        const tgt = idx.get(key)!;
         if (folder) {
-          const tgt = idx.get(key)!;
           const sub = tgt.files.get(folder) || [];
           if (filter) {
             all.push(sub.filter(el => filter!.test(el.module)));
           } else {
             all.push(sub);
           }
-          if (folder === 'src' && tgt.index && (!filter || filter!.test(tgt.index.module))) {
-            all.push([tgt.index]);
-          }
         } else {
-          for (const sub of idx.get(key)!.files.values()) {
+          for (const sub of tgt.files.values()) {
             if (filter) {
               all.push(sub.filter(el => filter!.test(el.module)));
             } else {
               all.push(sub);
             }
           }
+        }
+        if (config.includeIndex && tgt.index && (!filter || filter!.test(tgt.index.module))) {
+          all.push([tgt.index]);
         }
       }
     }

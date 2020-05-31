@@ -1,5 +1,3 @@
-
-
 The common environment variables throughout the code base:
 
 ## General App
@@ -19,9 +17,8 @@ The common environment variables throughout the code base:
 * `TRV_TEST_COMPILE` = 0|1       - Determines if all tests should be compiled, primarily used for tool integration, defaults to `0`
 * `TRV_TEST_PHASE_TIMEOUT` = 15s - The default time to wait for each phase to finish, default `15s`
 * `TRV_TEST_TIMEOUT` = 5s        - The default time for a single test to finish, default `5s`
-* `TRV_TEST_IDLE_TIMEOUT` = 2m   - Default timeout for a test-worker, determines self termination if no request within that time window, default `2m`
 
-## Exec
+## Command
 * `TRV_DOCKER` = 0|any           - Docker support, if non-zero, acts as the docker namespace.  If `0`, disables running if docker should even be considered when running a command service, defaults to `undefined`
 
 ## Framework

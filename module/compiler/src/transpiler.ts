@@ -56,7 +56,8 @@ export class Transpiler {
    * Write file to disk, and set value in cache as well
    */
   private writeFile(fileName: string, content: string) {
-    fileName = fileName.replace(/[.]js$/, '.ts');
+    // @ts-ignore
+    fileName = fileName.ᚕunix;
     this.contents.set(fileName, content);
     this.hashes.set(fileName, SystemUtil.naiveHash(content));
     this.cache.writeEntry(fileName, content);
