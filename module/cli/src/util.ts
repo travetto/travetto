@@ -6,14 +6,15 @@ import { ExecUtil } from '@travetto/boot/src/exec';
 
 import { CompletionConfig } from './types';
 
-type AppEnv = {
+export interface AppEnv {
   env?: string;
-  watch?: string;
+  watch?: boolean;
   debug?: string;
   roots?: string[];
   resourceRoots?: string[];
   profiles?: string[];
-};
+  envExtra?: Record<string, any>;
+}
 
 const join = (items: string[]) => [...new Set(items)].join(',');
 
@@ -84,7 +85,8 @@ export class CliUtil {
   /**
    * Initialize the app environment
    */
-  static initAppEnv({ env, watch, roots, resourceRoots, profiles, debug }: AppEnv) {
+  static initAppEnv({ env, watch, roots, resourceRoots, profiles, debug, envExtra }: AppEnv) {
+    Object.assign(process.env, envExtra ?? {});
     process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
     process.env.NODE_ENV = EnvUtil.isProd() ? 'production' : 'development';
     process.env.TRV_WATCH = `${watch ? EnvUtil.getBoolean('TRV_WATCH') && !EnvUtil.isProd() : false}`;
@@ -92,6 +94,7 @@ export class CliUtil {
     process.env.TRV_RESOURCE_ROOTS = join(EnvUtil.getList('TRV_RESOURCE_ROOTS', resourceRoots));
     process.env.TRV_PROFILES = join(EnvUtil.getList('TRV_PROFILES', profiles));
     process.env.TRV_DEBUG = EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', debug ?? (EnvUtil.isProd() ? '0' : '')));
+    process.env.TRV_WATCH = `${(watch === undefined || watch) && (EnvUtil.getBoolean('TRV_WATCH') ?? !EnvUtil.isProd())}`;
   }
 
   /**
