@@ -10,6 +10,9 @@
   "dependencies": {
     "@travetto/base": "^1.0.0-rc.1"
   },
+  "devDependencies": {
+    "@travetto/net": "^1.0.0-rc.1"
+  },
   "homepage": "https://travetto.io",
   "keywords": [
     "command",

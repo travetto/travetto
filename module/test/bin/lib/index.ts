@@ -4,26 +4,29 @@ import type { RunState } from '../../src/runner/types';
 const DEF_ENV = { env: 'test', debug: '0', resourceRoots: ['test'] };
 const ENV_EXT = { TRV_LOG_TIME: 0 };
 
-/**
- * Run tests given the input state
- * @param opts
- */
-export async function runTests(opts: RunState) {
-  const { StandardWorker } = await import('../../src/worker/standard');
-  return StandardWorker.run(opts);
-}
 
-export async function customLogs() {
+async function customLogs() {
   const { ConsoleManager } = await import('@travetto/base');
   ConsoleManager.setFile(`!test-worker.${process.pid}.log`, {
     processArgs: (payload, args: any[]) => [process.pid, ...args]
   });
 }
 
-export async function load() {
+async function load() {
   await CliUtil.compile();
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.init('require-all');
+}
+
+/**
+ * Run tests given the input state
+ * @param opts
+ */
+export async function runTests(opts: RunState) {
+  CliUtil.initAppEnv({ ...DEF_ENV, envExtra: ENV_EXT });
+  await load();
+  const { StandardWorker } = await import('../../src/worker/standard');
+  return StandardWorker.run(opts);
 }
 
 export async function runTestsDirect(...args: string[]) {

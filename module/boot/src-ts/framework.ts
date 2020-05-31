@@ -47,7 +47,7 @@ export class FrameworkUtil {
 
     pth = FsUtil.toUnix(pth);
 
-    if (/travetto[^/]*\/module\/[^/]+\/bin/.test(pth)) { // Convert bin from framework module
+    if (/travetto[^/]*\/module\/[^/]+\/bin/.test(pth) && !pth.startsWith(FsUtil.cwd)) { // Convert bin from framework module
       pth = `${FsUtil.cwd}/node_modules/@travetto/${pth.split(/\/module\//)[1]}`;
     }
 

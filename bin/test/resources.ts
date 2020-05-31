@@ -57,7 +57,7 @@ function status(svc: Service) {
 export async function run(mode: 'start' | 'stop' | 'restart' | 'status') {
 
   const services = FrameworkUtil
-    .scan(x => /support\/service[.].*?[.]json/.test(x), FsUtil.resolveUnix(process.cwd(), 'module'))
+    .scan(x => /support\/service[.].*?[.]json/.test(x), FsUtil.resolveUnix(__dirname, '..', '..', 'module'))
     .filter(x => x.stats.isFile() && !x.module.includes('node_modules'))
     .map(x => require(x.file) as Service);
 

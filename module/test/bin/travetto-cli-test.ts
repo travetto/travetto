@@ -1,7 +1,7 @@
 import * as commander from 'commander';
 import * as os from 'os';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
-import { RunState } from '../src/runner/types';
+import type { RunState } from '../src/runner/types';
 
 /**
  * Launch test framework and execute tests
@@ -18,9 +18,7 @@ export class TestPlugin extends BasePlugin {
   }
 
   async action(args: string[]) {
-    const { runTests, load } = await import('./lib');
-
-    await load();
+    const { runTests } = await import('./lib');
 
     const state: Partial<RunState> = {
       args,
