@@ -124,31 +124,18 @@ export class AppRunFeature extends BaseFeature {
    * Build code lenses for a given document
    * @param doc
    */
-  buildCodeLenses(doc: vscode.TextDocument) {
-    const out: vscode.CodeLens[] = [];
-    for (let i = 0; i < doc.lineCount; i++) {
-      const line = doc.lineAt(i);
-      if (line.text.includes('@Application')) {
-        const [, name] = line.text.match(/^@Application\(['"]([^'"]+)/)!;
-        // Find start of function
-        while (!/\s+run\(/.test(doc.lineAt(i).text)) {
-          i += 1;
+  async buildCodeLenses(doc: vscode.TextDocument) {
+    return (await this.getAppList())
+      .filter(x => x.filename === doc.fileName)
+      .map(app => ({
+        range: doc.lineAt(app.start - 1).range,
+        isResolved: true,
+        command: {
+          command: this.commandName('new'),
+          title: `Debug Application`,
+          arguments: [app.name, app.codeStart]
         }
-
-        const cmd = {
-          range: doc.lineAt(i).range,
-          isResolved: true,
-          command: {
-            command: this.commandName('new'),
-            title: `Debug Application`,
-            arguments: [name, i + 1]
-          }
-        };
-        // @ts-ignore
-        out.push(cmd);
-      }
-    }
-    return out;
+      }));
   }
 
   /**

@@ -435,4 +435,23 @@ export class TransformUtil {
       return { name: parts[1], source };
     }
   }
+
+  /**
+   * Get first line of method body
+   * @param m
+   */
+  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, n: T, k?: keyof Extract<T, ts.Node | undefined>) {
+    let o: ts.Node = n;
+    if (k) {
+      o = (o as any)[k];
+    }
+    if (o) {
+      const start = ts.getLineAndCharacterOfPosition(source, o.getStart());
+      const end = ts.getLineAndCharacterOfPosition(source, o.getStart());
+      return {
+        start: start.line + 1,
+        end: end.line + 1
+      };
+    }
+  }
 }

@@ -19,3 +19,13 @@ export interface SuiteCore {
    */
   lines: { start: number, end: number };
 }
+
+/**
+ * Test core definition, adds codeStart
+ */
+export interface TestCore {
+  /**
+   * The lines within the file the tests overlaps
+   */
+  lines: { start: number, end: number, codeStart: number };
+}

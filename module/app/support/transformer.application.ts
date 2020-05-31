@@ -77,6 +77,12 @@ export class ApplicationTransformer {
       declArgs.push(TransformUtil.fromLiteral({}));
     }
 
+    // Track start point
+    declArgs[1] = TransformUtil.extendObjectLiteral(declArgs[1], {
+      start: TransformUtil.getRangeOf(state.source, node)?.start,
+      codeStart: TransformUtil.getRangeOf(state.source, runMethod, 'body')?.start
+    });
+
     dec.expression.arguments = ts.createNodeArray([
       ...declArgs,
       TransformUtil.fromLiteral(outParams)

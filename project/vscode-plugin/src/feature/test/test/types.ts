@@ -40,13 +40,17 @@ export interface SuiteConfig {
   lines: { start: number, end: number };
 }
 
+export interface TestCore extends SuiteConfig {
+  lines: { start: number, end: number, codeStart: number };
+}
+
 export interface SuiteResult extends SuiteConfig {
   skipped: number;
   failed: number;
   passed: number;
 }
 
-export interface TestConfig extends SuiteConfig {
+export interface TestConfig extends TestCore {
   methodName: string;
 }
 
