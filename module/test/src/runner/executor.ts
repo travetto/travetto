@@ -223,11 +223,6 @@ export class TestExecutor {
       return;
     }
 
-    // If using a debugger, add a delay for the debugger to connect
-    if (EnvUtil.isTrue('TRV_TEST_DEBUGGER')) {
-      await new Promise(t => setTimeout(t, 100));
-    }
-
     // Initialize registry (after loading the above)
     await TestRegistry.init();
 

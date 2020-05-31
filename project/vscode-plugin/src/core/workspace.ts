@@ -88,9 +88,11 @@ export class Workspace {
       runtimeArgs: [
         '--nolazy'
       ],
+      breakOnLoadStrategy: 'regex',
       skipFiles: [
         '<node_internals>/**',
-        '**/@travetto/context/**/*'
+        '**/@travetto/context/**/*',
+        '**/@travetto/boot/**/*'
       ],
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',

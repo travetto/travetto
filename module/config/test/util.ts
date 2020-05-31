@@ -34,4 +34,17 @@ a:
 
     assert(broken.a.e.g === 'test');
   }
+
+  @Test()
+  testSecret() {
+    const sanitized = ConfigUtil.sanitizeValuesByKey({
+      secret: 'custom',
+      standard: 'fine',
+      key: 'SECRETIVE'
+    }, [/(secret|key)/]);
+
+    assert(sanitized.secret === '******');
+    assert(sanitized.key === '*********');
+    assert(sanitized.standard === 'fine');
+  }
 }

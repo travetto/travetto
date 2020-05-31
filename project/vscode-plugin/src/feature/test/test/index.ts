@@ -19,6 +19,7 @@ class TestRunnerFeature extends BaseFeature {
   private runner: ExecutionState;
   private running = true;
   private cacheDir = `${Workspace.path}/.trv_cache_plugin`;
+  private codeLensUpdated: (e: void) => any;
 
   /**
    * Launch a test from the current location
@@ -68,7 +69,10 @@ class TestRunnerFeature extends BaseFeature {
       }
     });
 
-    this.runner.process.addListener('message', ev => this.consumer.onEvent(ev as TestEvent));
+    this.runner.process.addListener('message', ev => {
+      this.consumer.onEvent(ev as TestEvent);
+      this.codeLensUpdated?.();
+    });
   }
 
   /**
@@ -119,7 +123,13 @@ class TestRunnerFeature extends BaseFeature {
         base: Workspace.path,
         pattern: 'test/**'
       }
-    }, { provideCodeLenses: this.buildCodeLenses.bind(this) });
+    }, {
+      provideCodeLenses: this.buildCodeLenses.bind(this),
+      onDidChangeCodeLenses: l => {
+        this.codeLensUpdated = l;
+        return { dispose: () => { } };
+      }
+    });
 
     await this.launchTestServer();
 

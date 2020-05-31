@@ -24,7 +24,7 @@ export class AnnotationTransformer {
       dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
         lines: {
           ...TransformUtil.getRangeOf(state.source, n),
-          codeStart: TransformUtil.getRangeOf(state.source, n, 'body')?.start
+          codeStart: TransformUtil.getRangeOf(state.source, n?.body?.statements[0])?.start
         }
       })]);
     }

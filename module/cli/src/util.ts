@@ -134,6 +134,10 @@ export class CliUtil {
       work = work();
     }
 
+    if (!process.stdout.isTTY) {
+      return work; // Dip early
+    }
+
     let i = -1;
     let done = false;
     let value: T | undefined;
@@ -163,8 +167,8 @@ export class CliUtil {
    */
   static compile(output?: string) {
     return this.waiting('Compiling...',
-      ExecUtil.worker('@travetto/compiler/bin/compile-target', [], {
-        env: output ? { TRV_CACHE_DIR: output } : {}
+      ExecUtil.worker('@travetto/compiler/bin/travetto-plugin-compile', [], {
+        env: output ? { TRV_CACHE: output } : {}
       }).result
     );
   }

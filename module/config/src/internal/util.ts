@@ -165,7 +165,6 @@ export class ConfigUtil {
   /**
    * Sanitize payload
    */
-  // TODO: Write Tests
   static sanitizeValuesByKey(obj: any, patterns: RegExp[]) {
     const str = JSON.stringify(obj, (k, value) => {
       // TODO: Expand restriction detection
