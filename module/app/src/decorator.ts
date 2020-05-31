@@ -40,12 +40,12 @@ export function Application(
       out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] ?? {}), name: x.name! }) as ApplicationParameter);
     }
 
-    const [, root, first] = target.__file.replace(`${FsUtil.cwd}/`, '').match(/^([^\/]+)\/([^\/]+)/)!;
+    const module = target.__file.replace(`${FsUtil.cwd}/`, '');
 
     // If root is in node_modules or is 'src', default to local
     // * This supports apps being run from modules vs locally
-    out.root = (first === 'node_modules' || first === 'src') ? '.' :
-      root.split('/src')[0];
+    out.root = /^(node_modules|src|support)\//.test(module) ? '.' :
+      module.split('/src')[0];
 
     ApplicationRegistry.register(out.name, out as ApplicationConfig);
     return target;
