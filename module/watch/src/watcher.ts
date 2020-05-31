@@ -162,7 +162,7 @@ export class Watcher extends EventEmitter {
 
     try {
       console.debug('Watching Directory', entry.file);
-      const watcher = fs.watch(entry.file, throttle(() => {
+      const watcher = fs.watch(entry.file, { persistent: false }, throttle(() => {
         this.processDirectoryChange(entry);
       }, this.options.debounceDelay));
 

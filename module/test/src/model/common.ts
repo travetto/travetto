@@ -23,7 +23,7 @@ export interface SuiteCore {
 /**
  * Test core definition, adds codeStart
  */
-export interface TestCore {
+export interface TestCore extends SuiteCore {
   /**
    * The lines within the file the tests overlaps
    */
