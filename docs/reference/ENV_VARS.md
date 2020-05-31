@@ -16,7 +16,6 @@ The common environment variables throughout the code base:
 * `TRV_LOG_TIME` = 0|ms|s        - Determines if we should log time when logging, defaults to `ms` 
 
 ## Tests
-* `TRV_TEST_DEBUGGER` = 0|1      - Indicates whether or not a debugger is attached.  Some timing compensation is needed
 * `TRV_TEST_COMPILE` = 0|1       - Determines if all tests should be compiled, primarily used for tool integration, defaults to `0`
 * `TRV_TEST_PHASE_TIMEOUT` = 15s - The default time to wait for each phase to finish, default `15s`
 * `TRV_TEST_TIMEOUT` = 5s        - The default time for a single test to finish, default `5s`

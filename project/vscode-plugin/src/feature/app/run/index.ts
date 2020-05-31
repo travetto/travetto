@@ -15,12 +15,13 @@ import { BaseFeature } from '../../base';
 export class AppRunFeature extends BaseFeature {
 
   private storage = new ActionStorage<AppChoice>('app.run', Workspace.path);
+  private codeLensUpdated: () => any;
 
-  private runner(title: string, choices: () => Promise<AppChoice[] | AppChoice | undefined>) {
+  private runner(title: string, choices: () => Promise<AppChoice[] | AppChoice | undefined>, line?: number) {
     return async () => {
       const choice = await choices();
       if (choice) {
-        await this.runApplication(title, choice);
+        await this.runApplication(title, choice, line);
       }
     };
   }
@@ -29,6 +30,7 @@ export class AppRunFeature extends BaseFeature {
    * Get list of applications
    */
   async getAppList() {
+    await this.compile();
     return JSON.parse(await this.runPlugin('list')) as AppChoice[];
   }
 
@@ -106,12 +108,20 @@ export class AppRunFeature extends BaseFeature {
    * @param title
    * @param apps
    */
-  async runApplication(title: string, apps: AppChoice[] | AppChoice) {
+  async runApplication(title: string, apps: AppChoice[] | AppChoice, line?: number) {
     try {
       const choice = await this.resolveChoices(title, apps);
 
       if (!choice) {
         return;
+      }
+
+      if (line) {
+        const editor = vscode.window.visibleTextEditors.find(x => x.document.fileName === choice.filename);
+        if (editor) {
+          Workspace.addBreakpoint(editor, line);
+          await new Promise(r => setTimeout(r, 100));
+        }
       }
 
       await vscode.debug.startDebugging(Workspace.folder, this.getLaunchConfig(choice));
@@ -145,23 +155,14 @@ export class AppRunFeature extends BaseFeature {
     this.register('new', (name?: string, line?: number) =>
       this.runner('Run New Application', async () => {
         const list = await this.getAppList();
-        if (name) {
-          const choice = list.find(x => x.name === name);
-          if (choice && line) {
-            const active = Workspace.getDocumentEditor(vscode.window.activeTextEditor);
-            if (active) {
-              Workspace.addBreakpoint(active, line);
-            }
-          }
-          return choice;
-        } else {
-          return list;
-        }
-      })()
+        return name ? list.find(x => x.name === name) : list;
+      }, line)()
     );
     this.register('recent', this.runner('Run Recent Application', () => this.getValidRecent(10)));
     this.register('mostRecent', this.runner('Run Most Recent Application', () => this.getValidRecent(1).then(([x]) => x)));
     this.register('export', async () => this.exportLaunchConfig());
+
+    vscode.window.onDidChangeActiveTextEditor(() => this.codeLensUpdated?.());
 
     vscode.languages.registerCodeLensProvider({
       language: 'typescript',
@@ -169,6 +170,12 @@ export class AppRunFeature extends BaseFeature {
         base: Workspace.path,
         pattern: '**/src/**'
       }
-    }, { provideCodeLenses: this.buildCodeLenses.bind(this) });
+    }, {
+      provideCodeLenses: this.buildCodeLenses.bind(this),
+      onDidChangeCodeLenses: l => {
+        l = this.codeLensUpdated;
+        return { dispose: () => { } };
+      }
+    });
   }
 }

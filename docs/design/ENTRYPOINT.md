@@ -40,7 +40,7 @@ t = typescript, i = init, r = run, a = await
 * compiler/bin (Run app to establish all transformers)
   ------------------------------------------------------
   [    ] ./travetto-cli-compile.ts  
-  [tira] ./compile-target.js
+  [tira] ./travetto-plugin-compile.js
 
 * di/bin (Run app selected, collect app data)
   ------------------------------------------------------

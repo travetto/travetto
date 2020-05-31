@@ -440,14 +440,10 @@ export class TransformUtil {
    * Get first line of method body
    * @param m
    */
-  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, n: T, k?: keyof Extract<T, ts.Node | undefined>) {
-    let o: ts.Node = n;
-    if (k) {
-      o = (o as any)[k];
-    }
+  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, o: T | undefined) {
     if (o) {
       const start = ts.getLineAndCharacterOfPosition(source, o.getStart());
-      const end = ts.getLineAndCharacterOfPosition(source, o.getStart());
+      const end = ts.getLineAndCharacterOfPosition(source, o.getEnd());
       return {
         start: start.line + 1,
         end: end.line + 1

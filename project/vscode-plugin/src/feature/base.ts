@@ -30,6 +30,23 @@ export abstract class BaseFeature implements ActivationTarget {
     return this.resolve('bin', `travetto-plugin-${name}.js`);
   }
 
+  async compile() {
+    const { result } = ExecUtil.fork(Workspace.resolve('node_modules/@travetto/compiler/bin/travetto-plugin-compile.js'), [], {
+      cwd: Workspace.path
+    });
+
+    try {
+      return await Promise.race([result, new Promise((res, rej) => setTimeout(rej, 500))]);
+    } catch (err) { // Handle timeout
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: 'Compiling...',
+        cancellable: false
+      }, () => result);
+      return (await result).stdout;
+    }
+  }
+
   async runPlugin(name: string) {
     const { result } = ExecUtil.fork(this.resolvePlugin(name), [], {
       cwd: Workspace.path
