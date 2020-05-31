@@ -22,8 +22,7 @@ The common environment variables throughout the code base:
 * `TRV_TEST_IDLE_TIMEOUT` = 2m   - Default timeout for a test-worker, determines self termination if no request within that time window, default `2m`
 
 ## Exec
-* `TRV_DOCKER_DISABLE` = 0|1     - Indicates if docker should even be considered when running a command service, defaults to `0`
-* `TRV_DOCKER_NS` =              - Defaults to undefined, but can be specified to ensure unique instantiation
+* `TRV_DOCKER` = 0|any           - Docker support, if non-zero, acts as the docker namespace.  If `0`, disables running if docker should even be considered when running a command service, defaults to `undefined`
 
 ## Framework
 * `TRV_DEV` = 0|1                - If we are in development mode, 
