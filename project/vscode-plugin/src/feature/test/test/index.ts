@@ -36,7 +36,7 @@ class TestRunnerFeature extends BaseFeature {
     }
 
     if (editor && breakpoint) {
-      Workspace.addBreakpoint(editor, line + 1);
+      Workspace.addBreakpoint(editor, line);
     }
 
     return await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
@@ -93,15 +93,17 @@ class TestRunnerFeature extends BaseFeature {
    * @param doc
    */
   buildCodeLenses(doc: vscode.TextDocument) {
-    return (this.consumer.getResults(doc)?.getListOfTests() || []).map(test => ({
-      range: doc.lineAt(test.start - 1).range,
-      isResolved: true,
-      command: {
-        command: this.commandName('line'),
-        title: `Debug Test`,
-        arguments: [doc.fileName, test.code, true]
-      }
-    }) as vscode.CodeLens);
+    return (this.consumer.getResults(doc)?.getListOfTests() || [])
+      .filter(x => x.start < doc.lineCount && doc.lineAt(x.start - 1).text.includes('@Test'))
+      .map(test => ({
+        range: doc.lineAt(test.start - 1).range,
+        isResolved: true,
+        command: {
+          command: this.commandName('line'),
+          title: `Debug Test`,
+          arguments: [doc.fileName, test.code, true]
+        }
+      }) as vscode.CodeLens);
   }
 
   /**

@@ -1,17 +1,8 @@
 {
+  "extends": "../../module/boot/tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "outDir": "out",
-    "target": "es2018",
-    "strict": true,
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
-    "lib": [
-      "es2015",
-      "es2018"
-    ]
+    "importHelpers": false,
+    "outDir": "out"
   },
   "exclude": [
     "node_modules",
