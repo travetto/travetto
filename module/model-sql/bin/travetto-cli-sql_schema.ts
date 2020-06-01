@@ -8,6 +8,7 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
  */
 export class SqlSchemaPlugin extends BasePlugin {
   name = 'sql:schema';
+
   init(cmd: commander.Command) {
     return cmd
       .option('-a, --app [app]', 'Application root to export, (default: .)')

@@ -14,10 +14,7 @@ if (
   ExecUtil.fork(process.argv[1], process.argv.slice(2), {
     stdio: [0, 1, 2],
     shell: true,
-    env: {
-      NODE_PRESERVE_SYMLINKS: '1',
-      TRV_DEV: '1',
-    }
+    env: { NODE_PRESERVE_SYMLINKS: 1, TRV_DEV: 1 }
   }).result.catch(err => {
     if (err.meta.code !== 255) {
       console.log(err);
@@ -31,18 +28,17 @@ if (
  * Handle if cli is install globally
  */
 if (!FsUtil.toUnix(__filename).includes(FsUtil.cwd)) { // If the current file is not under the working directory
-  const hasLocal = FsUtil.existsSync(`${FsUtil.cwd}/node_modules/@travetto/${FsUtil.toUnix(__filename).split('@travetto/')[1]}`);
+  const PKG = '@travetto/cli';
+  const hasLocal = FsUtil.existsSync(`${FsUtil.cwd}/node_modules/${PKG}`);
 
   // Map the module loading for targeting the local node_modules
   const Module = require('module');
   const og = Module._load;
   Module._load = function (req, parent) {
-    if (req.startsWith('@travetto/cli')) { // Support delegating to installed CLI
-      if (!hasLocal) { // Map all $pkg calls to root of global package
-        req = FsUtil.resolveUnix(__dirname, `../${FsUtil.toUnix(req).split(`@travetto/cli/`)[1]}`);
-      } else { // Rewrite $pkg to map to local folder, when calling globally
-        req = FsUtil.resolveUnix(FsUtil.cwd, `node_modules/${req}`);
-      }
+    if (req.startsWith(PKG)) { // Support delegating to installed CLI
+      req = hasLocal ?
+        FsUtil.resolveUnix(FsUtil.cwd, 'node_modules', req) : // Rewrite $PKG to map to local folder
+        FsUtil.resolveUnix(__dirname, '..', req.replace(`${PKG}/`, '')); // Map to global package
     }
     return og.call(Module, req, parent);
   };

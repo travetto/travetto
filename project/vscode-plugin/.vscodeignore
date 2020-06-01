@@ -7,3 +7,12 @@ src/**
 .gitignore
 tsconfig.json
 vsc-extension-quickstart.md
+node_modules/typescript/**
+node_modules/source-map*/**
+node_modules/source-map-support/**
+node_modules/buffer-from/**
+**/node_modules/@types/**
+node_modules/@travetto/boot/**/*.d.ts
+node_modules/@travetto/boot/tsconfig.json
+node_modules/@travetto/boot/{README.md,LICENSE}
+node_modules/@travetto/boot/bin/**

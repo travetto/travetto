@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
+import { ExecUtil } from '@travetto/boot';
 
 import { ActivationTarget } from '../core/types';
 import { Workspace } from '../core/workspace';
-import { ExecUtil } from '@travetto/boot';
 
 // @ts-ignore
 export abstract class BaseFeature implements ActivationTarget {
