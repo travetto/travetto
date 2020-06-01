@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/cache": "^1.0.0-rc.1",
-    "@travetto/rest": "^1.0.0-rc.1"
+    "@travetto/cache": "^1.0.0-rc.2",
+    "@travetto/rest": "^1.0.0-rc.2"
   },
   "description": "Session provider for the travetto rest module.",
   "homepage": "https://travetto.io",
@@ -28,5 +28,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.1"
+  "version": "1.0.0-rc.2"
 }

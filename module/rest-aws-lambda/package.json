@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/rest": "^1.0.0-rc.1",
+    "@travetto/rest": "^1.0.0-rc.2",
     "@types/aws-lambda": "^8.10.51",
     "@types/aws-serverless-express": "^3.3.3",
     "@types/body-parser": "^1.19.0",
@@ -19,7 +19,7 @@
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "@travetto/app": "^1.0.0-rc.1"
+    "@travetto/app": "^1.0.0-rc.2"
   },
   "description": "AWS lambda provider for the travetto rest module.",
   "homepage": "https://travetto.io",
@@ -42,5 +42,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.1"
+  "version": "1.0.0-rc.2"
 }
