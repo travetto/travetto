@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^1.0.0-rc.1",
-    "@travetto/email": "^1.0.0-rc.1",
-    "@travetto/image": "^1.0.0-rc.1",
+    "@travetto/di": "^1.0.0-rc.2",
+    "@travetto/email": "^1.0.0-rc.2",
+    "@travetto/image": "^1.0.0-rc.2",
     "@types/html-entities": "^1.2.16",
     "@types/mustache": "^4.0.1",
     "@types/parse5": "^5.0.2",
@@ -48,5 +48,5 @@
     "support",
     "bin"
   ],
-  "version": "1.0.0-rc.1"
+  "version": "1.0.0-rc.2"
 }
