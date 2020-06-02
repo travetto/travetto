@@ -1,13 +1,12 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { FsUtil, ScanFs } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
 import { StyleUtil } from './style';
 import { ImageUtil } from './image';
-import { ScanApp } from '@travetto/base';
 
 const fsWriteFile = util.promisify(fs.writeFile);
 const fsReadFile = util.promisify(fs.readFile);

@@ -50,12 +50,7 @@ export class Runner {
       .process(new IterableInputSource(files))
       .finally(() => pool.shutdown());
 
-    const result = consumer.summarize();
-    if (result) {
-      return result.summary.failed <= 0;
-    } else {
-      return true;
-    }
+    return consumer.summarizeAsBoolean();
   }
 
   /**
@@ -66,11 +61,9 @@ export class Runner {
     consumer.onStart();
 
     await PhaseManager.create('test').run();
-    const res = await TestExecutor.execute(consumer, this.state.args[0], ...this.state.args.slice(1));
+    await TestExecutor.execute(consumer, this.state.args[0], ...this.state.args.slice(1));
 
-    consumer.summarize();
-
-    return res;
+    return consumer.summarizeAsBoolean();
   }
 
   /**

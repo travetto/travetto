@@ -53,4 +53,13 @@ export class RunnableTestConsumer implements TestConsumer {
       return this.results;
     }
   }
+
+  summarizeAsBoolean() {
+    const result = this.summarize();
+    if (result) {
+      return result.summary.failed <= 0;
+    } else {
+      return true;
+    }
+  }
 }
