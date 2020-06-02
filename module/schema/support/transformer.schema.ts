@@ -104,17 +104,17 @@ export class SchemaTransformer {
   /**
    * Track schema on start
    */
-  @OnClass('trv/schema/Schema')
+  @OnClass('@trv:schema/Schema')
   static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta) {
     state[inSchema] = true;
-    state[hasSchema] = !!state.findDecorator(node, 'trv/schema/Schema', 'Schema', SCHEMA_MOD);
+    state[hasSchema] = !!state.findDecorator(node, '@trv:schema/Schema', 'Schema', SCHEMA_MOD);
     return node;
   }
 
   /**
    * Mark the end of the schema, document
    */
-  @AfterClass('trv/schema/Schema')
+  @AfterClass('@trv:schema/Schema')
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators ?? [])];
 
@@ -149,7 +149,7 @@ export class SchemaTransformer {
    */
   @OnProperty()
   static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
-    const ignore = state.findDecorator(node, 'trv/schema/Ignore', 'Ignore', FIELD_MOD);
+    const ignore = state.findDecorator(node, '@trv:schema/Ignore', 'Ignore', FIELD_MOD);
     const isPublic = !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier); // eslint-disable-line no-bitwise
     return state[inSchema] && !ignore && isPublic ?
       this.computeProperty(state, node) : node;

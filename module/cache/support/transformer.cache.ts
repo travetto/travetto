@@ -10,8 +10,8 @@ interface CacheState {
   evict: ts.PropertyAccessExpression;
 }
 
-const CACHE_KEY = 'trv/cache/Cache';
-const EVICT_KEY = 'trv/cache/Evict';
+const CACHE_KEY = '@trv:cache/Cache';
+const EVICT_KEY = '@trv:cache/Evict';
 
 /**
  * Transform the cache headers

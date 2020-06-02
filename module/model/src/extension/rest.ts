@@ -36,7 +36,7 @@ class SuggestQuery {
  * - Read all
  * - Suggest by field
  *
- * @augments trv/di/Injectable
+ * @augments `@trv:di/Injectable`
  */
 export function ModelController<T extends ModelCore>(path: string, cls: Class<T>) {
   function getCls() {

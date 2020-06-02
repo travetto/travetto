@@ -18,8 +18,8 @@ export type AppDecorator = Partial<ApplicationConfig> & {
  * compiler will automatically infer the parameters from the `run` method of
  * the class.
  *
- * @augments trv/app/Application
- * @augments trv/di/Injectable
+ * @augments `@trv:app/Application`
+ * @augments `@trv:di/Injectable`
  */
 export function Application(
   name: string,

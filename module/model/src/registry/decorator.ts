@@ -7,7 +7,7 @@ import { ModelOptions, IndexConfig } from './types';
 /**
  * Model decorator, extends `@Schema`
  *
- * @augments trv/schema/Schema
+ * @augments `@trv:schema/Schema`
  */
 export function Model(conf: Partial<ModelOptions<any>> = {}) {
   return function <T extends Class>(target: T) {

@@ -118,7 +118,7 @@ export class TransformerState implements State {
       dec,
       ident,
       file: decl?.getSourceFile().fileName,
-      targets: this.resolver.readDocsTags(ident, 'augments').map(x => x.replace(/trv \//, 'trv/')),
+      targets: this.resolver.readDocsTags(ident, 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b)),
       name: ident ?
         ident.escapedText! as string :
         undefined

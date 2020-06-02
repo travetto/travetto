@@ -11,7 +11,7 @@ type TypedMethodDecorator<T, U> = (target: T, propertyKey: string, descriptor: T
  * Indicates a method is intended to cache.  The return type must be properly serializable
  * @param field The field of the cache source
  * @param config The additional cache configuration
- * @augments trv/cache/Cache
+ * @augments `@trv:cache/Cache`
  */
 export function Cache<U>(field: ValidCacheFields<U>, config: CacheConfig = {}): TypedMethodDecorator<U, Promise<any>> {
   return function (target: U, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => Promise<any>>) { };
@@ -22,7 +22,7 @@ export function Cache<U>(field: ValidCacheFields<U>, config: CacheConfig = {}): 
  * freshest data will be collected
  * @param field The field of the cache source
  * @param config The additional cache configuration
- * @augments trv/cache/Evict
+ * @augments `@trv:cache/Evict`
  */
 export function EvictCache<U>(field: ValidCacheFields<U>, config: CoreCacheConfig = {}): TypedMethodDecorator<U, Promise<any>> {
   return function (target: U, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => Promise<any>>) { };

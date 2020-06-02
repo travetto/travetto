@@ -4,9 +4,8 @@ import { ControllerDecorator } from '../registry/types';
 
 /**
  * Decorator to register a new rest controller
- *
- * @augments trv/di/Injectable
- * @augments trv/rest/Controller
+ * @augments `@trv:di/Injectable`
+ * @augments `@trv:rest/Controller`
  */
 export function Controller(path = '') {
   return function (target: Class) {

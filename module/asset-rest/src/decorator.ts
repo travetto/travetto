@@ -14,8 +14,8 @@ const extractUpload = (config: ParamConfig, req: Request) => req.files[config.na
 /**
  * Allows for supporting uploads
  *
- * @augments trv/asset-rest/AssetUpload
- * @augments trv/rest/Param
+ * @augments `@trv:asset-rest/AssetUpload`
+ * @augments `@trv:rest/Param`
  */
 export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetConfig> = {}) {
 

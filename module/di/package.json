@@ -9,6 +9,9 @@
   "dependencies": {
     "@travetto/registry": "^1.0.0-rc.2"
   },
+  "devDependencies": {
+    "@travetto/config": "^1.0.0-rc.2"
+  },
   "description": "Dependency registration/management and injection support.",
   "homepage": "https://travetto.io",
   "keywords": [
