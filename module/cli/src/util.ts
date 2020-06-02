@@ -163,17 +163,6 @@ export class CliUtil {
   }
 
   /**
-   * Trigger a compile
-   */
-  static compile(output?: string) {
-    return this.waiting('Compiling...',
-      ExecUtil.worker('@travetto/compiler/bin/travetto-plugin-compile', [], {
-        env: output ? { TRV_CACHE: output } : {}
-      }).result
-    );
-  }
-
-  /**
    * Return plugin data depending on how it has been called
    */
   static pluginResponse(obj: any) {

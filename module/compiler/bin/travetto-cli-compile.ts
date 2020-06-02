@@ -3,9 +3,7 @@ import * as commander from 'commander';
 import { CliUtil } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
-import { CompileUtil } from './lib/util';
-import { ExecUtil } from '@travetto/boot';
-
+import { CompileCliUtil } from './lib/util';
 
 /**
  * Command line support for pre-compiling the code with the ability to
@@ -37,10 +35,10 @@ export class CompilerCompilePlugin extends BasePlugin {
     }
 
     try {
-      await CliUtil.compile(path);
+      await CompileCliUtil.compile(path);
 
       if (this._cmd.runtimeDir) {
-        await CompileUtil.rewriteRuntimeDir(this._cmd.runtimeDir);
+        await CompileCliUtil.rewriteRuntimeDir(this._cmd.runtimeDir);
       }
 
       if (!this._cmd.quiet) {
