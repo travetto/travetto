@@ -9,7 +9,7 @@ import type { ClassTarget } from '../src/types';
  */
 export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
 
-  const DEFAULT_INSTANCE = Symbol.for('__di_default');
+  const DEFAULT_INSTANCE = Symbol.for('@trv:di/default');
 
   /**
    * Extending the $DependencyRegistry class to add some functionality for watching

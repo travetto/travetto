@@ -5,7 +5,7 @@ import { Watchable } from '@travetto/base/src/internal/watchable';
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
 
-export const DEFAULT_INSTANCE = Symbol.for('__di_default');
+export const DEFAULT_INSTANCE = Symbol.for('@trv:di/default');
 
 export interface ManagedExtra {
   postConstruct?: () => any;
