@@ -163,7 +163,7 @@ export const Currency = () => Precision(13, 2);
 /**
  * Mark a field as ignored
  *
- * @augments trv/schema/Ignore
+ * @augments `@trv:schema/Ignore`
  */
 export function Ignore(): PropertyDecorator {
   return (target: any, property: string | symbol) => { };

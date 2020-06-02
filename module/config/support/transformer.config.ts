@@ -16,13 +16,13 @@ interface AutoState {
  */
 export class ConfigTransformer {
 
-  @OnClass('trv/config/Config')
+  @OnClass('@trv:config/Config')
   static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
     state[hasConfig] = !!dm;
     return node;
   }
 
-  @AfterClass('trv/config/Config')
+  @AfterClass('@trv:config/Config')
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators ?? [])];
 

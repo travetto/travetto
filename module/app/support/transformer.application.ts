@@ -49,7 +49,7 @@ export class ApplicationTransformer {
   /**
    * On presence of `@Application`
    */
-  @OnClass('trv/app/Application')
+  @OnClass('@trv:app/Application')
   static handleClass(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
     const dec = dm?.dec;
 

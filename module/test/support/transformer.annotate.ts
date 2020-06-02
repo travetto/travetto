@@ -9,8 +9,8 @@ import {
  */
 export class AnnotationTransformer {
 
-  @OnClass('trv/test/Suite')
-  @OnMethod('trv/test/Test')
+  @OnClass('@trv:test/Suite')
+  @OnMethod('@trv:test/Test')
   static annotate(state: TransformerState, node: ts.MethodDeclaration | ts.ClassDeclaration, dm?: DecoratorMeta) {
 
     const dec = dm?.dec;

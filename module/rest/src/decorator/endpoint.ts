@@ -13,49 +13,49 @@ function Endpoint(method: MethodOrAll, path: PathType = '/', extra: Partial<Endp
 /**
  * Registers for ALL HTTP verbs
  * @param path The path to route the request to
- * @augments trv/rest/Endpoint
+ * @augments `@trv:rest/Endpoint`
  */
 export const All = (path?: PathType) => Endpoint('all', path);
 /**
  * Registers GET requests
  * @param path The path to route the request to
- * @augments trv/rest/Endpoint
+ * @augments `@trv:rest/Endpoint`
  */
 export const Get = (path?: PathType) => Endpoint('get', path);
 /**
  * Registers POST requests
  * @param path The path to route the request to
- * @augments trv/rest/Endpoint
+ * @augments `@trv:rest/Endpoint`
  */
 export const Post = (path?: PathType) => Endpoint('post', path);
 /**
  * Registers PUT requests
  * @param path The path to route the request to
- * @augments trv/rest/Endpoint
+ * @augments `@trv:rest/Endpoint`
  */
 export const Put = (path?: PathType) => Endpoint('put', path);
 /**
  * Registers PATCH requests
  * @param path The path to route the request to
- * @augments trv/rest/Endpoint
+ * @augments `@trv:rest/Endpoint`
  */
 export const Patch = (path?: PathType) => Endpoint('patch', path);
 /**
  * Registers DELETE requests
  * @param path The path to route the request to
- * @augments trv/rest/Endpoint
+ * @augments `@trv:rest/Endpoint`
  */
 export const Delete = (path?: PathType) => Endpoint('delete', path);
 /**
  * Registers HEAD requests
  * @param path The path to route the request to
- * @augments trv/rest/Endpoint
+ * @augments `@trv:rest/Endpoint`
  */
 export const Head = (path?: PathType) => Endpoint('head', path);
 /**
  * Registers OPTIONS requests
  * @param path The path to route the request to
- * @augments trv/rest/Endpoint
+ * @augments `@trv:rest/Endpoint`
  */
 export const Options = (path?: PathType) => Endpoint('options', path);
 

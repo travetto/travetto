@@ -38,31 +38,31 @@ export const Param = (location: ParamConfig['location'], extra: string | Partial
 /**
  * Define a Context param
  * @param param The parma configuration or name
- * @augments trv/rest/Param
+ * @augments `@trv:rest/Param`
  */
 export const Context = (param: string | Partial<ParamConfig> = {}) => Param('context', param);
 /**
  * Define a Path param
  * @param param The parma configuration or name
- * @augments trv/rest/Param
+ * @augments `@trv:rest/Param`
  */
 export const Path = (param: string | Partial<ParamConfig> = {}) => Param('path', param);
 /**
  * Define a Query param
  * @param param The parma configuration or name
- * @augments trv/rest/Param
+ * @augments `@trv:rest/Param`
  */
 export const Query = (param: string | Partial<ParamConfig> = {}) => Param('query', param);
 /**
  * Define a Header param
  * @param param The parma configuration or name
- * @augments trv/rest/Param
+ * @augments `@trv:rest/Param`
  */
 export const Header = (param: string | Partial<ParamConfig> = {}) => Param('header', param);
 /**
  * Define a body param as an input
  * @param param The parma configuration
- * @augments trv/rest/Param
+ * @augments `@trv:rest/Param`
  */
 export const Body = (param: Partial<ParamConfig> = {}) => Param('body', param);
 

@@ -19,7 +19,7 @@ function extractSymbolOrConfig<T extends { qualifier?: symbol }>(args: any[]) {
 /**
  * Indicate that a class is able to be injected
  *
- * @augments trv/di/Injectable
+ * @augments `@trv:di/Injectable`
  */
 export function Injectable(qualifier: symbol, config?: Partial<InjectableConfig<any>>): ClassDecorator;
 export function Injectable(config: Partial<InjectableConfig<any>>): ClassDecorator;
@@ -45,7 +45,7 @@ export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
 /**
  * Indicate that a field is able to be injected
  *
- * @augments trv/di/Inject
+ * @augments `@trv:di/Inject`
  */
 export function Inject(symbol: symbol, config?: InjectConfig): ParameterDecorator & PropertyDecorator;
 export function Inject(config: InjectConfig): ParameterDecorator & PropertyDecorator;
@@ -67,7 +67,7 @@ export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
 /**
  * Identifies a static method that is able to produce a dependency
  *
- * @augments trv/di/InjectableFactory
+ * @augments `@trv:di/InjectableFactory`
  */
 export function InjectableFactory(symbol: symbol, config?: InjectableFactoryConfig<any>): MethodDecorator;
 export function InjectableFactory(config: InjectableFactoryConfig<any>): MethodDecorator;

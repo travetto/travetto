@@ -6,7 +6,7 @@ import { ValidatorFn } from '../validate/types';
 /**
  * Register a class as a Schema
  *
- * @augments trv/schema/Schema
+ * @augments `@trv:schema/Schema`
  */
 export function Schema(): ClassDecorator { // Auto is used during compilation
   return (<T>(target: Class<T>): Class<T> => {

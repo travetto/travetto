@@ -66,7 +66,7 @@ export class RestTransformer {
    * Handle endpoint parameter
    */
   static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation) {
-    const pDec = state.findDecorator(node, 'trv/rest/Param');
+    const pDec = state.findDecorator(node, '@trv:rest/Param');
     let pDecArg = TransformUtil.getPrimaryArgument(pDec)!;
     if (pDecArg && ts.isStringLiteral(pDecArg)) {
       pDecArg = TransformUtil.fromLiteral({ name: pDecArg });
@@ -103,7 +103,7 @@ export class RestTransformer {
   /**
    * On @Endpoint method
    */
-  @OnMethod('trv/rest/Endpoint')
+  @OnMethod('@trv:rest/Endpoint')
   static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration) {
 
     const decls = node.decorators;
@@ -181,7 +181,7 @@ export class RestTransformer {
   /**
    * Handle @Controller
    */
-  @OnClass('trv/rest/Controller')
+  @OnClass('@trv:rest/Controller')
   static handleController(state: TransformerState, node: ts.ClassDeclaration) {
     // Read title/description/summary from jsdoc on class
     const comments = state.readJSDocs(node);
