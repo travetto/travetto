@@ -7,6 +7,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@travetto/config": "^1.0.0-rc.2",
     "@travetto/di": "^1.0.0-rc.2"
   },
   "description": "Application registration/management and run support.",

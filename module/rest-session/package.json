@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@travetto/cache": "^1.0.0-rc.2",
+    "@travetto/config": "^1.0.0-rc.2",
     "@travetto/rest": "^1.0.0-rc.2"
   },
   "description": "Session provider for the travetto rest module.",
