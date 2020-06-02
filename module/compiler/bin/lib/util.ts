@@ -1,6 +1,8 @@
 import * as fs from 'fs';
+import { ExecUtil } from '@travetto/boot';
+import { CliUtil } from '@travetto/cli/src/util';
 
-export class CompileUtil {
+export class CompileCliUtil {
   /**
    * Rewrite the cache directory to allow for packaging
    */
@@ -15,5 +17,16 @@ export class CompileUtil {
         .replace(new RegExp(FsUtil.cwd, 'g'), runtimeDir); // Rewrite paths
       fs.writeFileSync(file, contents, 'utf-8');
     }
+  }
+
+  /**
+   * Trigger a compile
+   */
+  static compile(output?: string) {
+    return CliUtil.waiting('Compiling...',
+      ExecUtil.worker('@travetto/compiler/bin/travetto-plugin-compile', [], {
+        env: output ? { TRV_CACHE: output } : {}
+      }).result
+    );
   }
 }

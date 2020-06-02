@@ -1,7 +1,9 @@
 import { CliUtil } from '@travetto/cli/src/util';
+import { CompileCliUtil } from '@travetto/compiler/bin/lib/util';
 
 import { AppListManager } from './list';
 import { ApplicationParameter } from '../../src/types';
+
 
 /**
  * Supporting app execution
@@ -33,7 +35,7 @@ export class RunUtil {
         { roots: [app.root], profiles: [app.name] }
     );
 
-    await CliUtil.compile();
+    await CompileCliUtil.compile();
 
     // Compile all code as needed
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
