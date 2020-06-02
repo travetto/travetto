@@ -7,6 +7,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@travetto/config": "^1.0.0-rc.2",
     "@travetto/context": "^1.0.0-rc.2",
     "@travetto/model": "^1.0.0-rc.2"
   },

@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@travetto/auth-rest": "^1.0.0-rc.2",
+    "@travetto/config": "^1.0.0-rc.2",
     "@types/passport": "^1.0.3",
     "passport": "^0.4.1"
   },

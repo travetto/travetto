@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@travetto/auth": "^1.0.0-rc.2",
+    "@travetto/config": "^1.0.0-rc.2",
     "@travetto/context": "^1.0.0-rc.2",
     "@travetto/rest": "^1.0.0-rc.2"
   },
