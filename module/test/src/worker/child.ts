@@ -8,6 +8,7 @@ const FIXED_MODULES = new Set([
   //  'cache', 'openapi',
   'boot', 'base', 'cli', 'config', 'compiler', 'yaml',
   'worker', 'command', 'log', 'net', 'jwt', 'image', 'test',
+  'transformer'
   // 'registry'
 ].map(x => `@travetto/${x}`));
 

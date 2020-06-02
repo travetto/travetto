@@ -1,11 +1,16 @@
 import * as ts from 'typescript';
 import { DecoratorMeta, NodeTransformer, State } from './types/visitor';
 
-const HANDLERS = Symbol.for('@trv:compiler/transform-handlers');
+const HANDLERS = Symbol.for('@trv:transform/handlers');
 
-// Retrieve from class
-export function getTransformHandlers(cls: any): NodeTransformer[] {
-  return cls[HANDLERS];
+/**
+ * Get all transformers
+ * @param obj Object to search for transformers
+ */
+export function getAllTransformers(obj: any) {
+  return Object.values(obj)
+    .map(x => (x as any)[HANDLERS] as NodeTransformer[] ?? [])
+    .flat();
 }
 
 // Store handlers in class

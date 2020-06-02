@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import {
   TransformUtil, TransformerState, res, OnClass, OnMethod, ParamDocumentation, DeclDocumentation
-} from '@travetto/compiler/src/transform-support';
+} from '@travetto/transformer';
 
 import { ParamConfig } from '../src/types';
 

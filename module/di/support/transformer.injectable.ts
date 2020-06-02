@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import {
   TransformUtil, TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, res
-} from '@travetto/compiler/src/transform-support';
+} from '@travetto/transformer';
 
 const INJECTABLE_MOD = require.resolve('../src/decorator');
 

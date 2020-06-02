@@ -2,8 +2,8 @@ import * as ts from 'typescript';
 import { ScanApp } from '@travetto/base';
 
 import {
-  NodeTransformer, VisitorFactory, TransformerState, getTransformHandlers
-} from './transform-support'; // Narrow import to minimize scope
+  NodeTransformer, VisitorFactory, TransformerState, getAllTransformers
+} from '@travetto/transformer'; // Narrow import to minimize scope
 
 /**
  * Manages the typescript transformers
@@ -27,17 +27,10 @@ export class TransformerManager {
     const found = ScanApp.findFiles({ folder: 'support', filter: /\/transformer.*[.]ts/ });
 
     for (const entry of found) { // Exclude based on blacklist
-      const all = require(entry.file);
-      const resolved = Object
-        .values(all)
-        .map(x => getTransformHandlers(x) as this['transformers'])
-        .filter(x => !!x && x.length > 0);
-
-      for (const transformers of resolved) {
-        this.transformers.push(...transformers.map(x => {
-          x.file = entry.file;
-          return x;
-        }));
+      for (const transformer of getAllTransformers(require(entry.file))) {
+        const withFile = transformer as this['transformers'][number];
+        withFile.file = entry.file;
+        this.transformers.push(withFile);
       }
     }
 

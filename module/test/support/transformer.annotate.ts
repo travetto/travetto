@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import {
   TransformUtil, TransformerState, DecoratorMeta, OnMethod, OnClass
-} from '@travetto/compiler/src/transform-support';
+} from '@travetto/transformer';
 
 /**
  * Annotate tests and suites for better diagnostics

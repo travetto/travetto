@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import {
   TransformUtil, TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, res
-} from '@travetto/compiler/src/transform-support';
+} from '@travetto/transformer';
 
 const hasSchema = Symbol.for('@trv:schema/has');
 const inSchema = Symbol.for('@trv:schema/valid');

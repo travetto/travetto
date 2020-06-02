@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerState, DecoratorMeta, OnProperty, OnClass, AfterClass } from '@travetto/compiler/src/transform-support';
+import { TransformerState, DecoratorMeta, OnProperty, OnClass, AfterClass } from '@travetto/transformer';
 
 const hasConfig = Symbol.for('@trv:config/exists');
 

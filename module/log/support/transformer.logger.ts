@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import { EnvUtil } from '@travetto/boot';
 import { ConsoleManager } from '@travetto/base';
-import { TransformerState, OnCall, TransformUtil } from '@travetto/compiler/src/transform-support';
+import { TransformerState, OnCall, TransformUtil } from '@travetto/transformer';
 
 /**
  * Allows for removal of debug log messages depending on whether app is running
