@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, DecoratorMeta, OnMethod } from '@travetto/compiler/src/transform-support';
+import { TransformUtil, TransformerState, DecoratorMeta, OnMethod } from '@travetto/transformer';
 
 const CACHE_UTIL = 'CacheUtil';
 

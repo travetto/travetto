@@ -17,14 +17,6 @@ export class TranspileUtil {
 
   private static preProcessors: Preprocessor[] = [];
 
-  private static get ts() { // Only registered on first call
-    return global.ts = global.ts ?? new Proxy({}, { // Only in inject as needed
-      get(t, p, r) {
-        return (global.ts = require('typescript'))[p]; // Overwrite
-      }
-    });
-  }
-
   static readonly ext = '.ts';
 
   /**
@@ -102,9 +94,9 @@ export class TranspileUtil {
    */
   static get compilerOptions(): any {
     if (!this[OPTS]) {
-      const json = this.ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, this.ts.sys.readFile);
+      const json = global.ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, global.ts.sys.readFile);
       this[OPTS] = {
-        ...this.ts.parseJsonSourceFileConfigFileContent(json, this.ts.sys, FsUtil.cwd).options,
+        ...global.ts.parseJsonSourceFileConfigFileContent(json, global.ts.sys, FsUtil.cwd).options,
         rootDir: FsUtil.cwd,
         outDir: FsUtil.cwd
       };
@@ -120,7 +112,7 @@ export class TranspileUtil {
   static checkTranspileErrors(fileName: string, diagnostics: readonly any[]) {
     if (diagnostics && diagnostics.length) {
       const errors = diagnostics.slice(0, 5).map(diag => {
-        const message = this.ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+        const message = global.ts.flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
           const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
           return ` @ ${diag.file.fileName.replace(`${FsUtil.cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
@@ -193,7 +185,7 @@ export class TranspileUtil {
     return AppCache.getOrSet(tsf, () => {
       try {
         const diags: any[] = [];
-        const ret = this.ts.transpile(this.preProcess(tsf), this.compilerOptions, tsf, diags);
+        const ret = global.ts.transpile(this.preProcess(tsf), this.compilerOptions, tsf, diags);
         this.checkTranspileErrors(tsf, diags);
         return ret;
       } catch (e) {
@@ -208,12 +200,10 @@ export class TranspileUtil {
   static init() {
     AppCache.init();
 
-    // Drop typescript import, and use global. Great speedup;
-    this.addPreProcessor((name, contents) => {
-      if (name.includes('transform')) { // Should only ever be in transformation code
-        contents = contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/g, x => `// ${x}`);
+    global.ts = new Proxy({}, { // Only in inject as needed
+      get(t, p, r) {
+        return (global.ts = require('typescript'))[p]; // Overwrite
       }
-      return contents;
     });
 
     // Register source maps for cached files

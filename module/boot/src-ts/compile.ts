@@ -1,7 +1,6 @@
 // @ts-ignore
 import * as Mod from 'module';
 
-import { EnvUtil } from './env';
 import { TranspileUtil } from './transpile';
 import { FrameworkUtil } from './framework';
 

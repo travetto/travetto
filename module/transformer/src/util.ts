@@ -3,7 +3,6 @@ import { resolve as pathResolve, dirname } from 'path';
 
 import { FsUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
-
 import { Util } from '@travetto/base';
 
 import { DeclDocumentation, Import } from './types/shared';

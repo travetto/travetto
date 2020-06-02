@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import {
   TransformUtil, TransformerState, DecoratorMeta, res, OnClass
-} from '@travetto/compiler/src/transform-support';
+} from '@travetto/transformer';
 
 /**
  * Converts classes with `@Application` to auto register with the `ApplicationRegistry`

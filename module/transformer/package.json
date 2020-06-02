@@ -7,19 +7,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^1.0.0-rc.2",
-    "@travetto/transformer": "^1.0.0-rc.2",
-    "@travetto/watch": "^1.0.0-rc.2"
+    "@travetto/base": "^1.0.0-rc.2"
   },
-  "description": "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.",
+  "description": "Functionality for AST transformations, with transformer registration, and general utils",
   "homepage": "https://travetto.io",
   "keywords": [
-    "tsc",
     "typescript",
-    "compiler",
-    "caching",
-    "change-detection",
-    "real-time",
+    "ast-transformations",
     "travetto"
   ],
   "license": "MIT",
@@ -27,11 +21,9 @@
   "files": [
     "index.ts",
     "src",
-    "bin",
-    "support",
     "tsconfig.json"
   ],
-  "name": "@travetto/compiler",
+  "name": "@travetto/transformer",
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },

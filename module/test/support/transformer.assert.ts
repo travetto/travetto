@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
-import { TransformUtil, TransformerState, OnCall, res } from '@travetto/compiler/src/transform-support';
+import { TransformUtil, TransformerState, OnCall, res } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
