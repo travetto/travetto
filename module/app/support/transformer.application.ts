@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformUtil, TransformerState, DecoratorMeta, res, OnClass
+  TransformUtil, TransformerState, DecoratorMeta, OnClass
 } from '@travetto/transformer';
 
 /**
@@ -21,26 +21,35 @@ export class ApplicationTransformer {
     let meta;
 
     // If a choice type
-    if (res.isUnionType(type)) {
-      const choices = type.unionTypes
-        .map(x => res.isLiteralType(x) ? x.value : undefined)
-        .filter(x => x !== undefined);
-
-      type = {
-        ...type.commonType,
-        name: type.name,
-        undefinable: type.undefinable,
-        comment: type.comment,
-        nullable: type.nullable
-      };
-      subtype = 'choice';
-      meta = { choices };
-    } else if (res.isLiteralType(type)) { // If a file
-      if (type.ctor === String && /file$/i.test(name)) {
-        subtype = 'file';
+    switch (type.key) {
+      case 'union': {
+        const choices = type.unionTypes
+          .map(x => x.key === 'literal' ? x.value : undefined)
+          .filter(x => x !== undefined);
+        if (type.commonType && type.commonType.key === 'literal') {
+          type = {
+            ...type.commonType,
+            name: type.name,
+            undefinable: type.undefinable,
+            comment: type.comment,
+            nullable: type.nullable
+          };
+        } else {
+          throw new Error('Cannot handle common type');
+        }
+        subtype = 'choice';
+        meta = { choices };
+        break;
       }
-    } else {
-      type = { ctor: String, name: 'string' } as res.LiteralType;
+      case 'literal': { // If a file
+        if (type.ctor === String && /file$/i.test(name)) {
+          subtype = 'file';
+        }
+        break;
+      }
+      default: {
+        type = { key: 'literal', ctor: String, name: 'string' };
+      }
     }
 
     return { name, type: type.name!, subtype, meta, optional: !!def || type.undefinable || type.nullable, def };

@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { resolve as pathResolve, dirname } from 'path';
+import { resolve as pathResolve } from 'path';
 
 import { FsUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
@@ -262,7 +262,10 @@ export class TransformUtil {
   /**
    * Find declaration for a type, symbol or a declaration
    */
-  static getDeclarations(type: ts.Type | ts.Symbol | ts.Declaration[]): ts.Declaration[] {
+  static getDeclarations(type: ts.Node, checker: ts.TypeChecker): ts.Declaration[];
+  static getDeclarations(type: ts.Type | ts.Symbol | ts.Declaration[]): ts.Declaration[];
+  static getDeclarations(type: ts.Node | ts.Type | ts.Symbol | ts.Declaration[], checker?: ts.TypeChecker): ts.Declaration[] {
+    type = 'getSourceFile' in type ? checker!.getTypeAtLocation(type) : type;
     let decls: ts.Declaration[] = [];
     if (Array.isArray(type)) {
       decls = type;
@@ -280,10 +283,19 @@ export class TransformUtil {
   }
 
   /**
+   * Find primary declaration out of a list of declarations
+   */
+  static getPrimaryDeclarationFromNode(node: ts.Node, checker: ts.TypeChecker): ts.Declaration;
+  static getPrimaryDeclarationFromNode(node: ts.Type | ts.Symbol, checker?: ts.TypeChecker): ts.Declaration;
+  static getPrimaryDeclarationFromNode(node: ts.Type | ts.Symbol | ts.Node, checker?: ts.TypeChecker): ts.Declaration {
+    return this.getPrimaryDeclaration(this.getDeclarations(node as ts.Node, checker!));
+  }
+
+  /**
    * Read JS Docs from a `ts.Type` or a `ts.Node`
    */
   static readJSDocs(type: ts.Type | ts.Node) {
-    let node = 'getSourceFile' in type ? type : this.getPrimaryDeclaration(this.getDeclarations(type));
+    let node = 'getSourceFile' in type ? type : this.getPrimaryDeclarationFromNode(type);
 
     const out: DeclDocumentation = {
       description: undefined,
@@ -325,7 +337,10 @@ export class TransformUtil {
   /**
    * Read JS Doc tags for a type
    */
-  static readJSDocTags(type: ts.Type, name: string) {
+  static readJSDocTags(type: ts.Node, name: string, checker: ts.TypeChecker): string[];
+  static readJSDocTags(type: ts.Type, name: string): string[];
+  static readJSDocTags(type: ts.Type | ts.Node, name: string, checker?: ts.TypeChecker): string[] {
+    type = 'getSourceFile' in type ? checker!.getTypeAtLocation(type) : type;
     const tags = this.getSymbol(type)?.getJsDocTags() ?? [];
     return tags
       .filter(el => el.name === name)
@@ -420,22 +435,6 @@ export class TransformUtil {
   }
 
   /**
-   * Resolve a concrete type for a shape type, if the `@concrete` JS Doc tag is in place
-   */
-  static resolveConcreteType(type: ts.Type) {
-    const tags = TransformUtil.readJSDocTags(type, 'concrete');
-    if (tags.length) {
-      const parts = tags[0].split(':');
-      const fileName = this.getPrimaryDeclaration(this.getDeclarations(type))?.getSourceFile().fileName;
-      if (parts.length === 1) {
-        parts.unshift('.');
-      }
-      const source = parts[0] === '.' ? fileName : FsUtil.resolveUnix(dirname(fileName), parts[0]);
-      return { name: parts[1], source };
-    }
-  }
-
-  /**
    * Get first line of method body
    * @param m
    */
@@ -448,5 +447,50 @@ export class TransformUtil {
         end: end.line + 1
       };
     }
+  }
+
+  /**
+   * Resolve the `ts.ObjectFlags`
+   */
+  static getObjectFlags(type: ts.Type): ts.ObjectFlags {
+    // @ts-ignore
+    return ts.getObjectFlags(type);
+  }
+
+  /**
+   * Determine if a type is a literal type
+   * @param type
+   */
+  static isLiteralType(type: ts.Type): type is ts.LiteralType {
+    const flags = type.getFlags();
+    // eslint-disable-next-line no-bitwise
+    return (flags & (ts.TypeFlags.BooleanLiteral | ts.TypeFlags.NumberLiteral | ts.TypeFlags.StringLiteral)) > 0;
+  }
+
+  /**
+   * Get type as a string representation
+   */
+  static getTypeAsString(checker: ts.TypeChecker, type: ts.Type) {
+    return checker.typeToString(checker.getApparentType(type)) || undefined;
+  }
+
+  /**
+   * Fetch all type arguments for a give type
+   */
+  static getAllTypeArguments(checker: ts.TypeChecker, ref: ts.Type): ts.Type[] {
+    return checker.getTypeArguments(ref as ts.TypeReference) as ts.Type[];
+  }
+
+  /**
+   * Resolve the return type for a method
+   */
+  static getReturnType(checker: ts.TypeChecker, node: ts.MethodDeclaration) {
+    let type = checker.getTypeAtLocation(node);
+    if (type.isUnion()) { // Handle methods that are optional
+      // eslint-disable-next-line no-bitwise
+      type = type.types.find(x => !(x.flags & ts.TypeFlags.Undefined))!;
+    }
+    const [sig] = type.getCallSignatures();
+    return checker.getReturnTypeOfSignature(sig);
   }
 }

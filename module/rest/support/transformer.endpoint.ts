@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformUtil, TransformerState, res, OnClass, OnMethod, ParamDocumentation, DeclDocumentation
+  TransformUtil, TransformerState, OnClass, OnMethod, ParamDocumentation, DeclDocumentation
 } from '@travetto/transformer';
 
 import { ParamConfig } from '../src/types';
@@ -38,25 +38,25 @@ export class RestTransformer {
    */
   static getParameterType(state: TransformerState, node: ts.ParameterDeclaration) {
 
-    let rType: res.Type = state.resolveType(node);
+    let paramType = state.resolveType(node);
     let array = false;
-    if (res.isLiteralType(rType)) {
-      array = rType.ctor === Array;
+    if (paramType.key === 'literal') {
+      array = paramType.ctor === Array;
       if (array) {
-        rType = rType.typeArguments?.[0]!;
+        paramType = paramType.typeArguments?.[0]!;
       }
     }
 
     let type: ts.Expression;
     let defaultType = 'Query';
 
-    if (rType.name === 'Request' || rType.name === 'Response') { // Convert to custom types, special handling for interfaces
-      type = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, rType.name.toUpperCase());
+    if (paramType.name === 'Request' || paramType.name === 'Response') { // Convert to custom types, special handling for interfaces
+      type = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, paramType.name.toUpperCase());
       defaultType = 'Context'; // White list request/response as context
-    } else if (res.isUnionType(rType)) {
+    } else if (paramType.key === 'union') {
       type = ts.createIdentifier('Object');
     } else {
-      type = state.typeToIdentifier(rType)!;
+      type = state.typeToIdentifier(paramType)!;
     }
 
     return { array, type, defaultType };
@@ -112,7 +112,7 @@ export class RestTransformer {
     // Process returnType
     let retType = state.resolveReturnType(node);
 
-    if (res.isLiteralType(retType) && retType.ctor === Promise) {
+    if (retType.key === 'literal' && retType.ctor === Promise) {
       retType = retType.typeArguments?.[0]!; // We have a promise nested
     }
 
@@ -123,15 +123,15 @@ export class RestTransformer {
       const type: Record<string, any> = {
         type: retType
       };
-      if (res.isLiteralType(retType) && retType.ctor === Array) {
+      if (retType.key === 'literal' && retType.ctor === Array) {
         type.array = true;
         type.type = retType.typeArguments?.[0]!;
       }
 
-      if (res.isExternalType(type.type)) {
-        type.type = state.typeToIdentifier(type.type);
-      } else if (res.isShapeType(type.type)) { // TODO: How do we handle shapes?
-        delete type.type;
+      switch (type.type.key) {
+        case 'external': type.type = state.typeToIdentifier(type.type); break;
+        // TODO: How do we handle shapes?
+        case 'shape': delete type.type; break;
       }
 
       const produces = state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', TransformUtil.fromLiteral({

@@ -69,7 +69,7 @@ export class VisitorFactory<S extends State = State> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
         ConsoleManager.setFile('!compiler.log', { processArgs: (__, args) => TransformUtil.collapseNodes(args) }); // Suppress logging into an output file
-        console.log(process.pid, 'Processing', file.fileName, [...this.transformers.keys()]);
+        console.debug(process.pid, 'Processing', file.fileName);
         const state = this.getState(file);
         const ret = this.visit(state, context, file);
         const out = state.finalize(ret);

@@ -1,9 +1,9 @@
 import * as ts from 'typescript';
 
-import * as res from './types/resolver';
+import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta } from './types/visitor';
 
-import { TypeResolver } from './resolver';
+import { TypeResolver } from './resolver/service';
 import { ImportManager } from './importer';
 import { TransformUtil } from './util';
 
@@ -23,14 +23,7 @@ export class TransformerState implements State {
   /**
    * Get or import the node or external type
    */
-  getOrImport(type: res.ExternalType | ts.Node) {
-    if ('getSourceFile' in type) {
-      const ogType = type;
-      type = this.resolveType(type) as res.ExternalType;
-      if (!res.isExternalType(type)) {
-        throw new Error(`Unable to import non-external type: ${ogType.getText()}`);
-      }
-    }
+  getOrImport(type: ExternalType) {
     return this.imports.getOrImport(type);
   }
 
@@ -42,7 +35,7 @@ export class TransformerState implements State {
   }
 
   /**
-   * Resolve a `res.Type` from a `ts.Type` or `ts.Node`
+   * Resolve an `AnyType` from a `ts.Type` or `ts.Node`
    */
   resolveType(node: ts.Type | ts.Node) {
     const resolved = this.resolver.resolveType(node);
@@ -51,18 +44,25 @@ export class TransformerState implements State {
   }
 
   /**
+   * Resolve external type
+   */
+  resolveExternalType(node: ts.Node) {
+    const resolved = this.resolveType(node);
+    if (resolved.key !== 'external') {
+      throw new Error(`Unable to import non-external type: ${node.getText()}`);
+    }
+    return resolved;
+  }
+
+  /**
    * Convert a type to it's identifier, will return undefined if none match
    */
-  typeToIdentifier(node: ts.Type | res.Type) {
-    if ('flags' in node) {
-      node = this.resolveType(node);
-    }
-    if (res.isLiteralType(node)) {
-      return ts.createIdentifier(node.ctor!.name);
-    } else if (res.isExternalType(node)) {
-      return this.getOrImport(node);
-    } else if (res.isShapeType(node)) {
-      return;
+  typeToIdentifier(node: ts.Type | AnyType) {
+    const type = 'flags' in node ? this.resolveType(node) : node;
+    switch (type.key) {
+      case 'literal': return ts.createIdentifier(type.ctor!.name);
+      case 'external': return this.getOrImport(type);
+      case 'shape': return;
     }
   }
 

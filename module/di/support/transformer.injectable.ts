@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformUtil, TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, res
+  TransformUtil, TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod
 } from '@travetto/transformer';
 
 const INJECTABLE_MOD = require.resolve('../src/decorator');
@@ -44,7 +44,7 @@ export class InjectableTransformer {
 
     return TransformUtil.fromLiteral({
       original,
-      target: state.getOrImport(param),
+      target: state.getOrImport(state.resolveExternalType(param)),
       optional,
       qualifier: TransformUtil.getObjectValue(injectConfig, 'qualifier')
     });
@@ -142,7 +142,7 @@ export class InjectableTransformer {
     let target = TransformUtil.getObjectValue(injectConfig, 'target');
     if (!target) {  // Infer from typings
       const ret = state.resolveReturnType(node);
-      if (res.isExternalType(ret)) {
+      if (ret.key === 'external') {
         target = state.getOrImport(ret);
       }
     }

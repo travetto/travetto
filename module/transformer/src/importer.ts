@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 
-import * as res from './types/resolver';
+import { AnyType, ExternalType } from './resolver/types';
 import { Import } from './types/shared';
 import { TransformUtil } from './util';
 
@@ -51,17 +51,18 @@ export class ImportManager {
   /**
    * Import given an external type
    */
-  importFromResolved(type: res.Type) {
-    if (res.isExternalType(type)) {
-      if (type.source && type.source !== this.source.fileName) {
-        this.importFile(type.source);
-      }
+  importFromResolved(type: AnyType) {
+    let nested: AnyType[] | undefined;
+    switch (type.key) {
+      case 'external': {
+        if (type.source && type.source !== this.source.fileName) {
+          this.importFile(type.source);
+        }
+        nested = type.typeArguments;
+      } break;
+      case 'union': nested = type.unionTypes; break;
+      case 'tuple': nested = type.tupleTypes; break;
     }
-
-    const nested = res.isExternalType(type) ? type.typeArguments :
-      (res.isUnionType(type) ? type.unionTypes :
-        (res.isTupleType(type) ? type.tupleTypes : undefined));
-
     if (nested) {
       for (const sub of nested) {
         this.importFromResolved(sub);
@@ -79,7 +80,7 @@ export class ImportManager {
   /**
    * Get the identifier and import if needed
    */
-  getOrImport(type: res.ExternalType) {
+  getOrImport(type: ExternalType) {
     if (type.source === this.source.fileName) {
       return ts.createIdentifier(type.name!);
     } else {
