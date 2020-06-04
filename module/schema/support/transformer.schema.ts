@@ -1,7 +1,8 @@
 import * as ts from 'typescript';
 
 import {
-  TransformUtil, TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, res
+  TransformUtil, TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta,
+  AnyType
 } from '@travetto/transformer';
 
 const hasSchema = Symbol.for('@trv:schema/has');
@@ -24,28 +25,31 @@ export class SchemaTransformer {
   /**
    * Produce final type given transformer type
    */
-  static toFinalType(state: TransformerState, type: res.Type): ts.Expression {
-    if (res.isExternalType(type)) {
-      return state.getOrImport(type);
-    } else if (res.isTupleType(type)) {
-      return TransformUtil.fromLiteral(type.tupleTypes.map(x => this.toFinalType(state, x)!));
-    } else if (res.isLiteralType(type)) {
-      if (type.ctor === Array && type.typeArguments?.length) {
-        return TransformUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0])]);
-      } else {
-        return ts.createIdentifier(type.ctor!.name!);
+  static toFinalType(state: TransformerState, type: AnyType): ts.Expression {
+    switch (type.key) {
+      case 'external': return state.getOrImport(type);
+      case 'tuple': return TransformUtil.fromLiteral(type.tupleTypes.map(x => this.toFinalType(state, x)!));
+      case 'literal': {
+        if (type.ctor === Array && type.typeArguments?.length) {
+          return TransformUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0])]);
+        } else {
+          return ts.createIdentifier(type.ctor!.name!);
+        }
       }
-    } else if (res.isUnionType(type)) {
-      if (type.commonType) {
-        return this.toFinalType(state, type.commonType);
+      case 'union': {
+        if (type.commonType) {
+          return this.toFinalType(state, type.commonType);
+        }
+        break;
       }
-    } else if (res.isShapeType(type)) {
-      const out: Record<string, ts.Expression | undefined> = {};
-      for (const el of Object.keys(type.fields)) {
-        out[el] = this.toFinalType(state, type.fields[el]);
+      case 'shape': {
+        const out: Record<string, ts.Expression | undefined> = {};
+        for (const el of Object.keys(type.fields)) {
+          out[el] = this.toFinalType(state, type.fields[el]);
+        }
+        console.debug('Shapely shape', type);
+        return TransformUtil.fromLiteral(type);
       }
-      console.debug('Shapely shape', type);
-      return TransformUtil.fromLiteral(type);
     }
     return ts.createIdentifier('Object');
   }
@@ -63,8 +67,9 @@ export class SchemaTransformer {
     }
 
     // If we have a union type
-    if (res.isUnionType(typeExpr)) {
-      const values = typeExpr.unionTypes.map(x => res.isLiteralType(x) ? x.value : undefined).filter(x => x !== undefined && x !== null);
+    if (typeExpr.key === 'union') {
+      const values = typeExpr.unionTypes.map(x => x.key === 'literal' ? x.value : undefined)
+        .filter(x => x !== undefined && x !== null);
 
       properties.push(ts.createPropertyAssignment('enum', TransformUtil.fromLiteral({
         values,

@@ -1,9 +1,13 @@
-type Primitive = boolean | string | number | RegExp | Date;
+import ts = require('typescript');
 
 /**
  * Base type for a simplistic type structure
  */
-export interface Type {
+interface Type<K extends string> {
+  /**
+   * Unique key
+   */
+  key: K;
   /**
    * Name of type, if nominal, otherwise we will generate a unique identifier
    */
@@ -25,7 +29,7 @@ export interface Type {
 /**
  * A type that is not defined in the scope of the given file
  */
-export interface ExternalType extends Type {
+export interface ExternalType extends Type<'external'> {
   /**
    *  Location the type came from, for class references
    */
@@ -33,23 +37,33 @@ export interface ExternalType extends Type {
   /**
    * Type arguments
    */
-  typeArguments?: Type[];
+  typeArguments?: AnyType[];
+
+  /**
+   * Type Info
+   */
+  typeInfo?: ts.Type[];
 }
 
 /**
  * A type that is defined structurally (like an interface)
  */
-export interface ShapeType extends Type {
+export interface ShapeType extends Type<'shape'> {
   /**
    * Does not include methods, used for shapes not concrete types
    */
-  fields: Record<string, Type>;
+  fields: Record<string, AnyType>;
+
+  /**
+ * Type Info
+ */
+  typeInfo?: Record<string, ts.Type>;
 }
 
 /**
  * A literal type, with an optional real value
  */
-export interface LiteralType extends Type {
+export interface LiteralType extends Type<'literal'> {
   /**
    * Pointer to real type (String/Date/Number) if applicable
    */
@@ -57,39 +71,47 @@ export interface LiteralType extends Type {
   /**
    * Applicable real value
    */
-  value?: Primitive;
+  value?: boolean | string | number | RegExp | Date;
   /**
    * Type arguments
    */
-  typeArguments?: Type[];
+  typeArguments?: AnyType[];
+  /**
+   * Type Info
+   */
+  typeInfo?: ts.Type[];
 }
 
 /**
  * Union type
  */
-export interface UnionType extends Type {
+export interface UnionType extends Type<'union'> {
   /**
    * A common type if derivable, e.g. 'a'|'b' will have a common type of string
    */
-  commonType?: Type;
+  commonType?: AnyType;
   /**
    * All the types represented in the union
    */
-  unionTypes: Type[];
+  unionTypes: AnyType[];
+  /**
+   * Type Info
+   */
+  typeInfo?: ts.Type[];
 }
 
 /**
  * Tuple type
  */
-export interface TupleType extends Type {
+export interface TupleType extends Type<'tuple'> {
   /**
    * All the types represented in the tuple
    */
-  tupleTypes: Type[];
+  tupleTypes: AnyType[];
+  /**
+   * Type Info
+   */
+  typeInfo?: ts.Type[];
 }
 
-export const isExternalType = (type: Type): type is ExternalType => 'source' in type;
-export const isShapeType = (type: Type): type is ShapeType => 'fields' in type;
-export const isLiteralType = (type: Type): type is LiteralType => 'ctor' in type;
-export const isUnionType = (type: Type): type is UnionType => 'unionTypes' in type;
-export const isTupleType = (type: Type): type is TupleType => 'tupleTypes' in type;
+export type AnyType = TupleType | ShapeType | UnionType | LiteralType | ExternalType;

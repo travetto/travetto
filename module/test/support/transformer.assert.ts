@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
-import { TransformUtil, TransformerState, OnCall, res } from '@travetto/transformer';
+import { TransformUtil, TransformerState, OnCall } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
@@ -236,7 +236,7 @@ export class AssertTransformer {
       const matched = METHODS[key.text!];
       if (matched) {
         const resolved = state.resolveType(root);
-        if (res.isLiteralType(resolved) && matched.find(x => resolved.ctor === x)) { // Ensure method is against real type
+        if (resolved.key === 'literal' && matched.find(x => resolved.ctor === x)) { // Ensure method is against real type
           return {
             fn: key.text,
             args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)]
