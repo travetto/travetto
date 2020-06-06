@@ -54,7 +54,6 @@ export class AssetUtil {
    * Extension is determined via mime type if missing.
    */
   static async ensureFileExtension(filePath: string) {
-
     const type = await this.resolveFileType(filePath);
     const ext = mime.getExtension(type);
     const newFile = filePath.replace(/[.][^.]+$/, ext!);
@@ -85,12 +84,7 @@ export class AssetUtil {
    * Convert local file to asset structure
    */
   static async fileToAsset(file: string, metadata: Partial<Asset['metadata']> = {}): Promise<Asset> {
-    let hash: string | undefined = metadata.hash;
-
-    if (!hash) {
-      hash = await this.hashFile(file);
-    }
-
+    const hash = metadata.hash ?? await this.hashFile(file);
     const size = (await fsStat(file)).size;
     const contentType = await this.resolveFileType(file);
 
@@ -102,7 +96,7 @@ export class AssetUtil {
       metadata: {
         name: path.basename(file),
         title: path.basename(file).replace(/-_/g, ' '),
-        hash: hash!,
+        hash,
         createdDate: new Date(),
         ...(metadata ?? {})
       }
