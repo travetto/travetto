@@ -16,7 +16,7 @@ if (
     shell: true,
     env: { NODE_PRESERVE_SYMLINKS: 1, TRV_DEV: 1 }
   }).result.catch(err => {
-    if (err.meta.code !== 255) {
+    if (err.meta.code !== 255 && err.meta.code !== 1) {
       console.log(err);
     }
     process.exit(err.meta.code);

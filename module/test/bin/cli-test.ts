@@ -1,6 +1,9 @@
 import * as commander from 'commander';
 import * as os from 'os';
+
+import { FsUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
+
 import type { RunState } from '../src/runner/types';
 
 /**
@@ -31,6 +34,8 @@ export class TestPlugin extends BasePlugin {
       if (args.length === 0) {
         state.args = ['test/.*'];
       } else if (state.concurrency === 1) {
+        state.mode = 'single';
+      } else if ((await FsUtil.exists(args[0]))?.isFile() && /^\d+/.test(args[1])) { // If is a single file and specifying a line
         state.mode = 'single';
       }
     } else if (args.length < 1 && state.mode === 'single') {

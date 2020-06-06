@@ -200,4 +200,13 @@ parent:
     assert(output === { parent: { values: [1, 2, 3] } });
   }
 
+  @Test()
+  singleList() {
+    const output = YamlUtil.parse(`--
+config:
+  redacted:
+    - panda.user
+panda.user: bob`);
+    assert(output.config.redacted === ['panda.user']);
+  }
 }

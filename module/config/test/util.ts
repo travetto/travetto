@@ -41,10 +41,29 @@ a:
       secret: 'custom',
       standard: 'fine',
       key: 'SECRETIVE'
-    }, [/(secret|key)/]);
+    }, ['secret', 'key']);
 
     assert(sanitized.secret === '******');
     assert(sanitized.key === '*********');
     assert(sanitized.standard === 'fine');
+  }
+
+  @Test()
+  testSecretRgex() {
+    const sanitized = ConfigUtil.sanitizeValuesByKey({
+      secret: 'custom',
+      superSecret: 'super',
+      big: {
+        little: {
+          special: '5',
+        }
+      },
+      none: 'none'
+    }, ['secret', 'big.*little']);
+
+    assert(sanitized.secret === '******');
+    assert(sanitized.superSecret === '*****');
+    assert(sanitized.big.little.special === '*');
+    assert(sanitized.none === 'none');
   }
 }

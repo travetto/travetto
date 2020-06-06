@@ -18,7 +18,6 @@ export class ConfigManager {
     '.*token',
     'pw',
   ];
-  private static redactTest: RegExp;
 
   /*
     Order of specificity (least to most)
@@ -31,7 +30,6 @@ export class ConfigManager {
     if (this.initialized) {
       return;
     }
-    this.redactTest = new RegExp(`^(${this.redactedKeys.join('|')})$`, 'i');
     this.initialized = true;
     this.load();
   }
@@ -63,7 +61,10 @@ export class ConfigManager {
    * Get a sub tree with sensitive fields redacted
    */
   static getSecure(key?: string) {
-    return ConfigUtil.sanitizeValuesByKey(this.get(key), [this.redactTest]);
+    return ConfigUtil.sanitizeValuesByKey(this.get(key), [
+      ...this.redactedKeys,
+      this.get('config')?.redacted ?? []
+    ].flat());
   }
 
   /**

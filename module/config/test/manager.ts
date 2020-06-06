@@ -116,4 +116,19 @@ export class ManagerTest {
 
     assert(res.active === false);
   }
+
+  @Test()
+  testSecret() {
+    this.reinit();
+
+    ConfigManager.putAll(YamlUtil.parse(`
+--
+config:
+  redacted:
+    - panda.user
+panda.user: bob`));
+
+    const all = ConfigManager.getSecure();
+    assert(all.panda?.user === '***');
+  }
 }

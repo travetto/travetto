@@ -61,8 +61,10 @@ database:
     password: <secret>
 ```
 
-## Consuming
+## Secrets
+By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under `config.redacted`.  
 
+## Consuming
 The `ConfigManager` service provides direct access to all of the loaded configuration. For simplicity, a decorator, `@Config` allows for classes to automatically be bound with config information on post construction. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
