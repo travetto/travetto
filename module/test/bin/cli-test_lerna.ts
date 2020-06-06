@@ -16,9 +16,8 @@ export class TestLernaPlugin extends BasePlugin {
 
   async action() {
     const child = ExecUtil.spawn('npx', [
-      'lerna', '--no-sort', 'exec', '--no-bail',
-      // '--concurrency', '1',
-      '--stream', '--',
+      'lerna', '--no-sort',
+      'exec', '--no-bail', '--stream', '--',
       'npx', 'trv', 'test', '-f', 'event', '-c', '2'
     ], { shell: true, quiet: true, cwd: FsUtil.resolveUnix(__dirname, '..', '..') });
 

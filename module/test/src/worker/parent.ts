@@ -2,6 +2,7 @@ import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { ParentCommChannel, WorkUtil } from '@travetto/worker';
 import { Events, RunEvent } from './types';
 import { TestConsumer } from '../consumer/types';
+import { FsUtil } from '@travetto/boot';
 
 /**
  *  Produce a handler for the child worker
@@ -10,7 +11,7 @@ export function buildWorkManager(consumer: TestConsumer) {
   /**
    * Spawn a child
    */
-  return WorkUtil.spawnedWorker(`${__dirname}/../../bin/test-worker`, {
+  return WorkUtil.spawnedWorker(FsUtil.resolveUnix(__dirname, '..', '..', 'bin', 'plugin-child-worker'), {
     handlers: {
       /**
        * Child initialization

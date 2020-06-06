@@ -1,4 +1,3 @@
-require('@travetto/boot/bin/init')
-  .libRequire('@travetto/base')
-  .PhaseManager.init();
-require('./simple.child');
+require('@travetto/boot/register');
+require('@travetto/base').PhaseManager
+  .init().then(() => require('./simple.child'));

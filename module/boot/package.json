@@ -29,6 +29,7 @@
   "files": [
     "src",
     "bin",
+    "register.js",
     "eslint.json",
     "tsconfig.json"
   ],
@@ -37,7 +38,7 @@
     "url": "https://github.com/travetto/travetto.git"
   },
   "scripts": {
-    "postinstall": "node bin/postinstall",
+    "postinstall": "node bin/plugin-postinstall",
     "prepublish": "cd src-ts; tsc --project .",
     "clean": "rm -f src/"
   },

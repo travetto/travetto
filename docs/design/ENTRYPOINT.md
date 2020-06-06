@@ -39,18 +39,18 @@ t = typescript, i = init, r = run, a = await
 
 * compiler/bin (Run app to establish all transformers)
   ------------------------------------------------------
-  [    ] ./travetto-cli-compile.ts  
-  [tira] ./travetto-plugin-compile.js
+  [    ] ./cli-compile.ts  
+  [tira] ./plugin-compile.js
 
 * di/bin (Run app selected, collect app data)
   ------------------------------------------------------
-  [tira] ./find-apps.js           [ lib.js - computeApps, bootstrap - compiler ]
-  [ ira] ./travetto-cli-run.ts    [ lib.js - runApp ] 
-  [tira] ./travetto-plugin-run.js [ lib.js - runApp ]
+  [tira] ./plugin-find-apps.js           [ lib.js - computeApps, bootstrap - compiler ]
+  [ ira] ./cli-run.ts    [ lib.js - runApp ] 
+  [tira] ./plugin-run.js [ lib.js - runApp ]
 
 * email-template/bin (Run app for email activity)
   ------------------------------------------------------
-  [ ira] ./travetto-cli-email-template.ts  
+  [ ira] ./cli-email-template.ts  
 
 * generator-app/app (Used as a bootstrap)
   ------------------------------------------------------
@@ -58,18 +58,18 @@ t = typescript, i = init, r = run, a = await
 
 * model-elasticsearch/bin (Run app to collect data)
   ------------------------------------------------------
-  [ ira] ./travetto-cli-es_schema.ts [ lib.js - getSchemas ] 
+  [ ira] ./cli-es_schema.ts [ lib.js - getSchemas ] 
 
 * rest-aws-lambda/bin (Run app to collect data)
   ------------------------------------------------------
-  [ ira] ./travetto-cli-rest-aws-lambda_build-sam.ts  
+  [ ira] ./cli-rest-aws-lambda_build-sam.ts  
 
 * swagger/bin  (Run app to collect data)
   ------------------------------------------------------
-  [ ira] ./travetto-cli-swagger-client.ts [ lib.js ] 
+  [ ira] ./cli-swagger-client.ts [ lib.js ] 
 
 * test/bin (Initialize compiler, not loading transformers)
   ------------------------------------------------------
-  [ ira] ./test-worker.js          [ lib.js - worker ]
-  [ ira] ./travetto-cli-test.ts    [ self, lib.js - runTests ]
-  [tira] ./travetto-plugin-test.js [ lib.js - runTests ]
+  [ ira] ./plugin-child-worker.js          [ lib.js - worker ]
+  [ ira] ./cli-test.ts    [ self, lib.js - runTests ]
+  [tira] ./plugin-test.js [ lib.js - runTests ]

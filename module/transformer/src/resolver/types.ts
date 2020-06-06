@@ -3,7 +3,7 @@ import ts = require('typescript');
 /**
  * Base type for a simplistic type structure
  */
-interface Type<K extends string> {
+export interface Type<K extends string> {
   /**
    * Unique key
    */

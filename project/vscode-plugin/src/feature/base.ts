@@ -27,11 +27,11 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   resolvePlugin(name: string) {
-    return this.resolve('bin', `travetto-plugin-${name}.js`);
+    return this.resolve('bin', `plugin-${name}.js`);
   }
 
   async compile() {
-    const { result } = ExecUtil.fork(Workspace.resolve('node_modules/@travetto/compiler/bin/travetto-plugin-compile.js'), [], {
+    const { result } = ExecUtil.fork(Workspace.resolve('node_modules/@travetto/compiler/bin/plugin-compile.js'), [], {
       cwd: Workspace.path
     });
 

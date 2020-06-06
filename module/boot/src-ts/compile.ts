@@ -15,7 +15,6 @@ const Module = Mod as any as Module;
 
 declare const global: {
   trvInit: {
-    libRequire: (x: string) => any;
     reset: () => void;
   };
 };
@@ -26,11 +25,6 @@ declare const global: {
 export class CompileUtil {
   private static ogModuleLoad = Module._load!.bind(Module);
   private static moduleHandlers: ((name: string, o: any) => any)[] = [];
-
-  /**
-   * The entrypoint for plugins and cli operations to ensure local framework development works
-   */
-  static libRequire: (x: string) => any;
 
   /**
    * When a module load is requested
@@ -111,7 +105,6 @@ export class CompileUtil {
     const resolve = FrameworkUtil.resolvePath;
 
     // Supports bootstrapping with framework resolution
-    this.libRequire = x => require(resolve(x));
     Module._load = (req, p) => this.onModuleLoad(resolve(req, p), p);
     require.extensions[TranspileUtil.ext] = (m, tsf) => this.compile(m, resolve(tsf));
 
