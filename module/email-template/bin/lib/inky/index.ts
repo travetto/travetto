@@ -1,16 +1,23 @@
-import { ComponentFactory } from './factory';
+import { InkyComponentFactory } from './factory';
 
-// TODO: Document
+/**
+ * Inky factory entry
+ */
 export class Inky {
-  static defaultFactory = new ComponentFactory();
+  static defaultFactory = new InkyComponentFactory();
 
-  static render(text: string, factory?: ComponentFactory) {
+  /**
+   * Render markdown to HTML
+   * @param text Text to convert
+   * @param factory Optional component factory, default is the inky set
+   */
+  static render(text: string, factory?: InkyComponentFactory) {
     factory = factory ?? this.defaultFactory;
     // Extract raws
     const raws: string[] = [];
     const html = text.replace(/\< *raw *\>(.*?)\<\/ *raw *\>/gi, (all, inner) => raws.push(inner) ? `###RAW${raws.length - 1}###` : '');
 
-    let out = factory.convertAll(html);
+    let out = factory.render(html);
 
     // Take care of various minor fixes
     out = out

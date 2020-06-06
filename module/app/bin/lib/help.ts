@@ -1,7 +1,7 @@
+import { FsUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 import { RunUtil } from './run';
 import { ApplicationConfig } from '../../src/types';
-import { FsUtil } from '@travetto/boot';
 
 export class HelpUtil {
 
