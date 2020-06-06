@@ -168,7 +168,6 @@ export class ConfigUtil {
   /**
    * Bind `src` to `target`
    */
-  // TODO: Write Tests
   static bindTo(src: any, target: any, key?: string) {
     const keys = (key ? key.split('.') : []);
     let sub: any = src;

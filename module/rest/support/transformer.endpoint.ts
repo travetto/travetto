@@ -130,7 +130,7 @@ export class RestTransformer {
 
       switch (type.type.key) {
         case 'external': type.type = state.typeToIdentifier(type.type); break;
-        // TODO: How do we handle shapes?
+        // FIXME: How do we handle shapes?
         case 'shape': delete type.type; break;
       }
 
