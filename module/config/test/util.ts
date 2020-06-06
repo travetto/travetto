@@ -9,7 +9,7 @@ import { ConfigUtil } from '../src/internal/util';
 export class UtilTest {
 
   @Test()
-  async breakDownKeys() {
+  breakDownKeys() {
     const data = YamlUtil.parse(`
 a.b.c:
   - 1
@@ -33,6 +33,16 @@ a:
     assert(broken.a.b.d === 'name');
 
     assert(broken.a.e.g === 'test');
+  }
+
+  @Test()
+  bindTo() {
+    const res = ConfigUtil.bindTo({ a: { b: { c: '5' } } }, {}, 'a.b');
+    assert(res.c === '5');
+    process.env.A_B_C = '20';
+
+    const res2 = ConfigUtil.bindTo({ a: { b: { c: '5' } } }, {}, 'a.b');
+    assert(res2.c === '20');
   }
 
   @Test()
