@@ -44,7 +44,7 @@ class TestRunnerFeature extends BaseFeature {
       program: this.resolvePlugin('test'),
       args: [
         file.replace(`${Workspace.path}${path.sep}`, ''),
-        `${line + 1}`
+        line
       ],
       env: Workspace.getDefaultEnv()
     }));
