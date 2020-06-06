@@ -32,7 +32,7 @@ export class AppListManager {
   static async buildList() {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Compiling', () =>
-        ExecUtil.worker<ApplicationConfig[]>(FsUtil.resolveUnix(__dirname, '../plugin-list'), ['build'])
+        ExecUtil.worker<ApplicationConfig[]>(require.resolve('../plugin-list'), ['build'])
           .message
       );
     } else {
@@ -119,13 +119,7 @@ export class AppListManager {
    */
   static async run(mode?: string) {
     CliUtil.initAppEnv({ roots: this.getRoots() });
-
-    let list: ApplicationConfig[];
-    if (mode === 'build') {
-      list = await this.buildList();
-    } else {
-      list = await this.getList() ?? [];
-    }
-    CliUtil.pluginResponse(list);
+    const list = mode === 'build' ? this.buildList() : this.getList();
+    CliUtil.pluginResponse((await list) ?? []);
   }
 }

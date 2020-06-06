@@ -1,9 +1,8 @@
 import * as commander from 'commander';
 
-import { CliUtil } from '@travetto/cli/src/util';
 import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
-import { CompileCliUtil } from './lib/util';
+import { CompileCliUtil } from './lib';
 
 /**
  * Command line support for pre-compiling the code with the ability to

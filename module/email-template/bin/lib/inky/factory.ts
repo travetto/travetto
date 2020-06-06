@@ -1,36 +1,63 @@
 import { Node, serialize, parse, parseFragment } from 'parse5';
 
 import { HtmlUtil, Parse5Adapter } from '../html';
+import { Tag, TagRegistry, ComponentFactory } from '../factory';
 
-export const COMPONENT_DEFAULTS = {
-  button: 'button',
-  row: 'row',
-  columns: 'columns',
-  container: 'container',
-  callout: 'callout',
-  'block-grid': 'blockGrid',
-  menu: 'menu',
-  item: 'menuItem',
-  center: 'center',
-  spacer: 'spacer',
-  wrapper: 'wrapper',
-  'h-line': 'hLine',
-  hr: 'hr'
-};
+/**
+ * Standard component factory, implements Inky behavior
+ */
+export class InkyComponentFactory implements ComponentFactory {
 
-// TODO: Document
-export class ComponentFactory {
-  private spacer16: string;
-  public componentTags: typeof COMPONENT_DEFAULTS;
+  private _spacer16: string;
 
-  constructor(
-    public columnCount: number = 12,
-    componentTags: Partial<typeof COMPONENT_DEFAULTS> = {}
-  ) {
-    this.componentTags = { ...COMPONENT_DEFAULTS, ...componentTags };
-    this.spacer16 = this.convertAll(`<spacer size="16"></spacer>`);
+  constructor(public columnCount: number = 12, public ns: string = '') { }
+
+  get spacer16() {
+    if (!this._spacer16) {
+      this._spacer16 = this.render(`<${this.ns}spacer size="16"></${this.ns}spacer>`);
+    }
+    return this._spacer16;
   }
 
+  private generate(element: Node) {
+    const tag = TagRegistry.getTag(element, this.ns);
+    if (TagRegistry.has(this, tag)) {
+      return TagRegistry.resolve(this, tag).call(this, element).trim();
+    } else {
+      return `<tr><td>${serialize(element)}</td></tr>`;
+    }
+  }
+
+  /**
+   * Traverse nodes
+   */
+  private traverse(node: Node & { hasColumns?: boolean }) {
+    const children = Parse5Adapter.getChildNodes(node) ?? [];
+    let i = -1;
+    for (const child of children.slice(0)) {
+      i = i + 1;
+      const tagName = Parse5Adapter.getTagName(child);
+      if (!tagName) {
+        continue;
+      }
+      this.traverse(child);
+      if (TagRegistry.has(this, TagRegistry.getTag(tagName, this.ns))) {
+        if (tagName === 'columns' && !('hasColumns' in node)) {
+          node.hasColumns = true;
+          const all = children.filter(x => Parse5Adapter.isElementNode(x));
+          HtmlUtil.setDomAttribute(all[0], 'class', 'first');
+          HtmlUtil.setDomAttribute(all[all.length - 1], 'class', 'last');
+        }
+        const text = this.generate(child);
+        const newFrag = parseFragment(text);
+        const newNodes = (Parse5Adapter.getChildNodes(newFrag).filter(x => Parse5Adapter.isElementNode(x)))!;
+        children.splice(i, 1, ...newNodes);
+      }
+    }
+    return node;
+  }
+
+  @Tag()
   columns(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
@@ -81,6 +108,7 @@ export class ComponentFactory {
       </th>`;
   }
 
+  @Tag('h-line')
   hLine(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
 
@@ -90,6 +118,7 @@ export class ComponentFactory {
     </table>`;
   }
 
+  @Tag()
   row(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
@@ -104,6 +133,7 @@ export class ComponentFactory {
     </table>`;
   }
 
+  @Tag()
   button(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     let inner = HtmlUtil.getInner(element);
@@ -117,9 +147,9 @@ export class ComponentFactory {
 
     // If the button is expanded, it needs a <center> tag around the content
     if (/\bexpand(ed)?\b/.test(cls ?? '')) {
-      inner = this.convertAll(`<center>
+      inner = this.render(`<${this.ns}center>
         ${inner}
-      </center>`);
+      </${this.ns}center>`);
       expander = `\n<td class="expander"></td>`;
     }
 
@@ -145,6 +175,7 @@ export class ComponentFactory {
       ${this.spacer16}`;
   }
 
+  @Tag()
   container(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
@@ -161,6 +192,7 @@ export class ComponentFactory {
 
   }
 
+  @Tag('block-grid')
   blockGrid(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
@@ -173,6 +205,7 @@ export class ComponentFactory {
     </table>`;
   }
 
+  @Tag()
   menu(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     let inner = HtmlUtil.getInner(element);
@@ -200,6 +233,7 @@ export class ComponentFactory {
       </table>`;
   }
 
+  @Tag('item')
   menuItem(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
@@ -213,6 +247,7 @@ export class ComponentFactory {
        </th>`;
   }
 
+  @Tag()
   center(element: Node) {
     for (const child of (Parse5Adapter.getChildNodes(element) ?? [])) {
       if (Parse5Adapter.isElementNode(child)) {
@@ -230,11 +265,14 @@ export class ComponentFactory {
       }
     });
 
-    const df = Parse5Adapter.createDocumentFragment();
-    Parse5Adapter.appendChild(df, element);
-    return serialize(df);
+    return `
+      <center>
+        ${HtmlUtil.getInner(element)}
+      </center>
+    `;
   }
 
+  @Tag()
   callout(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
@@ -255,6 +293,7 @@ export class ComponentFactory {
       </table>`;
   }
 
+  @Tag()
   spacer(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     const html: string[] = [];
@@ -299,6 +338,7 @@ export class ComponentFactory {
     return html.join('\n');
   }
 
+  @Tag()
   wrapper(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
@@ -318,61 +358,24 @@ export class ComponentFactory {
       </table>`;
   }
 
+  @Tag()
   hr(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     attrs.class = HtmlUtil.classes('hr', attrs.class);
     return `<div ${HtmlUtil.toStr(attrs)}></div>`;
   }
 
-  generate(element: Node) {
-    const tagName = Parse5Adapter.getTagName(element);
-
-    if (tagName in this.componentTags) {
-      const fnName = (this.componentTags as Record<string, string>)[tagName];
-      const text: string = this[fnName as 'hr'](element);
-      return text.trim();
-    } else {
-      // If it's not a custom component, return it as-is
-      return `<tr><td>${serialize(element)}</td></tr>`;
-    }
-  }
-
-  convertAll(document: Node): Node;
-  convertAll(document: string): string;
-  convertAll(document: string | Node): string | Node {
-    const traverse = (node: Node & { hasColumns?: boolean }) => {
-      const children = Parse5Adapter.getChildNodes(node) ?? [];
-      let i = -1;
-      for (const child of children.slice(0)) {
-        i = i + 1;
-        const tagName = Parse5Adapter.getTagName(child);
-        if (!tagName) {
-          continue;
-        }
-        traverse(child);
-        if (tagName in this.componentTags) {
-          if (tagName === this.componentTags.columns && !('hasColumns' in node)) {
-            node.hasColumns = true;
-            const all = children.filter(x => Parse5Adapter.isElementNode(x));
-            HtmlUtil.setDomAttribute(all[0], 'class', 'first');
-            HtmlUtil.setDomAttribute(all[all.length - 1], 'class', 'last');
-          }
-          const text = this.generate(child);
-          const newFrag = parseFragment(text);
-          const newNodes = (Parse5Adapter.getChildNodes(newFrag).filter(x => Parse5Adapter.isElementNode(x)))!;
-          children.splice(i, 1, ...newNodes);
-        }
-      }
-      return node;
-    };
+  render(document: Node): Node;
+  render(document: string): string;
+  render(document: string | Node): string | Node {
 
     if (typeof document === 'string') {
       const node = document.includes('<html') ? parse(document) : parseFragment(document);
-      const ret = traverse(node);
+      const ret = this.traverse(node);
       const out = serialize(ret);
       return out;
     } else {
-      return traverse(document);
+      return this.traverse(document);
     }
   }
 }

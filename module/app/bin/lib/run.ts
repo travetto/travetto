@@ -1,5 +1,5 @@
 import { CliUtil } from '@travetto/cli/src/util';
-import { CompileCliUtil } from '@travetto/compiler/bin/lib/util';
+import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 
 import { AppListManager } from './list';
 import { ApplicationParameter } from '../../src/types';

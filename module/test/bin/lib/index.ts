@@ -1,5 +1,5 @@
 import { CliUtil } from '@travetto/cli/src/util';
-import { CompileCliUtil } from '@travetto/compiler/bin/lib/util';
+import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 import type { RunState } from '../../src/runner/types';
 
 const DEF_ENV = { env: 'test', debug: '0', resourceRoots: ['test'] };

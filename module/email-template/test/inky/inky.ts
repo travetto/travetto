@@ -3,21 +3,17 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
 import { cleanseOutput, cleanseTemplate } from './util';
-import { ComponentFactory } from '../../bin/lib/inky/factory';
+import { InkyComponentFactory } from '../../bin/lib/inky/factory';
+
 
 @Suite('Inky')
 class InkyTest {
 
   @Test('can take in settings in the constructor')
   testSettings() {
-
-    const factory = new ComponentFactory(
-      16,
-      { columns: 'col' }
-    );
-
-    assert.equal(factory.componentTags.columns, 'col', 'Sets custom component tags');
+    const factory = new InkyComponentFactory(16, 'inky-');
     assert.equal(factory.columnCount, 16, 'Sets a custom column count');
+    assert(!factory.render('<inky-center></inky-center>').includes('<inky-center>'));
   }
 
   @Test(`doesn't choke on inline elements`)
