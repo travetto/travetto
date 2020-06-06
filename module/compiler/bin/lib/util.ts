@@ -24,7 +24,7 @@ export class CompileCliUtil {
    */
   static compile(output?: string) {
     return CliUtil.waiting('Compiling...',
-      ExecUtil.worker('@travetto/compiler/bin/travetto-plugin-compile', [], {
+      ExecUtil.worker('@travetto/compiler/bin/plugin-compile', [], {
         env: output ? { TRV_CACHE: output } : {}
       }).result
     );

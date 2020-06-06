@@ -47,34 +47,15 @@ export class TypeResolver {
   }
 
   /**
-   * Finalize type
-   */
-  finalize(val: AnyType) {
-    switch (val.key) {
-      case 'union': {
-        const { undefinable, nullable, unionTypes } = val;
-        const [first] = unionTypes;
-
-        if (unionTypes.length === 1) {
-          val = { undefinable, nullable, ...first };
-        } else if (first.key === 'literal' && unionTypes.every(el => el.name === first.name)) { // We have a common
-          val.commonType = first;
-        }
-        break;
-      }
-    }
-    delete val.typeInfo;
-    return val;
-  }
-
-  /**
    * Resolve an `AnyType` from a `ts.Type` or a `ts.Node`
    */
   resolveType(node: ts.Type | ts.Node): AnyType {
     const root = 'getSourceFile' in node ? this.tsChecker.getTypeAtLocation(node) : node;
 
     const resolve = (frame: { type: ts.Type, alias?: ts.Symbol }): AnyType => {
-      let result = TypeBuilder[TypeCategorize(this.tsChecker, frame.type)](this.tsChecker, frame.type, frame.alias);
+      const { build, finalize } = TypeBuilder[TypeCategorize(this.tsChecker, frame.type)];
+
+      let result = build(this.tsChecker, frame.type, frame.alias);
 
       // Recurse
       if (result?.typeInfo) {
@@ -99,7 +80,11 @@ export class TypeResolver {
             }
           }
         }
-        result = this.finalize(result);
+
+        if (finalize) {
+          result = finalize(result as any);
+        }
+        delete result.typeInfo;
       }
       return result ?? { key: 'literal', ctor: Object, name: 'object' };
     };

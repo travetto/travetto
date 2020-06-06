@@ -1,5 +1,5 @@
-require('@travetto/boot/bin/init')
-  .libRequire('@travetto/base')
+require('@travetto/boot/register');
+require('@travetto/base')
   .PhaseManager.init('schema')
   .then(() => {
     require('./watch');

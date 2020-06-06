@@ -20,6 +20,9 @@ export class OpenApiSpecPlugin extends BasePlugin {
     const { OpenApiService } = await import('../src/service');
 
     const instance = await DependencyRegistry.getInstance(OpenApiService);
-    await instance.spec;
+    const spec = await instance.spec;
+    if (this._cmd.output === '-' || !this._cmd.output) {
+      console.log!(spec);
+    }
   }
 }

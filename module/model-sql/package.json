@@ -30,9 +30,6 @@
   ],
   "license": "MIT",
   "main": "index.ts",
-  "bin": {
-    "travetto-cli-sql_schema": "bin/travetto-cli-sql_schema.ts"
-  },
   "files": [
     "bin",
     "index.ts",

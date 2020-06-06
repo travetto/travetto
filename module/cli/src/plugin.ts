@@ -5,14 +5,13 @@ import { BasePlugin } from './plugin-base';
  * Manages loading and finding all plugins
  */
 export class PluginManager {
-  static readonly PREFIX = 'travetto-cli';
 
   /**
    * Get list of all plugins available
    */
   static getPluginMapping() {
     const all = new Map<string, string>();
-    for (const { file, stats } of FrameworkUtil.scan(f => /bin\/travetto-cli-/.test(f))) {
+    for (const { file, stats } of FrameworkUtil.scan(f => /bin\/cli-/.test(f))) {
       if (stats.isFile()) {
         all.set(file.replace(/^.*\/bin\/.+-(.*?)[.][^.]*$/, (_, f) => f), file);
       }

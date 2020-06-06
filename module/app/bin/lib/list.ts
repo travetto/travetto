@@ -32,7 +32,7 @@ export class AppListManager {
   static async buildList() {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Compiling', () =>
-        ExecUtil.worker<ApplicationConfig[]>(FsUtil.resolveUnix(__dirname, '../travetto-plugin-list'), ['build'])
+        ExecUtil.worker<ApplicationConfig[]>(FsUtil.resolveUnix(__dirname, '../plugin-list'), ['build'])
           .message
       );
     } else {

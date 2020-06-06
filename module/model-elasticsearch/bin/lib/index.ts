@@ -1,4 +1,4 @@
-import { ElasticsearchModelSource } from '../src/source';
+import { ElasticsearchModelSource } from '../../src/source';
 
 /**
  * Get all models registered in the application and return as a plain object
@@ -13,7 +13,7 @@ export async function getSchemas() {
 
   const src = (await DependencyRegistry.getInstance<ElasticsearchModelSource>(ModelSource));
 
-  const { ElasticsearchUtil } = await import('../src/internal/util');
+  const { ElasticsearchUtil } = await import('../../src/internal/util');
 
   const out: Record<string, Record<string, string>> = {};
   for (const cls of ModelRegistry.getClasses()) {

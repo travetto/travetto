@@ -47,6 +47,6 @@ if (!FsUtil.toUnix(__filename).includes(FsUtil.cwd)) { // If the current file is
 /**
  * Start cli
  */
-require('@travetto/boot/bin/init')
-  .libRequire('@travetto/cli/src/execute')
+require('@travetto/boot/register');
+require('@travetto/cli/src/execute')
   .ExecutionManager.run(process.argv); // Allow for handing off to local/external cli
