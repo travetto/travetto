@@ -64,6 +64,32 @@ export class ConfigUtil {
   }
 
   /**
+  * Break down dotted keys into proper objects with nesting
+  */
+  static toFullKeys(data: Nested, prefix: string = '') {
+    const out: Record<string, any> = {};
+    for (const [key, value] of Object.entries(data)) {
+      const pre = `${prefix}${key}`;
+      if (Util.isPlainObject(value)) {
+        Object.assign(out,
+          this.toFullKeys(value as Nested, `${pre}.`)
+        );
+      } else if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+          if (Util.isPlainObject(value[i]) || Array.isArray(value[i])) {
+            Object.assign(out, this.toFullKeys(value[i], `${pre}[${i}].`));
+          } else {
+            out[`${pre}[${i}]`] = value[i];
+          }
+        }
+      } else {
+        out[pre] = value;
+      }
+    }
+    return out;
+  }
+
+  /**
    * Coerce the input type to match the existing field type
    */
   static coerce(a: any, val: any): any {
@@ -102,7 +128,7 @@ export class ConfigUtil {
     const matcher = !key ? /./ : new RegExp(`^${key.replace(/[.]/g, '_')}`, 'i'); // Check is case insensitive
     for (const k of Object.keys(process.env)) { // Find all keys that match
       if (k.includes('_') && (!key || matcher.test(k))) { // Require at least one level
-        ConfigUtil.bindEnvByParts(obj, key ? k.substring(key.length + 1).split('_') : k.split('_'), process.env[k]!);
+        this.bindEnvByParts(obj, key ? k.substring(key.length + 1).split('_') : k.split('_'), process.env[k]!);
       }
     }
   }
@@ -156,27 +182,31 @@ export class ConfigUtil {
       Util.deepAssign(target, sub);
     }
 
-    ConfigUtil.bindEnvByKey(target, key);
+    this.bindEnvByKey(target, key);
 
     return target;
   }
 
+  /**
+   * Build redacting regex
+   */
+  static buildRedactRegex(base: string[]) {
+    // Support custom redacted keys
+    return new RegExp(`(${base.filter(x => !!x).join('|')})`, 'i');
+  }
 
   /**
    * Sanitize payload
    */
-  static sanitizeValuesByKey(obj: any, patterns: RegExp[]) {
-    const str = JSON.stringify(obj, (k, value) => {
-      // TODO: Expand restriction detection
-      if (
-        typeof value === 'string' && patterns.find(p => p.test(k))
-      ) {
-        return '*'.repeat(value.length);
-      } else {
-        return value;
-      }
-    });
+  static sanitizeValuesByKey(obj: any, patterns: string[]) {
+    const regex = this.buildRedactRegex(patterns);
 
-    return JSON.parse(str);
+    const full = this.toFullKeys(obj);
+    for (const [k, value] of Object.entries(full)) {
+      if (typeof value === 'string' && regex.test(k)) {
+        full[k] = '*'.repeat(value.length);
+      }
+    }
+    return this.breakDownKeys(full) as any;
   }
 }
