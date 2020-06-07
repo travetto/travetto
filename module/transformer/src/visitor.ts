@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 import { ConsoleManager } from '@travetto/base';
 
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
-import { TransformUtil } from './util';
+import { LogUtil } from './util/log';
 
 /**
  * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler
@@ -69,7 +69,7 @@ export class VisitorFactory<S extends State = State> {
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
-        ConsoleManager.setFile(this.logTarget, { processArgs: (__, args) => TransformUtil.collapseNodes(args) }); // Suppress logging into an output file
+        ConsoleManager.setFile(this.logTarget, { processArgs: (__, args) => LogUtil.collapseNodes(args) }); // Suppress logging into an output file
         console.debug(process.pid, 'Processing', file.fileName);
         const state = this.getState(file);
         const ret = this.visit(state, context, file);

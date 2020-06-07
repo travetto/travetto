@@ -5,8 +5,8 @@ import { dirname } from 'path';
 import { FsUtil } from '@travetto/boot';
 import { Util } from '@travetto/base';
 
-import { TransformUtil } from '../util';
-import { Type, AnyType, UnionType } from './types';
+import { Type, AnyType, UnionType, Checker } from './types';
+import { DocUtil, CoreUtil, DeclarationUtil, LiteralUtil } from '../util';
 
 /**
  * List of global types that can be parameterized
@@ -37,17 +37,17 @@ type Category = 'void' | 'undefined' | 'concrete' | 'unknown' | 'tuple' | 'shape
  */
 export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { category: Category, type: ts.Type } {
   const flags = type.getFlags();
-  const objectFlags = TransformUtil.getObjectFlags(type) ?? 0;
+  const objectFlags = CoreUtil.getObjectFlags(type) ?? 0;
 
   if (flags & ts.TypeFlags.Void) {
     return { category: 'void', type };
   } else if (flags & ts.TypeFlags.Undefined) {
     return { category: 'undefined', type };
-  } else if (TransformUtil.readDocTag(type, 'concrete').length) {
+  } else if (DocUtil.readDocTag(type, 'concrete').length) {
     return { category: 'concrete', type };
   } else if (flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) { // Any or unknown
     return { category: 'unknown', type };
-  } else if (objectFlags & ts.ObjectFlags.Reference && !TransformUtil.getSymbol(type)) { // Tuple type?
+  } else if (objectFlags & ts.ObjectFlags.Reference && !CoreUtil.getSymbol(type)) { // Tuple type?
     return { category: 'tuple', type };
   } else if (objectFlags & ts.ObjectFlags.Anonymous) {
     return { category: 'shape', type };
@@ -58,7 +58,7 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
     }
 
     if (!resolvedType.isClass()) { // Real type
-      const source = TransformUtil.findSource(resolvedType);
+      const source = DeclarationUtil.getPrimaryDeclarationNode(resolvedType).getSourceFile();
       if (source && source.fileName.includes('typescript/lib')) { // Global Type
         return { category: 'literal', type };
       } else {
@@ -88,7 +88,7 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
  */
 export const TypeBuilder: {
   [K in Category]: {
-    build(checker: ts.TypeChecker, type: ts.Type, alias?: ts.Symbol): AnyType | undefined;
+    build(checker: Checker, type: ts.Type, alias?: ts.Symbol): AnyType | undefined;
     finalize?(type: Type<K>): AnyType;
   }
 } = {
@@ -102,17 +102,17 @@ export const TypeBuilder: {
     build: (checker, type) => ({ key: 'literal', name: 'void', ctor: undefined })
   },
   tuple: {
-    build: (checker, type) => ({ key: 'tuple', tsTupleTypes: TransformUtil.getAllTypeArguments(checker, type), subTypes: [] })
+    build: (checker, type) => ({ key: 'tuple', tsTupleTypes: checker.getAllTypeArguments(type), subTypes: [] })
   },
   literal: {
     build: (checker, type) => {
       // Handle void/undefined
-      const name = TransformUtil.getTypeAsString(checker, type) ?? '';
-      const complexName = TransformUtil.getSymbol(type)?.getName() ?? '';
+      const name = checker.getTypeAsString(type) ?? '';
+      const complexName = CoreUtil.getSymbol(type)?.getName() ?? '';
 
       if (name in GLOBAL_SIMPLE) {
         const cons = GLOBAL_SIMPLE[name];
-        const ret = TransformUtil.isLiteralType(type) ? Util.coerceType(type.value, cons as typeof String, false) :
+        const ret = LiteralUtil.isLiteralType(type) ? Util.coerceType(type.value, cons as typeof String, false) :
           undefined;
 
         return {
@@ -127,30 +127,35 @@ export const TypeBuilder: {
           key: 'literal',
           name: cons.name,
           ctor: cons,
-          tsTypeArguments: TransformUtil.getAllTypeArguments(checker, type)
+          tsTypeArguments: checker.getAllTypeArguments(type)
         };
       }
     }
   },
   external: {
     build: (checker, type) => {
-      const source = TransformUtil.findSource(type)!;
-      const comments = TransformUtil.describeDocs(type);
-      const name = TransformUtil.getSymbol(type)?.getName();
-
-      const obj: AnyType = { key: 'external', name, source: source.fileName, comment: comments.description };
-      obj.tsTypeArguments = TransformUtil.getAllTypeArguments(checker, type);
-      return obj;
+      const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
+      const name = CoreUtil.getSymbol(type)?.getName();
+      return {
+        key: 'external', name, source: source.fileName,
+        tsTypeArguments: checker.getAllTypeArguments(type)
+      };
     }
   },
   union: {
     build: (checker, type) => {
       const uType = type as ts.UnionType;
-      const undefinable = uType.types.some(x => (x.getFlags() & ts.TypeFlags.Undefined));
-      const nullable = uType.types.some(x => x.getFlags() & ts.TypeFlags.Null);
-      const remainder = uType.types.filter(x => !(x.getFlags() & (ts.TypeFlags.Null | ts.TypeFlags.Undefined)));
-      const name = TransformUtil.getSymbol(type)?.getName();
-      return { key: 'union', name, undefinable, nullable, tsUnionTypes: remainder, subTypes: [] };
+      let undefinable = false;
+      let nullable = false;
+      const remainder = uType.types.filter(ut => {
+        const u = (ut.getFlags() & (ts.TypeFlags.Undefined)) > 0;
+        const n = (ut.getFlags() & (ts.TypeFlags.Null)) > 0;
+        undefinable = undefinable || u;
+        nullable = nullable || n;
+        return !(u || n);
+      });
+      const name = CoreUtil.getSymbol(type)?.getName();
+      return { key: 'union', name, undefinable, nullable, tsSubTypes: remainder, subTypes: [] };
     },
     finalize: (type: UnionType) => {
       const { undefinable, nullable, subTypes } = type;
@@ -166,12 +171,12 @@ export const TypeBuilder: {
   },
   shape: {
     build: (checker, type, alias?) => {
-      const docs = TransformUtil.describeDocs(type);
       const fieldNodes: Record<string, ts.Type> = {};
-      const name = TransformUtil.getSymbol(alias ?? type);
+      const name = CoreUtil.getSymbol(alias ?? type);
+      const source = DeclarationUtil.getPrimaryDeclarationNode(type)?.getSourceFile();
       for (const member of checker.getPropertiesOfType(type)) {
-        const memberType = checker.getTypeAtLocation(
-          TransformUtil.getPrimaryDeclarationNode(member)
+        const memberType = checker.getType(
+          DeclarationUtil.getPrimaryDeclarationNode(member)
         );
         if (memberType.getCallSignatures().length) {
           continue;
@@ -180,19 +185,19 @@ export const TypeBuilder: {
       }
       return {
         key: 'shape', name: name?.getName(),
-        comment: docs.description,
+        source: source?.fileName,
         tsFieldTypes: fieldNodes,
-        tsTypeArguments: TransformUtil.getAllTypeArguments(checker, type),
-        fields: {}
+        tsTypeArguments: checker.getAllTypeArguments(type),
+        fieldTypes: {}
       };
     }
   },
   concrete: {
     build: (checker, type) => {
-      const tags = TransformUtil.readDocTag(type, 'concrete');
+      const tags = DocUtil.readDocTag(type, 'concrete');
       if (tags.length) {
         const parts = tags[0].split(':');
-        const fileName = TransformUtil.getPrimaryDeclaration(TransformUtil.getDeclarations(type))?.getSourceFile().fileName;
+        const fileName = DeclarationUtil.getPrimaryDeclarationNode(type)?.getSourceFile().fileName;
         if (parts.length === 1) {
           parts.unshift('.');
         }

@@ -1,23 +1,15 @@
 import * as ts from 'typescript';
 
-import { AnyType } from './types';
+import { AnyType, Checker } from './types';
 import { TypeCategorize, TypeBuilder } from './builder';
-import { TransformUtil } from '../util';
 import { VisitCache } from './cache';
+import { DocUtil } from '../util';
 
 /**
  * Type resolver
  */
-export class TypeResolver {
+export class TypeResolver implements Checker {
   constructor(private tsChecker: ts.TypeChecker) { }
-
-  /**
-   * Get type from element
-   * @param el
-   */
-  getTypeOrSymbol(el: ts.Type | ts.Node | ts.Symbol) {
-    return 'getSourceFile' in el ? this.tsChecker.getTypeAtLocation(el as ts.Node) : el;
-  }
 
   /**
    * Get type from element
@@ -27,40 +19,34 @@ export class TypeResolver {
     return 'getSourceFile' in el ? this.tsChecker.getTypeAtLocation(el as ts.Node) : el;
   }
 
-
   /**
    * Fetch all type arguments for a give type
    */
   getAllTypeArguments(ref: ts.Type): ts.Type[] {
-    return TransformUtil.getAllTypeArguments(this.tsChecker, ref);
+    return this.tsChecker.getTypeArguments(ref as ts.TypeReference) as ts.Type[];
   }
 
   /**
    * Resolve the return type for a method
    */
   getReturnType(node: ts.MethodDeclaration) {
-    return TransformUtil.getReturnType(this.tsChecker, node);
+    const type = this.getType(node);
+    const [sig] = type.getCallSignatures();
+    return this.tsChecker.getReturnTypeOfSignature(sig);
   }
 
   /**
-   * Read JS Doc tags by name
+   * Get type as a string representation
    */
-  readDocTag(node: ts.Declaration, name: string): string[] {
-    return TransformUtil.readDocTag(this.tsChecker.getTypeAtLocation(node), name);
+  getTypeAsString(type: ts.Type) {
+    return this.tsChecker.typeToString(this.tsChecker.getApparentType(type)) || undefined;
   }
 
   /**
-   * Get all declarations of a node
+   * Get list of properties
    */
-  getDeclarations(node: ts.Node | ts.Type | ts.Symbol): ts.Declaration[] {
-    return TransformUtil.getDeclarations(this.getTypeOrSymbol(node));
-  }
-
-  /**
-   * Get primary declaration of a node
-   */
-  getPrimaryDeclaration(node: ts.Node | ts.Symbol | ts.Type): ts.Declaration {
-    return TransformUtil.getPrimaryDeclarationNode(this.getTypeOrSymbol(node));
+  getPropertiesOfType(type: ts.Type) {
+    return this.tsChecker.getPropertiesOfType(type);
   }
 
   /**
@@ -77,10 +63,10 @@ export class TypeResolver {
       const { category, type } = TypeCategorize(this.tsChecker, resType);
       const { build, finalize } = TypeBuilder[category];
 
-      let result = build(this.tsChecker, type, alias);
+      let result = build(this, type, alias);
 
       if (result) {
-        console.debug('Detected', result?.key);
+        console.debug('Detected', result.key);
       } else {
         console.debug('Not Detected');
       }
@@ -90,6 +76,8 @@ export class TypeResolver {
 
       // Recurse
       if (result) {
+        result.comment = DocUtil.describeDocs(type).description;
+
         if ('tsTypeArguments' in result) {
           result.typeArguments = result.tsTypeArguments!.map((elType, i) => resolve(elType, type.aliasSymbol, depth + 1));
           delete result.tsTypeArguments;
@@ -99,7 +87,7 @@ export class TypeResolver {
           for (const [name, fieldType] of Object.entries(result.tsFieldTypes ?? [])) {
             fields[name] = resolve(fieldType, undefined, depth + 1);
           }
-          result.fields = fields;
+          result.fieldTypes = fields;
           delete result.tsFieldTypes;
         }
         if ('tsSubTypes' in result) {
@@ -117,7 +105,7 @@ export class TypeResolver {
     try {
       return resolve(this.getType(node));
     } catch (err) {
-      console.error(`Unable to resolve type`, err);
+      console.error(`Unable to resolve type`, err.stack);
       return { key: 'literal', ctor: Object, name: 'object' };
     }
   }

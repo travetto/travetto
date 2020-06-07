@@ -1,10 +1,11 @@
 import * as ts from 'typescript';
 
 import {
-  TransformUtil, TransformerState, OnClass, OnMethod, ParamDocumentation, DeclDocumentation
+  TransformerState, OnClass, OnMethod, ParamDocumentation, DeclDocumentation, DocUtil, LiteralUtil
 } from '@travetto/transformer';
 
 import { ParamConfig } from '../src/types';
+import { DecoratorUtil } from '@travetto/transformer/src/util/decorator';
 
 const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
 const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
@@ -67,9 +68,9 @@ export class RestTransformer {
    */
   static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation) {
     const pDec = state.findDecorator(node, '@trv:rest/Param');
-    let pDecArg = TransformUtil.getPrimaryArgument(pDec)!;
+    let pDecArg = DecoratorUtil.getPrimaryArgument(pDec)!;
     if (pDecArg && ts.isStringLiteral(pDecArg)) {
-      pDecArg = TransformUtil.fromLiteral({ name: pDecArg });
+      pDecArg = LiteralUtil.fromLiteral({ name: pDecArg });
     }
 
     const { type, array, defaultType } = this.getParameterType(state, node);
@@ -79,7 +80,7 @@ export class RestTransformer {
       ...(array ? { array: true } : {})
     };
 
-    const conf = TransformUtil.extendObjectLiteral(common, pDecArg);
+    const conf = LiteralUtil.extendObjectLiteral(common, pDecArg);
     const decs = (node.decorators ?? []).filter(x => x !== pDec);
 
     if (!pDec) { // Handle default
@@ -116,7 +117,7 @@ export class RestTransformer {
       retType = retType.typeArguments?.[0]!; // We have a promise nested
     }
 
-    const comments = state.describeDocs(node);
+    const comments = DocUtil.describeDocs(node);
 
     // IF we have a winner, declare response type
     if (retType) {
@@ -134,7 +135,7 @@ export class RestTransformer {
         case 'shape': delete type.type; break;
       }
 
-      const produces = state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', TransformUtil.fromLiteral({
+      const produces = state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', LiteralUtil.fromLiteral({
         ...type,
         title: comments.return
       }));
@@ -143,7 +144,7 @@ export class RestTransformer {
 
     // Handle description/title/summary w/e
     if (comments.description) {
-      newDecls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
+      newDecls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', LiteralUtil.fromLiteral({
         title: comments.description,
       })));
     }
@@ -184,14 +185,14 @@ export class RestTransformer {
   @OnClass('@trv:rest/Controller')
   static handleController(state: TransformerState, node: ts.ClassDeclaration) {
     // Read title/description/summary from jsdoc on class
-    const comments = state.describeDocs(node);
+    const comments = DocUtil.describeDocs(node);
 
     if (!comments.description) {
       return node;
     }
 
     const decls = [...(node.decorators ?? [])];
-    decls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', TransformUtil.fromLiteral({
+    decls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', LiteralUtil.fromLiteral({
       title: comments.description
     })));
 
