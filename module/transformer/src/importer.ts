@@ -1,21 +1,23 @@
 import * as ts from 'typescript';
-import * as path from 'path';
+import { basename } from 'path';
 
 import { AnyType, ExternalType } from './resolver/types';
+import { ImportUtil } from './util/import';
 import { Import } from './types/shared';
-import { TransformUtil } from './util';
 
 /**
  * Manages imports within a ts.SourceFile
  */
 export class ImportManager {
+
+
   private newImports = new Map<string, Import>();
   private imports: Map<string, Import>;
   private idx: Record<string, number> = {};
   private ids = new Map<string, string>();
 
   constructor(public source: ts.SourceFile) {
-    this.imports = TransformUtil.collectImports(source);
+    this.imports = ImportUtil.collectImports(source);
   }
 
   /**
@@ -23,7 +25,7 @@ export class ImportManager {
    */
   getId(file: string) {
     if (!this.ids.has(file)) {
-      const key = path.basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
+      const key = basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
       this.ids.set(file, `ᚕ_${key}_${this.idx[key] = (this.idx[key] || 0) + 1}`);
     }
     return this.ids.get(file)!;
@@ -51,21 +53,17 @@ export class ImportManager {
   /**
    * Import given an external type
    */
-  importFromResolved(type: AnyType) {
-    let nested: AnyType[] | undefined;
-    switch (type.key) {
-      case 'external': {
-        if (type.source && type.source !== this.source.fileName) {
-          this.importFile(type.source);
-        }
-        nested = type.typeArguments;
-      } break;
-      case 'union':
-      case 'tuple': nested = type.subTypes; break;
-    }
-    if (nested) {
-      for (const sub of nested) {
-        this.importFromResolved(sub);
+  importFromResolved(...types: AnyType[]) {
+    for (const type of types) {
+      if (type.key === 'external' && type.source && type.source !== this.source.fileName) {
+        this.importFile(type.source);
+      }
+      switch (type.key) {
+        case 'external':
+        case 'literal': this.importFromResolved(...type.typeArguments || []); break;
+        case 'union':
+        case 'tuple': this.importFromResolved(...type.subTypes || []); break;
+        case 'shape': this.importFromResolved(...Object.values(type.fieldTypes)); break;
       }
     }
   }
@@ -74,7 +72,7 @@ export class ImportManager {
    * Reset the imports into the source file
    */
   finalize(ret: ts.SourceFile) {
-    return TransformUtil.addImports(ret, ...this.newImports.values());
+    return ImportUtil.addImports(ret, ...this.newImports.values());
   }
 
   /**

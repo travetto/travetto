@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
-import { TransformUtil, TransformerState, OnCall } from '@travetto/transformer';
+import { TransformerState, OnCall, DeclarationUtil, CoreUtil } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
@@ -126,7 +126,7 @@ export class AssertTransformer {
       found = !!state.getDeclarations(node).find(x =>
         // In a separate file or is const
         x.getSourceFile().fileName !== state.source.fileName ||
-        TransformUtil.isConstantDeclaration(x));
+        DeclarationUtil.isConstantDeclaration(x));
     }
 
     return found;
@@ -153,7 +153,7 @@ export class AssertTransformer {
   static doAssert<T extends ts.CallExpression>(state: TransformerState & AssertState, node: T, cmd: Command): T {
     this.initState(state);
 
-    const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);
+    const first = CoreUtil.getPrimaryArgument<ts.CallExpression>(node);
     const firstText = first!.getText();
 
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
@@ -178,7 +178,7 @@ export class AssertTransformer {
    * Convert `assert.(throws|rejects|doesNotThrow|doesNotReject)` to the appropriate structure
    */
   static doThrows(state: TransformerState & AssertState, node: ts.CallExpression, key: string, args: ts.Expression[]): ts.Node {
-    const first = TransformUtil.getPrimaryArgument<ts.CallExpression>(node);
+    const first = CoreUtil.getPrimaryArgument<ts.CallExpression>(node);
     const firstText = first!.getText();
 
     this.initState(state);

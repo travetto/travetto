@@ -1,11 +1,10 @@
 import * as fs from 'fs';
+import type * as tsi from 'typescript';
 import { EnvUtil } from './env';
 import { FsUtil } from './fs';
 import { AppCache } from './app-cache';
 
 type Preprocessor = (name: string, contents: string) => string;
-
-declare const global: { ts: any }; // Used for transformers
 
 const OPTS = Symbol.for('@trv:compiler/options');
 
@@ -94,9 +93,10 @@ export class TranspileUtil {
    */
   static get compilerOptions(): any {
     if (!this[OPTS]) {
-      const json = global.ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, global.ts.sys.readFile);
+      const ts: typeof tsi = require('typescript');
+      const json = ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, ts.sys.readFile);
       this[OPTS] = {
-        ...global.ts.parseJsonSourceFileConfigFileContent(json, global.ts.sys, FsUtil.cwd).options,
+        ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options,
         rootDir: FsUtil.cwd,
         outDir: FsUtil.cwd
       };
@@ -112,7 +112,8 @@ export class TranspileUtil {
   static checkTranspileErrors(fileName: string, diagnostics: readonly any[]) {
     if (diagnostics && diagnostics.length) {
       const errors = diagnostics.slice(0, 5).map(diag => {
-        const message = global.ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+        const ts: typeof tsi = require('typescript');
+        const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
           const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
           return ` @ ${diag.file.fileName.replace(`${FsUtil.cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
@@ -185,7 +186,8 @@ export class TranspileUtil {
     return AppCache.getOrSet(tsf, () => {
       try {
         const diags: any[] = [];
-        const ret = global.ts.transpile(this.preProcess(tsf), this.compilerOptions, tsf, diags);
+        const ts: typeof tsi = require('typescript');
+        const ret = ts.transpile(this.preProcess(tsf), this.compilerOptions, tsf, diags);
         this.checkTranspileErrors(tsf, diags);
         return ret;
       } catch (e) {
@@ -199,12 +201,6 @@ export class TranspileUtil {
    */
   static init() {
     AppCache.init();
-
-    global.ts = new Proxy({}, { // Only in inject as needed
-      get(t, p, r) {
-        return (global.ts = require('typescript'))[p]; // Overwrite
-      }
-    });
 
     // Register source maps for cached files
     require('source-map-support').install({

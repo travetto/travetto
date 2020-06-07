@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformUtil, TransformerState, DecoratorMeta, OnMethod, OnClass
+  TransformerState, DecoratorMeta, OnMethod, OnClass, LiteralUtil, CoreUtil
 } from '@travetto/transformer';
 
 /**
@@ -18,13 +18,13 @@ export class AnnotationTransformer {
     // If we have a @Suite/@Test decorator
     if (dec && ts.isCallExpression(dec.expression)) {
       const args = [...(dec.expression.arguments ?? [])];
-      const n = (TransformUtil.hasOriginal(node) ? node.original : node) as ts.MethodDeclaration;
+      const n = (CoreUtil.hasOriginal(node) ? node.original : node) as ts.MethodDeclaration;
 
       // Add line start/end information into the decorator
-      dec.expression.arguments = ts.createNodeArray([...args, TransformUtil.fromLiteral({
+      dec.expression.arguments = ts.createNodeArray([...args, LiteralUtil.fromLiteral({
         lines: {
-          ...TransformUtil.getRangeOf(state.source, n),
-          codeStart: TransformUtil.getRangeOf(state.source, n?.body?.statements[0])?.start
+          ...CoreUtil.getRangeOf(state.source, n),
+          codeStart: CoreUtil.getRangeOf(state.source, n?.body?.statements[0])?.start
         }
       })]);
     }

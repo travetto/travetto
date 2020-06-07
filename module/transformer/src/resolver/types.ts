@@ -50,9 +50,13 @@ export interface ExternalType extends Type<'external'> {
  */
 export interface ShapeType extends Type<'shape'> {
   /**
+   *  Location the type came from, for class references
+   */
+  source: string;
+  /**
    * Does not include methods, used for shapes not concrete types
    */
-  fields: Record<string, AnyType>;
+  fieldTypes: Record<string, AnyType>;
 
   /**
    * Type Info
@@ -135,3 +139,13 @@ export interface PointerType extends Type<'pointer'> {
 }
 
 export type AnyType = TupleType | ShapeType | UnionType | LiteralType | ExternalType | PointerType;
+
+/**
+ * Simple interface for checked methods
+ */
+export interface Checker {
+  getAllTypeArguments(type: ts.Type): ts.Type[];
+  getPropertiesOfType(type: ts.Type): ts.Symbol[];
+  getTypeAsString(type: ts.Type): string | undefined;
+  getType(node: ts.Node): ts.Type;
+}

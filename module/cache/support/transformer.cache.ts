@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformUtil, TransformerState, DecoratorMeta, OnMethod } from '@travetto/transformer';
+import { TransformerState, DecoratorMeta, OnMethod, LiteralUtil } from '@travetto/transformer';
 
 const CACHE_UTIL = 'CacheUtil';
 
@@ -45,12 +45,12 @@ export class CacheTransformer {
 
       const params = dec.expression.arguments;
       const id = params[0] as ts.Identifier;
-      let config = params.length > 1 ? params[1] : TransformUtil.fromLiteral({});
+      let config = params.length > 1 ? params[1] : LiteralUtil.fromLiteral({});
 
       // Read literal, and extend config onto it
       const parent = ((node.parent as ts.ClassExpression) || { name: { getText: () => 'unknown' } }).name!;
       const keySpace = `${parent.getText()}.${node.name.getText()}`;
-      config = TransformUtil.extendObjectLiteral({ keySpace }, config);
+      config = LiteralUtil.extendObjectLiteral({ keySpace }, config);
 
       // Create an arrow function to retain the `this` value.
       const fn = ts.createArrowFunction(

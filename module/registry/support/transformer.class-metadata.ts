@@ -1,7 +1,8 @@
 import * as ts from 'typescript';
 
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { TransformUtil, TransformerState, OnMethod, OnClass, AfterClass } from '@travetto/transformer';
+import { TransformerState, OnMethod, OnClass, AfterClass, LiteralUtil, CoreUtil } from '@travetto/transformer';
+import { DecoratorUtil } from '@travetto/transformer/src/util/decorator';
 
 const REGISTER_MOD = require.resolve('../src/decorator');
 
@@ -64,7 +65,7 @@ export class RegisterTransformer {
         ts.createIdentifier(node.name?.getText()!),
         ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
         ts.createLiteral(state[cls]!),
-        TransformUtil.extendObjectLiteral(state[methods] || {}),
+        LiteralUtil.extendObjectLiteral(state[methods] || {}),
         ts.createLiteral(isAbstract)
       ]
     );
@@ -73,7 +74,7 @@ export class RegisterTransformer {
 
     return ts.updateClassDeclaration(
       node,
-      TransformUtil.spliceDecorators(
+      DecoratorUtil.spliceDecorators(
         node, undefined, [state.createDecorator(REGISTER_MOD, 'Register')], 0
       ),
       node.modifiers,
@@ -81,7 +82,7 @@ export class RegisterTransformer {
       node.typeParameters,
       ts.createNodeArray(node.heritageClauses),
       [
-        TransformUtil.createStaticField('__init', meta),
+        CoreUtil.createStaticField('__init', meta),
         ...node.members
       ]
     );

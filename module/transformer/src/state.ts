@@ -5,7 +5,9 @@ import { State, DecoratorMeta } from './types/visitor';
 
 import { TypeResolver } from './resolver/service';
 import { ImportManager } from './importer';
-import { TransformUtil } from './util';
+import { DocUtil } from './util/doc';
+import { DecoratorUtil } from './util/decorator';
+import { DeclarationUtil } from './util/declaration';
 
 /**
  * Transformer runtime state
@@ -74,17 +76,10 @@ export class TransformerState implements State {
   }
 
   /**
-   * Read JSDocs for a type
-   */
-  describeDocs(type: ts.Type | ts.Declaration) {
-    return TransformUtil.describeDocs(type);
-  }
-
-  /**
    * Read all JSDoc tags
    */
   readDocTag(node: ts.Declaration, name: string) {
-    return this.resolver.readDocTag(node, name);
+    return DocUtil.readDocTag(this.resolver.getType(node), name);
   }
 
   /**
@@ -104,20 +99,23 @@ export class TransformerState implements State {
    */
   createDecorator(pth: string, name: string, ...contents: (ts.Expression | undefined)[]) {
     this.importDecorator(pth, name);
-    return TransformUtil.createDecorator(this.decorators.get(name)!, ...contents);
+    return DecoratorUtil.createDecorator(this.decorators.get(name)!, ...contents);
   }
 
   /**
    * Read a decorator's metadata
    */
   getDecoratorMeta(dec: ts.Decorator): DecoratorMeta {
-    const ident = TransformUtil.getDecoratorIdent(dec);
-    const decl = this.resolver.getPrimaryDeclaration(ident);
+    const ident = DecoratorUtil.getDecoratorIdent(dec);
+    const decl = DeclarationUtil.getPrimaryDeclarationNode(
+      this.resolver.getType(ident)
+    );
+
     return ({
       dec,
       ident,
       file: decl?.getSourceFile().fileName,
-      targets: this.resolver.readDocTag(ident, 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b)),
+      targets: DocUtil.readDocTag(this.resolver.getType(ident), 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b)),
       name: ident ?
         ident.escapedText! as string :
         undefined
@@ -154,7 +152,7 @@ export class TransformerState implements State {
    * Get all declarations for a node
    */
   getDeclarations(node: ts.Node): ts.Declaration[] {
-    return this.resolver.getDeclarations(node);
+    return DeclarationUtil.getDeclarations(this.resolver.getType(node));
   }
 
   /**

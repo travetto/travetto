@@ -1,8 +1,11 @@
 import * as ts from 'typescript';
 
 import {
-  TransformUtil, TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta,
-  AnyType
+  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta,
+  AnyType,
+  DocUtil,
+  LiteralUtil,
+  CoreUtil
 } from '@travetto/transformer';
 
 const hasSchema = Symbol.for('@trv:schema/has');
@@ -28,21 +31,24 @@ export class SchemaTransformer {
   static toFinalType(state: TransformerState, type: AnyType): ts.Expression {
     switch (type.key) {
       case 'pointer': return this.toFinalType(state, type.target);
-      case 'external': return state.getOrImport(type);
-      case 'tuple': return TransformUtil.fromLiteral(type.subTypes.map(x => this.toFinalType(state, x)!));
+      case 'external': {
+        const res = state.getOrImport(type);
+        return res;
+      }
+      case 'tuple': return LiteralUtil.fromLiteral(type.subTypes.map(x => this.toFinalType(state, x)!));
       case 'literal': {
         if ((type.ctor === Array || type.ctor === Set) && type.typeArguments?.length) {
-          return TransformUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0])]);
+          return LiteralUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0])]);
         } else {
           return ts.createIdentifier(type.ctor!.name!);
         }
       }
       case 'shape': {
         const out: Record<string, ts.Expression | undefined> = {};
-        for (const el of Object.keys(type.fields)) {
-          out[el] = this.toFinalType(state, type.fields[el]);
+        for (const el of Object.keys(type.fieldTypes)) {
+          out[el] = this.toFinalType(state, type.fieldTypes[el]);
         }
-        return TransformUtil.fromLiteral(type);
+        return LiteralUtil.fromLiteral(type);
       }
       case 'union': {
         if (type.commonType) {
@@ -62,7 +68,7 @@ export class SchemaTransformer {
     const properties = [];
 
     if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
-      properties.push(ts.createPropertyAssignment('required', TransformUtil.fromLiteral({ active: true })));
+      properties.push(ts.createPropertyAssignment('required', LiteralUtil.fromLiteral({ active: true })));
     }
 
     // If we have a union type
@@ -71,7 +77,7 @@ export class SchemaTransformer {
         .filter(x => x !== undefined && x !== null);
 
       if (values.length === typeExpr.subTypes.length) {
-        properties.push(ts.createPropertyAssignment('enum', TransformUtil.fromLiteral({
+        properties.push(ts.createPropertyAssignment('enum', LiteralUtil.fromLiteral({
           values,
           message: `{path} is only allowed to be "${values.join('" or "')}"`
         })));
@@ -88,9 +94,9 @@ export class SchemaTransformer {
     const dec = state.createDecorator(FIELD_MOD, 'Field', ...params);
     const newDecs = [...(node.decorators ?? []), dec];
 
-    const comments = state.describeDocs(node);
+    const comments = DocUtil.describeDocs(node);
     if (comments.description) {
-      newDecs.push(state.createDecorator(COMMON_MOD, 'Describe', TransformUtil.fromLiteral({
+      newDecs.push(state.createDecorator(COMMON_MOD, 'Describe', LiteralUtil.fromLiteral({
         description: comments.description
       })));
     }
@@ -124,14 +130,14 @@ export class SchemaTransformer {
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators ?? [])];
 
-    const comments = state.describeDocs(node);
+    const comments = DocUtil.describeDocs(node);
 
     if (!state[hasSchema]) {
       decls.unshift(state.createDecorator(SCHEMA_MOD, 'Schema'));
     }
 
     if (comments.description) {
-      decls.push(state.createDecorator(COMMON_MOD, 'Describe', TransformUtil.fromLiteral({
+      decls.push(state.createDecorator(COMMON_MOD, 'Describe', LiteralUtil.fromLiteral({
         title: comments.description
       })));
     }
@@ -156,7 +162,7 @@ export class SchemaTransformer {
   @OnProperty()
   static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
     const ignore = state.findDecorator(node, '@trv:schema/Ignore', 'Ignore', FIELD_MOD);
-    return state[inSchema] && !ignore && TransformUtil.isPublic(node) ?
+    return state[inSchema] && !ignore && CoreUtil.isPublic(node) ?
       this.computeProperty(state, node) : node;
   }
 }

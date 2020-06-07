@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformUtil, TransformerState, DecoratorMeta, OnClass
+  TransformerState, DecoratorMeta, OnClass, LiteralUtil, CoreUtil
 } from '@travetto/transformer';
 
 /**
@@ -83,18 +83,18 @@ export class ApplicationTransformer {
 
     // Name only, need a config object
     if (declArgs.length === 1) {
-      declArgs.push(TransformUtil.fromLiteral({}));
+      declArgs.push(LiteralUtil.fromLiteral({}));
     }
 
     // Track start point
-    declArgs[1] = TransformUtil.extendObjectLiteral(declArgs[1], {
-      start: TransformUtil.getRangeOf(state.source, node)?.start,
-      codeStart: TransformUtil.getRangeOf(state.source, runMethod?.body?.statements[0])?.start
+    declArgs[1] = LiteralUtil.extendObjectLiteral(declArgs[1], {
+      start: CoreUtil.getRangeOf(state.source, node)?.start,
+      codeStart: CoreUtil.getRangeOf(state.source, runMethod?.body?.statements[0])?.start
     });
 
     dec.expression.arguments = ts.createNodeArray([
       ...declArgs,
-      TransformUtil.fromLiteral(outParams)
+      LiteralUtil.fromLiteral(outParams)
     ]);
 
     return ts.updateClassDeclaration(node,
