@@ -30,7 +30,8 @@ export class VisitorFactory<S extends State = State> {
 
   constructor(
     private getState: (src: ts.SourceFile) => S,
-    transformers: NodeTransformer<S, any, any>[]
+    transformers: NodeTransformer<S, any, any>[],
+    private logTarget = '!compiler.log'
   ) {
     this.init(transformers);
   }
@@ -68,7 +69,7 @@ export class VisitorFactory<S extends State = State> {
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
-        ConsoleManager.setFile('!compiler.log', { processArgs: (__, args) => TransformUtil.collapseNodes(args) }); // Suppress logging into an output file
+        ConsoleManager.setFile(this.logTarget, { processArgs: (__, args) => TransformUtil.collapseNodes(args) }); // Suppress logging into an output file
         console.debug(process.pid, 'Processing', file.fileName);
         const state = this.getState(file);
         const ret = this.visit(state, context, file);

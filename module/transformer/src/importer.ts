@@ -60,8 +60,8 @@ export class ImportManager {
         }
         nested = type.typeArguments;
       } break;
-      case 'union': nested = type.unionTypes; break;
-      case 'tuple': nested = type.tupleTypes; break;
+      case 'union':
+      case 'tuple': nested = type.subTypes; break;
     }
     if (nested) {
       for (const sub of nested) {

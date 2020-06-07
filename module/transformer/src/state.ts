@@ -70,22 +70,21 @@ export class TransformerState implements State {
    * Resolve the return type
    */
   resolveReturnType(node: ts.MethodDeclaration) {
-    console.debug('Resolving type', node);
     return this.resolveType(this.resolver.getReturnType(node));
   }
 
   /**
    * Read JSDocs for a type
    */
-  readJSDocs(type: ts.Type | ts.Node) {
-    return TransformUtil.readJSDocs(type);
+  describeDocs(type: ts.Type | ts.Declaration) {
+    return TransformUtil.describeDocs(type);
   }
 
   /**
    * Read all JSDoc tags
    */
-  readDocsTags(node: ts.Node, name: string) {
-    return this.resolver.readDocsTags(node, name);
+  readDocTag(node: ts.Declaration, name: string) {
+    return this.resolver.readDocTag(node, name);
   }
 
   /**
@@ -118,7 +117,7 @@ export class TransformerState implements State {
       dec,
       ident,
       file: decl?.getSourceFile().fileName,
-      targets: this.resolver.readDocsTags(ident, 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b)),
+      targets: this.resolver.readDocTag(ident, 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b)),
       name: ident ?
         ident.escapedText! as string :
         undefined

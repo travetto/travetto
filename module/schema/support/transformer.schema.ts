@@ -27,28 +27,27 @@ export class SchemaTransformer {
    */
   static toFinalType(state: TransformerState, type: AnyType): ts.Expression {
     switch (type.key) {
+      case 'pointer': return this.toFinalType(state, type.target);
       case 'external': return state.getOrImport(type);
-      case 'tuple': return TransformUtil.fromLiteral(type.tupleTypes.map(x => this.toFinalType(state, x)!));
+      case 'tuple': return TransformUtil.fromLiteral(type.subTypes.map(x => this.toFinalType(state, x)!));
       case 'literal': {
-        if (type.ctor === Array && type.typeArguments?.length) {
+        if ((type.ctor === Array || type.ctor === Set) && type.typeArguments?.length) {
           return TransformUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0])]);
         } else {
           return ts.createIdentifier(type.ctor!.name!);
         }
-      }
-      case 'union': {
-        if (type.commonType) {
-          return this.toFinalType(state, type.commonType);
-        }
-        break;
       }
       case 'shape': {
         const out: Record<string, ts.Expression | undefined> = {};
         for (const el of Object.keys(type.fields)) {
           out[el] = this.toFinalType(state, type.fields[el]);
         }
-        console.debug('Shapely shape', type);
         return TransformUtil.fromLiteral(type);
+      }
+      case 'union': {
+        if (type.commonType) {
+          return this.toFinalType(state, type.commonType);
+        }
       }
     }
     return ts.createIdentifier('Object');
@@ -68,13 +67,15 @@ export class SchemaTransformer {
 
     // If we have a union type
     if (typeExpr.key === 'union') {
-      const values = typeExpr.unionTypes.map(x => x.key === 'literal' ? x.value : undefined)
+      const values = typeExpr.subTypes.map(x => x.key === 'literal' ? x.value : undefined)
         .filter(x => x !== undefined && x !== null);
 
-      properties.push(ts.createPropertyAssignment('enum', TransformUtil.fromLiteral({
-        values,
-        message: `{path} is only allowed to be "${values.join('" or "')}"`
-      })));
+      if (values.length === typeExpr.subTypes.length) {
+        properties.push(ts.createPropertyAssignment('enum', TransformUtil.fromLiteral({
+          values,
+          message: `{path} is only allowed to be "${values.join('" or "')}"`
+        })));
+      }
     }
 
     const resolved = this.toFinalType(state, typeExpr);
@@ -87,7 +88,7 @@ export class SchemaTransformer {
     const dec = state.createDecorator(FIELD_MOD, 'Field', ...params);
     const newDecs = [...(node.decorators ?? []), dec];
 
-    const comments = state.readJSDocs(node);
+    const comments = state.describeDocs(node);
     if (comments.description) {
       newDecs.push(state.createDecorator(COMMON_MOD, 'Describe', TransformUtil.fromLiteral({
         description: comments.description
@@ -123,7 +124,7 @@ export class SchemaTransformer {
   static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators ?? [])];
 
-    const comments = state.readJSDocs(node);
+    const comments = state.describeDocs(node);
 
     if (!state[hasSchema]) {
       decls.unshift(state.createDecorator(SCHEMA_MOD, 'Schema'));
@@ -155,8 +156,7 @@ export class SchemaTransformer {
   @OnProperty()
   static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
     const ignore = state.findDecorator(node, '@trv:schema/Ignore', 'Ignore', FIELD_MOD);
-    const isPublic = !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier); // eslint-disable-line no-bitwise
-    return state[inSchema] && !ignore && isPublic ?
+    return state[inSchema] && !ignore && TransformUtil.isPublic(node) ?
       this.computeProperty(state, node) : node;
   }
 }

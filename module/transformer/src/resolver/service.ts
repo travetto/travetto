@@ -3,13 +3,30 @@ import * as ts from 'typescript';
 import { AnyType } from './types';
 import { TypeCategorize, TypeBuilder } from './builder';
 import { TransformUtil } from '../util';
+import { VisitCache } from './cache';
 
-// FIXME: Provide support for recursive types and resolution
 /**
  * Type resolver
  */
 export class TypeResolver {
   constructor(private tsChecker: ts.TypeChecker) { }
+
+  /**
+   * Get type from element
+   * @param el
+   */
+  getTypeOrSymbol(el: ts.Type | ts.Node | ts.Symbol) {
+    return 'getSourceFile' in el ? this.tsChecker.getTypeAtLocation(el as ts.Node) : el;
+  }
+
+  /**
+   * Get type from element
+   * @param el
+   */
+  getType(el: ts.Type | ts.Node) {
+    return 'getSourceFile' in el ? this.tsChecker.getTypeAtLocation(el as ts.Node) : el;
+  }
+
 
   /**
    * Fetch all type arguments for a give type
@@ -28,67 +45,80 @@ export class TypeResolver {
   /**
    * Read JS Doc tags by name
    */
-  readDocsTags(node: ts.Node, name: string): string[] {
-    return TransformUtil.readJSDocTags(node, name, this.tsChecker);
+  readDocTag(node: ts.Declaration, name: string): string[] {
+    return TransformUtil.readDocTag(this.tsChecker.getTypeAtLocation(node), name);
   }
 
   /**
    * Get all declarations of a node
    */
   getDeclarations(node: ts.Node | ts.Type | ts.Symbol): ts.Declaration[] {
-    return TransformUtil.getDeclarations(node as ts.Node, this.tsChecker);
+    return TransformUtil.getDeclarations(this.getTypeOrSymbol(node));
   }
 
   /**
    * Get primary declaration of a node
    */
   getPrimaryDeclaration(node: ts.Node | ts.Symbol | ts.Type): ts.Declaration {
-    return TransformUtil.getPrimaryDeclarationFromNode(node as ts.Node, this.tsChecker);
+    return TransformUtil.getPrimaryDeclarationNode(this.getTypeOrSymbol(node));
   }
 
   /**
    * Resolve an `AnyType` from a `ts.Type` or a `ts.Node`
    */
   resolveType(node: ts.Type | ts.Node): AnyType {
-    const root = 'getSourceFile' in node ? this.tsChecker.getTypeAtLocation(node) : node;
+    const visited = new VisitCache();
+    const resolve = (resType: ts.Type, alias?: ts.Symbol, depth = 0): AnyType => {
 
-    const resolve = (frame: { type: ts.Type, alias?: ts.Symbol }): AnyType => {
-      const { build, finalize } = TypeBuilder[TypeCategorize(this.tsChecker, frame.type)];
+      if (depth > 20) { // Max depth is 20
+        throw new Error('Object structure too nested');
+      }
 
-      let result = build(this.tsChecker, frame.type, frame.alias);
+      const { category, type } = TypeCategorize(this.tsChecker, resType);
+      const { build, finalize } = TypeBuilder[category];
+
+      let result = build(this.tsChecker, type, alias);
+
+      if (result) {
+        console.debug('Detected', result?.key);
+      } else {
+        console.debug('Not Detected');
+      }
+
+      // Convert via cache if needed
+      result = visited.getOrSet(type, result);
 
       // Recurse
-      if (result?.typeInfo) {
-        switch (result.key) {
-          case 'shape': {
-            const fields: Record<string, AnyType> = {};
-            for (const [name, fieldNode] of Object.entries(result.typeInfo)) {
-              fields[name] = resolve({ type: fieldNode });
-            }
-            result.fields = fields;
-            break;
-          }
-          default: {
-            const arr = result.typeInfo.map((type, i) => resolve({
-              type,
-              alias: i === 0 && ('aliasSymbol' in frame.type) ? frame.type.aliasSymbol : undefined,
-            }));
-            switch (result.key) {
-              case 'union': result.unionTypes = arr; break;
-              case 'tuple': result.tupleTypes = arr; break;
-              default: result.typeArguments = arr;
-            }
-          }
+      if (result) {
+        if ('tsTypeArguments' in result) {
+          result.typeArguments = result.tsTypeArguments!.map((elType, i) => resolve(elType, type.aliasSymbol, depth + 1));
+          delete result.tsTypeArguments;
         }
-
+        if ('tsFieldTypes' in result) {
+          const fields: Record<string, AnyType> = {};
+          for (const [name, fieldType] of Object.entries(result.tsFieldTypes ?? [])) {
+            fields[name] = resolve(fieldType, undefined, depth + 1);
+          }
+          result.fields = fields;
+          delete result.tsFieldTypes;
+        }
+        if ('tsSubTypes' in result) {
+          result.subTypes = result.tsSubTypes!.map((elType, i) => resolve(elType, type.aliasSymbol, depth + 1));
+          delete result.tsSubTypes;
+        }
         if (finalize) {
           result = finalize(result as any);
         }
-        delete result.typeInfo;
       }
+
       return result ?? { key: 'literal', ctor: Object, name: 'object' };
     };
 
-    return resolve({ type: root });
+    try {
+      return resolve(this.getType(node));
+    } catch (err) {
+      console.error(`Unable to resolve type`, err);
+      return { key: 'literal', ctor: Object, name: 'object' };
+    }
   }
 }

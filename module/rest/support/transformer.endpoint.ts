@@ -116,7 +116,7 @@ export class RestTransformer {
       retType = retType.typeArguments?.[0]!; // We have a promise nested
     }
 
-    const comments = state.readJSDocs(node);
+    const comments = state.describeDocs(node);
 
     // IF we have a winner, declare response type
     if (retType) {
@@ -184,7 +184,7 @@ export class RestTransformer {
   @OnClass('@trv:rest/Controller')
   static handleController(state: TransformerState, node: ts.ClassDeclaration) {
     // Read title/description/summary from jsdoc on class
-    const comments = state.readJSDocs(node);
+    const comments = state.describeDocs(node);
 
     if (!comments.description) {
       return node;
