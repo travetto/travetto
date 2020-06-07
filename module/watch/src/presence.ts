@@ -92,7 +92,7 @@ export class FilePresenceManager {
    * Initialize manager
    */
   init() {
-    setTimeout(() => this.folders.forEach(p => this.addNewFolder(p)), 50); // FIXME: 1000 og
+    setTimeout(() => this.folders.forEach(p => this.addNewFolder(p)), 50); // TODO: Should be definitive here, 1000 og
   }
 
   /**

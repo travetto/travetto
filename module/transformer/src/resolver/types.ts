@@ -42,7 +42,7 @@ export interface ExternalType extends Type<'external'> {
   /**
    * Type Info
    */
-  typeInfo?: ts.Type[];
+  tsTypeArguments?: ts.Type[];
 }
 
 /**
@@ -55,9 +55,19 @@ export interface ShapeType extends Type<'shape'> {
   fields: Record<string, AnyType>;
 
   /**
- * Type Info
- */
-  typeInfo?: Record<string, ts.Type>;
+   * Type Info
+   */
+  tsFieldTypes?: Record<string, ts.Type>;
+
+  /**
+   * Type arguments
+   */
+  typeArguments?: AnyType[];
+
+  /**
+   * Type Arguments
+   */
+  tsTypeArguments?: ts.Type[];
 }
 
 /**
@@ -79,7 +89,7 @@ export interface LiteralType extends Type<'literal'> {
   /**
    * Type Info
    */
-  typeInfo?: ts.Type[];
+  tsTypeArguments?: ts.Type[];
 }
 
 /**
@@ -93,11 +103,11 @@ export interface UnionType extends Type<'union'> {
   /**
    * All the types represented in the union
    */
-  unionTypes: AnyType[];
+  subTypes: AnyType[];
   /**
    * Type Info
    */
-  typeInfo?: ts.Type[];
+  tsSubTypes?: ts.Type[];
 }
 
 /**
@@ -107,11 +117,21 @@ export interface TupleType extends Type<'tuple'> {
   /**
    * All the types represented in the tuple
    */
-  tupleTypes: AnyType[];
+  subTypes: AnyType[];
   /**
    * Type Info
    */
-  typeInfo?: ts.Type[];
+  tsSubTypes?: ts.Type[];
 }
 
-export type AnyType = TupleType | ShapeType | UnionType | LiteralType | ExternalType;
+/**
+ * Pointer to a higher place in the tree
+ */
+export interface PointerType extends Type<'pointer'> {
+  /**
+   * Actual type to point to
+   */
+  target: Exclude<AnyType, PointerType>;
+}
+
+export type AnyType = TupleType | ShapeType | UnionType | LiteralType | ExternalType | PointerType;

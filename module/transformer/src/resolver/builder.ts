@@ -30,61 +30,64 @@ const GLOBAL_SIMPLE: Record<string, Function> = {
   PromiseConstructor: Promise.constructor
 };
 
+type Category = 'void' | 'undefined' | 'concrete' | 'unknown' | 'tuple' | 'shape' | 'literal' | 'external' | 'union';
+
 /**
  * Type categorizer, input for builder
  */
-export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type) {
+export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { category: Category, type: ts.Type } {
   const flags = type.getFlags();
   const objectFlags = TransformUtil.getObjectFlags(type) ?? 0;
 
   if (flags & ts.TypeFlags.Void) {
-    return 'void';
+    return { category: 'void', type };
   } else if (flags & ts.TypeFlags.Undefined) {
-    return 'undefined';
-  } else if (TransformUtil.readJSDocTags(type, 'concrete').length) {
-    return 'concrete';
+    return { category: 'undefined', type };
+  } else if (TransformUtil.readDocTag(type, 'concrete').length) {
+    return { category: 'concrete', type };
   } else if (flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) { // Any or unknown
-    return 'unknown';
+    return { category: 'unknown', type };
   } else if (objectFlags & ts.ObjectFlags.Reference && !TransformUtil.getSymbol(type)) { // Tuple type?
-    return 'tuple';
+    return { category: 'tuple', type };
   } else if (objectFlags & ts.ObjectFlags.Anonymous) {
-    return 'shape';
+    return { category: 'shape', type };
   } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
-    // Handle target types
-    if ('target' in type && type['target']) {
-      type = type['target'] as ts.Type;
+    let resolvedType = type;
+    if ('target' in resolvedType && resolvedType['target']) {
+      resolvedType = resolvedType['target'] as ts.Type;
     }
-    if (!type.isClass()) { // Real type
-      const source = TransformUtil.getPrimaryDeclarationFromNode(type, checker)?.getSourceFile().fileName!;
-      if (source.includes('typescript/lib')) { // Global Type
-        return 'literal';
+
+    if (!resolvedType.isClass()) { // Real type
+      const source = TransformUtil.findSource(resolvedType);
+      if (source && source.fileName.includes('typescript/lib')) { // Global Type
+        return { category: 'literal', type };
       } else {
-        return 'shape';
+        return { category: 'shape', type: resolvedType };
       }
     }
-    return 'external';
+    return { category: 'external', type: resolvedType };
   } else if (flags & (
     ts.TypeFlags.Boolean | ts.TypeFlags.BooleanLiteral |
     ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral |
     ts.TypeFlags.String | ts.TypeFlags.StringLiteral |
     ts.TypeFlags.Void | ts.TypeFlags.Undefined
   )) {
-    return 'literal';
+    return { category: 'literal', type };
   } else if (type.isUnion()) {
-    return 'union';
+    return { category: 'union', type };
   } else if (objectFlags & ts.ObjectFlags.Tuple) {
-    return 'tuple';
+    return { category: 'tuple', type };
   } else if (type.isLiteral()) {
-    return 'shape';
+    return { category: 'shape', type };
   }
-  return 'unknown';
+  return { category: 'unknown', type };
 }
 
 /**
  * Type builder
  */
 export const TypeBuilder: {
-  [K in ReturnType<typeof TypeCategorize>]: {
+  [K in Category]: {
     build(checker: ts.TypeChecker, type: ts.Type, alias?: ts.Symbol): AnyType | undefined;
     finalize?(type: Type<K>): AnyType;
   }
@@ -99,13 +102,13 @@ export const TypeBuilder: {
     build: (checker, type) => ({ key: 'literal', name: 'void', ctor: undefined })
   },
   tuple: {
-    build: (checker, type) => ({ key: 'tuple', typeInfo: TransformUtil.getAllTypeArguments(checker, type), tupleTypes: [] })
+    build: (checker, type) => ({ key: 'tuple', tsTupleTypes: TransformUtil.getAllTypeArguments(checker, type), subTypes: [] })
   },
   literal: {
     build: (checker, type) => {
       // Handle void/undefined
       const name = TransformUtil.getTypeAsString(checker, type) ?? '';
-      const complexName = TransformUtil.getSymbolName(type) ?? '';
+      const complexName = TransformUtil.getSymbol(type)?.getName() ?? '';
 
       if (name in GLOBAL_SIMPLE) {
         const cons = GLOBAL_SIMPLE[name];
@@ -114,8 +117,8 @@ export const TypeBuilder: {
 
         return {
           key: 'literal',
-          name: SIMPLE_NAMES[cons.name] ?? cons.name,
           ctor: cons,
+          name: SIMPLE_NAMES[cons.name] ?? cons.name,
           value: ret
         };
       } else if (complexName in GLOBAL_COMPLEX) {
@@ -124,26 +127,19 @@ export const TypeBuilder: {
           key: 'literal',
           name: cons.name,
           ctor: cons,
-          typeInfo: TransformUtil.getAllTypeArguments(checker, type)
+          tsTypeArguments: TransformUtil.getAllTypeArguments(checker, type)
         };
       }
     }
   },
   external: {
     build: (checker, type) => {
-      const decl = TransformUtil.getPrimaryDeclarationFromNode(type, checker);
-      const source = decl?.getSourceFile().fileName!;
-      const name = TransformUtil.getSymbolName(type);
-      const comments = TransformUtil.readJSDocs(type);
+      const source = TransformUtil.findSource(type)!;
+      const comments = TransformUtil.describeDocs(type);
+      const name = TransformUtil.getSymbol(type)?.getName();
 
-      const obj: AnyType = { key: 'external', name, source, comment: comments.description };
-
-      // Handle target types
-      if ('target' in type && type['target']) {
-        type = type['target'] as ts.Type;
-      }
-
-      obj.typeInfo = TransformUtil.getAllTypeArguments(checker, type);
+      const obj: AnyType = { key: 'external', name, source: source.fileName, comment: comments.description };
+      obj.tsTypeArguments = TransformUtil.getAllTypeArguments(checker, type);
       return obj;
     }
   },
@@ -153,16 +149,16 @@ export const TypeBuilder: {
       const undefinable = uType.types.some(x => (x.getFlags() & ts.TypeFlags.Undefined));
       const nullable = uType.types.some(x => x.getFlags() & ts.TypeFlags.Null);
       const remainder = uType.types.filter(x => !(x.getFlags() & (ts.TypeFlags.Null | ts.TypeFlags.Undefined)));
-      const name = TransformUtil.getSymbolName(type);
-      return { key: 'union', name, undefinable, nullable, typeInfo: remainder, unionTypes: [] };
+      const name = TransformUtil.getSymbol(type)?.getName();
+      return { key: 'union', name, undefinable, nullable, tsUnionTypes: remainder, subTypes: [] };
     },
     finalize: (type: UnionType) => {
-      const { undefinable, nullable, unionTypes } = type;
-      const [first] = unionTypes;
+      const { undefinable, nullable, subTypes } = type;
+      const [first] = subTypes;
 
-      if (unionTypes.length === 1) {
+      if (subTypes.length === 1) {
         return { undefinable, nullable, ...first };
-      } else if (first.key === 'literal' && unionTypes.every(el => el.name === first.name)) { // We have a common
+      } else if (first.key === 'literal' && subTypes.every(el => el.name === first.name)) { // We have a common
         type.commonType = first;
       }
       return type;
@@ -170,24 +166,30 @@ export const TypeBuilder: {
   },
   shape: {
     build: (checker, type, alias?) => {
-      const docs = TransformUtil.readJSDocs(type);
+      const docs = TransformUtil.describeDocs(type);
       const fieldNodes: Record<string, ts.Type> = {};
-      const name = TransformUtil.getSymbolName(alias ?? type);
+      const name = TransformUtil.getSymbol(alias ?? type);
       for (const member of checker.getPropertiesOfType(type)) {
         const memberType = checker.getTypeAtLocation(
-          TransformUtil.getPrimaryDeclarationFromNode(member, checker)
+          TransformUtil.getPrimaryDeclarationNode(member)
         );
         if (memberType.getCallSignatures().length) {
           continue;
         }
         fieldNodes[member.getName()] = memberType;
       }
-      return { key: 'shape', name, comment: docs.description, typeInfo: fieldNodes, fields: {} };
+      return {
+        key: 'shape', name: name?.getName(),
+        comment: docs.description,
+        tsFieldTypes: fieldNodes,
+        tsTypeArguments: TransformUtil.getAllTypeArguments(checker, type),
+        fields: {}
+      };
     }
   },
   concrete: {
     build: (checker, type) => {
-      const tags = TransformUtil.readJSDocTags(type, 'concrete');
+      const tags = TransformUtil.readDocTag(type, 'concrete');
       if (tags.length) {
         const parts = tags[0].split(':');
         const fileName = TransformUtil.getPrimaryDeclaration(TransformUtil.getDeclarations(type))?.getSourceFile().fileName;

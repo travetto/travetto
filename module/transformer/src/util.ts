@@ -253,19 +253,9 @@ export class TransformUtil {
   }
 
   /**
-   * Get name of symbol from a symbol or type
-   */
-  static getSymbolName(type: ts.Type | ts.Symbol): string | undefined {
-    return this.getSymbol(type)?.getName() || undefined;
-  }
-
-  /**
    * Find declaration for a type, symbol or a declaration
    */
-  static getDeclarations(type: ts.Node, checker: ts.TypeChecker): ts.Declaration[];
-  static getDeclarations(type: ts.Type | ts.Symbol | ts.Declaration[]): ts.Declaration[];
-  static getDeclarations(type: ts.Node | ts.Type | ts.Symbol | ts.Declaration[], checker?: ts.TypeChecker): ts.Declaration[] {
-    type = 'getSourceFile' in type ? checker!.getTypeAtLocation(type) : type;
+  static getDeclarations(type: ts.Type | ts.Symbol | ts.Declaration[]): ts.Declaration[] {
     let decls: ts.Declaration[] = [];
     if (Array.isArray(type)) {
       decls = type;
@@ -285,18 +275,28 @@ export class TransformUtil {
   /**
    * Find primary declaration out of a list of declarations
    */
-  static getPrimaryDeclarationFromNode(node: ts.Node, checker: ts.TypeChecker): ts.Declaration;
-  static getPrimaryDeclarationFromNode(node: ts.Type | ts.Symbol, checker?: ts.TypeChecker): ts.Declaration;
-  static getPrimaryDeclarationFromNode(node: ts.Type | ts.Symbol | ts.Node, checker?: ts.TypeChecker): ts.Declaration {
-    return this.getPrimaryDeclaration(this.getDeclarations(node as ts.Node, checker!));
+  static getPrimaryDeclarationNode(node: ts.Type | ts.Symbol): ts.Declaration {
+    return this.getPrimaryDeclaration(this.getDeclarations(node));
   }
 
   /**
-   * Read JS Docs from a `ts.Type` or a `ts.Node`
+   * Find source for a node
    */
-  static readJSDocs(type: ts.Type | ts.Node) {
-    let node = 'getSourceFile' in type ? type : this.getPrimaryDeclarationFromNode(type);
+  static findSource(node: ts.Type | ts.Symbol | ts.Node): ts.SourceFile | undefined {
+    if ('getSourceFile' in node) {
+      return node.getSourceFile();
+    } else {
+      return this.getPrimaryDeclarationNode(node)?.getSourceFile();
+    }
+  }
 
+  /**
+   * Read JS Docs from a `ts.Declaration`
+   */
+  static describeDocs(node: ts.Declaration | ts.Type) {
+    if (!('getSourceFile' in node)) {
+      node = this.getPrimaryDeclarationNode(node);
+    }
     const out: DeclDocumentation = {
       description: undefined,
       return: undefined,
@@ -306,7 +306,7 @@ export class TransformUtil {
     if (node) {
       const tags = ts.getJSDocTags(node);
       while (!this.hasJSDoc(node) && this.hasOriginal(node)) {
-        node = node.original;
+        node = node.original as ts.Declaration;
       }
 
       const docs = this.hasJSDoc(node) ? node.jsDoc : undefined;
@@ -337,10 +337,7 @@ export class TransformUtil {
   /**
    * Read JS Doc tags for a type
    */
-  static readJSDocTags(type: ts.Node, name: string, checker: ts.TypeChecker): string[];
-  static readJSDocTags(type: ts.Type, name: string): string[];
-  static readJSDocTags(type: ts.Type | ts.Node, name: string, checker?: ts.TypeChecker): string[] {
-    type = 'getSourceFile' in type ? checker!.getTypeAtLocation(type) : type;
+  static readDocTag(type: ts.Type | ts.Symbol, name: string): string[] {
     const tags = this.getSymbol(type)?.getJsDocTags() ?? [];
     return tags
       .filter(el => el.name === name)
@@ -485,12 +482,16 @@ export class TransformUtil {
    * Resolve the return type for a method
    */
   static getReturnType(checker: ts.TypeChecker, node: ts.MethodDeclaration) {
-    let type = checker.getTypeAtLocation(node);
-    if (type.isUnion()) { // Handle methods that are optional
-      // eslint-disable-next-line no-bitwise
-      type = type.types.find(x => !(x.flags & ts.TypeFlags.Undefined))!;
-    }
+    const type = checker.getTypeAtLocation(node);
     const [sig] = type.getCallSignatures();
     return checker.getReturnTypeOfSignature(sig);
+  }
+
+  /**
+   * See if a declaration is public
+   */
+  static isPublic(node: ts.Declaration) {
+    // eslint-disable-next-line no-bitwise
+    return !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier);
   }
 }

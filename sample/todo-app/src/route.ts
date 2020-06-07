@@ -3,7 +3,7 @@ import { Inject } from '@travetto/di';
 import { SchemaBody, SchemaQuery } from '@travetto/schema';
 
 import { TodoService } from './service';
-import { Todo, TodoSearch } from './model';
+import { Todo, TodoSearch, Tree } from './model';
 
 @Controller('/todo')
 export class TodoController {
@@ -53,5 +53,10 @@ export class TodoController {
   @Delete('/:id')
   async remove(@Path() id: string) {
     await this.svc.remove(id);
+  }
+
+  @Get('/tree')
+  async getTree() {
+    return new Tree();
   }
 }

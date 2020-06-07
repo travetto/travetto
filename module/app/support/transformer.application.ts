@@ -23,7 +23,7 @@ export class ApplicationTransformer {
     // If a choice type
     switch (type.key) {
       case 'union': {
-        const choices = type.unionTypes
+        const choices = type.subTypes
           .map(x => x.key === 'literal' ? x.value : undefined)
           .filter(x => x !== undefined);
         if (type.commonType && type.commonType.key === 'literal') {
