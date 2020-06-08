@@ -65,12 +65,6 @@ export class TypeResolver implements Checker {
 
       let result = build(this, type, alias);
 
-      if (result) {
-        console.debug('Detected', result.key);
-      } else {
-        console.debug('Not Detected');
-      }
-
       // Convert via cache if needed
       result = visited.getOrSet(type, result);
 

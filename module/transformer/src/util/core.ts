@@ -71,4 +71,15 @@ export class CoreUtil {
   static getSymbol(type: ts.Type | ts.Symbol) {
     return 'valueDeclaration' in type ? type : (type.aliasSymbol ?? type.symbol);
   }
+
+  /**
+   * Updates source
+   * @param src
+   * @param statements
+   */
+  static updateSource(src: ts.SourceFile, statements: ts.Statement[]) {
+    return ts.updateSourceFileNode(
+      src, statements, src.isDeclarationFile, src.referencedFiles, src.typeReferenceDirectives, src.hasNoDefaultLib
+    );
+  }
 }

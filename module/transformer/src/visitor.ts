@@ -4,6 +4,7 @@ import { ConsoleManager } from '@travetto/base';
 
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
 import { LogUtil } from './util/log';
+import { CoreUtil } from './util';
 
 /**
  * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler
@@ -72,9 +73,24 @@ export class VisitorFactory<S extends State = State> {
         ConsoleManager.setFile(this.logTarget, { processArgs: (__, args) => LogUtil.collapseNodes(args) }); // Suppress logging into an output file
         console.debug(process.pid, 'Processing', file.fileName);
         const state = this.getState(file);
-        const ret = this.visit(state, context, file);
-        const out = state.finalize(ret);
-        return out;
+        let ret = this.visit(state, context, file);
+
+        // Process added content
+        let statements = ret.statements.slice(0);
+        while (state.added.size) {
+          for (const [k, all] of [...state.added]) {
+            const idx = k === -1 ? state.added.size : k;
+            statements = [
+              ...statements.slice(0, idx),
+              ...all.map(v => this.visit(state, context, v)),
+              ...statements.slice(idx)
+            ];
+            state.added.delete(idx);
+          }
+        }
+
+        ret = CoreUtil.updateSource(ret, statements);
+        return state.finalize(ret);
       } finally {
         ConsoleManager.clear(); // Reset logging
       }

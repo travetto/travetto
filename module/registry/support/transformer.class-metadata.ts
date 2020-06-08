@@ -62,7 +62,7 @@ export class RegisterTransformer {
       ts.createPropertyAccess(ident, 'initMeta'),
       [],
       [
-        ts.createIdentifier(node.name?.getText()!),
+        ts.createIdentifier(node.name?.escapedText.toString()!),
         ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
         ts.createLiteral(state[cls]!),
         LiteralUtil.extendObjectLiteral(state[methods] || {}),

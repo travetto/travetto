@@ -75,6 +75,7 @@ export class ShutdownManager {
       // If the err is not an exit code
       if (err && typeof err !== 'number') {
         console.warn(err);
+        console.debug(err.stack);
       }
 
       // Get list of all pending listeners
