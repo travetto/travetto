@@ -24,7 +24,7 @@ async function load() {
  * @param opts
  */
 export async function runTests(opts: RunState) {
-  CliUtil.initAppEnv({ ...DEF_ENV, envExtra: ENV_EXT });
+  CliUtil.initAppEnv({ ...DEF_ENV, envExtra: ENV_EXT, watch: false });
   await load();
   const { StandardWorker } = await import('../../src/worker/standard');
   return StandardWorker.run(opts);
