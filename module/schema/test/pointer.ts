@@ -25,29 +25,30 @@ class PointerSuite {
     assert(Custom.from({ pointer: 5 }).pointer === 5);
     assert(Custom.from({ pointer: true }).pointer === true);
     // @ts-ignore
-    assert(Custom.fromRaw({ pointer: new Date() }).pointer instanceof Date);
+    assert(Custom.from({ pointer: new Date() }).pointer instanceof Date);
     // @ts-ignore
-    assert(Custom.fromRaw({ pointer: false }).pointer === false);
+    assert(Custom.from({ pointer: false }).pointer === false);
   }
 
   @Test()
   async testValidate() {
     try {
-      await SchemaValidator.validate(Custom.fromRaw({ pointer: false }));
+      // @ts-ignore
+      await SchemaValidator.validate(Custom.from({ pointer: false }));
       assert(false);
     } catch (err) {
       assert(err.errors?.[0].kind === 'type');
     }
 
     try {
-      await SchemaValidator.validate(Custom.fromRaw({ pointer: 1000 }));
+      await SchemaValidator.validate(Custom.from({ pointer: 1000 }));
       assert(false);
     } catch (err) {
       assert(err.errors?.[0].kind === 'maxlength');
     }
 
     try {
-      await SchemaValidator.validate(Custom.fromRaw({}));
+      await SchemaValidator.validate(Custom.from({}));
       assert(false);
     } catch (err) {
       assert(err.errors?.[0].kind === 'required');

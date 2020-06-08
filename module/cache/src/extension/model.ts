@@ -71,7 +71,7 @@ export class ModelCacheSource extends CullableCacheSource {
   }
 
   async touch(key: string, expiresAt: number) {
-    await this.modelService.updatePartialByQuery(CacheModel, { where: { key } }, CacheModel.fromRaw({
+    await this.modelService.updatePartialByQuery(CacheModel, { where: { key } }, CacheModel.from({
       key,
       expiresAt
     }));

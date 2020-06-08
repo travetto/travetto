@@ -17,10 +17,11 @@ class DataBinding {
 
   @Test('Validate bind')
   validateBind() {
-    const person = Person.fromRaw({
+    const person = Person.from({
       name: 'Test',
       age: 19.99978,
       // dob: '2018-01-01',
+      // @ts-ignore
       dob: 1514764800000,
       address: {
         street1: '1234 Fun',
@@ -103,7 +104,7 @@ class DataBinding {
 
   @Test('Should handle nulls in arrays')
   validateNullArrays() {
-    const p = Person.fromRaw({
+    const p = Person.from({
       counts: [
         {
           area: 'a',
@@ -202,7 +203,7 @@ class DataBinding {
     assert('street1' in simple2);
     assert(simple2.street1 === null);
 
-    const simple3 = Address.fromRaw({
+    const simple3 = Address.from({
       street1: null as any,
       street2: undefined
     });

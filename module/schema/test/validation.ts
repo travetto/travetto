@@ -38,9 +38,10 @@ class Validation {
 
   @Test('Should validate nested')
   async nested() {
-    const res = Parent.fromRaw({
+    const res = Parent.from({
       response: {
         url: 'a.b',
+        // @ts-ignore
         pandaState: 'orange'
       },
       responses: []
@@ -87,11 +88,13 @@ class Validation {
   @Test('Nested validations should be fine')
   @ShouldThrow(ValidationResultError)
   async nestedObjectErrors() {
-    const obj = Nested.fromRaw({
+    const obj = Nested.from({
+      // @ts-ignore
       name: 5,
       address: {
         street1: 'abc',
         city: 'city',
+        // @ts-ignore
         zip: 400
       }
     });
@@ -165,7 +168,7 @@ class Validation {
   async dates() {
 
     await assert.rejects(() => {
-      const o = DateTestSchema.fromRaw({ date: undefined });
+      const o = DateTestSchema.from({ date: undefined });
       return SchemaValidator.validate(o);
     }, (err: any) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'required')) {
@@ -174,7 +177,8 @@ class Validation {
     });
 
     await assert.rejects(() => {
-      const o = DateTestSchema.fromRaw({ date: NaN });
+      // @ts-ignore
+      const o = DateTestSchema.from({ date: NaN });
       return SchemaValidator.validate(o);
     }, (err: any) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'type')) {
@@ -183,7 +187,7 @@ class Validation {
     });
 
     await assert.rejects(() => {
-      const o = CustomValidated.fromRaw({ age: Number.NaN, age2: 1 });
+      const o = CustomValidated.from({ age: Number.NaN, age2: 1 });
       return SchemaValidator.validate(o);
     }, (err: any) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'type')) {
@@ -192,7 +196,7 @@ class Validation {
     });
 
     await assert.rejects(() => {
-      const o = CustomValidated.fromRaw({ age: 1, age2: 1 });
+      const o = CustomValidated.from({ age: 1, age2: 1 });
       return SchemaValidator.validate(o);
     }, (err: any) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'custom')) {
@@ -201,7 +205,8 @@ class Validation {
     });
 
     await assert.rejects(() => {
-      const o = DateTestSchema.fromRaw({ date: '' });
+      // @ts-ignore
+      const o = DateTestSchema.from({ date: '' });
       return SchemaValidator.validate(o);
     }, (err: any) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'required')) {
@@ -226,7 +231,7 @@ class Validation {
 
   @Test()
   async verifyNestedPolymorphic() {
-    const item = AllAs.fromRaw({
+    const item = AllAs.from({
       all: [{
         type: 'bbbbz',
         a: true
@@ -267,7 +272,7 @@ class Validation {
 
   @Test()
   async verifyOptional() {
-    const addr = Address.fromRaw({
+    const addr = Address.from({
       street1: 'street1',
       city: 'city',
       postal: '30000',
@@ -286,11 +291,20 @@ class Validation {
 
   // @Test({ skip: false })
   async badValidate() {
-    const addr = Address.fromRaw({
+    const addr = Address.from({
       city: 'city',
       postal: '30000',
     });
 
     await SchemaValidator.validate(addr);
+  }
+
+  @Test()
+  async nestedList() {
+    AllAs.from({
+      all: [{
+        a: false
+      }]
+    });
   }
 }
