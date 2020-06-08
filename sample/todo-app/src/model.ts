@@ -16,10 +16,3 @@ export class TodoSearch {
   offset?: number;
   limit?: number;
 }
-
-@Schema()
-export class Tree {
-  left?: Tree;
-  right?: Tree;
-  value: number;
-}
