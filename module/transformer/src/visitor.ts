@@ -76,7 +76,8 @@ export class VisitorFactory<S extends State = State> {
         let ret = this.visit(state, context, file);
 
         // Process added content
-        let statements = ret.statements.slice(0);
+        const changed = state.added.size;
+        let statements = ret.statements as any as ts.Statement[];
         while (state.added.size) {
           for (const [k, all] of [...state.added]) {
             const idx = k === -1 ? state.added.size : k;
@@ -89,7 +90,9 @@ export class VisitorFactory<S extends State = State> {
           }
         }
 
-        ret = CoreUtil.updateSource(ret, statements);
+        if (changed) {
+          ret = CoreUtil.updateSource(ret, statements);
+        }
         return state.finalize(ret);
       } finally {
         ConsoleManager.clear(); // Reset logging
