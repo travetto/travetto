@@ -103,7 +103,7 @@ export class $SchemaChangeListener extends EventEmitter {
    */
   emitFieldChanges({ prev, curr }: ChangeEvent<ClassConfig>) {
 
-    const prevView = prev!.views[ALL_VIEW];
+    const prevView = prev?.views[ALL_VIEW] || { fields: [], schema: {} };
     const currView = curr!.views[ALL_VIEW];
 
     const prevFields = new Set(prevView.fields);

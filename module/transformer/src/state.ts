@@ -1,4 +1,5 @@
 import * as ts from 'typescript';
+import { Util } from '@travetto/base';
 
 import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta } from './types/visitor';
@@ -8,6 +9,7 @@ import { ImportManager } from './importer';
 import { DocUtil } from './util/doc';
 import { DecoratorUtil } from './util/decorator';
 import { DeclarationUtil } from './util/declaration';
+import { CoreUtil } from './util';
 
 /**
  * Transformer runtime state
@@ -16,6 +18,7 @@ export class TransformerState implements State {
   private resolver: TypeResolver;
   private imports: ImportManager;
   private decorators = new Map<string, ts.PropertyAccessExpression>();
+  added = new Map<number, ts.Statement[]>();
 
   constructor(public source: ts.SourceFile, checker: ts.TypeChecker) {
     this.imports = new ImportManager(source);
@@ -153,6 +156,22 @@ export class TransformerState implements State {
    */
   getDeclarations(node: ts.Node): ts.Declaration[] {
     return DeclarationUtil.getDeclarations(this.resolver.getType(node));
+  }
+
+  addStatement(stmt: ts.Statement, before?: ts.Node) {
+    const stmts = this.source.statements.slice(0);
+    let idx = stmts.length;
+    let n = before;
+    while (n && !ts.isSourceFile(n.parent)) {
+      n = n.parent;
+    }
+    if (n && ts.isSourceFile(n.parent) && stmts.indexOf(n as ts.Statement) >= 0) {
+      idx = stmts.indexOf(n as ts.Statement) - 1;
+    }
+    if (!this.added.has(idx)) {
+      this.added.set(idx, []);
+    }
+    this.added.get(idx)!.push(stmt);
   }
 
   /**

@@ -18,7 +18,7 @@ export class LiteralUtil {
   /**
    * Convert literal to a `ts.Node` type
    */
-  static fromLiteral<T extends ts.Node>(val: T): T;
+  static fromLiteral<T extends ts.Expression>(val: T): T;
   static fromLiteral(val: undefined): ts.Identifier;
   static fromLiteral(val: null): ts.NullLiteral;
   static fromLiteral(val: object): ts.ObjectLiteralExpression;

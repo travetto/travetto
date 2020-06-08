@@ -227,9 +227,13 @@ export class SchemaValidator {
 
     // Handle class level validators
     for (const fn of validators) {
-      const res = await fn(o, view);
-      if (res) {
-        errors.push(res);
+      try {
+        const res = await fn(o, view);
+        if (res) {
+          errors.push(res);
+        }
+      } catch (err) {
+        errors.push(err);
       }
     }
 

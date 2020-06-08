@@ -38,7 +38,6 @@ export interface ExternalType extends Type<'external'> {
    * Type arguments
    */
   typeArguments?: AnyType[];
-
   /**
    * Type Info
    */

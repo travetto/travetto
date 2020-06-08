@@ -185,6 +185,9 @@ export class AssertCheck {
     try {
       action();
       if (!positive) {
+        if (!Util.isPrimitive(shouldThrow)) {
+          shouldThrow = shouldThrow?.name;
+        }
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'}`));
       }
     } catch (e) {
@@ -225,6 +228,9 @@ export class AssertCheck {
         await action();
       }
       if (!positive) {
+        if (!Util.isPrimitive(shouldThrow)) {
+          shouldThrow = shouldThrow?.name;
+        }
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'} `));
       }
     } catch (e) {

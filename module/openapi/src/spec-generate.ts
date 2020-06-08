@@ -169,7 +169,7 @@ export class SpecGenerateUtil {
     }
     if (isEndpointClassType(eType)) {
       const schemaName = this.processSchema(eType.type, state);
-      if (schemaName) {
+      if (schemaName && schemaName !== 'void' && schemaName !== 'undefined') {
         const ref: SchemaObject = this.getType(eType.type, state);
         return {
           content: {

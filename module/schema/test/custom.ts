@@ -72,7 +72,7 @@ export class CustomTest {
     });
     await assert.rejects(() => SchemaValidator.validate(u), 'Validation errors');
     await assert.rejects(() => SchemaValidator.validate(u), (err: ValidationResultError) => {
-      if (!err.errors.find(x => x.message.includes('A password must'))) {
+      if (!err.errors.some(x => x.message.includes('A password must'))) {
         return err;
       }
     });

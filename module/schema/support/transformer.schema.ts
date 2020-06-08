@@ -7,6 +7,7 @@ import {
   LiteralUtil,
   CoreUtil
 } from '@travetto/transformer';
+import { Util } from '@travetto/base';
 
 const hasSchema = Symbol.for('@trv:schema/has');
 const inSchema = Symbol.for('@trv:schema/valid');
@@ -28,31 +29,50 @@ export class SchemaTransformer {
   /**
    * Produce final type given transformer type
    */
-  static toFinalType(state: TransformerState, type: AnyType): ts.Expression {
+  static toFinalType(state: TransformerState, type: AnyType, node: ts.Node): ts.Expression {
     switch (type.key) {
-      case 'pointer': return this.toFinalType(state, type.target);
+      case 'pointer': return this.toFinalType(state, type.target, node);
       case 'external': {
         const res = state.getOrImport(type);
         return res;
       }
-      case 'tuple': return LiteralUtil.fromLiteral(type.subTypes.map(x => this.toFinalType(state, x)!));
+      case 'tuple': return LiteralUtil.fromLiteral(type.subTypes.map(x => this.toFinalType(state, x, node)!));
       case 'literal': {
         if ((type.ctor === Array || type.ctor === Set) && type.typeArguments?.length) {
-          return LiteralUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0])]);
+          return LiteralUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0], node)]);
         } else {
           return ts.createIdentifier(type.ctor!.name!);
         }
       }
       case 'shape': {
-        const out: Record<string, ts.Expression | undefined> = {};
-        for (const el of Object.keys(type.fieldTypes)) {
-          out[el] = this.toFinalType(state, type.fieldTypes[el]);
-        }
-        return LiteralUtil.fromLiteral(type);
+        // Build class on the fly
+        const cls = ts.createClassDeclaration(
+          [
+            state.createDecorator(SCHEMA_MOD, 'Schema'),
+            state.createDecorator(COMMON_MOD, 'Describe',
+              LiteralUtil.fromLiteral({
+                title: type.name,
+                description: type.comment
+              })
+            )
+          ],
+          [], `${type.name || ''}_${Util.uuid(type.name ? 5 : 10)}`, [], [],
+          Object.entries(type.fieldTypes).map(([k, v]) =>
+            this.computeProperty(state, ts.createProperty(
+              [], [], k,
+              v.undefinable || v.nullable ? ts.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+              undefined, undefined
+            ), v)
+          )
+        );
+        cls.name!.getText = () => cls.name?.escapedText.toString()!;
+        cls.getText = () => '';
+        state.addStatement(cls, node);
+        return cls.name!;
       }
       case 'union': {
         if (type.commonType) {
-          return this.toFinalType(state, type.commonType);
+          return this.toFinalType(state, type.commonType, node);
         }
       }
     }
@@ -62,9 +82,9 @@ export class SchemaTransformer {
   /**
    * Compute property information from declaration
    */
-  static computeProperty(state: AutoState & TransformerState, node: ts.PropertyDeclaration) {
+  static computeProperty(state: AutoState & TransformerState, node: ts.PropertyDeclaration, type?: AnyType) {
 
-    const typeExpr = state.resolveType(node);
+    const typeExpr = type || state.resolveType(node);
     const properties = [];
 
     if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
@@ -84,7 +104,7 @@ export class SchemaTransformer {
       }
     }
 
-    const resolved = this.toFinalType(state, typeExpr);
+    const resolved = this.toFinalType(state, typeExpr, node);
     const params: ts.Expression[] = resolved ? [resolved] : [];
 
     if (properties.length) {

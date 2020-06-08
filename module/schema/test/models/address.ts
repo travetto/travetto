@@ -10,3 +10,8 @@ export class Address {
   @Field(String)
   street2: string;
 }
+
+export interface Address2 {
+  street1: string;
+  mode?: 'c' | 'd';
+}
