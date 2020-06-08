@@ -9,11 +9,11 @@ import { FieldConfig, ALL_VIEW } from './service/types';
 export class BindUtil {
 
   /**
-   * Register fromRaw and from on the Function prototype
+   * Register `from` on the Function prototype
    */
   static register() {
     const proto = Object.getPrototypeOf(Function);
-    proto.fromRaw = proto.from = function (data: any, view?: string) {
+    proto.from = function (data: any, view?: string) {
       return BindUtil.bindSchema(this, data, view);
     };
   }
