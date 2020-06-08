@@ -135,6 +135,12 @@ export class SpecGenerateUtil {
     if (!state.components.schemas[typeId]) {
       const config = SchemaRegistry.get(type);
       if (config) {
+        state.components.schemas[typeId] = {
+          title: config.title || config.description,
+          description: config.description || config.title,
+          example: config.examples
+        };
+
         const properties: Record<string, SchemaObject> = {};
         const def = config.views[ALL_VIEW];
         const required: string[] = [];
@@ -143,13 +149,10 @@ export class SpecGenerateUtil {
           properties[fieldName] = this.processSchemaField(def.schema[fieldName], required, state);
         }
 
-        state.components.schemas[typeId] = {
-          title: config.title || config.description,
-          description: config.description || config.title,
-          example: config.examples,
+        Object.assign(state.components.schemas[typeId], {
           properties,
           ...(required.length ? { required } : {})
-        };
+        });
       } else {
         state.components.schemas[typeId] = { title: typeId };
       }
