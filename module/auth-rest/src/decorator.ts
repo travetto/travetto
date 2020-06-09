@@ -18,7 +18,7 @@ export function Authenticate(source: symbol, ...sources: symbol[]) {
  * @param exclude Set of invalid permissions
  */
 export function Authenticated(include: string[] = [], exclude: string[] = []) {
-  const checker = AuthUtil.permissionSetChecker(new Set(include), new Set(exclude));
+  const checker = AuthUtil.permissionSetChecker(include, exclude);
 
   return ControllerRegistry.createFilterDecorator((req, res) => {
     if (!req.auth.principal) {

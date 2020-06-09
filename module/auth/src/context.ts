@@ -92,7 +92,7 @@ export class AuthContext<
    * @param exclude The list of permissions that should be excluded.
    * @param matchAll Do all permissions need to be matched or any?
    */
-  checkPermissions(include: Set<string>, exclude: Set<string>, mode: 'all' | 'any' = 'any') {
+  checkPermissions(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') {
     if (!AuthUtil.permissionSetChecker(include, exclude, mode)(this.permsSet)) {
       throw new AppError('Insufficient permissions', 'permissions');
     }
