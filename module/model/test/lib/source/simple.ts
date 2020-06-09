@@ -481,5 +481,32 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
 
     assert(results5.length === 3);
   }
+
+  @Test('verify sorting')
+  async testSorting() {
+    const service = await this.service;
+
+    const people = [1, 2, 3, 8].map(x => Person.from({
+      id: service.generateId(),
+      name: 'Bob',
+      age: 20 + x,
+      gender: 'm',
+      address: {
+        street1: 'a',
+        ...(x === 1 ? { street2: 'b' } : {})
+      }
+    }));
+
+    await service.bulkProcess(Person,
+      people.map(p => ({ upsert: p }))
+    );
+
+    const all = await service.getAllByQuery(Person, {
+      sort: [{
+        age: -1
+      }]
+    });
+    assert(all[0].age > all[1].age);
+  }
 }
 

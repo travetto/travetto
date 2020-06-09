@@ -73,7 +73,7 @@ export class MongoModelSource extends ModelSource {
     }
 
     if (query.sort) {
-      cursor = cursor.sort(query.sort.map(x => MongoUtil.extractSimple(x)));
+      cursor = cursor.sort(Object.assign({}, ...query.sort.map(x => MongoUtil.extractSimple(x))));
     }
 
     cursor = cursor.limit(Math.trunc(query.limit ?? 200));
