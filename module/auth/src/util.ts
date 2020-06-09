@@ -5,17 +5,37 @@ import { Util, AppError } from '@travetto/base';
 
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 
-type Checker = ReturnType<(typeof AuthUtil)['permissionChecker']>;
-
 type PermSet = Set<string> | ReadonlySet<string>;
+
+type PermissionChecker = {
+  all: (perms: PermSet) => boolean;
+  any: (perms: PermSet) => boolean;
+};
 
 /**
  * Standard auth utilities
  */
 export class AuthUtil {
 
-  private static CHECK_EXC_CACHE = new Map<string, [Checker, Checker]>();
-  private static CHECK_INC_CACHE = new Map<string, [Checker, Checker]>();
+  private static CHECK_EXC_CACHE = new Map<string, PermissionChecker>();
+  private static CHECK_INC_CACHE = new Map<string, PermissionChecker>();
+
+  /**
+   * Build a permission checker against the provided permissions
+   *
+   * @param perms Set of permissions to check
+   * @param defaultIfEmpty If no perms passed, default to empty
+   */
+  private static buildChecker(perms: Iterable<string>, defaultIfEmpty: boolean): PermissionChecker {
+    const permArr = [...perms].map(x => x.toLowerCase());
+    let all = (_: PermSet) => defaultIfEmpty;
+    let any = (_: PermSet) => defaultIfEmpty;
+    if (permArr.length) {
+      all = (uPerms: PermSet) => permArr.every(x => uPerms.has(x));
+      any = (uPerms: PermSet) => permArr.some(x => uPerms.has(x));
+    }
+    return { all, any };
+  }
 
   /**
    * Generate a hash for a given value
@@ -50,42 +70,25 @@ export class AuthUtil {
   }
 
   /**
-   * Build a permission checker against the provided permissions
-   *
-   * @param perms Set of permissions to check
-   * @param matchAll Whether or not all permissions are needed to satisfy
-   * @param defaultIfEmpty If no perms passed, default to empty
-   */
-  static permissionChecker(perms: PermSet, matchAll = true, defaultIfEmpty = true) {
-    const permArr = [...perms].map(x => x.toLowerCase());
-    if (permArr.length === 0) {
-      return () => defaultIfEmpty;
-    }
-    return matchAll ?
-      (uPerms: PermSet) => !permArr.find(x => !uPerms.has(x)) :
-      (uPerms: PermSet) => !!permArr.find(x => uPerms.has(x));
-  }
-
-  /**
    * Build a permission checker off of an include, and exclude set
    *
    * @param include Which permissions to include
    * @param exclude Which permissions to exclude
    * @param matchAll Whether not all permissions should be matched
    */
-  static permissionSetChecker(include: PermSet, exclude: PermSet, mode: 'all' | 'any' = 'any') {
-    const incKey = Array.from(include).sort().join(',');
-    const excKey = Array.from(include).sort().join(',');
+  static permissionSetChecker(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') {
+    const incKey = [...include].sort().join(',');
+    const excKey = [...exclude].sort().join(',');
 
     if (!this.CHECK_INC_CACHE.has(incKey)) {
-      this.CHECK_INC_CACHE.set(incKey, [this.permissionChecker(include, true, true), this.permissionChecker(include, false, true)]);
+      this.CHECK_INC_CACHE.set(incKey, this.buildChecker(include, true));
     }
     if (!this.CHECK_EXC_CACHE.has(excKey)) {
-      this.CHECK_EXC_CACHE.set(excKey, [this.permissionChecker(exclude, true, false), this.permissionChecker(exclude, false, false)]);
+      this.CHECK_EXC_CACHE.set(excKey, this.buildChecker(exclude, false));
     }
 
-    const includes = this.CHECK_INC_CACHE.get(incKey)![mode === 'all' ? 1 : 0];
-    const excludes = this.CHECK_EXC_CACHE.get(excKey)![mode === 'all' ? 1 : 0];
+    const includes = this.CHECK_INC_CACHE.get(incKey)![mode];
+    const excludes = this.CHECK_EXC_CACHE.get(excKey)![mode];
 
     return (perms: PermSet) => includes(perms) && !excludes(perms);
   }

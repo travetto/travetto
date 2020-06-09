@@ -18,4 +18,20 @@ export class UtilTest {
     assert(salt.length === 32);
     assert(hash !== 'hello');
   }
+
+  @Test()
+  async testPermissions() {
+    const checker = AuthUtil.permissionSetChecker(['a', 'b'], ['c', 'd'], 'all');
+    assert(checker(new Set(['a', 'b'])) === true);
+    assert(checker(new Set(['a', 'b', 'c', 'd'])) === false);
+
+    const checker2 = AuthUtil.permissionSetChecker(['a', 'b'], ['c', 'd'], 'any');
+    assert(checker2(new Set(['a'])) === true);
+    assert(checker2(new Set(['b'])) === true);
+    assert(checker2(new Set(['a', 'b', 'c'])) === false);
+
+    const checker3 = AuthUtil.permissionSetChecker([], ['c', 'd'], 'any');
+    assert(checker3(new Set(['a'])) === true);
+    assert(checker3(new Set([])) === true);
+  }
 }
