@@ -1,16 +1,14 @@
 import * as ts from 'typescript';
 import { DecoratorMeta, NodeTransformer, State } from './types/visitor';
 
-const HANDLERS = Symbol.for('@trv:transform/handlers');
+const HANDLERS = Symbol.for('@trv:transformer/handlers');
 
 /**
  * Get all transformers
  * @param obj Object to search for transformers
  */
 export function getAllTransformers(obj: any) {
-  return Object.values(obj)
-    .map(x => (x as any)[HANDLERS] as NodeTransformer[] ?? [])
-    .flat();
+  return Object.values(obj).flatMap(x => (x as any)[HANDLERS] as NodeTransformer[] ?? []);
 }
 
 // Store handlers in class
@@ -26,6 +24,15 @@ export function OnCall(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.CallExpression, dm?: DecoratorMeta) => R>
   ) => storeHandler(inst, { before: d.value?.bind(inst), type: 'call', target });
+}
+
+/**
+ * Listens for a `ts.ParameterDeclaration`, on descent
+ */
+export function OnParameter(target?: string | string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.ParameterDeclaration, dm?: DecoratorMeta) => R>
+  ) => storeHandler(inst, { before: d.value?.bind(inst), type: 'parameter', target });
 }
 
 /**
@@ -71,6 +78,15 @@ export function AfterCall(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.CallExpression, dm?: DecoratorMeta) => R>
   ) => storeHandler(inst, { after: d.value?.bind(inst), type: 'call', target });
+}
+
+/**
+ * Listens for a `ts.ParameterDeclaration`, on ascent
+ */
+export function AfterParameter(target?: string | string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.ParameterDeclaration, dm?: DecoratorMeta) => R>
+  ) => storeHandler(inst, { after: d.value?.bind(inst), type: 'parameter', target });
 }
 
 /**

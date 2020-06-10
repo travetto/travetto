@@ -68,4 +68,11 @@ export class DocUtil {
       .map(el => el.text!);
   }
 
+  /**
+   * Read augments information
+   * @param type
+   */
+  static readAugments(type: ts.Type | ts.Symbol) {
+    return this.readDocTag(type, 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
+  }
 }

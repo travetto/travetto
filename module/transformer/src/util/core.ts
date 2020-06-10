@@ -56,12 +56,12 @@ export class CoreUtil {
   /**
    * Create a static field for a class
    */
-  static createStaticField(name: string, val: ts.Expression | string | number): ts.PropertyDeclaration {
+  static createStaticField(name: string, val: ts.Expression | string | boolean | number): ts.PropertyDeclaration {
     return ts.createProperty(
       undefined,
       [ts.createToken(ts.SyntaxKind.StaticKeyword)],
       name, undefined, undefined,
-      (typeof val === 'string' || typeof val === 'number') ? ts.createLiteral(val) : val as ts.Expression
+      (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') ? ts.createLiteral(val) : val as ts.Expression
     );
   }
 

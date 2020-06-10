@@ -1,13 +1,11 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnClass, OnMethod, ParamDocumentation, DeclDocumentation, DocUtil, LiteralUtil
+  TransformerState, OnClass, OnMethod, ParamDocumentation, DeclDocumentation, DocUtil, LiteralUtil, DecoratorUtil
 } from '@travetto/transformer';
 
 import { ParamConfig } from '../src/types';
-import { DecoratorUtil } from '@travetto/transformer/src/util/decorator';
 
-const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
 const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
 const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
 
@@ -41,25 +39,26 @@ export class RestTransformer {
 
     let paramType = state.resolveType(node);
     let array = false;
-    if (paramType.key === 'literal') {
-      array = paramType.ctor === Array;
-      if (array) {
-        paramType = paramType.typeArguments?.[0]!;
+    let defaultType = 'Query';
+
+    switch (paramType.key) {
+      case 'literal': {
+        array = paramType.ctor === Array;
+        if (array) {
+          paramType = paramType.typeArguments?.[0]!;
+        }
+        break;
+      }
+      case 'external': {
+        defaultType = 'Context'; // White list pointer types as context
+        break;
+      }
+      case 'union': {
+        paramType = { key: 'literal', ctor: Object, name: 'object' };
       }
     }
 
-    let type: ts.Expression;
-    let defaultType = 'Query';
-
-    if (paramType.name === 'Request' || paramType.name === 'Response') { // Convert to custom types, special handling for interfaces
-      type = ts.createPropertyAccess(state.importFile(PARAM_DEC_FILE).ident, paramType.name.toUpperCase());
-      defaultType = 'Context'; // White list request/response as context
-    } else if (paramType.key === 'union') {
-      type = ts.createIdentifier('Object');
-    } else {
-      type = state.typeToIdentifier(paramType)!;
-    }
-
+    const type = state.typeToIdentifier(paramType)!;
     return { array, type, defaultType };
   }
 
@@ -90,7 +89,8 @@ export class RestTransformer {
       decs.push(pDec);
     }
 
-    return ts.createParameter(
+    const ret = ts.updateParameter(
+      node,
       decs,
       node.modifiers,
       node.dotDotDotToken,
@@ -99,6 +99,11 @@ export class RestTransformer {
       node.type,
       node.initializer
     );
+
+    // Convey parentage
+    ret.parent = node.parent;
+
+    return ret;
   }
 
   /**
@@ -110,42 +115,12 @@ export class RestTransformer {
     const decls = node.decorators;
     const newDecls = [];
 
-    // Process returnType
-    let retType = state.resolveReturnType(node);
-
-    if (retType.key === 'literal' && retType.ctor === Promise) {
-      retType = retType.typeArguments?.[0]!; // We have a promise nested
-    }
-
     const comments = DocUtil.describeDocs(node);
-
-    // IF we have a winner, declare response type
-    if (retType) {
-      const type: Record<string, any> = {
-        type: retType
-      };
-      if (retType.key === 'literal' && retType.ctor === Array) {
-        type.array = true;
-        type.type = retType.typeArguments?.[0]!;
-      }
-
-      switch (type.type.key) {
-        case 'external': type.type = state.typeToIdentifier(type.type); break;
-        // FIXME: How do we handle shapes?
-        case 'shape': delete type.type; break;
-      }
-
-      const produces = state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', LiteralUtil.fromLiteral({
-        ...type,
-        title: comments.return
-      }));
-      newDecls.push(produces);
-    }
 
     // Handle description/title/summary w/e
     if (comments.description) {
       newDecls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', LiteralUtil.fromLiteral({
-        title: comments.description,
+        title: comments.description
       })));
     }
 
@@ -163,7 +138,8 @@ export class RestTransformer {
     }
 
     if (newDecls.length || nParams !== node.parameters) {
-      return ts.createMethod(
+      return ts.updateMethod(
+        node,
         [...decls!, ...newDecls],
         node.modifiers,
         node.asteriskToken,
@@ -189,21 +165,21 @@ export class RestTransformer {
 
     if (!comments.description) {
       return node;
+    } else {
+      return ts.updateClassDeclaration(
+        node,
+        [
+          ...(node.decorators || []),
+          state.createDecorator(COMMON_DEC_FILE, 'Describe', LiteralUtil.fromLiteral({
+            title: comments.description
+          }))
+        ],
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        node.members
+      );
     }
-
-    const decls = [...(node.decorators ?? [])];
-    decls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', LiteralUtil.fromLiteral({
-      title: comments.description
-    })));
-
-    return ts.updateClassDeclaration(
-      node,
-      ts.createNodeArray(decls),
-      node.modifiers,
-      node.name,
-      node.typeParameters,
-      node.heritageClauses,
-      node.members
-    );
   }
 }

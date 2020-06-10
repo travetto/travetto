@@ -1,9 +1,8 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, LiteralUtil
+  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, LiteralUtil, DecoratorUtil
 } from '@travetto/transformer';
-import { DecoratorUtil } from '@travetto/transformer/src/util/decorator';
 
 const INJECTABLE_MOD = require.resolve('../src/decorator');
 
@@ -157,7 +156,8 @@ export class InjectableTransformer {
     }, injectConfig);
 
     // Replace decorator
-    return ts.createMethod(
+    return ts.updateMethod(
+      node,
       DecoratorUtil.spliceDecorators(node, dec, [
         state.createDecorator(INJECTABLE_MOD, 'InjectableFactory', args)
       ]),

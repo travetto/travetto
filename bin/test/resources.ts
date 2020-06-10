@@ -48,10 +48,10 @@ async function start(svc: Service) {
   }
 }
 
-function status(svc: Service) {
-  const running = isRunning(svc);
-  const pid = getContainerId(svc);
-  log(svc, !running ? 'Not running' : (pid ? 'Started' : 'Started, but not managed'));
+async function status(svc: Service) {
+  const running = await isRunning(svc);
+  const pid = await getContainerId(svc);
+  log(svc, !running ? 'Not running' : (pid ? `Started ${pid}` : 'Started, but not managed'));
 }
 
 export async function run(mode: 'start' | 'stop' | 'restart' | 'status') {
@@ -62,14 +62,11 @@ export async function run(mode: 'start' | 'stop' | 'restart' | 'status') {
     .map(x => require(x.file) as Service);
 
   const all = services.map(async svc => {
-    if (mode === 'stop' || mode === 'restart') {
-      stop(svc);
-    }
-    if (mode === 'start' || mode === 'restart') {
-      start(svc);
-    }
-    if (mode === 'status') {
-      status(svc);
+    switch (mode) {
+      case 'stop': return stop(svc);
+      case 'start': return start(svc);
+      case 'restart': return stop(svc).finally(() => start(svc));
+      default: return status(svc);
     }
 
   });

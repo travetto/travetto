@@ -7,5 +7,6 @@ declare interface Function {
   __file: string;
   __hash: number;
   __methods: Record<string, { hash: number }>;
+  __synthetic: boolean;
   __abstract: boolean;
 }

@@ -1,5 +1,4 @@
 import * as ts from 'typescript';
-import { Util } from '@travetto/base';
 
 import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta } from './types/visitor';
@@ -9,7 +8,6 @@ import { ImportManager } from './importer';
 import { DocUtil } from './util/doc';
 import { DecoratorUtil } from './util/decorator';
 import { DeclarationUtil } from './util/declaration';
-import { CoreUtil } from './util';
 
 /**
  * Transformer runtime state
@@ -89,7 +87,7 @@ export class TransformerState implements State {
    * Import a decorator, generally to handle erasure
    */
   importDecorator(pth: string, name: string) {
-    if (!this.decorators.has(name)) {
+    if (!this.decorators.has(`${pth}:${name}`)) {
       const ref = this.imports.importFile(pth);
       const ident = ts.createIdentifier(name);
       this.decorators.set(name, ts.createPropertyAccess(ref.ident, ident));
@@ -118,7 +116,7 @@ export class TransformerState implements State {
       dec,
       ident,
       file: decl?.getSourceFile().fileName,
-      targets: DocUtil.readDocTag(this.resolver.getType(ident), 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b)),
+      targets: DocUtil.readAugments(this.resolver.getType(ident)),
       name: ident ?
         ident.escapedText! as string :
         undefined
@@ -158,6 +156,11 @@ export class TransformerState implements State {
     return DeclarationUtil.getDeclarations(this.resolver.getType(node));
   }
 
+  /**
+   * Register statement for inclusion in final output
+   * @param stmt
+   * @param before
+   */
   addStatement(stmt: ts.Statement, before?: ts.Node) {
     const stmts = this.source.statements.slice(0);
     let idx = stmts.length;

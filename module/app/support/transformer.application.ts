@@ -92,6 +92,7 @@ export class ApplicationTransformer {
       codeStart: CoreUtil.getRangeOf(state.source, runMethod?.body?.statements[0])?.start
     });
 
+    // TODO: Do a proper update
     dec.expression.arguments = ts.createNodeArray([
       ...declArgs,
       LiteralUtil.fromLiteral(outParams)
@@ -102,7 +103,7 @@ export class ApplicationTransformer {
       node.modifiers,
       node.name,
       node.typeParameters,
-      ts.createNodeArray(node.heritageClauses),
+      node.heritageClauses,
       node.members
     );
   }

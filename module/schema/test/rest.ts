@@ -7,6 +7,13 @@ import { RootRegistry } from '@travetto/registry';
 import { SchemaBody, SchemaQuery } from '../src/extension/rest';
 import { Schema } from '../src/decorator/schema';
 
+interface UserShape {
+  id: number | undefined;
+  age: number;
+  name: string;
+  active: boolean;
+}
+
 @Schema()
 class User {
   id: number = -1;
@@ -26,6 +33,11 @@ class API {
   async queryUser(@SchemaQuery() user: User) {
     return user;
   }
+
+  @Get('/interface')
+  async ifUser(@SchemaQuery() user: UserShape) {
+    return user;
+  }
 }
 
 @Suite()
@@ -33,6 +45,22 @@ export class RestTest {
 
   static getEndpoint(path: string, method: MethodOrAll) {
     return ControllerRegistry.get(API).endpoints.find(x => x.path === path && x.method === method)!;
+  }
+
+  static getResponse() {
+    return {
+      result: undefined as any,
+      statusCode: 201,
+      setHeader() { },
+      getHeader(field: string) { return ''; },
+      send(val: any) {
+        this.result = JSON.parse(val);
+      },
+      status(val: number) { },
+      json(val: any) {
+        this.send(JSON.stringify(val));
+      }
+    };
   }
 
   @BeforeAll()
@@ -46,20 +74,7 @@ export class RestTest {
 
     const handler = RouteUtil.createRouteHandler([new SerializeInterceptor()], ep);
 
-    const res = {
-      result: undefined as any,
-      statusCode: 201,
-      setHeader() { },
-      getHeader(field: string) { return ''; },
-      send(val: any) {
-        this.result = JSON.parse(val);
-      },
-      status(val: number) { },
-      json(val: any) {
-        this.send(JSON.stringify(val));
-      }
-    };
-
+    const res = RestTest.getResponse();
     const user = { id: 0, name: 'bob', age: 20, active: false };
 
     await handler({ body: user, query: {} } as any, res as any);
@@ -83,19 +98,32 @@ export class RestTest {
 
     const handler = RouteUtil.createRouteHandler([new SerializeInterceptor()], ep);
 
-    const res = {
-      result: undefined as any,
-      statusCode: 201,
-      setHeader() { },
-      getHeader(field: string) { return ''; },
-      send(val: any) {
-        this.result = JSON.parse(val);
-      },
-      status(val: number) { },
-      json(val: any) {
-        this.send(JSON.stringify(val));
-      }
-    };
+    const res = RestTest.getResponse();
+
+    const user = { id: '0', name: 'bob', age: '20', active: 'false' };
+
+    await handler({ query: user } as any, res as any);
+
+    assert(res.result!.name === user.name);
+
+    await handler({ query: { id: 'orange' } } as any, res as any);
+
+    assert(/Validation errors have occurred/.test(res.result.message));
+    assert(res.result.errors[0].path === 'id');
+
+    await handler({ query: { id: 0, name: 'bob', age: 'a' } } as any, res as any);
+
+    assert(/Validation errors have occurred/.test(res.result.message));
+    assert(res.result.errors[0].path === 'age');
+  }
+
+  @Test()
+  async verifyInterface() {
+    const ep = RestTest.getEndpoint('/interface', 'get');
+
+    const handler = RouteUtil.createRouteHandler([new SerializeInterceptor()], ep);
+
+    const res = RestTest.getResponse();
 
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
