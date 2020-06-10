@@ -7,6 +7,7 @@ declare global {
   namespace Travetto {
     /**
      * Travetto request
+     * @concrete ./internal/types:RequestCls
      */
     interface Request {
       /**
@@ -82,6 +83,7 @@ declare global {
 
     /**
      * Travetto response
+     * @concrete ./internal/types:ResponseCls
      */
     interface Response {
       /**

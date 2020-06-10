@@ -8,7 +8,7 @@ import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';
 
-const SIMPLE_COMPILATION = /support\/(transformer|phase|watch)[.].+/;
+const SIMPLE_COMPILATION = /support\/(transformer|phase|watch|lib)[.].+/;
 
 /**
  * Handles all transpilation from TS to JS.

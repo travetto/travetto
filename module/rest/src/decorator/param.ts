@@ -1,4 +1,4 @@
-import { ParamConfig, Request, Response } from '../types';
+import { ParamConfig } from '../types';
 import { ControllerRegistry } from '../registry/registry';
 import { ParamUtil, ExtractFn } from '../util/param';
 
@@ -70,5 +70,3 @@ export const Body = (param: Partial<ParamConfig> = {}) => Param('body', param);
  * Create context provider as a decorator, to allow for adding additional context parameter values
  */
 export const ContextProvider = ParamUtil.provider.bind(ParamUtil);
-@ContextProvider((__: any, rq: Request) => rq) export class REQUEST { }
-@ContextProvider((__: any, rq: Request, rs: Response) => rs) export class RESPONSE { }

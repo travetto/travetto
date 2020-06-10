@@ -16,13 +16,14 @@ class $PendingRegister {
    * @param methods Methods and their hashes
    * @param abstract Is the class abstract
    */
-  initMeta(cls: Class<any>, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean) {
+  initMeta(cls: Class<any>, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean) {
     const meta = {
       __id: SystemUtil.computeModuleClass(file, cls.name),
       __file: file,
       __hash: hash,
       __methods: methods,
       __abstract: abstract,
+      __synthetic: synthetic,
       __init: true
     };
 

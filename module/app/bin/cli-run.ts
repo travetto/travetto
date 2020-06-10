@@ -41,6 +41,7 @@ export class AppRunPlugin extends BasePlugin {
    * Main action
    */
   async action(app: string, args: string[]) {
+    let runner;
     try {
       // Find app
       const selected = await AppListManager.findByName(app);
@@ -52,10 +53,13 @@ export class AppRunPlugin extends BasePlugin {
       } else {
         await CliUtil.initAppEnv({ ...this._cmd as any, watch: true });
         // Run otherwise
-        await RunUtil.run(app, ...args);
+        runner = await RunUtil.getRunner(app, ...args);
       }
     } catch (err) {
       this.showHelp(err, `\nUsage: ${HelpUtil.getAppUsage((await AppListManager.findByName(app))!)}`);
+    }
+    if (runner) {
+      await runner();
     }
   }
 

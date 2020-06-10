@@ -21,7 +21,7 @@ export class RunUtil {
    * Execute running of an application, by name.  Setting important environment variables before
    * loading framework and compiling
    */
-  static async run(name: string, ...sub: string[]) {
+  static async getRunner(name: string, ...sub: string[]) {
     const app = await AppListManager.findByName(name);
 
     if (!app) {
@@ -63,6 +63,6 @@ export class RunUtil {
     ConsoleManager.clear();
     events.forEach(([a, b]) => ConsoleManager.invoke(a, ...b));
 
-    await ApplicationRegistry.run(name, sub);
+    return () => ApplicationRegistry.run(name, sub);
   }
 }

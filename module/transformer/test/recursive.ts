@@ -26,4 +26,14 @@ export class RecursiveTransformSuite {
     assert(output.includes('target: TreeNode2'));
     assert(output.includes('TreeNode2'));
   }
+
+  @Test()
+  async transformTree3() {
+    const output = await TranformerTestUtil.compile(
+      FsUtil.resolveUnix(__dirname, '../alt/recursive'),
+      'tree3.ts'
+    );
+    assert(output.includes('left:'));
+    assert(output.includes('fieldTypes:'));
+  }
 }

@@ -82,6 +82,7 @@ export function schemaParamConfig(location: 'body' | 'query', config: Partial<Pa
 /**
  * Define as the request body as being defined by a schema
  * @param config The schema configuration
+ * @augments `@trv:schema/Param`
  * @augments `@trv:rest/Param`
  */
 export function SchemaBody<T>(config: Partial<ParamConfig> & { view?: string } = {}) {
@@ -94,6 +95,7 @@ export function SchemaBody<T>(config: Partial<ParamConfig> & { view?: string } =
 /**
  * Define the query parameters as a schema class
  * @param config The schema configuration
+ * @augments `@trv:schema/Param`
  * @augments `@trv:rest/Param`
  */
 export function SchemaQuery<T>(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {

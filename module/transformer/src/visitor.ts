@@ -24,6 +24,8 @@ export class VisitorFactory<S extends State = State> {
       return 'call';
     } else if (ts.isClassDeclaration(node)) {
       return 'class';
+    } else if (ts.isParameter(node)) {
+      return 'parameter';
     }
   }
 
@@ -94,6 +96,9 @@ export class VisitorFactory<S extends State = State> {
           ret = CoreUtil.updateSource(ret, statements);
         }
         return state.finalize(ret);
+      } catch (e) {
+        console.error(e.stack);
+        throw e;
       } finally {
         ConsoleManager.clear(); // Reset logging
       }
@@ -107,11 +112,13 @@ export class VisitorFactory<S extends State = State> {
     if (!set[phase]?.size) {
       return;
     }
-
+    const og = node;
     for (const all of set[phase]!.get('ALL') ?? []) {
-      const og = node;
       node = (all[phase]!(state, node) as T) ?? node;
-      node.parent = og.parent;
+      if (og !== node) {
+        node.parent = og.parent;
+      }
+
     }
     return node;
   }
@@ -136,6 +143,7 @@ export class VisitorFactory<S extends State = State> {
       return;
     }
 
+    const og = node;
     for (const [key, dec] of targets.entries()) {
       const values = set[phase]!.get(key);
       if (!values || !values.length) {
@@ -144,9 +152,10 @@ export class VisitorFactory<S extends State = State> {
 
       // For all matching handlers, execute
       for (const item of values) {
-        const og = node;
         node = (item[phase]!(state, node, dec) as T) ?? node;
-        node.parent = og.parent;
+        if (og !== node) {
+          node.parent = og.parent;
+        }
       }
     }
     return node;
@@ -173,13 +182,10 @@ export class VisitorFactory<S extends State = State> {
       node = this.executePhase(state, target, 'after', node) ?? node;
 
       // Set parents on ascent
-      if (og !== node) {
-        node.parent = og.parent;
-        if (ts.isClassDeclaration(node)) {
-          for (const el of node.members) {
-            if (!el.parent) {
-              el.parent = node;
-            }
+      if (og !== node && ts.isClassDeclaration(node)) {
+        for (const el of node.members) {
+          if (!el.parent) {
+            el.parent = node;
           }
         }
       }

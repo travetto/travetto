@@ -15,12 +15,12 @@ export class OpenApiController {
 
   @Get('openapi.json')
   async getSpec() {
-    return this.service.spec;
+    return this.service.spec as object; // Force output to be simple
   }
 
   @Get(/openapi[.]ya?ml$/)
   @SetHeaders({ 'Content-Type': 'text/vnd.yaml' })
   async getYmlSpec() {
-    return YamlUtil.serialize(this.service.spec);
+    return YamlUtil.serialize(this.service.spec); // Force output to be simple
   }
 }
