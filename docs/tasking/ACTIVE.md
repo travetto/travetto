@@ -9,11 +9,6 @@ Rest
 ----------------------
 - [ ] Documentation on auth, w.r.t sessions and cookies
    - [ ] Making sessions optional?
-
-Compiler
-----------------------
-- [?] Support type checking in transformers
-  - [?] Investigate auto creating schemas from interfaces for simple one offs  
   
 Tests
 --------------

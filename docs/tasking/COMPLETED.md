@@ -1,6 +1,11 @@
 Completed Tasks
 ==============
 
+Compiler
+----------------------
+- [x] Support type checking in transformers
+  - [x] Investigate auto creating schemas from interfaces for simple one offs  
+
 General
 --------------------------
 - [x] Reorganize rest module
@@ -19,18 +24,18 @@ Transformers
 
 Model
 ----------------------
-- [X] Basic aggregation support, to get model counts by a specific attribute
+- [x] Basic aggregation support, to get model counts by a specific attribute
 
 Caching
 -----------------------
-- [X] Rework cache infrastructure to allow for multiple providers
-- [X] Integrate caching with
-    - [X] File System
-    - [X] Redis
-    - [X] Memory
-    - [X] Model Service
+- [x] Rework cache infrastructure to allow for multiple providers
+- [x] Integrate caching with
+    - [x] File System
+    - [x] Redis
+    - [x] Memory
+    - [x] Model Service
 - [/] See if we can integrate with asset service
-- [X] See if we can integrate with session store
+- [x] See if we can integrate with session store
 
 Assets
 -----------------------
@@ -40,31 +45,31 @@ Assets
 
 Base
 ----------------------
-- [X] Separate out e2e into a better pattern
-- [X] Remove dependency on dev/test
-- [X] Unify path usage, default to URI model and convert to local path when needed, look into upath
+- [x] Separate out e2e into a better pattern
+- [x] Remove dependency on dev/test
+- [x] Unify path usage, default to URI model and convert to local path when needed, look into upath
 
 Model Elasticsearch
 -----------------------
-- [X] Upgrade to latest client, and convert code to support all
-- [X] Regex as strings wrt to binding and schema validation
-- [X] Schema config for text field arrays
-- [X] Migrated to new elasticsearch client as old one was deprecated
+- [x] Upgrade to latest client, and convert code to support all
+- [x] Regex as strings wrt to binding and schema validation
+- [x] Schema config for text field arrays
+- [x] Migrated to new elasticsearch client as old one was deprecated
 
 Model SQL
 ----------------------
-- [X] Building out SQL model support
-  - [X] Add tests to base for 'replace' mode of deepAssign
-  - [X] Support mysql/postgres as first pass
-  - [X] Figure out paradigm for ownership of namespacing
-  - [X] Basic polymorphism support
-  - [X] Sorting/paging
-  - [X] Handle schema changes (columns added removed)
-- [X] Resolve issues with multiple tests from same file
+- [x] Building out SQL model support
+  - [x] Add tests to base for 'replace' mode of deepAssign
+  - [x] Support mysql/postgres as first pass
+  - [x] Figure out paradigm for ownership of namespacing
+  - [x] Basic polymorphism support
+  - [x] Sorting/paging
+  - [x] Handle schema changes (columns added removed)
+- [x] Resolve issues with multiple tests from same file
 
 Exec
 -----------------------
-- [X] Modify spawn to take in command and args, not full string
+- [x] Modify spawn to take in command and args, not full string
 
 Tests
 -------------------
@@ -164,7 +169,7 @@ Rest Support
 - [x] HTTP/2
 - [x] Koa
 - [x] Add Swagger generation  
-- [X] Enable host name override for applications
+- [x] Enable host name override for applications
 
 User Tooling
 --------------------
@@ -187,11 +192,11 @@ Auth Support
 - [x] Auth Module
  - [x] OAuth support
  - [x] Rewrite st
-- [X] Move to JWT as session store, prep for Lambda
+- [x] Move to JWT as session store, prep for Lambda
  
 DI
 ----------------------
-- [X] Prevent duplicate constructions via different targets
+- [x] Prevent duplicate constructions via different targets
   - Rewrite module to align with consistency of naming
 
 Platform Support
