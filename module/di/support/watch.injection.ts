@@ -1,5 +1,6 @@
 import { RetargettingProxy } from '@travetto/watch';
-import { Class, METADATA } from '@travetto/registry/src/types';
+import { Class } from '@travetto/registry/src/types';
+import { Metadata } from '@travetto/registry/src/util';
 
 import type { DependencyRegistry } from '../src/registry';
 import type { ClassTarget } from '../src/types';
@@ -62,7 +63,7 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
       const classId = cls.__id;
 
       if (
-        !cls[METADATA].abstract &&
+        !Metadata.read(cls, 'abstract') &&
         this.proxies.has(classId) &&
         this.proxies.get(classId)!.has(config.qualifier)
       ) {

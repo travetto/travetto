@@ -20,13 +20,7 @@ class $PendingRegister {
     const meta = {
       __id: SystemUtil.computeModuleClass(file, cls.name),
       __file: file,
-      __init: true,
-      [METADATA]: {
-        hash,
-        methods,
-        abstract,
-        synthetic,
-      }
+      __init: true
     };
 
     const keys = [...Object.keys(meta)] as (keyof typeof meta)[];
@@ -39,6 +33,17 @@ class $PendingRegister {
       };
       return all;
     }, {} as { [K in keyof typeof meta]: PropertyDescriptor }));
+
+    Object.defineProperty(cls, METADATA, {
+      enumerable: false,
+      configurable: false,
+      get: () => ({
+        hash,
+        methods,
+        abstract,
+        synthetic,
+      })
+    });
 
     return true;
   }
