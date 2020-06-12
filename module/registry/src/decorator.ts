@@ -1,5 +1,5 @@
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { Class, METADATA } from './types';
+import { Class } from './types';
 
 /**
  * Register a class as pending
@@ -12,15 +12,19 @@ class $PendingRegister {
    * Initialize the meta data for the cls
    * @param cls Class
    * @param file Filename
-   * @param hash Hash of class contents
-   * @param methods Methods and their hashes
-   * @param abstract Is the class abstract
+   * @param `ᚕhash` Hash of class contents
+   * @param `ᚕmethods` Methods and their hashes
+   * @param `ᚕabstract` Is the class abstract
    */
-  initMeta(cls: Class<any>, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean) {
+  initMeta(cls: Class<any>, ᚕfile: string, ᚕhash: number, ᚕmethods: Record<string, { hash: number }>, ᚕabstract: boolean, ᚕsynthetic: boolean) {
     const meta = {
-      __id: SystemUtil.computeModuleClass(file, cls.name),
-      __file: file,
-      __init: true
+      ᚕid: SystemUtil.computeModuleClass(ᚕfile, cls.name),
+      ᚕfile,
+      ᚕinit: true,
+      ᚕhash,
+      ᚕmethods,
+      ᚕabstract,
+      ᚕsynthetic,
     };
 
     const keys = [...Object.keys(meta)] as (keyof typeof meta)[];
@@ -29,21 +33,10 @@ class $PendingRegister {
         value: meta[k],
         enumerable: false,
         configurable: false,
-        writable: k === '__init'
+        writable: k === 'ᚕinit'
       };
       return all;
     }, {} as { [K in keyof typeof meta]: PropertyDescriptor }));
-
-    Object.defineProperty(cls, METADATA, {
-      enumerable: false,
-      configurable: false,
-      get: () => ({
-        hash,
-        methods,
-        abstract,
-        synthetic,
-      })
-    });
 
     return true;
   }
@@ -52,12 +45,12 @@ class $PendingRegister {
    * Register class as pending
    */
   add(cls: Class<any>) {
-    if (!this.map.has(cls.__file)) {
+    if (!this.map.has(cls.ᚕfile)) {
       const sub: Class<any>[] = [];
-      this.map.set(cls.__file, sub);
-      this.ordered.push([cls.__file, sub]);
+      this.map.set(cls.ᚕfile, sub);
+      this.ordered.push([cls.ᚕfile, sub]);
     }
-    this.map.get(cls.__file)!.push(cls);
+    this.map.get(cls.ᚕfile)!.push(cls);
   }
 
   /**

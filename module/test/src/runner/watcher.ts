@@ -51,8 +51,8 @@ export class TestWatcher {
         process.send({
           type: 'removeTest',
           method: method?.name,
-          classId: cls?.__id,
-          file: cls?.__file,
+          classId: cls?.ᚕid,
+          file: cls?.ᚕfile,
         });
       }
     });

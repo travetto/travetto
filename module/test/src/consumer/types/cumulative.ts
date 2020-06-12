@@ -24,7 +24,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
 
     this.state[`${test.classId}!${test.methodName}`] = test.status;
     const SuiteCls = TestRegistry.getClasses().find(x =>
-      x.__id === test.classId
+      x.ᚕid === test.classId
     )!;
 
     const suite = TestRegistry.get(SuiteCls);

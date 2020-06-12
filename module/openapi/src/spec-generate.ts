@@ -31,7 +31,7 @@ export class SpecGenerateUtil {
     const viewConf = SchemaRegistry.has(cls) && SchemaRegistry.getViewSchema(cls, view);
     const schemaConf = viewConf && viewConf.schema;
     if (!schemaConf) {
-      throw new Error(`Unknown class, not registered as a schema: ${cls.__id}`);
+      throw new Error(`Unknown class, not registered as a schema: ${cls.ᚕid}`);
     }
     const params = Object.keys(schemaConf).reduce((acc, x) => {
       const field = schemaConf[x];

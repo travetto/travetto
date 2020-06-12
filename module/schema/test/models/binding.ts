@@ -61,7 +61,7 @@ export class Response {
 export abstract class BasePoly {
   private type: string;
   constructor() {
-    this.type = this.constructor.__id;
+    this.type = this.constructor.ᚕid;
   }
 }
 

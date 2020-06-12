@@ -12,7 +12,7 @@ import { ValidationResultError } from './error';
  * @param o The value to use for the polymorphic check
  */
 function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
-  if (base.__id) {
+  if (base.ᚕid) {
     return SchemaRegistry.getViewSchema(
       SchemaRegistry.resolveSubTypeForInstance(base as Class<T>, o), undefined).schema;
   } else {

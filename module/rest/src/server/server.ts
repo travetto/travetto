@@ -146,8 +146,8 @@ export abstract class RestServer<T = any> {
       ep.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, ep, config);
     }
 
-    await this.registerRoutes(config.class.__id, config.basePath, config.endpoints);
-    console.debug('Registering Controller Instance', config.class.__id, config.basePath, config.endpoints.length);
+    await this.registerRoutes(config.class.ᚕid, config.basePath, config.endpoints);
+    console.debug('Registering Controller Instance', config.class.ᚕid, config.basePath, config.endpoints.length);
   }
 
   /**
@@ -155,7 +155,7 @@ export abstract class RestServer<T = any> {
    * @param c The class to unregister
    */
   async unregisterController(c: Class) {
-    await this.unregisterRoutes(c.__id);
+    await this.unregisterRoutes(c.ᚕid);
   }
 
   /**

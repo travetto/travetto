@@ -30,7 +30,7 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
-    return this.pending.get(cls.__id)! as ModelOptions<T>;
+    return this.pending.get(cls.ᚕid)! as ModelOptions<T>;
   }
 }
 ```
@@ -44,5 +44,5 @@ As the [`Compiler`](https://github.com/travetto/travetto/tree/master/module/comp
 
 ## Supporting Metadata
 For the registries to work properly, metadata needs to be collected about files and classes to uniquely identify them, especially across file reloads for the live flow.  To achieve this, every `class` is decorated with additional fields.  The data that is added is:
-* `__file` denotes the fully qualified path name of the class
-* `__id` represents a computed id that is tied to the file/class combination
+* `ᚕfile` denotes the fully qualified path name of the class
+* `ᚕid` represents a computed id that is tied to the file/class combination

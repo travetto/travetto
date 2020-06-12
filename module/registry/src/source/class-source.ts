@@ -36,7 +36,7 @@ export class ClassSource implements ChangeSource<Class> {
       }
       this.classes.set(file, new Map());
       for (const cls of classes) {
-        this.classes.get(cls.__file)!.set(cls.__id, cls);
+        this.classes.get(cls.ᚕfile)!.set(cls.ᚕid, cls);
         this.emit({ type: 'added', curr: cls });
       }
     }
@@ -46,7 +46,7 @@ export class ClassSource implements ChangeSource<Class> {
    * Listen for a single file, and process all the classes within
    */
   protected async handleFileChanges(file: string, classes: Class<any>[] = []) {
-    const next = new Map(classes.map(cls => [cls.__id, cls] as [string, Class]));
+    const next = new Map(classes.map(cls => [cls.ᚕid, cls] as [string, Class]));
 
     let prev = new Map<string, Class>();
     if (this.classes.has(file)) {
@@ -70,7 +70,7 @@ export class ClassSource implements ChangeSource<Class> {
         this.classes.get(file)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
           this.emit({ type: 'added', curr: next.get(k)! });
-        } else if (prev.get(k)![METADATA].hash !== next.get(k)![METADATA].hash) {
+        } else if (prev.get(k)!.ᚕhash !== next.get(k)!.ᚕhash) {
           this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
         }
       }
@@ -91,7 +91,7 @@ export class ClassSource implements ChangeSource<Class> {
    * Emit a change event
    */
   emit(e: ChangeEvent<Class>) {
-    console.debug('Emitting change', e.type, e.curr && e.curr.__id, e.prev && e.prev.__id);
+    console.debug('Emitting change', e.type, e.curr && e.curr.ᚕid, e.prev && e.prev.ᚕid);
     this.events.emit('change', e);
   }
 
