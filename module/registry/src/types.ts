@@ -22,3 +22,5 @@ export interface ChangeSource<T> {
   on(callback: (e: ChangeEvent<T>) => any): void;
   reset(): void;
 }
+
+export const METADATA: unique symbol = Symbol.for('@trv:registry/metadata');

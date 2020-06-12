@@ -1,12 +1,18 @@
+import type { METADATA } from './types';
+
 /**
  * Extensions to the Function interface, to provide common
  * information for all registered classes
  */
-declare interface Function {
-  __id: string;
-  __file: string;
-  __hash: number;
-  __methods: Record<string, { hash: number }>;
-  __synthetic: boolean;
-  __abstract: boolean;
+declare global {
+  export interface Function {
+    __id: string;
+    __file: string;
+    [METADATA]: {
+      hash: number;
+      methods: Record<string, { hash: number }>;
+      synthetic: boolean;
+      abstract: boolean;
+    }
+  }
 }

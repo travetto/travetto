@@ -46,6 +46,3 @@ As the [`Compiler`](https://github.com/travetto/travetto/tree/master/module/comp
 For the registries to work properly, metadata needs to be collected about files and classes to uniquely identify them, especially across file reloads for the live flow.  To achieve this, every `class` is decorated with additional fields.  The data that is added is:
 * `__file` denotes the fully qualified path name of the class
 * `__id` represents a computed id that is tied to the file/class combination
-* `__hash` a quick and dirty hash of the contents of the class to be able to quickly determine if a class has changed or not
-* `__methods` a map of hashes for each class method to be able to determine if the method contents have changed
-* `__abstract` a flag to determine if the type is abstract or not.
