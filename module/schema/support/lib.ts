@@ -32,7 +32,7 @@ export class SchemaTransformUtil {
         if (!name && ts.isParameter(node) && ts.isIdentifier(node.name)) {
           name = `${node.name.escapedText}`;
         }
-        const id = ts.createIdentifier(`${name}_${Util.uuid(type.name ? 5 : 10)}__syn`);
+        const id = ts.createIdentifier(`${name}_${Util.uuid(type.name ? 5 : 10)}ᚕsyn`);
         const cls = ts.createClassDeclaration(
           [
             state.createDecorator(SCHEMA_MOD, 'Schema'),

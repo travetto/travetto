@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class, METADATA } from '@travetto/registry';
 import { PendingRegister } from '@travetto/registry/src/decorator';
 
 /**
@@ -17,7 +17,7 @@ export class TestRegistryUtil {
     Object.defineProperty(Custom, 'name', { value: name });
     Object.defineProperty(Custom, 'shortName', { value: coreName });
 
-    PendingRegister.initMeta(Custom, src.__file, src.__hash, { ...src.__methods }, false);
+    PendingRegister.initMeta(Custom, src.__file, src[METADATA].hash, { ...src[METADATA].methods }, false, true);
 
     return Custom as Class & { shortName: string };
   }

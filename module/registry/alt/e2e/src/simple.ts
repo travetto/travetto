@@ -1,3 +1,5 @@
+import { METADATA } from '../../../src/types';
+
 console.log('Loading');
 
 export class Test {
@@ -18,4 +20,4 @@ export class Test6 {
   }
 }
 
-console.log(Test6.__id, Test6.__hash);
+console.log(Test6.__id, Test6[METADATA].hash);

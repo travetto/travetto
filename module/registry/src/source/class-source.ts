@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
 
-import { Class, ChangeSource, ChangeEvent } from '../types';
+import { Class, ChangeSource, ChangeEvent, METADATA } from '../types';
 import { PendingRegister } from '../decorator';
 
 /**
@@ -70,7 +70,7 @@ export class ClassSource implements ChangeSource<Class> {
         this.classes.get(file)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
           this.emit({ type: 'added', curr: next.get(k)! });
-        } else if (prev.get(k)!.__hash !== next.get(k)!.__hash) {
+        } else if (prev.get(k)![METADATA].hash !== next.get(k)![METADATA].hash) {
           this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
         }
       }

@@ -1,5 +1,5 @@
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { Class } from './types';
+import { Class, METADATA } from './types';
 
 /**
  * Register a class as pending
@@ -20,14 +20,17 @@ class $PendingRegister {
     const meta = {
       __id: SystemUtil.computeModuleClass(file, cls.name),
       __file: file,
-      __hash: hash,
-      __methods: methods,
-      __abstract: abstract,
-      __synthetic: synthetic,
-      __init: true
+      __init: true,
+      [METADATA]: {
+        hash,
+        methods,
+        abstract,
+        synthetic,
+      }
     };
 
-    Object.defineProperties(cls, [...Object.keys(meta) as (keyof typeof meta)[]].reduce((all, k) => {
+    const keys = [...Object.keys(meta)] as (keyof typeof meta)[];
+    Object.defineProperties(cls, keys.reduce((all, k) => {
       all[k] = {
         value: meta[k],
         enumerable: false,
@@ -35,7 +38,7 @@ class $PendingRegister {
         writable: k === '__init'
       };
       return all;
-    }, {} as Record<keyof typeof meta, PropertyDescriptor>));
+    }, {} as { [K in keyof typeof meta]: PropertyDescriptor }));
 
     return true;
   }

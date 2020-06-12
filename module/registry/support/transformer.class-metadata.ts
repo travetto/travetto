@@ -68,7 +68,7 @@ export class RegisterTransformer {
         ts.createLiteral(state[cls]!),
         LiteralUtil.extendObjectLiteral(state[methods] || {}),
         ts.createLiteral(isAbstract),
-        ts.createLiteral(name.endsWith('__syn'))
+        ts.createLiteral(name.endsWith('ᚕsyn'))
       ]
     );
 
