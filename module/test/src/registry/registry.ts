@@ -1,4 +1,4 @@
-import { MetadataRegistry, Class, METADATA } from '@travetto/registry';
+import { MetadataRegistry, Class, Metadata } from '@travetto/registry';
 import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';
 
@@ -11,7 +11,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    * Find all valid tests (ignoring abstract)
    */
   getValidClasses() {
-    return this.getClasses().filter(c => !c[METADATA].abstract);
+    return this.getClasses().filter(c => !Metadata.read(c, 'abstract'));
   }
 
   createPending(cls: Class): Partial<SuiteConfig> {
@@ -105,7 +105,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       } else {
         const suites = this.getValidClasses()
           .map(x => this.get(x))
-          .filter(x => !x.class[METADATA].abstract);  // Do not run abstract suites
+          .filter(x => !Metadata.read(x.class, 'abstract'));  // Do not run abstract suites
         return { suites };
       }
     }

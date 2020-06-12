@@ -1,4 +1,4 @@
-import { MetadataRegistry, Class, RootRegistry, ChangeEvent, METADATA } from '@travetto/registry';
+import { MetadataRegistry, Class, RootRegistry, ChangeEvent, Metadata } from '@travetto/registry';
 import { Util } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
@@ -385,7 +385,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
-    if (cls[METADATA].abstract) { // Skip out early, only needed to inherit
+    if (Metadata.read(cls, 'abstract')) { // Skip out early, only needed to inherit
       return config;
     }
 
@@ -403,7 +403,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.classToTarget.get(classId)!.set(config.qualifier, targetId);
 
     // If targeting self (default @Injectable behavior)
-    if (classId === targetId && (parentConfig || parentClass[METADATA].abstract)) {
+    if (classId === targetId && (parentConfig || Metadata.read(parentClass, 'abstract'))) {
       const parentId = parentClass.__id;
       const qualifier = config.qualifier === DEFAULT_INSTANCE ? Symbol.for(`@trv:di/Extends-${parentId}-${classId}`) : config.qualifier;
 
