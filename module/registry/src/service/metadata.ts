@@ -4,7 +4,7 @@ import { Registry } from '../registry';
 import { Class, ChangeEvent } from '../types';
 
 function id(cls: string | Class): string {
-  return cls && typeof cls !== 'string' ? cls.__id : cls;
+  return cls && typeof cls !== 'string' ? cls.ᚕid : cls;
 }
 
 /**
@@ -77,10 +77,10 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any, F = 
   getOrCreatePendingField(cls: Class, field: F): Partial<M> {
     this.getOrCreatePending(cls);
 
-    if (!this.pendingFields.get(cls.__id)!.has(field)) {
-      this.pendingFields.get(cls.__id)!.set(field, this.createPendingField(cls, field));
+    if (!this.pendingFields.get(cls.ᚕid)!.has(field)) {
+      this.pendingFields.get(cls.ᚕid)!.set(field, this.createPendingField(cls, field));
     }
-    return this.pendingFields.get(cls.__id)!.get(field)!;
+    return this.pendingFields.get(cls.ᚕid)!.get(field)!;
   }
 
   register(cls: Class, pconfig: Partial<C>) {
@@ -94,27 +94,27 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any, F = 
   }
 
   onInstall(cls: Class, e: ChangeEvent<Class>) {
-    if (this.pending.has(cls.__id) || this.pendingFields.has(cls.__id)) {
-      console.debug(this.constructor.name, 'Installing', cls.__id);
+    if (this.pending.has(cls.ᚕid) || this.pendingFields.has(cls.ᚕid)) {
+      console.debug(this.constructor.name, 'Installing', cls.ᚕid);
       const result = this.onInstallFinalize(cls);
-      this.pendingFields.delete(cls.__id);
-      this.pending.delete(cls.__id);
+      this.pendingFields.delete(cls.ᚕid);
+      this.pending.delete(cls.ᚕid);
 
-      this.entries.set(cls.__id, result);
+      this.entries.set(cls.ᚕid, result);
       this.emit(e);
     }
   }
 
   onUninstall(cls: Class, e: ChangeEvent<Class>) {
-    if (this.entries.has(cls.__id)) {
-      console.debug(this.constructor.name, 'Uninstalling', cls.__id);
-      this.expired.set(cls.__id, this.entries.get(cls.__id)!);
-      this.entries.delete(cls.__id);
+    if (this.entries.has(cls.ᚕid)) {
+      console.debug(this.constructor.name, 'Uninstalling', cls.ᚕid);
+      this.expired.set(cls.ᚕid, this.entries.get(cls.ᚕid)!);
+      this.entries.delete(cls.ᚕid);
       this.onUninstallFinalize(cls);
       if (e.type === 'removing') {
         this.emit(e);
       }
-      process.nextTick(() => this.expired.delete(cls.__id));
+      process.nextTick(() => this.expired.delete(cls.ᚕid));
     }
   }
 

@@ -17,7 +17,7 @@ export class TestRegistryUtil {
     Object.defineProperty(Custom, 'name', { value: name });
     Object.defineProperty(Custom, 'shortName', { value: coreName });
 
-    PendingRegister.initMeta(Custom, src.__file, src[METADATA].hash, { ...src[METADATA].methods }, false, true);
+    PendingRegister.initMeta(Custom, src.ᚕfile, src.ᚕhash, { ...src.ᚕmethods }, false, true);
 
     return Custom as Class & { shortName: string };
   }

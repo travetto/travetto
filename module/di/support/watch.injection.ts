@@ -1,6 +1,5 @@
 import { RetargettingProxy } from '@travetto/watch';
 import { Class } from '@travetto/registry/src/types';
-import { Metadata } from '@travetto/registry/src/util';
 
 import type { DependencyRegistry } from '../src/registry';
 import type { ClassTarget } from '../src/types';
@@ -32,11 +31,11 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
       if (!this.proxies.get(classId)!.has(qualifier)) {
         proxy = new RetargettingProxy(instance);
         this.proxies.get(classId)!.set(qualifier, proxy);
-        console.debug('Registering proxy', target.__id, qualifier);
+        console.debug('Registering proxy', target.ᚕid, qualifier);
       } else {
         proxy = this.proxies.get(classId)!.get(qualifier)!;
         proxy.setTarget(instance);
-        console.debug('Updating target', target.__id, qualifier, instance);
+        console.debug('Updating target', target.ᚕid, qualifier, instance);
       }
 
       return proxy.get();
@@ -60,10 +59,10 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
     onInstallFinalize<T>(cls: Class<T>) {
       const config = super.onInstallFinalize(cls);
       // If already loaded, reload
-      const classId = cls.__id;
+      const classId = cls.ᚕid;
 
       if (
-        !Metadata.read(cls, 'abstract') &&
+        !cls.ᚕabstract &&
         this.proxies.has(classId) &&
         this.proxies.get(classId)!.has(config.qualifier)
       ) {
@@ -76,7 +75,7 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
     }
 
     destroyInstance(cls: Class, qualifier: symbol) {
-      const classId = cls.__id;
+      const classId = cls.ᚕid;
       const proxy = this.proxies.get(classId)!.get(qualifier);
       super.destroyInstance(cls, qualifier);
       if (proxy) {

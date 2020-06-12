@@ -1,4 +1,4 @@
-import { Class, ChangeEvent, Metadata } from '@travetto/registry';
+import { Class, ChangeEvent } from '@travetto/registry';
 import { SchemaRegistry, FieldConfig, SchemaChangeEvent, Schema } from '@travetto/schema';
 import { Util, AppError } from '@travetto/base';
 import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
@@ -611,7 +611,7 @@ ${this.getLimitSQL(cls, query)}`;
     const parent = stack.length > 1;
     const array = parent && config.array;
 
-    if (config.type && !Metadata.read(config.type, 'synthetic')) {
+    if (config.type && config.type.ᚕsynthetic) {
       throw new AppError(`Cannot create SQL tables for synthetic types, please convert ${SQLUtil.buildPath(stack)} to a concrete class`);
     }
 

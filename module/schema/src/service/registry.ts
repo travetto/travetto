@@ -43,7 +43,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
    * @param type The sub tye value
    */
   resolveSubType(cls: Class, type: Class | string) {
-    const typeId = type && (typeof type === 'string' ? type : type.__id);
+    const typeId = type && (typeof type === 'string' ? type : type.ᚕid);
     const hasId = this.subTypes.has(cls) && type;
     return (hasId && this.subTypes.get(cls)!.get(typeId!)!) || cls;
   }
@@ -73,7 +73,7 @@ export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> 
         this.subTypes.set(parent, new Map());
       }
       this.subTypes.get(parent)!.set(type, cls);
-      this.subTypes.get(parent)!.set(cls.__id, cls);
+      this.subTypes.get(parent)!.set(cls.ᚕid, cls);
       parent = this.getParentClass(parent!)!;
       parentConfig = this.get(parent);
     }

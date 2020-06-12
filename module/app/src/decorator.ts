@@ -31,16 +31,16 @@ export function Application(
     const paramMap = config?.paramMap ?? {};
 
     out.target = target;
-    out.filename = target.__file;
-    out.targetId = target.__id;
+    out.filename = target.ᚕfile;
+    out.targetId = target.ᚕid;
     out.name = name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-');
-    out.generatedTime = FsUtil.maxTime(fs.lstatSync(target.__file));
+    out.generatedTime = FsUtil.maxTime(fs.lstatSync(target.ᚕfile));
 
     if (params) {
       out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] ?? {}), name: x.name! }) as ApplicationParameter);
     }
 
-    const module = target.__file.replace(`${FsUtil.cwd}/`, '');
+    const module = target.ᚕfile.replace(`${FsUtil.cwd}/`, '');
 
     // If root is in node_modules or is 'src', default to local
     // * This supports apps being run from modules vs locally

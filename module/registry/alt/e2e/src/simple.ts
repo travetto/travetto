@@ -20,4 +20,4 @@ export class Test6 {
   }
 }
 
-console.log(Test6.__id, Test6[METADATA].hash);
+console.log(Test6.ᚕid, Test6.ᚕhash);

@@ -1,4 +1,4 @@
-import { MetadataRegistry, Class, Metadata } from '@travetto/registry';
+import { MetadataRegistry, Class } from '@travetto/registry';
 import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';
 
@@ -11,14 +11,14 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    * Find all valid tests (ignoring abstract)
    */
   getValidClasses() {
-    return this.getClasses().filter(c => !Metadata.read(c, 'abstract'));
+    return this.getClasses().filter(c => !c.ᚕabstract);
   }
 
   createPending(cls: Class): Partial<SuiteConfig> {
     return {
       class: cls,
-      classId: cls.__id,
-      file: cls.__file,
+      classId: cls.ᚕid,
+      file: cls.ᚕfile,
       tests: [],
       beforeAll: [],
       beforeEach: [],
@@ -30,7 +30,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPendingField(cls: Class, fn: Function) {
     return {
       class: cls,
-      file: cls.__file,
+      file: cls.ᚕfile,
       methodName: fn.name
     };
   }
@@ -49,7 +49,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    */
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
     const config = this.getOrCreatePending(cls) as SuiteConfig;
-    const tests = [...this.pendingFields.get(cls.__id)!.values()];
+    const tests = [...this.pendingFields.get(cls.ᚕid)!.values()];
 
     const parent = this.getParentClass(cls);
 
@@ -83,7 +83,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);
-      const suites = this.getValidClasses().filter(f => f.__file === file).map(x => this.get(x)).filter(x => !x.skip);
+      const suites = this.getValidClasses().filter(f => f.ᚕfile === file).map(x => this.get(x)).filter(x => !x.skip);
       const suite = suites.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
 
       if (suite) {
@@ -105,7 +105,7 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       } else {
         const suites = this.getValidClasses()
           .map(x => this.get(x))
-          .filter(x => !Metadata.read(x.class, 'abstract'));  // Do not run abstract suites
+          .filter(x => !x.class.ᚕabstract);  // Do not run abstract suites
         return { suites };
       }
     }

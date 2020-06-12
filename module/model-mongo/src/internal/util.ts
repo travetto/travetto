@@ -93,7 +93,7 @@ export class MongoUtil {
       } else {
         const isPlain = v && Util.isPlainObject(v);
         const firstKey = isPlain ? Object.keys(v)[0] : '';
-        if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.__id) {
+        if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.ᚕid) {
           Object.assign(out, this.extractSimple(v, `${subpath}.`));
         } else {
           if (firstKey === '$regex') {

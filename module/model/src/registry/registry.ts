@@ -31,7 +31,7 @@ export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
-    return this.pending.get(cls.__id)! as ModelOptions<T>;
+    return this.pending.get(cls.ᚕid)! as ModelOptions<T>;
   }
 
   onUninstallFinalize(cls: Class) {

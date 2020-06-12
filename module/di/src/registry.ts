@@ -1,4 +1,4 @@
-import { MetadataRegistry, Class, RootRegistry, ChangeEvent, Metadata } from '@travetto/registry';
+import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
 import { Util } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
@@ -54,7 +54,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Convert target to actual injectable config
    */
   protected resolveTargetToClass<T>(target: ClassTarget<T>, qualifier: symbol): InjectableConfig<any> {
-    const targetId = target.__id;
+    const targetId = target.ᚕid;
 
     const qualifiers = this.targetToClass.get(targetId);
 
@@ -68,7 +68,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   protected resolveClassId<T>(target: ClassTarget<T>, qualifier: symbol): string {
     const managed = this.resolveTargetToClass(target, qualifier);
-    return (managed.factory ? managed.target : managed.class).__id;
+    return (managed.factory ? managed.target : managed.class).ᚕid;
   }
 
   /**
@@ -101,7 +101,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
             return undefined;
           } else {
-            e.message = `${e.message} for ${managed.class.__id}`;
+            e.message = `${e.message} for ${managed.class.ᚕid}`;
             throw e;
           }
         }
@@ -192,7 +192,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Destroy an instance
    */
   protected destroyInstance(cls: Class, qualifier: symbol) {
-    const classId = cls.__id;
+    const classId = cls.ᚕid;
 
     const activeInstance = this.instances.get(classId)!.get(qualifier);
     if (activeInstance && activeInstance.preDestroy) {
@@ -201,8 +201,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     this.instances.get(classId)!.delete(qualifier);
     this.instancePromises.get(classId)!.delete(qualifier);
-    this.classToTarget.get(cls.__id)!.delete(qualifier);
-    console.debug('On uninstall', cls.__id, qualifier, classId);
+    this.classToTarget.get(cls.ᚕid)!.delete(qualifier);
+    console.debug('On uninstall', cls.ᚕid, qualifier, classId);
   }
 
   /**
@@ -255,7 +255,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Get all available candidate types for the target
    */
   getCandidateTypes<T>(target: Class<T>) {
-    const targetId = target.__id;
+    const targetId = target.ᚕid;
     const qualifiers = this.targetToClass.get(targetId)!;
     const uniqueQualifiers = qualifiers ? Array.from(new Set(qualifiers.values())) : [];
     return uniqueQualifiers.map(id => this.get(id)! as InjectableConfig<T>);
@@ -334,17 +334,17 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Create mock cls for DI purposes
-    const cls = { __id: config.id } as Class<any>;
+    const cls = { ᚕid: config.id } as Class<any>;
 
     finalConfig.class = cls;
 
     this.registerClass(cls, finalConfig);
 
-    if (!this.factories.has(config.src.__id)) {
-      this.factories.set(config.src.__id, new Map());
+    if (!this.factories.has(config.src.ᚕid)) {
+      this.factories.set(config.src.ᚕid, new Map());
     }
 
-    this.factories.get(config.src.__id)!.set(cls, finalConfig as InjectableConfig);
+    this.factories.get(config.src.ᚕid)!.set(cls, finalConfig as InjectableConfig);
   }
 
   /**
@@ -354,8 +354,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     super.onInstall(cls, e);
 
     // Install factories separate from classes
-    if (this.factories.has(cls.__id)) {
-      for (const fact of this.factories.get(cls.__id)!.keys()) {
+    if (this.factories.has(cls.ᚕid)) {
+      for (const fact of this.factories.get(cls.ᚕid)!.keys()) {
         this.onInstall(fact, e);
       }
     }
@@ -365,13 +365,13 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Handle installing a class
    */
   onInstallFinalize<T>(cls: Class<T>) {
-    const classId = cls.__id;
+    const classId = cls.ᚕid;
 
     const config = this.getOrCreatePending(cls) as InjectableConfig<T>;
 
     // Allow for the factory to fulfill the target
     const parentClass = config.factory ? config.target : Object.getPrototypeOf(cls);
-    const parentConfig = this.get(parentClass.__id);
+    const parentConfig = this.get(parentClass.ᚕid);
 
     if (parentConfig) {
       config.dependencies.fields = {
@@ -385,7 +385,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
-    if (Metadata.read(cls, 'abstract')) { // Skip out early, only needed to inherit
+    if (cls.ᚕabstract) { // Skip out early, only needed to inherit
       return config;
     }
 
@@ -393,7 +393,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.classToTarget.set(classId, new Map());
     }
 
-    const targetId = config.target.__id;
+    const targetId = config.target.ᚕid;
 
     if (!this.targetToClass.has(targetId)) {
       this.targetToClass.set(targetId, new Map());
@@ -403,8 +403,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.classToTarget.get(classId)!.set(config.qualifier, targetId);
 
     // If targeting self (default @Injectable behavior)
-    if (classId === targetId && (parentConfig || Metadata.read(parentClass, 'abstract'))) {
-      const parentId = parentClass.__id;
+    if (classId === targetId && (parentConfig || parentClass.ᚕabstract)) {
+      const parentId = parentClass.ᚕid;
       const qualifier = config.qualifier === DEFAULT_INSTANCE ? Symbol.for(`@trv:di/Extends-${parentId}-${classId}`) : config.qualifier;
 
       if (!this.targetToClass.has(parentId)) {
@@ -427,9 +427,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Handle uninstalling a class
    */
   onUninstallFinalize(cls: Class) {
-    const classId = cls.__id;
+    const classId = cls.ᚕid;
 
-    if (!this.classToTarget.has(cls.__id)) {
+    if (!this.classToTarget.has(cls.ᚕid)) {
       return;
     }
 

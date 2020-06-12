@@ -6,4 +6,3 @@ export * from './src/registry';
 export * from './src/source/class-source';
 export * from './src/source/method-source';
 export * from './src/types';
-export * from './src/util';

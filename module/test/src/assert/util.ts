@@ -22,7 +22,7 @@ export class AssertUtil {
     ) {
       return JSON.stringify(val);
     } else {
-      if (val.__id || !val.constructor || (!val.constructor.__id && Util.isFunction(val))) { // If a function, show name
+      if (val.ᚕid || !val.constructor || (!val.constructor.ᚕid && Util.isFunction(val))) { // If a function, show name
         return val.name;
       } else { // Else inspect
         return util.inspect(val, false, 1).replace(/\n/g, ' ');

@@ -551,7 +551,7 @@ export class ElasticsearchModelSource extends ModelSource {
     const text = spec && spec.startsWith('text');
 
     if (!text) {
-      console.warn(`${classes[0].__id}.${field} is not registered as @Text, reverting to keyword search`);
+      console.warn(`${classes[0].ᚕid}.${field} is not registered as @Text, reverting to keyword search`);
     }
 
     const res = this.buildRawMultiQuery(classes, filter, query ? {
