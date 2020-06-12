@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 
 import { Compiler } from '@travetto/compiler';
 
-import { Class, ChangeSource, ChangeEvent, METADATA } from '../types';
+import { Class, ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';
 
 /**

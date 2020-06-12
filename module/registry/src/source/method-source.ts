@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { Class, ChangeSource, ChangeEvent, METADATA } from '../types';
+import { Class, ChangeSource, ChangeEvent } from '../types';
 
 /**
  * Change source specific to individual methods of classes.  Useful
@@ -27,8 +27,8 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
    * On a class being emitted, check methods
    */
   onClassEvent(e: ChangeEvent<Class>) {
-    const next = e.curr?.[METADATA].methods ?? {};
-    const prev = e.prev?.[METADATA].methods ?? {};
+    const next = e.curr?.ᚕmethods ?? {};
+    const prev = e.prev?.ᚕmethods ?? {};
 
     /**
      * Go through each method, comparing hashes.  To see added/removed and changed

@@ -1,4 +1,4 @@
-import { Class, METADATA } from '@travetto/registry';
+import { Class } from '@travetto/registry';
 import { PendingRegister } from '@travetto/registry/src/decorator';
 
 /**

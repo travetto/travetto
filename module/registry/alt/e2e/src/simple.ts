@@ -1,5 +1,3 @@
-import { METADATA } from '../../../src/types';
-
 console.log('Loading');
 
 export class Test {
