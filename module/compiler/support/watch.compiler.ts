@@ -1,13 +1,14 @@
 import { ShutdownManager, ScanApp } from '@travetto/base';
 import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
 import { CompileUtil, FsUtil } from '@travetto/boot';
+import type { Class } from '@travetto/registry';
 
 import { Compiler } from '../src/compiler';
 
 /**
  * Wraps the compiler supporting real-time changes to files
  */
-export function watch($Compiler: { new(...args: any[]): typeof Compiler }) {
+export function watch($Compiler: Class<typeof Compiler>) {
   /**
    * Extending the $Compiler class to add some functionality
    */
