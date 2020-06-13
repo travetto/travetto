@@ -212,7 +212,7 @@ export class DockerContainer {
 
   /**
    * Set unref status
-   * @param on 
+   * @param on
    */
   setUnref(on: boolean) {
     this.unref = on;
