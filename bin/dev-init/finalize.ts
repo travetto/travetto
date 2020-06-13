@@ -1,12 +1,12 @@
 import * as fs from 'fs';
-import { Util } from './util';
+import * as path from 'path';
 import { DepResolver } from './resolver';
 import { FsUtil } from '../../module/boot/src/fs';
 
 export class Finalize {
-  static MOD_ROOT = `${Util.ROOT}/module`;
-  static MOD_TPL_ROOT = `${Util.ROOT}/module-template`;
-  static NM_ROOT = `${Util.ROOT}/node_modules`;
+  static ROOT = FsUtil.toUnix(path.resolve(fs.realpathSync(__dirname), '..', '..')); // Move up from ./bin folder;
+  static MOD_ROOT = `${Finalize.ROOT}/module`;
+  static NM_ROOT = `${Finalize.ROOT}/node_modules`;
   static COMMON_LIBS = ['typescript', 'tslib'];
 
   /**
@@ -67,11 +67,6 @@ export class Finalize {
 
     // wrt to module's node_modules
     const NM_MOD = `${base}/${mod}/node_modules`;
-
-    // Copy over all files that match from template
-    if (!onlyModules) {
-      Util.copyTemplateFiles(this.MOD_TPL_ROOT, `${base}/${mod}`);
-    }
 
     // Create necessary directories
     FsUtil.mkdirpSync(NM_MOD);
