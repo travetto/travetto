@@ -9,9 +9,9 @@ export class RestAwsLambdaDeployPlugin extends BasePlugin {
   init(cmd: commander.Command) {
     return cmd;
   }
-  action(config: string) {
+  async action(config: string) {
     if (!config) {
-      this.showHelp();
+      await this.showHelp();
     } else {
       console!.log('To be implemented...');
     }
