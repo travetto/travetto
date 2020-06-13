@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { DepResolver } from './resolver';
 import { Finalize } from './finalize';
-import { Util } from './util';
 
 import { ExecUtil } from '../../module/boot/src/exec';
 
@@ -14,14 +13,14 @@ export async function run() {
 
   // Clear out package-lock
   try {
-    fs.unlinkSync(`${Util.ROOT}/package-lock.json`);
+    fs.unlinkSync(`${Finalize.ROOT}/package-lock.json`);
   } catch (e) { }
 
-  const lj = require('../../lerna.json');
+  const lj = require('../../lerna.json') as { packages: string[] };
 
   // Finalize all modules
-  for (const dir of lj.packages.map((x: string) => x.split('/')[0])) {
-    const base = `${Util.ROOT}/${dir}`;
+  for (const dir of lj.packages.map(x => x.split('/')[0])) {
+    const base = `${Finalize.ROOT}/${dir}`;
     for (const mod of fs.readdirSync(base)) {
       Finalize.finalize(mod, base, /^(yes|1|true|on)$/.test(`${process.argv[2]}`));
     }
