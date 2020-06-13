@@ -53,6 +53,8 @@ export class DockerContainer {
   private tty: boolean = false;
   /** Run in background mode? */
   private daemon: boolean = false;
+  /** Should the process be unref'd */
+  private unref = true;
 
   /**
    * Working directory
@@ -209,6 +211,15 @@ export class DockerContainer {
   }
 
   /**
+   * Set unref status
+   * @param on 
+   */
+  setUnref(on: boolean) {
+    this.unref = on;
+    return this;
+  }
+
+  /**
    * Get flags for running a container
    */
   getRuntimeFlags(extra?: string[]) {
@@ -328,7 +339,9 @@ export class DockerContainer {
     this.pendingExecutions.add(execState);
 
     this.watchForEviction(execState);
-    execState.process.unref();
+    if (this.unref) {
+      execState.process.unref();
+    }
 
     return execState.result.finally(() => this.pendingExecutions.delete(execState));
   }

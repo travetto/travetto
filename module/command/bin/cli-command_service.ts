@@ -26,7 +26,7 @@ export class CliServicePlugin extends BasePlugin {
       const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;
       const maxVersion = Math.max(...all.map(x => x.version.length), 'Version'.length) + 3;
 
-      console.log();
+      process.stdout.write('\x1B[?25l\n');
       console.log(color`${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`);
       console.log('-'.repeat(maxName + maxVersion + 10));
       console.log('\n'.repeat(all.length));
@@ -57,8 +57,10 @@ export class CliServicePlugin extends BasePlugin {
           }
         });
 
-      await Promise.all(promises);
-      rl.moveCursor(process.stdout, 0, all.length - y + 1);
+      await Promise.allSettled(promises);
+      rl.moveCursor(process.stdout, 0, all.length - y);
+      process.stdout.write('\x1B[?25h\n');
+
     } else {
       console.log(`\nNo services found\n`);
     }

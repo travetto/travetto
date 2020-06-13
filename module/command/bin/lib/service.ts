@@ -55,6 +55,7 @@ export class ServiceUtil {
         .exposePort(svc.port)
         .addLabel(`trv-${svc.name}`)
         .addEnvVars(svc.env || {})
+        .setUnref(false)
         .run();
 
       const out = (await promise).stdout;
