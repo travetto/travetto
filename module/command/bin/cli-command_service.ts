@@ -24,8 +24,7 @@ export class CliServicePlugin extends BasePlugin {
 
     if (!mode) {
       await this.showHelp(undefined, color`\n${{ title: '   Available Services' }}\n${'-'.repeat(20)}\n${
-        all.map(x => color` * ${{ identifier: x.name }}@${{ type: x.version }}`).join('\n')
-        }\n`);
+        all.map(x => color` * ${{ identifier: x.name }}@${{ type: x.version }}`).join('\n')}\n`);
     }
 
     if (all.length) {

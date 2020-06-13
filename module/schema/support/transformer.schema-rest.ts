@@ -26,7 +26,7 @@ export class SchemaRestTransformer {
     let retType = state.resolveReturnType(node);
 
     if (retType.key === 'literal' && retType.ctor === Promise) {
-      retType = retType.typeArguments?.[0]!; // We have a promise nested
+      retType = retType.typeArguments?.[0] ?? { key: 'literal', ctor: Object }; // We have a promise nested
     }
 
     // IF we have a winner, declare response type
@@ -36,7 +36,7 @@ export class SchemaRestTransformer {
       };
       if (retType.key === 'literal' && (retType.ctor === Array || retType.ctor === Set)) {
         type.array = true;
-        type.type = retType.typeArguments?.[0]!;
+        type.type = retType.typeArguments?.[0] ?? { key: 'literal', ctor: Object };
       }
 
       switch (type.type.key) {

@@ -57,7 +57,7 @@ export class RegisterTransformer {
 
     const ident = state.importDecorator(REGISTER_MOD, 'Register')!;
 
-    const name = node.name?.escapedText.toString()!;
+    const name = node.name?.escapedText.toString() ?? '';
 
     const meta = ts.createCall(
       ts.createPropertyAccess(ident, 'initMeta'),

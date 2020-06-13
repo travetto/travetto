@@ -31,7 +31,7 @@ export class MakeUpper {
       node.type,
       ts.updateBlock(node.body!, ts.createNodeArray([
         ts.createExpressionStatement(ts.createLiteral(msg)),
-        ...node.body?.statements!
+        ...node.body?.statements ?? []
       ]))
     );
   }

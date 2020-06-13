@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 export type Status = 'skipped' | 'failed' | 'passed';
 export type StatusUnknown = Status | 'unknown';
 
-export type SMap<v> = Record<string, v>;
+export type SMap<V> = Record<string, V>;
 
 export type Decs<T> = SMap<SMap<T>>;
 

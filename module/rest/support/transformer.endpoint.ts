@@ -45,7 +45,7 @@ export class RestTransformer {
       case 'literal': {
         array = paramType.ctor === Array;
         if (array) {
-          paramType = paramType.typeArguments?.[0]!;
+          paramType = paramType.typeArguments?.[0] ?? { key: 'literal', ctor: Object, name: 'object' };
         }
         break;
       }
