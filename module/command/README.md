@@ -24,7 +24,7 @@ async function runMongo() {
     .forceDestroyOnShutdown();
 
   container.run(['--storageEngine', 'ephemeralForTest', '--port', port]);
-  await NetUtil.waitForPort(port);
+  await CommandUtil.waitForPort(port);
 
   return;
 }
