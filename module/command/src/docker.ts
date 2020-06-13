@@ -38,6 +38,8 @@ export class DockerContainer {
   private evict: boolean = false;
   /** Internal flag to indicate if the container is unresponsive */
   private runAway: boolean = false;
+  /** Labels */
+  private labels: string[] = [];
   /**
    * List of volumes to mount
    */
@@ -128,6 +130,15 @@ export class DockerContainer {
    */
   exposePort(port: number, internalPort = port) {
     this.ports.set(port, internalPort);
+    return this;
+  }
+
+  /**
+   * Add label
+   * @param label
+   */
+  addLabel(label: string) {
+    this.labels.push(label);
     return this;
   }
 
@@ -241,7 +252,9 @@ export class DockerContainer {
     for (const [k, v] of this.ports.entries()) {
       flags.push('-p', `${k}:${v}`);
     }
-
+    for (const l of this.labels) {
+      flags.push('-l', l);
+    }
     flags.push(...this.getRuntimeFlags(extra));
 
     return flags;

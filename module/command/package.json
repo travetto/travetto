@@ -10,9 +10,6 @@
   "dependencies": {
     "@travetto/base": "^1.0.0-rc.2"
   },
-  "devDependencies": {
-    "@travetto/net": "^1.0.0-rc.2"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "command",
@@ -24,6 +21,7 @@
   "main": "index.ts",
   "files": [
     "index.ts",
+    "bin",
     "src"
   ],
   "name": "@travetto/command",
