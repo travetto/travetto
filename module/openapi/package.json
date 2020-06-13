@@ -11,7 +11,7 @@
     "@travetto/rest": "^1.0.0-rc.2",
     "@travetto/schema": "^1.0.0-rc.2",
     "@travetto/yaml": "^1.0.0-rc.3",
-    "openapi3-ts": "^1.3.0"
+    "openapi3-ts": "^1.4.0"
   },
   "description": "OpenAPI integration support for the travetto framework",
   "homepage": "https://travetto.io",

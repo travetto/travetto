@@ -9,7 +9,7 @@
   "dependencies": {
     "@travetto/asset": "^1.0.0-rc.2",
     "@travetto/config": "^1.0.0-rc.2",
-    "aws-sdk": "^2.676.0"
+    "aws-sdk": "^2.696.0"
   },
   "description": "AWS S3 backend for the travetto asset module",
   "homepage": "https://travetto.io",

@@ -19,7 +19,8 @@ export class CliServicePlugin extends BasePlugin {
   }
 
   async action(mode: string, services: string[]) {
-    const all = ServiceUtil.findAll();
+    const all = ServiceUtil.findAll()
+      .filter(x => services && services.length && !services.includes('all') ? services.includes(x.name) : true);
 
     if (all.length) {
       const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;
@@ -32,7 +33,7 @@ export class CliServicePlugin extends BasePlugin {
 
       let y = all.length + 1;
 
-      const promises = all.filter(x => services && services.length && !services.includes('all') ? services.includes(x.name) : true)
+      const promises = all
         .map(async svc => {
           switch (mode) {
             case 'stop': return ServiceUtil.stop(svc);

@@ -54,9 +54,10 @@ export class CommandUtil {
           try {
             const sock = net.createConnection(port, 'localhost');
             sock.on('connect', () => {
-              sock.destroy();
               res();
+              sock.destroy();
             });
+            sock.on('timeout', rej);
             sock.on('error', rej);
           } catch (e) {
             rej(e);

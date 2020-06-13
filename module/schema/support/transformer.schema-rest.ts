@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 import { TransformerState, OnParameter, DecoratorMeta, LiteralUtil, OnMethod, DocUtil, DecoratorUtil } from '@travetto/transformer';
 import { SchemaTransformUtil } from './lib';
 
-const ENDPOINT_DEC_FILE = require.resolve('@travetto/rest/src/decorator/endpoint');
+const ENDPOINT_DEC_FILE = (() => { try { return require.resolve('@travetto/rest/src/decorator/endpoint'); } catch { } })()!;
 
 /**
  * Processes `@SchemaBody` or `@SchemaQuery` to register interface types as a valid Schema
