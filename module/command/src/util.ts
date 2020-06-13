@@ -52,13 +52,11 @@ export class CommandUtil {
       try {
         await new Promise((res, rej) => {
           try {
-            const sock = net.createConnection(port, 'localhost');
-            sock.on('connect', () => {
-              res();
-              sock.destroy();
-            });
-            sock.on('timeout', rej);
-            sock.on('error', rej);
+            const sock: net.Socket = net.createConnection(port, 'localhost')
+              .on('connect', res)
+              .on('connect', () => sock.destroy())
+              .on('timeout', rej)
+              .on('error', rej);
           } catch (e) {
             rej(e);
           }
