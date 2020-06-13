@@ -49,14 +49,14 @@ export class AppRunPlugin extends BasePlugin {
       // If app not found
       if (!selected) {
         // Show help always exists when it's done
-        this.showHelp(app ? `${app} is an unknown application` : 'You must specify an application to run');
+        await this.showHelp(app ? `${app} is an unknown application` : 'You must specify an application to run');
       } else {
         await CliUtil.initAppEnv({ ...this._cmd as any, watch: true });
         // Run otherwise
         runner = await RunUtil.getRunner(app, ...args);
       }
     } catch (err) {
-      this.showHelp(err, `\nUsage: ${HelpUtil.getAppUsage((await AppListManager.findByName(app))!)}`);
+      await this.showHelp(err, `\nUsage: ${HelpUtil.getAppUsage((await AppListManager.findByName(app))!)}`);
     }
     if (runner) {
       await runner();

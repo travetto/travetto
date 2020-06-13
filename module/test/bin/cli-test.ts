@@ -39,7 +39,7 @@ export class TestPlugin extends BasePlugin {
         state.mode = 'single';
       }
     } else if (args.length < 1 && state.mode === 'single') {
-      this.showHelp('You must specify a file to run in single mode');
+      await this.showHelp('You must specify a file to run in single mode');
     }
 
     const res = await runTests(state as RunState);
