@@ -1,2 +1,2 @@
-export * from './src/app';
+export * from './src/server';
 export * from './src/config';

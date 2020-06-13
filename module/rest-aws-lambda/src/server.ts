@@ -36,9 +36,10 @@ export class AwsLambdaRestServer extends RestServer<express.Application> {
    */
   createRaw(): express.Application {
     const app = express();
+    app.set('query parser', 'simple');
     app.use(compression());
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded());
+    app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use(awsServerlessExpressMiddleware.eventContext());
     app.use((

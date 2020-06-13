@@ -11,17 +11,17 @@ export class SchemaTransformUtil {
   /**
    * Produce final type given transformer type
    */
-  static toFinalType(state: TransformerState, type: AnyType, node: ts.Node): ts.Expression {
+  static toFinalType(state: TransformerState, type: AnyType, node: ts.Node, root: ts.Node = node): ts.Expression {
     switch (type.key) {
-      case 'pointer': return this.toFinalType(state, type.target, node);
+      case 'pointer': return this.toFinalType(state, type.target, node, root);
       case 'external': {
         const res = state.getOrImport(type);
         return res;
       }
-      case 'tuple': return LiteralUtil.fromLiteral(type.subTypes.map(x => this.toFinalType(state, x, node)!));
+      case 'tuple': return LiteralUtil.fromLiteral(type.subTypes.map(x => this.toFinalType(state, x, node, root)!));
       case 'literal': {
         if ((type.ctor === Array || type.ctor === Set) && type.typeArguments?.length) {
-          return LiteralUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0], node)]);
+          return LiteralUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0], node, root)]);
         } else {
           return ts.createIdentifier(type.ctor!.name!);
         }
@@ -49,16 +49,16 @@ export class SchemaTransformUtil {
               [], [], k,
               v.undefinable || v.nullable ? ts.createToken(ts.SyntaxKind.QuestionToken) : undefined,
               undefined, undefined
-            ), v)
+            ), v, root)
           )
         );
         cls.getText = () => '';
-        state.addStatement(cls, node);
+        state.addStatement(cls, root || node);
         return id;
       }
       case 'union': {
         if (type.commonType) {
-          return this.toFinalType(state, type.commonType, node);
+          return this.toFinalType(state, type.commonType, node, root);
         }
       }
     }
@@ -69,7 +69,7 @@ export class SchemaTransformUtil {
   /**
    * Compute property information from declaration
    */
-  static computeProperty<T extends ts.PropertyDeclaration>(state: TransformerState, node: T, type?: AnyType): T {
+  static computeProperty<T extends ts.PropertyDeclaration>(state: TransformerState, node: T, type?: AnyType, root: ts.Node = node): T {
 
     const typeExpr = type || state.resolveType(node);
     const properties = [];
@@ -91,7 +91,7 @@ export class SchemaTransformUtil {
       }
     }
 
-    const resolved = this.toFinalType(state, typeExpr, node);
+    const resolved = this.toFinalType(state, typeExpr, node, root);
     const params: ts.Expression[] = resolved ? [resolved] : [];
 
     if (properties.length) {

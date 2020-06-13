@@ -36,7 +36,8 @@ export class SpecGenerateUtil {
     const params = Object.keys(schemaConf).reduce((acc, x) => {
       const field = schemaConf[x];
       if (SchemaRegistry.has(field.type) || SchemaRegistry.hasPending(field.type)) {
-        acc = [...acc, ...this.schemaToDotParams(state, location, field.type, undefined, prefix ? `${prefix}.${field.name}` : `${field.name}.`)];
+        const suffix = (field.array) ? '[]' : '';
+        acc = [...acc, ...this.schemaToDotParams(state, location, field.type, undefined, prefix ? `${prefix}.${field.name}${suffix}` : `${field.name}${suffix}.`)];
       } else {
         acc.push({
           name: `${prefix}${field.name}`,

@@ -214,4 +214,15 @@ class DataBinding {
     assert('street2' in simple3);
     assert(simple3.street2 === undefined);
   }
+
+  @Test()
+  async validateRealworld() {
+    assert(BindUtil.expandPaths({
+      'children[0].age': 20
+    }) === {
+      children: [
+        { age: 20 }
+      ]
+    });
+  }
 }
