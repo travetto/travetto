@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
-import { NetUtil } from '@travetto/net';
 import { DockerContainer } from '../src/docker';
+import { CommandUtil } from '../src/util';
 
 @Suite()
 export class DockerTest {
@@ -14,7 +14,7 @@ export class DockerTest {
       .forceDestroyOnShutdown();
     try {
       container.run();
-      await assert.doesNotReject(() => NetUtil.waitForPort(port));
+      await assert.doesNotReject(() => CommandUtil.waitForPort(port));
     } finally {
       await container.stop();
     }

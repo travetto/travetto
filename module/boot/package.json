@@ -13,8 +13,8 @@
     "@types/node": "^12.12.7",
     "@types/source-map-support": "^0.5.1",
     "source-map-support": "^0.5.19",
-    "tslib": "^1.12.0",
-    "typescript": "^3.9.2"
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.5"
   },
   "description": "Bootstrapping and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
@@ -39,7 +39,7 @@
   },
   "scripts": {
     "postinstall": "node bin/plugin-postinstall",
-    "prepublish": "cd src-ts; tsc --project .",
+    "prepare": "cd src-ts; tsc --project .",
     "clean": "rm -f src/"
   },
   "version": "1.0.0-rc.1"
