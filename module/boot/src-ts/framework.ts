@@ -79,14 +79,13 @@ export class FrameworkUtil {
   * @param testFile The test to determine if a file is desired
   */
   static scan(testFile?: (x: string) => boolean, base = FsUtil.cwd) {
+    const matcher = new RegExp(`^node_modules\/(@travetto|${EnvUtil.getExtModules('!').join('|')})`);
     const out = ScanFs.scanDirSync({
       testFile,
       testDir: x => // Ensure its a valid folder or module folder
-        !/node_modules[/][^@]/.test(x) && (  // Excluding non framework node modules
-          !x.includes('node_modules') || // All non-framework folders
-          x.endsWith('node_modules') || // Is first level node_modules
-          x.includes('@travetto')  // Is framework folder, include everything under it
-        ),
+        /^node_modules[/]?$/.test(x) ||  // Top level node_modules
+        (matcher.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
+        !x.includes('node_modules'), // non module file
       resolvePath: this.resolvePath
     }, base);
 
