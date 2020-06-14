@@ -69,7 +69,7 @@ export class StacktraceUtil {
 
     let lastLocation: string = '';
     const body = err.stack!.replace(/\\/g, '/').split('\n')
-      .filter(x => !this.filterRegex.test(x)) // Exclude framework boilerplate
+      .filter(x => filter && !this.filterRegex.test(x)) // Exclude framework boilerplate
       .reduce((acc, line) => {
         const location = getLocation(line);
 
