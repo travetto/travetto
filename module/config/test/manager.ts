@@ -126,9 +126,13 @@ export class ManagerTest {
 config:
   redacted:
     - panda.user
-panda.user: bob`));
+  s3:
+    secretAccessKey: bob
+panda.user: bob
+`));
 
     const all = ConfigManager.getSecure();
     assert(all.panda?.user === '***');
+    assert(all.config.s3.secretAccessKey === '***');
   }
 }

@@ -2,7 +2,7 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Controller, Post, ControllerRegistry, RouteUtil, Get, SerializeInterceptor, MethodOrAll } from '@travetto/rest';
-import { RootRegistry } from '@travetto/registry';
+import { RootRegistry, Class } from '@travetto/registry';
 
 import { SchemaBody, SchemaQuery } from '../src/extension/rest';
 import { Schema } from '../src/decorator/schema';
@@ -56,6 +56,11 @@ class API {
   @Get('/users')
   async allUsers() {
     return [1, 2, 3,].map(x => getUser(x));
+  }
+
+  @Get('/allShapes')
+  async allShape() {
+    return Promise.all([1, 2, 3,].map(async x => ({ key: x, count: 5 })));
   }
 }
 
@@ -177,5 +182,11 @@ export class RestTest {
   async verifyList() {
     const ep = RestTest.getEndpoint('/users', 'get');
     assert(ep.responseType?.type === User);
+  }
+
+  @Test()
+  async verifyShapeALl() {
+    const ep = RestTest.getEndpoint('/allShapes', 'get');
+    console.log(ep.responseType);
   }
 }
