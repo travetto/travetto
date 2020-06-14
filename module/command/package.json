@@ -8,7 +8,7 @@
   },
   "description": "Support for executing complex commands at runtime.",
   "dependencies": {
-    "@travetto/base": "^1.0.0-rc.3"
+    "@travetto/base": "^1.0.0-rc.4"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -28,5 +28,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.3"
+  "version": "1.0.0-rc.4"
 }
