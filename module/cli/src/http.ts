@@ -14,9 +14,10 @@ const read = (p: string) => fs.readFileSync(path.resolve(RESOURCES, p), 'utf8');
 export interface HttpHandler {
   onChange?(cb: () => void): void;
   resolve(message: http.IncomingMessage): Promise<{
-    content: string | Buffer;
+    content?: string | Buffer;
     contentType?: string;
     statusCode?: number;
+    message?: string;
     static?: boolean;
   }>;
 }
@@ -74,14 +75,18 @@ export class WebServer {
         contentType = WebServer.CONTENT_TYPES.json;
       } else {
         const res = await this.handler.resolve(request);
-        content = res.content;
-        isStatic = !!res.static;
         response.statusCode = res.statusCode || 200;
+        content = res.content || '';
+        isStatic = !!res.static;
 
         if (res.contentType) {
           contentType = res.contentType;
         } else {
           contentType = WebServer.CONTENT_TYPES[ext!];
+        }
+
+        if (res.message) {
+          response.statusMessage = res.message;
         }
       }
 
@@ -95,7 +100,7 @@ export class WebServer {
       content = new Error(e).stack;
       contentType = WebServer.CONTENT_TYPES.txt;
       response.statusCode = 503;
-      response.statusMessage = e.message;
+      response.statusMessage = 'Invalid server response';
     }
 
     response.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

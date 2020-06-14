@@ -48,6 +48,21 @@
         grid-column: 1;
       }
 
+      .templates .card-content {
+        display: grid;
+        height: 100%;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      .templates .sidenav-trigger {
+        font-size: 1rem;
+        display: inline-block !important;
+      }
+
+      .templates .send .btn {
+        width: 100%;
+      }
+
       .preview {
         border: 0;
         width: 100%;
@@ -82,11 +97,6 @@
 
       .sidenav h4 {
         padding-left: 1em;
-      }
-
-      .templates .sidenav-trigger {
-        font-size: 1rem;
-        display: inline-block !important;
       }
 
       .sidenav .templates .card-content {
@@ -144,6 +154,9 @@
             </a>
             {{/templates}}
           </div>
+          <div class="send" hidden="true">
+            <button class="btn" onclick="sendEmail(this)">Send</button>
+          </div>
         </div>
       </div>
       <iframe class="preview" src="">
@@ -183,6 +196,19 @@
       node.classList.add('active');
       sessionStorage.setItem('template', node.href);
       updateIframe();
+    }
+
+    /**
+     * Send email
+     */
+    async function sendEmail(node) {
+      const url = new URL(iframe.src);
+      url.searchParams.append('to', 'timothy.soehnlin@gmail.com');
+      console.log(url.toString())
+      const res = await fetch(url, {
+        method: 'POST',
+      });
+      return res.status;
     }
 
     /**
