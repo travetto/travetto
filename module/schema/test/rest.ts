@@ -22,6 +22,10 @@ class User {
   active: boolean;
 }
 
+async function getUser(x: number) {
+  return User.from({});
+}
+
 @Controller()
 class API {
   @Post('/user')
@@ -37,6 +41,16 @@ class API {
   @Get('/interface')
   async ifUser(@SchemaQuery() user: UserShape) {
     return user;
+  }
+
+  @Get('/void')
+  async voidUser() {
+    return Promise.resolve((() => { })());
+  }
+
+  @Get('/users')
+  async allUsers() {
+    return [1, 2, 3,].map(x => getUser(x));
   }
 }
 
@@ -140,5 +154,19 @@ export class RestTest {
 
     assert(/Validation errors have occurred/.test(res.result.message));
     assert(res.result.errors[0].path === 'age');
+  }
+
+  @Test()
+  async verifyVoid() {
+    const ep = RestTest.getEndpoint('/void', 'get');
+    assert(JSON.stringify(ep.responseType).includes('void'));
+
+  }
+
+
+  @Test()
+  async verifyList() {
+    const ep = RestTest.getEndpoint('/users', 'get');
+    assert(ep.responseType?.type === User);
   }
 }

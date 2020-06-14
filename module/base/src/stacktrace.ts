@@ -21,20 +21,21 @@ export class StacktraceUtil {
     if (EnvUtil.isProd()) {
       return;
     } else if (FrameworkUtil.devMode) {
-      Error.stackTraceLimit = 100; // Set stacktrace to high for local dev
+      Error.stackTraceLimit = 50; // Set stacktrace to high for local dev
     } else {
-      this.addStackFilters(
-        __filename.replace(/\.js$/, ''),
-        // 'timers.js',
-        'typescript.js',
-        'async_hooks',
-        '(native)',
-        'internal',
-        'tslib',
-        // '<anonymous>',
-        'source-map-support.js'
-      );
+      this.addStackFilters('typescript');
     }
+
+    this.addStackFilters(
+      __filename.replace(/\.js$/, ''),
+      // 'timers.js',
+      'async_hooks',
+      '(native)',
+      'internal',
+      'tslib',
+      // '<anonymous>',
+      'source-map-support.js'
+    );
   }
 
   /**
@@ -62,16 +63,11 @@ export class StacktraceUtil {
    * @param filter Should the stack be filtered
    */
   static simplifyStack(err: Error, filter = true): string {
-    const getLocation = (x: string) => {
-      const [, l] = x.split(FsUtil.cwd);
-      return l;
-    };
-
     let lastLocation: string = '';
     const body = err.stack!.replace(/\\/g, '/').split('\n')
-      .filter(x => filter && !this.filterRegex.test(x)) // Exclude framework boilerplate
+      .filter(x => !filter || !this.filters.length || !this.filterRegex.test(x)) // Exclude framework boilerplate
       .reduce((acc, line) => {
-        const location = getLocation(line);
+        const [, location] = line.split(FsUtil.cwd);
 
         if (location === lastLocation) {
           // Do nothing
@@ -91,7 +87,7 @@ export class StacktraceUtil {
     if (!filter || body.length > 2) {
       return body.join('  \n');
     } else {
-      return this.simplifyStack(err, false);
+      return `${body.length}.${this.simplifyStack(err, false)}`;
     }
   }
 }
