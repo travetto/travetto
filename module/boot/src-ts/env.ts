@@ -136,4 +136,14 @@ export class EnvUtil {
   static isWatch() {
     return this.isTrue('TRV_WATCH');
   }
+
+  /**
+   * Get module roots
+   */
+  static getExtModules(...extra: string[]) {
+    // TODO: Move out
+    // Need a way to determine list of eligible modules, do not want to scan at startup
+    const roots = require(`${process.cwd()}/package.json`)['@travetto:modules'] || ['!'];
+    return this.getList('TRV_MOD_ROOTS', roots);
+  }
 }

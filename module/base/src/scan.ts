@@ -1,4 +1,4 @@
-import { ScanEntry, FsUtil } from '@travetto/boot';
+import { ScanEntry, FsUtil, EnvUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { AppManifest } from './manifest';
 
@@ -22,10 +22,13 @@ export class ScanApp {
 
   private static INDEX = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
 
+  private static moduleMatcherSimple: RegExp;
+
   /**
    * List of primary app folders to search
    */
   static mainAppFolders = new Set(['src']);
+
   /**
    * List of modules to not traverse into
    */
@@ -38,11 +41,11 @@ export class ScanApp {
    * Compute index for a scan entry
    * @param entry
    */
-  static computeIndex(entry: ScanEntry) {
+  static computeIndex(entry: ScanEntry, moduleMatcher: RegExp) {
     const file = entry.module;
     if (file.includes('node_modules')) {
-      if (file.includes('@travetto/')) { // External module
-        const mod = file.replace(/^.*node_modules\/(@travetto\/[^/]+)(\/?.*?)$/, (a, b) => b);
+      if (moduleMatcher.test(file)) { // External module
+        const mod = file.replace(moduleMatcher, (a, b) => b);
         if (mod.includes('node_modules')) {
           return;
         } else if (entry.stats.isDirectory() || entry.stats.isSymbolicLink()) {
@@ -76,8 +79,12 @@ export class ScanApp {
     if (this.INDEX.size === 0) {
       this.INDEX.set('.', { base: FsUtil.cwd, files: new Map() });
 
+      const moduleMatcher = new RegExp(
+        `^.*node_modules\/((?:@travetto\/[^/]+)|${EnvUtil.getExtModules('!').join('|') || '#'})(\/?.*?)$`
+      );
+
       for (const el of FrameworkUtil.scan(x => !x.endsWith('.d.ts') && x.endsWith('.ts'))) {
-        const res = this.computeIndex(el);
+        const res = this.computeIndex(el, moduleMatcher);
         if (!res) {
           continue;
         }
@@ -113,8 +120,12 @@ export class ScanApp {
    * @param roots App paths
    */
   static getPaths(roots: string[]) {
+    if (!this.moduleMatcherSimple) {
+      this.moduleMatcherSimple = new RegExp(`(@travetto|${EnvUtil.getExtModules('!').join('|')})`);
+    }
     return [...this.index.keys()]
-      .filter(key => (key.startsWith('@travetto') && !this.modAppExclude.has(key)) || roots.includes(key));
+      // If a module
+      .filter(key => (this.moduleMatcherSimple.test(key) && !this.modAppExclude.has(key)) || roots.includes(key));
   }
 
   /**
