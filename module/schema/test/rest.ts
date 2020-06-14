@@ -48,6 +48,11 @@ class API {
     return Promise.resolve((() => { })());
   }
 
+  @Get('/voidAll')
+  async voidAllUser() {
+    return Promise.resolve([1, 2, 3].map(() => { }));
+  }
+
   @Get('/users')
   async allUsers() {
     return [1, 2, 3,].map(x => getUser(x));
@@ -159,10 +164,14 @@ export class RestTest {
   @Test()
   async verifyVoid() {
     const ep = RestTest.getEndpoint('/void', 'get');
-    assert(JSON.stringify(ep.responseType).includes('void'));
-
+    assert(ep.responseType === undefined);
   }
 
+  @Test()
+  async verifyVoidAll() {
+    const ep = RestTest.getEndpoint('/voidAll', 'get');
+    assert(ep.responseType === undefined);
+  }
 
   @Test()
   async verifyList() {
