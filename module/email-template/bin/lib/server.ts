@@ -4,8 +4,11 @@ import * as Mustache from 'mustache';
 
 import { TemplateUtil, MapLite } from './util';
 import { ImageUtil } from './image';
+import type { MailService } from '@travetto/email/src/service';
 
 export class DevServerUtil {
+
+  private static _svc: Promise<MailService>;
 
   /**
    * Resolves listing
@@ -20,6 +23,41 @@ export class DevServerUtil {
       contentType: 'text/html',
       static: true
     };
+  }
+
+  static async getService() {
+    if (!this._svc) {
+      const { MailService: M, MailTransport, NodemailerTransport } = await import('@travetto/email');
+      const { DependencyRegistry } = await import('@travetto/di');
+      const cls = class { };
+      DependencyRegistry.registerFactory({
+        fn: () => new NodemailerTransport(require('nodemailer-sendmail-transport')()),
+        target: MailTransport as any,
+        src: cls,
+        id: 'nodemailer',
+      });
+      DependencyRegistry.install(cls, { curr: cls, type: 'added' });
+      this._svc = DependencyRegistry.getInstance(M);
+    }
+    return this._svc;
+  }
+
+  /**
+   * Resolve template
+   */
+  static async sendEmail(key: string, to: string, context: Record<string, any>) {
+    try {
+      console.log(`Sending email to ${to}`);
+      await TemplateUtil.compileToDisk(key, true);
+      // Let the engine template
+      await (await this.getService()).sendCompiled(key.split('.tpl')[0].split('email/')[1], { to, context });
+      console.log(`Sent email to ${to}`);
+    } catch (e) {
+      console.log(`Failed to send email to ${to}`);
+      console.error(e);
+      throw e;
+    }
+    return { status: 201, message: 'Successfully sent' };
   }
 
   /**
@@ -59,6 +97,7 @@ export class DevServerUtil {
     const reqUrl = new url.URL(request.url!);
     const filename = reqUrl.pathname.substring(1) || 'index.html';
     const ext = filename.replace(/^.*?(?=[.](tpl[.])?[^.]+)/, '');
+
     console.debug('Resolving', filename, ext);
 
     switch (ext) {
@@ -68,9 +107,13 @@ export class DevServerUtil {
       case '.gif': return this.resolveImage(filename);
       case '.html': return this.resolveIndex();
       case '.tpl.html': {
-        const format = (reqUrl.searchParams.get('format') || 'html').toLowerCase();
         const context = await (async () => JSON.parse(reqUrl.searchParams.get('jsonContext') || '{}'))().catch(e => ({}));
-        return this.resolveTemplate(filename, format, context, reqUrl.searchParams);
+        if (!/POST/i.test(request.method || '')) {
+          const format = (reqUrl.searchParams.get('format') || 'html').toLowerCase();
+          return this.resolveTemplate(filename, format, context, reqUrl.searchParams);
+        } else {
+          return this.sendEmail(filename, reqUrl.searchParams.get('to')!, context);
+        }
       }
       default: {
         console.log('Unknown request', request.url);
