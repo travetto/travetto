@@ -18,46 +18,38 @@ export class SchemaRestTransformer {
   @OnMethod('@trv:rest/Endpoint')
   static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
     const decls = node.decorators || [];
-    const newDecls = [];
 
     const comments = DocUtil.describeDocs(node);
 
     // Process returnType
     let retType = state.resolveReturnType(node);
 
-    if (retType.key === 'literal' && retType.ctor === Promise) {
+    // IF we have a winner, declare response type
+    const type: Record<string, any> = {};
+
+    while (retType?.key === 'literal' && retType.typeArguments?.length) {
+      if (retType.ctor === Array || retType.ctor === Set) {
+        type.array = true;
+      }
       retType = retType.typeArguments?.[0] ?? { key: 'literal', ctor: Object }; // We have a promise nested
     }
 
-    // IF we have a winner, declare response type
-    if (retType) {
-      const type: Record<string, any> = {
-        type: retType
-      };
-      if (retType.key === 'literal' && (retType.ctor === Array || retType.ctor === Set)) {
-        type.array = true;
-        type.type = retType.typeArguments?.[0] ?? { key: 'literal', ctor: Object };
+    switch (retType?.key) {
+      case 'external': type.type = state.typeToIdentifier(retType); break;
+      case 'shape': {
+        const id = SchemaTransformUtil.toFinalType(state, retType, node) as ts.Identifier;
+        type.type = id;
       }
+    }
 
-      switch (type.type.key) {
-        case 'external': type.type = state.typeToIdentifier(type.type); break;
-        case 'shape': {
-          const id = SchemaTransformUtil.toFinalType(state, retType, node) as ts.Identifier;
-          type.type = id;
-        }
-      }
-
+    if (type.type) {
       const produces = state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', LiteralUtil.fromLiteral({
         ...type,
         title: comments.return
       }));
-      newDecls.push(produces);
-    }
-
-    if (newDecls.length) {
       return ts.updateMethod(
         node,
-        [...decls, ...newDecls],
+        [...decls, produces],
         node.modifiers,
         node.asteriskToken,
         node.name,
@@ -70,6 +62,7 @@ export class SchemaRestTransformer {
     } else {
       return node;
     }
+    return node;
   }
 
   /**
