@@ -85,8 +85,13 @@ export class RestTransformer {
     if (!pDec) { // Handle default
       decs.push(state.createDecorator(PARAM_DEC_FILE, defaultType, conf));
     } else if (ts.isCallExpression(pDec.expression)) {
-      pDec.expression.arguments = ts.createNodeArray([conf, ...pDec.expression.arguments.slice(1)]);
-      decs.push(pDec);
+      decs.push(ts.createDecorator(
+        ts.createCall(
+          pDec.expression.expression,
+          [],
+          [conf, ...pDec.expression.arguments.slice(1)]
+        )
+      ));
     }
 
     const ret = ts.updateParameter(
