@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^1.0.0-rc.2",
+    "@travetto/di": "^1.0.0-rc.3",
     "@types/mime": "^2.0.2",
     "file-type": "^14.6.1",
     "mime": "^2.4.6"
@@ -31,5 +31,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.2"
+  "version": "1.0.0-rc.3"
 }
