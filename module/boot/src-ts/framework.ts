@@ -79,7 +79,7 @@ export class FrameworkUtil {
   * @param testFile The test to determine if a file is desired
   */
   static scan(testFile?: (x: string) => boolean, base = FsUtil.cwd) {
-    const matcher = new RegExp(`^node_modules\/(@travetto|${EnvUtil.getExtModules('!').join('|')})`);
+    const matcher = new RegExp(`^node_modules\/(@travetto|${EnvUtil.getExtModules('!').map(x => x.replace(/\/.*$/, a => `(\\${a})?`)).join('|')})`);
     const out = ScanFs.scanDirSync({
       testFile,
       testDir: x => // Ensure its a valid folder or module folder
