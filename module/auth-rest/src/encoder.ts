@@ -25,12 +25,14 @@ export abstract class AuthContextEncoder {
  */
 @Injectable({ target: HeaderAuthContextEncoder })
 export class HeaderAuthContextEncoder extends AuthContextEncoder {
-  key = 'X-Auth-Context';
+  key = 'Authorization';
 
   read(req: Request) {
     const text = req.header(this.key) as string;
-    const ctx = JSON.parse(Buffer.from(text, 'base64').toString('utf8'));
-    return new AuthContext(ctx.identity, ctx.principal);
+    if (text) {
+      const ctx = JSON.parse(Buffer.from(text, 'base64').toString('utf8'));
+      return new AuthContext(ctx.identity, ctx.principal);
+    }
   }
 
   write(ctx: AuthContext, req: Request, res: Response) {

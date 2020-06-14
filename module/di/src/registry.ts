@@ -370,7 +370,14 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const config = this.getOrCreatePending(cls) as InjectableConfig<T>;
 
     // Allow for the factory to fulfill the target
-    const parentClass = config.factory ? config.target : Object.getPrototypeOf(cls);
+    let parentClass = config.factory ? config.target : Object.getPrototypeOf(cls);
+
+    if (config.factory) {
+      while (Object.getPrototypeOf(parentClass).ᚕabstract) {
+        parentClass = Object.getPrototypeOf(parentClass);
+      }
+    }
+
     const parentConfig = this.get(parentClass.ᚕid);
 
     if (parentConfig) {
