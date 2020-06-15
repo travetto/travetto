@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import { AnyType, LiteralUtil, DocUtil, TransformerState } from '@travetto/transformer';
 import { Util } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 const SCHEMA_MOD = require.resolve('../src/decorator/schema');
 const FIELD_MOD = require.resolve('../src/decorator/field');
@@ -27,12 +28,19 @@ export class SchemaTransformUtil {
         }
       }
       case 'shape': {
-        // Build class on the fly
+        // Determine type name
         let name = type.name && !type.name.startsWith('_') ? type.name : '';
-        if (!name && ts.isParameter(node) && ts.isIdentifier(node.name)) {
-          name = `${node.name.escapedText}`;
+        if (!name && (node as any).name?.escapedText) {
+          name = `${(node as any).name.escapedText}`;
         }
-        const id = ts.createIdentifier(`${name}_${Util.uuid(type.name ? 5 : 10)}ᚕsyn`);
+        // Determine type unique ident
+        let unique: string = Util.uuid(type.name ? 5 : 10);
+        try {
+          unique = `_${SystemUtil.naiveHash(node.getText())}`;
+        } catch { }
+
+        // Build class on the fly
+        const id = ts.createIdentifier(`${name}_${unique}ᚕsyn`);
         const cls = ts.createClassDeclaration(
           [
             state.createDecorator(SCHEMA_MOD, 'Schema'),
