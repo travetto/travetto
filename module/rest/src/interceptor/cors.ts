@@ -50,7 +50,7 @@ export class CorsInterceptor extends RestInterceptor {
 
   postConstruct() {
     this.origins = new Set(this.corsConfig.origins ?? []);
-    this.methods = (this.corsConfig.methods ?? ['put', 'post', 'get', 'delete', 'patch']).join(',');
+    this.methods = (this.corsConfig.methods ?? ['PUT', 'POST', 'GET', 'DELETE', 'PATCH', 'HEAD', 'TRACE']).join(',');
     this.headers = (this.corsConfig.headers ?? []).join(',');
     this.credentials = !!this.corsConfig.credentials;
   }
