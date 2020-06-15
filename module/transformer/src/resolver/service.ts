@@ -70,6 +70,7 @@ export class TypeResolver implements Checker {
 
       // Recurse
       if (result) {
+        result.original = resType;
         result.comment = DocUtil.describeDocs(type).description;
 
         if ('tsTypeArguments' in result) {

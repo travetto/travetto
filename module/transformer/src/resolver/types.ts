@@ -24,6 +24,10 @@ export interface Type<K extends string> {
    * Can be null
    */
   nullable?: boolean;
+  /**
+   * Original type
+   */
+  original?: ts.Type;
 }
 
 /**

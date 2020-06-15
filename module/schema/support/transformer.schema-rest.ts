@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerState, OnParameter, DecoratorMeta, LiteralUtil, OnMethod, DocUtil, DecoratorUtil } from '@travetto/transformer';
+import { TransformerState, OnParameter, DecoratorMeta, LiteralUtil, OnMethod, DocUtil, DecoratorUtil, DeclarationUtil } from '@travetto/transformer';
 import { SchemaTransformUtil } from './lib';
 
 const ENDPOINT_DEC_FILE = (() => { try { return require.resolve('@travetto/rest/src/decorator/endpoint'); } catch { } })()!;
@@ -35,7 +35,16 @@ export class SchemaRestTransformer {
     }
 
     switch (retType?.key) {
-      case 'external': type.type = state.typeToIdentifier(retType); break;
+      case 'external': {
+        const ext = state.typeToIdentifier(retType);
+        const [cls] = DeclarationUtil.getDeclarations(retType.original!);
+        if (cls &&
+          ts.isClassDeclaration(cls) && !state.getDecoratorList(cls).some(x => x.targets?.includes('@trv:schema/Schema'))) {
+          throw new Error(`Class ${cls.name?.escapedText} is missing a @Schema decorator`);
+        }
+        type.type = ext;
+        break;
+      }
       case 'shape': {
         const id = SchemaTransformUtil.toFinalType(state, retType, node) as ts.Identifier;
         type.type = id;
