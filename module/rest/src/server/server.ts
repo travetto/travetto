@@ -51,7 +51,7 @@ export abstract class RestServer<T = any> {
    * @param req The http request
    */
   async globalHandler(req: Request) {
-    if (req.method === 'options') {
+    if (req.method === 'OPTIONS') {
       return '';
     } else if (req.path === '/' && this.config.defaultMessage) {
       return this.info;

@@ -10,7 +10,7 @@ export type PathType = string | RegExp;
 export type Request = Travetto.Request;
 export type Response = Travetto.Response;
 
-export type MethodOrAll = Request['method'] | 'all';
+export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'trace' | 'all';
 
 export type RouteHandler<T = any> = (...args: any[]) => Promise<T> | T | void;
 

@@ -21,7 +21,7 @@ declare global {
       /**
        * The http method
        */
-      method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'trace';
+      method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'TRACE';
       /**
        * The path of the request
        */
