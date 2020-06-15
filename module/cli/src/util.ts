@@ -2,7 +2,6 @@ import * as readline from 'readline';
 import { parentPort } from 'worker_threads';
 // Imported individually to prevent barrel import loading too much
 import { EnvUtil } from '@travetto/boot/src/env';
-import { FsUtil } from '@travetto/boot/src/fs';
 import { ExecUtil } from '@travetto/boot/src/exec';
 
 import { CompletionConfig } from './types';
@@ -87,15 +86,15 @@ export class CliUtil {
    * Initialize the app environment
    */
   static initAppEnv({ env, watch, roots, resourceRoots, profiles, debug, envExtra }: AppEnv) {
-    Object.assign(process.env, envExtra ?? {});
     process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
-    process.env.NODE_ENV = EnvUtil.isProd() ? 'production' : 'development';
-    process.env.TRV_WATCH = `${(watch || watch === undefined) ? EnvUtil.getBoolean('TRV_WATCH') && !EnvUtil.isProd() : false}`;
-    process.env.TRV_ROOTS = join(EnvUtil.getList('TRV_ROOTS', roots));
-    process.env.TRV_RESOURCE_ROOTS = join(EnvUtil.getList('TRV_RESOURCE_ROOTS', resourceRoots));
-    process.env.TRV_PROFILES = join(EnvUtil.getList('TRV_PROFILES', profiles));
-    process.env.TRV_DEBUG = EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', debug ?? (EnvUtil.isProd() ? '0' : '')));
-    process.env.TRV_WATCH = `${(watch === undefined || watch) && (EnvUtil.getBoolean('TRV_WATCH') ?? !EnvUtil.isProd())}`;
+    Object.assign(process.env, envExtra ?? {}, {
+      NODE_ENV: EnvUtil.isProd() ? 'production' : 'development',
+      TRV_WATCH: `${(watch || watch === undefined) ? EnvUtil.getBoolean('TRV_WATCH') && !EnvUtil.isProd() : false}`,
+      TRV_ROOTS: join(EnvUtil.getList('TRV_ROOTS', roots)),
+      TRV_RESOURCE_ROOTS: join(EnvUtil.getList('TRV_RESOURCE_ROOTS', resourceRoots)),
+      TRV_PROFILES: join(EnvUtil.getList('TRV_PROFILES', profiles)),
+      TRV_DEBUG: EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', debug ?? (EnvUtil.isProd() ? '0' : '')))
+    });
   }
 
   /**
