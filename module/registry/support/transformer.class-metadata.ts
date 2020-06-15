@@ -82,7 +82,7 @@ export class RegisterTransformer {
       node.modifiers,
       node.name,
       node.typeParameters,
-      ts.createNodeArray(node.heritageClauses),
+      node.heritageClauses,
       [
         CoreUtil.createStaticField('ᚕinit', meta),
         ...node.members
