@@ -32,8 +32,9 @@ export class AppListManager {
   static async buildList() {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Compiling', () =>
-        ExecUtil.worker<ApplicationConfig[]>(require.resolve('../plugin-list'), ['build'])
-          .message
+        ExecUtil.worker<ApplicationConfig[]>(require.resolve('../plugin-list'), ['build'], {
+          env: { TRV_WATCH: '0' }
+        }).message
       );
     } else {
       const { PhaseManager } = await import('@travetto/base');
