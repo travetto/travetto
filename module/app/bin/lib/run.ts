@@ -65,4 +65,11 @@ export class RunUtil {
 
     return () => ApplicationRegistry.run(name, sub);
   }
+
+  /**
+   * Run support
+   */
+  static async run(name: string, ...args: any[]) {
+    return (await this.getRunner(name, ...args))();
+  }
 }
