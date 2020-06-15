@@ -6,9 +6,18 @@ import { RootRegistry, Class } from '@travetto/registry';
 
 import { SchemaBody, SchemaQuery } from '../src/extension/rest';
 import { Schema } from '../src/decorator/schema';
+import { SchemaRegistry } from '../src/service/registry';
 
 interface UserShape {
   id: number | undefined;
+  age: number;
+  name: string;
+  active: boolean;
+}
+
+@Schema()
+class SimpleUser {
+  id: number;
   age: number;
   name: string;
   active: boolean;
@@ -61,6 +70,11 @@ class API {
   @Get('/allShapes')
   async allShape() {
     return Promise.all([1, 2, 3,].map(async x => ({ key: x, count: 5 })));
+  }
+
+  @Get('/classShape')
+  async classShape() {
+    return new SimpleUser();
   }
 }
 
@@ -185,8 +199,15 @@ export class RestTest {
   }
 
   @Test()
-  async verifyShapeALl() {
+  async verifyShapeAll() {
     const ep = RestTest.getEndpoint('/allShapes', 'get');
     console.log(ep.responseType);
+  }
+
+  @Test()
+  async verifyShapeClass() {
+    const ep = RestTest.getEndpoint('/classShape', 'get');
+    assert(ep.responseType);
+    assert(SchemaRegistry.has(ep.responseType!.type));
   }
 }
