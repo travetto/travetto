@@ -1,4 +1,4 @@
-// @file-if @auth-rest
+// @file-if @travetto/auth-rest
 import { Injectable, DEFAULT_INSTANCE } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { AuthContext } from '@travetto/auth';
