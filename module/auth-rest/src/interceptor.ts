@@ -1,8 +1,6 @@
 import { AuthContext } from '@travetto/auth';
 import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
-import { AsyncContextInterceptor } from '@travetto/context'; // @line-if @travetto/context
-import { SessionInterceptor } from '@travetto/rest-session'; // @line-if @travetto/rest-session
 
 import { AuthContextService } from './context';
 import { AuthContextEncoder, HeaderAuthContextEncoder } from './encoder';
@@ -19,8 +17,8 @@ import { AuthService } from './auth';
 export class AuthInterceptor extends RestInterceptor {
 
   after = [
-    AsyncContextInterceptor, // @line-if @travetto/context
-    SessionInterceptor, // @line-if @travetto/rest-session
+    require('@travetto/context').AsyncContextInterceptor, // @line-if @travetto/context
+    require('@travetto/rest-session').SessionInterceptor, // @line-if @travetto/rest-session
   ];
 
   @Inject()
