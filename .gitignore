@@ -14,3 +14,4 @@ bin/test/error.ts
 **/api-client/**
 sample/dummy/**
 **/resources/email/*.compiled.*
+module/**/dev.yml

@@ -70,11 +70,21 @@ export class MailService {
 
     if (msg.text) {
       msg.alternatives = msg.alternatives || [];
-      msg.alternatives.unshift({
+      msg.alternatives.push({
         content: msg.text, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `text/plain; charset=utf-8`
       });
       delete msg.text;
     }
+
+    // Force html to the end per the mime spec
+    if (msg.html) {
+      msg.alternatives = msg.alternatives || [];
+      msg.alternatives.push({
+        content: msg.html, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `text/html; charset=utf-8`
+      });
+      delete msg.html;
+    }
+
 
     return this.transport.send(msg);
   }
