@@ -202,12 +202,15 @@
      * Send email
      */
     async function sendEmail(node) {
-      const url = new URL(iframe.src);
-      url.searchParams.append('to', 'timothy.soehnlin@gmail.com');
-      console.log(url.toString())
-      const res = await fetch(url, {
-        method: 'POST',
-      });
+      const reqUrl = new URL(iframe.src);
+      const res = await fetch(reqUrl, { method: 'POST', });
+      const { url } = await res.json();
+      console.log('Received', url);
+      if (url) {
+        M.toast({ html: `Email sent, available at &nbsp;<a target="_blank" href="${url}">here</a>` });
+      } else {
+        M.toast({ html: 'Email sent successfully' });
+      }
       return res.status;
     }
 
