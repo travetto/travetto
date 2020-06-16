@@ -5,14 +5,14 @@ import { ParamConfig } from '../../../core/types';
  */
 export interface Application {
   name: string;
+  root: string;
   filename: string;
-  params: ParamConfig[];
-  id: string;
+  description?: string;
   start: number;
   codeStart: number;
-  root: string;
-  description?: string;
-  env: string;
+  params: ParamConfig[];
+  targetId: string;
+  generatedTime?: number;
 }
 
 /**
