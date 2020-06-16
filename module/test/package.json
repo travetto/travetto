@@ -4,8 +4,8 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/compiler": "^1.0.0-rc.4",
-    "@travetto/registry": "^1.0.0-rc.4",
+    "@travetto/compiler": "^1.0.0-rc.5",
+    "@travetto/registry": "^1.0.0-rc.5",
     "@travetto/watch": "^1.0.0-rc.4",
     "@travetto/worker": "^1.0.0-rc.4",
     "@travetto/yaml": "^1.0.0-rc.5"
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.4"
+  "version": "1.0.0-rc.5"
 }
