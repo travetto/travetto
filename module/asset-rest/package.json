@@ -9,7 +9,7 @@
   "dependencies": {
     "@travetto/asset": "^1.0.0-rc.5",
     "@travetto/config": "^1.0.0-rc.4",
-    "@travetto/rest": "^1.0.0-rc.5",
+    "@travetto/rest": "^1.0.0-rc.6",
     "@types/busboy": "^0.2.3",
     "busboy": "^0.3.1",
     "mime-match": "^1.0.2"
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.5"
+  "version": "1.0.0-rc.6"
 }
