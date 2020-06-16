@@ -62,7 +62,6 @@ export class AppSelectorUtil {
   static async resolveApp(title: string, choices: AppChoice[]) {
     const items = choices
       .map(x => {
-        x.inputs = x.inputs || [];
         x.params = x.params || [];
         return x;
       })
@@ -123,7 +122,7 @@ export class AppSelectorUtil {
       return;
     }
 
-    if (!choice.key && choice.params) {
+    if (!choice.key && choice.params && choice.params.length) {
       const inputs = await this.resolveParameters(choice);
 
       if (inputs === undefined) {
@@ -132,6 +131,8 @@ export class AppSelectorUtil {
 
       choice.inputs = inputs;
 
+      return choice;
+    } else {
       return choice;
     }
   }

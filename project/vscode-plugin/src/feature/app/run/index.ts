@@ -31,7 +31,11 @@ export class AppRunFeature extends BaseFeature {
    */
   async getAppList() {
     await this.compile();
-    return JSON.parse(await this.runPlugin('list')) as AppChoice[];
+    const choices = JSON.parse(await this.runPlugin('list')) as AppChoice[];
+    return choices.map(x => {
+      x.inputs = x.inputs || [];
+      return x;
+    });
   }
 
   /**
@@ -42,7 +46,7 @@ export class AppRunFeature extends BaseFeature {
     const appList = await this.getAppList();
 
     return this.storage.getRecentAndFilterState(count * 2, x =>
-      appList.some(a => a.id === x.id && a.name === x.name)
+      !appList.some(a => a.targetId === x.targetId && a.name === x.name)
     )
       .map(x => x.data)
       .slice(0, count);
@@ -56,7 +60,7 @@ export class AppRunFeature extends BaseFeature {
   async resolveChoices(title: string, choices: AppChoice[] | AppChoice) {
     const choice = await AppSelectorUtil.resolveChoices(title, choices);
     if (choice) {
-      const key = `${choice.id}#${choice.name}:${choice.inputs.join(',')}`;
+      const key = `${choice.targetId}#${choice.name}:${choice.inputs.join(',')}`;
       this.storage.set(key, { ...choice, time: Date.now(), key });
       return choice;
     }
@@ -135,6 +139,12 @@ export class AppRunFeature extends BaseFeature {
    * @param doc
    */
   async buildCodeLenses(doc: vscode.TextDocument) {
+    const hasApp = ' '.repeat(doc.lineCount).split('').some((x, i) => /@Application/.test(doc.lineAt(i).text));
+
+    if (!hasApp) {
+      return;
+    }
+
     return (await this.getAppList())
       .filter(x => x.filename === doc.fileName)
       .map(app => ({
