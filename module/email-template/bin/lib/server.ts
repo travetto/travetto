@@ -8,6 +8,8 @@ import { ConfigManager } from '@travetto/config';
 import { TemplateUtil, MapLite } from './util';
 import { ImageUtil } from './image';
 
+const EMAIL = ConfigManager.get('email-dev');
+
 export class DevServerUtil {
 
   private static _svc: Promise<MailService>;
@@ -31,17 +33,35 @@ export class DevServerUtil {
     if (!this._svc) {
       const { MailService: M, MailTransport, NodemailerTransport } = await import('@travetto/email');
       const { DependencyRegistry } = await import('@travetto/di');
-      const cls = class { };
-      const config = ConfigManager.get('email-dev');
 
-      DependencyRegistry.registerFactory({
-        fn: () => new NodemailerTransport(config as any),
-        target: MailTransport as any,
-        src: cls,
-        id: 'nodemailer',
-      });
+      if ('email-dev' in ConfigManager.get()) {
+        const cls = class { };
+        DependencyRegistry.registerFactory({
+          fn: () => new NodemailerTransport(EMAIL as any),
+          target: MailTransport as any,
+          src: cls,
+          id: 'nodemailer',
+        });
 
-      DependencyRegistry.install(cls, { curr: cls, type: 'added' });
+        DependencyRegistry.install(cls, { curr: cls, type: 'added' });
+      } else if (!DependencyRegistry.getCandidateTypes(MailTransport as any).length) {
+        console.error(`=`.repeat(40));
+        console.error('Please configure your email setup and/or credentials for testing. Under `email-dev` in your `dev.yml`');
+        console.error('Email sending will not work until the above is fixed');
+        console.error('If you want a free service to send emails, use https://ethereal.email/');
+        console.error(`A sample configuration would look like:     
+      email-dev:
+        to: my-email@gmail.com
+        port: 587,
+        host: smtp.host.email
+        auth:
+          user:	email@blah.com
+          pass: password
+      `);
+        console.error(`=`.repeat(40));
+        return;
+      }
+
       this._svc = DependencyRegistry.getInstance(M);
     }
     return this._svc;
@@ -55,11 +75,19 @@ export class DevServerUtil {
       console.log(`Sending email to ${to}`);
       await TemplateUtil.compileToDisk(key, true);
       // Let the engine template
-      const info = await (await this.getService()).sendCompiled(key.split('.tpl')[0].split('email/')[1], { to, context });
+      const svc = await this.getService();
+      if (!svc) {
+        throw new Error('Node mailer support is missing');
+      }
+      const info = await svc.sendCompiled(key.split('.tpl')[0].split('email/')[1], { to, context });
       console.log(`Sent email to ${to}`);
-      return { status: 200, message: 'Successfully sent', content: { url: require('nodemailer').getTestMessageUrl(info) }, contentType: 'application/json' };
+      return {
+        status: 200, message: 'Successfully sent',
+        content: EMAIL.host?.includes('ethereal') ? JSON.stringify({ url: require('nodemailer').getTestMessageUrl(info) }) : '{}',
+        contentType: 'application/json'
+      };
     } catch (e) {
-      console.log(`Failed to send email to ${to}`);
+      console.log(`Failed to send email to ${to}`, e.message);
       console.error(e);
       throw e;
     }
@@ -138,8 +166,4 @@ export class DevServerUtil {
   }
 }
 
-if (!ConfigManager.get('email-dev')) {
-  console.error('Please configure your email setup and/or credentials for testing. Under `email-dev` in your `dev.yml`');
-  console.error('If you want a free service to send emails, use https://ethereal.email/');
-  console.error('Email sending will not work until the above is fixed');
-}
+setTimeout(() => DevServerUtil.getService(), 2000);
