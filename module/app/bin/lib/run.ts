@@ -28,12 +28,11 @@ export class RunUtil {
       throw new Error(`'Unknown application ${name}`);
     }
 
-    CliUtil.initAppEnv(
+    CliUtil.initAppEnv({
       // If standard app, don't add root/profile
-      /^([.]|.*node_modules.*)/.test(app.root) ?
-        {} :
-        { roots: [app.root], profiles: [app.name] }
-    );
+      ... (/^([.]|.*node_modules.*)/.test(app.root) ? {} : { roots: [app.root], profiles: [app.name] }),
+      watch: true
+    });
 
     await CompileCliUtil.compile();
 
