@@ -64,9 +64,18 @@ export class MailService {
       });
     }
 
-    return this.transport.send({
-      ...msg,
-      ...MailUtil.extractImageAttachments(msg.html)
-    });
+    if (msg.html) {
+      Object.assign(msg, MailUtil.extractImageAttachments(msg.html));
+    }
+
+    if (msg.text) {
+      msg.alternatives = msg.alternatives || [];
+      msg.alternatives.unshift({
+        content: msg.text, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `text/plain; charset=utf-8`
+      });
+      delete msg.text;
+    }
+
+    return this.transport.send(msg);
   }
 }
