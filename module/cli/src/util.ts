@@ -89,7 +89,7 @@ export class CliUtil {
     process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
     Object.assign(process.env, envExtra ?? {}, {
       NODE_ENV: EnvUtil.isProd() ? 'production' : 'development',
-      TRV_WATCH: `${(watch === undefined ? EnvUtil.getBoolean('TRV_WATCH') : watch) && !EnvUtil.isProd()}`,
+      TRV_WATCH: `${watch === undefined ? EnvUtil.getBoolean('TRV_WATCH') : watch}`,
       TRV_ROOTS: join(EnvUtil.getList('TRV_ROOTS', roots)),
       TRV_RESOURCE_ROOTS: join(EnvUtil.getList('TRV_RESOURCE_ROOTS', resourceRoots)),
       TRV_PROFILES: join(EnvUtil.getList('TRV_PROFILES', profiles)),

@@ -33,4 +33,25 @@ export class CompileCliUtil {
       }).result
     );
   }
+
+  /**
+   * Compile CLI
+   */
+  static async compileCli() {
+    const { ScanApp } = await import('@travetto/base');
+    const { AppCache } = await import('@travetto/boot');
+
+    // Compile @travetto/cli directly
+    for (const x of ScanApp.findFiles({ folder: 'src', paths: ['@travetto/cli'] })) {
+      if (!AppCache.hasEntry(x.file)) {
+        require(x.file); // Transpile all the desired files
+      }
+    }
+
+    for (const x of ScanApp.findFiles({ folder: 'bin' })) {
+      if (!AppCache.hasEntry(x.file)) {
+        require(x.file); // Transpile all the desired files
+      }
+    }
+  }
 }
