@@ -33,7 +33,7 @@ export class SQLModelConfig {
   /**
    * Auto schema creation
    */
-  autoCreate = !EnvUtil.isProd();
+  autoCreate = !EnvUtil.isReadonly();
   /**
    * Db version
    */

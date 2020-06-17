@@ -105,6 +105,6 @@ export class HelpUtil {
       console!.error(color`${{ failure: message }}\n`);
     }
     command.outputHelp(text => HelpUtil.getHelpText(text, extra));
-    process.exit(-1);
+    process.exit(message ? -1 : 0);
   }
 }

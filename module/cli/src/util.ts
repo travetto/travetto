@@ -125,7 +125,7 @@ export class CliUtil {
   static async waiting<T>(message: string, work: Promise<T> | (() => Promise<T>),
     config: { completion?: string, delay?: number, stream?: NodeJS.WritableStream } = {}
   ) {
-    const { stream, delay, completion } = { delay: 250, stream: process.stderr, ...config };
+    const { stream, delay, completion } = { delay: 1000, stream: process.stderr, ...config };
 
     const writeLine = this.rewriteLine.bind(this, stream);
     const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
