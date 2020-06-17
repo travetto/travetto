@@ -209,7 +209,11 @@ export class ExecUtil {
       argv: args
     });
 
-    const result = new Promise<number>((res, rej) => worker.on('error', rej).on('exit', c => c > 0 ? rej(new Error(`${c}`)) : res(c)));
+    const result = new Promise<number>((res, rej) =>
+      worker
+        .on('error', e => rej(e))
+        .on('exit', c => c > 0 ? rej(new Error(`${c}`)) : res(c))
+    );
     const message = new Promise<T>((r, rej) => {
       worker.once('message', d => result.then(() => r(d)));
       result.catch(rej);

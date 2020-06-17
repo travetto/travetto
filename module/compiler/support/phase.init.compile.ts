@@ -8,7 +8,7 @@ export const init = {
     const { AppCache, EnvUtil } = await import('@travetto/boot');
 
     if (EnvUtil.isReadonly()) {
-      console.debug('Skipping compilation');
+      console.debug('Skipping compilation, in readonly mode');
       return;
     }
 
@@ -16,6 +16,12 @@ export const init = {
     const { Compiler } = await import('../src/compiler');
 
     for (const x of ScanApp.findAppSourceFiles()) {
+      if (!AppCache.hasEntry(x.file)) {
+        Compiler.transpile(x.file); // Transpile all the desired files
+      }
+    }
+
+    for (const x of ScanApp.findFiles({ folder: 'support' })) {
       if (!AppCache.hasEntry(x.file)) {
         Compiler.transpile(x.file); // Transpile all the desired files
       }

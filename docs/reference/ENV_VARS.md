@@ -5,9 +5,9 @@ The common environment variables throughout the code base:
 * `TRV_PROFILES`=['application'] - Additional profiles to run app under
 * `TRV_ROOTS` = ['.']            - The root of the application search space
 * `TRV_RESOURCE_ROOTS` = ['.']   - The root of resource searching
-* `TRV_WATCH` = 0|1              - Wether or not to run the program in watch mode
 * `TRV_MOD_ROOTS` = []           - Additional module paths for auto loading
-* `TRV_COMPILE` = 0|1            - Should compilation be supported, forced to false in PROD.  Defaults to 1
+* `TRV_WATCH` = 0|1              - Wether or not to run the program in watch mode
+* `TRV_READONLY` = 0|1            - Should compilation be supported, forced to false in PROD.  Defaults to 1
 
 ## Logging 
 * `TRV_DEBUG` = 0|*              - Outputs all console.debug messages, defaults to `*` in dev, and `off` in prod.  Will inherit from `DEBUG` if not specified.

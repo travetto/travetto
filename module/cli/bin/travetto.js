@@ -1,28 +1,6 @@
 #!/usr/bin/env node
 
 const { FsUtil } = require('@travetto/boot/src/fs');
-const { ExecUtil } = require('@travetto/boot/src/exec');
-const { EnvUtil } = require('@travetto/boot/src/env');
-
-/**
- * Supporting local development
- */
-if (
-  !EnvUtil.isSet('TRV_DEV') && // If not defined
-  /\/travetto.*\/(module|sample)\//.test(FsUtil.cwd) // And in local module
-) { // If in framework development mode
-  ExecUtil.fork(process.argv[1], process.argv.slice(2), {
-    stdio: [0, 1, 2],
-    shell: true,
-    env: { NODE_PRESERVE_SYMLINKS: 1, TRV_DEV: 1 }
-  }).result.catch(err => {
-    if (err.meta.code !== 255 && err.meta.code !== 1) {
-      console.log(err);
-    }
-    process.exit(err.meta.code);
-  });
-  return;
-}
 
 /**
  * Handle if cli is install globally
@@ -45,8 +23,25 @@ if (!FsUtil.toUnix(__filename).includes(FsUtil.cwd)) { // If the current file is
 }
 
 /**
+ * Compile CLI for usage
+ */
+function compile() {
+  const { AppCache, EnvUtil, TranspileUtil } = require('@travetto/boot');
+  const { FrameworkUtil } = require('@travetto/boot/src/framework');
+
+  if (!EnvUtil.isReadonly()) {
+    for (const { file, stats } of FrameworkUtil.scan(f => /bin\//.test(f))) {
+      if (stats.isFile() && file.endsWith('.ts') && !file.endsWith('.d.ts') && !AppCache.hasEntry(file)) {
+        TranspileUtil.transpile(file);
+      }
+    }
+  }
+}
+
+/**
  * Start cli
  */
 require('@travetto/boot/register');
+compile();
 require('@travetto/cli/src/execute')
   .ExecutionManager.run(process.argv); // Allow for handing off to local/external cli

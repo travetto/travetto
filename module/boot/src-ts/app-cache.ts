@@ -22,6 +22,10 @@ class $AppCache extends FileCache {
       return; // Skip trying to delete;
     }
 
+    if (EnvUtil.isReadonly()) {
+      return; // Do not clean cache in readonly mode
+    }
+
     for (const f of fs.readdirSync(this.cacheDir)) {
       const full = this.fromEntryName(f);
       try {

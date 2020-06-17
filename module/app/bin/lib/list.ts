@@ -2,6 +2,7 @@ import * as util from 'util';
 import * as fs from 'fs';
 import { parentPort } from 'worker_threads';
 
+import { EnvUtil } from '@travetto/boot';
 import { CliUtil } from '@travetto/cli/src/util';
 import { AppCache } from '@travetto/boot/src/app-cache';
 import { FsUtil } from '@travetto/boot/src/fs';
@@ -96,12 +97,15 @@ export class AppListManager {
    * Request list of applications
    */
   static async getList(): Promise<ApplicationConfig[] | undefined> {
-    if (!(await this.readList())) { // no list
-      this.storeList(await this.buildList());
+    let items: ApplicationConfig[] | undefined;
+    if (!(items = await this.readList())) { // no list
+      items = await this.buildList();
+      if (items && !EnvUtil.isReadonly()) {
+        this.storeList(items);
+      }
     }
 
-    const items = await this.readList();
-    if (items) {
+    if (items && !EnvUtil.isReadonly()) {
       try {
         await this.verifyList(items);
       } catch (e) {

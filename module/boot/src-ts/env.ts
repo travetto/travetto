@@ -134,7 +134,7 @@ export class EnvUtil {
    * Is the app in watch mode?
    */
   static isWatch() {
-    return this.isReadonly() && this.isTrue('TRV_WATCH');
+    return !this.isReadonly() && this.isTrue('TRV_WATCH');
   }
 
   /**

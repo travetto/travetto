@@ -26,7 +26,7 @@ export class ElasticsearchModelConfig {
   /**
    * Auto-create, disabled in prod by default
    */
-  autoCreate = !EnvUtil.isProd();
+  autoCreate = !EnvUtil.isReadonly();
   /**
    * Base schema config for elasticsearch
    */

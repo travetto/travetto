@@ -14,7 +14,7 @@
 		"prepare": "cd module/boot; npm run prepare",
 		"reinit": "rm -rf node_modules/; npm i; npm run init",
 		"service": "./bin/test/resources.sh",
-		"test": "cd module/boot; npx trv test:lerna",
+		"test": "cd module/boot; npx trv-fw-dev test:lerna",
 		"boot": "cd module/boot/src-ts; tsc -w -p ."
 	},
 	"devDependencies": {

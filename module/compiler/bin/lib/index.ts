@@ -1,5 +1,6 @@
 import * as fs from 'fs';
-import { ExecUtil } from '@travetto/boot';
+import { ExecUtil } from '@travetto/boot/src/exec';
+import { EnvUtil } from '@travetto/boot/src/env';
 import { CliUtil } from '@travetto/cli/src/util';
 
 export class CompileCliUtil {
@@ -23,6 +24,10 @@ export class CompileCliUtil {
    * Trigger a compile
    */
   static compile(output?: string) {
+    if (EnvUtil.isReadonly()) {
+      return; // Do not run the compiler
+    }
+
     return CliUtil.waiting('Compiling...',
       ExecUtil.worker('@travetto/compiler/bin/plugin-compile', [], {
         env: {
@@ -35,23 +40,18 @@ export class CompileCliUtil {
   }
 
   /**
-   * Compile CLI
+   * Compile All
    */
-  static async compileCli() {
-    const { ScanApp } = await import('@travetto/base');
-    const { AppCache } = await import('@travetto/boot');
-
-    // Compile @travetto/cli directly
-    for (const x of ScanApp.findFiles({ folder: 'src', paths: ['@travetto/cli'] })) {
-      if (!AppCache.hasEntry(x.file)) {
-        require(x.file); // Transpile all the desired files
-      }
+  static async compileAll() {
+    const { FsUtil } = await import('@travetto/boot');
+    const alt = FsUtil.resolveUnix(FsUtil.cwd, 'alt');
+    if (FsUtil.existsSync(alt)) {
+      process.env.TRV_ROOTS = fs.readdirSync(alt).map(x => `./alt/${x}`).join(',');
     }
 
-    for (const x of ScanApp.findFiles({ folder: 'bin' })) {
-      if (!AppCache.hasEntry(x.file)) {
-        require(x.file); // Transpile all the desired files
-      }
-    }
+    const { PhaseManager } = await import('@travetto/base');
+
+    // Standard compile
+    PhaseManager.init('compile-all');
   }
 }

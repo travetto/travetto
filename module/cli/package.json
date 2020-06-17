@@ -8,7 +8,8 @@
   },
   "bin": {
     "travetto": "bin/travetto.js",
-    "trv": "bin/travetto.js"
+    "trv": "bin/travetto.js",
+    "trv-fw-dev": "bin/travetto-dev.sh"
   },
   "dependencies": {
     "@travetto/base": "^1.0.0-rc.5",
