@@ -209,7 +209,7 @@ export class TranspileUtil {
     });
 
     // Disable compilation
-    if (!EnvUtil.canCompile()) {
+    if (EnvUtil.isReadonly()) {
       this.transpile = (tsf: string) => AppCache.readEntry(tsf);
     }
   }

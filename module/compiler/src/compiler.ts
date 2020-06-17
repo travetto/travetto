@@ -53,7 +53,7 @@ class $Compiler {
 
     require.extensions[TranspileUtil.ext] = this.compile.bind(this);
 
-    if (EnvUtil.canCompile()) {
+    if (!EnvUtil.isReadonly()) {
       this.transpiler.init();
     } else { // Force reading from cache
       this.transpile = (tsf: string) => this.cache.readEntry(tsf);
@@ -66,7 +66,7 @@ class $Compiler {
    * Reset the compiler
    */
   reset() {
-    if (EnvUtil.canCompile()) {
+    if (!EnvUtil.isReadonly()) {
       this.transpiler.reset();
     }
     ScanApp.reset();

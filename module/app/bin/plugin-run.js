@@ -1,5 +1,4 @@
 // Entry point for the direct execution
 //  all information is passed as env vars
 require('@travetto/boot/register');
-require('@travetto/app/bin/lib/run')
-  .RunUtil.run(...process.argv.slice(2));
+require('./lib/run').RunUtil.run(...process.argv.slice(2));

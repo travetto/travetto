@@ -7,7 +7,7 @@ export const init = {
   action: async () => {
     const { AppCache, EnvUtil } = await import('@travetto/boot');
 
-    if (!EnvUtil.canCompile()) {
+    if (EnvUtil.isReadonly()) {
       console.debug('Skipping compilation');
       return;
     }
