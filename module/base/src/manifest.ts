@@ -107,7 +107,7 @@ class $AppManifest {
         return acc;
       }, {
         watch: EnvUtil.isWatch(),
-        compile: EnvUtil.canCompile()
+        readonly: EnvUtil.isReadonly()
       } as Record<string, any>);
   }
 

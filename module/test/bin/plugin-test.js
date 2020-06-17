@@ -2,4 +2,4 @@
  * Endpoint for running directly from the test plugin
  */
 require('@travetto/boot/register');
-require('@travetto/test/bin/lib').runTestsDirect(...process.argv.slice(2)); // Pass args
+require('./lib').runTestsDirect(...process.argv.slice(2)); // Pass args
