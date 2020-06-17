@@ -105,7 +105,10 @@ class $AppManifest {
       .reduce((acc, k) => {
         acc[k] = this[k];
         return acc;
-      }, {} as Record<string, any>);
+      }, {
+        watch: EnvUtil.isWatch(),
+        compile: EnvUtil.canCompile()
+      } as Record<string, any>);
   }
 
   /**

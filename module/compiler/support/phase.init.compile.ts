@@ -5,7 +5,13 @@ export const init = {
   key: 'compile-all',
   after: ['compiler'],
   action: async () => {
-    const { AppCache } = await import('@travetto/boot');
+    const { AppCache, EnvUtil } = await import('@travetto/boot');
+
+    if (!EnvUtil.canCompile()) {
+      console.debug('Skipping compilation');
+      return;
+    }
+
     const { ScanApp } = await import('@travetto/base');
     const { Compiler } = await import('../src/compiler');
 

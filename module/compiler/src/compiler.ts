@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 
-import { FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil } from '@travetto/boot';
+import { FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil, EnvUtil } from '@travetto/boot';
 import { ScanApp, AppManifest } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
@@ -15,6 +15,7 @@ class $Compiler {
 
   protected transpiler: Transpiler;
   protected emitter = new EventEmitter();
+  protected rootFiles: Set<string>;
 
   active = false;
 
@@ -28,14 +29,15 @@ class $Compiler {
      */
     protected readonly roots: string[] = AppManifest.roots
   ) {
-    this.transpiler = new Transpiler(this.cache, this.roots);
+    this.rootFiles = new Set(ScanApp.findAppSourceFiles({ roots: this.roots }).map(x => x.file));
+    this.transpiler = new Transpiler(this.cache, this.rootFiles);
   }
 
   /**
    * Return list of root files captured by the compiler
    */
   getRootFiles() {
-    return this.transpiler.getRootFiles();
+    return this.rootFiles;
   }
 
   /**
@@ -48,8 +50,15 @@ class $Compiler {
 
     const start = Date.now();
     this.active = true;
+
     require.extensions[TranspileUtil.ext] = this.compile.bind(this);
-    this.transpiler.init();
+
+    if (EnvUtil.canCompile()) {
+      this.transpiler.init();
+    } else { // Force reading from cache
+      this.transpile = (tsf: string) => this.cache.readEntry(tsf);
+    }
+
     console.debug('Initialized', (Date.now() - start) / 1000);
   }
 
@@ -57,7 +66,9 @@ class $Compiler {
    * Reset the compiler
    */
   reset() {
-    this.transpiler.reset();
+    if (EnvUtil.canCompile()) {
+      this.transpiler.reset();
+    }
     ScanApp.reset();
     this.active = false;
   }

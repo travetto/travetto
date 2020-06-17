@@ -134,7 +134,14 @@ export class EnvUtil {
    * Is the app in watch mode?
    */
   static isWatch() {
-    return this.isTrue('TRV_WATCH');
+    return this.canCompile() && this.isTrue('TRV_WATCH');
+  }
+
+  /**
+   * Can use compile
+   */
+  static canCompile() {
+    return !this.isProd() && !this.isFalse('TRV_COMPILE');
   }
 
   /**

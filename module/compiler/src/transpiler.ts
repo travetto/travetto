@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { FileCache, TranspileUtil, FsUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
-import { ScanApp, Util } from '@travetto/base';
+import { Util } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';
@@ -18,7 +18,6 @@ const SIMPLE_COMPILATION = /support\/(transformer|phase|watch|lib)[.].+/;
 export class Transpiler {
   private transformerManager: TransformerManager;
 
-  private rootNames = new Set<string>();
   private contents = new Map<string, string>();
   private sources = new Map<string, ts.SourceFile>();
   private hashes = new Map<string, number>();
@@ -32,7 +31,7 @@ export class Transpiler {
     /**
      * App Root paths to load files for
      */
-    private roots: string[]
+    private rootNames: Set<string>
   ) {
     this.transformerManager = new TransformerManager();
   }
@@ -119,7 +118,7 @@ export class Transpiler {
         host: this.getHost(),
         oldProgram: this.program
       });
-      this.transformerManager.init();
+
       this.transformerManager.build(this.program.getTypeChecker());
     }
     return this.program;
@@ -155,16 +154,7 @@ export class Transpiler {
    * Initialize
    */
   init() {
-    // Find all active app files
-    ScanApp.findAppSourceFiles({ roots: this.roots })
-      .forEach(x => this.rootNames.add(x.file));
-  }
-
-  /**
-   * Return all root files for the ts compiler
-   */
-  getRootFiles() {
-    return [...this.rootNames];
+    this.transformerManager.init();
   }
 
   /**

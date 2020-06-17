@@ -207,6 +207,11 @@ export class TranspileUtil {
       emptyCacheBetweenOperations: EnvUtil.isWatch(),
       retrieveFile: (p: string) => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined
     });
+
+    // Disable compilation
+    if (!EnvUtil.canCompile()) {
+      this.transpile = (tsf: string) => AppCache.readEntry(tsf);
+    }
   }
 
   /**
