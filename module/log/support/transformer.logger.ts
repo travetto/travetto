@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
-import { EnvUtil } from '@travetto/boot';
-import { ConsoleManager } from '@travetto/base';
+import { EnvUtil } from '@travetto/boot/src/env';
+import { ConsoleManager } from '@travetto/base/src/console';
 import { TransformerState, OnCall, CoreUtil, LiteralUtil } from '@travetto/transformer';
 
 /**

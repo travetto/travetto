@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { ConsoleManager } from '@travetto/base';
+import { ConsoleManager } from '@travetto/base/src/console';
 
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
 import { LogUtil } from './util/log';

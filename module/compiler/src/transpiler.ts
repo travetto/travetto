@@ -119,6 +119,7 @@ export class Transpiler {
         host: this.getHost(),
         oldProgram: this.program
       });
+      this.transformerManager.init();
       this.transformerManager.build(this.program.getTypeChecker());
     }
     return this.program;
@@ -157,8 +158,6 @@ export class Transpiler {
     // Find all active app files
     ScanApp.findAppSourceFiles({ roots: this.roots })
       .forEach(x => this.rootNames.add(x.file));
-
-    this.transformerManager.init();
   }
 
   /**
