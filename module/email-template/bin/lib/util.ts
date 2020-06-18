@@ -157,4 +157,14 @@ export class TemplateUtil {
     watcher.init();
     await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24 * 1));
   }
+
+  /**
+   * Initialize for operation
+   */
+  static async initApp() {
+    process.env.TRV_RESOURCE_ROOTS = `${process.env.TRV_RESOURCE_ROOTS || ''},${FsUtil.resolveUnix(__dirname, '..', '..', 'resources')}`;
+
+    const { PhaseManager } = await import('@travetto/base');
+    await PhaseManager.init();
+  }
 }

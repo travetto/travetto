@@ -15,10 +15,9 @@ export class EmailCompilePlugin extends BasePlugin {
 
   }
   async action() {
-    const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.init();
-
     const { TemplateUtil } = await import('./lib/util');
+    await TemplateUtil.initApp();
+
     const count = (await TemplateUtil.compileAllToDisk()).length;
     console!.log(color`Successfully compiled ${{ param: count }} templates`);
 
