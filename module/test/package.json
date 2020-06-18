@@ -4,11 +4,11 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/compiler": "^1.0.0-rc.6",
-    "@travetto/registry": "^1.0.0-rc.6",
-    "@travetto/watch": "^1.0.0-rc.5",
-    "@travetto/worker": "^1.0.0-rc.5",
-    "@travetto/yaml": "^1.0.0-rc.6"
+    "@travetto/compiler": "^1.0.0-rc.7",
+    "@travetto/registry": "^1.0.0-rc.7",
+    "@travetto/watch": "^1.0.0-rc.6",
+    "@travetto/worker": "^1.0.0-rc.6",
+    "@travetto/yaml": "^1.0.0-rc.7"
   },
   "description": "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin",
   "homepage": "https://travetto.io",
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.6"
+  "version": "1.0.0-rc.7"
 }
