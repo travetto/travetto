@@ -7,10 +7,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^1.0.0-rc.5",
-    "@travetto/rest": "^1.0.0-rc.8",
-    "@travetto/schema": "^1.0.0-rc.6",
-    "@travetto/yaml": "^1.0.0-rc.6",
+    "@travetto/config": "^1.0.0-rc.6",
+    "@travetto/rest": "^1.0.0-rc.9",
+    "@travetto/schema": "^1.0.0-rc.7",
+    "@travetto/yaml": "^1.0.0-rc.7",
     "openapi3-ts": "^1.4.0"
   },
   "description": "OpenAPI integration support for the travetto framework",
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.8"
+  "version": "1.0.0-rc.9"
 }

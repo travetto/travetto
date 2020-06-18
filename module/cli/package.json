@@ -12,7 +12,7 @@
     "trv-fw-dev": "bin/travetto-dev.sh"
   },
   "dependencies": {
-    "@travetto/base": "^1.0.0-rc.5",
+    "@travetto/base": "^1.0.0-rc.6",
     "commander": "^5.1.0"
   },
   "description": "CLI infrastructure for travetto framework",
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.7"
+  "version": "1.0.0-rc.8"
 }
