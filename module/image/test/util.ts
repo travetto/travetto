@@ -28,7 +28,22 @@ class ImageUtilTest {
     const imgStream = await ResourceManager.readToStream('google.png');
     const imgBuffer = await ResourceManager.read('google.png');
 
-    const out = await ImageUtil.optimizePng(imgStream);
+    const out = await ImageUtil.optimize('png', imgStream);
+
+    const optimized = await StreamUtil.toBuffer(out);
+
+    assert(optimized.length > 0);
+
+    assert(imgBuffer.length >= optimized.length);
+  }
+
+
+  @Test('compress jpeg')
+  async compressJpeg() {
+    const imgStream = await ResourceManager.readToStream('lincoln.jpg');
+    const imgBuffer = await ResourceManager.read('lincoln.jpg');
+
+    const out = await ImageUtil.optimize('jpeg', imgStream);
 
     const optimized = await StreamUtil.toBuffer(out);
 

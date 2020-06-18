@@ -55,7 +55,12 @@ export class ImageUtil {
     const out = AppCache.toEntryName(pth);
 
     if (!(await FsUtil.exists(out))) {
-      const stream = await ImgUtil.optimizePng(pth);
+      let stream: Buffer | NodeJS.ReadableStream = await ResourceManager.readToStream(rel);
+      if (/.png$/.test(pth)) {
+        stream = await ImgUtil.optimize('png', stream);
+      } else if (/.jpe?g$/i.test(pth)) {
+        stream = await ImgUtil.optimize('jpeg', stream);
+      }
       await StreamUtil.writeToFile(stream, out);
     }
 

@@ -19,7 +19,7 @@ export interface ImageOptions {
   optimize?: boolean;
 }
 
-type ImageType = NodeJS.ReadableStream | Buffer | string;
+type ImageType = NodeJS.ReadableStream | Buffer;
 
 /**
  * Simple support for image manipulation.  Built upon @travetto/command, it can
@@ -44,9 +44,18 @@ export class ImageUtil {
   });
 
   /**
+   * Compressor
+   */
+  static jpegCompressor = new CommandService({
+    containerImage: 'shomatan/jpegoptim:1.4.4',
+    localCheck: ['jpegotim', ['-h']]
+  });
+
+
+  /**
    * Resize image using image magick
    */
-  static resize(image: string | NodeJS.ReadableStream, options: ImageOptions): Promise<NodeJS.ReadableStream>;
+  static resize(image: NodeJS.ReadableStream, options: ImageOptions): Promise<NodeJS.ReadableStream>;
   static resize(image: Buffer, options: ImageOptions): Promise<Buffer>;
   static async resize(image: ImageType, options: ImageOptions): Promise<NodeJS.ReadableStream | Buffer> {
     const state = await this.converter.exec(
@@ -62,11 +71,21 @@ export class ImageUtil {
   /**
    * Optimize png usng pngquant
    */
-  static optimizePng(image: string | NodeJS.ReadableStream): Promise<NodeJS.ReadableStream>;
-  static optimizePng(image: Buffer): Promise<Buffer>;
-  static async optimizePng(image: ImageType): Promise<NodeJS.ReadableStream | Buffer> {
-    const state = await this.pngCompressor.exec(
-      'pngquant', '--quality', '40-80', '--speed', '1', '--force', '-');
-    return await ExecUtil.pipe(state, image as Buffer);
+  static optimize(format: 'png' | 'jpeg', image: NodeJS.ReadableStream): Promise<NodeJS.ReadableStream>;
+  static optimize(format: 'png' | 'jpeg', image: Buffer): Promise<Buffer>;
+  static async optimize(format: 'png' | 'jpeg', image: ImageType): Promise<NodeJS.ReadableStream | Buffer> {
+    let stream;
+    switch (format) {
+      case 'png': {
+        stream = await this.pngCompressor.exec(
+          'pngquant', '--quality', '40-80', '--speed', '1', '--force', '-');
+        break;
+      }
+      case 'jpeg': {
+        stream = await this.jpegCompressor.exec('jpegoptim', '-s', '--stdin', '--stdout');
+        break;
+      }
+    }
+    return await ExecUtil.pipe(stream, image as Buffer);
   }
 }
