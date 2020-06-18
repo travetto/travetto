@@ -19,12 +19,9 @@ export class EmailDevPlugin extends BasePlugin {
   }
 
   async action() {
-    process.env.TRV_RESOURCE_ROOTS = `${process.env.TRV_RESOURCE_ROOTS || ''},${__dirname}/lib`;
-
-    const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.init();
-
     const { TemplateUtil } = await import('./lib/util');
+    await TemplateUtil.initApp();
+
     const { DevServerUtil } = await import('./lib/server');
 
     const count = (await TemplateUtil.compileAllToDisk()).length;
