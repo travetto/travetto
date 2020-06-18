@@ -162,9 +162,12 @@ export class TemplateUtil {
    * Initialize for operation
    */
   static async initApp() {
-    process.env.TRV_RESOURCE_ROOTS = `${process.env.TRV_RESOURCE_ROOTS || ''},${FsUtil.resolveUnix(__dirname, '..', '..', 'resources')}`;
-
-    const { PhaseManager } = await import('@travetto/base');
+    process.env.TRV_RESOURCE_ROOTS = [
+      `${process.env.TRV_RESOURCE_ROOTS || ''}`,
+      FsUtil.resolveUnix(__dirname, '..', '..'),
+      __dirname
+    ].join(',');
+    const { PhaseManager, AppManifest } = await import('@travetto/base');
     await PhaseManager.init();
   }
 }
