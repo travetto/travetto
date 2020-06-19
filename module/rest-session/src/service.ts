@@ -8,7 +8,6 @@ import { EnvUtil } from '@travetto/boot';
 
 import { Session } from './types';
 import { SessionConfig } from './config';
-import { CookieEncoder } from './encoder/cookie';
 import { SessionEncoder } from './encoder/encoder';
 
 export const SESSION_CACHE = Symbol.for('@trv:session/cache');
@@ -38,7 +37,7 @@ export class RestSessionService {
   /**
    * Initialize store if none defined
    */
-  postConstruct() {
+  async postConstruct() {
     if (this.cacheSource === undefined) {
       this.cacheSource = new MemoryCacheSource<Session>();
       if (!EnvUtil.isProd()) {

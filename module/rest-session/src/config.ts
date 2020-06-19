@@ -33,4 +33,8 @@ export class SessionConfig {
    * Signature key name
    */
   keyName = 'trv_sid';
+  /**
+   * Location for auth
+   */
+  transport: 'cookie' | 'header' = 'cookie';
 }
