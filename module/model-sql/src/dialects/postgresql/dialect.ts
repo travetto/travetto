@@ -11,7 +11,7 @@ import { PostgreSQLConnection } from './connection';
 /**
  * Postgresql Dialect for the SQL Model Source
  */
-@Injectable({ target: SQLDialect })
+@Injectable()
 export class PostgreSQLDialect extends SQLDialect {
 
   conn: PostgreSQLConnection;

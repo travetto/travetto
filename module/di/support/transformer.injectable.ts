@@ -21,33 +21,20 @@ export class InjectableTransformer {
       return;
     }
 
-    let injectConfig = DecoratorUtil.getPrimaryArgument<ts.ObjectLiteralExpression>(existing);
-
-    let original = undefined;
-
     const callExpr = existing?.expression as ts.CallExpression;
-    if (callExpr) {
-      const args = callExpr.arguments! ?? [];
-      // Handle special case
-      if (args.length && ts.isIdentifier(args[0])) {
-        original = args[0];
-        injectConfig = args[1] as ts.ObjectLiteralExpression;
-      }
-    }
+    const args: ts.Expression[] = [...(callExpr?.arguments ?? [])];
 
-    injectConfig = injectConfig ?? LiteralUtil.fromLiteral({});
-
-    let optional = LiteralUtil.getObjectValue(injectConfig, 'optional');
+    let optional = undefined;
     if (optional === undefined && !!param.questionToken) {
       optional = ts.createTrue();
     }
 
-    return LiteralUtil.fromLiteral({
-      original,
+    args.unshift(LiteralUtil.fromLiteral({
       target: state.getOrImport(state.resolveExternalType(param)),
-      optional,
-      qualifier: LiteralUtil.getObjectValue(injectConfig, 'qualifier')
-    });
+      optional
+    }));
+
+    return args;
   }
 
   /**
@@ -61,25 +48,11 @@ export class InjectableTransformer {
 
     // Add injectable decorator if not there
     const decl = state.findDecorator(node, '@trv:di/Injectable', 'Injectable', INJECTABLE_MOD);
-
-    // Find config
-    let config: ts.ObjectLiteralExpression | undefined = undefined;
-    if (decl && ts.isCallExpression(decl.expression)) { // Combine
-      const callExpr = decl.expression;
-      const args = callExpr.arguments;
-      if (args.length) {
-        const first = args[0];
-        if (ts.isObjectLiteralExpression(first)) {
-          config = first;
-        } else {
-          config = LiteralUtil.fromLiteral({ qualifier: first });
-        }
-      }
-    }
+    const args = decl && ts.isCallExpression(decl.expression) ? decl.expression.arguments : [undefined];
 
     return ts.updateClassDeclaration(node,
       DecoratorUtil.spliceDecorators(node, decl, [
-        state.createDecorator(INJECTABLE_MOD, 'Injectable', config),
+        state.createDecorator(INJECTABLE_MOD, 'Injectable', ...args),
         state.createDecorator(INJECTABLE_MOD, 'InjectArgs', injectArgs)
       ]),
       node.modifiers,
@@ -101,7 +74,7 @@ export class InjectableTransformer {
     return ts.updateProperty(
       node,
       DecoratorUtil.spliceDecorators(node, decl, [
-        state.createDecorator(INJECTABLE_MOD, 'Inject', this.processDeclaration(state, node)!),
+        state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)!),
       ], 0),
       node.modifiers,
       node.name,
@@ -121,45 +94,31 @@ export class InjectableTransformer {
     }
 
     const dec = dm?.dec;
-    let original: any;
 
     // Extract config
-    const injectArgs = node.parameters.map(x => InjectableTransformer.processDeclaration(state, x)!);
-    let injectConfig = DecoratorUtil.getPrimaryArgument<ts.Expression>(dec);
-
-    if (injectConfig && ts.isIdentifier(injectConfig)) {
-      original = injectConfig; // Shift to original
-      injectConfig = undefined; // Config is empty
-    }
-
-    injectConfig = injectConfig ?? LiteralUtil.fromLiteral({});
-
-    if (!ts.isObjectLiteralExpression(injectConfig)) {
-      throw new Error('Unexpected InjectFactory config parameter');
-    }
+    const dependencies = node.parameters.map(x => InjectableTransformer.processDeclaration(state, x)!);
 
     // Read target from config or resolve
-    let target = LiteralUtil.getObjectValue(injectConfig, 'target');
-    if (!target) {  // Infer from typings
-      const ret = state.resolveReturnType(node);
-      if (ret.key === 'external') {
-        target = state.getOrImport(ret);
-      }
+    let target;
+    const ret = state.resolveReturnType(node);
+    if (ret.key === 'external') {
+      target = state.getOrImport(ret);
     }
 
     // Build decl
-    const args = LiteralUtil.extendObjectLiteral({
-      dependencies: injectArgs,
+    const args = [...(dec && ts.isCallExpression(dec.expression) ? dec.expression.arguments : [undefined])];
+
+    args.unshift(LiteralUtil.extendObjectLiteral({
+      dependencies,
       src: (node.parent as ts.ClassDeclaration).name,
-      target,
-      original
-    }, injectConfig);
+      target
+    }));
 
     // Replace decorator
     return ts.updateMethod(
       node,
       DecoratorUtil.spliceDecorators(node, dec, [
-        state.createDecorator(INJECTABLE_MOD, 'InjectableFactory', args)
+        state.createDecorator(INJECTABLE_MOD, 'InjectableFactory', ...args)
       ]),
       node.modifiers,
       node.asteriskToken,

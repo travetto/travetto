@@ -23,6 +23,9 @@ export class TemplateUtil {
 
   static TPL_EXT = /[.]tpl[.]html$/;
 
+  /**
+   * Grab list of all avaliable templates
+   */
   static async findAllTemplates() {
     const { ResourceManager } = await import('@travetto/base');
 

@@ -5,7 +5,7 @@ export type ClassTarget<T> = Class<T> | Function;
 /**
  * State of a Dependency
  */
-export interface Dependency<T = any> {
+interface Core<T = any> {
   /**
    * Actual reference to a Class
    */
@@ -14,24 +14,23 @@ export interface Dependency<T = any> {
    * Qualifier symbol
    */
   qualifier: symbol;
+}
+
+
+/**
+ * State of a Dependency
+ */
+export interface Dependency<T = any> extends Core<T> {
   /**
    * Whether or not the dependency is optional
    */
   optional?: boolean;
-  /**
-   * Default if missing
-   */
-  defaultIfMissing?: ClassTarget<T>;
-  /**
-   * The original qualifier
-   */
-  original?: symbol | object;
 }
 
 /**
  * Injectable configuration
  */
-export interface InjectableConfig<T = any> extends Dependency<T> {
+export interface InjectableConfig<T = any> extends Core<T> {
   /**
    * Reference for the class
    */
@@ -40,6 +39,10 @@ export interface InjectableConfig<T = any> extends Dependency<T> {
    * Factory function for the injectable
    */
   factory?: (...args: any[]) => T;
+  /**
+   * Is this the primary instance
+   */
+  primary: boolean;
   /**
    * List of dependencies as fields or as constructor arguments
    */
@@ -52,25 +55,17 @@ export interface InjectableConfig<T = any> extends Dependency<T> {
 /**
  * Factory configuration
  */
-export interface InjectableFactoryConfig<T> {
-  /**
-   * Reference for target class
-   */
-  target: Class<T>;
+export interface InjectableFactoryConfig<T> extends Core<T> {
   /**
    * Src of the factory method
    */
   src: Class<T>;
   /**
-   * Qualifier for the dependency
+   * Is this the primary instance
    */
-  qualifier?: symbol;
+  primary: boolean;
   /**
    * List of all dependencies as function arguments
    */
   dependencies?: Dependency<any>[];
-  /**
-   * Original symbol
-   */
-  original?: symbol | object;
 }
