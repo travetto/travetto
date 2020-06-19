@@ -14,5 +14,4 @@ if (!fs.existsSync(`${root}/tsconfig.json`)) {
 }
 
 // Initialize the app and clear the cache
-require('../register');
-require('../src/app-cache').AppCache.clear();
+require('./plugin-clean');

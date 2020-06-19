@@ -1,3 +1,2 @@
-require('./init')
-  .libRequire('@travetto/boot/src/app-cache')
-  .AppCache.clear();
+require('./register');
+require('@travetto/boot/src/app-cache').AppCache.clear();
