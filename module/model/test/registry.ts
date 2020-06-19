@@ -4,7 +4,7 @@ import { Injectable } from '@travetto/di';
 import { ModelSource, Query, BulkResponse, ModelCore, ModelQuery, PageableModelQuery } from '../';
 import { BulkOp } from '../src/model/bulk';
 
-@Injectable({ target: ModelSource })
+@Injectable()
 // @ts-expect-error
 export class TestSource implements ModelSource {
   onChange(e: ChangeEvent<Class<any>>) {

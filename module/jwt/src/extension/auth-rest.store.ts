@@ -2,6 +2,7 @@
 import { AuthContext } from '@travetto/auth';
 import { AuthContextEncoder } from '@travetto/auth-rest';
 import { Response, Request } from '@travetto/rest';
+import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 
 import { sign } from '../sign';
 import { verify } from '../verify';
@@ -11,20 +12,27 @@ import { verify } from '../verify';
  */
 export class JWTAuthContextStore extends AuthContextEncoder {
 
-  /**
-   * Singing key
-   */
-  signingKey: string;
+  private accessor: ValueAccessor;
 
-  /**
-   * Location of storage
-   */
-  location: 'cookie' | 'header';
+  constructor(
+    /**
+     * Singing key
+     */
+    private signingKey: string,
 
-  /**
-   * Name of cookie/header key
-   */
-  name: string;
+    /**
+     * Name of cookie/header key
+     */
+    name: string,
+
+    /**
+     * Location of storage
+     */
+    location: 'cookie' | 'header'
+  ) {
+    super();
+    this.accessor = new ValueAccessor(name, location);
+  }
 
   /**
    * Write context
@@ -35,18 +43,14 @@ export class JWTAuthContextStore extends AuthContextEncoder {
     };
     body.principal.permissions = [...ctx.principal.permissions];
     const token = await sign(body, { key: this.signingKey });
-    if (this.location === 'cookie') {
-      res.cookies.set(this.name, token);
-    } else {
-      res.setHeader(this.name, token);
-    }
+    this.accessor.writevalue(res, token);
   }
 
   /**
    * Read JWT from location
    */
   async read(req: Request) {
-    const input = this.location === 'cookie' ? req.cookies.get(this.name) : req.header(this.name) as string;
+    const input = this.accessor.readValue(req);
     const ac = await verify<AuthContext>(input!, { key: this.signingKey });
     return new AuthContext(ac.identity, ac.principal);
   }

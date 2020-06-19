@@ -13,7 +13,7 @@ import { MySQLConnection } from './connection';
 /**
  * MYSQL Dialect for the SQL Model Source
  */
-@Injectable({ target: SQLDialect })
+@Injectable()
 export class MySQLDialect extends SQLDialect {
 
   conn: MySQLConnection;

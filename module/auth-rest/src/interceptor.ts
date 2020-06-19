@@ -3,7 +3,7 @@ import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 
 import { AuthContextService } from './context';
-import { AuthContextEncoder, HeaderAuthContextEncoder } from './encoder';
+import { AuthContextEncoder } from './encoder';
 import { AuthService } from './auth';
 
 /**
@@ -27,8 +27,19 @@ export class AuthInterceptor extends RestInterceptor {
   @Inject()
   service: AuthService;
 
-  @Inject({ defaultIfMissing: HeaderAuthContextEncoder })
-  contextStore: AuthContextEncoder;
+  @Inject()
+  contextStore?: AuthContextEncoder;
+
+
+  /**
+   * Determines the current route is applicable for the interceptor
+   * @param route The route to check
+   * @param controller The controller the route belongs to
+   */
+  public applies() {
+    return !!this.contextStore;
+  }
+
 
   async configure(req: Request, res: Response) {
     req.logout = async function () { delete this.auth.principal; };
@@ -43,7 +54,7 @@ export class AuthInterceptor extends RestInterceptor {
 
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
     try {
-      const ctx = (await this.contextStore.read(req))
+      const ctx = (await this.contextStore!.read(req))
         // @ts-ignore
         || new AuthContext();
       this.context.set(ctx, req);
@@ -51,7 +62,7 @@ export class AuthInterceptor extends RestInterceptor {
       await this.configure(req, res);
       return await next();
     } finally {
-      await this.contextStore.write(req.auth, req, res);
+      await this.contextStore!.write(req.auth, req, res);
       this.context.clear();
     }
   }

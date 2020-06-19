@@ -63,7 +63,7 @@ The encoder will `encode` the session into the response, as a string.  The `deco
 
 **Code: Header Encoder**
 ```typescript
-@Injectable({ target: HeaderEncoder })
+@Injectable()
 export class HeaderEncoder extends SessionEncoder {
   async encode(req: Request, res: Response, session: Session<any> | null): Promise<void> {
     if (session) {
