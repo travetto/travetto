@@ -276,8 +276,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   /**
    * Register a class
-   *
-   * Last one to register wins before finalization
    */
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
     const config = this.getOrCreatePending(pconfig.class!);
@@ -406,7 +404,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         this.targetToClass.set(parentId, new Map());
       }
 
-      // First one wins here, type will be default
       if (config.primary) {
         this.targetToClass.get(parentId)!.set(PRIMARY, classId);
       }

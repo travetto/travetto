@@ -16,7 +16,6 @@ export class CompilerCompilePlugin extends BasePlugin {
     return cmd
       .option('-c, --clean', 'Indicates if the cache dir should be cleaned')
       .option('-o, --output <output>', 'Output directory')
-      .option('-r, --runtime-dir [runtimeDir]', 'Expected path during runtime')
       .option('-q, --quiet', 'Quiet operation');
   }
 
@@ -35,10 +34,6 @@ export class CompilerCompilePlugin extends BasePlugin {
 
     try {
       await CompileCliUtil.compile(path);
-
-      if (this._cmd.runtimeDir) {
-        await CompileCliUtil.rewriteRuntimeDir(this._cmd.runtimeDir);
-      }
 
       if (!this._cmd.quiet) {
         console!.log(color`${{ success: 'Successfully' }} wrote to ${{ path }}`);

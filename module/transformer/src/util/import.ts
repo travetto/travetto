@@ -68,7 +68,7 @@ export class ImportUtil {
         const imptStmt = ts.createImportDeclaration(
           undefined, undefined,
           ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
-          ts.createLiteral(require.resolve(path))
+          ts.createLiteral(path.replace(/^.*node_modules\//, '').replace(FsUtil.cwd, '@app'))
         );
         return imptStmt;
       });
