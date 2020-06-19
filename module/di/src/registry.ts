@@ -55,7 +55,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         if (qualifiers.has(PRIMARY)) {
           qualifier = PRIMARY;
         } else {
-          const resolved = [...qualifiers.keys()].filter(x => getName(x).startsWith('@trv/di:'));
+          const resolved = [...qualifiers.keys()].filter(x => getName(x).startsWith('@trv:di/'));
           if (resolved.length === 1) {
             qualifier = resolved[0];
           } else if (resolved.length > 1) {
@@ -281,7 +281,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const config = this.getOrCreatePending(pconfig.class!);
 
     config.class = cls;
-    config.qualifier = pconfig.qualifier ?? config.qualifier ?? Symbol.for(`@trv/di:${cls.ᚕid}`);
+    config.qualifier = pconfig.qualifier ?? config.qualifier ?? Symbol.for(`@trv:di/${cls.ᚕid}`);
 
     if (pconfig.primary !== undefined) {
       config.primary = pconfig.primary;
@@ -309,7 +309,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     finalConfig.factory = config.fn;
     finalConfig.target = config.target;
-    finalConfig.qualifier = config.qualifier ?? Symbol.for(`@trv/di:${config.id}`);
+    finalConfig.qualifier = config.qualifier ?? Symbol.for(`@trv:di/${config.id}`);
     if (config.primary !== undefined) {
       finalConfig.primary = config.primary;
     }
