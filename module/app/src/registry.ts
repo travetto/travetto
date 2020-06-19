@@ -1,7 +1,7 @@
 import * as util from 'util';
 
-import { EnvUtil } from '@travetto/boot';
-import { AppManifest } from '@travetto/base';
+import { EnvUtil, FsUtil } from '@travetto/boot';
+import { AppManifest, ShutdownManager } from '@travetto/base';
 import { ConfigManager } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 
@@ -29,7 +29,7 @@ export class $ApplicationRegistry {
   logInit(config: ApplicationConfig) {
 
     // Log startup
-    console.log('Running application', config.name, config.filename);
+    console.log('Running application', config.name, config.filename.replace(/^.*node_modules\//, '').replace(FsUtil.cwd, '.'));
     console.log(`Configured`, util.inspect({
       app: AppManifest.toJSON(),
       config: EnvUtil.isProd() ? ConfigManager.getSecure() : ConfigManager.get()
@@ -70,6 +70,8 @@ export class $ApplicationRegistry {
     if (AppUtil.isHandle(target)) { // If response is a listener
       await AppUtil.processHandle(target); // Wait for app to finish
     }
+    // Trigger shutdown
+    ShutdownManager.execute(0);
   }
 
   /**

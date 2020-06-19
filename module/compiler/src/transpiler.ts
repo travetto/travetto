@@ -17,6 +17,7 @@ const SIMPLE_COMPILATION = /support\/(transformer|phase|watch|lib)[.].+/;
  */
 export class Transpiler {
   private transformerManager: TransformerManager;
+  private host: ts.CompilerHost;
 
   private contents = new Map<string, string>();
   private sources = new Map<string, ts.SourceFile>();
@@ -115,7 +116,7 @@ export class Transpiler {
       this.program = ts.createProgram({
         rootNames: [...this.rootNames],
         options: TranspileUtil.compilerOptions,
-        host: this.getHost(),
+        host: this.host,
         oldProgram: this.program
       });
 
@@ -147,13 +148,15 @@ export class Transpiler {
       this.contents.set(fileName, cached);
     }
 
-    return this.contents.get(fileName)!;
+    return this.contents.get(fileName)!
+      .replace(/(require.*)(@app)/g, (all, pre) => `${pre}${FsUtil.cwd}`);
   }
 
   /**
    * Initialize
    */
   init() {
+    this.host = this.getHost();
     this.transformerManager.init();
   }
 
