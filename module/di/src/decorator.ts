@@ -4,14 +4,19 @@ import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry } from './registry';
 
 function extractSymbolOrConfig<T extends { qualifier?: symbol }>(args: any[]) {
-  const out = {} as T;
+  let out = {} as T;
   if (args) {
-    let extra = args[0];
-    if (typeof extra === 'symbol') {
-      out.qualifier = extra;
-      extra = args[1];
+    if (Array.isArray(args)) {
+      for (const arg of args) {
+        if (typeof arg === 'symbol') {
+          out.qualifier = arg;
+        } else if (arg) {
+          Object.assign(out, arg);
+        }
+      }
+    } else {
+      out = args as T;
     }
-    Object.assign(out, extra);
   }
   return out;
 }
@@ -34,11 +39,12 @@ export function Injectable(...args: any[]): ClassDecorator {
   };
 }
 
-export type InjectConfig = { qualifier?: symbol, optional?: boolean, defaultIfMissing?: Class };
+export type InjectConfig = { qualifier?: symbol, optional?: boolean };
 
-export function InjectArgs(configs?: InjectConfig[]): ClassDecorator {
+export function InjectArgs(configs?: InjectConfig[][]): ClassDecorator {
   return (target: any) => {
-    DependencyRegistry.registerConstructor(target, configs as Dependency[]);
+    DependencyRegistry.registerConstructor(target,
+      configs?.map(x => extractSymbolOrConfig(x)));
   };
 }
 
@@ -76,6 +82,11 @@ export function InjectableFactory(...args: any[]): MethodDecorator {
 
   return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
     const config: InjectableFactoryConfig<any> = extractSymbolOrConfig(args);
-    DependencyRegistry.registerFactory({ ...config, fn: descriptor.value, id: `${target.ᚕid}#${property.toString()}` });
+    DependencyRegistry.registerFactory({
+      ...config,
+      dependencies: config.dependencies?.map(x => extractSymbolOrConfig(x as any)),
+      fn: descriptor.value,
+      id: `${target.ᚕid}#${property.toString()}`
+    });
   };
 }

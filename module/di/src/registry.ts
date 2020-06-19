@@ -1,11 +1,8 @@
 import { MetadataRegistry, Class, RootRegistry, ChangeEvent } from '@travetto/registry';
-import { Util } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
-
-export const DEFAULT_INSTANCE = Symbol.for('@trv:di/default');
 
 export interface ManagedExtra {
   postConstruct?: () => any;
@@ -18,18 +15,7 @@ function getName(symbol: symbol) {
   return symbol.toString().split(/[()]/g)[1];
 }
 
-/** Merge config at runtime as needed */
-function mergeWithOriginal<T extends { original?: symbol | object, qualifier?: symbol }>(o: T) {
-  if (o.original) {
-    if (typeof o.original === 'symbol') {
-      o.qualifier = o.original;
-    } else if (Util.isPlainObject(o.original)) {
-      Util.deepAssign(o, o.original);
-    }
-    o.original = undefined;
-  }
-  return o;
-}
+const PRIMARY = Symbol.for('@trv:di/primary');
 
 /**
  * Dependency registry
@@ -51,24 +37,48 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }
 
   /**
-   * Convert target to actual injectable config
+   * Resolve the target given a qualifier
+   * @param target
+   * @param qualifier
    */
-  protected resolveTargetToClass<T>(target: ClassTarget<T>, qualifier: symbol): InjectableConfig<any> {
+  protected resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol) {
     const targetId = target.ᚕid;
 
-    const qualifiers = this.targetToClass.get(targetId);
+    const qualifiers = this.targetToClass.get(targetId) ?? new Map();
 
-    if (!qualifiers || !qualifiers.has(qualifier)) {
-      throw new InjectionError(`Dependency not found: ${targetId}[${getName(qualifier)}]`, 'notfound');
+    let cls: string | undefined;
+
+    if (qualifier && qualifiers.has(qualifier)) {
+      cls = qualifiers.get(qualifier);
+    } else {
+      if (!qualifier) {
+        if (qualifiers.has(PRIMARY)) {
+          qualifier = PRIMARY;
+        } else {
+          const resolved = [...qualifiers.keys()].filter(x => getName(x).startsWith('@trv/di:'));
+          if (resolved.length === 1) {
+            qualifier = resolved[0];
+          } else if (resolved.length > 1) {
+            throw new InjectionError(`Dependency has multiple candiates: ${targetId}[${resolved.map(getName)}]`, 'notfound');
+          }
+        }
+      }
+
+      if (!qualifier) {
+        throw new InjectionError(`Dependency not found: ${targetId}`, 'notfound');
+      } else if (!qualifiers.has(qualifier)) {
+        throw new InjectionError(`Dependency not found: ${targetId}[${getName(qualifier)}]`, 'notfound');
+      } else {
+        cls = qualifiers.get(qualifier!)!;
+      }
     }
 
-    const clz = qualifiers.get(qualifier)!;
-    return this.get(clz);
-  }
-
-  protected resolveClassId<T>(target: ClassTarget<T>, qualifier: symbol): string {
-    const managed = this.resolveTargetToClass(target, qualifier);
-    return (managed.factory ? managed.target : managed.class).ᚕid;
+    const config = this.get(cls!);
+    return {
+      qualifier,
+      config,
+      id: (config.factory ? config.target : config.class).ᚕid
+    };
   }
 
   /**
@@ -79,24 +89,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       return [];
     }
 
-    for (const dep of deps) {
-      mergeWithOriginal(dep);
-    }
-
     const promises = deps
       .map(async x => {
         try {
           return await this.getInstance(x.target, x.qualifier);
         } catch (e) {
-
-          if (x.defaultIfMissing && e instanceof InjectionError && e.category === 'notfound') {
-            try {
-              return await this.getInstance(x.defaultIfMissing);
-            } catch (e2) {
-              e = e2;
-            }
-          }
-
           if (x.optional && e instanceof InjectionError && e.category === 'notfound') {
 
             return undefined;
@@ -126,8 +123,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Actually construct an instance while resolving the dependencies
    */
-  protected async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
-    const managed = this.resolveTargetToClass(target, qualifier);
+  protected async construct<T>(target: ClassTarget<T & ManagedExtra>, qualifier: symbol): Promise<T> {
+    const managed = this.resolveTarget(target, qualifier).config;
 
     // Only fetch constructor values
     const consValues = await this.fetchDependencies(managed, managed.dependencies.cons);
@@ -165,8 +162,8 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Create the instance
    */
-  protected async createInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE) {
-    const classId = this.resolveClassId(target, qualifier);
+  protected async createInstance<T>(target: ClassTarget<T>, qualifier: symbol) {
+    const classId = this.resolveTarget(target, qualifier).id;
 
     if (!this.instances.has(classId)) {
       this.instances.set(classId, new Map());
@@ -226,7 +223,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     return {
-      qualifier: DEFAULT_INSTANCE,
       class: cls,
       target: cls,
       dependencies: {
@@ -240,10 +236,10 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Get an instance by type and qualifier
    */
-  async getInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE): Promise<T> {
+  async getInstance<T>(target: ClassTarget<T>, qual?: symbol): Promise<T> {
     this.verifyInitialized();
 
-    const classId = this.resolveClassId(target, qualifier);
+    const { id: classId, qualifier } = this.resolveTarget(target, qual);
 
     if (!this.instances.has(classId) || !this.instances.get(classId)!.has(qualifier)) {
       await this.createInstance(target, qualifier); // Wait for proxy
@@ -267,11 +263,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   registerConstructor<T>(cls: Class<T>, dependencies?: Dependency<any>[]) {
     const conf = this.getOrCreatePending(cls);
     conf.dependencies!.cons = dependencies;
-    if (dependencies) {
-      for (const dependency of dependencies) {
-        dependency.qualifier = dependency.qualifier ?? DEFAULT_INSTANCE;
-      }
-    }
   }
 
   /**
@@ -281,24 +272,24 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const conf = this.getOrCreatePending(cls);
 
     conf.dependencies!.fields[field] = dependency;
-    dependency.qualifier = dependency.qualifier ?? DEFAULT_INSTANCE;
   }
 
   /**
    * Register a class
    *
-   * Last one to register wins
+   * Last one to register wins before finalization
    */
   registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
     const config = this.getOrCreatePending(pconfig.class!);
 
     config.class = cls;
+    config.qualifier = pconfig.qualifier ?? config.qualifier ?? Symbol.for(`@trv/di:${cls.ᚕid}`);
 
-    if (pconfig.factory) {
-      config.factory = pconfig.factory;
+    if (pconfig.primary !== undefined) {
+      config.primary = pconfig.primary;
     }
-    if (pconfig.qualifier) {
-      config.qualifier = pconfig.qualifier;
+    if (pconfig.factory) {
+      config.factory = pconfig.factory ?? config.factory;
     }
     if (pconfig.target) {
       config.target = pconfig.target;
@@ -318,13 +309,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   registerFactory(config: InjectableFactoryConfig<any> & { fn: (...args: any[]) => any, id: string }) {
     const finalConfig: Partial<InjectableConfig<any>> = {};
 
-    mergeWithOriginal(config);
-
     finalConfig.factory = config.fn;
     finalConfig.target = config.target;
-
-    if (config.qualifier) {
-      finalConfig.qualifier = config.qualifier;
+    finalConfig.qualifier = config.qualifier ?? Symbol.for(`@trv/di:${config.id}`);
+    if (config.primary !== undefined) {
+      finalConfig.primary = config.primary;
     }
 
     finalConfig.dependencies = { fields: {} };
@@ -412,19 +401,22 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // If targeting self (default @Injectable behavior)
     if ((classId === targetId || config.factory) && (parentConfig || parentClass.ᚕabstract)) {
       const parentId = parentClass.ᚕid;
-      const qualifier = config.qualifier === DEFAULT_INSTANCE ? Symbol.for(`@trv:di/Extends-${parentId}-${classId}`) : config.qualifier;
 
       if (!this.targetToClass.has(parentId)) {
         this.targetToClass.set(parentId, new Map());
       }
 
-      // First type will be default
-      if (!this.targetToClass.get(parentId)!.has(DEFAULT_INSTANCE)) {
-        this.targetToClass.get(parentId)!.set(DEFAULT_INSTANCE, classId);
+      // First one wins here, type will be default
+      if (config.primary) {
+        this.targetToClass.get(parentId)!.set(PRIMARY, classId);
       }
 
-      this.targetToClass.get(parentId)!.set(qualifier, classId);
-      this.classToTarget.get(classId)!.set(qualifier, parentId);
+      this.targetToClass.get(parentId)!.set(config.qualifier, classId);
+      this.classToTarget.get(classId)!.set(config.qualifier, parentId);
+    }
+
+    if (config.primary) {
+      this.targetToClass.get(classId)!.set(PRIMARY, classId);
     }
 
     return config;

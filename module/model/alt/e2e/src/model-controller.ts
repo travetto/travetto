@@ -15,7 +15,7 @@ import { QueryVerifierService } from '../../../src/service/verify';
 import { BulkOp } from '../../../src/model/bulk';
 import { ValidStringFields } from '../../../src/service/source';
 
-@Injectable({ target: ModelSource })
+@Injectable()
 // @ts-expect-error
 export class TestSource implements ModelSource {
   onChange(e: ChangeEvent<Class<any>>) {

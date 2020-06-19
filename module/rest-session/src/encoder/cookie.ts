@@ -10,7 +10,7 @@ import { SessionConfig } from '../config';
  * Primarily encode the user identifier, but relies on cookie behavior for
  * encoding the expiry time.
  */
-@Injectable({ target: CookieEncoder })
+@Injectable()
 export class CookieEncoder extends SessionEncoder {
 
   @Inject()

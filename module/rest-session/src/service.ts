@@ -26,7 +26,7 @@ export class RestSessionService {
   /**
    * Encoder for how to send/receive session from the user
    */
-  @Inject({ defaultIfMissing: CookieEncoder })
+  @Inject()
   encoder: SessionEncoder;
 
   /**

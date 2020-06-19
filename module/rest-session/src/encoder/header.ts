@@ -10,7 +10,7 @@ import { SessionConfig } from '../config';
  * coherency with the user.  Relies on a session identifier as the storage
  * mechanism.
  */
-@Injectable({ target: HeaderEncoder })
+@Injectable()
 export class HeaderEncoder extends SessionEncoder {
 
   @Inject()

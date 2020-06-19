@@ -1,5 +1,5 @@
 // @file-if @travetto/auth-rest
-import { Injectable, DEFAULT_INSTANCE } from '@travetto/di';
+import { Injectable } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { AuthContext } from '@travetto/auth';
 import { AuthContextEncoder } from '@travetto/auth-rest';
@@ -8,7 +8,7 @@ import { AuthContextEncoder } from '@travetto/auth-rest';
  * Integration with the auth module,  using the session as a backing
  * store for the auth context.
  */
-@Injectable({ target: AuthContextEncoder, qualifier: DEFAULT_INSTANCE })
+@Injectable()
 export class SessionAuthContextEncoder extends AuthContextEncoder {
 
   key = '__auth_context__'; // Must be serializable, so it cannot be a symbol

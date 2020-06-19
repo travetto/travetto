@@ -9,19 +9,17 @@ import type { ClassTarget } from '../src/types';
  */
 export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
 
-  const DEFAULT_INSTANCE = Symbol.for('@trv:di/default');
-
   /**
    * Extending the $DependencyRegistry class to add some functionality for watching
    */
   const Cls = class extends $DependencyRegistry {
-    private proxies = new Map<string, Map<symbol, RetargettingProxy<any>>>();
+    private proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<any>>>();
 
     /**
      * Proxy the created instance
      */
-    protected proxyInstance<T>(target: ClassTarget<T>, qualifier: symbol, instance: T): T {
-      const classId = this.resolveClassId(target, qualifier);
+    protected proxyInstance<T>(target: ClassTarget<T>, qual: symbol | undefined, instance: T): T {
+      const { qualifier, id: classId } = this.resolveTarget(target, qual);
       let proxy: RetargettingProxy<T>;
 
       if (!this.proxies.has(classId)) {
@@ -44,9 +42,9 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
     /**
      * Create instance and wrap in a proxy
      */
-    protected async createInstance<T>(target: ClassTarget<T>, qualifier: symbol = DEFAULT_INSTANCE) {
+    protected async createInstance<T>(target: ClassTarget<T>, qualifier: symbol) {
       const instance = await super.createInstance(target, qualifier);
-      const classId = this.resolveClassId(target, qualifier);
+      const classId = this.resolveTarget(target, qualifier).id;
       // Reset as proxy instance
       const proxied = this.proxyInstance(target, qualifier, instance);
       this.instances.get(classId)!.set(qualifier, proxied);
