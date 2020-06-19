@@ -22,12 +22,12 @@ export class CliServicePlugin extends BasePlugin {
     const all = ServiceUtil.findAll()
       .filter(x => services && services.length && !services.includes('all') ? services.includes(x.name) : true);
 
-    if (!mode) {
-      await this.showHelp(undefined, color`\n${{ title: '   Available Services' }}\n${'-'.repeat(20)}\n${
-        all.map(x => color` * ${{ identifier: x.name }}@${{ type: x.version }}`).join('\n')}\n`);
-    }
-
     if (all.length) {
+      if (!mode) {
+        await this.showHelp(undefined, color`\n${{ title: '   Available Services' }}\n${'-'.repeat(20)}\n${
+          all.map(x => color` * ${{ identifier: x.name }}@${{ type: x.version }}`).join('\n')}\n`);
+      }
+
       const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;
       const maxVersion = Math.max(...all.map(x => x.version.length), 'Version'.length) + 3;
 
@@ -67,7 +67,7 @@ export class CliServicePlugin extends BasePlugin {
       process.stdout.write('\x1B[?25h\n');
 
     } else {
-      console.log(`\nNo services found\n`);
+      this.showHelp('', `\nNo services found\n`);
     }
   }
 }
