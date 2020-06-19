@@ -64,13 +64,8 @@ export class MailService {
       });
     }
 
-    if (msg.html) {
-      Object.assign(msg, MailUtil.extractImageAttachments(msg.html));
-    }
-
     if (msg.text) {
-      msg.alternatives = msg.alternatives || [];
-      msg.alternatives.push({
+      (msg.alternatives = msg.alternatives || []).push({
         content: msg.text, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `text/plain; charset=utf-8`
       });
       delete msg.text;
@@ -78,13 +73,14 @@ export class MailService {
 
     // Force html to the end per the mime spec
     if (msg.html) {
-      msg.alternatives = msg.alternatives || [];
-      msg.alternatives.push({
-        content: msg.html, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `text/html; charset=utf-8`
+      const { html, attachments } = await MailUtil.extractImageAttachments(msg.html);
+      (msg.attachments = msg.attachments || []).push(...attachments);
+      (msg.alternatives = msg.alternatives || []).push({
+        // NOTE: The leading space on the content type is to force node mailer to not do anything fancy with
+        content: html, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: ` text/html; charset=utf-8`
       });
       delete msg.html;
     }
-
 
     return this.transport.send(msg);
   }

@@ -18,6 +18,7 @@ export class MailUtil {
       attachments!.push({
         cid,
         content: Buffer.from(content, 'base64'),
+        contentDisposition: 'inline',
         contentType: type
       });
       return `cid:${cid}`;
