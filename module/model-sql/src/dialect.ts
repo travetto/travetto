@@ -451,8 +451,8 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$regex': {
-              const re = (v as RegExp);
-              const src = Util.toRegex(re).source;
+              const re = Util.toRegex(v);
+              const src = re.source;
               const ins = re.flags && re.flags.includes('i');
 
               if (/^[\^]\S+[.][*][$]?$/.test(src)) {
