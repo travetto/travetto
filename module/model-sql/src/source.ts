@@ -39,8 +39,10 @@ export class SQLModelSource extends ModelSource {
   }
 
   async postConstruct() {
-    await this.initClient();
-    await this.initDatabase();
+    if (this.dialect) {
+      await this.initClient();
+      await this.initDatabase();
+    }
   }
 
   /**

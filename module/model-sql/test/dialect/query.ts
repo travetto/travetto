@@ -10,6 +10,7 @@ import { VisitStack } from '../../src/internal/util';
 import { SQLDialect } from '../../src/dialect';
 import { TestUtil } from '../lib/util';
 import { DialectSuite as Suite } from '../decorator';
+import { SQLModelSource } from '../../src/source';
 
 @Schema()
 class User {
@@ -61,7 +62,7 @@ export abstract class QueryTest {
   }
 
   get dialect() {
-    return DependencyRegistry.getInstance(SQLDialect);
+    return this.service.then(s => (s['source'] as SQLModelSource)['dialect']);
   }
 
   @Test()
@@ -78,7 +79,7 @@ export abstract class QueryTest {
       ]
     };
 
-    const dct = await DependencyRegistry.getInstance(SQLDialect);
+    const dct = await this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
       const field = stack[stack.length - 1] as FieldConfig;
       const parent = stack[stack.length - 2] as FieldConfig;
@@ -91,7 +92,7 @@ export abstract class QueryTest {
 
   @Test()
   async testRegEx() {
-    const dct = await DependencyRegistry.getInstance(SQLDialect);
+    const dct = await this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
       const field = stack[stack.length - 1] as FieldConfig;
       return `${field.owner.name}.${field.name}`;

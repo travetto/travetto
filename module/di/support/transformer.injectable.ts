@@ -58,7 +58,7 @@ export class InjectableTransformer {
       node.modifiers,
       node.name,
       node.typeParameters,
-      ts.createNodeArray(node.heritageClauses),
+      node.heritageClauses,
       node.members
     );
   }
