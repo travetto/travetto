@@ -51,15 +51,16 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     if (qualifier && qualifiers.has(qualifier)) {
       cls = qualifiers.get(qualifier);
     } else {
+      const resolved = [...qualifiers.keys()];
       if (!qualifier) {
         if (qualifiers.has(PRIMARY)) {
           qualifier = PRIMARY;
         } else {
-          const resolved = [...qualifiers.keys()].filter(x => getName(x).startsWith('@trv:di/'));
-          if (resolved.length === 1) {
-            qualifier = resolved[0];
-          } else if (resolved.length > 1) {
-            throw new InjectionError(`Dependency has multiple candiates: ${targetId}[${resolved.map(getName)}]`, 'notfound');
+          const filtered = resolved.filter(x => getName(x).startsWith('@trv:di/'));
+          if (filtered.length === 1) {
+            qualifier = filtered[0];
+          } else if (filtered.length > 1) {
+            throw new InjectionError(`Dependency has multiple candiates: ${targetId}[${filtered.map(getName)}]`, 'notfound');
           }
         }
       }

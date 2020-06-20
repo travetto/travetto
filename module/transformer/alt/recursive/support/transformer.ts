@@ -1,3 +1,4 @@
+import * as util from 'util';
 import * as ts from 'typescript';
 
 import { TransformerState, OnMethod } from '../../..';
@@ -8,16 +9,9 @@ export class MakeUpper {
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration) {
     const resolved = state.resolveReturnType(node);
 
-    const msg = JSON.stringify(resolved, (k, v) => {
-      if (v) {
-        if (v.target) {
-          v.target = v.target.name;
-        }
-        return v;
-      }
-    }, 2).replace(/["]/g, '');
+    delete resolved.original;
 
-    console.log(msg);
+    const msg = util.inspect(resolved);
 
     return ts.updateMethod(
       node,
@@ -29,9 +23,8 @@ export class MakeUpper {
       node.typeParameters,
       node.parameters,
       node.type,
-      ts.updateBlock(node.body!, ts.createNodeArray([
+      ts.createBlock(ts.createNodeArray([
         ts.createExpressionStatement(ts.createLiteral(msg)),
-        ...node.body?.statements ?? []
       ]))
     );
   }

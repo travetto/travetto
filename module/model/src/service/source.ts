@@ -56,6 +56,7 @@ export interface IModelSource {
  * Duplicate as the abstract class is not directly useful due to weirdness
  */
 export abstract class ModelSource implements IModelSource {
+
   onChange?<T extends ModelCore>(e: ChangeEvent<Class<T>>): void;
   onSchemaChange?(e: SchemaChangeEvent): void;
 

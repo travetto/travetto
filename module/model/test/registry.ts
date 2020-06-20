@@ -6,7 +6,7 @@ import { BulkOp } from '../src/model/bulk';
 
 @Injectable()
 // @ts-expect-error
-export class TestSource implements ModelSource {
+export class TestSource extends ModelSource {
   onChange(e: ChangeEvent<Class<any>>) {
     console.log('Changed model', e);
   }
