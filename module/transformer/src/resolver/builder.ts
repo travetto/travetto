@@ -56,6 +56,7 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
     if ('target' in resolvedType && resolvedType['target']) {
       resolvedType = resolvedType['target'] as ts.Type;
     }
+    console.log('Resolving here');
 
     if (!resolvedType.isClass()) { // Real type
       const source = DeclarationUtil.getPrimaryDeclarationNode(resolvedType).getSourceFile();

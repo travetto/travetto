@@ -5,7 +5,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
-import { HeaderEncoder } from '../src/encoder/header';
+import { RequetSessionEncoder } from '../src/encoder/request';
 import { Session } from '../src/types';
 import { SessionConfig } from '../src/config';
 // import { CookieEncoder } from '../src/encoder/cookie';
@@ -20,8 +20,9 @@ export class EncoderTest {
 
   @Test()
   async testSessionHeader() {
-    const instance = await DependencyRegistry.getInstance(HeaderEncoder);
+    const instance = await DependencyRegistry.getInstance(RequetSessionEncoder);
     const config = await DependencyRegistry.getInstance(SessionConfig);
+    config.transport = 'header';
 
     const headers: Record<string, any> = {};
 
@@ -41,8 +42,9 @@ export class EncoderTest {
 
   @Test()
   async testSessionHeaderMissing() {
-    const instance = await DependencyRegistry.getInstance(HeaderEncoder);
+    const instance = await DependencyRegistry.getInstance(RequetSessionEncoder);
     const config = await DependencyRegistry.getInstance(SessionConfig);
+    config.transport = 'header';
 
     const headers: Record<string, any> = {};
 

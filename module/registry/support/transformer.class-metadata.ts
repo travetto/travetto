@@ -38,8 +38,10 @@ export class RegisterTransformer {
 
     const conf = { hash };
 
-    state[methods] = state[methods] || {};
-    state[methods]![node.name.getText()] = conf;
+    if (ts.isIdentifier(node.name)) {
+      state[methods] = state[methods] || {};
+      state[methods]![node.name.escapedText.toString()] = conf;
+    }
     return node;
   }
 

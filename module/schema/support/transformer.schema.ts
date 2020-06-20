@@ -59,11 +59,11 @@ export class SchemaTransformer {
 
     return ts.updateClassDeclaration(
       node,
-      ts.createNodeArray(decls),
+      decls,
       node.modifiers,
       node.name,
       node.typeParameters,
-      ts.createNodeArray(node.heritageClauses),
+      node.heritageClauses,
       node.members
     );
   }
