@@ -117,7 +117,7 @@ export class HttpRequest {
    * Produces the necessary data for the request to be executed
    */
   static buildRequestContext<T>(inOpts: HttpRawExecArgs & { binary?: boolean, responseHandler?: HttpResponseHandler<T> }): HttpRequestContext {
-    const { url: requestUrl, payload: inPayload, responseHandler, ...rest } = inOpts;
+    const { url: requestUrl, payload: inPayload, responseHandler, insecure, ...rest } = inOpts;
     const { hostname: host, port, pathname: path, username, password, searchParams, protocol } = new url.URL(requestUrl) as Required<url.URL>;
 
     const opts: URLContext = {
@@ -126,6 +126,10 @@ export class HttpRequest {
       auth: (username && password) ? `${username}:${password}` : undefined,
       path,
       protocol,
+      ...(insecure ? {
+        rejectUnauthorized: false,
+        requestCert: true
+      } : {}),
       method: 'GET',
       ...rest,
       headers: rest.headers ?? {}

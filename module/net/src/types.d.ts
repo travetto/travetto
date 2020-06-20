@@ -14,7 +14,10 @@ export interface HttpClient {
 /**
  * HTTP Exec arguments
  */
-export type HttpExecArgs = { [k in keyof http.RequestOptions]?: NonNullable<http.RequestOptions[k]> } & { url: string };
+export type HttpExecArgs = { [k in keyof http.RequestOptions]?: NonNullable<http.RequestOptions[k]> } & {
+  url: string;
+  insecure?: boolean;
+};
 export type HttpRawExecArgs = HttpExecArgs & { payload?: any };
 
 /**
