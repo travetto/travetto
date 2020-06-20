@@ -148,8 +148,7 @@ export class Transpiler {
       this.contents.set(fileName, cached);
     }
 
-    return this.contents.get(fileName)!
-      .replace(new RegExp(`(require.*)(${'@'}${'app'})`, 'mg'), (all, pre) => `${pre}${FsUtil.cwd}`);
+    return this.contents.get(fileName)!;
   }
 
   /**
