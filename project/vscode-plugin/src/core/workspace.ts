@@ -92,6 +92,8 @@ export class Workspace {
       skipFiles: [
         '<node_internals>/**',
         '**/@travetto/context/**/*',
+        '**/@travetto/watch/**/*',
+        '**/tslib/**/*',
         '**/@travetto/boot/**/*'
       ],
       console: 'internalConsole',

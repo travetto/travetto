@@ -10,7 +10,10 @@ import { RestSessionService } from './service';
 @Injectable()
 export class SessionInterceptor extends RestInterceptor {
 
-  after = [CookiesInterceptor];
+  after = [
+    CookiesInterceptor,
+    require('@travetto/context').AsyncContextInterceptor, // @line-if @travetto/context
+  ];
 
   @Inject()
   service: RestSessionService;

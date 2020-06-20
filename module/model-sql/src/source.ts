@@ -172,9 +172,9 @@ export class SQLModelSource extends ModelSource {
 
     // Handle ADD/REMOVE
     if (e.prev && !e.curr) { // Removing
-      this.dropTables(e.prev);
+      await this.dropTables(e.prev);
     } else if (e.curr && !e.prev) { // Adding
-      this.createTables(e.curr!);
+      await this.createTables(e.curr!);
     }
   }
 
