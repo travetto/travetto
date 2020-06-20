@@ -75,10 +75,10 @@ export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
  *
  * @augments `@trv:di/InjectableFactory`
  */
-export function InjectableFactory(symbol: symbol, config?: InjectableFactoryConfig<any>): MethodDecorator;
-export function InjectableFactory(config: InjectableFactoryConfig<any>): MethodDecorator;
+export function InjectableFactory(symbol: symbol, config?: Partial<InjectableFactoryConfig<any>>): MethodDecorator;
+export function InjectableFactory(config: Partial<InjectableFactoryConfig<any>>): MethodDecorator;
 export function InjectableFactory(): MethodDecorator;
-export function InjectableFactory(...args: any[]): MethodDecorator {
+export function InjectableFactory(...args: (Partial<InjectableFactoryConfig<any>> | symbol | undefined)[]): MethodDecorator {
 
   return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
     const config: InjectableFactoryConfig<any> = extractSymbolOrConfig(args);

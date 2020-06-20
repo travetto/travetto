@@ -46,6 +46,19 @@ class CustomFactory {
   }
 }
 
+abstract class PrimaryWithFactory { }
+@Injectable()
+class SubPrimaryWithFactoryA extends PrimaryWithFactory { }
+
+class PrimaryFactory {
+  @InjectableFactory({ primary: true })
+  static getPrimaryFactory(): PrimaryWithFactory {
+    return new class extends PrimaryWithFactory {
+
+    }();
+  }
+}
+
 
 @Suite('complex-di')
 class ComplexDiTest {
@@ -78,5 +91,11 @@ class ComplexDiTest {
   async commonWithCustomFactory() {
     await RootRegistry.init();
     assert(await DependencyRegistry.getInstance(CommonWithFactory) instanceof CommonWithFactory);
+  }
+
+  @Test()
+  async primaryWithFactory() {
+    await RootRegistry.init();
+    assert(!(await DependencyRegistry.getInstance(PrimaryWithFactory) instanceof SubPrimaryWithFactoryA));
   }
 }

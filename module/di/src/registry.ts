@@ -413,6 +413,9 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     if (config.primary) {
+      if (!this.targetToClass.has(classId)) {
+        this.targetToClass.set(classId, new Map());
+      }
       this.targetToClass.get(classId)!.set(PRIMARY, classId);
     }
 
