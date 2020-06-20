@@ -70,8 +70,6 @@ export class $ApplicationRegistry {
     if (AppUtil.isHandle(target)) { // If response is a listener
       await AppUtil.processHandle(target); // Wait for app to finish
     }
-    // Trigger shutdown
-    ShutdownManager.execute(0);
   }
 
   /**

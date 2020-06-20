@@ -59,7 +59,13 @@ export class AppRunPlugin extends BasePlugin {
       await this.showHelp(err, `\nUsage: ${HelpUtil.getAppUsage((await AppListManager.findByName(app))!)}`);
     }
     if (runner) {
-      await runner();
+      try {
+        await runner();
+        process.exit(0);
+      } catch (err) {
+        console.error(err);
+        process.exit(1);
+      }
     }
   }
 
