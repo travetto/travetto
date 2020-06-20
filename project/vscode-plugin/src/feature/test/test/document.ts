@@ -128,6 +128,20 @@ export class DocumentResultsManager {
     }
   }
 
+  findDocument(file: string) {
+    const content = fs.readFileSync(file, 'utf8');
+    const self = {
+      lines: content.split(/\n/g),
+      lineAt(line: number) {
+        return {
+          firstNonWhitespaceCharacterIndex: (self.lines[line].length - self.lines[line].trimLeft().length)
+        };
+      }
+    };
+    // @ts-ignore
+    return self as vscode.TextDocument;
+  }
+
   /**
    * Refresh global diagnostics
    */
@@ -144,19 +158,7 @@ export class DocumentResultsManager {
           const { bodyFirst } = Decorations.buildErrorHover(as.src as ErrorHoverAssertion);
           const rng = as.decoration!.range;
 
-          if (!document) {
-            const content = fs.readFileSync(this.file, 'utf8');
-            const self = {
-              lines: content.split(/\n/g),
-              lineAt(line: number) {
-                return {
-                  firstNonWhitespaceCharacterIndex: (self.lines[line].length - self.lines[line].trimLeft().length)
-                };
-              }
-            };
-            // @ts-ignore
-            document = self as vscode.TextDocument;
-          }
+          document = document || this.findDocument(this.file);
 
           const diagRng = new vscode.Range(
             new vscode.Position(rng.start.line,
@@ -165,6 +167,20 @@ export class DocumentResultsManager {
             rng.end
           );
           const diag = new vscode.Diagnostic(diagRng, `${ts.src.classId.split(/[^a-z-/]+/i).pop()}.${ts.src.methodName} - ${bodyFirst}`, vscode.DiagnosticSeverity.Error);
+          diag.source = '@travetto/test';
+          acc.push(diag);
+        }
+        if (ts.status === 'failed' && ts.assertions.length === 0) {
+          document = document || this.findDocument(this.file);
+          const rng = ts.decoration!.range!;
+          const diagRng = new vscode.Range(
+            new vscode.Position(rng.start?.line,
+              document.lineAt(rng.start.line).firstNonWhitespaceCharacterIndex
+            ),
+            rng.end
+          );
+          const err = (ts.src as TestResult).error!.message.split(/\n/).shift();
+          const diag = new vscode.Diagnostic(diagRng, `${ts.src.classId.split(/[^a-z-/]+/i).pop()}.${ts.src.methodName} - ${err}`, vscode.DiagnosticSeverity.Error);
           diag.source = '@travetto/test';
           acc.push(diag);
         }

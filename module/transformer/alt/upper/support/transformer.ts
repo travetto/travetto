@@ -5,6 +5,9 @@ import { OnProperty, TransformerState, OnMethod, OnClass } from '../../..';
 export class MakeUpper {
   @OnProperty()
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration) {
+    if (!state.source.fileName.includes(`upper/src`)) {
+      return node;
+    }
     return ts.updateProperty(
       node,
       [],
@@ -18,6 +21,9 @@ export class MakeUpper {
 
   @OnClass()
   static handleClass(state: TransformerState, node: ts.ClassDeclaration) {
+    if (!state.source.fileName.includes(`upper/src`)) {
+      return node;
+    }
     return ts.updateClassDeclaration(
       node,
       [],
@@ -31,6 +37,9 @@ export class MakeUpper {
 
   @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration) {
+    if (!state.source.fileName.includes(`upper/src`)) {
+      return node;
+    }
     return ts.updateMethod(
       node,
       [],

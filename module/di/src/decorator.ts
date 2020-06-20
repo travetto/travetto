@@ -65,7 +65,7 @@ export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
       DependencyRegistry.registerProperty(
         target.constructor,
         propertyKey as string,
-        (typeof config === 'symbol' ? { qualifier: config } : config) as Dependency);
+        config as Dependency);
     }
   };
 }
