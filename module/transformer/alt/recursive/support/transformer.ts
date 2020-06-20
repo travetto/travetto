@@ -7,11 +7,14 @@ export class MakeUpper {
 
   @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration) {
+    if (!state.source.fileName.includes('alt/')) {
+      return node;
+    }
     const resolved = state.resolveReturnType(node);
 
     delete resolved.original;
 
-    const msg = util.inspect(resolved);
+    const msg = util.inspect(resolved, false, 5);
 
     return ts.updateMethod(
       node,

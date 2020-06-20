@@ -39,6 +39,8 @@ export class TestLernaPlugin extends BasePlugin {
       })
       .on('close', () => consumer.summarize());
 
+    child.process.stderr?.pipe(process.stderr);
+
     await child.result.catch(() => { });
   }
 }

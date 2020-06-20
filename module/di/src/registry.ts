@@ -56,7 +56,7 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         if (qualifiers.has(PRIMARY)) {
           qualifier = PRIMARY;
         } else {
-          const filtered = resolved.filter(x => getName(x).startsWith('@trv:di/'));
+          const filtered = resolved.filter(x => !!x).filter(x => getName(x).startsWith('@trv:di/'));
           if (filtered.length === 1) {
             qualifier = filtered[0];
           } else if (filtered.length > 1) {
@@ -271,7 +271,6 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    */
   registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency<any>) {
     const conf = this.getOrCreatePending(cls);
-
     conf.dependencies!.fields[field] = dependency;
   }
 

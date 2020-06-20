@@ -149,7 +149,7 @@ export class Transpiler {
     }
 
     return this.contents.get(fileName)!
-      .replace(/(require.*)(@app)/g, (all, pre) => `${pre}${FsUtil.cwd}`);
+      .replace(new RegExp(`(require.*)(${'@'}${'app'})`, 'mg'), (all, pre) => `${pre}${FsUtil.cwd}`);
   }
 
   /**
