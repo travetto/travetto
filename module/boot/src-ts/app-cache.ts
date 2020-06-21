@@ -47,7 +47,7 @@ class $AppCache extends FileCache {
   fromEntryName(cached: string) {
     return FsUtil.joinUnix(FsUtil.cwd,
       super.fromEntryName(cached)
-        .replace(/\._\./g, 'node_modules/@travetto')
+        .replace(/_._/g, 'node_modules/@travetto')
     ).replace(/[.]js$/, '.ts');
   }
 
@@ -57,7 +57,7 @@ class $AppCache extends FileCache {
    */
   toEntryName(local: string) {
     return super.toEntryName(local.replace(FsUtil.cwd, '')
-      .replace(/node_modules\/@travetto/g, '._.')
+      .replace(/node_modules\/@travetto/g, '_._')
     ).replace(/[.]ts$/, '.js');
   }
 
