@@ -1,4 +1,4 @@
-import { Request, Response, Filter, RouteConfig } from '../types';
+import { Request, Response, Filter, RouteConfig, TRV_ADDED_HEADERS } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { RestInterceptor } from '../interceptor/interceptor';
 
@@ -14,9 +14,10 @@ export class RouteUtil {
    * @param filters Filters to chain
    */
   static createFilterChain(filters: (Filter | RestInterceptor['intercept'])[]): Filter<Promise<any>> {
-    return function filterChain(req: Request, res: Response, idx: number = filters.length - 1): Promise<any> | any {
+    const max = filters.length - 1;
+    return function filterChain(req: Request, res: Response, idx: number = 0): Promise<any> | any {
       const it = filters[idx];
-      const next = idx === 0 ? (x?: any) => x : filterChain.bind(null, req, res, idx - 1);
+      const next = idx === max ? (x?: any) => x : filterChain.bind(null, req, res, idx + 1);
       if (it.length === 3) {
         return it(req, res, next);
       } else {
@@ -61,21 +62,14 @@ export class RouteUtil {
       handlerBound
     ];
 
-    if (headers && Object.keys(headers).length > 1) {
-      filterChain.splice(filterChain.length - 1, 0, (async (__: Request, res: Response, next: () => Promise<any>) => {
-        try {
-          return await next();
-        } finally {
-          if (!res.headersSent) {
-            for (const [h, v] of Object.entries(headers)) {
-              res.setHeader(h, typeof v === 'string' ? v : v());
-            }
-          }
-        }
+    if (headers && Object.keys(headers).length > 0) {
+      filterChain.unshift((async (__: Request, res: Response, next: () => Promise<any>) => {
+        res[TRV_ADDED_HEADERS] = { ...headers };
+        return next();
       }));
     }
 
-    const chain = this.createFilterChain(filterChain.reverse());
+    const chain = this.createFilterChain(filterChain);
     return (req, res) => chain(req, res);
   }
 }

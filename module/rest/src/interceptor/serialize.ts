@@ -4,7 +4,7 @@ import { Injectable } from '@travetto/di';
 import { RestInterceptor } from './interceptor';
 import { LoggingInterceptor } from './logging';
 
-import { Response, Request } from '../types';
+import { Response, Request, TRV_ADDED_HEADERS } from '../types';
 import { isRenderable } from '../response/renderable';
 
 /**
@@ -33,6 +33,11 @@ export class SerializeInterceptor extends RestInterceptor {
   static async sendOutput(req: Request, res: Response, output: any) {
     if (!res.headersSent) {
       if (output) {
+        if (res[TRV_ADDED_HEADERS]) {
+          for (const [k, v] of Object.entries(res[TRV_ADDED_HEADERS]!)) {
+            res.setHeader(k, typeof v === 'string' ? v : v());
+          }
+        }
         if (isRenderable(output)) {
           await output.render(res);
         } else if (typeof output === 'string') {
