@@ -1,7 +1,7 @@
 import 'express-serve-static-core';
 import { SetOption, GetOption } from 'cookies';
 import { IncomingMessage, ServerResponse } from 'http';
-import { TRV_RAW, TRV_ORIG } from './types';
+import { TRV_RAW, TRV_ORIG, TRV_ADDED_HEADERS, HeaderMap } from './types';
 
 declare global {
   namespace Travetto {
@@ -94,6 +94,10 @@ declare global {
        * The raw http server response object
        */
       [TRV_RAW]: ServerResponse;
+      /**
+       * The additional headers for this request, provided by controllers/route config
+       */
+      [TRV_ADDED_HEADERS]?: HeaderMap;
       /**
        * Outbound status code
        */
