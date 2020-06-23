@@ -112,6 +112,7 @@ export class WorkspaceResultsManager {
    */
   async dispose() {
     // Remove all state
+    this.setStatus('');
     const entries = [...this.results.entries()];
     this.results.clear();
     for (const [, v] of entries) {

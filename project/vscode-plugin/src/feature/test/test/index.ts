@@ -107,10 +107,18 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   /**
+   * Restart test server
+   */
+  async restartTest() {
+    this.killTestServer(true);
+  }
+
+  /**
    * On feature activate
    */
   async activate(context: vscode.ExtensionContext) {
     this.register('line', this.launchTestDebugger.bind(this));
+    this.register('reload', this.restartTest.bind(this));
     this.register('rerun', () => this.consumer.trackEditor(vscode.window.activeTextEditor));
 
     vscode.workspace.onDidOpenTextDocument(x => this.consumer.trackEditor(x), null, context.subscriptions);

@@ -81,6 +81,11 @@
         "category": "Travetto"
       },
       {
+        "command": "travetto.test.test:reload",
+        "title": "Reload Test Server",
+        "category": "Travetto"
+      },
+      {
         "command": "travetto.app.run:new",
         "title": "Run New App",
         "category": "Travetto"
@@ -110,6 +115,10 @@
         {
           "command": "travetto.test.test:line",
           "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorIsOpen"
+        },
+        {
+          "command": "travetto.test.test:reload",
+          "when": "travetto.test"
         },
         {
           "command": "travetto.test.test:rerun",
