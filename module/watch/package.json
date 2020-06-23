@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^1.0.0-rc.7"
+    "@travetto/base": "^1.0.0-rc.8"
   },
   "description": "Support for making files watchable during runtime",
   "homepage": "https://travetto.io",
@@ -26,5 +26,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0-rc.7"
+  "version": "1.0.0-rc.8"
 }
