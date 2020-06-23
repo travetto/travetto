@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerState, OnParameter, DecoratorMeta, LiteralUtil, OnMethod, DocUtil, DecoratorUtil, DeclarationUtil } from '@travetto/transformer';
+import { TransformerState, OnParameter, DecoratorMeta, LiteralUtil, OnMethod, DocUtil, DecoratorUtil, DeclarationUtil, AnyType } from '@travetto/transformer';
 import { SchemaTransformUtil } from './lib';
 
 const ENDPOINT_DEC_FILE = (() => { try { return require.resolve('@travetto/rest/src/decorator/endpoint'); } catch { } })()!;
@@ -12,17 +12,43 @@ const ENDPOINT_DEC_FILE = (() => { try { return require.resolve('@travetto/rest/
  */
 export class SchemaRestTransformer {
 
+  static findRenderMethod(state: TransformerState, cls: ts.ClassLikeDeclaration | ts.Type): AnyType | undefined {
+    let render;
+    if ('getSourceFile' in cls) {
+      render = cls.members.find(
+        m => ts.isMethodDeclaration(m) && ts.isIdentifier(m.name) && m.name.escapedText === 'render'
+      );
+    } else {
+      // TODO: fix direct access to resolver
+      const props = state['resolver'].getPropertiesOfType(cls);
+      for (const prop of props) {
+        const decl = prop.declarations[0];
+        if (prop.escapedName === 'render' && ts.isMethodDeclaration(decl)) {
+          render = decl;
+        }
+      }
+    }
+
+    if (render && ts.isMethodDeclaration(render)) {
+      const typeNode = ts.getJSDocReturnType(render);
+      if (typeNode) {
+        // TODO: fix direct access to tsChecker
+        const resolved = state['resolver']['tsChecker'].getTypeFromTypeNode(typeNode);
+        return state.resolveType(resolved);
+      } else {
+        throw new Error(`All Renderable outputs must declare a @returns type on the render method`);
+      }
+    }
+  }
+
   /**
-   * Annotate return type
+   * Resolve method return type
+   * @param state
+   * @param node
    */
-  @OnMethod('@trv:rest/Endpoint')
-  static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
-    const decls = node.decorators || [];
-
-    const comments = DocUtil.describeDocs(node);
-
+  static resolveReturnType(state: TransformerState, node: ts.MethodDeclaration, retType?: AnyType): Record<string, any> {
     // Process returnType
-    let retType = state.resolveReturnType(node);
+    retType = retType || state.resolveReturnType(node);
 
     // IF we have a winner, declare response type
     const type: Record<string, any> = {};
@@ -36,22 +62,50 @@ export class SchemaRestTransformer {
 
     switch (retType?.key) {
       case 'external': {
-        const ext = state.typeToIdentifier(retType);
+        const ext = retType;
         const [cls] = DeclarationUtil.getDeclarations(retType.original!);
-        if (cls &&
-          ts.isClassDeclaration(cls) && !state.getDecoratorList(cls).some(x => x.targets?.includes('@trv:schema/Schema'))) {
-          throw new Error(`Class ${cls.name?.escapedText} is missing a @Schema decorator`);
+        if (cls && ts.isClassDeclaration(cls)) {
+          const renderReturn = this.findRenderMethod(state, cls);
+          if (renderReturn) {
+            return this.resolveReturnType(state, node, renderReturn);
+          } else if (!state.getDecoratorList(cls).some(x => x.targets?.includes('@trv:schema/Schema'))) {
+            throw new Error(`Class ${cls.name?.escapedText} is missing a @Schema decorator`);
+          }
         }
-        type.type = ext;
+        type.type = state.typeToIdentifier(ext);
         break;
       }
       case 'shape': {
-        const id = SchemaTransformUtil.toFinalType(state, retType, node) as ts.Identifier;
-        type.type = id;
+        if (retType.original) {
+          const renderReturn = this.findRenderMethod(state, retType.original);
+          if (renderReturn) {
+            return this.resolveReturnType(state, node, renderReturn);
+          }
+        }
+        type.type = SchemaTransformUtil.toFinalType(state, retType, node) as ts.Identifier;
+        break;
+      }
+      case 'literal': {
+        if (retType.ctor) {
+          type.type = SchemaTransformUtil.toFinalType(state, retType, node);
+        }
       }
     }
 
+    return type;
+  }
+
+  /**
+   * Annotate return type
+   */
+  @OnMethod('@trv:rest/Endpoint')
+  static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
+    // IF we have a winner, declare response type
+    const type = this.resolveReturnType(state, node);
+
     if (type.type) {
+      const decls = node.decorators || [];
+      const comments = DocUtil.describeDocs(node);
       const produces = state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', LiteralUtil.fromLiteral({
         ...type,
         title: comments.return
@@ -71,7 +125,6 @@ export class SchemaRestTransformer {
     } else {
       return node;
     }
-    return node;
   }
 
   /**

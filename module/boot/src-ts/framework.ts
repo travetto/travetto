@@ -28,11 +28,6 @@ export class FrameworkUtil {
   };
 
   /**
-   * Are we in dev mode?
-   */
-  static readonly devMode = isDev;
-
-  /**
    * Only called in Framework dev mode
    * @param pth The full path to translate
    * @param mod The module to check against

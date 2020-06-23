@@ -15,6 +15,7 @@ export class Redirect implements Renderable {
 
   /**
    * Render the response
+   * @returns {void}
    */
   render(res: Response) {
     res.redirect(this.status, this.location);
