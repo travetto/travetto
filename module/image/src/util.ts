@@ -59,8 +59,7 @@ export class ImageUtil {
   static resize(image: Buffer, options: ImageOptions): Promise<Buffer>;
   static async resize(image: ImageType, options: ImageOptions): Promise<NodeJS.ReadableStream | Buffer> {
     const state = await this.converter.exec(
-      'convert', '-resize', `
-      ${options.w ?? ''}X${options.h ?? ''}`,
+      'convert', '-resize', `${options.w ?? ''}x${options.h ?? ''}`,
       '-auto-orient',
       ...(options.optimize ? ['-strip', '-quality', '86'] : []),
       '-', '-');
