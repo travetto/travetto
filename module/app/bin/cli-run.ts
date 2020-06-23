@@ -32,7 +32,7 @@ export class AppRunPlugin extends BasePlugin {
     return cmd
       .arguments('[application] [args...]')
       .allowUnknownOption()
-      .option('-e, --env [env]', 'Application environment (dev|prod|<any>)', 'dev')
+      .option('-e, --env [env]', 'Application environment (dev|prod|<any>)')
       .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [] as string[])
       .option('-r, --resource [resourcesRoot]', 'Specify additional resource root locations', (v, ls) => { ls.push(v); return ls; }, [] as string[]);
   }
