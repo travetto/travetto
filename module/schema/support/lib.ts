@@ -23,9 +23,10 @@ export class SchemaTransformUtil {
       case 'literal': {
         if ((type.ctor === Array || type.ctor === Set) && type.typeArguments?.length) {
           return LiteralUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0], node, root)]);
-        } else {
-          return ts.createIdentifier(type.ctor!.name!);
+        } else if (type.ctor) {
+          return ts.createIdentifier(type.ctor.name!);
         }
+        break;
       }
       case 'shape': {
         // Determine type name

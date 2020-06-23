@@ -106,6 +106,9 @@ export class AssetRestUtil {
    */
   static downloadable(asset: Asset) {
     return {
+      /**
+       * @returns {Asset}
+       */
       async render(res: Response) {
         const stream = asset.stream ?? fs.createReadStream(asset.path);
         res.status(200);

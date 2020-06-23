@@ -1,8 +1,8 @@
 // @file-if @travetto/rest
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Controller, Post, ControllerRegistry, RouteUtil, Get, SerializeInterceptor, MethodOrAll } from '@travetto/rest';
-import { RootRegistry, Class } from '@travetto/registry';
+import { Controller, Redirect, Post, ControllerRegistry, RouteUtil, Get, SerializeInterceptor, MethodOrAll } from '@travetto/rest';
+import { RootRegistry } from '@travetto/registry';
 
 import { SchemaBody, SchemaQuery } from '../src/extension/rest';
 import { Schema } from '../src/decorator/schema';
@@ -75,6 +75,23 @@ class API {
   @Get('/classShape')
   async classShape() {
     return new SimpleUser();
+  }
+
+  @Get('/renderable')
+  async renderable() {
+    return new Redirect('google.com');
+  }
+
+  @Get('/customRender')
+  async customRender() {
+    return {
+      /**
+       * @returns {Promise<User>}
+       */
+      render() {
+
+      }
+    };
   }
 }
 
@@ -209,5 +226,17 @@ export class RestTest {
     const ep = RestTest.getEndpoint('/classShape', 'get');
     assert(ep.responseType);
     assert(SchemaRegistry.has(ep.responseType!.type));
+  }
+
+  @Test()
+  async verifyRenderable() {
+    const ep = RestTest.getEndpoint('/renderable', 'get');
+    assert(ep.responseType?.type === undefined);
+  }
+
+  @Test()
+  async verifyCustomRenderable() {
+    const ep = RestTest.getEndpoint('/customRender', 'get');
+    assert(ep.responseType?.type === User);
   }
 }
