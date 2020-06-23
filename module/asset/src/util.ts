@@ -83,19 +83,19 @@ export class AssetUtil {
   /**
    * Convert local file to asset structure
    */
-  static async fileToAsset(file: string, metadata: Partial<Asset['metadata']> = {}): Promise<Asset> {
+  static async fileToAsset(file: string, remote: string = file, metadata: Partial<Asset['metadata']> = {}): Promise<Asset> {
     const hash = metadata.hash ?? await this.hashFile(file);
     const size = (await fsStat(file)).size;
     const contentType = await this.resolveFileType(file);
-
+    const name = path.basename(file);
     return {
       size,
-      path: file,
+      path: remote,
       contentType,
       stream: fs.createReadStream(file),
       metadata: {
-        name: path.basename(file),
-        title: path.basename(file).replace(/-_/g, ' '),
+        name,
+        title: name.replace(/-_/g, ' '),
         hash,
         createdDate: new Date(),
         ...(metadata ?? {})
