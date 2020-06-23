@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 
-import { StreamUtil } from '@travetto/boot';
+import { StreamUtil, FsUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
 import { ImageUtil } from '../src/util';
 
@@ -50,5 +50,18 @@ class ImageUtilTest {
     assert(optimized.length > 0);
 
     assert(imgBuffer.length >= optimized.length);
+  }
+
+  @Test('resizeToFile')
+  async resizeToFile() {
+    const imgStream = await ResourceManager.readToStream('lincoln.jpg');
+    const out = await ImageUtil.resize(imgStream, {
+      w: 50,
+      h: 50,
+      optimize: true
+    });
+
+    await StreamUtil.writeToFile(out, 'temp.jpg');
+    require('fs').unlinkSync('temp.jpg');
   }
 }
