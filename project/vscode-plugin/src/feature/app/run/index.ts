@@ -15,7 +15,6 @@ import { BaseFeature } from '../../base';
 export class AppRunFeature extends BaseFeature {
 
   private storage = new ActionStorage<AppChoice>('app.run', Workspace.path);
-  private codeLensUpdated: () => any;
 
   private runner(title: string, choices: () => Promise<AppChoice[] | AppChoice | undefined>, line?: number) {
     return async () => {
@@ -171,21 +170,5 @@ export class AppRunFeature extends BaseFeature {
     this.register('recent', this.runner('Run Recent Application', () => this.getValidRecent(10)));
     this.register('mostRecent', this.runner('Run Most Recent Application', () => this.getValidRecent(1).then(([x]) => x)));
     this.register('export', async () => this.exportLaunchConfig());
-
-    vscode.window.onDidChangeActiveTextEditor(() => this.codeLensUpdated?.());
-
-    vscode.languages.registerCodeLensProvider({
-      language: 'typescript',
-      pattern: {
-        base: Workspace.path,
-        pattern: '**/src/**'
-      }
-    }, {
-      provideCodeLenses: this.buildCodeLenses.bind(this),
-      onDidChangeCodeLenses: l => {
-        l = this.codeLensUpdated;
-        return { dispose: () => { } };
-      }
-    });
   }
 }
