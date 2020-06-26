@@ -20,7 +20,7 @@ export type State = {
 
 export type TransformPhase = 'before' | 'after';
 
-export type TransformerType = 'class' | 'method' | 'property' | 'parameter' | 'static-method' | 'call';
+export type TransformerType = 'class' | 'method' | 'property' | 'parameter' | 'static-method' | 'call' | 'function';
 
 export type TransformerSet<S extends State = State> = {
   before?: Map<string, NodeTransformer<S>[]>;

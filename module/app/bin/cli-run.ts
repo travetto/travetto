@@ -49,7 +49,7 @@ export class AppRunPlugin extends BasePlugin {
       // If app not found
       if (!selected) {
         // Show help always exists when it's done
-        await this.showHelp(app ? `${app} is an unknown application` : 'You must specify an application to run');
+        await this.showHelp(app ? `${app} is an unknown application` : '');
       } else {
         await CliUtil.initAppEnv({ env: this._cmd.env, profiles: this._cmd.profile, resourceRoots: this._cmd.resource, watch: true });
         // Run otherwise

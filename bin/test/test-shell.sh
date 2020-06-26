@@ -8,7 +8,7 @@ else
 
   pushd $ROOT/module/$1
 
-  npx trv-fw-dev test -f event -c 1
+  npx trv test -f event -c 1
 
   popd
 fi
