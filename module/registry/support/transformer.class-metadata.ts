@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { TransformerState, OnMethod, OnClass, AfterClass, LiteralUtil, CoreUtil, DecoratorUtil } from '@travetto/transformer';
+import { TransformerState, OnMethod, OnClass, AfterClass, LiteralUtil, CoreUtil, DecoratorUtil, OnFunction } from '@travetto/transformer';
 
 const REGISTER_MOD = require.resolve('../src/decorator');
 
@@ -90,5 +90,24 @@ export class RegisterTransformer {
         ...node.members
       ]
     );
+  }
+
+  /**
+   * Give proper functions a file name
+   */
+  @OnFunction()
+  static transformFunction(state: TransformerState & RegisterInfo, node: ts.FunctionDeclaration) {
+    if (node.name && /^[A-Z]/.test(node.name.escapedText.toString())) {
+      // If we have a class like function
+      state.addStatement(
+        ts.createExpressionStatement(
+          ts.createAssignment(
+            ts.createPropertyAccess(node.name, 'ᚕfile'),
+            ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
+          )
+        )
+      );
+    }
+    return node;
   }
 }

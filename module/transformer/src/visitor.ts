@@ -26,6 +26,8 @@ export class VisitorFactory<S extends State = State> {
       return 'class';
     } else if (ts.isParameter(node)) {
       return 'parameter';
+    } else if (ts.isFunctionDeclaration(node)) {
+      return 'function';
     }
   }
 

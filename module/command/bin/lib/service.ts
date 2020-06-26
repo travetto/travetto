@@ -3,7 +3,23 @@ import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
 
-export type Service = { name: string, version: string, port: number, image: string, env?: Record<string, string> };
+export type Service = {
+  name: string;
+  version: string;
+  port: number;
+  image: string;
+  env?: Record<string, string>;
+  require?: string;
+};
+
+function hasModule(f: string) {
+  try {
+    require.resolve(f);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Utils for starting up in place services, primarily for development
@@ -106,6 +122,6 @@ export class ServiceUtil {
       all.push(require(e) as Service);
     }
 
-    return all;
+    return all.filter(x => !x.require || hasModule(x.require));
   }
 }

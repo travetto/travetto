@@ -26,12 +26,9 @@ function extractSymbolOrConfig<T extends { qualifier?: symbol }>(args: any[]) {
  *
  * @augments `@trv:di/Injectable`
  */
-export function Injectable(qualifier: symbol, config?: Partial<InjectableConfig<any>>): ClassDecorator;
-export function Injectable(config: Partial<InjectableConfig<any>>): ClassDecorator;
-export function Injectable(): ClassDecorator;
-export function Injectable(...args: any[]): ClassDecorator {
+export function Injectable(first?: Partial<InjectableConfig<any>> | symbol, ...args: (Partial<InjectableConfig<any>> | undefined)[]): ClassDecorator {
   return (target: Class | any) => {
-    const config = extractSymbolOrConfig(args) as Partial<InjectableConfig<any>>;
+    const config = extractSymbolOrConfig([first, ...args]) as Partial<InjectableConfig<any>>;
 
     config.class = target;
     DependencyRegistry.registerClass(target, config as InjectableConfig<any>);
@@ -53,14 +50,11 @@ export function InjectArgs(configs?: InjectConfig[][]): ClassDecorator {
  *
  * @augments `@trv:di/Inject`
  */
-export function Inject(symbol: symbol, config?: InjectConfig): ParameterDecorator & PropertyDecorator;
-export function Inject(config: InjectConfig): ParameterDecorator & PropertyDecorator;
-export function Inject(): ParameterDecorator & PropertyDecorator;
-export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
+export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | undefined)[]): ParameterDecorator & PropertyDecorator {
 
   return (target: any, propertyKey: string | symbol, idx?: number) => {
     if (typeof idx !== 'number') { // Only register if on property
-      const config: InjectConfig = extractSymbolOrConfig(args);
+      const config: InjectConfig = extractSymbolOrConfig([first, ...args]);
 
       DependencyRegistry.registerProperty(
         target.constructor,
@@ -75,13 +69,11 @@ export function Inject(...args: any[]): ParameterDecorator & PropertyDecorator {
  *
  * @augments `@trv:di/InjectableFactory`
  */
-export function InjectableFactory(symbol: symbol, config?: Partial<InjectableFactoryConfig<any>>): MethodDecorator;
-export function InjectableFactory(config: Partial<InjectableFactoryConfig<any>>): MethodDecorator;
-export function InjectableFactory(): MethodDecorator;
-export function InjectableFactory(...args: (Partial<InjectableFactoryConfig<any>> | symbol | undefined)[]): MethodDecorator {
+export function InjectableFactory(first?: Partial<InjectableFactoryConfig<any>> | symbol,
+  ...args: (Partial<InjectableFactoryConfig<any>> | undefined)[]): MethodDecorator {
 
   return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
-    const config: InjectableFactoryConfig<any> = extractSymbolOrConfig(args);
+    const config: InjectableFactoryConfig<any> = extractSymbolOrConfig([first, ...args]);
     DependencyRegistry.registerFactory({
       ...config,
       dependencies: config.dependencies?.map(x => extractSymbolOrConfig(x as any)),

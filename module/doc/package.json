@@ -1,0 +1,32 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "dependencies": {
+    "@travetto/boot": "^1.0.0-rc.9",
+    "@travetto/registry": "^1.0.0-rc.9"
+  },
+  "description": "Documentation support for the travetto framework",
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "docs",
+    "travetto",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "files": [
+    "bin",
+    "index.ts",
+    "src"
+  ],
+  "name": "@travetto/doc",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "version": "1.0.0-rc.9"
+}

@@ -61,6 +61,7 @@ export class Finalize {
     const deps = DepResolver.resolve(mod, base);
     // deps.regular.add(`@travetto/${mod}`);
     deps.regular.add('@travetto/test');
+    deps.regular.add('@travetto/doc');
 
     Object.assign(deps.bin, DepResolver.resolve('cli', base).bin);
     Object.assign(deps.bin, DepResolver.resolve('test', base).bin);
