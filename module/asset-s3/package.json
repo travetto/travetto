@@ -11,6 +11,7 @@
     "@travetto/config": "^1.0.0-rc.8",
     "aws-sdk": "^2.696.0"
   },
+  "title": "S3 Asset Source",
   "description": "AWS S3 backend for the travetto asset module",
   "homepage": "https://travetto.io",
   "keywords": [

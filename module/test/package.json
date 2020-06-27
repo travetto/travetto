@@ -10,6 +10,7 @@
     "@travetto/worker": "^1.0.0-rc.8",
     "@travetto/yaml": "^1.0.0-rc.9"
   },
+  "title": "Testing",
   "description": "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin",
   "homepage": "https://travetto.io",
   "keywords": [

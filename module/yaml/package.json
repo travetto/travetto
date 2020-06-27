@@ -6,6 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "title": "YAML",
   "description": "Simple YAML support, provides only clean subset of yaml",
   "homepage": "https://travetto.io",
   "keywords": [

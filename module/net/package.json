@@ -6,6 +6,7 @@
   "dependencies": {
     "@travetto/base": "^1.0.0-rc.8"
   },
+  "title": "Network",
   "description": "Network utilities of the travetto framework",
   "homepage": "https://travetto.io",
   "keywords": [

@@ -12,6 +12,7 @@
     "@types/mongodb": "^3.5.20",
     "mongodb": "^3.5.9"
   },
+  "title": "MongoDB Model Source",
   "description": "Mongo backing for the travetto model module.",
   "homepage": "https://travetto.io",
   "keywords": [

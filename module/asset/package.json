@@ -12,6 +12,7 @@
     "file-type": "^14.6.1",
     "mime": "^2.4.6"
   },
+  "title": "Asset",
   "description": "Modular library for storing and retrieving binary assets",
   "homepage": "https://travetto.io",
   "keywords": [

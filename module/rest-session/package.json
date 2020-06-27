@@ -11,6 +11,7 @@
     "@travetto/config": "^1.0.0-rc.8",
     "@travetto/rest": "^1.0.0-rc.12"
   },
+  "title": "REST Session",
   "description": "Session provider for the travetto rest module.",
   "homepage": "https://travetto.io",
   "keywords": [

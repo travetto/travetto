@@ -17,6 +17,7 @@
     "koa-compress": "^4.0.1",
     "koa-router": "^9.0.1"
   },
+  "title": "Koa REST Source",
   "description": "Koa provider for the travetto rest module.",
   "homepage": "https://travetto.io",
   "keywords": [

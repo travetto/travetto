@@ -21,6 +21,7 @@
   "devDependencies": {
     "@travetto/app": "^1.0.0-rc.11"
   },
+  "title": "AWS Lambda REST",
   "description": "AWS lambda provider for the travetto rest module.",
   "homepage": "https://travetto.io",
   "keywords": [

@@ -1,6 +1,6 @@
 import * as commander from 'commander';
 
-import { color } from '@travetto/cli/src/color';
+import { CompileCliUtil } from '@travetto/compiler/bin/lib/index';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { FsUtil } from '@travetto/boot';
 
@@ -18,6 +18,11 @@ export class DocPlugin extends BasePlugin {
   }
 
   async action() {
+    await CompileCliUtil.compile();
+    process.env.TRV_DEBUG = '0';
+    process.env.TRV_LOG_PLAIN = '1';
+    const { PhaseManager } = await import('@travetto/base');
+    await PhaseManager.init();
     await import(FsUtil.resolveUnix(FsUtil.cwd, './README.ts'));
   }
 

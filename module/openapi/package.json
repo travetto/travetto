@@ -13,6 +13,7 @@
     "@travetto/yaml": "^1.0.0-rc.9",
     "openapi3-ts": "^1.4.0"
   },
+  "title": "OpenAPI Specification",
   "description": "OpenAPI integration support for the travetto framework",
   "homepage": "https://travetto.io",
   "keywords": [

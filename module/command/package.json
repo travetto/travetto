@@ -6,6 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "title": "Command",
   "description": "Support for executing complex commands at runtime.",
   "dependencies": {
     "@travetto/base": "^1.0.0-rc.8"

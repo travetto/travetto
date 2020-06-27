@@ -10,6 +10,7 @@
     "@travetto/di": "^1.0.0-rc.10",
     "@travetto/schema": "^1.0.0-rc.9"
   },
+  "title": "Data Modeling",
   "description": "Datastore abstraction for CRUD operations with advanced query support.",
   "optionalPeerDependencies": {
     "@travetto/rest": "^1.0.0-beta.0"

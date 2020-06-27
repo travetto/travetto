@@ -12,6 +12,7 @@
     "@types/mustache": "^4.0.1",
     "mustache": "^4.0.1"
   },
+  "title": "Email",
   "description": "Email transmission module.",
   "optionalPeerDependencies": {
     "nodemailer": "^6.4.8",

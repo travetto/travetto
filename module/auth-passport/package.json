@@ -12,6 +12,7 @@
     "@types/passport": "^1.0.3",
     "passport": "^0.4.1"
   },
+  "title": "Passport Auth",
   "description": "Passport authentication integration support for the travetto framework",
   "homepage": "https://travetto.io",
   "keywords": [
