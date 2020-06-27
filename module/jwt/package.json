@@ -1,6 +1,7 @@
 {
   "name": "@travetto/jwt",
   "version": "1.0.0-rc.8",
+  "title": "JWT",
   "description": "JSON Web Token implementation",
   "main": "index.ts",
   "files": [

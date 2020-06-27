@@ -10,6 +10,7 @@
     "travetto": "bin/travetto.js",
     "trv": "bin/travetto.js"
   },
+  "title": "Command Line Interface",
   "dependencies": {
     "@travetto/base": "^1.0.0-rc.8",
     "commander": "^5.1.0"

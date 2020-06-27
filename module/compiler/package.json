@@ -11,6 +11,7 @@
     "@travetto/transformer": "^1.0.0-rc.9",
     "@travetto/watch": "^1.0.0-rc.8"
   },
+  "title": "Compiler",
   "description": "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.",
   "homepage": "https://travetto.io",
   "keywords": [

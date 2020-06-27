@@ -9,6 +9,7 @@
   "dependencies": {
     "@travetto/boot": "^1.0.0-rc.9"
   },
+  "title": "Base",
   "description": "Application phase management, environment config and common utilities for travetto applications.",
   "homepage": "https://travetto.io",
   "keywords": [

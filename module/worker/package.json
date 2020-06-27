@@ -6,6 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "title": "Worker",
   "description": "Process management utilties, with a focus on inter-process communication",
   "dependencies": {
     "@travetto/base": "^1.0.0-rc.8",

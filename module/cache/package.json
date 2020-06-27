@@ -9,6 +9,7 @@
   "dependencies": {
     "@travetto/compiler": "^1.0.0-rc.10"
   },
+  "title": "Caching",
   "description": "Caching functionality with decorators for declarative use.",
   "optionalPeerDependencies": {
     "redis": "^3.0.2",

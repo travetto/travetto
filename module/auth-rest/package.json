@@ -12,6 +12,7 @@
     "@travetto/context": "^1.0.0-rc.9",
     "@travetto/rest": "^1.0.0-rc.12"
   },
+  "title": "Rest Auth",
   "description": "Rest authentication integration support for the travetto framework",
   "homepage": "https://travetto.io",
   "keywords": [

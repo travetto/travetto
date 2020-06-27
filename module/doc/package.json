@@ -10,6 +10,7 @@
     "@travetto/boot": "^1.0.0-rc.9",
     "@travetto/registry": "^1.0.0-rc.9"
   },
+  "title": "Documentation",
   "description": "Documentation support for the travetto framework",
   "homepage": "https://travetto.io",
   "keywords": [

@@ -10,6 +10,7 @@
     "@travetto/auth": "^1.0.0-rc.9",
     "@travetto/model": "^1.0.0-rc.9"
   },
+  "title": "Model Auth Source",
   "description": "Model-based authentication and registration support for the travetto framework",
   "optionalPeerDependencies": {
     "@travetto/auth-rest": "^1.0.0-beta.0"

@@ -9,6 +9,7 @@
   "dependencies": {
     "@travetto/base": "^1.0.0-rc.8"
   },
+  "title": "Watch",
   "description": "Support for making files watchable during runtime",
   "homepage": "https://travetto.io",
   "keywords": [

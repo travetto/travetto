@@ -10,6 +10,7 @@
     "@travetto/base": "^1.0.0-rc.8",
     "@travetto/yaml": "^1.0.0-rc.9"
   },
+  "title": "Configuration",
   "description": "Environment-aware config management using yaml files",
   "homepage": "https://travetto.io",
   "keywords": [

@@ -14,6 +14,7 @@
     "busboy": "^0.3.1",
     "mime-match": "^1.0.2"
   },
+  "title": "Asset Rest Support",
   "description": "Provides integration between the travetto asset and rest module.",
   "homepage": "https://travetto.io",
   "keywords": [

@@ -3,7 +3,6 @@ import * as path from 'path';
 
 import { FileCache, TranspileUtil, FsUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
-import { Util } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';
@@ -74,31 +73,24 @@ export class Transpiler {
    */
   private getHost(): ts.CompilerHost {
     const host: ts.CompilerHost = {
-      readFile: this.readFile,
+      readFile: f => this.readFile(f),
       realpath: FrameworkUtil.resolvePath,
-      writeFile: this.writeFile,
-      fileExists: this.fileExists,
+      writeFile: this.writeFile.bind(this),
+      fileExists: f => this.fileExists(f),
       getDefaultLibFileName: ts.getDefaultLibFileName,
       getCurrentDirectory: () => FsUtil.cwd,
       getCanonicalFileName: x => x,
       getNewLine: () => ts.sys.newLine,
       useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
-      getSourceFile(this: Transpiler, fileName: string, languageVersion: ts.ScriptTarget, _, shouldCreateNewSourceFile?: boolean) {
+      getSourceFile: (fileName: string, languageVersion: ts.ScriptTarget, _, shouldCreateNewSourceFile?: boolean) => {
         if (!this.sources.has(fileName) || shouldCreateNewSourceFile) {
           const content = this.readFile(fileName)!;
           this.sources.set(fileName, ts.createSourceFile(fileName, content ?? '', languageVersion));
         }
         return this.sources.get(fileName);
       },
-      getDefaultLibLocation(this: Transpiler) {
-        return path.dirname(ts.getDefaultLibFilePath(TranspileUtil.compilerOptions));
-      },
+      getDefaultLibLocation: () => path.dirname(ts.getDefaultLibFilePath(TranspileUtil.compilerOptions)),
     };
-    for (const [k, v] of Object.entries(host) as [(keyof ts.CompilerHost), any][]) {
-      if (Util.isFunction(v)) {
-        host[k] = v.bind(this);
-      }
-    }
     return host;
   }
 

@@ -9,6 +9,7 @@
   "dependencies": {
     "@travetto/base": "^1.0.0-rc.8"
   },
+  "title": "Transformation",
   "description": "Functionality for AST transformations, with transformer registration, and general utils",
   "homepage": "https://travetto.io",
   "keywords": [

@@ -12,6 +12,7 @@
     "@types/mongodb": "^3.5.20",
     "mongodb": "^3.5.9"
   },
+  "title": "MongoDB Asset Source",
   "description": "Mongo/GridFS backend for the travetto asset module",
   "homepage": "https://travetto.io",
   "keywords": [

@@ -9,6 +9,7 @@
   "dependencies": {
     "@travetto/command": "^1.0.0-rc.8"
   },
+  "title": "Image",
   "description": "Image support, resizing, and optimization",
   "homepage": "https://travetto.io",
   "keywords": [

@@ -10,6 +10,7 @@
     "@travetto/config": "^1.0.0-rc.8",
     "@travetto/di": "^1.0.0-rc.10"
   },
+  "title": "Application",
   "description": "Application registration/management and run support.",
   "homepage": "https://travetto.io",
   "keywords": [

@@ -12,6 +12,7 @@
   "devDependencies": {
     "@travetto/config": "^1.0.0-rc.8"
   },
+  "title": "Dependency Injection",
   "description": "Dependency registration/management and injection support.",
   "homepage": "https://travetto.io",
   "keywords": [

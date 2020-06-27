@@ -18,6 +18,7 @@
     "node-forge": "^0.9.1",
     "@types/node-forge": "^0.9.4"
   },
+  "title": "RESTful API",
   "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
   "homepage": "https://travetto.io",
   "keywords": [
