@@ -23,7 +23,10 @@ export class DocPlugin extends BasePlugin {
     process.env.TRV_LOG_PLAIN = '1';
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.init();
-    await import(FsUtil.resolveUnix(FsUtil.cwd, './README.ts'));
+    const { default: all } = await import(FsUtil.resolveUnix(FsUtil.cwd, './README.ts'));
+    const { Markdown, Header } = await import('..');
+    console.log(Markdown.render(Header(FsUtil.cwd)));
+    console.log(Markdown.render(all));
   }
 
   complete() {

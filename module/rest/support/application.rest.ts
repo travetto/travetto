@@ -7,7 +7,7 @@ import { RestServer } from '../src/server/server';
 @Application('rest', {
   description: 'Default rest application entrypoint'
 })
-class EntryPoint {
+export class DefaultRestApplication {
   constructor(private server: RestServer) { }
   run() {
     return this.server.run();

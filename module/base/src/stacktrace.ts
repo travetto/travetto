@@ -23,6 +23,7 @@ export class StacktraceUtil {
       '(native)',
       'internal',
       'tslib',
+      '@travetto/boot', // @life-if !$TRV_DEV
       '@travetto/context', // @life-if !$TRV_DEV
       '@travetto/watch', // @life-if !$TRV_DEV
       'typescript',  // @life-if !$TRV_DEV

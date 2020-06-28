@@ -1,0 +1,21 @@
+import { d, Mod, Library, Code, Note, inp } from '@travetto/doc';
+import { AssetSource } from '@travetto/asset';
+import { Config } from '@travetto/config';
+
+export default d`
+
+This provides a ${Library('s3', 'https://aws.amazon.com/documentation/s3/')} implementation of the ${AssetSource} which is a backend for the  ${Mod('asset')} module.  
+
+${Code('S3 backend wiring', 'alt/docs/src/config.ts')}
+
+There is a default configuration that you can easily use, with some sensible defaults. 
+ 
+${Code('S3 Configuration', 'src/config.ts')}
+
+Additionally, you can see that the class is registered with the ${Config} annotation, and so these values can be overridden using the standard ${Mod('config')} resolution paths. 
+
+${Note(`
+  Do not commit your ${inp`accessKeyId`} or ${inp`secretAccessKey`} values to your source repository, especially if it is public facing.  Not only is it a security risk, but Amazon will scan public repos, looking for keys, and if found will react swiftly.
+`)}
+
+`;

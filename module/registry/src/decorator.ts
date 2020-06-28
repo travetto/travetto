@@ -11,7 +11,7 @@ class $PendingRegister {
   /**
    * Initialize the meta data for the cls
    * @param cls Class
-   * @param file Filename
+   * @param `ᚕfile` Filename
    * @param `ᚕhash` Hash of class contents
    * @param `ᚕmethods` Methods and their hashes
    * @param `ᚕabstract` Is the class abstract

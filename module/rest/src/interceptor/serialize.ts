@@ -7,7 +7,7 @@ import { LoggingInterceptor } from './logging';
 import { Response, Request, TRV_ADDED_HEADERS } from '../types';
 import { Renderable } from '../response/renderable';
 
-const isRenderable = <T = any>(o: any): o is Renderable<T> => !!o['render'];
+const isRenderable = (o: any): o is Renderable => !!o['render'];
 
 /**
  * Serialization interceptor

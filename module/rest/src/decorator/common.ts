@@ -24,13 +24,13 @@ function register(config: Partial<EndpointConfig | ControllerConfig>) {
  * Decorator used to add description metadata to a class or method
  * @param desc The describe config
  */
-export const Describe = (desc: DescribableConfig) => register(desc);
+export function Describe(desc: DescribableConfig) { return register(desc); }
 
 /**
  * Set response headers on success
  * @param headers The response headers to set
  */
-export const SetHeaders = (headers: HeaderMap) => register({ headers });
+export function SetHeaders(headers: HeaderMap) { return register({ headers }); }
 
 /**
  * Set the max-age of a response based on the config

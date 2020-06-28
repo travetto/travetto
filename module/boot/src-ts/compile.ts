@@ -35,7 +35,7 @@ export class CompileUtil {
     let mod: any;
     try {
       mod = this.ogModuleLoad.apply(null, [request, parent]);
-      if (!parent.loaded) { // Standard ts compiler output
+      if (parent && !parent.loaded) { // Standard ts compiler output
         const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
         if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
           try {

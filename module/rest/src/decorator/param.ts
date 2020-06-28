@@ -27,44 +27,44 @@ export const paramConfig = (location: ParamConfig['location'], extra: string | P
  * @param location The location of the parameter
  * @param extra Any extra configuration for the param
  */
-export const Param = (location: ParamConfig['location'], extra: string | Partial<ParamConfig>) => {
+export function Param(location: ParamConfig['location'], extra: string | Partial<ParamConfig>) {
   const param = paramConfig(location, extra);
   return (target: any, propertyKey: string | symbol, idx: number) => {
     const handler = target.constructor.prototype[propertyKey];
     ControllerRegistry.registerEndpointParameter(target.constructor, handler, param, idx);
   };
-};
+}
 
 /**
  * Define a Context param
  * @param param The parma configuration or name
  * @augments `@trv:rest/Param`
  */
-export const Context = (param: string | Partial<ParamConfig> = {}) => Param('context', param);
+export function Context(param: string | Partial<ParamConfig> = {}) { return Param('context', param); }
 /**
  * Define a Path param
  * @param param The parma configuration or name
  * @augments `@trv:rest/Param`
  */
-export const Path = (param: string | Partial<ParamConfig> = {}) => Param('path', param);
+export function Path(param: string | Partial<ParamConfig> = {}) { return Param('path', param); }
 /**
  * Define a Query param
  * @param param The parma configuration or name
  * @augments `@trv:rest/Param`
  */
-export const Query = (param: string | Partial<ParamConfig> = {}) => Param('query', param);
+export function Query(param: string | Partial<ParamConfig> = {}) { return Param('query', param); }
 /**
  * Define a Header param
  * @param param The parma configuration or name
  * @augments `@trv:rest/Param`
  */
-export const Header = (param: string | Partial<ParamConfig> = {}) => Param('header', param);
+export function Header(param: string | Partial<ParamConfig> = {}) { return Param('header', param); }
 /**
  * Define a body param as an input
  * @param param The parma configuration
  * @augments `@trv:rest/Param`
  */
-export const Body = (param: Partial<ParamConfig> = {}) => Param('body', param);
+export function Body(param: Partial<ParamConfig> = {}) { return Param('body', param); }
 
 /**
  * Create context provider as a decorator, to allow for adding additional context parameter values
