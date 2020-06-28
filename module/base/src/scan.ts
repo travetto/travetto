@@ -34,8 +34,8 @@ export class ScanApp {
    */
   static modAppExclude = new Set(
     AppManifest.hasProfile('test') ?
-      ['@travetto/cli', '@travetto/boot'] :
-      ['@travetto/test', '@travetto/cli', '@travetto/boot']);
+      ['@travetto/cli', '@travetto/boot', '@travetto/doc'] :
+      ['@travetto/test', '@travetto/cli', '@travetto/boot', '@travetto/doc']);
 
   /**
    * Compute index for a scan entry
