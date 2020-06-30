@@ -1,55 +1,123 @@
-travetto: Model-SQL
-===
+# SQL Model Source
+## SQL backing for the travetto model module, with real-time modeling support for SQL schemas.
 
-
-**Install: SQL provider**
+**Install: @travetto/model-sql**
 ```bash
-$ npm install @travetto/model-sql
+npm install @travetto/model-sql
 ```
 
-**Install: Specific SQL client**
+**Install: Specific SQL Client: mysql**
 ```bash
-$ npm install mysql # Use this for mysql
-
-$ npm install pg # Use this for postgres
+npm install mysql
 ```
 
+or 
 
-This module provides a `SQL`-based implementation of `ModelSource` for the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module.  This source allows the `Model` module to read, write and query against `SQL` databases. In development mode, the `ModelSource` will also modify the database schema in real time to minimize impact to development.  
+**Install: Specific SQL Client: postgres**
+```bash
+npm install pg
+```
+
+This module provides a [SQL](https://en.wikipedia.org/wiki/SQL)-based implementation of [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/service/source.ts#L58) for the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.") module.  This source allows the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/service/source.ts#L58) will also modify the database schema in real time to minimize impact to development.
 
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of
-a `SQL` database.  Every table generated will have a `path_id` which determines it's location in the document hierarchy as well as sub tables will have a `parent_path_id` to associate records with the parent values.
+a [SQL](https://en.wikipedia.org/wiki/SQL) database.  Every table generated will have a `path_id` which determines it's location in the document hierarchy as well as sub tables will have a `parent_path_id` to associate records with the parent values.
 
 The current SQL client support stands at:
-* MySQL - 5.6 and 5.7
-* Postgres - 11+
-* SQL Server - Currently unsupported
-* Oracle - Currently unsupported
+   
+   *  [MySQL](https://www.mysql.com/) - 5.6 and 5.7
+   *  [Postgres](https://postgresql.org) - 11+
+   *  `SQL Server` - Currently unsupported
+   *  `Oracle` - Currently unsupported
 
-Note: Wider client support will roll out as usage increases.
+**Note**: Wider client support will roll out as usage increases.
 
-Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) module.
+Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di "Dependency registration/management and injection support.") module.
 
-**Code: Wiring up the SQL Model Source**
+**Code: Wiring up a custom Model Source**
 ```typescript
+import { AsyncContext } from '@travetto/context';
+import { InjectableFactory } from '@travetto/di';
+
+import { SQLModelConfig } from '@travetto/model-sql/src/config';
+import { SQLModelSource } from '@travetto/model-sql/src/source';
+import { MySQLDialect } from '@travetto/model-sql/src/dialects/mysql/dialect';
+
 export class Init {
-  @InjectableFactory()
-  static getModelSource(conf: SQLModelConfig): ModelSource {
-    return new SQLModelSource(conf);
+  @InjectableFactory({ primary: true })
+  static getModelSource(ctx: AsyncContext, conf: SQLModelConfig) {
+    return new SQLModelSource(ctx, conf, new MySQLDialect(ctx, conf));
   }
 }
 ```
 
-where the `SQLModelConfig` is defined by:
+where the [SQLModelConfig](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-sql/src/config.ts#L8) is defined by:
 
 **Code: Structure of SQLModelConfig**
 ```typescript
+import { EnvUtil } from '@travetto/boot';
+import { Config } from '@travetto/config';
+
+/**
+ * SQL Model Config
+ */
 @Config('sql.model')
 export class SQLModelConfig {
+  /**
+   * Host to connect to
+   */
   host = '127.0.0.1';
-  port = 3306;
+  /**
+   * Default port
+   */
+  port = 0;
+  /**
+   * Username
+   */
+  user = '';
+  /**
+   * Password
+   */
+  password = '';
+  /**
+   * Table prefix
+   */
+  namespace = '';
+  /**
+   * Database name
+   */
   database = 'app';
+  /**
+   * Auto schema creation
+   */
+  autoCreate = !EnvUtil.isReadonly();
+  /**
+   * Db version
+   */
+  version = '';
+  /**
+   * Raw client options
+   */
+  options = {};
 }
 ```
 
-and can be overridden via environment variables or config files, as defined in [`Config`](https://github.com/travetto/travetto/tree/master/module/config).
+and can be overridden via environment variables or config files, as defined in [Configuration](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config "Environment-aware config management using yaml files").
+
+## CLI - model:sql-schema
+
+The module provides the ability to generate the full [SQL](https://en.wikipedia.org/wiki/SQL) schema from all the various [@Model](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/registry/decorator.ts#L12)s within the application.  This is useful for being able to generate the appropriate [SQL](https://en.wikipedia.org/wiki/SQL) commands to define your schemas in production.
+
+**Terminal: Running schema generate**
+```bash
+$ travetto travetto model:sql-schema --help
+
+Usage:  model:sql-schema [options]
+
+Options:
+  -a, --app [app]      Application root to export, (default: .)
+  -c, --clear [clear]  Whether or not to generate DROP statements first
+                       (default: true)
+  -h, --help           display help for command
+```
+

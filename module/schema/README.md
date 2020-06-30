@@ -1,47 +1,52 @@
-travetto: Schema
-===
+# Schema
+## Data type registry for runtime validation, reflection and binding. 
 
-**Install: primary**
+**Install: @travetto/schema**
 ```bash
-$ npm install @travetto/schema
+npm install @travetto/schema
 ```
 
 This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
 
 ## Registration
-The registry's schema information is defined by `typescript` AST and only applies to classes registered with the `@Schema` decoration. 
+The registry's schema information is defined by [typescript](https://typescriptlang.org) AST and only applies to classes registered with the [@Schema](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/schema.ts#L11) decoration. 
 
 ### Classes
 The module utilizes AST transformations to collect schema information, and facilitate the registration process without user intervention. The class can also be described using providing a:
-* `title` - definition of the schema
-* `description` - detailed description of the schema
-* `examples` - A set of examples as JSON or YAML
 
-The `title` will be picked up from the [`JSDoc`](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [`@Describe`](./src/decorator/common) decorator.
+   
+   *  `title` - definition of the schema
+   *  `description` - detailed description of the schema
+   *  `examples` - A set of examples as [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML)
+
+The `title` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/common.ts#L9) decorator.
 
 **Code: Sample User Schema**
 ```typescript
+import { Schema } from '@travetto/schema/src/decorator/schema';
+
 @Schema()
-class User {
+export class User {
   name: string;
   age: number;
-  favoriteFood?: 'pizza'|'burrito'|'salad';
+  favoriteFood?: 'pizza' | 'burrito' | 'salad';
 }
 ```
+
 From this schema, the registry would have the following information:
 
-**Config: User schema as yaml**
+**Config: User schemas as a YAML file**
 ```yaml
 User:
   fields:
-    - 
+    -
       name: name
       type": string
-      required: true 
+      required: true
     -
       name: age
       type: number
-      required: true      
+      required: true
     -
       name: favoriteFood
       type: string
@@ -52,98 +57,111 @@ User:
 ### Fields
 This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
 
- * `@Field` defines a field that will be serialized, generally used in conjunction with ```@Schema(false)``` which disables the auto registration.
- * `@Require` defines a that field should be required
- * `@Enum` defines the allowable values that a field can have
- * `@Trimmed` augments binding to remove leading and trailing whitespace from string values
- * `@Match` defines a regular expression that the field value should match
- * `@MinLength` enforces min length of a string
- * `@MaxLength` enforces max length of a string
- * `@Min` enforces min value for a date or a number
- * `@Max` enforces max value for a date or a number
- * `@Email` ensures string field matches basic email regex
- * `@Telephone` ensures string field matches basic telephone regex
- * `@Url` ensures string field matches basic url regex
- * `@Ignore` exclude from auto schema registration
- * `@Integer` ensures number passed in is only a whole number
- * `@Float` ensures number passed in allows fractional values
- * `@Currency` provides support for standard currency
- * `@Text` indicates that a field is expecting natural language input, not just discrete values
- * `@LongText` same as text, but expects longer form content
+   
+   *  [@Field](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L40) defines a field that will be serialized.
+   *  [@Required](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L61) defines a that field should be required
+   *  [@Enum](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L68) defines the allowable values that a field can have
+   *  [@Trimmed](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L78) augments binding to remove leading and trailing whitespace from string values
+   *  [@Match](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L96) defines a regular expression that the field value should match
+   *  [@MinLength](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L104) enforces min length of a string
+   *  [@MaxLength](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L112) enforces max length of a string
+   *  [@Min](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L104) enforces min value for a date or a number
+   *  [@Max](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L112) enforces max value for a date or a number
+   *  [@Email](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L135) ensures string field matches basic email regex
+   *  [@Telephone](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L142) ensures string field matches basic telephone regex
+   *  [@Url](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L149) ensures string field matches basic url regex
+   *  [@Ignore](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L188) exclude from auto schema registration
+   *  [@Integer](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L163) ensures number passed in is only a whole number
+   *  [@Float](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L169) ensures number passed in allows fractional values
+   *  [@Currency](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L181) provides support for standard currency
+   *  [Text](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//doc/src/nodes.ts#L10) indicates that a field is expecting natural language input, not just discrete values
+   *  [@LongText](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L88) same as text, but expects longer form content
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated.
 
 Just like the class, all fields can be defined with
-* `description` - detailed description of the schema
-* `examples` - A set of examples as JSON or YAML
 
-And similarly, the `description` will be picked up from the [`JSDoc`](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [`@Describe`](./src/decorator/common) decorator.
+   
+   *  `description` - detailed description of the schema
+   *  `examples` - A set of examples as [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML)
+
+And similarly, the `description` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/common.ts#L9) decorator.
 
 ## Binding/Validation
-At runtime, once a schema is registered, a programmer can utilize this structure to perform specific operations. Specifically binding and validation. 
+At runtime, once a schema is registered, a programmer can utilize this structure to perform specific operations. Specifically binding and validation.
 
 ### Binding
-Binding is a very simple operation, as it takes in a class registered as as `@Schema` and a JS object that will be the source of the binding. Given the schema
+Binding is a very simple operation, as it takes in a class registered as as [@Schema](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/schema.ts#L11) and a JS object that will be the source of the binding. Given the schema:
 
 **Code: Sub Schemas via Address**
 ```typescript
+import { Schema } from '@travetto/schema/src/decorator/schema';
+import { Integer } from '@travetto/schema/src/decorator/field';
+
 @Schema()
-class Address {
+export class Address {
   street1: string;
   street2: string;
 }
 
 @Schema()
-class Person {
+export class Person {
   name: string;
   @Integer() age: number;
   address: Address;
 }
 ```
 
-A binding operation could look like
+A binding operation could look like:
 
 **Code: Binding from JSON to Schema**
 ```typescript
-Person.from({
-  name: 'Test',
-  age: 19.999978,
-  address: {
-    street1: '1234 Fun',
-    street2: 'Unit 20'
-  }
-});
+import { Person } from './person';
+
+export function Test() {
+  return Person.from({
+    name: 'Test',
+    age: 19.999978,
+    address: {
+      street1: '1234 Fun',
+      street2: 'Unit 20'
+    }
+  });
+}
 ```
 
 and the output would be a `Person` instance with the following structure
 
-**Code: Sample data output after binding**
-```typescript
-Person(
+**Terminal: Sample data output after binding**
+```bash
+$ alt/docs/src/person-output.js -r @travetto/boot/register alt/docs/src/person-output.js
+
+Person {
   name: 'Test',
-  age: 20,
-  address: Address(
-    street1: '1234 Fun',
-    street2: 'Unit 20'
-  )
-)
+  age: 19.999978,
+  address: { street1: '1234 Fun', street2: 'Unit 20' }
+}
 ```
 
-**NOTE** Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.
+**Note**: Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.
 
 ### Validation
-Validation is very similar to binding, but instead of attempting to assign values, any mismatch or violation of the schema will result in errors. All errors will be collected and returned. Given the same schema as above, 
 
-**Code: Reference Schema for Validations**
+Validation is very similar to binding, but instead of attempting to assign values, any mismatch or violation of the schema will result in errors. All errors will be collected and returned. Given the same schema as above,
+
+**Code: Sub Schemas via Address**
 ```typescript
+import { Schema } from '@travetto/schema/src/decorator/schema';
+import { Integer } from '@travetto/schema/src/decorator/field';
+
 @Schema()
-class Address {
+export class Address {
   street1: string;
   street2: string;
 }
 
 @Schema()
-class Person {
+export class Person {
   name: string;
   @Integer() age: number;
   address: Address;
@@ -154,43 +172,62 @@ But now with an invalid json object
 
 **Code: Read Person, and validate**
 ```typescript
-const person = Person.from({
-  name: 'Test',
-  age: 'abc',
-  address: {
-    street1: '1234 Fun'
-  }
-});
+import { Person } from './person';
+import { SchemaValidator } from '@travetto/schema/src/validate/validator';
 
-try {
+export async function validate() {
+
+  const person = Person.from({
+    name: 'Test',
+    // @ts-ignore
+    age: 'abc',
+    address: {
+      street1: '1234 Fun'
+    }
+  });
+
   await SchemaValidator.validate(person);
-} catch (e) {
-  if (e instanceof ValidationError) {
-    ... Handle errors ...
-  }
 }
 ```
 
 would produce an exception similar to following structure
 
-**Config: Sample error output**
-```yaml
-errors:
-  - 
-    path: age
-    kind: type
-    message: 'abc' is not assignable to type number
-  - 
-    path: address.street2
-    kind: required
-    message: address.street2 is a required field
+**Terminal: Sample error output**
+```bash
+$ alt/docs/src/person-invalid-output.js -r @travetto/boot/register alt/docs/src/person-invalid-output.js
+
+ValidationResultError: Validation errors have occurred
+    at Function.validate (./src/validate/validator.ts:241:13)
+    at validate (./alt/docs/src/person-binding-invalid.ts:15:25)
+    at ./alt/docs/src/person-invalid-output.js:9:11 {
+  category: 'data',
+  payload: { errors: [ [Object], [Object] ] },
+  type: 'ValidationResultError',
+  errors: [
+    {
+      kind: 'type',
+      type: 'number',
+      path: 'age',
+      message: 'age is not a valid number'
+    },
+    {
+      kind: 'required',
+      active: true,
+      path: 'address.street2',
+      message: 'address.street2 is required'
+    }
+  ]
+}
 ```
 
 ### Custom Validators
+
 Within the schema framework, it is possible to add custom validators class level.  This allows for more flexibility when dealing with specific situations (e.g. password requirements or ensuring two fields match)
 
 **Code: Password Validator**
-```ts
+```typescript
+import { Schema, Validator } from '@travetto/schema/src/decorator/schema';
+
 const passwordValidator = (user: User) => {
   const p = user.password;
   const hasNum = /\d/.test(p);
@@ -203,7 +240,7 @@ const passwordValidator = (user: User) => {
       message: 'A password must include at least one number, one special char, and have no repeating characters'
     };
   }
-}
+};
 
 @Schema()
 @Validator(passwordValidator)
@@ -214,108 +251,179 @@ class User {
 
 When the validator is executed, it has access to the entire object, and you can check any of the values.  The validator expects an object of a specific structure if you are looking to indicate an error has occurred.
 
-**Code: Validation Error**
-```js
-  {
-    kind: '<what type of error is it>',
-    path: '<which field, or field path did the error occur at>',
-    message: '<human readable message to indicate what the error was>'
-  }
+**Code: Validation Error Structure**
+```typescript
+export interface ValidationError {
+  /**
+   * The error message
+   */
+  message: string;
+  /**
+   * The object path of the error
+   */
+  path: string;
+  /**
+   * The kind of validation
+   */
+  kind: ValidationKind;
+  /**
+   * The value provided
+   */
+  value?: any;
+  /**
+   * Regular expression to match
+   */
+  re?: string;
+  /**
+   * The type of the field
+   */
+  type?: string;
+}
 ```
 
-## Rest - Extension
-The module provides high level access for [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) support, via decorators, for validating and typing request bodies.  
+## Extension - Rest
 
-`@SchemaBody` provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
- 
+The module provides high level access for [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") support, via decorators, for validating and typing request bodies.
+
+[@SchemaBody](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/extension/rest.ts#L88) provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+
 **Code: Using SchemaBody for POST requests**
 ```typescript
- import { SearchBody } from '@travetto/schema';
+import { Controller, Post } from '@travetto/rest';
+import { SchemaBody } from '@travetto/schema/src/extension/rest';
+import { Schema } from '@travetto/schema/src/decorator/schema';
 
+@Schema()
 class User {
-   name: string;
-   age: number;
- }
- ...
-  @Post('/saveUser')  
-  async save(@SchemaBody() user: User) {
-    const user = await this.service.update(user);
-    return { success : true };
-  }
- ...
- ```
+  name: string;
+  age: number;
+}
 
-`@SchemaQuery` provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request. 
+@Controller('/user')
+class UserController {
+
+  private service: any;
+
+  @Post('/saveUser')
+  async save(@SchemaBody() user: User) {
+    user = await this.service.update(user);
+    return { success: true };
+  }
+}
+```
+
+[@SchemaQuery](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/extension/rest.ts#L101) provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
 **Code: Using SchemaQuery for GET requests**
 ```typescript
- import { SchemaQuery } from '@travetto/schema';
+import { Controller, Get } from '@travetto/rest';
+import { SchemaQuery } from '@travetto/schema/src/extension/rest';
+import { Schema } from '@travetto/schema/src/decorator/schema';
 
- class SearchParams {
-   page: number = 0;
-   pageSize: number = 100;
- }
- ...
-  @Get('/search')  
+@Schema()
+class SearchParams {
+  page: number = 0;
+  pageSize: number = 100;
+}
+
+@Controller('/user')
+class UserController {
+
+  private service: any;
+
+  @Get('/search')
   async search(@SchemaQuery() query: SearchParams) {
     return await this.service.search(query);
   }
- ...
- ```
+}
+```
 
- ## Generation - Extension
+Addtionally, [@SchemaQuery](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/extension/rest.ts#L101) and [@SchemaBody](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/extension/rest.ts#L88) can also be used with `interface`s and `type` literals in lieu of classes. This is best suited for simple types:
 
-In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward.  The generation utility is built upon [`faker`](https://github.com/marak/Faker.js/), mapping data types, and various field names into specific `faker` generation routines.
+**Code: Using SchemaQuery with a type literal**
+```typescript
+import { Controller, Get } from '@travetto/rest';
+import { SchemaQuery } from '@travetto/schema/src/extension/rest';
+
+type Paging = {
+  page?: number;
+  pageSize?: number;
+};
+
+@Controller('/user')
+class UserController {
+
+  private service: any;
+
+  @Get('/search')
+  async search(@SchemaQuery() query: Paging = { page: 0, pageSize: 100 }) {
+    return await this.service.search(query);
+  }
+}
+```
+
+## Extension - Generation
+In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward.  The generation utility is built upon [faker](https://github.com/marak/Faker.js/), mapping data types, and various field names into specific [faker](https://github.com/marak/Faker.js/) generation routines.
 
 By default all types are mapped as-is:
-* `string`
-* `number`
-* `Date`
-* `boolean`
-* Enumerations as `string` or `number` types.
-* Provided regular expressions:
-  * email
-  * url
-  * telephone
-  * postalCode
-* Sub-schemas as registered via `@Schema` decorators.
+
+   
+   *  `string`
+   *  `number`
+   *  `Date`
+   *  `boolean`
+   *  Enumerations as `string` or `number` types.
+   *  Provided regular expressions:    
+      *  email
+      *  url
+      *  telephone
+      *  postalCode
+   *  Sub-schemas as registered via [@Schema](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/schema.ts#L11) decorators.
 
 In addition to the general types, the code relies upon name matching to provide additional refinement:
-* string
- * `/^(image|img).*url$/` - image.imageUrl
- * `/^url$/` - internet.url
- * `/^email(addr(ress)?)?$/` - internet.email
- * `/^(tele)?phone(num|number)?$/` - phone.phoneNumber
- * `/^((postal|zip)code)|zip$/` - address.zipCode
- * `/f(irst)?name/` - name.firstName
- * `/l(ast)?name/` - name.lastName
- * `/^ip(add(ress)?)?$/` - internet.ip
- * `/^ip(add(ress)?)?(v?)6$/` - internet.ipv6
- * `/^username$/` - internet.userName
- * `/^domain(name)?$/` - internet.domainName
- * `/^file(path|name)?$/` - system.filePath
- * `/^street(1)?$/` - address.streetAddress
- * `/^street2$/` - address.secondaryAddress
- * `/^county$/` - address.county
- * `/^country$/` - address.country
- * `/^state$/` - address.state
- * `/^lon(gitude)/` - address.longitude
- * `/^lat(itude)/` - address.latitude
- * `/(profile).*(image|img)/` - image.avatar
- * `/(image|img)/` - image.image
- * `/^company(name)?$/` - company.companyName
- * `/(desc|description)$/` - lorem.sentences(10)
-* Date
- * `/dob|birth/` - date.past(60)
- * `/creat(e|ion)/` - dates between 200 and 100 days ago
- * `/(update|modif(y|ied))/` - dates between 100 and 50 days ago
-* number
- * `/(price|amt|amount)$/` - parseFloat(finance.amount()
+
+**Code: Supported Mappings**
+```typescript
+static NAMES_TO_TYPE: Record<string, [RegExp, () => any][]> = {
+    string: [
+      [/^(image|img).*url$/, faker.image.imageUrl],
+      [/^url$/, faker.internet.url],
+      [/^email(addr(ress)?)?$/, faker.internet.email],
+      [/^(tele)?phone(num|number)?$/, faker.phone.phoneNumber],
+      [/^((postal|zip)code)|zip$/, faker.address.zipCode],
+      [/f(irst)?name/, faker.name.firstName],
+      [/l(ast)?name/, faker.name.lastName],
+      [/^ip(add(ress)?)?$/, faker.internet.ip],
+      [/^ip(add(ress)?)?(v?)6$/, faker.internet.ipv6],
+      [/^username$/, faker.internet.userName],
+      [/^domain(name)?$/, faker.internet.domainName],
+      [/^file(path|name)?$/, faker.system.filePath],
+      [/^street(1)?$/, faker.address.streetAddress],
+      [/^street2$/, faker.address.secondaryAddress],
+      [/^county$/, faker.address.county],
+      [/^country$/, faker.address.country],
+      [/^state$/, faker.address.state],
+      [/^lon(gitude)/, faker.address.longitude],
+      [/^lat(itude)/, faker.address.latitude],
+      [/(profile).*(image|img)/, faker.image.avatar],
+      [/(image|img)/, faker.image.image],
+      [/^company(name)?$/, faker.company.companyName],
+      [/(desc|description)$/, () => faker.lorem.sentences(10)]
+    ],
+    date: [
+      [/dob|birth/, () => faker.date.past(60)],
+      [/creat(e|ion)/, () => between(-200, -100)],
+      [/(update|modif(y|ied))/, () => between(-100, -50)]
+    ]
+  };
+```
 
 An example of this would be:
 
 **Code: More complex Schema, used with Faker**
 ```typescript
+import { Schema } from '@travetto/schema/src/decorator/schema';
+import { SchemaFakerUtil } from '@travetto/schema/src/extension/faker';
 
 @Schema()
 class Address {
@@ -336,55 +444,85 @@ class User {
   address: Address;
 }
 
-const user = GenerateUtil.generate(User);
-assert(user instanceof User);
-assert.ok(user.fName);
-assert.ok(user.address);
-assert(user.address instanceof Address);
-
+export function generate() {
+  const user = SchemaFakerUtil.generate(User);
+  return user;
+}
 ```
 
 ## Custom Types
-When working with the schema, the basic types are easily understood, but some of Typescript's more complex constructs are too complex to automate cleanly.  
+When working with the schema, the basic types are easily understood, but some of [typescript](https://typescriptlang.org)'s more complex constructs are too complex to automate cleanly.
+
 To that end, the module supports two concepts:
 
 ### Type Adapters
-This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module handles geo data.
+This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.") module handles geo data.
 
 **Code: Simple Custom Type**
 ```typescript
+import { Util } from '@travetto/base';
+
 /**
- * @concrete Point
+ * @concrete PointImpl
  */
 export type Point = [number, number];
 
-export const Point = class Point {
+const INVALID = Symbol.for('invalid-point');
+
+export class PointImpl {
   static validateSchema(input: any) {
     const ret = this.bindSchema(input);
-    return ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
+    return ret !== INVALID && ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
   }
 
-  static bindSchema(input: any): [number, number] | undefined {
+  static bindSchema(input: any): [number, number] | typeof INVALID | undefined {
     if (Array.isArray(input) && input.length === 2) {
       return input.map(x => Util.coerceType(x, Number, false)) as [number, number];
+    } else {
+      return INVALID;
     }
   }
-};
+}
 ```
 
 What you can see here is that the `Point` type is now backed by a class that supports:
-* `validateSchema` - Will run during validation for this specific type.
-* `bindSchema` - Will run during binding to ensure correct behavior.
+
+   
+   *  `validateSchema` - Will run during validation for this specific type.
+   *  `bindSchema` - Will run during binding to ensure correct behavior.
 
 **Code: Simple Custom Type Usage**
 ```typescript
-import { Point } from '@travetto/model';
+import { Schema } from '@travetto/schema/src/decorator/schema';
+import { Point } from './custom-type';
 
 @Schema()
-class LocationAware {
+export class LocationAware {
   name: string;
   point: Point;
 }
 ```
 
-All that happens now, is the type is exported, and the class above is able to properly handle point as an `[x,y]` tuple.  All standard binding and validation patterns are supported, and type enforcement will work as expected. 
+All that happens now, is the type is exported, and the class above is able to properly handle point as an `[x, y]` tuple.  All standard binding and validation patterns are supported, and type enforcement will work as expected.
+
+**Terminal: Custom Type Validation**
+```bash
+$ alt/docs/src/custom-type-output.js -r @travetto/boot/register alt/docs/src/custom-type-output.js
+
+ValidationResultError: Validation errors have occurred
+    at Function.validate (./src/validate/validator.ts:241:13)
+    at ./alt/docs/src/custom-type-output.js:17:27 {
+  category: 'data',
+  payload: { errors: [ [Object] ] },
+  type: 'ValidationResultError',
+  errors: [
+    {
+      kind: 'type',
+      type: 'PointImpl',
+      path: 'point',
+      message: 'point is not a valid PointImpl'
+    }
+  ]
+}
+```
+;

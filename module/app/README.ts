@@ -1,7 +1,7 @@
 import { Injectable } from '@travetto/di';
 import { Application } from '.';
 
-import { d, Mod, Method, Code, Command, Terminal, inp, Section, List, meth, Execute } from '@travetto/doc';
+import { doc as d, Mod, Code, Command, inp, Section, List, meth, Execute } from '@travetto/doc';
 
 export default d`
 
@@ -11,7 +11,7 @@ With the application, the ${meth`run`} method is the entry point that will be in
 
 For example:
 
-${Code(d`Example of ${Application} target`, 'alt/simple/src/entry.ts')}
+${Code(d`Example of ${Application.name} target`, 'alt/simple/src/entry.ts')}
 
 Additionally, the ${Application} decorator exposes some additional functionality, which can be used to launch the application.
 
@@ -20,7 +20,13 @@ The arguments specified in the ${meth`run`} method are extracted via code transf
   
 ${Code(d`Simple Entry Point with Parameters`, 'alt/simple/src/domain.ts')}
 
-These command line invocation of ${Command('travetto', 'run')} would look like:
+${Section('CLI - run')}
+
+The run command allows for invocation of applications as defined by the ${Application} decorator.  Additionally, the environment can manually be specified (dev, test, prod).
+
+${Execute('CLI Run Help', 'travetto', ['run', '--help'])}
+
+Running without specifying an application ${Command('travetto', 'run')}, will display all the available apps, and would look like:
 
 ${Execute('Sample CLI Output', 'travetto', ['run'])}
 
@@ -30,21 +36,19 @@ ${Execute('Invoke Simple', 'travetto', ['run', 'simple-domain', 'mydomain.biz', 
 
 ${Section(`Type Checking`)}
 
-The parameters to ${Method('run')} will be type checked, to ensure proper evaluation.
+The parameters to ${meth`run`} will be type checked, to ensure proper evaluation.
 
 ${Execute('Invoke Simple with bad port', 'travetto', ['run', 'simple-domain', 'mydomain.biz', 'orange'])}
 
-The types are inferred from the ${Method(`.run()`)} method parameters, but can be overridden in the ${Application} 
+The types are inferred from the ${meth`.run()`} method parameters, but can be overridden in the ${Application} 
 annotation to support customization. Only primitive types are supported:
 
-${
-  List(
-    d`${inp`number`} - Float or decimal`,
-    d`${inp`string`} - Default if no type is specified`,
-    d`${inp`boolean`} - true(yes/on/1) and false(no/off/0)`,
-    d`${inp`union`} - Type unions of the same type (${inp`string_a | string_b`} or ${inp`1 | 2 | 3 | 4`})`
-  )
-  }
+${List(
+  d`${inp`number`} - Float or decimal`,
+  d`${inp`string`} - Default if no type is specified`,
+  d`${inp`boolean`} - true(yes/on/1) and false(no/off/0)`,
+  d`${inp`union`} - Type unions of the same type (${inp`string_a | string_b`} or ${inp`1 | 2 | 3 | 4`})`
+)}
   
 Customizing the types is done by name, and allows for greater control:
   

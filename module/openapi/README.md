@@ -1,0 +1,112 @@
+# OpenAPI Specification
+## OpenAPI integration support for the travetto framework
+
+**Install: @travetto/openapi**
+```bash
+npm install @travetto/openapi
+```
+
+In the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap.
+
+The module is provides an [OpenAPI](https://github.com/OAI/OpenAPI-Specification) v3.x representation of the API metadata provided via the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") and [Schema](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//schema "Data type registry for runtime validation, reflection and binding. ") modules.
+
+## Configuration
+By installing the dependency, the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) endpoint is automatically generated and exposed at the root of the application as `/openapi.yml` or `/openapi.json` (by default). 
+
+All of the high level configurations can be found in the following structure:
+
+**Code: Config: OpenAPI Configuration**
+```typescript
+import * as path from 'path';
+import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
+
+import { Config } from '@travetto/config';
+import { FsUtil, EnvUtil } from '@travetto/boot';
+import { AppManifest } from '@travetto/base';
+
+/**
+ * API Information, infers as much as possible from the package.json
+ */
+@Config('api.info')
+export class ApiInfoConfig {
+  contact: ContactObject = AppManifest.author ?? {};
+  description: string = AppManifest.description;
+  license: LicenseObject = { name: AppManifest.license! };
+  termsOfService?: string;
+  title: string = AppManifest.name;
+  version: string = AppManifest.version;
+}
+
+/**
+ * The API host, infers from rest host configuration
+ */
+@Config('api.host')
+export class ApiHostConfig {
+  /**
+   * List of servers
+   */
+  servers?: ServerObject[];
+  /**
+   * OpenAPI Version
+   */
+  openapi = '3.0.1';
+}
+
+/**
+ * The spec file configuration
+ */
+@Config('api.spec')
+export class ApiSpecConfig {
+  /**
+   * Where to output file to
+   */
+  output: string = 'openapi.json';
+  /**
+   * Should file be generated at runtime
+   */
+  persist: boolean = !EnvUtil.isReadonly();
+  /**
+   * Skip emitting all routes
+   */
+  skipRoutes: boolean = false;
+  /**
+   * Expose all schemas, even if not referenced
+   */
+  exposeAllSchemas: boolean = false;
+
+  async postConstruct() {
+    this.output = FsUtil.toUnix(this.output);
+    if (this.persist) {
+      if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder
+        this.output = FsUtil.resolveUnix(this.output, 'api.spec.yml');
+      }
+      await FsUtil.mkdirp(path.dirname(this.output));
+    }
+  }
+}
+```
+
+## Spec Generation
+The framework, when in watch mode, will generate the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification in either [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML). This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development.  The output format is defined by the suffix of the output file, `.yaml` or `.json`.  
+
+## Client Generation
+The outputted spec can be consumed using the [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator).
+
+## CLI - openapi:spec
+
+The module provides a plugin for the [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cli "CLI infrastructure for travetto framework") to allow scripting file generation.
+
+**Terminal: OpenAPI usage**
+```bash
+$ travetto travetto openapi:spec --help
+
+Usage:  openapi:spec [options]
+
+Options:
+  -o, --output [output]  Output files (default: "./openapi.yml")
+  -h, --help             display help for command
+```
+
+The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
+
+**Note**: The module supports generating the OpenAPI spec in real-time while listening for changes to routes and models.

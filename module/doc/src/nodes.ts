@@ -20,23 +20,40 @@ export function Mod(name: string) {
     throw new Error(`Module ${name} is unknown`);
   }
   const config = DocUtil.PACKAGES.get(name)!;
-  return { _type: 'mod' as const, title: Text(config.title), link: Text(`../${name}`), description: Text(config.description) };
+  return { _type: 'mod' as const, title: Text(config.title), link: Text(`@travetto/${name}`), description: Text(config.description) };
 }
 
 export function Ref(title: Content, file: string) {
   // Ensure it is valid
+  let line = 0;
   if (file.startsWith('@')) {
     file = require.resolve(file);
+  } else if (/^([.][/]|src|alt)/.test(file)) {
+    if (!file.startsWith('.')) {
+      file = `./${file}`;
+    }
+    file = FsUtil.resolveUnix(FsUtil.cwd, file);
   }
   if (!FsUtil.existsSync(file)) {
     throw new Error(`${file} is not a valid location`);
-  } else if (typeof title == 'string' && DocUtil.isDecorator(title, file)) {
-    title = `@${title}`;
+  } else {
+    const res = DocUtil.read(file);
+    file = res.file;
+    if (typeof title == 'string') {
+      line = res.content.split(/\n/g)
+        .findIndex(x => new RegExp(`(class|function)[ ]+${title}`).test(x));
+      if (line < 0) {
+        line = 0;
+      } else {
+        line += 1;
+      }
+      if (DocUtil.isDecorator(title, file)) {
+        title = `@${title}`;
+      }
+      title = Text(title);
+    }
   }
-  if (typeof title === 'string') {
-    title = Text(title);
-  }
-  return { _type: 'ref' as const, title, link: Text(file) };
+  return { _type: 'ref' as const, title, link: Text(file), line };
 }
 
 export function Method(content: Content) {
@@ -64,7 +81,7 @@ export function Code(title: Content, content: Content, outline = false, language
 
   language = language ?? 'typescript';
 
-  return { _type: 'code' as const, title, content, language, file };
+  return { _type: 'code' as const, title, content, language, file: file ? Text(file) : file };
 }
 
 export function Config(title: Content, content: Content, language = 'yaml') {
@@ -73,7 +90,7 @@ export function Config(title: Content, content: Content, language = 'yaml') {
     title = Text(title);
   }
   if (typeof content === 'string') {
-    if (/^[@:A-Za-z0-9\/\\\-_.]+[.]ts$/.test(content)) {
+    if (/^[@:A-Za-z0-9\/\\\-_.]+[.](ya?ml|properties)$/.test(content)) {
       const res = DocUtil.read(content);
       language = res.language;
       file = res.file;
@@ -82,12 +99,13 @@ export function Config(title: Content, content: Content, language = 'yaml') {
     content = Text(content);
   }
 
-  return { _type: 'config' as const, title, content, language, file };
+  return { _type: 'config' as const, title, content, language, file: file ? Text(file) : file };
 }
 
 export function Snippet(title: Content, file: string, startPattern: RegExp, endPattern?: RegExp, outline?: boolean, language = 'typescript') {
   const res = DocUtil.read(file);
   language = res.language;
+  file = res.file;
   const content = res.content.split(/\n/g);
   const startIdx = content.findIndex(l => startPattern.test(l));
   const endIdx = endPattern ? content.findIndex((l, i) => i > startIdx && endPattern.test(l)) : startIdx;
@@ -102,10 +120,11 @@ export function Snippet(title: Content, file: string, startPattern: RegExp, endP
   }
 
   return {
-    _type: 'snippet' as const,
+    _type: 'code' as const,
     title,
     content: Text(text),
-    file,
+    line: startIdx + 1,
+    file: Text(file),
     language
   };
 }
@@ -130,9 +149,16 @@ export function Terminal(title: Content, script: string) {
   return { _type: 'terminal' as const, title, content: Text(script), language: 'bash' };
 }
 
-export function Execute(title: Content, cmd: string, args: string[] = []) {
-  const script = DocUtil.run(cmd, ...args);
-  return Terminal(title, script);
+export function Execute(title: Content, cmd: string, args: string[] = [], cwd = FsUtil.cwd) {
+  const script = DocUtil.run(cmd, args, { cwd });
+  return Terminal(title, `$ ${cmd} ${args.join(' ')}\n\n${script}`);
+}
+
+export function Hidden(content: Content) {
+  if (typeof content === 'string') {
+    content = Text(content);
+  }
+  return { _type: 'hidden' as const, content };
 }
 
 export function Input(content: Content) {
@@ -149,6 +175,20 @@ export function Path(content: Content) {
   return { _type: 'path' as const, content };
 }
 
+export function Class(content: Content) {
+  if (typeof content === 'string') {
+    content = Text(content);
+  }
+  return { _type: 'class' as const, content };
+}
+
+export function Field(content: Content) {
+  if (typeof content === 'string') {
+    content = Text(content);
+  }
+  return { _type: 'field' as const, content };
+}
+
 export function Section(title: Content) {
   if (typeof title === 'string') {
     title = Text(title);
@@ -163,16 +203,22 @@ export function SubSection(title: Content) {
   return { _type: 'subsection' as const, title };
 }
 
-export function Install(pkg: string, title: Content = pkg) {
+export function Install(title: Content, pkg: Content) {
   if (typeof title === 'string') {
     title = Text(title);
   }
+  if (typeof pkg === 'string') {
+    if (!pkg.includes(' ')) {
+      pkg = Text(`npm install ${pkg}`);
+    } else {
+      pkg = Text(pkg);
+    }
+  }
   return {
     _type: 'install' as const,
-    _package: Text(pkg),
     title,
     language: 'bash',
-    content: Text(`npm install ${pkg}`)
+    content: pkg
   };
 }
 
@@ -184,6 +230,16 @@ export function Library(title: Content, link: Content) {
     link = Text(link);
   }
   return { _type: 'library' as const, title, link };
+}
+
+export function Anchor(title: Content, link: Content) {
+  if (typeof title === 'string') {
+    title = Text(title);
+  }
+  if (typeof link === 'string') {
+    link = Text(link);
+  }
+  return { _type: 'anchor' as const, title, link };
 }
 
 export function Note(content: Content) {
@@ -223,12 +279,35 @@ export function Ordered(...items: Content[]) {
   return BuildList(items, true);
 }
 
-export function Header(folder: string) {
+export function Header(folder: string, install = true) {
   const pkg = require(`${folder}/package.json`);
   return {
     _type: 'header' as const,
     title: Text(pkg.title as string),
     description: Text(pkg.description as string),
-    package: pkg.name as string
+    package: pkg.name as string,
+    install
+  };
+}
+
+export function RawHeader(title: Content, description?: string) {
+  return {
+    _type: 'header' as const,
+    title: typeof title === 'string' ? Text(title) : title,
+    description: description ? Text(description) : undefined
+  };
+}
+
+export function Image(title: Content, file: string) {
+  if (!FsUtil.existsSync(file)) {
+    throw new Error(`${file} is not a valid location`);
+  }
+
+  file = DocUtil.read(file).file;
+
+  return {
+    _type: 'image' as const,
+    title: typeof title === 'string' ? Text(title) : title,
+    link: Text(file)
   };
 }

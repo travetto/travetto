@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { JsonpModule, HttpModule } from '@angular/http';
+import { HttpClientJsonpModule, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
@@ -45,7 +45,7 @@ const routes: Routes = [
   ],
   imports: [
     BrowserModule,
-    HttpModule, JsonpModule,
+    HttpClientModule, HttpClientJsonpModule,
     DocumentationModule,
     RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled' }),
     BrowserAnimationsModule,

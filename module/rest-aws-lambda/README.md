@@ -1,0 +1,24 @@
+# AWS Lambda REST
+## AWS lambda provider for the travetto rest module.
+
+**Install: @travetto/rest-aws-lambda**
+```bash
+npm install @travetto/rest-aws-lambda
+```
+
+The module is an [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md) provider for the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") module.
+
+## Default Middleware
+When working with an [express](https://expressjs.com) applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
+
+**Code: Configured Middleware**
+```typescript
+const app = express();
+    app.set('query parser', 'simple');
+    app.use(compression());
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(bodyParser.raw({ type: 'image/*' }));
+    app.use(awsServerlessExpressMiddleware.eventContext());
+```
+

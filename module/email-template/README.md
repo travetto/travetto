@@ -1,0 +1,223 @@
+# Email Templating
+## Email templating module
+
+**Install: @travetto/email-template**
+```bash
+npm install @travetto/email-template
+```
+
+This is primarily a set of command line tools for compiling and developing templates.  The templating process is built upon three primary ideas, with the final output being an [inky](https://github.com/zurb/inky) rendered html/text email.  
+
+## Asset Management
+
+The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying of asset paths, with the following paths (in order of precedence):
+
+   
+   1. `%ROOT%/resources`
+   1. `@travetto/email-template/resources`
+   1. `foundation-emails/scss` (specifically for [sass](https://github.com/sass/dart-sass) files)
+
+When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process with convert `.tpl.html` files into `.compiled.html` and `.compiled.txt` suffixes to generate the html and text outputs respectively.  
+
+## Template Compilation
+
+The general process is as follows:
+
+   
+   1. Load in a general wrapper for email, located at `/resources/email/wrapper.html`.
+   1. Load in the general stylings as [sass](https://github.com/sass/dart-sass), from `/resources/email/app.scss`.
+   1. Resolving all mustache partial templates, at `/resources/email/**/*.tpl.html`.
+   1. Render the [inky](https://github.com/zurb/inky) directives into the final `html` output.
+   1. Inline and optimize all images for email transmission.
+   1. Generate markdown version of email to support the alternate text format.
+
+## Reusable Email Elements
+
+In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. `{{{> email/common-element }}}`
+
+## Images
+
+When referencing an image from the `resources` folder in a template, e.g.
+
+**Code: Sample Image Reference**
+```html
+<img src="/email/logo.png">
+```
+
+The image will be extracted out and embedded in the email as a multi part message.  This allows for compression and optimization of images as well as externalizing resources that may not be immediately public.  The currently supported set of image types are:
+
+   
+   *  jpeg
+   *  png
+
+## Template Development
+
+The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cli "CLI infrastructure for travetto framework") support for email template development. Running
+
+**Terminal: Running template development environment**
+```bash
+$ travetto travetto email:dev -h
+
+Usage:  email:dev [options]
+
+Options:
+  -p, --port [port]               Port to serve ui on (default: "3839")
+  -r, --reload-rate [reloadRate]  The rate to reload the UI at (default:
+                                  "1000")
+  -o, --open [open]               Open the ui automatically on start (default:
+                                  true)
+  -h, --help                      display help for command
+```
+
+## Template Compilation
+
+The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cli "CLI infrastructure for travetto framework") support for email template compilation also. Running
+
+**Terminal: Running template compilation**
+```bash
+$ travetto travetto email:compile -h
+
+Usage:  email:compile [options]
+
+Options:
+  -w, --watch [watch]  Compile in watch mode, requires @travetto/watch
+                       (default: false)
+  -h, --help           display help for command
+```
+
+Will convert all `.tpl.html` files into the appropriate `.compiled.html` and `.compiled.txt` files.  These will be used during the execution of the application.
+
+## Supporting Libraries
+
+Templating emails is achieved through a combination of multiple libraries, specifically:
+
+   
+   *  [inky](https://github.com/zurb/inky) is a email rendering framework that aims to provide a standard set of constructs for building visually appealing emails.  The version of inky being used is a complete rewrite to optimize for size and performance.
+   *  [sass](https://github.com/sass/dart-sass) used for styles compilation.
+   *  [mustache](https://github.com/janl/mustache.js/) allows for interpolation of variables for personalized emails.
+
+## Templating Example
+
+**Code: Example inky template with mustache support**
+```html
+<row>
+  <columns large="{{left}}">Bob</columns>
+  <columns large="{{right}}"> </columns>
+</row>
+```
+
+which will then interpolate the context to replace `left` and `right`, and compile to a final html output. When using [mustache](https://github.com/janl/mustache.js/) expressions, make sure to use `{{{ }}}`, triple braces on complex text, to prevent [mustache](https://github.com/janl/mustache.js/) from escaping any characters.
+
+## Example inky template with partials
+
+Given two files, `resources/email/welcome.html` and `resources/email/footer.hml`
+
+**Code: resources/email/welcome.html**
+```html
+<row>
+  <row>
+    <columns large="{{left}}">Bob</columns>
+    <columns large="{{right}}"> </columns>
+  </row>
+  {{{> email/footer }}}
+</row>
+```
+
+**Code: resources/email/footer.html**
+```html
+<row>
+  This is a footer
+  <a href="{{salesLink}}">Sales Link</a>
+</row>
+```
+
+The final template will render as:
+
+**Terminal: Final Output, with styling removed**
+```bash
+$ alt/docs/src/render.ts -r @travetto/boot/register alt/docs/src/render.ts
+
+<!DOCTYPE html><html>
+
+  <body>
+    <table align="center" class="container">
+      <tbody>
+        <tr><td>
+      <table class="row">
+      <tbody>
+        <tr>
+  </tr></tbody></table><table class="row">
+      <tbody>
+        <tr>
+    <th class="small-12 large-12 columns first">
+        <table>
+          <tbody>
+            <tr>
+              <th>Bob</th>
+<th class="expander"></th>
+            </tr>
+          </tbody>
+        </table>
+      </th>
+    <th class="small-12 large-12 columns last">
+        <table>
+          <tbody>
+            <tr>
+              <th> </th>
+<th class="expander"></th>
+            </tr>
+          </tbody>
+        </table>
+      </th>
+  </tr>
+      </tbody>
+    </table><a href="{{salesLink}}">Sales Link</a><table class="row">
+      <tbody>
+        <tr>
+</tr>
+      </tbody>
+    </table>
+
+    </td></tr>
+      </tbody>
+    </table>
+  
+
+</body></html>
+```
+
+## CLI - email:compile
+
+This command is used to compile the email templates ahead of time for use during execution.  The generated files are `.compiled.html` and `.compiled.txt` for the html/text output respectivevly.  By default these files are added to the `.gitignore` as they are generally not intended to be saved but to be generated during the build process.
+
+**Terminal: Compile help**
+```bash
+$ travetto travetto email:compile --help
+
+Usage:  email:compile [options]
+
+Options:
+  -w, --watch [watch]  Compile in watch mode, requires @travetto/watch
+                       (default: false)
+  -h, --help           display help for command
+```
+
+## CLI - email:dev
+
+This command will spin up a web server (port `3839`) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline. Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
+
+**Terminal: Dev help**
+```bash
+$ travetto travetto email:dev --help
+
+Usage:  email:dev [options]
+
+Options:
+  -p, --port [port]               Port to serve ui on (default: "3839")
+  -r, --reload-rate [reloadRate]  The rate to reload the UI at (default:
+                                  "1000")
+  -o, --open [open]               Open the ui automatically on start (default:
+                                  true)
+  -h, --help                      display help for command
+```
+

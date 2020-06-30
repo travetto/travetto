@@ -1,90 +1,199 @@
-<div class="documentation"><h2 id="worker" id="worker">Worker</h2>
-<app-section-header headerType="install">Primary</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/worker</code></pre><p>This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc (inter-process communication) functionality out of the box. This module builds upon that by providing enhanced event management, richer process management, as well as constructs for orchestrating a conversation between two processes.  </p>
-<h3 id="execution-pools">Execution Pools</h3>
-<p>With respect to managing multiple executions, <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/worker/src/pool.ts" target="_blank" null><code class="inline">WorkPool</code></a> is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/worker/src/input/types.ts" target="_blank" null><code class="inline">InputSource</code></a> implementation that allow for a wide range of use cases.</p>
-<p>The supported <code class="inline">InputSource</code>s are</p>
-<ul>
-<li><code class="inline language-typescript">Iterable</code> supports any iterable (Array, Set, etc) input as well as any async iterable input. The source will continue to produce jobs until the underlying iterator is exhausted.</li>
-<li><code class="inline language-typescript">Event</code> is an asynchronous source that allows the caller to determine when the next item is available.  Useful triggering work on event driven problems.</li>
-</ul>
-<p>Below is a pool that will convert images on demand, while queuing as needed.</p>
-<app-section-header headerType="code">Image processing queue, with a fixed batch/pool size</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">ImageProcessor</span> <span class="token punctuation">{{ '{' }}</span>
+<div class="documentation">
+<h1>Worker
+          <small>Process management utilties, with a focus on inter-process communication</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/worker
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/worker</code></pre>     
+      </figure>
+
+This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc (inter-process communication) functionality out of the box. This module builds upon that by providing enhanced event management, richer process management, as well as constructs for orchestrating a conversation between two processes.
+
+<h2>Execution Pools</h2>
+With respect to managing multiple executions, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/pool.ts#L23">WorkPool</a> is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various <a target="_blank" class="source-link" href="src/input/types.ts#L3">InputSource</a> implementation that allow for a wide range of use cases.
+
+The only provided <a target="_blank" class="source-link" href="src/input/types.ts#L3">InputSource</a> is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/input/iterable.ts#L11">IterableInputSource</a> which supports all <code class="item input">Iterable</code> and <code class="item input">Iterator</code> sources.  Additionally, the module provides <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/input/async-iterator.ts#L6">DynamicAsyncIterator</a> which allows for manual control of iteration, which is useful for event driven work loads.
+
+Below is a pool that will convert images on demand, while queuing as needed.
+
+      <figure class="code">
+      <figcaption class="code">Image processing queue, with a fixed batch/pool size
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/alt/docs/src/images.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ExecUtil<span class="token punctuation">,</span> ExecutionState <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Worker<span class="token punctuation">,</span> WorkPool<span class="token punctuation">,</span> IterableInputSource<span class="token punctuation">,</span> DynamicAsyncIterator <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/worker'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">ImageProcessor</span> <span class="token keyword">implements</span> <span class="token class-name">Worker</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
   active <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-  proc<span class="token operator">:</span> <span class="token type">ChildProcess</span><span class="token punctuation">;</span>
+  proc<span class="token operator">:</span> ExecutionState<span class="token punctuation">;</span>
 
-  <span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>proc<span class="token punctuation">.</span><span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
+  <span class="token keyword">get</span> <span class="token function">id</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>proc<span class="token punctuation">.</span>process<span class="token punctuation">.</span>pid<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
-  <span class="token keyword">async</span> <span class="token function">execute</span><span class="token punctuation">(</span><span class="token parameter">path<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>proc<span class="token punctuation">.</span>process<span class="token punctuation">.</span><span class="token function">kill</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">async</span> <span class="token function">execute</span><span class="token punctuation">(</span><span class="token parameter">path<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>active <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{{ '{' }}</span>
-      <span class="token keyword">this</span><span class="token punctuation">.</span>proc <span class="token operator">=</span> <span class="token operator">...</span>convert <span class="token operator">...</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>proc <span class="token operator">=</span> ExecUtil<span class="token punctuation">.</span><span class="token function">spawn</span><span class="token punctuation">(</span><span class="token string">'convert images'</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>path<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>proc<span class="token punctuation">;</span>
-    <span class="token punctuation">{{ '}' }}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>e<span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>e<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
 
-    <span class="token punctuation">{{ '}' }}</span>
+    <span class="token punctuation">{{'}'}}</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>active <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
 
-<span class="token keyword">class</span> <span class="token class-name">ImageCompressor</span> <span class="token keyword">extends</span> <span class="token class-name">WorkerPool</span> <span class="token punctuation">{{ '{' }}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ImageCompressor</span> <span class="token keyword">extends</span> <span class="token class-name">WorkPool</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> ImageProcessor<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
 
-  pendingImages <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">EventInputSource</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  pendingImages <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DynamicAsyncIterator</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">new</span> <span class="token class-name">ImageProcessor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
+  <span class="token punctuation">{{'}'}}</span>
 
-  <span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">process</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>pendingImages<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
+  <span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">process</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">IterableInputSource</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>pendingImages<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
-  <span class="token function">convert</span><span class="token punctuation">(</span><span class="token parameter"><span class="token operator">...</span>images<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>pendingImages<span class="token punctuation">.</span><span class="token function">trigger</span><span class="token punctuation">(</span>images<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>Once a pool is constructed, it can be shutdown by calling the <code class="inline">.shutdown()</code> method, and awaiting the result.</p>
-<h3 id="ipc-support">IPC Support</h3>
-<p>Within the <code class="inline">comm</code> package, there is support for two primary communication elements: <code class="inline">child</code> and <code class="inline">parent</code>.  Usually <code class="inline">parent</code> indicates it is the owner of the sub process.  <code class="inline">Child</code> indicates that it has been created/spawned/forked by the parent and will communicate back to it’s parent.  This generally means that a <code class="inline">parent</code> channel can be destroyed (i.e. killing the subprocess) where a <code class="inline">child</code> channel can only exit the process, but the channel cannot be destroyed.</p>
-<h4 id="ipc-as-a-worker">IPC as a Worker</h4>
-<p>A common pattern is to want to model a sub process as a worker, to be a valid candidate in a <code class="inline">WorkPool</code>.  The <code class="inline">WorkUtil</code> class provides a utility to facilitate this desire.   </p>
-<app-section-header headerType="code">Spawned Worker Signature</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">WorkUtil</span> <span class="token punctuation">{{ '{' }}</span>
- <span class="token keyword">static</span> spawnedWorker<span class="token operator">&lt;</span><span class="token constant">X</span><span class="token operator">></span><span class="token punctuation">(</span>
-    config<span class="token operator">:</span> <span class="token type">SpawnConfig</span> <span class="token operator">&amp;</span> <span class="token punctuation">{{ '{' }}</span>
-      <span class="token function-variable function">execute</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">channel<span class="token operator">:</span> <span class="token type">ParentCommChannel</span><span class="token punctuation">,</span> input<span class="token operator">:</span> <span class="token constant">X</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">any</span><span class="token punctuation">,</span>
-      destroy<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">channel<span class="token operator">:</span> ParentCommChannel</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">any</span><span class="token punctuation">,</span>
-      init<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">channel<span class="token operator">:</span> ParentCommChannel</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">any</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{{ '}' }}</span>
-  <span class="token punctuation">)</span></code></pre><p>When creating your work, via process spawning, you will need to provide the script (and any other features you would like in <code class="inline">SpawnConfig</code>).   Additionally you must, at a minimum, provide functionality to run whenever an input element is up for grabs in the input source.  This method will be provided the communication channel (<code class="inline">parent</code>) and the input value.  A simple example could look like:</p>
-<app-section-header headerType="code">Simple Spawned Worker</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">const</span> pool <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WorkPool</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span>
-  <span class="token type">WorkUtil</span><span class="token punctuation">.</span>spawnedWorker<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token type">FsUtil</span><span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>__dirname<span class="token punctuation">,</span> <span class="token string">'simple.child-launcher.js'</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">{{ '{' }}</span>
-    handlers<span class="token operator">:</span> <span class="token punctuation">{{ '{' }}</span>
-      <span class="token keyword">async</span> <span class="token function">init</span><span class="token punctuation">(</span><span class="token parameter">channel</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-        <span class="token keyword">return</span> channel<span class="token punctuation">.</span><span class="token function">listenOnce</span><span class="token punctuation">(</span><span class="token string">'ready'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// <span class="token type">Wait</span> for child to indicate it is ready</span>
-      <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span>
-      <span class="token keyword">async</span> <span class="token function">execute</span><span class="token punctuation">(</span><span class="token parameter">channel<span class="token punctuation">,</span> inp</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-        <span class="token keyword">const</span> res <span class="token operator">=</span> channel<span class="token punctuation">.</span><span class="token function">listenOnce</span><span class="token punctuation">(</span><span class="token string">'response'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//  <span class="token type">Register</span> response listener</span>
-        channel<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token string">'request'</span><span class="token punctuation">,</span> <span class="token punctuation">{{ '{' }}</span> data<span class="token operator">:</span> inp <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// <span class="token type">Send</span> request</span>
+  <span class="token function">convert</span><span class="token punctuation">(</span><span class="token parameter"><span class="token operator">...</span>images<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>pendingImages<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>images<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
-        <span class="token keyword">const</span> <span class="token punctuation">{{ '{' }}</span> data <span class="token punctuation">{{ '}' }}</span> <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">;</span> <span class="token comment">// <span class="token type">Get</span> answer</span>
-        <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Sent</span>'</span><span class="token punctuation">,</span> inp<span class="token punctuation">,</span> <span class="token string">'<span class="token type">Received</span>'</span><span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+Once a pool is constructed, it can be shutdown by calling the <code class="item method">.shutdown()</code> method, and awaiting the result.
 
-        <span class="token function">assert</span><span class="token punctuation">(</span>inp <span class="token operator">+</span> inp <span class="token operator">===</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// <span class="token type">Ensure</span> the answer is double the input</span>
-      <span class="token punctuation">{{ '}' }}</span>
-    <span class="token punctuation">{{ '}' }}</span>
-  <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
-<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><app-section-header headerType="code">Spawned Worker Target</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">const</span> exec <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ChildCommChannel</span><span class="token operator">&lt;</span><span class="token punctuation">{{ '{' }}</span> data<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{ '}' }}</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<h2>IPC Support</h2>
 
-exec<span class="token punctuation">.</span><span class="token function">listenFor</span><span class="token punctuation">(</span><span class="token string">'request'</span><span class="token punctuation">,</span> <span class="token parameter">data</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
-  exec<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token string">'response'</span><span class="token punctuation">,</span> <span class="token punctuation">{{ '{' }}</span> data<span class="token operator">:</span> <span class="token punctuation">(</span>data<span class="token punctuation">.</span>data <span class="token operator">+</span> data<span class="token punctuation">.</span>data<span class="token punctuation">)</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// <span class="token type">When</span> data is received, return double</span>
-<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Within the <code class="item input">comm</code> package, there is support for two primary communication elements: <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/child.ts#L6">ChildCommChannel</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/parent.ts#L9">ParentCommChannel</a>.  Usually <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/parent.ts#L9">ParentCommChannel</a> indicates it is the owner of the sub process.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/child.ts#L6">ChildCommChannel</a> indicates that it has been created/spawned/forked by the parent and will communicate back to it's parent.  This generally means that a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/parent.ts#L9">ParentCommChannel</a> can be destroyed (i.e. killing the subprocess) where a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/child.ts#L6">ChildCommChannel</a> can only exit the process, but the channel cannot be destroyed.
 
-exec<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token string">'ready'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// <span class="token type">Indicate</span> the child is ready to receive requests</span>
+<h3>IPC as a Worker</h3>
+A common pattern is to want to model a sub process as a worker, to be a valid candidate in a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/pool.ts#L23">WorkPool</a>.  The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/util.ts#L8">WorkUtil</a> class provides a utility to facilitate this desire.
 
-<span class="token keyword">const</span> <span class="token function-variable function">heartbeat</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>heartbeat<span class="token punctuation">,</span> <span class="token number">5000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// <span class="token type">Keep</span>-alive</span>
-<span class="token function">heartbeat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div>
+      <figure class="code">
+      <figcaption class="code">Spawned Worker
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/util.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ExecUtil<span class="token punctuation">,</span> ExecutionOptions<span class="token punctuation">,</span> <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ParentCommChannel <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./comm/parent'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Worker <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./pool'</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Spawned worker
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">WorkUtil</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Create a process channel worker from a given spawn config
+   */</span>
+  <span class="token keyword">static</span> spawnedWorker<span class="token operator">&lt;</span><span class="token constant">X</span><span class="token operator">></span><span class="token punctuation">(</span>
+    command<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{{'{'}}</span> args<span class="token punctuation">,</span> opts<span class="token punctuation">,</span> handlers <span class="token punctuation">{{'}'}}</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+      args<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+      opts<span class="token operator">?</span><span class="token operator">:</span> ExecutionOptions<span class="token punctuation">;</span>
+      handlers<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+        init<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">channel<span class="token operator">:</span> ParentCommChannel</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
+        <span class="token function-variable function">execute</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">channel<span class="token operator">:</span> ParentCommChannel<span class="token punctuation">,</span> input<span class="token operator">:</span> <span class="token constant">X</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
+        destroy<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">channel<span class="token operator">:</span> ParentCommChannel</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">)</span><span class="token operator">:</span> Worker<span class="token operator">&lt;</span><span class="token constant">X</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> channel <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ParentCommChannel</span><span class="token punctuation">(</span>
+      ExecUtil<span class="token punctuation">.</span><span class="token function">fork</span><span class="token punctuation">(</span>command<span class="token punctuation">,</span> args<span class="token punctuation">,</span> opts<span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">get</span> <span class="token function">id</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token keyword">return</span> channel<span class="token punctuation">.</span>id<span class="token punctuation">;</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+      <span class="token keyword">get</span> <span class="token function">active</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token keyword">return</span> channel<span class="token punctuation">.</span>active<span class="token punctuation">;</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+      init<span class="token operator">:</span> handlers<span class="token punctuation">.</span>init <span class="token operator">?</span> handlers<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>handlers<span class="token punctuation">,</span> channel<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+      execute<span class="token operator">:</span> handlers<span class="token punctuation">.</span><span class="token function">execute</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>handlers<span class="token punctuation">,</span> channel<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token keyword">async</span> <span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>handlers<span class="token punctuation">.</span>destroy<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+          <span class="token keyword">await</span> handlers<span class="token punctuation">.</span><span class="token function">destroy</span><span class="token punctuation">(</span>channel<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{{'}'}}</span>
+        <span class="token keyword">await</span> channel<span class="token punctuation">.</span><span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+When creating your work, via process spawning, you will need to provide the script (and any other features you would like in <code class="item input">SpawnConfig</code>).   Additionally you must, at a minimum, provide functionality to run whenever an input element is up for grabs in the input source.  This method will be provided the communication channel (<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/parent.ts#L9">ParentCommChannel</a>) and the input value.  A simple example could look like:
+
+      <figure class="code">
+      <figcaption class="code">Spawning Pool
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/alt/docs/src/spawner.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WorkUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/worker/src/util'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FsUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WorkPool <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/worker/src/pool'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> IterableInputSource <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/worker/src/input/iterable'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> pool <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WorkPool</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+  WorkUtil<span class="token punctuation">.</span>spawnedWorker<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">(</span>FsUtil<span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>__dirname<span class="token punctuation">,</span> <span class="token string">'spawned.js'</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
+    handlers<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">async</span> <span class="token function">init</span><span class="token punctuation">(</span><span class="token parameter">channel</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">return</span> channel<span class="token punctuation">.</span><span class="token function">listenOnce</span><span class="token punctuation">(</span><span class="token string">'ready'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Wait for child to indicate it is ready</span>
+      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+      <span class="token keyword">async</span> <span class="token function">execute</span><span class="token punctuation">(</span><span class="token parameter">channel<span class="token punctuation">,</span> inp</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">const</span> res <span class="token operator">=</span> channel<span class="token punctuation">.</span><span class="token function">listenOnce</span><span class="token punctuation">(</span><span class="token string">'response'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//  Register response listener</span>
+        channel<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token string">'request'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> data<span class="token operator">:</span> inp <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Send request</span>
+
+        <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> data <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">;</span> <span class="token comment">// Get answer</span>
+        <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Sent'</span><span class="token punctuation">,</span> inp<span class="token punctuation">,</span> <span class="token string">'Received'</span><span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span>inp <span class="token operator">+</span> inp <span class="token operator">===</span> data<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+          <span class="token comment">// Ensure the answer is double the input</span>
+          <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Didn't get the double</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+pool<span class="token punctuation">.</span><span class="token function">process</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">IterableInputSource</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">x</span> <span class="token operator">=></span> pool<span class="token punctuation">.</span><span class="token function">shutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>     
+      </figure>
+
+      <figure class="code">
+      <figcaption class="code">Spawned Worker
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/alt/docs/src/spawned.js">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-javascript"><span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@travetto/boot/register'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@travetto/base'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>PhaseManager<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> ChildCommChannel <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'../../..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> exec <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ChildCommChannel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  exec<span class="token punctuation">.</span><span class="token function">listenFor</span><span class="token punctuation">(</span><span class="token string">'request'</span><span class="token punctuation">,</span> <span class="token parameter">data</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+    exec<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token string">'response'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> data<span class="token operator">:</span> <span class="token punctuation">(</span>data<span class="token punctuation">.</span>data <span class="token operator">+</span> data<span class="token punctuation">.</span>data<span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// When data is received, return double</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  exec<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token string">'ready'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Indicate the child is ready to receive requests</span>
+
+  <span class="token keyword">const</span> <span class="token function-variable function">heartbeat</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>heartbeat<span class="token punctuation">,</span> <span class="token number">5000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Keep-alive</span>
+  <span class="token function">heartbeat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>     
+      </figure>
+
+      <figure class="terminal">
+      <figcaption class="terminal">Output
+      
+      </figcaption>
+      <pre><code class="language-bash">$ ./alt/docs/src/spawner.ts -r @travetto/boot/register ./alt/docs/src/spawner.ts
+
+Sent <span class="token number">1</span> Received <span class="token number">2</span>
+Sent <span class="token number">2</span> Received <span class="token number">4</span>
+Sent <span class="token number">3</span> Received <span class="token number">6</span>
+Sent <span class="token number">4</span> Received <span class="token number">8</span>
+Sent <span class="token number">5</span> Received <span class="token number">10</span></code></pre>     
+      </figure>
+
+</div>

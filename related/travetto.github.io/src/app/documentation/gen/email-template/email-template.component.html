@@ -1,72 +1,242 @@
-<div class="documentation"><h2 id="email-template" id="email-template">Email-Template</h2>
-<app-section-header headerType="install">Templating support for email module</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> -D @travetto/email-template</code></pre><p>This is primarily a set of command line tools for compiling and developing templates.  The templating process is built upon three primary ideas, with the final output being an <a class="external-link" href="https://github.com/zurb/inky" target="_blank" null><code class="inline">inky</code></a> rendered html/text email.  </p>
-<h3 id="asset-management">Asset Management</h3>
-<p>The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying of asset paths, with the following paths (in order of precedence):</p>
-<ol>
-<li><code class="inline">%ROOT%/resources</code></li>
-<li><code class="path inline">@travetto/email-template/resources</code></li>
-<li><code class="inline">foundation-emails/scss</code> (specifically for <code class="inline">sass</code> files)</li>
-</ol>
-<p>When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process with convert <code class="inline">.tpl.html</code> files into <code class="inline">.compiled.html</code> and <code class="inline">.compiled.txt</code> suffixes to generate the html and text outputs respectively.  </p>
-<h3 id="template-compilation">Template Compilation</h3>
-<p>The general process is as follows:</p>
-<ol>
-<li>Load in a general wrapper for email, located at <code class="path inline">/resources/email/wrapper.html</code>.</li>
-<li>Load in the general stylings as <code class="inline">sass</code>, from <code class="path inline">/resources/email/app.scss</code>.</li>
-<li>Resolving all mustache partial templates, at <code class="path inline">/resources/email/**/*.tpl.html</code>.</li>
-<li>Render the <code class="inline">inky</code> directives into the final <code class="inline">html</code> output.</li>
-<li>Inline and optimize all images for email transmission.</li>
-<li>Generate markdown version of email to support the alternate text format.</li>
-</ol>
-<h3 id="common-email-elements">Common Email Elements</h3>
-<p>In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. <code class="inline">{{ '{' }}{{ '{' }}{{ '{' }}&gt; email/common-element {{ '}' }}{{ '}' }}{{ '}' }}</code></p>
-<h3 id="images">Images</h3>
-<p>When referencing an image from the <code class="inline">resources</code> folder in a template, e.g.</p>
-<pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>/email/logo.png<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></code></pre><p>The image will be extracted out and embedded in the email as a multi part message.  This allows for compression and optimization of images as well as externalizing resources that may not be immediately public. </p>
-<h3 id="template-development">Template Development</h3>
-<p>The module provides <a class="module-link" routerLink="/docs/cli"  null><code class="inline">cli</code></a> support for email template development. Running </p>
-<p><strong>Shell: running template development environment</strong></p>
-<pre><code class="language-bash">$ npx trv email:dev</code></pre><h3 id="template-compilation-1">Template Compilation</h3>
-<p>The module provides <a class="module-link" routerLink="/docs/cli"  null><code class="inline">cli</code></a> support for email template compilation also. Running </p>
-<p><strong>Shell: running template compilation</strong></p>
-<pre><code class="language-bash">$ npx trv email:compile</code></pre><p>Will convert all <code class="inline">.tpl.html</code> files into the appropriate <code class="inline">.compiled.html</code> and <code class="inline">.compiled.txt</code> files.  These will be used during the execution of the application.</p>
-<h3 id="supporting-libraries">Supporting Libraries</h3>
-<p>Templating emails is achieved through a combination of multiple libraries, specifically:</p>
-<ul>
-<li><a class="external-link" href="https://github.com/zurb/inky" target="_blank" null><code class="inline">inky</code></a> is a email rendering framework that aims to provide a standard set of constructs for building visually appealing emails.  The version of inky being used is a complete rewrite to optimize for size and performance.</li>
-<li><a class="external-link" href="https://github.com/sass/dart-sass" target="_blank" null><code class="inline">sass</code></a> used for sass compilation.</li>
-<li><a class="external-link" href="https://github.com/janl/mustache.js/" target="_blank" null><code class="inline">mustache</code></a> allows for interpolation of variables for personalized emails.</li>
-</ul>
-<h3 id="example">Example</h3>
-<p>A sample template could look like:</p>
-<app-section-header headerType="code">Example inky template with mustache support</app-section-header>
-<pre><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ '{' }}{{ '{' }}left{{ '}' }}{{ '}' }}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token type">Bob</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ '{' }}{{ '{' }}right{{ '}' }}{{ '}' }}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span></code></pre><p>which will then interpolate the context to replace <code class="inline">left</code> and <code class="inline">right</code>, and compile to a final html output. When using mustache expressions, make sure to use <code class="inline">{{ '{' }}{{ '{' }}{{ '{' }} {{ '}' }}{{ '}' }}{{ '}' }}</code>, triple braces on complex text, to prevent mustache from escaping any characters.</p>
-<h3 id="example-inky-template-with-partials">Example inky template with partials</h3>
-<p>Given two files, <code class="path inline">resources/email/welcome.html</code> and <code class="path inline">resources/email/footer.hml</code></p>
-<app-section-header headerType="code">Assets/welcome.html</app-section-header>
-<pre><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
+<div class="documentation">
+<h1>Email Templating
+          <small>Email templating module</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/email-template
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/email-template</code></pre>     
+      </figure>
+
+This is primarily a set of command line tools for compiling and developing templates.  The templating process is built upon three primary ideas, with the final output being an <a target="_blank" class="external-link" href="https://github.com/zurb/inky">inky</a> rendered html/text email.  
+
+<h2>Asset Management</h2>
+
+The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying of asset paths, with the following paths (in order of precedence):
+
+<ol> <li><code class="item path">%ROOT%/resources</code></li>
+ <li><code class="item path">@travetto/email-template/resources</code></li>
+ <li><code class="item path">foundation-emails/scss</code> (specifically for <a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a> files)</li></ol>
+
+When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process with convert <code class="item path">.tpl.html</code> files into <code class="item path">.compiled.html</code> and <code class="item path">.compiled.txt</code> suffixes to generate the html and text outputs respectively.  
+
+<h2>Template Compilation</h2>
+
+The general process is as follows:
+
+<ol> <li>Load in a general wrapper for email, located at <code class="item path">/resources/email/wrapper.html</code>.</li>
+ <li>Load in the general stylings as <a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a>, from <code class="item path">/resources/email/app.scss</code>.</li>
+ <li>Resolving all mustache partial templates, at <code class="item path">/resources/email/**/*.tpl.html</code>.</li>
+ <li>Render the <a target="_blank" class="external-link" href="https://github.com/zurb/inky">inky</a> directives into the final <code class="item input">html</code> output.</li>
+ <li>Inline and optimize all images for email transmission.</li>
+ <li>Generate markdown version of email to support the alternate text format.</li></ol>
+
+<h2>Reusable Email Elements</h2>
+
+In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. <code class="item input">{{'{'}}{{'{'}}{{'{'}}&gt; email/common-element {{'}'}}{{'}'}}{{'}'}}</code>
+
+<h2>Images</h2>
+
+When referencing an image from the <code class="item path">resources</code> folder in a template, e.g.
+
+      <figure class="code">
+      <figcaption class="code">Sample Image Reference
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email-template/alt/docs/resources/email/sample-image.html">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>/email/logo.png<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></code></pre>     
+      </figure>
+
+The image will be extracted out and embedded in the email as a multi part message.  This allows for compression and optimization of images as well as externalizing resources that may not be immediately public.  The currently supported set of image types are:
+
+<ul> <li>jpeg</li>
+ <li>png</li></ul>
+
+<h2>Template Development</h2>
+
+The module provides <a class="module-link" href="/docs/cli" title="CLI infrastructure for travetto framework">Command Line Interface</a> support for email template development. Running
+
+      <figure class="terminal">
+      <figcaption class="terminal">Running template development environment
+      
+      </figcaption>
+      <pre><code class="language-bash">$ travetto travetto email:dev -h
+
+Usage:  email:dev <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -p, --port <span class="token punctuation">[</span>port<span class="token punctuation">]</span>               Port to serve ui on <span class="token punctuation">(</span>default: <span class="token string">"3839"</span><span class="token punctuation">)</span>
+  -r, --reload-rate <span class="token punctuation">[</span>reloadRate<span class="token punctuation">]</span>  The rate to reload the UI at <span class="token punctuation">(</span>default:
+                                  <span class="token string">"1000"</span><span class="token punctuation">)</span>
+  -o, --open <span class="token punctuation">[</span>open<span class="token punctuation">]</span>               Open the ui automatically on start <span class="token punctuation">(</span>default:
+                                  <span class="token boolean">true</span><span class="token punctuation">)</span>
+  -h, --help                      display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
+
+<h2>Template Compilation</h2>
+
+The module provides <a class="module-link" href="/docs/cli" title="CLI infrastructure for travetto framework">Command Line Interface</a> support for email template compilation also. Running
+
+      <figure class="terminal">
+      <figcaption class="terminal">Running template compilation
+      
+      </figcaption>
+      <pre><code class="language-bash">$ travetto travetto email:compile -h
+
+Usage:  email:compile <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -w, --watch <span class="token punctuation">[</span>watch<span class="token punctuation">]</span>  Compile <span class="token keyword">in</span> <span class="token function">watch</span> mode, requires @travetto/watch
+                       <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -h, --help           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
+
+Will convert all <code class="item path">.tpl.html</code> files into the appropriate <code class="item path">.compiled.html</code> and <code class="item path">.compiled.txt</code> files.  These will be used during the execution of the application.
+
+<h2>Supporting Libraries</h2>
+
+Templating emails is achieved through a combination of multiple libraries, specifically:
+
+<ul> <li><a target="_blank" class="external-link" href="https://github.com/zurb/inky">inky</a> is a email rendering framework that aims to provide a standard set of constructs for building visually appealing emails.  The version of inky being used is a complete rewrite to optimize for size and performance.</li>
+ <li><a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a> used for styles compilation.</li>
+ <li><a target="_blank" class="external-link" href="https://github.com/janl/mustache.js/">mustache</a> allows for interpolation of variables for personalized emails.</li></ul>
+
+<h2>Templating Example</h2>
+
+      <figure class="code">
+      <figcaption class="code">Example inky template with mustache support
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email-template/alt/docs/resources/email/example.tpl.html">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}left{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Bob<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}right{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span></code></pre>     
+      </figure>
+
+which will then interpolate the context to replace <code class="item input">left</code> and <code class="item input">right</code>, and compile to a final html output. When using <a target="_blank" class="external-link" href="https://github.com/janl/mustache.js/">mustache</a> expressions, make sure to use <code class="item input">{{'{'}}{{'{'}}{{'{'}} {{'}'}}{{'}'}}{{'}'}}</code>, triple braces on complex text, to prevent <a target="_blank" class="external-link" href="https://github.com/janl/mustache.js/">mustache</a> from escaping any characters.
+
+<h2>Example inky template with partials</h2>
+
+Given two files, <code class="item path">resources/email/welcome.html</code> and <code class="item path">resources/email/footer.hml</code>
+
+      <figure class="code">
+      <figcaption class="code">resources/email/welcome.html
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email-template/alt/docs/resources/email/welcome.tpl.html">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ '{' }}{{ '{' }}left{{ '}' }}{{ '}' }}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token type">Bob</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ '{' }}{{ '{' }}right{{ '}' }}{{ '}' }}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}left{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Bob<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}right{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span>
-  {{ '{' }}{{ '{' }}{{ '{' }}> email/footer {{ '}' }}{{ '}' }}{{ '}' }}
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span></code></pre><app-section-header headerType="code">Assets/footer.html</app-section-header>
-<pre><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
-  <span class="token type">This</span> is a footer
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ '{' }}{{ '{' }}salesLink{{ '}' }}{{ '}' }}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token type">Sales</span> <span class="token type">Link</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span></code></pre><p>The final template will render as</p>
-<app-section-header headerType="code">Final output</app-section-header>
-<pre><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ '{' }}{{ '{' }}left{{ '}' }}{{ '}' }}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token type">Bob</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ '{' }}{{ '{' }}right{{ '}' }}{{ '}' }}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
-    <span class="token type">This</span> is a footer
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ '{' }}{{ '{' }}salesLink{{ '}' }}{{ '}' }}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token type">Sales</span> <span class="token type">Link</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span></code></pre></div>
+  {{'{'}}{{'{'}}{{'{'}}> email/footer {{'}'}}{{'}'}}{{'}'}}
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span></code></pre>     
+      </figure>
+
+      <figure class="code">
+      <figcaption class="code">resources/email/footer.html
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email-template/alt/docs/resources/email/footer.html">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
+  This is a footer
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}salesLink{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Sales Link<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span></code></pre>     
+      </figure>
+
+The final template will render as:
+
+      <figure class="terminal">
+      <figcaption class="terminal">Final Output, with styling removed
+      
+      </figcaption>
+      <pre><code class="language-bash">$ alt/docs/src/render.ts -r @travetto/boot/register alt/docs/src/render.ts
+
+<span class="token operator">&lt;</span><span class="token operator">!</span>DOCTYPE html<span class="token operator">></span><span class="token operator">&lt;</span>html<span class="token operator">></span>
+
+  <span class="token operator">&lt;</span>body<span class="token operator">></span>
+    <span class="token operator">&lt;</span>table <span class="token assign-left variable">align</span><span class="token operator">=</span><span class="token string">"center"</span> <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"container"</span><span class="token operator">></span>
+      <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>tr<span class="token operator">></span><span class="token operator">&lt;</span>td<span class="token operator">></span>
+      <span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"row"</span><span class="token operator">></span>
+      <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>tr<span class="token operator">></span>
+  <span class="token operator">&lt;</span>/tr<span class="token operator">></span><span class="token operator">&lt;</span>/tbody<span class="token operator">></span><span class="token operator">&lt;</span>/table<span class="token operator">></span><span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"row"</span><span class="token operator">></span>
+      <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>tr<span class="token operator">></span>
+    <span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"small-12 large-12 columns first"</span><span class="token operator">></span>
+        <span class="token operator">&lt;</span>table<span class="token operator">></span>
+          <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+            <span class="token operator">&lt;</span>tr<span class="token operator">></span>
+              <span class="token operator">&lt;</span>th<span class="token operator">></span>Bob<span class="token operator">&lt;</span>/th<span class="token operator">></span>
+<span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"expander"</span><span class="token operator">></span><span class="token operator">&lt;</span>/th<span class="token operator">></span>
+            <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
+          <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>/table<span class="token operator">></span>
+      <span class="token operator">&lt;</span>/th<span class="token operator">></span>
+    <span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"small-12 large-12 columns last"</span><span class="token operator">></span>
+        <span class="token operator">&lt;</span>table<span class="token operator">></span>
+          <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+            <span class="token operator">&lt;</span>tr<span class="token operator">></span>
+              <span class="token operator">&lt;</span>th<span class="token operator">></span> <span class="token operator">&lt;</span>/th<span class="token operator">></span>
+<span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"expander"</span><span class="token operator">></span><span class="token operator">&lt;</span>/th<span class="token operator">></span>
+            <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
+          <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>/table<span class="token operator">></span>
+      <span class="token operator">&lt;</span>/th<span class="token operator">></span>
+  <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
+      <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/table<span class="token operator">></span><span class="token operator">&lt;</span>a <span class="token assign-left variable">href</span><span class="token operator">=</span><span class="token string">"{{'{'}}{{'{'}}salesLink{{'}'}}{{'}'}}"</span><span class="token operator">></span>Sales Link<span class="token operator">&lt;</span>/a<span class="token operator">></span><span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"row"</span><span class="token operator">></span>
+      <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>tr<span class="token operator">></span>
+<span class="token operator">&lt;</span>/tr<span class="token operator">></span>
+      <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/table<span class="token operator">></span>
+
+    <span class="token operator">&lt;</span>/td<span class="token operator">></span><span class="token operator">&lt;</span>/tr<span class="token operator">></span>
+      <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/table<span class="token operator">></span>
+
+<span class="token operator">&lt;</span>/body<span class="token operator">></span><span class="token operator">&lt;</span>/html<span class="token operator">></span></code></pre>     
+      </figure>
+
+<h2>CLI - email:compile</h2>
+
+This command is used to compile the email templates ahead of time for use during execution.  The generated files are <code class="item path">.compiled.html</code> and <code class="item path">.compiled.txt</code> for the html/text output respectivevly.  By default these files are added to the <code class="item path">.gitignore</code> as they are generally not intended to be saved but to be generated during the build process.
+
+      <figure class="terminal">
+      <figcaption class="terminal">Compile help
+      
+      </figcaption>
+      <pre><code class="language-bash">$ travetto travetto email:compile --help
+
+Usage:  email:compile <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -w, --watch <span class="token punctuation">[</span>watch<span class="token punctuation">]</span>  Compile <span class="token keyword">in</span> <span class="token function">watch</span> mode, requires @travetto/watch
+                       <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -h, --help           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
+
+<h2>CLI - email:dev</h2>
+
+This command will spin up a web server (port <code class="item input">3839</code>) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline. Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
+
+      <figure class="terminal">
+      <figcaption class="terminal">Dev help
+      
+      </figcaption>
+      <pre><code class="language-bash">$ travetto travetto email:dev --help
+
+Usage:  email:dev <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -p, --port <span class="token punctuation">[</span>port<span class="token punctuation">]</span>               Port to serve ui on <span class="token punctuation">(</span>default: <span class="token string">"3839"</span><span class="token punctuation">)</span>
+  -r, --reload-rate <span class="token punctuation">[</span>reloadRate<span class="token punctuation">]</span>  The rate to reload the UI at <span class="token punctuation">(</span>default:
+                                  <span class="token string">"1000"</span><span class="token punctuation">)</span>
+  -o, --open <span class="token punctuation">[</span>open<span class="token punctuation">]</span>               Open the ui automatically on start <span class="token punctuation">(</span>default:
+                                  <span class="token boolean">true</span><span class="token punctuation">)</span>
+  -h, --help                      display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
+
+</div>

@@ -1,0 +1,183 @@
+# Worker
+## Process management utilties, with a focus on inter-process communication
+
+**Install: @travetto/worker**
+```bash
+npm install @travetto/worker
+```
+
+This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc (inter-process communication) functionality out of the box. This module builds upon that by providing enhanced event management, richer process management, as well as constructs for orchestrating a conversation between two processes.
+
+## Execution Pools
+With respect to managing multiple executions, [WorkPool](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/pool.ts#L23) is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various [InputSource](src/input/types.ts#L3) implementation that allow for a wide range of use cases.
+
+The only provided [InputSource](src/input/types.ts#L3) is the [IterableInputSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/input/iterable.ts#L11) which supports all `Iterable` and `Iterator` sources.  Additionally, the module provides [DynamicAsyncIterator](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/input/async-iterator.ts#L6) which allows for manual control of iteration, which is useful for event driven work loads.
+
+Below is a pool that will convert images on demand, while queuing as needed.
+
+**Code: Image processing queue, with a fixed batch/pool size**
+```typescript
+import { ExecUtil, ExecutionState } from '@travetto/boot';
+
+import { Worker, WorkPool, IterableInputSource, DynamicAsyncIterator } from '@travetto/worker';
+
+class ImageProcessor implements Worker<string> {
+  active = false;
+  proc: ExecutionState;
+
+  get id() {
+    return this.proc.process.pid;
+  }
+
+  async destroy() {
+    this.proc.process.kill();
+  }
+
+  async execute(path: string) {
+    this.active = true;
+    try {
+      this.proc = ExecUtil.spawn('convert images', [path]);
+      await this.proc;
+    } catch (e) {
+
+    }
+    this.active = false;
+  }
+}
+
+export class ImageCompressor extends WorkPool<string, ImageProcessor> {
+
+  pendingImages = new DynamicAsyncIterator<string>();
+
+  constructor() {
+    super(async () => new ImageProcessor());
+  }
+
+  begin() {
+    this.process(new IterableInputSource(this.pendingImages));
+  }
+
+  convert(...images: string[]) {
+    this.pendingImages.add(images);
+  }
+}
+```
+
+Once a pool is constructed, it can be shutdown by calling the `.shutdown()` method, and awaiting the result.
+
+## IPC Support
+
+Within the `comm` package, there is support for two primary communication elements: [ChildCommChannel](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/child.ts#L6) and [ParentCommChannel](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/parent.ts#L9).  Usually [ParentCommChannel](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/parent.ts#L9) indicates it is the owner of the sub process.  [ChildCommChannel](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/child.ts#L6) indicates that it has been created/spawned/forked by the parent and will communicate back to it's parent.  This generally means that a [ParentCommChannel](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/parent.ts#L9) can be destroyed (i.e. killing the subprocess) where a [ChildCommChannel](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/child.ts#L6) can only exit the process, but the channel cannot be destroyed.
+
+### IPC as a Worker
+A common pattern is to want to model a sub process as a worker, to be a valid candidate in a [WorkPool](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/pool.ts#L23).  The [WorkUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/util.ts#L8) class provides a utility to facilitate this desire.
+
+**Code: Spawned Worker**
+```typescript
+import { ExecUtil, ExecutionOptions, } from '@travetto/boot';
+import { ParentCommChannel } from './comm/parent';
+import { Worker } from './pool';
+
+/**
+ * Spawned worker
+ */
+export class WorkUtil {
+  /**
+   * Create a process channel worker from a given spawn config
+   */
+  static spawnedWorker<X>(
+    command: string,
+    { args, opts, handlers }: {
+      args?: string[];
+      opts?: ExecutionOptions;
+      handlers: {
+        init?: (channel: ParentCommChannel) => Promise<any>;
+        execute: (channel: ParentCommChannel, input: X) => Promise<any>;
+        destroy?: (channel: ParentCommChannel) => Promise<any>;
+      };
+    }
+  ): Worker<X> {
+    const channel = new ParentCommChannel(
+      ExecUtil.fork(command, args, opts)
+    );
+    return {
+      get id() { return channel.id; },
+      get active() { return channel.active; },
+      init: handlers.init ? handlers.init.bind(handlers, channel) : undefined,
+      execute: handlers.execute.bind(handlers, channel),
+      async destroy() {
+        if (handlers.destroy) {
+          await handlers.destroy(channel);
+        }
+        await channel.destroy();
+      },
+    };
+  }
+}
+```
+
+When creating your work, via process spawning, you will need to provide the script (and any other features you would like in `SpawnConfig`).   Additionally you must, at a minimum, provide functionality to run whenever an input element is up for grabs in the input source.  This method will be provided the communication channel ([ParentCommChannel](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/worker/src/comm/parent.ts#L9)) and the input value.  A simple example could look like:
+
+**Code: Spawning Pool**
+```typescript
+import { WorkUtil } from '@travetto/worker/src/util';
+import { FsUtil } from '@travetto/boot';
+
+import { WorkPool } from '@travetto/worker/src/pool';
+import { IterableInputSource } from '@travetto/worker/src/input/iterable';
+
+const pool = new WorkPool(() =>
+  WorkUtil.spawnedWorker<string>(FsUtil.resolveUnix(__dirname, 'spawned.js'), {
+    handlers: {
+      async init(channel) {
+        return channel.listenOnce('ready'); // Wait for child to indicate it is ready
+      },
+      async execute(channel, inp) {
+        const res = channel.listenOnce('response'); //  Register response listener
+        channel.send('request', { data: inp }); // Send request
+
+        const { data } = await res; // Get answer
+        console.log('Sent', inp, 'Received', data);
+
+        if (!(inp + inp === data)) {
+          // Ensure the answer is double the input
+          throw new Error(`Didn't get the double`);
+        }
+      }
+    }
+  })
+);
+
+pool.process(new IterableInputSource([1, 2, 3, 4, 5])).then(x => pool.shutdown());
+```
+
+**Code: Spawned Worker**
+```javascript
+require('@travetto/boot/register');
+require('@travetto/base').PhaseManager.init().then(async () => {
+  const { ChildCommChannel } = require('../../..');
+
+  const exec = new ChildCommChannel();
+
+  exec.listenFor('request', data => {
+    exec.send('response', { data: (data.data + data.data) }); // When data is received, return double
+  });
+
+  exec.send('ready'); // Indicate the child is ready to receive requests
+
+  const heartbeat = () => setTimeout(heartbeat, 5000); // Keep-alive
+  heartbeat();
+});
+```
+
+**Terminal: Output**
+```bash
+$ ./alt/docs/src/spawner.ts -r @travetto/boot/register ./alt/docs/src/spawner.ts
+
+Sent 1 Received 2
+Sent 2 Received 4
+Sent 3 Received 6
+Sent 4 Received 8
+Sent 5 Received 10
+```
+

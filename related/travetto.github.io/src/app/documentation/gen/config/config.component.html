@@ -1,69 +1,124 @@
-<div class="documentation"><h1 id="config" id="config">Config </h1>
-<app-section-header headerType="install">Primary</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/config</code></pre><p>The config module provides support for loading application config on startup. Configuration values support all valid <a class="external-link" href="https://en.wikipedia.org/wiki/YAML" target="_blank" null><code class="inline">yaml</code></a> constructs.  The configuration information is comprised of:</p>
-<ul>
-<li><code class="inline">yaml</code> files</li>
-<li>environment variables</li>
-</ul>
-<h2 id="resolution">Resolution</h2>
-<p>Config loading follows a defined resolution path, below is the order in increasing specificity:</p>
-<ol>
-<li><code class="path inline">resources/application.yml</code> - Load the default <code class="inline">application.yml</code> if available.</li>
-<li><code class="path inline">resources/*.yml</code> - Load profile specific configurations as defined by the values in <code class="inline">process.env.TRV_PROFILES</code></li>
-<li><code class="path inline">resources/{{ '{' }}env{{ '}' }}.yml</code> - Load environment specific profile configurations as defined by the values of <code class="inline">process.env.TRV_ENV</code>.</li>
-<li><code class="inline">process.env</code> - Read startup configuration from environment to allow for overriding any values. Because we are overriding a <a class="external-link" href="https://en.wikipedia.org/wiki/YAML" target="_blank" null><code class="inline">yaml</code></a> based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as <code class="inline">UPPER_SNAKE_CASE</code>. When reading from <code class="inline">process.env</code> we will map <code class="inline">UPPER_SNAKE_CASE</code> to <code class="inline">upper.snake.case</code>, and will attempt to match by case-insensitive name.</li>
-</ol>
-<h3 id="a-complete-example">A Complete Example</h3>
-<p>A more complete example setup would look like:</p>
-<app-section-header headerType="config">Resources/database.yml</app-section-header>
-<pre><code class="language-yaml"><span class="token key atrule">database</span><span class="token punctuation">:</span>
+<div class="documentation">
+<h1>Configuration
+          <small>Environment-aware config management using yaml files</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/config
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/config</code></pre>     
+      </figure>
+
+The config module provides support for loading application config on startup. Configuration values support the common <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> constructs as defined in <a class="module-link" href="/docs/yaml" title="Simple YAML support, provides only clean subset of yaml">YAML</a>.  The configuration information is comprised of:
+
+<ul> <li><a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> files</li>
+ <li>environment variables</li></ul>
+
+<h2>Resolution</h2>
+
+Config loading follows a defined resolution path, below is the order in increasing specificity:
+<ol> <li><code class="item path">resources/application.yml</code> - Load the default <code class="item path">application.yml</code> if available.</li>
+ <li><code class="item path">resources/*.yml</code> - Load profile specific configurations as defined by the values in <code class="item field">process.env.TRV_PROFILES</code></li>
+ <li><code class="item path">resources/{{'{'}}env{{'}'}}.yml</code> - Load environment specific profile configurations as defined by the values of <code class="item field">process.env.TRV_ENV</code>.</li>
+ <li><code class="item field">process.env</code> - Read startup configuration from environment to allow for overriding any values. Because we are overriding a <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as <code class="item input">UPPER_SNAKE_CASE</code>. When reading from <code class="item field">process.env</code> we will map <code class="item input">UPPER_SNAKE_CASE</code> to <code class="item input">upper.snake.case</code>, and will attempt to match by case-insensitive name.</li></ol>
+
+<h2>A Complete Example</h2>
+
+A more complete example setup would look like:
+
+      <figure class="config">
+      <figcaption class="config">resources/application.yml
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/config/alt/docs/resources/application.yml">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-yaml"><span class="token punctuation">-</span><span class="token punctuation">-</span>
+<span class="token key atrule">database</span><span class="token punctuation">:</span>
   <span class="token key atrule">host</span><span class="token punctuation">:</span> localhost
-  <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">9423</span>
   <span class="token key atrule">creds</span><span class="token punctuation">:</span>
     <span class="token key atrule">user</span><span class="token punctuation">:</span> test
-    <span class="token key atrule">password</span><span class="token punctuation">:</span> test</code></pre><app-section-header headerType="config">Resources/prod.yml</app-section-header>
-<pre><code class="language-yaml"><span class="token key atrule">database</span><span class="token punctuation">:</span>
-  <span class="token key atrule">host</span><span class="token punctuation">:</span> prod<span class="token punctuation">-</span>host<span class="token punctuation">-</span>db
+    <span class="token key atrule">password</span><span class="token punctuation">:</span> test</code></pre>     
+      </figure>
+
+      <figure class="config">
+      <figcaption class="config">resources/prod.yml
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/config/alt/docs/resources/prod.yml">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-yaml"><span class="token punctuation">-</span><span class="token punctuation">-</span>
+<span class="token key atrule">database</span><span class="token punctuation">:</span>
+  <span class="token key atrule">host</span><span class="token punctuation">:</span> prod <span class="token punctuation">-</span> host <span class="token punctuation">-</span> db
   <span class="token key atrule">creds</span><span class="token punctuation">:</span>
-    <span class="token key atrule">user</span><span class="token punctuation">:</span> admin<span class="token punctuation">-</span>user</code></pre><p>with environment variables</p>
-<app-section-header headerType="config">Environment variables</app-section-header>
-<pre><code class="language-properties"><span class="token attr-name">PROFILE</span><span class="token punctuation">=</span><span class="token attr-value">prod</span>
-<span class="token attr-name">DATABASE_PORT</span><span class="token punctuation">=</span><span class="token attr-value">1234</span>
-<span class="token attr-name">DATABASE_CREDS_PASSWORD</span><span class="token punctuation">=</span><span class="token attr-value">&lt;secret></span></code></pre><p>At runtime the resolved config would be:</p>
-<app-section-header headerType="config">Runtime resolution</app-section-header>
-<pre><code class="language-yaml"><span class="token key atrule">database</span><span class="token punctuation">:</span>
-  <span class="token key atrule">host</span><span class="token punctuation">:</span> prod<span class="token punctuation">-</span>host<span class="token punctuation">-</span>db
-  <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">1234</span>
-  <span class="token key atrule">creds</span><span class="token punctuation">:</span>
-    <span class="token key atrule">user</span><span class="token punctuation">:</span> admin<span class="token punctuation">-</span>user
-    <span class="token key atrule">password</span><span class="token punctuation">:</span> &lt;secret<span class="token punctuation">></span></code></pre><h2 id="consuming">Consuming</h2>
-<p>The <code class="inline">ConfigManager</code> service provides direct access to all of the loaded configuration. For simplicity, a decorator, <code class="decorator inline">@Config</code> allows for classes to automatically be bound with config information on post construction. The decorator will install a <code class="inline">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.</p>
-<p>The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:</p>
-<app-section-header headerType="code">Database config object</app-section-header>
-<pre><code class="language-typescript">@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'database'</span><span class="token punctuation">)</span>
-<span class="token keyword">class</span> <span class="token class-name">DBConfig</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">private</span> host<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token keyword">private</span> port<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-  <span class="token keyword">private</span> creds <span class="token operator">=</span> <span class="token punctuation">{{ '{' }}</span>
+    <span class="token key atrule">user</span><span class="token punctuation">:</span> admin <span class="token punctuation">-</span> user</code></pre>     
+      </figure>
+
+with environment variables
+
+      <figure class="config">
+      <figcaption class="config">Environment variables
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/config/alt/docs/resources/env.properties">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-properties"><span class="token attr-name">TRV_ENV</span> <span class="token punctuation">=</span> <span class="token attr-value">prod</span>
+<span class="token attr-name">TRV_PROFILES</span> <span class="token punctuation">=</span> <span class="token attr-value">prod</span>
+<span class="token attr-name">DATABASE_PORT</span> <span class="token punctuation">=</span> <span class="token attr-value">1234</span>
+<span class="token attr-name">DATABASE_CREDS_PASSWORD</span> <span class="token punctuation">=</span> <span class="token attr-value">%secret%</span></code></pre>     
+      </figure>
+
+At runtime the resolved config would be:
+
+      <figure class="terminal">
+      <figcaption class="terminal">Runtime Resolution
+      
+      </figcaption>
+      <pre><code class="language-bash">$ alt/docs/src/resolve.ts -r @travetto/boot/register alt/docs/src/resolve.ts
+
+<span class="token punctuation">{{'{'}}</span>
+  database: <span class="token punctuation">{{'{'}}</span>
+    host: <span class="token string">'prod - host - db'</span>,
+    creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'admin - user'</span>, password: <span class="token string">'%secret%'</span> <span class="token punctuation">{{'}'}}</span>,
+    port: <span class="token string">'1234'</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>Secrets</h2>
+By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under <code class="item input">config.redacted</code>.
+
+<h2>Consuming</h2>
+The  service provides direct access to all of the loaded configuration. For simplicity, a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/config/src/decorator.ts#L9">@Config</a> allows for classes to automatically be bound with config information on post construction via the <a class="module-link" href="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module. The decorator will install a <code class="item method">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+
+The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
+
+      <figure class="code">
+      <figcaption class="code">Database config object
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/config/alt/docs/src/dbconfig.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'database'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DBConfig</span> <span class="token punctuation">{{'{'}}</span>
+  host<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  port<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  creds <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
     user<span class="token operator">:</span> <span class="token string">''</span><span class="token punctuation">,</span>
     password<span class="token operator">:</span> <span class="token string">''</span>
-  <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">;</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>And the corresponding config file:</p>
-<app-section-header headerType="config">Database config via yaml</app-section-header>
-<pre><code class="language-yaml"><span class="token key atrule">database</span><span class="token punctuation">:</span>
-  <span class="token key atrule">host</span><span class="token punctuation">:</span> localhost
-  <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">9423</span>
-  <span class="token key atrule">creds</span><span class="token punctuation">:</span>
-    <span class="token key atrule">user</span><span class="token punctuation">:</span> bob
-    <span class="token key atrule">password</span><span class="token punctuation">:</span> bobspw</code></pre><p>The instance of <code class="inline">DBConfig</code>  would be equivalent to:</p>
-<app-section-header headerType="config">Resolved database config as JSON</app-section-header>
-<pre><code class="language-js"><span class="token punctuation">{{ '{' }}</span>
-  host<span class="token operator">:</span> <span class="token string">'localhost'</span><span class="token punctuation">,</span>
-  port<span class="token operator">:</span> <span class="token number">9423</span><span class="token punctuation">,</span>
-  creds <span class="token operator">:</span> <span class="token punctuation">{{ '{' }}</span>
-    user<span class="token operator">:</span> <span class="token string">'bob'</span><span class="token punctuation">,</span>
-    password<span class="token operator">:</span> <span class="token string">'bobspw'</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre></div>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
-      <app-yaml></app-yaml>
+Using the above config files, the resultant object would be:
+
+      <figure class="terminal">
+      <figcaption class="terminal">Resolved database config
+      
+      </figcaption>
+      <pre><code class="language-bash">$ alt/docs/src/dbconfig-run.ts -r @travetto/boot/register alt/docs/src/dbconfig-run.ts
+
+DBConfig <span class="token punctuation">{{'{'}}</span>
+  host: <span class="token string">'prod - host - db'</span>,
+  port: undefined,
+  creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'admin - user'</span>, password: <span class="token string">'test'</span> <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+
+</div>

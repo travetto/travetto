@@ -1,0 +1,111 @@
+# JWT
+## JSON Web Token implementation
+
+**Install: @travetto/jwt**
+```bash
+npm install @travetto/jwt
+```
+
+This module is a simple component to support [JWT](https://jwt.io/) signing and verification.  The framework provides a port of [node-jsonwebtoken](https://github.com/auth0/node-jsonwebtoken). The API has been streamlined, and is intended as a lower level component as a basis for other modules.
+
+The API exposes:
+
+**Code: Signing Options**
+```typescript
+export interface SignOptions {
+  /**
+   * Key to use
+   */
+  key?: Key;
+  /**
+   * Ignore issued
+   */
+  iatExclude?: boolean;
+  /**
+   * Algorithm
+   */
+  alg?: AlgType;
+  /**
+   * Header type
+   */
+  header?: {
+    typ?: 'JWT';
+  } & {
+    [key: string]: string;
+  };
+  /**
+   * Encoding for key
+   */
+  encoding?: string;
+}
+```
+
+**Code: Signing API**
+```typescript
+export async function sign<T extends Payload>(payload: T, options: SignOptions = {}): Promise<string> {
+```
+
+**Code: Verify Options**
+```typescript
+export type VerifyOptions = {
+  /**
+   * Clock starting point
+   */
+  clock?: {
+    /**
+     * Time to check against
+     */
+    timestamp?: number | Date;
+    /**
+     * Time tolerance
+     */
+    tolerance?: number;
+  };
+  /**
+   * Ignore various checks
+   */
+  ignore?: {
+    /**
+     * Ignore expiration time
+     */
+    exp?: boolean;
+    /**
+     * Ignore not before timestamp
+     */
+    nbf?: boolean;
+  };
+  /**
+   * Max age in seconds
+   */
+  maxAgeSec?: number;
+  /**
+   * Header
+   */
+  header?: Record<string, string>;
+  /**
+   * Encryption key
+   */
+  key?: Key;
+  /**
+   * Encoding
+   */
+  encoding?: string;
+  /**
+   * Algorithms to use
+   */
+  alg?: AlgType | AlgType[];
+
+  /**
+   * Payload audience to check
+   */
+  payload?: {
+    aud?: string | RegExp | (string | RegExp)[];
+  } & PayloadCore;
+};
+```
+
+**Code: Verify API**
+```typescript
+export async function verify<T>(jwt: string, options: VerifyOptions = {}): Promise<Payload & T> {
+```
+

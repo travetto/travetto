@@ -1,4 +1,4 @@
-import { d, Mod, Code, inp, SnippetLink, Section, Method, List } from '@travetto/doc';
+import { doc as d, Mod, Code, inp, SnippetLink, Section, Method, List } from '@travetto/doc';
 import { AuthContext } from './src/context';
 import { PrincipalSource } from './src/principal';
 import { AuthUtil } from './src/util';
@@ -12,11 +12,10 @@ This module provides the high-level backdrop for managing security principals.  
 ${List(
   'Interfaces for standard security primitive',
   d`Patterns for producing a ${Principal}`,
-  `Common security-related utilities for`,
-  List(
+  d`Common security-related utilities for ${List(
     `Checking permissions`,
     `Generating passwords`
-  )
+  )}`
 )}
 
 ${Section('Interfaces / Primitives')}
@@ -53,17 +52,14 @@ ${Code('Auth util structure', AuthUtil.ᚕfile, true)}
 ${Method('permissionSetChecker')} is probably the only functionality that needs to be explained. The function operates in a ${inp`DENY`} / ${inp`ALLOW`} mode.  This means that a permission check will succeed only if:
 
 ${List(
-  `The user is logged in`,
-  List(
-    d`If ${inp`matchAll`} is false:`,
-    List(
+  d`The user is logged in  ${List(
+    d`If ${inp`matchAll`} is false: ${List(
       `The user does not have any permissions in the exclusion list`,
       `The include list is empty, or the user has at least one permission in the include list.`
-    ),
-    `Else`,
-    List(
+    )}`,
+    d`Else ${List(
       `The user does not have all permissions in the exclusion list`,
       `The include list is empty, or the user has all permissions in the include list.`
-    )
-  )
+    )}`
+  )}`
 )}`;

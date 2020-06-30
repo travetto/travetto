@@ -13,7 +13,7 @@ export class PluginManager {
     const all = new Map<string, string>();
     for (const { file, stats } of FrameworkUtil.scan(f => /bin\/cli-/.test(f))) {
       if (stats.isFile()) {
-        all.set(file.replace(/^.*\/bin\/.+-(.*?)[.][^.]*$/, (_, f) => f), file);
+        all.set(file.replace(/^.*\/bin\/.+?-(.*?)[.][^.]*$/, (_, f) => f), file);
       }
     }
     return all;

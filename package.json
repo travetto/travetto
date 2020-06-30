@@ -11,6 +11,7 @@
 	"scripts": {
 		"lint": "npx eslint --ignore-pattern '**/node_modules/**' --ignore-pattern '**/*.spec.ts' --ignore-pattern '**/out/**' --ext .js --ext .ts .",
 		"init": "./bin/run.sh dev-init/index",
+		"docs": "./bin/docs/gen.sh",
 		"prepare": "cd module/boot; npm run prepare",
 		"reinit": "rm -rf node_modules/; npm i; npm run init",
 		"service": "./bin/test/resources.sh",
@@ -42,7 +43,6 @@
 		"nodemailer-sendmail-transport": "^1.0.2",
 		"passport-facebook": "^3.0.0",
 		"pg": "^8.2.1",
-		"prismjs": "^1.20.0",
 		"redis": "^3.0.2",
 		"source-map-support": "^0.5.19"
 	},

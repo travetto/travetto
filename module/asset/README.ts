@@ -1,4 +1,4 @@
-import { d, Install, Code, Section, SnippetLink, Snippet } from '@travetto/doc'
+import { doc as d, Install, Code, Section, SnippetLink, Snippet } from '@travetto/doc'
 import { Injectable } from '@travetto/di';
 
 import { AssetNamingStrategy, AssetService, AssetSource } from '.';
@@ -9,7 +9,7 @@ export default d`
 
 The asset module requires an ${AssetSource} to provide functionality for reading and writing files. You will need to select one of the available providers to serve as your ${AssetSource}.
 
-${Install(`@travetto/asset-{provider}`, 'provider')}
+${Install('provider', `@travetto/asset-{provider}`)}
 
 Reading of and writing assets uses the ${AssetService}.  Below you can see an example dealing with a user's profile image.
 

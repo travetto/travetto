@@ -1,0 +1,107 @@
+# Configuration
+## Environment-aware config management using yaml files
+
+**Install: @travetto/config**
+```bash
+npm install @travetto/config
+```
+
+The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [YAML](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//yaml "Simple YAML support, provides only clean subset of yaml").  The configuration information is comprised of:
+
+   
+   *  [YAML](https://en.wikipedia.org/wiki/YAML) files
+   *  environment variables
+
+## Resolution
+
+Config loading follows a defined resolution path, below is the order in increasing specificity:
+   
+   1. `resources/application.yml` - Load the default `application.yml` if available.
+   1. `resources/*.yml` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
+   1. `resources/{env}.yml` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
+   1. `process.env` - Read startup configuration from environment to allow for overriding any values. Because we are overriding a [YAML](https://en.wikipedia.org/wiki/YAML) based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as `UPPER_SNAKE_CASE`. When reading from `process.env` we will map `UPPER_SNAKE_CASE` to `upper.snake.case`, and will attempt to match by case-insensitive name.
+
+## A Complete Example
+
+A more complete example setup would look like:
+
+**Config: resources/application.yml**
+```yaml
+--
+database:
+  host: localhost
+  creds:
+    user: test
+    password: test
+```
+
+**Config: resources/prod.yml**
+```yaml
+--
+database:
+  host: prod - host - db
+  creds:
+    user: admin - user
+```
+
+with environment variables
+
+**Config: Environment variables**
+```properties
+TRV_ENV = prod
+TRV_PROFILES = prod
+DATABASE_PORT = 1234
+DATABASE_CREDS_PASSWORD = %secret%
+```
+
+At runtime the resolved config would be:
+
+**Terminal: Runtime Resolution**
+```bash
+$ alt/docs/src/resolve.ts -r @travetto/boot/register alt/docs/src/resolve.ts
+
+{
+  database: {
+    host: 'prod - host - db',
+    creds: { user: 'admin - user', password: '%secret%' },
+    port: '1234'
+  }
+}
+```
+
+## Secrets
+By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under `config.redacted`.
+
+## Consuming
+The  service provides direct access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/config/src/decorator.ts#L9) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+
+The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
+
+**Code: Database config object**
+```typescript
+import { Config } from '@travetto/config';
+
+@Config('database')
+export class DBConfig {
+  host: string;
+  port: number;
+  creds = {
+    user: '',
+    password: ''
+  };
+}
+```
+
+Using the above config files, the resultant object would be:
+
+**Terminal: Resolved database config**
+```bash
+$ alt/docs/src/dbconfig-run.ts -r @travetto/boot/register alt/docs/src/dbconfig-run.ts
+
+DBConfig {
+  host: 'prod - host - db',
+  port: undefined,
+  creds: { user: 'admin - user', password: 'test' }
+}
+```
+

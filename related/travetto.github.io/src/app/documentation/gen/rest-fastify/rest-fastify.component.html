@@ -1,25 +1,57 @@
-<div class="documentation"><h2 id="rest-fastify" id="rest-fastify">Rest-Fastify</h2>
-<app-section-header headerType="install">Fastify Provider</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/rest-fastify</code></pre><p>The module is a <a class="external-link" href="https://www.fastify.io/" target="_blank" null><code class="inline">fastify</code></a> implementation of a <a class="module-link" routerLink="/docs/rest"  null><code class="inline">RestServer</code></a>. A valid customization of the <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest-fastify/src/server.ts" target="_blank" null><code class="inline">RestServer</code></a> would look like:</p>
-<app-section-header headerType="code">Customizing a Fastify App</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleConfig</span> <span class="token punctuation">{{ '{' }}</span>
+<div class="documentation">
+<h1>Fastify REST Source
+          <small>Fastify provider for the travetto rest module.</small>
 
-  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">customizer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">RestServerCustomizer</span><span class="token operator">&lt;</span>fastify<span class="token punctuation">.</span><span class="token type">FastifyInstance</span><span class="token operator">></span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token punctuation">(</span><span class="token keyword">class</span> <span class="token class-name">extends</span> <span class="token type">RestServerCustomizer</span><span class="token operator">&lt;</span>fastify<span class="token punctuation">.</span><span class="token type">FastifyInstance</span><span class="token operator">></span> <span class="token punctuation">{{ '{' }}</span>
-      <span class="token function">customize</span><span class="token punctuation">(</span><span class="token parameter">raw<span class="token operator">:</span> fastify<span class="token punctuation">.</span>FastifyInstance</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-        raw<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span>fastifyCaching<span class="token punctuation">,</span> <span class="token punctuation">{{ '{' }}</span>
-           privacy<span class="token operator">:</span> fastifyCaching<span class="token punctuation">.</span>privacy<span class="token punctuation">.</span><span class="token constant">NOCACHE</span><span class="token punctuation">,</span>
-        <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token parameter">err</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token keyword">throw</span> err <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token punctuation">{{ '}' }}</span>
-    <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p><strong>NOTE</strong> Fastify does not allow for redeclaring of routes at runtime and so is unable to be used in the live-reload portion of the development process. </p>
-<h3 id="default-stack">Default Stack</h3>
-<p>When working with <a class="external-link" href="https://www.fastify.io/" target="_blank" null><code class="inline">fastify</code></a> applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:</p>
-<ul>
-<li><code class="inline">fastify-compress</code></li>
-<li><code class="inline">fastify-formbody</code></li>
-<li><code class="inline">app.addContentTypeParser(&#39;multipart/form-data;&#39;)</code></li>
-</ul>
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/rest-fastify
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest-fastify</code></pre>     
+      </figure>
+
+The module is an <a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> provider for the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module.  This module provides an implementation of <a target="_blank" class="source-link" href="/docs/rest/src/server/server.ts#L16">RestServer</a> for automatic injection in the default Rest server.
+
+<h2>Customizing Rest App</h2>
+
+      <figure class="code">
+      <figcaption class="code">Customizing the Fastify App
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest-fastify/alt/docs/src/customize.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FastifyRestServer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest-fastify'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">declare</span> <span class="token keyword">let</span> rateLimit<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> primary<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">CustomRestServer</span> <span class="token keyword">extends</span> <span class="token class-name">FastifyRestServer</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">createRaw</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">createRaw</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> limiter <span class="token operator">=</span> <span class="token function">rateLimit</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+      windowMs<span class="token operator">:</span> <span class="token number">15</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">,</span> <span class="token comment">// 15 minutes</span>
+      max<span class="token operator">:</span> <span class="token number">100</span> <span class="token comment">// limit each IP to 100 requests per windowMs</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">//  apply to all requests</span>
+    app<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>limiter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> app<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>Default Middleware</h2>
+When working with an <a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
+
+      <figure class="code">
+      <figcaption class="code">Configured Middleware
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest-fastify/src/server.ts#L28">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token function">fastify</span><span class="token punctuation">(</span>fastConf<span class="token punctuation">)</span><span class="token punctuation">;</span>
+app<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span><span class="token keyword">require</span><span class="token punctuation">(</span><span class="token string">'fastify-compress'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+app<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span><span class="token keyword">require</span><span class="token punctuation">(</span><span class="token string">'fastify-formbody'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+app<span class="token punctuation">.</span><span class="token function">addContentTypeParser</span><span class="token punctuation">(</span><span class="token string">'multipart/form-data;'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>req<span class="token operator">:</span> IncomingMessage<span class="token punctuation">,</span> <span class="token function-variable function">done</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">err<span class="token operator">:</span> Error <span class="token operator">|</span> <span class="token keyword">null</span><span class="token punctuation">,</span> body<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">any</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">void</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span></code></pre>     
+      </figure>
+
 </div>

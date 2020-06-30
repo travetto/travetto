@@ -1,0 +1,164 @@
+# Boot
+## Bootstrapping and common utilities for travetto applications.
+
+**Install: @travetto/boot**
+```bash
+npm install @travetto/boot
+```
+
+Boot is basic environment  awareness coupled with typescript bootstrapping for [travetto](https://travetto.dev) apps and libraries.  It has support for the following key areas:
+   
+   *  Environmental Information
+   *  Cache Support
+   *  File Operations
+   *  Typescript bootstrapping
+   *  Process execution
+   *  Stream Support
+
+## Environmental Information
+The functionality we support for testing and retrieving environment information:
+   
+   *  `isTrue(key: string): boolean;` - Test whether or not an environment flag is set and is true
+   *  `isFalse(key: string): boolean;` - Test whether or not an environment flag is set and is false
+   *  `isSet(key:string): boolean;` - Test whether or not an environment value is set (excludes: `null`, `''`, and `undefined`)
+   *  `get(key: string, def?: string): string;` - Retrieve an environmental value with a potential default
+   *  `getInt(key: string, def?: number): number;` - Retrieve an environmental value as a number
+   *  `getList(key: string): string[];` - Retrieve an environmental value as a list
+   *  `getTime(key: string, def: number):number` - Reads an environment variable as milliseconds, with support for `s`, `m`, and `h` suffixes to provide succinct time units.
+
+## File Cache
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/app-cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/cache.ts#L11).  [FileCache](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/cache.ts#L11) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+
+The class organization looks like:
+
+**Code: File Cache Structure**
+```typescript
+/// <reference types="node" />
+import * as fs from 'fs';
+/**
+ * Standard file cache, with output file name normalization and truncation
+ */
+export declare class FileCache {
+    private cache;
+    readonly cacheDir: string;
+    /**
+     * Directory to cache into
+     */
+    constructor(cacheDir: string);
+    init(): void;
+    /**
+     * Write contents to disk
+     * @param local Local location
+     * @param contents Contents to write
+     */
+    writeEntry(local: string, contents: string | Buffer): void;
+    /**
+     * Read entry from disk
+     * @param local Read the entry given the local name
+     */
+    readEntry(local: string): string;
+    /**
+     * Delete expired entries
+     * @param full The local location
+     * @param force Should deletion be force
+     */
+    removeExpiredEntry(local: string, force?: boolean): void;
+    /**
+     * Delete entry
+     * @param local The location to delete
+     */
+    removeEntry(local: string): void;
+    /**
+     * Checks to see if a file has been loaded or if it's available on disk
+     * @param local The location to verify
+     */
+    hasEntry(local: string): true | fs.Stats | undefined;
+    /**
+     * Retrieve fs.Stats of the associated path
+     * @param local The location to stat
+     */
+    statEntry(local: string): fs.Stats;
+    /**
+     * Clear cache
+     * @param quiet Should the clear produce output
+     */
+    clear(quiet?: boolean): void;
+    /**
+     * Map entry file name to the original source
+     * @param entry The entry path
+     */
+    fromEntryName(entry: string): string;
+    /**
+     * Map the original file name to the cache file space
+     * @param local Local path
+     */
+    toEntryName(local: string): string;
+    /**
+     * Get or set a value (from the create function) if not in the cache
+     * @param local The local location
+     * @param create The method to execute if the entry is not found
+     * @param force Should create be executed always
+     */
+    getOrSet(local: string, create: () => string, force?: boolean): string;
+}
+```
+
+Everything is based on absolute paths being passed in, and translated into cache specific files.
+
+## Registration
+This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
+
+## File System Interaction
+[FsUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/fs.ts#L12) provides some high level functionality (like recursive directory delete).
+
+## File System Scanning
+[ScanFs](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/scan.ts#L56) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
+
+## Process Execution
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/exec.ts#L72) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+
+A simple example would be:
+
+**Code: Running a directory listing via ls**
+```typescript
+import { ExecUtil } from '@travetto/boot/src';
+
+export async function executeListing() {
+  const { result } = ExecUtil.spawn('ls');
+  const final = await result;
+  console.log(final.stdout.split('\n'));
+}
+```
+
+As you can see, the call returns not only the child process information, but the `Promise` to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
+
+   
+   *  `timeout` as the number of milliseconds the process can run before terminating and throwing an error
+   *  `quiet` which suppresses all stdout/stderr output
+   *  `stdin` as a string, buffer or stream to provide input to the program you are running;
+   *  `timeoutKill` allows for registering functionality to execute when a process is force killed by timeout
+
+## Stream Support
+The [StreamUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/stream.ts#L9) class provides basic stream utilities for use within the framework:
+
+   
+   *  `toBuffer(src: Readable | Buffer | string): Promise<Buffer>` for converting a stream/buffer/filepath to a Buffer.
+   *  `toReadable(src: Readable | Buffer | string):Promise<Readable>` for converting a stream/buffer/filepath to a Readable
+   *  `writeToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
+   *  `waitForCompletion(src: Readable, finish:()=>Promise<any>)` will ensure the stream remains open until the promise finish produces is satisfied.
+
+## CLI - clean
+
+The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
+
+**Terminal: Clean operation**
+```bash
+$ travetto travetto clean --help
+
+Usage:  clean [options]
+
+Options:
+  -q, --quiet  Quiet operation
+  -h, --help   display help for command
+```
+

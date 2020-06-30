@@ -1,0 +1,88 @@
+<div class="documentation">
+<h1>Transformation
+          <small>Functionality for AST transformations, with transformer registration, and general utils</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/transformer
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/transformer</code></pre>     
+      </figure>
+
+This module provides support for enhanced AST transformations, and declarative transformer registration, with common patterns to support all the transformers used throughout the framework. Transformations are located by <code class="item path">support/transformer.&lt;name&gt;.ts</code> as the filename. 
+
+The module is primarily aimed at extremely advanced usages for things that cannot be detected at runtime.  The <a class="module-link" href="/docs/registry" title="Patterns and utilities for handling registration of metadata and functionality for run-time use">Registry</a> module already has knowledge of all <code class="item input">class</code>es and <code class="item input">field</code>s, and is able to listen to changes there.  Many of the modules build upon work by some of the foundational transformers defined in <a class="module-link" href="/docs/registry" title="Patterns and utilities for handling registration of metadata and functionality for run-time use">Registry</a>, <a class="module-link" href="/docs/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a> and <a class="module-link" href="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a>.  These all center around defining a registry of classes, and associated type information.
+
+Because working with the <a target="_blank" class="external-link" href="https://typescriptlang.org">typescript</a> API can be delicate (and open to breaking changes), creating new transformers should be done cautiously. 
+
+<h2>Custom Transformer</h2>
+
+Below is an example of a transformer that uppercases all <code class="item input">class</code>, <code class="item input">method</code> and <code class="item input">param</code> declarations.  This will break any code that depends upon it as we are redefining all the identifiers at compile time.  
+
+      <figure class="code">
+      <figcaption class="code">Sample Transformer - Upper case all declarations
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/transformer/alt/upper/support/transformer.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> ts <span class="token keyword">from</span> <span class="token string">'typescript'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> OnProperty<span class="token punctuation">,</span> TransformerState<span class="token punctuation">,</span> OnMethod<span class="token punctuation">,</span> OnClass <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/transformer'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MakeUpper</span> <span class="token punctuation">{{'{'}}</span>
+  @<span class="token meta">OnProperty</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">handleProperty</span><span class="token punctuation">(</span><span class="token parameter">state<span class="token operator">:</span> TransformerState<span class="token punctuation">,</span> node<span class="token operator">:</span> ts<span class="token punctuation">.</span>PropertyDeclaration</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>state<span class="token punctuation">.</span>source<span class="token punctuation">.</span>fileName<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">upper/src</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">return</span> node<span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">return</span> ts<span class="token punctuation">.</span><span class="token function">updateProperty</span><span class="token punctuation">(</span>
+      node<span class="token punctuation">,</span>
+      <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>modifiers<span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>name<span class="token punctuation">.</span><span class="token function">getText</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span><span class="token keyword">type</span><span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>initializer <span class="token operator">??</span> ts<span class="token punctuation">.</span><span class="token function">createIdentifier</span><span class="token punctuation">(</span><span class="token string">'undefined'</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  @<span class="token meta">OnClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">handleClass</span><span class="token punctuation">(</span><span class="token parameter">state<span class="token operator">:</span> TransformerState<span class="token punctuation">,</span> node<span class="token operator">:</span> ts<span class="token punctuation">.</span>ClassDeclaration</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>state<span class="token punctuation">.</span>source<span class="token punctuation">.</span>fileName<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">upper/src</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">return</span> node<span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">return</span> ts<span class="token punctuation">.</span><span class="token function">updateClassDeclaration</span><span class="token punctuation">(</span>
+      node<span class="token punctuation">,</span>
+      <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>modifiers<span class="token punctuation">,</span>
+      ts<span class="token punctuation">.</span><span class="token function">createIdentifier</span><span class="token punctuation">(</span>node<span class="token punctuation">.</span>name<span class="token operator">!</span><span class="token punctuation">.</span><span class="token function">getText</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>typeParameters<span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>heritageClauses<span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>members
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  @<span class="token meta">OnMethod</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">handleMethod</span><span class="token punctuation">(</span><span class="token parameter">state<span class="token operator">:</span> TransformerState<span class="token punctuation">,</span> node<span class="token operator">:</span> ts<span class="token punctuation">.</span>MethodDeclaration</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>state<span class="token punctuation">.</span>source<span class="token punctuation">.</span>fileName<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">upper/src</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">return</span> node<span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">return</span> ts<span class="token punctuation">.</span><span class="token function">updateMethod</span><span class="token punctuation">(</span>
+      node<span class="token punctuation">,</span>
+      <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>modifiers<span class="token punctuation">,</span>
+      <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+      ts<span class="token punctuation">.</span><span class="token function">createIdentifier</span><span class="token punctuation">(</span>node<span class="token punctuation">.</span>name<span class="token punctuation">.</span><span class="token function">getText</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>typeParameters<span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>parameters<span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span><span class="token keyword">type</span><span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>body
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<p class="note"><strong>Note</strong> This should be a strong indicator that it is very easy to break code in unexpected ways.</p>
+
+</div>

@@ -1,0 +1,198 @@
+# REST Session
+## Session provider for the travetto rest module.
+
+**Install: @travetto/rest-session**
+```bash
+npm install @travetto/rest-session
+```
+
+This is a module that adds session support to the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") framework.  Sessions are represented as:
+
+**Code: Session Structure**
+```typescript
+export class Session<T = any> implements CacheEntry {
+  /**
+   * The expiry time when the session was loaded
+   */
+  private expiresAtLoaded: number | undefined;
+  /**
+   * The hash of the session at load
+   */
+  private hash: number;
+  /**
+   * The session key name
+   */
+  readonly key: string;
+  /**
+   * Session max age in ms
+   */
+  readonly maxAge?: number;
+  /**
+   * Session signature
+   */
+  readonly signature?: string;
+  /**
+   * Session initial issue timestamp
+   */
+  readonly issuedAt: number;
+  /**
+   * Expires at time
+   */
+  expiresAt: number | undefined;
+  /**
+   * What action should be taken against the session
+   */
+  action?: 'create' | 'destroy' | 'modify';
+  /**
+   * The session data
+   */
+  data: T;
+  /**
+   * Create a new Session object given a partial version of itself
+   */
+  constructor(data: Partial<Session>) ;
+  /**
+   * Determine if session has changed
+   */
+  isChanged() ;
+  /**
+   * Determine if the expiry time has changed
+   */
+  isTimeChanged() ;
+  /**
+   * See if the session is nearly expired
+   */
+  isAlmostExpired() ;
+  /**
+   * See if the session is truly expired
+   */
+  isExpired() ;
+  /**
+   * Refresh the session expiration time
+   */
+  refresh() ;
+  /**
+   * Mark the session for destruction, delete the data
+   */
+  destroy() ;
+  /**
+   * Serialize the session
+   */
+  toJSON() ;
+}
+```
+
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest/src/decorator/param.ts#L43) parameter as [Session](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest-session/src/types.ts#L9) and [SessionData](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest-session/src/types.ts#L9) respectively.  Iit can also be accessed via the [Request](./src/types.d.ts#L8) as a session property.
+
+**Code: Sample Session Usage**
+```typescript
+import { Controller } from '@travetto/rest/src/decorator/controller';
+import { Put, Get } from '@travetto/rest/src/decorator/endpoint';
+import { Context } from '@travetto/rest/src/decorator/param';
+import { SessionData, Session } from '@travetto/rest-session/alt/src/types';
+
+@Controller('/session')
+export class SessionRoutes {
+
+  @Put('/info')
+  async storeInfo(@Context() data: SessionData) {
+    data.age = 20;
+    data.name = 'Roger'; // Setting data
+  }
+
+  @Get('/logout')
+  async logout(@Context() session: Session) {
+    await session.destroy();
+  }
+
+  @Get('/info/age')
+  async getInfo(@Context() data: SessionData) {
+    return data.age;
+  }
+}
+```
+
+This usage should be comparable to express, koa and mostly every other framework.
+
+## Configuration
+
+Session mechanics are defined by two main components, encoders and a cache source.  The encoders are provided within the module, but the stores are provided via the [@Cache](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cache/src/decorator.ts#L16) module.
+
+By default, the module supplies the [RequetSessionEncoder](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest-session/src/encoder/request.ts#L14) and the [MemoryCacheSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cache/src/source/memory.ts#L8) as default usage.
+
+### Building an Encoder
+
+Encoders are pieces that enable you read/write the session state from the request/response.  This allows for sessions to be read/written to cookies, headers, url parameters, etc. The structure for the encoder is fairly straightforward:
+
+**Code: Encoder structure**
+```typescript
+import { Request, Response } from '@travetto/rest';
+import { Session } from '../types';
+
+/**
+ * Basic encoder for reading/writing the session to/from a user request/response
+ *
+ * The session may be an entire payload or it may just be a session identifier.
+ */
+export abstract class SessionEncoder {
+  /**
+   * Send the session to the user
+   */
+  abstract encode(req: Request, res: Response, session: Session | null): Promise<void>;
+  /**
+   * Read the session from the user
+   */
+  abstract decode(req: Request): Promise<string | Session | undefined>;
+}
+```
+
+The encoder will `encode` the session into the response, as a string.  The `decode` operation will then read that string and either produce a session identifier (a string) or a fully defined [Session](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest-session/src/types.ts#L9) object.  This allows for storing the session data externally or internal to the app, and referencing it by a session identifier.
+
+**Code: Standard Request Encoder**
+```typescript
+import { Request, Response } from '@travetto/rest';
+import { Inject, Injectable } from '@travetto/di';
+
+import { SessionEncoder } from './encoder';
+import { Session } from '../types';
+import { SessionConfig } from '../config';
+
+/**
+ * Uses request for maintaining the session coherency with the user.
+ * Primarily encode the user identifier, but relies on cookie behavior for
+ * encoding the expiry time, when transport is set to cookie.
+ */
+@Injectable()
+export class RequetSessionEncoder extends SessionEncoder {
+
+  @Inject()
+  config: SessionConfig;
+
+  async encode(req: Request, res: Response, session: Session<any> | null): Promise<void> {
+    if (session && session.data) {
+      if (this.config.transport === 'cookie') {
+        res.cookies.set(this.config.keyName, session.key, {
+          maxAge: !session.expiresAt ? -1 : undefined, // Session cookie by default
+          expires: session.expiresAt ? new Date(session.expiresAt) : undefined
+        });
+      } else {
+        res.setHeader(this.config.keyName, session.key);
+      }
+    } else if (this.config.transport === 'cookie' && req.cookies.get(this.config.keyName)) { // If cookie present, clear out
+      res.cookies.set(this.config.keyName, null, {
+        maxAge: 0,
+      });
+    }
+    return;
+  }
+
+  async decode(req: Request): Promise<string | Session | undefined> {
+    if (this.config.transport === 'cookie') {
+      return req.cookies.get(this.config.keyName);
+    } else {
+      return req.header(this.config.keyName) as string;
+    }
+  }
+}
+```
+

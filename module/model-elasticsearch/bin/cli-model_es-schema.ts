@@ -7,7 +7,7 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
  * Allow for exporting of elasticsearch schemas to stdout
  */
 export class EsSchemaPlugin extends BasePlugin {
-  name = 'es:schema';
+  name = 'model:es-schema';
 
   init(cmd: commander.Command) {
     return cmd

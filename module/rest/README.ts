@@ -1,4 +1,4 @@
-import { d, Library, SnippetLink, Section, List, inp, pth, Code, SubSection, Mod, Note, Ordered, Command, Ref, Snippet } from '@travetto/doc';
+import { doc as d, lib, SnippetLink, Section, List, inp, pth, Code, SubSection, Mod, Note, Ordered, Command, Ref, Snippet } from '@travetto/doc';
 import { Application } from '@travetto/app';
 
 import { Controller } from './src/decorator/controller';
@@ -13,16 +13,14 @@ import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies'
 import { DefaultRestApplication } from './support/application.rest';
 import { RestConfig } from './src/server/config';
 
-const Express = Library(`express`, 'https://expressjs.com');
 
 const Request = SnippetLink(`Request`, './src/types.d.ts', /interface Request/);
 const Response = SnippetLink(`Response`, './src/types.d.ts', /interface Response/);
-const JSDOC = Library(`JSDoc`, 'http://usejsdoc.org/about-getting-started.html');
 const ResourceManager = Ref('ResourceManager', `@travetto/base/src/resource.ts`);
 
 export default d`
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles ${Express} in the ${Request} and ${Response} objects). 
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles ${lib.Express} in the ${Request} and ${Response} objects). 
 
 ${Section('Routes: Controller')}
 
@@ -35,7 +33,7 @@ ${List(
 
 Additionally, the module is predicated upon ${Mod('di')}, and so all standard injection techniques (constructor, fields) work for registering dependencies.
 
-${JSDOC} comments can also be used to define the ${inp`title`} attribute.
+${lib.JSDoc} comments can also be used to define the ${inp`title`} attribute.
 
 ${Code('Basic Controller Registration', 'alt/docs/src/simple-controller.ts')}
 
@@ -63,7 +61,7 @@ ${List(
   d`${inp`requestType?`} - Class describing the request body`,
 )}
 
-${JSDOC} comments can also be used to define the ${inp`title`} attribute, as well as describing the parameters using ${inp`@param`} tags in the comment.
+${lib.JSDoc} comments can also be used to define the ${inp`title`} attribute, as well as describing the parameters using ${inp`@param`} tags in the comment.
 
 Additionally, the return type of the method will also be used to describe the ${inp`responseType`} if not specified manually.
 
@@ -85,12 +83,12 @@ ${List(
 Each ${Param} can be configured to indicate:
 ${List(
   d`${inp`name`} - Name of param, field name, defaults to handler parameter name if necessary`,
-  d`${inp`description`} - Description of param, pulled from ${JSDOC}, or defaults to name if empty`,
+  d`${inp`description`} - Description of param, pulled from ${lib.JSDoc}, or defaults to name if empty`,
   d`${inp`required?`} - Is the field required?, defaults to whether or not the parameter itself is optional`,
   d`${inp`type`} - The class of the type to be enforced, pulled from parameter type`,
 )}
 
-${JSDOC} comments can also be used to describe parameters using ${inp`@param`} tags in the comment.
+${lib.JSDoc} comments can also be used to describe parameters using ${inp`@param`} tags in the comment.
 
 ${Code('Full-fledged Controller with Routes', 'alt/docs/src/simple-full.ts')}
 
@@ -153,7 +151,7 @@ ${Code('Defining a fully controlled Interceptor', 'alt/docs/src/interceptor-cont
 Currently ${Mod('asset-rest')} is implemented in this fashion, as well as ${Mod('auth-rest')}.
 
 ${Section('Cookie Support')}
-Express/Koa/Fastify all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using ${Library(`cookies`, 'https://www.npmjs.com/package/cookies')}.  This functionality is exposed onto the ${Request}/${Response} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+Express/Koa/Fastify all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using ${lib.Cookies}.  This functionality is exposed onto the ${Request}/${Response} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 ${Code('Sample Cookie Usage', 'alt/docs/src/cookie-routes.ts')}
 
@@ -162,7 +160,7 @@ ${Section(`SSL Support`)}
 Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
 ${List(
   `SSL support is configured`,
-  d`${Library('node-forge', 'https://www.npmjs.com/package/node-forge')} is installed`,
+  d`${lib.NodeForge} is installed`,
   `No keys provided`
 )}
 
