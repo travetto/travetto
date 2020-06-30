@@ -1,64 +1,172 @@
-<div class="documentation"><h1 id="generator-app" id="yeoman-app-generator">Yeoman App Generator</h1>
-<p>A simple <a class="external-link" href="http://yeoman.io" target="_blank" null><code class="inline">yeoman</code></a> generator for scaffolding a reference project.  To get started, you need to make sure: </p>
-<app-section-header headerType="install">Setting up yeoman and the generator</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> i -g yo <span class="token comment">#<span class="token type">Ensure</span> yeoman is installed globally</span>
-$ <span class="token function">npm</span> i -g @travetto/generator-app <span class="token comment">#<span class="token type">Ensure</span> this yeoman generator is installed</span>
-$ <span class="token function">git</span> config --global.username <span class="token operator">&lt;</span><span class="token type">Username</span><span class="token operator">></span> <span class="token comment">#<span class="token type">Set</span> your git username</span></code></pre><p>Once installed you can invoke the scaffolding by running</p>
-<app-section-header headerType="terminal">Running generator</app-section-header>
-<pre><code class="language-bash">$ yo @travetto/app</code></pre><p>Currently, the generator supports, two main features.</p>
-<h2 id="restful-architecture">Restful Architecture</h2>
-<p>The <a class="module-link" routerLink="/docs/rest"  null><code class="inline">Rest</code></a> provides the necessary integration for exposing restful apis.  When selecting the <code class="inline">rest</code> feature, you will need to specify which backend you want to include with your application, the default being <code class="inline">express</code>.  Currently you can select from:</p>
-<ul>
-<li><code class="inline">express</code></li>
-<li><code class="inline">koa</code></li>
-<li><code class="inline">fastify</code></li>
-</ul>
-<p>The code will establish some basic routes, specifically, <code class="inline">GET /</code> as the root endpoint.  This will return the contents of your <code class="inline">package.json</code> as an identification operation.  </p>
-<h3 id="additional-rest-features">Additional Rest Features</h3>
-<p>In addition to the core functionality, the <code class="inline">rest</code> feature has some useful sub-features.  Specifically:</p>
-<p><a class="module-link" routerLink="/docs/undefined" fragment="swagger" null><code class="inline">Swagger</code></a> support for the restful api.  This will automatically expose a <code class="inline">swagger.json</code> endpoint, and provide the necessary plumbing to support client generation.</p>
-<p><a class="module-link" routerLink="/docs/utils" fragment="log" null><code class="inline">Log</code></a> support for better formatting and colorized output.  This is generally useful for server logs, especially during development.</p>
-<h2 id="authentication">Authentication</h2>
-<p>Authentication is also supported on the Restful endpoints by selecting <a class="module-link" routerLink="/docs/auth" fragment="auth-rest" null><code class="inline">Auth-Rest</code></a> during setup.  This will support basic authentication running out of local memory, with user <a class="module-link" routerLink="/docs/rest" fragment="rest-session" null><code class="inline">Session</code></a>s. </p>
-<h2 id="testing">Testing</h2>
-<p><a class="module-link" routerLink="/docs/test"  null><code class="inline">Test</code></a>ing can also be configured out of the box to provide simple test cases for the data model.  </p>
-<h2 id="data-modelling-and-storage">Data Modelling and Storage</h2>
-<p>The <a class="module-link" routerLink="/docs/model"  null><code class="inline">Model</code></a> allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:</p>
-<ul>
-<li><code class="inline">elasticsearch</code></li>
-<li><code class="inline">mongodb</code><!-- * ...more to come -->
+<div class="documentation">
 
-</li>
-</ul>
-<p>A default model is constructed, a <code class="inline">Todo</code> class:</p>
-<app-section-header headerType="code">Todo model</app-section-header>
-<pre><code class="language-typescript">@<span class="token meta">Model</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Todo</span> <span class="token keyword">implements</span> <span class="token class-name">ModelCore</span> <span class="token punctuation">{{ '{' }}</span>
+<h1>Yeoman Generator
+          <small>Yeoman app generator for the Travetto framework</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/generator-app
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/generator-app</code></pre>     
+      </figure>
+
+A simple <a target="_blank" class="external-link" href="http://yeoman.io">yeoman</a> generator for scaffolding a reference project.  To get started, you need to make sure:
+
+      <figure class="install">
+      <figcaption class="install">Setting up yeoman and the generator
+      
+      </figcaption>
+      <pre><code class="language-bash">$ <span class="token function">npm</span> i -g yo <span class="token comment">#Ensure yeoman is installed globally</span>
+$ <span class="token function">npm</span> i -g @travetto/generator-app <span class="token comment">#Ensure this yeoman generator is installed</span>
+$ <span class="token function">git</span> config --global.username <span class="token operator">&lt;</span>Username<span class="token operator">></span> <span class="token comment">#Set your git username</span></code></pre>     
+      </figure>
+
+Once installed you can invoke the scaffolding by running
+
+      <figure class="terminal">
+      <figcaption class="terminal">Running Generator
+      
+      </figcaption>
+      <pre><code class="language-bash">$ yo @travetto/app</code></pre>     
+      </figure>
+
+The generator will ask about enabling the following features:
+
+<h2>Restful Architecture</h2>
+The <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> provides the necessary integration for exposing restful apis.  When selecting the <code class="item input">rest</code> feature, you will need to specify which backend you want to include with your application, the default being <a target="_blank" class="external-link" href="https://expressjs.com">express</a>.  Currently you can select from:
+
+<ul> <li><a target="_blank" class="external-link" href="https://expressjs.com">express</a></li>
+ <li><a target="_blank" class="external-link" href="https://koajs.com/">koa</a></li>
+ <li><a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a></li></ul>
+
+The code will establish some basic routes, specifically, <code class="item input">GET /</code> as the root endpoint.  This will return the contents of your <code class="item path">package.json</code> as an identification operation.
+
+<h3>Additional Rest Features</h3>
+In addition to the core functionality, the <code class="item input">rest</code> feature has some useful sub-features.  Specifically:
+
+<a class="module-link" href="/docs/openapi" title="OpenAPI integration support for the travetto framework">OpenAPI Specification</a> support for the restful api.  This will automatically expose a <code class="item path">openapi.yml</code> endpoint, and provide the necessary plumbing to support client generation.
+
+<a class="module-link" href="/docs/log" title="Logging framework that integrates at the console.log level.">Logging</a> support for better formatting, <a target="_blank" class="external-link" href="https://www.npmjs.com/package/debug">debug</a> like support, and colorized output.  This is generally useful for server logs, especially during development.
+
+<h2>Authentication</h2>
+Authentication is also supported on the Restful endpoints by selecting <a class="module-link" href="/docs/auth-rest" title="Rest authentication integration support for the travetto framework">Rest Auth</a> during setup.  This will support basic authentication running out of local memory, with user <a class="module-link" href="/docs/rest-session" title="Session provider for the travetto rest module.">REST Session</a>s.
+
+<h2>Testing</h2>
+<a class="module-link" href="/docs/test" title="Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin">Testing</a> can also be configured out of the box to provide simple test cases for the data model.
+
+<h2>Data Modelling and Storage</h2>
+
+The <a class="module-link" href="/docs/model" title="Datastore abstraction for CRUD operations with advanced query support.">Data Modeling</a> allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:
+
+<ul> <li><a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a></li>
+ <li><a target="_blank" class="external-link" href="https://mongodb.com">mongodb</a></li>
+ <li><a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a></li></ul>
+
+A default model is constructed, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/generator-app/templates/todo/src/model/todo.ts#L4">Todo</a> class:
+
+      <figure class="code">
+      <figcaption class="code">Todo Model
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/generator-app/templates/todo/src/model/todo.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Model<span class="token punctuation">,</span> ModelCore <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Model</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Todo</span> <span class="token keyword">implements</span> <span class="token class-name">ModelCore</span> <span class="token punctuation">{{'{'}}</span>
   id<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   text<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  completed<span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>Basic tests are also included for the <code class="inline">model</code> to verify that database interaction and functionality is working properly.</p>
-<h2 id="rest--model">Rest + Model</h2>
-<p>In the case both <code class="inline">Rest</code> and <code class="inline">Model</code> features are enabled, the code will produce a controller that exposes the <code class="inline">Todo</code> model via restful patterns.</p>
-<app-section-header headerType="code">Todo controller</app-section-header>
-<pre><code class="language-typescript">@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/todo'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TodoController</span> <span class="token punctuation">{{ '{' }}</span>
+  completed<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
+Basic tests are also included for the <code class="item input">model</code> to verify that database interaction and functionality is working properly.
+
+<h2>Rest + Model</h2>
+In the case both <code class="item input">rest</code> and <code class="item input">model</code> features are enabled, the code will produce a controller that exposes the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/generator-app/templates/todo/src/model/todo.ts#L4">Todo</a> model via restful patterns.
+
+      <figure class="code">
+      <figcaption class="code">Todo controller
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/generator-app/templates/todo/src/rest/todo.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Put<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Delete<span class="token punctuation">,</span> Path <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelService<span class="token punctuation">,</span> ModelQuery <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaBody<span class="token punctuation">,</span> SchemaQuery<span class="token punctuation">,</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Todo <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../model/todo'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">Query</span> <span class="token punctuation">{{'{'}}</span>
+  q<span class="token operator">:</span> <span class="token builtin">any</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token comment">/**
+ * Controller for managing all aspects of the Todo lifecycle
+ */</span>
+@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/todo'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TodoController</span> <span class="token punctuation">{{'{'}}</span>
+
+  @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  source<span class="token operator">:</span> ModelService<span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * Get all Todos
+   */</span>
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getAll</span><span class="token punctuation">(</span>req<span class="token operator">:</span> <span class="token type">Request</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token type">Todo</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span>
+  <span class="token keyword">async</span> <span class="token function">getAll</span><span class="token punctuation">(</span>@<span class="token meta">SchemaQuery</span><span class="token punctuation">(</span><span class="token punctuation">)</span> query<span class="token operator">:</span> Query<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Todo<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    query<span class="token punctuation">.</span>q <span class="token operator">=</span> query<span class="token punctuation">.</span>q <span class="token operator">||</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">getAllByQuery</span><span class="token punctuation">(</span>Todo<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> where<span class="token operator">:</span> query<span class="token punctuation">.</span>q <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
+  <span class="token comment">/**
+   * Get Todo by id
+   */</span>
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/:id'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getOne</span><span class="token punctuation">(</span>req<span class="token operator">:</span> <span class="token type">Request</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token type">Todo</span><span class="token operator">></span>
+  <span class="token keyword">async</span> <span class="token function">getOne</span><span class="token punctuation">(</span>@<span class="token meta">Path</span><span class="token punctuation">(</span><span class="token punctuation">)</span> id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Todo<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> q<span class="token operator">:</span> ModelQuery<span class="token operator">&lt;</span>Todo<span class="token operator">></span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> where<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> id <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">getByQuery</span><span class="token punctuation">(</span>Todo<span class="token punctuation">,</span> q<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
+  <span class="token comment">/**
+   * Create a Todo
+   */</span>
   @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">save</span><span class="token punctuation">(</span>req<span class="token operator">:</span> <span class="token type">TypedBody</span><span class="token operator">&lt;</span><span class="token type">Todo</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token type">Todo</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">async</span> <span class="token function">save</span><span class="token punctuation">(</span>@<span class="token meta">SchemaBody</span><span class="token punctuation">(</span><span class="token punctuation">)</span> todo<span class="token operator">:</span> Todo<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Todo<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">save</span><span class="token punctuation">(</span>Todo<span class="token punctuation">,</span> todo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
+  <span class="token comment">/**
+   * Update a Todo
+   */</span>
   @<span class="token meta">Put</span><span class="token punctuation">(</span><span class="token string">'/:id'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">update</span><span class="token punctuation">(</span>req<span class="token operator">:</span> <span class="token type">TypedBody</span><span class="token operator">&lt;</span><span class="token type">Todo</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token type">Todo</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">async</span> <span class="token function">update</span><span class="token punctuation">(</span>@<span class="token meta">SchemaBody</span><span class="token punctuation">(</span><span class="token punctuation">)</span> todo<span class="token operator">:</span> Todo<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Todo<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span>Todo<span class="token punctuation">,</span> todo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
+  <span class="token comment">/**
+   * Delete a Todo
+   */</span>
   @<span class="token meta">Delete</span><span class="token punctuation">(</span><span class="token string">'/:id'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token keyword">delete</span><span class="token punctuation">(</span>req<span class="token operator">:</span> <span class="token type">Request</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><h2 id="executing">Executing</h2>
-<p>Once finished the application will reflect the modules chosen, and will be ready for execution, if you have configured a runnable application.  Currently, this requires the <code class="inline">rest</code> feature to be selected.</p>
-<app-section-header headerType="terminal">Starting app</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> start</code></pre></div>
+  <span class="token keyword">async</span> <span class="token function">remove</span><span class="token punctuation">(</span>@<span class="token meta">Path</span><span class="token punctuation">(</span><span class="token punctuation">)</span> id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> q<span class="token operator">:</span> ModelQuery<span class="token operator">&lt;</span>Todo<span class="token operator">></span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> where<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> id <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">deleteByQuery</span><span class="token punctuation">(</span>Todo<span class="token punctuation">,</span> q<span class="token punctuation">)</span> <span class="token operator">!==</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">AppError</span><span class="token punctuation">(</span><span class="token string">'Not found by id'</span><span class="token punctuation">,</span> <span class="token string">'notfound'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>Running</h2>
+
+Once finished the application will reflect the modules chosen, and will be ready for execution, if you have configured a runnable application.  Currently, this requires the <code class="item input">rest</code> feature to be selected.
+
+      <figure class="terminal">
+      <figcaption class="terminal">Starting the App
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> start</code></pre>     
+      </figure>
+
+</div>

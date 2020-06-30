@@ -1,9 +1,9 @@
-import { d, Mod, Library, Code } from '@travetto/doc';
+import { doc as d, Mod, Code, lib } from '@travetto/doc';
 import { AssetSource } from '@travetto/asset/src/source';
 import { Config } from '@travetto/config';
 
 export default d`
-This provides a ${Library('mongodb', 'https://mongodb.com')} implementation of the ${AssetSource} which is a backend for the  ${Mod('asset')} module.  
+This provides a ${lib.MongoDB} implementation of the ${AssetSource} which is a backend for the  ${Mod('asset')} module.  
 
 ${Code('Mongo backend wiring', 'alt/docs/src/config.ts')}
   

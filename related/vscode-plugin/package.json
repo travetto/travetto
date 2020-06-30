@@ -35,10 +35,11 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "files": [
-    "src/"
+    "src-ts/"
   ],
   "devDependencies": {
     "@types/node": "^13.0.0",
+    "@travetto/doc": "^1.0.0-rc.0",
     "vscode": "^1.1.37"
   },
   "dependencies": {

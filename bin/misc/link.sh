@@ -37,7 +37,7 @@ BASE="${CURR//${ROOT}\/module\/}"
 
 TARGET="$CURR/node_modules/@travetto/$MODULE"
 
-if [ -f "${CURR}/package.json" ] && [[ "$CURR" =~ "travetto/module" ]]; then
+if [ -f "${CURR}/package.json" ]; then
   if [ "$ACTION" == "add" ]; then 
     ln -sf "$SOURCE" "$TARGET"
     echo "$BASE is linking @travetto/$MODULE to ../$MODULE" 

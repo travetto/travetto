@@ -1,15 +1,15 @@
-import { d, Code, Section, List, Library, inp, meth, Ref, Travetto } from '@travetto/doc';
+import { doc as d, Code, Section, List, inp, meth, Ref, lib, Execute } from '@travetto/doc';
 import { FileCache, ExecUtil, StreamUtil } from './src';
 
 const AppCacheLink = Ref('AppCache', './src-ts/app-cache.ts');
 const FileCacheLink = Ref(FileCache.name, './src-ts/cache.ts');
 const FsUtilLink = Ref('FsUtil', './src-ts/fs.ts');
-const ScanFsLink = Ref('ScanFs', './src-ts/scan-fs.ts');
+const ScanFsLink = Ref('ScanFs', './src-ts/scan.ts');
 const ExecUtilLink = Ref(ExecUtil.name, './src-ts/exec.ts');
 const StreamUtilLink = Ref(StreamUtil.name, './src-ts/stream.ts');
 
 export default d`
-Boot is basic environment  awareness coupled with typescript bootstrapping for ${Travetto} apps and libraries.  It has support for the following key areas:
+Boot is basic environment  awareness coupled with typescript bootstrapping for ${lib.Travetto} apps and libraries.  It has support for the following key areas:
 ${List(
   'Environmental Information',
   'Cache Support',
@@ -51,7 +51,7 @@ ${Section('File System Scanning')}
 ${ScanFsLink} provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 ${Section('Process Execution')}
-Just like ${Library(`child_process`, 'https://nodejs.org/api/child_process.html')}, the ${ExecUtilLink} exposes ${meth`spawn`} and ${meth`fork`}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${inp`Promise`} structure, that throws an error on an non-zero return status.
+Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${meth`spawn`} and ${meth`fork`}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${inp`Promise`} structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 
@@ -75,4 +75,10 @@ ${List(
   d`${meth`writeToFile(src: Readable, out: string):Promise<void>`} will stream a readable into a file path, and wait for completion.`,
   d`${meth`waitForCompletion(src: Readable, finish:()=>Promise<any>)`} will ensure the stream remains open until the promise finish produces is satisfied.`,
 )}
+
+${Section('CLI - clean')}
+
+The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
+
+${Execute('Clean operation', 'travetto', ['clean', '--help'])}
 `;

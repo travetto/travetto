@@ -22,7 +22,9 @@ export async function run() {
   for (const dir of lj.packages.map(x => x.split('/')[0])) {
     const base = `${Finalize.ROOT}/${dir}`;
     for (const mod of fs.readdirSync(base)) {
-      Finalize.finalize(mod, base, /^(yes|1|true|on)$/.test(`${process.argv[2]}`));
+      Finalize.finalize(mod, base);
     }
   }
+  await ExecUtil.spawn('npm', ['i'], { shell: true, cwd: `${Finalize.ROOT}/related/vscode-plugin` }).result.catch(err => { });
+  Finalize.finalize('vscode-plugin', 'related');
 }

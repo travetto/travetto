@@ -1,213 +1,400 @@
-<div class="documentation"><h1 id="rest" id="rest">Rest</h1>
-<app-section-header headerType="install">Primary</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/rest</code></pre><p>The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a class="external-link" href="https://expressjs.com" target="_blank" null><code class="inline">express</code></a> in the <code class="inline">Request</code> and <code class="inline">Response</code> objects). </p>
-<h2 id="routes-controller">Routes: Controller</h2>
-<p>To define a route, you must first declare a <code class="decorator inline">@Controller</code> which is only allowed on classes. Controllers can be configured with:</p>
-<ul>
-<li><code class="inline">title</code> - The definition of the controller</li>
-<li><code class="inline">description</code> - High level description fo the controller</li>
-</ul>
-<p><a class="external-link" href="http://usejsdoc.org/about-getting-started.html" target="_blank" null><code class="inline">JSDoc</code></a> comments can also be used to define the <code class="inline">title</code> attribute.</p>
-<app-section-header headerType="code">Example of Controller decorator</app-section-header>
-<pre><code class="language-typescript"><span class="token comment">/**
- * <span class="token type">Provides</span> basic interface to our primary service
- */</span>
-@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/simple-route'</span><span class="token punctuation">)</span>
-<span class="token keyword">class</span> <span class="token class-name">SimpleController</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token operator">...</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><h2 id="routes-endpoints">Routes: Endpoints</h2>
-<p>Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported.  </p>
-<p>The HTTP methods that are supported via:</p>
-<ul>
-<li><code class="decorator inline">@Get</code></li>
-<li><code class="decorator inline">@Post</code></li>
-<li><code class="decorator inline">@Put</code></li>
-<li><code class="decorator inline">@Delete</code></li>
-<li><code class="decorator inline">@Patch</code></li>
-<li><code class="decorator inline">@Head</code></li>
-<li><code class="decorator inline">@Options</code></li>
-</ul>
-<p>Each endpoint decorator handles the following config:</p>
-<ul>
-<li><code class="inline">title</code> - The definition of the endpoint</li>
-<li><code class="inline">description</code> - High level description fo the endpoint</li>
-<li><code class="inline">responseType?</code> - Class describing the response type</li>
-<li><code class="inline">requestType?</code> - Class describing the request body</li>
-</ul>
-<p><a class="external-link" href="http://usejsdoc.org/about-getting-started.html" target="_blank" null><code class="inline">JSDoc</code></a> comments can also be used to define the <code class="inline">title</code> attribute, as well as describing the parameters using <code class="decorator inline">@param</code> tags in the comment.</p>
-<p>Additionally, the annotated return type on the method will also be used to describe the <code class="inline">responseType</code> if specified.</p>
-<app-section-header headerType="code">Controller with Sample Route</app-section-header>
-<pre><code class="language-typescript"><span class="token comment">/**
- * <span class="token type">Provides</span> basic interface to our primary service
- */</span>
-@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/simple-route'</span><span class="token punctuation">)</span>
-<span class="token keyword">class</span> <span class="token class-name">SimpleController</span> <span class="token punctuation">{{ '{' }}</span>
+<div class="documentation">
+<h1>RESTful API
+          <small>Declarative api for RESTful APIs with support for the dependency injection module.</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/rest
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest</code></pre>     
+      </figure>
+
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="./src/types.d.ts#L11">Request</a> and <a target="_blank" class="source-link" href="./src/types.d.ts#L87">Response</a> objects). 
+
+<h2>Routes: Controller</h2>
+
+To define a route, you must first declare a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/controller.ts#L10">@Controller</a> which is only allowed on classes. Controllers can be configured with:
+
+<ul> <li><code class="item input">title</code> - The definition of the controller</li>
+ <li><code class="item input">description</code> - High level description fo the controller</li></ul>
+
+Additionally, the module is predicated upon <a class="module-link" href="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a>, and so all standard injection techniques (constructor, fields) work for registering dependencies.
+
+<a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a> comments can also be used to define the <code class="item input">title</code> attribute.
+
+      <figure class="code">
+      <figcaption class="code">Basic Controller Registration
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/alt/docs/src/simple-controller.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/decorator/controller'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">SimpleController</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">// routes</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>Routes: Endpoints</h2>
+
+Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported.  
+
+The HTTP methods that are supported via:
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/endpoint.ts#L24">@Get</a></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/endpoint.ts#L30">@Post</a></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/endpoint.ts#L36">@Put</a></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/endpoint.ts#L48">@Delete</a></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/endpoint.ts#L42">@Patch</a></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/endpoint.ts#L54">@Head</a></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/endpoint.ts#L60">@Options</a></li></ul>
+
+Each endpoint decorator handles the following config:
+<ul> <li><code class="item input">title</code> - The definition of the endpoint</li>
+ <li><code class="item input">description</code> - High level description fo the endpoint</li>
+ <li><code class="item input">responseType?</code> - Class describing the response type</li>
+ <li><code class="item input">requestType?</code> - Class describing the request body</li></ul>
+
+<a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a> comments can also be used to define the <code class="item input">title</code> attribute, as well as describing the parameters using <code class="item input">@param</code> tags in the comment.
+
+Additionally, the return type of the method will also be used to describe the <code class="item input">responseType</code> if not specified manually.
+
+      <figure class="code">
+      <figcaption class="code">Controller with Sample Route
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/alt/docs/src/simple-route.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/decorator/controller'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/decorator/endpoint'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Data</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+
+@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">SimpleController</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token comment">/**
-   * <span class="token type">Gets</span> the most basic of data
+   * Gets the most basic of data
    */</span>
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
-  <span class="token function">simpleGet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span><span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token type">Data</span><span class="token operator">></span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token operator">...</span>
+  <span class="token keyword">async</span> <span class="token function">simpleGet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">let</span> data<span class="token operator">:</span> Data <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+    <span class="token comment">//</span>
     <span class="token keyword">return</span> data<span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><h3 id="parameters">Parameters</h3>
-<p>Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:</p>
-<ul>
-<li><code class="decorator inline">@Path</code> - Path params</li>
-<li><code class="decorator inline">@Query</code> - Query params</li>
-<li><code class="decorator inline">@Body</code> - Request body (in it’s entirety)</li>
-<li><code class="decorator inline">@Header</code> - Header values</li>
-<li><code class="decorator inline">@Context</code> - Special values exposed (e.g. Request, Response, Session, AuthContext, etc.)</li>
-</ul>
-<p>Each <code class="decorator inline">@Param</code> can be configured to indicate:</p>
-<ul>
-<li><code class="inline">name</code> - Name of param, field name, defaults to handler parameter name if necessary</li>
-<li><code class="inline">description</code> - Description of param, pulled from <code class="inline">JSdoc</code>, or defaults to name if empty</li>
-<li><code class="inline">required?</code> - Is the field required?, defaults to whether or not the parameter itself is optional</li>
-<li><code class="inline">type</code> - The class of the type to be enforced, pulled from parameter type</li>
-</ul>
-<p><a class="external-link" href="http://usejsdoc.org/about-getting-started.html" target="_blank" null><code class="inline">JSDoc</code></a> comments can also be used to describe parameters using <code class="decorator inline">@param</code> tags in the comment.</p>
-<h3 id="example">Example</h3>
-<p>A simple example could look like:</p>
-<app-section-header headerType="code">Full-fledged Controller with Routes</app-section-header>
-<pre><code class="language-typescript">@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Simple</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
-  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">private</span> service<span class="token operator">:</span> MockService</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span><span class="token punctuation">{{ '}' }}</span>
+<p class="note"><strong>Note</strong> In development mode the module supports hot reloading of <code class="item input">class</code>es.  Routes can be added/modified/removed at runtime.</p>
+
+<h3>Parameters</h3>
+
+Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/param.ts#L49">@Path</a> - Path params</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/param.ts#L55">@Query</a> - Query params</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/param.ts#L67">@Body</a> - Request body (in it's entirety)</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/param.ts#L61">@Header</a> - Header values</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/param.ts#L43">@Context</a> - Special values exposed (e.g. <a target="_blank" class="source-link" href="./src/types.d.ts#L11">Request</a>, <a target="_blank" class="source-link" href="./src/types.d.ts#L87">Response</a>, Session, AuthContext, etc.)</li></ul>
+
+Each <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/decorator/param.ts#L30">Param</a> can be configured to indicate:
+<ul> <li><code class="item input">name</code> - Name of param, field name, defaults to handler parameter name if necessary</li>
+ <li><code class="item input">description</code> - Description of param, pulled from <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a>, or defaults to name if empty</li>
+ <li><code class="item input">required?</code> - Is the field required?, defaults to whether or not the parameter itself is optional</li>
+ <li><code class="item input">type</code> - The class of the type to be enforced, pulled from parameter type</li></ul>
+
+<a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a> comments can also be used to describe parameters using <code class="item input">@param</code> tags in the comment.
+
+      <figure class="code">
+      <figcaption class="code">Full-fledged Controller with Routes
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/alt/docs/src/simple-full.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/decorator/controller'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Get<span class="token punctuation">,</span> Post <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/decorator/endpoint'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Path<span class="token punctuation">,</span> Body<span class="token punctuation">,</span> Context<span class="token punctuation">,</span> Query <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/decorator/param'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Request <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/types'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MockService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./mock'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Simple</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">private</span> service<span class="token operator">:</span> MockService</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
-   * <span class="token type">Get</span> a random user by name
+   * Get a random user by name
    */</span>
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/name'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">doIt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">/simple/name => </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{ '{' }}</span>user<span class="token punctuation">.</span>first<span class="token punctuation">.</span><span class="token function">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">{{ '}' }}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
+    <span class="token keyword">return</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">/simple/name => </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>user<span class="token punctuation">.</span>first<span class="token punctuation">.</span><span class="token function">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
-   * <span class="token type">Get</span> a user by id
+   * Get a user by id
    */</span>
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/:id'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">doIt</span><span class="token punctuation">(</span>@<span class="token meta">Path</span><span class="token punctuation">(</span><span class="token punctuation">)</span> id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">async</span> <span class="token function">getById</span><span class="token punctuation">(</span><span class="token parameter">@<span class="token meta">Path</span><span class="token punctuation">(</span><span class="token punctuation">)</span> id<span class="token operator">:</span> <span class="token builtin">number</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">/simple/name => </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{ '{' }}</span>user<span class="token punctuation">.</span>first<span class="token punctuation">.</span><span class="token function">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">{{ '}' }}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-
+    <span class="token keyword">return</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">/simple/id => </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>user<span class="token punctuation">.</span>first<span class="token punctuation">.</span><span class="token function">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
   @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/name'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">doIt</span><span class="token punctuation">(</span><span class="token parameter">@<span class="token meta">Body</span><span class="token punctuation">(</span><span class="token punctuation">)</span> person<span class="token operator">:</span> <span class="token punctuation">{{ '{' }}</span> name<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{ '}' }}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> name<span class="token operator">:</span> req<span class="token punctuation">.</span>body<span class="token punctuation">.</span>name <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{ '{' }}</span> success <span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
+  <span class="token keyword">async</span> <span class="token function">createName</span><span class="token punctuation">(</span><span class="token parameter">@<span class="token meta">Body</span><span class="token punctuation">(</span><span class="token punctuation">)</span> person<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> name<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'}'}}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> name<span class="token operator">:</span> person<span class="token punctuation">.</span>name <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> success<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token regex">/\/img(.*)[.](jpg|png|gif)/</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getImage</span><span class="token punctuation">(</span>@<span class="token meta">Context</span><span class="token punctuation">(</span><span class="token punctuation">)</span> req<span class="token operator">:</span> <span class="token type">Request</span><span class="token punctuation">,</span> @<span class="token meta">Query</span><span class="token punctuation">(</span><span class="token string">'w'</span><span class="token punctuation">)</span> width<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> @<span class="token meta">Query</span><span class="token punctuation">(</span><span class="token string">'h'</span><span class="token punctuation">)</span> height<span class="token operator">?</span><span class="token operator">:</span><span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">const</span> img <span class="token operator">=</span>  <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>req<span class="token punctuation">.</span>path<span class="token punctuation">,</span> <span class="token punctuation">{{ '{' }}</span>width<span class="token punctuation">,</span> height<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token operator">...</span> <span class="token keyword">return</span> image <span class="token operator">...</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>Additionally, the module is predicated upon <a class="module-link" routerLink="/docs/di"  null><code class="inline">Dependency Injection</code></a>, and so all standard di techniques work on controllers.</p>
-<p><strong>NOTE</strong> in development mode the module supports hot reloading of <code class="inline">class</code>es.  Routes can be added/modified/removed at runtime.</p>
-<h2 id="inputoutput">Input/Output</h2>
-<p>The module provides standard structure for rendering content on the response.  This includes:</p>
-<ul>
-<li>JSON</li>
-<li>String responses</li>
-<li>Files </li>
-</ul>
-<p>Additionally, there is support for typing requests and request bodies.  This can be utilized by other modules to handle special types of requests.</p>
-<h2 id="interceptors">Interceptors</h2>
-<p><a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/interceptor.ts" target="_blank" null><code class="inline">Interceptor</code></a>s are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.</p>
-<app-section-header headerType="code">A Simple Timing Interceptor</app-section-header>
-<pre><code class="language-typescript">@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">HelloWorldInterceptor</span> <span class="token keyword">extends</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token function">intercept</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> <span class="token type">Request</span><span class="token punctuation">,</span> res<span class="token operator">:</span> Response</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Hello</span> world!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:</p>
-<ul>
-<li><a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/cors.ts" target="_blank" null>‘CORS support’</a> - This interceptor allows cors functionality to be configured out of the box, by setting properties in your application.yml, specifically, <code class="inline">rest.cors.active: true</code></li>
-<li><a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/get-cache.ts" target="_blank" null>‘GET request cache control’</a> - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting <code class="inline">res.disableGetCache: true</code> in your config. </li>
-<li><a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/logging.ts" target="_blank" null>‘Logging’</a> - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so <pre><code class="language-yaml">rest.logRoutes.<span class="token punctuation">{{ '{' }}</span>deny<span class="token punctuation">|</span>allow<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">:</span>
+  <span class="token keyword">async</span> <span class="token function">getImage</span><span class="token punctuation">(</span>@<span class="token meta">Context</span><span class="token punctuation">(</span><span class="token punctuation">)</span> req<span class="token operator">:</span> Request<span class="token punctuation">,</span> @<span class="token meta">Query</span><span class="token punctuation">(</span><span class="token string">'w'</span><span class="token punctuation">)</span> width<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> @<span class="token meta">Query</span><span class="token punctuation">(</span><span class="token string">'h'</span><span class="token punctuation">)</span> height<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> img <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">fetchImage</span><span class="token punctuation">(</span>req<span class="token punctuation">.</span>path<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> width<span class="token punctuation">,</span> height <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> img<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>Input/Output</h2>
+
+The module provides standard structure for rendering content on the response.  This includes:
+<ul> <li>JSON</li>
+ <li>String responses</li>
+ <li>Files</li></ul>
+
+Per the <a class="module-link" href="/docs/base" title="Application phase management, environment config and common utilities for travetto applications.">Base</a> module, the following types automatically have rest support as well:
+<ul> <li><code class="item input">Map</code> - Serializes as a JSON object</li>
+ <li><code class="item input">Set</code> - Serializes as an array</li>
+ <li><code class="item input">Error</code> - Serializes to a standard object, with status, and the error message.</li>
+ <li><code class="item input">AppError</code> - Serializes like <code class="item input">Error</code> but translates the error category to an HTTP status</li></ul>
+
+Additionally, the <a class="module-link" href="/docs/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a> module supports typing requests and request bodies for run-time validation of requests. 
+
+<h2>Interceptors</h2>
+
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/interceptor/interceptor.ts#L9">RestInterceptor</a>s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+
+      <figure class="code">
+      <figcaption class="code">A Trivial Intereptor
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/alt/docs/src/interceptor-hello-world.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestInterceptor <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/interceptor/interceptor'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Request<span class="token punctuation">,</span> Response <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/types'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SerializeInterceptor <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/interceptor/serialize'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">HelloWorldInterceptor</span> <span class="token keyword">extends</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{'{'}}</span>
+
+  after <span class="token operator">=</span> <span class="token punctuation">[</span>SerializeInterceptor<span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  <span class="token function">intercept</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> Request<span class="token punctuation">,</span> res<span class="token operator">:</span> Response</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Hello world!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<p class="note"><strong>Note</strong> The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after reuirements to ensure the appropriate order of execution.</p>
+
+Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
+<ol> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/interceptor/serialize.ts#L16">SerializeInterceptor</a> - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/interceptor/cors.ts#L39">CorsInterceptor</a> - This interceptor allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, <code class="item input">rest.cors.active: true</code>
+  
+      <figure class="code">
+      <figcaption class="code">Cors Config
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/interceptor/cors.ts#L12">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RestCorsConfig</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Is cors active
+   */</span>
+  active<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Allowed origins
+   */</span>
+  origins<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Allowed http methods
+   */</span>
+  methods<span class="token operator">?</span><span class="token operator">:</span> Request<span class="token punctuation">[</span><span class="token string">'method'</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Allowed http headers
+   */</span>
+  headers<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Support credentials?
+   */</span>
+  credentials<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/interceptor/cookies.ts#L52">CookiesInterceptor</a> - This interceptor is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+  
+      <figure class="code">
+      <figcaption class="code">Cookies Config
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/interceptor/cookies.ts#L17">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RestCookieConfig</span> <span class="token keyword">implements</span> <span class="token class-name">cookies<span class="token punctuation">.</span>SetOption</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Are cookies supported
+   */</span>
+  active <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Are they signed
+   */</span>
+  signed <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Supported only via http (not in JS)
+   */</span>
+  httpOnly <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Enforce same site policy
+   */</span>
+  sameSite<span class="token operator">:</span> cookies<span class="token punctuation">.</span>SetOption<span class="token punctuation">[</span><span class="token string">'sameSite'</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token string">'lax'</span> <span class="token operator">=</span> <span class="token string">'lax'</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The signing keys
+   */</span>
+  keys <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'default-insecure'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Is the cookie only valid for https
+   */</span>
+  secure<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The domain of the cookie
+   */</span>
+  domain<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/interceptor/get-cache.ts#L12">GetCacheInterceptor</a> - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting <code class="item input">res.disableGetCache: true</code> in your config.</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/interceptor/logging.ts#L61">LoggingInterceptor</a> - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
+
+  
+      <figure class="code">
+      <figcaption class="code">Control Logging
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/alt/docs/resources/log.yml">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-yaml">rest.logRoutes.<span class="token punctuation">{{'{'}}</span>deny<span class="token punctuation">|</span>allow<span class="token punctuation">{{'}'}}</span><span class="token punctuation">:</span>
 <span class="token punctuation">-</span> <span class="token string">'/controller1'</span>
 <span class="token punctuation">-</span> <span class="token string">'/controller1:*'</span>
 <span class="token punctuation">-</span> <span class="token string">'/controller2:/path'</span>
-<span class="token punctuation">-</span> '/controller3<span class="token punctuation">:</span>/path/<span class="token important">*`</span></code></pre></li>
-<li><a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/serialize.ts" target="_blank" null>‘Serialization’</a> - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.</li>
-</ul>
-<h2 id="creating-and-running-an-app">Creating and Running an App</h2>
-<p>To run a REST server, you will need to construct an entry point using the <code class="decorator inline">@Application</code> decorator, as well as define a valid <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/server.ts" target="_blank" null><code class="inline">RestServer</code></a> to provide initialization for the application.  This could look like:</p>
-<app-section-header headerType="code">Application entry point for Rest Applications</app-section-header>
-<pre><code class="language-typescript">@<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'sample'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{ '{' }}</span>
+<span class="token punctuation">-</span> '/controller3<span class="token punctuation">:</span>/path/<span class="token important">*`</span></code></pre>     
+      </figure></li></ol>
 
-  @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  contextInterceptor<span class="token operator">:</span> <span class="token type">AsyncContextInterceptor</span><span class="token punctuation">;</span>
+<h2>Creating and Running an App</h2>
 
-  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">private</span> server<span class="token operator">:</span> RestServer</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span> <span class="token punctuation">{{ '}' }}</span>
+By default, the framework provices a default <a target="_blank" class="source-link" href="/docs/app/src/decorator.ts#L24">@Application</a> at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/support/application.rest.ts#L10">DefaultRestApplication</a> that will follow default behaviors, and spin up the REST server.  To customize a REST server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="/docs/app/src/decorator.ts#L24">@Application</a> decorator. This could look like:
 
-  <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>server<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>And using the pattern established in the <a class="module-link" routerLink="/docs/di"  null><code class="inline">Dependency Injection</code></a> module, you would run your program using <code class="inline">npx travetto sample</code>.</p>
-<h2 id="custom-interceptors">Custom Interceptors</h2>
-<p>Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" routerLink="/docs/di"  null><code class="inline">Dependency Injection</code></a> by extending the <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor" target="_blank" null><code class="inline">RestInterceptor</code></a> class.  The interceptors are tied to the defined <code class="inline">Request</code> and <code class="inline">Response</code> objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:</p>
-<app-section-header headerType="code">Defining a new Interceptor</app-section-header>
-<pre><code class="language-typescript">@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LoggingInterceptor</span> <span class="token keyword">extends</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">async</span> <span class="token function">intercept</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> <span class="token type">Request</span><span class="token punctuation">,</span> res<span class="token operator">:</span> Response</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>req<span class="token punctuation">.</span>method<span class="token punctuation">,</span> req<span class="token punctuation">.</span>path<span class="token punctuation">,</span> req<span class="token punctuation">.</span>query<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>A <code class="inline">next</code> parameter is also available to allow for controlling the flow of the request, either by stopping the flow of interceptors, or being able to determine when a request starts, and when it is ending.</p>
-<app-section-header headerType="code">Defining a fully controlled Interceptor</app-section-header>
-<pre><code class="language-typescript">@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LoggingInterceptor</span> <span class="token keyword">extends</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">async</span> <span class="token function">intercept</span><span class="token punctuation">(</span>req<span class="token operator">:</span> <span class="token type">Request</span><span class="token punctuation">,</span> res<span class="token operator">:</span> <span class="token type">Response</span><span class="token punctuation">,</span> <span class="token function-variable function">next</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">let</span> start <span class="token operator">=</span> <span class="token type">Date</span><span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{{ '{' }}</span>
+      <figure class="code">
+      <figcaption class="code">Application entry point for Rest Applications
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/alt/docs/src/custom-app.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestServer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/server/server'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'custom'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">private</span> server<span class="token operator">:</span> RestServer</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token comment">// Configure server before running</span>
+
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>server<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+And using the pattern established in the <a class="module-link" href="/docs/app" title="Application registration/management and run support.">Application</a> module, you would run your program using <code class="item command"></code>.
+
+<h2>Custom Interceptors</h2>
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" href="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by extending the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/interceptor/interceptor.ts#L9">RestInterceptor</a> class.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="./src/types.d.ts#L11">Request</a> and <a target="_blank" class="source-link" href="./src/types.d.ts#L87">Response</a> objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+
+      <figure class="code">
+      <figcaption class="code">Defining a new Interceptor
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/alt/docs/src/interceptor-logging.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Request<span class="token punctuation">,</span> Response <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/types'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestInterceptor <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/interceptor/interceptor'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Appender</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">write</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+
+@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LoggingInterceptor</span> <span class="token keyword">extends</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">private</span> appender<span class="token operator">:</span> Appender</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">async</span> <span class="token function">intercept</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> Request<span class="token punctuation">,</span> res<span class="token operator">:</span> Response</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token comment">// Write request to database</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>appender<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>req<span class="token punctuation">.</span>method<span class="token punctuation">,</span> req<span class="token punctuation">.</span>path<span class="token punctuation">,</span> req<span class="token punctuation">.</span>query<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+A <code class="item input">next</code> parameter is also available to allow for controlling the flow of the request, either by stopping the flow of interceptors, or being able to determine when a request starts, and when it is ending.
+
+      <figure class="code">
+      <figcaption class="code">Defining a fully controlled Interceptor
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/alt/docs/src/interceptor-controlled.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestInterceptor <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/interceptor/interceptor'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Response<span class="token punctuation">,</span> Request <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/types'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LoggingInterceptor</span> <span class="token keyword">extends</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">intercept</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">,</span> res<span class="token operator">:</span> Response<span class="token punctuation">,</span> <span class="token function-variable function">next</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> start <span class="token operator">=</span> Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">await</span> <span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{ '}' }}</span> <span class="token keyword">finally</span> <span class="token punctuation">{{ '{' }}</span>
-      <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string"><span class="token type">Request</span> took </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{ '{' }}</span><span class="token type">Date</span><span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> start<span class="token interpolation-punctuation punctuation">{{ '}' }}</span></span><span class="token string">ms</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{ '}' }}</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>Currently <a class="module-link" routerLink="/docs/asset" fragment="asset-rest" null><code class="inline">Asset-Rest</code></a> is implemented in this fashion, as well as <a class="module-link" routerLink="/docs/auth" fragment="auth-rest" null><code class="inline">Auth-Rest</code></a>.</p>
-<h2 id="async-context-support">Async Context Support</h2>
-<p><a class="module-link" routerLink="/docs/core" fragment="context" null><code class="inline">AsyncContext</code></a> provides support for automatically injecting an async context into every request. The context management is provided via an <code class="inline">Interceptor</code> and is transparent to the programmer.</p>
-<app-section-header headerType="code">Showing contextual support for Routes</app-section-header>
-<pre><code class="language-typescript"><span class="token operator">...</span>
- @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/preferences'</span><span class="token punctuation">)</span>
- <span class="token keyword">async</span> <span class="token function">save</span><span class="token punctuation">(</span><span class="token parameter">@<span class="token meta">Body</span><span class="token punctuation">(</span><span class="token punctuation">)</span> prefs<span class="token operator">:</span> Preferences</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-   <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span>prefs<span class="token punctuation">)</span><span class="token punctuation">;</span>
-   <span class="token keyword">return</span> <span class="token punctuation">{{ '{' }}</span> success <span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">;</span>
- <span class="token punctuation">{{ '}' }}</span>
-<span class="token operator">...</span>
-<span class="token keyword">class</span> <span class="token class-name">PreferenceService</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">private</span> context<span class="token operator">:</span> <span class="token type">AsyncContext</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">finally</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Request took </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> start<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">ms</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
-  <span class="token keyword">async</span> <span class="token function">update</span><span class="token punctuation">(</span><span class="token parameter">prefs<span class="token operator">:</span> Preferences</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">const</span> userId <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>userId<span class="token punctuation">;</span>
-    <span class="token operator">...</span> store preferences <span class="token keyword">for</span> user <span class="token operator">...</span>
-    <span class="token keyword">return</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><h2 id="cookie-support">Cookie Support</h2>
-<p>Express/Koa/Fastify all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using <a class="external-link" href="https://www.npmjs.com/package/cookies" target="_blank" null><code class="inline">cookies</code></a>.  This functionality is exposed onto the request/response object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.</p>
-<app-section-header headerType="code">Sample Cookie Usage</app-section-header>
-<pre><code class="language-typescript">req<span class="token punctuation">.</span>cookies<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'name'</span><span class="token punctuation">,</span> options<span class="token punctuation">)</span><span class="token punctuation">;</span>
-res<span class="token punctuation">.</span>cookies<span class="token punctuation">.</span><span class="token keyword">set</span><span class="token punctuation">(</span><span class="token string">'name'</span><span class="token punctuation">,</span> value<span class="token punctuation">,</span> options<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h2 id="ssl-support">SSL Support</h2>
-<p>Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if SSL support is configured, but no keys provided.  This is useful for local development where you implicitly trust the cert.</p>
-<p>SSL support can be enabled by setting <code class="inline">rest.ssl.active: true</code>. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the <code class="inline">ResourceManager</code>.</p>
-<h2 id="full-config">Full Config</h2>
-<p>The entire <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/config.ts" target="_blank" null><code class="inline">config object</code></a> which will show the full set of valid configuration parameters for the rest module.</p>
+Currently <a class="module-link" href="/docs/asset-rest" title="Provides integration between the travetto asset and rest module.">Asset Rest Support</a> is implemented in this fashion, as well as <a class="module-link" href="/docs/auth-rest" title="Rest authentication integration support for the travetto framework">Rest Auth</a>.
+
+<h2>Cookie Support</h2>
+Express/Koa/Fastify all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using <a target="_blank" class="external-link" href="https://www.npmjs.com/package/cookies">cookies</a>.  This functionality is exposed onto the <a target="_blank" class="source-link" href="./src/types.d.ts#L11">Request</a>/<a target="_blank" class="source-link" href="./src/types.d.ts#L87">Response</a> object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+
+      <figure class="code">
+      <figcaption class="code">Sample Cookie Usage
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/alt/docs/src/cookie-routes.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> GetOption<span class="token punctuation">,</span> SetOption <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'cookies'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/decorator/controller'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/decorator/endpoint'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Request<span class="token punctuation">,</span> Response <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/types'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Query <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/decorator/param'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SimpleRoutes</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token keyword">private</span> getOptions<span class="token operator">:</span> GetOption<span class="token punctuation">;</span>
+  <span class="token keyword">private</span> setOptions<span class="token operator">:</span> SetOption<span class="token punctuation">;</span>
+
+  @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/cookies'</span><span class="token punctuation">)</span>
+  <span class="token function">cookies</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> Request<span class="token punctuation">,</span> res<span class="token operator">:</span> Response<span class="token punctuation">,</span> @<span class="token meta">Query</span><span class="token punctuation">(</span><span class="token punctuation">)</span> value<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    req<span class="token punctuation">.</span>cookies<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>getOptions<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    res<span class="token punctuation">.</span>cookies<span class="token punctuation">.</span><span class="token keyword">set</span><span class="token punctuation">(</span><span class="token string">'name'</span><span class="token punctuation">,</span> value<span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>setOptions<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>SSL Support</h2>
+
+Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
+<ul> <li>SSL support is configured</li>
+ <li><a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-forge">node-forge</a> is installed</li>
+ <li>No keys provided</li></ul>
+
+This is useful for local development where you implicitly trust the cert.
+
+SSL support can be enabled by setting <code class="item input">rest.ssl.active: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the <a target="_blank" class="source-link" href="/docs/base/src/resource.ts">ResourceManager</a>.
+
+<h2>Full Config</h2>
+The entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest/src/server/config.ts#L13">RestConfig</a> which will show the full set of valid configuration parameters for the rest module.
+
 </div>
-
-      <app-openapi></app-openapi>
-
-      <app-rest-session></app-rest-session>
-
-      <app-rest-express></app-rest-express>
-
-      <app-rest-koa></app-rest-koa>
-
-      <app-rest-fastify></app-rest-fastify>
-
-      <app-rest-aws-lambda></app-rest-aws-lambda>

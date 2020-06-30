@@ -26,6 +26,8 @@ import { RegistryComponent } from './gen/registry/registry.component';
 import { DiComponent } from './gen/di/di.component';
 import { EmailComponent } from './gen/email/email.component';
 import { EmailTemplateComponent } from './gen/email-template/email-template.component';
+import { ImageComponent } from './gen/image/image.component';
+import { TransformerComponent } from './gen/transformer/transformer.component';
 import { SchemaComponent } from './gen/schema/schema.component';
 import { ModelComponent } from './gen/model/model.component';
 import { ModelElasticsearchComponent } from './gen/model-elasticsearch/model-elasticsearch.component';
@@ -116,7 +118,9 @@ import { WatchComponent } from './gen/watch/watch.component';
     AppComponent,
     OpenapiComponent,
     CommandComponent,
-    WatchComponent
+    WatchComponent,
+    ImageComponent,
+    TransformerComponent
   ]
 })
 export class DocumentationModule { }

@@ -1,27 +1,79 @@
-travetto: Transform
-===
+# Transformation
+## Functionality for AST transformations, with transformer registration, and general utils
 
-**Install: primary**
+**Install: @travetto/transformer**
 ```bash
-$ npm install @travetto/transformer
+npm install @travetto/transformer
 ```
 
-This module provides support for enhanced AST transformations, and transformer registration, with support for common AST transformation patterns to facilitate all the transformers used throughout the framework.
-Transformations are defined by `support/transformer.<name>.ts` as the filename. The schema for a transformer is:
+This module provides support for enhanced AST transformations, and declarative transformer registration, with common patterns to support all the transformers used throughout the framework. Transformations are located by `support/transformer.<name>.ts` as the filename. 
 
-**Code: Sample transformer, registration and execution**
+The module is primarily aimed at extremely advanced usages for things that cannot be detected at runtime.  The [Registry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//registry "Patterns and utilities for handling registration of metadata and functionality for run-time use") module already has knowledge of all `class`es and `field`s, and is able to listen to changes there.  Many of the modules build upon work by some of the foundational transformers defined in [Registry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//registry "Patterns and utilities for handling registration of metadata and functionality for run-time use"), [Schema](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//schema "Data type registry for runtime validation, reflection and binding. ") and [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di "Dependency registration/management and injection support.").  These all center around defining a registry of classes, and associated type information.
+
+Because working with the [typescript](https://typescriptlang.org) API can be delicate (and open to breaking changes), creating new transformers should be done cautiously. 
+
+## Custom Transformer
+
+Below is an example of a transformer that uppercases all `class`, `method` and `param` declarations.  This will break any code that depends upon it as we are redefining all the identifiers at compile time.  
+
+**Code: Sample Transformer - Upper case all declarations**
 ```typescript
-  export class CustomerTransformer {
-    after: ['base'],
-    phase: 'before'|'after', // The phase as defined by Typescript's AST processing
-    transformer: (context: ts.TransformationContext) => {
-       return (file: ts.SourceFile) => {
-         ... modify source file ...
-         return file;
-       }
+import * as ts from 'typescript';
+
+import { OnProperty, TransformerState, OnMethod, OnClass } from '@travetto/transformer';
+
+export class MakeUpper {
+  @OnProperty()
+  static handleProperty(state: TransformerState, node: ts.PropertyDeclaration) {
+    if (!state.source.fileName.includes(`upper/src`)) {
+      return node;
     }
+    return ts.updateProperty(
+      node,
+      [],
+      node.modifiers,
+      node.name.getText().toUpperCase(),
+      undefined,
+      node.type,
+      node.initializer ?? ts.createIdentifier('undefined')
+    );
   }
+
+  @OnClass()
+  static handleClass(state: TransformerState, node: ts.ClassDeclaration) {
+    if (!state.source.fileName.includes(`upper/src`)) {
+      return node;
+    }
+    return ts.updateClassDeclaration(
+      node,
+      [],
+      node.modifiers,
+      ts.createIdentifier(node.name!.getText().toUpperCase()),
+      node.typeParameters,
+      node.heritageClauses,
+      node.members
+    );
+  }
+
+  @OnMethod()
+  static handleMethod(state: TransformerState, node: ts.MethodDeclaration) {
+    if (!state.source.fileName.includes(`upper/src`)) {
+      return node;
+    }
+    return ts.updateMethod(
+      node,
+      [],
+      node.modifiers,
+      undefined,
+      ts.createIdentifier(node.name.getText().toUpperCase()),
+      undefined,
+      node.typeParameters,
+      node.parameters,
+      node.type,
+      node.body
+    );
+  }
+}
 ```
 
-## Advanced
-When dealing with transformers, logging is somewhat tricky as the compiler executes before the code is loaded.  To that end, a file `compiler.log` is created in the cache directory during the compilation process. This is a location that transformers should be free to log to, for debugging, and any additional feedback.
+**Note**: This should be a strong indicator that it is very easy to break code in unexpected ways.

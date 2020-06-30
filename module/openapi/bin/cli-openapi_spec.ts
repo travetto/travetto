@@ -5,7 +5,7 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
  * CLI for outputting the open api spec to a local file
  */
 export class OpenApiSpecPlugin extends BasePlugin {
-  name = 'openapi-spec';
+  name = 'openapi:spec';
   init(cmd: commander.Command) {
     return cmd.option('-o, --output [output]', 'Output files', './openapi.yml');
   }

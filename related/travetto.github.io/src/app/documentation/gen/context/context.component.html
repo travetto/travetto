@@ -1,36 +1,77 @@
-<div class="documentation"><h2 id="context" id="context">Context</h2>
-<app-section-header headerType="install">Primary</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/context</code></pre><p>This module provides a wrapper around <code class="inline">nodejs</code>‘s <a class="external-link" href="https://nodejs.org/api/async_hooks.html" target="_blank" null><code class="inline">async_hooks</code></a> to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow.</p>
-<p>The most common way of utilizing the context, is via the <code class="decorator inline">@WithAsyncContext</code> decorator.  The decorator requires the class it’s being used in, to have a <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/context/src/service/context.ts" target="_blank" null><code class="inline">AsyncContext</code></a> member, as it is the source of the contextual information.</p>
-<p>The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain.</p>
-<app-section-header headerType="code">Usage of context within a service</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">ContextAwareService</span> <span class="token punctuation">{{ '{' }}</span>
+<div class="documentation">
+<h1>Async Context
+          <small>Async-aware state management, maintaining context across asynchronous calls.</small>
 
-   <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">public</span> context<span class="token operator">:</span>AsyncContext</span><span class="token punctuation">)</span><span class="token punctuation">{{ '{' }}</span><span class="token punctuation">{{ '}' }}</span>
+        </h1>
 
-   @<span class="token meta">WithAsyncContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-   <span class="token keyword">async</span> <span class="token function">complexOperator</span><span class="token punctuation">(</span><span class="token parameter">name<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-     <span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">set</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span> name <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
-     <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">additionalOp</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <figure class="install">
+      <figcaption class="install">Install @travetto/context
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/context</code></pre>     
+      </figure>
 
-     <span class="token function">assert</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'finished'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-   <span class="token punctuation">{{ '}' }}</span>
+This module provides a wrapper around node's <a target="_blank" class="external-link" href="https://nodejs.org/api/async_hooks.html">async_hooks</a> to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow.
 
-   <span class="token keyword">async</span> <span class="token function">additionalOp</span><span class="token punctuation">(</span><span class="token parameter">check<span class="token operator">:</span><span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-     <span class="token function">assert</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>name <span class="token operator">===</span> check<span class="token punctuation">)</span><span class="token punctuation">;</span>
-     <span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>name <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">finished</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
-   <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>The decorator also allows for a priming of the contextual information.  This is generally useful for system generated operations that are not initiated by a user.</p>
-<app-section-header headerType="code">Using context as an internal invocation</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">SystemInitiatedContext</span> <span class="token punctuation">{{ '{' }}</span>
+The most common way of utilizing the context, is via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/context/src/decorator.ts#L6">WithAsyncContext</a> decorator.  The decorator requires the class it's being used in, to have a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/context/src/service.ts#L10">AsyncContext</a> member, as it is the source of the contextual information.
 
-   <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">public</span> context<span class="token operator">:</span>AsyncContext</span><span class="token punctuation">)</span><span class="token punctuation">{{ '{' }}</span><span class="token punctuation">{{ '}' }}</span>
+The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain.
 
-   @<span class="token meta">WithContext</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>
-     user<span class="token operator">:</span> <span class="token string">'system'</span><span class="token punctuation">,</span>
-     uid<span class="token operator">:</span> <span class="token number">20</span>
-   <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span>
-   <span class="token keyword">async</span> <span class="token function">runJob</span><span class="token punctuation">(</span><span class="token parameter">name<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-     <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string"><span class="token type">User</span>=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{ '{' }}</span><span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>user<span class="token interpolation-punctuation punctuation">{{ '}' }}</span></span><span class="token string">, jobName=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{ '{' }}</span>name<span class="token interpolation-punctuation punctuation">{{ '}' }}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-   <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre></div>
+      <figure class="code">
+      <figcaption class="code">Usage of context within a service
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/context/alt/docs/src/usage.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AsyncContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/context/src/service'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WithAsyncContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/context/src/decorator'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ContextAwareService</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">public</span> context<span class="token operator">:</span> AsyncContext</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+
+  @<span class="token meta">WithAsyncContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">complexOperator</span><span class="token punctuation">(</span><span class="token parameter">name<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">set</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> name <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">additionalOp</span><span class="token punctuation">(</span><span class="token string">'extra'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">finalOp</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">async</span> <span class="token function">additionalOp</span><span class="token punctuation">(</span><span class="token parameter">additional<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> name <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">set</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> name<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>name<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string"> </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>additional<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">async</span> <span class="token function">finalOp</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> name <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// Use name</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+The decorator also allows for a priming of the contextual information.  This is generally useful for system generated operations that are not initiated by a user.
+
+      <figure class="code">
+      <figcaption class="code">Usage of context within a service
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/context/alt/docs/src/usage-primed.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AsyncContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/context/src/service'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WithAsyncContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/context/src/decorator'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SystemInitiatedContext</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">public</span> context<span class="token operator">:</span> AsyncContext</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+
+  @<span class="token meta">WithAsyncContext</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+    user<span class="token operator">:</span> <span class="token string">'system'</span><span class="token punctuation">,</span>
+    uid<span class="token operator">:</span> <span class="token number">20</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">runJob</span><span class="token punctuation">(</span><span class="token parameter">name<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">User=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>context<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>user<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">, jobName=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>name<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>Extension - Rest</h2>
+
+Within the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module, it can be challening to share context across the various layers that may be touched by a request.  This module provides <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/context/src/extension/rest.interceptor.ts#L12">AsyncContextInterceptor</a> to create a data store that will be private to an individual request. This is used by <a class="module-link" href="/docs/auth-rest" title="Rest authentication integration support for the travetto framework">Rest Auth</a> to store authentiated user information for built-in authorization and permission validation.
+
+</div>

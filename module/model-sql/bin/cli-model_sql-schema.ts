@@ -7,12 +7,12 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
  * Allow for exporting of all Models as SQL statements to stdout
  */
 export class SqlSchemaPlugin extends BasePlugin {
-  name = 'sql:schema';
+  name = 'model:sql-schema';
 
   init(cmd: commander.Command) {
     return cmd
       .option('-a, --app [app]', 'Application root to export, (default: .)')
-      .option('-c, --clear [clear]', 'Whether or not to clear the database first (default: true)', CliUtil.isBoolean);
+      .option('-c, --clear [clear]', 'Whether or not to generate DROP statements first (default: true)', CliUtil.isBoolean);
   }
 
   async action() {

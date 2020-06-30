@@ -1,4 +1,4 @@
-import { d, Section, SnippetLink, inp, Code, meth, SubSection, Execute } from '@travetto/doc';
+import { doc as d, Section, SnippetLink, inp, Code, meth, SubSection, Execute } from '@travetto/doc';
 import { WorkPool } from './src/pool';
 import { IterableInputSource } from './src/input/iterable';
 import { DynamicAsyncIterator } from './src/input/async-iterator';

@@ -1,0 +1,227 @@
+# Application
+## Application registration/management and run support.
+
+**Install: @travetto/app**
+```bash
+npm install @travetto/app
+```
+
+The [Base](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base "Application phase management, environment config and common utilities for travetto applications.") module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24) who's job is to register entry points into the application, along with the associated  metadata. 
+
+With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di "Dependency registration/management and injection support."), the [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24) is a synonym for [@Injectable](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di/src/decorator.ts#L29), and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
+
+For example:
+
+**Code: Example of Application target**
+```typescript
+import { Injectable, Inject } from '@travetto/di';
+import { Application } from '@travetto/app/src/decorator';
+
+@Injectable()
+class Server {
+  name = 'roger';
+
+  async launch() {
+    // ...
+  }
+}
+
+@Application('simple')
+class SimpleApp {
+
+  @Inject()
+  server: Server;
+
+  async run() {
+    return this.server.launch();
+  }
+}
+```
+
+Additionally, the [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24) decorator exposes some additional functionality, which can be used to launch the application.
+
+## `.run()` Arguments
+The arguments specified in the `run` method are extracted via code transformation, and are able to be bound when invoking the application.  Whether from the command line or a plugin, the parameters will be mapped to the inputs of `run`.  For instance:
+  
+
+**Code: Simple Entry Point with Parameters**
+```typescript
+import { Application } from '@travetto/app/src/decorator';
+
+@Application('simple-domain')
+class SimpleApp {
+  async run(domain: string, port = 3000) {
+    console.log('Launching', domain, 'on port', port);
+  }
+}
+```
+
+## CLI - run
+
+The run command allows for invocation of applications as defined by the [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24) decorator.  Additionally, the environment can manually be specified (dev, test, prod).
+
+**Terminal: CLI Run Help**
+```bash
+$ travetto travetto run --help
+
+Usage:  run [options] [application] [args...]
+
+Options:
+  -e, --env [env]                 Application environment (dev|prod|<any>)
+  -p, --profile [profile]         Specify additional application profiles
+                                  (default: [])
+  -r, --resource [resourcesRoot]  Specify additional resource root locations
+                                  (default: [])
+  -h, --help                      display help for command
+
+Available Applications:
+
+   ● complex 
+     ----------------------------------------
+     usage: complex domain:string port:number
+     file:  alt/example/src/complex.ts
+
+   ● test-eptest 
+     --------------------------------------------------------
+     usage: test-eptest [age:number=5] [format:html|pdf=html]
+     file:  alt/example/src/entry.ts
+
+   ● simple 
+     ------------------------------
+     usage: simple 
+     file:  alt/simple/src/entry.ts
+
+   ● simple-domain 
+     -----------------------------------------------------
+     usage: simple-domain domain:string [port:number=3000]
+     file:  alt/simple/src/domain.ts
+```
+
+Running without specifying an application ``, will display all the available apps, and would look like:
+
+**Terminal: Sample CLI Output**
+```bash
+$ travetto travetto run
+
+Usage: travetto run [options] [application] [args...]
+
+Options:
+  -e, --env [env]                 Application environment (dev|prod|<any>)
+  -p, --profile [profile]         Specify additional application profiles
+                                  (default: [])
+  -r, --resource [resourcesRoot]  Specify additional resource root locations
+                                  (default: [])
+  -h, --help                      display help for command
+
+Available Applications:
+
+   ● complex 
+     ----------------------------------------
+     usage: complex domain:string port:number
+     file:  alt/example/src/complex.ts
+
+   ● test-eptest 
+     --------------------------------------------------------
+     usage: test-eptest [age:number=5] [format:html|pdf=html]
+     file:  alt/example/src/entry.ts
+
+   ● simple 
+     ------------------------------
+     usage: simple 
+     file:  alt/simple/src/entry.ts
+
+   ● simple-domain 
+     -----------------------------------------------------
+     usage: simple-domain domain:string [port:number=3000]
+     file:  alt/simple/src/domain.ts
+```
+
+To invoke the `simple` application, you need to pass `domain` where port is optional with a default.
+  
+
+**Terminal: Invoke Simple**
+```bash
+$ travetto travetto run simple-domain mydomain.biz 4000
+
+Running application simple-domain ./alt/simple/src/domain.ts
+Configured {
+  app: {
+    watch: true,
+    readonly: false,
+    travetto: '1.0.0-rc.8',
+    name: '@travetto/app',
+    version: '1.0.0-rc.11',
+    license: 'MIT',
+    description: 'Application registration/management and run support.',
+    author: {
+      email: 'travetto.framework@gmail.com',
+      name: 'Travetto Framework'
+    },
+    env: 'dev',
+    profiles: [ 'application', 'simple-domain', 'dev' ],
+    roots: [ '.', './alt/simple' ],
+    resourceRoots: [ '.', './alt/simple' ],
+    debug: { status: false, value: undefined }
+  },
+  config: {}
+}
+Launching mydomain.biz on port 4000
+```
+
+## Type Checking
+
+The parameters to `run` will be type checked, to ensure proper evaluation.
+
+**Terminal: Invoke Simple with bad port**
+```bash
+$ travetto travetto run simple-domain mydomain.biz orange
+
+Usage: travetto run [options] [application] [args...]
+
+Options:
+  -e, --env [env]                 Application environment (dev|prod|<any>)
+  -p, --profile [profile]         Specify additional application profiles
+                                  (default: [])
+  -r, --resource [resourcesRoot]  Specify additional resource root locations
+                                  (default: [])
+  -h, --help                      display help for command
+
+Usage: simple-domain domain:string [port:number=3000]
+```
+
+The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24) 
+annotation to support customization. Only primitive types are supported:
+
+   
+   *  `number` - Float or decimal
+   *  `string` - Default if no type is specified
+   *  `boolean` - true(yes/on/1) and false(no/off/0)
+   *  `union` - Type unions of the same type (`string_a | string_b` or `1 | 2 | 3 | 4`)
+  
+Customizing the types is done by name, and allows for greater control:
+  
+
+**Code: Complex Entry Point with Customization**
+```typescript
+import { Application } from '@travetto/app';
+
+@Application('complex', {
+  paramMap: {
+    domain: {
+      title: 'Domain Name',
+      type: 'string',
+      subtype: 'url'
+    },
+    port: {
+      title: 'Server Port',
+      def: '3000'
+    }
+  }
+})
+class Complex {
+  async run(domain: string, port: number) {
+    console.debug('Launching', domain, 'on port', port);
+  }
+}
+```
+

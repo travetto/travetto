@@ -1,0 +1,121 @@
+# Logging
+## Logging framework that integrates at the console.log level.
+
+**Install: @travetto/log**
+```bash
+npm install @travetto/log
+```
+
+This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base/src/console.ts) in the [Base](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base "Application phase management, environment config and common utilities for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. 
+
+The supported operations are:
+   
+   *  `console.fatal` which logs at the `FATAL` level
+   *  `console.error` which logs at the `ERROR` level
+   *  `console.warn` which logs at the `WARN` level
+   *  `console.info` which logs at the `INFO` level
+   *  `console.debug` which logs at the `DEBUG` level
+   *  `console.log` which logs at the `INFO` level
+
+**Note**: All other console methods are excluded, specifically `trace`, `inspect`, `dir`, `time`/`timeEnd`
+
+## Filtering Debug
+
+The `debug` messages can be filtered using the patterns from the [debug](https://www.npmjs.com/package/debug).  You can specify wild cards to only `DEBUG` specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
+
+**Terminal: Sample environment flags**
+```bash
+# Debug
+$ DEBUG=@app:*,-@trv:model npx travetto run app
+$ DEBUG=-@trv:registry npx travetto run app
+$ DEBUG=@trv:rest npx travetto run app
+$ DEBUG=@trv:*,-@trv:model npx travetto run app
+```
+
+**Note**: In production mode, all `console.debug` invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.
+
+## How Logging is Instrumented
+
+All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base/src/console.ts).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base/src/console.ts) and receives all logging events from all files compiled by the [Compiler](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//compiler "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.") module.
+
+A sample of the instrumentation would be:
+
+**Code: Sample logging at various levels**
+```typescript
+export function work() {
+  console.debug('Start Work');
+
+  try {
+    1 / 0;
+  } catch (e) {
+    console.error(e);
+  }
+  console.debug('End Work');
+}
+```
+
+**Code: Sample After Transpilation**
+```javascript
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.work = void 0;
+function work() {
+    ᚕlg({ level: 'debug', file: __filename.ᚕunix, category: 'alt/docs.src.transpile', line: 2 }, 'Start Work');
+    try {
+        1 / 0;
+    }
+    catch (e) {
+        ᚕlg({ level: 'error', file: __filename.ᚕunix, category: 'alt/docs.src.transpile', line: 7 }, e);
+    }
+    ᚕlg({ level: 'debug', file: __filename.ᚕunix, category: 'alt/docs.src.transpile', line: 9 }, 'End Work');
+}
+exports.work = work;
+Object.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });
+```
+
+And when in `prod` mode transforms into:
+
+**Code: Sample After Transpilation, in Prod**
+```javascript
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.work = void 0;
+function work() {
+    try {
+        1 / 0;
+    }
+    catch (e) {
+        ᚕlg({ level: 'error', file: __filename.ᚕunix, category: 'alt/docs.src.transpile-prod', line: 5 }, e);
+    }
+}
+exports.work = work;
+Object.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });
+```
+
+## Sample Output
+
+The logging output, as indicated provides context for location of invocation. Given the file `test/simple.ts`:
+
+**Code: Various log levels**
+```typescript
+console.log('Hello World');
+
+console.log('Woah!', { a: { b: { c: { d: 10 } } } });
+
+console.info('Woah!');
+
+console.debug('Test');
+```
+
+The corresponding output would be
+
+**Terminal: Logging output**
+```bash
+$ alt/docs/src/output.ts -r @travetto/boot/register alt/docs/src/output.ts
+
+2020-07-03T18:04:55.184Z info  [alt/docs.src.output:5] Hello World
+2020-07-03T18:04:55.187Z info  [alt/docs.src.output:7] Woah! { a: { b: { c: [Object] } } }
+2020-07-03T18:04:55.189Z info  [alt/docs.src.output:9] Woah!
+2020-07-03T18:04:55.189Z debug [alt/docs.src.output:11] Test
+```
+

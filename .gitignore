@@ -15,3 +15,4 @@ bin/test/error.ts
 sample/dummy/**
 **/resources/email/*.compiled.*
 module/**/dev.yml
+**/README.html

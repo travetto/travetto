@@ -1,2 +1,2 @@
 ---
-elasticsearch.model.namespace: app-test
+mongo.model.namespace: app-test

@@ -1,31 +1,47 @@
-<div class="documentation"><h2 id="compiler" id="compiler">Compiler</h2>
-<app-section-header headerType="install">Primary</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/compiler</code></pre><p>This module expands upon <a class="external-link" href="http://typescriptlang.org" target="_blank" null><code class="inline">typescript</code></a>, with supplemental functionality:</p>
-<ul>
-<li>Read <code class="inline">tsconfig.json</code> from the project directory to provide </li>
-<li>Supports on-the-fly compilation, nothing needs to be compiled ahead of time</li>
-<li>Enhanced AST transformations, and transformer registration<ul>
-<li>All AST transformations are single-file based, and runs without access to the <code class="inline">TypeChecker</code></li>
-</ul>
-</li>
-<li>Intelligent caching of source files to minimize recompilation</li>
-<li>Support for detecting changes in sources files at runtime</li>
-<li>Allows for hot-reloading of classes during development<ul>
-<li>Utilizes <code class="inline">es2015</code> <code class="inline language-typescript">Proxy</code>s to allow for swapping out implementation at runtime</li>
-</ul>
-</li>
-</ul>
-<p>Additionally, there is support for common AST transformation patterns to facilitate all the transformers used throughout the framework.<br>Transformations are defined by <code class="path inline">support/transformer.&lt;name&gt;.ts</code> as the filename. The schema for a transformer is:</p>
-<app-section-header headerType="code">Sample transformer, registration and execution</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomerTransformer</span> <span class="token punctuation">{{ '{' }}</span>
-  after<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'base'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  phase<span class="token operator">:</span> <span class="token string">'before'</span><span class="token operator">|</span><span class="token string">'after'</span><span class="token punctuation">,</span> <span class="token comment">// <span class="token type">The</span> phase as defined by <span class="token type">Typescript</span>'s AST processing</span>
-  <span class="token function-variable function">transformer</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">context<span class="token operator">:</span> ts<span class="token punctuation">.</span>TransformationContext</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
-     <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token parameter">file<span class="token operator">:</span> ts<span class="token punctuation">.</span>SourceFile</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
-       <span class="token operator">...</span> modify source file <span class="token operator">...</span>
-       <span class="token keyword">return</span> file<span class="token punctuation">;</span>
-     <span class="token punctuation">{{ '}' }}</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><h3 id="advanced">Advanced</h3>
-<p>When dealing with transformers, logging is somewhat tricky as the compiler executes before the code is loaded.  To that end, a file <code class="inline">compiler.log</code> is created in the cache directory during the compilation process. This is a location that transformers should be free to log to, for debugging, and any additional feedback.</p>
+<div class="documentation">
+<h1>Compiler
+          <small>Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/compiler
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/compiler</code></pre>     
+      </figure>
+
+This module expands upon <a target="_blank" class="external-link" href="https://typescriptlang.org">typescript</a>, with supplemental functionality:
+<ul> <li>Read <code class="item path">tsconfig.json</code> from the project directory to provide </li>
+ <li>Supports on-the-fly compilation, nothing needs to be compiled ahead of time</li>
+ <li>Enhanced AST transformations, and transformer registration [object Object]</li>
+ <li>Intelligent caching of source files to minimize recompilation</li>
+ <li>Support for detecting changes in sources files at runtime</li>
+ <li>Allows for hot-reloading of classes during development <ul> <li>Utilizes <code class="item input">es2015</code> <code class="item class">Proxy</code>s to allow for swapping out implementation at runtime</li></ul></li></ul>
+
+Additionally, there is support for common AST transformations via <a class="module-link" href="/docs/transformer" title="Functionality for AST transformations, with transformer registration, and general utils">Transformation</a>
+
+<h2>Debugging</h2>
+
+When dealing with transformers, logging is somewhat tricky as the compiler executes before the code is loaded.  To that end, the file <code class="item path">compiler.log</code> is created in the cache directory during the compilation process. This is a location that transformers should be free to log to, for debugging, and any additional feedback.
+
+<h2>CLI - compile</h2> 
+
+      <figure class="terminal">
+      <figcaption class="terminal">Compiler usage
+      
+      </figcaption>
+      <pre><code class="language-bash">$ travetto travetto compile --help
+
+Usage:  compile <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -c, --clean            Indicates <span class="token keyword">if</span> the cache <span class="token function">dir</span> should be cleaned
+  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>  Output directory
+  -q, --quiet            Quiet operation
+  -h, --help             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
+
+This command line operation pre-compiles all of the application source code.  You can target the output location as well, which is useful in conjunction with <code class="item field">process.env.TRV_CACHE</code> for relocating the compiled files.
+
 </div>

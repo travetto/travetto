@@ -56,7 +56,7 @@ export class Finalize {
     }
   }
 
-  static finalize(mod: string, base: string, onlyModules: boolean = false) {
+  static finalize(mod: string, base: string) {
     // Fetch deps
     const deps = DepResolver.resolve(mod, base);
     // deps.regular.add(`@travetto/${mod}`);

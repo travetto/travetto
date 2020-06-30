@@ -41,6 +41,10 @@ li {
   h1 {
     line-height: 2em;
     border-bottom: 1px solid #ccc;
+    small {
+      display: inline-block;
+      font-size: 1rem;
+    }
   }
 
   h2,
@@ -54,10 +58,6 @@ li {
 
   h2 {
     margin-top: .7em;
-  }
-
-  pre+h2 {
-    margin-top: 1.5em;
   }
 
   h3,
@@ -81,197 +81,302 @@ li {
     margin-top: 0;
   }
 
-  a[class$="-link"] {
+  a[class$="-link"], code.item {
     display: inline-block;
+
+    font-size: 1.2rem;
+    border: none;
+    background-color: rgba(120,120,120, .8);
+    border-radius: 5px;
+    font-weight: 400;
+    font-family: "Source Sans Pro", sans-serif;      
+    padding: .1em .4em;
+    margin: .1em .2em;
+    line-height: 1.5em;
+  }
+
+  a[class$="-link"] {
     text-decoration: none;
+    color: white;
+    opacity: .8;
+    transition: .5s opacity;
 
-    code {
-      color: white;
-      opacity: .8;
-      transition: .5s opacity;
-      margin: 0;
-      padding: .2em .4em;
-      border: none;
-    }
-
-    &:hover code {
+    &:hover  {
       opacity: 1;
     }
+
+    &.module-link  {
+      background-color: green;
+    }
+
+    &.source-link  {
+      background-color: rgba(255, 0, 0, .8);
+    }
+
+    &.external-link  {
+      background-color: rgba(0, 0, 255, .8);
+    }
   }
 
-  a.module-link code {
-    background-color: green;
-  }
-
-  a.source-link code {
-    background-color: rgba(255, 0, 0, .8);
-  }
-
-  a.external-link code {
-    background-color: rgba(0, 0, 255, .8);
+  code.item {
+    color: #222;
+    background: rgba(200,200,200,.8);
   }
 
 
-  code {
-    line-height: 1.2;
-    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-    margin: .2em;
-    white-space: pre;
-    word-spacing: normal;
-    word-break: normal;
-    font-weight: normal;
+  figure {
 
-    -moz-tab-size: 2;
-    -o-tab-size: 2;
-    tab-size: 2;
+    padding: 0px;
+    margin: 0px;
+    margin-top: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    
+    cite {
+      font-size: 1rem;
+      line-height: 1.3rem;
+      text-decoration: none;
+      font-style: normal;
+      margin: 0px;
+      padding: 0px;
+      a {
+        color: white;
+        text-decoration: none;
+      }
+    }
 
-    -webkit-hyphens: none;
-    -moz-hyphens: none;
-    -ms-hyphens: none;
-    hyphens: none;
-    display: block;
+    figcaption {
+      display: block;
+      position: relative;
+      font-size: 20px;
+      line-height: 35px;
+      font-family: "Source Sans Pro", sans-serif;
+      margin: 0px;
+      padding: 0px;
+      color: white;
 
-    font-size: 12pt;
-    padding: 1em;
-    background: #ccc;
-    color: #333;
-    border-radius: .3em;
-    // box-shadow: 1px 1px .3em -.1em black;
+      cite, .copy {
+        position: absolute;
+        right: 10px;
+        top: 0px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(0,0,0,0);
+        font-size: .8em;
+        line-height: 1.2em;
+        margin: .4em 0;
+        &:hover {
+          border-bottom: 1px solid #fff;
+        }
+      }
+    
+      &::before {
+        font-family: 'Material Icons';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 20px;
+        /* Preferred icon size */
+        display: inline-block;
+        line-height: 35px;
+        text-transform: none;
+        letter-spacing: normal;
+        vertical-align: bottom;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+        padding-left: .5em;
+        margin-right: .5em;
+    
+        /* Support for all WebKit browsers. */
+        -webkit-font-smoothing: antialiased;
+        /* Support for Safari and Chrome. */
+        text-rendering: optimizeLegibility;
+    
+        /* Support for Firefox. */
+        -moz-osx-font-smoothing: grayscale;
+    
+        /* Support for IE. */
+        font-feature-settings: 'liga';
+      }            
 
-    &[class*="language-"] {
-      overflow-x: auto;
-      font-size: 13pt;
+      &.install::before { content: 'playlist_add'; }
+      &.terminal::before { content: 'call_to_action'; }
+      &.code::before { content: 'code'; }
+      &.config::before { content: 'settings'; }
 
-      background: rgba(0, 0, 0, .8);
-      color: hsl(0, 0%, 95%);
+      
+      &.install {
+        background-color: desaturate(darken(rgba(218, 165, 32, 1), 5%), 0%);
+      }
+    
+      &.terminal {
+        background-color: desaturate(rgba(102, 102, 102, 1), 0%);
+      }
+    
+      &.code {
+        background-color: desaturate(darken(rgba(0, 255, 0, 1), 20%), 0%);
+      }
+    
+      &.config {
+        background-color: desaturate(darken(rgba(0, 0, 255, 1), 20%), 40%);
+      }  
+    }
 
-      &.inline {
-        background: rgba(0, 0, 0, .7);
+    pre {
+      margin:0;
+    }
+
+    code {
+      line-height: 1.2;
+      font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+      margin: .2em;
+      white-space: pre;
+      word-spacing: normal;
+      word-break: normal;
+      font-weight: normal;
+
+      -moz-tab-size: 2;
+      -o-tab-size: 2;
+      tab-size: 2;
+
+      -webkit-hyphens: none;
+      -moz-hyphens: none;
+      -ms-hyphens: none;
+      hyphens: none;
+      display: block;
+
+      font-size: 12pt;
+      padding: 1.5em;
+      background: #ccc;
+      color: #333;
+      // box-shadow: 1px 1px .3em -.1em black;
+
+      margin: 0;
+
+      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAAAAABXZoBIAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAHOSURBVCjPJdDBASMpDATAtWCMWkwem39sa7qFB/A9rkKo119XJ05hMFZljBg3PbGr3JDBW2WBbRV2hm76dJbHZQfsH6hsnKoYEJ6enqF6wl6n0+WqTyXoxL4ez1CoLEtbPpGdl1wu34X110ZnsJirrEYfIL4+8SvCsOPDBZmguntCrvdspzCIrD+oZbMQtrEppk/P+sSIxKqM9DTFU7+Qj5ATvPZNX4XByDCsS57IWMFQqDz/j4BYtiubfGK9Ts/+QdZdRhAZq1gZISjOe9rjIwhVBT3xFJnAEJ7XP+g6riAUGcSqGYbs9GXqctpx+nC5+q6CTDHiWzfoiV1mTGSbofoEYWCksz4hrFe6PH02Od8rZBty3Xpv7JqeyDiulj5su71+nT4ir1PzFoRVtmdMpG1L+wa7MMrwgfRVs5ygz8jLYpTVP6FIEIpdCF3fzkaXCVme+9PYEvSnZrCP6xvZ082F/R5IT8/IssD4F8vkH8gydh0uZCQy8lpgrDox+3DDuhLzzliebbRRHpxLGD76sXMN53u0XXdLCLxWpevO2MVsBGP6Kax/oFDnRWSXL5MpGMTv+oCv09kJQp2+r4QFwVjl09VlCwMT6fRdCf4HTj6GcxpsVvEAAAAASUVORK5CYII=');
+      background-repeat: repeat;
+
+      &[class*="language-"] {
+        overflow-x: auto;
+        font-size: 13pt;
+
+        background: rgba(0, 0, 0, .8);
+        color: hsl(0, 0%, 95%);
+
+        &.inline {
+          background: rgba(0, 0, 0, .7);
+          color: white;
+        }
+
+        .token {
+
+          &.class-name,
+          &.type {
+            color: hsl(195, 53%, 79%);
+          }
+
+
+          &.meta {
+            color: hsl(39, 100%, 50%);
+          }
+
+          &.comment,
+          &.prolog,
+          &.doctype,
+          &.cdata {
+            color: hsl(30, 50%, 50%);
+
+            &>* {
+              color: hsl(30, 50%, 50%) !important;
+            }
+          }
+
+          &.punctuation {
+            opacity: .7;
+          }
+
+          &.function {
+            color: hsl(55, 87%, 80%);
+          }
+
+          &.property,
+          &.tag,
+          &.boolean,
+          &.number,
+          &.constant,
+          &.symbol {
+            color: hsl(350, 60%, 70%);
+          }
+
+          &.selector,
+          &.attr-name,
+          &.string,
+          &.char,
+          &.builtin,
+          &.inserted {
+            color: hsl(75, 80%, 60%);
+          }
+
+          &.operator,
+          &.entity,
+          &.url,
+          .language-css &.string,
+          .style &.string,
+          &.variable {
+            color: hsl(40, 90%, 60%);
+          }
+
+          &.atrule,
+          &.attr-value,
+          &.keyword {
+            color: hsl(350, 60%, 70%);
+          }
+
+          &.regex,
+          &.important {
+            color: hsl(120, 93%, 75%);
+          }
+
+          &.important,
+          &.bold {
+            font-weight: bold;
+          }
+
+          &.italic {
+            font-style: italic;
+          }
+
+          &.entity {
+            cursor: help;
+          }
+
+          &.deleted {
+            color: hsl(0, 100%, 50%);
+          }
+        }
+      }
+
+      &.decorator {
+        background-color: orange;
         color: white;
       }
 
-      .token {
+      &.path {
+        background-color: darken(pink, 30%);
+        color: white;
+      }
 
-        &.class-name,
-        &.type {
-          color: hsl(195, 53%, 79%);
-        }
-
-
-        &.meta {
-          color: hsl(39, 100%, 50%);
-        }
-
-        &.comment,
-        &.prolog,
-        &.doctype,
-        &.cdata {
-          color: hsl(30, 50%, 50%);
-
-          &>* {
-            color: hsl(30, 50%, 50%) !important;
-          }
-        }
-
-        &.punctuation {
-          opacity: .7;
-        }
-
-        &.function {
-          color: hsl(55, 87%, 80%);
-        }
-
-        &.property,
-        &.tag,
-        &.boolean,
-        &.number,
-        &.constant,
-        &.symbol {
-          color: hsl(350, 60%, 70%);
-        }
-
-        &.selector,
-        &.attr-name,
-        &.string,
-        &.char,
-        &.builtin,
-        &.inserted {
-          color: hsl(75, 80%, 60%);
-        }
-
-        &.operator,
-        &.entity,
-        &.url,
-        .language-css &.string,
-        .style &.string,
-        &.variable {
-          color: hsl(40, 90%, 60%);
-        }
-
-        &.atrule,
-        &.attr-value,
-        &.keyword {
-          color: hsl(350, 60%, 70%);
-        }
-
-        &.regex,
-        &.important {
-          color: hsl(120, 93%, 75%);
-        }
-
-        &.important,
-        &.bold {
-          font-weight: bold;
-        }
-
-        &.italic {
-          font-style: italic;
-        }
-
-        &.entity {
-          cursor: help;
-        }
-
-        &.deleted {
-          color: hsl(0, 100%, 50%);
-        }
+      &.inline {
+        font-family: "Source Sans Pro", sans-serif;
+        min-width: 0px;
+        font-size: 14pt;
+        overflow: visible;
+        display: inline-block;
+        padding: .2em .4em;
       }
     }
-
-    &.decorator {
-      background-color: orange;
-      color: white;
-    }
-
-    &.path {
-      background-color: darken(pink, 30%);
-      color: white;
-    }
-
-    &.inline {
-      font-family: "Source Sans Pro", sans-serif;
-      min-width: 0px;
-      font-size: 14pt;
-      overflow: visible;
-      display: inline-block;
-      padding: .2em .4em;
-    }
   }
-
-  pre {
-    margin-top: 0;
-  }
-
-  app-section-header + pre code {
-    margin: 0;
-    padding: 1.5em;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAAAAABXZoBIAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAHOSURBVCjPJdDBASMpDATAtWCMWkwem39sa7qFB/A9rkKo119XJ05hMFZljBg3PbGr3JDBW2WBbRV2hm76dJbHZQfsH6hsnKoYEJ6enqF6wl6n0+WqTyXoxL4ez1CoLEtbPpGdl1wu34X110ZnsJirrEYfIL4+8SvCsOPDBZmguntCrvdspzCIrD+oZbMQtrEppk/P+sSIxKqM9DTFU7+Qj5ATvPZNX4XByDCsS57IWMFQqDz/j4BYtiubfGK9Ts/+QdZdRhAZq1gZISjOe9rjIwhVBT3xFJnAEJ7XP+g6riAUGcSqGYbs9GXqctpx+nC5+q6CTDHiWzfoiV1mTGSbofoEYWCksz4hrFe6PH02Od8rZBty3Xpv7JqeyDiulj5su71+nT4ir1PzFoRVtmdMpG1L+wa7MMrwgfRVs5ygz8jLYpTVP6FIEIpdCF3fzkaXCVme+9PYEvSnZrCP6xvZ082F/R5IT8/IssD4F8vkH8gydh0uZCQy8lpgrDox+3DDuhLzzliebbRRHpxLGD76sXMN53u0XXdLCLxWpevO2MVsBGP6Kax/oFDnRWSXL5MpGMTv+oCv09kJQp2+r4QFwVjl09VlCwMT6fRdCf4HTj6GcxpsVvEAAAAASUVORK5CYII=');
-    background-repeat: repeat;
-  }
-
+  
   ul {
     list-style-type: circle;
 

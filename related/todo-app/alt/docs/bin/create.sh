@@ -1,0 +1,1 @@
+curl -XPOST localhost:3000/todo -H 'Content-Type: application/json' -d '{ "text": "New Todo" }' | jq

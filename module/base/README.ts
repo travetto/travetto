@@ -1,4 +1,4 @@
-import { d, Mod, Code, Terminal, Section, List, Library, inp, meth, SubSection, Ref, Travetto, Execute, pth } from '@travetto/doc';
+import { doc as d, Mod, Code, Section, List, inp, meth, SubSection, Ref, Execute, pth, lib, fld } from '@travetto/doc';
 import { AppError } from './src/error';
 import { Util } from './src/util';
 import { SystemUtil } from './src/internal/system';
@@ -10,7 +10,7 @@ const SystemUtilLink = Ref(SystemUtil.name, './src/internal/system.ts');
 
 export default d`
 
-Base is the foundation of all ${Travetto} applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
+Base is the foundation of all ${lib.Travetto} applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
 ${List(
   'Environmental Information',
@@ -26,15 +26,15 @@ The framework provides basic environment information, e.g. in prod/test/dev.  Th
 as well. The information that is available is:
 
 ${List(
-  d`${inp`prod`}- Determines if app is in prod mode.  A ${inp`boolean`} flag that should indicate a production run.`,
-  d`${inp`env`} - The environment name.  Will usually be one of ${inp`dev`}, ${inp`test`}, or ${inp`prod`}.  Can be anything that is passed in.`,
-  d`${inp`profiles: Set<string>`} - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.`,
-  d`${inp`debug`}/${inp`trace`} - Simple logging flags.  These ${inp`boolean`} flags will enable or disable logging at various levels. By default ${inp`debug`} is on in non-${inp`prod`} or ${inp`e2e`} mode, and nowhere else.  ${inp`trace`} is always off by default.`,
-  d`${inp`appRoots: string[]`} - The file root paths for the application, the default set is the current project. Order matters with respect to resource resolution. All paths should be relative to the project base`,
-  d`${inp`hasProfile(p: string): boolean;`} - Test whether or not a profile is active.`,
+  d`${fld`prod`}- Determines if app is in prod mode.  A ${inp`boolean`} flag that should indicate a production run.`,
+  d`${fld`env`} - The environment name.  Will usually be one of ${inp`dev`}, ${inp`test`}, or ${inp`prod`}.  Can be anything that is passed in.`,
+  d`${fld`profiles: Set<string>`} - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.`,
+  d`${fld`debug`} - Simple logging flag.  This ${inp`boolean`} flag will enable or disable logging at various levels. By default ${inp`debug`} is on in non-${inp`prod`}.`,
+  d`${fld`appRoots: string[]`} - The file root paths for the application, the default set is the current project. Order matters with respect to resource resolution. All paths should be relative to the project base`,
+  d`${meth`hasProfile(p: string): boolean;`} - Test whether or not a profile is active.`,
 )}
 
-With respect to ${inp`process.env`}, we specifically test for all uppercase, lowercase, and given case. This allows us to test various patterns and catch flags that might be off due to casing. That would mean that a key of ${inp`Enable_Feature`} would be tested as:
+With respect to ${fld`process.env`}, we specifically test for all uppercase, lowercase, and given case. This allows us to test various patterns and catch flags that might be off due to casing. That would mean that a key of ${inp`Enable_Feature`} would be tested as:
 
 ${List(
   inp`Enable_Feature`,
@@ -43,12 +43,12 @@ ${List(
 )}
 
 ${SubSection('App Information')}
-This basically exposes your ${inp`package.json`} data as a typed data structure, useful for integrating package information into your application.
+This basically exposes your ${pth`package.json`} data as a typed data structure, useful for integrating package information into your application.
 
 ${Section('File Operations')}
 The framework does a fair amount of file system scanning to auto - load files. It also needs to have knowledge of what files are available. The framework provides a simple and performant functionality for recursively finding files. This functionality leverages regular expressions in lieu of glob pattern matching(this is to minimize overall code complexity).
 
-A simple example of finding specific ${inp`.config`} files in your codebase:
+A simple example of finding specific ${pth`.config`} files in your codebase:
 
 ${Code('Looking for all .config files with the prefix defined by svc', 'alt/docs/src/find.ts')}
 
@@ -63,10 +63,9 @@ ${Section('Lifecycle Support')}
 During the lifecycle of an application, there is a need to handle different phases of execution. When executing a phase, the code will recursively find all ${pth`phase.<phase>.ts`} files under ${pth`node_modules/@travetto`}, and in the root of your project. The format of each phase handler is comprised of five main elements:
 
 ${List(
-  d`The phase of execution, which is defined by the file name ${pth`phase.<phase>.ts`}`,
-  List(
+  d`The phase of execution, which is defined by the file name ${pth`phase.<phase>.ts`} ${List(
     'The key of the handler to be referenced for dependency management.'
-  ),
+  )}`,
   'The list of dependent handlers that the current handler depends on, if any.',
   'The list of handlers that should be dependent on the current handler, if any.',
   'The actual functionality to execute'
@@ -94,7 +93,7 @@ ${List(
 
 ${Section('Shutdown')}
 
-Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides ${inp`process.exit`} to properly handle ${inp`SIGKILL`} and ${inp`SIGINT`}, with a default threshold of 3 seconds. In the advent of a ${inp`SIGTERM`} signal, the code exits immediately without any cleanup.
+Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides ${meth`process.exit`} to properly handle ${inp`SIGKILL`} and ${inp`SIGINT`}, with a default threshold of 3 seconds. In the advent of a ${inp`SIGTERM`} signal, the code exits immediately without any cleanup.
 
 As a registered shutdown handler, you can do.
 ${Code('Registering a shutdown handler', 'alt/docs/src/shutdown.ts')}
@@ -110,10 +109,10 @@ Will produce the following stack trace:
 
 ${Execute('tack trace from async errors', './alt/docs/src/stack-test.ts')}
 
-The needed functionality cannot be loaded until ${inp`init.action`} executes, and so must be required only at that time.
+The needed functionality cannot be loaded until ${meth`init.action`} executes, and so must be required only at that time.
 
 ${Section('Util')}
-Simple functions for providing a minimal facsimile to ${Library('lodash', 'https://lodash.com')}, but without all the weight. Currently ${UtilLink} includes:
+Simple functions for providing a minimal facsimile to ${lib.Lodash}, but without all the weight. Currently ${UtilLink} includes:
 
 ${List(
   d`${meth`isPrimitive(el: any)`} determines if ${inp`el`} is a ${inp`string`}, ${inp`boolean`}, ${inp`number`} or ${inp`RegExp`}`,
@@ -121,12 +120,11 @@ ${List(
   d`${meth`isFunction(o: any)`} determines if ${inp`o`} is a simple ${inp`Function`}`,
   d`${meth`isClass(o: any)`} determines if ${inp`o`} is a class constructor`,
   d`${meth`isSimple(a: any)`} determines if ${inp`a`} is a simple value`,
-  d`${meth`deepAssign(a: any, b: any, mode ?)`} which allows for deep assignment of ${inp`b`} onto ${inp`a`}, the ${inp`mode`} determines how aggressive the assignment is, and how flexible it is.  ${inp`mode`} can have any of the following values:`,
-  List(
+  d`${meth`deepAssign(a: any, b: any, mode ?)`} which allows for deep assignment of ${inp`b`} onto ${inp`a`}, the ${inp`mode`} determines how aggressive the assignment is, and how flexible it is.  ${inp`mode`} can have any of the following values: ${List(
     d`${inp`loose`}, which is the default is the most lenient. It will not error out, and overwrites will always happen`,
     d`${inp`coerce`}, will attempt to force values from ${inp`b`} to fit the types of ${inp`a`}, and if it can't it will error out`,
     d`${inp`strict`}, will error out if the types do not match`,
-  ),
+  )}`,
   d`${meth`uuid(len: number)`} generates a simple uuid for use within the application.`
 )}
 

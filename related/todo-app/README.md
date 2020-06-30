@@ -1,53 +1,58 @@
-Getting Started: A Todo App
-====
 
-The following tutorial wil walk you through setting up a `travetto` application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [`github`](https://www.github.com/travetto/todo-app).  Additionally, you can use the [`Yeoman Generator`](https://github.com/travetto/travetto/tree/master/module/generator-app).
+# Getting Started: A Todo App
+
+The following tutorial wil walk you through setting up a [travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App Source](https://www.github.com/travetto/todo-app).  Additionally, you can use the [Yeoman Generator](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//generator-app "Yeoman app generator for the Travetto framework").
 
 ### Overview
-* [Prerequisites](#prerequisites)
-* [Project initialization](#project-initialization)
-* [Establishing the model](#establishing-the-model)
-* [Configuring the data source](#configuring-the-data-source)
-* [Building the service layer](#building-the-service-layer)
-* [Writing unit tests](#writing-unit-tests)
-* [Creating the rest routes](#creating-the-rest-routes)
-* [Creating the App Entry Point](#creating-the-app-entry-point)
-* [Test the final product](#test-the-final-product)
+   
+   *  [Prerequisites](#prerequisites)
+   *  [Project initialization](#project-initialization)
+   *  [Establishing the model](#establishing-the-model)
+   *  [Configuring the data source](#configuring-the-data-source)
+   *  [Building the service layer](#building-the-service-layer)
+   *  [Writing unit tests](#writing-unit-tests)
+   *  [Creating the rest routes](#creating-the-rest-routes)
+   *  [Creating the App Entry Point](#creating-the-app-entry-point)
+   *  [Test the final product](#test-the-final-product)
 
 ## Prerequisites
 
 Install
+   
+   *  [Node](https://nodejs.org/en/download/current/) v12.x + (required)
+   *  [Mongodb](https://docs.mongodb.com/manual/administration/install-community/) 3.6+ (required)
+   *  [vscode](https://code.visualstudio.com/download) (recommended)
+   *  [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) (recommended)
 
-* [`Node`](https://nodejs.org/en/download/current/) v11.x + (required)
-* [`Mongodb`](https://docs.mongodb.com/manual/administration/install-community/) 3.6+ (required)
-* [`vscode`](https://code.visualstudio.com/download) (recommended)
-* [`Travetto Plugin`](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) (recommended)
+## Project Initialization
 
-## Project initialization
-
-**Install: Getting Ready**
+**Terminal: Getting Ready**
 ```bash
 $ mkdir todo-project
 $ cd todo-project
 
 $ git init .
 
-$ npm init -f 
+$ npm init -f
 $ npm i @travetto/{log,test,rest-express,model-mongo}
 ```
 
-## Establishing the model
+## Establishing The Model
+
 Let's create the model for the todo application.  The fields we will need should be:
-* `id` as a unique identifier
-* `text` as the actual todo information
-* `created` the date the todo was created
-* `completed` whether or not the todo was completed
+
+   
+   *  `id` as a unique identifier
+   *  `text` as the actual todo information
+   *  `created` the date the todo was created
+   *  `completed` whether or not the todo was completed
 
 Create the file `src/model.ts`
 
-**Code: Models, src/model.ts**
+**Code: Models**
 ```typescript
-import { Model, ModelCore } from '@travetto/model';
+import { Model } from '@travetto/model';
+import { Schema } from '@travetto/schema';
 
 @Model()
 export class Todo {
@@ -55,6 +60,9 @@ export class Todo {
   text: string;
   created?: Date;
   completed?: boolean;
+  priority?: number;
+  who?: string;
+  color?: string;
 }
 
 @Schema()
@@ -63,18 +71,21 @@ export class TodoSearch {
   limit?: number;
 }
 ```
-as you can see, the model structure is simple.  Everything that uses the `Model` services needs to implement `ModelCore`.
 
-## Building the service layer
+as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/registry/decorator.ts#L12) services needs to implement [ModelCore](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/model/core.ts).
+
+## Building the Service Layer
+
 Next we establish the functionality for the service layer. The operations we need are:
-* Create a new todo
-* Complete a todo
-* Remove a todo
-* Get all todos
+   
+   *  Create a new todo
+   *  Complete a todo
+   *  Remove a todo
+   *  Get all todos
 
 Now we need to create `src/service.ts`
 
-**Code: Service Definition, src/service.ts**
+**Code: Service Definition**
 ```typescript
 import { ModelService } from '@travetto/model';
 import { Injectable, Inject } from '@travetto/di';
@@ -92,14 +103,17 @@ export class TodoService {
     return saved;
   }
 
+  async get(id: string) {
+    return this.modelService.getById(Todo, id);
+  }
+
   async getAll(search: TodoSearch) {
     return this.modelService.getAllByQuery(Todo, search);
   }
 
   async complete(id: string, completed = true) {
-    return this.modelService.updatePartialByQuery(Todo,
-      { where: { id } },
-      { completed }
+    return this.modelService.updatePartial(Todo,
+      Todo.from({ id, completed })
     );
   }
 
@@ -109,37 +123,27 @@ export class TodoService {
 }
 ```
 
-## Writing unit tests
-After we have established our service layer, we will now construct some simple tests to verify the service layer is running correctly. First we need to initialize the testing configuration as the config in the `src/` folder is not automatically scanned.
+## Writing Unit tests
 
-Create the new test config at `test/config.ts`
+After we have established our service layer, we will now construct some simple tests to verify the service layer is running correctly. By default we set the database schema name under `test/resources/application.yml` to ensure we aren't writing to our dev database.
 
-**Code: Test configuration, test/config.ts**
-```typescript
-import { InjectableFactory } from '@travetto/di';
-import { ModelSource } from '@travetto/model';
-import { MongoModelSource, MongoModelConfig } from '@travetto/model-mongo';
-
-export class TestConfig {
-  @InjectableFactory()
-  static testSource(): ModelSource {
-    return new MongoModelSource(MongoModelConfig.from({
-      namespace: `test-${Math.trunc(Math.random() * 10000)}`
-    }));
-  }
-}
+**Code: Test YAML**
+```yaml
+---
+mongo.model.namespace: app-test
 ```
 
-The tests should be defined at `test/service.ts`
+Now the tests should be defined at `test/service.ts`
 
-**Code: Test bed, test/service.ts**
+**Code: Test bed**
 ```typescript
 import * as assert from 'assert';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
+import { Suite, Test, BeforeAll, AfterAll } from '@travetto/test';
+import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { ModelRegistry } from '@travetto/model';
-import { SchemaRegistry } from '@travetto/schema';
+import { ModelSource } from '@travetto/model';
+// import { BaseSQLModelTest } from '@travetto/model-sql/support/test.model-sql';
 
 import { TodoService } from '../src/service';
 import { Todo } from '../src/model';
@@ -149,11 +153,13 @@ export class TodoTest {
 
   @BeforeAll()
   async init() {
-    await import('./config');
+    await RootRegistry.init();
+  }
 
-    await DependencyRegistry.init();
-    await ModelRegistry.init();
-    await SchemaRegistry.init();
+  @AfterAll()
+  async destroy() {
+    const source = await DependencyRegistry.getInstance(ModelSource);
+    return source.clearDatabase();
   }
 
   @Test('Create todo')
@@ -197,6 +203,7 @@ export class TodoTest {
 
     const saved = await svc.add(test);
     assert.ok(saved.id);
+    assert(test.text === 'Sample Task');
 
     await svc.remove(saved.id!);
 
@@ -209,14 +216,14 @@ export class TodoTest {
 }
 ```
 
-## Creating the rest routes
+## Adding Rest Routes
 Now we establish the routes, providing an interface to the service layer.
 
-Finally, we establish the controller at `src/controller.ts`
+Finally, we establish the controller at `src/route.ts`
 
-**Code: Controller contents, src/controller.ts**
+**Code: Controller contents**
 ```typescript
-import { Controller, Get, TypedBody, Post, Put, Delete, Request, TypedQuery } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete, Path, Query } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 import { SchemaBody, SchemaQuery } from '@travetto/schema';
 
@@ -233,7 +240,7 @@ export class TodoController {
    * Get all todos
    */
   @Get('/')
-  async getAll(@SchemaQuery() search: TodoSearch): Promise<Todo[]> {
+  async getAll(@SchemaQuery() search: TodoSearch) {
     return this.svc.getAll(search);
   }
 
@@ -242,7 +249,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Get('/:id')
-  async getById(@Path() id: string): Promise<Todo> {
+  async getById(@Path() id: string) {
     return this.svc.get(id);
   }
 
@@ -250,7 +257,7 @@ export class TodoController {
    * Create a todo
    */
   @Post('/')
-  async create(@SchemaBody() todo: Todo): Promise<Todo> {
+  async create(@SchemaBody() todo: Todo) {
     return await this.svc.add(todo);
   }
 
@@ -273,143 +280,62 @@ export class TodoController {
   }
 }
 ```
-## Test the final product
-First we must start the application
 
-**Terminal: Output of application startup**
+## Running the App
+
+First we must start the application:
+
+**Terminal: Application Startup**
 ```bash
-$ npx travetto run
-2019-03-22T04:51:28 info  Env {
-  "cwd": "/Users/tim/Code/travetto/sample/todo-app",
-  "profiles": [
-    "application",
-    "dev"
-  ],
-  "dev": true,
-  "appRoots": [
-    "./"
-  ],
-  "debug": true
-}
-2019-03-22T04:51:28 debug [@trv:base/phase] Initializing Phase init [ 'base', 'log', 'config', 'compiler', 'registry', 'schema' ]
-2019-03-22T04:51:28 debug [@trv:config/source] Found configurations for [ 'application' ]
-2019-03-22T04:51:28 info  [@trv:config/source] Configured {
-  "registry": {
-    "injectable": {
-      "@travetto/config": "Config",
-      "@travetto/model": [
-        "ModelController"
-      ],
-      "@travetto/rest": [
-        "Controller",
-        "Application"
-      ]
-    },
-    "schema": {
-      "@travetto/model": "Model"
-    },
-    "application": {
-      "@travetto/rest": [
-        "Application"
-      ]
-    }
+$ /bin/bash alt/docs/bin/startup.sh
+
+2020-07-03T18:05:23.298Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
+2020-07-03T18:05:23.302Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
+  app: {
+    watch: true,
+    readonly: false,
+    travetto: '1.0.0-rc.8',
+    name: '@travetto/todo-app',
+    version: undefined,
+    license: 'ISC',
+    description: '',
+    author: '',
+    env: 'dev',
+    profiles: [ 'application', 'dev' ],
+    roots: [ '.' ],
+    resourceRoots: [ '.' ],
+    debug: { status: false, value: undefined }
   },
-  "rest": {
-    "cors": {
-      "active": true
-    }
-  },
-  "api": {
-    "client": {
-      "output": "./api-client",
-      "format": "typescript-angular",
-      "formatOptions": "supportsES6=true,ngVersion=6.1"
-    }
-  },
-  "elasticsearch": {
-    "model": {
-      "namespace": "todo"
+  config: {
+    rest: { cors: { active: true } },
+    api: { spec: { output: './openapi.json' } },
+    sql: {
+      model: { namespace: 'todo', user: 'root', password: 'password' }
     }
   }
 }
-2019-03-22T04:51:28 debug [@trv:compiler/transformers] Configured Transformers before [ 'application',
-  'test:line-numbers',
-  'registry',
-  'di',
-  'log',
-  'rest',
-  'schema',
-  'test:assert' ]
-2019-03-22T04:51:28 debug [@trv:compiler/compiler] Initialized 0.002
-2019-03-22T04:51:28 debug [@trv:registry/registry: 42] Initialized @trv:model/registry#$ModelRegistry
-2019-03-22T04:51:28 debug [@trv:registry/registry: 42] Initialized @trv:rest/registry.registry#$ControllerRegistry
-2019-03-22T04:51:28 debug [@trv:registry/registry: 42] Initialized @trv:schema/service.registry#$SchemaRegistry
-2019-03-22T04:51:28 debug [@trv:registry/registry: 42] Initialized @trv:di/registry#$DependencyRegistry
-2019-03-22T04:51:28 debug [@trv:registry/registry: 42] Initialized @trv:registry/service.root#$RootRegistry
-body-parser deprecated undefined extended: provide extended option node_modules/@travetto/di/bin/lib.js:76:49
-2019-03-22T04:51:28 debug [@trv:rest/interceptor.types: 51] Sorting interceptors 2 [ 'CorsInterceptor', 'GetCacheInterceptor', [length]: 2 ]
-2019-03-22T04:51:28 debug [@trv:model-elasticsearch/config: 17] Constructed ElasticsearchModelConfig {
-  hosts: [ '127.0.0.1', [length]: 1 ],
-  port: 9200,
-  options: {},
-  namespace: 'todo',
-  autoCreate: true,
-  indexCreate: { number_of_replicas: 0, number_of_shards: 1 } }
-2019-03-22T04:51:28 info  [@trv:swagger/client-generate: 33] Running code generator in watch mode ./api-client
-2019-03-22T04:51:28 debug [@trv:rest/app: 87] Registering Controller Instance @trv:swagger/controller#SwaggerController / 1
-2019-03-22T04:51:28 debug [@trv:rest/app: 87] Registering Controller Instance @app/src.route#TodoController /todo 5
-2019-03-22T04:51:28 info  [@trv:rest/app:106] Listening on 3000
-2019-03-22T04:51:29 debug [@trv:compiler/presence] Watching files 5
 ```
+ 
 
-next, let's execute `curl` requests to interact with the new api
+next, let's execute [curl](https://curl.haxx.se/) requests to interact with the new api
 
-**Terminal: Creating todo by curl, and then fetching**
+**Code: Creating Todo by curl**
 ```bash
-# Let's create a new todo
-$ curl -XPOST localhost:3000/todo -H 'Content-Type: application/json' -d '{ "text": "New Todo" }' 
-
-## returned data
-{
-  "text": "New Todo",
-  "created": "2018-06-24T05:03:16.438Z",
-  "id": "5b2f2614020fd21df02cd216"
-}
-
-# Now let's list all todos currently saved
-$ curl -XGET localhost:3000/todo -H 'Content-Type: application/json' 
-
-## returns
-[
-  {
-    "id": "5b2f2614020fd21df02cd216",
-    "text": "New Todo",
-    "created": "2018-06-24T05:03:16.438Z"
-  }
-]
-
+curl -XPOST localhost:3000/todo -H 'Content-Type: application/json' -d '{ "text": "New Todo" }' | jq
 ```
 
-## Appendix
-
-### Configuring the data source
-By default the data source is automatically configured to point to localhost at startup. These properties can be overridden in the application's configuration yaml files.  Alternatively, you can augment the configuration in code, to do so  we need to create a config source file, e.g. `src/config.ts`:
-
-**Code: Configuration, src/config.ts**
-```typescript
-import { InjectableFactory } from '@travetto/di';
-import { MongoModelSource, MongoModelConfig } from '@travetto/model-mongo';
-import { ModelSource } from '@travetto/model';
-
-export class AppConfig {
-  @InjectableFactory()
-  static getDataSource(config: MongoModelConfig): ModelSource {
-    return new MongoModelSource(config);
-  }
-}
+**Terminal: Create Output**
+```bash
+$ sh alt/docs/bin/create.sh
 ```
 
-The `@InjectableFactory` allows you to create injection candidates.  Note that the `MongoModelSource` has the return type 
-specified as `ModelSource`.
+**Code: Listing Todos by curl**
+```bash
+curl -XGET localhost:3000/todo -H 'Content-Type: application/json' | jq
+```
 
-At this point, the config, the model source and any other value can be modified programmatically.
+**Terminal: Listing Output**
+```bash
+$ sh alt/docs/bin/list.sh
+```
+

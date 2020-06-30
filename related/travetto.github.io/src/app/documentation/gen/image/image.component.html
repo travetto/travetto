@@ -1,0 +1,37 @@
+<div class="documentation">
+<h1>Image
+          <small>Image support, resizing, and optimization</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/image
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/image</code></pre>     
+      </figure>
+
+This module provides functionality for image resizing, and png optimization. This is primarily meant to be used in conjunction with other modules, like the <a class="module-link" href="/docs/asset" title="Modular library for storing and retrieving binary assets">Asset</a> module or the <a class="module-link" href="/docs/email-template" title="Email templating module">Email Templating</a> module. It can also be invoked directly as needed (as it can be very handy for batch processing images on the command line).
+
+The utility's primary structure revolves around the <a target="_blank" class="source-link" href="/docs/command/src/command.ts#L11">CommandService</a> from the <a class="module-link" href="/docs/command" title="Support for executing complex commands at runtime.">Command</a> module.  The <a target="_blank" class="source-link" href="/docs/command/src/command.ts#L11">CommandService</a>  allows for declaration of a local executable, and a fall-back docker container (mainly meant for development).  The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/image/src/util.ts#L28">ImageUtil</a> utilizes <a target="_blank" class="external-link" href="https://imagemagick.org/index.php">ImageMagick</a>, <a target="_blank" class="external-link" href="https://pngquant.org/">pngquant</a>, and  <a target="_blank" class="external-link" href="https://github.com/tjko/jpegoptim">Jpegoptim</a> as the backing for image resizing and png compression, respectively.
+
+      <figure class="code">
+      <figcaption class="code">Simple Image Resize
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/image/alt/docs/src/resize.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> StreamUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ImageUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/image/src/util'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ResizeService</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">resizeImage</span><span class="token punctuation">(</span>imgPath<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> width<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> height<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> stream <span class="token operator">=</span> <span class="token keyword">await</span> ImageUtil<span class="token punctuation">.</span><span class="token function">resize</span><span class="token punctuation">(</span>fs<span class="token punctuation">.</span><span class="token function">createReadStream</span><span class="token punctuation">(</span>imgPath<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> w<span class="token operator">:</span> width<span class="token punctuation">,</span> h<span class="token operator">:</span> height <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> out <span class="token operator">=</span> imgPath<span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token regex">/[.][^.]+$/</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">ext</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">.resized</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>ext<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">await</span> StreamUtil<span class="token punctuation">.</span><span class="token function">writeToFile</span><span class="token punctuation">(</span>stream<span class="token punctuation">,</span> out<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> out<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+</div>

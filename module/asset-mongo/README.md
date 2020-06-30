@@ -1,0 +1,54 @@
+# MongoDB Asset Source
+## Mongo/GridFS backend for the travetto asset module
+
+**Install: @travetto/asset-mongo**
+```bash
+npm install @travetto/asset-mongo
+```
+
+This provides a [mongodb](https://mongodb.com) implementation of the [AssetSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset/src/source.ts#L6) which is a backend for the  [Asset](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset "Modular library for storing and retrieving binary assets") module.  
+
+**Code: Mongo backend wiring**
+```typescript
+import { InjectableFactory } from '@travetto/di';
+import { MongoAssetSource, MongoAssetConfig } from '@travetto/asset-mongo';
+
+class AppConfig {
+  @InjectableFactory()
+  static getSource(cfg: MongoAssetConfig) {
+    return new MongoAssetSource(cfg);
+  }
+}
+```
+
+  
+There is a default configuration that you can easily use, with some sensible defaults. 
+  
+
+**Code: Mongo configuration**
+```typescript
+import { Config } from '@travetto/config';
+
+/**
+ * Mongo configuration as asset source
+ */
+@Config('mongo.asset')
+export class MongoAssetConfig {
+  hosts: string = 'localhost';  // List of hosts, comma separated
+  namespace = 'app'; // Database namespace
+  port = 27017;
+  options = {}; // connection options
+
+  /**
+   * Compute connection URL
+   */
+  get url() {
+    const hosts = this.hosts.split(',').map(h => `${h}:${this.port}`).join(',');
+    const opts = Object.entries(this.options).map(([k, v]) => `${k}=${v}`).join('&');
+    return `mongodb://${hosts}/${this.namespace}?${opts}`;
+  }
+}
+```
+
+  
+Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config/src/decorator.ts#L9) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config "Environment-aware config management using yaml files") resolution paths. 

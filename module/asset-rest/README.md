@@ -1,0 +1,44 @@
+# Asset Rest Support
+## Provides integration between the travetto asset and rest module.
+
+**Install: @travetto/asset-rest**
+```bash
+npm install @travetto/asset-rest
+```
+
+This module provides a clean and direct mechanism for processing uploads, built upon [busboy](https://github.com/mscdex/busboy). The module also provides some best practices with respect to temporary file deletion.
+
+Once the files are uploaded, they are exposed on [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.")'s request object as `req.files`. The uploaded files are constructed as [Asset](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset/src/types.ts#L5) instances, which allows for  integration with the [Asset](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset "Modular library for storing and retrieving binary assets") module.
+
+A simple example:
+
+**Code: Rest controller with upload support**
+```typescript
+import { Controller, Post, Get } from '@travetto/rest';
+import { Asset } from '@travetto/asset';
+
+import { AssetRestUtil, Upload } from '@travetto/asset-rest';
+
+@Controller('/simple')
+export class Simple {
+
+  @Get('/age')
+  getAge() {
+    return { age: 50 };
+  }
+
+  @Post('/age')
+  getPage() {
+    return { age: 20 };
+  }
+
+  /**
+   * @param file A file to upload
+   */
+  @Post('/files')
+  loadFiles(@Upload() file: Asset) {
+    return AssetRestUtil.downloadable(file);
+  }
+}
+```
+

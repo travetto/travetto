@@ -1,10 +1,8 @@
-import { d, Code, Library, List, Note } from '@travetto/doc';
+import { doc as d, Code, lib, List, Note } from '@travetto/doc';
 import { PassportIdentitySource } from './src/identity';
 
-const Passport = Library('passport', 'http://passportjs.org');
-
 export default d`
-Within the node ecosystem, the most prevalent auth framework is ${Passport}.  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for ${Passport} baked in. Registering and configuring a ${Passport} strategy is fairly straightforward.
+Within the node ecosystem, the most prevalent auth framework is ${lib.Passport}.  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for ${lib.Passport} baked in. Registering and configuring a ${lib.Passport} strategy is fairly straightforward.
 
 ${Code('Sample Facebook/passport config', 'alt/e2e/src/conf.ts')}
 
@@ -15,8 +13,8 @@ ${List(
   `The conversion functions which defines the mapping between external and local identities.`
 )}
 
-After that, the provider is no different than any other, and can be used accordingly.  Additionally, because ${Passport} runs first, in it's entirety, you can 
-use the provider as you normally would any ${Passport} middleware.
+After that, the provider is no different than any other, and can be used accordingly.  Additionally, because ${lib.Passport} runs first, in it's entirety, you can 
+use the provider as you normally would any ${lib.Passport} middleware.
 
 ${Code('Sample routes using Facebook/passport provider', 'alt/e2e/src/simple.ts')}
 `;

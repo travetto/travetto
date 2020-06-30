@@ -1,0 +1,192 @@
+# Authentication
+## Authentication scaffolding for the travetto framework
+
+**Install: @travetto/auth**
+```bash
+npm install @travetto/auth
+```
+
+This module provides the high-level backdrop for managing security principals.  The goal of this module is to be a centralized location for various security frameworks to plug into.  The primary contributions are:
+
+   
+   *  Interfaces for standard security primitive
+   *  Patterns for producing a [Principal](./src/types.ts#L4)
+   *  Common security-related utilities for    
+      *  Checking permissions
+      *  Generating passwords
+
+## Interfaces / Primitives
+The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [AuthContext](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth/src/context.ts#L11).
+
+**Code: Auth context structure**
+```typescript
+import { AppError } from '@travetto/base';
+import { AuthUtil } from './util';
+import { Principal, Identity } from './types';
+/**
+ * Combination of an identity and a principal, to be used for
+ * authorizing. Provides simple access to permissions and
+ * additional principal details.
+ */
+export class AuthContext<
+  U = any,
+  I extends Identity = Identity,
+  P extends Principal = Principal> {
+  private permsSet: Set<string>;
+  private permsArr: string[];
+  /**
+   * Identity of the context
+   */
+  public identity: I;
+  /**
+   * The principal of the context
+   */
+  public principal: P;
+  constructor(identity: I, principal?: P) ;
+  /**
+   * Get the principal/identity id
+   */
+  get id() ;
+  /**
+   * Get list of permissions
+   */
+  get permissions(): Readonly<string[]> ;
+  /**
+   * Set list of permissions
+   */
+  set permissions(perms: Readonly<string[]>) ;
+  /**
+   * Get permissions as a set
+   */
+  get permissionSet(): ReadonlySet<string> ;
+  /**
+   * Get principal's details
+   */
+  get principalDetails() ;
+  /**
+   * Set principal's details
+   * @param details Details to set
+   */
+  set principalDetails(details: U) ;
+  /**
+   * Update the principal's details
+   * @param details Details to update
+   */
+  updatePrincipalDetails(details: U) ;
+  /**
+   * Check permissions for a given principal
+   *
+   * @param include The list of permissions that should be included.
+   * @param exclude The list of permissions that should be excluded.
+   * @param matchAll Do all permissions need to be matched or any?
+   */
+  checkPermissions(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') ;
+}
+```
+
+As referenced above, a [Principal](./src/types.ts#L4) is defined as a user with respect to a security context.  This is generally understood to be the information that the application knows about a user, specifically the configuration the application has about a user.
+
+Comparatively, [Identity](./src/types.ts#L26) is defined as an authenticated user session that can be provided by the application or derived from some other source.  In simpler systems the identity will be equal to the principal, but in systems where you support 3rd party logins (e.g. Google/Facebook/Twitter/etc.) your identity will be external to the system.
+
+Overall, the structure is simple, but drives home the primary use cases of the framework.  The goals are:
+   
+   *  Be able to identify a user uniquely
+   *  To have a reference to a user's set of permissions
+   *  To have access to the raw principal
+   *  To have access to the raw identity
+
+## Customization
+By default, the module does not provide an implementation for the [PrincipalSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth/src/principal.ts#L9). By default the structure of the provider can be boiled down to:
+
+**Code: Principal Source**
+```typescript
+import { AppError } from '@travetto/base';
+import { Identity, Principal } from './types';
+import { AuthContext } from './context';
+/**
+ * Produces a principal from an identity
+ */
+export abstract class PrincipalSource {
+  /**
+   * Optional ability to create a principal as opposed to just reading
+   * @param principal The principal to create
+   */
+  createPrincipal?(principal: Principal): Promise<Principal>;
+  /**
+   * Authorizes an identity to produce an AuthContext
+   * @param ident The identity to authorize
+   */
+  async authorize(ident: Identity): Promise<AuthContext> ;
+}
+```
+
+The provider only requires one method to be defined, and that is `resolvePrincipal`.  This method receives an identity as an input, and is responsible for converting that to a principal (external user to internal user).  If you want to be able to auto-provision users from a remote source, you can set `autoCreate` to `true`, and supply `createPrincipal`'s functionality for storing the user as well.
+
+The [Model Auth Source](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//auth-model "Model-based authentication and registration support for the travetto framework") module is a good example of a principal provider that is also an identity source.  This is a common use case for simple internal auth.
+
+## Common Utilities
+The [AuthUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth/src/util.ts#L18) provides the following functionality:
+
+**Code: Auth util structure**
+```typescript
+import * as crypto from 'crypto';
+import * as util from 'util';
+import { Util, AppError } from '@travetto/base';
+const pbkdf2 = util.promisify(crypto.pbkdf2);
+type PermSet = Set<string> | ReadonlySet<string>;
+type PermissionChecker = {
+  all: (perms: PermSet) => boolean;
+  any: (perms: PermSet) => boolean;
+};
+/**
+ * Standard auth utilities
+ */
+export class AuthUtil {
+  private static CHECK_EXC_CACHE = new Map<string, PermissionChecker>();
+  private static CHECK_INC_CACHE = new Map<string, PermissionChecker>();
+  /**
+   * Build a permission checker against the provided permissions
+   *
+   * @param perms Set of permissions to check
+   * @param defaultIfEmpty If no perms passed, default to empty
+   */
+  private static buildChecker(perms: Iterable<string>, defaultIfEmpty: boolean): PermissionChecker ;
+  /**
+   * Generate a hash for a given value
+   *
+   * @param value Value to hash
+   * @param salt The salt value
+   * @param iterations Number of iterations on hashing
+   * @param keylen Length of hash
+   * @param digest Digest method
+   */
+  static generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256') ;
+  /**
+   * Generate a salted password, with the ability to validate the password
+   *
+   * @param password
+   * @param saltLen Length of salt
+   * @param validator Optional function to validate your password
+   */
+  static async generatePassword(password: string, saltLen = 32) ;
+  /**
+   * Build a permission checker off of an include, and exclude set
+   *
+   * @param include Which permissions to include
+   * @param exclude Which permissions to exclude
+   * @param matchAll Whether not all permissions should be matched
+   */
+  static permissionSetChecker(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') ;
+}
+```
+
+`permissionSetChecker` is probably the only functionality that needs to be explained. The function operates in a `DENY` / `ALLOW` mode.  This means that a permission check will succeed only if:
+
+   
+   *  The user is logged in     
+      *  If `matchAll` is false:    
+         *  The user does not have any permissions in the exclusion list
+         *  The include list is empty, or the user has at least one permission in the include list.
+      *  Else    
+         *  The user does not have all permissions in the exclusion list
+         *  The include list is empty, or the user has all permissions in the include list.

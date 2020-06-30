@@ -1,0 +1,73 @@
+# Registry
+## Patterns and utilities for handling registration of metadata and functionality for run-time use
+
+**Install: @travetto/registry**
+```bash
+npm install @travetto/registry
+```
+
+This module is the backbone for all "discovered" and "registered" behaviors within the framework. This is primarily used for building modules within the framework and not directly useful for application development.
+
+## Flows
+Registration, within the framework flows throw two main use cases:
+
+### Initial Flows
+
+The primary flow occurs on initialization of the application. At that point, the module will:
+
+   
+   1. Initialize [RootRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/registry/src/service/root.ts) and will automatically register/load all relevant files
+   1. As files are imported, decorators within the files will record various metadata relevant to the respective registries
+   1. When all files are processed, the [RootRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/registry/src/service/root.ts) is finished, and it will signal to anything waiting on registered data that its free to use it.
+
+This flow ensures all files are loaded and processed before application starts. A sample registry could like:
+
+**Code: Sample Registry**
+```typescript
+import { MetadataRegistry } from '@travetto/registry/src/service/metadata';
+import { Class } from '@travetto/registry/src/types';
+
+interface Group {
+  class: Class;
+  name: string;
+}
+
+interface Child {
+  name: string;
+  method: Function;
+}
+
+export class SampleRegistry extends MetadataRegistry<Group, Child> {
+  /**
+   * Finalize class after all metadata is collected
+   */
+  onInstallFinalize<T>(cls: Class<T>): Group {
+    return this.getOrCreatePending(cls) as Group;
+  }
+
+  /**
+   * Create scaffolding on first encounter of a class
+   */
+  createPending(cls: Class<any>): Partial<Group> {
+    return {
+      class: cls,
+      name: cls.name
+    };
+  }
+}
+```
+
+The registry is a [MetadataRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/registry/src/service/metadata.ts#L13) that similar to the [SchemaRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/service/registry.ts) and the [DependencyRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/di/src/registry.ts).
+
+### Live Flow
+At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries.
+
+As the [Compiler](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//compiler "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.") notifies that a file has been changed and recompiled, the [RootRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/registry/src/service/root.ts) will pick it up, and process it accordingly.
+
+## Supporting Metadata
+
+For the registries to work properly, metadata needs to be collected about files and classes to uniquely identify them, especially across file reloads for the live flow.  To achieve this, every `class` is decorated with additional fields.  The data that is added is:
+
+   
+   *  `ᚕfile` denotes the fully qualified path name of the class
+   *  `ᚕid` represents a computed id that is tied to the file/class combination;
