@@ -1,124 +1,229 @@
-<div class="documentation"><h2 id="base" id="base">Base</h2>
-<app-section-header headerType="install">Primary</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/base</code></pre><p>Base is the foundation of all <code class="inline">travetto</code> applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:</p>
-<ul>
-<li>Environmental Information</li>
-<li>File Operations</li>
-<li>Resource Management</li>
-<li>Life-cycle Support</li>
-<li>Stacktrace Management </li>
-<li>General Utilities</li>
-</ul>
-<h3 id="environmental-information">Environmental Information</h3>
-<p>The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers as well. The information that is available is:</p>
-<ul>
-<li><code class="inline">prod</code> - Determines if app is in prod mode.  A <code class="inline">boolean</code> flag that should indicate a production run.</li>
-<li><code class="inline">env</code> - The environment name.  Will usually be one of <code class="inline">dev</code>, <code class="inline">test</code>, or <code class="inline">prod</code>.  Can be anything that is passed in.</li>
-<li><code class="inline">profiles: Set&lt;string&gt;</code> - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.</li>
-<li><code class="inline">debug</code>/<code class="inline">trace</code> - Simple logging flags.  These <code class="inline">boolean</code> flags will enable or disable logging at various levels. By default <code class="inline">debug</code> is on in non-<code class="inline">prod</code> or <code class="inline">e2e</code> mode, and nowhere else.  <code class="inline">trace</code> is always off by default.</li>
-<li><code class="inline">appRoots: string[]</code> - The file root paths for the application, the default set is the current project. Order matters with respect to resource resolution. All paths should be relative to the project base</li>
-<li><code class="inline">hasProfile(p: string): boolean;</code> - Test whether or not a profile is active.</li>
-</ul>
-<p>With respect to <code class="inline">process.env</code>, we specifically test for all uppercase, lowercase, and given case.  This allows us to test various patterns and catch flags that might be off due to casing.  That would mean that a key of <code class="inline">Enable_Feature</code> would be tested as:</p>
-<ul>
-<li><code class="inline">Enable_Feature</code></li>
-<li><code class="inline">ENABLE_FEATURE</code></li>
-<li><code class="inline">enable_feature</code></li>
-</ul>
-<h4 id="app-information">App Information</h4>
-<p>This basically exposes your <code class="inline">package.json</code> data as a typed data structure, useful for integrating package information into your application.</p>
-<h3 id="file-operations">File Operations</h3>
-<p>The framework does a fair amount of file system scanning to auto-load files.  It also needs to have knowledge of what files are available. The framework provides a simple and performant functionality for recursively finding files. This functionality leverages regular expressions in lieu of glob pattern matching (this is to minimize overall code complexity).</p>
-<p>A simple example of finding specific <code class="inline">.config</code> files in your codebase:</p>
-<app-section-header headerType="code">Looking for all .config files with the prefix defined by svc</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">function</span> <span class="token function">processServiceConfigs</span><span class="token punctuation">(</span><span class="token parameter">svc<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">const</span> svcConfigs <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token type">ScanApp</span><span class="token punctuation">.</span><span class="token function">findFiles</span><span class="token punctuation">(</span><span class="token string">'.config'</span><span class="token punctuation">,</span> <span class="token parameter">file</span> <span class="token operator">=></span> path<span class="token punctuation">.</span><span class="token function">basename</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">startsWith</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{ '{' }}</span>svc<span class="token interpolation-punctuation punctuation">{{ '}' }}</span></span><span class="token string">.</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> conf <span class="token keyword">of</span> svcConfigs<span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token operator">...</span> <span class="token keyword">do</span> work
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><h3 id="application-resources">Application Resources</h3>
-<p>Resource management, loading of files, and other assets at runtime is a common pattern that the <code class="inline">ResourceManager</code> encapsulates.  It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.</p>
-<app-section-header headerType="code">Finding Image Resource</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">const</span> imagePath <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token type">ResourceManager</span><span class="token punctuation">.</span><span class="token function">findFirst</span><span class="token punctuation">(</span><span class="token string">'/images/asset.gif'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><app-section-header headerType="code">Finding All Image Resource</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">const</span> imagePaths <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token type">ResourceManager</span><span class="token punctuation">.</span><span class="token function">findAllByPattern</span><span class="token punctuation">(</span><span class="token regex">/[.]gif$/</span><span class="token punctuation">,</span> <span class="token string">'images/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h3 id="lifecycle-support">Lifecycle Support</h3>
-<p>During the lifecycle of an application, there is a need to handle different phases of execution.  When executing a phase, the code will recursively find all <code class="inline">phase.&lt;phase&gt;.ts</code> files under <code class="inline">node_modules/@travetto</code>, and in the root of your project.  The format of each phase handler is comprised of five main elements:</p>
-<ul>
-<li>The phase of execution, which is defined by the file name <code class="inline">phase.&lt;phase&gt;.ts</code></li>
-<li>The key of the handler to be referenced for dependency management.</li>
-<li>The list of dependent handlers that the current handler depends on, if any.</li>
-<li>The list of handlers that should be dependent on the current handler, if any.</li>
-<li>The actual functionality to execute</li>
-</ul>
-<p>An example would be something like <code class="inline">phase.init.ts</code> in the <a class="module-link" routerLink="/docs/config"  null><code class="inline">Config</code></a> module.  </p>
-<app-section-header headerType="code">Sample phase init</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">const</span> init <span class="token operator">=</span> <span class="token punctuation">{{ '{' }}</span>
+<div class="documentation">
+<h1>Base
+          <small>Application phase management, environment config and common utilities for travetto applications.</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/base
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/base</code></pre>     
+      </figure>
+
+Base is the foundation of all <a target="_blank" class="external-link" href="https://travetto.dev">travetto</a> applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
+
+<ul> <li>Environmental Information</li>
+ <li>File Operations</li>
+ <li>Resource Management</li>
+ <li>Life-cycle Support</li>
+ <li>Stacktrace Management </li>
+ <li>General Utilities</li></ul>
+
+<h2>Environmental Information</h2>
+The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers 
+as well. The information that is available is:
+
+<ul> <li><code class="item field">prod</code>- Determines if app is in prod mode.  A <code class="item input">boolean</code> flag that should indicate a production run.</li>
+ <li><code class="item field">env</code> - The environment name.  Will usually be one of <code class="item input">dev</code>, <code class="item input">test</code>, or <code class="item input">prod</code>.  Can be anything that is passed in.</li>
+ <li><code class="item field">profiles: Set&lt;string&gt;</code> - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.</li>
+ <li><code class="item field">debug</code> - Simple logging flag.  This <code class="item input">boolean</code> flag will enable or disable logging at various levels. By default <code class="item input">debug</code> is on in non-<code class="item input">prod</code>.</li>
+ <li><code class="item field">appRoots: string[]</code> - The file root paths for the application, the default set is the current project. Order matters with respect to resource resolution. All paths should be relative to the project base</li>
+ <li><code class="item method">hasProfile(p: string): boolean;</code> - Test whether or not a profile is active.</li></ul>
+
+With respect to <code class="item field">process.env</code>, we specifically test for all uppercase, lowercase, and given case. This allows us to test various patterns and catch flags that might be off due to casing. That would mean that a key of <code class="item input">Enable_Feature</code> would be tested as:
+
+<ul> <li><code class="item input">Enable_Feature</code></li>
+ <li><code class="item input">ENABLE_FEATURE</code></li>
+ <li><code class="item input">enable_feature</code></li></ul>
+
+<h3>App Information</h3>
+This basically exposes your <code class="item path">package.json</code> data as a typed data structure, useful for integrating package information into your application.
+
+<h2>File Operations</h2>
+The framework does a fair amount of file system scanning to auto - load files. It also needs to have knowledge of what files are available. The framework provides a simple and performant functionality for recursively finding files. This functionality leverages regular expressions in lieu of glob pattern matching(this is to minimize overall code complexity).
+
+A simple example of finding specific <code class="item path">.config</code> files in your codebase:
+
+      <figure class="code">
+      <figcaption class="code">Looking for all .config files with the prefix defined by svc
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/alt/docs/src/find.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ScanApp <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/scan'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">processServiceConfigs</span><span class="token punctuation">(</span><span class="token parameter">svc<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> svcConfigs <span class="token operator">=</span> <span class="token keyword">await</span> ScanApp<span class="token punctuation">.</span><span class="token function">findFiles</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> filter<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">RegExp</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>svc<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">.*[.]config$/</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> conf <span class="token keyword">of</span> svcConfigs<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token comment">// Do work</span>
+
+    <span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">res<span class="token punctuation">,</span> rej</span><span class="token punctuation">)</span> <span class="token operator">=></span> fs<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>conf<span class="token punctuation">.</span><span class="token keyword">module</span><span class="token punctuation">,</span> <span class="token string">'utf8'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">err<span class="token punctuation">,</span> v</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+      err <span class="token operator">?</span> <span class="token function">rej</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token function">res</span><span class="token punctuation">(</span>v<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Read file</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>Application Resources</h2>
+
+Resource management, loading of files, and other assets at runtime is a common pattern that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/resource.ts">ResourceManager</a> encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
+
+      <figure class="code">
+      <figcaption class="code">Finding Images
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/alt/docs/src/image.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ResourceManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/resource'</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Find a single image, first one wins by resource path order
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">findSingleImage</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> imagePath <span class="token operator">=</span> <span class="token keyword">await</span> ResourceManager<span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span><span class="token string">'/images/asset.gif'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> imagePath<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token comment">/**
+ * Find all .gif files under the imsages folder
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">findAllImages</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> imagePaths <span class="token operator">=</span> <span class="token keyword">await</span> ResourceManager<span class="token punctuation">.</span><span class="token function">findAllByPattern</span><span class="token punctuation">(</span><span class="token regex">/[.]gif$/</span><span class="token punctuation">,</span> <span class="token string">'images/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> imagePaths<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>Lifecycle Support</h2>
+
+During the lifecycle of an application, there is a need to handle different phases of execution. When executing a phase, the code will recursively find all <code class="item path">phase.&lt;phase&gt;.ts</code> files under <code class="item path">node_modules/@travetto</code>, and in the root of your project. The format of each phase handler is comprised of five main elements:
+
+<ul> <li>The phase of execution, which is defined by the file name <code class="item path">phase.&lt;phase&gt;.ts</code> <ul> <li>The key of the handler to be referenced for dependency management.</li></ul></li>
+ <li>The list of dependent handlers that the current handler depends on, if any.</li>
+ <li>The list of handlers that should be dependent on the current handler, if any.</li>
+ <li>The actual functionality to execute</li></ul>
+
+An example would be something like <code class="item path">phase.init.ts</code> in the <a class="module-link" href="/docs/config" title="Environment-aware config management using yaml files">Configuration</a> module.  
+
+      <figure class="code">
+      <figcaption class="code">Config phase init
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/config/support/phase.init.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token comment">/**
+ * Initializes the config source
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> init <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   key<span class="token operator">:</span> <span class="token string">'config'</span><span class="token punctuation">,</span>
   after<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'base'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token function-variable function">action</span><span class="token operator">:</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">const</span> <span class="token punctuation">{{ '{' }}</span> <span class="token type">ConfigManager</span><span class="token punctuation">{{ '}' }}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'../src/service/config'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">await</span> <span class="token type">ConfigManager</span><span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><h3 id="common-application-error-class">Common Application Error Class</h3>
-<p>While the framework is 100% compatible with standard <code class="inline">Error</code> instances, there are cases in which additional functionality is desired.  Within the framework we use <code class="inline">AppError</code> (or its derivatives) to represent framework errors.  This class is available for use in your own projects.  Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" routerLink="/docs/rest"  null><code class="inline">Rest</code></a> module and HTTP status codes).  </p>
-<p>The <code class="inline">AppError</code> takes in a message, and an optional payload and/or error classification.  The currently supported error classifications are:</p>
-<ul>
-<li><code class="inline">general</code> - General purpose errors</li>
-<li><code class="inline">system</code>  - Synonym for <code class="inline">general</code></li>
-<li><code class="inline">data</code> - Data format, content, etc are incorrect.  Generally correlated to bad input.</li>
-<li><code class="inline">permission</code> - Operation failed due to lack of permissions</li>
-<li><code class="inline">auth</code> - Operation failed due to lack of authentication</li>
-<li><code class="inline">missing</code> - Resource was not found when requested</li>
-<li><code class="inline">timeout</code> - Operation did not finish in a timely manner</li>
-<li><code class="inline">unavailable</code> - Resource was unresponsive</li>
-</ul>
-<h3 id="shutdown">Shutdown</h3>
-<p>Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown.  Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers.  The code overrides <code class="inline">process.exit</code> to properly handle <code class="inline">SIGKILL</code> and <code class="inline">SIGINT</code>, with a default threshold of 3 seconds.  In the advent of a <code class="inline">SIGTERM</code> signal, the code exits immediately without any cleanup.</p>
-<p>As a registered shutdown handler, you can do.</p>
-<app-section-header headerType="code">Registering a shutdown handler</app-section-header>
-<pre><code class="language-typescript"><span class="token type">ShutdownManager</span><span class="token punctuation">.</span><span class="token function">onShutdown</span><span class="token punctuation">(</span><span class="token string">'handler-name'</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token comment">// <span class="token type">Do</span> important work, the framework will wait until all async</span>
-  <span class="token comment">//   operations are completed before finishing shutdown</span>
-<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span></code></pre><h3 id="stacktrace">Stacktrace</h3>
-<p>We integrate with <a class="external-link" href="https://trace.js.org/" target="_blank" null><code class="inline">trace.js</code></a> to handle asynchronous call stacks, and provide higher quality stack traces.  The stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  This is primarily used for development purposes, and is disabled by default in <code class="inline">prod</code>.  That means in a production environment you will get the full stacktrace, in all it’s glory.</p>
-<p>From a test scenario:</p>
-<app-section-header headerType="code">Tracking asynchronous behavior</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">function</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token function">inner1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token function">inner2</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-      <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token function">inner3</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'<span class="token type">Uh</span> oh'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">{{ '}' }}</span>
+  <span class="token function-variable function">action</span><span class="token operator">:</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> ConfigManager <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'../src/manager'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    ConfigManager<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>     
+      </figure>
 
-<span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>Will produce the following stack trace:</p>
-<app-section-header headerType="terminal">Stack trace from async errors</app-section-header>
-<pre><code class="language-bash"><span class="token type">Error</span>: <span class="token type">Uh</span> oh
-    at <span class="token type">Timeout</span>.inner3 <span class="token punctuation">[</span>as _onTimeout<span class="token punctuation">]</span> <span class="token punctuation">(</span>./test/stack.js:6:23<span class="token punctuation">)</span>
-    at <span class="token type">Timeout</span>.inner2 <span class="token punctuation">[</span>as _onTimeout<span class="token punctuation">]</span> <span class="token punctuation">(</span>./test/stack.js:5:13<span class="token punctuation">)</span>
-    at <span class="token type">Timeout</span>.inner1 <span class="token punctuation">[</span>as _onTimeout<span class="token punctuation">]</span> <span class="token punctuation">(</span>./test/stack.js:4:9<span class="token punctuation">)</span>
-    at <span class="token type">Object</span>.load <span class="token punctuation">[</span>as .ts<span class="token punctuation">]</span> <span class="token punctuation">(</span>./bin/travetto.js:27:12<span class="token punctuation">)</span></code></pre><p>The needed functionality cannot be loaded until <code class="inline">init.action</code> executes, and so must be required only at that time.</p>
-<h3 id="util">Util</h3>
-<p>Simple functions for providing a minimal facsimile to <a class="external-link" href="https://lodash.com" target="_blank" null><code class="inline">lodash</code></a>, but without all the weight. Currently <code class="inline">Util</code> includes:</p>
-<ul>
-<li><code class="inline">isPrimitive(el: any)</code> determines if <code class="inline">el</code> is a <code class="inline">string</code>, <code class="inline">boolean</code>, <code class="inline">number</code> or <code class="inline">RegExp</code></li>
-<li><code class="inline">isPlainObject(obj: any)</code> determines if the obj is a simple object</li>
-<li><code class="inline">isFunction(o: any)</code> determines if <code class="inline">o</code> is a simple <code class="inline">Function</code></li>
-<li><code class="inline">isClass(o: any)</code> determines if <code class="inline">o</code> is a class constructor</li>
-<li><code class="inline">isSimple(a: any)</code> determines if <code class="inline">a</code> is a simple value</li>
-<li><code class="inline">deepAssign(a: any, b: any, mode?)</code> which allows for deep assignment of <code class="inline">b</code> onto <code class="inline">a</code>, the <code class="inline">mode</code> determines how aggressive the assignment is, and how flexible it is.  <code class="inline">mode</code> can have any of the following values:<ul>
-<li><code class="inline">loose</code>, which is the default is the most lenient.  It will not error out, and overwrites will always happen</li>
-<li><code class="inline">coerce</code>, will attempt to force values from <code class="inline">b</code> to fit the types of <code class="inline">a</code>, and if it can’t it will error out</li>
-<li><code class="inline">strict</code>, will error out if the types do not match  </li>
-</ul>
-</li>
-<li><code class="inline">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
-</ul>
-<h3 id="systemutil">SystemUtil</h3>
-<p>Unlike <code class="inline">Util</code>, the <code class="inline">SystemUtil</code> is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful. <code class="inline">SystemUtil</code> has functionality for:</p>
-<ul>
-<li><code class="inline">naiveHash(text: string): number</code> computes a very naive hash.  Should not be relied upon for scenarios where collisions cannot be tolerated.</li>
-<li><code class="inline">computeModule(file: string): string</code> computes the internal module name from a given file.</li>
-</ul>
+<h2>Common Application Error Class</h2>
+
+While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/error.ts#L10">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
+
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/error.ts#L10">AppError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+<ul> <li><code class="item input">general</code> - General purpose errors</li>
+ <li><code class="item input">system</code> - Synonym for <code class="item input">general</code></li>
+ <li><code class="item input">data</code> - Data format, content, etc are incorrect. Generally correlated to bad input.</li>
+ <li><code class="item input">permission</code> - Operation failed due to lack of permissions</li>
+ <li><code class="item input">auth</code> - Operation failed due to lack of authentication</li>
+ <li><code class="item input">missing</code> - Resource was not found when requested</li>
+ <li><code class="item input">timeout</code> - Operation did not finish in a timely manner</li>
+ <li><code class="item input">unavailable</code> - Resource was unresponsive</li></ul>
+
+<h2>Shutdown</h2>
+
+Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides <code class="item method">process.exit</code> to properly handle <code class="item input">SIGKILL</code> and <code class="item input">SIGINT</code>, with a default threshold of 3 seconds. In the advent of a <code class="item input">SIGTERM</code> signal, the code exits immediately without any cleanup.
+
+As a registered shutdown handler, you can do.
+
+      <figure class="code">
+      <figcaption class="code">Registering a shutdown handler
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/alt/docs/src/shutdown.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ShutdownManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/shutdown'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">registerShutdownHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  ShutdownManager<span class="token punctuation">.</span><span class="token function">onShutdown</span><span class="token punctuation">(</span><span class="token string">'handler-name'</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token comment">// Do important work, the framework will wait until all async</span>
+    <span class="token comment">//   operations are completed before finishing shutdown</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>Stacktrace</h2>
+The built in stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  
+
+From a test scenario:
+
+      <figure class="code">
+      <figcaption class="code">Tracking asynchronous behavior
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/alt/docs/src/stack-test.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> StacktraceUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/stacktrace'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">function</span> <span class="token function">inner3</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'Uh oh'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">inner2</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token function">inner3</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">inner1</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token function">inner2</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">await</span> <span class="token function">inner1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+process<span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token string">'unhandledRejection'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">err<span class="token operator">:</span> <span class="token builtin">any</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+  StacktraceUtil<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token builtin">console</span><span class="token operator">!</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>StacktraceUtil<span class="token punctuation">.</span><span class="token function">simplifyStack</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>     
+      </figure>
+
+Will produce the following stack trace:
+
+      <figure class="terminal">
+      <figcaption class="terminal">tack trace from async errors
+      
+      </figcaption>
+      <pre><code class="language-bash">$ ./alt/docs/src/stack-test.ts -r @travetto/boot/register ./alt/docs/src/stack-test.ts
+
+Error: Uh oh
+    at inner3 <span class="token punctuation">(</span>alt/docs/src/stack-test.ts:4:9<span class="token punctuation">)</span>
+    at inner2 <span class="token punctuation">(</span>alt/docs/src/stack-test.ts:8:16<span class="token punctuation">)</span>
+    at inner1 <span class="token punctuation">(</span>alt/docs/src/stack-test.ts:12:16<span class="token punctuation">)</span>
+    at <span class="token builtin class-name">test</span> <span class="token punctuation">(</span>alt/docs/src/stack-test.ts:16:9<span class="token punctuation">)</span>
+    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>alt/docs/src/stack-test.ts:24:1<span class="token punctuation">)</span></code></pre>     
+      </figure>
+
+The needed functionality cannot be loaded until <code class="item method">init.action</code> executes, and so must be required only at that time.
+
+<h2>Util</h2>
+Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/util.ts#L8">Util</a> includes:
+
+<ul> <li><code class="item method">isPrimitive(el: any)</code> determines if <code class="item input">el</code> is a <code class="item input">string</code>, <code class="item input">boolean</code>, <code class="item input">number</code> or <code class="item input">RegExp</code></li>
+ <li><code class="item method">isPlainObject(obj: any)</code> determines if the obj is a simple object</li>
+ <li><code class="item method">isFunction(o: any)</code> determines if <code class="item input">o</code> is a simple <code class="item input">Function</code></li>
+ <li><code class="item method">isClass(o: any)</code> determines if <code class="item input">o</code> is a class constructor</li>
+ <li><code class="item method">isSimple(a: any)</code> determines if <code class="item input">a</code> is a simple value</li>
+ <li><code class="item method">deepAssign(a: any, b: any, mode ?)</code> which allows for deep assignment of <code class="item input">b</code> onto <code class="item input">a</code>, the <code class="item input">mode</code> determines how aggressive the assignment is, and how flexible it is.  <code class="item input">mode</code> can have any of the following values: <ul> <li><code class="item input">loose</code>, which is the default is the most lenient. It will not error out, and overwrites will always happen</li>
+ <li><code class="item input">coerce</code>, will attempt to force values from <code class="item input">b</code> to fit the types of <code class="item input">a</code>, and if it can't it will error out</li>
+ <li><code class="item input">strict</code>, will error out if the types do not match</li></ul></li>
+ <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li></ul>
+
+<h2>SystemUtil</h2>
+
+Unlike <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/util.ts#L8">Util</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/internal/system.ts#L7">SystemUtil</a> is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/internal/system.ts#L7">SystemUtil</a> has functionality for:
+
+<ul> <li><code class="item method">naiveHash(text: string): number</code> computes a very naive hash. Should not be relied upon for scenarios where collisions cannot be tolerated.</li>
+ <li><code class="item method">computeModule(file: string): string</code> computes the internal module name from a given file.</li></ul>
+
 </div>

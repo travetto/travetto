@@ -1,4 +1,4 @@
-import { d, Mod, Code, SnippetLink, Section, Snippet } from '@travetto/doc';
+import { doc as d, Mod, Code, SnippetLink, Section, Snippet } from '@travetto/doc';
 
 export default d`
 

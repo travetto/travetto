@@ -1,4 +1,4 @@
-import { d, Code, List, Mod, Section, Snippet, Method, inp, SnippetLink } from '@travetto/doc';
+import { doc as d, Code, List, Mod, Section, Snippet, Method, inp, SnippetLink } from '@travetto/doc';
 import { IdentitySource } from './src/identity';
 import { InjectableFactory } from '@travetto/di';
 import { AuthService } from './src/auth';

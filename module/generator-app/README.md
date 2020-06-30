@@ -1,6 +1,13 @@
-travetto: Yeoman App Generator
-===
-A simple [`yeoman`](http://yeoman.io) generator for scaffolding a reference project.  To get started, you need to make sure: 
+
+# Yeoman Generator
+## Yeoman app generator for the Travetto framework
+
+**Install: @travetto/generator-app**
+```bash
+npm install @travetto/generator-app
+```
+
+A simple [yeoman](http://yeoman.io) generator for scaffolding a reference project.  To get started, you need to make sure:
 
 **Install: Setting up yeoman and the generator**
 ```bash
@@ -11,84 +18,141 @@ $ git config --global.username <Username> #Set your git username
 
 Once installed you can invoke the scaffolding by running
 
-**Terminal: Running generator**
+**Terminal: Running Generator**
 ```bash
 $ yo @travetto/app
 ```
 
-Currently, the generator supports, two main features.
+The generator will ask about enabling the following features:
 
 ## Restful Architecture
-The [`Rest`](https://github.com/travetto/travetto/tree/master/module/rest) provides the necessary integration for exposing restful apis.  When selecting the `rest` feature, you will need to specify which backend you want to include with your application, the default being `express`.  Currently you can select from:
-* `express`
-* `koa`
-* `fastify`
+The [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") provides the necessary integration for exposing restful apis.  When selecting the `rest` feature, you will need to specify which backend you want to include with your application, the default being [express](https://expressjs.com).  Currently you can select from:
 
-The code will establish some basic routes, specifically, `GET /` as the root endpoint.  This will return the contents of your `package.json` as an identification operation.  
+   
+   *  [express](https://expressjs.com)
+   *  [koa](https://koajs.com/)
+   *  [fastify](https://www.fastify.io/)
+
+The code will establish some basic routes, specifically, `GET /` as the root endpoint.  This will return the contents of your `package.json` as an identification operation.
 
 ### Additional Rest Features
 In addition to the core functionality, the `rest` feature has some useful sub-features.  Specifically:
 
-[`Swagger`](https://github.com/travetto/travetto/tree/master/module/swagger) support for the restful api.  This will automatically expose a `swagger.json` endpoint, and provide the necessary plumbing to support client generation.
+[OpenAPI Specification](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//openapi "OpenAPI integration support for the travetto framework") support for the restful api.  This will automatically expose a `openapi.yml` endpoint, and provide the necessary plumbing to support client generation.
 
-[`Log`](https://github.com/travetto/travetto/tree/master/module/log) support for better formatting and colorized output.  This is generally useful for server logs, especially during development.
+[Logging](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//log "Logging framework that integrates at the console.log level.") support for better formatting, [debug](https://www.npmjs.com/package/debug) like support, and colorized output.  This is generally useful for server logs, especially during development.
 
 ## Authentication
-Authentication is also supported on the Restful endpoints by selecting [`Auth-Rest`](https://github.com/travetto/travetto/tree/master/module/auth-rest) during setup.  This will support basic authentication running out of local memory, with user [`Session`](https://github.com/travetto/travetto/tree/master/module/rest-session)s. 
+Authentication is also supported on the Restful endpoints by selecting [Rest Auth](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//auth-rest "Rest authentication integration support for the travetto framework") during setup.  This will support basic authentication running out of local memory, with user [REST Session](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest-session "Session provider for the travetto rest module.")s.
 
 ## Testing
-[`Test`](https://github.com/travetto/travetto/tree/master/module/test)ing can also be configured out of the box to provide simple test cases for the data model.  
+[Testing](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//test "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin") can also be configured out of the box to provide simple test cases for the data model.
 
 ## Data Modelling and Storage
-The [`Model`](https://github.com/travetto/travetto/tree/master/module/model) allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:
-* `elasticsearch`
-* `mongodb`
-<!-- * ...more to come -->
 
-A default model is constructed, a `Todo` class:
+The [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.") allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:
 
-**Code: Todo model**
+   
+   *  [elasticsearch](https://elastic.co)
+   *  [mongodb](https://mongodb.com)
+   *  [SQL](https://en.wikipedia.org/wiki/SQL)
+
+A default model is constructed, a [Todo](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/generator-app/templates/todo/src/model/todo.ts#L4) class:
+
+**Code: Todo Model**
 ```typescript
+import { Model, ModelCore } from '@travetto/model';
+
 @Model()
 export class Todo implements ModelCore {
   id?: string;
   text: string;
-  completed: boolean;
+  completed?: boolean;
 }
 ```
 
 Basic tests are also included for the `model` to verify that database interaction and functionality is working properly.
 
 ## Rest + Model
-In the case both `Rest` and `Model` features are enabled, the code will produce a controller that exposes the `Todo` model via restful patterns.
+In the case both `rest` and `model` features are enabled, the code will produce a controller that exposes the [Todo](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/generator-app/templates/todo/src/model/todo.ts#L4) model via restful patterns.
 
 **Code: Todo controller**
-```typescript 
+```typescript
+import { AppError } from '@travetto/base';
+import { Controller, Get, Put, Post, Delete, Path } from '@travetto/rest';
+import { Inject } from '@travetto/di';
+import { ModelService, ModelQuery } from '@travetto/model';
+import { SchemaBody, SchemaQuery, Schema } from '@travetto/schema';
+
+import { Todo } from '../model/todo';
+
+@Schema()
+class Query {
+  q: any = {};
+}
+
+/**
+ * Controller for managing all aspects of the Todo lifecycle
+ */
 @Controller('/todo')
 export class TodoController {
 
+  @Inject()
+  source: ModelService;
+
+  /**
+   * Get all Todos
+   */
   @Get('/')
-  async getAll(req: Request): Promise<Todo[]>
+  async getAll(@SchemaQuery() query: Query): Promise<Todo[]> {
+    query.q = query.q || {};
+    return this.source.getAllByQuery(Todo, { where: query.q });
+  }
 
+  /**
+   * Get Todo by id
+   */
   @Get('/:id')
-  async getOne(req: Request): Promise<Todo>
+  async getOne(@Path() id: string): Promise<Todo> {
+    const q: ModelQuery<Todo> = { where: { id } };
+    return this.source.getByQuery(Todo, q);
+  }
 
+  /**
+   * Create a Todo
+   */
   @Post('/')
-  async save(req: TypedBody<Todo>): Promise<Todo>;
+  async save(@SchemaBody() todo: Todo): Promise<Todo> {
+    return this.source.save(Todo, todo);
+  }
 
+  /**
+   * Update a Todo
+   */
   @Put('/:id')
-  async update(req: TypedBody<Todo>): Promise<Todo>;
+  async update(@SchemaBody() todo: Todo): Promise<Todo> {
+    return this.source.update(Todo, todo);
+  }
 
+  /**
+   * Delete a Todo
+   */
   @Delete('/:id')
-  async delete(req: Request): Promise<void>;
+  async remove(@Path() id: string): Promise<void> {
+    const q: ModelQuery<Todo> = { where: { id } };
+    if (await this.source.deleteByQuery(Todo, q) !== 1) {
+      throw new AppError('Not found by id', 'notfound');
+    }
+  }
 }
-```  
+```
 
-## Executing
+## Running
 
 Once finished the application will reflect the modules chosen, and will be ready for execution, if you have configured a runnable application.  Currently, this requires the `rest` feature to be selected.
 
-**Terminal: starting app**
+**Terminal: Starting the App**
 ```bash
-$ npm start
+npm start
 ```
+

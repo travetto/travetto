@@ -1,9 +1,8 @@
-import { d, Section, SubSection, Ref, Mod, inp, List, Ordered, Code } from '@travetto/doc';
+import { doc as d, Section, SubSection, Ref, Mod, inp, List, Ordered, Code } from '@travetto/doc';
 
 const RootReg = Ref('RootRegistry', './src/service/root.ts');
 const SchemaReg = Ref('SchemaRegistry', '../schema/src/service/registry.ts');
 const MetadataReg = Ref('MetadataRegistry', './src/service/metadata.ts');
-const ModelReg = Ref('ModelRegistry', '../model/src/registry/registry.ts');
 const DependencyReg = Ref('DependencyRegistry', '../di/src/registry.ts');
 
 export default d`
@@ -17,9 +16,9 @@ ${SubSection('Initial Flows')}
 The primary flow occurs on initialization of the application. At that point, the module will:
 
 ${Ordered(
-  `Initialize ${RootReg} and will automatically register/load all relevant files`,
+  d`Initialize ${RootReg} and will automatically register/load all relevant files`,
   `As files are imported, decorators within the files will record various metadata relevant to the respective registries`,
-  `When all files are processed, the ${RootReg} is finished, and it will signal to anything waiting on registered data that its free to use it.`,
+  d`When all files are processed, the ${RootReg} is finished, and it will signal to anything waiting on registered data that its free to use it.`,
 )}
 
 This flow ensures all files are loaded and processed before application starts. A sample registry could like:

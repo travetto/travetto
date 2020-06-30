@@ -1,15 +1,14 @@
-import { d, Library, Mod, Config, List, inp, Section, Terminal, meth, Code, Ordered, Execute, pth } from '@travetto/doc';
+import { doc as d, Mod, Config, List, inp, Section, meth, Code, Ordered, Execute, pth, lib, fld } from '@travetto/doc';
 import { ConfigManager } from './src/manager';
 import { Config as ConfigDec } from './src/decorator';
 
-const YAML = Library('yaml', 'https://en.wikipedia.org/wiki/YAML');
 
 export default d`
 
-The config module provides support for loading application config on startup. Configuration values support the common ${YAML} constructs as defined in ${Mod('yaml')}.  The configuration information is comprised of:
+The config module provides support for loading application config on startup. Configuration values support the common ${lib.YAML} constructs as defined in ${Mod('yaml')}.  The configuration information is comprised of:
 
 ${List(
-  d`${inp`yaml`} files`,
+  d`${lib.YAML} files`,
   d`environment variables`
 )}
 
@@ -18,16 +17,16 @@ ${Section('Resolution')}
 Config loading follows a defined resolution path, below is the order in increasing specificity:
 ${Ordered(
   d`${pth`resources/application.yml`} - Load the default ${pth`application.yml`} if available.`,
-  d`${pth`resources/*.yml`} - Load profile specific configurations as defined by the values in ${inp`process.env.TRV_PROFILES`}`,
-  d`${pth`resources/{env}.yml`} - Load environment specific profile configurations as defined by the values of ${inp`process.env.TRV_ENV`}.`,
-  d`${inp`process.env`} - Read startup configuration from environment to allow for overriding any values. Because we are overriding a ${YAML} based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as ${inp`UPPER_SNAKE_CASE`}. When reading from ${inp`process.env`} we will map ${inp`UPPER_SNAKE_CASE`} to ${inp`upper.snake.case`}, and will attempt to match by case-insensitive name.`
+  d`${pth`resources/*.yml`} - Load profile specific configurations as defined by the values in ${fld`process.env.TRV_PROFILES`}`,
+  d`${pth`resources/{env}.yml`} - Load environment specific profile configurations as defined by the values of ${fld`process.env.TRV_ENV`}.`,
+  d`${fld`process.env`} - Read startup configuration from environment to allow for overriding any values. Because we are overriding a ${lib.YAML} based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as ${inp`UPPER_SNAKE_CASE`}. When reading from ${fld`process.env`} we will map ${inp`UPPER_SNAKE_CASE`} to ${inp`upper.snake.case`}, and will attempt to match by case-insensitive name.`
 )}
 
 ${Section('A Complete Example')}
 
 A more complete example setup would look like:
 
-${Config('resources/database.yml', 'alt/docs/resources/database.yml')}
+${Config('resources/application.yml', 'alt/docs/resources/application.yml')}
 
 ${Config('resources/prod.yml', 'alt/docs/resources/prod.yml')}
 

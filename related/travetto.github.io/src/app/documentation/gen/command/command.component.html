@@ -1,39 +1,134 @@
-<div class="documentation"><h2 id="command" id="command">Command</h2>
-<app-section-header headerType="install">Primary</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/command</code></pre><p>The command module provides the necessary foundation for calling complex commands at runtime. Additionally special attention is provided to running <a class="external-link" href="https://www.docker.com/community-edition" target="_blank" null><code class="inline">docker</code></a> containers.</p>
-<h3 id="docker-support">Docker Support</h3>
-<p>Docker provides a unified way of executing external programs with a high level of consistency and simplicity.  For that reason, the framework leverages this functionality to provide a clean cross-platform experience.  The docker functionality allows you to interact with containers in two ways:</p>
-<ul>
-<li>Invoke a single operation against a container</li>
-<li>Spin up a container and run multiple executions against it.  In this format, the container, once started, will be scheduled to terminate on <code class="inline language-typescript">Shutdown</code> of the application. </li>
-</ul>
-<app-section-header headerType="code">Establishing mongo as a DockerContainer instance</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">runMongo</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">const</span> port <span class="token operator">=</span> <span class="token number">10000</span><span class="token punctuation">;</span>
-  <span class="token keyword">const</span> container <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DockerContainer</span><span class="token punctuation">(</span><span class="token string">'mongo:latest'</span><span class="token punctuation">)</span>
-    <span class="token punctuation">.</span><span class="token function">createTempVolume</span><span class="token punctuation">(</span><span class="token string">'/var/workspace'</span><span class="token punctuation">)</span>
-    <span class="token punctuation">.</span><span class="token function">exposePort</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span>
-    <span class="token punctuation">.</span><span class="token function">setWorkingDir</span><span class="token punctuation">(</span><span class="token string">'/var/workspace'</span><span class="token punctuation">)</span>
-    <span class="token punctuation">.</span><span class="token function">forceDestroyOnShutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<div class="documentation">
+<h1>Command
+          <small>Support for executing complex commands at runtime.</small>
 
-  container<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'--storageEngine'</span><span class="token punctuation">,</span> <span class="token string">'ephemeralForTest'</span><span class="token punctuation">,</span> <span class="token string">'--port'</span><span class="token punctuation">,</span> port<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token keyword">await</span> <span class="token type">NetUtil</span><span class="token punctuation">.</span><span class="token function">waitForPort</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        </h1>
 
-  <span class="token keyword">return</span><span class="token punctuation">;</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><h3 id="command-service">Command Service</h3>
-<p>While docker containers provide a high level of flexibility, performance can be an issue.  <a class="source-link" href="https://github.com/travetto/travetto/tree/master/module/command/src/command.ts" target="_blank" null><code class="inline language-typescript">CommandService</code></a> is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.</p>
-<app-section-header headerType="code">Command Service example, using pngquant</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">const</span> converter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CommandService</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>
-  containerImage<span class="token operator">:</span> <span class="token string">'agregad/pngquant'</span><span class="token punctuation">,</span>
-  localCheck<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'pngquant'</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token string">'-h'</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
-<span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <figure class="install">
+      <figcaption class="install">Install @travetto/command
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/command</code></pre>     
+      </figure>
 
-<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">compress</span><span class="token punctuation">(</span><span class="token parameter">img</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">const</span> state <span class="token operator">=</span> <span class="token keyword">await</span> converter<span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token string">'pngquant'</span><span class="token punctuation">,</span> <span class="token string">'--quality'</span><span class="token punctuation">,</span> <span class="token string">'40-80'</span><span class="token punctuation">,</span> <span class="token string">'--speed 1'</span><span class="token punctuation">,</span> <span class="token string">'--force'</span><span class="token punctuation">,</span> <span class="token string">'-'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token keyword">const</span> out <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{ '{' }}</span>img<span class="token interpolation-punctuation punctuation">{{ '}' }}</span></span><span class="token string">.compressed</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+The command module provides the necessary foundation for calling complex commands at runtime. Additionally special attention is provided to running <a target="_blank" class="external-link" href="https://www.docker.com/community-edition">docker</a> containers.
 
-  fs<span class="token punctuation">.</span><span class="token function">createReadStream</span><span class="token punctuation">(</span>img<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>state<span class="token punctuation">.</span>process<span class="token punctuation">.</span>stdin<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  state<span class="token punctuation">.</span>process<span class="token punctuation">.</span>stdout<span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>fs<span class="token punctuation">.</span><span class="token function">createWriteStream</span><span class="token punctuation">(</span>out<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<h2>Docker Support</h2>
 
-  <span class="token keyword">await</span> state<span class="token punctuation">.</span>result<span class="token punctuation">;</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre></div>
+Docker provides a unified way of executing external programs with a high level of consistency and simplicity.  For that reason, the framework leverages this functionality to provide a clean cross-platform experience.  The docker functionality allows you to interact with containers in two ways:
+<ul> <li>Invoke a single operation against a container</li>
+ <li>Spin up a container and run multiple executions against it.  In this format, the container, once started, will be scheduled to terminate on <code class="item class">Shutdown</code> of the application.</li></ul>
+
+      <figure class="code">
+      <figcaption class="code">Launching nginx and wait for connect
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/command/alt/docs/src/docker.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DockerContainer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/command/src/docker'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CommandUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/command/src/util'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">NginxServer</span> <span class="token punctuation">{{'{'}}</span>
+  container<span class="token operator">:</span> DockerContainer<span class="token punctuation">;</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span>
+    <span class="token keyword">private</span> port <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">trunc</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">40000</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">10000</span>
+  <span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>container <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DockerContainer</span><span class="token punctuation">(</span><span class="token string">'nginx:latest'</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">exposePort</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token punctuation">,</span> <span class="token number">80</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">forceDestroyOnShutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+  <span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>container<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    CommandUtil<span class="token punctuation">.</span><span class="token function">waitForPort</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Ready!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">async</span> <span class="token function">stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>container<span class="token punctuation">.</span><span class="token function">stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Stopped'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>Command Service</h2>
+
+While docker containers provide a high level of flexibility, performance can be an issue.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/command/src/command.ts#L11">CommandService</a> is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
+
+      <figure class="code">
+      <figcaption class="code">Command Service example, using pngquant
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/command/alt/docs/src/service.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CommandService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/command/src/command'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ImageCompressor</span> <span class="token punctuation">{{'{'}}</span>
+  converter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CommandService</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+    containerImage<span class="token operator">:</span> <span class="token string">'agregad/pngquant'</span><span class="token punctuation">,</span>
+    localCheck<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'pngquant'</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token string">'-h'</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">async</span> <span class="token function">compress</span><span class="token punctuation">(</span><span class="token parameter">img<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> state <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>converter<span class="token punctuation">.</span><span class="token function">exec</span><span class="token punctuation">(</span><span class="token string">'pngquant'</span><span class="token punctuation">,</span> <span class="token string">'--quality'</span><span class="token punctuation">,</span> <span class="token string">'40-80'</span><span class="token punctuation">,</span> <span class="token string">'--speed 1'</span><span class="token punctuation">,</span> <span class="token string">'--force'</span><span class="token punctuation">,</span> <span class="token string">'-'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> out <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>img<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">.compressed</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Feed into process</span>
+    fs<span class="token punctuation">.</span><span class="token function">createReadStream</span><span class="token punctuation">(</span>img<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>state<span class="token punctuation">.</span>process<span class="token punctuation">.</span>stdin<span class="token operator">!</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// Feed from process to file system</span>
+    state<span class="token punctuation">.</span>process<span class="token punctuation">.</span>stdout<span class="token operator">!</span><span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>fs<span class="token punctuation">.</span><span class="token function">createWriteStream</span><span class="token punctuation">(</span>out<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">await</span> state<span class="token punctuation">.</span>result<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h2>CLI - command:service</h2>
+
+The module provides the ability to start/stop/restart services as <a target="_blank" class="external-link" href="https://www.docker.com/community-edition">docker</a> containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targetted individually or handled as a group.
+
+      <figure class="terminal">
+      <figcaption class="terminal">Command Service
+      
+      </figcaption>
+      <pre><code class="language-bash">$ travetto travetto command:service --help
+
+Usage:  command:service <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>start<span class="token operator">|</span>stop<span class="token operator">|</span>restart<span class="token operator">|</span>status<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">..</span>.services<span class="token punctuation">]</span>
+
+Options:
+  -h, --help  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
+
+A sample of all services available to the entire framework:
+
+      <figure class="terminal">
+      <figcaption class="terminal">All Services
+      
+      </figcaption>
+      <pre><code class="language-bash">Service          Version    Status
+----------------------------------------------
+
+ * redis                  <span class="token number">5</span>    Not running
+ * elasticsearch      <span class="token number">6.8</span>.2    Not running
+ * mongodb              <span class="token number">3.6</span>    Not running
+ * postgresql          <span class="token number">12.2</span>    Not running
+ * mysql                <span class="token number">5.6</span>    Not running</code></pre>     
+      </figure>
+
+<h3>Defining new Services</h3>
+
+The services are defined as <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> files within the framework and can easily be extended:
+
+      <figure class="code">
+      <figcaption class="code">Sample Service Definition
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-elasticsearch/support/service.elasticsearch.json">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-json"><span class="token punctuation">{{'{'}}</span>
+  <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"elasticsearch"</span><span class="token punctuation">,</span>
+  <span class="token property">"version"</span><span class="token operator">:</span> <span class="token string">"6.8.2"</span><span class="token punctuation">,</span>
+  <span class="token property">"port"</span><span class="token operator">:</span> <span class="token number">9200</span><span class="token punctuation">,</span>
+  <span class="token property">"env"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token property">"discovery.type"</span><span class="token operator">:</span> <span class="token string">"single-node"</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+  <span class="token property">"image"</span><span class="token operator">:</span> <span class="token string">"docker.elastic.co/elasticsearch/elasticsearch:6.8.2"</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+</div>

@@ -1,43 +1,84 @@
-<div class="documentation"><h1 id="email" id="email">Email</h1>
-<app-section-header headerType="install">Primary</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/email</code></pre><p>A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the <code class="inline">NullTransport</code> which will just drop emails. The structure of the API is derived from  <a class="external-link" href="https://nodemailer.com/about/" target="_blank" null><code class="inline">nodemailer</code></a>, but is compatible with any library that can handle the <code class="inline">MessageOptions</code> input.</p>
-<p>To expose the necessary email transport, the following pattern is commonly used:</p>
-<app-section-header headerType="code">Declaring the null transport for development</app-section-header> 
-<pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{ '{' }}</span>
+<div class="documentation">
+<h1>Email
+          <small>Email transmission module.</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/email
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/email</code></pre>     
+      </figure>
+
+A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email/src/transport.ts#L13">NullTransport</a> which will just drop emails. The structure of the API is derived from  <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a>, but is compatible with any library that can handle the <a target="_blank" class="source-link" href="src/types.ts#L36">MessageOptions</a> input.
+
+To expose the necessary email transport, the following pattern is commonly used:
+
+      <figure class="code">
+      <figcaption class="code">Declaring the null transport for development
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email/alt/docs/src/null.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NullTransport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email/src/transport'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{'{'}}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">MailTransport</span> <span class="token punctuation">{{ '{' }}</span>
+  <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NullTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>Given the amorphous nature of transports, the <code class="inline">transport</code> field in <code class="inline">MailConfig</code> is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.</p>
-<h2 id="nodemailer---extension">Nodemailer - Extension</h2>
-<p>Due to the connection with <code class="inline">nodemailer</code>, all nodemailer extensions should be usable out of the box. The primary <code class="inline">nodemailer</code> modules are provided (assuming dependencies are installed):</p>
-<p><code class="inline">sendmail</code> to send all messages via the sendmail operation</p>
-<app-section-header headerType="code">Sendmail transport from nodemailer</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{ '{' }}</span> <span class="token type">NodeMailerTransport</span> <span class="token punctuation">{{ '}' }}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email'</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
-<span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{ '{' }}</span>
+Given the amorphous nature of transports, the <code class="item input">transport</code> field in <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email/src/config.ts#L7">MailConfig</a> is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
+
+<h2>Nodmailer - Extension</h2>
+
+Due to the connection with <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a>, all extensions should be usable out of the box. The primary <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a> modules are provided (assuming dependencies are installed):
+
+      <figure class="code">
+      <figcaption class="code"><code class="item input">sendmail</code> to send all messages via the sendmail operation
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email/alt/docs/src/sendmail.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NodemailerTransport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{'{'}}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">MailTransport</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NodeMailerTransport</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span><span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p><code class="inline">smtp</code> to utilizing the protocol directly and send to a specific server</p>
-<app-section-header headerType="code">SMTP transport from nodemailer</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{ '{' }}</span> <span class="token type">NodeMailerTransport</span> <span class="token punctuation">{{ '}' }}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email'</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NodemailerTransport</span><span class="token punctuation">(</span><span class="token keyword">require</span><span class="token punctuation">(</span><span class="token string">'nodemailer-sendmail-transport'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
-<span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{ '{' }}</span>
+      <figure class="code">
+      <figcaption class="code"><code class="item input">smtp</code> to send all messages via the smtp operation
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email/alt/docs/src/smtp.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NodemailerTransport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{'{'}}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">MailTransport</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NodeMailerTransport</span><span class="token punctuation">(</span><span class="token keyword">require</span><span class="token punctuation">(</span><span class="token string">'nodemailer-smtp-transport'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p><code class="inline">ses</code> send via Amazon’s SES apis</p>
-<app-section-header headerType="code">SES transport from nodemailer</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{ '{' }}</span> <span class="token type">NodeMailerTransport</span> <span class="token punctuation">{{ '}' }}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email'</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NodemailerTransport</span><span class="token punctuation">(</span><span class="token keyword">require</span><span class="token punctuation">(</span><span class="token string">'nodemailer-smtp-transport'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
-<span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{ '{' }}</span>
+      <figure class="code">
+      <figcaption class="code"><code class="item input">ses</code> to send all messages via the ses operation
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email/alt/docs/src/ses.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NodemailerTransport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{'{'}}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token type">MailTransport</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NodeMailerTransport</span><span class="token punctuation">(</span><span class="token keyword">require</span><span class="token punctuation">(</span><span class="token string">'nodemailer-ses-transport'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre></div>
+  <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NodemailerTransport</span><span class="token punctuation">(</span><span class="token keyword">require</span><span class="token punctuation">(</span><span class="token string">'nodemailer-ses-transport'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
-      <app-email-template></app-email-template>
+</div>

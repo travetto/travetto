@@ -1,27 +1,52 @@
-<div class="documentation"><h2 id="asset-rest" id="asset-rest">Asset-Rest</h2>
-<app-section-header headerType="install">Rest support</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/asset-rest</code></pre><p>This module provides a clean and direct mechanism for processing uploads, built upon <a class="external-link" href="https://github.com/mscdex/busboy" target="_blank" null><code class="inline">busboy</code></a>.  The module also provides some best practices with respect to temporary file deletion.</p>
-<p>Once the files are uploaded, they are exposed on <a class="module-link" routerLink="/docs/rest"  null><code class="inline">Rest</code></a>‘s request object as <code class="inline">req.files</code>. The uploaded files are constructed as <code class="inline">Asset</code> instances, which allows for integration with the <a class="module-link" routerLink="/docs/asset"  null><code class="inline">Asset</code></a> module.</p>
-<p>A simple example:</p>
-<app-section-header headerType="code">Rest controller with upload support</app-section-header>
-<pre><code class="language-typescript">@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/asset'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AssetController</span> <span class="token punctuation">{{ '{' }}</span>
+<div class="documentation">
+<h1>Asset Rest Support
+          <small>Provides integration between the travetto asset and rest module.</small>
 
-  <span class="token keyword">constructor</span><span class="token punctuation">(</span>
-    <span class="token parameter"><span class="token keyword">private</span> assetService<span class="token operator">:</span> AssetService</span>
-  <span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span> <span class="token punctuation">{{ '}' }}</span>
+        </h1>
 
-  @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">store</span><span class="token punctuation">(</span><span class="token parameter">@<span class="token meta">Upload</span><span class="token punctuation">(</span><span class="token punctuation">)</span> file<span class="token operator">:</span> UploadAsset</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">const</span> stored <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>assetService<span class="token punctuation">.</span><span class="token function">save</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{ '{' }}</span>
-      path<span class="token operator">:</span> stored<span class="token punctuation">.</span>path
-    <span class="token punctuation">{{ '}' }}</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
+      <figure class="install">
+      <figcaption class="install">Install @travetto/asset-rest
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/asset-rest</code></pre>     
+      </figure>
 
-  @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/:imgPath'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getImage</span><span class="token punctuation">(</span><span class="token parameter">@<span class="token meta">Path</span><span class="token punctuation">(</span><span class="token punctuation">)</span> imgPath<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-    <span class="token keyword">const</span> asset <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>assetService<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>imgPath<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token type">AssetUtil</span><span class="token punctuation">.</span><span class="token function">downloadable</span><span class="token punctuation">(</span>asset<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{ '}' }}</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre></div>
+This module provides a clean and direct mechanism for processing uploads, built upon <a target="_blank" class="external-link" href="https://github.com/mscdex/busboy">busboy</a>. The module also provides some best practices with respect to temporary file deletion.
+
+Once the files are uploaded, they are exposed on <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a>'s request object as <code class="item field">req.files</code>. The uploaded files are constructed as <a target="_blank" class="source-link" href="/docs/asset/src/types.ts#L5">Asset</a> instances, which allows for  integration with the <a class="module-link" href="/docs/asset" title="Modular library for storing and retrieving binary assets">Asset</a> module.
+
+A simple example:
+
+      <figure class="code">
+      <figcaption class="code">Rest controller with upload support
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/asset-rest/alt/e2e/src/simple-controller.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Asset <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/asset'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AssetRestUtil<span class="token punctuation">,</span> Upload <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/asset-rest'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Simple</span> <span class="token punctuation">{{'{'}}</span>
+
+  @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/age'</span><span class="token punctuation">)</span>
+  <span class="token function">getAge</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> age<span class="token operator">:</span> <span class="token number">50</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/age'</span><span class="token punctuation">)</span>
+  <span class="token function">getPage</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> age<span class="token operator">:</span> <span class="token number">20</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token comment">/**
+   * @param file A file to upload
+   */</span>
+  @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/files'</span><span class="token punctuation">)</span>
+  <span class="token function">loadFiles</span><span class="token punctuation">(</span><span class="token parameter">@<span class="token meta">Upload</span><span class="token punctuation">(</span><span class="token punctuation">)</span> file<span class="token operator">:</span> Asset</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> AssetRestUtil<span class="token punctuation">.</span><span class="token function">downloadable</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+</div>

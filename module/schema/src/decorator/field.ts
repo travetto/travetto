@@ -35,6 +35,7 @@ function enumKeys(c: any): string[] {
  * Registering a field
  * @param type The type for the field
  * @param config The field configuration
+ * @augments `@trv:schema/Field`
  */
 export function Field(type: ClassList, config?: Partial<FieldConfig>) {
   return (f: any, p: string) => {
@@ -48,117 +49,136 @@ export function Field(type: ClassList, config?: Partial<FieldConfig>) {
 /**
  * Alias for the field
  * @param aliases List of all aliases for a field
+ * @augments `@trv:schema/Field`
  */
-export const Alias = (...aliases: string[]) => prop({ aliases });
+export function Alias(...aliases: string[]) { return prop({ aliases }); }
 /**
  * Mark a field as required
  * @param active This determines if this field is required or not.
  * @param message The error message when a the constraint fails.
+ * @augments `@trv:schema/Field`
  */
-export const Required = (active = true, message?: string) => prop({ required: { active, message } });
+export function Required(active = true, message?: string) { return prop({ required: { active, message } }); }
 /**
  * Define a field as a set of enumerated values
  * @param vals The list of values allowed for the enumeration
  * @param message The error message to show when the constraint fails
+ * @augments `@trv:schema/Field`
  */
-export const Enum = ((vals: string[] | any, message?: string) => {
+export function Enum(vals: string[] | any, message?: string) {
   const values = enumKeys(vals);
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
   return stringNumberProp({ enum: { values, message } });
-});
+}
 
 /**
  * Should the field be trimmed on storage
+ * @augments `@trv:schema/Field`
  */
-export const Trimmed = () => stringArrStringProp({ trim: true });
+export function Trimmed() { return stringArrStringProp({ trim: true }); }
 /**
  * Mark the field as indicating it's storing textual data
+ * @augments `@trv:schema/Field`
  */
-export const Text = () => stringArrStringProp({ specifier: 'text' });
+export function Text() { return stringArrStringProp({ specifier: 'text' }); }
 /**
  * Mark the field to indicate it's for long form text
+ * @augments `@trv:schema/Field`
  */
-export const LongText = () => stringArrStringProp({ specifier: 'text-long' });
+export function LongText() { return stringArrStringProp({ specifier: 'text-long' }); }
 
 /**
  * Require the field to match a specific RegExp
  * @param re The regular expression to match against
  * @param message The message to show when the constraint fails
+ * @augments `@trv:schema/Field`
  */
-export const Match = (re: RegExp, message?: string) => stringArrStringProp({ match: { re, message } });
+export function Match(re: RegExp, message?: string) { return stringArrStringProp({ match: { re, message } }); }
 
 /**
  * The minimum length for the string or array
  * @param n The minimum length
  * @param message The message to show when the constraint fails
+ * @augments `@trv:schema/Field`
  */
-export const MinLength = (n: number, message?: string) => stringArrProp({ minlength: { n, message }, ...(n === 0 ? { required: { active: false } } : {}) });
+export function MinLength(n: number, message?: string) { return stringArrProp({ minlength: { n, message }, ...(n === 0 ? { required: { active: false } } : {}) }); }
 
 /**
  * The maximum length for the string or array
  * @param n The maximum length
  * @param message The message to show when the constraint fails
+ * @augments `@trv:schema/Field`
  */
-export const MaxLength = (n: number, message?: string) => stringArrProp({ maxlength: { n, message } });
+export function MaxLength(n: number, message?: string) { return stringArrProp({ maxlength: { n, message } }); }
 
 /**
  * The minimum value
  * @param n The minimum value
  * @param message The message to show when the constraint fails
+ * @augments `@trv:schema/Field`
  */
-export const Min = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ min: { n, message } });
+export function Min<T extends number | Date>(n: T, message?: string) { return dateNumberProp({ min: { n, message } }); }
 
 /**
  * The maximum value
  * @param n The maximum value
  * @param message The message to show when the constraint fails
+ * @augments `@trv:schema/Field`
  */
-export const Max = <T extends number | Date>(n: T, message?: string) => dateNumberProp({ max: { n, message } });
+export function Max<T extends number | Date>(n: T, message?: string) { return dateNumberProp({ max: { n, message } }); }
 
 /**
  * Mark a field as an email
  * @param message The message to show when the constraint fails
+ * @augments `@trv:schema/Field`
  */
-export const Email = (message?: string) => Match(CommonRegExp.email, message);
+export function Email(message?: string) { return Match(CommonRegExp.email, message); }
 
 /**
  * Mark a field as an telephone number
  * @param message The message to show when the constraint fails
+ * @augments `@trv:schema/Field`
  */
-export const Telephone = (message?: string) => Match(CommonRegExp.telephone, message);
+export function Telephone(message?: string) { return Match(CommonRegExp.telephone, message); }
 
 /**
  * Mark a field as a url
  * @param message The message to show when the constraint fails
+ * @augments `@trv:schema/Field`
  */
-export const Url = (message?: string) => Match(CommonRegExp.url, message);
+export function Url(message?: string) { return Match(CommonRegExp.url, message); }
 
 /**
  * Determine the numeric precision of the value
  * @param digits The number of digits a number should have
  * @param decimals The number of decimal digits to support
+ * @augments `@trv:schema/Field`
  */
-export const Precision = (digits: number, decimals?: number) => numberProp({ precision: [digits, decimals] });
+export function Precision(digits: number, decimals?: number) { return numberProp({ precision: [digits, decimals] }); }
 
 /**
  * Mark a number as an integer
+ * @augments `@trv:schema/Field`
  */
-export const Integer = () => Precision(0);
+export function Integer() { return Precision(0); }
 
 /**
  * Mark a number as a float
+ * @augments `@trv:schema/Field`
  */
-export const Float = () => Precision(10, 7);
+export function Float() { return Precision(10, 7); }
 
 /**
  * Mark a number as a long value
+ * @augments `@trv:schema/Field`
  */
-export const Long = () => Precision(19, 0);
+export function Long() { return Precision(19, 0); }
 
 /**
  * Mark a number as a currency
+ * @augments `@trv:schema/Field`
  */
-export const Currency = () => Precision(13, 2);
+export function Currency() { return Precision(13, 2); }
 
 /**
  * Mark a field as ignored

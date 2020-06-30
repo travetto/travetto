@@ -1,65 +1,172 @@
-<div class="documentation"><h2 id="boot" id="boot">Boot</h2>
-<app-section-header headerType="install">Primary</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/boot</code></pre><p>Boot is basic environment  awareness coupled with typescript bootstrapping for <code class="inline">travetto</code> apps and libraries.  It has support for the following key areas:</p>
-<ul>
-<li>Environmental Information</li>
-<li>Cache Support</li>
-<li>File Operations</li>
-<li>Typescript bootstrapping</li>
-<li>Process execution </li>
-<li>Stream Support</li>
-</ul>
-<h3 id="environmental-information">Environmental Information</h3>
-<p>The functionality we support for testing and retrieving environment information:</p>
-<ul>
-<li><code class="inline">isTrue(key: string): boolean;</code> - Test whether or not an environment flag is set and is true</li>
-<li><code class="inline">isFalse(key: string): boolean;</code> - Test whether or not an environment flag is set and is false</li>
-<li><code class="inline">isSet(key:string): boolean;</code> - Test whether or not an environment value is set (excludes: <code class="inline">null</code>, <code class="inline">&#39;&#39;</code>, and <code class="inline">undefined</code>)</li>
-<li><code class="inline">get(key: string, def?: string): string;</code> - Retrieve an environmental value with a potential default</li>
-<li><code class="inline">getInt(key: string, def?: number): number;</code> - Retrieve an environmental value as a number</li>
-<li><code class="inline">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li>
-<li><code class="inline">getTime(key: string, def: number):number</code> - Reads an environment variable as milliseconds, with support for <code class="inline">s</code>, <code class="inline">m</code>, and <code class="inline">h</code> suffixes to provide succinct time units.</li>
-</ul>
-<h3 id="file-cache">File Cache</h3>
-<p>The framework uses a file cache to support it’s compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <code class="inline">AppCache</code> is the cache that is used specific to the framework, and is an instance of <code class="inline">FileCache</code>.  <code class="inline">FileCache</code> is the generic structure for supporting a file cache that invalidates on modification/creation changes.</p>
-<p>The class organization looks like:</p>
-<pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">FileCache</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">constructor</span><span class="token punctuation">(</span>cwd<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> cacheDir<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-  <span class="token function">writeEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> contents<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token type">Buffer</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-  <span class="token function">readEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token function">removeExpiredEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> force<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-  <span class="token function">removeEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-  <span class="token function">hasEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token function">statEntry</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> fs<span class="token punctuation">.</span><span class="token type">Stats</span><span class="token punctuation">;</span>
-  <span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>Everything is based on absolute paths being passed in, and translated into cache specific files.  </p>
-<h3 id="registration">Registration</h3>
-<p>This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.</p>
-<h3 id="file-system-interaction">File System Interaction</h3>
-<p><code class="inline">FsUtil</code> provides some high level functionality (like recursive directory delete). </p>
-<h3 id="file-system-scanning">File System Scanning</h3>
-<p><code class="inline">ScanFs</code> provides a breadth-first search through the file system with the ability to track and collect files via patterns.</p>
-<h3 id="process-execution">Process Execution</h3>
-<p>Just like [<code class="inline">child_process</code>], the <code class="inline">ExecUtil</code> exposes <code class="inline language-typescript">spawn</code> and <code class="inline language-typescript">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="inline language-typescript">Promise</code> structure, that throws an error on an non-zero return status.</p>
-<p>A simple example would be</p>
-<app-section-header headerType="code">Running a directory listing via ls</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">executeListing</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{ '{' }}</span>
-  <span class="token keyword">const</span> <span class="token punctuation">{{ '{' }}</span> result <span class="token punctuation">{{ '}' }}</span> <span class="token operator">=</span> <span class="token type">ExecUtil</span><span class="token punctuation">.</span><span class="token function">spawn</span><span class="token punctuation">(</span><span class="token string">'ls'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token keyword">await</span> result<span class="token punctuation">;</span>
-<span class="token punctuation">{{ '}' }}</span></code></pre><p>As you can see, the call returns not only the child process information, but the <code class="inline language-typescript">Promise</code> to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:</p>
-<ul>
-<li><code class="inline">timeout</code> as the number of milliseconds the process can run before terminating and throwing an error</li>
-<li><code class="inline">quiet</code> which suppresses all stdout/stderr output</li>
-<li><code class="inline">stdin</code> as a string, buffer or stream to provide input to the program you are running;</li>
-<li><code class="inline">timeoutKill</code> allows for registering functionality to execute when a process is force killed by timeout</li>
-</ul>
-<h3 id="stream-support">Stream Support</h3>
-<p>The <code class="inline">StreamUtil</code> class provides basic stream utilities for use within the framework:</p>
-<ul>
-<li><code class="inline">toBuffer(src: Readable | Buffer | string): Promise&lt;Buffer&gt;</code> for converting a stream/buffer/filepath to a Buffer.</li>
-<li><code class="inline">toReadable(src: Readable | Buffer | string):Promise&lt;Readable&gt;</code> for converting a stream/buffer/filepath to a Readable </li>
-<li><code class="inline">writeToFile(src: Readable, out: string):Promise&lt;void&gt;</code> will stream a readable into a file path, and wait for completion.</li>
-<li><code class="inline">waitForCompletion(src: Readable, finish:()=&gt;Promise&lt;any&gt;)</code> will ensure the stream remains open until the promise finish produces is satisfied.</li>
-</ul>
+<div class="documentation">
+<h1>Boot
+          <small>Bootstrapping and common utilities for travetto applications.</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/boot
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/boot</code></pre>     
+      </figure>
+
+Boot is basic environment  awareness coupled with typescript bootstrapping for <a target="_blank" class="external-link" href="https://travetto.dev">travetto</a> apps and libraries.  It has support for the following key areas:
+<ul> <li>Environmental Information</li>
+ <li>Cache Support</li>
+ <li>File Operations</li>
+ <li>Typescript bootstrapping</li>
+ <li>Process execution</li>
+ <li>Stream Support</li></ul>
+
+<h2>Environmental Information</h2>
+The functionality we support for testing and retrieving environment information:
+<ul> <li><code class="item method">isTrue(key: string): boolean;</code> - Test whether or not an environment flag is set and is true</li>
+ <li><code class="item method">isFalse(key: string): boolean;</code> - Test whether or not an environment flag is set and is false</li>
+ <li><code class="item method">isSet(key:string): boolean;</code> - Test whether or not an environment value is set (excludes: <code class="item input">null</code>, <code class="item input">''</code>, and <code class="item input">undefined</code>)</li>
+ <li><code class="item method">get(key: string, def?: string): string;</code> - Retrieve an environmental value with a potential default</li>
+ <li><code class="item method">getInt(key: string, def?: number): number;</code> - Retrieve an environmental value as a number</li>
+ <li><code class="item method">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li>
+ <li><code class="item method">getTime(key: string, def: number):number</code> - Reads an environment variable as milliseconds, with support for <code class="item input">s</code>, <code class="item input">m</code>, and <code class="item input">h</code> suffixes to provide succinct time units.</li></ul>
+
+<h2>File Cache</h2>
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/app-cache.ts">AppCache</a> is the cache that is used specific to the framework, and is an instance of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/cache.ts#L11">FileCache</a>.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/cache.ts#L11">FileCache</a> is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+
+The class organization looks like:
+
+      <figure class="code">
+      <figcaption class="code">File Cache Structure
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src/cache.d.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token comment">/// &lt;reference types="node" /></span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+<span class="token comment">/**
+ * Standard file cache, with output file name normalization and truncation
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">declare</span> <span class="token keyword">class</span> <span class="token class-name">FileCache</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">private</span> cache<span class="token punctuation">;</span>
+    <span class="token keyword">readonly</span> cacheDir<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Directory to cache into
+     */</span>
+    <span class="token keyword">constructor</span><span class="token punctuation">(</span>cacheDir<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Write contents to disk
+     * @param local Local location
+     * @param contents Contents to write
+     */</span>
+    <span class="token function">writeEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> contents<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> Buffer<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Read entry from disk
+     * @param local Read the entry given the local name
+     */</span>
+    <span class="token function">readEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Delete expired entries
+     * @param full The local location
+     * @param force Should deletion be force
+     */</span>
+    <span class="token function">removeExpiredEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> force<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Delete entry
+     * @param local The location to delete
+     */</span>
+    <span class="token function">removeEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Checks to see if a file has been loaded or if it's available on disk
+     * @param local The location to verify
+     */</span>
+    <span class="token function">hasEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token operator">|</span> fs<span class="token punctuation">.</span>Stats <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Retrieve fs.Stats of the associated path
+     * @param local The location to stat
+     */</span>
+    <span class="token function">statEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> fs<span class="token punctuation">.</span>Stats<span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Clear cache
+     * @param quiet Should the clear produce output
+     */</span>
+    <span class="token function">clear</span><span class="token punctuation">(</span>quiet<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Map entry file name to the original source
+     * @param entry The entry path
+     */</span>
+    <span class="token function">fromEntryName</span><span class="token punctuation">(</span>entry<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Map the original file name to the cache file space
+     * @param local Local path
+     */</span>
+    <span class="token function">toEntryName</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Get or set a value (from the create function) if not in the cache
+     * @param local The local location
+     * @param create The method to execute if the entry is not found
+     * @param force Should create be executed always
+     */</span>
+    <span class="token function">getOrSet</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token function-variable function">create</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">string</span><span class="token punctuation">,</span> force<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+Everything is based on absolute paths being passed in, and translated into cache specific files.
+
+<h2>Registration</h2>
+This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
+
+<h2>File System Interaction</h2>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/fs.ts#L12">FsUtil</a> provides some high level functionality (like recursive directory delete).
+
+<h2>File System Scanning</h2>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/scan.ts#L56">ScanFs</a> provides a breadth-first search through the file system with the ability to track and collect files via patterns.
+
+<h2>Process Execution</h2>
+Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/exec.ts#L72">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
+
+A simple example would be:
+
+      <figure class="code">
+      <figcaption class="code">Running a directory listing via ls
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/alt/docs/src/exec.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ExecUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot/src'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">executeListing</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> result <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> ExecUtil<span class="token punctuation">.</span><span class="token function">spawn</span><span class="token punctuation">(</span><span class="token string">'ls'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> final <span class="token operator">=</span> <span class="token keyword">await</span> result<span class="token punctuation">;</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>final<span class="token punctuation">.</span>stdout<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token string">'\n'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+As you can see, the call returns not only the child process information, but the <code class="item input">Promise</code> to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
+
+<ul> <li><code class="item input">timeout</code> as the number of milliseconds the process can run before terminating and throwing an error</li>
+ <li><code class="item input">quiet</code> which suppresses all stdout/stderr output</li>
+ <li><code class="item input">stdin</code> as a string, buffer or stream to provide input to the program you are running;</li>
+ <li><code class="item input">timeoutKill</code> allows for registering functionality to execute when a process is force killed by timeout</li></ul>
+
+<h2>Stream Support</h2>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/stream.ts#L9">StreamUtil</a> class provides basic stream utilities for use within the framework:
+
+<ul> <li><code class="item method">toBuffer(src: Readable | Buffer | string): Promise&lt;Buffer&gt;</code> for converting a stream/buffer/filepath to a Buffer.</li>
+ <li><code class="item method">toReadable(src: Readable | Buffer | string):Promise&lt;Readable&gt;</code> for converting a stream/buffer/filepath to a Readable</li>
+ <li><code class="item method">writeToFile(src: Readable, out: string):Promise&lt;void&gt;</code> will stream a readable into a file path, and wait for completion.</li>
+ <li><code class="item method">waitForCompletion(src: Readable, finish:()=&gt;Promise&lt;any&gt;)</code> will ensure the stream remains open until the promise finish produces is satisfied.</li></ul>
+
+<h2>CLI - clean</h2>
+
+The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
+
+      <figure class="terminal">
+      <figcaption class="terminal">Clean operation
+      
+      </figcaption>
+      <pre><code class="language-bash">$ travetto travetto clean --help
+
+Usage:  clean <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -q, --quiet  Quiet operation
+  -h, --help   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
+
 </div>

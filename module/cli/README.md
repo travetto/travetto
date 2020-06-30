@@ -1,9 +1,9 @@
-CLI Support
-===
+# Command Line Interface
+## CLI infrastructure for travetto framework
 
-**Install: primary**
+**Install: @travetto/cli**
 ```bash
-$ npm install -g @travetto/cli
+npm install @travetto/cli
 ```
 
 The cli is the primary structure for interacting with the external requirements of the framework.  This can range from running tests, to running applications, to generating email templates. The main executable can be installed globally or locally.  If installed globally and locally, it will defer to the local installation for execution.
@@ -14,82 +14,80 @@ As is the custom, modules are able to register their own cli extensions as scrip
 
 **Terminal: General Usage**
 ```bash
-travetto --help
-Usage: travetto [options] 
+$ travetto travetto --help
+
+Usage:  [options] [command]
+
 Options:
-  ...
+  -V, --version                output the version number
+  -h, --help                   display help for command
+
+Commands:
+  echo [options] [args...]
+  clean [options]
+  compile [options]
+  doc [options]
+  test [options] [regexes...]
+  test:lerna [options]
+  help [command]               display help for command
 ```
+
 This will show all the available options/choices that are exposed given the currently installed modules.
 
+## Extending
 
-## Base
+Extending the `cli` is fairly straightforward.  It is built upon [commander](https://www.npmjs.com/package/commander), with a plugin model that is extensible:
 
-**Terminal: Clean operation**
-```bash
-travetto clean
+**Code: Echo Plugin**
+```typescript
+import * as commander from 'commander';
+import { BasePlugin } from '@travetto/cli/src/plugin-base';
+
+/**
+ * `npx trv echo`
+ *
+ * Allows for cleaning of the cache dire
+ */
+export class CliEchoPlugin extends BasePlugin {
+  name = 'echo';
+
+  init(cmd: commander.Command) {
+    return cmd.arguments('[args...]')
+      .option('-u, --uppercase', 'Upper case', false);
+  }
+
+  async action(args: string[]) {
+    if (this._cmd.uppercase) {
+      args = args.map(x => x.toUpperCase());
+    }
+    console.log(args);
+  }
+
+  complete() {
+    return { '': ['--uppercase'] };
+  }
+}
 ```
 
-Clears [`Boot`](https://github.com/travetto/travetto/tree/master/module/boot) compilation cache to handle any inconsistencies that may arise from checking timestamps for cache freshness.
+With the corresponding output:
 
-## Compiler
-
-**Terminal: Compiler usage**
+**Terminal: Echo Plugin Help**
 ```bash
-travetto compile
-  -o, --output <output>  # Output directory
-  -r, --runtime-dir [runtimeDir]  # Expected root path during runtime      
-```
-This command line operation invokes the [`Compiler`](https://github.com/travetto/travetto/tree/master/module/compiler) to pre-compile of all the application source code.  This is useful for production builds when startup performance is critical.
+$ travetto travetto echo --help
 
-## Application
+Usage:  echo [options] [args...]
 
-**Terminal: Run usage**
-```bash
-travetto run [application]
-  -e, --env [env]  # Application environment
-  -w, --watch [watch]  # Run the application in watch mode
-  -p, --profile [profile]  # Specify additional application profiles
-```
-The run command allows for invocation of [`Application`](https://github.com/travetto/travetto/tree/master/module/app)-based applications as defined by the `@Application` decorator.  Additionally, the environment can manually be specified (dev, test, prod, e2e) as well as whether or not the application should be run in `watch` mode.
-
-## Testing
-
-**Terminal: Test usage**
-```bash
-travetto test [regexes...]
-  -f, --format <format>  # Output format for test results, valid formats are: tap (default), json, noop, exec, event
-  -c, --concurrency <concurrency>  # Number of tests to run concurrently, defaults to number of CPUs - 1
-  -m, --mode <mode>  # Test run mode: all (default), single
-```
-The regexes are the patterns of tests you want to run, and all tests must be found under the `test/` folder.
-
-The test command is the only supported method for invoking the [`Test`](https://github.com/travetto/travetto/tree/master/module/test) module via the command line.  As stated in the test documentation, the primary output format is `tap`.  Additionally the code supports `json` and `event` as formats that can be consumed programmatically.  `exec` is used internally for sub-dividing tests to run concurrently, and communicate results over IPC.
-
-## Email Templating
-
-**Terminal: Email template compilation**
-```bash
-travetto email:compile
-``` 
-
-This command is provided by [`email-template`](https://github.com/travetto/travetto/tree/master/module/email-template).  It is used to compile the email templates ahead of time for use during execution.  The generated files are `.compiled.html` and `.compiled.txt` for the html/text output respectivevly.  By default these files are added to the `.gitignore` as they are generally not intended to be saved but to be generated during the build process.
-
-
-**Terminal: Email template development**
-```bash
-travetto email:dev
-``` 
-
-This command is provided by [`email-template`](https://github.com/travetto/travetto/tree/master/module/email-template).  It will spin up a web server (port 3839) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline. Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
-
-## OpenAPI Spec Generation
-
-**Terminal: OpenAPI usage**
-```bash
-travetto openapi-spec
-  -o, --output [output]  # Output file, defaults to ./openapi.json
+Options:
+  -u, --uppercase  Upper case (default: false)
+  -h, --help       display help for command
 ```
 
-The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `openapi.json`.  Once produced, the code will store the output in the specified location.  
+And actually using it:
 
-**NOTE** The [`openapi`](https://github.com/travetto/travetto/tree/master/module/OpenAPI) module supports generating the OpenAPI spec in real-time while listening for changes to routes and models.
+**Terminal: Echo Plugin Run**
+```bash
+$ travetto travetto echo -u bOb rOb DRoP
+
+[ 'BOB', 'ROB', 'DROP' ]
+```
+

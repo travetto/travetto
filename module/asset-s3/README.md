@@ -1,0 +1,78 @@
+# S3 Asset Source
+## AWS S3 backend for the travetto asset module
+
+**Install: @travetto/asset-s3**
+```bash
+npm install @travetto/asset-s3
+```
+
+This provides a [s3](https://aws.amazon.com/documentation/s3/) implementation of the [AssetSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset/src/source.ts#L6) which is a backend for the [Asset](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset "Modular library for storing and retrieving binary assets") module.  
+
+**Code: S3 backend wiring**
+```typescript
+import { InjectableFactory } from '@travetto/di';
+import { S3AssetSource, S3AssetConfig } from '@travetto/asset-s3';
+
+class AppConfig {
+  @InjectableFactory()
+  static getSource(cfg: S3AssetConfig) {
+    return new S3AssetSource(cfg);
+  }
+}
+```
+
+There is a default configuration that you can easily use, with some sensible defaults. 
+ 
+
+**Code: S3 Configuration**
+```typescript
+import * as aws from 'aws-sdk';
+import { EnvUtil } from '@travetto/boot';
+import { Config } from '@travetto/config';
+
+/**
+ * S3 Support as an Asset Source
+ */
+@Config('s3.asset')
+export class S3AssetConfig {
+  region = 'us-east-1'; // AWS Region
+  namespace = ''; // S3 Bucket folder
+  bucket = ''; // S3 bucket
+
+  accessKeyId = EnvUtil.get('AWS_ACCESS_KEY_ID') ?? '';
+  secretAccessKey = EnvUtil.get('AWS_SECRET_ACCESS_KEY') ?? '';
+
+  config: aws.S3.ClientConfiguration; // Additional s3 config
+
+  get hostName() {
+    return `${this.bucket}.s3.amazonaws.com`;
+  }
+
+  /**
+   * Produces the s3 config from the provide details, post construction
+   */
+  postConstruct() {
+    if (!this.accessKeyId && !this.secretAccessKey) {
+      const creds = new aws.SharedIniFileCredentials({ profile: EnvUtil.get('AWS_PROFILE') });
+      this.accessKeyId = creds.accessKeyId;
+      this.secretAccessKey = creds.secretAccessKey;
+    }
+
+    this.config = {
+      apiVersion: '2006-03-01',
+      credentials: {
+        accessKeyId: this.accessKeyId,
+        secretAccessKey: this.secretAccessKey
+      },
+      params: {
+        Bucket: this.bucket
+      }
+    };
+  }
+}
+```
+
+Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config/src/decorator.ts#L9) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config "Environment-aware config management using yaml files") resolution paths. 
+
+**Note**: Do not commit your `accessKeyId` or `secretAccessKey` values to your source repository, especially if it is public facing.  Not only is it a security risk, but Amazon will scan public repos, looking for keys, and if found will react swiftly.
+

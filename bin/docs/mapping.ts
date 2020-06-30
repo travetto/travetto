@@ -54,6 +54,7 @@ export const MAPPING: Mapping[] = [
       { module: 'boot' },
       { module: 'base' },
       { module: 'compiler' },
+      { module: 'transformer' },
       { module: 'context' },
       { module: 'registry' }
     ]
@@ -69,6 +70,7 @@ export const MAPPING: Mapping[] = [
     children: [
       { module: 'log' },
       { module: 'cache' },
+      { module: 'image' },
       { module: 'command' },
       { module: 'worker' },
       { module: 'net' },

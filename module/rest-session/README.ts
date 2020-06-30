@@ -1,4 +1,4 @@
-import { d, Mod, Snippet, SnippetLink, Code, Section, SubSection, meth } from '@travetto/doc';
+import { doc as d, Mod, Snippet, SnippetLink, Code, Section, SubSection, meth } from '@travetto/doc';
 import { Context } from '@travetto/rest/src/decorator/param';
 import { Cache, MemoryCacheSource } from '@travetto/cache';
 

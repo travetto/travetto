@@ -1,0 +1,98 @@
+# YAML
+## Simple YAML support, provides only clean subset of yaml
+
+**Install: @travetto/yaml**
+```bash
+npm install @travetto/yaml
+```
+
+In the desire to provide a minimal footprint, the framework provides a minimal [YAML](https://en.wikipedia.org/wiki/YAML) parser/serializer to handle standard configuration structure.
+
+[YamlUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/yaml/src/util.ts#L7) is the main access point for this module, and will expose two method, `parse` and `serialize`.
+
+**Code: Simple YAML Parsing**
+```typescript
+import { YamlUtil } from '@travetto/yaml/src/util';
+
+const obj = YamlUtil.parse(`
+name: Source
+age: 20
+fields:
+  sub: 
+    - a
+    - b 
+    - c
+  sub2: [1,2,3]
+  sub3: {"k":5, "v":20}
+`);
+
+console.log(JSON.stringify(obj, null, 2));
+```
+
+**Terminal: Simple YAML Parsing**
+```bash
+$ alt/docs/src/parse.ts -r @travetto/boot/register alt/docs/src/parse.ts
+
+{
+  "name": "Source",
+  "age": 20,
+  "fields": {
+    "sub": [
+      "a",
+      "b",
+      "c"
+    ],
+    "sub2": [
+      1,
+      2,
+      3
+    ],
+    "sub3": {
+      "k": 5,
+      "v": 20
+    }
+  }
+}
+```
+
+**Code: Simple YAML Serialization**
+```typescript
+import { YamlUtil } from '@travetto/yaml/src/util';
+
+const text = YamlUtil.serialize({
+  name: 'Source',
+  age: 20,
+  fields: {
+    sub: [
+      'a',
+      'b',
+      'c'
+    ],
+    sub2: [1, 2, 3],
+    sub3: { k: 5, v: 20 }
+  }
+});
+
+console.log(text);
+```
+
+**Terminal: Simple YAML Serialization**
+```bash
+$ alt/docs/src/serialize.ts -r @travetto/boot/register alt/docs/src/serialize.ts
+
+name: Source
+age: 20
+fields:
+  sub:
+    - a
+    - b
+    - c
+  sub2:
+    - 1
+    - 2
+    - 3
+  sub3:
+    k: 5
+    v: 20
+```
+

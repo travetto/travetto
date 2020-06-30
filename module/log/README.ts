@@ -1,13 +1,10 @@
-import { d, Library, inp, Terminal, List, Note, Section, Mod, Ref, meth, Code, Execute, pth } from '@travetto/doc';
+import { doc as d, lib, inp, Terminal, List, Note, Section, Mod, Ref, meth, Code, Execute, pth } from '@travetto/doc';
 import { AppCache } from '@travetto/boot';
-
-const Console = Library('console', 'https://nodejs.org/api/console.html');
-const Debug = Library(`debug`, 'https://www.npmjs.com/package/debug');
 
 const BaseConsole = Ref('ConsoleManager', '@travetto/base/src/console.ts');
 
 export default d`
-This module provides logging functionality, building upon ${BaseConsole} in the ${Mod('base')} module.  This is all ultimately built upon ${Console} operations. 
+This module provides logging functionality, building upon ${BaseConsole} in the ${Mod('base')} module.  This is all ultimately built upon ${lib.Console} operations. 
 
 The supported operations are:
 ${List(
@@ -23,7 +20,7 @@ ${Note(d`All other console methods are excluded, specifically ${meth`trace`}, ${
 
 ${Section('Filtering Debug')}
 
-The ${inp`debug`} messages can be filtered using the patterns from the ${Debug}.  You can specify wild cards to only ${inp`DEBUG`} specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
+The ${inp`debug`} messages can be filtered using the patterns from the ${lib.Debug}.  You can specify wild cards to only ${inp`DEBUG`} specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
 
 ${Terminal('Sample environment flags', `
 # Debug
@@ -33,11 +30,11 @@ $ DEBUG=@trv:rest npx travetto run app
 $ DEBUG=@trv:*,-@trv:model npx travetto run app
 `)}
 
-${Note(d`In production mode, all ${inp`console.debug`} invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.`)}
+${Note(d`In production mode, all ${meth`console.debug`} invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.`)}
 
 ${Section('How Logging is Instrumented')}
 
-All of the logging instrumentation occurs at transpilation time.  All ${inp`console.*`} methods are replaced with a call to a globally defined variable that delegates to the ${BaseConsole}.  This module, hooks into the ${BaseConsole} and receives all logging events from all files compiled by the ${Mod('compiler')} module.
+All of the logging instrumentation occurs at transpilation time.  All ${meth`console.*`} methods are replaced with a call to a globally defined variable that delegates to the ${BaseConsole}.  This module, hooks into the ${BaseConsole} and receives all logging events from all files compiled by the ${Mod('compiler')} module.
 
 A sample of the instrumentation would be:
 

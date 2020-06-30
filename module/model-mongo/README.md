@@ -1,39 +1,126 @@
-travetto: Model-Mongo
-===
+# MongoDB Model Source
+## Mongo backing for the travetto model module.
 
-
-**Install: Mongo Provider**
+**Install: @travetto/model-mongo**
 ```bash
-$ npm install @travetto/model-mongo
+npm install @travetto/model-mongo
 ```
 
+This module provides an [mongodb](https://mongodb.com)-based implementation of [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/service/source.ts#L58) for the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.").  This source allows the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.") module to read, write and query against [mongodb](https://mongodb.com).. Given the dynamic nature of [mongodb](https://mongodb.com), during development when models are modified, nothing needs to be done to adapt to the latest schema.
 
-This module provides an [`mongodb`](https://mongodb.com)-based implementation of `ModelSource` for the [`Model`](https://github.com/travetto/travetto/tree/master/module/model) module.  This source allows the `Model` module to read, write and query against `mongodb`. Given the dynamic nature of `mongodb`, during development when models are modified, nothing needs to be done to adapt to the latest schema.
+Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di "Dependency registration/management and injection support.") module.
 
-Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the [`Dependency Injection`](https://github.com/travetto/travetto/tree/master/module/di) module.
-
-**Code: Wiring up Mongo Model Source**
+**Code: Wiring up a custom Model Source**
 ```typescript
+import { InjectableFactory } from '@travetto/di';
+import { MongoModelConfig } from '@travetto/model-mongo/src/config';
+import { MongoModelSource } from '@travetto/model-mongo/src/source';
+
 export class Init {
-  @InjectableFactory()
-  static getModelSource(conf: MongoModelConfig): ModelSource {
+  @InjectableFactory({
+    primary: true
+  })
+  static getModelSource(conf: MongoModelConfig) {
     return new MongoModelSource(conf);
   }
 }
 ```
 
-where the `MongoModelConfig` is defined by:
+where the [MongoModelConfig](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-mongo/src/config.ts#L15) is defined by:
 
 **Code: Structure of MongoModelConfig**
 ```typescript
+import * as mongo from 'mongodb';
+import * as fs from 'fs';
+import * as util from 'util';
+
+import { ResourceManager } from '@travetto/base';
+import { Config } from '@travetto/config';
+
+const exists = util.promisify(fs.exists);
+const read = util.promisify(fs.readFile);
+
+/**
+ * Mongo model config
+ */
 @Config('mongo.model')
 export class MongoModelConfig {
-  hosts = 'localhost';
+  /**
+   * Hosts
+   */
+  hosts = ['localhost'];
+  /**
+   * Collection prefix
+   */
   namespace = 'app';
+  /**
+   * Username
+   */
+  username = '';
+  /**
+   * Password
+   */
+  password = '';
+  /**
+   * Server port
+   */
   port = 27017;
-  clientOptions = {}; // Passed to Client constructor
-  connectionOptions = {} // Passed as query parameters to connection string
+  /**
+   * Direct mongo connection options
+   */
+  connectionOptions = {};
+  /**
+   * Mongo client options
+   */
+  clientOptions = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  } as mongo.MongoClientOptions;
+
+  /**
+   * Load a resource
+   */
+  async fetch(val: string) {
+    try {
+      return (await exists(val)) ? read(val) : ResourceManager.read(val);
+    } catch {
+      return val;
+    }
+  }
+
+  /**
+   * Load all the ssl certs as needed
+   */
+  async postConstruct() {
+    const opts = this.clientOptions;
+    if (opts.ssl) {
+      if (opts.sslCert) {
+        opts.sslCert = await this.fetch(opts.sslCert as string);
+      }
+      if (opts.sslKey) {
+        opts.sslKey = await this.fetch(opts.sslKey as string);
+      }
+      if (opts.sslCA) {
+        opts.sslCA = await Promise.all(opts.sslCA.map(k => this.fetch(k as string)));
+      }
+      if (opts.sslCRL) {
+        opts.sslCRL = await Promise.all(opts.sslCRL.map(k => this.fetch(k as string)));
+      }
+    }
+  }
+
+  /**
+   * Build connection URLs
+   */
+  get url() {
+    const hosts = this.hosts
+      .map(h => h.includes(':') ? h : `${h}:${this.port}`)
+      .join(',');
+    const opts = Object.entries(this.connectionOptions).map(([k, v]) => `${k}=${v}`).join('&');
+    return `mongodb://${hosts}/${this.namespace}?${opts}`;
+  }
 }
 ```
 
-and can be overridden via environment variables or config files, as defined in [`Config`](https://github.com/travetto/travetto/tree/master/module/config).  The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a `ResourceManager` path or just a standard file path.
+and can be overridden via environment variables or config files, as defined in [Configuration](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config "Environment-aware config management using yaml files").  The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base/src/resource.ts#L-1) path or just a standard file path.
+

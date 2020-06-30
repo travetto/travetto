@@ -15,26 +15,38 @@ export class DocUtil {
       .map(x => [x, require(`${PKG_ROOT}/${x}/package.json`) as Record<string, any>])
   );
 
-  static run(cmd: string, ...args: string[]) {
+  static run(cmd: string, args: string[], config: { cwd?: string } = {}) {
     if (cmd === 'travetto') {
       args.unshift(cmd);
       cmd = `npx`;
-    } else if (/.*[.]ts$/.test(cmd)) {
+    } else if (/.*[.][tj]s$/.test(cmd)) {
       args.unshift('-r', '@travetto/boot/register', cmd);
       cmd = `node`;
     }
 
     process.env.TRV_DEBUG = '0';
-    // eslint-disable-next-line no-control-regex
-    return ExecUtil.execSync(cmd, args).replace(/\x1b\[\d+[a-z]/g, '');
+    if (config.cwd) {
+      process.chdir(config.cwd);
+    }
+    try {
+      return ExecUtil.execSync(cmd, args)
+        // eslint-disable-next-line no-control-regex
+        .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
+        .replace(new RegExp(FsUtil.cwd, 'g'), '.');
+    } finally {
+      process.chdir(FsUtil.cwd);
+    }
   }
 
   static read(file: string) {
     if (file.startsWith('@')) {
       file = require.resolve(file);
     }
-    let text = fs.readFileSync(FsUtil.resolveUnix(FsUtil.cwd, file), 'utf8')
+    const resolved = FsUtil.resolveUnix(FsUtil.cwd, file);
+    let text = fs.readFileSync(resolved, 'utf8')
       .replace(/^\/\/\s*@file-if.*/, '');
+
+    const cleaned = resolved.replace(/^.*node_modules\//, '');
 
     text = text.split(/\n/)
       .map(x => {
@@ -57,7 +69,8 @@ export class DocUtil {
       case '.js': language = 'javascript'; break;
       case '.yml':
       case '.yaml': language = 'yaml'; break;
-      case 'properties': language = 'properties'; break;
+      case '.json': language = 'json'; break;
+      case '.properties': language = 'properties'; break;
       case '.sh': language = 'bash'; break;
       case '.xml': language = 'xml'; break;
       case '.html': language = 'html'; break;
@@ -65,7 +78,7 @@ export class DocUtil {
       case '.scss': language = 'scss'; break;
     }
 
-    return { content: text, language, file };
+    return { content: text, language, file: cleaned };
   }
 
   static isDecorator(name: string, file: string) {
@@ -81,7 +94,7 @@ export class DocUtil {
     const text = fs.readFileSync(FsUtil.resolveUnix(FsUtil.cwd, file), 'utf8')
       .split(/\n/g);
 
-    const start = text.findIndex(x => x.includes(`function ${name}`));
+    const start = text.findIndex(x => new RegExp(`function ${name}\\b`).test(x));
     let ret = false;
     if (start > 0) {
       for (let i = start - 1; i > start - 3; i--) {

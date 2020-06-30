@@ -1,0 +1,49 @@
+# Express REST Source
+## Express provider for the travetto rest module.
+
+**Install: @travetto/rest-express**
+```bash
+npm install @travetto/rest-express
+```
+
+The module is an [express](https://expressjs.com) provider for the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestServer](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest/src/server/server.ts#L16) for automatic injection in the default Rest server.
+
+## Customizing Rest App
+
+**Code: Customizing the Express App**
+```typescript
+import { Injectable } from '@travetto/di';
+import { ExpressRestServer } from '@travetto/rest-express';
+
+declare let rateLimit: any;
+
+@Injectable({ primary: true })
+class CustomRestServer extends ExpressRestServer {
+  createRaw() {
+    const app = super.createRaw();
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100 // limit each IP to 100 requests per windowMs
+    });
+
+    //  apply to all requests
+    app.use(limiter);
+
+    return app;
+  }
+}
+```
+
+## Default Middleware
+When working with an [express](https://expressjs.com) applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
+
+**Code: Configured Middleware**
+```typescript
+const app = express();
+    app.set('query parser', 'simple');
+    app.use(compression());
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(bodyParser.raw({ type: 'image/*' }));
+```
+

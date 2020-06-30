@@ -1,0 +1,219 @@
+# Base
+## Application phase management, environment config and common utilities for travetto applications.
+
+**Install: @travetto/base**
+```bash
+npm install @travetto/base
+```
+
+Base is the foundation of all [travetto](https://travetto.dev) applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
+
+   
+   *  Environmental Information
+   *  File Operations
+   *  Resource Management
+   *  Life-cycle Support
+   *  Stacktrace Management 
+   *  General Utilities
+
+## Environmental Information
+The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers 
+as well. The information that is available is:
+
+   
+   *  `prod`- Determines if app is in prod mode.  A `boolean` flag that should indicate a production run.
+   *  `env` - The environment name.  Will usually be one of `dev`, `test`, or `prod`.  Can be anything that is passed in.
+   *  `profiles: Set<string>` - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.
+   *  `debug` - Simple logging flag.  This `boolean` flag will enable or disable logging at various levels. By default `debug` is on in non-`prod`.
+   *  `appRoots: string[]` - The file root paths for the application, the default set is the current project. Order matters with respect to resource resolution. All paths should be relative to the project base
+   *  `hasProfile(p: string): boolean;` - Test whether or not a profile is active.
+
+With respect to `process.env`, we specifically test for all uppercase, lowercase, and given case. This allows us to test various patterns and catch flags that might be off due to casing. That would mean that a key of `Enable_Feature` would be tested as:
+
+   
+   *  `Enable_Feature`
+   *  `ENABLE_FEATURE`
+   *  `enable_feature`
+
+### App Information
+This basically exposes your `package.json` data as a typed data structure, useful for integrating package information into your application.
+
+## File Operations
+The framework does a fair amount of file system scanning to auto - load files. It also needs to have knowledge of what files are available. The framework provides a simple and performant functionality for recursively finding files. This functionality leverages regular expressions in lieu of glob pattern matching(this is to minimize overall code complexity).
+
+A simple example of finding specific `.config` files in your codebase:
+
+**Code: Looking for all .config files with the prefix defined by svc**
+```typescript
+import * as fs from 'fs';
+import { ScanApp } from '@travetto/base/src/scan';
+
+export async function processServiceConfigs(svc: string) {
+  const svcConfigs = await ScanApp.findFiles({ filter: new RegExp(`${svc}.*[.]config$/`) });
+  for (const conf of svcConfigs) {
+    // Do work
+
+    await new Promise((res, rej) => fs.readFile(conf.module, 'utf8', (err, v) => {
+      err ? rej(err) : res(v);
+    })); // Read file
+  }
+}
+```
+
+## Application Resources
+
+Resource management, loading of files, and other assets at runtime is a common pattern that the [ResourceManager](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/resource.ts) encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
+
+**Code: Finding Images**
+```typescript
+import { ResourceManager } from '@travetto/base/src/resource';
+
+/**
+ * Find a single image, first one wins by resource path order
+ */
+export async function findSingleImage() {
+  const imagePath = await ResourceManager.find('/images/asset.gif');
+  return imagePath;
+}
+
+/**
+ * Find all .gif files under the imsages folder
+ */
+export async function findAllImages() {
+  const imagePaths = await ResourceManager.findAllByPattern(/[.]gif$/, 'images/');
+  return imagePaths;
+}
+```
+
+## Lifecycle Support
+
+During the lifecycle of an application, there is a need to handle different phases of execution. When executing a phase, the code will recursively find all `phase.<phase>.ts` files under `node_modules/@travetto`, and in the root of your project. The format of each phase handler is comprised of five main elements:
+
+   
+   *  The phase of execution, which is defined by the file name `phase.<phase>.ts`    
+      *  The key of the handler to be referenced for dependency management.
+   *  The list of dependent handlers that the current handler depends on, if any.
+   *  The list of handlers that should be dependent on the current handler, if any.
+   *  The actual functionality to execute
+
+An example would be something like `phase.init.ts` in the [Configuration](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config "Environment-aware config management using yaml files") module.  
+
+**Code: Config phase init**
+```typescript
+/**
+ * Initializes the config source
+ */
+export const init = {
+  key: 'config',
+  after: ['base'],
+  action: async () => {
+    const { ConfigManager } = await import('../src/manager');
+    ConfigManager.init();
+  }
+};
+```
+
+## Common Application Error Class
+
+While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/error.ts#L10) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes).  
+
+The [AppError](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/error.ts#L10) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+   
+   *  `general` - General purpose errors
+   *  `system` - Synonym for `general`
+   *  `data` - Data format, content, etc are incorrect. Generally correlated to bad input.
+   *  `permission` - Operation failed due to lack of permissions
+   *  `auth` - Operation failed due to lack of authentication
+   *  `missing` - Resource was not found when requested
+   *  `timeout` - Operation did not finish in a timely manner
+   *  `unavailable` - Resource was unresponsive
+
+## Shutdown
+
+Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides `process.exit` to properly handle `SIGKILL` and `SIGINT`, with a default threshold of 3 seconds. In the advent of a `SIGTERM` signal, the code exits immediately without any cleanup.
+
+As a registered shutdown handler, you can do.
+
+**Code: Registering a shutdown handler**
+```typescript
+import { ShutdownManager } from '@travetto/base/src/shutdown';
+
+export function registerShutdownHandler() {
+  ShutdownManager.onShutdown('handler-name', async () => {
+    // Do important work, the framework will wait until all async
+    //   operations are completed before finishing shutdown
+  });
+}
+```
+
+## Stacktrace
+The built in stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  
+
+From a test scenario:
+
+**Code: Tracking asynchronous behavior**
+```typescript
+import { StacktraceUtil } from '@travetto/base/src/stacktrace';
+
+function inner3() {
+  throw new Error('Uh oh');
+}
+
+async function inner2() {
+  return await inner3();
+}
+
+async function inner1() {
+  return await inner2();
+}
+
+async function test() {
+  await inner1();
+}
+
+process.on('unhandledRejection', (err: any) => {
+  StacktraceUtil.init();
+  console!.log(StacktraceUtil.simplifyStack(err));
+});
+
+test();
+```
+
+Will produce the following stack trace:
+
+**Terminal: tack trace from async errors**
+```bash
+$ ./alt/docs/src/stack-test.ts -r @travetto/boot/register ./alt/docs/src/stack-test.ts
+
+Error: Uh oh  
+    at inner3 (alt/docs/src/stack-test.ts:4:9)  
+    at inner2 (alt/docs/src/stack-test.ts:8:16)  
+    at inner1 (alt/docs/src/stack-test.ts:12:16)  
+    at test (alt/docs/src/stack-test.ts:16:9)  
+    at Object.<anonymous> (alt/docs/src/stack-test.ts:24:1)
+```
+
+The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
+
+## Util
+Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [Util](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/util.ts#L8) includes:
+
+   
+   *  `isPrimitive(el: any)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
+   *  `isPlainObject(obj: any)` determines if the obj is a simple object
+   *  `isFunction(o: any)` determines if `o` is a simple `Function`
+   *  `isClass(o: any)` determines if `o` is a class constructor
+   *  `isSimple(a: any)` determines if `a` is a simple value
+   *  `deepAssign(a: any, b: any, mode ?)` which allows for deep assignment of `b` onto `a`, the `mode` determines how aggressive the assignment is, and how flexible it is.  `mode` can have any of the following values:    
+      *  `loose`, which is the default is the most lenient. It will not error out, and overwrites will always happen
+      *  `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out
+      *  `strict`, will error out if the types do not match
+   *  `uuid(len: number)` generates a simple uuid for use within the application.
+
+## SystemUtil
+
+Unlike [Util](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/util.ts#L8), the [SystemUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/internal/system.ts#L7) is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful.  [SystemUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/internal/system.ts#L7) has functionality for:
+
+   
+   *  `naiveHash(text: string): number` computes a very naive hash. Should not be relied upon for scenarios where collisions cannot be tolerated.
+   *  `computeModule(file: string): string` computes the internal module name from a given file.

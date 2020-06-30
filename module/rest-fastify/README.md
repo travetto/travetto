@@ -1,0 +1,47 @@
+# Fastify REST Source
+## Fastify provider for the travetto rest module.
+
+**Install: @travetto/rest-fastify**
+```bash
+npm install @travetto/rest-fastify
+```
+
+The module is an [fastify](https://www.fastify.io/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestServer](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest/src/server/server.ts#L16) for automatic injection in the default Rest server.
+
+## Customizing Rest App
+
+**Code: Customizing the Fastify App**
+```typescript
+import { Injectable } from '@travetto/di';
+import { FastifyRestServer } from '@travetto/rest-fastify';
+
+declare let rateLimit: any;
+
+@Injectable({ primary: true })
+class CustomRestServer extends FastifyRestServer {
+  async createRaw() {
+    const app = await super.createRaw();
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100 // limit each IP to 100 requests per windowMs
+    });
+
+    //  apply to all requests
+    app.use(limiter);
+
+    return app;
+  }
+}
+```
+
+## Default Middleware
+When working with an [fastify](https://www.fastify.io/) applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
+
+**Code: Configured Middleware**
+```typescript
+const app = fastify(fastConf);
+    app.register(require('fastify-compress'));
+    app.register(require('fastify-formbody'));
+    app.addContentTypeParser('multipart/form-data;', (req: IncomingMessage, done: (err: Error | null, body?: any) => void) => {
+```
+

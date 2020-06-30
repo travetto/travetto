@@ -1,0 +1,15 @@
+User:
+  fields:
+    -
+      name: name
+      type": string
+      required: true
+    -
+      name: age
+      type: number
+      required: true
+    -
+      name: favoriteFood
+      type: string
+      required: false
+      allowedValues: ["pizza", "burrito", "salad" ]

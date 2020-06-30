@@ -1,139 +1,245 @@
-travetto: Test
-===
+# Testing
+## Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin
 
-**Install: primary**
+**Install: @travetto/test**
 ```bash
-$ npm install @travetto/test
+npm install @travetto/test
 ```
 
 This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the following formats:
- * [`TAP 13`](https://testanything.org/tap-version-13-specification.html), default and human-readable
- * `JSON`, best for integrating with at a code level
- * [`xUnit`](https://en.wikipedia.org/wiki/XUnit), standard format for CI/CD systems e.g. Jenkins, Bamboo, etc.
 
-**NOTE** All tests should be under the `test/.*` folders.  The pattern for tests is defined as a regex and not standard globbing.
+   
+   *  [TAP 13](https://testanything.org/tap-version-13-specification.html), default and human-readable
+   *  [JSON](https://www.json.org), best for integrating with at a code level
+   *  [xUnit](https://en.wikipedia.org/wiki/XUnit), standard format for CI/CD systems e.g. Jenkins, Bamboo, etc.
+
+**Note**: All tests should be under the `test/.*` folders.  The pattern for tests is defined as a regex and not standard globbing.
 
 ## Definition
-A test suite is a collection of individual tests.  All test suites are classes with the `@Suite` decorator. Tests are defined as methods on the suite class, using the `@Test` decorator.  All tests intrinsically support `async`/`await`.  
+
+A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/test/src/decorator/suite.ts#L12) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/test/src/decorator/test.ts#L9) decorator.  All tests intrinsically support `async`/`await`.
 
 A simple example would be:
 
-**Code: Example Test suite**
+**Code: Example Test Suite**
 ```typescript
 import * as assert from 'assert';
+
+import { Suite } from '@travetto/test/src/decorator/suite';
+import { Test } from '@travetto/test/src/decorator/test';
 
 @Suite()
 class SimpleTest {
 
-  private complexService: ComplexService;
+  private complexService: any;
 
   @Test()
   async test1() {
-    let val = await this.complexService.doLongOp();
+    const val = await this.complexService.doLongOp();
     assert(val === 5);
   }
 
   @Test()
   test2() {
+    const text = this.complexService.getText();
     assert(/abc/.test(text));
   }
 }
 ```
 
 ## Assertions
-A common aspect of the tests themselves are the assertions that are made.  `Node` provides a built-in [`assert`](https://nodejs.org/api/assert.html) library.  The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions.  For example:
+A common aspect of the tests themselves are the assertions that are made.  [node](https://nodejs.org) provides a built-in [assert](https://nodejs.org/api/assert.html) library.  The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions.  For example:
 
 **Code: Example assertion for deep comparison**
 ```typescript
-assert({size: 20, address: { state: 'VA' }} === {});
+import * as assert from 'assert';
+
+import { Suite } from '@travetto/test/src/decorator/suite';
+import { Test } from '@travetto/test/src/decorator/test';
+
+@Suite()
+class SimpleTest {
+
+  @Test()
+  async test() {
+    assert({ size: 20, address: { state: 'VA' } } === {});
+  }
+}
 ```
 
-would generate the error:
+would translate to:
 
-**Code: Sample structure of validation error**
+**Code: Transpiled test Code**
+```javascript
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+const ᚕ_check_1 = require("@app/src/assert/check.ts");
+const ᚕ_decorator_1 = require("@travetto/registry/src/decorator.ts");
+const assert = require("assert");
+const suite_1 = require("../../../../src/decorator/suite");
+const test_1 = require("../../../../src/decorator/test");
+let SimpleTest = class SimpleTest {
+    async test() {
+        ᚕ_check_1.AssertCheck.check(__filename.ᚕunix, "{ size: 20, address: { state: 'VA' } } === {}", "deepStrictEqual", true, { size: 20, address: { state: 'VA' } }, {});
+    }
+};
+SimpleTest.ᚕinit = ᚕ_decorator_1.Register.initMeta(SimpleTest, __filename.ᚕunix, 471606460, { test: { hash: 1747552309 } }, false, false);
+tslib_1.__decorate([
+    test_1.Test({ lines: { start: 9, end: 12, codeStart: 11 } })
+], SimpleTest.prototype, "test", null);
+SimpleTest = tslib_1.__decorate([
+    ᚕ_decorator_1.Register(),
+    suite_1.Suite({ lines: { start: 6, end: 13 } })
+], SimpleTest);
+Object.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });
+```
+
+This would ultimately produce the error like:
+
+**Code: Sample Validation Error**
 ```typescript
 AssertionError(
   message="{size: 20, address: {state: 'VA' }} should deeply strictly equal {}"
 )
 ```
 
-The equivalences for the assertion operations are:
+The equivalences for all of the [assert](https://nodejs.org/api/assert.html) operations are:
 
-* `assert(a == b)` as `assert.equal(a, b)`
-* `assert(a !== b)` as `assert.notEqual(a, b)`
-* `assert(a === b)` as `assert.strictEqual(a, b)`
-* `assert(a !== b)` as `assert.notStrictEqual(a, b)`
-* `assert(a >= b)` as `assert.greaterThanEqual(a, b)`
-* `assert(a > b)` as `assert.greaterThan(a, b)`
-* `assert(a <= b)` as `assert.lessThanEqual(a, b)`
-* `assert(a < b)` as `assert.lessThan(a, b)`
-* `assert(a instanceof b)` as `assert.instanceOf(a, b)`
-* `assert(a.includes(b))` as `assert.ok(a.includes(b))`
-* `assert(/a/.test(b))` as `assert.ok(/a/.test(b))`
+   
+   *  `assert(a == b)` as `assert.equal(a, b)`
+   *  `assert(a !== b)` as `assert.notEqual(a, b)`
+   *  `assert(a === b)` as `assert.strictEqual(a, b)`
+   *  `assert(a !== b)` as `assert.notStrictEqual(a, b)`
+   *  `assert(a >= b)` as `assert.greaterThanEqual(a, b)`
+   *  `assert(a > b)` as `assert.greaterThan(a, b)`
+   *  `assert(a <= b)` as `assert.lessThanEqual(a, b)`
+   *  `assert(a < b)` as `assert.lessThan(a, b)`
+   *  `assert(a instanceof b)` as `assert.instanceOf(a, b)`
+   *  `assert(a.includes(b))` as `assert.ok(a.includes(b))`
+   *  `assert(/a/.test(b))` as `assert.ok(/a/.test(b))`
 
-In addition to the standard operations, there is support for throwing/rejecting errors (or the inverse).  This is useful for testing error states or ensuring errors do not occur.  
-* `throws`/`doesNotThrow` is for catching synchronous rejections
+In addition to the standard operations, there is support for throwing/rejecting errors (or the inverse).  This is useful for testing error states or ensuring errors do not occur.
 
-**Code: Throws vs Does Not Throw**
-```typescript
-assert.throws(() => {
-  throw new Error();
-});
-
-assert.doesNotThrow(() => {
-  let a = 5;
-});
-```
-
-* `rejects`/`doesNotReject` is for catching asynchronous rejections
-
-**Code: Reject vs Does Not Reject**
-```typescript
-await assert.rejects(async () => {
-  throw new Error();
-});
-
-await assert.doesNotReject(async () => {
-  let a = 5;
-});
-```
+   
+   *  `throws`/`doesNotThrow` is for catching synchronous rejections
+     
+   **Code: Throws vs Does Not Throw**
+   ```typescript
+   import * as assert from 'assert';
+   
+   import { Suite } from '@travetto/test/src/decorator/suite';
+   import { Test } from '@travetto/test/src/decorator/test';
+   
+   @Suite()
+   class SimpleTest {
+   
+     @Test()
+     async testThrows() {
+       assert.throws(() => {
+         throw new Error();
+       });
+   
+       assert.doesNotThrow(() => {
+         let a = 5;
+       });
+     }
+   }
+   ```
+   
+     
+   *  `rejects`/`doesNotReject` is for catching asynchronous rejections
+     
+   **Code: Rejects vs Does Not Reject**
+   ```typescript
+   import * as assert from 'assert';
+   
+   import { Suite } from '@travetto/test/src/decorator/suite';
+   import { Test } from '@travetto/test/src/decorator/test';
+   
+   @Suite()
+   class SimpleTest {
+   
+     @Test()
+     async testRejects() {
+       await assert.rejects(async () => {
+         throw new Error();
+       });
+   
+       await assert.doesNotReject(async () => {
+         let a = 5;
+       });
+     }
+   }
+   ```
+   
+     
 
 Additionally, the `throws`/`rejects` assertions take in a secondary parameter to allow for specification of the type of error expected.  This can be:
-* A regular expression or string to match against the error's message
-* A class to ensure the returned error is an instance of the class passed in
-* A function to allow for whatever custom verification of the error is needed
+   
+   *  A regular expression or string to match against the error's message
+   *  A class to ensure the returned error is an instance of the class passed in
+   *  A function to allow for whatever custom verification of the error is needed
 
-**Code: Example of different Error matching paradigms** 
+**Code: Example of different Error matching paradigms**
 ```typescript
-assert.throws(() => {
-  throw new Error('Big Error');
-}, 'Big Error');
+import * as assert from 'assert';
 
-assert.throws(() => {
-  throw new Error('Big Error');
-}, /B.*Error/);
+import { Suite } from '@travetto/test/src/decorator/suite';
+import { Test } from '@travetto/test/src/decorator/test';
 
-assert.throws(() => {
-  throw new Error('Big Error');
-}, Error);
+@Suite()
+class SimpleTest {
 
-assert.throws(() => {
-  throw new Error('Big Error');
-}, (err: any) => {
-  return err.message.startsWith('Big') && err.message.length > 4 ? undefined : err;
-});
+  @Test()
+  async errorTypes() {
+    assert.throws(() => {
+      throw new Error('Big Error');
+    }, 'Big Error');
+
+    assert.throws(() => {
+      throw new Error('Big Error');
+    }, /B.*Error/);
+
+    await assert.rejects(() => {
+      throw new Error('Big Error');
+    }, Error);
+
+    await assert.rejects(() => {
+      throw new Error('Big Error');
+    }, (err: any) =>
+      err.message.startsWith('Big') && err.message.length > 4 ? undefined : err
+    );
+  }
+}
 ```
 
 ## Running Tests
-To run the tests you can either call the [`cli`](https://github.com/travetto/travetto/tree/master/module/cli) by invoking
 
+To run the tests you can either call the [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cli "CLI infrastructure for travetto framework") by invoking
+
+**Terminal: Test Help Output**
 ```bash
-$ npx trv test
+$ travetto travetto test --help
+
+Usage:  test [options] [regexes...]
+
+Options:
+  -f, --format <format>            Output format for test results (default:
+                                   "tap")
+  -c, --concurrency <concurrency>  Number of tests to run concurrently
+                                   (default: "4")
+  -m, --mode <mode>                Test run mode (default: "all")
+  -h, --help                       display help for command
 ```
 
-or via the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin), which will provide even more functionality for real-time testing and debugging.
+The regexes are the patterns of tests you want to run, and all tests must be found under the `test/` folder.
+
+### Travetto Plugin
+
+The [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) also supports test running,  which will provide even more functionality for real-time testing and debugging.
 
 ## Additional Considerations
-During the test execution, a few things additionally happen that should be helpful.  The primary addition, is that all console output is captured, and will be exposed in the test output.  This allows for investigation at a later point in time by analyzing the output.  
+During the test execution, a few things additionally happen that should be helpful.  The primary addition, is that all console output is captured, and will be exposed in the test output.  This allows for investigation at a later point in time by analyzing the output.
 
 Like output, all promises are also intercepted.  This allows the code to ensure that all promises have been resolved before completing the test.  Any uncompleted promises will automatically trigger an error state and fail the test.

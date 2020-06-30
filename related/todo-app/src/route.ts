@@ -16,7 +16,6 @@ export class TodoController {
    */
   @Get('/')
   async getAll(@SchemaQuery() search: TodoSearch) {
-    console.debug('howdy');
     return this.svc.getAll(search);
   }
 

@@ -1,12 +1,63 @@
-<div class="documentation"><h2 id="watch" id="watch">Watch</h2>
-<app-section-header headerType="install">Primary</app-section-header>
-<pre><code class="language-bash">$ <span class="token function">npm</span> <span class="token function">install</span> @travetto/watch</code></pre><p>Watch is the base file system watching support for <code class="inline">travetto</code> applications.  In addition to file system scanning, the framework offers a simple file watching library.  The goal is to provide a substantially smaller footprint than <a class="external-link" href="https://github.com/shama/gaze" target="_blank" null><code class="inline">gaze</code></a> or <a class="external-link" href="https://github.com/paulmillr/chokidar" target="_blank" null><code class="inline">chokidar</code></a>.  Utilizing the patterns from the file scanning, you create a <code class="inline">Watcher</code> that either has files added manually, or has patterns added that will recursively look for files. </p>
-<app-section-header headerType="code">Example of watching for specific files</app-section-header>
-<pre><code class="language-typescript"><span class="token keyword">const</span> watcher <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Watcher</span><span class="token punctuation">(</span><span class="token punctuation">{{ '{' }}</span>cwd<span class="token operator">:</span> <span class="token string">'base/path/to/...'</span><span class="token punctuation">{{ '}' }}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<div class="documentation">
+<h1>Watch
+          <small>Support for making files watchable during runtime</small>
+
+        </h1>
+
+      <figure class="install">
+      <figcaption class="install">Install @travetto/watch
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/watch</code></pre>     
+      </figure>
+
+This module is intended to be used during development, and is not during production.  This constraint is tied to the performance hit the functionality could have at run-time.  To that end, this is primarily an utilitiy for other modules, but it's functionality could prove useful to others during development.
+
+<h2>File Watching</h2>
+
+This module  is the base file system watching support for <a target="_blank" class="external-link" href="https://travetto.dev">travetto</a> applications.  In addition to file system scanning, the framework offers a simple file watching library.  The goal is to provide a substantially smaller footprint than <a target="_blank" class="external-link" href="https://github.com/shama/gaze">gaze</a> or <a target="_blank" class="external-link" href="https://github.com/paulmillr/chokidar">chokidar</a>.  Utilizing the patterns from the file scanning, you create a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/watch/src/watcher.ts#L40">Watcher</a> that either has files added manually, or has patterns added that will recursively look for files. 
+
+      <figure class="code">
+      <figcaption class="code">Example of watching for specific files
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/watch/alt/docs/src/watch.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Watcher <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/watch/src/watcher'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> watcher <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Watcher</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> cwd<span class="token operator">:</span> <span class="token string">'base/path/to/...'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 watcher<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
   <span class="token string">'local.config'</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{{ '{' }}</span>
+  <span class="token punctuation">{{'{'}}</span>
     <span class="token function-variable function">testFile</span><span class="token operator">:</span> <span class="token parameter">x</span> <span class="token operator">=></span> x<span class="token punctuation">.</span><span class="token function">endsWith</span><span class="token punctuation">(</span><span class="token string">'.config'</span><span class="token punctuation">)</span> <span class="token operator">||</span> x<span class="token punctuation">.</span><span class="token function">endsWith</span><span class="token punctuation">(</span><span class="token string">'.config.json'</span><span class="token punctuation">)</span>
-  <span class="token punctuation">{{ '}' }}</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-watcher<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></div>
+watcher<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>     
+      </figure>
+
+<h2>Retargetting Proxy</h2>
+
+In addition to file watching, the module also provides a core utiltity for hot reloading at runtime.  The framework makes use of <code class="item input">ES2015</code> <code class="item input">Proxy</code>s.  Specifically the the module provides <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/watch/src/proxy.ts#L84">RetargettingProxy</a>, as a means to provide a reference that can have it's underlying target changed at runtime. 
+
+      <figure class="code">
+      <figcaption class="code">Example of using the RetargettingProxy
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/watch/alt/docs/src/proxy.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RetargettingProxy <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/watch/src/proxy'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CoolService</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">tricky</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> target <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">User</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> proxy <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RetargettingProxy</span><span class="token punctuation">(</span>target<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Update target a second later</span>
+    <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+      proxy<span class="token punctuation">.</span><span class="token function">setTarget</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">User</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> proxy<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+</div>
