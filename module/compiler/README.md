@@ -16,7 +16,7 @@ This module expands upon [typescript](https://typescriptlang.org), with suppleme
    *  Allows for hot-reloading of classes during development    
       *  Utilizes `es2015` `Proxy`s to allow for swapping out implementation at runtime
 
-Additionally, there is support for common AST transformations via [Transformation](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//transformer "Functionality for AST transformations, with transformer registration, and general utils")
+Additionally, there is support for common AST transformations via [Transformation](https://github.com/travetto/travetto/tree/1.0.0-dev/module/transformer "Functionality for AST transformations, with transformer registration, and general utils")
 
 ## Debugging
 

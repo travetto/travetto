@@ -11,13 +11,13 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-elasticsearch</code></pre>     
       </figure>
 
-This module provides an <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a>-based implementation of <a target="_blank" class="source-link" href="/docs/model/src/service/source.ts#L58">ModelSource</a> for the <a class="module-link" href="/docs/model" title="Datastore abstraction for CRUD operations with advanced query support.">Data Modeling</a>.  This source allows the <a class="module-link" href="/docs/model" title="Datastore abstraction for CRUD operations with advanced query support.">Data Modeling</a> module to read, write and query against <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a>. In development mode, the <a target="_blank" class="source-link" href="/docs/model/src/service/source.ts#L58">ModelSource</a> will also modify the <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> schema in real time to minimize impact to development.
+This module provides an <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a>-based implementation of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58">ModelSource</a> for the <a class="module-link" href="/docs/model" title="Datastore abstraction for CRUD operations with advanced query support.">Data Modeling</a>.  This source allows the <a class="module-link" href="/docs/model" title="Datastore abstraction for CRUD operations with advanced query support.">Data Modeling</a> module to read, write and query against <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a>. In development mode, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58">ModelSource</a> will also modify the <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> schema in real time to minimize impact to development.
 
 Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the <a class="module-link" href="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module.
 
       <figure class="code">
       <figcaption class="code">Wiring up a custom Model Source
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-elasticsearch/alt/docs/src/source.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model-elasticsearch/alt/docs/src/source.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ElasticsearchModelConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-elasticsearch/src/config'</span><span class="token punctuation">;</span>
@@ -33,11 +33,11 @@ Out of the box, by installing the module, everything should be wired up by defau
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-elasticsearch/src/config.ts#L9">ElasticsearchModelConfig</a> is defined by:
+where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model-elasticsearch/src/config.ts#L9">ElasticsearchModelConfig</a> is defined by:
 
       <figure class="code">
       <figcaption class="code">Structure of ElasticsearchModelConfig
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-elasticsearch/src/config.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model-elasticsearch/src/config.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> EnvUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
@@ -99,7 +99,7 @@ and can be overridden via environment variables or config files, as defined in <
 
 <h2>CLI - model:es-schema</h2>
 
-The module provides the ability to generate the full <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> schema from all the various <a target="_blank" class="source-link" href="/docs/model/src/registry/decorator.ts#L12">@Model</a>s within the application.  This is useful for being able to generate the appropriate <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> files to define your schemas in production.
+The module provides the ability to generate the full <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> schema from all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/registry/decorator.ts#L12">@Model</a>s within the application.  This is useful for being able to generate the appropriate <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> files to define your schemas in production.
 
       <figure class="terminal">
       <figcaption class="terminal">Running schema generate

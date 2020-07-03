@@ -6,7 +6,7 @@
 npm install @travetto/log
 ```
 
-This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base/src/console.ts) in the [Base](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base "Application phase management, environment config and common utilities for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. 
+This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/console.ts) in the [Base](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base "Application phase management, environment config and common utilities for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. 
 
 The supported operations are:
    
@@ -36,7 +36,7 @@ $ DEBUG=@trv:*,-@trv:model npx travetto run app
 
 ## How Logging is Instrumented
 
-All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base/src/console.ts).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base/src/console.ts) and receives all logging events from all files compiled by the [Compiler](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//compiler "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.") module.
+All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/console.ts).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/console.ts) and receives all logging events from all files compiled by the [Compiler](https://github.com/travetto/travetto/tree/1.0.0-dev/module/compiler "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.") module.
 
 A sample of the instrumentation would be:
 
@@ -113,9 +113,9 @@ The corresponding output would be
 ```bash
 $ alt/docs/src/output.ts -r @travetto/boot/register alt/docs/src/output.ts
 
-2020-07-03T18:04:55.184Z info  [alt/docs.src.output:5] Hello World
-2020-07-03T18:04:55.187Z info  [alt/docs.src.output:7] Woah! { a: { b: { c: [Object] } } }
-2020-07-03T18:04:55.189Z info  [alt/docs.src.output:9] Woah!
-2020-07-03T18:04:55.189Z debug [alt/docs.src.output:11] Test
+2020-07-03T18:43:55.918Z info  [alt/docs.src.output:5] Hello World
+2020-07-03T18:43:55.921Z info  [alt/docs.src.output:7] Woah! { a: { b: { c: [Object] } } }
+2020-07-03T18:43:55.923Z info  [alt/docs.src.output:9] Woah!
+2020-07-03T18:43:55.923Z debug [alt/docs.src.output:11] Test
 ```
 

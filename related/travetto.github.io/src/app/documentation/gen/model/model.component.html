@@ -16,11 +16,11 @@ This module provides a clean interface to data model persistence, modification a
 The module can be segmented into three main areas: declaration, access/storage, and querying
 
 <h2>Declaration</h2>
-Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/registry/decorator.ts#L12">@Model</a> decorator, which allows the system to know that this is a class that is compatible with the module.
+Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/registry/decorator.ts#L12">@Model</a> decorator, which allows the system to know that this is a class that is compatible with the module.
 
       <figure class="code">
       <figcaption class="code">Extending BaseModel
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/alt/docs/src/user.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/alt/docs/src/user.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Model <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model/src/registry/decorator'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BaseModel <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model/src/model/base'</span><span class="token punctuation">;</span>
@@ -36,11 +36,11 @@ Models are declared via the <a target="_blank" class="source-link" href="https:/
 The <code class="item input">User</code> model is now ready to be used with the model services.
 
 <h2>Access/Storage</h2>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/service/model.ts#L24">ModelService</a> is the foundation for all access to the storage layer, and provides a comprehensive set of functionality.  The service includes support for modifying individual records, bulk update/insert/delete, partial updates, finding records, and more.  This should be the expected set of functionality for storage and retrieval.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/model.ts#L24">ModelService</a> is the foundation for all access to the storage layer, and provides a comprehensive set of functionality.  The service includes support for modifying individual records, bulk update/insert/delete, partial updates, finding records, and more.  This should be the expected set of functionality for storage and retrieval.
 
       <figure class="code">
       <figcaption class="code">Using ModelService with the User model
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/alt/docs/src/user-manager.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/alt/docs/src/user-manager.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model/src/service/model'</span><span class="token punctuation">;</span>
@@ -66,9 +66,9 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/service/model.ts#L24">ModelService</a> itself relies upon a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/service/source.ts#L58">ModelSource</a> which is the driver for the storage layer.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/model.ts#L24">ModelService</a> itself relies upon a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58">ModelSource</a> which is the driver for the storage layer.
 
-During development, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/service/source.ts#L58">ModelSource</a> supports the ability to respond to model changes in real-time, and to modify the underlying storage mechanism.  An example of this would be <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> schemas being updated as fields are added or removed from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/registry/decorator.ts#L12">@Model</a> class.
+During development, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58">ModelSource</a> supports the ability to respond to model changes in real-time, and to modify the underlying storage mechanism.  An example of this would be <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> schemas being updated as fields are added or removed from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/registry/decorator.ts#L12">@Model</a> class.
 
 <h2>Querying</h2>
 
@@ -108,7 +108,7 @@ A sample query for <code class="item input">User</code>'s might be:
 
       <figure class="code">
       <figcaption class="code">Using the query structure for specific queries
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/alt/docs/src/user-query.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/alt/docs/src/user-query.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model/src/service/model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
@@ -181,11 +181,11 @@ When querying with regular expressions,patterns can be specified as <code class=
 
 <h2>Extension - Rest</h2>
 
-To facilitate common RESTful patterns, the module exposes  <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/extension/rest.ts#L41">@ModelController</a>.
+To facilitate common RESTful patterns, the module exposes  <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/extension/rest.ts#L41">@ModelController</a>.
 
       <figure class="code">
       <figcaption class="code">ModelController example
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/alt/docs/src/model-controller.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/alt/docs/src/model-controller.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 
@@ -204,7 +204,7 @@ is a shorthand that is equal to:
 
       <figure class="code">
       <figcaption class="code">Comparable UserController, built manually
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/alt/docs/src/controller.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/alt/docs/src/controller.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Path<span class="token punctuation">,</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Request<span class="token punctuation">,</span> Delete<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Put<span class="token punctuation">,</span> Query <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>

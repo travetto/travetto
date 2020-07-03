@@ -6,7 +6,7 @@
 npm install @travetto/asset-s3
 ```
 
-This provides a [s3](https://aws.amazon.com/documentation/s3/) implementation of the [AssetSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset/src/source.ts#L6) which is a backend for the [Asset](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset "Modular library for storing and retrieving binary assets") module.  
+This provides a [s3](https://aws.amazon.com/documentation/s3/) implementation of the [AssetSource](https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset/src/source.ts#L6) which is a backend for the [Asset](https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset "Modular library for storing and retrieving binary assets") module.  
 
 **Code: S3 backend wiring**
 ```typescript
@@ -72,7 +72,7 @@ export class S3AssetConfig {
 }
 ```
 
-Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config/src/decorator.ts#L9) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config "Environment-aware config management using yaml files") resolution paths. 
+Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/1.0.0-dev/module/config/src/decorator.ts#L9) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/1.0.0-dev/module/config "Environment-aware config management using yaml files") resolution paths. 
 
 **Note**: Do not commit your `accessKeyId` or `secretAccessKey` values to your source repository, especially if it is public facing.  Not only is it a security risk, but Amazon will scan public repos, looking for keys, and if found will react swiftly.
 

@@ -6,7 +6,7 @@
 npm install @travetto/asset-mongo
 ```
 
-This provides a [mongodb](https://mongodb.com) implementation of the [AssetSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset/src/source.ts#L6) which is a backend for the  [Asset](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset "Modular library for storing and retrieving binary assets") module.  
+This provides a [mongodb](https://mongodb.com) implementation of the [AssetSource](https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset/src/source.ts#L6) which is a backend for the  [Asset](https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset "Modular library for storing and retrieving binary assets") module.  
 
 **Code: Mongo backend wiring**
 ```typescript
@@ -51,4 +51,4 @@ export class MongoAssetConfig {
 ```
 
   
-Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config/src/decorator.ts#L9) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config "Environment-aware config management using yaml files") resolution paths. 
+Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/1.0.0-dev/module/config/src/decorator.ts#L9) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/1.0.0-dev/module/config "Environment-aware config management using yaml files") resolution paths. 

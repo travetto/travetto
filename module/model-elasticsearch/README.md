@@ -6,9 +6,9 @@
 npm install @travetto/model-elasticsearch
 ```
 
-This module provides an [elasticsearch](https://elastic.co)-based implementation of [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/service/source.ts#L58) for the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.").  This source allows the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.") module to read, write and query against [elasticsearch](https://elastic.co). In development mode, the [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/service/source.ts#L58) will also modify the [elasticsearch](https://elastic.co) schema in real time to minimize impact to development.
+This module provides an [elasticsearch](https://elastic.co)-based implementation of [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58) for the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model "Datastore abstraction for CRUD operations with advanced query support.").  This source allows the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model "Datastore abstraction for CRUD operations with advanced query support.") module to read, write and query against [elasticsearch](https://elastic.co). In development mode, the [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58) will also modify the [elasticsearch](https://elastic.co) schema in real time to minimize impact to development.
 
-Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di "Dependency registration/management and injection support.") module.
+Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-dev/module/di "Dependency registration/management and injection support.") module.
 
 **Code: Wiring up a custom Model Source**
 ```typescript
@@ -26,7 +26,7 @@ export class Init {
 }
 ```
 
-where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-elasticsearch/src/config.ts#L9) is defined by:
+where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model-elasticsearch/src/config.ts#L9) is defined by:
 
 **Code: Structure of ElasticsearchModelConfig**
 ```typescript
@@ -86,11 +86,11 @@ export class ElasticsearchModelConfig {
 }
 ```
 
-and can be overridden via environment variables or config files, as defined in [Configuration](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config "Environment-aware config management using yaml files").
+and can be overridden via environment variables or config files, as defined in [Configuration](https://github.com/travetto/travetto/tree/1.0.0-dev/module/config "Environment-aware config management using yaml files").
 
 ## CLI - model:es-schema
 
-The module provides the ability to generate the full [elasticsearch](https://elastic.co) schema from all the various [@Model](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/registry/decorator.ts#L12)s within the application.  This is useful for being able to generate the appropriate [JSON](https://www.json.org) files to define your schemas in production.
+The module provides the ability to generate the full [elasticsearch](https://elastic.co) schema from all the various [@Model](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/registry/decorator.ts#L12)s within the application.  This is useful for being able to generate the appropriate [JSON](https://www.json.org) files to define your schemas in production.
 
 **Terminal: Running schema generate**
 ```bash

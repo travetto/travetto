@@ -6,7 +6,7 @@
 npm install @travetto/email
 ```
 
-A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the [NullTransport](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email/src/transport.ts#L13) which will just drop emails. The structure of the API is derived from  [nodemailer](https://nodemailer.com/about/), but is compatible with any library that can handle the [MessageOptions](src/types.ts#L36) input.
+A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the [NullTransport](https://github.com/travetto/travetto/tree/1.0.0-dev/module/email/src/transport.ts#L13) which will just drop emails. The structure of the API is derived from  [nodemailer](https://nodemailer.com/about/), but is compatible with any library that can handle the [MessageOptions](src/types.ts#L36) input.
 
 To expose the necessary email transport, the following pattern is commonly used:
 
@@ -23,7 +23,7 @@ class Config {
 }
 ```
 
-Given the amorphous nature of transports, the `transport` field in [MailConfig](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/email/src/config.ts#L7) is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
+Given the amorphous nature of transports, the `transport` field in [MailConfig](https://github.com/travetto/travetto/tree/1.0.0-dev/module/email/src/config.ts#L7) is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
 
 ## Nodmailer - Extension
 

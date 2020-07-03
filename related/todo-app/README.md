@@ -1,7 +1,7 @@
 
 # Getting Started: A Todo App
 
-The following tutorial wil walk you through setting up a [travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App Source](https://www.github.com/travetto/todo-app).  Additionally, you can use the [Yeoman Generator](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//generator-app "Yeoman app generator for the Travetto framework").
+The following tutorial wil walk you through setting up a [travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App Source](https://www.github.com/travetto/todo-app).  Additionally, you can use the [Yeoman Generator](https://github.com/travetto/travetto/tree/1.0.0-dev/module/generator-app "Yeoman app generator for the Travetto framework").
 
 ### Overview
    
@@ -72,7 +72,7 @@ export class TodoSearch {
 }
 ```
 
-as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/registry/decorator.ts#L12) services needs to implement [ModelCore](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/model/core.ts).
+as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/registry/decorator.ts#L12) services needs to implement [ModelCore](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/model/core.ts).
 
 ## Building the Service Layer
 
@@ -289,8 +289,8 @@ First we must start the application:
 ```bash
 $ /bin/bash alt/docs/bin/startup.sh
 
-2020-07-03T18:05:23.298Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
-2020-07-03T18:05:23.302Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
+2020-07-03T18:44:15.308Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
+2020-07-03T18:44:15.312Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
   app: {
     watch: true,
     readonly: false,

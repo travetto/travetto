@@ -52,7 +52,7 @@ The image will be extracted out and embedded in the email as a multi part messag
 
 ## Template Development
 
-The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cli "CLI infrastructure for travetto framework") support for email template development. Running
+The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-dev/module/cli "CLI infrastructure for travetto framework") support for email template development. Running
 
 **Terminal: Running template development environment**
 ```bash
@@ -71,7 +71,7 @@ Options:
 
 ## Template Compilation
 
-The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cli "CLI infrastructure for travetto framework") support for email template compilation also. Running
+The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-dev/module/cli "CLI infrastructure for travetto framework") support for email template compilation also. Running
 
 **Terminal: Running template compilation**
 ```bash

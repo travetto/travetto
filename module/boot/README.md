@@ -27,7 +27,7 @@ The functionality we support for testing and retrieving environment information:
    *  `getTime(key: string, def: number):number` - Reads an environment variable as milliseconds, with support for `s`, `m`, and `h` suffixes to provide succinct time units.
 
 ## File Cache
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/app-cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/cache.ts#L11).  [FileCache](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/cache.ts#L11) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/1.0.0-dev/module/boot/src-ts/app-cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/1.0.0-dev/module/boot/src-ts/cache.ts#L11).  [FileCache](https://github.com/travetto/travetto/tree/1.0.0-dev/module/boot/src-ts/cache.ts#L11) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
 
@@ -109,13 +109,13 @@ Everything is based on absolute paths being passed in, and translated into cache
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 ## File System Interaction
-[FsUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/fs.ts#L12) provides some high level functionality (like recursive directory delete).
+[FsUtil](https://github.com/travetto/travetto/tree/1.0.0-dev/module/boot/src-ts/fs.ts#L12) provides some high level functionality (like recursive directory delete).
 
 ## File System Scanning
-[ScanFs](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/scan.ts#L56) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
+[ScanFs](https://github.com/travetto/travetto/tree/1.0.0-dev/module/boot/src-ts/scan.ts#L56) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/exec.ts#L72) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/1.0.0-dev/module/boot/src-ts/exec.ts#L72) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 
@@ -139,7 +139,7 @@ As you can see, the call returns not only the child process information, but the
    *  `timeoutKill` allows for registering functionality to execute when a process is force killed by timeout
 
 ## Stream Support
-The [StreamUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/boot/src-ts/stream.ts#L9) class provides basic stream utilities for use within the framework:
+The [StreamUtil](https://github.com/travetto/travetto/tree/1.0.0-dev/module/boot/src-ts/stream.ts#L9) class provides basic stream utilities for use within the framework:
 
    
    *  `toBuffer(src: Readable | Buffer | string): Promise<Buffer>` for converting a stream/buffer/filepath to a Buffer.

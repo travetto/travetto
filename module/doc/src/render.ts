@@ -30,7 +30,7 @@ export const Markdown: Renderer = {
     const link = (s: any, ctx?: any) =>
       `${this.render(s)
         .replace(/^\/.*\/module\//, GIT_SRC_ROOT)
-        .replace('@travetto', GIT_SRC_ROOT)}${ctx.line ? `#L${ctx.line}` : ''}`;
+        .replace('@travetto/', GIT_SRC_ROOT)}${ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
       case 'group': return c.nodes.map(cc => recurse(cc,)).join('');
       case 'code':
@@ -83,8 +83,10 @@ export const Html: Renderer = {
     const recurse = (s: any) => this.render(s);
     const link = (s: any, ctx?: any) =>
       `${this.render(s)
+        .replace(/@travetto\/([^.]+)$/, (_, x) => `/docs/${x}`)
         .replace(/^\/.*\/module\//, GIT_SRC_ROOT)
-        .replace('@travetto', '/docs')}${ctx && ctx.line ? `#L${ctx.line}` : ''}`;
+        .replace(/^images\//, '/assets/images/%MOD%/')
+        .replace(/^.*@travetto\//, GIT_SRC_ROOT)}${ctx && ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
       case 'group': return c.nodes.map(cc => recurse(cc)).join('');
       case 'install':
@@ -102,7 +104,7 @@ export const Html: Renderer = {
       case 'file':
       case 'ref': return `<a target="_blank" class="${c._type === 'library' ? 'external-link' : 'source-link'}" href="${link(c.link, c)}">${recurse(c.title)}</a>`;
       case 'mod': return `<a class="module-link" href="${link(c.link, c)}" title="${recurse(c.description)}">${recurse(c.title)}</a>`;
-      case 'image': return `<img src="${link(c.link, c)}" alt"${recurse(c.title)}">`;
+      case 'image': return `<img src="${link(c.link, c)}" alt="${recurse(c.title)}">`;
       case 'section': return `<h2>${recurse(c.title)}</h2>`;
       case 'subsection': return `<h3>${recurse(c.title)}</h3>`;
       case 'command':
@@ -133,7 +135,8 @@ export const Html: Renderer = {
         return '';
     }
   },
-  wrap: x => `<div class="documentation">\n${x}\n</div>`
+  wrap: (x, module) => `<div class="documentation">\n${x}\n</div>`
+    .replace(/%MOD%/g, module)
 };
 
 

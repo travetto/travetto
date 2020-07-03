@@ -27,7 +27,7 @@ or
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> pg</code></pre>     
       </figure>
 
-This module provides a <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a>-based implementation of <a target="_blank" class="source-link" href="/docs/model/src/service/source.ts#L58">ModelSource</a> for the <a class="module-link" href="/docs/model" title="Datastore abstraction for CRUD operations with advanced query support.">Data Modeling</a> module.  This source allows the <a class="module-link" href="/docs/model" title="Datastore abstraction for CRUD operations with advanced query support.">Data Modeling</a> module to read, write and query against <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> databases. In development mode, the <a target="_blank" class="source-link" href="/docs/model/src/service/source.ts#L58">ModelSource</a> will also modify the database schema in real time to minimize impact to development.
+This module provides a <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a>-based implementation of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58">ModelSource</a> for the <a class="module-link" href="/docs/model" title="Datastore abstraction for CRUD operations with advanced query support.">Data Modeling</a> module.  This source allows the <a class="module-link" href="/docs/model" title="Datastore abstraction for CRUD operations with advanced query support.">Data Modeling</a> module to read, write and query against <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> databases. In development mode, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58">ModelSource</a> will also modify the database schema in real time to minimize impact to development.
 
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of
 a <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> database.  Every table generated will have a <code class="item input">path_id</code> which determines it's location in the document hierarchy as well as sub tables will have a <code class="item input">parent_path_id</code> to associate records with the parent values.
@@ -44,7 +44,7 @@ Out of the box, by installing the module, everything should be wired up by defau
 
       <figure class="code">
       <figcaption class="code">Wiring up a custom Model Source
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-sql/alt/docs/src/source.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model-sql/alt/docs/src/source.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AsyncContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/context'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
@@ -61,11 +61,11 @@ Out of the box, by installing the module, everything should be wired up by defau
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-sql/src/config.ts#L8">SQLModelConfig</a> is defined by:
+where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model-sql/src/config.ts#L8">SQLModelConfig</a> is defined by:
 
       <figure class="code">
       <figcaption class="code">Structure of SQLModelConfig
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-sql/src/config.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model-sql/src/config.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> EnvUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
@@ -118,7 +118,7 @@ and can be overridden via environment variables or config files, as defined in <
 
 <h2>CLI - model:sql-schema</h2>
 
-The module provides the ability to generate the full <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> schema from all the various <a target="_blank" class="source-link" href="/docs/model/src/registry/decorator.ts#L12">@Model</a>s within the application.  This is useful for being able to generate the appropriate <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> commands to define your schemas in production.
+The module provides the ability to generate the full <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> schema from all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/registry/decorator.ts#L12">@Model</a>s within the application.  This is useful for being able to generate the appropriate <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> commands to define your schemas in production.
 
       <figure class="terminal">
       <figcaption class="terminal">Running schema generate

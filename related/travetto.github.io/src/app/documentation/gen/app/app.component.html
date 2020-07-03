@@ -11,15 +11,15 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/app</code></pre>     
       </figure>
 
-The <a class="module-link" href="/docs/base" title="Application phase management, environment config and common utilities for travetto applications.">Base</a> module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24">@Application</a> who's job is to register entry points into the application, along with the associated  metadata. 
+The <a class="module-link" href="/docs/base" title="Application phase management, environment config and common utilities for travetto applications.">Base</a> module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24">@Application</a> who's job is to register entry points into the application, along with the associated  metadata. 
 
-With the application, the <code class="item method">run</code> method is the entry point that will be invoked post construction of the class. Building off of the <a class="module-link" href="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24">@Application</a> is a synonym for <a target="_blank" class="source-link" href="/docs/di/src/decorator.ts#L29">@Injectable</a>, and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
+With the application, the <code class="item method">run</code> method is the entry point that will be invoked post construction of the class. Building off of the <a class="module-link" href="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24">@Application</a> is a synonym for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/di/src/decorator.ts#L29">@Injectable</a>, and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
 
 For example:
 
       <figure class="code">
       <figcaption class="code">Example of Application target
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/alt/simple/src/entry.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/alt/simple/src/entry.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app/src/decorator'</span><span class="token punctuation">;</span>
@@ -45,7 +45,7 @@ For example:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-Additionally, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24">@Application</a> decorator exposes some additional functionality, which can be used to launch the application.
+Additionally, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24">@Application</a> decorator exposes some additional functionality, which can be used to launch the application.
 
 <h2><code class="item method">.run()</code> Arguments</h2>
 The arguments specified in the <code class="item method">run</code> method are extracted via code transformation, and are able to be bound when invoking the application.  Whether from the command line or a plugin, the parameters will be mapped to the inputs of <code class="item method">run</code>.  For instance:
@@ -53,7 +53,7 @@ The arguments specified in the <code class="item method">run</code> method are e
 
       <figure class="code">
       <figcaption class="code">Simple Entry Point with Parameters
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/alt/simple/src/domain.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/alt/simple/src/domain.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app/src/decorator'</span><span class="token punctuation">;</span>
 
@@ -67,7 +67,7 @@ The arguments specified in the <code class="item method">run</code> method are e
 
 <h2>CLI - run</h2>
 
-The run command allows for invocation of applications as defined by the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24">@Application</a> decorator.  Additionally, the environment can manually be specified (dev, test, prod).
+The run command allows for invocation of applications as defined by the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24">@Application</a> decorator.  Additionally, the environment can manually be specified (dev, test, prod).
 
       <figure class="terminal">
       <figcaption class="terminal">CLI Run Help
@@ -206,7 +206,7 @@ Options:
 Usage: simple-domain domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span></code></pre>     
       </figure>
 
-The types are inferred from the <code class="item method">.run()</code> method parameters, but can be overridden in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24">@Application</a> 
+The types are inferred from the <code class="item method">.run()</code> method parameters, but can be overridden in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24">@Application</a> 
 annotation to support customization. Only primitive types are supported:
 
 <ul> <li><code class="item input">number</code> - Float or decimal</li>
@@ -219,7 +219,7 @@ Customizing the types is done by name, and allows for greater control:
 
       <figure class="code">
       <figcaption class="code">Complex Entry Point with Customization
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/alt/example/src/complex.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/alt/example/src/complex.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
 

@@ -62,7 +62,7 @@ export async function processServiceConfigs(svc: string) {
 
 ## Application Resources
 
-Resource management, loading of files, and other assets at runtime is a common pattern that the [ResourceManager](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/resource.ts) encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
+Resource management, loading of files, and other assets at runtime is a common pattern that the [ResourceManager](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/resource.ts) encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
 
 **Code: Finding Images**
 ```typescript
@@ -96,7 +96,7 @@ During the lifecycle of an application, there is a need to handle different phas
    *  The list of handlers that should be dependent on the current handler, if any.
    *  The actual functionality to execute
 
-An example would be something like `phase.init.ts` in the [Configuration](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config "Environment-aware config management using yaml files") module.  
+An example would be something like `phase.init.ts` in the [Configuration](https://github.com/travetto/travetto/tree/1.0.0-dev/module/config "Environment-aware config management using yaml files") module.  
 
 **Code: Config phase init**
 ```typescript
@@ -115,9 +115,9 @@ export const init = {
 
 ## Common Application Error Class
 
-While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/error.ts#L10) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes).  
+While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/error.ts#L10) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes).  
 
-The [AppError](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/error.ts#L10) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+The [AppError](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/error.ts#L10) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
    
    *  `general` - General purpose errors
    *  `system` - Synonym for `general`
@@ -196,7 +196,7 @@ Error: Uh oh
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
 
 ## Util
-Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [Util](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/util.ts#L8) includes:
+Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [Util](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/util.ts#L8) includes:
 
    
    *  `isPrimitive(el: any)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
@@ -212,7 +212,7 @@ Simple functions for providing a minimal facsimile to [lodash](https://lodash.co
 
 ## SystemUtil
 
-Unlike [Util](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/util.ts#L8), the [SystemUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/internal/system.ts#L7) is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful.  [SystemUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/internal/system.ts#L7) has functionality for:
+Unlike [Util](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/util.ts#L8), the [SystemUtil](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/internal/system.ts#L7) is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful.  [SystemUtil](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/internal/system.ts#L7) has functionality for:
 
    
    *  `naiveHash(text: string): number` computes a very naive hash. Should not be relied upon for scenarios where collisions cannot be tolerated.

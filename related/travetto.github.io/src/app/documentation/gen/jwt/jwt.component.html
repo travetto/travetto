@@ -17,7 +17,7 @@ The API exposes:
 
       <figure class="code">
       <figcaption class="code">Signing Options
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/jwt/src/types.ts#L132">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/jwt/src/types.ts#L132">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">SignOptions</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
@@ -49,14 +49,14 @@ The API exposes:
 
       <figure class="code">
       <figcaption class="code">Signing API
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/jwt/src/sign.ts#L9">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/jwt/src/sign.ts#L9">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> sign<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> <span class="token class-name">Payload</span><span class="token operator">></span><span class="token punctuation">(</span>payload<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">,</span> options<span class="token operator">:</span> SignOptions <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span></code></pre>     
       </figure>
 
       <figure class="code">
       <figcaption class="code">Verify Options
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/jwt/src/types.ts#L65">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/jwt/src/types.ts#L65">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">type</span> VerifyOptions <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
@@ -117,7 +117,7 @@ The API exposes:
 
       <figure class="code">
       <figcaption class="code">Verify API
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/jwt/src/verify.ts#L34">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/jwt/src/verify.ts#L34">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> verify<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">(</span>jwt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> options<span class="token operator">:</span> VerifyOptions <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Payload <span class="token operator">&amp;</span> <span class="token constant">T</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span></code></pre>     
       </figure>

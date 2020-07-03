@@ -11,13 +11,13 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest-koa</code></pre>     
       </figure>
 
-The module is an <a target="_blank" class="external-link" href="https://koajs.com/">koa</a> provider for the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module.  This module provides an implementation of <a target="_blank" class="source-link" href="/docs/rest/src/server/server.ts#L16">RestServer</a> for automatic injection in the default Rest server.
+The module is an <a target="_blank" class="external-link" href="https://koajs.com/">koa</a> provider for the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module.  This module provides an implementation of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest/src/server/server.ts#L16">RestServer</a> for automatic injection in the default Rest server.
 
 <h2>Customizing Rest App</h2>
 
       <figure class="code">
       <figcaption class="code">Customizing the Koa App
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest-koa/alt/docs/src/customize.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest-koa/alt/docs/src/customize.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> KoaRestServer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest-koa'</span><span class="token punctuation">;</span>
@@ -46,7 +46,7 @@ When working with an <a target="_blank" class="external-link" href="https://koaj
 
       <figure class="code">
       <figcaption class="code">Configured Middleware
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest-koa/src/server.ts#L23">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest-koa/src/server.ts#L23">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">koa</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 app<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span><span class="token function">kCompress</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>

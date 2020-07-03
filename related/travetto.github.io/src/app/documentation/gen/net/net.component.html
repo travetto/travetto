@@ -12,11 +12,11 @@
       </figure>
 
 <h2>HTTP Requests</h2>
-The http request functionality exists to allow for simple usage of the <code class="item input">node</code> <a target="_blank" class="external-link" href="https://nodejs.org/api/http.html">http</a> and <a target="_blank" class="external-link" href="https://nodejs.org/api/https.html">https</a> modules. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/net/src/request.ts#L13">HttpRequest</a> exists, in lieu of alternatives, as a means to provide the smallest footprint possible.  Using it is fairly straightforward:
+The http request functionality exists to allow for simple usage of the <code class="item input">node</code> <a target="_blank" class="external-link" href="https://nodejs.org/api/http.html">http</a> and <a target="_blank" class="external-link" href="https://nodejs.org/api/https.html">https</a> modules. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/net/src/request.ts#L13">HttpRequest</a> exists, in lieu of alternatives, as a means to provide the smallest footprint possible.  Using it is fairly straightforward:
 
       <figure class="code">
       <figcaption class="code">Using HttpRequest
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/net/alt/docs/src/http-request.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/net/alt/docs/src/http-request.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> HttpRequest <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/net'</span><span class="token punctuation">;</span>
 
@@ -31,7 +31,7 @@ Or a more complex example:
 
       <figure class="code">
       <figcaption class="code">Using HttpRequest to Make API Calls
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/net/alt/docs/src/http-api-post.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/net/alt/docs/src/http-api-post.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> HttpRequest <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/net/src/request'</span><span class="token punctuation">;</span>
 

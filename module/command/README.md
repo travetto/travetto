@@ -45,7 +45,7 @@ export class NginxServer {
 
 ## Command Service
 
-While docker containers provide a high level of flexibility, performance can be an issue.  [CommandService](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/command/src/command.ts#L11) is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
+While docker containers provide a high level of flexibility, performance can be an issue.  [CommandService](https://github.com/travetto/travetto/tree/1.0.0-dev/module/command/src/command.ts#L11) is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
 
 **Code: Command Service example, using pngquant**
 ```typescript
@@ -96,8 +96,8 @@ Service          Version    Status
  * redis                  5    Not running
  * elasticsearch      6.8.2    Not running
  * mongodb              3.6    Not running
- * postgresql          12.2    Not running
  * mysql                5.6    Not running
+ * postgresql          12.2    Not running
 ```
 
 ### Defining new Services

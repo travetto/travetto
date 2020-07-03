@@ -1,7 +1,7 @@
 
 # VS Code Plugin
 
-The [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) directly integrates with [travetto](https://travetto.dev) framework, exposing some of the [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cli "CLI infrastructure for travetto framework") functionality.
+The [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) directly integrates with [travetto](https://travetto.dev) framework, exposing some of the [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-dev/module/cli "CLI infrastructure for travetto framework") functionality.
 
 The currently supported features are:
    
@@ -11,7 +11,7 @@ The currently supported features are:
 
 ## Testing
 
-The test related functionality relies upon the [Testing](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//test "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin") module being installed, and used to define tests ([@Suite](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//test/src/decorator/suite.ts#L12) and [@Test](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//test/src/decorator/test.ts#L9)).
+The test related functionality relies upon the [Testing](https://github.com/travetto/travetto/tree/1.0.0-dev/module/test "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin") module being installed, and used to define tests ([@Suite](https://github.com/travetto/travetto/tree/1.0.0-dev/module/test/src/decorator/suite.ts#L12) and [@Test](https://github.com/travetto/travetto/tree/1.0.0-dev/module/test/src/decorator/test.ts#L9)).
 
 ### Real-time Test Evaluation
 
@@ -37,7 +37,7 @@ In addition to manual invocation at a line, each test has a [CodeLens](https://c
 
 ## Application Launching
 
-While using the [Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//app "Application registration/management and run support."), a common pattern is to use [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//app/src/decorator.ts#L24) annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated.
+While using the [Application](https://github.com/travetto/travetto/tree/1.0.0-dev/module/app "Application registration/management and run support."), a common pattern is to use [@Application](https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24) annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated.
 
 The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.
 
@@ -74,8 +74,8 @@ Currently the supported commands are:
 ### Requirements
    
    *  You should have the [travetto](https://travetto.dev) framework installed, version 1.0.0 and higher.
-   *  Tests require the [Testing](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//test "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin") module to be installed.
-   *  Application running requires the [Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//app "Application registration/management and run support.") module to be installed.
+   *  Tests require the [Testing](https://github.com/travetto/travetto/tree/1.0.0-dev/module/test "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin") module to be installed.
+   *  Application running requires the [Application](https://github.com/travetto/travetto/tree/1.0.0-dev/module/app "Application registration/management and run support.") module to be installed.
 
 ## Known Issues
 

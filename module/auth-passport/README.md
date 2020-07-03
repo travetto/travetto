@@ -58,7 +58,7 @@ export class AppConfig {
 }
 ```
 
-As you can see, [PassportIdentitySource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-passport/src/identity.ts#L14) will take care of the majority of the work, and all that is required is:
+As you can see, [PassportIdentitySource](https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-passport/src/identity.ts#L14) will take care of the majority of the work, and all that is required is:
    
    *  Provide the name of the strategy (should be unique)
    *  Provide the strategy instance. **Note**: you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework

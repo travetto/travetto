@@ -29,6 +29,11 @@ li {
   min-width: 800px;
   padding: 0 1em;
 
+  img {
+    display: block;
+    margin: 1em 0;
+  }
+
   &:first-child {
     padding-top: 1em;
   }

@@ -6,7 +6,7 @@
 npm install @travetto/rest-koa
 ```
 
-The module is an [koa](https://koajs.com/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestServer](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest/src/server/server.ts#L16) for automatic injection in the default Rest server.
+The module is an [koa](https://koajs.com/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestServer](https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest/src/server/server.ts#L16) for automatic injection in the default Rest server.
 
 ## Customizing Rest App
 
