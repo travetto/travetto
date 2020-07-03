@@ -303,8 +303,6 @@ export function Image(title: Content, file: string) {
     throw new Error(`${file} is not a valid location`);
   }
 
-  file = DocUtil.read(file).file;
-
   return {
     _type: 'image' as const,
     title: typeof title === 'string' ? Text(title) : title,

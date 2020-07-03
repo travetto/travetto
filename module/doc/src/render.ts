@@ -3,7 +3,7 @@ import { highlight } from './code-highlight';
 import { ExecUtil } from '@travetto/boot';
 
 const PRIMARY_BRANCH = ExecUtil.execSync('git', ['status', '-b', '-s', '.']).split(/\n/)[0].split('...')[0].split(' ')[1].trim();
-const GIT_SRC _ROOT = `https://github.com/travetto/travetto/tree/${PRIMARY_BRANCH}/module/`;
+const GIT_SRC_ROOT = `https://github.com/travetto/travetto/tree/${PRIMARY_BRANCH}/module/`;
 
 type N = typeof n;
 export type AllChildren = { [K in keyof N]: ReturnType<N[K]> }[keyof N];
@@ -29,8 +29,8 @@ export const Markdown: Renderer = {
     const recurse = (s: any) => this.render(s);
     const link = (s: any, ctx?: any) =>
       `${this.render(s)
-        .replace(/^\/.*\/module\//, GIT_SRC _ROOT)
-        .replace('@travetto', GIT_SRC _ROOT)}${ctx.line ? `#L${ctx.line}` : ''}`;
+        .replace(/^\/.*\/module\//, GIT_SRC_ROOT)
+        .replace('@travetto', GIT_SRC_ROOT)}${ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
       case 'group': return c.nodes.map(cc => recurse(cc,)).join('');
       case 'code':
@@ -83,7 +83,7 @@ export const Html: Renderer = {
     const recurse = (s: any) => this.render(s);
     const link = (s: any, ctx?: any) =>
       `${this.render(s)
-        .replace(/^\/.*\/module\//, GIT_SRC _ROOT)
+        .replace(/^\/.*\/module\//, GIT_SRC_ROOT)
         .replace('@travetto', '/docs')}${ctx && ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
       case 'group': return c.nodes.map(cc => recurse(cc)).join('');

@@ -289,8 +289,8 @@ First we must start the application:
 ```bash
 $ /bin/bash alt/docs/bin/startup.sh
 
-2020-07-03T17:58:09.810Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
-2020-07-03T17:58:09.814Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
+2020-07-03T18:05:23.298Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
+2020-07-03T18:05:23.302Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
   app: {
     watch: true,
     readonly: false,
