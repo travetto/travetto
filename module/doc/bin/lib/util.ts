@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 import type { Renderer } from '../../src/render';
 import { FsUtil } from '@travetto/boot';
@@ -48,7 +49,7 @@ export class CliDocUtil {
   }
 
   static getPackageName() {
-    return require(FsUtil.resolveUnix(FsUtil.cwd, 'package.json')).name.split('/')[1];
+    return path.basename(FsUtil.cwd);
   }
 
   /**

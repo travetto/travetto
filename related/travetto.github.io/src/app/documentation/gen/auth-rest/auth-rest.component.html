@@ -20,12 +20,12 @@ The integration with the <a class="module-link" href="/docs/rest" title="Declara
  <li>Route declaration</li></ul>
 
 <h2>Security information management</h2>
-When working with framework's authentication, the user information is exposed via the <a target="_blank" class="source-link" href="/docs/rest/src/types.d.ts#L11">Request</a> 
+When working with framework's authentication, the user information is exposed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest/src/types.d.ts#L11">Request</a> 
 object.  The auth functionality is exposed on the request as the property <code class="item input">auth</code>.
 
       <figure class="code">
       <figcaption class="code">Structure of auth property on the request
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/src/typings.d.ts#L5">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/src/typings.d.ts#L5">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Request</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
@@ -53,11 +53,11 @@ This allows for any filters/middleware to access this information without deeper
 When authenticating, with a multi-step process, it is useful to share information between steps.  The <code class="item method">loginContext</code> property is intended to be a location in which that information is persisted. Currently only the <a class="module-link" href="/docs/auth-passport" title="Passport authentication integration support for the travetto framework">Passport Auth</a> module uses this, when dealing with multi-step logins.
 
 <h2>Patterns for Integration</h2>
-Every external framework integration relies upon the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/src/identity.ts#L7">IdentitySource</a> contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
+Every external framework integration relies upon the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/src/identity.ts#L7">IdentitySource</a> contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
       <figure class="code">
       <figcaption class="code">Structure for the Identity Source
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/src/identity.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/src/identity.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Request<span class="token punctuation">,</span> Response <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Identity <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
@@ -76,16 +76,16 @@ Every external framework integration relies upon the <a target="_blank" class="s
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-The only required method to be defined is the <code class="item method">authenticate</code> method.  This takes in a <a target="_blank" class="source-link" href="/docs/rest/src/types.d.ts#L11">Request</a> and <a target="_blank" class="source-link" href="/docs/rest/src/types.d.ts#L87">Response</a>, and is responsible for:
+The only required method to be defined is the <code class="item method">authenticate</code> method.  This takes in a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest/src/types.d.ts#L11">Request</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest/src/types.d.ts#L87">Response</a>, and is responsible for:
 
-<ul> <li>Returning an <a target="_blank" class="source-link" href="/docs/auth/src/types.ts#L26">Identity</a> if authentication was successful</li>
+<ul> <li>Returning an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth/src/types.ts#L26">Identity</a> if authentication was successful</li>
  <li>Throwing an error if it failed</li>
  <li>Returning undefined if the authentication is multi-staged and has not completed yet</li></ul>
 A sample auth provider would look like:
 
       <figure class="code">
       <figcaption class="code">Sample Identity Source
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/alt/docs/src/source.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/alt/docs/src/source.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Response<span class="token punctuation">,</span> Request <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
@@ -111,11 +111,11 @@ A sample auth provider would look like:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/src/identity.ts#L7">IdentitySource</a>'s are collected and stored for reference at runtime, via symbol. For example:
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/src/identity.ts#L7">IdentitySource</a>'s are collected and stored for reference at runtime, via symbol. For example:
 
       <figure class="code">
       <figcaption class="code">Potential Facebook provider
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/alt/docs/src/facebook.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/alt/docs/src/facebook.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SimpleIdentitySource <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./source'</span><span class="token punctuation">;</span>
@@ -130,16 +130,16 @@ The provider must be registered with a custom symbol to be used within the frame
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-The symbol <code class="item input">FB_AUTH</code> is what will be used to reference providers at runtime.  This was chosen, over <code class="item input">class</code> references due to the fact that most providers will not be defined via a new class, but via an <a target="_blank" class="source-link" href="/docs/di/src/decorator.ts#L72">@InjectableFactory</a> method.
+The symbol <code class="item input">FB_AUTH</code> is what will be used to reference providers at runtime.  This was chosen, over <code class="item input">class</code> references due to the fact that most providers will not be defined via a new class, but via an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/di/src/decorator.ts#L72">@InjectableFactory</a> method.
 
 <h2>Route Declaration</h2>
-Like the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/src/auth.ts#L14">AuthService</a>, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
+Like the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/src/auth.ts#L14">AuthService</a>, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/src/decorator.ts#L10">Authenticate</a> provides middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/src/decorator.ts#L10">Authenticate</a> provides middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
       <figure class="code">
       <figcaption class="code">Using provider with routes
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/alt/docs/src/route.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/alt/docs/src/route.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Redirect<span class="token punctuation">,</span> Request <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 
@@ -170,6 +170,6 @@ Like the <a target="_blank" class="source-link" href="https://github.com/travett
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/src/decorator.ts#L20">Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/auth-rest/src/decorator.ts#L35">Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, <a target="_blank" class="source-link" href="/docs/auth/src/context.ts#L11">AuthContext</a> is accessible via <a target="_blank" class="source-link" href="/docs/rest/src/decorator/param.ts#L43">@Context</a> directly, without wiring in a request object, but is also accessible on the request object as <a target="_blank" class="source-link" href="/docs/rest/src/types.d.ts#L11">Request</a>.auth.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/src/decorator.ts#L20">Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth-rest/src/decorator.ts#L35">Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth/src/context.ts#L11">AuthContext</a> is accessible via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest/src/decorator/param.ts#L43">@Context</a> directly, without wiring in a request object, but is also accessible on the request object as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest/src/types.d.ts#L11">Request</a>.auth.
 
 </div>

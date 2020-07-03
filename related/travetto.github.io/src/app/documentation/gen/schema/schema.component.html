@@ -14,7 +14,7 @@
 This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
 
 <h2>Registration</h2>
-The registry's schema information is defined by <a target="_blank" class="external-link" href="https://typescriptlang.org">typescript</a> AST and only applies to classes registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/schema.ts#L11">@Schema</a> decoration. 
+The registry's schema information is defined by <a target="_blank" class="external-link" href="https://typescriptlang.org">typescript</a> AST and only applies to classes registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/schema.ts#L11">@Schema</a> decoration. 
 
 <h3>Classes</h3>
 The module utilizes AST transformations to collect schema information, and facilitate the registration process without user intervention. The class can also be described using providing a:
@@ -23,11 +23,11 @@ The module utilizes AST transformations to collect schema information, and facil
  <li><code class="item input">description</code> - detailed description of the schema</li>
  <li><code class="item input">examples</code> - A set of examples as <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> or <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a></li></ul>
 
-The <code class="item input">title</code> will be picked up from the <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a> comments, and additionally all fields can be set using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/common.ts#L9">@Describe</a> decorator.
+The <code class="item input">title</code> will be picked up from the <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a> comments, and additionally all fields can be set using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/common.ts#L9">@Describe</a> decorator.
 
       <figure class="code">
       <figcaption class="code">Sample User Schema
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/user.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/user.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/decorator/schema'</span><span class="token punctuation">;</span>
 
@@ -43,7 +43,7 @@ From this schema, the registry would have the following information:
 
       <figure class="config">
       <figcaption class="config">User schemas as a YAML file
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/resources/user.yml">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/resources/user.yml">Source</a></cite>
       </figcaption>
       <pre><code class="language-yaml"><span class="token key atrule">User</span><span class="token punctuation">:</span>
   <span class="token key atrule">fields</span><span class="token punctuation">:</span>
@@ -65,24 +65,24 @@ From this schema, the registry would have the following information:
 <h3>Fields</h3>
 This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
 
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L40">@Field</a> defines a field that will be serialized.</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L61">@Required</a> defines a that field should be required</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L68">@Enum</a> defines the allowable values that a field can have</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L78">@Trimmed</a> augments binding to remove leading and trailing whitespace from string values</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L96">@Match</a> defines a regular expression that the field value should match</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L104">@MinLength</a> enforces min length of a string</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L112">@MaxLength</a> enforces max length of a string</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L104">@Min</a> enforces min value for a date or a number</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L112">@Max</a> enforces max value for a date or a number</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L135">@Email</a> ensures string field matches basic email regex</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L142">@Telephone</a> ensures string field matches basic telephone regex</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L149">@Url</a> ensures string field matches basic url regex</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L188">@Ignore</a> exclude from auto schema registration</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L163">@Integer</a> ensures number passed in is only a whole number</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L169">@Float</a> ensures number passed in allows fractional values</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L181">@Currency</a> provides support for standard currency</li>
- <li><a target="_blank" class="source-link" href="/docs/doc/src/nodes.ts#L10">Text</a> indicates that a field is expecting natural language input, not just discrete values</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/field.ts#L88">@LongText</a> same as text, but expects longer form content</li></ul>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L40">@Field</a> defines a field that will be serialized.</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L61">@Required</a> defines a that field should be required</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L68">@Enum</a> defines the allowable values that a field can have</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L78">@Trimmed</a> augments binding to remove leading and trailing whitespace from string values</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L96">@Match</a> defines a regular expression that the field value should match</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L104">@MinLength</a> enforces min length of a string</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L112">@MaxLength</a> enforces max length of a string</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L104">@Min</a> enforces min value for a date or a number</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L112">@Max</a> enforces max value for a date or a number</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L135">@Email</a> ensures string field matches basic email regex</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L142">@Telephone</a> ensures string field matches basic telephone regex</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L149">@Url</a> ensures string field matches basic url regex</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L188">@Ignore</a> exclude from auto schema registration</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L163">@Integer</a> ensures number passed in is only a whole number</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L169">@Float</a> ensures number passed in allows fractional values</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L181">@Currency</a> provides support for standard currency</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/doc/src/nodes.ts#L10">Text</a> indicates that a field is expecting natural language input, not just discrete values</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/field.ts#L88">@LongText</a> same as text, but expects longer form content</li></ul>
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated.
 
@@ -91,17 +91,17 @@ Just like the class, all fields can be defined with
 <ul> <li><code class="item input">description</code> - detailed description of the schema</li>
  <li><code class="item input">examples</code> - A set of examples as <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> or <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a></li></ul>
 
-And similarly, the <code class="item input">description</code> will be picked up from the <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a> comments, and additionally all fields can be set using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/common.ts#L9">@Describe</a> decorator.
+And similarly, the <code class="item input">description</code> will be picked up from the <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a> comments, and additionally all fields can be set using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/common.ts#L9">@Describe</a> decorator.
 
 <h2>Binding/Validation</h2>
 At runtime, once a schema is registered, a programmer can utilize this structure to perform specific operations. Specifically binding and validation.
 
 <h3>Binding</h3>
-Binding is a very simple operation, as it takes in a class registered as as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/schema.ts#L11">@Schema</a> and a JS object that will be the source of the binding. Given the schema:
+Binding is a very simple operation, as it takes in a class registered as as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/schema.ts#L11">@Schema</a> and a JS object that will be the source of the binding. Given the schema:
 
       <figure class="code">
       <figcaption class="code">Sub Schemas via Address
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/person.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/person.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/decorator/schema'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Integer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/decorator/field'</span><span class="token punctuation">;</span>
@@ -124,7 +124,7 @@ A binding operation could look like:
 
       <figure class="code">
       <figcaption class="code">Binding from JSON to Schema
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/person-binding.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/person-binding.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Person <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./person'</span><span class="token punctuation">;</span>
 
@@ -163,7 +163,7 @@ Validation is very similar to binding, but instead of attempting to assign value
 
       <figure class="code">
       <figcaption class="code">Sub Schemas via Address
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/person.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/person.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/decorator/schema'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Integer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/decorator/field'</span><span class="token punctuation">;</span>
@@ -186,7 +186,7 @@ But now with an invalid json object
 
       <figure class="code">
       <figcaption class="code">Read Person, and validate
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/person-binding-invalid.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/person-binding-invalid.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Person <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./person'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaValidator <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/validate/validator'</span><span class="token punctuation">;</span>
@@ -244,7 +244,7 @@ Within the schema framework, it is possible to add custom validators class level
 
       <figure class="code">
       <figcaption class="code">Password Validator
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/password-validator.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/password-validator.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema<span class="token punctuation">,</span> Validator <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/decorator/schema'</span><span class="token punctuation">;</span>
 
@@ -273,7 +273,7 @@ When the validator is executed, it has access to the entire object, and you can 
 
       <figure class="code">
       <figcaption class="code">Validation Error Structure
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/validate/types.ts#L6">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/validate/types.ts#L6">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ValidationError</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
@@ -307,11 +307,11 @@ When the validator is executed, it has access to the entire object, and you can 
 
 The module provides high level access for <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> support, via decorators, for validating and typing request bodies.
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/extension/rest.ts#L88">@SchemaBody</a> provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/extension/rest.ts#L88">@SchemaBody</a> provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
 
       <figure class="code">
       <figcaption class="code">Using SchemaBody for POST requests
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/schema-body.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/schema-body.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Post <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaBody <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/extension/rest'</span><span class="token punctuation">;</span>
@@ -336,11 +336,11 @@ The module provides high level access for <a class="module-link" href="/docs/res
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/extension/rest.ts#L101">@SchemaQuery</a> provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/extension/rest.ts#L101">@SchemaQuery</a> provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
       <figure class="code">
       <figcaption class="code">Using SchemaQuery for GET requests
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/schema-query.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/schema-query.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaQuery <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/extension/rest'</span><span class="token punctuation">;</span>
@@ -364,11 +364,11 @@ The module provides high level access for <a class="module-link" href="/docs/res
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-Addtionally, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/extension/rest.ts#L101">@SchemaQuery</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/extension/rest.ts#L88">@SchemaBody</a> can also be used with <code class="item input">interface</code>s and <code class="item input">type</code> literals in lieu of classes. This is best suited for simple types:
+Addtionally, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/extension/rest.ts#L101">@SchemaQuery</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/extension/rest.ts#L88">@SchemaBody</a> can also be used with <code class="item input">interface</code>s and <code class="item input">type</code> literals in lieu of classes. This is best suited for simple types:
 
       <figure class="code">
       <figcaption class="code">Using SchemaQuery with a type literal
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/schema-query-type.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/schema-query-type.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaQuery <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/extension/rest'</span><span class="token punctuation">;</span>
@@ -404,13 +404,13 @@ By default all types are mapped as-is:
  <li>url</li>
  <li>telephone</li>
  <li>postalCode</li></ul></li>
- <li>Sub-schemas as registered via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/decorator/schema.ts#L11">@Schema</a> decorators.</li></ul>
+ <li>Sub-schemas as registered via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/decorator/schema.ts#L11">@Schema</a> decorators.</li></ul>
 
 In addition to the general types, the code relies upon name matching to provide additional refinement:
 
       <figure class="code">
       <figcaption class="code">Supported Mappings
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/extension/faker.ts#L34">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/extension/faker.ts#L34">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">static</span> <span class="token constant">NAMES_TO_TYPE</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>RegExp<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">any</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token builtin">string</span><span class="token operator">:</span> <span class="token punctuation">[</span>
@@ -450,7 +450,7 @@ An example of this would be:
 
       <figure class="code">
       <figcaption class="code">More complex Schema, used with Faker
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/faker.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/faker.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/decorator/schema'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaFakerUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/extension/faker'</span><span class="token punctuation">;</span>
@@ -490,7 +490,7 @@ This feature is meant to allow for simple Typescript types to be able to be back
 
       <figure class="code">
       <figcaption class="code">Simple Custom Type
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/custom-type.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/custom-type.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Util <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 
@@ -524,7 +524,7 @@ What you can see here is that the <code class="item input">Point</code> type is 
 
       <figure class="code">
       <figcaption class="code">Simple Custom Type Usage
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/alt/docs/src/custom-type-usage.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/alt/docs/src/custom-type-usage.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema/src/decorator/schema'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Point <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./custom-type'</span><span class="token punctuation">;</span>

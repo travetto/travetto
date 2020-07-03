@@ -64,11 +64,11 @@ The <a class="module-link" href="/docs/model" title="Datastore abstraction for C
  <li><a target="_blank" class="external-link" href="https://mongodb.com">mongodb</a></li>
  <li><a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a></li></ul>
 
-A default model is constructed, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/generator-app/templates/todo/src/model/todo.ts#L4">Todo</a> class:
+A default model is constructed, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/generator-app/templates/todo/src/model/todo.ts#L4">Todo</a> class:
 
       <figure class="code">
       <figcaption class="code">Todo Model
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/generator-app/templates/todo/src/model/todo.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/generator-app/templates/todo/src/model/todo.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Model<span class="token punctuation">,</span> ModelCore <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
 
@@ -83,11 +83,11 @@ A default model is constructed, a <a target="_blank" class="source-link" href="h
 Basic tests are also included for the <code class="item input">model</code> to verify that database interaction and functionality is working properly.
 
 <h2>Rest + Model</h2>
-In the case both <code class="item input">rest</code> and <code class="item input">model</code> features are enabled, the code will produce a controller that exposes the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/generator-app/templates/todo/src/model/todo.ts#L4">Todo</a> model via restful patterns.
+In the case both <code class="item input">rest</code> and <code class="item input">model</code> features are enabled, the code will produce a controller that exposes the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/generator-app/templates/todo/src/model/todo.ts#L4">Todo</a> model via restful patterns.
 
       <figure class="code">
       <figcaption class="code">Todo controller
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/generator-app/templates/todo/src/rest/todo.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/generator-app/templates/todo/src/rest/todo.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Put<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Delete<span class="token punctuation">,</span> Path <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>

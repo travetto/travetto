@@ -6,9 +6,9 @@
 npm install @travetto/model-mongo
 ```
 
-This module provides an [mongodb](https://mongodb.com)-based implementation of [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model/src/service/source.ts#L58) for the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.").  This source allows the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.") module to read, write and query against [mongodb](https://mongodb.com).. Given the dynamic nature of [mongodb](https://mongodb.com), during development when models are modified, nothing needs to be done to adapt to the latest schema.
+This module provides an [mongodb](https://mongodb.com)-based implementation of [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58) for the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model "Datastore abstraction for CRUD operations with advanced query support.").  This source allows the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model "Datastore abstraction for CRUD operations with advanced query support.") module to read, write and query against [mongodb](https://mongodb.com).. Given the dynamic nature of [mongodb](https://mongodb.com), during development when models are modified, nothing needs to be done to adapt to the latest schema.
 
-Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di "Dependency registration/management and injection support.") module.
+Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-dev/module/di "Dependency registration/management and injection support.") module.
 
 **Code: Wiring up a custom Model Source**
 ```typescript
@@ -26,7 +26,7 @@ export class Init {
 }
 ```
 
-where the [MongoModelConfig](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model-mongo/src/config.ts#L15) is defined by:
+where the [MongoModelConfig](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model-mongo/src/config.ts#L15) is defined by:
 
 **Code: Structure of MongoModelConfig**
 ```typescript
@@ -122,5 +122,5 @@ export class MongoModelConfig {
 }
 ```
 
-and can be overridden via environment variables or config files, as defined in [Configuration](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//config "Environment-aware config management using yaml files").  The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base/src/resource.ts#L-1) path or just a standard file path.
+and can be overridden via environment variables or config files, as defined in [Configuration](https://github.com/travetto/travetto/tree/1.0.0-dev/module/config "Environment-aware config management using yaml files").  The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/resource.ts#L-1) path or just a standard file path.
 

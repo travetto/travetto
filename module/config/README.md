@@ -6,7 +6,7 @@
 npm install @travetto/config
 ```
 
-The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [YAML](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//yaml "Simple YAML support, provides only clean subset of yaml").  The configuration information is comprised of:
+The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [YAML](https://github.com/travetto/travetto/tree/1.0.0-dev/module/yaml "Simple YAML support, provides only clean subset of yaml").  The configuration information is comprised of:
 
    
    *  [YAML](https://en.wikipedia.org/wiki/YAML) files
@@ -73,7 +73,7 @@ $ alt/docs/src/resolve.ts -r @travetto/boot/register alt/docs/src/resolve.ts
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under `config.redacted`.
 
 ## Consuming
-The  service provides direct access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/config/src/decorator.ts#L9) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The  service provides direct access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/1.0.0-dev/module/config/src/decorator.ts#L9) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-dev/module/di "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 

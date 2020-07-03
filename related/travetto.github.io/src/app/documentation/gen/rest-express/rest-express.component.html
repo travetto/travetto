@@ -11,13 +11,13 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest-express</code></pre>     
       </figure>
 
-The module is an <a target="_blank" class="external-link" href="https://expressjs.com">express</a> provider for the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module.  This module provides an implementation of <a target="_blank" class="source-link" href="/docs/rest/src/server/server.ts#L16">RestServer</a> for automatic injection in the default Rest server.
+The module is an <a target="_blank" class="external-link" href="https://expressjs.com">express</a> provider for the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module.  This module provides an implementation of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest/src/server/server.ts#L16">RestServer</a> for automatic injection in the default Rest server.
 
 <h2>Customizing Rest App</h2>
 
       <figure class="code">
       <figcaption class="code">Customizing the Express App
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest-express/alt/docs/src/customize.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest-express/alt/docs/src/customize.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ExpressRestServer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest-express'</span><span class="token punctuation">;</span>
@@ -46,7 +46,7 @@ When working with an <a target="_blank" class="external-link" href="https://expr
 
       <figure class="code">
       <figcaption class="code">Configured Middleware
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/rest-express/src/server.ts#L18">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest-express/src/server.ts#L18">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token function">express</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 app<span class="token punctuation">.</span><span class="token keyword">set</span><span class="token punctuation">(</span><span class="token string">'query parser'</span><span class="token punctuation">,</span> <span class="token string">'simple'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>

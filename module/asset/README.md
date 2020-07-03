@@ -6,14 +6,14 @@
 npm install @travetto/asset
 ```
 
-The asset module requires an [AssetSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/asset/src/source.ts#L6) to provide functionality for reading and writing files. You will need to select one of the available providers to serve as your [AssetSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/asset/src/source.ts#L6).
+The asset module requires an [AssetSource](https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset/src/source.ts#L6) to provide functionality for reading and writing files. You will need to select one of the available providers to serve as your [AssetSource](https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset/src/source.ts#L6).
 
 **Install: provider**
 ```bash
 npm install @travetto/asset-{provider}
 ```
 
-Reading of and writing assets uses the [AssetService](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/asset/src/service.ts#L14).  Below you can see an example dealing with a user's profile image.
+Reading of and writing assets uses the [AssetService](https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset/src/service.ts#L14).  Below you can see an example dealing with a user's profile image.
 
 **Code: User Profile Images**
 ```typescript
@@ -47,7 +47,7 @@ export class UserProfileService {
 
 By default, the assets are stored by path, as specified in the [Asset](./src/types.ts#L5) object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
 
-The underlying contract for a [AssetNamingStrategy](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/asset/src/naming.ts#L8) looks like:
+The underlying contract for a [AssetNamingStrategy](https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset/src/naming.ts#L8) looks like:
 
 **Code: Asset Naming Strategy**
 ```typescript
@@ -61,7 +61,7 @@ export abstract class AssetNamingStrategy {
 }
 ```
 
-By extending this, and making it [@Injectable](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di/src/decorator.ts#L29), the naming strategy will become the default for the system.  
+By extending this, and making it [@Injectable](https://github.com/travetto/travetto/tree/1.0.0-dev/module/di/src/decorator.ts#L29), the naming strategy will become the default for the system.  
 
 ## Advanced Usage
 

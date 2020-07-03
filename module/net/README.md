@@ -7,7 +7,7 @@ npm install @travetto/net
 ```
 
 ## HTTP Requests
-The http request functionality exists to allow for simple usage of the `node` [http](https://nodejs.org/api/http.html) and [https](https://nodejs.org/api/https.html) modules. [HttpRequest](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/net/src/request.ts#L13) exists, in lieu of alternatives, as a means to provide the smallest footprint possible.  Using it is fairly straightforward:
+The http request functionality exists to allow for simple usage of the `node` [http](https://nodejs.org/api/http.html) and [https](https://nodejs.org/api/https.html) modules. [HttpRequest](https://github.com/travetto/travetto/tree/1.0.0-dev/module/net/src/request.ts#L13) exists, in lieu of alternatives, as a means to provide the smallest footprint possible.  Using it is fairly straightforward:
 
 **Code: Using HttpRequest**
 ```typescript

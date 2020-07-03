@@ -17,7 +17,7 @@ This module provides unit testing functionality that integrates with the framewo
 
 ## Definition
 
-A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/test/src/decorator/suite.ts#L12) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/test/src/decorator/test.ts#L9) decorator.  All tests intrinsically support `async`/`await`.
+A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/1.0.0-dev/module/test/src/decorator/suite.ts#L12) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/1.0.0-dev/module/test/src/decorator/test.ts#L9) decorator.  All tests intrinsically support `async`/`await`.
 
 A simple example would be:
 
@@ -216,7 +216,7 @@ class SimpleTest {
 
 ## Running Tests
 
-To run the tests you can either call the [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cli "CLI infrastructure for travetto framework") by invoking
+To run the tests you can either call the [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-dev/module/cli "CLI infrastructure for travetto framework") by invoking
 
 **Terminal: Test Help Output**
 ```bash

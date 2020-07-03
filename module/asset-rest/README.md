@@ -8,7 +8,7 @@ npm install @travetto/asset-rest
 
 This module provides a clean and direct mechanism for processing uploads, built upon [busboy](https://github.com/mscdex/busboy). The module also provides some best practices with respect to temporary file deletion.
 
-Once the files are uploaded, they are exposed on [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.")'s request object as `req.files`. The uploaded files are constructed as [Asset](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset/src/types.ts#L5) instances, which allows for  integration with the [Asset](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//asset "Modular library for storing and retrieving binary assets") module.
+Once the files are uploaded, they are exposed on [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest "Declarative api for RESTful APIs with support for the dependency injection module.")'s request object as `req.files`. The uploaded files are constructed as [Asset](https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset/src/types.ts#L5) instances, which allows for  integration with the [Asset](https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset "Modular library for storing and retrieving binary assets") module.
 
 A simple example:
 

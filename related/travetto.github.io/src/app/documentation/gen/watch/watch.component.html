@@ -15,11 +15,11 @@ This module is intended to be used during development, and is not during product
 
 <h2>File Watching</h2>
 
-This module  is the base file system watching support for <a target="_blank" class="external-link" href="https://travetto.dev">travetto</a> applications.  In addition to file system scanning, the framework offers a simple file watching library.  The goal is to provide a substantially smaller footprint than <a target="_blank" class="external-link" href="https://github.com/shama/gaze">gaze</a> or <a target="_blank" class="external-link" href="https://github.com/paulmillr/chokidar">chokidar</a>.  Utilizing the patterns from the file scanning, you create a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/watch/src/watcher.ts#L40">Watcher</a> that either has files added manually, or has patterns added that will recursively look for files. 
+This module  is the base file system watching support for <a target="_blank" class="external-link" href="https://travetto.dev">travetto</a> applications.  In addition to file system scanning, the framework offers a simple file watching library.  The goal is to provide a substantially smaller footprint than <a target="_blank" class="external-link" href="https://github.com/shama/gaze">gaze</a> or <a target="_blank" class="external-link" href="https://github.com/paulmillr/chokidar">chokidar</a>.  Utilizing the patterns from the file scanning, you create a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/watch/src/watcher.ts#L40">Watcher</a> that either has files added manually, or has patterns added that will recursively look for files. 
 
       <figure class="code">
       <figcaption class="code">Example of watching for specific files
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/watch/alt/docs/src/watch.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/watch/alt/docs/src/watch.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Watcher <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/watch/src/watcher'</span><span class="token punctuation">;</span>
 
@@ -35,11 +35,11 @@ watcher<span class="token punctuation">.</span><span class="token function">run<
 
 <h2>Retargetting Proxy</h2>
 
-In addition to file watching, the module also provides a core utiltity for hot reloading at runtime.  The framework makes use of <code class="item input">ES2015</code> <code class="item input">Proxy</code>s.  Specifically the the module provides <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/watch/src/proxy.ts#L84">RetargettingProxy</a>, as a means to provide a reference that can have it's underlying target changed at runtime. 
+In addition to file watching, the module also provides a core utiltity for hot reloading at runtime.  The framework makes use of <code class="item input">ES2015</code> <code class="item input">Proxy</code>s.  Specifically the the module provides <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/watch/src/proxy.ts#L84">RetargettingProxy</a>, as a means to provide a reference that can have it's underlying target changed at runtime. 
 
       <figure class="code">
       <figcaption class="code">Example of using the RetargettingProxy
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/watch/alt/docs/src/proxy.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/watch/alt/docs/src/proxy.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RetargettingProxy <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/watch/src/proxy'</span><span class="token punctuation">;</span>
 

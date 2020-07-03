@@ -6,7 +6,7 @@
 npm install @travetto/auth-model
 ```
 
-This module provides the integration between the [Authentication](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//auth "Authentication scaffolding for the travetto framework") module and the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//model "Datastore abstraction for CRUD operations with advanced query support.").
+This module provides the integration between the [Authentication](https://github.com/travetto/travetto/tree/1.0.0-dev/module/auth "Authentication scaffolding for the travetto framework") module and the [Data Modeling](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model "Datastore abstraction for CRUD operations with advanced query support.").
 
 The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a [RegisteredIdentity](./src/identity.ts#L5)
 

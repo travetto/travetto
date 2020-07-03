@@ -6,9 +6,9 @@
 npm install @travetto/app
 ```
 
-The [Base](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//base "Application phase management, environment config and common utilities for travetto applications.") module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24) who's job is to register entry points into the application, along with the associated  metadata. 
+The [Base](https://github.com/travetto/travetto/tree/1.0.0-dev/module/base "Application phase management, environment config and common utilities for travetto applications.") module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, [@Application](https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24) who's job is to register entry points into the application, along with the associated  metadata. 
 
-With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di "Dependency registration/management and injection support."), the [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24) is a synonym for [@Injectable](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//di/src/decorator.ts#L29), and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
+With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [Dependency Injection](https://github.com/travetto/travetto/tree/1.0.0-dev/module/di "Dependency registration/management and injection support."), the [@Application](https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24) is a synonym for [@Injectable](https://github.com/travetto/travetto/tree/1.0.0-dev/module/di/src/decorator.ts#L29), and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
 
 For example:
 
@@ -38,7 +38,7 @@ class SimpleApp {
 }
 ```
 
-Additionally, the [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24) decorator exposes some additional functionality, which can be used to launch the application.
+Additionally, the [@Application](https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24) decorator exposes some additional functionality, which can be used to launch the application.
 
 ## `.run()` Arguments
 The arguments specified in the `run` method are extracted via code transformation, and are able to be bound when invoking the application.  Whether from the command line or a plugin, the parameters will be mapped to the inputs of `run`.  For instance:
@@ -58,7 +58,7 @@ class SimpleApp {
 
 ## CLI - run
 
-The run command allows for invocation of applications as defined by the [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24) decorator.  Additionally, the environment can manually be specified (dev, test, prod).
+The run command allows for invocation of applications as defined by the [@Application](https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24) decorator.  Additionally, the environment can manually be specified (dev, test, prod).
 
 **Terminal: CLI Run Help**
 ```bash
@@ -189,7 +189,7 @@ Options:
 Usage: simple-domain domain:string [port:number=3000]
 ```
 
-The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/app/src/decorator.ts#L24) 
+The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/1.0.0-dev/module/app/src/decorator.ts#L24) 
 annotation to support customization. Only primitive types are supported:
 
    

@@ -16,9 +16,9 @@ Registration, within the framework flows throw two main use cases:
 The primary flow occurs on initialization of the application. At that point, the module will:
 
    
-   1. Initialize [RootRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/registry/src/service/root.ts) and will automatically register/load all relevant files
+   1. Initialize [RootRegistry](https://github.com/travetto/travetto/tree/1.0.0-dev/module/registry/src/service/root.ts) and will automatically register/load all relevant files
    1. As files are imported, decorators within the files will record various metadata relevant to the respective registries
-   1. When all files are processed, the [RootRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/registry/src/service/root.ts) is finished, and it will signal to anything waiting on registered data that its free to use it.
+   1. When all files are processed, the [RootRegistry](https://github.com/travetto/travetto/tree/1.0.0-dev/module/registry/src/service/root.ts) is finished, and it will signal to anything waiting on registered data that its free to use it.
 
 This flow ensures all files are loaded and processed before application starts. A sample registry could like:
 
@@ -57,12 +57,12 @@ export class SampleRegistry extends MetadataRegistry<Group, Child> {
 }
 ```
 
-The registry is a [MetadataRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/registry/src/service/metadata.ts#L13) that similar to the [SchemaRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/schema/src/service/registry.ts) and the [DependencyRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/di/src/registry.ts).
+The registry is a [MetadataRegistry](https://github.com/travetto/travetto/tree/1.0.0-dev/module/registry/src/service/metadata.ts#L13) that similar to the [SchemaRegistry](https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema/src/service/registry.ts) and the [DependencyRegistry](https://github.com/travetto/travetto/tree/1.0.0-dev/module/di/src/registry.ts).
 
 ### Live Flow
 At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries.
 
-As the [Compiler](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//compiler "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.") notifies that a file has been changed and recompiled, the [RootRegistry](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/registry/src/service/root.ts) will pick it up, and process it accordingly.
+As the [Compiler](https://github.com/travetto/travetto/tree/1.0.0-dev/module/compiler "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.") notifies that a file has been changed and recompiled, the [RootRegistry](https://github.com/travetto/travetto/tree/1.0.0-dev/module/registry/src/service/root.ts) will pick it up, and process it accordingly.
 
 ## Supporting Metadata
 

@@ -6,12 +6,12 @@
 npm install @travetto/model
 ```
 
-This module provides a clean interface to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//schema "Data type registry for runtime validation, reflection and binding. "), which is used for data model validation.
+This module provides a clean interface to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema "Data type registry for runtime validation, reflection and binding. "), which is used for data model validation.
 
 The module can be segmented into three main areas: declaration, access/storage, and querying
 
 ## Declaration
-Models are declared via the [@Model](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/registry/decorator.ts#L12) decorator, which allows the system to know that this is a class that is compatible with the module.
+Models are declared via the [@Model](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/registry/decorator.ts#L12) decorator, which allows the system to know that this is a class that is compatible with the module.
 
 **Code: Extending BaseModel**
 ```typescript
@@ -29,7 +29,7 @@ export class User extends BaseModel {
 The `User` model is now ready to be used with the model services.
 
 ## Access/Storage
-The [ModelService](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/service/model.ts#L24) is the foundation for all access to the storage layer, and provides a comprehensive set of functionality.  The service includes support for modifying individual records, bulk update/insert/delete, partial updates, finding records, and more.  This should be the expected set of functionality for storage and retrieval.
+The [ModelService](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/model.ts#L24) is the foundation for all access to the storage layer, and provides a comprehensive set of functionality.  The service includes support for modifying individual records, bulk update/insert/delete, partial updates, finding records, and more.  This should be the expected set of functionality for storage and retrieval.
 
 **Code: Using ModelService with the User model**
 ```typescript
@@ -57,9 +57,9 @@ export class UserManager {
 }
 ```
 
-The [ModelService](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/service/model.ts#L24) itself relies upon a [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/service/source.ts#L58) which is the driver for the storage layer.
+The [ModelService](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/model.ts#L24) itself relies upon a [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58) which is the driver for the storage layer.
 
-During development, [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/service/source.ts#L58) supports the ability to respond to model changes in real-time, and to modify the underlying storage mechanism.  An example of this would be [elasticsearch](https://elastic.co) schemas being updated as fields are added or removed from the [@Model](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/registry/decorator.ts#L12) class.
+During development, [ModelSource](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/service/source.ts#L58) supports the ability to respond to model changes in real-time, and to modify the underlying storage mechanism.  An example of this would be [elasticsearch](https://elastic.co) schemas being updated as fields are added or removed from the [@Model](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/registry/decorator.ts#L12) class.
 
 ## Querying
 
@@ -174,7 +174,7 @@ When querying with regular expressions,patterns can be specified as `'strings'` 
 
 ## Extension - Rest
 
-To facilitate common RESTful patterns, the module exposes  [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") support in the form of [@ModelController](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/model/src/extension/rest.ts#L41).
+To facilitate common RESTful patterns, the module exposes  [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest "Declarative api for RESTful APIs with support for the dependency injection module.") support in the form of [@ModelController](https://github.com/travetto/travetto/tree/1.0.0-dev/module/model/src/extension/rest.ts#L41).
 
 **Code: ModelController example**
 ```typescript

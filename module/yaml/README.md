@@ -8,7 +8,7 @@ npm install @travetto/yaml
 
 In the desire to provide a minimal footprint, the framework provides a minimal [YAML](https://en.wikipedia.org/wiki/YAML) parser/serializer to handle standard configuration structure.
 
-[YamlUtil](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/yaml/src/util.ts#L7) is the main access point for this module, and will expose two method, `parse` and `serialize`.
+[YamlUtil](https://github.com/travetto/travetto/tree/1.0.0-dev/module/yaml/src/util.ts#L7) is the main access point for this module, and will expose two method, `parse` and `serialize`.
 
 **Code: Simple YAML Parsing**
 ```typescript

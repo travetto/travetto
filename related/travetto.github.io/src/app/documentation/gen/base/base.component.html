@@ -47,7 +47,7 @@ A simple example of finding specific <code class="item path">.config</code> file
 
       <figure class="code">
       <figcaption class="code">Looking for all .config files with the prefix defined by svc
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/alt/docs/src/find.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/alt/docs/src/find.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ScanApp <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/scan'</span><span class="token punctuation">;</span>
@@ -66,11 +66,11 @@ A simple example of finding specific <code class="item path">.config</code> file
 
 <h2>Application Resources</h2>
 
-Resource management, loading of files, and other assets at runtime is a common pattern that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/resource.ts">ResourceManager</a> encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
+Resource management, loading of files, and other assets at runtime is a common pattern that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/resource.ts">ResourceManager</a> encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
 
       <figure class="code">
       <figcaption class="code">Finding Images
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/alt/docs/src/image.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/alt/docs/src/image.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ResourceManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/resource'</span><span class="token punctuation">;</span>
 
@@ -104,7 +104,7 @@ An example would be something like <code class="item path">phase.init.ts</code> 
 
       <figure class="code">
       <figcaption class="code">Config phase init
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/config/support/phase.init.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/config/support/phase.init.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token comment">/**
  * Initializes the config source
@@ -121,9 +121,9 @@ An example would be something like <code class="item path">phase.init.ts</code> 
 
 <h2>Common Application Error Class</h2>
 
-While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/error.ts#L10">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
+While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/error.ts#L10">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/error.ts#L10">AppError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/error.ts#L10">AppError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
 <ul> <li><code class="item input">general</code> - General purpose errors</li>
  <li><code class="item input">system</code> - Synonym for <code class="item input">general</code></li>
  <li><code class="item input">data</code> - Data format, content, etc are incorrect. Generally correlated to bad input.</li>
@@ -141,7 +141,7 @@ As a registered shutdown handler, you can do.
 
       <figure class="code">
       <figcaption class="code">Registering a shutdown handler
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/alt/docs/src/shutdown.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/alt/docs/src/shutdown.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ShutdownManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/shutdown'</span><span class="token punctuation">;</span>
 
@@ -160,7 +160,7 @@ From a test scenario:
 
       <figure class="code">
       <figcaption class="code">Tracking asynchronous behavior
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/alt/docs/src/stack-test.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/alt/docs/src/stack-test.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> StacktraceUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/stacktrace'</span><span class="token punctuation">;</span>
 
@@ -207,7 +207,7 @@ Error: Uh oh
 The needed functionality cannot be loaded until <code class="item method">init.action</code> executes, and so must be required only at that time.
 
 <h2>Util</h2>
-Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/util.ts#L8">Util</a> includes:
+Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/util.ts#L8">Util</a> includes:
 
 <ul> <li><code class="item method">isPrimitive(el: any)</code> determines if <code class="item input">el</code> is a <code class="item input">string</code>, <code class="item input">boolean</code>, <code class="item input">number</code> or <code class="item input">RegExp</code></li>
  <li><code class="item method">isPlainObject(obj: any)</code> determines if the obj is a simple object</li>
@@ -221,7 +221,7 @@ Simple functions for providing a minimal facsimile to <a target="_blank" class="
 
 <h2>SystemUtil</h2>
 
-Unlike <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/util.ts#L8">Util</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/internal/system.ts#L7">SystemUtil</a> is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/base/src/internal/system.ts#L7">SystemUtil</a> has functionality for:
+Unlike <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/util.ts#L8">Util</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/internal/system.ts#L7">SystemUtil</a> is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/base/src/internal/system.ts#L7">SystemUtil</a> has functionality for:
 
 <ul> <li><code class="item method">naiveHash(text: string): number</code> computes a very naive hash. Should not be relied upon for scenarios where collisions cannot be tolerated.</li>
  <li><code class="item method">computeModule(file: string): string</code> computes the internal module name from a given file.</li></ul>

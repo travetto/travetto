@@ -11,11 +11,11 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/asset-mongo</code></pre>     
       </figure>
 
-This provides a <a target="_blank" class="external-link" href="https://mongodb.com">mongodb</a> implementation of the <a target="_blank" class="source-link" href="/docs/asset/src/source.ts#L6">AssetSource</a> which is a backend for the  <a class="module-link" href="/docs/asset" title="Modular library for storing and retrieving binary assets">Asset</a> module.  
+This provides a <a target="_blank" class="external-link" href="https://mongodb.com">mongodb</a> implementation of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset/src/source.ts#L6">AssetSource</a> which is a backend for the  <a class="module-link" href="/docs/asset" title="Modular library for storing and retrieving binary assets">Asset</a> module.  
 
       <figure class="code">
       <figcaption class="code">Mongo backend wiring
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/asset-mongo/alt/docs/src/config.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset-mongo/alt/docs/src/config.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MongoAssetSource<span class="token punctuation">,</span> MongoAssetConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/asset-mongo'</span><span class="token punctuation">;</span>
@@ -33,7 +33,7 @@ There is a default configuration that you can easily use, with some sensible def
 
       <figure class="code">
       <figcaption class="code">Mongo configuration
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module/asset-mongo/src/config.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/asset-mongo/src/config.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 
@@ -58,6 +58,6 @@ There is a default configuration that you can easily use, with some sensible def
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
   
-Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="/docs/config/src/decorator.ts#L9">@Config</a> annotation, and so these values can be overridden using the standard <a class="module-link" href="/docs/config" title="Environment-aware config management using yaml files">Configuration</a> resolution paths. 
+Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/1.0.0-dev/module/config/src/decorator.ts#L9">@Config</a> annotation, and so these values can be overridden using the standard <a class="module-link" href="/docs/config" title="Environment-aware config management using yaml files">Configuration</a> resolution paths. 
 
 </div>

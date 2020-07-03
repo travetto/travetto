@@ -6,9 +6,9 @@
 npm install @travetto/openapi
 ```
 
-In the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap.
+In the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest "Declarative api for RESTful APIs with support for the dependency injection module.") module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap.
 
-The module is provides an [OpenAPI](https://github.com/OAI/OpenAPI-Specification) v3.x representation of the API metadata provided via the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//rest "Declarative api for RESTful APIs with support for the dependency injection module.") and [Schema](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//schema "Data type registry for runtime validation, reflection and binding. ") modules.
+The module is provides an [OpenAPI](https://github.com/OAI/OpenAPI-Specification) v3.x representation of the API metadata provided via the [RESTful API](https://github.com/travetto/travetto/tree/1.0.0-dev/module/rest "Declarative api for RESTful APIs with support for the dependency injection module.") and [Schema](https://github.com/travetto/travetto/tree/1.0.0-dev/module/schema "Data type registry for runtime validation, reflection and binding. ") modules.
 
 ## Configuration
 By installing the dependency, the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) endpoint is automatically generated and exposed at the root of the application as `/openapi.yml` or `/openapi.json` (by default). 
@@ -94,7 +94,7 @@ The outputted spec can be consumed using the [OpenAPI client generation tools](h
 
 ## CLI - openapi:spec
 
-The module provides a plugin for the [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-docs-overhaul/module//cli "CLI infrastructure for travetto framework") to allow scripting file generation.
+The module provides a plugin for the [Command Line Interface](https://github.com/travetto/travetto/tree/1.0.0-dev/module/cli "CLI infrastructure for travetto framework") to allow scripting file generation.
 
 **Terminal: OpenAPI usage**
 ```bash
