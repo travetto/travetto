@@ -1,6 +1,6 @@
 import {
-  doc as d, Anchor, RawHeader, lib, Mod, SubSection, List, Section, Library,
-  Terminal, fld, pth, Code, SnippetLink, Execute, DocUtil, Hidden
+  doc as d, RawHeader, lib, Mod, List, Section,
+  Terminal, fld, pth, Code, SnippetLink, Execute, DocUtil, Hidden, Ref
 } from '@travetto/doc';
 import { Model } from '@travetto/model';
 
@@ -8,23 +8,12 @@ export const header = false;
 
 const ModelCore = SnippetLink('ModelCore', '@travetto/model/src/model/core.ts', /./);
 
+export const toc = 'Overview';
+
 export default d`
 ${RawHeader('Getting Started: A Todo App')}
 
-The following tutorial wil walk you through setting up a ${lib.Travetto} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at ${lib.TodoApp}.  Additionally, you can use the ${Mod('generator-app')}.
-
-${SubSection('Overview')}
-${List(
-  Anchor('Prerequisites', '#prerequisites'),
-  Anchor('Project initialization', '#project-initialization'),
-  Anchor('Establishing the model', '#establishing-the-model'),
-  Anchor('Configuring the data source', '#configuring-the-data-source'),
-  Anchor('Building the service layer', '#building-the-service-layer'),
-  Anchor('Writing unit tests', '#writing-unit-tests'),
-  Anchor('Creating the rest routes', '#creating-the-rest-routes'),
-  Anchor('Creating the App Entry Point', '#creating-the-app-entry-point'),
-  Anchor('Test the final product', '#test-the-final-product'),
-)}
+The following tutorial wil walk you through setting up a ${lib.Travetto} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at ${Ref('Todo App', __dirname)}.  Additionally, you can use the ${Mod('generator-app')}.
 
 ${Section('Prerequisites')}
 

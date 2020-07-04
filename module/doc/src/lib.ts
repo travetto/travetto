@@ -1,16 +1,15 @@
 import { Library } from './nodes';
 
 // Common
-export const Travetto = Library('travetto', 'https://travetto.dev');
-export const Typescript = Library('typescript', 'https://typescriptlang.org');
-export const Node = Library('node', 'https://nodejs.org');
+export const Travetto = Library('Travetto', 'https://travetto.dev');
+export const Typescript = Library('Typescript', 'https://typescriptlang.org');
+export const Node = Library('Node', 'https://nodejs.org');
 export const TravettoPlugin = Library('VSCode plugin', 'https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin');
-export const TodoApp = Library('Todo App Source', 'https://www.github.com/travetto/todo-app');
 
 // Download
 export const NodeDownload = Library(`Node`, 'https://nodejs.org/en/download/current/');
 export const MongoDownload = Library(`Mongodb`, 'https://docs.mongodb.com/manual/administration/install-community/');
-export const VSCodeDownload = Library(`vscode`, 'https://code.visualstudio.com/download');
+export const VSCodeDownload = Library(`VSCode`, 'https://code.visualstudio.com/download');
 
 // Data formats
 export const YAML = Library('YAML', 'https://en.wikipedia.org/wiki/YAML');

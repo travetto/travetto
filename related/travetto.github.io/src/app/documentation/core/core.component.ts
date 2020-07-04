@@ -7,9 +7,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CoreComponent implements OnInit {
 
+  pages: { title: string, path: string }[];
+
   constructor() { }
 
   ngOnInit() {
+    // @ts-ignore
+    const { PAGES } = require('../pages');
+    this.pages = PAGES.find(x => x.component === this.constructor).subs;
   }
 
 }

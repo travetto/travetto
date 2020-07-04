@@ -1,13 +1,11 @@
-<div class="documentation"><h1 id="core" id="core-system-components">Core System Components</h1>
-<p>Within the framework there primarily internal modules that support the user facing modules.  These modules are generally used for building modules.</p>
+<div class="documentation">
+  <h1 id="core" id="core-components">Core Components</h1>
+  <p>Within the framework there primarily internal modules that support the user facing modules.
+    These modules are generally used for building modules.</p>
+  <ul>
+    <li *ngFor="let page of pages" class="{{page.path}}">
+      <a [routerLink]="'/docs/' + page.path">{{page.title}}</a>
+    </li>
+  </ul>
+
 </div>
-
-      <app-boot></app-boot>
-
-      <app-base></app-base>
-
-      <app-compiler></app-compiler>
-
-      <app-context></app-context>
-
-      <app-registry></app-registry>

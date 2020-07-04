@@ -16,14 +16,17 @@
 
 .external-comps {
   background-color: pink;
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  min-width: unset;
 }
 
 .modules {
   max-width: 900px;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: auto repeat(6, 1fr) auto auto;
   grid-template-rows: 10;
-  margin: 1em auto;
+  margin: 1em 0;
 
   div {
     border-radius: 5px;
@@ -103,82 +106,77 @@
 
 
   .cli {
-    grid-row: 2;
-    grid-column: 5/span 2;
+    grid-row: 3/span 8;
+    grid-column: 8;
   }
 
   .vscode-plugin {
-    grid-row: 2;
-    grid-column: 3/span 2;
+    grid-row: 3/span 8;
+    grid-column: 9;
   }
 
   .generator-app {
-    grid-row: 2;
-    grid-column: 1/span 2;
-  }
-
-  .email {
-    grid-row: 3;
-    grid-column: 5/span 2;
-  }
-
-  .auth {
-    grid-row: 3;
-    grid-column: 3/span 2;
-  }
-
-  .model {
-    grid-row: 3;
-    grid-column: 1/span 2;
-  }
-
-  .asset {
-    grid-row: 4;
-    grid-column: 5/span 2;
-  }
-
-  .rest {
-    grid-row: 4;
-    grid-column: 3/span 2;
-  }
-
-  .schema {
-    grid-row: 4;
-    grid-column: 1/span 2;
+    grid-row: 3/span 8;
+    grid-column: 1;
   }
 
   .app {
+    grid-row: 3;
+    grid-column: 2/span 6;
+  }
+
+  .email {
+    grid-row: 4;
+    grid-column: 6/span 2;
+  }
+
+  .auth {
+    grid-row: 4;
+    grid-column: 4/span 2;
+  }
+
+  .model {
+    grid-row: 4;
+    grid-column: 2/span 2;
+  }
+
+  .asset {
     grid-row: 5;
-    grid-column: 1/span 6;
+    grid-column: 6/span 2;
+  }
+
+  .rest {
+    grid-row: 5;
+    grid-column: 4/span 2;
+  }
+
+  .schema {
+    grid-row: 5;
+    grid-column: 2/span 2;
   }
 
   .di {
     grid-row: 6;
-    grid-column: 1/span 6;
+    grid-column: 5/span 3;
   }
 
-  .utils {
-    grid-row: 7;
-    grid-column: 4/span 3;
+  .config {
+    grid-row: 6;
+    grid-column: 2/span 3;
   }
 
   .test {
     grid-row: 7;
-    grid-column: 1/span 3;
+    grid-column: 2/span 6;
+  }
+
+  .utils {
+    grid-row: 8;
+    grid-column: 2/span 6;
   }
 
   .core {
-    grid-row: 8;
-    grid-column: 1/span 6;
-  }
-
-  .config {
     grid-row: 9;
-    grid-column: 1/span 6;
-  }
-
-  .base {
-    grid-row: 10;
-    grid-column: 1/span 6;
+    grid-column: 2/span 6;
   }
 }

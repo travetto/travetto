@@ -1,16 +1,18 @@
 import * as n from './nodes';
 import { highlight } from './code-highlight';
-import { ExecUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 
-const PRIMARY_BRANCH = ExecUtil.execSync('git', ['status', '-b', '-s', '.']).split(/\n/)[0].split('...')[0].split(' ')[1].trim();
-const GIT_SRC_ROOT = `https://github.com/travetto/travetto/tree/${PRIMARY_BRANCH}/module/`;
+const ROOT = FsUtil.resolveUnix(FsUtil.cwd, '..', '..');
 
 type N = typeof n;
 export type AllChildren = { [K in keyof N]: ReturnType<N[K]> }[keyof N];
 
+type Anchor = ReturnType<N['Anchor']>;
+
 export type Renderer = {
   render(child: AllChildren): string;
   wrap(content: string, module: string): string;
+  toc(content: string, title: string, anchors: Anchor[]): string;
 };
 
 function titleCase(a: string) {
@@ -24,13 +26,23 @@ function clean(a?: string) {
   return a ? a.replace(/^[\n ]+|[\n ]+$/gs, '') : '';
 }
 
+function getId(a: string) {
+  return a.toLowerCase().replace(/[^a-z]+/g, '-');
+}
+
 export const Markdown: Renderer = {
-  render(c: AllChildren, depth = 0) {
+  toc(content: string, title: string, anchors: Anchor[]) {
+    const lines = content.split(/\n/g);
+    const empty = lines.findIndex(x => x.startsWith('##'));
+    lines.splice(empty - 1, 0, this.render(n.Group([n.SubSection(title), n.Ordered(...anchors)])), '');
+    return lines.join('\n');
+  },
+  render(c: AllChildren) {
     const recurse = (s: any) => this.render(s);
     const link = (s: any, ctx?: any) =>
       `${this.render(s)
-        .replace(/^\/.*\/module\//, GIT_SRC_ROOT)
-        .replace('@travetto/', GIT_SRC_ROOT)}${ctx.line ? `#L${ctx.line}` : ''}`;
+        .replace(ROOT, '%GIT%')
+        .replace('@travetto/', `%GIT%/module/`)}${ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
       case 'group': return c.nodes.map(cc => recurse(cc,)).join('');
       case 'code':
@@ -41,8 +53,8 @@ export const Markdown: Renderer = {
 \`\`\`${c.language}
 ${clean(recurse(c.content))}
 \`\`\`\n`;
+      case 'anchor': return `[${recurse(c.title)}](#${getId(recurse(c.fragment))}})`;
       case 'library':
-      case 'anchor':
       case 'file':
       case 'ref': return `[${recurse(c.title)}](${link(c.link, c)})`;
       case 'mod': return `[${recurse(c.title)}](${link(c.link, c)} "${recurse(c.description)}")`;
@@ -79,14 +91,20 @@ ${clean(recurse(c.content))}
 };
 
 export const Html: Renderer = {
+  toc(content: string, title: string, anchors: Anchor[]) {
+    return `<div class="toc"><div class="inner">
+  ${this.render(n.SubSection(n.Text(title)))}
+  ${this.render(n.List(...anchors))}
+</div></div>${content}`;
+  },
   render(c: AllChildren) {
     const recurse = (s: any) => this.render(s);
     const link = (s: any, ctx?: any) =>
       `${this.render(s)
         .replace(/@travetto\/([^.]+)$/, (_, x) => `/docs/${x}`)
-        .replace(/^\/.*\/module\//, GIT_SRC_ROOT)
+        .replace(ROOT, '%GIT%')
         .replace(/^images\//, '/assets/images/%MOD%/')
-        .replace(/^.*@travetto\//, GIT_SRC_ROOT)}${ctx && ctx.line ? `#L${ctx.line}` : ''}`;
+        .replace(/^.*@travetto\//, '%GIT%/module/')}${ctx && ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
       case 'group': return c.nodes.map(cc => recurse(cc)).join('');
       case 'install':
@@ -99,14 +117,18 @@ export const Html: Renderer = {
       </figcaption>
       <pre><code class="language-${c.language}">${clean(highlight(recurse(c.content), c.language))}</code></pre>     
       </figure>`;
-      case 'anchor':
+      case 'anchor': return `<a class="anchor-link" routerLink="." fragment="${getId(recurse(c.fragment))}">${recurse(c.title)}</a>`;
       case 'library':
       case 'file':
       case 'ref': return `<a target="_blank" class="${c._type === 'library' ? 'external-link' : 'source-link'}" href="${link(c.link, c)}">${recurse(c.title)}</a>`;
       case 'mod': return `<a class="module-link" href="${link(c.link, c)}" title="${recurse(c.description)}">${recurse(c.title)}</a>`;
       case 'image': return `<img src="${link(c.link, c)}" alt="${recurse(c.title)}">`;
-      case 'section': return `<h2>${recurse(c.title)}</h2>`;
-      case 'subsection': return `<h3>${recurse(c.title)}</h3>`;
+      case 'section':
+      case 'subsection': {
+        const tag = c._type === 'section' ? 'h2' : 'h3';
+        const title = recurse(c.title);
+        return `<${tag} id="${getId(title)}">${title}</${tag}>`;
+      }
       case 'command':
       case 'method':
       case 'path':

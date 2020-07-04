@@ -40,20 +40,23 @@ export function Ref(title: Content, file: string) {
     const res = DocUtil.read(file);
     file = res.file;
     if (typeof title == 'string') {
-      line = res.content.split(/\n/g)
-        .findIndex(x => new RegExp(`(class|function)[ ]+${title}`).test(x));
-      if (line < 0) {
-        line = 0;
-      } else {
-        line += 1;
-      }
-      if (DocUtil.isDecorator(title, file)) {
-        title = `@${title}`;
+      if (res.content) {
+        line = res.content.split(/\n/g)
+          .findIndex(x => new RegExp(`(class|function)[ ]+${title}`).test(x));
+        if (line < 0) {
+          line = 0;
+        } else {
+          line += 1;
+        }
+        if (DocUtil.isDecorator(title, file)) {
+          title = `@${title}`;
+        }
       }
       title = Text(title);
     }
   }
-  return { _type: 'ref' as const, title, link: Text(file), line };
+  const ret = { _type: 'ref' as const, title, link: Text(file), line };
+  return ret;
 }
 
 export function Method(content: Content) {
@@ -232,14 +235,14 @@ export function Library(title: Content, link: Content) {
   return { _type: 'library' as const, title, link };
 }
 
-export function Anchor(title: Content, link: Content) {
+export function Anchor(title: Content, fragment: Content) {
   if (typeof title === 'string') {
     title = Text(title);
   }
-  if (typeof link === 'string') {
-    link = Text(link);
+  if (typeof fragment === 'string') {
+    fragment = Text(fragment);
   }
-  return { _type: 'anchor' as const, title, link };
+  return { _type: 'anchor' as const, title, fragment };
 }
 
 export function Note(content: Content) {
