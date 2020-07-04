@@ -66,7 +66,7 @@ import { WatchComponent } from './gen/watch/watch.component';
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'overview' },
           { path: 'overview', component: OverviewComponent },
-          ...PAGES
+          ...PAGES.map(x => [x, ...(x.subs ?? [])]).reduce((a, b) => a.concat(b), [])
         ]
       }
     ])

@@ -38,32 +38,21 @@ export class DocUtil {
     }
   }
 
-  static read(file: string) {
+  static cleanFile(file: string) {
     if (file.startsWith('@')) {
       file = require.resolve(file);
     }
     const resolved = FsUtil.resolveUnix(FsUtil.cwd, file);
-    let text = fs.readFileSync(resolved, 'utf8')
-      .replace(/^\/\/\s*@file-if.*/, '');
+    return { resolved, cleaned: resolved.replace(/^.*node_modules\//, '') };
+  }
 
-    const cleaned = resolved.replace(/^.*node_modules\//, '');
+  static read(file: string) {
+    const { resolved, cleaned } = this.cleanFile(file);
+    if (file.startsWith('@')) {
+      file = require.resolve(file);
+    }
 
-    text = text.split(/\n/)
-      .map(x => {
-        if (/^import.*\.\.\/\.\./.test(x)) {
-          // eslint-disable-next-line prefer-const
-          let [imp, from] = x.split(' from ');
-          from = FsUtil.resolveUnix(path.dirname(file), from.replace(/[';]/g, ''))
-            .replace(/^.*travetto\/module/, '@travetto');
-
-          return `${imp} from '${from}';`;
-        }
-        return x;
-      })
-      .filter(x => !x.includes('@doc-exclude'))
-      .join('\n');
-
-    let language = 'typescript';
+    let language = '';
     switch (path.extname(file)) {
       case '.ts': language = 'typescript'; break;
       case '.js': language = 'javascript'; break;
@@ -78,7 +67,28 @@ export class DocUtil {
       case '.scss': language = 'scss'; break;
     }
 
-    return { content: text, language, file: cleaned };
+    let text: string | undefined;
+    if (language) {
+      text = fs.readFileSync(resolved, 'utf8')
+        .replace(/^\/\/\s*@file-if.*/, '');
+
+      text = text.split(/\n/)
+        .map(x => {
+          if (/^import.*\.\.\/\.\./.test(x)) {
+            // eslint-disable-next-line prefer-const
+            let [imp, from] = x.split(' from ');
+            from = FsUtil.resolveUnix(path.dirname(file), from.replace(/[';]/g, ''))
+              .replace(/^.*travetto\/module/, '@travetto');
+
+            return `${imp} from '${from}';`;
+          }
+          return x;
+        })
+        .filter(x => !x.includes('@doc-exclude'))
+        .join('\n');
+    }
+
+    return { content: text ?? '', language, file: cleaned };
   }
 
   static isDecorator(name: string, file: string) {

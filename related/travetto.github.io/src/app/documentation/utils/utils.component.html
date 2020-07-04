@@ -1,15 +1,11 @@
-<div class="documentation"><h1 id="utils" id="app-utilities">App Utilities</h1>
-<p>The framework provides some basic utilities that are primarily support utilities for various modules. These modules are aimed at higher level consumption to deal with application facing needs.</p>
+<div class="documentation">
+  <h1 id="utils" id="common-utilities">Common Utilities</h1>
+  <p>The framework provides some basic utilities that are primarily support utilities for
+    various modules. These modules are aimed at higher level consumption to deal with
+    application facing needs.</p>
+  <ul>
+    <li *ngFor="let page of pages" class="{{page.path}}">
+      <a [routerLink]="'/docs/' + page.path">{{page.title}}</a>
+    </li>
+  </ul>
 </div>
-
-      <app-log></app-log>
-
-      <app-cache></app-cache>
-
-      <app-command></app-command>
-
-      <app-worker></app-worker>
-
-      <app-net></app-net>
-
-      <app-watch></app-watch>

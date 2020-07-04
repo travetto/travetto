@@ -20,7 +20,7 @@ $SMALL-HEADER-HEIGHT: 40px;
 .main-module /deep/>* {
   padding-top: $HEADER-HEIGHT;
 
-  .documentation-links {
+  .toc {
     top: $HEADER-HEIGHT;
   }
 }

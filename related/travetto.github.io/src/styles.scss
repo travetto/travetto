@@ -28,6 +28,8 @@ li {
 .documentation {
   min-width: 800px;
   padding: 0 1em;
+  line-height: 1.25em;
+  word-break: break-word;
 
   img {
     display: block;
@@ -58,11 +60,11 @@ li {
     font-family: "Julius Sans One", sans-serif;
     font-weight: normal;
     color: #444;
-    border-bottom: 1px solid #ddd;
   }
 
   h2 {
     margin-top: .7em;
+    border-bottom: 1px solid #ddd;
   }
 
   h3,
@@ -70,7 +72,6 @@ li {
     margin-top: .7em;
     font-size: 18pt;
     color: #333;
-    border-bottom: 1px solid #eee;
   }
 
   h4 {
@@ -391,7 +392,7 @@ li {
   }
 }
 
-.documentation-links {
+.toc {
   grid-area: nav;
   margin-left: 50px;
   width: 250px;
@@ -485,7 +486,7 @@ li {
       display: block !important;
     }
 
-    .documentation-links {
+    .toc {
       display: block !important;
       width: 100%;
       padding: 0;
