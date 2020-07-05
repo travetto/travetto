@@ -1,15 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * Initialization function for all applications, this provides the
- * necessary structure for handling standard dev and framework dev
+ * Initialization function for all applications
  */
 function init() {
   const cwd = process.cwd();
-  const root = !process.env.TRV_DEV ? '.' : // Standard
-    cwd.includes('/module/boot') ? cwd : // In boot module
-      !/\/(module|related)\//.test(cwd) ? `${cwd}/module/boot` : // At root
-        `${cwd}/node_modules/@travetto/boot`; // Everywhere else
+  try { require(`${cwd}/.trv_env`); } catch { } // Load the .env.js file
+  const root = process.env.TRV_BOOT || `${cwd}/node_modules/@travetto/boot`;
   require(`${root}/src/compile`).CompileUtil.init();
 }
 

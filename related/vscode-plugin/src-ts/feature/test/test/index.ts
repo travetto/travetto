@@ -73,6 +73,10 @@ class TestRunnerFeature extends BaseFeature {
       this.consumer.onEvent(ev as TestEvent);
       this.codeLensUpdated?.();
     });
+
+    this.runner.process.once('message', () => { // Listen for first message
+      this.consumer.trackEditor(vscode.window.activeTextEditor);
+    });
   }
 
   /**

@@ -16,3 +16,9 @@ node_modules/@travetto/boot/**/*.d.ts
 node_modules/@travetto/boot/tsconfig.json
 node_modules/@travetto/boot/{README.md,LICENSE}
 node_modules/@travetto/boot/bin/**
+.trv_cache/
+images/*.gif
+.eslintignore
+README.js
+node_modules/**/*.d.ts
+node_modules/**/*.html
