@@ -23,17 +23,17 @@ ${SubSection('Real-time Test Evaluation')}
 
 The real-time test functionality will re-evaluate your test code on save.  This means as you type and save, the test will run.  The test will provide feedback inline, using green to indicate success, red to indicate failure, and gray to indicate unknown.
 
-${Image('Real-time Testing', 'images/real-time-testing.gif')}
+${Image('Real-time Testing', 'https://travetto.dev/assets/images/vscode-plugin/real-time-testing.gif')}
 
 ${SubSection('Debugging Tests')}
 
 While working on a test, if you want to debug it, you can press running ${inp`command-shift-t`} on OSX or ${inp`ctrl-shift-t`} on Windows/Linux.  This will start a debug session with the current line activated as a breakpoint.  This allows you to seamlessly jump into a debug session while writing tests.
 
-${Image('Debugging Single Test', 'images/debug-single-test.gif')}
+${Image('Debugging Single Test', 'https://travetto.dev/assets/images/vscode-plugin/debug-single-test.gif')}
 
 In addition to manual invocation at a line, each test has a ${lib.CodeLens}, that allows for trigger the test as well.
 
-${Image('Debugging Single Test', 'images/debug-code-lens.gif')}
+${Image('Debugging Single Test', 'https://travetto.dev/assets/images/vscode-plugin/debug-code-lens.gif')}
 
 
 ${SubSection('Commands')}
@@ -51,7 +51,7 @@ The plugin exposes this functionality as a command, to allow you to debug these 
 
 ${SubSection('Running')}
 
-${Image('Run Workflow', 'images/run-workflow.gif')}
+${Image('Run Workflow', 'https://travetto.dev/assets/images/vscode-plugin/run-workflow.gif')}
 
 Launching relies upon the command ${inp`Travetto: Run New Application`}.  This will show you a list of the available entry points in the application, with the parameters they support.  Selecting an application will take you through the parameter flow to select inputs, and once all parameters are selected, your application will launch.
 
@@ -59,7 +59,7 @@ After running and selecting a configuration for an application, you can now acce
 
 ${SubSection('Exporting and Customizing')}
 
-${Image('Export Workflow', 'images/run-export-workflow.gif')}
+${Image('Export Workflow', 'https://travetto.dev/assets/images/vscode-plugin/run-export-workflow.gif')}
 
 If at any point in time, you wish to modify the launch configuration of any application, you can execute the command ${inp`Travetto: Export Application Launch`}, and it will provide the same options as launch.  The only difference is that instead of running the application when it's done, you will have a new launch config in your debug launch configs.  This option is now completely independent from the plugin and can be modified without issue.
 

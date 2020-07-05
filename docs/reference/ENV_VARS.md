@@ -27,5 +27,6 @@ The common environment variables throughout the code base:
 * `TRV_DEV` = 0|1                - If we are in development mode, 
 * `TRV_CACHE` = cwd              - The output directory for compilation, defaults to `.trv_cache` of the cwd
 * `TRV_SHUTDOWN_WAIT` = 2s       - The max time to wait for shutdown to finish after initial SIGINT, default `2s`
+* `TRV_BOOT` = ''                - The location of the boot module location, primarily used for dev on the boot module
 
 Anything not prefixed with `TRV_`, is a standard env var that we are leveraging

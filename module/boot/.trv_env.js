@@ -1,0 +1,1 @@
+process.env.TRV_BOOT = __dirname;
