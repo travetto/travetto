@@ -57,7 +57,7 @@ ${clean(recurse(c.content))}
       case 'library':
       case 'file':
       case 'ref': return `[${recurse(c.title)}](${link(c.link, c)})`;
-      case 'mod': return `[${recurse(c.title)}](${link(c.link, c)} "${recurse(c.description)}")`;
+      case 'mod': return `[${recurse(c.title)}](${link(c.link, c)}#readme "${recurse(c.description)}")`;
       case 'image': return `![${recurse(c.title)}](${link(c.link, c)})`;
       case 'section': return `## ${recurse(c.title)}`;
       case 'subsection': return `### ${recurse(c.title)}`;
