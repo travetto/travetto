@@ -15,7 +15,7 @@
 		"prepare": "cd module/boot; npm run prepare",
 		"reinit": "rm -rf node_modules/; npm i; npm run init",
 		"service": "./bin/test/resources.sh",
-		"test": "cd module/boot; npx trv test:lerna",
+		"test": "cd module/base; npx trv test:lerna",
 		"boot": "cd module/boot/src-ts; tsc -w -p ."
 	},
 	"devDependencies": {
@@ -44,7 +44,8 @@
 		"passport-facebook": "^3.0.0",
 		"pg": "^8.2.1",
 		"redis": "^3.0.2",
-		"source-map-support": "^0.5.19"
+		"source-map-support": "^0.5.19",
+		"markdown-to-html": "0.0.13"
 	},
 	"dependencies": {
 		"typescript": "^3.9.5"

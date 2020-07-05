@@ -15,8 +15,6 @@ type Module = {
 
 const Module = Mod as any as Module;
 
-const isDev = EnvUtil.isTrue('TRV_DEV');
-
 /**
  * Framework specific utilities
  */
@@ -67,7 +65,9 @@ export class FrameworkUtil {
    * Standard path resolver
    */
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  static resolvePath = isDev ? (a: string, b?: any) => FrameworkUtil.resolveDev(a, b) : (x: string) => x;
+  static resolvePath = EnvUtil.isTrue('TRV_DEV') ?
+    (a: string, b?: any) => FrameworkUtil.resolveDev(a, b) :
+    (x: string) => x;
 
   /**
   * Scan the framework for folder/files only the framework should care about

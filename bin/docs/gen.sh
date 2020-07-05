@@ -1,19 +1,20 @@
 #!/bin/bash
 
+function link() {
+  pushd $1
+  for MOD in ${@:2}; do 
+    ../../bin/misc/link.sh $MOD; 
+  done
+  popd
+}
+
+link module/model          rest config
+link module/schema         rest config
+link related/vscode-plugin cli  config doc compiler registry base test app
+ln -sf `pwd`/module/cli/bin/travetto.js related/vscode-plugin/node_modules/.bin/trv
+
 # Startup mongo
 npm run service restart mongodb
-
-pushd module/model
-../../bin/misc/link.sh rest
-../../bin/misc/link.sh config
-popd
-pushd module/schema
-../../bin/misc/link.sh rest
-../../bin/misc/link.sh config
-popd
-pushd related/vscode-plugin
-../../bin/misc/link.sh app
-popd
 
 TGT=related/travetto.github.io/src/app/documentation/overview/overview.component.html
 echo '<div class="documentation">' > $TGT;

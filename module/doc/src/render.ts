@@ -104,6 +104,7 @@ export const Html: Renderer = {
         .replace(/@travetto\/([^.]+)$/, (_, x) => `/docs/${x}`)
         .replace(ROOT, '%GIT%')
         .replace(/^images\//, '/assets/images/%MOD%/')
+        .replace(/^https?:\/\/travetto.dev\//g, '/')
         .replace(/^.*@travetto\//, '%GIT%/module/')}${ctx && ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
       case 'group': return c.nodes.map(cc => recurse(cc)).join('');

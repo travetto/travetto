@@ -302,7 +302,7 @@ export function RawHeader(title: Content, description?: string) {
 }
 
 export function Image(title: Content, file: string) {
-  if (!FsUtil.existsSync(file)) {
+  if (!/^https?:/.test(file) && !FsUtil.existsSync(file)) {
     throw new Error(`${file} is not a valid location`);
   }
 

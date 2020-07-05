@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { Suite, Test } from '@travetto/test';
+import { Suite, Test, BeforeEach } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
 import { DependencyRegistry } from '../src/registry';
@@ -63,39 +63,38 @@ class PrimaryFactory {
 @Suite('complex-di')
 class ComplexDiTest {
 
+  @BeforeEach()
+  init() {
+    return RootRegistry.init();
+  }
+
   @Test()
   async commonWithDuplicates() {
-    await RootRegistry.init();
     await assert.rejects(() => DependencyRegistry.getInstance(Common), /multiple/i);
   }
 
   @Test()
   async commonWithSingle() {
-    await RootRegistry.init();
     assert(await DependencyRegistry.getInstance(CommonWithSingle) instanceof SubCommonSingle);
   }
 
   @Test()
   async commonWithPrimary() {
-    await RootRegistry.init();
     assert(await DependencyRegistry.getInstance(CommonWithPrimary) instanceof SubCommonWithPrimaryA);
   }
 
   @Test()
   async commonWithCustom() {
-    await RootRegistry.init();
     assert(await DependencyRegistry.getInstance(CommonWithCustom) instanceof SubCommonWithCustomB);
   }
 
   @Test()
   async commonWithCustomFactory() {
-    await RootRegistry.init();
     assert(await DependencyRegistry.getInstance(CommonWithFactory) instanceof CommonWithFactory);
   }
 
   @Test()
   async primaryWithFactory() {
-    await RootRegistry.init();
     assert(!(await DependencyRegistry.getInstance(PrimaryWithFactory) instanceof SubPrimaryWithFactoryA));
   }
 }

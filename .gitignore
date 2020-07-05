@@ -1,5 +1,6 @@
 .vscode/
 **/.trv*
+!**/.trv_env.js
 **/.DS_STORE
 lerna-debug.log
 bin/test/model/**
