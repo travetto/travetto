@@ -39,8 +39,12 @@ TARGET="$CURR/node_modules/@travetto/$MODULE"
 
 if [ -f "${CURR}/package.json" ]; then
   if [ "$ACTION" == "add" ]; then 
-    ln -sf "$SOURCE" "$TARGET"
-    echo "$BASE is linking @travetto/$MODULE to ../$MODULE" 
+    if [ ! -e "$TARGET" ]; then
+      ln -sf "$SOURCE" "$TARGET"
+      echo "$BASE is linking @travetto/$MODULE to ../$MODULE" 
+    else
+      echo "$BASE is already linked on @travetto/$MODULE to ../$MODULE" 
+    fi
   else
     rm $TARGET 
     echo "$BASE is unlinking @travetto/$MODULE" 
