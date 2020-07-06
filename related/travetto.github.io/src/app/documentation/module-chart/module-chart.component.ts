@@ -8,7 +8,15 @@ import { PAGES } from '../pages';
 })
 export class ModuleChartComponent implements OnInit {
 
-  pages = PAGES;
+  _pages = PAGES;
+
+  get pages() {
+    return this._pages.filter(x => x.path !== 'tools');
+  }
+
+  get tools() {
+    return this._pages.filter(x => x.path === 'tools');
+  }
 
   constructor() { }
 

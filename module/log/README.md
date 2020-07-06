@@ -115,9 +115,9 @@ The corresponding output would be
 ```bash
 $ alt/docs/src/output.ts -r @travetto/boot/register alt/docs/src/output.ts
 
-2020-07-05T16:31:47.119Z info  [alt/docs.src.output:5] Hello World
-2020-07-05T16:31:47.123Z info  [alt/docs.src.output:7] Woah! { a: { b: { c: [Object] } } }
-2020-07-05T16:31:47.125Z info  [alt/docs.src.output:9] Woah!
-2020-07-05T16:31:47.125Z debug [alt/docs.src.output:11] Test
+2020-07-06T20:17:08.111Z info  [alt/docs.src.output:5] Hello World
+2020-07-06T20:17:08.113Z info  [alt/docs.src.output:7] Woah! { a: { b: { c: [Object] } } }
+2020-07-06T20:17:08.114Z info  [alt/docs.src.output:9] Woah!
+2020-07-06T20:17:08.114Z debug [alt/docs.src.output:11] Test
 ```
 

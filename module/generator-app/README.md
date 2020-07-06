@@ -48,7 +48,7 @@ In addition to the core functionality, the `rest` feature has some useful sub-fe
 Authentication is also supported on the Restful endpoints by selecting [Rest Auth](https://github.com/travetto/travetto/tree/master/module/auth-rest#readme "Rest authentication integration support for the travetto framework") during setup.  This will support basic authentication running out of local memory, with user [REST Session](https://github.com/travetto/travetto/tree/master/module/rest-session#readme "Session provider for the travetto rest module.")s.
 
 ## Testing
-[Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin") can also be configured out of the box to provide simple test cases for the data model.
+[Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework") can also be configured out of the box to provide simple test cases for the data model.
 
 ## Data Modelling and Storage
 

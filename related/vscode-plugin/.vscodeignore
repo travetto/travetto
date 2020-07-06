@@ -2,7 +2,7 @@
 .vscode-test/**
 out/test/**
 test/**
-src/**
+src-ts/**
 **/*.map
 .gitignore
 tsconfig.json
@@ -16,7 +16,7 @@ node_modules/@travetto/boot/**/*.d.ts
 node_modules/@travetto/boot/tsconfig.json
 node_modules/@travetto/boot/{README.md,LICENSE}
 node_modules/@travetto/boot/bin/**
-.trv_cache/
+.trv_*/
 images/*.gif
 .eslintignore
 README.js

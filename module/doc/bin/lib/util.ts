@@ -1,9 +1,10 @@
 import * as path from 'path';
-import { FsUtil, ExecUtil } from '@travetto/boot';
+import { FsUtil, ExecUtil, EnvUtil } from '@travetto/boot';
 import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 import type { Renderer, AllChildren } from '../../src/render';
 
-const PRIMARY_BRANCH = ExecUtil.execSync('git', ['status', '-b', '-s', '.']).split(/\n/)[0].split('...')[0].split(' ')[1].trim();
+const PRIMARY_BRANCH = EnvUtil.get('TRV_DOC_BRANCH') ||
+  ExecUtil.execSync('git', ['status', '-b', '-s', '.']).split(/\n/)[0].split('...')[0].split(' ')[1].trim();
 const GIT_SRC_ROOT = `https://github.com/travetto/travetto/tree/${PRIMARY_BRANCH}`;
 
 export class CliDocUtil {

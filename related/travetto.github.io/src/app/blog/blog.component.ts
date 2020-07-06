@@ -31,17 +31,11 @@ export class BlogComponent implements OnInit {
   constructor(private client: HttpClient) { }
 
   ngOnInit() {
-    this.client.get<{ items: Post[] }>(`https://www.googleapis.com/blogger/v3/blogs/${this.blogId}/posts/`, {
-      params: {
-        callback: 'JSONP_CALLBACK',
-        key: 'AIzaSyBfg2W_JaAJU4qQWSKs-Vx_zVbFh4joYos'
-      }
-    }).subscribe(data => {
+    const key = 'AIzaSyBfg2W_JaAJU4qQWSKs-Vx_zVbFh4joYos';
+    this.client.get<{ items: Post[] }>(
+      `https://www.googleapis.com/blogger/v3/blogs/${this.blogId}/posts/?key=${key}`,
+    ).subscribe(data => {
       this.posts = data.items;
-      for (const item of this.posts) {
-        console.log(item);
-      }
     });
   }
-
 }

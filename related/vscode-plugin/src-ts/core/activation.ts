@@ -13,12 +13,12 @@ interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {
  */
 export class ActivationManager {
 
-  static registry = new Set<{ namespace: string, sub?: string, cls: ActivationFactory, instance?: ActivationTarget }>();
+  static registry = new Set<{ namespace: string, sub?: string, cls: ActivationFactory, instance?: ActivationTarget, module?: boolean }>();
 
   static async init() {
     for (const entry of [...this.registry.values()]) {
-      const { namespace, sub, cls } = entry;
-      if (!cls.isModule || (await Workspace.isInstalled(namespace))) {
+      const { namespace, sub, cls, module } = entry;
+      if (!module || (await Workspace.isInstalled(namespace))) {
         entry.instance = new cls(namespace, sub);
       }
     }
@@ -38,5 +38,5 @@ export class ActivationManager {
 }
 
 export function Activatible(namespace: string, sub?: string) {
-  return (cls: ActivationFactory) => { ActivationManager.registry.add({ namespace, sub, cls }); };
+  return (cls: ActivationFactory) => { ActivationManager.registry.add({ namespace, sub, cls, module: namespace.startsWith('@travetto') }); };
 }

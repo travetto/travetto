@@ -85,13 +85,13 @@ class SimpleController {
 
 Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
    
-   *  [@Path](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L49) - Path params
-   *  [@Query](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L55) - Query params
-   *  [@Body](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L67) - Request body (in it's entirety)
-   *  [@Header](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L61) - Header values
-   *  [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L43) - Special values exposed (e.g. [Request](./src/types.d.ts#L11), [Response](./src/types.d.ts#L87), Session, AuthContext, etc.)
+   *  [@Path](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L50) - Path params
+   *  [@Query](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L56) - Query params
+   *  [@Body](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L68) - Request body (in it's entirety)
+   *  [@Header](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L62) - Header values
+   *  [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L44) - Special values exposed (e.g. [Request](./src/types.d.ts#L11), [Response](./src/types.d.ts#L87), Session, AuthContext, etc.)
 
-Each [Param](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L30) can be configured to indicate:
+Each [@Param](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L31) can be configured to indicate:
    
    *  `name` - Name of param, field name, defaults to handler parameter name if necessary
    *  `description` - Description of param, pulled from [JSDoc](http://usejsdoc.org/about-getting-started.html), or defaults to name if empty
