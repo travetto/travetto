@@ -16,6 +16,8 @@ export class DocumentationComponent {
   ];
   url = '';
 
+  active = {};
+
   constructor(private router: Router) {
     router.events.subscribe((e) => {
       if (e instanceof NavigationEnd) {
@@ -26,5 +28,9 @@ export class DocumentationComponent {
 
   hasFragment(f) {
     return this.url.endsWith(`#${f}`);
+  }
+
+  setActive(page: (typeof PAGES)[number]) {
+    this.active = { [page.path]: true };
   }
 }

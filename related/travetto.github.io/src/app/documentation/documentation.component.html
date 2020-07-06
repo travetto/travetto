@@ -3,10 +3,12 @@
     <h3>Pages</h3>
     <ul>
       <li [routerLinkActive]="['active']" *ngFor="let page of pages" class="{{page.path}}">
-        <a [routerLink]="'/docs/' + page.path">{{page.title}}</a>
-        <ul *ngIf="page.subs">
+        <a *ngIf="page.component" [routerLink]="['', 'docs', page.path]">{{page.title}}</a>
+        <h4 [class]="grouping" *ngIf="!page.component" (click)="setActive(page)">{{page.title}}
+        </h4>
+        <ul *ngIf="page.subs" [class.toggled]="active[page.path]">
           <li *ngFor="let subp of page.subs" [ngClass]="{active:hasFragment(subp.path)}">
-            <a [routerLink]="'/docs/' + subp.path">{{subp.title}}</a>
+            <a [routerLink]="['/', 'docs', subp.path]">{{subp.title}}</a>
           </li>
         </ul>
       </li>

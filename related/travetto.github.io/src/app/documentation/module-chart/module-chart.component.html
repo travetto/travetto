@@ -1,10 +1,15 @@
 <div class="documentation">
   <div class="modules">
+    <div [class]="page.path" *ngFor="let page of tools[0].subs">
+      <a [routerLink]="['/', 'docs', page.path]" [innerHtml]="page.title"></a>
+    </div>
     <div [class]="page.path" *ngFor="let page of pages">
-      <a [routerLink]="'/docs/' + page.path" [innerHtml]="page.title"></a>
+      <a *ngIf="page.component" [routerLink]="['/', 'docs', page.path]"
+        [innerHtml]="page.title"></a>
+      <div class="title" *ngIf="!page.component" [innerHtml]="page.title"></div>
       <ul *ngIf="page.subs && page.subs.length">
         <li class="sub" *ngFor="let sub of page.subs">
-          <a [routerLink]="'/docs/' + sub.path" [innerHtml]="sub.title"></a>
+          <a [routerLink]="['/', 'docs', sub.path]" [innerHtml]="sub.title"></a>
         </li>
       </ul>
     </div>

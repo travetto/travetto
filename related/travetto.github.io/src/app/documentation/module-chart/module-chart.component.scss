@@ -28,7 +28,7 @@
   grid-template-rows: 10;
   margin: 1em 0;
 
-  div {
+  >div {
     border-radius: 5px;
     display: block;
     text-align: center;
@@ -39,7 +39,7 @@
     transition: .5s opacity;
     box-shadow: 1px 1px .3em -.1em black;
 
-    a {
+    a, .title {
       color: #333;
       font-size: 20pt;
       line-height: 2em;

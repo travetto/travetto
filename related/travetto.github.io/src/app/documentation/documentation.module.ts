@@ -7,8 +7,6 @@ import { DocumentationComponent } from './documentation.component';
 import { PAGES } from './pages';
 import { OverviewComponent } from './overview/overview.component';
 import { VSCodePluginComponent } from './vscode-plugin/vscode-plugin.component';
-import { CoreComponent } from './core/core.component';
-import { UtilsComponent } from './utils/utils.component';
 import { AssetComponent } from './gen/asset/asset.component';
 import { AssetMongoComponent } from './gen/asset-mongo/asset-mongo.component';
 import { AssetS3Component } from './gen/asset-s3/asset-s3.component';
@@ -66,7 +64,7 @@ import { WatchComponent } from './gen/watch/watch.component';
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'overview' },
           { path: 'overview', component: OverviewComponent },
-          ...PAGES.map(x => [x, ...(x.subs ?? [])]).reduce((a, b) => a.concat(b), [])
+          ...PAGES.map(x => [x, ...(x.subs ?? [])]).reduce((a, b) => a.concat(b), []).filter(x => !!x.component)
         ]
       }
     ])
@@ -75,8 +73,6 @@ import { WatchComponent } from './gen/watch/watch.component';
     DocumentationComponent,
     OverviewComponent,
     VSCodePluginComponent,
-    CoreComponent,
-    UtilsComponent,
     AssetComponent,
     AssetMongoComponent,
     AssetS3Component,

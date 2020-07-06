@@ -16,6 +16,7 @@ export function Authenticate(source: symbol, ...sources: symbol[]) {
  * Ensure the controller/route is authenticated, give a set of permissions
  * @param include Set of required permissions
  * @param exclude Set of invalid permissions
+ * @augments `@trv:auth/Authenticated`
  */
 export function Authenticated(include: string[] = [], exclude: string[] = []) {
   const checker = AuthUtil.permissionSetChecker(include, exclude);
@@ -31,6 +32,7 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
 
 /**
  * Require the controller/route to be unauthenticated
+ * @augments `@trv:auth/Unauthenticated`
  */
 export function Unauthenticated() {
   return ControllerRegistry.createFilterDecorator(req => {

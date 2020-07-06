@@ -90,13 +90,13 @@ Additionally, the return type of the method will also be used to describe the <c
 <h3 id="parameters">Parameters</h3>
 
 Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L49">@Path</a> - Path params</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L55">@Query</a> - Query params</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L67">@Body</a> - Request body (in it's entirety)</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L61">@Header</a> - Header values</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L43">@Context</a> - Special values exposed (e.g. <a target="_blank" class="source-link" href="./src/types.d.ts#L11">Request</a>, <a target="_blank" class="source-link" href="./src/types.d.ts#L87">Response</a>, Session, AuthContext, etc.)</li></ul>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L50">@Path</a> - Path params</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L56">@Query</a> - Query params</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L68">@Body</a> - Request body (in it's entirety)</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L62">@Header</a> - Header values</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L44">@Context</a> - Special values exposed (e.g. <a target="_blank" class="source-link" href="./src/types.d.ts#L11">Request</a>, <a target="_blank" class="source-link" href="./src/types.d.ts#L87">Response</a>, Session, AuthContext, etc.)</li></ul>
 
-Each <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L30">Param</a> can be configured to indicate:
+Each <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L31">@Param</a> can be configured to indicate:
 <ul> <li><code class="item input">name</code> - Name of param, field name, defaults to handler parameter name if necessary</li>
  <li><code class="item input">description</code> - Description of param, pulled from <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a>, or defaults to name if empty</li>
  <li><code class="item input">required?</code> - Is the field required?, defaults to whether or not the parameter itself is optional</li>

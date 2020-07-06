@@ -20,14 +20,16 @@
 
   li ul {
     display: none;
+    &.toggled {
+      display: block;
+    }
   }
 
   li.active>ul {
     display: block;
   }
 
-  li.util,
-  li.core {
+  li.tools {
     border-top: 1px dotted #ccc;
     padding-top: .5em;
     margin-top: .25em;

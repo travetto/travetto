@@ -44,6 +44,3 @@ src/assets/images/vscode-plugin
 # System Files
 .DS_Store
 Thumbs.db
-
-
-src/assets/vscode-plugin
