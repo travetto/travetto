@@ -12,7 +12,7 @@ export class RecursiveTransformSuite {
       FsUtil.resolveUnix(__dirname, '../alt/recursive'),
       'tree.ts'
     );
-    assert(output.includes('target: TreeNode'));
+    assert(output.includes('name: \'TreeNode\''));
     assert(output.includes('TreeNode'));
   }
 
@@ -23,7 +23,7 @@ export class RecursiveTransformSuite {
       FsUtil.resolveUnix(__dirname, '../alt/recursive'),
       'tree2.ts'
     );
-    assert(output.includes('target: TreeNode2'));
+    assert(output.includes('name: \'TreeNode2\''));
     assert(output.includes('TreeNode2'));
   }
 

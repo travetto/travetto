@@ -13,7 +13,11 @@ export class TranformerTestUtil {
    * Compile a single file from a folder
    */
   static async compile(folder: string, file?: string) {
-    const tsconfig = FsUtil.resolveUnix(folder, 'tsconfig.json');
+    let tsconfig = FsUtil.resolveUnix(folder, 'tsconfig.json');
+
+    if (!FsUtil.existsSync(tsconfig)) {
+      tsconfig = FsUtil.resolveUnix(__dirname, '..', '..', 'node_modules', '@travetto', 'boot', 'tsconfig.json');
+    }
 
     const prog = ts.createProgram({
       options: ts.convertCompilerOptionsFromJson(require(tsconfig), tsconfig).options,
