@@ -15,6 +15,9 @@ type Module = {
 
 const Module = Mod as any as Module;
 
+// Pre installation of resolution rules
+const pkg = (() => { try { return require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')); } catch { return {}; } })();
+
 /**
  * Framework specific utilities
  */
@@ -22,7 +25,7 @@ export class FrameworkUtil {
 
   private static readonly devCache = {
     boot: FsUtil.toUnix(path.resolve(__dirname, '..')),
-    [require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')).name.split('/')[1]]: FsUtil.cwd // Initial
+    [(pkg.name || '').split('/')[1]]: FsUtil.cwd // Initial
   };
 
   /**
