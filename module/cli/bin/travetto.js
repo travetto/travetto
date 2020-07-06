@@ -6,20 +6,11 @@ const { FsUtil } = require('@travetto/boot/src/fs');
  * Handle if cli is install globally
  */
 if (!FsUtil.toUnix(__filename).includes(FsUtil.cwd)) { // If the current file is not under the working directory
-  const PKG = '@travetto/cli';
-  const hasLocal = FsUtil.existsSync(`${FsUtil.cwd}/node_modules/${PKG}`);
-
-  // Map the module loading for targeting the local node_modules
-  const Module = require('module');
-  const og = Module._load;
-  Module._load = function (req, parent) {
-    if (req.startsWith(PKG)) { // Support delegating to installed CLI
-      req = hasLocal ?
-        FsUtil.resolveUnix(FsUtil.cwd, 'node_modules', req) : // Rewrite $PKG to map to local folder
-        FsUtil.resolveUnix(__dirname, '..', req.replace(`${PKG}/`, '')); // Map to global package
-    }
-    return og.call(Module, req, parent);
-  };
+  console.error('The @travetto/cli is not intended to be installed globally.  Please install it within your local project');
+  console.error();
+  console.error(`npm i @travetto/cli`);
+  console.error();
+  process.exit(1);
 }
 
 /**
