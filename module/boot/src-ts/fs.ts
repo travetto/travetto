@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as util from 'util';
 import * as path from 'path';
-import { ExecUtil, ExecutionResult } from './exec';
+import { ExecUtil } from './exec';
 
 const fsStat = util.promisify(fs.stat);
 const fsMkdir = util.promisify(fs.mkdir);
