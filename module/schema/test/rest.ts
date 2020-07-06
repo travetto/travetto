@@ -64,7 +64,7 @@ class API {
 
   @Get('/users')
   async allUsers() {
-    return [1, 2, 3,].map(x => getUser(x));
+    return Promise.all([1, 2, 3,].map(x => getUser(x)));
   }
 
   @Get('/allShapes')
@@ -121,6 +121,7 @@ export class RestTest {
   @BeforeAll()
   async before() {
     await RootRegistry.init();
+    await ControllerRegistry.init();
   }
 
   @Test()
