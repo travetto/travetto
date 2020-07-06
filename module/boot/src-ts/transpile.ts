@@ -94,7 +94,11 @@ export class TranspileUtil {
   static get compilerOptions(): any {
     if (!this[OPTS]) {
       const ts: typeof tsi = require('typescript');
-      const json = ts.readJsonConfigFile(`${FsUtil.cwd}/tsconfig.json`, ts.sys.readFile);
+      const projTsconfig = FsUtil.resolveUnix(FsUtil.cwd, 'tsconfig.json');
+      const baseTsconfig = FsUtil.resolveUnix(__dirname, '..', 'tsconfig.json');
+      // Fallback to base tsconfig if not found in local folder
+      const config = FsUtil.existsSync(projTsconfig) ? projTsconfig : baseTsconfig;
+      const json = ts.readJsonConfigFile(config, ts.sys.readFile);
       this[OPTS] = {
         ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options,
         rootDir: FsUtil.cwd,
