@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/app": "^1.0.0",
-    "@travetto/config": "^1.0.0",
-    "@travetto/di": "^1.0.0",
+    "@travetto/app": "^1.0.1",
+    "@travetto/config": "^1.0.1",
+    "@travetto/di": "^1.0.1",
     "@types/cookies": "^0.7.4",
     "@types/express-serve-static-core": "^4.17.7",
     "cookies": "^0.8.0"
@@ -40,5 +40,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
