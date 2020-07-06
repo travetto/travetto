@@ -5,7 +5,7 @@ const { FsUtil } = require('@travetto/boot/src/fs');
 /**
  * Handle if cli is install globally
  */
-if (!FsUtil.toUnix(__filename).includes(FsUtil.cwd)) { // If the current file is not under the working directory
+if (process.env.TRV_DEV !== '1' && !FsUtil.toUnix(__filename).includes(FsUtil.cwd)) { // If the current file is not under the working directory
   console.error('The @travetto/cli is not intended to be installed globally.  Please install it within your local project');
   console.error();
   console.error(`npm i @travetto/cli`);
@@ -34,5 +34,4 @@ function compile() {
  */
 require('@travetto/boot/register');
 compile();
-require('@travetto/cli/src/execute')
-  .ExecutionManager.run(process.argv); // Allow for handing off to local/external cli
+require('@travetto/cli/src/execute').ExecutionManager.run(process.argv); // Allow for handing off to local/external cli
