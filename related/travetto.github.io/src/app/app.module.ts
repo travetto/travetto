@@ -45,7 +45,7 @@ const routes: Routes = [
   ],
   imports: [
     BrowserModule,
-    HttpClientModule, HttpClientJsonpModule,
+    HttpClientModule,
     DocumentationModule,
     RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled' }),
     BrowserAnimationsModule,

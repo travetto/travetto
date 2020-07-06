@@ -39,36 +39,14 @@ import { AuthRestComponent } from './gen/auth-rest/auth-rest.component';
 import { AuthPassportComponent } from './gen/auth-passport/auth-passport.component';
 import { JwtComponent } from './gen/jwt/jwt.component';
 import { EmailTemplateComponent } from './gen/email-template/email-template.component';
-import { CoreComponent } from './core/core.component';
-import { UtilsComponent } from './utils/utils.component';
 import { YamlComponent } from './gen/yaml/yaml.component';
 import { TransformerComponent } from './gen/transformer/transformer.component';
 import { ImageComponent } from './gen/image/image.component';
 
 export const PAGES = [
-  { path: 'cli', title: 'CLI Support', component: CliComponent, subs: [] },
-  { path: 'vscode-plugin', title: 'VS Code Plugin', component: VSCodePluginComponent, subs: [] },
-  { path: 'generator-app', title: 'Yeoman App Generator', component: GeneratorAppComponent, subs: [] },
-  {
-    path: 'config', title: 'Config ', component: ConfigComponent, subs: [
-      { path: 'yaml', title: 'Simple YAML Parser', component: YamlComponent }
-    ]
-  },
-  {
-    path: 'app', title: 'Application', component: AppComponent, subs: [
-
-    ]
-  },
-  {
-    path: 'di', title: 'Dependency Injection  ', component: DiComponent, subs: [
-
-    ]
-  },
-  {
-    path: 'schema', title: 'Schema', component: SchemaComponent, subs: [
-
-    ]
-  },
+  { path: 'di', title: 'Dependency Injection  ', component: DiComponent },
+  { path: 'app', title: 'Application', component: AppComponent },
+  { path: 'schema', title: 'Schema', component: SchemaComponent },
   {
     path: 'model', title: 'Model', component: ModelComponent, subs: [
       { path: 'model-elasticsearch', title: 'Elasticsearch', component: ModelElasticsearchComponent },
@@ -86,7 +64,11 @@ export const PAGES = [
       { path: 'rest-aws-lambda', title: 'Aws-Lambda', component: RestAwsLambdaComponent }
     ]
   },
-  { path: 'test', title: 'Test', component: TestComponent, subs: [] },
+  {
+    path: 'config', title: 'Config ', component: ConfigComponent, subs: [
+      { path: 'yaml', title: 'Simple YAML Parser', component: YamlComponent }
+    ]
+  },
   {
     path: 'asset', title: 'Asset', component: AssetComponent, subs: [
       { path: 'asset-mongo', title: 'Mongo', component: AssetMongoComponent },
@@ -108,8 +90,16 @@ export const PAGES = [
       { path: 'image', title: 'Image', component: ImageComponent }
     ]
   },
+  { path: 'test', title: 'Test', component: TestComponent },
   {
-    path: 'core', title: 'Core Components', component: CoreComponent, subs: [
+    path: 'tools', title: 'Tooling', subs: [
+      { path: 'cli', title: 'CLI Support', component: CliComponent },
+      { path: 'vscode-plugin', title: 'VS Code Plugin', component: VSCodePluginComponent },
+      { path: 'generator-app', title: 'Yeoman App Generator', component: GeneratorAppComponent },
+    ]
+  },
+  {
+    path: 'core', title: 'Core Components', subs: [
       { path: 'boot', title: 'Boot', component: BootComponent },
       { path: 'base', title: 'Base', component: BaseComponent },
       { path: 'compiler', title: 'Compiler', component: CompilerComponent },
@@ -118,7 +108,7 @@ export const PAGES = [
     ]
   },
   {
-    path: 'utils', title: 'Common Utilities', component: UtilsComponent, subs: [
+    path: 'utils', title: 'Common Utilities', subs: [
       { path: 'log', title: 'Log', component: LogComponent },
       { path: 'cache', title: 'Cache', component: CacheComponent },
       { path: 'command', title: 'Command', component: CommandComponent },

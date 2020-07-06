@@ -26,6 +26,7 @@ export const paramConfig = (location: ParamConfig['location'], extra: string | P
  * Define a parameter
  * @param location The location of the parameter
  * @param extra Any extra configuration for the param
+ * @augments `@trv:rest/Param`
  */
 export function Param(location: ParamConfig['location'], extra: string | Partial<ParamConfig>) {
   const param = paramConfig(location, extra);

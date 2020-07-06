@@ -288,8 +288,8 @@ First we must start the application:
 ```bash
 $ /bin/bash alt/docs/bin/startup.sh
 
-2020-07-05T16:31:14.727Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
-2020-07-05T16:31:14.732Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
+2020-07-06T20:16:44.984Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
+2020-07-06T20:16:44.988Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
   app: {
     watch: true,
     readonly: false,
@@ -313,7 +313,7 @@ $ /bin/bash alt/docs/bin/startup.sh
     }
   }
 }
-2020-07-05T16:31:14.760Z info  [./node_modules/@travetto/rest/src/server/server.ts:187] Listening on 3000
+2020-07-06T20:16:45.012Z info  [./node_modules/@travetto/rest/src/server/server.ts:187] Listening on 3000
 ```
  
 
@@ -330,8 +330,8 @@ $ sh alt/docs/bin/create.sh
 
 {
   "text": "New Todo",
-  "created": "2020-07-05T16:31:18.868Z",
-  "id": "5f0200568447a84497907d6e"
+  "created": "2020-07-06T20:16:49.527Z",
+  "id": "5f0386b18c54776b4126184d"
 }
 ```
 
@@ -346,14 +346,14 @@ $ sh alt/docs/bin/list.sh
 
 [
   {
-    "id": "5f02004e81e264444a7e782a",
+    "id": "5f0386a99a1ebb6a9de5e4f1",
     "text": "New Todo",
-    "created": "2020-07-05T16:31:10.091Z"
+    "created": "2020-07-06T20:16:41.384Z"
   },
   {
-    "id": "5f0200568447a84497907d6e",
+    "id": "5f0386b18c54776b4126184d",
     "text": "New Todo",
-    "created": "2020-07-05T16:31:18.868Z"
+    "created": "2020-07-06T20:16:49.527Z"
   }
 ]
 ```

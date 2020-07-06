@@ -13,7 +13,7 @@ The currently supported features are:
 
 ## Testing
 
-The test related functionality relies upon the [Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin") module being installed, and used to define tests ([@Suite](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L12) and [@Test](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L9)).
+The test related functionality relies upon the [Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework") module being installed, and used to define tests ([@Suite](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L12) and [@Test](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L9)).
 
 ### Real-time Test Evaluation
 
@@ -76,7 +76,7 @@ Currently the supported commands are:
 ### Requirements
    
    *  You should have the [Travetto](https://travetto.dev) framework installed, version 1.0.0 and higher.
-   *  Tests require the [Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework that provides hooks for high levels of integration with the travetto framework and test plugin") module to be installed.
+   *  Tests require the [Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework") module to be installed.
    *  Application running requires the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to be installed.
 
 ## Known Issues
