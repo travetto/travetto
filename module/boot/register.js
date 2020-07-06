@@ -6,7 +6,7 @@
 function init() {
   const cwd = process.cwd();
   try { require(`${cwd}/.trv_env`); } catch { } // Load the .env.js file
-  const root = process.env.TRV_BOOT || `${cwd}/node_modules/@travetto/boot`;
+  const root = process.env.TRV_BOOT || __dirname;
   require(`${root}/src/compile`).CompileUtil.init();
 }
 
