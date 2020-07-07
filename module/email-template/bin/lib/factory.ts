@@ -33,7 +33,7 @@ export class TagRegistry {
 
   static resolve(cls: any, tag: string) {
     cls = this.id(cls);
-    return this.data.get(cls)?.[tag] ?? '';
+    return this.data.get(cls)?.[tag];
   }
 
   static has(cls: any, tag: string) {
