@@ -22,7 +22,7 @@ export class InkyComponentFactory implements ComponentFactory {
   private generate(element: Node) {
     const tag = TagRegistry.getTag(element, this.ns);
     if (TagRegistry.has(this, tag)) {
-      return TagRegistry.resolve(this, tag).call(this, element).trim();
+      return TagRegistry.resolve(this, tag)!.call(this, element).trim();
     } else {
       return `<tr><td>${serialize(element)}</td></tr>`;
     }
@@ -33,27 +33,32 @@ export class InkyComponentFactory implements ComponentFactory {
    */
   private traverse(node: Node & { hasColumns?: boolean }) {
     const children = Parse5Adapter.getChildNodes(node) ?? [];
-    let i = -1;
-    for (const child of children.slice(0)) {
-      i = i + 1;
+    const out = [];
+
+    for (const child of children) {
       const tagName = Parse5Adapter.getTagName(child);
       if (!tagName) {
-        continue;
-      }
-      this.traverse(child);
-      if (TagRegistry.has(this, TagRegistry.getTag(tagName, this.ns))) {
-        if (tagName === 'columns' && !('hasColumns' in node)) {
-          node.hasColumns = true;
-          const all = children.filter(x => Parse5Adapter.isElementNode(x));
-          HtmlUtil.setDomAttribute(all[0], 'class', 'first');
-          HtmlUtil.setDomAttribute(all[all.length - 1], 'class', 'last');
+        out.push(child);
+      } else {
+        this.traverse(child);
+        if (TagRegistry.has(this, TagRegistry.getTag(tagName, this.ns))) {
+          if (tagName === 'columns' && !('hasColumns' in node)) {
+            node.hasColumns = true;
+            const all = children.filter(x => Parse5Adapter.isElementNode(x));
+            HtmlUtil.setDomAttribute(all[0], 'class', 'first');
+            HtmlUtil.setDomAttribute(all[all.length - 1], 'class', 'last');
+          }
+          const text = this.generate(child);
+          const newFrag = parseFragment(text);
+          const newNodes = (Parse5Adapter.getChildNodes(newFrag).filter(x => Parse5Adapter.isElementNode(x)))!;
+          out.push(...newNodes);
+        } else {
+          out.push(child);
         }
-        const text = this.generate(child);
-        const newFrag = parseFragment(text);
-        const newNodes = (Parse5Adapter.getChildNodes(newFrag).filter(x => Parse5Adapter.isElementNode(x)))!;
-        children.splice(i, 1, ...newNodes);
       }
     }
+    // @ts-expect-error
+    node.childNodes = out;
     return node;
   }
 
@@ -362,7 +367,7 @@ export class InkyComponentFactory implements ComponentFactory {
   hr(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);
     attrs.class = HtmlUtil.classes('hr', attrs.class);
-    return `<div ${HtmlUtil.toStr(attrs)}></div>`;
+    return `<table ${HtmlUtil.toStr(attrs)}><th></th></table>`;
   }
 
   render(document: Node): Node;
