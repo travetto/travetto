@@ -1,3 +1,3 @@
 export * from './src/service';
 export * from './src/decorator';
-export * from './src/extension/rest.interceptor';
+export { AsyncContextInterceptor } from './src/extension/rest.interceptor';
