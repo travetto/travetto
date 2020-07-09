@@ -77,7 +77,7 @@ export class Transpiler {
       realpath: FrameworkUtil.resolvePath,
       writeFile: this.writeFile.bind(this),
       fileExists: f => this.fileExists(f),
-      getDefaultLibFileName: ts.getDefaultLibFileName,
+      getDefaultLibFileName: (opts) => ts.getDefaultLibFileName(opts),
       getCurrentDirectory: () => FsUtil.cwd,
       getCanonicalFileName: x => x,
       getNewLine: () => ts.sys.newLine,
