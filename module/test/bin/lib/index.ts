@@ -31,7 +31,7 @@ export async function runTests(opts: RunState) {
 }
 
 export async function runTestsDirect(...args: string[]) {
-  CliUtil.initAppEnv({ ...DEF_ENV, envExtra: { ...ENV_EXT, TRV_TEST_DEBUGGER: 1 } });
+  CliUtil.initAppEnv({ ...DEF_ENV, envExtra: ENV_EXT });
   await load();
 
   return runTests({
