@@ -142,14 +142,15 @@ export class CliUtil {
     let done = false;
     let value: T | undefined;
     let err: Error | undefined;
-    work
+    const final = work
       .then(res => value = res)
       .catch(e => err = e)
       .finally(() => done = true);
-    await sleep(delay);
+    await Promise.race([sleep(delay), final]);
+
     while (!done) {
       await writeLine(`${this.WAIT_STATE[i = (i + 1) % this.WAIT_STATE.length]} ${message}`);
-      await sleep(100);
+      await sleep(50);
     }
 
     if (i >= 0) {
