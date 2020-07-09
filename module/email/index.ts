@@ -4,4 +4,4 @@ export * from './src/config';
 export * from './src/transport';
 export * from './src/util';
 export * from './src/template';
-export * from './src/extension/nodemailer';
+export { NodemailerTransport } from './src/extension/nodemailer';

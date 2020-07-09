@@ -304,7 +304,11 @@ export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Register a factory configuration
    */
-  registerFactory(config: InjectableFactoryConfig<any> & { fn: (...args: any[]) => any, id: string }) {
+  registerFactory(config: Omit<InjectableFactoryConfig<any>, 'qualifier'> & {
+    id: string;
+    qualifier?: undefined | symbol;
+    fn: (...args: any[]) => any;
+  }) {
     const finalConfig: Partial<InjectableConfig<any>> = {};
 
     finalConfig.factory = config.fn;

@@ -63,7 +63,7 @@ export interface InjectableFactoryConfig<T> extends Core<T> {
   /**
    * Is this the primary instance
    */
-  primary: boolean;
+  primary?: boolean;
   /**
    * List of all dependencies as function arguments
    */

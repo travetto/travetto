@@ -5,5 +5,5 @@ export * from './src/source/memory';
 export * from './src/source/core';
 export * from './src/source/cullable';
 export * from './src/source/util';
-export * from './src/extension/model';
-export * from './src/extension/redis';
+export { ModelCacheSource } from './src/extension/model';
+export { RedisCacheSource } from './src/extension/redis';

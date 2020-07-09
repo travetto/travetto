@@ -12,5 +12,5 @@ export * from './src/validate/validator';
 export * from './src/validate/error';
 export * from './src/validate/types';
 export * from './src/bind-util';
-export * from './src/extension/rest';
-export * from './src/extension/faker';
+export { SchemaBody, SchemaQuery } from './src/extension/rest';
+export { SchemaFakerUtil } from './src/extension/faker';
