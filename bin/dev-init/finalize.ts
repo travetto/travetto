@@ -7,7 +7,7 @@ export class Finalize {
   static ROOT = FsUtil.toUnix(path.resolve(fs.realpathSync(__dirname), '..', '..')); // Move up from ./bin folder;
   static MOD_ROOT = `${Finalize.ROOT}/module`;
   static NM_ROOT = `${Finalize.ROOT}/node_modules`;
-  static COMMON_LIBS = ['typescript', 'tslib'];
+  static COMMON_LIBS = [];
 
   /**
    * Symlink, with some platform specific support
