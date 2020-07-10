@@ -34,11 +34,12 @@ export class RegisterTransformer {
    */
   @OnMethod()
   static transformMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration) {
-    const hash = SystemUtil.naiveHash(node.getText());
+    // eslint-disable-next-line no-bitwise
+    const isAbstract = !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
 
-    const conf = { hash };
-
-    if (ts.isIdentifier(node.name)) {
+    if (ts.isIdentifier(node.name) && !isAbstract) {
+      const hash = SystemUtil.naiveHash(node.getText());
+      const conf = { hash };
       state[methods] = state[methods] || {};
       state[methods]![node.name.escapedText.toString()] = conf;
     }
