@@ -14,7 +14,7 @@
   "homepage": "https://travetto.io",
   "keywords": [
     "shutdown-helper",
-    "file-watcher",
+    "console-manager",
     "filesystem-traversal",
     "travetto",
     "typescript"
