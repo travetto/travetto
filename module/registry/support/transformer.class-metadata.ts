@@ -37,7 +37,7 @@ export class RegisterTransformer {
     // eslint-disable-next-line no-bitwise
     const isAbstract = !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
 
-    if (ts.isIdentifier(node.name) && !isAbstract) {
+    if (ts.isIdentifier(node.name) && !isAbstract && ts.isClassDeclaration(node.parent)) {
       const hash = SystemUtil.naiveHash(node.getText());
       const conf = { hash };
       state[methods] = state[methods] || {};

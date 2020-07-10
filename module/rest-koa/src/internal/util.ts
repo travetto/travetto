@@ -18,7 +18,7 @@ export class KoaServerUtil {
         [TRV_ORIG]: ctx,
         [TRV_RAW]: ctx.req,
         protocol: ctx.protocol as 'http',
-        method: ctx.request.method as 'get',
+        method: ctx.request.method as 'GET',
         path: ctx.request.path,
         query: ctx.request.query,
         params: ctx.params,

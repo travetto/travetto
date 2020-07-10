@@ -10,18 +10,18 @@ export abstract class RestInterceptor {
   /**
    * This interceptor must run after these
    */
-  public after?: Class<RestInterceptor>[];
+  after?: Class<RestInterceptor>[];
   /**
    * This interceptor must run before these
    */
-  public before?: Class<RestInterceptor>[];
+  before?: Class<RestInterceptor>[];
 
   /**
    * Determines the current route is applicable for the interceptor
    * @param route The route to check
    * @param controller The controller the route belongs to
    */
-  public applies?(route: RouteConfig, controller: Partial<ControllerConfig>): boolean;
+  abstract applies?(route: RouteConfig, controller: Partial<ControllerConfig>): boolean;
 
   /**
    * Actually handle the request, response when applicable
