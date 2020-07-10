@@ -16,7 +16,7 @@ export class AsyncContextInterceptor extends RestInterceptor {
   @Inject()
   context: AsyncContext;
 
-  public applies?(route: RouteConfig): boolean {
+  applies(route: RouteConfig): boolean {
     return !ConfigManager.get('rest.context').disabled;
   }
 

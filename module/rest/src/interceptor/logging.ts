@@ -79,7 +79,7 @@ export class LoggingInterceptor extends RestInterceptor {
   @Inject()
   logConfig: RestLogRoutesConfig;
 
-  public applies?(route: RouteConfig, controller: Partial<ControllerConfig>) {
+  applies(route: RouteConfig, controller: Partial<ControllerConfig>) {
     const check = this.logConfig.deny.length ?
       !LoggingInterceptor.matchRoute(controller, route, this.logConfig.denyList) :
       (this.logConfig.allow.length ?

@@ -5,7 +5,7 @@ import { ChildProcess } from 'child_process';
  */
 export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any, U extends { type: string } = V & { type: string }> {
 
-  public proc: T;
+  proc: T;
 
   constructor(proc: T) {
     this.proc = proc;

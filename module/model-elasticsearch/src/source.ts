@@ -56,7 +56,8 @@ export class ElasticsearchModelSource extends ModelSource {
   private identities: Map<Class, EsIdentity> = new Map();
   // private indices: Record<string, IndexConfig<any>[]> = {};
   private indexToClass: Map<string, Class> = new Map();
-  public client: es.Client;
+
+  client: es.Client;
 
   constructor(private config: ElasticsearchModelConfig) {
     super();

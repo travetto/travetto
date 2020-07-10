@@ -31,7 +31,7 @@ export class DocumentResultsManager {
   private diagnostics: vscode.Diagnostic[] = [];
   private editors = new Set<vscode.TextEditor>();
   private document: vscode.TextDocument;
-  public active = false;
+  active = false;
 
   constructor(private file: string) { }
 

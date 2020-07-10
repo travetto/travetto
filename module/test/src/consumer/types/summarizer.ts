@@ -7,7 +7,7 @@ import { SuitesSummary, TestConsumer } from '../types';
  */
 export class TestResultsSummarizer implements TestConsumer {
 
-  public summary: SuitesSummary = {
+  summary: SuitesSummary = {
     passed: 0,
     failed: 0,
     skipped: 0,

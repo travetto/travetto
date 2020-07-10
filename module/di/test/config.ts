@@ -6,17 +6,17 @@ import { Util } from './util';
 
 @Injectable()
 export class Empty {
-  public age = 10;
+  age = 10;
 }
 
 class Basic {
   @Inject()
-  public empty: Empty;
+  empty: Empty;
 }
 
 @Config('a')
 export class DbConfig<A, B> extends Basic {
-  public temp: any;
+  temp: any;
 
   constructor() {
     super();
