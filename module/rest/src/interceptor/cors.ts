@@ -55,7 +55,7 @@ export class CorsInterceptor extends RestInterceptor {
     this.credentials = !!this.corsConfig.credentials;
   }
 
-  public applies?(route: RouteConfig) {
+  applies(route: RouteConfig) {
     return this.corsConfig && this.corsConfig.active;
   }
 

@@ -36,7 +36,7 @@ export class AuthInterceptor extends RestInterceptor {
    * @param route The route to check
    * @param controller The controller the route belongs to
    */
-  public applies() {
+  applies() {
     return !!this.contextStore;
   }
 

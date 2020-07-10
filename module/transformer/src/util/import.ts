@@ -58,7 +58,7 @@ export class ImportUtil {
   /**
    * Add imports to a source file
    */
-  public static addImports(file: ts.SourceFile, ...imports: Import[]) {
+  static addImports(file: ts.SourceFile, ...imports: Import[]) {
     if (!imports.length) {
       return file;
     }

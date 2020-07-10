@@ -6,7 +6,8 @@ import { Asset } from './types';
  * Standard class for an asset naming strateigy
  */
 export abstract class AssetNamingStrategy {
-  public readonly prefix: string;
+  readonly prefix: string;
+
   /**
    * Produce a path for a given asset
    * @param Asset Get path from an asset

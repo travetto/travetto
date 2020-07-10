@@ -44,7 +44,7 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
     ShutdownManager.onShutdown(__filename, () => this.pool.end());
   }
 
-  public get asyncContext() {
+  get asyncContext() {
     return this.context.get<{ connection: pg.PoolClient }>('connection');
   }
 
