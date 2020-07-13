@@ -21,19 +21,13 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   private compiler: typeof Compiler;
   private runs = 0;
 
-  constructor() {
-    super();
-
-    (async () => {
-      const { TestUtil } = await import('../runner/util');
-      TestUtil.registerCleanup('worker');
-    })();
-  }
-
   /**
    * Start the worker
    */
   async activate() {
+    const { TestUtil } = await import('../runner/util');
+    TestUtil.registerCleanup('worker');
+
     // Listen for inbound requests
     this.listen(this.onCommand.bind(this));
 
@@ -87,7 +81,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
     // Reload registries, test and root
     await PhaseManager.create('reset').run();
-    ShutdownManager.execute(-1);
+    await ShutdownManager.executeAsync(-1);
   }
 
   /**
