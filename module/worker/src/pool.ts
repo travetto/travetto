@@ -127,6 +127,7 @@ export class WorkPool<X, T extends Worker<X>> {
 
     while (await src.hasNext()) {
       const worker = (await this.pool.acquire())!;
+      console.debug(`[${process.pid}] Acquired ${worker.id}`);
       const nextInput = await src.next();
 
       const completion = worker.execute(nextInput)
