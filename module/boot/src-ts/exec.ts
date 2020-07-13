@@ -76,10 +76,13 @@ export class ExecUtil {
    */
   static getOpts(opts: ExecutionOptions) {
     return {
-      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       cwd: process.cwd(),
       shell: false,
       ...opts,
+      stdio:
+        opts.stdio ??
+        (opts.quiet ? ['pipe', 'ignore', 'ignore', 'ipc'] : undefined) ??
+        ['pipe', 'pipe', 'pipe', 'ipc'],
       env: {
         ...process.env,
         ...(opts.env ?? {})
