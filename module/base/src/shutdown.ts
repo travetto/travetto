@@ -59,7 +59,7 @@ export class ShutdownManager {
     return promises;
   }
 
-  private static async executeAsync(exitCode: number = 0, err?: any) {
+  static async executeAsync(exitCode: number = 0, err?: any) {
 
     if (this.shutdownCode > 0) { // Killed twice
       if (exitCode > 0) { // Handle force kill
