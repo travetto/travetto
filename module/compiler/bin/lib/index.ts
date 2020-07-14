@@ -29,7 +29,7 @@ export class CompileCliUtil {
    */
   static async compileAll() {
     const { FsUtil } = await import('@travetto/boot');
-    const alt = FsUtil.resolveUnix(FsUtil.cwd, 'alt');
+    const alt = FsUtil.resolveUnix('alt');
     if (FsUtil.existsSync(alt)) {
       process.env.TRV_ROOTS = fs.readdirSync(alt).map(x => `./alt/${x}`).join(',');
     }

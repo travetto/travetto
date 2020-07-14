@@ -28,7 +28,7 @@ export class ImportUtil {
    */
   static collectImports(src: ts.SourceFile) {
     const pth = require.resolve(src.fileName);
-    const base = FsUtil.resolveUnix(FsUtil.toUnix(pth));
+    const base = FsUtil.toUnix(pth);
 
     const imports = new Map<string, Import>();
 
