@@ -1,10 +1,9 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import { DepResolver } from './resolver';
 import { FsUtil } from '../../module/boot/src/fs';
 
 export class Finalize {
-  static ROOT = FsUtil.toUnix(path.resolve(fs.realpathSync(__dirname), '..', '..')); // Move up from ./bin folder;
+  static ROOT = FsUtil.resolveUnix(fs.realpathSync(__dirname), '..', '..'); // Move up from ./bin folder;
   static MOD_ROOT = `${Finalize.ROOT}/module`;
   static NM_ROOT = `${Finalize.ROOT}/node_modules`;
   static COMMON_LIBS = [];

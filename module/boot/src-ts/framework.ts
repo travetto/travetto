@@ -1,6 +1,5 @@
 // @ts-ignore
 import * as Mod from 'module';
-import * as path from 'path';
 
 import { FsUtil } from './fs';
 import { ScanFs } from './scan';
@@ -16,7 +15,7 @@ type Module = {
 const Module = Mod as any as Module;
 
 // Pre installation of resolution rules
-const pkg = (() => { try { return require(FsUtil.joinUnix(FsUtil.cwd, 'package.json')); } catch { return {}; } })();
+const pkg = (() => { try { return require(FsUtil.resolveUnix('package.json')); } catch { return {}; } })();
 
 /**
  * Framework specific utilities
@@ -24,7 +23,7 @@ const pkg = (() => { try { return require(FsUtil.joinUnix(FsUtil.cwd, 'package.j
 export class FrameworkUtil {
 
   private static readonly devCache = {
-    boot: FsUtil.toUnix(path.resolve(__dirname, '..')),
+    boot: FsUtil.resolveUnix(__dirname, '..'),
     [(pkg.name || '').split('/')[1]]: FsUtil.cwd // Initial
   };
 

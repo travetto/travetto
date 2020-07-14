@@ -61,7 +61,7 @@ export class FsUtil {
    * @param pths The paths to resolve
    */
   static resolveUnix(...pths: string[]) {
-    return this.toUnix(path.resolve(...pths));
+    return this.toUnix(path.resolve(this.cwd, ...pths));
   }
 
   /**

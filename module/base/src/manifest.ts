@@ -77,7 +77,7 @@ class $AppManifest {
 
     this.roots = [FsUtil.cwd, ...EnvUtil.getList('TRV_ROOTS')]
       .filter(x => !!x)
-      .map(x => FsUtil.resolveUnix(FsUtil.cwd, x).replace(FsUtil.cwd, '.'))
+      .map(x => FsUtil.resolveUnix(x).replace(FsUtil.cwd, '.'))
       .filter((x, i, all) => i === 0 || x !== all[i - 1]); // De-dupe
 
     this.resourceRoots = [
@@ -119,4 +119,4 @@ class $AppManifest {
   }
 }
 
-export const AppManifest = new $AppManifest(FsUtil.joinUnix(FsUtil.cwd, 'package.json'));
+export const AppManifest = new $AppManifest(FsUtil.resolveUnix('package.json'));

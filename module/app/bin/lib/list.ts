@@ -22,7 +22,7 @@ export class AppListManager {
     // Initialize up to compiler
     const roots = ['.'];
     try {
-      roots.push(...fs.readdirSync(FsUtil.resolveUnix(FsUtil.cwd, 'alt')).map(x => `alt/${x}`));
+      roots.push(...fs.readdirSync(FsUtil.resolveUnix('alt')).map(x => `alt/${x}`));
     } catch { }
     return roots;
   }
