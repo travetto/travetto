@@ -1,66 +1,51 @@
+import { EventEmitter } from 'events';
 import { Assertion, TestConfig } from '../model/test';
-import { AssertUtil } from './util';
+
+export interface CaptureAssert extends Partial<Assertion> {
+  file: string;
+  line: number;
+  text: string;
+  operator: string;
+}
 
 /**
  * Assertion capturer
  */
-export class AssertCapture {
+class $AssertCapture extends EventEmitter {
 
   /**
-   * Assertions captured so far
+   * Collect all events until the handler is closed
+   * @param test Test to capture for
+   * @param listener optional listener for events
    */
-  static assertions: Assertion[] = [];
-  /**
-   * Listener for captured asserts
-   */
-  static listener?: (a: Assertion) => void;
-  /**
-   * Test the asserts are for
-   */
-  static test: TestConfig;
+  collector(test: TestConfig, listener?: (a: Assertion) => void) {
+    const assertions: Assertion[] = [];
 
-  /**
-   * Start capturing
-   */
-  static start(test: TestConfig, listener?: (a: Assertion) => void) {
-    this.test = test;
-    this.listener = listener;
-    this.assertions = [];
-  }
-
-  /**
-   * Add a new assertion
-   */
-  static add(a: Assertion) {
-    this.assertions.push(a);
-    if (this.listener) {
-      this.listener(a);
-    }
-  }
-
-  /**
-   * Stop listening
-   */
-  static end() {
-    const ret = this.assertions;
-    this.assertions = [];
-    delete this.listener, this.test;
-    return ret;
-  }
-
-  /**
-   * Build full assertion for a given operator
-   */
-  static buildAssertion(filename: string, text: string, operator: string) {
-    const { file, line } = AssertUtil.getPositionOfError(new Error(), filename.replace(/[.][tj]s$/, ''));
-
-    const assertion: Assertion = {
-      classId: this.test.classId,
-      methodName: this.test.methodName,
-      file, line, text,
-      operator,
+    // Emit and collect, every assertion as it occurs
+    const handler = (a: CaptureAssert) => {
+      const assrt = {
+        ...a,
+        classId: test.classId,
+        methodName: test.methodName
+      };
+      assertions.push(assrt);
+      if (listener) {
+        listener(assrt);
+      }
     };
 
-    return assertion;
+    this.on('assert', handler);
+
+    return () => {
+      this.off('assert', handler);
+      return assertions;
+    };
+  }
+
+
+  add(a: CaptureAssert) {
+    return super.emit('assert', a);
   }
 }
+
+export const AssertCapture = new $AssertCapture();

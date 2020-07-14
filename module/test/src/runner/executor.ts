@@ -105,7 +105,14 @@ export class TestExecutor {
     }
 
     // Emit every assertion as it occurs
-    AssertCapture.start(test, (a) => consumer.onEvent({ type: 'assertion', phase: 'after', assertion: a }));
+    const getAssertions = AssertCapture.collector(test, assrt =>
+      consumer.onEvent({
+        type: 'assertion',
+        phase: 'after',
+        assertion: assrt
+      })
+    );
+
     ConsoleCapture.start(); // Capture all output from transpiled code
 
     // Run method and get result
@@ -121,7 +128,7 @@ export class TestExecutor {
     Object.assign(result, {
       status: error ? 'failed' : 'passed',
       output: ConsoleCapture.end(),
-      assertions: AssertCapture.end(),
+      assertions: getAssertions(),
       duration: Date.now() - startTime,
       ...(error ? { error } : {})
     });
