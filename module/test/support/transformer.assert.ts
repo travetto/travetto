@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
-import { TransformerState, OnCall, DeclarationUtil, CoreUtil } from '@travetto/transformer';
+import { TransformerState, OnCall, DeclarationUtil, CoreUtil, LiteralUtil } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
@@ -140,9 +140,9 @@ export class AssertTransformer {
       const assrt = state.importFile(require.resolve('../src/assert/check')).ident;
       state[ASSERT] = {
         assert: assrt,
-        assertCheck: ts.createPropertyAccess(ts.createPropertyAccess(assrt, ASSERT_UTIL), 'check'),
-        checkThrow: ts.createPropertyAccess(ts.createPropertyAccess(assrt, ASSERT_UTIL), 'checkThrow'),
-        checkThrowAsync: ts.createPropertyAccess(ts.createPropertyAccess(assrt, ASSERT_UTIL), 'checkThrowAsync'),
+        assertCheck: CoreUtil.createAccess(assrt, ASSERT_UTIL, 'check'),
+        checkThrow: CoreUtil.createAccess(assrt, ASSERT_UTIL, 'checkThrow'),
+        checkThrowAsync: CoreUtil.createAccess(assrt, ASSERT_UTIL, 'checkThrowAsync'),
       };
     }
   }
@@ -158,9 +158,12 @@ export class AssertTransformer {
 
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
     const check = ts.createCall(state[ASSERT]!.assertCheck, undefined, ts.createNodeArray([
-      ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
-      ts.createLiteral(firstText),
-      ts.createLiteral(cmd.fn),
+      LiteralUtil.fromLiteral({
+        file: CoreUtil.createAccess('__filename', 'ᚕunix'),
+        line: ts.createLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
+        text: ts.createLiteral(firstText),
+        operator: ts.createLiteral(cmd.fn)
+      }),
       ts.createLiteral(!cmd.negate),
       ...cmd.args
     ]));
@@ -186,9 +189,12 @@ export class AssertTransformer {
       /reject/i.test(key) ? state[ASSERT]!.checkThrowAsync : state[ASSERT]!.checkThrow,
       undefined,
       ts.createNodeArray([
-        ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
-        ts.createLiteral(`${key} ${firstText}`),
-        ts.createLiteral(`${key}`),
+        LiteralUtil.fromLiteral({
+          file: CoreUtil.createAccess('__filename', 'ᚕunix'),
+          line: ts.createLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
+          text: ts.createLiteral(`${key} ${firstText}`),
+          operator: ts.createLiteral(`${key}`)
+        }),
         ts.createLiteral(key.startsWith('doesNot')),
         ...args
       ]));

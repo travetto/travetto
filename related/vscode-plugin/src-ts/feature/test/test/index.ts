@@ -64,7 +64,9 @@ class TestRunnerFeature extends BaseFeature {
     this.runner.result.finally(() => {
       if (this.running) { // If still running, reinit
         this.killTestServer(true);
-        FsUtil.unlinkRecursiveSync(this.cacheDir);
+        try {
+          FsUtil.unlinkRecursiveSync(this.cacheDir);
+        } catch { }
         this.launchTestServer();
       }
     });

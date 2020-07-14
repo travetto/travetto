@@ -82,4 +82,17 @@ export class CoreUtil {
       src, statements, src.isDeclarationFile, src.referencedFiles, src.typeReferenceDirectives, src.hasNoDefaultLib
     );
   }
+
+  /**
+   * Create property access
+   */
+  static createAccess(first: string | ts.Expression, second: string | ts.Identifier, ...items: (string | ts.Identifier)[]) {
+    if (typeof first === 'string') {
+      first = ts.createIdentifier(first);
+    }
+    return items.reduce(
+      (acc, p) => ts.createPropertyAccess(acc, p),
+      ts.createPropertyAccess(first, second)
+    );
+  }
 }

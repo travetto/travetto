@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerState, DecoratorMeta, OnMethod, LiteralUtil } from '@travetto/transformer';
+import { TransformerState, DecoratorMeta, OnMethod, LiteralUtil, CoreUtil } from '@travetto/transformer';
 
 const CACHE_UTIL = 'CacheUtil';
 
@@ -25,8 +25,8 @@ export class CacheTransformer {
     if (!state.util) {
       const util = state.importFile(require.resolve('../src/util')).ident;
       state.util = util;
-      state.cache = ts.createPropertyAccess(ts.createPropertyAccess(util, CACHE_UTIL), 'cache');
-      state.evict = ts.createPropertyAccess(ts.createPropertyAccess(util, CACHE_UTIL), 'evict');
+      state.cache = CoreUtil.createAccess(util, CACHE_UTIL, 'cache');
+      state.evict = CoreUtil.createAccess(util, CACHE_UTIL, 'evict');
     }
   }
 
