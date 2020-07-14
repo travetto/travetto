@@ -12,7 +12,7 @@ export class WatchTest {
   @Test()
   async runWatcher() {
     const found: [string, string][] = [];
-    const w = new Watcher({ cwd: FsUtil.joinUnix(FsUtil.cwd, 'src') });
+    const w = new Watcher({ cwd: FsUtil.resolveUnix('src') });
     w
       .on('all', ({ event, entry }) => {
         console.log(event, entry.file);

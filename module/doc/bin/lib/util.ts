@@ -41,7 +41,7 @@ export class CliDocUtil {
    */
   static async generate(renderer: Renderer) {
     const { Header } = await import('../..');
-    const file = FsUtil.resolveUnix(FsUtil.cwd, 'README.js');
+    const file = FsUtil.resolveUnix('README.js');
 
     const doc: {
       header?: boolean;
@@ -76,7 +76,7 @@ ${content}`;
    * @param output
    */
   static async getOutputLoc(output: string) {
-    const root = FsUtil.resolveUnix(FsUtil.cwd, output);
+    const root = FsUtil.resolveUnix(output);
     const name = this.getPackageName();
     return root.replace(/%MOD/g, name);
   }
@@ -93,7 +93,7 @@ ${content}`;
     new Watcher({ interval: 250 })
       .on('all', e => {
         console.log('Recompiling', e);
-        Compiler.unload(require.resolve(FsUtil.resolveUnix(FsUtil.cwd, file)));
+        Compiler.unload(require.resolve(FsUtil.resolveUnix(file)));
         cb(e);
       })
       .add([{ testFile: f => f.endsWith(file), testDir: x => true }])

@@ -32,7 +32,7 @@ export function Ref(title: Content, file: string) {
     if (!file.startsWith('.')) {
       file = `./${file}`;
     }
-    file = FsUtil.resolveUnix(FsUtil.cwd, file);
+    file = FsUtil.resolveUnix(file);
   }
   if (!FsUtil.existsSync(file)) {
     throw new Error(`${file} is not a valid location`);

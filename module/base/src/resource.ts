@@ -27,7 +27,7 @@ export class $ResourceManager {
     this.paths.push(...this.rootPaths);
 
     this.paths = this.paths
-      .map(x => FsUtil.resolveUnix(FsUtil.cwd, x, this.folder))
+      .map(x => FsUtil.resolveUnix(x, this.folder))
       .filter(x => FsUtil.existsSync(x));
   }
 
@@ -57,7 +57,7 @@ export class $ResourceManager {
    * @param full Is the path fully qualified or should it be relative to the cwd
    */
   addPath(searchPath: string, full = false) {
-    this.paths.push(full ? FsUtil.resolveUnix(FsUtil.cwd, searchPath) : FsUtil.resolveUnix(FsUtil.cwd, searchPath, this.folder));
+    this.paths.push(FsUtil.resolveUnix(searchPath, full ? '' : this.folder));
   }
 
   /**

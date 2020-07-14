@@ -42,7 +42,7 @@ export class DocUtil {
     if (file.startsWith('@')) {
       file = require.resolve(file);
     }
-    const resolved = FsUtil.resolveUnix(FsUtil.cwd, file);
+    const resolved = FsUtil.resolveUnix(file);
     return { resolved, cleaned: resolved.replace(/^.*node_modules\//, '') };
   }
 
@@ -101,7 +101,7 @@ export class DocUtil {
     }
 
 
-    const text = fs.readFileSync(FsUtil.resolveUnix(FsUtil.cwd, file), 'utf8')
+    const text = fs.readFileSync(FsUtil.resolveUnix(file), 'utf8')
       .split(/\n/g);
 
     const start = text.findIndex(x => new RegExp(`function ${name}\\b`).test(x));
