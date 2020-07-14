@@ -63,11 +63,11 @@ export class RegisterTransformer {
     const name = node.name?.escapedText.toString() ?? '';
 
     const meta = ts.createCall(
-      ts.createPropertyAccess(ident, 'initMeta'),
+      CoreUtil.createAccess(ident, 'initMeta'),
       [],
       [
         ts.createIdentifier(name),
-        ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
+        CoreUtil.createAccess('__filename', 'ᚕunix'),
         ts.createLiteral(state[cls]!),
         LiteralUtil.extendObjectLiteral(state[methods] || {}),
         ts.createLiteral(isAbstract),
@@ -103,8 +103,8 @@ export class RegisterTransformer {
       state.addStatement(
         ts.createExpressionStatement(
           ts.createAssignment(
-            ts.createPropertyAccess(node.name, 'ᚕfile'),
-            ts.createPropertyAccess(ts.createIdentifier('__filename'), 'ᚕunix'),
+            CoreUtil.createAccess(node.name, 'ᚕfile'),
+            CoreUtil.createAccess('__filename', 'ᚕunix'),
           )
         )
       );

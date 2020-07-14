@@ -6,7 +6,7 @@ import { FsUtil } from '@travetto/boot';
 import { Util, AppError } from '@travetto/base';
 
 import { ThrowableError, TestConfig } from '../model/test';
-import { AssertCapture } from './capture';
+import { AssertCapture, CaptureAssert } from './capture';
 import { AssertUtil } from './util';
 import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types';
 
@@ -18,15 +18,13 @@ const { AssertionError } = assert;
 export class AssertCheck {
   /**
    * Check a given assertion
-   * @param filename The file to assert in
-   * @param text The text representation of the assertion
-   * @param fn The name of the assertion operation
+   * @param assertion The basic assertion information
    * @param positive Is the check positive or negative
    * @param args The arguments passed in
    */
-  static check(filename: string, text: string, fn: string, positive: boolean, ...args: any[]) {
-    // Build the assertion object
-    const assertion = AssertCapture.buildAssertion(filename, text, ASSERT_FN_OPERATOR[fn]);
+  static check(assertion: CaptureAssert, positive: boolean, ...args: any[]) {
+    let fn = assertion.operator;
+    assertion.operator = ASSERT_FN_OPERATOR[fn];
 
     // Determine text based on positivity
     const common: Record<string, string> = {
@@ -169,17 +167,13 @@ export class AssertCheck {
 
   /**
    * Check the throw, doesNotThrow behavior of an assertion
-   * @param filename File
-   * @param text Text of assertion
-   * @param key Method to call
+   * @param assertion The basic assertion information
    * @param positive Is the test positive or negative
    * @param action Function to run
    * @param shouldThrow Should this action throw
    * @param message Message to share on failure
    */
-  static checkThrow(filename: string, text: string, key: string, positive: boolean,
-    action: Function, shouldThrow?: ThrowableError, message?: string) {
-    const assertion = AssertCapture.buildAssertion(filename, text, key);
+  static checkThrow(assertion: CaptureAssert, positive: boolean, action: Function, shouldThrow?: ThrowableError, message?: string) {
     let missed: Error | undefined;
 
     try {
@@ -208,17 +202,13 @@ export class AssertCheck {
 
   /**
    * Check the rejects, doesNotReject behavior of an assertion
-   * @param filename File
-   * @param text Text of assertion
-   * @param key Method to call
+   * @param assertion Basic assertion information
    * @param positive Is the test positive or negative
    * @param action Async function to run
    * @param shouldThrow Should this action reject
    * @param message Message to share on failure
    */
-  static async checkThrowAsync(filename: string, text: string, key: string, positive: boolean,
-    action: Function | Promise<any>, shouldThrow?: ThrowableError, message?: string) {
-    const assertion = AssertCapture.buildAssertion(filename, text, key);
+  static async checkThrowAsync(assertion: CaptureAssert, positive: boolean, action: Function | Promise<any>, shouldThrow?: ThrowableError, message?: string) {
     let missed: Error | undefined;
 
     try {
@@ -262,8 +252,6 @@ export class AssertCheck {
     }
 
     AssertCapture.add({
-      classId: test.classId,
-      methodName: test.methodName,
       file: test.file.replace(`${FsUtil.cwd}/`, ''),
       line,
       operator: 'throws',
