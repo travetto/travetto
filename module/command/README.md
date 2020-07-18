@@ -95,9 +95,9 @@ A sample of all services available to the entire framework:
 Service          Version    Status
 ----------------------------------------------
 
- * mysql                5.6    Not running
+ * mongodb              3.6    Running 19d622f75085
+ * mysql                5.6    Running be29e0cb3555
  * elasticsearch      6.8.2    Running ce45db3cfa6d
- * mongodb              3.6    Running c201ccc228bf
  * postgresql          12.2    Running b7fee0127785
  * redis                  5    Running 6c5e4bd3452b
 ```

@@ -33,6 +33,8 @@ export class DocUtil {
         // eslint-disable-next-line no-control-regex
         .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
         .replace(new RegExp(FsUtil.cwd, 'g'), '.');
+    } catch (err) {
+      return err.message;
     } finally {
       process.chdir(FsUtil.cwd);
     }

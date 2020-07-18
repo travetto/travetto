@@ -173,7 +173,7 @@ export class TranspileUtil {
       err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${fileName}]` : `from ${fileName}`}`);
     }
 
-    if (EnvUtil.isWatch() && !fileName.includes('/node_modules/')) {
+    if (EnvUtil.isWatch() && !fileName.includes('/node_modules/') && !fileName.startsWith('test/')) {
       console.trace(`Unable to ${phase} ${fileName}: stubbing out with error proxy.`, err.message);
       return this.getErrorModule(err.message);
     }

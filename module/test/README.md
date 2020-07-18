@@ -83,7 +83,7 @@ const suite_1 = require("../../../../src/decorator/suite");
 const test_1 = require("../../../../src/decorator/test");
 let SimpleTest = class SimpleTest {
     async test() {
-        ᚕ_check_1.AssertCheck.check(__filename.ᚕunix, "{ size: 20, address: { state: 'VA' } } === {}", "deepStrictEqual", true, { size: 20, address: { state: 'VA' } }, {});
+        ᚕ_check_1.AssertCheck.check({ file: __filename.ᚕunix, line: 11, text: "{ size: 20, address: { state: 'VA' } } === {}", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
     }
 };
 SimpleTest.ᚕinit = ᚕ_decorator_1.Register.initMeta(SimpleTest, __filename.ᚕunix, 471606460, { test: { hash: 1747552309 } }, false, false);

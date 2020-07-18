@@ -288,12 +288,12 @@ First we must start the application:
 ```bash
 $ /bin/bash alt/docs/bin/startup.sh
 
-2020-07-06T20:16:44.984Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
-2020-07-06T20:16:44.988Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
+2020-07-19T15:32:26.626Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
+2020-07-19T15:32:26.629Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
   app: {
     watch: true,
     readonly: false,
-    travetto: '1.0.0-rc.8',
+    travetto: '1.0.1',
     name: '@travetto/todo-app',
     version: undefined,
     license: 'ISC',
@@ -307,13 +307,13 @@ $ /bin/bash alt/docs/bin/startup.sh
   },
   config: {
     rest: { cors: { active: true } },
-    api: { spec: { output: './openapi.json' } },
+    api: { spec: { output: './openapi.yml' } },
     sql: {
       model: { namespace: 'todo', user: 'root', password: 'password' }
     }
   }
 }
-2020-07-06T20:16:45.012Z info  [./node_modules/@travetto/rest/src/server/server.ts:187] Listening on 3000
+2020-07-19T15:32:26.650Z info  [./node_modules/@travetto/rest/src/server/server.ts:187] Listening on 3000
 ```
  
 
@@ -330,8 +330,8 @@ $ sh alt/docs/bin/create.sh
 
 {
   "text": "New Todo",
-  "created": "2020-07-06T20:16:49.527Z",
-  "id": "5f0386b18c54776b4126184d"
+  "created": "2020-07-19T15:32:31.782Z",
+  "id": "5f14678ff14981f2b31904fe"
 }
 ```
 
@@ -346,14 +346,9 @@ $ sh alt/docs/bin/list.sh
 
 [
   {
-    "id": "5f0386a99a1ebb6a9de5e4f1",
+    "id": "5f14678ff14981f2b31904fe",
     "text": "New Todo",
-    "created": "2020-07-06T20:16:41.384Z"
-  },
-  {
-    "id": "5f0386b18c54776b4126184d",
-    "text": "New Todo",
-    "created": "2020-07-06T20:16:49.527Z"
+    "created": "2020-07-19T15:32:31.782Z"
   }
 ]
 ```

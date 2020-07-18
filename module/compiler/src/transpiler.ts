@@ -41,7 +41,7 @@ export class Transpiler {
    */
   private readFile(fileName: string) {
     let content = ts.sys.readFile(fileName);
-    if (!content) {
+    if (content === undefined) {
       throw new Error(`Unable to read file ${fileName}`);
     }
     if (!fileName.endsWith('.d.ts') && fileName.endsWith('.ts')) {

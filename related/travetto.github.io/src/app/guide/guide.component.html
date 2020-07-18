@@ -302,12 +302,12 @@ First we must start the application:
       </figcaption>
       <pre><code class="language-bash">$ /bin/bash alt/docs/bin/startup.sh
 
-<span class="token number">2020</span>-07-06T20:16:36.768Z info  <span class="token punctuation">[</span>./node_modules/@travetto/app/src/registry.ts:32<span class="token punctuation">]</span> Running application rest @travetto/rest/support/application.rest.ts
-<span class="token number">2020</span>-07-06T20:16:36.772Z info  <span class="token punctuation">[</span>./node_modules/@travetto/app/src/registry.ts:33<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
+<span class="token number">2020</span>-07-19T15:32:26.626Z info  <span class="token punctuation">[</span>./node_modules/@travetto/app/src/registry.ts:32<span class="token punctuation">]</span> Running application rest @travetto/rest/support/application.rest.ts
+<span class="token number">2020</span>-07-19T15:32:26.629Z info  <span class="token punctuation">[</span>./node_modules/@travetto/app/src/registry.ts:33<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
   app: <span class="token punctuation">{{'{'}}</span>
     watch: true,
     readonly: false,
-    travetto: <span class="token string">'1.0.0-rc.8'</span>,
+    travetto: <span class="token string">'1.0.1'</span>,
     name: <span class="token string">'@travetto/todo-app'</span>,
     version: undefined,
     license: <span class="token string">'ISC'</span>,
@@ -321,13 +321,13 @@ First we must start the application:
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     rest: <span class="token punctuation">{{'{'}}</span> cors: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-    api: <span class="token punctuation">{{'{'}}</span> spec: <span class="token punctuation">{{'{'}}</span> output: <span class="token string">'./openapi.json'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+    api: <span class="token punctuation">{{'{'}}</span> spec: <span class="token punctuation">{{'{'}}</span> output: <span class="token string">'./openapi.yml'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
     sql: <span class="token punctuation">{{'{'}}</span>
       model: <span class="token punctuation">{{'{'}}</span> namespace: <span class="token string">'todo'</span>, user: <span class="token string">'root'</span>, password: <span class="token string">'password'</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2020</span>-07-06T20:16:36.793Z info  <span class="token punctuation">[</span>./node_modules/@travetto/rest/src/server/server.ts:187<span class="token punctuation">]</span> Listening on <span class="token number">3000</span></code></pre>     
+<span class="token number">2020</span>-07-19T15:32:26.650Z info  <span class="token punctuation">[</span>./node_modules/@travetto/rest/src/server/server.ts:187<span class="token punctuation">]</span> Listening on <span class="token number">3000</span></code></pre>     
       </figure> 
 
 next, let's execute <a target="_blank" class="external-link" href="https://curl.haxx.se/">curl</a> requests to interact with the new api
@@ -347,8 +347,8 @@ next, let's execute <a target="_blank" class="external-link" href="https://curl.
 
 <span class="token punctuation">{{'{'}}</span>
   <span class="token string">"text"</span><span class="token builtin class-name">:</span> <span class="token string">"New Todo"</span>,
-  <span class="token string">"created"</span><span class="token builtin class-name">:</span> <span class="token string">"2020-07-06T20:16:41.384Z"</span>,
-  <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"5f0386a99a1ebb6a9de5e4f1"</span>
+  <span class="token string">"created"</span><span class="token builtin class-name">:</span> <span class="token string">"2020-07-19T15:32:31.782Z"</span>,
+  <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"5f14678ff14981f2b31904fe"</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -367,9 +367,9 @@ next, let's execute <a target="_blank" class="external-link" href="https://curl.
 
 <span class="token punctuation">[</span>
   <span class="token punctuation">{{'{'}}</span>
-    <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"5f0386a99a1ebb6a9de5e4f1"</span>,
+    <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"5f14678ff14981f2b31904fe"</span>,
     <span class="token string">"text"</span><span class="token builtin class-name">:</span> <span class="token string">"New Todo"</span>,
-    <span class="token string">"created"</span><span class="token builtin class-name">:</span> <span class="token string">"2020-07-06T20:16:41.384Z"</span>
+    <span class="token string">"created"</span><span class="token builtin class-name">:</span> <span class="token string">"2020-07-19T15:32:31.782Z"</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">]</span></code></pre>     
       </figure>

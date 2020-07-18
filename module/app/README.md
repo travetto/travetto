@@ -150,9 +150,9 @@ Configured {
   app: {
     watch: true,
     readonly: false,
-    travetto: '1.0.0-rc.8',
+    travetto: '1.0.1',
     name: '@travetto/app',
-    version: '1.0.0-rc.11',
+    version: '1.0.1',
     license: 'MIT',
     description: 'Application registration/management and run support.',
     author: {
@@ -178,17 +178,8 @@ The parameters to `run` will be type checked, to ensure proper evaluation.
 ```bash
 $ travetto travetto run simple-domain mydomain.biz orange
 
-Usage: travetto run [options] [application] [args...]
-
-Options:
-  -e, --env [env]                 Application environment (dev|prod|<any>)
-  -p, --profile [profile]         Specify additional application profiles
-                                  (default: [])
-  -r, --resource [resourcesRoot]  Specify additional resource root locations
-                                  (default: [])
-  -h, --help                      display help for command
-
-Usage: simple-domain domain:string [port:number=3000]
+Command failed: npx travetto run simple-domain mydomain.biz orange
+Invalid parameter port: Received orange, but exepcted number
 ```
 
 The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) 
