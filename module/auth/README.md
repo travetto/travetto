@@ -39,11 +39,11 @@ export class AuthContext<
   /**
    * Identity of the context
    */
-  public identity: I;
+  identity: I;
   /**
    * The principal of the context
    */
-  public principal: P;
+  principal: P;
   constructor(identity: I, principal?: P) ;
   /**
    * Get the principal/identity id

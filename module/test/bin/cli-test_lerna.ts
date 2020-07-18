@@ -19,7 +19,7 @@ export class TestLernaPlugin extends BasePlugin {
       'lerna', '--no-sort',
       'exec', '--no-bail', '--stream', '--',
       'npx', 'trv', 'test', '-f', 'event', '-c', '2'
-    ], { shell: true, quiet: true, cwd: FsUtil.resolveUnix(__dirname, '..', '..') });
+    ], { shell: true, rawOutput: true, cwd: FsUtil.resolveUnix(__dirname, '..', '..') });
 
     const { RunnableTestConsumer } = await import('../src/consumer/types/runnable');
     const { TapEmitter } = await import('../src/consumer/types/tap');

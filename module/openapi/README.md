@@ -78,6 +78,9 @@ export class ApiSpecConfig {
 
   async postConstruct() {
     this.output = FsUtil.toUnix(this.output);
+    if (!this.output || this.output === '-') {
+      this.persist = false;
+    }
     if (this.persist) {
       if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder
         this.output = FsUtil.resolveUnix(this.output, 'api.spec.yml');

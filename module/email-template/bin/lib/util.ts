@@ -137,27 +137,15 @@ export class TemplateUtil {
     const { ResourceManager } = await import('@travetto/base');
     const { FilePresenceManager } = await import('@travetto/watch');
 
-    const ext = /[.](html|txt|scss|css|png|jpg|gif)$/;
-
-    const watcher = new FilePresenceManager({
-      cwd: FsUtil.cwd,
-      validFile: x => ext.test(x),
-      folders: ResourceManager.getRelativePaths().map(x => `${x}/email`),  // Email folders only
-      files: ResourceManager.findAllByPatternSync(ext, 'email'),
-      listener: {
-        changed: async f => {
-          if (/\/email\/.*[.](compiled|dev)[.]/.test(f)) {
-            return;
-          }
-          console.log('Contents changed', f);
-          await this.compileToDisk(f, true);
-          if (cb) {
-            cb(f);
-          }
-        }
-      }
+    new FilePresenceManager(ResourceManager.getRelativePaths().map(x => `${x}/email`), {
+      ignoreInitial: true,
+      validFile: x =>
+        /[.](html|txt|scss|css|png|jpg|gif)$/.test(x) &&
+        !/\/email\/.*[.](compiled|dev)[.]/.test(x)
+    }).on('changed', ({ file: f }) => {
+      console.log('Contents changed', f);
+      this.compileToDisk(f, true).then(() => cb && cb(f));
     });
-    watcher.init();
     await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24 * 1));
   }
 

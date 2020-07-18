@@ -1,37 +1,28 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
+import * as ts from 'typescript';
 
-import { ScanEntry, ScanHandler, ScanFs, FsUtil } from '@travetto/boot';
+import { ScanEntry, ScanFs, FsUtil, ScanHandler } from '@travetto/boot';
 
 /**
  * Watch Options
  */
-interface WatcherOptions {
+export interface WatcherOptions {
+  cwd?: string; // The relative cwd
   maxListeners?: number; // Max number of file listeners
-  interval: number; // Polling interval for watching
-  debounceDelay: number; // Delay in debounce on changes
-  cwd: string; // Starting location
+  interval?: number; // Polling interval for watching
+  ignoreInitial?: boolean; // Ignore intial load
+  exclude?: ScanHandler;
 }
 
-/**
- * Throttle a function to run only once within a specific threshold of time
- */
-function throttle<T extends Function>(fn: T, threshold = 250) {
-  let last = 0;
-  let deferTimer: NodeJS.Timer;
-  function check(...args: any[]) {
-    const now = Date.now();
-    // Still within throttle window
-    if (last && now < last + threshold) {
-      clearTimeout(deferTimer);
-      deferTimer = setTimeout(check, threshold + 1);
-    } else { // Must call
-      last = now;
-      fn(...args);
-    }
-  }
-  // @ts-ignore
-  return check as T;
+export interface Watcher {
+  on(type: 'all', handlder: (payload: { event: string, entry: ScanEntry }) => void): this;
+  on(type: 'added', handlder: (entry: ScanEntry) => void): this;
+  on(type: 'addedDir', handlder: (entry: ScanEntry) => void): this;
+  on(type: 'removed', handlder: (entry: ScanEntry) => void): this;
+  on(type: 'removedDir', handlder: (entry: ScanEntry) => void): this;
+  on(type: 'changed', handlder: (entry: ScanEntry) => void): this;
+  on(type: string | symbol, handler: (...payload: any[]) => void): this;
 }
 
 /**
@@ -40,43 +31,35 @@ function throttle<T extends Function>(fn: T, threshold = 250) {
 export class Watcher extends EventEmitter {
 
   private watched = new Map<string, ScanEntry>();
-  private watchers = new Map<string, fs.FSWatcher>();
-  private pollers = new Map<string, (curr: fs.Stats, prev: fs.Stats) => void>();
-  private findHandlers: ScanHandler[] = [];
-  private pendingWatched: ScanEntry[] = [];
-  private pending = true;
+  private directories = new Map<string, { close: () => void }>();
+  private files = new Map<string, { close: () => void }>();
   private suppress = false;
-
-  private options: WatcherOptions;
 
   /**
    * Create a new watcher, priming the root direction
    * as the starting point
    * @param opts
    */
-  constructor(opts: Partial<WatcherOptions> = {}) {
+  constructor(private folder: string, private options: WatcherOptions = {}) {
     super();
 
-    this.options = {
-      maxListeners: opts.maxListeners,
-      interval: opts.interval ?? 250,
-      debounceDelay: opts.debounceDelay ?? 250,
-      cwd: opts.cwd ?? FsUtil.cwd
-    };
-
-    this.options.cwd = FsUtil.toUnix(this.options.cwd);
+    this.options = { interval: 100, ...this.options };
+    this.folder = FsUtil.resolveUnix(this.options.cwd || FsUtil.cwd, this.folder);
 
     // Set maxListeners
     if (this.options.maxListeners !== undefined) {
       this.setMaxListeners(this.options.maxListeners);
-      super.setMaxListeners(this.options.maxListeners);
     }
 
-    this.pendingWatched.push({
-      file: this.options.cwd,
-      module: this.options.cwd,
-      stats: fs.lstatSync(this.options.cwd)
-    });
+    this.suppress = !!this.options.ignoreInitial;
+
+    this.watch(
+      { file: this.folder, module: this.folder, stats: fs.statSync(this.folder) },
+      ...ScanFs.scanDirSync(this.options.exclude ?? { testFile: x => true, testDir: x => true }, this.folder)
+    );
+
+    // Allow initial suppression for 1s
+    setTimeout(() => this.suppress = false, 1000);
   }
 
   /**
@@ -86,12 +69,8 @@ export class Watcher extends EventEmitter {
     dir.children = dir.children ?? [];
 
     fs.readdir(dir.file, (err, current) => {
-      if (err) {
-        if (err.code === 'ENOENT') {
-          current = [];
-        } else {
-          return this.registryEmit('error', err);
-        }
+      if (err && !this.handleError(err)) {
+        current = [];
       }
 
       // Convert to full paths
@@ -108,10 +87,7 @@ export class Watcher extends EventEmitter {
           this.unwatch(child.file);
           dir.children!.splice(dir.children!.indexOf(child), 1);
 
-          if (ScanFs.isNotDir(child)) {
-            this.registryEmit('removed', child);
-            this.registryEmit('all', { event: 'removed', entry: child });
-          }
+          this.emit(ScanFs.isNotDir(child) ? 'removed' : 'removedDIr', child);
         }
       }
 
@@ -119,37 +95,17 @@ export class Watcher extends EventEmitter {
 
       // If file was added
       for (const next of current) {
-        const nextRel = next.replace(this.options.cwd, '');
         const nextStats = fs.lstatSync(next);
 
-        if (!prevSet.has(next) && (nextStats.isDirectory() ||
-          this.findHandlers.find(x => x.testFile?.(nextRel) ?? false))
-        ) {
-          const sub: ScanEntry = {
-            file: next,
-            module: next,
-            stats: nextStats
-          };
+        if (!prevSet.has(next)) {
+          const sub = { file: next, module: next, stats: nextStats };
           this.watch(sub);
           dir.children!.push(sub);
 
-          if (ScanFs.isNotDir(sub)) {
-            this.registryEmit('added', sub);
-            this.registryEmit('all', { event: 'added', entry: sub });
-          }
+          this.emit(ScanFs.isNotDir(sub) ? 'added' : 'addedDir', sub);
         }
       }
     });
-  }
-
-  /**
-   * Emit change to file
-   */
-  private registryEmit(type: string, payload?: any) {
-    if (!this.suppress) {
-      console.debug('Watch Event', type, payload && payload.file);
-      this.emit(type, payload);
-    }
   }
 
   /**
@@ -162,15 +118,11 @@ export class Watcher extends EventEmitter {
 
     try {
       console.debug('Watching Directory', entry.file);
-      const watcher = fs.watch(entry.file, { persistent: false }, throttle(() => {
-        this.processDirectoryChange(entry);
-      }, this.options.debounceDelay));
+      // const watcher = fs.watch(FsUtil.resolveUnix(entry.file), { persistent: false }, () => this.processDirectoryChange(entry);
+      const watcher = ts.sys.watchDirectory!(FsUtil.resolveUnix(entry.file), () => this.processDirectoryChange(entry), false);
 
-      watcher.on('error', (err) => {
-        this.handleError(err);
-      });
-
-      this.watchers.set(entry.file, watcher);
+      // watcher.on('error', this.handleError.bind(this));
+      this.directories.set(entry.file, watcher);
 
       this.processDirectoryChange(entry);
 
@@ -189,42 +141,46 @@ export class Watcher extends EventEmitter {
 
     const opts = { persistent: false, interval: this.options.interval };
 
-    this.pollers.set(entry.file, (curr: fs.Stats, prev: fs.Stats) => {
-      // Only emit changed if the file still exists
-      // Prevents changed/deleted duplicate events
-      try {
-        // Get stats on file
-        const stats = fs.lstatSync(entry.file);
-        entry.stats = stats;
+    // const poller = () => {
+    //   // Only emit changed if the file still exists
+    //   // Prevents changed/deleted duplicate events
+    //   try {
+    //     // Get stats on file
+    //     const stats = fs.lstatSync(entry.file);
+    //     entry.stats = stats;
 
-        this.registryEmit('changed', entry);
-        this.registryEmit('all', { event: 'changed', entry });
+    //     this.emit('changed', entry);
+    //   } catch (e) {
+    //     if (this.handleError(e)) {
+    //       throw e;
+    //     }
+    //   }
+    // });
 
-      } catch (e) {
-        if (e.code === 'ENOENT') {
-          // Missing file, continue
-        } else {
-          throw e;
-        }
+    const poller = (_: any, kind: number) => {
+      const stats = fs.lstatSync(entry.file);
+      entry.stats = stats;
+      switch (kind) {
+        case ts.FileWatcherEventKind.Created: this.emit('added', entry); break;
+        case ts.FileWatcherEventKind.Changed: this.emit('changed', entry); break;
+        case ts.FileWatcherEventKind.Deleted: this.emit('removed', entry); break;
       }
-    });
+    };
 
-    try {
-      fs.watchFile(entry.file, opts, this.pollers.get(entry.file)!);
-    } catch (err) {
-      return this.handleError(err);
-    }
+    this.files.set(entry.file, ts.sys.watchFile!(entry.file, poller, opts.interval, opts));
+    // this.files.set(entry.file, { close: () => fs.unwatchFile(entry.file, poller) });
+    // fs.watchFile(entry.file, opts, poller);
   }
 
   /**
    * Stop watching a file
    */
   private unwatchFile(entry: ScanEntry) {
-    if (this.pollers.has(entry.file)) {
+    if (this.files.has(entry.file)) {
       console.debug('Unwatching File', entry.file);
 
-      fs.unwatchFile(entry.file, this.pollers.get(entry.file)!);
-      this.pollers.delete(entry.file);
+      this.files.get(entry.file)!.close();
+      this.files.delete(entry.file);
     }
   }
 
@@ -232,101 +188,30 @@ export class Watcher extends EventEmitter {
    * Stop watching a directory
    */
   private unwatchDirectory(entry: ScanEntry) {
-    if (this.watchers.has(entry.file)) {
+    if (this.directories.has(entry.file)) {
       console.debug('Unwatching Directory', entry.file);
 
       for (const child of (entry.children ?? [])) {
         this.unwatch(child.file);
       }
 
-      const watcher = this.watchers.get(entry.file)!;
-      watcher.close();
-      this.watchers.delete(entry.file);
+      this.directories.get(entry.file)!.close();
+      this.directories.delete(entry.file);
     }
-  }
-
-  /**
-   * Handle watch error
-   */
-  private handleError(err: Error & { code?: string }) {
-    if (err.code === 'EMFILE') {
-      this.registryEmit('error', new Error('EMFILE: Too many opened files.'));
-    }
-    this.registryEmit('error', err);
-  }
-
-  /**
-   * Close the watcher, releasing all the file system pollers
-   */
-  close() {
-    for (const [, watcher] of this.watchers) {
-      watcher.close();
-    }
-    this.watchers = new Map();
-
-    for (const dir of this.watched.keys()) {
-      this.unwatch(dir);
-    }
-
-    this.watched = new Map();
-
-    setImmediate(() => {
-      this.registryEmit('end');
-      this.removeAllListeners();
-    });
-    return this;
-  }
-
-  /**
-   * Add new patterns of things to search for or to exclude from watching
-   */
-  add(handlers: (string | ScanHandler)[]) {
-    const finalHandlers = handlers.map(x =>
-      typeof x === 'string' ? { testFile: (rel: string) => rel === x } : x
-    );
-    this.findHandlers = this.findHandlers.concat(finalHandlers);
-
-    for (const entry of ScanFs.bulkScanDirSync(finalHandlers, this.options.cwd)) {
-      if (!this.watched.has(entry.file)) {
-        if (this.pending) {
-          this.pendingWatched.push(entry);
-        } else {
-          this.watch(entry);
-        }
-      }
-    }
-    return this;
-  }
-
-  /**
-   * Start watching
-   * @param listenInitial Fire on first events, or only on subsequent changes
-   */
-  run(listenInitial = true) {
-    this.pending = false;
-    if (this.pendingWatched.length) {
-      this.suppress = !listenInitial;
-      this.pendingWatched.map(x => this.watch(x));
-      this.pendingWatched = [];
-      setImmediate(() => this.suppress = false);
-    }
-    return this;
   }
 
   /**
    * Watch an entry, could be a file or a folder
    */
-  watch(entry: ScanEntry) {
-    if (this.watched.has(entry.file)) {
-      return;
-    }
+  private watch(...entries: ScanEntry[]) {
+    for (const entry of entries.filter(x => !this.watched.has(x.file))) {
+      this.watched.set(entry.file, entry);
 
-    this.watched.set(entry.file, entry);
-
-    if (ScanFs.isDir(entry)) { // Watch Directory
-      this.watchDirectory(entry);
-    } else { // Watch File
-      this.watchFile(entry);
+      if (ScanFs.isDir(entry)) { // Watch Directory
+        this.watchDirectory(entry);
+      } else { // Watch File
+        this.watchFile(entry);
+      }
     }
     return this;
   }
@@ -334,18 +219,59 @@ export class Watcher extends EventEmitter {
   /**
    * Unwatch a path
    */
-  unwatch(file: string) {
-    if (!this.watched.has(file)) {
-      return;
-    }
-    const entry = this.watched.get(file)!;
-    this.watched.delete(file);
+  private unwatch(...files: string[]) {
+    for (const file of files.filter(x => this.watched.has(x))) {
+      const entry = this.watched.get(file)!;
+      if (!entry) {
+        return;
+      }
+      this.watched.delete(file);
 
-    if (ScanFs.isDir(entry)) {
-      this.unwatchDirectory(entry);
-    } else {
-      this.unwatchFile(entry);
+      if (ScanFs.isDir(entry)) {
+        this.unwatchDirectory(entry);
+      } else {
+        this.unwatchFile(entry);
+      }
     }
+    return this;
+  }
+
+  /**
+   * Handle watch error
+   */
+  private handleError(err: Error & { code?: string }) {
+    switch (err.code) {
+      case 'EMFILE': this.emit('error', new Error('EMFILE: Too many opened files.')); break;
+      case 'ENOENT': return false;
+      default: this.emit('error', err);
+    }
+    return true;
+  }
+
+  /**
+   * Emit change to file
+   */
+  emit(type: string, payload?: any) {
+    if (!this.suppress) {
+      console.debug('Watch Event', type, payload && payload.file);
+      if (type !== 'error' && type !== 'end') {
+        super.emit('all', { event: type, entry: payload });
+      }
+      super.emit(type, payload);
+    }
+    return true;
+  }
+
+  /**
+   * Close the watcher, releasing all the file system pollers
+   */
+  close() {
+    this.unwatch(...this.watched.keys());
+
+    setImmediate(() => {
+      this.emit('end');
+      this.removeAllListeners();
+    });
     return this;
   }
 }

@@ -11,7 +11,7 @@ export class DocPlugin extends BasePlugin {
 
   init(cmd: commander.Command) {
     return cmd
-      .option('-o, --output <output>', 'Output file')
+      .option('-o, --output <output>', 'Output files', (v, ls) => { ls.push(v); return ls; }, [] as string[])
       .option('-f, --format <format>', 'Format', 'md')
       .option('-w, --watch <watch>', 'Watch', false);
   }
@@ -19,20 +19,29 @@ export class DocPlugin extends BasePlugin {
   async action() {
     await CliDocUtil.init();
 
-    const renderer = await CliDocUtil.getRenderer(this._cmd.format);
+    if (this._cmd.output) {
 
-    if (!this._cmd.output) {
-      console.log(await CliDocUtil.generate(renderer));
-    } else {
-      const finalName = await CliDocUtil.getOutputLoc(this._cmd.output);
+      const writers = await Promise.all((this._cmd.output as string[]).map(async (out) => {
+        const fmt = out.includes('.') ? out.split('.').pop()! : this._cmd.format;
+        const renderer = await CliDocUtil.getRenderer(fmt);
+        const finalName = await CliDocUtil.getOutputLoc(out);
+        return { renderer, finalName };
+      }));
 
-      const write = async () => fs.writeFileSync(finalName, await CliDocUtil.generate(renderer), 'utf8');
+      const write = async () => {
+        for (const { renderer, finalName } of writers) {
+          const content = await CliDocUtil.generate(renderer);
+          fs.writeFileSync(finalName, content, 'utf8');
+        }
+      };
 
       if (this._cmd.watch) {
-        await CliDocUtil.watchFile('README.ts', write);
+        await CliDocUtil.watchFile('README.js', write);
       } else {
         await write();
       }
+    } else {
+      console.log(await CliDocUtil.getRenderer(this._cmd.format));
     }
   }
 }

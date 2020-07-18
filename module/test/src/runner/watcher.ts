@@ -28,9 +28,8 @@ export class TestWatcher {
     await TestRegistry.init();
     TestRegistry.listen(RootRegistry);
 
-    const pool = new WorkPool(buildWorkManager.bind(null, new CumulativeSummaryConsumer(
-      TestConsumerRegistry.getInstance(format)
-    )), {
+    const consumer = new CumulativeSummaryConsumer(TestConsumerRegistry.getInstance(format));
+    const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
       idleTimeoutMillis: 120000,
       min: 2,
       max: os.cpus.length - 1
@@ -38,6 +37,10 @@ export class TestWatcher {
 
     new MethodSource(RootRegistry).on(e => {
       const [cls, method] = (e.prev ?? e.curr ?? []) as [Class, Function];
+      if (!method) {
+        consumer.removeClass(cls.ᚕid);
+        return;
+      }
       const conf = TestRegistry.getByClassAndMethod(cls, method)!;
       if (e.type !== 'removing') {
         if (conf) {

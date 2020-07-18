@@ -109,7 +109,9 @@ A common pattern is to want to model a sub process as a worker, to be a valid ca
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">)</span><span class="token operator">:</span> Worker<span class="token operator">&lt;</span><span class="token constant">X</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> channel <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ParentCommChannel</span><span class="token punctuation">(</span>
-      ExecUtil<span class="token punctuation">.</span><span class="token function">fork</span><span class="token punctuation">(</span>command<span class="token punctuation">,</span> args<span class="token punctuation">,</span> opts<span class="token punctuation">)</span>
+      ExecUtil<span class="token punctuation">.</span><span class="token function">fork</span><span class="token punctuation">(</span>command<span class="token punctuation">,</span> args<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token operator">...</span><span class="token punctuation">(</span>opts <span class="token operator">??</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">get</span> <span class="token function">id</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token keyword">return</span> channel<span class="token punctuation">.</span>id<span class="token punctuation">;</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>

@@ -1,4 +1,4 @@
-import { ShutdownManager, ScanApp } from '@travetto/base';
+import { ShutdownManager } from '@travetto/base';
 import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
 import { CompileUtil, FsUtil } from '@travetto/boot';
 import type { Class } from '@travetto/registry';
@@ -13,7 +13,7 @@ export function watch($Compiler: Class<typeof Compiler>) {
    * Extending the $Compiler class to add some functionality
    */
   const Cls = class extends $Compiler {
-    presenceManager: FilePresenceManager;
+    presence: FilePresenceManager;
     modules = new Map<string, RetargettingProxy<any>>();
 
     constructor(...args: any[]) {
@@ -28,7 +28,7 @@ export function watch($Compiler: Class<typeof Compiler>) {
 
       // Proxy all file loads
       CompileUtil.addModuleHandler((name, mod) => {
-        if (name.includes(FsUtil.cwd) && !name.includes('node_modules') && /(src|test)\//.test(name)) {
+        if (name.includes(FsUtil.cwd) && !name.includes('node_modules') && /src\//.test(name)) {
           if (!this.modules.has(name)) {
             this.modules.set(name, new RetargettingProxy(mod));
           } else {
@@ -44,48 +44,22 @@ export function watch($Compiler: Class<typeof Compiler>) {
       require('source-map-support').install({
         retrieveFile: (p: string) => this.transpiler.getContents(p)
       });
-    }
 
-    init() {
-      super.init();
-      this.presenceManager = new FilePresenceManager({ // Kick off listener
-        validFile: f =>
-          !f.includes('node_modules') &&
-          f.endsWith('.ts') &&
-          !f.endsWith('.d.ts') &&
-          f !== `${FsUtil.cwd}/index.ts`,
-        cwd: FsUtil.cwd,
-        files: ScanApp.findFiles({ paths: this.roots, folder: 'src' })
-          .filter(x => !(x.file in require.cache)) // Skip already imported files
-          .map(x => x.file),
-        folders: ScanApp.findFolders({ paths: this.roots, folder: 'src' }),
-        listener: this,
+      this.presence = new FilePresenceManager(this.roots.flatMap(x => x === '.' ? [`${x}/src`, `${x}/test`] : [`${x}/src`]), {
+        ignoreInitial: true,
+        validFile: x => x.endsWith('.ts') && !x.endsWith('.d.ts')
+      }).on('all', ({ event, entry }) => {
+        switch (event) {
+          case 'added': this.added(entry.file); break;
+          case 'removed': this.removed(entry.file); break;
+          case 'changed': this.changed(entry.file); break;
+        }
       });
-
-      this.presenceManager.init();
     }
 
     reset() {
       super.reset();
       this.modules.clear();
-      this.presenceManager.close();
-    }
-
-    /**
-     * Wrap compile, listening for new additions
-     */
-    compile(mod: NodeModule, tsf: string) {
-      const isNew = !this.presenceManager?.has(tsf);
-      try {
-        return super.compile(mod, tsf);
-      } finally {
-        // If known by the source manager, track it's presence
-        //   some files will be transpile only, and should not trigger
-        //   presence activity
-        if (isNew && this.transpiler.hasContents(tsf)) {
-          this.presenceManager.addNewFile(tsf, false);
-        }
-      }
     }
   };
 

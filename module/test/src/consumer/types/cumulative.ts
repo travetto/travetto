@@ -1,3 +1,5 @@
+import { Class } from '@travetto/registry';
+
 import { TestConsumer } from '../types';
 import { TestEvent } from '../../model/event';
 import { TestResult } from '../../model/test';
@@ -11,7 +13,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
   /**
    * Total state of all tests run so far
    */
-  private state: Record<string, TestResult['status']> = {};
+  private state: Record<string, Record<string, TestResult['status']>> = {};
 
   constructor(private target: TestConsumer) { }
 
@@ -20,16 +22,36 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    * state
    */
   summarizeSuite(test: TestResult): SuiteResult {
-    require(test.file);
+    try {
+      require(test.file);
+      this.state[test.classId] = this.state[test.classId] ?? {};
+      this.state[test.classId][test.methodName] = test.status;
+      const SuiteCls = TestRegistry.getClasses().find(x =>
+        x.ᚕid === test.classId
+      )!;
+      return this.computeTotal(SuiteCls);
+    } catch {
+      return this.removeClass(test.classId);
+    }
+  }
 
-    this.state[`${test.classId}!${test.methodName}`] = test.status;
-    const SuiteCls = TestRegistry.getClasses().find(x =>
-      x.ᚕid === test.classId
-    )!;
+  /**
+   * Remove a class
+   */
+  removeClass(clsId: string) {
+    this.state[clsId] = {};
+    return {
+      classId: clsId, passed: 0, failed: 0, skipped: 0, total: 0, tests: [], duration: 0, file: '', lines: { start: 0, end: 0 }
+    };
+  }
 
-    const suite = TestRegistry.get(SuiteCls);
+  /**
+   * Compute totals
+   */
+  computeTotal(cls: Class) {
+    const suite = TestRegistry.get(cls);
     const total = suite.tests.reduce((acc, x) => {
-      const status = this.state[`${x.classId}!${x.methodName}`] ?? 'unknown';
+      const status = this.state[x.classId][x.methodName] ?? 'unknown';
       acc[status] += 1;
       return acc;
     }, { skipped: 0, passed: 0, failed: 0, unknown: 0 });

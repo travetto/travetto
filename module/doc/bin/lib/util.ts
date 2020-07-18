@@ -90,14 +90,11 @@ ${content}`;
     const { Watcher } = await import('@travetto/watch');
     const { Compiler } = await import('@travetto/compiler');
 
-    new Watcher({ interval: 250 })
+    new Watcher(__dirname, { interval: 250, exclude: { testDir: () => false, testFile: f => f === file } })
       .on('all', e => {
-        console.log('Recompiling', e);
         Compiler.unload(require.resolve(FsUtil.resolveUnix(file)));
         cb(e);
-      })
-      .add([{ testFile: f => f.endsWith(file), testDir: x => true }])
-      .run(true);
+      });
     await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24));
   }
 }

@@ -54,7 +54,8 @@ The underlying contract for a [AssetNamingStrategy](https://github.com/travetto/
 **Code: Asset Naming Strategy**
 ```typescript
 export abstract class AssetNamingStrategy {
-  public readonly prefix: string;
+  readonly prefix: string;
+
   /**
    * Produce a path for a given asset
    * @param Asset Get path from an asset
