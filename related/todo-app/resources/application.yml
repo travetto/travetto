@@ -1,5 +1,5 @@
 api.spec:
-  output: ./openapi.json
+  output: ./openapi.yml
 
 sql.model:
   namespace: todo
