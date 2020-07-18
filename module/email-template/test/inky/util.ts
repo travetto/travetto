@@ -1,7 +1,7 @@
 import { html } from 'js-beautify';
 
 import { Inky } from '../../bin/lib/inky';
-import { ComponentFactory } from '../../bin/lib/inky/factory';
+import { InkyComponentFactory } from '../../bin/lib/inky/factory';
 
 const OPTS = {
   ['indent_size']: 2,
@@ -13,7 +13,7 @@ export function cleanseOutput(output: string) {
   return html(output, OPTS);
 }
 
-export function cleanseTemplate(input: string, factory?: ComponentFactory) {
+export function cleanseTemplate(input: string, factory?: InkyComponentFactory) {
   const output = Inky.render(input, factory);
   return cleanseOutput(output);
 }

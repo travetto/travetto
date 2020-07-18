@@ -1,8 +1,7 @@
-import * as fs from 'fs';
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { FsUtil, ScanFs } from '@travetto/boot';
+import { ScanFs } from '@travetto/boot';
 
 import { Watcher } from '../src/watcher';
 
@@ -12,19 +11,12 @@ export class WatchTest {
   @Test()
   async runWatcher() {
     const found: [string, string][] = [];
-    const w = new Watcher({ cwd: FsUtil.resolveUnix('src') });
+    const w = new Watcher(__dirname);
     w
       .on('all', ({ event, entry }) => {
         console.log(event, entry.file);
         found.push([event, entry.file]);
       });
-
-    w.add([{ testFile: x => /.*/.test(x) }, FsUtil.toUnix(__filename)]);
-    w.watch({
-      file: FsUtil.toUnix(__dirname),
-      module: FsUtil.toUnix(__dirname),
-      stats: fs.lstatSync(__dirname)
-    });
 
     await new Promise(res => setTimeout(res, 100));
 

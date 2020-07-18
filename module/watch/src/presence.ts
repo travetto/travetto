@@ -1,142 +1,76 @@
-import * as path from 'path';
+import { EventEmitter } from 'events';
+import { ScanEntry } from '@travetto/boot';
 
-import { FsUtil, ScanEntry } from '@travetto/boot';
+import { Watcher, WatcherOptions } from './watcher';
 
-import { Watcher } from './watcher';
-
-export interface PresenceListener {
-  added(name: string): void;
-  changed(name: string): void;
-  removed(name: string): void;
+export interface FilePresenceManager {
+  on(type: 'all', handlder: (payload: { event: string, entry: ScanEntry }) => void): this;
+  on(type: 'added', handlder: (entry: ScanEntry) => void): this;
+  on(type: 'addedDir', handlder: (entry: ScanEntry) => void): this;
+  on(type: 'removed', handlder: (entry: ScanEntry) => void): this;
+  on(type: 'removedDir', handlder: (entry: ScanEntry) => void): this;
+  on(type: 'changed', handlder: (entry: ScanEntry) => void): this;
+  on(type: string | symbol, handler: (...payload: any[]) => void): this;
 }
+
+type Opts = WatcherOptions & {
+  validFile?: (f: string) => boolean;
+};
 
 /**
  * Tracks file changes for the application roots,
  * and handles multiple file roots.
  */
-export class FilePresenceManager {
-  private fileWatchers = new Map<string, Watcher>();
-
-  private validFile: (f: string) => boolean;
-  private cwd: string;
-  private listener: PresenceListener;
-  private files = new Set<string>();
-  private folders = new Set<string>();
+export class FilePresenceManager extends EventEmitter {
+  private watchers = new Map<string, Watcher>();
 
   /**
    * Build a new file presence manager
    *
    * @param config
    */
-  constructor(
-    config: {
-      validFile: FilePresenceManager['validFile'];
-      cwd: FilePresenceManager['cwd'];
-      folders: FilePresenceManager['folders'] | string[];
-      files: FilePresenceManager['files'] | string[];
-      listener: Partial<FilePresenceManager['listener']>;
-    }
-  ) {
-    config.files = new Set(config.files);
-    config.folders = new Set(config.folders);
+  constructor(folders: string[], private config: Opts = {}) {
+    super();
 
-    for (const k of ['added', 'removed', 'changed'] as const) {
-      config.listener[k] = config.listener[k] || (() => { });
-    }
-
-    Object.assign(this, config);
+    this.addFolder(...folders);
+    setTimeout(() => this.config.ignoreInitial = false, 1000);
   }
 
   /**
    * Callback handle for the watcher
    */
   private watcherListener({ event, entry }: { event: string, entry: ScanEntry }) {
-    if (!this.validFile(entry.file)) {
-      return;
-    }
-
-    console.debug('Watch', event, entry.file);
     switch (event) {
-      case 'added': {
-        this.files.add(entry.file);
-        return this.listener.added(entry.file);
-      }
-      case 'changed': {
-        const changed = this.files.has(entry.file);
-        if (changed) {
-          this.listener.changed(entry.file);
+      case 'added':
+      case 'changed':
+      case 'removed':
+        if (this.config.validFile && !this.config.validFile(entry.file)) {
           return;
-        } else {
-          this.files.add(entry.file);
-          return this.listener.added(entry.file);
         }
-      }
-      case 'removed': {
-        this.files.delete(entry.file);
-        return this.listener.removed(entry.file);
-      }
+        break;
+    }
+    this.emit('all', { event, entry });
+    this.emit(event, entry);
+  }
+
+  /**
+   * Add a folder
+   */
+  addFolder(...folders: string[]) {
+    for (const folder of folders.filter(x => !this.watchers.has(x))) {
+      this.watchers.set(folder, new Watcher(folder, this.config)
+        .on('all', this.watcherListener.bind(this)));
     }
   }
 
   /**
-   * Add a new watcher for a specific root
+   * Remove a folder
+   * @param folder
    */
-  private buildWatcher(cwd: string) {
-    return new Watcher({ interval: 250, cwd })
-      .on('all', this.watcherListener.bind(this))
-      .add([{ testFile: this.validFile, testDir: this.validFile }])
-      .run(false);
-  }
-
-  /**
-   * Initialize manager
-   */
-  init() {
-    setTimeout(() => this.folders.forEach(p => this.addNewFolder(p)), 50); // TODO: Should be definitive here, 1000 og
-  }
-
-  /**
-   * Add new folder to watch
-   */
-  addNewFolder(folder: string) {
-    if (!FsUtil.existsSync(folder)) {
-      console.warn(`Directory ${FsUtil.resolveUnix(folder)} missing, cannot watch`);
-    } else {
-      this.buildWatcher(FsUtil.resolveUnix(folder));
-    }
-  }
-
-  /**
-   * Determine if file is known
-   */
-  has(name: string) {
-    return this.files.has(name);
-  }
-
-  /**
-   * Add an individual file
-   *
-   * @param name File path
-   * @param notify Wether or not to emit on addition
-   */
-  addNewFile(name: string, notify = true) {
-    if (this.files.has(name)) {
-      return;
-    }
-
-    if (this.validFile(name)) {
-      // Already known to be a used file, just don't watch node modules
-      const topLevel = path.dirname(name);
-      if (!this.fileWatchers.has(topLevel)) {
-        this.fileWatchers.set(topLevel, this.buildWatcher(topLevel));
-      }
-      this.fileWatchers.get(topLevel)!.add([name.replace(`${topLevel}/`, '')]);
-    }
-
-    this.files.add(name);
-
-    if (notify) {
-      this.listener.added(name);
+  removeFolder(...folders: string[]) {
+    for (const folder of folders.filter(x => this.watchers.has(x))) {
+      this.watchers.get(folder)!.close();
+      this.watchers.delete(folder);
     }
   }
 
@@ -144,9 +78,6 @@ export class FilePresenceManager {
    * Close manager, freeing all watchers
    */
   close() {
-    [...this.fileWatchers.values()].forEach(x => x.close());
-    this.fileWatchers.clear();
-    this.files.clear();
-    this.folders.clear();
+    this.removeFolder(...this.watchers.keys());
   }
 }

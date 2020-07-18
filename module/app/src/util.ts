@@ -10,15 +10,18 @@ export class AppUtil {
    * Enforces application parameter input conforms to configuration
    */
   static enforceParamType(config: ApplicationParameter, param: string) {
-    switch (config.type) {
-      case 'boolean': return Util.coerceType(param, Boolean);
-      case 'number': return Util.coerceType(param, Number);
-      default:
-        if (config.meta?.choices && !config.meta.choices.find(c => `${c}` === param)) {
-          throw new Error(`Invalid parameter ${config.name}: Received ${param} expected ${config.meta.choices.join('|')}`);
-        }
-        return Util.coerceType(param, String);
+    try {
+      switch (config.type) {
+        case 'boolean': return Util.coerceType(param, Boolean);
+        case 'number': return Util.coerceType(param, Number);
+      }
+    } catch (err) {
+      throw new Error(`Invalid parameter ${config.name}: Received ${param}, but exepcted ${config.type}`);
     }
+    if (config.meta?.choices && !config.meta.choices.find(c => `${c}` === param)) {
+      throw new Error(`Invalid parameter ${config.name}: Received ${param} expected ${config.meta.choices.join('|')}`);
+    }
+    return Util.coerceType(param, String);
   }
 
   /**

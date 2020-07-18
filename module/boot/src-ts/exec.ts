@@ -49,9 +49,9 @@ export interface ExecutionOptions extends SpawnOptions {
    */
   timeout?: number;
   /**
-   * Whether or not to collect stdin/stdout
+   * Whether or not to collect stdin/stdout, defaults to false
    */
-  quiet?: boolean;
+  rawOutput?: boolean;
   /**
    * The stdin source for the execution
    */
@@ -76,13 +76,10 @@ export class ExecUtil {
    */
   static getOpts(opts: ExecutionOptions) {
     return {
+      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       cwd: process.cwd(),
       shell: false,
       ...opts,
-      stdio:
-        opts.stdio ??
-        (opts.quiet ? ['pipe', 'ignore', 'ignore', 'ipc'] : undefined) ??
-        ['pipe', 'pipe', 'pipe', 'ipc'],
       env: {
         ...process.env,
         ...(opts.env ?? {})
@@ -133,7 +130,7 @@ export class ExecUtil {
         }
       };
 
-      if (!options.quiet) {
+      if (!options.rawOutput) {
         if (p.stdout) {
           p.stdout!.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
         }

@@ -23,7 +23,6 @@ export class WorkUtil {
   ): Worker<X> {
     const channel = new ParentCommChannel(
       ExecUtil.fork(command, args, {
-        quiet: true,
         ...(opts ?? {})
       })
     );

@@ -12,20 +12,20 @@ This module is intended to be used during development, and is not during product
 
 ## File Watching
 
-This module  is the base file system watching support for [Travetto](https://travetto.dev) applications.  In addition to file system scanning, the framework offers a simple file watching library.  The goal is to provide a substantially smaller footprint than [gaze](https://github.com/shama/gaze) or [chokidar](https://github.com/paulmillr/chokidar).  Utilizing the patterns from the file scanning, you create a [Watcher](https://github.com/travetto/travetto/tree/master/module/watch/src/watcher.ts#L40) that either has files added manually, or has patterns added that will recursively look for files. 
+This module  is the base file system watching support for [Travetto](https://travetto.dev) applications.  In addition to file system scanning, the framework offers a simple file watching library.  The goal is to provide a substantially smaller footprint than [gaze](https://github.com/shama/gaze) or [chokidar](https://github.com/paulmillr/chokidar).  Utilizing the patterns from the file scanning, you create a [Watcher](https://github.com/travetto/travetto/tree/master/module/watch/src/watcher.ts#L31) that either has files added manually, or has patterns added that will recursively look for files. 
 
 **Code: Example of watching for specific files**
 ```typescript
 import { Watcher } from '@travetto/watch/src/watcher';
 
-const watcher = new Watcher({ cwd: 'base/path/to/...' });
-watcher.add([
-  'local.config',
-  {
-    testFile: x => x.endsWith('.config') || x.endsWith('.config.json')
-  }
-]);
-watcher.run();
+const watcher = new Watcher('base/path/to/...')
+  .on('all', ({ event, entry }) => {
+    if (entry.file.endsWith('.config') || entry.file.endsWith('.config.json')) {
+      console.log('File Event', event, entry.file);
+    }
+  });
+
+setTimeout(() => watcher.close(), 1000);
 ```
 
 ## Retargetting Proxy

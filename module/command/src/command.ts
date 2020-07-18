@@ -88,7 +88,7 @@ export class CommandService {
     if (container) {
       return container.exec(args);
     } else {
-      return ExecUtil.spawn(args[0], args.slice(1), { shell: true, quiet: false });
+      return ExecUtil.spawn(args[0], args.slice(1), { shell: true });
     }
   }
 
@@ -103,7 +103,7 @@ export class CommandService {
     if (container) {
       return container.setEntryPoint(cmd).run(rest);
     } else {
-      return await ExecUtil.spawn(cmd, rest, { shell: true, quiet: false }).result;
+      return await ExecUtil.spawn(cmd, rest, { shell: true }).result;
     }
   }
 }
