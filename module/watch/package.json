@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^1.0.1"
+    "@travetto/base": "^1.0.2"
   },
   "title": "Watch",
   "description": "Support for making files watchable during runtime",
@@ -27,5 +27,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.1"
+  "version": "1.0.2"
 }
