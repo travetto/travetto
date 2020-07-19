@@ -6,7 +6,7 @@ import { StacktraceUtil } from '../src/stacktrace';
  * And prepare shutdown manager
  */
 export const init = {
-  key: 'base',
+  key: '@trv:base/init',
   action: () => {
     StacktraceUtil.init();
     ShutdownManager.register();

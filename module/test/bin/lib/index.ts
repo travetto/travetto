@@ -16,7 +16,7 @@ async function customLogs() {
 async function load() {
   await CompileCliUtil.compile();
   const { PhaseManager } = await import('@travetto/base');
-  await PhaseManager.init('require-all');
+  await PhaseManager.init('@trv:compiler/load');
 }
 
 /**

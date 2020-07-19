@@ -39,7 +39,7 @@ export class RunUtil {
     // Compile all code as needed
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 
-    await PhaseManager.init('require-all');
+    await PhaseManager.init('@trv:compiler/load');
 
     // Load app if in support folder
     if (app.filename.includes('support')) {
@@ -52,7 +52,7 @@ export class RunUtil {
     ConsoleManager.set({ invoke(a, b) { events.push([a, b]); } });
 
     // Finish registration
-    await PhaseManager.initAfter('require-all');
+    await PhaseManager.initAfter('@trv:compiler/load');
 
     // And run
     const { ApplicationRegistry } = await import('../../src/registry');

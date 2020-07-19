@@ -2,8 +2,8 @@
  * Registers the bind utilities on class
  */
 export const init = {
-  key: 'schema',
-  after: ['registry'], // Should be global
+  key: '@trv:schema/init',
+  after: ['@trv:registry/init'], // Should be global
   action: async () => {
     const { BindUtil } = await import('../src/bind-util');
     BindUtil.register();
