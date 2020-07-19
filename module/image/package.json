@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/command": "^1.0.1"
+    "@travetto/command": "^1.0.2"
   },
   "title": "Image",
   "description": "Image support, resizing, and optimization",
@@ -27,5 +27,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.1"
+  "version": "1.0.2"
 }
