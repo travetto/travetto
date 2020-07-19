@@ -36,6 +36,7 @@ export class OpenApiClientPlugin extends BasePlugin {
       '--rm',
       this._cmd.dockerImage,
       'generate',
+      '--skip-validate-spec',
       '--remove-operation-id-prefix',
       '-g', format,
       '-o', '/workspace',
