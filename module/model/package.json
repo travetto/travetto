@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@travetto/di": "^1.0.2",
-    "@travetto/schema": "^1.0.2"
+    "@travetto/schema": "^1.0.3"
   },
   "title": "Data Modeling",
   "description": "Datastore abstraction for CRUD operations with advanced query support.",
@@ -36,5 +36,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.3"
+  "version": "1.0.4"
 }
