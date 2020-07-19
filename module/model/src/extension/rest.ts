@@ -1,6 +1,7 @@
 // @file-if @travetto/rest
 import { ControllerRegistry, paramConfig } from '@travetto/rest';
-import { Schema, schemaParamConfig } from '@travetto/schema';
+import { Schema, } from '@travetto/schema';
+import { schemaParamConfig } from '@travetto/schema/src/extension/rest';
 import { Class } from '@travetto/registry';
 
 import { ModelService } from '../service/model';
@@ -97,7 +98,7 @@ export function ModelController<T extends ModelCore>(path: string, cls: Class<T>
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
         target, function suggestField(this: Svc, field: ValidStringFields<T>, suggest: SuggestQuery) {
-          return this.source.suggest(getCls(), field, suggest.q, suggest);
+          return this.source.suggest<T>(getCls(), field, suggest.q, suggest);
         }),
       {
         description: `Suggest ${cls.name} by specific field`,
