@@ -11,6 +11,11 @@ export function buildWorkManager(consumer: TestConsumer) {
    * Spawn a child
    */
   return WorkUtil.spawnedWorker(require.resolve('../../bin/plugin-child-worker'), {
+    opts: {
+      env: {
+        TRV_WATCH: '0'
+      }
+    },
     handlers: {
       /**
        * Child initialization
