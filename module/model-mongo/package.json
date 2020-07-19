@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@travetto/config": "^1.0.2",
-    "@travetto/model": "^1.0.2",
+    "@travetto/model": "^1.0.4",
     "@types/mongodb": "^3.5.20",
     "mongodb": "^3.5.9"
   },
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.2"
+  "version": "1.0.3"
 }
