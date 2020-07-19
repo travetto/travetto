@@ -6,8 +6,8 @@ declare const global: { ts: any }; // Used for transformers
  * Responsible for initializing the transformer support
  */
 export const init = {
-  key: 'transformer',
-  before: ['config', 'base'], // First
+  key: '@trv:transformer/init',
+  before: ['@trv:config/init', '@trv:base/init'], // First
   action: async () => {
 
     // Inject into global space as 'ts'

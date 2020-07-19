@@ -2,8 +2,8 @@
  * Responsible for loading all available modules
  */
 export const init = {
-  key: 'require-all',
-  after: ['compile-all'],
+  key: '@trv:compiler/load',
+  after: ['@trv:compiler/compile'],
   action: async () => {
     const { Compiler } = await import('../src/compiler');
     for (const file of Compiler.getRootFiles()) {

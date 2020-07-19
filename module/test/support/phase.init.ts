@@ -2,9 +2,9 @@
  * Test initialization
  */
 export const init = {
-  key: 'test',
-  before: ['compiler'],
-  after: ['base'],
+  key: '@trv:test/init',
+  before: ['@trv:compiler/init'],
+  after: ['@trv:base/init'],
   action: async () => {
     const { EnvUtil } = await import('@travetto/boot');
     const { ScanApp } = await import('@travetto/base');

@@ -39,7 +39,7 @@ export class AppListManager {
       );
     } else {
       const { PhaseManager } = await import('@travetto/base');
-      await PhaseManager.init('compile-all'); // Compilation is pre done
+      await PhaseManager.init('@trv:compiler/compile'); // Compilation is pre done
 
       const { AppListUtil } = await import('../../src/list');
       const list = await AppListUtil.buildList();

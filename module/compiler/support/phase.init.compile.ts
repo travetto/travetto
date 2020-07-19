@@ -2,8 +2,8 @@
  * Responsible for compiling all new code
  */
 export const init = {
-  key: 'compile-all',
-  after: ['compiler'],
+  key: '@trv:compiler/compile',
+  after: ['@trv:compiler/init'],
   action: async () => {
     const { AppCache, EnvUtil } = await import('@travetto/boot');
 
