@@ -2,8 +2,8 @@
  * Initializes the config source
  */
 export const init = {
-  key: 'config',
-  after: ['base'],
+  key: '@trv:config/init',
+  after: ['@trv:base/init'],
   action: async () => {
     const { ConfigManager } = await import('../src/manager');
     ConfigManager.init();
