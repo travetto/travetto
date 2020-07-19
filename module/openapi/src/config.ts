@@ -41,7 +41,7 @@ export class ApiSpecConfig {
   /**
    * Where to output file to
    */
-  output: string = 'openapi.json';
+  output: string = 'openapi.yml';
   /**
    * Should file be generated at runtime
    */
@@ -62,7 +62,7 @@ export class ApiSpecConfig {
     }
     if (this.persist) {
       if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder
-        this.output = FsUtil.resolveUnix(this.output, 'api.spec.yml');
+        this.output = FsUtil.resolveUnix(this.output, 'openapi.yml');
       }
       await FsUtil.mkdirp(path.dirname(this.output));
     }

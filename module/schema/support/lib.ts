@@ -37,7 +37,7 @@ export class SchemaTransformUtil {
         // Determine type unique ident
         let unique: string = Util.uuid(type.name ? 5 : 10);
         try {
-          unique = `_${SystemUtil.naiveHash(node.getText())}`;
+          unique = `${ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line}_${node.getEnd() - node.getStart()}`;
         } catch { }
 
         // Build class on the fly
