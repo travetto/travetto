@@ -53,7 +53,13 @@ export async function worker() {
 
 export async function watchTests(format: string = 'tap') {
   CliUtil.initAppEnv({ ...DEF_ENV, watch: true, envExtra: { ...ENV_EXT, TRV_TEST_COMPILE: 1 } });
-  await load();
+
+  // Compile everything inline, don't delegate
+  const { PhaseManager } = await import('@travetto/base');
+  await PhaseManager.init('@trv:compiler/load');
+
+  // Trigger startup of transpiler
+  (await import('@travetto/compiler')).Compiler['transpiler']['getProgram']();
 
   const { TestWatcher } = await import('../../src/runner/watcher');
   await TestWatcher.watch(format);
