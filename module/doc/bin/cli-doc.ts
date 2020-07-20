@@ -30,13 +30,13 @@ export class DocPlugin extends BasePlugin {
 
       const write = async () => {
         for (const { renderer, finalName } of writers) {
-          const content = await CliDocUtil.generate(renderer);
+          const content = await CliDocUtil.generate('DOCS.js', renderer);
           fs.writeFileSync(finalName, content, 'utf8');
         }
       };
 
       if (this._cmd.watch) {
-        await CliDocUtil.watchFile('README.js', write);
+        await CliDocUtil.watchFile('DOCS.js', write);
       } else {
         await write();
       }

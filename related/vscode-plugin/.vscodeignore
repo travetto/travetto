@@ -19,6 +19,6 @@ node_modules/@travetto/boot/bin/**
 .trv_*/
 images/*.gif
 .eslintignore
-README.js
+DOCS.js
 node_modules/**/*.d.ts
 node_modules/**/*.html
