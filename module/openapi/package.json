@@ -7,10 +7,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^1.0.2",
-    "@travetto/rest": "^1.0.2",
-    "@travetto/schema": "^1.0.3",
-    "@travetto/yaml": "^1.0.2",
+    "@travetto/config": "^1.0.3",
+    "@travetto/rest": "^1.0.3",
+    "@travetto/schema": "^1.0.4",
+    "@travetto/yaml": "^1.0.3",
     "openapi3-ts": "^1.4.0"
   },
   "title": "OpenAPI Specification",
@@ -33,5 +33,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.3"
+  "version": "1.0.4"
 }
