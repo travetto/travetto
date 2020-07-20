@@ -1,4 +1,5 @@
-import * as aws from 'aws-sdk';
+import { fromIni } from '@aws-sdk/credential-provider-ini';
+import * as S3 from '@aws-sdk/client-s3';
 import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 
@@ -13,31 +14,24 @@ export class S3AssetConfig {
 
   accessKeyId = EnvUtil.get('AWS_ACCESS_KEY_ID') ?? '';
   secretAccessKey = EnvUtil.get('AWS_SECRET_ACCESS_KEY') ?? '';
+  config: S3.S3ClientConfig; // Additional s3 config
 
-  config: aws.S3.ClientConfiguration; // Additional s3 config
-
-  get hostName() {
-    return `${this.bucket}.s3.amazonaws.com`;
-  }
+  chunkSize = 5 * 2 ** 20; // Chunk size in bytes
 
   /**
    * Produces the s3 config from the provide details, post construction
    */
-  postConstruct() {
+  async postConstruct() {
     if (!this.accessKeyId && !this.secretAccessKey) {
-      const creds = new aws.SharedIniFileCredentials({ profile: EnvUtil.get('AWS_PROFILE') });
+      const creds = await fromIni({ profile: EnvUtil.get('AWS_PROFILE') })();
       this.accessKeyId = creds.accessKeyId;
       this.secretAccessKey = creds.secretAccessKey;
     }
 
     this.config = {
-      apiVersion: '2006-03-01',
       credentials: {
         accessKeyId: this.accessKeyId,
         secretAccessKey: this.secretAccessKey
-      },
-      params: {
-        Bucket: this.bucket
       }
     };
   }
