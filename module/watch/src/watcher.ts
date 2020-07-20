@@ -160,10 +160,14 @@ export class Watcher extends EventEmitter {
     const poller = (_: any, kind: number) => {
       const stats = fs.lstatSync(entry.file);
       entry.stats = stats;
-      switch (kind) {
-        case ts.FileWatcherEventKind.Created: this.emit('added', entry); break;
-        case ts.FileWatcherEventKind.Changed: this.emit('changed', entry); break;
-        case ts.FileWatcherEventKind.Deleted: this.emit('removed', entry); break;
+      try {
+        switch (kind) {
+          case ts.FileWatcherEventKind.Created: this.emit('added', entry); break;
+          case ts.FileWatcherEventKind.Changed: this.emit('changed', entry); break;
+          case ts.FileWatcherEventKind.Deleted: this.emit('removed', entry); break;
+        }
+      } catch (err) {
+        console.error('Error in watching', entry.file);
       }
     };
 
