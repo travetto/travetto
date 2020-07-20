@@ -5,5 +5,5 @@ module/boot/src
 module/boot/index.js
 module/generator-app/templates
 sample/**/api-client/
-module/*/README.js
-related/*/README.js
+module/*/DOCS.js
+related/*/DOCS.js

@@ -39,9 +39,9 @@ export class CliDocUtil {
    * Generate the text
    * @param renderer
    */
-  static async generate(renderer: Renderer) {
+  static async generate(file: string, renderer: Renderer) {
     const { Header } = await import('../..');
-    const file = FsUtil.resolveUnix('README.js');
+    file = FsUtil.resolveUnix(file);
 
     const doc: {
       header?: boolean;
