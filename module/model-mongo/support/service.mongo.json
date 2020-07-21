@@ -1,6 +1,0 @@
-{
-  "name": "mongodb",
-  "version": "3.6",
-  "port": 27017,
-  "image": "mongo:3.6"
-}

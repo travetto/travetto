@@ -33,7 +33,7 @@ ${Terminal('All Services', DocUtil.run('sh', ['./bin/test/resources.sh', 'status
 
 ${SubSection('Defining new Services')}
 
-The services are defined as ${lib.JSON} files within the framework and can easily be extended:
+The services are defined as plain javascript files within the framework and can easily be extended:
 
-${Code('Sample Service Definition', '../model-elasticsearch/support/service.elasticsearch.json')}
+${Code('Sample Service Definition', '../model-elasticsearch/support/service.elasticsearch.js')}
 `;

@@ -12,15 +12,6 @@ export type Service = {
   require?: string;
 };
 
-function hasModule(f: string) {
-  try {
-    require.resolve(f);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 /**
  * Utils for starting up in place services, primarily for development
  */
@@ -114,7 +105,7 @@ export class ServiceUtil {
   static findAll() {
     const extra = EnvUtil.getList('TRV_SVC_FILES');
     const all = FrameworkUtil
-      .scan(x => /support\/service[.].*?[.]json/.test(x))
+      .scan(x => /support\/service[.].*?[.]js$/.test(x))
       .filter(x => x.stats.isFile())
       .map(x => require(x.file) as Service);
 
@@ -122,6 +113,9 @@ export class ServiceUtil {
       all.push(require(e) as Service);
     }
 
-    return all.filter(x => !x.require || hasModule(x.require));
+    return all.filter(x => !!x).map(x => {
+      x.version = `${x.version}`;
+      return x;
+    });
   }
 }
