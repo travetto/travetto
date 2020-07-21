@@ -12,6 +12,13 @@ const ENDPOINT_DEC_FILE = (() => { try { return require.resolve('@travetto/rest/
  */
 export class SchemaRestTransformer {
 
+  static key = '@trv:schema';
+
+  /**
+   * Find the render method of a type if provided
+   * @param state
+   * @param cls
+   */
   static findRenderMethod(state: TransformerState, cls: ts.ClassLikeDeclaration | ts.Type): AnyType | undefined {
     let render;
     if ('getSourceFile' in cls) {
@@ -131,7 +138,7 @@ export class SchemaRestTransformer {
    * Handle all parameters that care about schema
    */
   @OnParameter('@trv:schema/Param')
-  static handleProperty(state: TransformerState, node: ts.ParameterDeclaration, dm?: DecoratorMeta) {
+  static processEndpointParameterType(state: TransformerState, node: ts.ParameterDeclaration, dm?: DecoratorMeta) {
     const resolved = state.resolveType(node.type!);
     if (dm && resolved.key === 'shape') {
       const id = SchemaTransformUtil.toFinalType(state, resolved, node) as ts.Identifier;

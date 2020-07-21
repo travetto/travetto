@@ -20,11 +20,13 @@ interface RegisterInfo {
  */
 export class RegisterTransformer {
 
+  static key = '@trv:registry';
+
   /**
    * Hash each class
    */
   @OnClass()
-  static prepareClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
+  static preprocessClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
     state[cls] = SystemUtil.naiveHash(node.getText());
     return node;
   }
@@ -33,7 +35,7 @@ export class RegisterTransformer {
    * Hash each method
    */
   @OnMethod()
-  static transformMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration) {
+  static processMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration) {
     // eslint-disable-next-line no-bitwise
     const isAbstract = !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
 
@@ -50,7 +52,7 @@ export class RegisterTransformer {
    * After visiting each class, register all the collected metadata
    */
   @AfterClass()
-  static transformClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
+  static registerClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
     if (state.source.fileName === REGISTER_MOD) {  // Cannot process self
       return node;
     }
@@ -97,7 +99,7 @@ export class RegisterTransformer {
    * Give proper functions a file name
    */
   @OnFunction()
-  static transformFunction(state: TransformerState & RegisterInfo, node: ts.FunctionDeclaration) {
+  static registerFunction(state: TransformerState & RegisterInfo, node: ts.FunctionDeclaration) {
     if (node.name && /^[A-Z]/.test(node.name.escapedText.toString())) {
       // If we have a class like function
       state.addStatement(

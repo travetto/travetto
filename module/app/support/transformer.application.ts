@@ -9,6 +9,8 @@ import {
  */
 export class ApplicationTransformer {
 
+  static key = '@trv:app';
+
   /**
    * Computes an `AppParameter` state from a TypeScript ParameterDeclaration
    */
@@ -59,7 +61,7 @@ export class ApplicationTransformer {
    * On presence of `@Application`
    */
   @OnClass('@trv:app/Application')
-  static handleClass(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
+  static registerAppClass(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
     const dec = dm?.dec;
 
     if (!dec || !ts.isCallExpression(dec.expression)) { // If not valid

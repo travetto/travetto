@@ -11,7 +11,7 @@ import {
 export class TransformerManager {
 
   private cached: { before: ts.TransformerFactory<ts.SourceFile>[] };
-  transformers: (NodeTransformer<TransformerState> & { file: string })[] = [];
+  transformers: NodeTransformer<TransformerState>[] = [];
 
   constructor() { }
 
@@ -27,22 +27,17 @@ export class TransformerManager {
     const found = ScanApp.findFiles({ folder: 'support', filter: /\/transformer.*[.]ts/ });
 
     for (const entry of found) { // Exclude based on blacklist
-      for (const transformer of getAllTransformers(require(entry.file))) {
-        const withFile = transformer as this['transformers'][number];
-        withFile.file = entry.file;
-        this.transformers.push(withFile);
-      }
+      this.transformers.push(...getAllTransformers(require(entry.file)));
     }
 
     console.debug('Transformers',
       ...this.transformers.map(x => {
-        const name = x.file.split(/[.]/).slice(1, -1).join('.');
         const flags = [
           ...(x.target ? [] : ['all']),
           ...(x.before ? ['before'] : []),
           ...(x.after ? ['after'] : [])
         ];
-        return `\n\t[${x.type}] ${name} - ${flags.join(' ')}`;
+        return `\n\t[${x.type}] ${x.key} - ${flags.join(' ')}`;
       })
     );
 
