@@ -173,7 +173,7 @@ export class HttpRequest {
     if (!out.headers) {
       out.headers = {};
     }
-    for (const k of ['Content-Type', 'Accept']) {
+    for (const k of opts.payload ? ['Content-Type', 'Accept'] : ['Accept']) {
       if (!out.headers[k]) {
         out.headers[k] = 'application/json';
       }
