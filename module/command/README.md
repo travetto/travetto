@@ -95,27 +95,29 @@ A sample of all services available to the entire framework:
 Service          Version    Status
 ----------------------------------------------
 
- * elasticsearch      6.8.2    Not running
- * mysql                5.6    Not running
- * mongodb              3.6    Running 8c882b03feea
- * redis                  5    Running b5452a1ecd21
- * postgresql          12.2    Running bc90298c00b7
+ * elasticsearch      6.8.7    Running a51d049c4af4
+ * mysql                5.6    Running be29e0cb3555
+ * postgresql          12.2    Running b7fee0127785
+ * mongodb              3.6    Running 19d622f75085
+ * redis                  5    Running 6c5e4bd3452b
 ```
 
 ### Defining new Services
 
-The services are defined as [JSON](https://www.json.org) files within the framework and can easily be extended:
+The services are defined as plain javascript files within the framework and can easily be extended:
 
 **Code: Sample Service Definition**
-```json
-{
-  "name": "elasticsearch",
-  "version": "6.8.2",
-  "port": 9200,
-  "env": {
-    "discovery.type": "single-node"
+```javascript
+const { version } = require('@elastic/elasticsearch/package.json');
+
+module.exports = {
+  name: 'elasticsearch',
+  version,
+  port: 9200,
+  env: {
+    'discovery.type': 'single-node'
   },
-  "image": "docker.elastic.co/elasticsearch/elasticsearch:6.8.2"
-}
+  image: `docker.elastic.co/elasticsearch/elasticsearch:${version}`
+};
 ```
 

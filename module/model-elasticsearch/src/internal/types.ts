@@ -27,5 +27,5 @@ export interface EsBulkResponse {
 
 export interface EsIdentity {
   index: string;
-  type: string;
+  type?: string;
 }

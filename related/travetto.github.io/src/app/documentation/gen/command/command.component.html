@@ -107,30 +107,32 @@ A sample of all services available to the entire framework:
       <pre><code class="language-bash">Service          Version    Status
 ----------------------------------------------
 
- * elasticsearch      <span class="token number">6.8</span>.2    Not running
- * mysql                <span class="token number">5.6</span>    Not running
- * mongodb              <span class="token number">3.6</span>    Running 8c882b03feea
- * redis                  <span class="token number">5</span>    Running b5452a1ecd21
- * postgresql          <span class="token number">12.2</span>    Running bc90298c00b7</code></pre>     
+ * elasticsearch      <span class="token number">6.8</span>.7    Running a51d049c4af4
+ * mysql                <span class="token number">5.6</span>    Running be29e0cb3555
+ * postgresql          <span class="token number">12.2</span>    Running b7fee0127785
+ * mongodb              <span class="token number">3.6</span>    Running 19d622f75085
+ * redis                  <span class="token number">5</span>    Running 6c5e4bd3452b</code></pre>     
       </figure>
 
 <h3 id="defining-new-services">Defining new Services</h3>
 
-The services are defined as <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> files within the framework and can easily be extended:
+The services are defined as plain javascript files within the framework and can easily be extended:
 
       <figure class="code">
       <figcaption class="code">Sample Service Definition
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model-elasticsearch/support/service.elasticsearch.json">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model-elasticsearch/support/service.elasticsearch.js">Source</a></cite>
       </figcaption>
-      <pre><code class="language-json"><span class="token punctuation">{{'{'}}</span>
-  <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"elasticsearch"</span><span class="token punctuation">,</span>
-  <span class="token property">"version"</span><span class="token operator">:</span> <span class="token string">"6.8.2"</span><span class="token punctuation">,</span>
-  <span class="token property">"port"</span><span class="token operator">:</span> <span class="token number">9200</span><span class="token punctuation">,</span>
-  <span class="token property">"env"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token property">"discovery.type"</span><span class="token operator">:</span> <span class="token string">"single-node"</span>
+      <pre><code class="language-javascript"><span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> version <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@elastic/elasticsearch/package.json'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+  name<span class="token operator">:</span> <span class="token string">'elasticsearch'</span><span class="token punctuation">,</span>
+  version<span class="token punctuation">,</span>
+  port<span class="token operator">:</span> <span class="token number">9200</span><span class="token punctuation">,</span>
+  env<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token string">'discovery.type'</span><span class="token operator">:</span> <span class="token string">'single-node'</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
-  <span class="token property">"image"</span><span class="token operator">:</span> <span class="token string">"docker.elastic.co/elasticsearch/elasticsearch:6.8.2"</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
+  image<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">docker.elastic.co/elasticsearch/elasticsearch:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>version<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>     
       </figure>
 
 </div>

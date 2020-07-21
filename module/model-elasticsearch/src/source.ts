@@ -1,6 +1,9 @@
 import * as es from '@elastic/elasticsearch';
 import { Reindex, Search, Index, Update, DeleteByQuery } from '@elastic/elasticsearch/api/requestParams';
 
+const VERSION = require('@elastic/elasticsearch/package.json').version;
+const MAJOR_VER = parseInt(VERSION.split('.')[0], 10);
+
 import {
   ModelSource, Query,
   BulkResponse, BulkOp,
@@ -124,7 +127,7 @@ export class ElasticsearchModelSource extends ModelSource {
     if (!this.identities.has(cls)) {
       const col = this.getCollectionName(cls);
       const index = this.getNamespacedIndex(col);
-      this.identities.set(cls, { index, type: '_doc' });
+      this.identities.set(cls, MAJOR_VER < 7 ? { index, type: '_doc' } : { index });
     }
     return { ...this.identities.get(cls)! };
   }
@@ -171,9 +174,7 @@ export class ElasticsearchModelSource extends ModelSource {
       await this.client.indices.create({
         index: concreteIndex,
         body: {
-          mappings: {
-            [ident.type]: schema
-          },
+          mappings: MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
           settings: this.config.indexCreate
         }
       });
@@ -184,9 +185,7 @@ export class ElasticsearchModelSource extends ModelSource {
       }
       console.debug(`Index ${ident.index} created`);
       console.debug('Index', JSON.stringify({
-        mappings: {
-          [ident.type]: schema
-        },
+        mappings: MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
         settings: this.config.indexCreate
       }, null, 2));
     } catch (e) {
@@ -363,8 +362,13 @@ export class ElasticsearchModelSource extends ModelSource {
    * Directly run the search
    */
   async execSearch<T>(search: Search<T>): Promise<SearchResponse<T>> {
-    const { body } = await this.client.search(search);
-    return body as SearchResponse<T>;
+    try {
+      const { body } = await this.client.search(search);
+      return body as SearchResponse<T>;
+    } catch (e) {
+      console.log(require('util').inspect(e.meta.body));
+      throw e;
+    }
   }
 
   /**
@@ -411,6 +415,7 @@ export class ElasticsearchModelSource extends ModelSource {
    */
   async initDatabase() {
     // PreCreate indexes if missing
+    console.log('Init Database', this.config.autoCreate);
     if (this.config.autoCreate) {
       const all = ModelRegistry.getClasses()
         .filter(x => !ModelRegistry.get(x).subType)
@@ -630,7 +635,7 @@ export class ElasticsearchModelSource extends ModelSource {
     }
 
     const { body: res } = await this.client.delete({
-      ...this.getIdentity(cls),
+      ...this.getIdentity(cls) as Required<EsIdentity>,
       id,
       refresh: 'true'
     });
@@ -647,7 +652,7 @@ export class ElasticsearchModelSource extends ModelSource {
     delete o.id;
 
     const { body: res } = await this.client.index({
-      ...this.getIdentity(o.constructor as Class),
+      ...this.getIdentity(o.constructor as Class) as Required<EsIdentity>,
       ... (id ? { id } : {}),
       refresh: 'true',
       body: o
@@ -751,7 +756,9 @@ export class ElasticsearchModelSource extends ModelSource {
     const body = operations.reduce((acc, op) => {
 
       const esIdent = this.getIdentity((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls }).constructor as Class);
-      const ident = { _index: esIdent.index, _type: esIdent.type };
+      const ident = MAJOR_VER < 7 ?
+        { _index: esIdent.index, _type: esIdent.type } :
+        { _index: esIdent.index };
 
       if (op.delete) {
         acc.push({ ['delete']: { ...ident, _id: op.delete.id } });

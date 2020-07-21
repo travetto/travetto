@@ -1,9 +1,0 @@
-{
-  "name": "elasticsearch",
-  "version": "6.8.2",
-  "port": 9200,
-  "env": {
-    "discovery.type": "single-node"
-  },
-  "image": "docker.elastic.co/elasticsearch/elasticsearch:6.8.2"
-}
