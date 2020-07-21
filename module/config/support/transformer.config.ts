@@ -16,14 +16,16 @@ interface AutoState {
  */
 export class ConfigTransformer {
 
+  static key = '@trv:config';
+
   @OnClass('@trv:config/Config')
-  static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
+  static startConfigClass(state: AutoState & TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
     state[hasConfig] = !!dm;
     return node;
   }
 
   @AfterClass('@trv:config/Config')
-  static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
+  static finalizeConfigClass(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators ?? [])];
 
     delete state[hasConfig];
@@ -40,7 +42,7 @@ export class ConfigTransformer {
   }
 
   @OnProperty()
-  static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
+  static onConfigProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
     if (state[hasConfig]) {
       if (!node.initializer) {
         node.initializer = ts.createIdentifier('undefined');

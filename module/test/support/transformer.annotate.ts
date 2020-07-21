@@ -9,9 +9,11 @@ import {
  */
 export class AnnotationTransformer {
 
+  static key = '@trv:test';
+
   @OnClass('@trv:test/Suite')
   @OnMethod('@trv:test/Test')
-  static annotate(state: TransformerState, node: ts.MethodDeclaration | ts.ClassDeclaration, dm?: DecoratorMeta) {
+  static annotateTestDetails(state: TransformerState, node: ts.MethodDeclaration | ts.ClassDeclaration, dm?: DecoratorMeta) {
 
     const dec = dm?.dec;
 

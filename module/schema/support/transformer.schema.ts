@@ -25,11 +25,13 @@ const COMMON_MOD = require.resolve('../src/decorator/common');
  */
 export class SchemaTransformer {
 
+  static key = '@trv:schema';
+
   /**
    * Track schema on start
    */
   @OnClass('@trv:schema/Schema')
-  static handleClassBefore(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta) {
+  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta) {
     state[inSchema] = true;
     state[hasSchema] = !!state.findDecorator(node, '@trv:schema/Schema', 'Schema', SCHEMA_MOD);
     return node;
@@ -39,7 +41,7 @@ export class SchemaTransformer {
    * Mark the end of the schema, document
    */
   @AfterClass('@trv:schema/Schema')
-  static handleClassAfter(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
+  static finalizeSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators ?? [])];
 
     const comments = DocUtil.describeDocs(node);
@@ -72,7 +74,7 @@ export class SchemaTransformer {
    * Handle all properties, while in schema
    */
   @OnProperty()
-  static handleProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
+  static processSchemaField(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
     const ignore = state.findDecorator(node, '@trv:schema/Ignore', 'Ignore', FIELD_MOD);
     return state[inSchema] && !ignore && CoreUtil.isPublic(node) ?
       SchemaTransformUtil.computeProperty(state, node) : node;

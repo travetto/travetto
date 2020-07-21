@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { DecoratorMeta, NodeTransformer, State } from './types/visitor';
+import { DecoratorMeta, NodeTransformer, State, TransformPhase, TransformerType } from './types/visitor';
 
 const HANDLERS = Symbol.for('@trv:transformer/handlers');
 
@@ -12,9 +12,9 @@ export function getAllTransformers(obj: any) {
 }
 
 // Store handlers in class
-function storeHandler(cls: any, handler: NodeTransformer) {
+function storeHandler(cls: any, fn: Function, phase: TransformPhase, type: TransformerType, target?: string | string[]) {
   cls[HANDLERS] = cls[HANDLERS] ?? [];
-  cls[HANDLERS].push(handler);
+  cls[HANDLERS].push({ key: `${cls.key}/${fn.name}`, [phase]: fn.bind(cls), type, target });
 }
 
 /**
@@ -23,7 +23,7 @@ function storeHandler(cls: any, handler: NodeTransformer) {
 export function OnCall(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.CallExpression) => R>
-  ) => storeHandler(inst, { before: d.value?.bind(inst), type: 'call', target });
+  ) => storeHandler(inst, d.value!, 'before', 'call', target);
 }
 
 /**
@@ -32,7 +32,7 @@ export function OnCall(target?: string | string[]) {
 export function OnFunction(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.FunctionDeclaration) => R>
-  ) => storeHandler(inst, { before: d.value?.bind(inst), type: 'function', target });
+  ) => storeHandler(inst, d.value!, 'before', 'function', target);
 }
 
 /**
@@ -41,7 +41,7 @@ export function OnFunction(target?: string | string[]) {
 export function OnParameter(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.ParameterDeclaration, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { before: d.value?.bind(inst), type: 'parameter', target });
+  ) => storeHandler(inst, d.value!, 'before', 'parameter', target);
 }
 
 /**
@@ -50,7 +50,7 @@ export function OnParameter(target?: string | string[]) {
 export function OnProperty(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.PropertyDeclaration, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { before: d.value?.bind(inst), type: 'property', target });
+  ) => storeHandler(inst, d.value!, 'before', 'property', target);
 }
 
 /**
@@ -59,7 +59,7 @@ export function OnProperty(target?: string | string[]) {
 export function OnMethod(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.MethodDeclaration, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { before: d.value?.bind(inst), type: 'method', target });
+  ) => storeHandler(inst, d.value!, 'before', 'method', target);
 }
 
 /**
@@ -68,7 +68,7 @@ export function OnMethod(target?: string | string[]) {
 export function OnStaticMethod(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.MethodDeclaration, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { before: d.value?.bind(inst), type: 'static-method', target });
+  ) => storeHandler(inst, d.value!, 'before', 'static-method', target);
 }
 
 /**
@@ -77,7 +77,7 @@ export function OnStaticMethod(target?: string | string[]) {
 export function OnClass(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.ClassDeclaration, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { before: d.value?.bind(inst), type: 'class', target });
+  ) => storeHandler(inst, d.value!, 'before', 'class', target);
 }
 
 /**
@@ -86,7 +86,7 @@ export function OnClass(target?: string | string[]) {
 export function AfterCall(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.CallExpression, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { after: d.value?.bind(inst), type: 'call', target });
+  ) => storeHandler(inst, d.value!, 'after', 'call', target);
 }
 
 /**
@@ -95,7 +95,7 @@ export function AfterCall(target?: string | string[]) {
 export function AfterFunction(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.FunctionDeclaration) => R>
-  ) => storeHandler(inst, { after: d.value?.bind(inst), type: 'function', target });
+  ) => storeHandler(inst, d.value!, 'after', 'function', target);
 }
 
 /**
@@ -104,7 +104,7 @@ export function AfterFunction(target?: string | string[]) {
 export function AfterParameter(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.ParameterDeclaration, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { after: d.value?.bind(inst), type: 'parameter', target });
+  ) => storeHandler(inst, d.value!, 'after', 'parameter', target);
 }
 
 /**
@@ -113,7 +113,7 @@ export function AfterParameter(target?: string | string[]) {
 export function AfterProperty(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.PropertyDeclaration, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { after: d.value?.bind(inst), type: 'property', target });
+  ) => storeHandler(inst, d.value!, 'after', 'property', target);
 }
 
 /**
@@ -122,7 +122,7 @@ export function AfterProperty(target?: string | string[]) {
 export function AfterMethod(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.MethodDeclaration, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { after: d.value?.bind(inst), type: 'method', target });
+  ) => storeHandler(inst, d.value!, 'after', 'method', target);
 }
 
 /**
@@ -131,7 +131,7 @@ export function AfterMethod(target?: string | string[]) {
 export function AfterStaticMethod(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.MethodDeclaration, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { after: d.value?.bind(inst), type: 'static-method', target });
+  ) => storeHandler(inst, d.value!, 'after', 'static-method', target);
 }
 
 /**
@@ -140,5 +140,5 @@ export function AfterStaticMethod(target?: string | string[]) {
 export function AfterClass(target?: string | string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: any, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.ClassDeclaration, dm?: DecoratorMeta) => R>
-  ) => storeHandler(inst, { after: d.value?.bind(inst), type: 'class', target });
+  ) => storeHandler(inst, d.value!, 'after', 'class', target);
 }

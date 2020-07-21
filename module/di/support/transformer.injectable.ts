@@ -11,6 +11,8 @@ const INJECTABLE_MOD = require.resolve('../src/decorator');
  */
 export class InjectableTransformer {
 
+  static key = '@trv:di';
+
   /**
    * Handle a specific declaration param/property
    */
@@ -41,7 +43,7 @@ export class InjectableTransformer {
    * Mark class as Injectable
    */
   @OnClass('@trv:di/Injectable')
-  static handleClass(state: TransformerState, node: ts.ClassDeclaration) {
+  static registerInjectable(state: TransformerState, node: ts.ClassDeclaration) {
     const cons = node.members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
     const injectArgs = cons &&
       LiteralUtil.fromLiteral(cons.parameters.map(x => InjectableTransformer.processDeclaration(state, x)));
@@ -67,7 +69,7 @@ export class InjectableTransformer {
    * Handle Inject annotations for fields/args
    */
   @OnProperty('@trv:di/Inject')
-  static handleProperty(state: TransformerState, node: ts.PropertyDeclaration, dm?: DecoratorMeta) {
+  static registerInjectProperty(state: TransformerState, node: ts.PropertyDeclaration, dm?: DecoratorMeta) {
     const decl = state.findDecorator(node, '@trv:di/Inject', 'Inject', INJECTABLE_MOD);
 
     // Doing decls
@@ -88,7 +90,7 @@ export class InjectableTransformer {
    * Handle InjectableFactory creation
    */
   @OnStaticMethod('@trv:di/InjectableFactory')
-  static handleFactory(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
+  static registerFactory(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
     if (!dm?.dec) {
       return node;
     }

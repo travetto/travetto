@@ -18,6 +18,8 @@ const EVICT_KEY = '@trv:cache/Evict';
  */
 export class CacheTransformer {
 
+  static key = '@trv:cache';
+
   /**
    * Manage state for access to cache functions
    */
@@ -34,7 +36,7 @@ export class CacheTransformer {
    * When `@Cache` and `@Evict` are present
    */
   @OnMethod([CACHE_KEY, EVICT_KEY])
-  static handleMethod(state: TransformerState & CacheState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
+  static instrumentCache(state: TransformerState & CacheState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
 
     const isCache = dm?.targets?.includes(CACHE_KEY);
     const dec = dm?.dec;

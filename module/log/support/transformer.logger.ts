@@ -10,8 +10,10 @@ import { TransformerState, OnCall, CoreUtil, LiteralUtil } from '@travetto/trans
  */
 export class LoggerTransformer {
 
+  static key = '@trv:log';
+
   @OnCall()
-  static handleCall(state: TransformerState, node: ts.CallExpression) {
+  static onDebugCall(state: TransformerState, node: ts.CallExpression) {
     if (!ts.isIdentifier(node.expression) || node.expression.text !== ConsoleManager.key) {
       return node;
     }

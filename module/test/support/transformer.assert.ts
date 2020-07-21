@@ -89,6 +89,8 @@ interface Command {
  */
 export class AssertTransformer {
 
+  static key = '@trv:test';
+
   /**
    * Resolves optoken to syntax kind.  Relies on `ts`
    */
@@ -277,7 +279,7 @@ export class AssertTransformer {
    * Listen for all call expression
    */
   @OnCall()
-  static handleCall(state: TransformerState & AssertState, node: ts.CallExpression) {
+  static onAssertCall(state: TransformerState & AssertState, node: ts.CallExpression) {
     // If not in test mode, see if file is valid
     if (state[isTest] === undefined) {
       const name = FsUtil.toUnix(state.source.fileName);

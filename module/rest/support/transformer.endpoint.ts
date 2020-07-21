@@ -14,6 +14,8 @@ const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
  */
 export class RestTransformer {
 
+  static key = '@trv:rest';
+
   /**
    * Get base parameter config
    */
