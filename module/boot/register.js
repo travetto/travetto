@@ -5,7 +5,7 @@
  */
 function init() {
   const cwd = process.cwd();
-  try { require(`${cwd}/.trv_env`); } catch { } // Load the .env.js file
+  try { require(`${cwd}/.env`); } catch { }
   const root = (process.env.TRV_BOOT || '').replace(/^[.]/, cwd) || __dirname;
   require(`${root}/src/compile`).CompileUtil.init();
 }
