@@ -9,7 +9,7 @@
   "dependencies": {
     "@travetto/auth-rest": "^1.0.3",
     "@travetto/config": "^1.0.3",
-    "@types/passport": "^1.0.3",
+    "@types/passport": "^1.0.4",
     "passport": "^0.4.1"
   },
   "title": "Passport Auth",

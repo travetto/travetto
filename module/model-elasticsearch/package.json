@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "~6.8.3",
+    "@elastic/elasticsearch": "~7.4.0",
     "@travetto/config": "^1.0.3",
     "@travetto/model": "^1.0.5"
   },

@@ -13,7 +13,7 @@
   },
   "peerDependencies": {
     "mysql": "^2.18.1",
-    "pg": "^8.2.1"
+    "pg": "^8.3.0"
   },
   "title": "SQL Model Source",
   "description": "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
