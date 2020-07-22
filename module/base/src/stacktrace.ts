@@ -59,9 +59,9 @@ export class StacktraceUtil {
    * @param err The error to filter
    * @param filter Should the stack be filtered
    */
-  static simplifyStack(err: Error, filter = true): string {
+  static simplifyStack(err: Error | string, filter = true): string {
     let lastLocation: string = '';
-    const body = err.stack!.replace(/\\/g, '/').split('\n')
+    const body = (typeof err === 'string' ? err : err.stack!).replace(/\\/g, '/').split('\n')
       .filter(x => !filter || !this.filters.length || !this.filterRegex.test(x)) // Exclude framework boilerplate
       .reduce((acc, line) => {
         const [, location] = line.split(FsUtil.cwd);

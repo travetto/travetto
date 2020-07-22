@@ -54,8 +54,7 @@ export class Transpiler {
    * Write file to disk, and set value in cache as well
    */
   private writeFile(fileName: string, content: string) {
-    // @ts-ignore
-    fileName = fileName.ᚕunix;
+    fileName = FsUtil.toUnixTs(fileName);
     this.contents.set(fileName, content);
     this.hashes.set(fileName, SystemUtil.naiveHash(content));
     this.cache.writeEntry(fileName, content);

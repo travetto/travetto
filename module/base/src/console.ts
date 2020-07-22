@@ -6,17 +6,17 @@ import { StacktraceUtil } from './stacktrace';
 import { AppManifest } from './manifest';
 
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error' | 'fatal';
-export type ConsolePayload = {
+export type ConsoleContext = {
   line: number;
   file: string;
-  category: string;
+  category?: string;
   level: LogLevel;
 };
 
 interface ConsoleState {
-  invoke(payload: ConsolePayload, args: any[]): void;
+  invoke(payload: ConsoleContext, args: any[]): void;
   enrich?: boolean;
-  processArgs?(payload: ConsolePayload, args: any[]): any[];
+  processArgs?(payload: ConsoleContext, args: any[]): any[];
 }
 
 const CONSOLE_RE = /(\bconsole[.](debug|info|warn|log|error|fatal)[(])|\n/g;
@@ -24,7 +24,7 @@ const CONSOLE_RE = /(\bconsole[.](debug|info|warn|log|error|fatal)[(])|\n/g;
 function wrap(target: Console, enrich: boolean) {
   return {
     enrich,
-    invoke(payload: ConsolePayload, args: any[]) {
+    invoke(payload: ConsoleContext, args: any[]) {
       const op = /error|warn|fatal/.test(payload.level) ? 'error' : 'log';
       return target[op](...args);
     }
@@ -90,7 +90,7 @@ class $ConsoleManager {
    * @param payload Console payload
    * @param args Supplemental arguments
    */
-  private enrich(payload: ConsolePayload, args: any[]) {
+  private enrich(payload: ConsoleContext, args: any[]) {
     args = [
       payload.level.padEnd(5), `[${payload.category}:${payload.line}]`,
       ...args
@@ -121,7 +121,7 @@ class $ConsoleManager {
         return a;
       } else {
         lvl = lvl === 'log' ? 'info' : lvl;
-        return `${this.key}({level:'${lvl}',file:__filename.ᚕunix,category:'${SystemUtil.computeModule(fileName)}',line:${line}},`;
+        return `${this.key}({level:'${lvl}',file:ᚕsrc(__filename),line:${line}},`;
       }
     });
     return fileContents;
@@ -130,22 +130,26 @@ class $ConsoleManager {
   /**
    * Handle direct call in lieu of the console.* commands
    */
-  invoke(payload: ConsolePayload, ...args: any[]) {
-    if (this.exclude.has(payload.level)) {
+  invoke(context: ConsoleContext, ...args: any[]) {
+    if (this.exclude.has(context.level)) {
       return; // Do nothing
+    }
+
+    if (context.file && !context.category) {
+      context.category = SystemUtil.computeModule(context.file);
     }
 
     args = args.map(x => (x && x.toConsole) ? x.toConsole() : x);
 
     if (this.state.processArgs) {
-      args = this.state.processArgs(payload, args);
+      args = this.state.processArgs(context, args);
     }
 
     if (this.state.enrich) {
-      args = this.enrich(payload, args);
+      args = this.enrich(context, args);
     }
 
-    return this.state.invoke(payload, args);
+    return this.state.invoke(context, args);
   }
 
   /**

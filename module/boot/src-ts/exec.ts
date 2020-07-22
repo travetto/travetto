@@ -191,7 +191,7 @@ export class ExecUtil {
    * @param args The arguments to pass in
    * @param options The worker options
    */
-  static worker<T = any>(file: string, args: string[] = [], options: WorkerOptions = {}) {
+  static worker<T = any>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
     if (!file.endsWith('.js')) {
       file = require.resolve(file);
     }
@@ -209,11 +209,28 @@ export class ExecUtil {
       argv: args
     });
 
+    const stderr: Buffer[] = [];
+    worker.stdout!.on('data', (d: string | Buffer) => { }); // Ignore
+    worker.stderr!.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
+
     const result = new Promise<number>((res, rej) =>
       worker
         .on('error', e => rej(e))
-        .on('exit', c => c > 0 ? rej(new Error(`${c}`)) : res(c))
+        .on('exit', c => {
+          if (c > 0) {
+            const msg = Buffer.concat(stderr).toString();
+            if (!options.minimal) {
+              console.error(msg);
+              process.exit(c);
+            } else {
+              rej(msg);
+            }
+          } else {
+            res(c);
+          }
+        })
     );
+
     const message = new Promise<T>((r, rej) => {
       worker.once('message', d => result.then(() => r(d)));
       result.catch(rej);

@@ -1,5 +1,5 @@
 import { ColorUtil, EnvUtil } from '@travetto/boot';
-import { ConsoleManager, LogLevel, ConsolePayload, AppManifest } from '@travetto/base';
+import { ConsoleManager, LogLevel, ConsoleContext, AppManifest } from '@travetto/base';
 
 import { LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
@@ -101,7 +101,7 @@ class $Logger {
   /**
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
-  invoke(event: ConsolePayload & Partial<LogEvent>, rest: any[]): void {
+  invoke(event: ConsoleContext & Partial<LogEvent>, rest: any[]): void {
     if (!('message' in event)) {
       const message = (rest.length && typeof rest[0] === 'string') ? rest.shift() : undefined;
       event.message = message;

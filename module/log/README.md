@@ -62,14 +62,14 @@ export function work() {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.work = void 0;
 function work() {
-    ᚕlg({ level: 'debug', file: __filename.ᚕunix, category: 'alt/docs.src.transpile', line: 2 }, 'Start Work');
+    ᚕlg({ level: 'debug', file: ᚕsrc(__filename), line: 2 }, 'Start Work');
     try {
         1 / 0;
     }
     catch (e) {
-        ᚕlg({ level: 'error', file: __filename.ᚕunix, category: 'alt/docs.src.transpile', line: 7 }, e);
+        ᚕlg({ level: 'error', file: ᚕsrc(__filename), line: 7 }, e);
     }
-    ᚕlg({ level: 'debug', file: __filename.ᚕunix, category: 'alt/docs.src.transpile', line: 9 }, 'End Work');
+    ᚕlg({ level: 'debug', file: ᚕsrc(__filename), line: 9 }, 'End Work');
 }
 exports.work = work;
 Object.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });
@@ -87,7 +87,7 @@ function work() {
         1 / 0;
     }
     catch (e) {
-        ᚕlg({ level: 'error', file: __filename.ᚕunix, category: 'alt/docs.src.transpile-prod', line: 5 }, e);
+        ᚕlg({ level: 'error', file: ᚕsrc(__filename), line: 5 }, e);
     }
 }
 exports.work = work;
@@ -115,9 +115,9 @@ The corresponding output would be
 ```bash
 $ alt/docs/src/output.ts -r @travetto/boot/register alt/docs/src/output.ts
 
-2020-07-20T12:00:46.276Z info  [alt/docs.src.output:5] Hello World
-2020-07-20T12:00:46.280Z info  [alt/docs.src.output:7] Woah! { a: { b: { c: [Object] } } }
-2020-07-20T12:00:46.282Z info  [alt/docs.src.output:9] Woah!
-2020-07-20T12:00:46.282Z debug [alt/docs.src.output:11] Test
+2020-07-23T01:07:40.085Z info  [alt/docs.src.output:5] Hello World
+2020-07-23T01:07:40.088Z info  [alt/docs.src.output:7] Woah! { a: { b: { c: [Object] } } }
+2020-07-23T01:07:40.090Z info  [alt/docs.src.output:9] Woah!
+2020-07-23T01:07:40.090Z debug [alt/docs.src.output:11] Test
 ```
 

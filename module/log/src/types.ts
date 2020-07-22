@@ -1,4 +1,4 @@
-import { ConsolePayload } from '@travetto/base';
+import { ConsoleContext } from '@travetto/base';
 
 /**
  * Log levels, numerically
@@ -14,7 +14,7 @@ export const LogLevels = {
 /**
  * Logging event
  */
-export interface LogEvent extends ConsolePayload {
+export interface LogEvent extends ConsoleContext {
   /**
    * Time of event
    */

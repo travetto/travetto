@@ -69,7 +69,7 @@ export class RegisterTransformer {
       [],
       [
         ts.createIdentifier(name),
-        CoreUtil.createAccess('__filename', 'ᚕunix'),
+        state.getFilenameAsSrc(),
         ts.createLiteral(state[cls]!),
         LiteralUtil.extendObjectLiteral(state[methods] || {}),
         ts.createLiteral(isAbstract),
@@ -106,7 +106,7 @@ export class RegisterTransformer {
         ts.createExpressionStatement(
           ts.createAssignment(
             CoreUtil.createAccess(node.name, 'ᚕfile'),
-            CoreUtil.createAccess('__filename', 'ᚕunix'),
+            state.getFilenameAsSrc()
           )
         )
       );
