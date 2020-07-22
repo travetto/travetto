@@ -104,7 +104,7 @@ export abstract class CacheTestSuite {
     assert(diff > 75);
     assert(res === 30);
 
-    await wait(500);
+    await wait(510);
 
     start = Date.now();
     res = await this.service.agesQuickly(10);
