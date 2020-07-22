@@ -52,4 +52,17 @@ c:
     });
     assert(!out3.includes(`name`));
   }
+
+  @Test()
+  testEmpty() {
+    const out = Serializer.serialize({
+      empty: {}
+    });
+    assert(out.includes('empty: {}'));
+
+    const outArr = Serializer.serialize({
+      empty: []
+    });
+    assert(outArr.includes('empty: []'));
+  }
 }

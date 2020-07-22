@@ -10,7 +10,7 @@ function link() {
 
 link module/model          rest config
 link module/schema         rest config
-link related/vscode-plugin cli  config doc compiler registry base test app
+link related/vscode-plugin cli  config boot doc compiler registry base test app
 ln -sf `pwd`/module/cli/bin/travetto.js related/vscode-plugin/node_modules/.bin/trv
 
 # Startup mongo

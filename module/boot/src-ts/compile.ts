@@ -3,6 +3,7 @@ import * as Mod from 'module';
 
 import { TranspileUtil } from './transpile';
 import { FrameworkUtil } from './framework';
+import { FsUtil } from './fs';
 
 type Module = {
   loaded?: boolean;
@@ -17,6 +18,7 @@ declare const global: {
   trvInit: {
     reset: () => void;
   };
+  ᚕsrc: (f: string) => string;
 };
 
 /**
@@ -94,9 +96,7 @@ export class CompileUtil {
     TranspileUtil.init();
 
     // Registering unix conversion to use for filenames
-    Object.defineProperty(String.prototype, 'ᚕunix', {
-      enumerable: false, get() { return this.replace(/[\\/]+/g, '/').replace(/[.]js$/, '.ts'); }
-    });
+    global.ᚕsrc = FsUtil.toUnixTs;
 
     // Tag output to indicate it was succefully processed by the framework
     TranspileUtil.addPreProcessor((__, contents) =>

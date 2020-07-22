@@ -1,5 +1,5 @@
 import * as util from 'util';
-import { ConsoleManager, ConsolePayload } from '@travetto/base';
+import { ConsoleManager, ConsoleContext } from '@travetto/base';
 
 /**
  * Console capturer.  Hooks into the Console manager, and collects the
@@ -14,11 +14,11 @@ export class ConsoleCapture {
     ConsoleManager.set(this);
   }
 
-  static processArgs(payload: ConsolePayload, args: any[]) {
+  static processArgs(context: ConsoleContext, args: any[]) {
     return args.map((x => typeof x === 'string' ? x : util.inspect(x, false, 4)));
   }
 
-  static invoke({ level }: ConsolePayload, args: any[]) {
+  static invoke({ level }: ConsoleContext, args: any[]) {
     (this.out[level] = this.out[level] ?? []).push(args.join(' '));
   }
 

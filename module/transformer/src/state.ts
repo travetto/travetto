@@ -8,6 +8,7 @@ import { ImportManager } from './importer';
 import { DocUtil } from './util/doc';
 import { DecoratorUtil } from './util/decorator';
 import { DeclarationUtil } from './util/declaration';
+import { CoreUtil } from './util/core';
 
 /**
  * Transformer runtime state
@@ -189,5 +190,14 @@ export class TransformerState implements State {
       }
     }
     return ret;
+  }
+
+  /**
+   * Get Filename as ᚕsrc
+   */
+  getFilenameAsSrc() {
+    const ident = ts.createIdentifier('ᚕsrc');
+    ident.getSourceFile = () => this.source;
+    return ts.createCall(ident, [], [ts.createIdentifier('__filename')]);
   }
 }

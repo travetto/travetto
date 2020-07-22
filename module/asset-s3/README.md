@@ -49,6 +49,13 @@ export class S3AssetConfig {
   chunkSize = 5 * 2 ** 20; // Chunk size in bytes
 
   /**
+   * Provide host to bucket
+   */
+  get hostName() {
+    return `${this.bucket}.s3.amazonaws.com`;
+  }
+
+  /**
    * Produces the s3 config from the provide details, post construction
    */
   async postConstruct() {

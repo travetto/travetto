@@ -49,6 +49,13 @@ export class FsUtil {
   }
 
   /**
+   * Convert a given path to a source path
+   */
+  static toUnixTs(file: string) {
+    return file.replace(/[\\\/]+/g, '/').replace(/[.]js$/, '.ts');
+  }
+
+  /**
    * Convert file to the native format
    * @param pth The path to convert
    */

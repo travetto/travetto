@@ -97,12 +97,17 @@ export class Serializer {
       }
     } else if (o !== undefined) {
       const fin = o;
-      out = (Object.keys(fin) as (keyof typeof fin)[])
-        .filter(x => fin[x] !== undefined)
-        .map(x => `${prefix}${this.clean(x)}:${this.serialize(fin[x], indent, wordwrap, indentLevel + indent)}`)
-        .join('\n');
-      if (indentLevel > 0) {
-        out = `\n${out}`;
+      const keys = Object.keys(fin) as (keyof typeof fin)[];
+      if (keys.length) {
+        out = keys
+          .filter(x => fin[x] !== undefined)
+          .map(x => `${prefix}${this.clean(x)}:${this.serialize(fin[x], indent, wordwrap, indentLevel + indent)}`)
+          .join('\n');
+        if (indentLevel > 0) {
+          out = `\n${out}`;
+        }
+      } else {
+        out = ' {}';
       }
     }
     return out;

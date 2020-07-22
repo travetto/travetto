@@ -161,7 +161,7 @@ export class AssertTransformer {
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
     const check = ts.createCall(state[ASSERT]!.assertCheck, undefined, ts.createNodeArray([
       LiteralUtil.fromLiteral({
-        file: CoreUtil.createAccess('__filename', 'ᚕunix'),
+        file: state.getFilenameAsSrc(),
         line: ts.createLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
         text: ts.createLiteral(firstText),
         operator: ts.createLiteral(cmd.fn)
@@ -192,7 +192,7 @@ export class AssertTransformer {
       undefined,
       ts.createNodeArray([
         LiteralUtil.fromLiteral({
-          file: CoreUtil.createAccess('__filename', 'ᚕunix'),
+          file: state.getFilenameAsSrc(),
           line: ts.createLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
           text: ts.createLiteral(`${key} ${firstText}`),
           operator: ts.createLiteral(`${key}`)
