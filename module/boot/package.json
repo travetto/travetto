@@ -43,5 +43,5 @@
     "prepare": "cd src-ts; tsc --project .",
     "clean": "rm -f src/"
   },
-  "version": "1.0.5"
+  "version": "1.0.6"
 }
