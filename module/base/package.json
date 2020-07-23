@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/boot": "^1.0.6"
+    "@travetto/boot": "^1.0.7"
   },
   "title": "Base",
   "description": "Application phase management, environment config and common utilities for travetto applications.",
@@ -30,5 +30,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.4"
+  "version": "1.0.5"
 }
