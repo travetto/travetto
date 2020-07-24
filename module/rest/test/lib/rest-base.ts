@@ -1,5 +1,6 @@
 import * as qs from 'querystring';
-import { HttpRequest } from '@travetto/net';
+import * as fetch from 'node-fetch';
+
 import { DependencyRegistry } from '@travetto/di';
 import { ApplicationHandle } from '@travetto/app';
 import { RootRegistry } from '@travetto/registry';
@@ -35,7 +36,7 @@ export abstract class BaseRestTest {
 
     while ((Date.now() - start) < 5000) {
       try {
-        await HttpRequest.exec({ url: this.url });
+        await fetch(this.url);
         return; // We good
       } catch  {
         await new Promise(res => setTimeout(res, 100));
@@ -52,11 +53,11 @@ export abstract class BaseRestTest {
     if (query && Object.keys(query).length) {
       q = `?${qs.stringify(query)}`;
     }
-    return await HttpRequest.execJSON({
-      url: `${this.url}/test${path}${q}`,
+    return await fetch(`${this.url}/test${path}${q}`, {
       method: method.toUpperCase(),
-      headers
-    }, body);
+      headers,
+      body: body ? JSON.stringify(body) : undefined
+    });
   }
 
   async destroySever() {

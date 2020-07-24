@@ -29,7 +29,6 @@ import { LogComponent } from './gen/log/log.component';
 import { CacheComponent } from './gen/cache/cache.component';
 import { CommandComponent } from './gen/command/command.component';
 import { WorkerComponent } from './gen/worker/worker.component';
-import { NetComponent } from './gen/net/net.component';
 import { WatchComponent } from './gen/watch/watch.component';
 import { AssetMongoComponent } from './gen/asset-mongo/asset-mongo.component';
 import { AssetS3Component } from './gen/asset-s3/asset-s3.component';
@@ -114,7 +113,6 @@ export const PAGES = [
       { path: 'command', title: 'Command', component: CommandComponent },
       { path: 'context', title: 'Context', component: ContextComponent },
       { path: 'worker', title: 'Worker', component: WorkerComponent },
-      { path: 'net', title: 'Net', component: NetComponent },
       { path: 'watch', title: 'Watch', component: WatchComponent }
     ]
   },
