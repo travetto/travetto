@@ -45,10 +45,15 @@ export function watch($Compiler: Class<typeof Compiler>) {
         retrieveFile: (p: string) => this.transpiler.getContents(p)
       });
 
-      this.presence = new FilePresenceManager(this.roots.flatMap(x => x === '.' ? [`${x}/src`, `${x}/test`] : [`${x}/src`]), {
-        ignoreInitial: true,
-        validFile: x => x.endsWith('.ts') && !x.endsWith('.d.ts')
-      }).on('all', ({ event, entry }) => {
+      this.presence = new FilePresenceManager(
+        this.roots
+          .flatMap(x => x === '.' ? [`${x}/src`, `${x}/test`] : [`${x}/src`])
+          .filter(x => FsUtil.existsSync(x)),
+        {
+          ignoreInitial: true,
+          validFile: x => x.endsWith('.ts') && !x.endsWith('.d.ts')
+        }
+      ).on('all', ({ event, entry }) => {
         switch (event) {
           case 'added': this.added(entry.file); break;
           case 'removed': this.removed(entry.file); break;
