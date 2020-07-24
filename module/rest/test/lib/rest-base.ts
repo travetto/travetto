@@ -60,7 +60,7 @@ export abstract class BaseRestTest {
       body: body ? JSON.stringify(body) : undefined
     });
     const out = await res.json();
-    if (res.status >= 400) {
+    if (!res.ok) {
       throw out;
     }
     return out;
