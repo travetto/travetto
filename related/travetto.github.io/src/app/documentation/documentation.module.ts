@@ -39,7 +39,6 @@ import { TestComponent } from './gen/test/test.component';
 import { CacheComponent } from './gen/cache/cache.component';
 import { CliComponent } from './gen/cli/cli.component';
 import { GeneratorAppComponent } from './gen/generator-app/generator-app.component';
-import { NetComponent } from './gen/net/net.component';
 import { ModuleChartComponent } from './module-chart/module-chart.component';
 import { YamlComponent } from './gen/yaml/yaml.component';
 import { JwtComponent } from './gen/jwt/jwt.component';
@@ -103,7 +102,6 @@ import { WatchComponent } from './gen/watch/watch.component';
     CacheComponent,
     CliComponent,
     GeneratorAppComponent,
-    NetComponent,
     ModuleChartComponent,
     YamlComponent,
     JwtComponent,

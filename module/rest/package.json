@@ -15,7 +15,7 @@
     "cookies": "^0.8.0"
   },
   "devDependencies": {
-    "@travetto/net": "^1.0.5"
+    "node-fetch": "^3.0.0-beta.7"
   },
   "optionalPeerDependencies": {
     "node-forge": "^0.9.1",
