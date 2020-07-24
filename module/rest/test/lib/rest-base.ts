@@ -53,11 +53,17 @@ export abstract class BaseRestTest {
     if (query && Object.keys(query).length) {
       q = `?${qs.stringify(query)}`;
     }
-    return await fetch(`${this.url}/test${path}${q}`, {
+
+    const res = await fetch(`${this.url}/test${path}${q}`, {
       method: method.toUpperCase(),
       headers,
       body: body ? JSON.stringify(body) : undefined
     });
+    const out = await res.json();
+    if (res.status >= 400) {
+      throw out;
+    }
+    return out;
   }
 
   async destroySever() {
