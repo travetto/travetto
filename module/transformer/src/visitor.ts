@@ -4,7 +4,7 @@ import { ConsoleManager } from '@travetto/base/src/console';
 
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
 import { LogUtil } from './util/log';
-import { CoreUtil } from './util';
+import { CoreUtil } from './util/core';
 
 /**
  * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler
@@ -34,7 +34,7 @@ export class VisitorFactory<S extends State = State> {
   private transformers = new Map<TransformerType, TransformerSet<S>>();
 
   constructor(
-    private getState: (src: ts.SourceFile) => S,
+    private getState: (context: ts.TransformationContext, src: ts.SourceFile) => S,
     transformers: NodeTransformer<S, any, any>[],
     private logTarget = '!compiler.log'
   ) {
@@ -50,7 +50,7 @@ export class VisitorFactory<S extends State = State> {
         this.transformers.set(trn.type, {});
       }
       const set = this.transformers.get(trn.type)!;
-      const targets = Array.isArray(trn.target) ? trn.target : [trn.target ?? 'ALL'];
+      const targets = trn.target && trn.target.length ? trn.target : ['ALL'];
 
       for (const target of targets) {
         for (const phase of ['before', 'after'] as const) {
@@ -76,7 +76,7 @@ export class VisitorFactory<S extends State = State> {
       try {
         ConsoleManager.setFile(this.logTarget, { processArgs: (__, args) => LogUtil.collapseNodes(args) }); // Suppress logging into an output file
         console.debug(process.pid, 'Processing', file.fileName);
-        const state = this.getState(file);
+        const state = this.getState(context, file);
         let ret = this.visit(state, context, file);
 
         // Process added content
@@ -95,7 +95,7 @@ export class VisitorFactory<S extends State = State> {
         }
 
         if (changed) {
-          ret = CoreUtil.updateSource(ret, statements);
+          ret = CoreUtil.updateSource(context.factory, ret, statements);
         }
         return state.finalize(ret);
       } catch (e) {
@@ -114,13 +114,9 @@ export class VisitorFactory<S extends State = State> {
     if (!set[phase]?.size) {
       return;
     }
-    const og = node;
+
     for (const all of set[phase]!.get('ALL') ?? []) {
       node = (all[phase]!(state, node) as T) ?? node;
-      if (og !== node) {
-        node.parent = og.parent;
-      }
-
     }
     return node;
   }
@@ -145,7 +141,6 @@ export class VisitorFactory<S extends State = State> {
       return;
     }
 
-    const og = node;
     for (const [key, dec] of targets.entries()) {
       const values = set[phase]!.get(key);
       if (!values || !values.length) {
@@ -155,9 +150,6 @@ export class VisitorFactory<S extends State = State> {
       // For all matching handlers, execute
       for (const item of values) {
         node = (item[phase]!(state, node, dec) as T) ?? node;
-        if (og !== node) {
-          node.parent = og.parent;
-        }
       }
     }
     return node;
@@ -173,7 +165,6 @@ export class VisitorFactory<S extends State = State> {
     if (!target) {
       return ts.visitEachChild(node, c => this.visit(state, context, c), context);
     } else {
-      const og = node;
       // Before
       node = this.executePhaseAlways(state, target, 'before', node) ?? node;
       node = this.executePhase(state, target, 'before', node) ?? node;
@@ -182,15 +173,6 @@ export class VisitorFactory<S extends State = State> {
       // After
       node = this.executePhaseAlways(state, target, 'after', node) ?? node;
       node = this.executePhase(state, target, 'after', node) ?? node;
-
-      // Set parents on ascent
-      if (og !== node && ts.isClassDeclaration(node)) {
-        for (const el of node.members) {
-          if (!el.parent) {
-            el.parent = node;
-          }
-        }
-      }
 
       return node;
     }

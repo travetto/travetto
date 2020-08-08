@@ -14,8 +14,8 @@
     "@types/node": "^12.12.7",
     "@types/source-map-support": "^0.5.2",
     "source-map-support": "^0.5.19",
-    "tslib": "^2.0.0",
-    "typescript": "^3.9.7"
+    "tslib": "^2.0.1",
+    "typescript": "^4.0.1-rc"
   },
   "description": "Bootstrapping and common utilities for travetto applications.",
   "homepage": "https://travetto.io",

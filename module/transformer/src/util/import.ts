@@ -5,7 +5,6 @@ import { FsUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 
 import { Import } from '../types/shared';
-import { CoreUtil } from './core';
 
 /**
  * Import utilities
@@ -53,34 +52,5 @@ export class ImportUtil {
     }
 
     return imports;
-  }
-
-  /**
-   * Add imports to a source file
-   */
-  static addImports(file: ts.SourceFile, ...imports: Import[]) {
-    if (!imports.length) {
-      return file;
-    }
-
-    try {
-      const importStmts = imports.map(({ path, ident }) => {
-        const imptStmt = ts.createImportDeclaration(
-          undefined, undefined,
-          ts.createImportClause(undefined, ts.createNamespaceImport(ident)),
-          ts.createLiteral(path.replace(/^.*node_modules\//, '').replace(FsUtil.cwd, '@app'))
-        );
-        return imptStmt;
-      });
-
-      return CoreUtil.updateSource(file, [
-        ...importStmts,
-        ...file.statements.filter((x: ts.Statement & { remove?: boolean }) => !x.remove) // Exclude culled imports
-      ]);
-    } catch (err) { // Missing import
-      const out = new Error(`${err.message} in ${file.fileName.replace(`${FsUtil.cwd}/`, '')}`);
-      out.stack = err.stack;
-      throw out;
-    }
   }
 }

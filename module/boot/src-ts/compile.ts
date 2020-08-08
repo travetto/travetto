@@ -129,6 +129,7 @@ export class CompileUtil {
     }
 
     delete require.extensions[TranspileUtil.ext];
+    // @ts-ignore
     delete global.trvInit;
     Module._load = this.ogModuleLoad;
 

@@ -12,8 +12,8 @@ class PreferenceService {
   async update(prefs: Preferences) {
     // Get user id from an authenticated request
     const userId = this.context.get().userId;
-
-    return;
+    // Update user
+    return userId;
   }
 }
 

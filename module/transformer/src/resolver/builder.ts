@@ -37,7 +37,7 @@ type Category = 'void' | 'undefined' | 'concrete' | 'unknown' | 'tuple' | 'shape
  */
 export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { category: Category, type: ts.Type } {
   const flags = type.getFlags();
-  const objectFlags = CoreUtil.getObjectFlags(type) ?? 0;
+  const objectFlags = DeclarationUtil.getObjectFlags(type) ?? 0;
 
   if (flags & ts.TypeFlags.Void) {
     return { category: 'void', type };

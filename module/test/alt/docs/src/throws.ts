@@ -13,6 +13,7 @@ class SimpleTest {
     });
 
     assert.doesNotThrow(() => {
+      // eslint-disable-next-line
       let a = 5;
     });
   }

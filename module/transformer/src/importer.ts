@@ -1,8 +1,11 @@
 import * as ts from 'typescript';
 import { basename } from 'path';
 
+import { FsUtil } from '@travetto/boot';
+
 import { AnyType, ExternalType } from './resolver/types';
 import { ImportUtil } from './util/import';
+import { CoreUtil } from './util/core';
 import { Import } from './types/shared';
 
 /**
@@ -16,7 +19,7 @@ export class ImportManager {
   private idx: Record<string, number> = {};
   private ids = new Map<string, string>();
 
-  constructor(public source: ts.SourceFile) {
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory) {
     this.imports = ImportUtil.collectImports(source);
   }
 
@@ -42,7 +45,7 @@ export class ImportManager {
         return this.imports.get(id)!;
       }
 
-      const ident = ts.createIdentifier(id);
+      const ident = this.factory.createIdentifier(id);
       const imprt = { path: file, ident };
       this.imports.set(ident.escapedText.toString(), imprt);
       this.newImports.set(file, imprt);
@@ -69,21 +72,50 @@ export class ImportManager {
   }
 
   /**
+   * Add imports to a source file
+   */
+  finalizeNewImports(file: ts.SourceFile) {
+    if (!this.newImports.size) {
+      return;
+    }
+
+    try {
+      const importStmts = [...this.newImports.values()].map(({ path, ident }) => {
+        const imptStmt = this.factory.createImportDeclaration(
+          undefined, undefined,
+          this.factory.createImportClause(false, undefined, this.factory.createNamespaceImport(ident)),
+          this.factory.createStringLiteral(path.replace(/^.*node_modules\//, '').replace(FsUtil.cwd, '@app'))
+        );
+        return imptStmt;
+      });
+
+      return CoreUtil.updateSource(this.factory, file, [
+        ...importStmts,
+        ...file.statements.filter((x: ts.Statement & { remove?: boolean }) => !x.remove) // Exclude culled imports
+      ]);
+    } catch (err) { // Missing import
+      const out = new Error(`${err.message} in ${file.fileName.replace(`${FsUtil.cwd}/`, '')}`);
+      out.stack = err.stack;
+      throw out;
+    }
+  }
+
+  /**
    * Reset the imports into the source file
    */
   finalize(ret: ts.SourceFile) {
-    return ImportUtil.addImports(ret, ...this.newImports.values());
+    return this.finalizeNewImports(ret) ?? ret;
   }
 
   /**
    * Get the identifier and import if needed
    */
-  getOrImport(type: ExternalType) {
+  getOrImport(factory: ts.NodeFactory, type: ExternalType) {
     if (type.source === this.source.fileName) {
-      return ts.createIdentifier(type.name!);
+      return factory.createIdentifier(type.name!);
     } else {
       const { ident } = this.imports.get(type.source) ?? this.importFile(type.source);
-      return ts.createPropertyAccess(ident, type.name!);
+      return factory.createPropertyAccessExpression(ident, type.name!);
     }
   }
 }

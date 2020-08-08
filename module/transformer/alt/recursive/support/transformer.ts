@@ -5,6 +5,8 @@ import { TransformerState, OnMethod } from '../../..';
 
 export class MakeUpper {
 
+  static key = '@trv:transformer-test';
+
   @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration) {
     if (!state.source.fileName.includes('alt/')) {
@@ -16,19 +18,19 @@ export class MakeUpper {
 
     const msg = util.inspect(resolved, false, 5);
 
-    return ts.updateMethod(
+    return state.factory.updateMethodDeclaration(
       node,
       [],
       node.modifiers,
-      undefined,
+      node.asteriskToken,
       node.name,
-      undefined,
+      node.questionToken,
       node.typeParameters,
       node.parameters,
       node.type,
-      ts.createBlock(ts.createNodeArray([
-        ts.createExpressionStatement(ts.createLiteral(msg)),
-      ]))
+      state.factory.createBlock([
+        state.factory.createExpressionStatement(state.fromLiteral(msg)),
+      ])
     );
   }
 }

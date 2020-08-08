@@ -31,7 +31,7 @@ export class TranformerTestUtil {
     await FsUtil.unlinkRecursive(log, true);
 
     const visitor = new VisitorFactory(
-      src => new TransformerState(src, prog.getTypeChecker()),
+      (ctx, src) => new TransformerState(src, ctx.factory, prog.getTypeChecker()),
       ScanFs.scanDirSync({ testFile: f => f.startsWith('support/transformer') }, folder)
         .filter(x => x.stats.isFile())
         .map(x => getAllTransformers(require(x.file)))

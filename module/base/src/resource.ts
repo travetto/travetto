@@ -14,7 +14,7 @@ const cleanPath = (p: string) => p.charAt(0) === '/' ? p.substring(1) : p;
  * Standard resource management interface allowing for look up by resource name
  * across multiple resource paths
  */
-export class $ResourceManager {
+class $ResourceManager {
   private cache = new Map<string, string>();
 
   private paths: string[] = [];

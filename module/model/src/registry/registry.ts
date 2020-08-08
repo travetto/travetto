@@ -7,7 +7,7 @@ import { ModelOptions } from './types';
 /**
  * Registry for all models, built on the Metadata registry
  */
-export class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
+class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   /**
    * All collection names
    */

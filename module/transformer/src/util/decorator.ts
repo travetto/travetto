@@ -7,19 +7,6 @@ import { CoreUtil } from './core';
 export class DecoratorUtil {
 
   /**
-   * Create a decorator with a given name, and arguments
-   */
-  static createDecorator(name: ts.Expression, ...contents: (ts.Expression | undefined)[]) {
-    return ts.createDecorator(
-      ts.createCall(
-        name,
-        undefined,
-        contents.filter(x => !!x) as ts.Expression[]
-      )
-    );
-  }
-
-  /**
    * Get identifier for a decorator
    */
   static getDecoratorIdent(d: ts.Decorator): ts.Identifier {
@@ -32,13 +19,19 @@ export class DecoratorUtil {
     }
   }
 
-
   /**
    * Replace or add a decorator to a list of decorators
    */
-  static spliceDecorators(node: { decorators?: ts.MethodDeclaration['decorators'] }, target: ts.Decorator | undefined, replacements: ts.Decorator[], idx = -1) {
+  static spliceDecorators(node: ts.Node, target: ts.Decorator | undefined, replacements: ts.Decorator[], idx = -1) {
+    if (idx < 0 && target) {
+      idx = node.decorators?.indexOf(target) ?? -1;
+    }
     const out = (node.decorators ?? []).filter(x => x !== target);
-    out.splice(idx, 0, ...replacements);
+    if (idx < 0) {
+      out.push(...replacements);
+    } else {
+      out.splice(idx, 0, ...replacements);
+    }
     return out;
   }
 
