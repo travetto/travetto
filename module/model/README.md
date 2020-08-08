@@ -47,7 +47,7 @@ export class UserManager {
 
   async register(user: User) {
     const created = await this.service.save(User, user);
-    // send welcome email 
+    // send welcome email
     return created;
   }
 

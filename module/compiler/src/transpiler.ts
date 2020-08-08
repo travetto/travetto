@@ -21,7 +21,7 @@ export class Transpiler {
   private contents = new Map<string, string>();
   private sources = new Map<string, ts.SourceFile>();
   private hashes = new Map<string, number>();
-  private program: ts.Program;
+  private program: ts.Program | undefined;
 
   constructor(
     /**

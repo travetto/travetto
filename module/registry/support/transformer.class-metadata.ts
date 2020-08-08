@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { TransformerState, OnMethod, OnClass, AfterClass, LiteralUtil, CoreUtil, DecoratorUtil, OnFunction } from '@travetto/transformer';
+import { TransformerState, OnMethod, OnClass, AfterClass, DecoratorUtil, OnFunction } from '@travetto/transformer';
 
 const REGISTER_MOD = require.resolve('../src/decorator');
 
@@ -64,22 +64,22 @@ export class RegisterTransformer {
 
     const name = node.name?.escapedText.toString() ?? '';
 
-    const meta = ts.createCall(
-      CoreUtil.createAccess(ident, 'initMeta'),
+    const meta = state.factory.createCallExpression(
+      state.createAccess(ident, 'initMeta'),
       [],
       [
-        ts.createIdentifier(name),
+        state.createIdentifier(name),
         state.getFilenameAsSrc(),
-        ts.createLiteral(state[cls]!),
-        LiteralUtil.extendObjectLiteral(state[methods] || {}),
-        ts.createLiteral(isAbstract),
-        ts.createLiteral(name.endsWith('ᚕsyn'))
+        state.fromLiteral(state[cls]!),
+        state.extendObjectLiteral(state[methods] || {}),
+        state.fromLiteral(isAbstract),
+        state.fromLiteral(name.endsWith('ᚕsyn'))
       ]
     );
 
     state[methods] = {};
 
-    return ts.updateClassDeclaration(
+    return state.factory.updateClassDeclaration(
       node,
       DecoratorUtil.spliceDecorators(
         node, undefined, [state.createDecorator(REGISTER_MOD, 'Register')], 0
@@ -89,7 +89,7 @@ export class RegisterTransformer {
       node.typeParameters,
       node.heritageClauses,
       [
-        CoreUtil.createStaticField('ᚕinit', meta),
+        state.createStaticField('ᚕinit', meta),
         ...node.members
       ]
     );
@@ -103,9 +103,9 @@ export class RegisterTransformer {
     if (node.name && /^[A-Z]/.test(node.name.escapedText.toString())) {
       // If we have a class like function
       state.addStatement(
-        ts.createExpressionStatement(
-          ts.createAssignment(
-            CoreUtil.createAccess(node.name, 'ᚕfile'),
+        state.factory.createExpressionStatement(
+          state.factory.createAssignment(
+            state.createAccess(node.name, 'ᚕfile'),
             state.getFilenameAsSrc()
           )
         )

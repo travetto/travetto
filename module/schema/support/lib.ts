@@ -1,7 +1,6 @@
 import * as ts from 'typescript';
-import { AnyType, LiteralUtil, DocUtil, TransformerState } from '@travetto/transformer';
+import { AnyType, DocUtil, TransformerState } from '@travetto/transformer';
 import { Util } from '@travetto/base';
-import { SystemUtil } from '@travetto/base/src/internal/system';
 
 const SCHEMA_MOD = require.resolve('../src/decorator/schema');
 const FIELD_MOD = require.resolve('../src/decorator/field');
@@ -19,12 +18,12 @@ export class SchemaTransformUtil {
         const res = state.getOrImport(type);
         return res;
       }
-      case 'tuple': return LiteralUtil.fromLiteral(type.subTypes.map(x => this.toFinalType(state, x, node, root)!));
+      case 'tuple': return state.fromLiteral(type.subTypes.map(x => this.toFinalType(state, x, node, root)!));
       case 'literal': {
         if ((type.ctor === Array || type.ctor === Set) && type.typeArguments?.length) {
-          return LiteralUtil.fromLiteral([this.toFinalType(state, type.typeArguments[0], node, root)]);
+          return state.fromLiteral([this.toFinalType(state, type.typeArguments[0], node, root)]);
         } else if (type.ctor) {
-          return ts.createIdentifier(type.ctor.name!);
+          return state.createIdentifier(type.ctor.name!);
         }
         break;
       }
@@ -41,12 +40,12 @@ export class SchemaTransformUtil {
         } catch { }
 
         // Build class on the fly
-        const id = ts.createIdentifier(`${name}_${unique}ᚕsyn`);
-        const cls = ts.createClassDeclaration(
+        const id = state.createIdentifier(`${name}_${unique}ᚕsyn`);
+        const cls = state.factory.createClassDeclaration(
           [
             state.createDecorator(SCHEMA_MOD, 'Schema'),
             state.createDecorator(COMMON_MOD, 'Describe',
-              LiteralUtil.fromLiteral({
+              state.fromLiteral({
                 title: type.name,
                 description: type.comment
               })
@@ -54,9 +53,9 @@ export class SchemaTransformUtil {
           ],
           [], id, [], [],
           Object.entries(type.fieldTypes).map(([k, v]) =>
-            this.computeProperty(state, ts.createProperty(
+            this.computeProperty(state, state.factory.createPropertyDeclaration(
               [], [], k,
-              v.undefinable || v.nullable ? ts.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+              v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
               undefined, undefined
             ), v, root)
           )
@@ -71,7 +70,7 @@ export class SchemaTransformUtil {
         }
       }
     }
-    return ts.createIdentifier('Object');
+    return state.createIdentifier('Object');
   }
 
 
@@ -84,7 +83,7 @@ export class SchemaTransformUtil {
     const properties = [];
 
     if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
-      properties.push(ts.createPropertyAssignment('required', LiteralUtil.fromLiteral({ active: true })));
+      properties.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
     }
 
     // If we have a union type
@@ -93,7 +92,7 @@ export class SchemaTransformUtil {
         .filter(x => x !== undefined && x !== null);
 
       if (values.length === typeExpr.subTypes.length) {
-        properties.push(ts.createPropertyAssignment('enum', LiteralUtil.fromLiteral({
+        properties.push(state.factory.createPropertyAssignment('enum', state.fromLiteral({
           values,
           message: `{path} is only allowed to be "${values.join('" or "')}"`
         })));
@@ -104,7 +103,7 @@ export class SchemaTransformUtil {
     const params: ts.Expression[] = resolved ? [resolved] : [];
 
     if (properties.length) {
-      params.push(ts.createObjectLiteral(properties));
+      params.push(state.factory.createObjectLiteralExpression(properties));
     }
 
     const dec = state.createDecorator(FIELD_MOD, 'Field', ...params);
@@ -112,13 +111,13 @@ export class SchemaTransformUtil {
 
     const comments = DocUtil.describeDocs(node);
     if (comments.description) {
-      newDecs.push(state.createDecorator(COMMON_MOD, 'Describe', LiteralUtil.fromLiteral({
+      newDecs.push(state.createDecorator(COMMON_MOD, 'Describe', state.fromLiteral({
         description: comments.description
       })));
     }
 
-    return ts.updateProperty(node as Exclude<typeof node, T>,
-      ts.createNodeArray(newDecs),
+    return state.factory.updatePropertyDeclaration(node as Exclude<typeof node, T>,
+      newDecs,
       node.modifiers,
       node.name,
       node.questionToken,

@@ -25,19 +25,22 @@ import * as ts from 'typescript';
 import { OnProperty, TransformerState, OnMethod, OnClass } from '@travetto/transformer';
 
 export class MakeUpper {
+
+  static key = '@trv:transformer-test';
+
   @OnProperty()
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration) {
     if (!state.source.fileName.includes(`upper/src`)) {
       return node;
     }
-    return ts.updateProperty(
+    return state.factory.updatePropertyDeclaration(
       node,
       [],
       node.modifiers,
       node.name.getText().toUpperCase(),
       undefined,
       node.type,
-      node.initializer ?? ts.createIdentifier('undefined')
+      node.initializer ?? state.createIdentifier('undefined')
     );
   }
 
@@ -46,11 +49,11 @@ export class MakeUpper {
     if (!state.source.fileName.includes(`upper/src`)) {
       return node;
     }
-    return ts.updateClassDeclaration(
+    return state.factory.updateClassDeclaration(
       node,
       [],
       node.modifiers,
-      ts.createIdentifier(node.name!.getText().toUpperCase()),
+      state.createIdentifier(node.name!.getText().toUpperCase()),
       node.typeParameters,
       node.heritageClauses,
       node.members
@@ -62,12 +65,12 @@ export class MakeUpper {
     if (!state.source.fileName.includes(`upper/src`)) {
       return node;
     }
-    return ts.updateMethod(
+    return state.factory.updateMethodDeclaration(
       node,
       [],
       node.modifiers,
       undefined,
-      ts.createIdentifier(node.name.getText().toUpperCase()),
+      state.createIdentifier(node.name.getText().toUpperCase()),
       undefined,
       node.typeParameters,
       node.parameters,

@@ -1,7 +1,7 @@
 import * as util from 'util';
 
 import { EnvUtil, FsUtil } from '@travetto/boot';
-import { AppManifest, ShutdownManager } from '@travetto/base';
+import { AppManifest } from '@travetto/base';
 import { ConfigManager } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 
@@ -12,7 +12,7 @@ import { AppUtil } from './util';
  * Registration point for all applications.  Generally invoked by using
  * the `@Application` decorator, but can be used directly as well.
  */
-export class $ApplicationRegistry {
+class $ApplicationRegistry {
   private applications = new Map<string, ApplicationConfig>();
 
   register(app: string, config: ApplicationConfig) {

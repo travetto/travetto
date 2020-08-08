@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, LiteralUtil, DecoratorUtil
+  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil
 } from '@travetto/transformer';
 
 const INJECTABLE_MOD = require.resolve('../src/decorator');
@@ -17,7 +17,7 @@ export class InjectableTransformer {
    * Handle a specific declaration param/property
    */
   static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
-    const existing = state.findDecorator(param, '@trv:di/Inject', 'Inject', INJECTABLE_MOD);
+    const existing = state.findDecorator(this, param, 'Inject', INJECTABLE_MOD);
 
     if (!(existing || ts.isParameter(param))) {
       return;
@@ -28,10 +28,10 @@ export class InjectableTransformer {
 
     let optional = undefined;
     if (optional === undefined && !!param.questionToken) {
-      optional = ts.createTrue();
+      optional = state.fromLiteral(true);
     }
 
-    args.unshift(LiteralUtil.fromLiteral({
+    args.unshift(state.fromLiteral({
       target: state.getOrImport(state.resolveExternalType(param)),
       optional
     }));
@@ -42,17 +42,17 @@ export class InjectableTransformer {
   /**
    * Mark class as Injectable
    */
-  @OnClass('@trv:di/Injectable')
+  @OnClass('Injectable')
   static registerInjectable(state: TransformerState, node: ts.ClassDeclaration) {
     const cons = node.members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
     const injectArgs = cons &&
-      LiteralUtil.fromLiteral(cons.parameters.map(x => InjectableTransformer.processDeclaration(state, x)));
+      state.fromLiteral(cons.parameters.map(x => InjectableTransformer.processDeclaration(state, x)));
 
     // Add injectable decorator if not there
-    const decl = state.findDecorator(node, '@trv:di/Injectable', 'Injectable', INJECTABLE_MOD);
+    const decl = state.findDecorator(this, node, 'Injectable', INJECTABLE_MOD);
     const args = decl && ts.isCallExpression(decl.expression) ? decl.expression.arguments : [undefined];
 
-    return ts.updateClassDeclaration(node,
+    return state.factory.updateClassDeclaration(node,
       DecoratorUtil.spliceDecorators(node, decl, [
         state.createDecorator(INJECTABLE_MOD, 'Injectable', ...args),
         state.createDecorator(INJECTABLE_MOD, 'InjectArgs', injectArgs)
@@ -68,12 +68,12 @@ export class InjectableTransformer {
   /**
    * Handle Inject annotations for fields/args
    */
-  @OnProperty('@trv:di/Inject')
+  @OnProperty('Inject')
   static registerInjectProperty(state: TransformerState, node: ts.PropertyDeclaration, dm?: DecoratorMeta) {
-    const decl = state.findDecorator(node, '@trv:di/Inject', 'Inject', INJECTABLE_MOD);
+    const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_MOD);
 
     // Doing decls
-    return ts.updateProperty(
+    return state.factory.updatePropertyDeclaration(
       node,
       DecoratorUtil.spliceDecorators(node, decl, [
         state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)!),
@@ -89,7 +89,7 @@ export class InjectableTransformer {
   /**
    * Handle InjectableFactory creation
    */
-  @OnStaticMethod('@trv:di/InjectableFactory')
+  @OnStaticMethod('InjectableFactory')
   static registerFactory(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
     if (!dm?.dec) {
       return node;
@@ -110,14 +110,14 @@ export class InjectableTransformer {
     // Build decl
     const args = [...(dec && ts.isCallExpression(dec.expression) ? dec.expression.arguments : [undefined])];
 
-    args.unshift(LiteralUtil.extendObjectLiteral({
+    args.unshift(state.extendObjectLiteral({
       dependencies,
       src: (node.parent as ts.ClassDeclaration).name,
       target
     }));
 
     // Replace decorator
-    return ts.updateMethod(
+    return state.factory.updateMethodDeclaration(
       node,
       DecoratorUtil.spliceDecorators(node, dec, [
         state.createDecorator(INJECTABLE_MOD, 'InjectableFactory', ...args)

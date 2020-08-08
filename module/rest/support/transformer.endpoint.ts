@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnClass, OnMethod, ParamDocumentation, DeclDocumentation, DocUtil, LiteralUtil, DecoratorUtil
+  TransformerState, OnClass, OnMethod, ParamDocumentation, DeclDocumentation, DocUtil, DecoratorUtil
 } from '@travetto/transformer';
 
 import { ParamConfig } from '../src/types';
@@ -51,13 +51,9 @@ export class RestTransformer {
         }
         break;
       }
-      case 'external': {
-        defaultType = 'Context'; // White list pointer types as context
-        break;
-      }
-      case 'union': {
-        paramType = { key: 'literal', ctor: Object, name: 'object' };
-      }
+      // White list pointer types as context
+      case 'external': defaultType = 'Context'; break;
+      case 'union': paramType = { key: 'literal', ctor: Object, name: 'object' };
     }
 
     const type = state.typeToIdentifier(paramType)!;
@@ -68,10 +64,10 @@ export class RestTransformer {
    * Handle endpoint parameter
    */
   static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation) {
-    const pDec = state.findDecorator(node, '@trv:rest/Param');
+    const pDec = state.findDecorator(this, node, 'Param');
     let pDecArg = DecoratorUtil.getPrimaryArgument(pDec)!;
     if (pDecArg && ts.isStringLiteral(pDecArg)) {
-      pDecArg = LiteralUtil.fromLiteral({ name: pDecArg });
+      pDecArg = state.fromLiteral({ name: pDecArg });
     }
 
     const { type, array, defaultType } = this.getParameterType(state, node);
@@ -81,14 +77,14 @@ export class RestTransformer {
       ...(array ? { array: true } : {})
     };
 
-    const conf = LiteralUtil.extendObjectLiteral(common, pDecArg);
+    const conf = state.extendObjectLiteral(common, pDecArg);
     const decs = (node.decorators ?? []).filter(x => x !== pDec);
 
     if (!pDec) { // Handle default
       decs.push(state.createDecorator(PARAM_DEC_FILE, defaultType, conf));
     } else if (ts.isCallExpression(pDec.expression)) {
-      decs.push(ts.createDecorator(
-        ts.createCall(
+      decs.push(state.factory.createDecorator(
+        state.factory.createCallExpression(
           pDec.expression.expression,
           [],
           [conf, ...pDec.expression.arguments.slice(1)]
@@ -96,7 +92,7 @@ export class RestTransformer {
       ));
     }
 
-    const ret = ts.updateParameter(
+    return state.factory.updateParameterDeclaration(
       node,
       decs,
       node.modifiers,
@@ -106,27 +102,22 @@ export class RestTransformer {
       node.type,
       node.initializer
     );
-
-    // Convey parentage
-    ret.parent = node.parent;
-
-    return ret;
   }
 
   /**
    * On @Endpoint method
    */
-  @OnMethod('@trv:rest/Endpoint')
+  @OnMethod('Endpoint')
   static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration) {
 
-    const decls = node.decorators;
+    const decls = node.decorators ?? [];
     const newDecls = [];
 
     const comments = DocUtil.describeDocs(node);
 
     // Handle description/title/summary w/e
     if (comments.description) {
-      newDecls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', LiteralUtil.fromLiteral({
+      newDecls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', state.fromLiteral({
         title: comments.description
       })));
     }
@@ -138,16 +129,16 @@ export class RestTransformer {
       const params: ts.ParameterDeclaration[] = [];
       // If there are parameters to process
       for (const p of node.parameters) {
-        params.push(RestTransformer.handleEndpointParameter(state, p, comments));
+        params.push(this.handleEndpointParameter(state, p, comments));
       }
 
-      nParams = ts.createNodeArray(params);
+      nParams = state.factory.createNodeArray(params);
     }
 
     if (newDecls.length || nParams !== node.parameters) {
-      return ts.updateMethod(
+      return state.factory.updateMethodDeclaration(
         node,
-        [...decls!, ...newDecls],
+        [...decls, ...newDecls],
         node.modifiers,
         node.asteriskToken,
         node.name,
@@ -165,7 +156,7 @@ export class RestTransformer {
   /**
    * Handle @Controller
    */
-  @OnClass('@trv:rest/Controller')
+  @OnClass('Controller')
   static handleController(state: TransformerState, node: ts.ClassDeclaration) {
     // Read title/description/summary from jsdoc on class
     const comments = DocUtil.describeDocs(node);
@@ -173,11 +164,11 @@ export class RestTransformer {
     if (!comments.description) {
       return node;
     } else {
-      return ts.updateClassDeclaration(
+      return state.factory.updateClassDeclaration(
         node,
         [
           ...(node.decorators || []),
-          state.createDecorator(COMMON_DEC_FILE, 'Describe', LiteralUtil.fromLiteral({
+          state.createDecorator(COMMON_DEC_FILE, 'Describe', state.fromLiteral({
             title: comments.description
           }))
         ],

@@ -19,7 +19,7 @@ const getClass = <T>(o: T) => o.constructor as Class<T>;
 /**
  * Schema registry for listening to changes
  */
-export class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
+class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
   subTypes = new Map<Class, Map<string, Class>>();
   pendingViews = new Map<Class, Map<string, ViewFieldsConfig<any>>>();

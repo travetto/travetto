@@ -20,5 +20,6 @@ export class ContextAwareService {
   async finalOp() {
     const { name } = this.context.get();
     // Use name
+    return name;
   }
 }

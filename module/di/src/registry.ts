@@ -21,7 +21,7 @@ const PRIMARY = Symbol.for('@trv:di/primary');
  * Dependency registry
  */
 @Watchable('@travetto/di/support/watch.injection')
-export class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
+class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   protected pendingFinalize: Class[] = [];
 
   protected instances = new Map<TargetId, Map<symbol, any>>();

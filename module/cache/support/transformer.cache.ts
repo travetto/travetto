@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerState, DecoratorMeta, OnMethod, LiteralUtil, CoreUtil } from '@travetto/transformer';
+import { TransformerState, DecoratorMeta, OnMethod } from '@travetto/transformer';
 
 const CACHE_UTIL = 'CacheUtil';
 
@@ -9,9 +9,6 @@ interface CacheState {
   cache: ts.PropertyAccessExpression;
   evict: ts.PropertyAccessExpression;
 }
-
-const CACHE_KEY = '@trv:cache/Cache';
-const EVICT_KEY = '@trv:cache/Evict';
 
 /**
  * Transform the cache headers
@@ -27,18 +24,18 @@ export class CacheTransformer {
     if (!state.util) {
       const util = state.importFile(require.resolve('../src/util')).ident;
       state.util = util;
-      state.cache = CoreUtil.createAccess(util, CACHE_UTIL, 'cache');
-      state.evict = CoreUtil.createAccess(util, CACHE_UTIL, 'evict');
+      state.cache = state.createAccess(util, CACHE_UTIL, 'cache');
+      state.evict = state.createAccess(util, CACHE_UTIL, 'evict');
     }
   }
 
   /**
    * When `@Cache` and `@Evict` are present
    */
-  @OnMethod([CACHE_KEY, EVICT_KEY])
+  @OnMethod('Cache', 'Evict')
   static instrumentCache(state: TransformerState & CacheState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
 
-    const isCache = dm?.targets?.includes(CACHE_KEY);
+    const isCache = !!state.findDecorator(this, node, 'Cache');
     const dec = dm?.dec;
 
     // If valid function
@@ -47,16 +44,16 @@ export class CacheTransformer {
 
       const params = dec.expression.arguments;
       const id = params[0] as ts.Identifier;
-      let config = params.length > 1 ? params[1] : LiteralUtil.fromLiteral({});
+      let config = params.length > 1 ? params[1] : state.fromLiteral({});
 
       // Read literal, and extend config onto it
       const parent = ((node.parent as ts.ClassExpression) || { name: { getText: () => 'unknown' } }).name!;
       const keySpace = `${parent.getText()}.${node.name.getText()}`;
-      config = LiteralUtil.extendObjectLiteral({ keySpace }, config);
+      config = state.extendObjectLiteral({ keySpace }, config);
 
       // Create an arrow function to retain the `this` value.
-      const fn = ts.createArrowFunction(
-        [ts.createModifier(ts.SyntaxKind.AsyncKeyword)],
+      const fn = state.factory.createArrowFunction(
+        [state.factory.createModifier(ts.SyntaxKind.AsyncKeyword)],
         undefined,
         [],
         undefined,
@@ -65,7 +62,7 @@ export class CacheTransformer {
       );
 
       // Return new method calling evict or cache depending on decorator.
-      return ts.updateMethod(
+      return state.factory.updateMethodDeclaration(
         node,
         node.decorators,
         node.modifiers,
@@ -75,14 +72,16 @@ export class CacheTransformer {
         node.typeParameters,
         node.parameters,
         node.type,
-        ts.createBlock([
-          ts.createReturn(
-            ts.createCall(isCache ? state.cache : state.evict, undefined, [
+        state.factory.createBlock([
+          state.factory.createReturnStatement(
+            state.factory.createCallExpression(isCache ? state.cache : state.evict, undefined, [
               config,
-              ts.createElementAccess(ts.createThis(), id),
-              ts.createThis(),
+              state.factory.createElementAccessExpression(state.factory.createThis(), id),
+              state.factory.createThis(),
               fn,
-              ts.createArrayLiteral([ts.createSpread(ts.createIdentifier('arguments'))])
+              state.factory.createArrayLiteralExpression([
+                state.factory.createSpreadElement(state.createIdentifier('arguments'))
+              ])
             ] as (readonly ts.Expression[]))
           )
         ])

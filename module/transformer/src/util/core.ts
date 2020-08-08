@@ -27,23 +27,6 @@ export class CoreUtil {
   }
 
   /**
-   * Resolve the `ts.ObjectFlags`
-   */
-  static getObjectFlags(type: ts.Type): ts.ObjectFlags {
-    // @ts-ignore
-    return ts.getObjectFlags(type);
-  }
-
-  /**
-   * See if a declaration is public
-   */
-  static isPublic(node: ts.Declaration) {
-    // eslint-disable-next-line no-bitwise
-    return !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier);
-  }
-
-
-  /**
    * Find the primary argument of a call expression, or decorator.
    */
   static getPrimaryArgument<T extends ts.Expression = ts.Expression>(node: ts.CallExpression | undefined): T | undefined {
@@ -56,12 +39,11 @@ export class CoreUtil {
   /**
    * Create a static field for a class
    */
-  static createStaticField(name: string, val: ts.Expression | string | boolean | number): ts.PropertyDeclaration {
-    return ts.createProperty(
+  static createStaticField(factory: ts.NodeFactory, name: string, val: ts.Expression): ts.PropertyDeclaration {
+    return factory.createPropertyDeclaration(
       undefined,
-      [ts.createToken(ts.SyntaxKind.StaticKeyword)],
-      name, undefined, undefined,
-      (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') ? ts.createLiteral(val) : val as ts.Expression
+      [factory.createToken(ts.SyntaxKind.StaticKeyword)],
+      name, undefined, undefined, val
     );
   }
 
@@ -77,8 +59,8 @@ export class CoreUtil {
    * @param src
    * @param statements
    */
-  static updateSource(src: ts.SourceFile, statements: ts.Statement[]) {
-    return ts.updateSourceFileNode(
+  static updateSource(factory: ts.NodeFactory, src: ts.SourceFile, statements: ts.Statement[]) {
+    return factory.updateSourceFile(
       src, statements, src.isDeclarationFile, src.referencedFiles, src.typeReferenceDirectives, src.hasNoDefaultLib
     );
   }
@@ -86,13 +68,26 @@ export class CoreUtil {
   /**
    * Create property access
    */
-  static createAccess(first: string | ts.Expression, second: string | ts.Identifier, ...items: (string | ts.Identifier)[]) {
+  static createAccess(factory: ts.NodeFactory, first: string | ts.Expression, second: string | ts.Identifier, ...items: (string | ts.Identifier)[]) {
     if (typeof first === 'string') {
-      first = ts.createIdentifier(first);
+      first = factory.createIdentifier(first);
     }
     return items.reduce(
-      (acc, p) => ts.createPropertyAccess(acc, p),
-      ts.createPropertyAccess(first, second)
+      (acc, p) => factory.createPropertyAccessExpression(acc, p),
+      factory.createPropertyAccessExpression(first, second)
+    );
+  }
+
+  /**
+   * Create a decorator with a given name, and arguments
+   */
+  static createDecorator(factory: ts.NodeFactory, name: ts.Expression, ...contents: (ts.Expression | undefined)[]) {
+    return factory.createDecorator(
+      factory.createCallExpression(
+        name,
+        undefined,
+        contents.filter(x => !!x) as ts.Expression[]
+      )
     );
   }
 }
