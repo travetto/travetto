@@ -52,4 +52,13 @@ export class DeclarationUtil {
   static getPrimaryDeclarationNode(node: ts.Type | ts.Symbol): ts.Declaration {
     return this.getPrimaryDeclaration(this.getDeclarations(node));
   }
+
+
+  /**
+   * Resolve the `ts.ObjectFlags`
+   */
+  static getObjectFlags(type: ts.Type): ts.ObjectFlags {
+    // @ts-ignore
+    return ts.getObjectFlags(type);
+  }
 }

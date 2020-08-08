@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnClass, LiteralUtil, CoreUtil
+  TransformerState, DecoratorMeta, OnClass, CoreUtil, DecoratorUtil
 } from '@travetto/transformer';
 
 /**
@@ -60,7 +60,7 @@ export class ApplicationTransformer {
   /**
    * On presence of `@Application`
    */
-  @OnClass('@trv:app/Application')
+  @OnClass('Application')
   static registerAppClass(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
     const dec = dm?.dec;
 
@@ -85,23 +85,29 @@ export class ApplicationTransformer {
 
     // Name only, need a config object
     if (declArgs.length === 1) {
-      declArgs.push(LiteralUtil.fromLiteral({}));
+      declArgs.push(state.fromLiteral({}));
     }
 
     // Track start point
-    declArgs[1] = LiteralUtil.extendObjectLiteral(declArgs[1], {
+    declArgs[1] = state.extendObjectLiteral(declArgs[1], {
       start: CoreUtil.getRangeOf(state.source, node)?.start,
       codeStart: CoreUtil.getRangeOf(state.source, runMethod?.body?.statements[0])?.start
     });
 
-    // TODO: Do a proper update
-    dec.expression.arguments = ts.createNodeArray([
-      ...declArgs,
-      LiteralUtil.fromLiteral(outParams)
-    ]);
+    // Compute new declaration
+    const newDec = state.factory.createDecorator(
+      state.factory.createCallExpression(
+        dec.expression.expression,
+        dec.expression.typeArguments,
+        state.factory.createNodeArray([
+          ...declArgs,
+          state.fromLiteral(outParams)
+        ])
+      )
+    );
 
-    return ts.updateClassDeclaration(node,
-      node.decorators,
+    return state.factory.updateClassDeclaration(node,
+      DecoratorUtil.spliceDecorators(node, dec, [newDec]),
       node.modifiers,
       node.name,
       node.typeParameters,

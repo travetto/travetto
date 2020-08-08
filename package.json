@@ -9,7 +9,7 @@
 	"name": "@travetto/mono-repo",
 	"license": "MIT",
 	"scripts": {
-		"lint": "npx eslint --ignore-pattern '**/node_modules/**' --ignore-pattern '**/*.spec.ts' --ignore-pattern '**/out/**' --ext .js --ext .ts .",
+		"lint": "npx eslint --ignore-pattern '**/*.spec.ts' --ignore-pattern '**/out/**' --ignore-pattern '**/api-client/**' --ignore-pattern '**/build/**' --ignore-pattern '**/dist/**' --ignore-pattern '**/node_modules/**' --ext .js --ext .ts .",
 		"init": "./bin/run.sh dev-init/index",
 		"docs": "./bin/docs/gen.sh",
 		"prepare": "cd module/boot; npm run prepare",
@@ -40,6 +40,6 @@
 		"source-map-support": "^0.5.19"
 	},
 	"dependencies": {
-		"typescript": "^3.9.7"
+		"typescript": "^4.0.1-rc"
 	}
 }

@@ -22,6 +22,11 @@ export type TransformPhase = 'before' | 'after';
 
 export type TransformerType = 'class' | 'method' | 'property' | 'parameter' | 'static-method' | 'call' | 'function';
 
+export type Transformer = {
+  key: string;
+  name: string;
+};
+
 export type TransformerSet<S extends State = State> = {
   before?: Map<string, NodeTransformer<S>[]>;
   after?: Map<string, NodeTransformer<S>[]>;
@@ -30,7 +35,7 @@ export type TransformerSet<S extends State = State> = {
 export interface NodeTransformer<S extends State = State, T extends TransformerType = TransformerType, N extends ts.Node = ts.Node> {
   type: T;
   key: string;
-  target?: string[] | string;
+  target?: string[];
   before?(state: S, node: N, dm?: DecoratorMeta): ts.Node | undefined;
   after?(state: S, node: N, dm?: DecoratorMeta): ts.Node | undefined;
 }

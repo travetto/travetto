@@ -7,5 +7,6 @@ class Complex { }
 class ManualLookup {
   async invoke() {
     const complex = await DependencyRegistry.getInstance(Complex);
+    return complex;
   }
 }

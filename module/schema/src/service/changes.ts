@@ -35,7 +35,7 @@ export const FIELD_CHANGE_EVENT = 'field:change';
 /**
  * Schema change listener.  Handles all changes that occur via the SchemaRegistry
  */
-export class $SchemaChangeListener extends EventEmitter {
+class $SchemaChangeListener extends EventEmitter {
 
   private mapping = new Map<string, Map<string, FieldMapping>>();
 

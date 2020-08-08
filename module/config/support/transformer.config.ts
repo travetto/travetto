@@ -18,19 +18,19 @@ export class ConfigTransformer {
 
   static key = '@trv:config';
 
-  @OnClass('@trv:config/Config')
+  @OnClass('Config')
   static startConfigClass(state: AutoState & TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
     state[hasConfig] = !!dm;
     return node;
   }
 
-  @AfterClass('@trv:config/Config')
+  @AfterClass('Config')
   static finalizeConfigClass(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
     const decls = [...(node.decorators ?? [])];
 
     delete state[hasConfig];
 
-    return ts.updateClassDeclaration(
+    return state.factory.updateClassDeclaration(
       node,
       decls,
       node.modifiers,
@@ -43,10 +43,16 @@ export class ConfigTransformer {
 
   @OnProperty()
   static onConfigProperty(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
-    if (state[hasConfig]) {
-      if (!node.initializer) {
-        node.initializer = ts.createIdentifier('undefined');
-      }
+    if (state[hasConfig] && !node.initializer) {
+      return state.factory.updatePropertyDeclaration(
+        node,
+        node.decorators,
+        node.modifiers,
+        node.name,
+        node.questionToken,
+        node.type,
+        state.createIdentifier('undefined'),
+      );
     }
     return node;
   }

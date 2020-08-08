@@ -10,7 +10,7 @@ import {
  */
 export class TransformerManager {
 
-  private cached: { before: ts.TransformerFactory<ts.SourceFile>[] };
+  private cached: { before: ts.TransformerFactory<ts.SourceFile>[] } | undefined;
   transformers: NodeTransformer<TransformerState>[] = [];
 
   constructor() { }
@@ -24,7 +24,8 @@ export class TransformerManager {
     }
 
     // Modules
-    const found = ScanApp.findFiles({ folder: 'support', filter: /\/transformer.*[.]ts/ });
+    const found = ScanApp.findFiles({ folder: 'support', filter: /\/transformer.*[.]ts/ })
+      .filter(x => !x.module.startsWith('alt')); // Exclude alt if they ever show up
 
     for (const entry of found) { // Exclude based on blacklist
       this.transformers.push(...getAllTransformers(require(entry.file)));
@@ -46,7 +47,7 @@ export class TransformerManager {
 
   build(checker: ts.TypeChecker) {
     const visitor = new VisitorFactory(
-      src => new TransformerState(src, checker),
+      (ctx, src) => new TransformerState(src, ctx.factory, checker),
       this.transformers
     );
 
@@ -60,7 +61,7 @@ export class TransformerManager {
    * Get typescript transformer object
    */
   getTransformers() {
-    return this.cached;
+    return this.cached!;
   }
 
   /**

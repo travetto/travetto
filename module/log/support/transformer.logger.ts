@@ -22,7 +22,7 @@ export class LoggerTransformer {
       // Oay since we create the object ourselves
       const { level } = LiteralUtil.toLiteral(arg, false);
       if (EnvUtil.isProd() && level === 'debug') {
-        return ts.createIdentifier('undefined'); // Lose the logging if in prod
+        return state.createIdentifier('undefined'); // Lose the logging if in prod
       }
     }
     return node;

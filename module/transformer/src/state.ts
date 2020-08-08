@@ -1,14 +1,15 @@
 import * as ts from 'typescript';
 
 import { ExternalType, AnyType } from './resolver/types';
-import { State, DecoratorMeta } from './types/visitor';
+import { State, DecoratorMeta, Transformer } from './types/visitor';
+
 
 import { TypeResolver } from './resolver/service';
 import { ImportManager } from './importer';
 import { DocUtil } from './util/doc';
 import { DecoratorUtil } from './util/decorator';
 import { DeclarationUtil } from './util/declaration';
-import { CoreUtil } from './util/core';
+import { CoreUtil, LiteralUtil } from './util';
 
 /**
  * Transformer runtime state
@@ -19,8 +20,8 @@ export class TransformerState implements State {
   private decorators = new Map<string, ts.PropertyAccessExpression>();
   added = new Map<number, ts.Statement[]>();
 
-  constructor(public source: ts.SourceFile, checker: ts.TypeChecker) {
-    this.imports = new ImportManager(source);
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker) {
+    this.imports = new ImportManager(source, factory);
     this.resolver = new TypeResolver(checker);
   }
 
@@ -28,7 +29,7 @@ export class TransformerState implements State {
    * Get or import the node or external type
    */
   getOrImport(type: ExternalType) {
-    return this.imports.getOrImport(type);
+    return this.imports.getOrImport(this.factory, type);
   }
 
   /**
@@ -64,7 +65,7 @@ export class TransformerState implements State {
   typeToIdentifier(node: ts.Type | AnyType) {
     const type = 'flags' in node ? this.resolveType(node) : node;
     switch (type.key) {
-      case 'literal': return ts.createIdentifier(type.ctor!.name);
+      case 'literal': return this.factory.createIdentifier(type.ctor!.name);
       case 'external': return this.getOrImport(type);
       case 'shape': return;
     }
@@ -90,8 +91,8 @@ export class TransformerState implements State {
   importDecorator(pth: string, name: string) {
     if (!this.decorators.has(`${pth}:${name}`)) {
       const ref = this.imports.importFile(pth);
-      const ident = ts.createIdentifier(name);
-      this.decorators.set(name, ts.createPropertyAccess(ref.ident, ident));
+      const ident = this.factory.createIdentifier(name);
+      this.decorators.set(name, this.factory.createPropertyAccessExpression(ref.ident, ident));
     }
     return this.decorators.get(name);
   }
@@ -101,7 +102,7 @@ export class TransformerState implements State {
    */
   createDecorator(pth: string, name: string, ...contents: (ts.Expression | undefined)[]) {
     this.importDecorator(pth, name);
-    return DecoratorUtil.createDecorator(this.decorators.get(name)!, ...contents);
+    return CoreUtil.createDecorator(this.factory, this.decorators.get(name)!, ...contents);
   }
 
   /**
@@ -134,23 +135,6 @@ export class TransformerState implements State {
   }
 
   /**
-   * Find a matching decorator.  Will match by target by default, but
-   * if name or file are specified, will include those as matching criteria.
-   *
-   * @param node
-   * @param target Name of decorator group
-   * @param name Specific name of decorator
-   * @param file File of decorator
-   */
-  findDecorator(node: ts.Node, target: string, name?: string, file?: string) {
-    return this.getDecoratorList(node).find(x =>
-      x.targets?.includes(target)
-      && (name === undefined || x.name === name)
-      && (file === undefined || x.file === file)
-    )?.dec;
-  }
-
-  /**
    * Get all declarations for a node
    */
   getDeclarations(node: ts.Node): ts.Declaration[] {
@@ -166,6 +150,9 @@ export class TransformerState implements State {
     const stmts = this.source.statements.slice(0);
     let idx = stmts.length;
     let n = before;
+    if (n && !n.parent && (n as any).original) {
+      n = (n as any).original;
+    }
     while (n && !ts.isSourceFile(n.parent)) {
       n = n.parent;
     }
@@ -183,12 +170,6 @@ export class TransformerState implements State {
    */
   finalize(ret: ts.SourceFile) {
     ret = this.imports.finalize(ret);
-
-    for (const el of ret.statements) {
-      if (!el.parent) {
-        el.parent = ret;
-      }
-    }
     return ret;
   }
 
@@ -196,8 +177,60 @@ export class TransformerState implements State {
    * Get Filename as ᚕsrc
    */
   getFilenameAsSrc() {
-    const ident = ts.createIdentifier('ᚕsrc');
+    const ident = this.factory.createIdentifier('ᚕsrc');
     ident.getSourceFile = () => this.source;
-    return ts.createCall(ident, [], [ts.createIdentifier('__filename')]);
+    return this.factory.createCallExpression(ident, [], [this.createIdentifier('__filename')]);
+  }
+
+  /**
+   * From literal
+   */
+  fromLiteral<T extends ts.Expression>(val: T): T;
+  fromLiteral(val: undefined): ts.Identifier;
+  fromLiteral(val: null): ts.NullLiteral;
+  fromLiteral(val: object): ts.ObjectLiteralExpression;
+  fromLiteral(val: any[]): ts.ArrayLiteralExpression;
+  fromLiteral(val: string | boolean | number): ts.LiteralExpression;
+  fromLiteral(val: any) {
+    return LiteralUtil.fromLiteral(this.factory, val);
+  }
+
+  /**
+   * Extend
+   */
+  extendObjectLiteral(src: object | ts.Expression, ...rest: (object | ts.Expression)[]) {
+    return LiteralUtil.extendObjectLiteral(this.factory, src, ...rest);
+  }
+
+  /**
+   * Create property access
+   */
+  createAccess(first: string | ts.Expression, second: string | ts.Identifier, ...items: (string | ts.Identifier)[]) {
+    return CoreUtil.createAccess(this.factory, first, second, ...items);
+  }
+
+  /**
+   * Create a static field for a class
+   */
+  createStaticField(name: string, val: ts.Expression): ts.PropertyDeclaration {
+    return CoreUtil.createStaticField(this.factory, name, val);
+  }
+
+  createIdentifier(name: string | { getText(): string }) {
+    return this.factory.createIdentifier(typeof name === 'string' ? name : name.getText());
+  }
+
+
+  /**
+   * Find decorator, relative to registered key
+   * @param state
+   * @param node
+   * @param name
+   * @param file
+   */
+  findDecorator(cls: Transformer, node: ts.Node, name: string, file?: string) {
+    const target = `${cls.key}/${name}`;
+    return this.getDecoratorList(node)
+      .find(x => x.targets?.includes(target) && (file ? x.name === name && x.file === file : true))?.dec;
   }
 }

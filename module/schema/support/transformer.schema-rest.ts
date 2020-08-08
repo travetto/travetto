@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerState, OnParameter, DecoratorMeta, LiteralUtil, OnMethod, DocUtil, DecoratorUtil, DeclarationUtil, AnyType } from '@travetto/transformer';
+import { TransformerState, OnParameter, DecoratorMeta, OnMethod, DocUtil, DecoratorUtil, DeclarationUtil, AnyType } from '@travetto/transformer';
 import { SchemaTransformUtil } from './lib';
 
 const ENDPOINT_DEC_FILE = (() => { try { return require.resolve('@travetto/rest/src/decorator/endpoint'); } catch { } })()!;
@@ -113,11 +113,11 @@ export class SchemaRestTransformer {
     if (type.type) {
       const decls = node.decorators || [];
       const comments = DocUtil.describeDocs(node);
-      const produces = state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', LiteralUtil.fromLiteral({
+      const produces = state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', state.fromLiteral({
         ...type,
         title: comments.return
       }));
-      return ts.updateMethod(
+      return state.factory.updateMethodDeclaration(
         node,
         [...decls, produces],
         node.modifiers,
@@ -137,20 +137,20 @@ export class SchemaRestTransformer {
   /**
    * Handle all parameters that care about schema
    */
-  @OnParameter('@trv:schema/Param')
+  @OnParameter('Param')
   static processEndpointParameterType(state: TransformerState, node: ts.ParameterDeclaration, dm?: DecoratorMeta) {
     const resolved = state.resolveType(node.type!);
     if (dm && resolved.key === 'shape') {
       const id = SchemaTransformUtil.toFinalType(state, resolved, node) as ts.Identifier;
-      const extra = LiteralUtil.extendObjectLiteral({
+      const extra = state.extendObjectLiteral({
         type: id
       });
       const primary = DecoratorUtil.getPrimaryArgument(dm.dec);
-      return ts.updateParameter(
+      return state.factory.updateParameterDeclaration(
         node,
         DecoratorUtil.spliceDecorators(
           node, dm.dec,
-          [state.createDecorator(dm.file!, dm.name!, primary ? LiteralUtil.extendObjectLiteral(primary, extra) : extra)]
+          [state.createDecorator(dm.file!, dm.name!, primary ? state.extendObjectLiteral(primary, extra) : extra)]
         ),
         node.modifiers,
         node.dotDotDotToken,

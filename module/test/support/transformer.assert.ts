@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
-import { TransformerState, OnCall, DeclarationUtil, CoreUtil, LiteralUtil } from '@travetto/transformer';
+import { TransformerState, OnCall, DeclarationUtil, CoreUtil } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
@@ -142,9 +142,9 @@ export class AssertTransformer {
       const assrt = state.importFile(require.resolve('../src/assert/check')).ident;
       state[ASSERT] = {
         assert: assrt,
-        assertCheck: CoreUtil.createAccess(assrt, ASSERT_UTIL, 'check'),
-        checkThrow: CoreUtil.createAccess(assrt, ASSERT_UTIL, 'checkThrow'),
-        checkThrowAsync: CoreUtil.createAccess(assrt, ASSERT_UTIL, 'checkThrowAsync'),
+        assertCheck: CoreUtil.createAccess(state.factory, assrt, ASSERT_UTIL, 'check'),
+        checkThrow: CoreUtil.createAccess(state.factory, assrt, ASSERT_UTIL, 'checkThrow'),
+        checkThrowAsync: CoreUtil.createAccess(state.factory, assrt, ASSERT_UTIL, 'checkThrowAsync'),
       };
     }
   }
@@ -159,22 +159,16 @@ export class AssertTransformer {
     const firstText = first!.getText();
 
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
-    const check = ts.createCall(state[ASSERT]!.assertCheck, undefined, ts.createNodeArray([
-      LiteralUtil.fromLiteral({
+    const check = state.factory.createCallExpression(state[ASSERT]!.assertCheck, undefined, state.factory.createNodeArray([
+      state.fromLiteral({
         file: state.getFilenameAsSrc(),
-        line: ts.createLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
-        text: ts.createLiteral(firstText),
-        operator: ts.createLiteral(cmd.fn)
+        line: state.fromLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
+        text: state.fromLiteral(firstText),
+        operator: state.fromLiteral(cmd.fn)
       }),
-      ts.createLiteral(!cmd.negate),
+      state.fromLiteral(!cmd.negate),
       ...cmd.args
     ]));
-
-    for (const arg of cmd.args) {
-      arg.parent = check;
-    }
-
-    check.parent = node.parent;
 
     return check as T;
   }
@@ -187,17 +181,17 @@ export class AssertTransformer {
     const firstText = first!.getText();
 
     this.initState(state);
-    return ts.createCall(
+    return state.factory.createCallExpression(
       /reject/i.test(key) ? state[ASSERT]!.checkThrowAsync : state[ASSERT]!.checkThrow,
       undefined,
-      ts.createNodeArray([
-        LiteralUtil.fromLiteral({
+      state.factory.createNodeArray([
+        state.fromLiteral({
           file: state.getFilenameAsSrc(),
-          line: ts.createLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
-          text: ts.createLiteral(`${key} ${firstText}`),
-          operator: ts.createLiteral(`${key}`)
+          line: state.fromLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
+          text: state.fromLiteral(`${key} ${firstText}`),
+          operator: state.fromLiteral(`${key}`)
         }),
-        ts.createLiteral(key.startsWith('doesNot')),
+        state.fromLiteral(key.startsWith('doesNot')),
         ...args
       ]));
   }
