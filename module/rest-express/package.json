@@ -15,6 +15,10 @@
     "compression": "^1.7.4",
     "express": "^4.17.1"
   },
+  "optionalPeerDependencies": {
+    "@types/aws-serverless-express": "^3.3.3",
+    "aws-serverless-express": "^3.3.8"
+  },
   "title": "Express REST Source",
   "description": "Express provider for the travetto rest module.",
   "homepage": "https://travetto.io",

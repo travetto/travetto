@@ -19,11 +19,8 @@ export const init = {
 
     // Drop typescript import, and use global. Great speedup;
     TranspileUtil.addPreProcessor((name, contents) => {
-      if (/(compiler|transformer|support)/.test(name)) { // Should only ever be in transformation code
-        contents = contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/mg, x => `// ${x}`);
-      }
+      contents = contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/mg, x => `// ${x}`);
       return contents;
     });
   }
 };
-

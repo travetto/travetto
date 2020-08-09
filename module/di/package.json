@@ -28,7 +28,6 @@
   "files": [
     "index.ts",
     "src",
-    "config",
     "support"
   ],
   "name": "@travetto/di",

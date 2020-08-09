@@ -31,7 +31,6 @@
     "src",
     "bin",
     "register.js",
-    "eslint.json",
     "tsconfig.json"
   ],
   "name": "@travetto/boot",
