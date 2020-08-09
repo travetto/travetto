@@ -1,4 +1,4 @@
-const { doc: d, inp, List, Mod, Section, pth, lib, cls, Execute, fld } = require('@travetto/doc');
+const { doc: d, inp, List, Mod, Section, pth, lib, cls, Execute, fld, SubSection, Snippet, Code, Terminal } = require('@travetto/doc');
 
 exports.text = d`
 
@@ -27,5 +27,25 @@ ${Section('CLI - compile')}
 ${Execute('Compiler usage', 'travetto', ['compile', '--help'])}
 
 This command line operation pre-compiles all of the application source code.  You can target the output location as well, which is useful in conjunction with ${fld`process.env.TRV_CACHE`} for relocating the compiled files.
+
+${Section('CLI - pack')} 
+
+${Execute('Pack usage', 'travetto', ['pack', '--help'])}
+
+This command line operation will compile your project, and produce a ready to use workspace as a deliverable.  The output can be zipped on demand, or left as a folder structure for integration with other tools.  
+
+${SubSection('Configuration')}
+
+By default packing follows a default pattern driven by a configuration structure:
+${Snippet('Config Structure', './bin/lib/pack.ts', /type Flags/, /^}$/)}
+
+A project can define it's own configuration at the root of the project with ${pth`pack.config.yml`}. 
+
+${Code('Example pack.config.yml', './alt/docs/pack.config.yml')}
+
+${SubSection('Modes')}
+Various modules may provide customizations to the default ${pth`pack.config.yml`} to allow for easy integration with the packing process.  A simple example of this is via the ${Mod('rest')} module, for how to publish lambda packages.
+
+${Terminal('Invoking Pack with Mode', `npx travetto pack <mode>`)}
 `;
 

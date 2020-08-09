@@ -4,7 +4,7 @@ import { Test, BeforeAll, AfterAll } from '@travetto/test';
 import { Controller } from '../../src/decorator/controller';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';
 import { Path, Query } from '../../src/decorator/param';
-import { Request } from '../../src/types';
+import { Request, Response } from '../../src/types';
 import { BaseRestTest } from './rest-base';
 
 
@@ -26,8 +26,8 @@ class TestController {
   }
 
   @Delete('/cookie')
-  withCookie(req: Request) {
-    console.log('COokie', req.cookies.get('orange'));
+  withCookie(req: Request, res: Response) {
+    res.cookies.set('flavor', 'oreo');
     return { cookie: req.cookies.get('orange') };
   }
 
@@ -47,26 +47,26 @@ export abstract class RestTestCommon extends BaseRestTest {
 
   @Test()
   async getJSON() {
-    const ret = await this.makeRequst('get', '/json');
+    const { body: ret } = await this.makeRequst('get', '/test/json');
     assert(ret === { json: true });
   }
 
   @Test()
   async getParam() {
-    const ret = await this.makeRequst('post', '/param/bob');
+    const { body: ret } = await this.makeRequst('post', '/test/param/bob');
     assert(ret === { param: 'bob' });
   }
 
   @Test()
   async putQuery() {
-    const ret = await this.makeRequst('put', '/query', {
+    const { body: ret } = await this.makeRequst('put', '/test/query', {
       query: {
         age: 20
       }
     });
     assert(ret === { query: 20 });
 
-    await assert.rejects(() => this.makeRequst('put', '/query', {
+    await assert.rejects(() => this.makeRequst('put', '/test/query', {
       query: {
         age: 'blue'
       }
@@ -74,18 +74,20 @@ export abstract class RestTestCommon extends BaseRestTest {
   }
 
   @Test()
-  async testCookie() {
-    const ret = await this.makeRequst('delete', '/cookie', {
+  async testCookie(res: Response) {
+    const { body: ret, headers } = await this.makeRequst('delete', '/test/cookie', {
       headers: {
         Cookie: `orange=yummy`
       }
     });
+    console.log(headers);
+    assert(/flavor.*oreo/.test(headers['set-cookie']));
     assert(ret === { cookie: 'yummy' });
   }
 
   @Test()
   async testRegex() {
-    const ret = await this.makeRequst('patch', '/regexp/super-poodle-party');
+    const { body: ret } = await this.makeRequst('patch', '/test/regexp/super-poodle-party');
     assert(ret === { path: 'poodle' });
   }
 }

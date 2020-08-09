@@ -11,18 +11,16 @@ export interface ManagedExtra {
 type TargetId = string;
 type ClassId = string;
 
-function getName(symbol: symbol) {
-  return symbol.toString().split(/[()]/g)[1];
-}
-
 const PRIMARY = Symbol.for('@trv:di/primary');
 
 /**
  * Dependency registry
  */
-@Watchable('@travetto/di/support/watch.injection')
+@Watchable('@trv:di/injection')
 class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   protected pendingFinalize: Class[] = [];
+
+  protected defaultSymbols = new Set<symbol>();
 
   protected instances = new Map<TargetId, Map<symbol, any>>();
   protected instancePromises = new Map<TargetId, Map<symbol, Promise<any>>>();
@@ -42,9 +40,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * @param qualifier
    */
   protected resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol) {
-    const targetId = target.ᚕid;
-
-    const qualifiers = this.targetToClass.get(targetId) ?? new Map();
+    const qualifiers = this.targetToClass.get(target.ᚕid) ?? new Map<symbol, string>();
 
     let cls: string | undefined;
 
@@ -56,19 +52,19 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         if (qualifiers.has(PRIMARY)) {
           qualifier = PRIMARY;
         } else {
-          const filtered = resolved.filter(x => !!x).filter(x => getName(x).startsWith('@trv:di/'));
+          const filtered = resolved.filter(x => !!x).filter(x => this.defaultSymbols.has(x));
           if (filtered.length === 1) {
             qualifier = filtered[0];
           } else if (filtered.length > 1) {
-            throw new InjectionError(`Dependency has multiple candiates: ${targetId}[${filtered.map(getName)}]`, 'notfound');
+            throw new InjectionError('Dependency has multiple candidates', target, filtered);
           }
         }
       }
 
       if (!qualifier) {
-        throw new InjectionError(`Dependency not found: ${targetId}`, 'notfound');
+        throw new InjectionError('Dependency not found', target);
       } else if (!qualifiers.has(qualifier)) {
-        throw new InjectionError(`Dependency not found: ${targetId}[${getName(qualifier)}]`, 'notfound');
+        throw new InjectionError('Dependency not found', target, [qualifier]);
       } else {
         cls = qualifiers.get(qualifier!)!;
       }
@@ -281,7 +277,11 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const config = this.getOrCreatePending(pconfig.class!);
 
     config.class = cls;
-    config.qualifier = pconfig.qualifier ?? config.qualifier ?? Symbol.for(`@trv:di/${cls.ᚕid}`);
+    config.qualifier = pconfig.qualifier ?? config.qualifier;
+    if (!config.qualifier) {
+      config.qualifier = Symbol.for(cls.ᚕid);
+      this.defaultSymbols.add(config.qualifier);
+    }
 
     if (pconfig.primary !== undefined) {
       config.primary = pconfig.primary;
@@ -313,7 +313,11 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     finalConfig.factory = config.fn;
     finalConfig.target = config.target;
-    finalConfig.qualifier = config.qualifier ?? Symbol.for(`@trv:di/${config.id}`);
+    finalConfig.qualifier = config.qualifier;
+    if (!finalConfig.qualifier) {
+      finalConfig.qualifier = Symbol.for(config.id);
+      this.defaultSymbols.add(finalConfig.qualifier);
+    }
     if (config.primary !== undefined) {
       finalConfig.primary = config.primary;
     }

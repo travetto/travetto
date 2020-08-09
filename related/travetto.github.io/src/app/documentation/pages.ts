@@ -19,7 +19,6 @@ import { RestSessionComponent } from './gen/rest-session/rest-session.component'
 import { RestExpressComponent } from './gen/rest-express/rest-express.component';
 import { RestKoaComponent } from './gen/rest-koa/rest-koa.component';
 import { RestFastifyComponent } from './gen/rest-fastify/rest-fastify.component';
-import { RestAwsLambdaComponent } from './gen/rest-aws-lambda/rest-aws-lambda.component';
 import { BootComponent } from './gen/boot/boot.component';
 import { BaseComponent } from './gen/base/base.component';
 import { CompilerComponent } from './gen/compiler/compiler.component';
@@ -59,8 +58,7 @@ export const PAGES = [
       { path: 'rest-koa', title: 'Koa', component: RestKoaComponent },
       { path: 'rest-fastify', title: 'Fastify', component: RestFastifyComponent },
       { path: 'rest-session', title: 'Session', component: RestSessionComponent },
-      { path: 'openapi', title: 'OpenAPI', component: OpenapiComponent },
-      { path: 'rest-aws-lambda', title: 'Aws-Lambda', component: RestAwsLambdaComponent }
+      { path: 'openapi', title: 'OpenAPI', component: OpenapiComponent }
     ]
   },
   {

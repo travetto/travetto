@@ -43,7 +43,7 @@ interface SearchResponse<T> {
   aggs: Agg;
 }
 
-function hasRawId(o: any): o is { _id: string } {
+function hasRawId(o: any): o is { _id?: string } {
   return '_id' in o;
 }
 
@@ -53,12 +53,12 @@ function hasRawId(o: any): o is { _id: string } {
 @Injectable()
 export class ElasticsearchModelSource extends ModelSource {
 
-  private indexToAlias: Map<string, string> = new Map();
-  private aliasToIndex: Map<string, string> = new Map();
+  private indexToAlias = new Map<string, string>();
+  private aliasToIndex = new Map<string, string>();
 
-  private identities: Map<Class, EsIdentity> = new Map();
+  private identities = new Map<Class, EsIdentity>();
   // private indices: Record<string, IndexConfig<any>[]> = {};
-  private indexToClass: Map<string, Class> = new Map();
+  private indexToClass = new Map<string, Class>();
 
   client: es.Client;
 

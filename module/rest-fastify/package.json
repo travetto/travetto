@@ -12,6 +12,9 @@
     "fastify-compress": "^3.2.1",
     "fastify-formbody": "^4.0.3"
   },
+  "optionalPeerDependencies": {
+    "aws-lambda-fastify": "1.4.4"
+  },
   "title": "Fastify REST Source",
   "description": "Fastify provider for the travetto rest module.",
   "homepage": "https://travetto.io",

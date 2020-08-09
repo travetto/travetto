@@ -19,7 +19,7 @@ const getClass = <T>(o: T) => o.constructor as Class<T>;
 /**
  * Model Service, takes in a model source as provided by various db implementations
  */
-@Watchable('@travetto/model/support/watch.schema')
+@Watchable('@trv:model/schema')
 @Injectable()
 export class ModelService implements IModelSource {
 

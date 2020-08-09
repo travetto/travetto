@@ -7,6 +7,7 @@ import { Injectable } from '@travetto/di';
 import { RouteUtil, RestServer, ParamConfig, RouteConfig, RouteHandler, TRV_RAW } from '@travetto/rest';
 
 import { RouteStack } from './internal/types';
+import { EnvUtil } from '@travetto/boot';
 
 /**
  * An express rest server
@@ -62,12 +63,15 @@ export class ExpressRestServer extends RestServer<express.Application> {
 
     // Register options handler for each controller
     if (key !== RestServer.GLOBAL) {
-      const optionHandler = RouteUtil.createRouteHandler(this.interceptors,
+      const optionHandler = RouteUtil.createRouteHandler(
+        this.interceptors,
         {
-          method: 'options', path: '*',
+          method: 'options',
+          path: '*',
           handler: this.globalHandler as RouteHandler,
           params: [{ extract: (__, r: any) => r } as ParamConfig]
-        });
+        }
+      );
 
       router.options('*',
         // @ts-ignore
@@ -78,7 +82,9 @@ export class ExpressRestServer extends RestServer<express.Application> {
     this.raw.use(path, router);
 
     if (this.listening && key !== RestServer.GLOBAL) {
-      await this.unregisterGlobal();
+      if (!EnvUtil.isReadonly()) {
+        await this.unregisterGlobal();
+      }
       await this.registerGlobal();
     }
   }

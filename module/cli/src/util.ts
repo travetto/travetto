@@ -146,7 +146,10 @@ export class CliUtil {
       .then(res => value = res)
       .catch(e => err = e)
       .finally(() => done = true);
-    await Promise.race([sleep(delay), final]);
+
+    if (delay) {
+      await Promise.race([sleep(delay), final]);
+    }
 
     while (!done) {
       await writeLine(`${this.WAIT_STATE[i = (i + 1) % this.WAIT_STATE.length]} ${message}`);
