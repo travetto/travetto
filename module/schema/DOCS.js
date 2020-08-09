@@ -1,7 +1,7 @@
-const { doc: d, Section, SubSection, List, inp, lib, Code, Text, Execute, Note, Snippet, Mod, meth, Config } = require('@travetto/doc');
+const { doc: d, Section, SubSection, List, inp, lib, Code, Execute, Note, Snippet, Mod, meth, Config } = require('@travetto/doc');
 const {
   Field, Required, Enum, Trimmed, Match, MinLength, MaxLength,
-  Min, Max, Email, Telephone, Url, Ignore, Integer, Float, Currency, LongText
+  Min, Max, Email, Telephone, Url, Ignore, Integer, Float, Currency, LongText, Text
 } = require('./src/decorator/field');
 const { Schema } = require('./src/decorator/schema');
 const { Describe } = require('./src/decorator/common');

@@ -51,7 +51,7 @@ export class Session<T = any> implements CacheEntry {
   /**
    * The session data
    */
-  data: T;
+  data: T | undefined;
 
   /**
    * Create a new Session object given a partial version of itself

@@ -6,7 +6,6 @@ const { Session, SessionData, SessionEncoder } = require('.');
 const { RequetSessionEncoder } = require('./src/encoder/request');
 
 const Request = SnippetLink(`Request`, './src/types.d.ts', /interface Request/);
-const Response = SnippetLink(`Response`, './src/types.d.ts', /interface Response/);
 
 exports.text = d`
 

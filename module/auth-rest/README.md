@@ -18,7 +18,7 @@ The integration with the [RESTful API](https://github.com/travetto/travetto/tree
    *  Route declaration
 
 ## Security information management
-When working with framework's authentication, the user information is exposed via the [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11) 
+When working with framework's authentication, the user information is exposed via the [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) 
 object.  The auth functionality is exposed on the request as the property `auth`.
 
 **Code: Structure of auth property on the request**
@@ -70,10 +70,10 @@ export abstract class IdentitySource {
 }
 ```
 
-The only required method to be defined is the `authenticate` method.  This takes in a [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11) and [Response](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L87), and is responsible for:
+The only required method to be defined is the `authenticate` method.  This takes in a [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [Response](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), and is responsible for:
 
    
-   *  Returning an [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L26) if authentication was successful
+   *  Returning an [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L27) if authentication was successful
    *  Throwing an error if it failed
    *  Returning undefined if the authentication is multi-staged and has not completed yet
 A sample auth provider would look like:
@@ -159,4 +159,4 @@ export class SampleAuth {
 }
 ```
 
-[@Authenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L21) and [@Unauthenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L37) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, [AuthContext](https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11) is accessible via [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L44) directly, without wiring in a request object, but is also accessible on the request object as [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11).auth.
+[@Authenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L21) and [@Unauthenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L37) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, [AuthContext](https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11) is accessible via [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L44) directly, without wiring in a request object, but is also accessible on the request object as [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12).auth.

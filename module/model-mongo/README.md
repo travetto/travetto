@@ -124,5 +124,5 @@ export class MongoModelConfig {
 }
 ```
 
-and can be overridden via environment variables or config files, as defined in [Configuration](https://github.com/travetto/travetto/tree/master/module/config#readme "Environment-aware config management using yaml files").  The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts#L-1) path or just a standard file path.
+and can be overridden via environment variables or config files, as defined in [Configuration](https://github.com/travetto/travetto/tree/master/module/config#readme "Environment-aware config management using yaml files").  The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts#L17) path or just a standard file path.
 

@@ -12,7 +12,7 @@ This module provides the high-level backdrop for managing security principals.  
 
    
    *  Interfaces for standard security primitive
-   *  Patterns for producing a [Principal](./src/types.ts#L4)
+   *  Patterns for producing a [Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L5)
    *  Common security-related utilities for    
       *  Checking permissions
       *  Generating passwords
@@ -86,9 +86,9 @@ export class AuthContext<
 }
 ```
 
-As referenced above, a [Principal](./src/types.ts#L4) is defined as a user with respect to a security context.  This is generally understood to be the information that the application knows about a user, specifically the configuration the application has about a user.
+As referenced above, a [Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L5) is defined as a user with respect to a security context.  This is generally understood to be the information that the application knows about a user, specifically the configuration the application has about a user.
 
-Comparatively, [Identity](./src/types.ts#L26) is defined as an authenticated user session that can be provided by the application or derived from some other source.  In simpler systems the identity will be equal to the principal, but in systems where you support 3rd party logins (e.g. Google/Facebook/Twitter/etc.) your identity will be external to the system.
+Comparatively, [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L27) is defined as an authenticated user session that can be provided by the application or derived from some other source.  In simpler systems the identity will be equal to the principal, but in systems where you support 3rd party logins (e.g. Google/Facebook/Twitter/etc.) your identity will be external to the system.
 
 Overall, the structure is simple, but drives home the primary use cases of the framework.  The goals are:
    
