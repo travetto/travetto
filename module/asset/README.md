@@ -47,7 +47,7 @@ export class UserProfileService {
 
 ## Naming Strategies
 
-By default, the assets are stored by path, as specified in the [Asset](./src/types.ts#L5) object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
+By default, the assets are stored by path, as specified in the [Asset](https://github.com/travetto/travetto/tree/master/module/asset/src/types.ts#L6) object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
 
 The underlying contract for a [AssetNamingStrategy](https://github.com/travetto/travetto/tree/master/module/asset/src/naming.ts#L8) looks like:
 
@@ -68,7 +68,7 @@ By extending this, and making it [@Injectable](https://github.com/travetto/trave
 
 ## Advanced Usage
 
-In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the [Asset](./src/types.ts#L5) looks like:
+In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the [Asset](https://github.com/travetto/travetto/tree/master/module/asset/src/types.ts#L6) looks like:
 
 **Code: Asset Structure**
 ```typescript

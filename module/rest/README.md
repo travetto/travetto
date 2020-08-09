@@ -8,7 +8,7 @@
 npm install @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [Request](./src/types.d.ts#L11) and [Response](./src/types.d.ts#L87) objects). 
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [Response](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) objects). 
 
 ## Routes: Controller
 
@@ -89,7 +89,7 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
    *  [@Query](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L56) - Query params
    *  [@Body](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L68) - Request body (in it's entirety)
    *  [@Header](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L62) - Header values
-   *  [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L44) - Special values exposed (e.g. [Request](./src/types.d.ts#L11), [Response](./src/types.d.ts#L87), Session, AuthContext, etc.)
+   *  [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L44) - Special values exposed (e.g. [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12), [Response](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), Session, AuthContext, etc.)
 
 Each [@Param](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L31) can be configured to indicate:
    
@@ -293,7 +293,7 @@ export class SampleApp {
 And using the pattern established in the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module, you would run your program using ``.
 
 ## Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") by extending the [RestInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/interceptor.ts#L9) class.  The interceptors are tied to the defined [Request](./src/types.d.ts#L11) and [Response](./src/types.d.ts#L87) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") by extending the [RestInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/interceptor.ts#L9) class.  The interceptors are tied to the defined [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [Response](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
@@ -343,7 +343,7 @@ export class LoggingInterceptor extends RestInterceptor {
 Currently [Asset Rest Support](https://github.com/travetto/travetto/tree/master/module/asset-rest#readme "Provides integration between the travetto asset and rest module.") is implemented in this fashion, as well as [Rest Auth](https://github.com/travetto/travetto/tree/master/module/auth-rest#readme "Rest authentication integration support for the travetto framework").
 
 ## Cookie Support
-Express/Koa/Fastify all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [Request](./src/types.d.ts#L11)/[Response](./src/types.d.ts#L87) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+Express/Koa/Fastify all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12)/[Response](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 **Code: Sample Cookie Usage**
 ```typescript

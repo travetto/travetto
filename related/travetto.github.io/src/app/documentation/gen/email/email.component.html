@@ -13,7 +13,7 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/email</code></pre>     
       </figure>
 
-A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/email/src/transport.ts#L13">NullTransport</a> which will just drop emails. The structure of the API is derived from  <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a>, but is compatible with any library that can handle the <a target="_blank" class="source-link" href="src/types.ts#L36">MessageOptions</a> input.
+A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/email/src/transport.ts#L13">NullTransport</a> which will just drop emails. The structure of the API is derived from  <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a>, but is compatible with any library that can handle the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/email/src/types.ts#L37">MessageOptions</a> input.
 
 To expose the necessary email transport, the following pattern is commonly used:
 

@@ -10,7 +10,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/travetto/jwt"
+    "url": "https://github.com/travetto/travetto.git"
   },
   "keywords": [
     "jwt",
@@ -22,7 +22,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/travetto/jwt/issues"
+    "url": "https://github.com/travetto/travetto/issues"
   },
   "dependencies": {
     "@travetto/base": "^1.0.5",

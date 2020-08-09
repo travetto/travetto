@@ -5,7 +5,8 @@ import type { Renderer, AllChildren } from '../../src/render';
 
 const PRIMARY_BRANCH = EnvUtil.get('TRV_DOC_BRANCH') ||
   ExecUtil.execSync('git', ['status', '-b', '-s', '.']).split(/\n/)[0].split('...')[0].split(' ')[1].trim();
-const GIT_SRC_ROOT = `https://github.com/travetto/travetto/tree/${PRIMARY_BRANCH}`;
+const REPO = (require(`${FsUtil.cwd}/package.json`).repository?.url || '').split(/[.]git$/)[0];
+const GIT_SRC_ROOT = `${REPO}/tree/${PRIMARY_BRANCH}`;
 
 export class CliDocUtil {
   /**
@@ -26,6 +27,7 @@ export class CliDocUtil {
    * @param fmt
    */
   static async getRenderer(fmt: string) {
+    fmt = fmt.replace(/^[.]/, ''); // Strip leading .
     const { Renderers } = await import('../..');
     const renderer = Renderers[fmt as keyof typeof Renderers];
     if (!renderer) {
@@ -43,11 +45,7 @@ export class CliDocUtil {
     const { Header } = await import('../..');
     file = FsUtil.resolveUnix(file);
 
-    const doc: {
-      header?: boolean;
-      toc?: string;
-      text: AllChildren;
-    } = await import(file);
+    const doc: { header?: boolean, toc?: string, text: AllChildren } = await import(file);
     let content = '';
     if (doc.header !== false) {
       content = `${renderer.render(Header(FsUtil.cwd)).trim()}\n`;

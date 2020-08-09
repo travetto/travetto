@@ -76,7 +76,7 @@ Create the file <code class="item path">src/model.ts</code>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-as you can see, the model structure is simple.  Everything that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/registry/decorator.ts#L12">@Model</a> services needs to implement <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/model/core.ts">ModelCore</a>.
+as you can see, the model structure is simple.  Everything that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/registry/decorator.ts#L12">@Model</a> services needs to implement <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/model/core.ts#L1">ModelCore</a>.
 
 <h2 id="building-the-service-layer">Building the Service Layer</h2>
 
@@ -302,8 +302,8 @@ First we must start the application:
       </figcaption>
       <pre><code class="language-bash">$ /bin/bash alt/docs/bin/startup.sh
 
-<span class="token number">2020</span>-08-09T04:52:48.929Z info  <span class="token punctuation">[</span>./node_modules/@travetto/app/src/registry.ts:32<span class="token punctuation">]</span> Running application rest @travetto/rest/support/application.rest.ts
-<span class="token number">2020</span>-08-09T04:52:48.933Z info  <span class="token punctuation">[</span>./node_modules/@travetto/app/src/registry.ts:33<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
+<span class="token number">2020</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>./node_modules/@travetto/app/src/registry.ts:32<span class="token punctuation">]</span> Running application rest @travetto/rest/support/application.rest.ts
+<span class="token number">2020</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>./node_modules/@travetto/app/src/registry.ts:33<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
   app: <span class="token punctuation">{{'{'}}</span>
     watch: true,
     readonly: false,
@@ -327,7 +327,7 @@ First we must start the application:
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2020</span>-08-09T04:52:48.957Z info  <span class="token punctuation">[</span>./node_modules/@travetto/rest/src/server/server.ts:187<span class="token punctuation">]</span> Listening on <span class="token number">3000</span></code></pre>     
+<span class="token number">2020</span>-03-14T04:00:01.510Z info  <span class="token punctuation">[</span>./node_modules/@travetto/rest/src/server/server.ts:187<span class="token punctuation">]</span> Listening on <span class="token number">3000</span></code></pre>     
       </figure> 
 
 next, let's execute <a target="_blank" class="external-link" href="https://curl.haxx.se/">curl</a> requests to interact with the new api
@@ -347,8 +347,8 @@ next, let's execute <a target="_blank" class="external-link" href="https://curl.
 
 <span class="token punctuation">{{'{'}}</span>
   <span class="token string">"text"</span><span class="token builtin class-name">:</span> <span class="token string">"New Todo"</span>,
-  <span class="token string">"created"</span><span class="token builtin class-name">:</span> <span class="token string">"2020-08-09T04:52:53.936Z"</span>,
-  <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"5f2f8125070430c68eb1df71"</span>
+  <span class="token string">"created"</span><span class="token builtin class-name">:</span> <span class="token string">"2020-03-14T04:00:02.450Z"</span>,
+  <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"422e793aed76ee063d13feec"</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -367,9 +367,9 @@ next, let's execute <a target="_blank" class="external-link" href="https://curl.
 
 <span class="token punctuation">[</span>
   <span class="token punctuation">{{'{'}}</span>
-    <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"5f2f8125070430c68eb1df71"</span>,
+    <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"422e793aed76ee063d13feec"</span>,
     <span class="token string">"text"</span><span class="token builtin class-name">:</span> <span class="token string">"New Todo"</span>,
-    <span class="token string">"created"</span><span class="token builtin class-name">:</span> <span class="token string">"2020-08-09T04:52:53.936Z"</span>
+    <span class="token string">"created"</span><span class="token builtin class-name">:</span> <span class="token string">"2020-03-14T04:00:02.625Z"</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">]</span></code></pre>     
       </figure>

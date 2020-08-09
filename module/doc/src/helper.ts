@@ -19,22 +19,8 @@ export function doc(values: TemplateStringsArray, ...keys: (AllChildren | { ᚕf
   return out.length === 1 ? out[0] : n.Group(out);
 }
 
-export function inp(values: TemplateStringsArray) {
-  return n.Input(values[0]);
-}
-
-export function pth(values: TemplateStringsArray) {
-  return n.Path(values[0]);
-}
-
-export function fld(values: TemplateStringsArray) {
-  return n.Field(values[0]);
-}
-
-export function cls(values: TemplateStringsArray) {
-  return n.Class(values[0]);
-}
-
-export function meth(values: TemplateStringsArray) {
-  return n.Method(values[0]);
-}
+export const inp = (values: TemplateStringsArray) => n.Input(values[0]);
+export const pth = (values: TemplateStringsArray) => n.Path(values[0]);
+export const fld = (values: TemplateStringsArray) => n.Field(values[0]);
+export const cls = (values: TemplateStringsArray) => n.Class(values[0]);
+export const meth = (values: TemplateStringsArray) => n.Method(values[0]);

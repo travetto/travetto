@@ -95,11 +95,11 @@ A sample of all services available to the entire framework:
 Service          Version    Status
 ----------------------------------------------
 
- * elasticsearch      7.4.0    Running 35ee3daa77a9
- * mongodb              3.6    Running 4368511021c5
- * redis                  5    Running 8f76f1b9b0b7
- * postgresql          12.2    Running 1f7f5a0e2446
- * mysql                5.6    Running 03c40fd294d3
+ * elasticsearch      7.4.0    Running 93af422e793a
+ * mongodb              3.6    Running ed76ee063d13
+ * mysql                5.6    Running feec2e5e95b4
+ * postgresql          12.2    Running 5513eba6734e
+ * redis                  5    Running 307bc66d442a
 ```
 
 ### Defining new Services

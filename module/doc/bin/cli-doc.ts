@@ -1,5 +1,6 @@
 import * as commander from 'commander';
 import * as fs from 'fs';
+import * as path from 'path';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { CliDocUtil } from './lib/util';
 
@@ -22,8 +23,7 @@ export class DocPlugin extends BasePlugin {
     if (this._cmd.output) {
 
       const writers = await Promise.all((this._cmd.output as string[]).map(async (out) => {
-        const fmt = out.includes('.') ? out.split('.').pop()! : this._cmd.format;
-        const renderer = await CliDocUtil.getRenderer(fmt);
+        const renderer = await CliDocUtil.getRenderer(path.extname(out) ?? this._cmd.format);
         const finalName = await CliDocUtil.getOutputLoc(out);
         return { renderer, finalName };
       }));

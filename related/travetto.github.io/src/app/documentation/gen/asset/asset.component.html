@@ -56,7 +56,7 @@ Reading of and writing assets uses the <a target="_blank" class="source-link" hr
 
 <h2 id="naming-strategies">Naming Strategies</h2>
 
-By default, the assets are stored by path, as specified in the <a target="_blank" class="source-link" href="./src/types.ts#L5">Asset</a> object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
+By default, the assets are stored by path, as specified in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/asset/src/types.ts#L6">Asset</a> object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
 
 The underlying contract for a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/asset/src/naming.ts#L8">AssetNamingStrategy</a> looks like:
 
@@ -79,7 +79,7 @@ By extending this, and making it <a target="_blank" class="source-link" href="ht
 
 <h2 id="advanced-usage">Advanced Usage</h2>
 
-In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the <a target="_blank" class="source-link" href="./src/types.ts#L5">Asset</a> looks like:
+In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/asset/src/types.ts#L6">Asset</a> looks like:
 
       <figure class="code">
       <figcaption class="code">Asset Structure
