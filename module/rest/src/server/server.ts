@@ -9,6 +9,7 @@ import { RestConfig } from './config';
 import { RouteUtil } from '../util/route';
 import { RestInterceptor } from '../interceptor/interceptor';
 import { ControllerRegistry } from '../registry/registry';
+import { EnvUtil } from '@travetto/boot';
 
 /**
  * The rest server
@@ -138,6 +139,11 @@ export abstract class RestServer<T = any> {
    * @param c The class to register
    */
   async registerController(c: Class) {
+    if (this.listening && EnvUtil.isReadonly()) {
+      console.warn('Reloading not supported in readonly mode');
+      return;
+    }
+
     const config = ControllerRegistry.get(c);
     config.instance = await DependencyRegistry.getInstance(config.class);
 
@@ -155,6 +161,11 @@ export abstract class RestServer<T = any> {
    * @param c The class to unregister
    */
   async unregisterController(c: Class) {
+    if (this.listening && EnvUtil.isReadonly()) {
+      console.warn('Unloading not supported in readonly mode');
+      return;
+    }
+
     await this.unregisterRoutes(c.ᚕid);
   }
 
@@ -162,6 +173,11 @@ export abstract class RestServer<T = any> {
    * Register the global listener as a hardcoded path
    */
   async registerGlobal() {
+    if (this.listening && EnvUtil.isReadonly()) {
+      console.warn('Reloading not supported in readonly mode');
+      return;
+    }
+
     const route: RouteConfig = {
       params: [{ extract: (c: any, r: any) => r } as ParamConfig],
       instance: {},
@@ -176,6 +192,11 @@ export abstract class RestServer<T = any> {
    * Remove the global listener
    */
   async unregisterGlobal() {
+    if (this.listening && EnvUtil.isReadonly()) {
+      console.warn('Unloading not supported in readonly mode');
+      return;
+    }
+
     await this.unregisterRoutes(RestServer.GLOBAL);
   }
 

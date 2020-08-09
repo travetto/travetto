@@ -12,4 +12,7 @@ ${Section('Default Middleware')}
 When working with an ${lib.Koa} applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
 
 ${Snippet('Configured Middleware', './src/server.ts', /const app\s*=/, /bodyParser/i)}
+
+${Section('Extension - AWS Lambda')}
+The ${lib.Koa} module supports integration with ${lib.AwsServerlessExpress} when installed.  This produces an instance of ${RestServer} that is able to integrate with AWS appropriately.
 `;

@@ -9,11 +9,8 @@ exports.handler = async (event, context) => {
     await DependencyRegistry.init();
 
     const { RestServer } = require('@travetto/rest');
-    const server = await DependencyRegistry.getInstance(RestServer);
-    await server.run();
-
-    inst = server['app'];
-    await new Promise(resolve => setTimeout(resolve, 100));
+    inst = await DependencyRegistry.getInstance(RestServer, Symbol.for('@trv:rest/aws-lambda'));
+    await inst.run();
   }
-  return new Promise(resolve => inst.handle(event, { ...context, succeed: resolve }));
+  return inst.handle(event, context);
 };

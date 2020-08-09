@@ -66,9 +66,9 @@ export class KoaServerUtil {
             ctx.res.end(); // Only end on redirect
           }
         },
-        setHeader: ctx.response.set.bind(ctx),
-        getHeader: ctx.response.get.bind(ctx),
-        removeHeader: ctx.response.remove.bind(ctx),
+        setHeader: ctx.response.set.bind(ctx.response),
+        getHeader: ctx.response.get.bind(ctx.response),
+        removeHeader: ctx.response.remove.bind(ctx.response),
         write: ctx.res.write.bind(ctx.res),
         cookies: ctx.cookies,
       });

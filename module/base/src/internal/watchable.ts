@@ -4,7 +4,7 @@ import { EnvUtil } from '@travetto/boot';
  * Denotes a class is watchable, and can optionally be upgraded
  * if watch mode is on
  */
-export function Watchable(mod: string): ClassDecorator {
+export function Watchable(key: string): ClassDecorator {
   return (target: any) => {
     if (EnvUtil.isWatch()) {
       try {
@@ -12,7 +12,9 @@ export function Watchable(mod: string): ClassDecorator {
       } catch {
         return;
       }
-      return require(mod).watch(target);
+      const [, mod, sub] = key.match(/@trv:([^/]+)\/(.*)/) ?? [];
+      const full = `@travetto/${mod}/support/watch.${sub}`;
+      return require(full).watch(target);
     }
   };
 }

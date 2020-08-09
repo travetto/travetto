@@ -1,7 +1,7 @@
-import { IncomingMessage } from 'http';
-import * as fastify from 'fastify';
+import * as https from 'https';
+import { FastifyInstance, fastify, FastifyServerOptions, FastifyHttpsOptions } from 'fastify';
 
-import { AppUtil } from '@travetto/app';
+import { ApplicationHandle, AppUtil } from '@travetto/app';
 import { RouteConfig, RestServer } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
@@ -11,15 +11,15 @@ import { FastifyServerUtil } from './internal/util';
  * Fastify-based rest server
  */
 @Injectable()
-export class FastifyRestServer extends RestServer<fastify.FastifyInstance> {
+export class FastifyRestServer extends RestServer<FastifyInstance> {
 
   /**
    * Build the fastify server
    */
   async createRaw() {
-    const fastConf: any = {};
+    const fastConf: FastifyServerOptions = {};
     if (this.config.ssl.active) {
-      fastConf.https = await this.config.getKeys();
+      (fastConf as FastifyHttpsOptions<https.Server>).https = (await this.config.getKeys())!;
     }
     if (this.config.trustProxy) {
       fastConf.trustProxy = true;
@@ -28,9 +28,7 @@ export class FastifyRestServer extends RestServer<fastify.FastifyInstance> {
     const app = fastify(fastConf);
     app.register(require('fastify-compress'));
     app.register(require('fastify-formbody'));
-    app.addContentTypeParser('multipart/form-data;', (req: IncomingMessage, done: (err: Error | null, body?: any) => void) => {
-      done(null);
-    });
+    app.addContentTypeParser('multipart/form-data;', (_r, _p, done) => done(null));
 
     return app;
   }
@@ -65,11 +63,11 @@ export class FastifyRestServer extends RestServer<fastify.FastifyInstance> {
     }
   }
 
-  async listen() {
+  async listen(): Promise<ApplicationHandle> {
     await this.raw.listen(this.config.port, this.config.bindAddress);
     return {
       ...AppUtil.listenToCloseable(this.raw.server),
-      close: this.raw.close.bind(this.raw)
+      close: this.raw.close.bind(this.raw) as any as () => Promise<void>
     };
   }
 }

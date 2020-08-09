@@ -4,7 +4,7 @@ import { ResourceManager, Util, AppManifest } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 type Prim = number | string | boolean | null;
-export type Nested = { [key: string]: Prim | Nested | Nested[] };
+export type Nested = { [key: string]: Prim | Prim[] | Nested };
 
 /**
  * Simple Config Utilities

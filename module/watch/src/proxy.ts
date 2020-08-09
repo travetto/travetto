@@ -1,4 +1,4 @@
-const IS_PROXIED = Symbol.for('@travetto/watch:proxy');
+const IS_PROXIED = Symbol.for('@trv:watch/proxy');
 
 /**
  * Handler for for proxying modules while watching

@@ -37,7 +37,7 @@
     "index.ts",
     "src",
     "support",
-    "config"
+    "test/lib"
   ],
   "name": "@travetto/rest",
   "repository": {

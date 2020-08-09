@@ -170,4 +170,13 @@ SSL support can be enabled by setting ${inp`rest.ssl.active: true`} in your conf
 
 ${Section('Full Config')}
 The entire ${RestConfig} which will show the full set of valid configuration parameters for the rest module.
+
+${Section('Serverless')}
+${SubSection('AWS Lambda')}
+
+The module provides support basic support with AWS lambdas. When using one of the specific rest modules (e.g. ${Mod('rest-express')}), you can install the appropriate lambda-related dependencies installed (e.g. ${lib.AwsServerlessExpress}) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers. 
+
+${Section('Packaging Lambdas')}
+
+${Execute('Invoking a Package Build', 'travetto', ['pack', 'rest/lambda', '-h'])}
 `;
