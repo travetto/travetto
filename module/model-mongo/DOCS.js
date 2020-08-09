@@ -2,7 +2,7 @@ const { doc: d, lib, Mod, Code, inp, SnippetLink } = require('@travetto/doc');
 const { ModelSource } = require('@travetto/model/src/service/source');
 const { MongoModelConfig } = require('./src/config');
 
-const ResourceManager = SnippetLink('ResourceManager', '@travetto/base/src/resource.ts', /class $Resource/);
+const ResourceManager = SnippetLink('ResourceManager', '@travetto/base/src/resource.ts', /class [$]Resource/);
 
 exports.text = d`
 This module provides an ${lib.MongoDB}-based implementation of ${ModelSource} for the ${Mod('model')}.  This source allows the ${Mod('model')} module to read, write and query against ${lib.MongoDB}.. Given the dynamic nature of ${lib.MongoDB}, during development when models are modified, nothing needs to be done to adapt to the latest schema.

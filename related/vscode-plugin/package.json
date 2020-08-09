@@ -18,7 +18,7 @@
     "name": "Travetto Framework"
   },
   "repository": {
-    "url": "https://github.com/travetto/vscode-plugin.git"
+    "url": "https://github.com/travetto/travetto.git"
   },
   "engines": {
     "vscode": "^1.44.0"

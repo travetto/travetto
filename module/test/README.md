@@ -143,7 +143,7 @@ In addition to the standard operations, there is support for throwing/rejecting 
        });
    
        assert.doesNotThrow(() => {
-         // eslint-disable-next-line
+   
          let a = 5;
        });
      }
@@ -170,7 +170,7 @@ In addition to the standard operations, there is support for throwing/rejecting 
        });
    
        await assert.doesNotReject(async () => {
-         // eslint-disable-next-line
+   
          let a = 5;
        });
      }

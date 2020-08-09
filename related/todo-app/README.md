@@ -71,7 +71,7 @@ export class TodoSearch {
 }
 ```
 
-as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/master/module/model/src/registry/decorator.ts#L12) services needs to implement [ModelCore](https://github.com/travetto/travetto/tree/master/module/model/src/model/core.ts).
+as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/master/module/model/src/registry/decorator.ts#L12) services needs to implement [ModelCore](https://github.com/travetto/travetto/tree/master/module/model/src/model/core.ts#L1).
 
 ## Building the Service Layer
 
@@ -288,8 +288,8 @@ First we must start the application:
 ```bash
 $ /bin/bash alt/docs/bin/startup.sh
 
-2020-08-09T04:52:48.929Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
-2020-08-09T04:52:48.933Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
+2020-03-14T04:00:00.618Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
+2020-03-14T04:00:00.837Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
   app: {
     watch: true,
     readonly: false,
@@ -313,7 +313,7 @@ $ /bin/bash alt/docs/bin/startup.sh
     }
   }
 }
-2020-08-09T04:52:48.957Z info  [./node_modules/@travetto/rest/src/server/server.ts:187] Listening on 3000
+2020-03-14T04:00:01.510Z info  [./node_modules/@travetto/rest/src/server/server.ts:187] Listening on 3000
 ```
  
 
@@ -330,8 +330,8 @@ $ sh alt/docs/bin/create.sh
 
 {
   "text": "New Todo",
-  "created": "2020-08-09T04:52:53.936Z",
-  "id": "5f2f8125070430c68eb1df71"
+  "created": "2020-03-14T04:00:02.450Z",
+  "id": "422e793aed76ee063d13feec"
 }
 ```
 
@@ -346,9 +346,9 @@ $ sh alt/docs/bin/list.sh
 
 [
   {
-    "id": "5f2f8125070430c68eb1df71",
+    "id": "422e793aed76ee063d13feec",
     "text": "New Todo",
-    "created": "2020-08-09T04:52:53.936Z"
+    "created": "2020-03-14T04:00:02.625Z"
   }
 ]
 ```

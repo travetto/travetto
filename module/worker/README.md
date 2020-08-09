@@ -11,9 +11,9 @@ npm install @travetto/worker
 This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc (inter-process communication) functionality out of the box. This module builds upon that by providing enhanced event management, richer process management, as well as constructs for orchestrating a conversation between two processes.
 
 ## Execution Pools
-With respect to managing multiple executions, [WorkPool](https://github.com/travetto/travetto/tree/master/module/worker/src/pool.ts#L23) is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various [InputSource](src/input/types.ts#L3) implementation that allow for a wide range of use cases.
+With respect to managing multiple executions, [WorkPool](https://github.com/travetto/travetto/tree/master/module/worker/src/pool.ts#L23) is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various [InputSource](https://github.com/travetto/travetto/tree/master/module/worker/src/input/types.ts#L4) implementation that allow for a wide range of use cases.
 
-The only provided [InputSource](src/input/types.ts#L3) is the [IterableInputSource](https://github.com/travetto/travetto/tree/master/module/worker/src/input/iterable.ts#L11) which supports all `Iterable` and `Iterator` sources.  Additionally, the module provides [DynamicAsyncIterator](https://github.com/travetto/travetto/tree/master/module/worker/src/input/async-iterator.ts#L6) which allows for manual control of iteration, which is useful for event driven work loads.
+The only provided [InputSource](https://github.com/travetto/travetto/tree/master/module/worker/src/input/types.ts#L4) is the [IterableInputSource](https://github.com/travetto/travetto/tree/master/module/worker/src/input/iterable.ts#L11) which supports all `Iterable` and `Iterator` sources.  Additionally, the module provides [DynamicAsyncIterator](https://github.com/travetto/travetto/tree/master/module/worker/src/input/async-iterator.ts#L6) which allows for manual control of iteration, which is useful for event driven work loads.
 
 Below is a pool that will convert images on demand, while queuing as needed.
 

@@ -1,7 +1,7 @@
 const { doc: d, inp, Ref, Section, Code, Note, SubSection, lib } = require('@travetto/doc');
 const { Injectable, InjectableFactory, Inject } = require('./src/decorator');
 const { Config } = require('@travetto/config');
-const { $DependencyRegistry } = require('./src/registry');
+const { DependencyRegistry } = require('./src/registry');
 
 exports.text = d`
 ${lib.DependencyInjection} is a framework primitive.  When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of ${lib.Typescript} and type erasure of interfaces, dependency injection only supports ${inp`class`}es as type signafiers. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.
@@ -61,7 +61,7 @@ ${Code(d`Example Multiple Candiate Types`, 'alt/docs/src/injectable-multiple-pri
 
 ${Section('Manual Invocation')}
 
-Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the ${Ref('DependencyRegistry', $DependencyRegistry.ᚕfile)}. The registry allows for requesting a dependency by class reference:
+Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the ${Ref('DependencyRegistry', DependencyRegistry.constructor.ᚕfile)}. The registry allows for requesting a dependency by class reference:
 
 ${Code(d`Example of Manual Lookup`, 'alt/docs/src/injectable-manual.ts')}
 `;
