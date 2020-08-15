@@ -1,5 +1,6 @@
 // @ts-ignore
 import * as Mod from 'module';
+import * as path from 'path';
 
 import { FsUtil } from './fs';
 import { ScanFs } from './scan';
@@ -13,6 +14,16 @@ type Module = {
 } & Mod;
 
 const Module = Mod as any as Module;
+type DepResolveConfig = { root?: string, types?: DepType[] | (readonly DepType[]), maxDepth?: number };
+type DepType = 'prod' | 'dev' | 'opt' | 'peer' | 'optPeer';
+
+const DEP_MAPPING = {
+  prod: 'dependencies',
+  dev: 'devDependencies',
+  opt: 'optionalDependencies',
+  peer: 'peerDependencies',
+  optPeer: 'optionalPeerDependencies'
+};
 
 // Pre installation of resolution rules
 const pkg = (() => { try { return require(FsUtil.resolveUnix('package.json')); } catch { return {}; } })();
@@ -37,7 +48,7 @@ export class FrameworkUtil {
     if (mod) {
       try {
         pth = Module._resolveFilename!(pth, mod);
-      } catch{ }
+      } catch { }
     }
 
     pth = FsUtil.toUnix(pth);
@@ -87,5 +98,68 @@ export class FrameworkUtil {
     }, base);
 
     return out;
+  }
+
+  static async resolveDependencyPackageJson(dep: string, root: string) {
+    const paths = [root, ...(require.resolve.paths(root) || [])];
+    let folder: string;
+    try {
+      folder = require.resolve(`${dep}/package.json`, { paths });
+      folder = path.dirname(FsUtil.resolveUnix(root, folder));
+    } catch {
+      folder = require.resolve(dep, { paths });
+      folder = path.dirname(FsUtil.resolveUnix(root, folder));
+      while (!(await FsUtil.exists(`${folder}/package.json`))) {
+        const next = path.dirname(folder);
+        if (folder === next) {
+          throw new Error(`Unable to resolve dependency: ${dep}`);
+        }
+        folder = next;
+      }
+    }
+    return folder;
+  }
+
+  /**
+   * Get list of all production dependencies and their folders, for a given package
+   */
+  static async resolveDependencies({
+    root = FsUtil.cwd,
+    types = ['prod'],
+    maxDepth = Number.MAX_SAFE_INTEGER
+  }: DepResolveConfig) {
+    // Copy over prod node_modules
+    const pending = [[root, 0]] as [string, number][];
+    const foundSet = new Set<string>();
+    const found: { file: string, type: DepType, dep: string }[] = [];
+    while (pending.length) {
+      const [top, depth] = pending.shift()!;
+      if (depth > maxDepth) { // Ignore if greater than valid max depth
+        continue;
+      }
+      const p = require(`${top}/package.json`) as Record<string, Record<string, string>> & { name: string };
+      const deps = [];
+      for (const k of types) {
+        if (k !== 'dev' || (process.env.TRV_DEV && p.name.startsWith('@travetto')) || maxDepth === 0) {
+          deps.push(...Object.keys(p[DEP_MAPPING[k]] ?? {}).map(d => [d, k] as const));
+        }
+      }
+      for (const [dep, mode] of deps) {
+        try {
+          const resolved = this.resolvePath(await this.resolveDependencyPackageJson(dep, top));
+
+          if (!foundSet.has(resolved)) {
+            foundSet.add(resolved);
+            found.push({ file: resolved, type: mode, dep });
+            pending.push([resolved, depth + 1]);
+          }
+        } catch (err) {
+          if (!dep.startsWith('@types') && mode !== 'opt' && mode !== 'optPeer') {
+            console.error('Unable to resolve', dep);
+          }
+        }
+      }
+    }
+    return found;
   }
 }

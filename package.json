@@ -10,13 +10,13 @@
 	"license": "MIT",
 	"scripts": {
 		"lint": "npx eslint --ignore-pattern '**/*.spec.ts' --ignore-pattern '**/out/**' --ignore-pattern '**/api-client/**' --ignore-pattern '**/build/**' --ignore-pattern '**/dist/**' --ignore-pattern '**/node_modules/**' --ext .js --ext .ts .",
-		"init": "./bin/run.sh dev-init/index",
+		"init": "./bin/run.sh dev-init",
 		"docs": "./bin/docs/gen.sh",
-		"prepare": "cd module/boot; npm run prepare",
 		"reinit": "rm -rf node_modules/; npm i; npm run init",
 		"service": "./bin/test/resources.sh",
 		"test": "cd module/base; npx trv test:lerna",
-		"boot": "cd module/boot/src-ts; tsc -w -p ."
+		"prepare": "cd module/boot; npm run prepare",
+		"boot": "cd module/boot; npm run watch"
 	},
 	"devDependencies": {
 		"@types/faker": "^4.1.12",

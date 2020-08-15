@@ -1,10 +1,8 @@
 import * as fs from 'fs';
-import * as util from 'util';
 import * as path from 'path';
 import { ExecUtil } from './exec';
 
-const fsStat = util.promisify(fs.stat);
-const fsMkdir = util.promisify(fs.mkdir);
+const fsp = fs.promises;
 
 /**
  * Standard utils for interacting with the file system
@@ -96,7 +94,7 @@ export class FsUtil {
    * @param f The file to check
    */
   static exists(f: string) {
-    return fsStat(f).catch(() => undefined);
+    return fsp.stat(f).catch(() => undefined);
   }
 
   /**
@@ -105,10 +103,10 @@ export class FsUtil {
    */
   static async mkdirp(pth: string) {
     try {
-      await fsStat(pth);
+      await fsp.stat(pth);
     } catch (e) {
       await this.mkdirp(path.dirname(pth));
-      await fsMkdir(pth);
+      await fsp.mkdir(pth);
     }
   }
 
@@ -172,5 +170,18 @@ export class FsUtil {
    */
   static maxTime(stat: fs.Stats) {
     return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
+  }
+
+  /**
+   * Symlink, with some platform specific support
+   */
+  static async symlink(actual: string, linkPath: string) {
+    try {
+      await fsp.lstat(linkPath);
+    } catch (e) {
+      const file = (await fsp.stat(actual)).isFile();
+      await fsp.symlink(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
+      await fsp.lstat(linkPath); // Ensure created
+    }
   }
 }
