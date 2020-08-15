@@ -4,11 +4,11 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/compiler": "^1.0.5",
-    "@travetto/registry": "^1.0.5",
-    "@travetto/watch": "^1.0.6",
-    "@travetto/worker": "^1.0.5",
-    "@travetto/yaml": "^1.0.5"
+    "@travetto/compiler": "^1.1.0-alpha.0",
+    "@travetto/registry": "^1.1.0-alpha.0",
+    "@travetto/watch": "^1.1.0-alpha.0",
+    "@travetto/worker": "^1.1.0-alpha.0",
+    "@travetto/yaml": "^1.1.0-alpha.0"
   },
   "title": "Testing",
   "description": "Declarative test framework",
@@ -33,5 +33,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.0.7"
+  "version": "1.1.0-alpha.0"
 }
