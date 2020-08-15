@@ -1,4 +1,4 @@
-.vscode/
+**/.vscode
 **/.trv*
 **/.DS_STORE
 lerna-debug.log
@@ -9,7 +9,6 @@ bin/test/error.ts
 **/build/**
 **/node_modules/**
 **/npm-debug.log
-**/package-lock.json
 **/*.lerna_backup
 **/api-client/**
 sample/dummy/**
