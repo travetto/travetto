@@ -2,12 +2,12 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 
+import { EnvUtil } from '@travetto/boot';
 import { AppUtil } from '@travetto/app';
 import { Injectable } from '@travetto/di';
 import { RouteUtil, RestServer, ParamConfig, RouteConfig, RouteHandler, TRV_RAW } from '@travetto/rest';
 
 import { RouteStack } from './internal/types';
-import { EnvUtil } from '@travetto/boot';
 
 /**
  * An express rest server

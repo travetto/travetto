@@ -218,7 +218,7 @@ export class Transpiler {
   reset() {
     this.transformerManager.reset();
     this.contents.clear();
-    this.rootNames.clear();
+    // this.rootNames.clear();
     this.sources.clear();
     this.hashes.clear();
     delete this.program;
