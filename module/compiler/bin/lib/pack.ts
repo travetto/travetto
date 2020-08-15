@@ -2,6 +2,7 @@ import * as path from 'path';
 import { promises as fs } from 'fs';
 
 import { ExecUtil, FsUtil, ScanFs } from '@travetto/boot';
+import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { color } from '@travetto/cli/src/color';
 import { Util } from '@travetto/base/src/util';
 import { YamlUtil } from '@travetto/yaml';
@@ -108,47 +109,6 @@ export class PackUtil {
     return config as Config;
   }
 
-  /**
-   * Get list of all production dependencies and their folders
-   */
-  static async getProdDeps() {
-    // Copy over prod node_modules
-    const pending = [FsUtil.cwd];
-    const foundSet = new Set<string>();
-    const found = [];
-    while (pending.length) {
-      const top = pending.shift()!;
-      const pkg = require(`${top}/package.json`) as Record<string, Record<string, string>>;
-      const { dependencies: deps, optionalDependencies: opts, optionalPeerDependencies: optPeer } = pkg;
-      for (const dep of Object.keys({ ...deps, ...opts, ...optPeer })) {
-        try {
-          let resolved = FsUtil.resolveUnix(top, require.resolve(dep, {
-            paths: [top, ...(require.resolve.paths(top) || [])]
-          }));
-          while (!(await FsUtil.exists(`${resolved}/package.json`))) {
-            const prev = resolved;
-            resolved = path.dirname(resolved);
-            if (resolved === prev) {
-              throw new Error('Unable to resolve dependency');
-            }
-          }
-          if (path.dirname(resolved).endsWith('@travetto')) {
-            resolved = resolved.replace(/node_modules.*@travetto/, 'node_modules/@travetto');
-          }
-          if (!foundSet.has(resolved)) {
-            foundSet.add(resolved);
-            found.push(resolved);
-            pending.push(resolved);
-          }
-        } catch (err) {
-          if (!dep.startsWith('@types') && !optPeer[dep]) {
-            throw err;
-          }
-        }
-      }
-    }
-    return found;
-  }
 
   /**
    * Copy over files by instruction, folders first then individual
@@ -365,7 +325,7 @@ export class PackUtil {
     await CompileCliUtil.compile(`${workspace}/cache`);
 
     await withMessage('Copying Node Modules', async () => {
-      const deps = await this.getProdDeps();
+      const deps = (await FrameworkUtil.resolveDependencies({ types: ['prod', 'opt'] })).map(x => x.file);
       await this.copyNodeModules(workspace, deps);
     });
 

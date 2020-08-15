@@ -40,6 +40,7 @@
   "scripts": {
     "postinstall": "node bin/plugin-postinstall",
     "prepare": "cd src-ts; tsc --project .",
+    "watch": "cd src-ts; tsc -w -p .",
     "clean": "rm -f src/"
   },
   "version": "1.0.7"
