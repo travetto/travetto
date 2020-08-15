@@ -1,8 +1,8 @@
-import * as fs from 'fs';
+import * as fss from 'fs';
 import * as path from 'path';
 import { ExecUtil } from './exec';
 
-const fsp = fs.promises;
+const fs = fss.promises;
 
 /**
  * Standard utils for interacting with the file system
@@ -83,7 +83,7 @@ export class FsUtil {
    */
   static existsSync(f: string) {
     try {
-      return fs.statSync(f);
+      return fss.statSync(f);
     } catch {
       return undefined;
     }
@@ -94,7 +94,7 @@ export class FsUtil {
    * @param f The file to check
    */
   static exists(f: string) {
-    return fsp.stat(f).catch(() => undefined);
+    return fs.stat(f).catch(() => undefined);
   }
 
   /**
@@ -103,10 +103,10 @@ export class FsUtil {
    */
   static async mkdirp(pth: string) {
     try {
-      await fsp.stat(pth);
+      await fs.stat(pth);
     } catch (e) {
       await this.mkdirp(path.dirname(pth));
-      await fsp.mkdir(pth);
+      await fs.mkdir(pth);
     }
   }
 
@@ -116,10 +116,10 @@ export class FsUtil {
    */
   static mkdirpSync(pth: string) {
     try {
-      fs.statSync(pth);
+      fss.statSync(pth);
     } catch (e) {
       this.mkdirpSync(path.dirname(pth));
-      fs.mkdirSync(pth);
+      fss.mkdirSync(pth);
     }
   }
 
@@ -168,7 +168,7 @@ export class FsUtil {
   /**
    * Find latest timestamp between creation and modification
    */
-  static maxTime(stat: fs.Stats) {
+  static maxTime(stat: fss.Stats) {
     return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
   }
 
@@ -177,11 +177,11 @@ export class FsUtil {
    */
   static async symlink(actual: string, linkPath: string) {
     try {
-      await fsp.lstat(linkPath);
+      await fs.lstat(linkPath);
     } catch (e) {
-      const file = (await fsp.stat(actual)).isFile();
-      await fsp.symlink(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
-      await fsp.lstat(linkPath); // Ensure created
+      const file = (await fs.stat(actual)).isFile();
+      await fs.symlink(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
+      await fs.lstat(linkPath); // Ensure created
     }
   }
 }

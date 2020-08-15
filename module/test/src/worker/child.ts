@@ -6,10 +6,13 @@ import { Events, RunEvent } from './types';
 
 const FIXED_MODULES = new Set([
   //  'cache', 'openapi',
-  'boot', 'base', 'cli', 'config', 'compiler', 'yaml',
-  'worker', 'command', 'log', 'net', 'jwt', 'image', 'test',
-  'transformer'
   // 'registry'
+  'boot', 'base', 'cli',
+  'compiler', 'transformer',
+  'config', 'yaml',
+  'worker', 'command',
+  'log', 'jwt', 'image',
+  'test',
 ].map(x => `@travetto/${x}`));
 
 /**
@@ -71,17 +74,20 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   async resetForRun() {
     // Clear require cache of all data loaded minus base framework pieces
     console.debug('Resetting', Object.keys(require.cache).length);
-    const paths = ScanApp.getPaths(AppManifest.roots).filter(x => !FIXED_MODULES.has(x));
-    for (const { file } of ScanApp.findFiles({ paths, includeIndex: true })) {
-      if (!/support\/(transformer|phase)[.]/.test(file)) {
-        console.debug(`[${process.pid}]`, 'Unloading', file);
-        this.compiler.unload(file);
-      }
-    }
 
     // Reload registries, test and root
     await PhaseManager.create('reset').run();
     await ShutdownManager.executeAsync(-1);
+
+    const paths = ScanApp.getPaths(AppManifest.roots).filter(x => !FIXED_MODULES.has(x));
+    for (const { file } of ScanApp.findFiles({ paths, includeIndex: true })) {
+      if (!/support\/(transformer|phase)[.]/.test(file) && !file.includes('/alt/')) {
+        const worked = this.compiler.unload(file);
+        if (worked) {
+          console.debug(`[${process.pid}]`, 'Unloading', file);
+        }
+      }
+    }
   }
 
   /**

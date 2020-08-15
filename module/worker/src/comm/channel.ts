@@ -5,11 +5,14 @@ import { ChildProcess } from 'child_process';
  */
 export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any, U extends { type: string } = V & { type: string }> {
 
-  proc: T;
+  proc: T | undefined;
 
   constructor(proc: T) {
     this.proc = proc;
     console.debug(`[${this.id}] Constructed Execution`);
+    this.listen((e) => { // Log in one place
+      console.debug(`[${this.parentId}] Received [${this.id}] ${e.type}`);
+    });
   }
 
   private get parentId() {
@@ -35,10 +38,12 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
    */
   send(eventType: string, data?: any) {
     console.debug(`[${this.parentId}] Sending [${this.id}] ${eventType}`);
-    if (this.proc.send) {
+    if (!this.proc) {
+      throw new Error('this.proc was not defined');
+    } else if (this.proc.send) {
       this.proc.send({ type: eventType, ...(data ?? {}) });
     } else {
-      throw new Error('this._proc.send was not defined');
+      throw new Error('this.proc.send was not defined');
     }
   }
 
@@ -67,7 +72,9 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
    * Remove a specific listener
    */
   removeListener(fn: (e: U) => any) {
-    this.proc.removeListener('message', fn);
+    if (this.proc) {
+      this.proc.removeListener('message', fn);
+    }
   }
 
   /**
@@ -97,8 +104,6 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
     };
 
     holder.fn = (e: U) => {
-      console.debug(`[${this.parentId}] Received [${this.id}] ${e.type}`);
-
       let res;
       try {
         res = handler(e, kill);

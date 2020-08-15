@@ -81,6 +81,7 @@ class $Compiler {
     const native = FsUtil.toNative(fileName);
     if (native in require.cache) {
       delete require.cache[native]; // Remove require cached element
+      return true;
     }
   }
 

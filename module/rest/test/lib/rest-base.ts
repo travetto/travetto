@@ -7,7 +7,6 @@ import { RootRegistry } from '@travetto/registry';
 import { Util } from '@travetto/base';
 
 import type { RestServer } from '../../src/server/server';
-import { RestCookieConfig } from '../../src/interceptor/cookies';
 
 const toMultiValue = (o: Record<string, string> | undefined) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, [v]]));
 const baseLambdaEvent = { resource: '/{proxy+}' };
@@ -44,10 +43,10 @@ export abstract class BaseRestTest {
   async initServer() {
     await RootRegistry.init();
 
-    const rest = await import('../../src/server/server');
+    const rest = await import('../..');
 
     Object.assign(
-      await DependencyRegistry.getInstance(RestCookieConfig),
+      await DependencyRegistry.getInstance(rest.RestCookieConfig),
       { active: true, secure: false, signed: false }
     );
 
@@ -133,7 +132,9 @@ export abstract class BaseRestTest {
   }
 
   async destroySever() {
-    await this.handle!.close?.();
-    delete this.handle;
+    if (this.handle) {
+      await this.handle.close?.();
+      delete this.handle;
+    }
   }
 }
