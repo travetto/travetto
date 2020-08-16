@@ -5,7 +5,6 @@ import { color } from '@travetto/cli/src/color';
 import { CliUtil } from '@travetto/cli/src/util';
 
 import { PackUtil } from './lib/pack';
-import { PackManager } from './lib/pack-manager';
 
 /**
  * Supports packing a project into a directory, ready for archiving
@@ -45,7 +44,8 @@ export class PackPlugin extends BasePlugin {
   async action() {
     const allModes = await PackUtil.getListOfPackModes();
     const mode = allModes.find(x => process.argv.find(a => a === x.key));
-    await PackUtil.pack(mode?.file, { flags: this._cmd.opts() as any });
+    const cfg = await PackUtil.getManager(mode?.file);
+    await PackUtil.pack(await cfg.load({ flags: this._cmd.opts() as any }));
     console.log(color`\n${{ success: 'Successfully' }} wrote project to ${{ path: this._cmd.workspace }}`);
   }
 

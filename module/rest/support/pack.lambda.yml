@@ -2,5 +2,5 @@ flags:
   keepSource: false
   zip: true
   output: dist/lambda.zip
-files:
+add:
   - node_modules/@travetto/rest/support/aws-lambda.js: index.js
