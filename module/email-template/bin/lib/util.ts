@@ -1,5 +1,4 @@
-import * as fs from 'fs';
-import * as util from 'util';
+import { promises as fs } from 'fs';
 
 import { FsUtil } from '@travetto/boot';
 
@@ -7,9 +6,6 @@ import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
 import { StyleUtil } from './style';
 import { ImageUtil } from './image';
-
-const fsWriteFile = util.promisify(fs.writeFile);
-const fsReadFile = util.promisify(fs.readFile);
 
 export type MapLite<K, V> = {
   get(k: K): V | null;
@@ -85,16 +81,16 @@ export class TemplateUtil {
     const textFile = tplFile.replace(/[.]tpl[.]html$/, '.compiled.txt');
     const htmlFile = tplFile.replace(/[.]tpl[.]html$/, '.compiled.html');
 
-    const resolved = await fsReadFile(tplFile, 'utf8');
+    const resolved = await fs.readFile(tplFile, 'utf8');
     if (force || !(await FsUtil.exists(textFile)) || !(await FsUtil.exists(htmlFile))) {
       const compiled = await this.compile(resolved);
-      await fsWriteFile(textFile, compiled.text, { encoding: 'utf8' });
-      await fsWriteFile(htmlFile, compiled.html, { encoding: 'utf8' });
+      await fs.writeFile(textFile, compiled.text, { encoding: 'utf8' });
+      await fs.writeFile(htmlFile, compiled.html, { encoding: 'utf8' });
       return compiled;
     } else {
       return {
-        text: await fsReadFile(textFile, 'utf8'),
-        html: await fsReadFile(htmlFile, 'utf8')
+        text: await fs.readFile(textFile, 'utf8'),
+        html: await fs.readFile(htmlFile, 'utf8')
       };
     }
   }

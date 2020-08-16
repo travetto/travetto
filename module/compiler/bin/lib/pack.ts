@@ -1,51 +1,75 @@
 import * as path from 'path';
 import { promises as fs } from 'fs';
 
-import { ExecUtil, FsUtil, ScanFs } from '@travetto/boot';
+import { ExecUtil, FsUtil, ScanEntry, ScanFs } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { color } from '@travetto/cli/src/color';
-import { Util } from '@travetto/base/src/util';
-import { YamlUtil } from '@travetto/yaml';
 
 import { CompileCliUtil } from './index';
+import { Config, File, PackManager } from './pack-manager';
 
-type Flags = {
-  keepSource?: boolean;
-  readonly?: boolean;
-  output?: string;
-  zip?: boolean;
-};
-
-interface Config {
-  delete?: {
-    file?: Record<string, number>;
-    folder?: Record<string, number>;
-    ext?: Record<string, number>;
-    module?: Record<string, number>;
-  };
-  copy?: {
-    folder?: Record<string, string>;
-    file?: Record<string, string | string[] | 0>;
-  };
-  env?: Record<string, string>;
-  defaultFlags?: Flags;
-}
-
-const withMessage = async <T>(msg: string, op: () => Promise<T>) => {
+const withMessage = async <T>(msg: string, op: Promise<T> | (() => Promise<T>)) => {
   process.stdout.write(`${msg} ... `);
-  try {
-    await op();
-    process.stdout.write(color`${{ subtitle: 'done' }}\n`);
-  } catch (err) {
-    process.stdout.write(`\n`);
-    throw err;
-  }
+  await ('call' in op ? op() : op)
+    .then(() => process.stdout.write(color`${{ subtitle: 'done' }}`))
+    .finally(() => process.stdout.write('\n'));
 };
 
 /**
  * Utils for packing source code and minimizing space usage
  */
 export class PackUtil {
+
+  /**
+   * Build file include/exclude lists/checker
+   * @param files
+   */
+  static buildFileIncExc(files: File[]) {
+    const include = files.filter(x => !(typeof x === 'string' && x.startsWith('!')));
+    const exclude = (files
+      .filter(x => typeof x === 'string' && x.startsWith('!')) as string[])
+      .map(x => x.substring(1))
+      .map(x => {
+        if (x.startsWith('*.')) {
+          return new RegExp(`[.]${x.substring(2)}$`);
+        } else if (x.startsWith('**/')) {
+          return new RegExp(`^.*[\\\/][^\\\/]${x.substring(3)}`);
+        } else {
+          return new RegExp(`^${x}`);
+        }
+      });
+
+    const check = (m: string) => !exclude.find(p => p?.test(m));
+    return { include, exclude, check };
+  }
+
+  /**
+   * Resolve all files
+   */
+  static async * iterateFileList(workspace: string, files: File[]): AsyncGenerator<[entry: ScanEntry, dest: string | string[]]> {
+    const { include, check } = this.buildFileIncExc(files);
+
+    for (const el of include) {
+      const src = typeof el === 'string' ? el : Object.keys(el)[0];
+      const dest = typeof el === 'string' ? el : Object.values(el)[0];
+      const finalSrc = FsUtil.resolveUnix(workspace, src);
+      const stat = await FsUtil.exists(finalSrc);
+      if (!stat) { continue; }
+      if (stat.isFile()) {
+        if (check(src)) {
+          yield [{ file: finalSrc, module: src, stats: stat }, dest];
+        }
+        continue;
+      }
+      for (const e of await ScanFs.scanDir({ testDir: check, testFile: check }, finalSrc)) {
+        if (e.stats.isFile()) {
+          if (check(e.module)) {
+            yield [e, FsUtil.resolveUnix(workspace, dest as string, finalSrc.replace(src, '.'))];
+          }
+        }
+      }
+    }
+  }
 
   /**
    * Find pack modes with associated metadata
@@ -55,7 +79,7 @@ export class PackUtil {
       testDir: x => /node_modules\/?(@travetto\/?)?$/.test(x)
         || /node_modules\/@travetto\/[^/]+\/?/.test(x)
         || /node_modules\/@travetto\/[^/]+\/support\/?/.test(x),
-      testFile: x => /pack[.].*[.]yml/.test(x)
+      testFile: x => /pack[.].*[.]yml/.test(x) && /@travetto/.test(x)
     }, FsUtil.cwd);
 
     const lines = files
@@ -71,121 +95,11 @@ export class PackUtil {
   }
 
   /**
-   * Read configuration
-   * @param provided
-   */
-  static async getModeConfig(...modes: string[]): Promise<Config | undefined> {
-    for (const mode of modes.filter(x => !!x)) {
-      const [main, sub] = mode.split(/\//) ?? [];
-      let override = '';
-      try {
-        override = require.resolve(`@travetto/${main}/support/pack.${sub ?? 'config'}.yml`);
-        return YamlUtil.parse(await fs.readFile(override, 'utf8')) as Config;
-      } catch {
-        try {
-          return YamlUtil.parse(await fs.readFile(mode as string, 'utf8')) as Config;
-        } catch { }
-      }
-    }
-  }
-
-  /**
-   * Process config with given override
-   * @param provided
-   */
-  static async getConfig(provided: Config = {}) {
-    // Handle loading from string
-
-    const config = YamlUtil.parse(await fs.readFile(FsUtil.resolveUnix(__dirname, '..', 'pack.config.yml'), 'utf8')) as Config;
-
-    if (!!(await FsUtil.exists('pack.config.yml'))) {
-      const override = YamlUtil.parse(await fs.readFile(FsUtil.resolveUnix('pack.config.yml',), 'utf8'));
-      Util.deepAssign(config, override);
-    }
-    if (provided) {
-      Util.deepAssign(config, provided);
-    }
-
-    return config as Config;
-  }
-
-
-  /**
-   * Copy over files by instruction, folders first then individual
-   * @param workspace
-   * @param config
-   */
-  static async copyFiles(workspace: string, config: Config['copy'] = {}) {
-    const files = { folder: {}, file: {}, ...config };
-    // Copy over contents
-    for (const [src, dest] of Object.entries(files.folder || {})) {
-      const finalSrc = src.startsWith('@') ? `node_module/${src}` : src;
-      const stat = await FsUtil.exists(finalSrc);
-      if (stat) {
-        FsUtil.copyRecursiveSync(finalSrc, `${workspace}/${dest}`);
-      }
-    }
-
-    for (const [src, dest] of Object.entries(files.file ?? {})) {
-      const finalSrc = src.startsWith('@') ? FsUtil.resolveUnix(`node_modules/${src}`) : src;
-      const stat = await FsUtil.exists(finalSrc);
-
-      if (stat) {
-        const dests = Array.isArray(dest) ? dest : [dest];
-        for (const d of dests) {
-          await FsUtil.mkdirp(path.dirname(`${workspace}/${d ?? finalSrc}`));
-          if (d) {
-            await fs.copyFile(finalSrc, `${workspace}/${d}`);
-          } else {
-            await fs.writeFile(`${workspace}/${d}`, finalSrc.endsWith('.js') ? 'module.exports = {}' : '');
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Copy over all production node modules
-   * @param workspace
-   * @param deps
-   */
-  static async copyNodeModules(workspace: string, deps: string[]) {
-    for (const el of deps) {
-      if (el.includes('node_modules/')) {
-        const suffix = el.replace(/^.*?node_modules\//, '');
-        const suffixDir = path.dirname(el).replace(/^.*?node_modules\//, '');
-        const existing = await FsUtil.exists(`${workspace}/node_modules/${suffix}`);
-        if (existing) {
-          continue;
-        }
-
-        if (suffixDir.endsWith('@travetto')) { // If dealing with travetto module
-          await FsUtil.mkdirp(`${workspace}/node_modules/${suffix}`);
-          const files = (require(`${el}/package.json`).files as string[] ?? []).filter(x => !x.startsWith('test'));
-          for (const sub of ['package.json', ...files]) {
-            const subEl = `${el}/${sub}`;
-            const stat = (await FsUtil.exists(subEl))!;
-            if (stat.isDirectory()) {
-              await FsUtil.copyRecursiveSync(subEl, `${workspace}/node_modules/${suffix}/${sub}`);
-            } else {
-              await fs.copyFile(subEl, `${workspace}/node_modules/${suffix}/${sub}`);
-            }
-          }
-        } else {
-          await FsUtil.mkdirp(`${workspace}/node_modules/${suffixDir}`);
-          await FsUtil.copyRecursiveSync(el, `${workspace}/node_modules/${suffix}`);
-        }
-      }
-    }
-  }
-
-  /**
    * Minimize cached source files, by removing source mapping info
    * @param workspace
    * @param dir
    */
-  static async cleanCache(workspace: string, dir = 'cache') {
-    const cache = `${workspace}/${dir}`;
+  static async cleanCache(cache: string) {
     // Drop source maps from cache
     for (const el of await fs.readdir(cache)) {
       if (el.endsWith('.js')) {
@@ -196,71 +110,18 @@ export class PackUtil {
   }
 
   /**
-   * Delete all files by instruction
-   */
-  static async deleteFiles(workspace: string, conf: Config['delete'] = {}) {
-    const del = { file: {}, ext: {}, folder: {}, module: {}, ...conf };
-
-    // Delete all the files
-    for (const f of await ScanFs.scanDir({ testFile: x => true, testDir: x => true }, `${workspace}/node_modules`)) {
-      let ext = (f.stats.isFile() ? path.extname(f.file) : undefined)!;
-      if (ext && f.file.endsWith('.d.ts')) {
-        ext = '.d.ts';
-      }
-      const file = (f.stats.isFile() ? path.basename(f.file) : undefined)!;
-      const folder = (f.stats.isDirectory() ? path.basename(f.file) : undefined)!;
-
-      let doDelete = !!(del.file[file] || del.ext[ext] || del.folder[folder] || del.module[f.module]);
-
-      if (!doDelete && folder === 'dist') {
-        // Clear out dist folders
-        const pkg = f.file.replace(/\/dist$/g, '/package.json');
-        doDelete = !(!!(await FsUtil.exists(pkg)) && require(pkg).main.includes('dist'));
-      }
-
-      if (doDelete) {
-        if (folder) {
-          await FsUtil.unlinkRecursive(f.file, true);
-        } else {
-          try {
-            await fs.unlink(f.file);
-          } catch { }
-        }
-      }
-    }
-  }
-
-  /**
    * Truncate all app source files, and framework sourc files
    * @param workspace
    */
-  static async purgeSource(workspace: string) {
+  static async purgeSource(folders: string[]) {
     // Copy module files, empty at dest
-    for (const sub of [`${workspace}/node_modules/@travetto`, `${workspace}/src`]) {
+    for (const sub of folders) {
       for (const f of await ScanFs.scanDir({ testFile: x => x.endsWith('.ts'), testDir: x => true }, sub)) {
         if (f.stats.isFile() && !f.module.startsWith('cli/')) {
           await fs.writeFile(f.file, '');
         }
       }
     }
-  }
-
-  /**
-   * Create or Append to '.env.js' to set runtime behavior for packed workspace
-   * @param workspace
-   * @param env
-   */
-  static async extendEnvJs(workspace: string, env: Record<string, string | string[]>) {
-    const out = `${workspace}/.env.js`;
-    let src = '';
-    if (!!(await FsUtil.exists(out))) {
-      src = await fs.readFile(out, 'utf8');
-    }
-    for (const [key, value] of Object.entries(env)) {
-      const finalVal = Array.isArray(value) ? `'${value.join(',')}'` : value;
-      src = `${src}\nprocess.env['${key}'] = ${finalVal};`;
-    }
-    await fs.writeFile(out, src, { encoding: 'utf8' });
   }
 
   /**
@@ -279,69 +140,56 @@ export class PackUtil {
   }
 
   /**
-   * Minify js files
-   */
-  static async minifyJS(workspace: string) {
-    for (const f of await ScanFs.scanDir({
-      testFile: x => x.endsWith('.js')
-    }, `${workspace}/node_modules`)) {
-      if (!f.stats.isFile()) {
-        continue;
-      }
-
-      await ExecUtil.spawn(`terser`, ['--compress', '-o', `${f.file}.out`, '--', f.file]).result;
-      await fs.unlink(f.file);
-      await fs.rename(`${f.file}.out`, f.file);
-    }
-  }
-
-  /**
    * Pack the project into a workspace directory, optimized for space and runtime
-   * @param workspace Directory to write to
-   * @param flags Flags effect the packing method
-   * @param config Config to pack with
    */
-  static async pack(workspace: string, flags: Flags, config: Config) {
+  static async pack(mgrOrMode: PackManager | string, config?: Partial<Config>) {
+    const mgr = typeof mgrOrMode === 'string' ? await PackManager.get(mgrOrMode) : mgrOrMode;
+    await mgr.addConfig(config);
 
-    workspace = FsUtil.resolveUnix(FsUtil.cwd, workspace); // Resolve against cwd
+    console.log('Executing with config', mgr.flags);
 
-    const env = config.env ?? {};
-
-    // eslint-disable-next-line no-template-curly-in-string
-    env.TRV_CACHE = '`${__dirname}/cache`';
-
-    if (flags.readonly || !flags.keepSource) {
-      env.TRV_READONLY = '1';
-    }
-
-    await withMessage('Cleaning Workspace', async () => {
-      await FsUtil.unlinkRecursive(workspace, true);
-      await FsUtil.mkdirp(workspace);
+    await withMessage('Computing Node Modules', async () => {
+      for (const el of await FrameworkUtil.resolveDependencies({ types: ['prod', 'opt'] })) {
+        mgr.files.push({
+          [el.file]: el.file
+            .replace(FsUtil.cwd, '')
+            .replace(path.dirname(FsUtil.cwd), '')
+            .replace(path.dirname(path.dirname(FsUtil.cwd)), '')
+            .replace(/^[\\/]/, './')
+        });
+      }
     });
 
-    await withMessage('Copying Content', () => this.copyFiles(workspace, config.copy));
+    await withMessage('Cleaning Workspace', FsUtil.unlinkRecursive(mgr.workspace, true));
+
+    await withMessage('Copying Content', async () => {
+      for await (const [el, dest] of this.iterateFileList(mgr.workspace, mgr.files)) {
+        await mgr.writeFile(el.file, dest);
+      }
+    });
+
+    process.exit(0);
 
     // Compile
-    await CompileCliUtil.compile(`${workspace}/cache`);
+    await CompileCliUtil.compile(FsUtil.resolveUnix(mgr.workspace, mgr.cacheDir));
 
-    await withMessage('Copying Node Modules', async () => {
-      const deps = (await FrameworkUtil.resolveDependencies({ types: ['prod', 'opt'] })).map(x => x.file);
-      await this.copyNodeModules(workspace, deps);
-    });
-
-    if (!flags.keepSource) {
+    if (!mgr.flags.keepSource) {
       await withMessage('Purging Source', async () => {
-        await this.cleanCache(workspace);
-        await this.purgeSource(workspace);
+        await this.cleanCache(FsUtil.resolveUnix(mgr.workspace, mgr.cacheDir));
+        await this.purgeSource([`${mgr.workspace}/node_modules/@travetto`, `${mgr.workspace}/src`]);
       });
     }
 
-    await withMessage('Scrubbing Files', () => this.deleteFiles(workspace, config.delete));
-    await withMessage('Writng Env.js', () => this.extendEnvJs(workspace, env));
+    await withMessage('Writng Env.js', async () => {
+      if (mgr.flags.readonly || !mgr.flags.keepSource) {
+        mgr.env.TRV_READONLY = '1';
+      }
+      await mgr.persistEnv();
+    });
 
     // Build zip if desired
-    if (flags.zip) {
-      await this.zipFile(workspace, flags.output);
+    if (mgr.flags.zip) {
+      await this.zipFile(mgr.workspace, mgr.flags.output);
     }
   }
 }

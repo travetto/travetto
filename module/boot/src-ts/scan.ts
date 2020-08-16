@@ -1,11 +1,7 @@
 import * as fs from 'fs';
-import * as util from 'util';
-
 import { FsUtil } from './fs';
 
-const fsReaddir = util.promisify(fs.readdir);
-const fsLstat = util.promisify(fs.lstat);
-const fsRealpath = util.promisify(fs.realpath);
+const fsp = fs.promises;
 
 export interface ScanEntry {
   /**
@@ -88,7 +84,7 @@ export class ScanFs {
 
     while (dirs.length) {
       const dir = dirs.shift()!;
-      inner: for (const file of (await fsReaddir(dir.file))) {
+      inner: for (const file of (await fsp.readdir(dir.file))) {
         if (file.startsWith('.')) {
           continue inner;
         }
@@ -97,13 +93,13 @@ export class ScanFs {
         if (handler.resolvePath) {
           full = handler.resolvePath(full);
         }
-        const stats = await fsLstat(full);
+        const stats = await fsp.lstat(full);
         const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
         if (this.isDir(subEntry)) {
           if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
             if (subEntry.stats.isSymbolicLink() || subEntry.stats.isDirectory()) {
-              const p = await fsRealpath(full);
+              const p = await fsp.realpath(full);
               if (!visited.has(p)) {
                 visited.add(p);
               } else {

@@ -1,35 +1,23 @@
-defaultFlags:
-  readonly: true
-  keepSource: true
-  workspace: dist/workspace
-  zip: false
-copy:
-  file:
-    package.json: package.json
-    node_modules/@travetto/cli/bin/travetto.js: 
+files:
+  - package.json
+  - src
+  - resources
+  - .trv_cache: cache
+  - node_modules/@travetto/cli/bin/travetto.js: 
       - node_modules/.bin/trv
       - node_modules/@travetto/cli/bin/travetto.js 
-    lodash/lodash.min.js: lodash/lodash.js
-  folder:
-    src: src
-    resources: resources
-    .trv_cache: cache
-delete: 
-  file: 
-    bower.json: 1
-    LICENSE: 1
-  ext: 
-    .d.ts: 1
-    .map: 1
-    .md: 1
-    .lock: 1
-    .html: 1
-    .mjs: 1
-  folder: 
-    test: 1
-  module: 
-    lodash/lodash.min.js: 1
-    typescript: 1
-    '@types': 1
-    bson/browser_build: 1
-    source-map-support/browser-source-map-support.js: 1
+  - lodash/lodash.min.js: lodash/lodash.js
+  - '!**/bower.json'
+  - '!**/LICENSE'
+  - '!*.d.ts'
+  - '!*.map'
+  - '!*.md'
+  - '!*.lock'
+  - '!*.html'
+  - '!*.mjs'
+  - '!test/'
+  - '!**/node_modules/lodash/lodash.min.js'
+  - '!**/node_modules/typescript/'
+  - '!**/node_modules/@types/'  
+  - '!**/node_modules/bson/browser_build/'
+  - '!**/node_modules/source-map-support/browser-source-map-support.js'

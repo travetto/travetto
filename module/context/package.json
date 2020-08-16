@@ -12,7 +12,7 @@
   "title": "Async Context",
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "optionalPeerDependencies": {
-    "@travetto/rest": "^1.0.3"
+    "@travetto/rest": "^1.1.0-alpha.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [

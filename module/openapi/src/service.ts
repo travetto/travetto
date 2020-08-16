@@ -1,5 +1,4 @@
-import * as fs from 'fs';
-import * as util from 'util';
+import { promises as fs } from 'fs';
 import { OpenAPIObject } from 'openapi3-ts';
 
 import { Injectable, Inject } from '@travetto/di';
@@ -9,9 +8,6 @@ import { YamlUtil } from '@travetto/yaml';
 
 import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config';
 import { SpecGenerateUtil } from './spec-generate';
-
-
-const fsWriteFile = util.promisify(fs.writeFile);
 
 /**
  * Open API generation service
@@ -31,7 +27,7 @@ export class OpenApiService {
   @Inject()
   private restConfig: RestConfig;
 
-  private _spec: OpenAPIObject;
+  private _spec: OpenAPIObject | undefined;
 
   /**
    * Reset specification
@@ -81,6 +77,6 @@ export class OpenApiService {
       JSON.stringify(this.spec, undefined, 2) :
       YamlUtil.serialize(this.spec);
 
-    await fsWriteFile(this.apiSpecConfig.output, output);
+    await fs.writeFile(this.apiSpecConfig.output, output);
   }
 }

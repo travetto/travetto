@@ -1,8 +1,6 @@
-defualtFlags:
+flags:
   workspace: dist/alt
   output: dist/build.zip
-copy:
-  folder:
-    assets: assets
-  file:
-    /secret/location/key.pem: resources/key.pem
+files:
+  - assets
+  - /secret/location/key.pem: resources/key.pem
