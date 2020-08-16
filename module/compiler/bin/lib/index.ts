@@ -11,14 +11,9 @@ export class CompileCliUtil {
   /**
    * Trigger a compile
    */
-  static async compile(output?: string) {
+  static compile(output?: string) {
     if (EnvUtil.isReadonly()) {
       return; // Do not run the compiler
-    }
-
-    // Pre compile cli/bin folders if targetting a different location
-    if (output) {
-      await ExecUtil.spawn('npx', ['trv'], { env: { TRV_CACHE: output } }).result.catch(() => { });
     }
 
     // Compile rest of code

@@ -20,7 +20,7 @@ export class InjectableTransformer {
     const existing = state.findDecorator(this, param, 'Inject', INJECTABLE_MOD);
 
     if (!(existing || ts.isParameter(param))) {
-      return;
+      return [];
     }
 
     const callExpr = existing?.expression as ts.CallExpression;
@@ -76,7 +76,7 @@ export class InjectableTransformer {
     return state.factory.updatePropertyDeclaration(
       node,
       DecoratorUtil.spliceDecorators(node, decl, [
-        state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)!),
+        state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)),
       ], 0),
       node.modifiers,
       node.name,
@@ -98,7 +98,7 @@ export class InjectableTransformer {
     const dec = dm?.dec;
 
     // Extract config
-    const dependencies = node.parameters.map(x => InjectableTransformer.processDeclaration(state, x)!);
+    const dependencies = node.parameters.map(x => InjectableTransformer.processDeclaration(state, x));
 
     // Read target from config or resolve
     let target;

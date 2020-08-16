@@ -1,4 +1,4 @@
-files:
-  - '!**/node_modules/node-forge'
-  - '!**/node_modules/faker/lib/locales/'
-  - '': node_modules/faker/lib/locales.js
+excludeCompile:
+  - node_modules/node-forge/
+  - node_modules/faker/locale/.publish
+  - node_modules/faker/

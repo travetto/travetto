@@ -44,6 +44,11 @@ export interface ScanHandler {
    * @param fullPath The full path
    */
   resolvePath?(fullPath: string): string;
+
+  /**
+   * Should hidden files be traversed
+   */
+  withHidden?: boolean;
 }
 
 /**
@@ -85,7 +90,7 @@ export class ScanFs {
     while (dirs.length) {
       const dir = dirs.shift()!;
       inner: for (const file of (await fsp.readdir(dir.file))) {
-        if (file.startsWith('.')) {
+        if (file === '.' || file === '..' || file === '.bin' || (file.startsWith('.') && !handler.withHidden)) {
           continue inner;
         }
 
@@ -153,7 +158,7 @@ export class ScanFs {
     while (dirs.length) {
       const dir = dirs.shift()!;
       inner: for (const file of fs.readdirSync(dir.file)) {
-        if (file.startsWith('.')) {
+        if (file === '.' || file === '..' || file === '.bin' || (file.startsWith('.') && !handler.withHidden)) {
           continue inner;
         }
 
