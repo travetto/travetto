@@ -1,6 +1,5 @@
 import * as os from 'os';
-import * as fs from 'fs';
-import * as util from 'util';
+import { promises as fs } from 'fs';
 
 import { FsUtil } from '@travetto/boot';
 import { ShutdownManager, Util } from '@travetto/base';
@@ -8,13 +7,6 @@ import { ShutdownManager, Util } from '@travetto/base';
 import { CullableCacheSource } from './cullable';
 import { CacheEntry } from '../types';
 import { CacheSourceUtil } from './util';
-
-const fsStat = util.promisify(fs.stat);
-const fsReaddir = util.promisify(fs.readdir);
-const fsRead = util.promisify(fs.readFile);
-const fsWrite = util.promisify(fs.writeFile);
-const fsUpdateTime = util.promisify(fs.utimes);
-const fsUnlink = util.promisify(fs.unlink);
 
 /**
  * A cache source backed by the file system
@@ -39,7 +31,7 @@ export class FileCacheSource<T extends CacheEntry = CacheEntry> extends Cullable
 
   async has(key: string): Promise<boolean> {
     try {
-      await fsStat(this.getPath(key));
+      await fs.stat(this.getPath(key));
       return true;
     } catch {
       return false;
@@ -49,7 +41,7 @@ export class FileCacheSource<T extends CacheEntry = CacheEntry> extends Cullable
   async get(key: string): Promise<T | undefined> {
     try {
       const pth = this.getPath(key);
-      const value = await fsRead(pth, 'utf8');
+      const value = await fs.readFile(pth, 'utf8');
       return CacheSourceUtil.readAsSafeJSON(value) as T;
     } catch {
       return;
@@ -63,7 +55,7 @@ export class FileCacheSource<T extends CacheEntry = CacheEntry> extends Cullable
 
     const cloned = CacheSourceUtil.storeAsSafeJSON(entry);
 
-    await fsWrite(pth, cloned, 'utf8');
+    await fs.writeFile(pth, cloned, 'utf8');
 
     if (entry.maxAge) {
       await this.touch(pth, entry.expiresAt!);
@@ -74,7 +66,7 @@ export class FileCacheSource<T extends CacheEntry = CacheEntry> extends Cullable
 
   async delete(key: string): Promise<boolean> {
     try {
-      await fsUnlink(this.getPath(key));
+      await fs.unlink(this.getPath(key));
       return true;
     } catch {
       return false;
@@ -86,19 +78,19 @@ export class FileCacheSource<T extends CacheEntry = CacheEntry> extends Cullable
     if (await this.has(key)) {
       // Convert to epoch seconds
       const sec = (Date.now() / 1000) + 1;
-      await fsUpdateTime(pth, sec, sec);
+      await fs.utimes(pth, sec, sec);
       return true;
     }
     return false;
   }
 
   async keys() {
-    return fsReaddir(this.folder);
+    return fs.readdir(this.folder);
   }
 
   async isExpired(key: string) {
     const pth = FsUtil.resolveUnix(this.folder, key);
-    const stat = await fsStat(pth);
+    const stat = await fs.stat(pth);
     if (stat.mtimeMs !== stat.birthtimeMs) { // If it has been touched at least once
       const entry = await this.get(key);
       try {

@@ -1,10 +1,7 @@
-defaultFlags:
+flags:
   keepSource: false
   zip: true
   output: dist/lambda.zip
-copy:
-  file: 
-    @travetto/rest/support/aws-lambda.js: index.js
 env: 
   REST_AWS_defaultBinaryMimeTypes: 
     - application/octet-stream
@@ -13,4 +10,6 @@ env:
     - font/otf
     - image/jpeg
     - image/png
+files:
+  - node_modules/@travetto/rest/support/aws-lambda.js: index.js
     

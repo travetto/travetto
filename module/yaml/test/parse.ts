@@ -209,4 +209,15 @@ config:
 panda.user: bob`);
     assert(output.config.redacted === ['panda.user']);
   }
+
+  @Test()
+  listMap() {
+    const output = YamlUtil.parse(`--
+add:
+  - package.json
+  - .trv_cache: cache
+  - src`);
+    assert(output.add[1]['.trv_cache'] === 'cache');
+    assert(output.add[2] === 'src');
+  }
 }
