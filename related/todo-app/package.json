@@ -10,12 +10,12 @@
   "keywords": [],
   "description": "",
   "dependencies": {
-    "@travetto/log": "^1.0.0-beta.0",
-    "@travetto/cli": "^1.0.0-beta.0",
-    "@travetto/model-mongo": "^1.0.0-beta.0",
-    "@travetto/rest-express": "^1.0.0-beta.0",
-    "@travetto/openapi": "^1.0.0-beta.0",
-    "@travetto/test": "^1.0.0-beta.0"
+    "@travetto/log": "^1.1.0-alpha.0",
+    "@travetto/cli": "^1.1.0-alpha.0",
+    "@travetto/model-mongo": "^1.1.0-alpha.0",
+    "@travetto/rest-express": "^1.1.0-alpha.0",
+    "@travetto/openapi": "^1.1.0-alpha.0",
+    "@travetto/test": "^1.1.0-alpha.0"
   },
   "repository": {
     "url": "https://github.com/travetto/travetto.git"

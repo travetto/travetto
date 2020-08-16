@@ -1,12 +1,9 @@
 import * as mongo from 'mongodb';
-import * as fs from 'fs';
-import * as util from 'util';
+import { promises as fs } from 'fs';
 
 import { ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
-
-const exists = util.promisify(fs.exists);
-const read = util.promisify(fs.readFile);
+import { FsUtil } from '../../base/node_modules/@travetto/boot/src';
 
 /**
  * Mongo model config
@@ -50,7 +47,7 @@ export class MongoModelConfig {
    */
   async fetch(val: string) {
     try {
-      return (await exists(val)) ? read(val) : ResourceManager.read(val);
+      return (await FsUtil.exists(val)) ? fs.readFile(val) : ResourceManager.read(val);
     } catch {
       return val;
     }

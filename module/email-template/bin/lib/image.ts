@@ -1,10 +1,7 @@
 import * as path from 'path';
-import * as fs from 'fs';
-import * as util from 'util';
+import { promises as fs } from 'fs';
 
 import { AppCache, FsUtil, StreamUtil } from '@travetto/boot';
-
-const fsReadFile = util.promisify(fs.readFile);
 
 export class ImageUtil {
 
@@ -64,6 +61,6 @@ export class ImageUtil {
       await StreamUtil.writeToFile(stream, out);
     }
 
-    return fsReadFile(out);
+    return fs.readFile(out);
   }
 }

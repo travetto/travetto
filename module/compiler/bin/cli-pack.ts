@@ -5,6 +5,7 @@ import { color } from '@travetto/cli/src/color';
 import { CliUtil } from '@travetto/cli/src/util';
 
 import { PackUtil } from './lib/pack';
+import { PackManager } from './lib/pack-manager';
 
 /**
  * Supports packing a project into a directory, ready for archiving
@@ -14,13 +15,12 @@ export class PackPlugin extends BasePlugin {
   name = 'pack';
 
   async init(cmd: commander.Command) {
-    const flags = (await PackUtil.getConfig(
-      await PackUtil.getModeConfig(...process.argv.slice(3).filter(x => !x.startsWith('-')))
-    )).defaultFlags ?? {};
+    const mode = process.argv.find(x => /@\S+\/\S+/.test(x));
+    const flags = (await PackManager.get(mode)).flags ?? {};
 
     return cmd
       .arguments('[mode]')
-      .option('-w --workspace [workspace]', 'Workspace directory', 'dist/workspace')
+      .option('-w --workspace [workspace]', 'Workspace directory', flags.workspace)
       .option('-k --keep-source [boolean]', 'Should source be preserved', CliUtil.isBoolean, flags.keepSource)
       .option('-r --readonly [boolean]', 'Build a readonly deployable', CliUtil.isBoolean, flags.readonly)
       .option('-z --zip [boolean]', 'Zip the workspace into an output file', CliUtil.isBoolean, flags.zip)
@@ -42,17 +42,7 @@ export class PackPlugin extends BasePlugin {
   }
 
   async action() {
-    const config = await PackUtil.getConfig(
-      await PackUtil.getModeConfig(this._cmd.args[0])
-    );
-
-    await PackUtil.pack(this._cmd.workspace, {
-      keepSource: this._cmd.keepSource,
-      readonly: this._cmd.readonly,
-      zip: this._cmd.zip,
-      output: this._cmd.output
-    }, config);
-
+    await PackUtil.pack(this._cmd.args[0], { flags: this._cmd as any });
     console.log(color`\n${{ success: 'Successfully' }} wrote project to ${{ path: this._cmd.workspace }}`);
   }
 

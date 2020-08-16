@@ -1,12 +1,9 @@
 import * as fs from 'fs';
-import * as util from 'util';
 
 import { FsUtil, ScanFs, ScanEntry } from '@travetto/boot';
 
 import { AppError } from './error';
 import { AppManifest } from './manifest';
-
-const fsReadFile = util.promisify(fs.readFile);
 
 const cleanPath = (p: string) => p.charAt(0) === '/' ? p.substring(1) : p;
 
@@ -148,7 +145,7 @@ class $ResourceManager {
    */
   async read(pth: string, options?: string | { encoding?: string, flag?: string }) {
     pth = await this.find(pth);
-    return fsReadFile(pth, options);
+    return fs.promises.readFile(pth, options);
   }
 
   /**

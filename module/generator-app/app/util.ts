@@ -1,10 +1,7 @@
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
 import * as path from 'path';
-import * as util from 'util';
 import * as mustache from 'mustache';
 import { FsUtil } from '@travetto/boot/src/fs';
-
-const fsRead = util.promisify(fs.readFile);
 
 export const verifyDestination = (target: string) => {
   if (FsUtil.existsSync(target)) {
@@ -40,6 +37,6 @@ export function meetsRequirement(modules: string[], desired: string[]) {
 }
 
 export async function template(file: string, context: any) {
-  const contents = await fsRead(file, 'utf-8');
+  const contents = await fs.readFile(file, 'utf-8');
   return mustache.render(contents, context).replace(/^\s*(\/\/|#)\s*\n/gsm, '');
 }

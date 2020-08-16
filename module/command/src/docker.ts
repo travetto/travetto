@@ -1,10 +1,7 @@
 import * as fs from 'fs';
-import * as util from 'util';
 
 import { FsUtil, EnvUtil, ExecUtil, ExecutionState } from '@travetto/boot';
 import { ShutdownManager } from '@travetto/base';
-
-const fsWriteFile = util.promisify(fs.writeFile);
 
 /**
  * Simple docker wrapper for launching and interacting with a container
@@ -409,7 +406,7 @@ export class DockerContainer {
     if (files) {
       await Promise.all(
         files.map(({ name, content }) =>
-          fsWriteFile(FsUtil.joinUnix(dir, name), content, { mode: '755' }))
+          fs.promises.writeFile(FsUtil.joinUnix(dir, name), content, { mode: '755' }))
       );
     }
     return;

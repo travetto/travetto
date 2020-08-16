@@ -56,12 +56,23 @@ async function finalizeModule(root: string) {
 export async function run() {
   // Init lerna
   await withMessage('Lerna clean', ExecUtil.spawn('npx', ['lerna', 'clean', '--yes'], { shell: true }).result);
-  await withMessage('Lerna bootstrap', ExecUtil.spawn('npx', ['lerna', 'bootstrap', '--hoist'], { shell: true }).result);
+
+  if (process.argv[1] !== 'soft') {
+    await withMessage('Lerna bootstrap', ExecUtil.spawn('npx', ['lerna', 'bootstrap', '--hoist'], { shell: true }).result);
+  }
 
   // Clear out package-lock
   try {
     await fs.unlink(`${ROOT}/package-lock.json`);
   } catch (e) { }
+
+  const packages = (await ExecUtil.spawn(`npx`, ['lerna', 'ls', '-p', '-a']).result).stdout.split(/\n/)
+    .filter(x => !!x && x.includes(FsUtil.cwd)).map(x => FsUtil.resolveUnix(x));
+
+  // Finalize all modules
+  for (const pkg of packages) {
+    await withMessage(`@travetto/${path.basename(pkg)}`, finalizeModule(pkg));
+  }
 
   await withMessage('vscode-plugin install', async () => {
     const tgt = `${ROOT}/related/vscode-plugin`;
@@ -69,11 +80,4 @@ export async function run() {
     await FsUtil.unlinkRecursive(`${tgt}/node_modules/@travetto/boot`, true);
     await FsUtil.copyRecursiveSync(`${MOD_ROOT}/boot`, `${tgt}/node_modules/@travetto/boot`);
   });
-
-  const packages = (await ExecUtil.spawn(`npx`, ['lerna', 'ls', '-p', '-a']).result).stdout.split(/\n/);
-
-  // Finalize all modules
-  for (const pkg of packages.filter(x => !!x && x.includes(FsUtil.cwd)).map(x => FsUtil.resolveUnix(x))) {
-    await withMessage(`@travetto/${path.basename(pkg)}`, finalizeModule(pkg));
-  }
 }

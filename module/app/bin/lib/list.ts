@@ -1,4 +1,3 @@
-import * as util from 'util';
 import * as fs from 'fs';
 import { parentPort } from 'worker_threads';
 
@@ -15,7 +14,6 @@ import type { ApplicationConfig } from '../../src/types';
  */
 export class AppListManager {
 
-  private static fsLstat = util.promisify(fs.lstat);
   private static cacheConfig = 'app-cache.json';
 
   static getRoots() {
@@ -71,7 +69,7 @@ export class AppListManager {
   static async verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
     try {
       for (const el of items) {
-        const elStat = (await this.fsLstat(el.filename).catch(e => { delete el.generatedTime; }));
+        const elStat = (await fs.promises.lstat(el.filename).catch(e => { delete el.generatedTime; }));
         // invalidate cache if changed
         if (elStat && (!el.generatedTime || FsUtil.maxTime(elStat) > el.generatedTime)) {
           throw new Error('Expired entry, data is stale');
