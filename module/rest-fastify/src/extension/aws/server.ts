@@ -35,8 +35,7 @@ export class AwsLambdaRestServer extends FastifyRestServer {
   async createRaw() {
     const ret = await super.createRaw();
     const config = ConfigManager.get('rest.aws');
-    const mimeTypes = config.binaryMimeTypes ?? config.defaultBinaryMimeTypes ?? [];
-    this.handle = awsLambdaFastify(ret, mimeTypes);
+    this.handle = awsLambdaFastify(ret, config.binaryMimeTypes ?? []);
     return ret;
   }
 

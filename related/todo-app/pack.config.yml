@@ -1,0 +1,4 @@
+files:
+  - '!**/node_modules/node-forge'
+  - '!**/node_modules/faker/lib/locales/'
+  - '': node_modules/faker/lib/locales.js
