@@ -35,8 +35,7 @@ export class AwsLambdaRestServer extends ExpressRestServer {
   createRaw() {
     const ret = super.createRaw();
     const config = ConfigManager.get('rest.aws');
-    const mimeTypes = config.binaryMimeTypes ?? config.defaultBinaryMimeTypes ?? [];
-    this.server = awsServerlessExpress.createServer(ret, undefined, mimeTypes);
+    this.server = awsServerlessExpress.createServer(ret, undefined, config.binaryMimeTypes ?? []);
     return ret;
   }
 

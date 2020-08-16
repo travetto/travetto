@@ -11,12 +11,18 @@ export class CompileCliUtil {
   /**
    * Trigger a compile
    */
-  static compile(output?: string) {
+  static async compile(output?: string) {
     if (EnvUtil.isReadonly()) {
       return; // Do not run the compiler
     }
 
-    return CliUtil.waiting('Compiling...',
+    // Pre compile cli/bin folders if targetting a different location
+    if (output) {
+      await ExecUtil.spawn('npx', ['trv'], { env: { TRV_CACHE: output } }).result.catch(() => { });
+    }
+
+    // Compile rest of code
+    return CliUtil.waiting(`Compiling... ${output || ''}`,
       ExecUtil.worker('@travetto/compiler/bin/plugin-compile', [], {
         env: {
           ...(output ? { TRV_CACHE: output } : {}),

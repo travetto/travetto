@@ -30,42 +30,64 @@ export class PackUtil {
       .filter(x => typeof x === 'string' && x.startsWith('!')) as string[])
       .map(x => x.substring(1))
       .map(x => {
-        if (x.startsWith('*.')) {
-          return new RegExp(`[.]${x.substring(2)}$`);
-        } else if (x.startsWith('**/')) {
-          return new RegExp(`^.*[\\\/][^\\\/]${x.substring(3)}`);
-        } else {
-          return new RegExp(`^${x}`);
-        }
+        // TODO: Replace with something better?
+        const re = x // Poor man's glob
+          .replace(/^[*][*][/]/, '**')
+          .replace(/[*][*.]?/g, r => {
+            switch (r) {
+              case '**': return /([^\\\/]+[\\\/])*([^\\\/]*)/.source;
+              case '*.': return /.*[.]/.source;
+              case '*': return /[^.\\\/]*/.source;
+              default: throw new Error('Unknown');
+            }
+          });
+        return new RegExp(`^${re}`);
       });
 
-    const check = (m: string) => !exclude.find(p => p?.test(m));
+    const check = (m: string) => !exclude.some(p => p?.test(m));
     return { include, exclude, check };
   }
 
   /**
    * Resolve all files
    */
-  static async * iterateFileList(workspace: string, files: File[]): AsyncGenerator<[entry: ScanEntry, dest: string | string[]]> {
+  static async * iterateFileList(workspace: string, files: File[]): AsyncGenerator<[entry: ScanEntry, dest: string]> {
     const { include, check } = this.buildFileIncExc(files);
 
     for (const el of include) {
       const src = typeof el === 'string' ? el : Object.keys(el)[0];
       const dest = typeof el === 'string' ? el : Object.values(el)[0];
-      const finalSrc = FsUtil.resolveUnix(workspace, src);
-      const stat = await FsUtil.exists(finalSrc);
-      if (!stat) { continue; }
-      if (stat.isFile()) {
-        if (check(src)) {
-          yield [{ file: finalSrc, module: src, stats: stat }, dest];
+      const finalSrc = FsUtil.resolveUnix(src);
+      let stat = src ? await FsUtil.exists(finalSrc) : undefined;
+      if (!stat) {
+        if (src) {
+          continue;
+        }
+        stat = { isFile: () => true } as any;
+      }
+
+      // TODO: Need to use workspace
+
+      if (stat!.isFile()) {
+        if (!src || check(src)) {
+          yield [{ file: src ? finalSrc : src, module: src, stats: stat! }, dest];
         }
         continue;
       }
-      for (const e of await ScanFs.scanDir({ testDir: check, testFile: check }, finalSrc)) {
+
+      const resolve = (...m: string[]) => FsUtil.resolveUnix(finalSrc, ...m)
+        .replace(`${FsUtil.cwd}/`, '').replace(/^.*?node_modules/, 'node_modules');
+      const testFile = (m: string) => check(resolve(m));
+
+      for (const e of await ScanFs.scanDir({
+        testDir: c => testFile(c) && !c.endsWith('node_modules'),
+        testFile
+      }, finalSrc)) {
         if (e.stats.isFile()) {
-          if (check(e.module)) {
-            yield [e, FsUtil.resolveUnix(workspace, dest as string, finalSrc.replace(src, '.'))];
-          }
+          yield [
+            e,
+            resolve(e.module)
+          ];
         }
       }
     }
@@ -75,23 +97,27 @@ export class PackUtil {
    * Find pack modes with associated metadata
    */
   static async getListOfPackModes() {
-    const files = await ScanFs.scanDir({
-      testDir: x => /node_modules\/?(@travetto\/?)?$/.test(x)
-        || /node_modules\/@travetto\/[^/]+\/?/.test(x)
-        || /node_modules\/@travetto\/[^/]+\/support\/?/.test(x),
-      testFile: x => /pack[.].*[.]yml/.test(x) && /@travetto/.test(x)
-    }, FsUtil.cwd);
-
-    const lines = files
+    return FrameworkUtil.scan(f => /\/support\/pack[.].*[.]ya?ml/.test(f))
       .filter(x => x.stats.isFile())
-      .filter(x => !x.module.includes('alt/docs')) // Docs
       .map(x => {
-        const [, mod, name] = x.module.match(/.*@travetto\/([^/]+)\/.*pack[.]([^.]+).yml/) ?? [];
+        const [, mod, name] = x.module.match(/.*@travetto\/([^/]+)\/.*pack[.]([^.]+).ya?ml/) ?? [];
         const key = x.module.includes('compiler/bin') ? `<default>` : `${mod}/${name}`;
         return { key, file: x.module };
       });
+  }
 
-    return lines;
+  /**
+   * Get a new manager for a given mode
+   * @param mode
+   */
+  static async getManager(modeFile?: string) {
+    const mgr = new PackManager();
+    // Handle loading from string
+    await mgr.addConfig(FsUtil.resolveUnix(__dirname, '..', 'pack.config.yml'));
+    await mgr.addConfig(modeFile);
+    await mgr.addConfig(FsUtil.resolveUnix('pack.config.yml',));
+    await mgr.addConfig(FsUtil.resolveUnix('pack.config.yaml',));
+    return mgr;
   }
 
   /**
@@ -142,20 +168,20 @@ export class PackUtil {
   /**
    * Pack the project into a workspace directory, optimized for space and runtime
    */
-  static async pack(mgrOrMode: PackManager | string, config?: Partial<Config>) {
-    const mgr = typeof mgrOrMode === 'string' ? await PackManager.get(mgrOrMode) : mgrOrMode;
+  static async pack(mgrOrMode: PackManager | string | undefined, config?: Partial<Config>) {
+    const mgr = (!mgrOrMode || typeof mgrOrMode === 'string') ? await this.getManager(mgrOrMode) : mgrOrMode;
     await mgr.addConfig(config);
 
     console.log('Executing with config', mgr.flags);
 
     await withMessage('Computing Node Modules', async () => {
-      for (const el of await FrameworkUtil.resolveDependencies({ types: ['prod', 'opt'] })) {
+      for (const el of await FrameworkUtil.resolveDependencies({ types: ['prod', 'opt', 'optPeer'] })) {
         mgr.files.push({
           [el.file]: el.file
             .replace(FsUtil.cwd, '')
             .replace(path.dirname(FsUtil.cwd), '')
             .replace(path.dirname(path.dirname(FsUtil.cwd)), '')
-            .replace(/^[\\/]/, './')
+            .replace(/^[\\/]/, '')
         });
       }
     });
@@ -167,8 +193,6 @@ export class PackUtil {
         await mgr.writeFile(el.file, dest);
       }
     });
-
-    process.exit(0);
 
     // Compile
     await CompileCliUtil.compile(FsUtil.resolveUnix(mgr.workspace, mgr.cacheDir));

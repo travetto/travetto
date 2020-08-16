@@ -15,8 +15,9 @@ export class PackPlugin extends BasePlugin {
   name = 'pack';
 
   async init(cmd: commander.Command) {
-    const mode = process.argv.find(x => /@\S+\/\S+/.test(x));
-    const flags = (await PackManager.get(mode)).flags ?? {};
+    const allModes = await PackUtil.getListOfPackModes();
+    const mode = allModes.find(x => process.argv.find(a => a === x.key));
+    const flags = (await PackUtil.getManager(mode?.file)).flags ?? {};
 
     return cmd
       .arguments('[mode]')
@@ -42,7 +43,9 @@ export class PackPlugin extends BasePlugin {
   }
 
   async action() {
-    await PackUtil.pack(this._cmd.args[0], { flags: this._cmd as any });
+    const allModes = await PackUtil.getListOfPackModes();
+    const mode = allModes.find(x => process.argv.find(a => a === x.key));
+    await PackUtil.pack(mode?.file, { flags: this._cmd.opts() as any });
     console.log(color`\n${{ success: 'Successfully' }} wrote project to ${{ path: this._cmd.workspace }}`);
   }
 

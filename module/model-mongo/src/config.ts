@@ -1,9 +1,9 @@
 import * as mongo from 'mongodb';
 import { promises as fs } from 'fs';
 
+import { FsUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
-import { FsUtil } from '../../base/node_modules/@travetto/boot/src';
 
 /**
  * Mongo model config

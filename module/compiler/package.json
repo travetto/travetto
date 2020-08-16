@@ -29,8 +29,7 @@
     "index.ts",
     "src",
     "bin",
-    "support",
-    "tsconfig.json"
+    "support"
   ],
   "name": "@travetto/compiler",
   "repository": {

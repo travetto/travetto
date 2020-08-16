@@ -2,11 +2,12 @@ files:
   - package.json
   - src
   - resources
-  - .trv_cache: cache
-  - node_modules/@travetto/cli/bin/travetto.js: 
-      - node_modules/.bin/trv
-      - node_modules/@travetto/cli/bin/travetto.js 
+  - node_modules/@travetto/cli/bin/travetto.js: node_modules/.bin/trv
+  - node_modules/@travetto/cli/bin/travetto.js: node_modules/.bin/travetto
   - lodash/lodash.min.js: lodash/lodash.js
+  - '!**/node_modules/@travetto/*/DOCS.js'
+  - '!**/node_modules/@travetto/*/alt'
+  - '!**/node_modules/@travetto/*/test'
   - '!**/bower.json'
   - '!**/LICENSE'
   - '!*.d.ts'

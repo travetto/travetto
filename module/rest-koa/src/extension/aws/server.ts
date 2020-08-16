@@ -35,8 +35,7 @@ export class AwsLambdaRestServer extends KoaRestServer {
   createRaw() {
     const ret = super.createRaw();
     const config = ConfigManager.get('rest.aws');
-    const mimeTypes = config.binaryMimeTypes ?? config.defaultBinaryMimeTypes ?? [];
-    this.server = awsServerlessExpress.createServer(ret.callback(), undefined, mimeTypes);
+    this.server = awsServerlessExpress.createServer(ret.callback(), undefined, config.binaryMimeTypes ?? []);
     return ret;
   }
 

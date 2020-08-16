@@ -5,7 +5,7 @@ import { FsUtil } from '@travetto/boot';
 import { YamlUtil } from '@travetto/yaml';
 
 
-export type File = (string | Record<string, string | string[]>);
+export type File = (string | Record<string, string>);
 
 export type Flags = {
   keepSource?: boolean;
@@ -22,23 +22,6 @@ export interface Config {
 }
 
 export class PackManager {
-  /**
-   * Get a new manager for a given mode
-   * @param mode
-   */
-  static async get(mode?: string) {
-    const mgr = new PackManager();
-    // Handle loading from string
-    if (mode && mode.startsWith('@')) {
-      const [, main, sub] = (mode.match(/@\S+\/\S+/) ?? []);
-      mode = require.resolve(`@travetto/${main}/support/pack.${sub}.yml`);
-    }
-
-    await mgr.addConfig(FsUtil.resolveUnix(__dirname, '..', 'pack.config.yml'));
-    await mgr.addConfig(mode);
-    await mgr.addConfig(FsUtil.resolveUnix('pack.config.yml',));
-    return mgr;
-  }
 
   private _cacheDir = 'cache';
   private _workspace: string;
@@ -103,17 +86,21 @@ export class PackManager {
   /**
    * Write file
    */
-  async writeFile(file: string, dest: string | string[]) {
-    const dests = Array.isArray(dest) ? dest : [dest];
-    for (const d of dests) {
-      const df = FsUtil.resolveUnix(this.workspace, d);
-      const folder = path.basename(df) === path.basename(file) ? path.dirname(df) : df;
-      const target = folder === df ? FsUtil.resolveUnix(folder, path.basename(file)) : df;
-      if (!this.folders.has(folder)) {
-        this.folders.add(folder);
-        await FsUtil.mkdirp(folder);
+  async writeFile(file: string, dest: string) {
+    const df = FsUtil.resolveUnix(this.workspace, dest);
+    const folder = (path.basename(df) === path.basename(file) || path.basename(df).includes('.')) ? path.dirname(df) : df;
+    const target = folder === df ? FsUtil.resolveUnix(folder, path.basename(file)) : df;
+
+    if (!this.folders.has(folder)) {
+      this.folders.add(folder);
+      await FsUtil.mkdirp(folder);
+    }
+    if (file) {
+      if (!await FsUtil.exists(target)) {
+        await fs.copyFile(file, target);
       }
-      await fs.copyFile(file, target);
+    } else {
+      await fs.writeFile(target, '', { encoding: 'utf8' });
     }
   }
 }
