@@ -1,9 +1,9 @@
+import type * as https from 'https';
 import * as koa from 'koa';
 import * as kCompress from 'koa-compress';
 import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
-import { AppUtil } from '@travetto/app';
 import { Injectable, Inject } from '@travetto/di';
 import { RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
 
@@ -76,13 +76,12 @@ export class KoaRestServer extends RestServer<koa> {
   }
 
   async listen() {
-    let server;
+    let raw: https.Server | koa = this.raw;
     if (this.config.ssl.active) {
-      const https = await import('https');
-      server = https.createServer((await this.config.getKeys())!, this.raw.callback()).listen(this.config.port, this.config.bindAddress);
-    } else {
-      server = this.raw.listen(this.config.port, this.config.bindAddress);
+      raw = (await import('https'))
+        .createServer((await this.config.getKeys())!, this.raw.callback())
+        .listen(this.config.port, this.config.bindAddress);
     }
-    return AppUtil.listenToCloseable(server);
+    return raw.listen(this.config.port, this.config.bindAddress);
   }
 }

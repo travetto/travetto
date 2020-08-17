@@ -1,3 +1,4 @@
+import { Closeable } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
 export const TRV_RAW = Symbol.for('@trv:rest/raw');
@@ -17,6 +18,8 @@ export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' |
 export type RouteHandler<T = any> = (...args: any[]) => Promise<T> | T | void;
 
 export type Filter<T = any> = (req: Request, res: Response) => Promise<T> | T | void;
+
+export type ServerHandle = Closeable & { on(type: 'close', callback: () => void): any };
 
 /**
  * Param configuration

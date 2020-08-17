@@ -1,6 +1,20 @@
 Completed Tasks
 ==============
 
+Worker
+----------------------
+[x] Use worker threads in lieu of IPC (should be more robust)
+  - [x] Rework @trv/worker (Used where possible)
+  - [x] Rework CLI invocation (Used where possible, limitations for CLI operations)
+
+Pack
+----------------------
+[x] Build in packing support, with a focus on space optimization for lambdas
+
+Watch
+----------------------
+[x] Extract watch to it's own package, as it's dev only
+
 Compiler
 ----------------------
 - [x] Support type checking in transformers
@@ -34,7 +48,7 @@ Caching
     - [x] Redis
     - [x] Memory
     - [x] Model Service
-- [/] See if we can integrate with asset service
+- [x] See if we can integrate with asset service
 - [x] See if we can integrate with session store
 
 Assets

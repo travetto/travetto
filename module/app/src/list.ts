@@ -40,6 +40,6 @@ export class AppListUtil {
 
     // Get applications
     const res = await ApplicationRegistry.getAll();
-    return AppListUtil.sortList(res);
+    return this.sortList(res);
   }
 }
