@@ -43,6 +43,6 @@
 		"source-map-support": "^0.5.19"
 	},
 	"dependencies": {
-		"typescript": "^4.0.1-rc"
+		"typescript": "^4.0.2"
 	}
 }

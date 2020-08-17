@@ -9,7 +9,11 @@ import { RestServer } from '../src/server/server';
 })
 export class DefaultRestApplication {
   constructor(private server: RestServer) { }
-  run() {
-    return this.server.run();
+  async run() {
+    const handle = await this.server.run();
+    return {
+      close: () => new Promise<void>(res => handle.close(() => res())),
+      wait: () => new Promise<void>(res => handle.on('close', res))
+    };
   }
 }

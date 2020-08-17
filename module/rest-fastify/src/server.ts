@@ -1,7 +1,6 @@
 import * as https from 'https';
 import { FastifyInstance, fastify, FastifyServerOptions, FastifyHttpsOptions } from 'fastify';
 
-import { ApplicationHandle, AppUtil } from '@travetto/app';
 import { RouteConfig, RestServer } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
@@ -63,11 +62,11 @@ export class FastifyRestServer extends RestServer<FastifyInstance> {
     }
   }
 
-  async listen(): Promise<ApplicationHandle> {
+  async listen() {
     await this.raw.listen(this.config.port, this.config.bindAddress);
     return {
-      ...AppUtil.listenToCloseable(this.raw.server),
-      close: this.raw.close.bind(this.raw) as any as () => Promise<void>
+      on: this.raw.server.on.bind(this.raw),
+      close: this.raw.close.bind(this.raw)
     };
   }
 }

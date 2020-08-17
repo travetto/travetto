@@ -1,9 +1,9 @@
+import type * as https from 'https';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 
 import { EnvUtil } from '@travetto/boot';
-import { AppUtil } from '@travetto/app';
 import { Injectable } from '@travetto/di';
 import { RouteUtil, RestServer, ParamConfig, RouteConfig, RouteHandler, TRV_RAW } from '@travetto/rest';
 
@@ -93,15 +93,11 @@ export class ExpressRestServer extends RestServer<express.Application> {
    * Listen to the application
    */
   async listen() {
-    let server;
+    let raw: express.Application | https.Server = this.raw;
     if (this.config.ssl.active) {
-      const https = await import('https');
       const keys = await this.config.getKeys();
-      server = https.createServer(keys!, this.raw);
-      server.listen(this.config.port, this.config.bindAddress);
-    } else {
-      server = this.raw.listen(this.config.port, this.config.bindAddress!);
+      raw = (await import('https')).createServer(keys!, this.raw);
     }
-    return AppUtil.listenToCloseable(server);
+    return raw.listen(this.config.port, this.config.bindAddress!);
   }
 }

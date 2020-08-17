@@ -1,0 +1,48 @@
+import { color } from '@travetto/cli/src/color';
+import { CommonConfig, PackOperation } from '../lib/types';
+import { PackUtil } from '../lib/util';
+import { Assemble } from './assemble';
+import { Docker } from './docker';
+import { Zip } from './zip';
+
+const ops = {
+  [Assemble.key]: Assemble,
+  [Zip.key]: Zip,
+  [Docker.key]: Docker
+} as const;
+
+type AllConfig = CommonConfig & {
+  [k in keyof typeof ops]: ReturnType<(typeof ops)[k]['extend']>;
+};
+
+export const Pack: PackOperation<AllConfig, ''> = {
+  key: '',
+  title: 'Packing',
+  flags: [
+    ['-w --workspace [workspace]', 'Workspace directory', undefined, 'workspace']
+  ],
+  extend(a: AllConfig, b: Partial<AllConfig>) {
+    const ret: Partial<AllConfig> = {
+      workspace: b.workspace ?? a.workspace,
+    };
+    for (const [k, op] of Object.entries(ops) as ['assemble', typeof Assemble][]) {
+      (ret as any)[k] = op.extend(a[k] ?? {}, b[k] ?? {});
+      (ret as any)[k].workspace = ret.workspace!;
+    }
+
+    return ret as AllConfig;
+  },
+  async context(cfg: AllConfig) {
+    return `[ ${Object.entries(ops).filter(x => cfg[x[0] as 'assemble'].active).map(x => x[0]).join(', ')} ]`;
+  },
+  async * exec(cfg: AllConfig) {
+    const steps = Object.entries(ops).filter(x => cfg[x[0] as 'assemble'].active);
+    if (!steps.length) {
+      throw new Error(`Pack operation has zero active steps`);
+    }
+    for (const [step, op] of steps) {
+      await PackUtil.runOperation(op as typeof Assemble, cfg[step as 'assemble'], 2);
+    }
+    yield color`${{ success: 'Successfully' }} packed project`;
+  }
+};

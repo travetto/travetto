@@ -1,8 +1,9 @@
 import * as util from 'util';
 
 import { EnvUtil, FsUtil } from '@travetto/boot';
-import { AppManifest } from '@travetto/base';
+import { AppManifest, ShutdownManager } from '@travetto/base';
 import { ConfigManager } from '@travetto/config';
+import { Class } from '@travetto/registry';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 
 import { ApplicationConfig } from './types';
@@ -55,7 +56,7 @@ class $ApplicationRegistry {
   async run(name: string, args: string[]) {
     const config = this.applications.get(name);
     if (!config) {
-      throw new InjectionError(`Application: ${name} does not exist`, 'notfound');
+      throw new InjectionError(`Application not found`, { ᚕid: name } as Class<any>);
     }
 
     const typed = this.resolveParameters(config, args);
@@ -67,8 +68,14 @@ class $ApplicationRegistry {
 
     const ret = await inst.run(...typed);
     const target = ret ?? inst;
-    if (AppUtil.isHandle(target)) { // If response is a listener
-      await AppUtil.processHandle(target); // Wait for app to finish
+
+    if (target) {
+      if ('close' in target) {
+        ShutdownManager.onShutdown(target); // Tie shutdown into app close
+      }
+      if ('wait' in target) {
+        await target.wait(); // Wait for close signal
+      }
     }
   }
 

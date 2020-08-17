@@ -1,15 +1,14 @@
-import { ApplicationHandle } from '@travetto/app';
 import { AppManifest, AppError } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { Class, ChangeEvent } from '@travetto/registry';
+import { EnvUtil } from '@travetto/boot';
 
-import { RouteConfig, Request, RouteHandler, ParamConfig } from '../types';
+import { RouteConfig, Request, RouteHandler, ParamConfig, ServerHandle } from '../types';
 import { RestConfig } from './config';
 import { RouteUtil } from '../util/route';
 import { RestInterceptor } from '../interceptor/interceptor';
 import { ControllerRegistry } from '../registry/registry';
-import { EnvUtil } from '@travetto/boot';
 
 /**
  * The rest server
@@ -80,7 +79,7 @@ export abstract class RestServer<T = any> {
   /**
    * Start the listening process
    */
-  abstract listen(): ApplicationHandle | Promise<ApplicationHandle>;
+  abstract listen(): ServerHandle | Promise<ServerHandle>;
 
   /**
    * Initialize the application
@@ -203,7 +202,7 @@ export abstract class RestServer<T = any> {
   /**
    * Run the application
    */
-  async run() {
+  async run(): Promise<ServerHandle> {
     await this.init();
     console.info(`Listening on ${this.config.port}`);
     const listener = await this.listen();

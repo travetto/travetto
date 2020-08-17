@@ -1,9 +1,12 @@
+import { Closeable } from '@travetto/base';
 import type { Class } from '@travetto/registry';
 
 type OrProm<T> = T | Promise<T>;
 
+/** A pattern that can be waited on */
+export type Waitable = { wait(): Promise<any> };
 export type AppClass = {
-  run(...args: any[]): OrProm<ApplicationHandle | void | undefined>;
+  run(...args: any[]): OrProm<Waitable | Closeable | void | undefined>;
 };
 
 /**
@@ -38,16 +41,3 @@ export interface ApplicationConfig<T extends AppClass = AppClass> {
   generatedTime?: number;
 }
 
-/**
- * A pattern that can be used to manage the run state of an application
- */
-export interface ApplicationHandle {
-  /**
-   * Can close an application, if defined
-   */
-  close?(): void | Promise<void>;
-  /**
-   * Can wait for an application if defined
-   */
-  wait?(): Promise<any>;
-}

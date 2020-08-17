@@ -1,4 +1,5 @@
-excludeCompile:
-  - node_modules/node-forge/
-  - node_modules/faker/locale/.publish
-  - node_modules/faker/
+assemble:
+  excludeCompile:
+    - node_modules/node-forge/
+    - node_modules/faker/locale/.publish
+    - node_modules/faker/

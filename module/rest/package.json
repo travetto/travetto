@@ -7,7 +7,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/app": "^1.1.0-alpha.2",
     "@travetto/config": "^1.1.0-alpha.2",
     "@travetto/di": "^1.1.0-alpha.2",
     "@types/cookies": "^0.7.4",
@@ -18,6 +17,7 @@
     "node-fetch": "^3.0.0-beta.7"
   },
   "optionalPeerDependencies": {
+    "@travetto/app": "^1.1.0-alpha.2",
     "node-forge": "^0.9.1",
     "@types/node-forge": "^0.9.4"
   },
