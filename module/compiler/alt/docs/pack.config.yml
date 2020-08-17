@@ -1,6 +1,0 @@
-flags:
-  workspace: dist/alt
-  output: dist/build.zip
-files:
-  - assets
-  - /secret/location/key.pem: resources/key.pem

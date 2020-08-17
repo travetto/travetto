@@ -1,0 +1,31 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@travetto/yaml": "^1.1.0-alpha.1",
+    "@travetto/boot": "^1.1.0-alpha.1"
+  },
+  "title": "Pack",
+  "description": "Code packing utilities",
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "travetto",
+    "typescript",
+    "packing",
+    "docker"
+  ],
+  "license": "MIT",
+  "files": [
+    "bin"
+  ],
+  "name": "@travetto/pack",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "version": "1.1.0-alpha.2"
+}

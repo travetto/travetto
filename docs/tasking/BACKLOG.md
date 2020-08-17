@@ -20,10 +20,6 @@ Rest
   - [ ] Deployment
   - [ ] Serverless framework?
 
-Base
------------------------
-- [ ] Watcher to use FSEvents
-
 Documentation
 -----------------------
 - [ ] How to develop, markdown for how to contribute

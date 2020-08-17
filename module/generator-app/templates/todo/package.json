@@ -7,6 +7,7 @@
     // {{#frameworkDependencies}}
     "{{{.}}}": "^{{{frameworkVersion}}}",
     // {{/frameworkDependencies}}
+    "@travetto/app": "^{{{frameworkVersion}}}",
     "@travetto/cli": "^{{{frameworkVersion}}}"
   },
   "devDependencies": {

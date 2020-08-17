@@ -6,6 +6,11 @@ const ogExit = process.exit;
 
 const SHUTDOWN_WAIT = EnvUtil.getTime('TRV_SHUTDOWN_WAIT', 2, 's');
 
+export type Closeable = {
+  close(cb?: Function): any;
+  name?: string;
+};
+
 type UnhandledHandler = (err: Error, prom?: Promise<any>) => boolean | undefined | void;
 type Listener = { name: string, handler: Function, final?: boolean };
 
@@ -120,12 +125,26 @@ export class ShutdownManager {
   }
 
   /**
+   * Register to handle closeable on shutdown
+   * @param closeable
+   */
+  static onShutdown(closeable: Closeable): void;
+  /**
    * Register a shutdown handler
    * @param name  Name to log
    * @param handler Actual code
    * @param final If this should be run an attempt to shutdown or only on the final shutdown
    */
-  static onShutdown(name: string, handler: Function, final = false) {
+  static onShutdown(name: string, handler: Function, final?: boolean): void;
+  static onShutdown(nameOrCloseable: string | Closeable, handler?: Function, final = false) {
+    let name: string;
+    if (typeof nameOrCloseable !== 'string') {
+      name = nameOrCloseable.name ?? nameOrCloseable.constructor.name;
+      handler = nameOrCloseable.close;
+    } else {
+      name = nameOrCloseable;
+      handler = handler!;
+    }
     if (/[.][jt]s$/.test(name)) {
       name = SystemUtil.computeModule(name);
     }

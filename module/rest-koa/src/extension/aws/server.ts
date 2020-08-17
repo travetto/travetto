@@ -4,7 +4,6 @@ import type * as lambda from 'aws-lambda';
 
 import * as awsServerlessExpress from 'aws-serverless-express';
 
-import { AppUtil } from '@travetto/app';
 import { Injectable } from '@travetto/di';
 import { RestServer } from '@travetto/rest/src/server/server';
 import { ConfigManager } from '@travetto/config';
@@ -29,9 +28,6 @@ export class AwsLambdaRestServer extends KoaRestServer {
     return awsServerlessExpress.proxy(this.server, event, context, 'PROMISE').promise;
   }
 
-  /**
-   * Create app
-   */
   createRaw() {
     const ret = super.createRaw();
     const config = ConfigManager.get('rest.aws');
@@ -39,13 +35,7 @@ export class AwsLambdaRestServer extends KoaRestServer {
     return ret;
   }
 
-  /**
-   * Listen for the application to close, don't wait up
-   */
   async listen() {
-    return {
-      ...AppUtil.listenToCloseable(this.server),
-      async wait() { } // Don't wait
-    };
+    return this.server;
   }
 }

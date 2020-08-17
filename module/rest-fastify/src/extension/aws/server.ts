@@ -2,7 +2,6 @@
 import type * as lambda from 'aws-lambda';
 import { FastifyInstance } from 'fastify';
 
-import { AppUtil } from '@travetto/app';
 import { Injectable } from '@travetto/di';
 import { RestServer } from '@travetto/rest/src/server/server';
 import { ConfigManager } from '@travetto/config';
@@ -29,9 +28,6 @@ export class AwsLambdaRestServer extends FastifyRestServer {
    */
   public handle: (event: lambda.APIGatewayProxyEvent, context: lambda.Context) => void;
 
-  /**
-   * Create app
-   */
   async createRaw() {
     const ret = await super.createRaw();
     const config = ConfigManager.get('rest.aws');
@@ -39,13 +35,10 @@ export class AwsLambdaRestServer extends FastifyRestServer {
     return ret;
   }
 
-  /**
-   * Listen for the application to close, don't wait up
-   */
   async listen() {
     return {
-      ...AppUtil.listenToCloseable(this.raw.server),
-      async wait() { } // Don't wait
+      close: this.raw.close.bind(this.raw),
+      on: this.raw.server.on.bind(this.raw.server)
     };
   }
 }

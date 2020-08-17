@@ -1,6 +1,9 @@
-flags:
+assemble:
+  active: true
   keepSource: false
-  zip: true
+  add:
+    - node_modules/@travetto/rest/support/aws-lambda.js: index.js
+zip:
+  active: true
   output: dist/lambda.zip
-add:
-  - node_modules/@travetto/rest/support/aws-lambda.js: index.js
+
