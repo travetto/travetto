@@ -26,7 +26,12 @@ export abstract class BasePackPlugin extends BasePlugin {
     const out = [...(await PackUtil.getConfigs()), extra]
       .map(x => this.operation.key ? x[this.operation.key] : x)
       .reduce((acc, l) => this.operation.extend(acc, l ?? {}), {});
-    out.workspace = out.workspace ?? FsUtil.resolveUnix(os.tmpdir(), 'trv-pack', 'workspace');
+    out.workspace = out.workspace ?? FsUtil.resolveUnix(os.tmpdir(),
+      `pack_${require(FsUtil.resolveUnix('package.json')).name}`
+        .toLowerCase()
+        .replace(/[^a-z]+/g, '_')
+        .replace(/_+/, '_')
+    );
     out.active = true;
     return out;
   }
