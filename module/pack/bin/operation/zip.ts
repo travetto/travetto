@@ -28,7 +28,7 @@ export const Zip: PackOperation<ZipConfig, 'zip'> = {
   */
   async* exec({ workspace, output }: ZipConfig) {
     const ws = FsUtil.resolveUnix(workspace);
-    const zipFile = FsUtil.resolveUnix(ws, output);
+    const zipFile = FsUtil.resolveUnix(output);
 
     yield 'Preparing Target';
     await FsUtil.mkdirp(path.dirname(zipFile));
@@ -41,6 +41,6 @@ export const Zip: PackOperation<ZipConfig, 'zip'> = {
       await ExecUtil.spawn(`zip`, ['-r', zipFile, '.'], { cwd: ws }).result;
     }
 
-    yield color`${{ success: 'Successfully' }} archived project`;
+    yield color`${{ success: 'Successfully' }} archived project to ${{ path: zipFile.replace(FsUtil.cwd, '.') }}`;
   }
 };
