@@ -9,8 +9,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^1.0.0-gamma.4",
     "@aws-sdk/credential-provider-ini": "^1.0.0-gamma.3",
-    "@travetto/asset": "^1.1.0-alpha.2",
-    "@travetto/config": "^1.1.0-alpha.2"
+    "@travetto/asset": "^1.1.0-alpha.3",
+    "@travetto/config": "^1.1.0-alpha.3"
   },
   "title": "S3 Asset Source",
   "description": "AWS S3 backend for the travetto asset module",
@@ -30,5 +30,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.1.0-alpha.2"
+  "version": "1.1.0-alpha.3"
 }
