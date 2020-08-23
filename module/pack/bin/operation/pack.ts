@@ -26,8 +26,9 @@ export const Pack: PackOperation<AllConfig, ''> = {
       workspace: b.workspace ?? a.workspace,
     };
     for (const [k, op] of Object.entries(ops) as ['assemble', typeof Assemble][]) {
-      (ret as any)[k] = op.extend(a[k] ?? {}, b[k] ?? {});
-      (ret as any)[k].workspace = ret.workspace!;
+      // @ts-ignore
+      ret[k] = op.extend(a[k] ?? {}, b[k] ?? {});
+      ret[k]!.workspace = ret.workspace!;
     }
 
     return ret as AllConfig;

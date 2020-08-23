@@ -18,21 +18,25 @@ export class SessionAuthContextEncoder extends AuthContextEncoder {
    * Build an auth context on top of the session
    */
   read(req: Request) {
-    let val = req.session.data[this.key];
-    if (val && val.constructor !== AuthContext) {
-      val = new AuthContext(val.identity, val.principal);
+    if (req.session) {
+      let val = req.session.data[this.key];
+      if (val && val.constructor !== AuthContext) {
+        val = new AuthContext(val.identity, val.principal);
+      }
+      return val;
     }
-    return val;
   }
 
   /**
    * Persist the auth context to the session
    */
   write(ctx: AuthContext, req: Request, res: Response) {
-    if (ctx && ctx.principal) {
-      req.session.data[this.key] = ctx;
-    } else {
-      req.session.destroy(); // Kill session
+    if (req.session) {
+      if (ctx && ctx.principal) {
+        req.session.data[this.key] = ctx;
+      } else {
+        req.session.destroy(); // Kill session
+      }
     }
   }
 }

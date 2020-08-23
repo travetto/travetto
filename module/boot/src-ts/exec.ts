@@ -1,5 +1,7 @@
+/// <reference path="./exec.d.ts" />
+
 import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
-import { Worker, WorkerOptions } from 'worker_threads';
+import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 import { StreamUtil } from './stream';
 
 /**
@@ -202,10 +204,8 @@ export class ExecUtil {
       ...options,
       env: {
         ...process.env,
-        // @ts-ignore
-        ...(options.env || {})
+        ...((options.env !== SHARE_ENV ? options.env : {}) || {})
       },
-      // @ts-ignore
       argv: args
     });
 

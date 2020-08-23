@@ -1,6 +1,10 @@
 import { Util, ShutdownManager } from '@travetto/base';
 import { Timeout } from './timeout';
 
+function canCancel(o: any): o is { cancel(): any } {
+  return o && 'cancel' in o;
+}
+
 /**
  * Build an execution barrier to handle various limitations
  */
@@ -48,8 +52,7 @@ export class Barrier {
   cleanup() {
     for (const k of this.support) {
       const el = this.barriers.get(k);
-      if (el && 'cancel' in el) {
-        // @ts-ignore
+      if (canCancel(el)) {
         el.cancel();
       }
     }

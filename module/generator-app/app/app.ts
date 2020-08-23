@@ -36,7 +36,7 @@ export class TravettoGenerator extends Generator {
   }
 
   async _init() {
-    let name: string = (this.options as any).name;
+    let name: string = (this.options as unknown as { name: string }).name;
 
     if (!name) {
       const res = await this.prompt([
@@ -62,7 +62,7 @@ export class TravettoGenerator extends Generator {
 
     const context = new Context(name);
 
-    context.template = (this.options as any).template;
+    context.template = (this.options as unknown as { template: string }).template;
 
     this.sourceRoot(FsUtil.resolveUnix(__dirname, `../templates/${context.template}`));
 

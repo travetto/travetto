@@ -2,6 +2,7 @@ import * as http from 'http';
 import * as url from 'url';
 import * as Mustache from 'mustache';
 
+import { Class } from '@travetto/registry';
 import type { MailService } from '@travetto/email/src/service';
 import { ConfigManager } from '@travetto/config';
 
@@ -38,13 +39,13 @@ export class DevServerUtil {
         const cls = class { };
         DependencyRegistry.registerFactory({
           fn: () => new NodemailerTransport(EMAIL as any),
-          target: MailTransport as any,
+          target: MailTransport as unknown as Class,
           src: cls,
           id: 'nodemailer',
         });
 
         DependencyRegistry.install(cls, { curr: cls, type: 'added' });
-      } else if (!DependencyRegistry.getCandidateTypes(MailTransport as any).length) {
+      } else if (!DependencyRegistry.getCandidateTypes(MailTransport as unknown as Class).length) {
         console.error(`=`.repeat(40));
         console.error('Please configure your email setup and/or credentials for testing. Under `email-dev` in your `dev.yml`');
         console.error('Email sending will not work until the above is fixed');

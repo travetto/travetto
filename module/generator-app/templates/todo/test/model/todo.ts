@@ -21,8 +21,8 @@ class TestCRUD {
 
   @AfterEach()
   async afterEach() {
-    const mms = (await DependencyRegistry.getInstance(ModelSource)) as any;
-    return await mms.resetDatabase();
+    const mms = (await DependencyRegistry.getInstance(ModelSource));
+    return await mms.clearDatabase();
   }
 
   @Test('save it')

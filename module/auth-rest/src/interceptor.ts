@@ -42,7 +42,7 @@ export class AuthInterceptor extends RestInterceptor {
 
 
   async configure(req: Request, res: Response) {
-    req.logout = async function () { delete this.auth.principal; };
+    req.logout = async function () { delete this.auth; };
     req.login = async (sources: symbol[]) => {
       const ctx = await this.service.login(req, res, sources);
       if (ctx) {
@@ -55,14 +55,15 @@ export class AuthInterceptor extends RestInterceptor {
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
     try {
       const ctx = (await this.contextStore!.read(req))
-        // @ts-ignore
-        || new AuthContext();
+        || new AuthContext(undefined as any);
       this.context.set(ctx, req);
 
       await this.configure(req, res);
       return await next();
     } finally {
-      await this.contextStore!.write(req.auth, req, res);
+      if (req.auth) {
+        await this.contextStore!.write(req.auth, req, res);
+      }
       this.context.clear();
     }
   }

@@ -4,16 +4,21 @@ import { ExecUtil } from '@travetto/boot';
 import { ActivationTarget } from '../core/types';
 import { Workspace } from '../core/workspace';
 
-// @ts-ignore
 export abstract class BaseFeature implements ActivationTarget {
 
   static isModule = true;
 
+  public readonly module: string;
+  public readonly command: string;
+
   constructor(
-    private module?: string,
-    private command?: string
+    module?: string,
+    command?: string
+
   ) {
-    const ctxRoot = this.module!.replace('@', '').replace(/\/+/g, '.');
+    this.module = module!;
+    this.command = command!;
+    const ctxRoot = this.module.replace('@', '').replace(/\/+/g, '.');
     vscode.commands.executeCommand('setContext', `${ctxRoot}.${this.command}`, true);
     vscode.commands.executeCommand('setContext', ctxRoot, true);
   }
@@ -22,7 +27,7 @@ export abstract class BaseFeature implements ActivationTarget {
     if (this.module === Workspace.getModule()) {
       return Workspace.resolve(...rel);
     } else {
-      return Workspace.resolve('node_modules', this.module!, ...rel);
+      return Workspace.resolve('node_modules', this.module, ...rel);
     }
   }
 
@@ -56,7 +61,7 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   commandName(task: string) {
-    return `${this.module!.replace('@', '').replace(/\/+/g, '.')}.${this.command}:${task}`;
+    return `${this.module.replace('@', '').replace(/\/+/g, '.')}.${this.command}:${task}`;
   }
 
   register(task: string, handler: () => any) {

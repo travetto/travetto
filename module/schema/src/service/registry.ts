@@ -11,12 +11,6 @@ function hasType<T>(o: any): o is { type: Class<T> | string } {
 }
 
 /**
- * Get the constructor for a class
- */
-// @ts-ignore
-const getClass = <T>(o: T) => o.constructor as Class<T>;
-
-/**
  * Schema registry for listening to changes
  */
 class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
@@ -34,7 +28,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param o Actual instance
    */
   resolveSubTypeForInstance<T>(cls: Class<T>, o: T) {
-    return this.resolveSubType(cls, hasType<T>(o) ? o.type : getClass(o));
+    return this.resolveSubType(cls, hasType<T>(o) ? o.type : (o as unknown as { constructor: Class<T> }).constructor);
   }
 
   /**

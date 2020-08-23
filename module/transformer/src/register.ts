@@ -10,7 +10,7 @@ type TransformerWithHandlers = Transformer & { [HANDLERS]?: NodeTransformer[] };
  * @param obj Object to search for transformers
  */
 export function getAllTransformers(obj: any) {
-  return Object.values(obj).flatMap(x => (x as any)[HANDLERS] as NodeTransformer[] ?? []);
+  return Object.values(obj).flatMap((x: any) => x[HANDLERS] as NodeTransformer[] ?? []);
 }
 
 // Store handlers in class

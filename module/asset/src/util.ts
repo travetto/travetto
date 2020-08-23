@@ -1,10 +1,16 @@
-import { promises as fs, createReadStream } from 'fs';
+import * as fs from 'fs';
+import * as util from 'util';
 import * as path from 'path';
 import * as fileType from 'file-type';
 import * as crypto from 'crypto';
 import * as mime from 'mime';
 
 import { Asset } from './types';
+
+const fsRead = util.promisify(fs.read);
+const fsOpen = util.promisify(fs.open);
+const fsStat = util.promisify(fs.stat);
+const fsRename = util.promisify(fs.rename);
 
 /**
  * Utilities for processing assets
@@ -16,7 +22,7 @@ export class AssetUtil {
    */
   static async hashFile(pth: string) {
     const hasher = crypto.createHash('sha256').setEncoding('hex');
-    const str = createReadStream(pth);
+    const str = fs.createReadStream(pth);
     const hashStream = str.pipe(hasher);
 
     await new Promise((res, rej) => {
@@ -29,9 +35,9 @@ export class AssetUtil {
    * Read a chunk from a file, primarily used for mime detection
    */
   static async readChunk(filePath: string, bytes: number) {
-    const fd = await fs.open(filePath, 'r');
+    const fd = await fsOpen(filePath, 'r');
     const buffer = Buffer.alloc(bytes);
-    await fs.read(fd, buffer, 0, bytes, 0);
+    await fsRead(fd, buffer, 0, bytes, 0);
     return buffer;
   }
 
@@ -53,7 +59,7 @@ export class AssetUtil {
     const newFile = filePath.replace(/[.][^.]+$/, ext!);
 
     if (filePath !== newFile) {
-      await fs.rename(filePath, newFile);
+      await fsRename(filePath, newFile);
       filePath = newFile;
     }
 
@@ -79,14 +85,14 @@ export class AssetUtil {
    */
   static async fileToAsset(file: string, remote: string = file, metadata: Partial<Asset['metadata']> = {}): Promise<Asset> {
     const hash = metadata.hash ?? await this.hashFile(file);
-    const size = (await fs.stat(file)).size;
+    const size = (await fsStat(file)).size;
     const contentType = await this.resolveFileType(file);
     const name = path.basename(file);
     return {
       size,
       path: remote,
       contentType,
-      stream: createReadStream(file),
+      stream: fs.createReadStream(file),
       metadata: {
         name,
         title: name.replace(/-_/g, ' '),

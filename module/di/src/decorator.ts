@@ -76,7 +76,7 @@ export function InjectableFactory(first?: Partial<InjectableFactoryConfig<any>> 
     const config: InjectableFactoryConfig<any> = extractSymbolOrConfig([first, ...args]);
     DependencyRegistry.registerFactory({
       ...config,
-      dependencies: config.dependencies?.map(x => extractSymbolOrConfig(x as any)),
+      dependencies: config.dependencies?.map(x => extractSymbolOrConfig(x as unknown as any[])),
       fn: descriptor.value,
       id: `${target.ᚕid}#${property.toString()}`
     });

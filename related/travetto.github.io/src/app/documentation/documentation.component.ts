@@ -11,7 +11,7 @@ import { Router, NavigationEnd } from '@angular/router';
 })
 export class DocumentationComponent {
   pages: typeof PAGES = [
-    { path: 'overview', title: 'Overview' } as any,
+    { path: 'overview', title: 'Overview' } as unknown as (typeof PAGES)[number],
     ...PAGES
   ];
   url = '';

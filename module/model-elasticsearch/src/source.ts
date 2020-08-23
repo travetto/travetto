@@ -354,8 +354,7 @@ export class ElasticsearchModelSource extends ModelSource {
       out.push(obj);
     }
 
-    // @ts-ignore
-    return out as U[];
+    return out as unknown as U[];
   }
 
   /**
@@ -485,8 +484,7 @@ export class ElasticsearchModelSource extends ModelSource {
 
   async getIdsByQuery<T extends ModelCore>(cls: Class<T>, query: ModelQuery<T>) {
     const res = await this.execSearch(this.getSearchObject(cls, {
-      // @ts-ignore
-      select: { id: 1 } as SelectClause<T>,
+      select: { id: 1 } as unknown as SelectClause<T>,
       ...query
     }));
     return res.hits.hits.map(x => x._source.id);

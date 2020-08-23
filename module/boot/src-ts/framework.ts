@@ -13,7 +13,7 @@ type Module = {
   _compile?(contents: string, file: string): any;
 } & Mod;
 
-const Module = Mod as any as Module;
+const Module = Mod as unknown as Module;
 type DepResolveConfig = { root?: string, types?: DepType[] | (readonly DepType[]), maxDepth?: number };
 type DepType = 'prod' | 'dev' | 'opt' | 'peer' | 'optPeer';
 

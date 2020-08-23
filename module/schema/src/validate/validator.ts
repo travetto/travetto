@@ -21,12 +21,6 @@ function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
 }
 
 /**
- * Get the constructor for a class
- */
-// @ts-ignore
-const getClass = <T>(o: T) => o.constructor as Class<T>;
-
-/**
  * The schema validator applies the schema constraints to a given object and looks
  * for errors
  */
@@ -43,11 +37,10 @@ export class SchemaValidator {
 
     for (const field of Object.keys(schema)) {
       const fieldSchema = schema[field];
-      // @ts-ignore
-      const val = o[field];
+      const val = o[field as keyof T];
       const path = `${relative}${relative && '.'}${field}`;
 
-      const hasValue = !(val === undefined || val === null || val === '' || (Array.isArray(val) && val.length === 0));
+      const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
 
       if (!hasValue) {
         if (fieldSchema.required && fieldSchema.required.active) {
@@ -216,7 +209,7 @@ export class SchemaValidator {
    * @param view The optional view to limit the scope to
    */
   static async validate<T>(o: T, view?: string): Promise<T> {
-    let cls = getClass(o);
+    let cls = (o as unknown as { constructor: Class<T> }).constructor;
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
 
     const config = SchemaRegistry.getViewSchema(cls, view);

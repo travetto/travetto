@@ -206,6 +206,6 @@ export class ConfigUtil {
         full[k] = '*'.repeat(value.length);
       }
     }
-    return this.breakDownKeys(full) as any;
+    return this.breakDownKeys(full);
   }
 }

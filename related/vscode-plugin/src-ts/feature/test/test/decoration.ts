@@ -62,7 +62,7 @@ export class Decorations {
 
     if ('errors' in asrt.error) {
       title = asrt.error.message;
-      const messages = ((asrt.error as any).errors as (Error | string)[])
+      const messages = (asrt.error as unknown as { errors: (Error | string)[] }).errors
         .map(x => typeof x === 'string' ? x : x.message);
 
       suffix = `(${title}) ${messages.join(', ')}`;

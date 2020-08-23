@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
  * Shape of an activation target
  */
 export interface ActivationTarget {
+  module: string;
   activate?(ctx: vscode.ExtensionContext): void | Promise<void>;
   deactivate?(): void | Promise<void>;
 }

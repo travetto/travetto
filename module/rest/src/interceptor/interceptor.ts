@@ -21,7 +21,7 @@ export abstract class RestInterceptor {
    * @param route The route to check
    * @param controller The controller the route belongs to
    */
-  abstract applies?(route: RouteConfig, controller: Partial<ControllerConfig>): boolean;
+  applies?(route: RouteConfig, controller: Partial<ControllerConfig>): boolean;
 
   /**
    * Actually handle the request, response when applicable

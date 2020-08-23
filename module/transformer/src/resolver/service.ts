@@ -90,7 +90,7 @@ export class TypeResolver implements Checker {
           delete result.tsSubTypes;
         }
         if (finalize) {
-          result = finalize(result as any);
+          result = finalize(result as never);
         }
       }
 

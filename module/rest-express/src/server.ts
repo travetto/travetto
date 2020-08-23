@@ -73,9 +73,8 @@ export class ExpressRestServer extends RestServer<express.Application> {
         }
       );
 
-      router.options('*',
-        // @ts-ignore
-        optionHandler);
+      // @ts-ignore
+      router.options('*', optionHandler);
     }
 
     router.key = key;

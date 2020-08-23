@@ -13,9 +13,6 @@ import { ModelSource, IModelSource, ValidStringFields } from './source';
 import { ModelRegistry } from '../registry/registry';
 import { QueryLanguageParser } from '../internal/query-lang/parser';
 
-// @ts-ignore
-const getClass = <T>(o: T) => o.constructor as Class<T>;
-
 /**
  * Model Service, takes in a model source as provided by various db implementations
  */
@@ -152,8 +149,7 @@ export class ModelService implements IModelSource {
     this.prepareQuery(cls, query);
 
     const res = await this.source.query<T, U>(cls, query);
-    // @ts-ignore
-    return res.map(o => this.postLoad(cls, o as T) as U);
+    return res.map(o => this.postLoad(cls, o as unknown as T) as unknown as U);
   }
 
   /**
@@ -217,7 +213,7 @@ export class ModelService implements IModelSource {
   async saveOrUpdate<T extends ModelCore>(cls: Class<T>, o: T, query: ModelQuery<T> & { keepId?: boolean }) {
     this.prepareQuery(cls, query);
 
-    const res = await this.getAllByQuery(getClass(o), { ...query, limit: 2 });
+    const res = await this.getAllByQuery(o.constructor as Class<T>, { ...query, limit: 2 });
     if (res.length === 1) {
       o = Util.deepAssign(res[0], o);
       return await this.update(cls, o);
