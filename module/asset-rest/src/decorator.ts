@@ -33,15 +33,13 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
     const handler = target.constructor.prototype[propertyKey];
     ControllerRegistry.registerEndpointParameter(target.constructor as Class, handler, {
       ...param as ParamConfig,
-      // @ts-ignore
-      location: 'files',
+      location: 'files' as 'body',
       async resolve(req: Request) {
         const assetConfig = await DependencyRegistry.getInstance(RestAssetConfig);
 
         if (!req.files) { // Prevent duplication if given multiple decorators
           req.files = await AssetRestUtil.upload(req, { ...assetConfig, ...finalConf },
-            // @ts-ignore
-            `${target.constructor.basePath}/`
+            `${(target.constructor as unknown as ControllerConfig).basePath}/`
           );
         }
       },

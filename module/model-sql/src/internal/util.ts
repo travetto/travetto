@@ -38,9 +38,9 @@ export class SQLUtil {
   /**
    * Clean results from db, by dropping internal fields
    */
-  static cleanResults<T>(dct: DialectState, o: T[]): T[];
-  static cleanResults<T>(dct: DialectState, o: T): T;
-  static cleanResults<T>(dct: DialectState, o: T | T[]): T | T[] {
+  static cleanResults<T, U = T>(dct: DialectState, o: T[]): U[];
+  static cleanResults<T, U = T>(dct: DialectState, o: T): U;
+  static cleanResults<T, U = T>(dct: DialectState, o: T | T[]): U | U[] {
     if (Array.isArray(o)) {
       return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x));
     } else if (!Util.isSimple(o)) {
@@ -51,9 +51,9 @@ export class SQLUtil {
           o[k] = this.cleanResults(dct, o[k]);
         }
       }
-      return { ...o };
+      return { ...o } as unknown as U[];
     } else {
-      return o;
+      return o as unknown as U;
     }
   }
 
@@ -285,8 +285,9 @@ export class SQLUtil {
     const mapping: Record<string, T> = {};
     for (const el of v) {
       const key = el[dct.pathField.name as keyof T];
-      // @ts-ignore
-      mapping[key] = el;
+      if (typeof key === 'string') {
+        mapping[key] = el;
+      }
     }
     return mapping;
   }

@@ -99,8 +99,7 @@ export class AssertCheck {
             if (/not/i.test(fn)) {
               common.state = 'should not';
             }
-            // @ts-ignore
-            assert[fn].apply(null, args);
+            assert[fn as 'ok'].apply(null, args as [string]);
           } else if (args[1] && fn && args[1][fn]) { // Method call
             asrt(args[1][fn](args[0]));
           }

@@ -81,7 +81,7 @@ export class VisitorFactory<S extends State = State> {
 
         // Process added content
         const changed = state.added.size;
-        let statements = ret.statements as any as ts.Statement[];
+        let statements: ts.NodeArray<ts.Statement> | ts.Statement[] = ret.statements;
         while (state.added.size) {
           for (const [k, all] of [...state.added]) {
             const idx = k === -1 ? state.added.size : k;

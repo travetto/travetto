@@ -11,7 +11,7 @@ const hasItr = (o: any): o is Iterable<any> => Symbol.iterator in o;
 export class IterableInputSource<X> implements InputSource<X> {
 
   private src: Itr<X>;
-  private ondeck: X;
+  private ondeck?: X;
   private done = false;
 
   constructor(src: Iterable<X> | AsyncIterable<X> | (() => Generator<X>) | (() => AsyncGenerator<X>) | Itr<X>) {
@@ -53,7 +53,7 @@ export class IterableInputSource<X> implements InputSource<X> {
   async next() {
     await this.hasNext();
 
-    const out = this.ondeck;
+    const out = this.ondeck!;
     delete this.ondeck;
     return out;
   }

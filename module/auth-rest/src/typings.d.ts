@@ -6,7 +6,7 @@ declare global {
       /**
        * The auth context
        */
-      auth: AuthContext;
+      auth?: AuthContext;
       /**
        * The login context
        */

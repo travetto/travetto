@@ -12,10 +12,10 @@ type Module = {
   _compile?(contents: string, file: string): any;
 } & Mod;
 
-const Module = Mod as any as Module;
+const Module = Mod as unknown as Module;
 
 declare const global: {
-  trvInit: {
+  trvInit?: {
     reset: () => void;
   };
   ᚕsrc: (f: string) => string;
@@ -129,7 +129,6 @@ export class CompileUtil {
     }
 
     delete require.extensions[TranspileUtil.ext];
-    // @ts-ignore
     delete global.trvInit;
     Module._load = this.ogModuleLoad;
 

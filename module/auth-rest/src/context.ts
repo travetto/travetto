@@ -4,14 +4,14 @@ import { Inject, Injectable } from '@travetto/di';
 import { AuthContext } from '@travetto/auth';
 import { AsyncContext } from '@travetto/context';
 
-const CTX_SYM = Symbol.for('@travetto/auth-rest:context');
+const CTX_SYM = Symbol.for('@trv:auth-rest/context');
 
 /**
  * Integration with the context service, to allow for tracking of
  * user state through async calls.
  */
 @Injectable()
-@ContextProvider(AuthContext, (c, req) => req!.auth)
+@ContextProvider(AuthContext, (c, req) => req.auth)
 export class AuthContextService {
 
   @Inject()
@@ -57,7 +57,7 @@ export class AuthContextService {
    * @param req The travetto request
    */
   getId(req?: Request) {
-    return this.get(req).id;
+    return this.get(req)?.id;
   }
 
   /**

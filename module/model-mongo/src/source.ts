@@ -20,7 +20,7 @@ import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
 import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
 
-function hasRawId(o: any): o is { _id: mongo.ObjectID } {
+function hasRawId(o: any): o is { _id?: mongo.ObjectID } {
   return '_id' in o;
 }
 

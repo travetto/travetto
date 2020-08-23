@@ -79,7 +79,7 @@ export class CliServicePlugin extends BasePlugin {
       process.stdout.write('\x1B[?25h\n');
     } else {
       for (const res of resolved) {
-        console.log((res as any).value);
+        console.log((res as unknown as { value: string }).value);
       }
     }
   }

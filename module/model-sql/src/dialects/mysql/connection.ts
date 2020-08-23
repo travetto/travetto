@@ -6,10 +6,16 @@ import { AsyncContext } from '@travetto/context';
 import { ConnectionSupport } from '../../connection';
 import { SQLModelConfig } from '../../config';
 
+const isFn = (o: any): o is Function => o && 'bind' in o;
+
 const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) => {
-  // @ts-ignore
-  const fn = ctx[prop].bind(ctx) as (cb: (err: any, val?: any) => void) => void;
-  return new Promise<V>((res, rej) => fn((e, v) => e ? rej(e) : res(v)));
+  const val = ctx[prop];
+  if (isFn(val)) {
+    const fn = val.bind(ctx) as (cb: (err: any, val?: any) => void) => void;
+    return new Promise<V>((res, rej) => fn((e, v) => e ? rej(e) : res(v)));
+  } else {
+    throw new Error(`Invalid async function: ${prop}`);
+  }
 };
 
 /**
