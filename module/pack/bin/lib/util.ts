@@ -5,9 +5,9 @@ import * as path from 'path';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { FsUtil, ScanFs } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
+import { YamlUtil } from '@travetto/yaml';
 
 import { CommonConfig, PackOperation } from './types';
-import { YamlUtil } from '@travetto/yaml';
 
 export const BASE_CONFIG = [FsUtil.resolveUnix(__dirname, '..', 'pack.config.yml')];
 export const USER_CONFIG = ['pack.config.yml', 'pack.config.yaml'].map(x => FsUtil.resolveUnix(x));

@@ -1,8 +1,8 @@
 import { Controller, Get, SetHeaders } from '@travetto/rest';
 import { Inject } from '@travetto/di';
+import { YamlUtil } from '@travetto/yaml';
 
 import { OpenApiService } from './service';
-import { YamlUtil } from '@travetto/yaml';
 
 /**
  * Basic controller for surfacing the api spec

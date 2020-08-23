@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 
-import { ApplicationConfig } from './types';
 import { ScanApp } from '@travetto/base';
+
+import { ApplicationConfig } from './types';
 import { ApplicationRegistry } from './registry';
 
 /**

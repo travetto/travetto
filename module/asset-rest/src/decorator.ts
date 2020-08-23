@@ -4,10 +4,10 @@ import { AppError } from '@travetto/base';
 import { ControllerRegistry, Request, ParamConfig, ControllerConfig } from '@travetto/rest';
 import { Class } from '@travetto/registry';
 import { AssetImpl } from '@travetto/asset/src/internal/types';
+import { DependencyRegistry } from '@travetto/di';
 
 import { AssetRestUtil } from './util';
 import { RestAssetConfig } from './config';
-import { DependencyRegistry } from '@travetto/di';
 
 const extractUpload = (config: ParamConfig, req: Request) => req.files[config.name!];
 
