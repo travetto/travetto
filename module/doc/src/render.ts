@@ -1,6 +1,7 @@
+import { FsUtil } from '@travetto/boot';
+
 import * as n from './nodes';
 import { highlight } from './code-highlight';
-import { FsUtil } from '@travetto/boot';
 
 const ROOT = FsUtil.resolveUnix(FsUtil.cwd, '..', '..');
 

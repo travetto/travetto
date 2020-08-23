@@ -2,6 +2,7 @@ import type { Compiler } from '@travetto/compiler';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager, ScanApp, AppManifest } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
+
 import { Events, RunEvent } from './types';
 
 const FIXED_MODULES = new Set([

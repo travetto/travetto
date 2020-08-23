@@ -1,11 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
-
+import { EnvUtil } from '@travetto/boot';
 import { CacheSource, MemoryCacheSource } from '@travetto/cache';
 import { Util, AppError } from '@travetto/base';
-import { TRV_SESSION } from './internal/types';
-import { EnvUtil } from '@travetto/boot';
 
+import { TRV_SESSION } from './internal/types';
 import { Session } from './types';
 import { SessionConfig } from './config';
 import { SessionEncoder } from './encoder/encoder';
