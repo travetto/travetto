@@ -199,7 +199,7 @@ would produce an exception similar to following structure
 $ alt/docs/src/person-invalid-output.js -r @travetto/boot/register alt/docs/src/person-invalid-output.js
 
 ValidationResultError: Validation errors have occurred
-    at Function.validate (./src/validate/validator.ts:241:13)
+    at Function.validate (./src/validate/validator.ts:234:13)
     at validate (./alt/docs/src/person-binding-invalid.ts:15:25)
     at ./alt/docs/src/person-invalid-output.js:9:11 {
   category: 'data',
@@ -512,7 +512,7 @@ All that happens now, is the type is exported, and the class above is able to pr
 $ alt/docs/src/custom-type-output.js -r @travetto/boot/register alt/docs/src/custom-type-output.js
 
 ValidationResultError: Validation errors have occurred
-    at Function.validate (./src/validate/validator.ts:241:13)
+    at Function.validate (./src/validate/validator.ts:234:13)
     at ./alt/docs/src/custom-type-output.js:17:27 {
   category: 'data',
   payload: { errors: [ [Object] ] },

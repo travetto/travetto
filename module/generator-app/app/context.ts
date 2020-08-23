@@ -13,8 +13,8 @@ export class Context {
   modules: Record<string, boolean> = {};
 
   author = {
-    name: ExecUtil.execSync('git config user.name').trim() || EnvUtil.get('USER'),
-    email: ExecUtil.execSync('git config user.email').trim()
+    name: ExecUtil.execSync('git', ['config', 'user.name']).trim() || EnvUtil.get('USER'),
+    email: ExecUtil.execSync('git', ['config', 'user.email']).trim()
   };
 
   constructor(public name: string) {

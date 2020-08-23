@@ -111,13 +111,13 @@ Everything is based on absolute paths being passed in, and translated into cache
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 ## File System Interaction
-[FsUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/fs.ts#L12) provides some high level functionality (like recursive directory delete).
+[FsUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/fs.ts#L10) provides some high level functionality (like recursive directory delete).
 
 ## File System Scanning
-[ScanFs](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L56) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
+[ScanFs](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L57) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L72) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L74) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

@@ -44,6 +44,8 @@ When working with an [fastify](https://www.fastify.io/) applications, the module
 const app = fastify(fastConf);
     app.register(require('fastify-compress'));
     app.register(require('fastify-formbody'));
-    app.addContentTypeParser('multipart/form-data;', (req: IncomingMessage, done: (err: Error | null, body?: any) => void) => {
+    app.addContentTypeParser('multipart/form-data;', (_r, _p, done) => done(null));
 ```
 
+## Extension - AWS Lambda
+The [fastify](https://www.fastify.io/) module supports integration with [aws-lambda-fastify](https://github.com/fastify/aws-lambda-fastify/blob/master/README.md) when installed.  This produces an instance of [RestServer](https://github.com/travetto/travetto/tree/master/module/rest/src/server/server.ts#L16) that is able to integrate with AWS appropriately. 

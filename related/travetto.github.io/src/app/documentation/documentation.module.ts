@@ -34,7 +34,6 @@ import { RestComponent } from './gen/rest/rest.component';
 import { RestExpressComponent } from './gen/rest-express/rest-express.component';
 import { RestKoaComponent } from './gen/rest-koa/rest-koa.component';
 import { RestFastifyComponent } from './gen/rest-fastify/rest-fastify.component';
-import { RestAwsLambdaComponent } from './gen/rest-aws-lambda/rest-aws-lambda.component';
 import { TestComponent } from './gen/test/test.component';
 import { CacheComponent } from './gen/cache/cache.component';
 import { CliComponent } from './gen/cli/cli.component';
@@ -51,6 +50,7 @@ import { AppComponent } from './gen/app/app.component';
 import { OpenapiComponent } from './gen/openapi/openapi.component';
 import { CommandComponent } from './gen/command/command.component';
 import { WatchComponent } from './gen/watch/watch.component';
+import { PackComponent } from './gen/pack/pack.component';
 
 @NgModule({
   imports: [
@@ -97,7 +97,6 @@ import { WatchComponent } from './gen/watch/watch.component';
     RestExpressComponent,
     RestKoaComponent,
     RestFastifyComponent,
-    RestAwsLambdaComponent,
     TestComponent,
     CacheComponent,
     CliComponent,
@@ -114,7 +113,8 @@ import { WatchComponent } from './gen/watch/watch.component';
     CommandComponent,
     WatchComponent,
     ImageComponent,
-    TransformerComponent
+    TransformerComponent,
+    PackComponent
   ]
 })
 export class DocumentationModule { }

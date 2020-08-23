@@ -118,8 +118,7 @@ Usage:  model:sql-schema [options]
 
 Options:
   -a, --app [app]      Application root to export, (default: .)
-  -c, --clear [clear]  Whether or not to generate DROP statements first
-                       (default: true)
+  -c, --clear [clear]  Whether or not to generate DROP statements first (default: true)
   -h, --help           display help for command
 ```
 

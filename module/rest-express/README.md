@@ -49,3 +49,5 @@ const app = express();
     app.use(bodyParser.raw({ type: 'image/*' }));
 ```
 
+## Extension - AWS Lambda
+The [express](https://expressjs.com) module supports integration with [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md) when installed.  This produces an instance of [RestServer](https://github.com/travetto/travetto/tree/master/module/rest/src/server/server.ts#L16) that is able to integrate with AWS appropriately.

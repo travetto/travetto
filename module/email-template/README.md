@@ -64,10 +64,8 @@ Usage:  email:dev [options]
 
 Options:
   -p, --port [port]               Port to serve ui on (default: "3839")
-  -r, --reload-rate [reloadRate]  The rate to reload the UI at (default:
-                                  "1000")
-  -o, --open [open]               Open the ui automatically on start (default:
-                                  true)
+  -r, --reload-rate [reloadRate]  The rate to reload the UI at (default: "1000")
+  -o, --open [open]               Open the ui automatically on start (default: true)
   -h, --help                      display help for command
 ```
 
@@ -82,8 +80,7 @@ $ travetto travetto email:compile -h
 Usage:  email:compile [options]
 
 Options:
-  -w, --watch [watch]  Compile in watch mode, requires @travetto/watch
-                       (default: false)
+  -w, --watch [watch]  Compile in watch mode, requires @travetto/watch (default: false)
   -h, --help           display help for command
 ```
 
@@ -199,8 +196,7 @@ $ travetto travetto email:compile --help
 Usage:  email:compile [options]
 
 Options:
-  -w, --watch [watch]  Compile in watch mode, requires @travetto/watch
-                       (default: false)
+  -w, --watch [watch]  Compile in watch mode, requires @travetto/watch (default: false)
   -h, --help           display help for command
 ```
 
@@ -216,10 +212,8 @@ Usage:  email:dev [options]
 
 Options:
   -p, --port [port]               Port to serve ui on (default: "3839")
-  -r, --reload-rate [reloadRate]  The rate to reload the UI at (default:
-                                  "1000")
-  -o, --open [open]               Open the ui automatically on start (default:
-                                  true)
+  -r, --reload-rate [reloadRate]  The rate to reload the UI at (default: "1000")
+  -o, --open [open]               Open the ui automatically on start (default: true)
   -h, --help                      display help for command
 ```
 

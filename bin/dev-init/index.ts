@@ -47,7 +47,7 @@ async function finalizeModule(root: string) {
   await FsUtil.mkdirp(`${root}/node_modules/.bin`);
   await FsUtil.symlink(`${MOD_ROOT}/cli/bin/travetto.js`, `${root}/node_modules/.bin/trv`);
   await FsUtil.symlink(`${MOD_ROOT}/cli/bin/travetto.js`, `${root}/node_modules/.bin/travetto`);
-  return `finalized ${links} linked`;
+  return `finalized ${links} links`;
 }
 
 /**
@@ -70,8 +70,9 @@ export async function run() {
     .filter(x => !!x && x.includes(FsUtil.cwd)).map(x => FsUtil.resolveUnix(x));
 
   // Finalize all modules
+  console.log('Linking Modules');
   for (const pkg of packages) {
-    await withMessage(`@travetto/${path.basename(pkg)}`, finalizeModule(pkg));
+    await withMessage(`- @travetto/${path.basename(pkg)}`.padEnd(35), finalizeModule(pkg));
   }
 
   await withMessage('vscode-plugin install', async () => {

@@ -288,12 +288,12 @@ First we must start the application:
 ```bash
 $ /bin/bash alt/docs/bin/startup.sh
 
-2020-03-14T04:00:00.618Z info  [./node_modules/@travetto/app/src/registry.ts:32] Running application rest @travetto/rest/support/application.rest.ts
-2020-03-14T04:00:00.837Z info  [./node_modules/@travetto/app/src/registry.ts:33] Configured {
+2020-03-14T04:00:00.618Z info  [./node_modules/@travetto/app/src/registry.ts:33] Running application rest @travetto/rest/support/application.rest.ts
+2020-03-14T04:00:00.837Z info  [./node_modules/@travetto/app/src/registry.ts:34] Configured {
   app: {
     watch: true,
     readonly: false,
-    travetto: '1.0.5',
+    travetto: '1.1.0-alpha.3',
     name: '@travetto/todo-app',
     version: undefined,
     license: 'ISC',
@@ -313,7 +313,7 @@ $ /bin/bash alt/docs/bin/startup.sh
     }
   }
 }
-2020-03-14T04:00:01.510Z info  [./node_modules/@travetto/rest/src/server/server.ts:187] Listening on 3000
+2020-03-14T04:00:01.510Z info  [./node_modules/@travetto/rest/src/server/server.ts:207] Listening on 3000
 ```
  
 
