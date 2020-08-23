@@ -399,4 +399,26 @@ SSL support can be enabled by setting <code class="item input">rest.ssl.active: 
 <h2 id="full-config">Full Config</h2>
 The entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/server/config.ts#L13">RestConfig</a> which will show the full set of valid configuration parameters for the rest module.
 
+<h2 id="serverless">Serverless</h2>
+<h3 id="aws-lambda">AWS Lambda</h3>
+
+The module provides support basic support with AWS lambdas. When using one of the specific rest modules (e.g. <a class="module-link" href="/docs/rest-express" title="Express provider for the travetto rest module.">Express REST Source</a>), you can install the appropriate lambda-related dependencies installed (e.g. <a target="_blank" class="external-link" href="https://github.com/awslabs/aws-serverless-express/blob/master/README.md">aws-serverless-express</a>) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers. 
+
+<h2 id="packaging-lambdas">Packaging Lambdas</h2>
+
+      <figure class="terminal">
+      <figcaption class="terminal">Invoking a Package Build
+      
+      </figcaption>
+      <pre><code class="language-bash">$ travetto travetto pack rest/lambda -h
+
+Command failed: npx travetto pack rest/lambda -h
+
+Missing Package
+--------------------
+To use pack please run:
+
+<span class="token function">npm</span> i --save-dev @travetto/pack</code></pre>     
+      </figure>
+
 </div>

@@ -27,7 +27,7 @@ export interface Request {
       /**
        * The auth context
        */
-      auth: AuthContext;
+      auth?: AuthContext;
       /**
        * The login context
        */

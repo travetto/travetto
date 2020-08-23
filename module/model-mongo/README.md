@@ -28,19 +28,16 @@ export class Init {
 }
 ```
 
-where the [MongoModelConfig](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/config.ts#L15) is defined by:
+where the [MongoModelConfig](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/config.ts#L12) is defined by:
 
 **Code: Structure of MongoModelConfig**
 ```typescript
 import * as mongo from 'mongodb';
-import * as fs from 'fs';
-import * as util from 'util';
+import { promises as fs } from 'fs';
 
+import { FsUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
-
-const exists = util.promisify(fs.exists);
-const read = util.promisify(fs.readFile);
 
 /**
  * Mongo model config
@@ -84,7 +81,7 @@ export class MongoModelConfig {
    */
   async fetch(val: string) {
     try {
-      return (await exists(val)) ? read(val) : ResourceManager.read(val);
+      return (await FsUtil.exists(val)) ? fs.readFile(val) : ResourceManager.read(val);
     } catch {
       return val;
     }
@@ -124,5 +121,5 @@ export class MongoModelConfig {
 }
 ```
 
-and can be overridden via environment variables or config files, as defined in [Configuration](https://github.com/travetto/travetto/tree/master/module/config#readme "Environment-aware config management using yaml files").  The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts#L17) path or just a standard file path.
+and can be overridden via environment variables or config files, as defined in [Configuration](https://github.com/travetto/travetto/tree/master/module/config#readme "Environment-aware config management using yaml files").  The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts#L14) path or just a standard file path.
 

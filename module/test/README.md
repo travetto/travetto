@@ -229,10 +229,8 @@ $ travetto travetto test --help
 Usage:  test [options] [regexes...]
 
 Options:
-  -f, --format <format>            Output format for test results (default:
-                                   "tap")
-  -c, --concurrency <concurrency>  Number of tests to run concurrently
-                                   (default: "4")
+  -f, --format <format>            Output format for test results (default: "tap")
+  -c, --concurrency <concurrency>  Number of tests to run concurrently (default: "4")
   -m, --mode <mode>                Test run mode (default: "all")
   -h, --help                       display help for command
 ```

@@ -1,4 +1,4 @@
-/// <reference path="./exec.d.ts" />
+/// <reference path="./worker_thread.d.ts" />
 
 import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';

@@ -17,7 +17,7 @@ $ travetto travetto pack --help
 Usage:  pack [options] [mode]
 
 Options:
-  -w --workspace [workspace]  Workspace directory (default: "dist/workspace")
+  -w --workspace [workspace]  Workspace directory (default: "/tmp/pack_travetto_pack")
   -h, --help                  display help for command
 ```
 
@@ -83,7 +83,7 @@ $ travetto travetto pack:assemble --help
 Usage:  pack:assemble [options] [mode]
 
 Options:
-  -w --workspace [workspace]  Workspace directory (default: "dist/workspace")
+  -w --workspace [workspace]  Workspace directory (default: "/tmp/pack_travetto_pack")
   -k --keep-source [boolean]  Should source be preserved (default: true)
   -r --readonly [boolean]     Build a readonly deployable (default: true)
   -h, --help                  display help for command
@@ -107,7 +107,7 @@ $ travetto travetto pack:zip --help
 Usage:  pack:zip [options] [mode]
 
 Options:
-  -w --workspace [workspace]  Workspace directory (default: "dist/workspace")
+  -w --workspace [workspace]  Workspace directory (default: "/tmp/pack_travetto_pack")
   -o --output [output]        Output File (default: "output.zip")
   -h, --help                  display help for command
 ```

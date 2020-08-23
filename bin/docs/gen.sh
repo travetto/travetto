@@ -8,8 +8,18 @@ function link() {
   popd
 }
 
-link module/model          rest config
-link module/schema         rest config
+sed -i'' -E 's/(process.stdout.columns \|\|).*;/\1 140;/' node_modules/commander/index.js
+
+link module/auth-rest      app
+link module/auth-passport  app
+link module/model          rest app config
+link module/schema         rest app config
+link module/openapi        app
+link module/rest           app
+link module/rest-fastify   app
+link module/rest-koa       app
+link module/rest-express   app
+
 link related/vscode-plugin cli  config boot doc compiler registry base test app
 ln -sf `pwd`/module/cli/bin/travetto.js related/vscode-plugin/node_modules/.bin/trv
 

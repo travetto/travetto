@@ -90,7 +90,7 @@ export class UserService {
 
 ## Building a Custom Source
 
-The module comes with a [MemoryCacheSource](https://github.com/travetto/travetto/tree/master/module/cache/src/source/memory.ts#L8) and a [FileCacheSource](https://github.com/travetto/travetto/tree/master/module/cache/src/source/file.ts#L22). The module also has extension for a [redis](https://redis.io) source and [Data Modeling](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for CRUD operations with advanced query support.")-backed source.
+The module comes with a [MemoryCacheSource](https://github.com/travetto/travetto/tree/master/module/cache/src/source/memory.ts#L8) and a [FileCacheSource](https://github.com/travetto/travetto/tree/master/module/cache/src/source/file.ts#L14). The module also has extension for a [redis](https://redis.io) source and [Data Modeling](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for CRUD operations with advanced query support.")-backed source.
 
 **Code: Cache Source Structure**
 ```typescript

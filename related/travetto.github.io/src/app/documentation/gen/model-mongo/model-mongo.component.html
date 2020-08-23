@@ -35,21 +35,18 @@ Out of the box, by installing the module, everything should be wired up by defau
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-mongo/src/config.ts#L15">MongoModelConfig</a> is defined by:
+where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-mongo/src/config.ts#L12">MongoModelConfig</a> is defined by:
 
       <figure class="code">
       <figcaption class="code">Structure of MongoModelConfig
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model-mongo/src/config.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> mongo <span class="token keyword">from</span> <span class="token string">'mongodb'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> util <span class="token keyword">from</span> <span class="token string">'util'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> promises <span class="token keyword">as</span> fs <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
 
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FsUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ResourceManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">const</span> exists <span class="token operator">=</span> util<span class="token punctuation">.</span><span class="token function">promisify</span><span class="token punctuation">(</span>fs<span class="token punctuation">.</span>exists<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">const</span> read <span class="token operator">=</span> util<span class="token punctuation">.</span><span class="token function">promisify</span><span class="token punctuation">(</span>fs<span class="token punctuation">.</span>readFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * Mongo model config
@@ -93,7 +90,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
    */</span>
   <span class="token keyword">async</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token parameter">val<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token function">exists</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token function">read</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span> <span class="token operator">:</span> ResourceManager<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token keyword">await</span> FsUtil<span class="token punctuation">.</span><span class="token function">exists</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">?</span> fs<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span> <span class="token operator">:</span> ResourceManager<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span> <span class="token keyword">catch</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">return</span> val<span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
@@ -133,7 +130,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-and can be overridden via environment variables or config files, as defined in <a class="module-link" href="/docs/config" title="Environment-aware config management using yaml files">Configuration</a>.  The SSL file options in <code class="item input">clientOptions</code> will automatically be resolved to files when given a path.  This path can be a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts#L17">ResourceManager</a> path or just a standard file path.
+and can be overridden via environment variables or config files, as defined in <a class="module-link" href="/docs/config" title="Environment-aware config management using yaml files">Configuration</a>.  The SSL file options in <code class="item input">clientOptions</code> will automatically be resolved to files when given a path.  This path can be a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts#L14">ResourceManager</a> path or just a standard file path.
 
 
 </div>

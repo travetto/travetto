@@ -40,6 +40,7 @@ import { EmailTemplateComponent } from './gen/email-template/email-template.comp
 import { YamlComponent } from './gen/yaml/yaml.component';
 import { TransformerComponent } from './gen/transformer/transformer.component';
 import { ImageComponent } from './gen/image/image.component';
+import { PackComponent } from './gen/pack/pack.component';
 
 export const PAGES = [
   { path: 'di', title: 'Dependency Injection  ', component: DiComponent },
@@ -110,6 +111,7 @@ export const PAGES = [
       { path: 'cache', title: 'Cache', component: CacheComponent },
       { path: 'command', title: 'Command', component: CommandComponent },
       { path: 'context', title: 'Context', component: ContextComponent },
+      { path: 'pack', title: 'Pack', component: PackComponent },
       { path: 'worker', title: 'Worker', component: WorkerComponent },
       { path: 'watch', title: 'Watch', component: WatchComponent }
     ]

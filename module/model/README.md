@@ -31,7 +31,7 @@ export class User extends BaseModel {
 The `User` model is now ready to be used with the model services.
 
 ## Access/Storage
-The [ModelService](https://github.com/travetto/travetto/tree/master/module/model/src/service/model.ts#L24) is the foundation for all access to the storage layer, and provides a comprehensive set of functionality.  The service includes support for modifying individual records, bulk update/insert/delete, partial updates, finding records, and more.  This should be the expected set of functionality for storage and retrieval.
+The [ModelService](https://github.com/travetto/travetto/tree/master/module/model/src/service/model.ts#L21) is the foundation for all access to the storage layer, and provides a comprehensive set of functionality.  The service includes support for modifying individual records, bulk update/insert/delete, partial updates, finding records, and more.  This should be the expected set of functionality for storage and retrieval.
 
 **Code: Using ModelService with the User model**
 ```typescript
@@ -59,7 +59,7 @@ export class UserManager {
 }
 ```
 
-The [ModelService](https://github.com/travetto/travetto/tree/master/module/model/src/service/model.ts#L24) itself relies upon a [ModelSource](https://github.com/travetto/travetto/tree/master/module/model/src/service/source.ts#L58) which is the driver for the storage layer.
+The [ModelService](https://github.com/travetto/travetto/tree/master/module/model/src/service/model.ts#L21) itself relies upon a [ModelSource](https://github.com/travetto/travetto/tree/master/module/model/src/service/source.ts#L58) which is the driver for the storage layer.
 
 During development, [ModelSource](https://github.com/travetto/travetto/tree/master/module/model/src/service/source.ts#L58) supports the ability to respond to model changes in real-time, and to modify the underlying storage mechanism.  An example of this would be [elasticsearch](https://elastic.co) schemas being updated as fields are added or removed from the [@Model](https://github.com/travetto/travetto/tree/master/module/model/src/registry/decorator.ts#L12) class.
 

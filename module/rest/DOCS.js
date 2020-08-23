@@ -1,4 +1,4 @@
-const { doc: d, lib, SnippetLink, Section, List, inp, pth, Code, SubSection, Mod, Note, Ordered, Command, Ref, Snippet } = require('@travetto/doc');
+const { doc: d, lib, Execute, SnippetLink, Section, List, inp, pth, Code, SubSection, Mod, Note, Ordered, Command, Ref, Snippet } = require('@travetto/doc');
 const { Application } = require('@travetto/app');
 
 const { Controller } = require('./src/decorator/controller');

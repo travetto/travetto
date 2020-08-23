@@ -70,10 +70,8 @@ Usage:  run [options] [application] [args...]
 
 Options:
   -e, --env [env]                 Application environment (dev|prod|<any>)
-  -p, --profile [profile]         Specify additional application profiles
-                                  (default: [])
-  -r, --resource [resourcesRoot]  Specify additional resource root locations
-                                  (default: [])
+  -p, --profile [profile]         Specify additional application profiles (default: [])
+  -r, --resource [resourcesRoot]  Specify additional resource root locations (default: [])
   -h, --help                      display help for command
 
 Available Applications:
@@ -109,10 +107,8 @@ Usage: travetto run [options] [application] [args...]
 
 Options:
   -e, --env [env]                 Application environment (dev|prod|<any>)
-  -p, --profile [profile]         Specify additional application profiles
-                                  (default: [])
-  -r, --resource [resourcesRoot]  Specify additional resource root locations
-                                  (default: [])
+  -p, --profile [profile]         Specify additional application profiles (default: [])
+  -r, --resource [resourcesRoot]  Specify additional resource root locations (default: [])
   -h, --help                      display help for command
 
 Available Applications:
@@ -150,9 +146,9 @@ Configured {
   app: {
     watch: true,
     readonly: false,
-    travetto: '1.0.5',
+    travetto: '1.1.0-alpha.3',
     name: '@travetto/app',
-    version: '1.0.5',
+    version: '1.1.0-alpha.3',
     license: 'MIT',
     description: 'Application registration/management and run support.',
     author: {
