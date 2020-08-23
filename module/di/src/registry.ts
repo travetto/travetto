@@ -294,9 +294,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
     if (pconfig.dependencies) {
       config.dependencies = {
-        // @ts-ignore
         fields: {},
-        ...pconfig.dependencies
+        ...pconfig.dependencies as Omit<InjectableConfig['dependencies'], 'fields'>
       };
     }
   }

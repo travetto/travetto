@@ -23,7 +23,7 @@ export abstract class PrincipalSource {
    * Resolves an identity to a principal
    * @param ident The denitity to resolve as  Principal
    */
-  abstract resolvePrincipal(ident: Identity): Promise<Principal>;
+  abstract resolvePrincipal(ident: Identity): Promise<Principal> | Principal;
 
   /**
    * Resolves or creates a principal as needed

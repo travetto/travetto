@@ -59,7 +59,7 @@ export class CoreUtil {
    * @param src
    * @param statements
    */
-  static updateSource(factory: ts.NodeFactory, src: ts.SourceFile, statements: ts.Statement[]) {
+  static updateSource(factory: ts.NodeFactory, src: ts.SourceFile, statements: ts.NodeArray<ts.Statement> | ts.Statement[]) {
     return factory.updateSourceFile(
       src, statements, src.isDeclarationFile, src.referencedFiles, src.typeReferenceDirectives, src.hasNoDefaultLib
     );

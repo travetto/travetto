@@ -180,17 +180,13 @@ export class ShutdownManager {
    * Listen for an unhandled event, as a promise
    */
   static listenForUnhandled(): Promise<void> & { cancel: () => void } {
-    const uncaught = Util.resolvablePromise();
-    // @ts-ignore
-    const cancel = this.onUnhandled(err => uncaught.reject(err) || true, 0);
-    Object.assign(uncaught, {
-      cancel: () => {
-        cancel(); // Remove the handler
-        uncaught.resolve(); // Close the promise
-      }
-    });
-    // @ts-ignore
-    return uncaught;
+    const uncaught = Util.resolvablePromise() as ReturnType<(typeof Util)['resolvablePromise']> & { cancel?: () => void };
+    const cancel = this.onUnhandled(err => { uncaught.reject(err); return true; }, 0);
+    uncaught.cancel = () => {
+      cancel(); // Remove the handler
+      uncaught.resolve(); // Close the promise
+    };
+    return uncaught as Promise<void> & { cancel: () => void };
   }
 
   /**

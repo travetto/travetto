@@ -353,8 +353,8 @@ export class SQLModelSource extends ModelSource {
     if (ModelRegistry.has(cls)) {
       await this.dialect.fetchDependents(cls, res, builder && builder.select);
     }
-    // @ts-ignore
-    return SQLUtil.cleanResults(this.dialect, res) as U[];
+
+    return SQLUtil.cleanResults<T, U>(this.dialect, res);
   }
 
   /**

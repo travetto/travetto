@@ -50,9 +50,8 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
       }
       throw new Error(`Unknown command: ${cmd}`);
     }
-    for (const v of Object.values(require(f))) {
+    for (const v of Object.values(require(f)) as { new(...args: any[]): any }[]) {
       try {
-        // @ts-ignore
         const inst = new v();
         if (inst instanceof BasePlugin) {
           if (op) {

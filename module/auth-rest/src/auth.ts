@@ -2,10 +2,10 @@ import { AppError } from '@travetto/base';
 import { Request, Response } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { Class } from '@travetto/registry';
+import { AuthContext } from '@travetto/auth/src/context';
 import { PrincipalSource } from '@travetto/auth';
 
 import { IdentitySource } from './identity';
-import { AuthContext } from '@travetto/auth/src/context';
 
 /**
  * Auth service to allow for rest-based interaction

@@ -33,8 +33,7 @@ export class ModelUtil {
   static getSuggestQuery<T>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>) {
     const re = this.getSuggestRegex(prefix);
     const limit = query?.limit ?? 10;
-    // @ts-ignore
-    const where: WhereClauseRaw<T> = { [field]: { $regex: re } };
+    const where: WhereClauseRaw<unknown> = { [field]: { $regex: re } };
 
     const q = {
       where: query && query.where ? { $and: [where, query.where!] } : where,
@@ -59,11 +58,10 @@ export class ModelUtil {
 
     const out: [string, U][] = [];
     for (const r of results) {
-      // @ts-ignore
-      const val: string | string[] = r[field];
+      const val = r[field];
       if (Array.isArray(val)) {
         out.push(...val.filter(f => pattern.test(f)).map(f => [f, transform(f, r)] as [string, U]));
-      } else {
+      } else if (typeof val === 'string') {
         out.push([val, transform(val, r)]);
       }
     }

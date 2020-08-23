@@ -63,7 +63,7 @@ export class ParameterSelector {
       qp.activeItems = qp.items.filter(x => x.label === qp.value);
     }
 
-    qp.value = undefined as any;
+    qp.value = undefined as unknown as string;
 
     return qp;
   }

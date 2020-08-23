@@ -63,7 +63,7 @@ export class Util {
    * Has to JSON
    * @param o Object to check
    */
-  static hasToJSON = (o: any): o is { toJSON(): any } => 'toJSON' in o;
+  static hasToJSON = (o: any): o is { toJSON?(): any } => 'toJSON' in o;
 
   /**
    * Create regex from string, including flags
@@ -233,7 +233,7 @@ export class Util {
    * Produce a promise that is externally resolvable
    */
   static resolvablePromise<T = void>() {
-    let ops: { resolve: (v: T) => void, reject: (err: Error) => void };
+    let ops: { resolve: (v?: T) => void, reject: (err?: any) => void };
     const prom = new Promise((resolve, reject) => ops = { resolve, reject });
     Object.assign(prom, ops!);
     return prom as Promise<T> & (typeof ops);
