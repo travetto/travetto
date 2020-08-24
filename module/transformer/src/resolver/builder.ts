@@ -194,15 +194,18 @@ export const TypeBuilder: {
   },
   concrete: {
     build: (checker, type) => {
-      const tags = DocUtil.readDocTag(type, 'concrete');
-      if (tags.length) {
-        const parts = tags[0].split(':');
-        const fileName = DeclarationUtil.getPrimaryDeclarationNode(type)?.getSourceFile().fileName;
-        if (parts.length === 1) {
-          parts.unshift('.');
+      const [tag] = DocUtil.readDocTag(type, 'concrete');
+      if (tag) {
+        const [file, name] = tag.split(':');
+        let source: string | undefined;
+        if (file.startsWith('.')) {
+          const src = DeclarationUtil.getDeclarations(type)
+            ?.find(x => ts.getAllJSDocTags(x, (t): t is any => t.tagName.getText() === 'concrete').length);
+          source = FsUtil.resolveUnix(dirname(src!.getSourceFile().fileName), file);
+        } else {
+          source = file;
         }
-        const source = parts[0] === '.' ? fileName : FsUtil.resolveUnix(dirname(fileName), parts[0]);
-        return { key: 'external', name: parts[1], source };
+        return { key: 'external', name, source };
       }
     }
   }
