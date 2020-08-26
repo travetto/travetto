@@ -18,7 +18,7 @@
   "title": "SQL Model Source",
   "description": "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "devDependencies": {
-    "@travetto/app": "^1.1.0-alpha.5"
+    "@travetto/app": "^1.1.0-alpha.6"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -42,5 +42,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.1.0-alpha.5"
+  "version": "1.1.0-alpha.6"
 }
