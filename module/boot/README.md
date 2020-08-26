@@ -117,7 +117,7 @@ This functionality allows the program to opt in the typescript compiler.  This a
 [ScanFs](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L57) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L74) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L78) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

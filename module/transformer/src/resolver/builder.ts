@@ -196,14 +196,15 @@ export const TypeBuilder: {
     build: (checker, type) => {
       const [tag] = DocUtil.readDocTag(type, 'concrete');
       if (tag) {
-        const [file, name] = tag.split(':');
-        let source: string | undefined;
-        if (file.startsWith('.')) {
+        let [source, name] = tag.split(':');
+        if (!name) {
+          name = source;
+          source = '.';
+        }
+        if (source.startsWith('.')) {
           const src = DeclarationUtil.getDeclarations(type)
             ?.find(x => ts.getAllJSDocTags(x, (t): t is any => t.tagName.getText() === 'concrete').length);
-          source = FsUtil.resolveUnix(dirname(src!.getSourceFile().fileName), file);
-        } else {
-          source = file;
+          source = FsUtil.resolveUnix(dirname(src!.getSourceFile().fileName), source);
         }
         return { key: 'external', name, source };
       }

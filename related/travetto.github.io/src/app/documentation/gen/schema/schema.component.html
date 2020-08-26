@@ -216,28 +216,24 @@ would produce an exception similar to following structure
       </figcaption>
       <pre><code class="language-bash">$ alt/docs/src/person-invalid-output.js -r @travetto/boot/register alt/docs/src/person-invalid-output.js
 
-ValidationResultError: Validation errors have occurred
-    at Function.validate <span class="token punctuation">(</span>./src/validate/validator.ts:234:13<span class="token punctuation">)</span>
-    at validate <span class="token punctuation">(</span>./alt/docs/src/person-binding-invalid.ts:15:25<span class="token punctuation">)</span>
-    at ./alt/docs/src/person-invalid-output.js:9:11 <span class="token punctuation">{{'{'}}</span>
-  category: <span class="token string">'data'</span>,
-  payload: <span class="token punctuation">{{'{'}}</span> errors: <span class="token punctuation">[</span> <span class="token punctuation">[</span>Object<span class="token punctuation">]</span>, <span class="token punctuation">[</span>Object<span class="token punctuation">]</span> <span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-  type: <span class="token string">'ValidationResultError'</span>,
-  errors: <span class="token punctuation">[</span>
-    <span class="token punctuation">{{'{'}}</span>
-      kind: <span class="token string">'type'</span>,
-      type: <span class="token string">'number'</span>,
-      path: <span class="token string">'age'</span>,
-      message: <span class="token string">'age is not a valid number'</span>
-    <span class="token punctuation">{{'}'}}</span>,
-    <span class="token punctuation">{{'{'}}</span>
-      kind: <span class="token string">'required'</span>,
-      active: true,
-      path: <span class="token string">'address.street2'</span>,
-      message: <span class="token string">'address.street2 is required'</span>
-    <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
+Command failed: node -r @travetto/boot/register alt/docs/src/person-invalid-output.js
+Error: Cannot <span class="token function">find</span> module <span class="token string">'/home/tim/Code/travetto/module/schema/alt/docs/src'</span>
+Require stack:
+- /home/tim/Code/travetto/module/schema/alt/docs/src/custom-type-usage.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/support/phase.init.load.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/base/src/phase.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/base/index.ts
+- /home/tim/Code/travetto/module/schema/alt/docs/src/person-invalid-output.js from alt/docs/src/custom-type-usage.ts
+    at Function.handlePhaseError <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/transpile.ts:173:13<span class="token punctuation">)</span>
+    at Function.compileJavascript <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:83:31<span class="token punctuation">)</span>
+    at <span class="token variable">$Compiler</span>.compile <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/src/compiler.ts:109:24<span class="token punctuation">)</span>
+    at Module.load <span class="token punctuation">(</span>internal/modules/cjs/loader.js:1100:32<span class="token punctuation">)</span>
+    at Function.Module._load <span class="token punctuation">(</span>internal/modules/cjs/loader.js:962:14<span class="token punctuation">)</span>
+    at Function.onModuleLoad <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:39:31<span class="token punctuation">)</span>
+    at Function.Module._load <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:108:37<span class="token punctuation">)</span>
+    at Module.require <span class="token punctuation">(</span>internal/modules/cjs/loader.js:1140:19<span class="token punctuation">)</span>
+    at require <span class="token punctuation">(</span>internal/modules/cjs/helpers.js:75:18<span class="token punctuation">)</span>
+    at Object.action <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/support/phase.init.load.ts:10:7<span class="token punctuation">)</span></code></pre>     
       </figure>
 
 <h3 id="custom-validators">Custom Validators</h3>
@@ -546,21 +542,24 @@ All that happens now, is the type is exported, and the class above is able to pr
       </figcaption>
       <pre><code class="language-bash">$ alt/docs/src/custom-type-output.js -r @travetto/boot/register alt/docs/src/custom-type-output.js
 
-ValidationResultError: Validation errors have occurred
-    at Function.validate <span class="token punctuation">(</span>./src/validate/validator.ts:234:13<span class="token punctuation">)</span>
-    at ./alt/docs/src/custom-type-output.js:17:27 <span class="token punctuation">{{'{'}}</span>
-  category: <span class="token string">'data'</span>,
-  payload: <span class="token punctuation">{{'{'}}</span> errors: <span class="token punctuation">[</span> <span class="token punctuation">[</span>Object<span class="token punctuation">]</span> <span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-  type: <span class="token string">'ValidationResultError'</span>,
-  errors: <span class="token punctuation">[</span>
-    <span class="token punctuation">{{'{'}}</span>
-      kind: <span class="token string">'type'</span>,
-      type: <span class="token string">'PointImpl'</span>,
-      path: <span class="token string">'point'</span>,
-      message: <span class="token string">'point is not a valid PointImpl'</span>
-    <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
+Command failed: node -r @travetto/boot/register alt/docs/src/custom-type-output.js
+Error: Cannot <span class="token function">find</span> module <span class="token string">'/home/tim/Code/travetto/module/schema/alt/docs/src'</span>
+Require stack:
+- /home/tim/Code/travetto/module/schema/alt/docs/src/custom-type-usage.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/support/phase.init.load.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/base/src/phase.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/base/index.ts
+- /home/tim/Code/travetto/module/schema/alt/docs/src/custom-type-output.js from alt/docs/src/custom-type-usage.ts
+    at Function.handlePhaseError <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/transpile.ts:173:13<span class="token punctuation">)</span>
+    at Function.compileJavascript <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:83:31<span class="token punctuation">)</span>
+    at <span class="token variable">$Compiler</span>.compile <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/src/compiler.ts:109:24<span class="token punctuation">)</span>
+    at Module.load <span class="token punctuation">(</span>internal/modules/cjs/loader.js:1100:32<span class="token punctuation">)</span>
+    at Function.Module._load <span class="token punctuation">(</span>internal/modules/cjs/loader.js:962:14<span class="token punctuation">)</span>
+    at Function.onModuleLoad <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:39:31<span class="token punctuation">)</span>
+    at Function.Module._load <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:108:37<span class="token punctuation">)</span>
+    at Module.require <span class="token punctuation">(</span>internal/modules/cjs/loader.js:1140:19<span class="token punctuation">)</span>
+    at require <span class="token punctuation">(</span>internal/modules/cjs/helpers.js:75:18<span class="token punctuation">)</span>
+    at Object.action <span class="token punctuation">(</span>/home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/support/phase.init.load.ts:10:7<span class="token punctuation">)</span></code></pre>     
       </figure>;
 
 </div>

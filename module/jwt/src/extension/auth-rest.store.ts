@@ -10,7 +10,7 @@ import { verify } from '../verify';
 /**
  * Auth context store via JWT
  */
-export class JWTAuthContextStore extends AuthContextEncoder {
+export class JWTAuthContextEncoder extends AuthContextEncoder {
 
   private accessor: ValueAccessor;
 

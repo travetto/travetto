@@ -277,7 +277,16 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 <h2 id="creating-and-running-an-app">Creating and Running an App</h2>
 
-By default, the framework provices a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24">@Application</a> at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/support/application.rest.ts#L10">DefaultRestApplication</a> that will follow default behaviors, and spin up the REST server.  To customize a REST server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24">@Application</a> decorator. This could look like:
+By default, the framework provices a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24">@Application</a> at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/support/application.rest.ts#L10">DefaultRestApplication</a> that will follow default behaviors, and spin up the REST server.  You will need to install the <a class="module-link" href="/docs/app" title="Application registration/management and run support.">Application</a> module to execute.  
+
+      <figure class="install">
+      <figcaption class="install">Installing app support
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travett/app</code></pre>     
+      </figure>
+
+To customize a REST server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24">@Application</a> decorator. This could look like:
 
       <figure class="code">
       <figcaption class="code">Application entry point for Rest Applications
