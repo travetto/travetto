@@ -1,8 +1,12 @@
-/// <reference path="./worker_thread.d.ts" />
-
 import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 import { StreamUtil } from './stream';
+
+declare module 'worker_threads' {
+  interface WorkerOptions {
+    argv?: any[];
+  }
+}
 
 /**
  * Result of an execution
