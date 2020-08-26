@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/boot": "^1.1.0-alpha.4",
-    "@travetto/yaml": "^1.1.0-alpha.4"
+    "@travetto/boot": "^1.1.0-alpha.5",
+    "@travetto/yaml": "^1.1.0-alpha.5"
   },
   "title": "Pack",
   "description": "Code packing utilities",
@@ -27,5 +27,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.1.0-alpha.6"
+  "version": "1.1.0-alpha.7"
 }
