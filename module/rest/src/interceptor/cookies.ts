@@ -92,14 +92,13 @@ export class CookiesInterceptor extends RestInterceptor {
   }
 
   intercept(req: Request, res: Response) {
-    if (!req.cookies) {
-      req.cookies = res.cookies = new cookies(
-        // @ts-ignore
-        req as IncomingMessage,
-        // @ts-ignore
-        res as ServerResponse,
-        this.cookieConfig
-      );
-    }
+    // Enforce this is set
+    req.cookies = res.cookies = new cookies(
+      // @ts-ignore
+      req as IncomingMessage,
+      // @ts-ignore
+      res as ServerResponse,
+      this.cookieConfig
+    );
   }
 }
