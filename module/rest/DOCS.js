@@ -1,4 +1,4 @@
-const { doc: d, lib, Execute, SnippetLink, Section, List, inp, pth, Code, SubSection, Mod, Note, Ordered, Command, Ref, Snippet } = require('@travetto/doc');
+const { doc: d, lib, Execute, SnippetLink, Section, List, inp, pth, Code, SubSection, Mod, Note, Ordered, Command, Ref, Snippet, Terminal, Install } = require('@travetto/doc');
 const { Application } = require('@travetto/app');
 
 const { Controller } = require('./src/decorator/controller');
@@ -133,7 +133,11 @@ ${Ordered(
 
 ${Section('Creating and Running an App')}
 
-By default, the framework provices a default ${Application} at ${DefaultRestApplication} that will follow default behaviors, and spin up the REST server.  To customize a REST server, you may need to construct an entry point using the ${Application} decorator. This could look like:
+By default, the framework provices a default ${Application} at ${DefaultRestApplication} that will follow default behaviors, and spin up the REST server.  You will need to install the ${Mod('app')} module to execute.  
+
+${Install('Installing app support', `@travett/app`)}
+
+To customize a REST server, you may need to construct an entry point using the ${Application} decorator. This could look like:
 
 ${Code('Application entry point for Rest Applications', 'alt/docs/src/custom-app.ts')}
 
