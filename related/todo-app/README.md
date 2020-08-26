@@ -293,7 +293,7 @@ $ /bin/bash alt/docs/bin/startup.sh
   app: {
     watch: true,
     readonly: false,
-    travetto: '1.1.0-alpha.4',
+    travetto: '1.1.0-alpha.5',
     name: '@travetto/todo-app',
     version: undefined,
     license: 'ISC',
