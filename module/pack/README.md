@@ -122,6 +122,8 @@ assemble:
   keepSource: false
   add:
     - node_modules/@travetto/rest/support/aws-lambda.js: index.js
+  env:
+    NO_COLOR: 1
 zip:
   active: true
   output: dist/lambda.zip
