@@ -39,12 +39,14 @@ export class JWTAuthContextEncoder extends AuthContextEncoder {
    */
   async write(ctx: AuthContext, req: Request, res: Response) {
     if (ctx) {
+      console.log(ctx.principal);
+      const expires = ctx.principal.expires || new Date(Date.now() + (1000 * 60 * 60 * 24 * 365));
       const body: Pick<AuthContext, 'identity' | 'principal'> & { exp: number } = {
-        ...ctx, exp: ctx.principal.expires!.getTime() / 1000
+        ...ctx, exp: Math.trunc(expires.getTime() / 1000)
       };
       body.principal.permissions = [...ctx.principal.permissions];
       const token = await sign(body, { key: this.signingKey });
-      this.accessor.writevalue(res, token);
+      this.accessor.writeValue(res, token, { expires });
     }
   }
 

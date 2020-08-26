@@ -1,3 +1,4 @@
+import { SetOption } from 'cookies';
 import { Response, Request } from '../types';
 
 /**
@@ -11,9 +12,9 @@ export class ValueAccessor {
    * @param res
    * @param token
    */
-  writeValue(res: Response, token: string) {
+  writeValue(res: Response, token: string, cookieArgs?: SetOption) {
     if (this.location === 'cookie') {
-      res.cookies.set(this.name, token);
+      res.cookies.set(this.name, token, cookieArgs);
     } else {
       res.setHeader(this.name, token);
     }

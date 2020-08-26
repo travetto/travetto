@@ -61,7 +61,7 @@ export class AuthInterceptor extends RestInterceptor {
       await this.configure(req, res);
       return await next();
     } finally {
-      if (req.auth) {
+      if (req.auth && req.auth.principal) {
         await this.contextStore!.write(req.auth, req, res);
       }
       this.context.clear();
