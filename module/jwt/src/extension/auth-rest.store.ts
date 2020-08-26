@@ -38,12 +38,14 @@ export class JWTAuthContextEncoder extends AuthContextEncoder {
    * Write context
    */
   async write(ctx: AuthContext, req: Request, res: Response) {
-    const body: Pick<AuthContext, 'identity' | 'principal'> & { exp: number } = {
-      ...ctx, exp: ctx.principal.expires!.getTime() / 1000
-    };
-    body.principal.permissions = [...ctx.principal.permissions];
-    const token = await sign(body, { key: this.signingKey });
-    this.accessor.writevalue(res, token);
+    if (ctx) {
+      const body: Pick<AuthContext, 'identity' | 'principal'> & { exp: number } = {
+        ...ctx, exp: ctx.principal.expires!.getTime() / 1000
+      };
+      body.principal.permissions = [...ctx.principal.permissions];
+      const token = await sign(body, { key: this.signingKey });
+      this.accessor.writevalue(res, token);
+    }
   }
 
   /**
@@ -51,7 +53,9 @@ export class JWTAuthContextEncoder extends AuthContextEncoder {
    */
   async read(req: Request) {
     const input = this.accessor.readValue(req);
-    const ac = await verify<AuthContext>(input!, { key: this.signingKey });
-    return new AuthContext(ac.identity, ac.principal);
+    if (input) {
+      const ac = await verify<AuthContext>(input!, { key: this.signingKey });
+      return new AuthContext(ac.identity, ac.principal);
+    }
   }
 }
