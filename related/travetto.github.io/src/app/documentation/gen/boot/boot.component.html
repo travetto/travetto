@@ -122,7 +122,7 @@ This functionality allows the program to opt in the typescript compiler.  This a
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L57">ScanFs</a> provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 <h2 id="process-execution">Process Execution</h2>
-Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L74">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
+Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L78">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

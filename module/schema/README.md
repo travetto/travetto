@@ -198,28 +198,24 @@ would produce an exception similar to following structure
 ```bash
 $ alt/docs/src/person-invalid-output.js -r @travetto/boot/register alt/docs/src/person-invalid-output.js
 
-ValidationResultError: Validation errors have occurred
-    at Function.validate (./src/validate/validator.ts:234:13)
-    at validate (./alt/docs/src/person-binding-invalid.ts:15:25)
-    at ./alt/docs/src/person-invalid-output.js:9:11 {
-  category: 'data',
-  payload: { errors: [ [Object], [Object] ] },
-  type: 'ValidationResultError',
-  errors: [
-    {
-      kind: 'type',
-      type: 'number',
-      path: 'age',
-      message: 'age is not a valid number'
-    },
-    {
-      kind: 'required',
-      active: true,
-      path: 'address.street2',
-      message: 'address.street2 is required'
-    }
-  ]
-}
+Command failed: node -r @travetto/boot/register alt/docs/src/person-invalid-output.js
+Error: Cannot find module '/home/tim/Code/travetto/module/schema/alt/docs/src'
+Require stack:
+- /home/tim/Code/travetto/module/schema/alt/docs/src/custom-type-usage.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/support/phase.init.load.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/base/src/phase.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/base/index.ts
+- /home/tim/Code/travetto/module/schema/alt/docs/src/person-invalid-output.js from alt/docs/src/custom-type-usage.ts
+    at Function.handlePhaseError (/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/transpile.ts:173:13)
+    at Function.compileJavascript (/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:83:31)
+    at $Compiler.compile (/home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/src/compiler.ts:109:24)
+    at Module.load (internal/modules/cjs/loader.js:1100:32)
+    at Function.Module._load (internal/modules/cjs/loader.js:962:14)
+    at Function.onModuleLoad (/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:39:31)
+    at Function.Module._load (/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:108:37)
+    at Module.require (internal/modules/cjs/loader.js:1140:19)
+    at require (internal/modules/cjs/helpers.js:75:18)
+    at Object.action (/home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/support/phase.init.load.ts:10:7)
 ```
 
 ### Custom Validators
@@ -511,20 +507,23 @@ All that happens now, is the type is exported, and the class above is able to pr
 ```bash
 $ alt/docs/src/custom-type-output.js -r @travetto/boot/register alt/docs/src/custom-type-output.js
 
-ValidationResultError: Validation errors have occurred
-    at Function.validate (./src/validate/validator.ts:234:13)
-    at ./alt/docs/src/custom-type-output.js:17:27 {
-  category: 'data',
-  payload: { errors: [ [Object] ] },
-  type: 'ValidationResultError',
-  errors: [
-    {
-      kind: 'type',
-      type: 'PointImpl',
-      path: 'point',
-      message: 'point is not a valid PointImpl'
-    }
-  ]
-}
+Command failed: node -r @travetto/boot/register alt/docs/src/custom-type-output.js
+Error: Cannot find module '/home/tim/Code/travetto/module/schema/alt/docs/src'
+Require stack:
+- /home/tim/Code/travetto/module/schema/alt/docs/src/custom-type-usage.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/support/phase.init.load.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/base/src/phase.ts
+- /home/tim/Code/travetto/module/schema/node_modules/@travetto/base/index.ts
+- /home/tim/Code/travetto/module/schema/alt/docs/src/custom-type-output.js from alt/docs/src/custom-type-usage.ts
+    at Function.handlePhaseError (/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/transpile.ts:173:13)
+    at Function.compileJavascript (/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:83:31)
+    at $Compiler.compile (/home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/src/compiler.ts:109:24)
+    at Module.load (internal/modules/cjs/loader.js:1100:32)
+    at Function.Module._load (internal/modules/cjs/loader.js:962:14)
+    at Function.onModuleLoad (/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:39:31)
+    at Function.Module._load (/home/tim/Code/travetto/module/schema/node_modules/@travetto/boot/src-ts/compile.ts:108:37)
+    at Module.require (internal/modules/cjs/loader.js:1140:19)
+    at require (internal/modules/cjs/helpers.js:75:18)
+    at Object.action (/home/tim/Code/travetto/module/schema/node_modules/@travetto/compiler/support/phase.init.load.ts:10:7)
 ```
 ;

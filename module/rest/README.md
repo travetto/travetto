@@ -269,7 +269,14 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 ## Creating and Running an App
 
-By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) at [DefaultRestApplication](https://github.com/travetto/travetto/tree/master/module/rest/support/application.rest.ts#L10) that will follow default behaviors, and spin up the REST server.  To customize a REST server, you may need to construct an entry point using the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) decorator. This could look like:
+By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) at [DefaultRestApplication](https://github.com/travetto/travetto/tree/master/module/rest/support/application.rest.ts#L10) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to execute.  
+
+**Install: Installing app support**
+```bash
+npm install @travett/app
+```
+
+To customize a REST server, you may need to construct an entry point using the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) decorator. This could look like:
 
 **Code: Application entry point for Rest Applications**
 ```typescript
