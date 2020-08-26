@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth": "^1.1.0-alpha.4",
-    "@travetto/model": "^1.1.0-alpha.4"
+    "@travetto/auth": "^1.1.0-alpha.5",
+    "@travetto/model": "^1.1.0-alpha.5"
   },
   "title": "Model Auth Source",
   "description": "Model-based authentication and registration support for the travetto framework",
@@ -32,5 +32,5 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git"
   },
-  "version": "1.1.0-alpha.4"
+  "version": "1.1.0-alpha.5"
 }
