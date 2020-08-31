@@ -13,18 +13,33 @@ assemble:
   exclude:
     - bower.json
     - LICENSE
+    - LICENCE
     - '*.map'
     - '*.md'
     - '*.lock'
     - '*.html'
     - '*.mjs'
+    - '*.ts'
+    - '*.d.ts'
+    - '*.tsbuildinfo'
+    - '*.java'
+    - '*.markdown'
+    - .eslintrc
+    - .npmignore
+    - .*.yml
+    - cache/*.log
     - node_modules/lodash/lodash.min.js
     - node_modules/source-map-support/browser-source-map-support.js
     - node_modules/bson/browser_build/
+    - node_modules/**/tsconfig.json
+    - node_modules/**/tsconfig.*.json
     - node_modules/@travetto/*/DOCS.js
     - node_modules/typescript/
     - node_modules/@types/
-    - '*.d.ts'
+    - ^./node_modules/@travetto/**/*.ts
+    - ^./node_modules/@travetto/*/tsconfig.json
+    - ^./resources/
+    - ^./src/
 zip:
   active: false
   output: output.zip
