@@ -6,7 +6,7 @@ assemble:
   add:
     - node_modules/@travetto/cli/bin/travetto.js: node_modules/.bin/trv
     - node_modules/@travetto/cli/bin/travetto.js: node_modules/.bin/travetto
-    - lodash/lodash.min.js: lodash/lodash.js
+    - node_modules/lodash/lodash.min.js: node_modules/lodash/lodash.js
   excludeCompile:
     - node_modules/@travetto/*/alt/
     - node_modules/@travetto/*/test/
