@@ -62,21 +62,26 @@ export class PackUtil {
     const all = files.map(x => {
       const negate = x.startsWith('!') || x.startsWith('^');
       x = negate ? x.substring(1) : x;
-      const re = glob(x, { flags: 'i', dot: true, basename: base, contains: true });
+      x = x.replace(/^[.][/]/g, `${base}/`);
+      const re = glob(x, { nocase: true, dot: true, basename: base, contains: true });
+      Object.defineProperty(re, 'source', { value: x });
       return [re, negate] as const;
     });
 
     return (f: string) => {
-      let exclude = false;
+      let exclude = undefined;
+      f = FsUtil.resolveUnix(base, f);
       for (const [p, n] of all) {
-        if (p(f)) {
-          exclude = !n;
+        if ((n || exclude === undefined) && p(f)) {
+          if (n) { // Fast exit if negating
+            return false;
+          }
+          exclude = p;
         }
       }
       return exclude;
     };
   }
-
 
   /**
    * Update .env.js with new env data
