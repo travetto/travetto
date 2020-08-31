@@ -2,6 +2,8 @@ import { promises as fs, readFileSync } from 'fs';
 import * as util from 'util';
 import * as path from 'path';
 
+const glob = require('picomatch');
+
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { FsUtil, ScanFs } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
@@ -56,31 +58,18 @@ export class PackUtil {
   /**
    * Build file include/exclude lists/checker
    */
-  static excludeChecker(files: string[]) {
+  static excludeChecker(files: string[], base: string) {
     const all = files.map(x => {
       const negate = x.startsWith('!') || x.startsWith('^');
       x = negate ? x.substring(1) : x;
-      if (!x.startsWith('/')) {
-        x = `**/${x}`;
-      }
-      // TODO: Replace with something better?
-      const re = x // Poor man's glob
-        .replace(/^[*][*][/]/, '**')
-        .replace(/[*][*.]?/g, r => {
-          switch (r) {
-            case '**': return /([^\\\/]+[\\\/])*([^\\\/]*)/.source;
-            case '*.': return /.*[.]/.source;
-            case '*': return /[^.\\\/]*/.source;
-            default: throw new Error('Unknown');
-          }
-        });
-      return [new RegExp(`^${re}`), negate] as [RegExp, boolean];
+      const re = glob(x, { flags: 'i', dot: true, basename: base, contains: true });
+      return [re, negate] as const;
     });
 
     return (f: string) => {
       let exclude = false;
       for (const [p, n] of all) {
-        if (p.test(f)) {
+        if (p(f)) {
           exclude = !n;
         }
       }
