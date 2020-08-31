@@ -63,7 +63,7 @@ export class AssembleUtil {
    * Purge workspace using file rules
    */
   static async excludeFiles(root: string, files: string[]) {
-    const checker = PackUtil.excludeChecker(files);
+    const checker = PackUtil.excludeChecker(files, root);
     for (const el of await ScanFs.scanDir({ testDir: x => true, testFile: checker, withHidden: true }, root)) {
       if (!el.stats.isFile()) { continue; }
       try {
