@@ -86,7 +86,7 @@ export class Session<T = any> implements CacheEntry {
    * Determine if the expiry time has changed
    */
   isTimeChanged() {
-    return this.expiresAt !== this.expiresAtLoaded;
+    return this.expiresAt !== undefined && this.expiresAt !== this.expiresAtLoaded;
   }
 
   /**
