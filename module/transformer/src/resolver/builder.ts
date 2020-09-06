@@ -201,12 +201,18 @@ export const TypeBuilder: {
           name = source;
           source = '.';
         }
-        if (source.startsWith('.')) {
-          const src = DeclarationUtil.getDeclarations(type)
-            ?.find(x => ts.getAllJSDocTags(x, (t): t is any => t.tagName.getText() === 'concrete').length);
-          source = FsUtil.resolveUnix(dirname(src!.getSourceFile().fileName), source);
+
+        const sourceFile = DeclarationUtil.getDeclarations(type)
+          ?.find(x => ts.getAllJSDocTags(x, (t): t is any => t.tagName.getText() === 'concrete').length)
+          ?.getSourceFile().fileName as string;
+
+        if (source === '.') {
+          source = sourceFile;
+        } else if (source.startsWith('.')) {
+          source = FsUtil.resolveUnix(dirname(sourceFile), source);
         }
-        return { key: 'external', name, source };
+
+        return { key: 'external', name, source: FsUtil.resolveUnix(sourceFile, source) };
       }
     }
   }
