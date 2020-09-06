@@ -1,5 +1,5 @@
 // @file-if @travetto/model
-import { ModelService, ModelRegistry } from '@travetto/model';
+import { ModelService, ModelRegistry, Index } from '@travetto/model';
 import { Schema, Text, Long } from '@travetto/schema';
 
 import { CacheEntry } from '../types';
@@ -27,7 +27,11 @@ export class ModelCacheSource extends CullableCacheSource {
 
   postConstruct() {
     // Manually install model on demand
-    ModelRegistry.register(CacheModel, {});
+    ModelRegistry.register(CacheModel, {
+      indices: [
+        { fields: [{ key: 1 }], options: { unique: true } }
+      ]
+    });
     ModelRegistry.install(CacheModel, { type: 'added', curr: CacheModel });
   }
 
