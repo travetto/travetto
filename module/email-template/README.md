@@ -8,18 +8,28 @@
 npm install @travetto/email-template
 ```
 
-This is primarily a set of command line tools for compiling and developing templates.  The templating process is built upon three primary ideas, with the final output being an [inky](https://github.com/zurb/inky) rendered html/text email.  
+This is primarily a set of command line tools for compiling and developing templates.  The primary input into this process is a `.email.html` under the `resources/email` folder.  This template drives the generation of the `html` and `text` outputs, as well as the `subject` file.
 
 ## Asset Management
 
-The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying of asset paths, with the following paths (in order of precedence):
+The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying asset paths, with the following paths (in order of precedence):
 
    
-   1. `%ROOT%/resources`
-   1. `@travetto/email-template/resources`
+   1. `%ROOT%/resources/email`
+   1. `@travetto/email-template/resources/email`
    1. `foundation-emails/scss` (specifically for [sass](https://github.com/sass/dart-sass) files)
 
-When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process with convert `.tpl.html` files into `.compiled.html` and `.compiled.txt` suffixes to generate the html and text outputs respectively.  
+When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process will convert `.email.html` files into `.compiled.html`, `.compiled.text` and `.compiled.subject` suffixes to generate the outputs respectively.  
+
+## Template Extension Points
+
+The template extension points are defined at:
+
+   
+   1. `email/wrapper.html` - This is the wrapping chrome for the email
+   1. `email/theme.scss` - The entry point for adding, and overriding any [sass](https://github.com/sass/dart-sass)
+
+In addition to the overrides, you can find the list of available settings at [Github](#https-github-com-foundation-foundation-emails-blob-develop-scss-settings-settings-scss})
 
 ## Template Compilation
 
@@ -27,15 +37,16 @@ The general process is as follows:
 
    
    1. Load in a general wrapper for email, located at `/resources/email/wrapper.html`.
-   1. Load in the general stylings as [sass](https://github.com/sass/dart-sass), from `/resources/email/app.scss`.
-   1. Resolving all mustache partial templates, at `/resources/email/**/*.tpl.html`.
+   1. Load in the general stylings as [sass](https://github.com/sass/dart-sass), from `/resources/email/main.scss`.
+   1. Resolving all mustache partial templates, at `/resources/email/**/*.email.html`.
    1. Render the [inky](https://github.com/zurb/inky) directives into the final `html` output.
+   1. Extract the subject from the `html`'s `<title>` tag, if present.
    1. Inline and optimize all images for email transmission.
-   1. Generate markdown version of email to support the alternate text format.
+   1. Generate markdown version of email to support the alternate `text` format.
 
 ## Reusable Email Elements
 
-In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. `{{{> email/common-element }}}`
+In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. `{{{> email/common-element }}}`.  All paths are relative to the `resource` folder, which precludes the use of paths like `../file.html`
 
 ## Images
 
@@ -54,22 +65,9 @@ The image will be extracted out and embedded in the email as a multi part messag
 
 ## Template Development
 
-The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/master/module/cli#readme "CLI infrastructure for travetto framework") support for email template development. Running
+The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/master/module/cli#readme "CLI infrastructure for travetto framework") and [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) support for email template development.
 
-**Terminal: Running template development environment**
-```bash
-$ travetto travetto email:dev -h
-
-Usage:  email:dev [options]
-
-Options:
-  -p, --port [port]               Port to serve ui on (default: "3839")
-  -r, --reload-rate [reloadRate]  The rate to reload the UI at (default: "1000")
-  -o, --open [open]               Open the ui automatically on start (default: true)
-  -h, --help                      display help for command
-```
-
-## Template Compilation
+### CLI Compilation
 
 The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/master/module/cli#readme "CLI infrastructure for travetto framework") support for email template compilation also. Running
 
@@ -84,7 +82,16 @@ Options:
   -h, --help           display help for command
 ```
 
-Will convert all `.tpl.html` files into the appropriate `.compiled.html` and `.compiled.txt` files.  These will be used during the execution of the application.
+Will convert all `.email.html` files into the appropriate `.compiled.html`, `.compiled.text` and `.compiled.subject` files.  These will be used during the running of the application.  By default these files are added to the `.gitignore` as they are generally not intended to be saved but to be generated during the build process.
+
+### [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin)
+In addition to command line tools, the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) also supports:
+
+   
+   *  automatic compilation on change
+   *  real-time rendering of changes visually
+   *  ability to send test emails during development
+   *  ability to define custom context for template rendering
 
 ## Supporting Libraries
 
@@ -136,84 +143,8 @@ The final template will render as:
 ```bash
 $ alt/docs/src/render.ts -r @travetto/boot/register alt/docs/src/render.ts
 
-<!DOCTYPE html><html>
-
-  <body>
-    <table align="center" class="container">
-      <tbody>
-        <tr><td>
-      <table class="row">
-      <tbody>
-        <tr>
-  </tr></tbody></table><table class="row">
-      <tbody>
-        <tr>
-    <th class="small-12 large-12 columns first">
-        <table>
-          <tbody>
-            <tr>
-              <th>Bob</th>
-<th class="expander"></th>
-            </tr>
-          </tbody>
-        </table>
-      </th>
-    <th class="small-12 large-12 columns last">
-        <table>
-          <tbody>
-            <tr>
-              <th> </th>
-<th class="expander"></th>
-            </tr>
-          </tbody>
-        </table>
-      </th>
-  </tr>
-      </tbody>
-    </table><a href="{{salesLink}}">Sales Link</a><table class="row">
-      <tbody>
-        <tr>
-</tr>
-      </tbody>
-    </table>
-
-    </td></tr>
-      </tbody>
-    </table>
-  
-
-</body></html>
-```
-
-## CLI - email:compile
-
-This command is used to compile the email templates ahead of time for use during execution.  The generated files are `.compiled.html` and `.compiled.txt` for the html/text output respectivevly.  By default these files are added to the `.gitignore` as they are generally not intended to be saved but to be generated during the build process.
-
-**Terminal: Compile help**
-```bash
-$ travetto travetto email:compile --help
-
-Usage:  email:compile [options]
-
-Options:
-  -w, --watch [watch]  Compile in watch mode, requires @travetto/watch (default: false)
-  -h, --help           display help for command
-```
-
-## CLI - email:dev
-
-This command will spin up a web server (port `3839`) with live reload.  This is to allow for real time configuring and testing of email templates through the templating pipeline. Additionally,  contextual variables can be specified via query parameters to see what a fully resolved email could look like.
-
-**Terminal: Dev help**
-```bash
-$ travetto travetto email:dev --help
-
-Usage:  email:dev [options]
-
-Options:
-  -p, --port [port]               Port to serve ui on (default: "3839")
-  -r, --reload-rate [reloadRate]  The rate to reload the UI at (default: "1000")
-  -o, --open [open]               Open the ui automatically on start (default: true)
-  -h, --help                      display help for command
+Command failed: node -r @travetto/boot/register alt/docs/src/render.ts
+ENOENT: no such file or directory, open 'email/welcome.tpl.html'
+Error: ENOENT: no such file or directory, open 'email/welcome.tpl.html'
 ```
 

@@ -45,6 +45,7 @@
   "files": [
     "support",
     "resources",
+    "!resources/email/demo/",
     "bin"
   ],
   "version": "1.1.0-alpha.5"

@@ -14,7 +14,6 @@ export abstract class BaseFeature implements ActivationTarget {
   constructor(
     module?: string,
     command?: string
-
   ) {
     this.module = module!;
     this.command = command!;

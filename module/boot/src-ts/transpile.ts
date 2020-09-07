@@ -102,7 +102,8 @@ export class TranspileUtil {
       this[OPTS] = {
         ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options,
         rootDir: FsUtil.cwd,
-        outDir: FsUtil.cwd
+        outDir: FsUtil.cwd,
+        sourceRoot: FsUtil.cwd
       };
     }
     return this[OPTS];

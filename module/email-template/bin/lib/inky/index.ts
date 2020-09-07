@@ -31,8 +31,26 @@ export class Inky {
         (a, left, size, right) => `<${left}100%${right}>`); // Drop important as a fix for outlook;
 
     // Re-inject raws
-    const res = out
+    let res = out
       .replace(/###RAW(\d+)###/g, (all, i) => raws[parseInt(i, 10)]);
+
+
+    // Get Subject
+    const headerTop: string[] = [];
+    const bodyTop: string[] = [];
+
+    // Force summary to top, and title to head
+    res = res
+      .replace(/<title>.*?<\/title>/, a => {
+        headerTop.push(a);
+        return '';
+      })
+      .replace(/<summary[^>]*>(.*?)<\/summary>/sm, (a, b) => {
+        bodyTop.push(`<div class="email-preview">${b}</div>`);
+        return '';
+      })
+      .replace(/<head[^>]*>/, t => `${t}\n${headerTop.join('\n')}`)
+      .replace(/<body[^>]*>/, t => `${t}\n${bodyTop.join('\n')}`);
 
     return res;
   }

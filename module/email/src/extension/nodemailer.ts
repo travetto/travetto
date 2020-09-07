@@ -15,7 +15,20 @@ export class NodemailerTransport extends MailTransport {
     this.transport = nodemailer.createTransport(transportFactory);
   }
 
-  send(mail: MessageOptions): Promise<SentMessage> {
-    return this.transport.sendMail(mail as nodemailer.SendMailOptions);
+  async send(mail: MessageOptions): Promise<SentMessage> {
+    const res = await this.transport.sendMail(mail as nodemailer.SendMailOptions) as {
+      messageId?: string;
+      envelope?: Record<string, string>;
+      accepted?: string[];
+      rejected?: string[];
+      pending?: string[];
+      response?: string;
+    };
+
+    if (res.rejected?.length) {
+      console.error(`Unable to send emails to ${res.rejected?.length} recipients`);
+    }
+
+    return res;
   }
 }

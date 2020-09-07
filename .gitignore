@@ -12,6 +12,7 @@ bin/test/error.ts
 **/*.lerna_backup
 **/api-client/**
 sample/dummy/**
-**/resources/email/*.compiled.*
+**/resources/email/**/*.compiled.*
 module/**/dev.yml
 **/README.html
+email-dev-context.json

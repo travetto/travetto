@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { FsUtil, ExecutionState, ExecUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
+import { ProcessServer } from '../../../core/server';
 import { BaseFeature } from '../../base';
 import { WorkspaceResultsManager } from './workspace';
 import { TestEvent } from './types';
@@ -15,11 +16,42 @@ import { TestEvent } from './types';
 @Activatible('@travetto/test', 'test')
 class TestRunnerFeature extends BaseFeature {
 
+  private server: ProcessServer;
   private consumer = new WorkspaceResultsManager(vscode.window);
-  private runner: ExecutionState;
-  private running = true;
   private cacheDir = `${Workspace.path}/.trv_cache_plugin`;
   private codeLensUpdated: (e: void) => any;
+
+  constructor(
+    module?: string,
+    command?: string
+  ) {
+    super(module, command);
+    this.server = new ProcessServer('node', [this.resolvePlugin('watch-test'), 'exec'], {
+      env: { TRV_CACHE: this.cacheDir, },
+      cwd: Workspace.path
+    });
+
+    this.server.on('stop', () => this.clean());
+    this.server.on('pre-start', () => this.clean(true));
+    this.server.on('start', () => {
+      this.server.onMessage('*', (type, ev) => {
+        this.consumer.onEvent(ev as TestEvent);
+        this.codeLensUpdated?.();
+      });
+
+      this.server.onceMessage('*', () =>  // Listen for first message
+        this.consumer.trackEditor(vscode.window.activeTextEditor));
+    });
+  }
+
+  /** Clean up */
+  clean(recopy = false) {
+    this.consumer.dispose();
+    FsUtil.unlinkRecursiveSync(this.cacheDir, true);
+    if (recopy) {
+      FsUtil.copyRecursiveSync(`${Workspace.path}/.trv_cache`, this.cacheDir, true);
+    }
+  }
 
   /**
    * Launch a test from the current location
@@ -27,7 +59,7 @@ class TestRunnerFeature extends BaseFeature {
   async launchTestDebugger(file?: string, line?: number, breakpoint: boolean = true) {
     const editor = Workspace.getDocumentEditor(vscode.window.activeTextEditor);
     if (editor) {
-      line = line ?? editor.selection.start.line;
+      line = line ?? editor.selection.start.line + 1;
       file = file ?? editor.document.fileName;
     }
 
@@ -50,48 +82,6 @@ class TestRunnerFeature extends BaseFeature {
     }));
   }
 
-  async launchTestServer() {
-    FsUtil.copyRecursiveSync(`${Workspace.path}/.trv_cache`, this.cacheDir, true);
-
-    this.runner = ExecUtil.fork(this.resolvePlugin('watch-test'), ['exec'], {
-      env: { TRV_CACHE: this.cacheDir, },
-      cwd: Workspace.path
-    });
-
-    this.runner.process.stdout?.pipe(process.stdout);
-    this.runner.process.stderr?.pipe(process.stderr);
-
-    this.runner.result.finally(() => {
-      if (this.running) { // If still running, reinit
-        this.killTestServer(true);
-        FsUtil.unlinkRecursiveSync(this.cacheDir, true);
-        this.launchTestServer();
-      }
-    });
-
-    this.runner.process.addListener('message', ev => {
-      this.consumer.onEvent(ev as TestEvent);
-      this.codeLensUpdated?.();
-    });
-
-    this.runner.process.once('message', () => { // Listen for first message
-      this.consumer.trackEditor(vscode.window.activeTextEditor);
-    });
-  }
-
-  /**
-   * Stop runner
-   */
-  killTestServer(running: boolean) {
-    console.debug('Test', 'Shutting down');
-    this.running = running;
-    if (this.runner && this.runner.process && !this.runner.process.killed) {
-      this.runner.process.kill();
-    }
-    // Remove all state
-    this.consumer.dispose();
-  }
-
   /**
    * Build code lenses for a given document
    * @param doc
@@ -111,18 +101,11 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   /**
-   * Restart test server
-   */
-  async restartTest() {
-    this.killTestServer(true);
-  }
-
-  /**
    * On feature activate
    */
   async activate(context: vscode.ExtensionContext) {
     this.register('line', this.launchTestDebugger.bind(this));
-    this.register('reload', this.restartTest.bind(this));
+    this.register('reload', () => this.server.restart());
     this.register('rerun', () => this.consumer.trackEditor(vscode.window.activeTextEditor));
 
     vscode.workspace.onDidOpenTextDocument(x => this.consumer.trackEditor(x), null, context.subscriptions);
@@ -145,17 +128,6 @@ class TestRunnerFeature extends BaseFeature {
       }
     });
 
-    await this.launchTestServer();
-
-    process.on('SIGKILL', this.deactivate.bind(this));
-    process.on('SIGINT', this.deactivate.bind(this));
-    process.on('exit', this.deactivate.bind(this));
-  }
-
-  /**
-   * On feature deactivate
-   */
-  deactivate() {
-    this.killTestServer(false);
+    await this.server.start();
   }
 }

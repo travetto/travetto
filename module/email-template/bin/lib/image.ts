@@ -1,26 +1,28 @@
+import { FsUtil } from '@travetto/boot';
 import * as path from 'path';
-import { promises as fs } from 'fs';
-
-import { AppCache, FsUtil, StreamUtil } from '@travetto/boot';
 
 export class ImageUtil {
 
   /**
    * Inline image sources
    */
-  static async inlineImageSource(html: string) {
+  static async inlineImageSource(html: string, root: string) {
+    const { ImageUtil: ImgUtil } = await import('@travetto/image');
+
     const srcs: string[] = [];
 
-    html.replace(/(<img[^>]src=")([^"]+)/g, (__, __2, src) => {
+    html = html.replace(/(<img[^>]src=")([^"]+)/g, (all, pre, src) => {
       if (!src.startsWith('http')) {
-        srcs.push(src);
+        const resolved = FsUtil.resolveUnix(root, src).replace(/^.*\/resources\//, '/');
+        srcs.push(resolved);
+        return `${pre}${resolved}`;
       }
-      return '';
+      return all;
     });
 
     const pendingImages = srcs.map(async src => {
       const [, ext] = path.extname(src).split('.');
-      const data = (await this.getImage(src)).toString('base64');
+      const data = (await ImgUtil.optimizeResource(src)).toString('base64');
 
       return { data, ext, src };
     });
@@ -38,29 +40,5 @@ export class ImageUtil {
     });
 
     return html;
-  }
-
-
-  /**
-   * Fetch image, compress and return as buffer
-   */
-  static async getImage(rel: string) {
-    const { ResourceManager } = await import('@travetto/base');
-    const { ImageUtil: ImgUtil } = await import('@travetto/image');
-
-    const pth = await ResourceManager.find(rel);
-    const out = AppCache.toEntryName(pth);
-
-    if (!(await FsUtil.exists(out))) {
-      let stream: Buffer | NodeJS.ReadableStream = await ResourceManager.readToStream(rel);
-      if (/.png$/.test(pth)) {
-        stream = await ImgUtil.optimize('png', stream);
-      } else if (/.jpe?g$/i.test(pth)) {
-        stream = await ImgUtil.optimize('jpeg', stream);
-      }
-      await StreamUtil.writeToFile(stream, out);
-    }
-
-    return fs.readFile(out);
   }
 }

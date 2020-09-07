@@ -65,6 +65,26 @@ If at any point in time, you wish to modify the launch configuration of any appl
    *  `Travetto: Run Most Recent Application` to launch the most recently run configured application
    *  `Travetto: Export Application Launch` to export an application config
 
+## Email Template Development
+
+While using the [Email Templating](https://github.com/travetto/travetto/tree/master/module/email-template#readme "Email templating module") module, the desire to visual inspect output, as well as quickly test changes is paramount.  To that end, the plugin supports the ability to compile, view, and send email templates all from within the plugin.
+
+The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.
+
+![Editing](https://travetto.dev/assets/images/vscode-plugin/email-editing.gif)
+
+Any file that ends with `.tpl.html` is assumed to be an email template, and will trigger background compilation upon editing the file.  All of the following commmands require the user to be actively editing the `.tpl.html` file to be available.  
+
+Additional, for rendering the email, a context may be needed to exercise the various logic paths. The plugin picks up `resources/email-dev-context.json` by default, and if its not found, then an empty object is provided. 
+
+### Commands
+
+   
+   *  `Travetto: Preview Email HTML` to view the `html` version of the rendered template
+   *  `Travetto: Preview Email Text` to view the `text` version of the rendered template
+   *  `Travetto: Send Email Template` to trigger sending an email (requires SMTP configuration)
+   *  `Travetto: Email Template Context` to view/edit the context file used to render the template
+
 ## Misc Utilities
 
 Currently the supported commands are:
@@ -75,15 +95,25 @@ Currently the supported commands are:
 
 ### Requirements
    
-   *  You should have the [Travetto](https://travetto.dev) framework installed, version 1.0.0 and higher.
+   *  You should have the [Travetto](https://travetto.dev) framework installed, version 1.1.0 and higher.
    *  Tests require the [Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework") module to be installed.
    *  Application running requires the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to be installed.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+   
+   *  None
 
 ## Release Notes
+
+### 1.1.x
+   
+   *  Introduced the email template functionality
+
+### 1.0.x
+   
+   *  Complete rewrite of plugin
+   *  Test framework integration completely inverted, and majority of logic offloaded to framework
 
 ### 0.5.x
    

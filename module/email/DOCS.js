@@ -1,4 +1,4 @@
-const { doc: d, lib, SnippetLink, Code, inp, Section } = require('@travetto/doc');
+const { doc: d, lib, SnippetLink, Code, inp, Section, List, Mod } = require('@travetto/doc');
 const { NullTransport } = require('./src/transport');
 const { MailConfig } = require('./src/config');
 
@@ -12,9 +12,18 @@ ${Code('Declaring the null transport for development', 'alt/docs/src/null.ts')}
 
 Given the amorphous nature of transports, the ${inp`transport`} field in ${MailConfig} is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
 
+${Section('Sending Compiled Templates')}
+By design, sending an email requires the sender to specify the html, text optionally, and subject.  To integrate with other tools, the framework also has the ability to send an email as a set of templates, based off a single key. The module will look for:
+${List(
+  d`${inp`resources/<key>.compiled.html`}`,
+  d`${inp`resources/<key>.compiled.text`}`,
+  d`${inp`resources/<key>.compiled.subject`}`
+)}
+With ${inp`.html`} being the only required field.  The ${Mod('email-template')} module supports this format, and will generate files accordingly. Also, note that ${inp`<key>`} can include slashes, allowing for nesting folders.
+
 ${Section('Nodmailer - Extension')}
 
-Due to the connection with ${lib.NodeMailer}, all extensions should be usable out of the box. The primary ${lib.NodeMailer} modules are provided (assuming dependencies are installed):
+Given the integration with ${lib.NodeMailer}, all extensions should be usable out of the box. The primary ${lib.NodeMailer} modules are provided (assuming dependencies are installed):
 
 ${Code(d`${inp`sendmail`} to send all messages via the sendmail operation`, 'alt/docs/src/sendmail.ts')}
 

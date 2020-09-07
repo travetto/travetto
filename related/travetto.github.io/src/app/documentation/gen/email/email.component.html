@@ -34,9 +34,16 @@ To expose the necessary email transport, the following pattern is commonly used:
 
 Given the amorphous nature of transports, the <code class="item input">transport</code> field in <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/email/src/config.ts#L7">MailConfig</a> is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
 
+<h2 id="sending-compiled-templates">Sending Compiled Templates</h2>
+By design, sending an email requires the sender to specify the html, text optionally, and subject.  To integrate with other tools, the framework also has the ability to send an email as a set of templates, based off a single key. The module will look for:
+<ul> <li><code class="item input">resources/&lt;key&gt;.compiled.html</code></li>
+ <li><code class="item input">resources/&lt;key&gt;.compiled.text</code></li>
+ <li><code class="item input">resources/&lt;key&gt;.compiled.subject</code></li></ul>
+With <code class="item input">.html</code> being the only required field.  The <a class="module-link" href="/docs/email-template" title="Email templating module">Email Templating</a> module supports this format, and will generate files accordingly. Also, note that <code class="item input">&lt;key&gt;</code> can include slashes, allowing for nesting folders.
+
 <h2 id="nodmailer-extension">Nodmailer - Extension</h2>
 
-Due to the connection with <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a>, all extensions should be usable out of the box. The primary <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a> modules are provided (assuming dependencies are installed):
+Given the integration with <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a>, all extensions should be usable out of the box. The primary <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a> modules are provided (assuming dependencies are installed):
 
       <figure class="code">
       <figcaption class="code"><code class="item input">sendmail</code> to send all messages via the sendmail operation
