@@ -1,8 +1,12 @@
 import * as commander from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { FsUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
+
 import { CliDocUtil } from './lib/util';
+
 
 /**
  * Command line support for generating module docs.
@@ -38,7 +42,11 @@ export class DocPlugin extends BasePlugin {
       if (this._cmd.watch) {
         await CliDocUtil.watchFile('DOCS.js', write);
       } else {
-        await write();
+        try {
+          await write();
+        } catch (err) {
+          console.log(FsUtil.cwd, err);
+        }
       }
     } else {
       console.log(await CliDocUtil.getRenderer(this._cmd.format));

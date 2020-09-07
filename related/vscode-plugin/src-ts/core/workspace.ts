@@ -83,10 +83,13 @@ export class Workspace {
       protocol: 'inspector',
       // eslint-disable-next-line no-template-curly-in-string
       cwd: '${workspaceFolder}',
-      stopOnEntry: false,
+      stopOnEntry: true,
       sourceMaps: true,
       runtimeArgs: [
         '--nolazy'
+      ],
+      resolveSourceMapLocations: [
+        '!**/node_modules/typescript/**'
       ],
       breakOnLoadStrategy: 'regex',
       skipFiles: [

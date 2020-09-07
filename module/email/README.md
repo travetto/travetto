@@ -27,9 +27,17 @@ class Config {
 
 Given the amorphous nature of transports, the `transport` field in [MailConfig](https://github.com/travetto/travetto/tree/master/module/email/src/config.ts#L7) is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
 
+## Sending Compiled Templates
+By design, sending an email requires the sender to specify the html, text optionally, and subject.  To integrate with other tools, the framework also has the ability to send an email as a set of templates, based off a single key. The module will look for:
+   
+   *  `resources/<key>.compiled.html`
+   *  `resources/<key>.compiled.text`
+   *  `resources/<key>.compiled.subject`
+With `.html` being the only required field.  The [Email Templating](https://github.com/travetto/travetto/tree/master/module/email-template#readme "Email templating module") module supports this format, and will generate files accordingly. Also, note that `<key>` can include slashes, allowing for nesting folders.
+
 ## Nodmailer - Extension
 
-Due to the connection with [nodemailer](https://nodemailer.com/about/), all extensions should be usable out of the box. The primary [nodemailer](https://nodemailer.com/about/) modules are provided (assuming dependencies are installed):
+Given the integration with [nodemailer](https://nodemailer.com/about/), all extensions should be usable out of the box. The primary [nodemailer](https://nodemailer.com/about/) modules are provided (assuming dependencies are installed):
 
 **Code: `sendmail` to send all messages via the sendmail operation**
 ```typescript

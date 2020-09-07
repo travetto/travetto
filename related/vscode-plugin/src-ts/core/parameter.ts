@@ -8,8 +8,8 @@ import { ParamConfig } from './types';
  */
 interface ParamWithMeta {
   param: ParamConfig;
-  total: number;
-  step: number;
+  total?: number;
+  step?: number;
   input?: string;
 }
 

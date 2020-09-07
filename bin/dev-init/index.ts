@@ -47,6 +47,7 @@ async function finalizeModule(root: string) {
   await FsUtil.mkdirp(`${root}/node_modules/.bin`);
   await FsUtil.symlink(`${MOD_ROOT}/cli/bin/travetto.js`, `${root}/node_modules/.bin/trv`);
   await FsUtil.symlink(`${MOD_ROOT}/cli/bin/travetto.js`, `${root}/node_modules/.bin/travetto`);
+  await FsUtil.symlink(`${ROOT}/node_modules/typescript`, `${root}/node_modules/typescript`);
   return `finalized ${links} links`;
 }
 

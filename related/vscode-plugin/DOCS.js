@@ -1,4 +1,4 @@
-const { RawHeader, doc: d, inp, lib, Image, Mod, List, Section, SubSection } = require('@travetto/doc');
+const { RawHeader, doc: d, inp, lib, Image, Mod, List, Section, SubSection, pth } = require('@travetto/doc');
 const { Test, Suite } = require('@travetto/test');
 const { Application } = require('@travetto/app');
 
@@ -72,6 +72,29 @@ ${List(
   d`${inp`Travetto: Export Application Launch`} to export an application config`,
 )}
 
+
+${Section('Email Template Development')}
+
+While using the ${Mod('email-template')} module, the desire to visual inspect output, as well as quickly test changes is paramount.  To that end, the plugin supports the ability to compile, view, and send email templates all from within the plugin.
+
+The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.
+
+${Image('Editing', 'https://travetto.dev/assets/images/vscode-plugin/email-editing.gif')}
+
+Any file that ends with ${inp`.tpl.html`} is assumed to be an email template, and will trigger background compilation upon editing the file.  All of the following commmands require the user to be actively editing the ${inp`.tpl.html`} file to be available.  
+
+Additional, for rendering the email, a context may be needed to exercise the various logic paths. The plugin picks up ${pth`resources/email-dev-context.json`} by default, and if its not found, then an empty object is provided. 
+
+${SubSection('Commands')}
+
+${List(
+  d`${inp`Travetto: Preview Email HTML`} to view the ${inp`html`} version of the rendered template`,
+  d`${inp`Travetto: Preview Email Text`} to view the ${inp`text`} version of the rendered template`,
+  d`${inp`Travetto: Send Email Template`} to trigger sending an email (requires SMTP configuration)`,
+  d`${inp`Travetto: Email Template Context`} to view/edit the context file used to render the template`,
+)}
+
+
 ${Section('Misc Utilities')}
 
 Currently the supported commands are:
@@ -84,16 +107,27 @@ ${Section('Release Info')}
 
 ${SubSection('Requirements')}
 ${List(
-  d`You should have the ${lib.Travetto} framework installed, version 1.0.0 and higher.`,
+  d`You should have the ${lib.Travetto} framework installed, version 1.1.0 and higher.`,
   d`Tests require the ${Mod('test')} module to be installed.`,
   d`Application running requires the ${Mod('app')} module to be installed.`,
 )}
 
 ${Section('Known Issues')}
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+${List(`None`)}
 
 ${Section('Release Notes')}
+
+${SubSection('1.1.x')}
+${List(
+  `Introduced the email template functionality`
+)}
+
+${SubSection('1.0.x')}
+${List(
+  `Complete rewrite of plugin`,
+  `Test framework integration completely inverted, and majority of logic offloaded to framework`
+)}
 
 ${SubSection('0.5.x')}
 ${List(

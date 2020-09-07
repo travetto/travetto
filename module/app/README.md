@@ -148,7 +148,7 @@ Configured {
     readonly: false,
     travetto: '1.1.0-alpha.5',
     name: '@travetto/app',
-    version: '1.1.0-alpha.5',
+    version: '1.1.0-alpha.6',
     license: 'MIT',
     description: 'Application registration/management and run support.',
     author: {

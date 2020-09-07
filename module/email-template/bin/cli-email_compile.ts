@@ -1,8 +1,8 @@
 import * as commander from 'commander';
 
 import { CliUtil } from '@travetto/cli/src/util';
-import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { color } from '@travetto/cli/src/color';
 
 /**
  * CLI Entry point for running the email server
@@ -15,11 +15,13 @@ export class EmailCompilePlugin extends BasePlugin {
 
   }
   async action() {
-    const { TemplateUtil } = await import('./lib/util');
-    await TemplateUtil.initApp();
+    const { PhaseManager } = await import('@travetto/base');
+    await PhaseManager.init();
 
-    const count = (await TemplateUtil.compileAllToDisk()).length;
-    console!.log(color`Successfully compiled ${{ param: count }} templates`);
+    const { TemplateUtil } = await import('./lib/util');
+
+    const all = await TemplateUtil.compileAllToDisk();
+    console!.log(color`Successfully compiled ${{ param: all.length }} templates`);
 
     if (CliUtil.isTrue(this._cmd.watch)) {
       await TemplateUtil.watchCompile();
