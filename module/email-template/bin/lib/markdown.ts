@@ -166,6 +166,7 @@ export class MarkdownUtil {
         case 'head':
           // Drop entirely
           break;
+        case 'title': case 'summary': break;
         default:
           descend();
       }

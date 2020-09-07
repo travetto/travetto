@@ -65,6 +65,25 @@ If at any point in time, you wish to modify the launch configuration of any appl
  <li><code class="item input">Travetto: Run Most Recent Application</code> to launch the most recently run configured application</li>
  <li><code class="item input">Travetto: Export Application Launch</code> to export an application config</li></ul>
 
+<h2 id="email-template-development">Email Template Development</h2>
+
+While using the <a class="module-link" href="/docs/email-template" title="Email templating module">Email Templating</a> module, the desire to visual inspect output, as well as quickly test changes is paramount.  To that end, the plugin supports the ability to compile, view, and send email templates all from within the plugin.
+
+The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.
+
+<img src="/assets/images/vscode-plugin/email-editing.gif" alt="Editing">
+
+Any file that ends with <code class="item input">.tpl.html</code> is assumed to be an email template, and will trigger background compilation upon editing the file.  All of the following commmands require the user to be actively editing the <code class="item input">.tpl.html</code> file to be available.  
+
+Additional, for rendering the email, a context may be needed to exercise the various logic paths. The plugin picks up <code class="item path">resources/email-dev-context.json</code> by default, and if its not found, then an empty object is provided. 
+
+<h3 id="commands">Commands</h3>
+
+<ul> <li><code class="item input">Travetto: Preview Email HTML</code> to view the <code class="item input">html</code> version of the rendered template</li>
+ <li><code class="item input">Travetto: Preview Email Text</code> to view the <code class="item input">text</code> version of the rendered template</li>
+ <li><code class="item input">Travetto: Send Email Template</code> to trigger sending an email (requires SMTP configuration)</li>
+ <li><code class="item input">Travetto: Email Template Context</code> to view/edit the context file used to render the template</li></ul>
+
 <h2 id="misc-utilities">Misc Utilities</h2>
 
 Currently the supported commands are:
@@ -73,15 +92,22 @@ Currently the supported commands are:
 <h2 id="release-info">Release Info</h2>
 
 <h3 id="requirements">Requirements</h3>
-<ul> <li>You should have the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework installed, version 1.0.0 and higher.</li>
+<ul> <li>You should have the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework installed, version 1.1.0 and higher.</li>
  <li>Tests require the <a class="module-link" href="/docs/test" title="Declarative test framework">Testing</a> module to be installed.</li>
  <li>Application running requires the <a class="module-link" href="/docs/app" title="Application registration/management and run support.">Application</a> module to be installed.</li></ul>
 
 <h2 id="known-issues">Known Issues</h2>
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+<ul> <li>None</li></ul>
 
 <h2 id="release-notes">Release Notes</h2>
+
+<h3 id="-x">1.1.x</h3>
+<ul> <li>Introduced the email template functionality</li></ul>
+
+<h3 id="-x">1.0.x</h3>
+<ul> <li>Complete rewrite of plugin</li>
+ <li>Test framework integration completely inverted, and majority of logic offloaded to framework</li></ul>
 
 <h3 id="-x">0.5.x</h3>
 <ul> <li>Introduced application launching</li>

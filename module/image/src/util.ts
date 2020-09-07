@@ -1,5 +1,7 @@
+import * as fs from 'fs';
+
 import { CommandService } from '@travetto/command';
-import { ExecUtil } from '@travetto/boot';
+import { ExecUtil, FsUtil, StreamUtil, AppCache } from '@travetto/boot';
 
 /**
  * Image output options
@@ -81,10 +83,32 @@ export class ImageUtil {
         break;
       }
       case 'jpeg': {
-        stream = await this.jpegCompressor.exec('jpegoptim', '-s', '--stdin', '--stdout');
+        stream = await this.jpegCompressor.exec('jpegoptim', '-m70', '-s', '--stdin', '--stdout');
         break;
       }
     }
     return await ExecUtil.pipe(stream, image as Buffer);
+  }
+
+  /**
+   * Fetch image, compress and return as buffer
+   */
+  static async optimizeResource(rel: string) {
+    const { ResourceManager } = await import('@travetto/base');
+
+    const pth = await ResourceManager.find(rel);
+    const out = AppCache.toEntryName(pth);
+
+    if (!(await FsUtil.exists(out))) {
+      let stream: Buffer | NodeJS.ReadableStream = await ResourceManager.readToStream(rel);
+      if (/[.]png$/.test(pth)) {
+        stream = await this.optimize('png', stream);
+      } else if (/[.]jpe?g$/i.test(pth)) {
+        stream = await this.optimize('jpeg', stream);
+      }
+      await StreamUtil.writeToFile(stream, out);
+    }
+
+    return fs.promises.readFile(out);
   }
 }

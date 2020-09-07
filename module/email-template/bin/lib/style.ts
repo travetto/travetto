@@ -1,5 +1,4 @@
 import * as util from 'util';
-import { FsUtil } from '@travetto/boot';
 
 /**
  * Style Utils
@@ -26,12 +25,12 @@ export class StyleUtil {
   static async getStyles() {
     const { ResourceManager } = await import('@travetto/base');
 
-    const file = await ResourceManager.find('email/app.scss');
+    const file = await ResourceManager.find('email/main.scss');
     return await this.compileSass(file, [
       require
         .resolve('foundation-emails/gulpfile.js')
         .replace('gulpfile.js', 'scss'), // Include foundation-emails as part of available roots
-      ...ResourceManager.getPaths().map(x => FsUtil.resolveUnix(x, 'email')),
+      ...ResourceManager.getPaths().map(x => `${x}/email`)
     ]);
   }
 
@@ -40,25 +39,15 @@ export class StyleUtil {
    * @param html
    */
   static async applyStyling(html: string) {
-    const css = await this.getStyles();
-    const styles = [`<style type="text/css">\n${css}\n</style>`];
-
-    html = html.replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (all) => {
-      styles.push(all);
-      return '';
-    });
-
-    // Macro support
-    html = html
-      .replace(/<\/head>/, all => `${styles.join('\n')}\n${all}`);
-
     // Inline css
     const inlineCss = await import('inline-css');
     html = (await inlineCss(html, {
       url: 'https://app.dev',
       preserveMediaQueries: true,
       removeStyleTags: true,
-      applyStyleTags: true
+      removeLinkTags: true,
+      applyStyleTags: true,
+      extraCss: await this.getStyles()
     }));
 
     return html;

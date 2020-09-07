@@ -1,5 +1,6 @@
 import { ResourceManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
+import { EnvUtil } from '@travetto/boot';
 
 import { MessageOptions } from './types';
 import { MailTransport } from './transport';
@@ -36,19 +37,19 @@ export class MailService {
   }
 
   /**
-   * Send a pre compiled email that has a relevant html and optional text file associated
+   * Send a pre compiled email that has a relevant html, subject and optional text file associated
    */
-  async sendCompiled(key: string, msg: Omit<MessageOptions, 'html' | 'text'>): Promise<any> {
-    if (!this.compiled.has(key)) {
-      this.compiled.set(key, {
-        html: await ResourceManager.read(`email/${key}.compiled.html`, 'utf8'),
-        text: await ResourceManager.read(`email/${key}.compiled.txt`, 'utf8').catch(err => undefined),
-      });
+  async sendCompiled(key: string, msg: Omit<MessageOptions, 'html' | 'text' | 'subject'>): Promise<any> {
+    if (!EnvUtil.isReadonly() || !this.compiled.has(key)) {
+      const [html, text, subject] = await Promise.all([
+        ResourceManager.read(`${key}.compiled.html`, 'utf8'),
+        ResourceManager.read(`${key}.compiled.text`, 'utf8').catch(() => ''),
+        ResourceManager.read(`${key}.compiled.subject`, 'utf8')
+      ]);
+
+      this.compiled.set(key, { html, text, subject });
     }
-    return this.send({
-      ...msg,
-      ...this.compiled.get(key)!
-    });
+    return this.send({ ...msg, ...this.compiled.get(key)! });
   }
 
   /**
@@ -57,11 +58,13 @@ export class MailService {
   async send(msg: MessageOptions): Promise<any> {
     // Template if context is provided
     if (msg.context) {
-      Object.assign(msg, {
-        html: await this.tplEngine!.template(msg.html, msg.context),
-        text: msg.text ? await this.tplEngine!.template(msg.text, msg.context) : undefined,
-        subject: msg.subject ? await this.tplEngine!.template(msg.subject, msg.context) : undefined
-      });
+      const [html, text, subject] = await Promise.all([
+        msg.html ? this.tplEngine!.template(msg.html, msg.context) : undefined,
+        msg.text ? this.tplEngine!.template(msg.text, msg.context) : undefined,
+        msg.subject ? this.tplEngine!.template(msg.subject, msg.context) : undefined
+      ]);
+
+      Object.assign(msg, { html, text, subject });
     }
 
     if (msg.text) {
@@ -79,7 +82,8 @@ export class MailService {
         // NOTE: The leading space on the content type is to force node mailer to not do anything fancy with
         content: html, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: ` text/html; charset=utf-8`
       });
-      delete msg.html;
+      // @ts-ignore
+      delete msg.html; // This is a hack to fix nodemailer
     }
 
     return this.transport.send(msg);

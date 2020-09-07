@@ -20,7 +20,8 @@ class ContainerTest {
     const expected = `
       <!DOCTYPE html>
       <html>
-        <head></head>
+        <head>
+        </head>
         <body>
           <table align="center" class="container">
             <tbody>

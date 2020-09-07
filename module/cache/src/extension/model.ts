@@ -1,5 +1,5 @@
 // @file-if @travetto/model
-import { ModelService, ModelRegistry, Index } from '@travetto/model';
+import { ModelService, ModelRegistry } from '@travetto/model';
 import { Schema, Text, Long } from '@travetto/schema';
 
 import { CacheEntry } from '../types';

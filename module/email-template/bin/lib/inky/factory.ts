@@ -113,6 +113,21 @@ export class InkyComponentFactory implements ComponentFactory {
       </th>`;
   }
 
+  @Tag()
+  title(element: Node) {
+    const inner = HtmlUtil.getInner(element);
+    return `
+      <title>${inner}</title>`;
+  }
+
+  @Tag()
+  summary(element: Node) {
+    const inner = HtmlUtil.getInner(element);
+    return `
+      <summary>${inner}</summary>`;
+  }
+
+
   @Tag('h-line')
   hLine(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);

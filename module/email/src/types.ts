@@ -37,6 +37,7 @@ export interface Attachment extends AttachmentLike {
 export interface MessageOptions {
   html: string;
   text?: string;
+  subject?: string;
   context?: Record<string, any>; // For templating
 
   from?: string | Address;
@@ -47,7 +48,6 @@ export interface MessageOptions {
   replyTo?: string | Address;
   inReplyTo?: string | Address;
   references?: string | string[];
-  subject?: string;
   headers?: Record<string, string | string[]>;
   attachments?: Attachment[];
   alternatives?: Attachment[];
@@ -56,4 +56,6 @@ export interface MessageOptions {
   encoding?: string;
 }
 
-export type SentMessage = any;
+export type SentMessage = {
+  messageId?: string;
+};

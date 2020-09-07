@@ -62,24 +62,20 @@ Assemble is the operation that stages the project's code for deployment.  The as
   <span class="token key atrule">add</span><span class="token punctuation">:</span>
     <span class="token punctuation">-</span> <span class="token key atrule">node_modules/@travetto/cli/bin/travetto.js</span><span class="token punctuation">:</span> node_modules/.bin/trv
     <span class="token punctuation">-</span> <span class="token key atrule">node_modules/@travetto/cli/bin/travetto.js</span><span class="token punctuation">:</span> node_modules/.bin/travetto
-    <span class="token punctuation">-</span> <span class="token key atrule">lodash/lodash.min.js</span><span class="token punctuation">:</span> lodash/lodash.js
+    <span class="token punctuation">-</span> <span class="token key atrule">node_modules/lodash/lodash.min.js</span><span class="token punctuation">:</span> node_modules/lodash/lodash.js
   <span class="token key atrule">excludeCompile</span><span class="token punctuation">:</span>
     <span class="token punctuation">-</span> node_modules/@travetto/<span class="token important">*/alt/</span>
     <span class="token punctuation">-</span> node_modules/@travetto/<span class="token important">*/test/</span>
   <span class="token key atrule">exclude</span><span class="token punctuation">:</span>
     <span class="token punctuation">-</span> bower.json
     <span class="token punctuation">-</span> LICENSE
+    <span class="token punctuation">-</span> LICENCE
     <span class="token punctuation">-</span> <span class="token string">'*.map'</span>
     <span class="token punctuation">-</span> <span class="token string">'*.md'</span>
     <span class="token punctuation">-</span> <span class="token string">'*.lock'</span>
     <span class="token punctuation">-</span> <span class="token string">'*.html'</span>
     <span class="token punctuation">-</span> <span class="token string">'*.mjs'</span>
-    <span class="token punctuation">-</span> node_modules/lodash/lodash.min.js
-    <span class="token punctuation">-</span> node_modules/source<span class="token punctuation">-</span>map<span class="token punctuation">-</span>support/browser<span class="token punctuation">-</span>source<span class="token punctuation">-</span>map<span class="token punctuation">-</span>support.js
-    <span class="token punctuation">-</span> node_modules/bson/browser_build/
-    <span class="token punctuation">-</span> node_modules/@travetto/<span class="token important">*/DOCS.js</span>
-    <span class="token punctuation">-</span> node_modules/typescript/
-    <span class="token punctuation">-</span> node_modules/@types/
+    <span class="token punctuation">-</span> <span class="token string">'*.ts'</span>
     <span class="token punctuation">-</span> <span class="token string">'*.d.ts'</span></code></pre>     
       </figure>
 
@@ -104,7 +100,7 @@ Zip is an optional step, that can run post assembly.  The only configuration it 
 
       <figure class="code">
       <figcaption class="code">Zip Default Config
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/pack/bin/pack.config.yml#L28">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/pack/bin/pack.config.yml#L43">Source</a></cite>
       </figcaption>
       <pre><code class="language-yaml"><span class="token key atrule">zip</span><span class="token punctuation">:</span>
   <span class="token key atrule">active</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>

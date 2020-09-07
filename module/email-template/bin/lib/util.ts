@@ -1,23 +1,25 @@
+import { dirname } from 'path';
 import { promises as fs } from 'fs';
-
-import { FsUtil } from '@travetto/boot';
 
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
 import { StyleUtil } from './style';
 import { ImageUtil } from './image';
+import { FsUtil } from '@travetto/boot';
 
-export type MapLite<K, V> = {
-  get(k: K): V | null;
-  has(k: K): boolean;
-};
+type Parts = 'html' | 'text' | 'subject';
+const PARTS = (['html', 'subject', 'text'] as const);
 
 /**
  * Utilities for templating
  */
 export class TemplateUtil {
 
-  static TPL_EXT = /[.]tpl[.]html$/;
+  static TPL_EXT = /[.]email[.]html$/;
+
+  static getOutputs(file: string) {
+    return PARTS.map(k => [k, file.replace(this.TPL_EXT, `.compiled.${k}`)] as [part: Parts, file: string]);
+  }
 
   /**
    * Grab list of all avaliable templates
@@ -25,40 +27,12 @@ export class TemplateUtil {
   static async findAllTemplates() {
     const { ResourceManager } = await import('@travetto/base');
 
-    return (await ResourceManager.findAllByPattern(this.TPL_EXT, 'email'))
+    return (await ResourceManager.findAllByPattern(this.TPL_EXT))
       .sort()
       .map(path => ({
-        path,
-        key: path.replace(/^email\//, '').replace(this.TPL_EXT, '')
+        path: ResourceManager.toAbsolutePathSync(path),
+        key: path.replace(this.TPL_EXT, '')
       }));
-  }
-
-  /**
-   * Create email context via URL and template
-   */
-  static async buildContext(context: Record<string, any>, content: string, overrides: MapLite<string, string>) {
-
-    const base: Record<string, any> = {
-      ...context
-    };
-
-    content.replace(/[{]{2}\s*([A-Za-z0-9_.]+)\s*[}]{2}/g, (all, sub) => {
-      if (!overrides.has(sub) || overrides.get(sub) === '') {
-        base[sub] = all;
-      } else {
-        base[sub] = overrides.get(sub);
-      }
-      return '';
-    });
-
-    try {
-      Object.assign(base, context);
-    } catch (e) {
-    }
-
-    const { ConfigUtil } = await import('@travetto/config/src/internal/util');
-
-    return ConfigUtil.breakDownKeys(base);
   }
 
   /**
@@ -66,39 +40,26 @@ export class TemplateUtil {
    */
   static async compileAllToDisk() {
     const keys = await this.findAllTemplates();
-    const all = keys.map(tpl => this.compileToDisk(tpl.path, true));
-    await Promise.all(all);
-    return all;
+    return Promise.all(keys.map(tpl => this.compileToDisk(tpl.path)));
   }
 
   /**
    * Compile templates to disk
    */
-  static async compileToDisk(key: string, force = false) {
-    const { ResourceManager } = await import('@travetto/base');
+  static async compileToDisk(file: string) {
+    const resolved = await fs.readFile(file, 'utf8');
+    const compiled = await this.compile(resolved, dirname(file));
 
-    const tplFile = key.startsWith(process.cwd()) ? key : await ResourceManager.toAbsolutePath(key);
-    const textFile = tplFile.replace(/[.]tpl[.]html$/, '.compiled.txt');
-    const htmlFile = tplFile.replace(/[.]tpl[.]html$/, '.compiled.html');
+    await Promise.all(this.getOutputs(file).map(([k, f]) =>
+      fs.writeFile(f, compiled[k], { encoding: 'utf8' })));
 
-    const resolved = await fs.readFile(tplFile, 'utf8');
-    if (force || !(await FsUtil.exists(textFile)) || !(await FsUtil.exists(htmlFile))) {
-      const compiled = await this.compile(resolved);
-      await fs.writeFile(textFile, compiled.text, { encoding: 'utf8' });
-      await fs.writeFile(htmlFile, compiled.html, { encoding: 'utf8' });
-      return compiled;
-    } else {
-      return {
-        text: await fs.readFile(textFile, 'utf8'),
-        html: await fs.readFile(htmlFile, 'utf8')
-      };
-    }
+    return compiled;
   }
 
   /**
    * Compile template
    */
-  static async compile(tpl: string) {
+  static async compile(tpl: string, root: string) {
     const { ResourceManager } = await import('@travetto/base');
     const { DependencyRegistry } = await import('@travetto/di');
     const { MailTemplateEngine } = await import('@travetto/email');
@@ -114,16 +75,56 @@ export class TemplateUtil {
     // Transform inky markup
     let html = Inky.render(tpl);
 
+    // Get Subject
+    const [, subject] = html.match(/<title>(.*?)<\/title>/) ?? [];
+
     // Apply styles
     html = await StyleUtil.applyStyling(html);
 
     // Inline Images
-    html = await ImageUtil.inlineImageSource(html);
+    html = await ImageUtil.inlineImageSource(html, root);
 
     // Generate text version
     const text = await MarkdownUtil.htmlToMarkdown(tpl);
 
-    return { html, text };
+    return { html, text, subject };
+  }
+
+  /**
+   * Resolve template
+   */
+  static async resolveTemplate(file: string, format: Parts, context: Record<string, any>) {
+
+    const files = this.getOutputs(file);
+    const missing = await Promise.all(files.map(x => FsUtil.exists(x[1])));
+
+    if (missing.some(x => x === undefined)) {
+      await this.compileToDisk(file);
+    }
+
+    const compiled = Object.fromEntries(await Promise.all(files.map(([k, f]) => fs.readFile(f, 'utf8').then(c => [k, c]))));
+
+    // Let the engine template
+    const { MailTemplateEngine } = await import('@travetto/email');
+    const { DependencyRegistry } = await import('@travetto/di');
+
+    const engine = await DependencyRegistry.getInstance(MailTemplateEngine);
+    return engine.template(compiled[format], context);
+  }
+
+  /**
+   * Render
+   * @param file
+   */
+  static async resolveCompiledTemplate(file: string, context: Record<string, any>) {
+    return Object.fromEntries(
+      await Promise.all(
+        PARTS.map(k =>
+          this.resolveTemplate(file, k, context)
+            .then(c => [k, c] as const)
+        )
+      )
+    );
   }
 
   /**
@@ -136,25 +137,25 @@ export class TemplateUtil {
     new FilePresenceManager(ResourceManager.getRelativePaths().map(x => `${x}/email`), {
       ignoreInitial: true,
       validFile: x =>
-        /[.](html|txt|scss|css|png|jpg|gif)$/.test(x) &&
-        !/\/email\/.*[.](compiled|dev)[.]/.test(x)
-    }).on('changed', ({ file: f }) => {
+        !/[.]compiled[.]/.test(x) && (
+          /[.](html|scss|css|png|jpe?g|gif|yml)$/.test(x)
+        )
+    }).on('changed', async ({ file: f }) => {
       console.log('Contents changed', f);
-      this.compileToDisk(f, true).then(() => cb && cb(f));
+      if (this.TPL_EXT.test(f)) {
+        await this.compileToDisk(f);
+        if (cb) {
+          cb(f);
+        }
+      } else {
+        await this.compileAllToDisk();
+        if (cb) {
+          for (const el of await this.findAllTemplates()) {
+            cb(el.path);
+          }
+        }
+      }
     });
     await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24 * 1));
-  }
-
-  /**
-   * Initialize for operation
-   */
-  static async initApp() {
-    process.env.TRV_RESOURCE_ROOTS = [
-      `${process.env.TRV_RESOURCE_ROOTS || ''}`,
-      FsUtil.resolveUnix(__dirname, '..', '..'),
-      __dirname
-    ].join(',');
-    const { PhaseManager, AppManifest } = await import('@travetto/base');
-    await PhaseManager.init();
   }
 }
