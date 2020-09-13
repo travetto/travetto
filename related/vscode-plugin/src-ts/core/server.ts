@@ -44,7 +44,7 @@ export class ProcessServer {
     if (!this.running) {
       this.start();
     } else {
-      this.state.process.kill();
+      this.state.process.kill('SIGKILL');
       // Will auto respawn
     }
   }

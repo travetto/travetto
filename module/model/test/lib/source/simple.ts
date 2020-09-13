@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Test } from '@travetto/test';
+import { AfterEach, BeforeEach, Test } from '@travetto/test';
 import { SchemaFakerUtil, Schema, Text, Precision } from '@travetto/schema';
 
 import { BaseModelTest } from '../test.base';
@@ -54,6 +54,16 @@ class Names {
 }
 
 export abstract class BaseSimpleSourceSuite extends BaseModelTest {
+
+  @BeforeEach()
+  async beforeEach() {
+    return this.initDb();
+  }
+
+  @AfterEach()
+  async afterEach() {
+    return this.reinit();
+  }
 
   @Test('save it')
   async save() {

@@ -3,6 +3,17 @@ import { Node, serialize, parse, parseFragment } from 'parse5';
 import { HtmlUtil, Parse5Adapter } from '../html';
 import { Tag, TagRegistry, ComponentFactory } from '../factory';
 
+export const SUMMARY_STYLE = Object.entries({
+  display: 'none',
+  'font-size': '1px',
+  color: '#333333',
+  'line-height': '1px',
+  'max-height': '0px',
+  'max-width': '0px',
+  opacity: '0',
+  overflow: 'hidden'
+}).map(([k, v]) => `${k}: ${v}`).join('; ');
+
 /**
  * Standard component factory, implements Inky behavior
  */
@@ -123,8 +134,7 @@ export class InkyComponentFactory implements ComponentFactory {
   @Tag()
   summary(element: Node) {
     const inner = HtmlUtil.getInner(element);
-    return `
-      <summary>${inner}</summary>`;
+    return `<span id="summary" style="${SUMMARY_STYLE}">${inner}</span>`;
   }
 
 

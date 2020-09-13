@@ -1,6 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
 import { Class, RootRegistry } from '@travetto/registry';
-import { AfterEach, BeforeEach } from '@travetto/test';
 
 import { ModelSource } from '../../src/service/source';
 import { ModelService } from '../../src/service/model';
@@ -24,13 +23,11 @@ export abstract class BaseModelTest {
     config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
   }
 
-  @BeforeEach()
   async initDb() {
     const mms = await this.source;
     await mms.initDatabase();
   }
 
-  @AfterEach()
   async reinit() {
     const mms = await this.source;
     await mms.clearDatabase();
