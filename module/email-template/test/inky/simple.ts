@@ -2,6 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 import { cleanseOutput, cleanseTemplate } from './util';
+import { SUMMARY_STYLE } from '../../bin/lib/inky/factory';
 
 @Suite('simple')
 class SimpleComponentTest {
@@ -22,6 +23,55 @@ class SimpleComponentTest {
 
     assert(cleanseTemplate(input) === cleanseOutput(expected));
   }
+
+  @Test('creates an email summary element')
+  testSummary() {
+    const input = `
+    <html>
+      <head>
+      </head>
+      <body>
+        <summary>Welcome Friends</summary>
+      </body>
+    </html>
+  `;
+    const expected = `
+    <html>
+      <head>
+      </head>
+      <body>
+        <span id="summary" style="${SUMMARY_STYLE}">Welcome Friends</span>
+      </body>
+    </html>
+  `;
+
+    assert(cleanseTemplate(input) === cleanseOutput(expected));
+  }
+
+  @Test('creates an email title element')
+  testTitle() {
+    const input = `
+    <html>
+      <head>
+      </head>
+      <body>
+        <title>Welcome Friends</title>
+      </body>
+    </html>
+  `;
+    const expected = `
+    <html>
+      <head>
+        <title>Welcome Friends</title>
+      </head>
+      <body>
+      </body>
+    </html>
+  `;
+
+    assert(cleanseTemplate(input) === cleanseOutput(expected));
+  }
+
 
   @Test('creates a horizontal rule that you can attach classes to')
   testHLine() {

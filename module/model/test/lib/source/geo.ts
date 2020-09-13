@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Test } from '@travetto/test';
+import { AfterEach, BeforeEach, Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
 import { Point, Model, ModelService } from '../../..';
@@ -19,6 +19,18 @@ class Region {
 }
 
 export abstract class BaseGeoTestSuite extends BaseModelTest {
+
+  @BeforeEach()
+  async beforeEach() {
+    return this.initDb();
+  }
+
+  @AfterEach()
+  async afterEach() {
+    return this.reinit();
+  }
+
+
   @Test('Test within')
   async testWithin() {
     const svc = await DependencyRegistry.getInstance(ModelService);

@@ -9,7 +9,7 @@ export const init = {
     const { EnvUtil } = await import('@travetto/boot');
     const { ScanApp } = await import('@travetto/base');
 
-    // If watching, allow auto load of all tests
+    // If we should treat test as source files (pre-compile, watching)
     if (EnvUtil.isTrue('TRV_TEST_COMPILE')) {
       ScanApp.mainAppFolders.add('test');
     }

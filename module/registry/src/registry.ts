@@ -14,7 +14,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Initializing promises
    */
-  protected initialized: Promise<any>;
+  protected initialized?: Promise<any>;
   /**
    * Event emitter, to broadcast event changes
    */

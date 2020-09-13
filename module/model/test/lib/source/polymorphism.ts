@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Test } from '@travetto/test';
+import { AfterEach, BeforeEach, Test } from '@travetto/test';
 
 import { Model, BaseModel } from '../../..';
 import { BaseModelTest } from '../test.base';
@@ -26,6 +26,16 @@ export class Engineer extends Person {
 }
 
 export abstract class BasePolymorphismSuite extends BaseModelTest {
+
+  @BeforeEach()
+  async beforeEach() {
+    return this.initDb();
+  }
+
+  @AfterEach()
+  async afterEach() {
+    return this.reinit();
+  }
 
   @Test('Verify save and find and deserialize')
   async testUpdate() {

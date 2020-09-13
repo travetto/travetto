@@ -32,10 +32,11 @@ export class ScanApp {
   /**
    * List of modules to not traverse into
    */
-  static modAppExclude = new Set(
-    AppManifest.hasProfile('test') ?
-      ['@travetto/cli', '@travetto/boot', '@travetto/doc'] :
-      ['@travetto/test', '@travetto/cli', '@travetto/boot', '@travetto/doc']);
+  static modAppExclude = new Set([
+    // This drives the init process, so cannot happen in a support file
+    ...(AppManifest.hasProfile('test') ? [] : ['@travetto/test']),
+    '@travetto/cli', '@travetto/boot', '@travetto/doc'
+  ]);
 
   /**
    * Compute index for a scan entry

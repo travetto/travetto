@@ -11,7 +11,7 @@ export class CompileCliUtil {
   /**
    * Trigger a compile
    */
-  static compile(output?: string) {
+  static compile(output?: string, env?: Record<string, string>) {
     if (EnvUtil.isReadonly()) {
       return; // Do not run the compiler
     }
@@ -21,7 +21,8 @@ export class CompileCliUtil {
       ExecUtil.worker('@travetto/compiler/bin/plugin-compile', [], {
         env: {
           ...(output ? { TRV_CACHE: output } : {}),
-          TRV_WATCH: '0' // Ensure no watching
+          TRV_WATCH: '0', // Ensure no watching
+          ...(env ?? {})
         },
         stderr: false
       }).result
