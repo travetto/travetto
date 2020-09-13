@@ -41,15 +41,9 @@ export class Inky {
 
     // Force summary to top, and title to head
     res = res
-      .replace(/<title>.*?<\/title>/, a => {
-        headerTop.push(a);
-        return '';
-      })
-      .replace(/<summary[^>]*>(.*?)<\/summary>/sm, (a, b) => {
-        bodyTop.push(`<div class="email-preview">${b}</div>`);
-        return '';
-      })
-      .replace(/<head[^>]*>/, t => `${t}\n${headerTop.join('\n')}`)
+      .replace(/<title>.*?<\/title>/, a => { headerTop.push(a); return ''; })
+      .replace(/<span[^>]+id="summary"[^>]*>(.*?)<\/span>/sm, a => { bodyTop.push(a); return ''; })
+      .replace(/<head( [^>]*)?>/, t => `${t}\n${headerTop.join('\n')}`)
       .replace(/<body[^>]*>/, t => `${t}\n${bodyTop.join('\n')}`);
 
     return res;

@@ -2,7 +2,7 @@ import { CliUtil } from '@travetto/cli/src/util';
 import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 import type { RunState } from '../../src/runner/types';
 
-const DEF_ENV = { env: 'test', debug: '0', resourceRoots: ['test'] };
+const DEF_ENV = { env: 'test', debug: '0', resourceRoots: ['test'], profiles: ['test'] };
 const ENV_EXT = { TRV_LOG_TIME: 0 };
 
 
@@ -14,7 +14,7 @@ async function customLogs() {
 }
 
 async function load() {
-  await CompileCliUtil.compile();
+  await CompileCliUtil.compile(undefined, { TRV_TEST_COMPILE: '1' });
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.init('@trv:compiler/load');
 }

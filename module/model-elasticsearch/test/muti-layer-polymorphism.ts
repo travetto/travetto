@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Model, ModelService, BaseModel, ModelSource } from '@travetto/model';
 import { DependencyRegistry } from '@travetto/di';
-import { Suite, Test, BeforeAll } from '@travetto/test';
+import { Suite, Test, BeforeAll, BeforeEach, AfterEach } from '@travetto/test';
 import { BaseModelTest } from '@travetto/model/test/lib/test.base';
 
 import { ElasticsearchModelSource } from '../src/source';
@@ -47,6 +47,16 @@ class TestMultilayerPolymorphism extends BaseModelTest {
   @BeforeAll()
   doInit() {
     return this.init();
+  }
+
+  @BeforeEach()
+  async beforeEach() {
+    return this.initDb();
+  }
+
+  @AfterEach()
+  async afterEach() {
+    return this.reinit();
   }
 
   @Test('Extraction')
