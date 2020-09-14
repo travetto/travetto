@@ -8,6 +8,7 @@ export type Service = {
   version: string;
   port: number;
   image: string;
+  args?: string[];
   env?: Record<string, string>;
   require?: string;
 };
@@ -63,7 +64,7 @@ export class ServiceUtil {
         .addLabel(`trv-${svc.name}`)
         .addEnvVars(svc.env || {})
         .setUnref(false)
-        .run();
+        .run(svc.args ?? []);
 
       const out = (await promise).stdout;
       if (!await this.isRunning(svc, 15000)) {
