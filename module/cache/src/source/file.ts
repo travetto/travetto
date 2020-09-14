@@ -51,14 +51,18 @@ export class FileCacheSource<T extends CacheEntry = CacheEntry> extends Cullable
   async set(key: string, entry: T): Promise<any> {
     this.cull();
 
+    if (entry.maxAge) {
+      entry.expiresAt = entry.maxAge + Date.now();
+    }
+
     const pth = this.getPath(key);
 
     const cloned = CacheSourceUtil.storeAsSafeJSON(entry);
 
     await fs.writeFile(pth, cloned, 'utf8');
 
-    if (entry.maxAge) {
-      await this.touch(pth, entry.expiresAt!);
+    if (entry.expiresAt) {
+      await this.touch(pth, entry.expiresAt);
     }
 
     return CacheSourceUtil.readAsSafeJSON(cloned);

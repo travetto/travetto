@@ -30,8 +30,7 @@ export class RedisCacheSource extends CacheSource {
   async get(key: string): Promise<CacheEntry | undefined> {
     const val: any = await this.toPromise(this.cl.get.bind(this.cl, key));
     if (val) {
-      const ret = CacheSourceUtil.readAsSafeJSON(val);
-      return { ...ret, expiresAt: ret.maxAge ? ret.maxAge + Date.now() : undefined };
+      return CacheSourceUtil.readAsSafeJSON(val);
     }
   }
 
@@ -40,12 +39,15 @@ export class RedisCacheSource extends CacheSource {
   }
 
   async set(key: string, entry: CacheEntry): Promise<any> {
+    if (entry.maxAge) {
+      entry.expiresAt = entry.maxAge + Date.now();
+    }
     const cloned = CacheSourceUtil.storeAsSafeJSON(entry);
 
     await this.toPromise(this.cl.setnx.bind(this.cl, key, cloned));
 
-    if (entry.maxAge) {
-      await this.touch(key, entry.maxAge + Date.now());
+    if (entry.expiresAt) {
+      await this.touch(key, entry.expiresAt);
     }
 
     return CacheSourceUtil.readAsSafeJSON(cloned);

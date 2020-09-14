@@ -211,9 +211,13 @@ export abstract class FullCacheSuite extends CacheTestSuite {
 
   abstract get source(): Class<CacheSource>;
 
+  getInstance() {
+    return new this.source();
+  }
+
   @BeforeEach()
   async postCons() {
-    const source = new this.source();
+    const source = this.getInstance();
     this.service.source = source;
     if (source instanceof CullableCacheSource) {
       source.cullRate = 1000;
