@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@travetto/di": "^1.1.0-alpha.6",
-    "@types/mime": "^2.0.2",
-    "file-type": "^14.6.2",
+    "@types/mime": "^2.0.3",
+    "file-type": "^14.7.1",
     "mime": "^2.4.6"
   },
   "title": "Asset",

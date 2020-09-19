@@ -13,7 +13,7 @@
   "description": "Caching functionality with decorators for declarative use.",
   "optionalPeerDependencies": {
     "redis": "^3.0.2",
-    "@types/redis": "^2.8.25"
+    "@types/redis": "^2.8.27"
   },
   "homepage": "https://travetto.io",
   "keywords": [
