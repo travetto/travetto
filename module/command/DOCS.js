@@ -29,7 +29,7 @@ ${Execute('Command Service', 'travetto', ['command:service', '--help'])}
 
 A sample of all services available to the entire framework:
 
-${Terminal('All Services', DocUtil.run('sh', ['./bin/test/resources.sh', 'status'], { cwd: FsUtil.resolveUnix(__dirname, '..', '..') }))}
+${Terminal('All Services', DocUtil.run('sh', ['./bin/npm/service.sh', 'status'], { cwd: FsUtil.resolveUnix(__dirname, '..', '..') }))}
 
 ${SubSection('Defining new Services')}
 
