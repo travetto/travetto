@@ -7,7 +7,7 @@ import { FrameworkUtil } from '../../module/boot/src/framework';
 
 const ROOT = FsUtil.resolveUnix(__dirname, '..', '..'); // Move up from ./bin folder;
 const MOD_ROOT = `${ROOT}/module`;
-const COMMON = ['test', 'doc', 'cli'].map(m => ({ type: 'dev' as const, file: `${MOD_ROOT}/${m}`, dep: `@travetto/${m}` }));
+const COMMON = ['test', 'doc', 'cli'].map(m => ({ type: 'dev' as const, file: `${MOD_ROOT}/${m}`, dep: `@travetto/${m}`, version: '' }));
 const DEP_TYPES = ['dev', 'prod', 'opt'] as const;
 
 /**
