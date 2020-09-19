@@ -100,6 +100,11 @@ export class FrameworkUtil {
     return out;
   }
 
+  /**
+   * Find the dependency's package.json file
+   * @param dep
+   * @param root
+   */
   static async resolveDependencyPackageJson(dep: string, root: string) {
     const paths = [root, ...(require.resolve.paths(root) || [])];
     let folder: string;
@@ -131,30 +136,30 @@ export class FrameworkUtil {
     // Copy over prod node_modules
     const pending = [[root, 0]] as [string, number][];
     const foundSet = new Set<string>();
-    const found: { file: string, type: DepType, dep: string }[] = [];
+    const found: { file: string, type: DepType, dep: string, version: string }[] = [];
     while (pending.length) {
       const [top, depth] = pending.shift()!;
       if (depth > maxDepth) { // Ignore if greater than valid max depth
         continue;
       }
       const p = require(`${top}/package.json`) as Record<string, Record<string, string>> & { name: string };
-      const deps = [];
-      for (const k of types) {
-        if (k !== 'dev' || (process.env.TRV_DEV && p.name.startsWith('@travetto')) || maxDepth === 0) {
-          deps.push(...Object.keys(p[DEP_MAPPING[k]] ?? {}).map(d => [d, k] as const));
+      const deps = [] as (readonly [name: string, type: DepType, version: string])[];
+      for (const type of types) {
+        if (type !== 'dev' || (process.env.TRV_DEV && p.name.startsWith('@travetto')) || maxDepth === 0) {
+          deps.push(...Object.entries(p[DEP_MAPPING[type]] ?? {}).map(([name, version]) => [name, type as DepType, version] as const));
         }
       }
-      for (const [dep, mode] of deps) {
+      for (const [dep, type, version] of deps) {
         try {
           const resolved = this.resolvePath(await this.resolveDependencyPackageJson(dep, top));
 
           if (!foundSet.has(resolved)) {
             foundSet.add(resolved);
-            found.push({ file: resolved, type: mode, dep });
+            found.push({ file: resolved, type, dep, version });
             pending.push([resolved, depth + 1]);
           }
         } catch (err) {
-          if (!dep.startsWith('@types') && mode !== 'opt' && mode !== 'optPeer') {
+          if (!dep.startsWith('@types') && type !== 'opt' && type !== 'optPeer') {
             console.error('Unable to resolve', dep);
           }
         }
