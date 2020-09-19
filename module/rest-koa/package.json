@@ -8,14 +8,14 @@
   },
   "dependencies": {
     "@travetto/rest": "^1.1.0-alpha.7",
-    "@types/koa": "^2.11.3",
+    "@types/koa": "^2.11.4",
     "@types/koa-bodyparser": "^4.3.0",
     "@types/koa-compress": "^4.0.0",
     "@types/koa-router": "^7.4.1",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
     "koa-compress": "^5.0.1",
-    "koa-router": "^9.1.0"
+    "koa-router": "^9.4.0"
   },
   "title": "Koa REST Source",
   "description": "Koa provider for the travetto rest module.",
