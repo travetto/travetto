@@ -135,7 +135,6 @@ export class DynamodbCacheSource extends CacheSource {
         ...(key ? { ExclusiveStartKey: { key: { S: key } } } : {})
       });
       out.push(...(req.Items?.map(x => x.key.S!) || []));
-      console.log(out.length, req.LastEvaluatedKey);
       key = req.LastEvaluatedKey?.key.S;
     }
     return out;
