@@ -1,16 +1,7 @@
-import * as path from 'path';
+import * as fs from 'fs';
 
 import { ExecUtil } from '../../module/boot/src/exec';
 import { FsUtil } from '../../module/boot/src/fs';
-import { FrameworkUtil } from '../../module/boot/src/framework';
-
-/**
- * Log message around async op
- */
-function withMessage(start: string, fn: Promise<any> | (() => Promise<any>), done?: string) {
-  process.stdout.write(`${start} ... `);
-  return ('call' in fn ? fn() : fn).then(x => process.stdout.write(`${(typeof x === 'string' ? x : done) ?? 'done'}.\n`));
-}
 
 /**
  * Take a monorepo module, and project out symlinks for all necessary dependencies
@@ -18,32 +9,38 @@ function withMessage(start: string, fn: Promise<any> | (() => Promise<any>), don
  */
 async function updateModule(root: string) {
   // Fetch deps
-  const deps = await FrameworkUtil.resolveDependencies({ root, types: ['dev', 'prod', 'opt'], maxDepth: 0 });
+  const pkg = require(`${root}/package.json`);
 
-  const resolved = deps
-    .filter(x => /^[\^~]/.test(x.version))
+  process.stdout.write(`- ${pkg.name}`.padEnd(35));
+
+  const resolved = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'optionalPeerDependencies']
+    .flatMap(type =>
+      Object.entries(pkg[type] ?? {})
+        .map(([dep, version]) => ({ dep, type, version })) as { dep: string, type: string, version: string }[]
+    )
+    .filter(x => !x.dep.startsWith('@travetto'))
+    .filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
     .map(({ dep, type, version }) =>
-      ExecUtil.spawn(`npm`, ['show', `${dep}@${version}`, 'versions', '--json']).result
-        .then(v => [dep, type, version.replace(/\d.*$/, JSON.parse(v.stdout).pop())] as [string, 'prod' | 'dev' | 'opt' | 'peer' | 'optPeer', string])
-        .catch(err => [])
+      ExecUtil.spawn(`npm`, ['show', `${dep}@${version}`, 'version', '--json']).result.then(v => {
+        const top = JSON.parse(v.stdout).pop();
+        const curr = pkg[type][dep];
+        const next = version.replace(/\d.*$/, top);
+        if (next !== curr) {
+          pkg[type][dep] = next;
+          return `${dep}@(${curr} -> ${next})`;
+        }
+        return false;
+      })
+        .catch(() => false)
     );
 
-  const toUpdate = (await Promise.all(resolved)).filter(x => !!x[2]);
+  const updated = await (await Promise.all(resolved)).filter(x => !!x);
 
-  if (toUpdate.length) {
-    const pkg = require(`${root}/package.json`);
-    for (const [dep, type, version] of toUpdate) {
-      switch (type) {
-        case 'dev': pkg.devDependencies[dep] = version; break;
-        case 'prod': pkg.dependencies[dep] = version; break;
-        case 'peer': pkg.peerDependencies[dep] = version; break;
-        case 'optPeer': pkg.optPeerDependencies[dep] = version; break;
-        case 'opt': pkg.optionalDependencies[dep] = version; break;
-      }
-    }
+  if (updated.length) {
+    await fs.promises.writeFile(`${root}/package.json`, `${JSON.stringify(pkg, undefined, 2)}\n`, { encoding: 'utf8' });
   }
 
-  return `updated ${toUpdate.length} dependencies`;
+  process.stdout.write(`updated ${updated.length} dependencies - ${updated.join(', ') || 'None'}\n`);
 }
 
 /**

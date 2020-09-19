@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^1.0.0-gamma.4",
-    "@aws-sdk/credential-provider-ini": "^1.0.0-gamma.3",
+    "@aws-sdk/client-s3": "^1.0.0-gamma.9",
+    "@aws-sdk/credential-provider-ini": "^1.0.0-gamma.8",
     "@travetto/asset": "^1.1.0-alpha.6",
     "@travetto/config": "^1.1.0-alpha.6"
   },
