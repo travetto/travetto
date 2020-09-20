@@ -50,8 +50,14 @@ export class TemplateUtil {
     const resolved = await fs.readFile(file, 'utf8');
     const compiled = await this.compile(resolved, dirname(file));
 
-    await Promise.all(this.getOutputs(file).map(([k, f]) =>
-      fs.writeFile(f, compiled[k], { encoding: 'utf8' })));
+    await Promise.all(this.getOutputs(file)
+      .map(([k, f]) => {
+        if (compiled[k]) {
+          return fs.writeFile(f, compiled[k], { encoding: 'utf8' });
+        } else {
+          return fs.unlink(f).catch(() => { }); // Remove file if data not provided
+        }
+      }));
 
     return compiled;
   }
