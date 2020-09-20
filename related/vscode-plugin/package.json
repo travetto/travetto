@@ -45,7 +45,7 @@
     "typescript": "^4.0.2"
   },
   "dependencies": {
-    "@travetto/boot": "^1.1.0-alpha.0"
+    "@travetto/boot": "^1.1.0-rc.0"
   },
   "activationEvents": [
     "workspaceContains:node_modules/@travetto",
