@@ -13,7 +13,7 @@
   "title": "Model Auth Source",
   "description": "Model-based authentication and registration support for the travetto framework",
   "optionalPeerDependencies": {
-    "@travetto/auth-rest": "^1.1.0-alpha.0"
+    "@travetto/auth-rest": "^1.1.0-rc.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [

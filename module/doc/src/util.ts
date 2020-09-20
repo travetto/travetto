@@ -65,7 +65,8 @@ export class DocUtil {
         .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
         .replace(new RegExp(FsUtil.cwd, 'g'), '.')
         .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.getDate.bind(this))
-        .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.getId.bind(this));
+        .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.getId.bind(this))
+        .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);
     } catch (err) {
       return err.message;
     } finally {
