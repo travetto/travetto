@@ -1,11 +1,11 @@
 #!/bin/bash
 
 function link() {
-  pushd $1
+  pushd $1 > /dev/null
   for MOD in ${@:2}; do 
     ../../bin/misc/link.sh $MOD; 
   done
-  popd
+  popd > /dev/null
 }
 
 link module/auth-rest      app
