@@ -154,9 +154,53 @@ The final template will render as:
       </figcaption>
       <pre><code class="language-bash">$ alt/docs/src/render.ts -r @travetto/boot/register alt/docs/src/render.ts
 
-Command failed: node -r @travetto/boot/register alt/docs/src/render.ts
-ENOENT: no such <span class="token function">file</span> or directory, <span class="token function">open</span> <span class="token string">'email/welcome.tpl.html'</span>
-Error: ENOENT: no such <span class="token function">file</span> or directory, <span class="token function">open</span> <span class="token string">'email/welcome.tpl.html'</span></code></pre>     
+<span class="token operator">&lt;</span><span class="token operator">!</span>DOCTYPE html<span class="token operator">></span><span class="token operator">&lt;</span>html<span class="token operator">></span>
+
+<span class="token operator">&lt;</span>body<span class="token operator">></span>
+
+  <span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"body"</span><span class="token operator">></span>
+    <span class="token operator">&lt;</span>tbody<span class="token operator">></span><span class="token operator">&lt;</span>tr<span class="token operator">></span>
+      <span class="token operator">&lt;</span>td <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"float-center"</span> <span class="token assign-left variable">align</span><span class="token operator">=</span><span class="token string">"center"</span> <span class="token assign-left variable">valign</span><span class="token operator">=</span><span class="token string">"top"</span><span class="token operator">></span>
+        <span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"row"</span><span class="token operator">></span>
+      <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>tr<span class="token operator">></span>
+  <span class="token operator">&lt;</span>/tr<span class="token operator">></span><span class="token operator">&lt;</span>/tbody<span class="token operator">></span><span class="token operator">&lt;</span>/table<span class="token operator">></span><span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"row"</span><span class="token operator">></span>
+      <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>tr<span class="token operator">></span>
+    <span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"small-12 large-12 columns first"</span><span class="token operator">></span>
+        <span class="token operator">&lt;</span>table<span class="token operator">></span>
+          <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+            <span class="token operator">&lt;</span>tr<span class="token operator">></span>
+              <span class="token operator">&lt;</span>th<span class="token operator">></span>Bob<span class="token operator">&lt;</span>/th<span class="token operator">></span>
+<span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"expander"</span><span class="token operator">></span><span class="token operator">&lt;</span>/th<span class="token operator">></span>
+            <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
+          <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>/table<span class="token operator">></span>
+      <span class="token operator">&lt;</span>/th<span class="token operator">></span>
+    <span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"small-12 large-12 columns last"</span><span class="token operator">></span>
+        <span class="token operator">&lt;</span>table<span class="token operator">></span>
+          <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+            <span class="token operator">&lt;</span>tr<span class="token operator">></span>
+              <span class="token operator">&lt;</span>th<span class="token operator">></span> <span class="token operator">&lt;</span>/th<span class="token operator">></span>
+<span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"expander"</span><span class="token operator">></span><span class="token operator">&lt;</span>/th<span class="token operator">></span>
+            <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
+          <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>/table<span class="token operator">></span>
+      <span class="token operator">&lt;</span>/th<span class="token operator">></span>
+  <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
+      <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/table<span class="token operator">></span><span class="token operator">&lt;</span>a <span class="token assign-left variable">href</span><span class="token operator">=</span><span class="token string">"{{'{'}}{{'{'}}salesLink{{'}'}}{{'}'}}"</span><span class="token operator">></span>Sales Link<span class="token operator">&lt;</span>/a<span class="token operator">></span><span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"row"</span><span class="token operator">></span>
+      <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
+        <span class="token operator">&lt;</span>tr<span class="token operator">></span>
+<span class="token operator">&lt;</span>/tr<span class="token operator">></span>
+      <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/table<span class="token operator">></span>
+
+      <span class="token operator">&lt;</span>/td<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
+  <span class="token operator">&lt;</span>/tbody<span class="token operator">></span><span class="token operator">&lt;</span>/table<span class="token operator">></span>
+
+<span class="token operator">&lt;</span>/body<span class="token operator">></span><span class="token operator">&lt;</span>/html<span class="token operator">></span></code></pre>     
       </figure>
 
 </div>

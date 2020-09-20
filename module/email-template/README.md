@@ -143,8 +143,52 @@ The final template will render as:
 ```bash
 $ alt/docs/src/render.ts -r @travetto/boot/register alt/docs/src/render.ts
 
-Command failed: node -r @travetto/boot/register alt/docs/src/render.ts
-ENOENT: no such file or directory, open 'email/welcome.tpl.html'
-Error: ENOENT: no such file or directory, open 'email/welcome.tpl.html'
+<!DOCTYPE html><html>
+
+<body>
+
+  <table class="body">
+    <tbody><tr>
+      <td class="float-center" align="center" valign="top">
+        <table class="row">
+      <tbody>
+        <tr>
+  </tr></tbody></table><table class="row">
+      <tbody>
+        <tr>
+    <th class="small-12 large-12 columns first">
+        <table>
+          <tbody>
+            <tr>
+              <th>Bob</th>
+<th class="expander"></th>
+            </tr>
+          </tbody>
+        </table>
+      </th>
+    <th class="small-12 large-12 columns last">
+        <table>
+          <tbody>
+            <tr>
+              <th> </th>
+<th class="expander"></th>
+            </tr>
+          </tbody>
+        </table>
+      </th>
+  </tr>
+      </tbody>
+    </table><a href="{{salesLink}}">Sales Link</a><table class="row">
+      <tbody>
+        <tr>
+</tr>
+      </tbody>
+    </table>
+
+      </td>
+    </tr>
+  </tbody></table>
+
+</body></html>
 ```
 
