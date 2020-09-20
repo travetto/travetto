@@ -135,7 +135,7 @@ By default the following paths are searched for configuration (in the following 
 
    
    1. @travetto/pack/bin/pack.config.yml
-   1. <mode> related pack.*.yml
+   1. `<mode>` related pack.*.yml
    1. pack.config.ya?ml
 
 Given the ordering, its clear to see that a project can define it's own configuration at the root of the project with `pack.config.yml`. Any defaults can be overidden.
