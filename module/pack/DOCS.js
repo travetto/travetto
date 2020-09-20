@@ -1,5 +1,5 @@
 // @ts-check
-const { pth, doc: d, Mod, Code, Command, Terminal, Section, List, meth, Execute, SubSection, Ordered, Snippet } = require('@travetto/doc');
+const { pth, doc: d, Mod, Code, inp, Command, Terminal, Section, List, meth, Execute, SubSection, Ordered, Snippet } = require('@travetto/doc');
 
 exports.text = d`
 ${Section('CLI - pack')} 
@@ -56,7 +56,7 @@ By default the following paths are searched for configuration (in the following 
 
 ${Ordered(
   '@travetto/pack/bin/pack.config.yml',
-  '<mode> related pack.*.yml',
+  d`${inp`<mode>`} related pack.*.yml`,
   'pack.config.ya?ml'
 )}
 
