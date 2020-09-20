@@ -80,6 +80,8 @@ export async function run() {
     const tgt = `${ROOT}/related/vscode-plugin`;
     await ExecUtil.spawn('npm', ['i'], { shell: true, cwd: tgt }).result.catch(err => { });
     await FsUtil.unlinkRecursive(`${tgt}/node_modules/@travetto/boot`, true);
-    await FsUtil.copyRecursiveSync(`${MOD_ROOT}/boot`, `${tgt}/node_modules/@travetto/boot`);
+    await FsUtil.mkdirp(`${tgt}/node_modules/@travetto/boot`);
+    await FsUtil.symlink(`${MOD_ROOT}/boot/src`, `${tgt}/node_modules/@travetto/boot/src`);
+    await FsUtil.symlink(`${MOD_ROOT}/boot/package.json`, `${tgt}/node_modules/@travetto/boot/package.json`);
   });
 }

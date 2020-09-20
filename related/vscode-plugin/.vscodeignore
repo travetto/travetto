@@ -22,3 +22,4 @@ images/*.gif
 DOCS.js
 node_modules/**/*.d.ts
 node_modules/**/*.html
+.trv.app.run.json

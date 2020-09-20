@@ -10,7 +10,7 @@ type Module = {
   _load?(req: string, parent: Module): any;
   _resolveFilename?(req: string, parent: Module): string;
   _compile?(contents: string, file: string): any;
-} & Mod;
+} & NodeJS.Module;
 
 const Module = Mod as unknown as Module;
 
