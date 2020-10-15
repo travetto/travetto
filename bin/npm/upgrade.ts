@@ -34,7 +34,7 @@ async function updateModule(root: string) {
         .catch(() => false)
     );
 
-  const updated = await (await Promise.all(resolved)).filter(x => !!x);
+  const updated = (await Promise.all(resolved)).filter(x => !!x);
 
   if (updated.length) {
     await fs.promises.writeFile(`${root}/package.json`, `${JSON.stringify(pkg, undefined, 2)}\n`, { encoding: 'utf8' });
