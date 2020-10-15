@@ -31,6 +31,7 @@
 		"@typescript-eslint/eslint-plugin": "^4.1.1",
 		"@typescript-eslint/parser": "^4.1.1",
 		"@types/aws-serverless-express": "^3.3.3",
+		"@aws-sdk/client-dynamodb": "^1.0.0-gamma.11",
 		"aws-serverless-express": "^3.3.8",
 		"aws-lambda-fastify": "^1.4.4",
 		"eslint": "^7.9.0",
