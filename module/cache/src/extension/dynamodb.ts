@@ -30,11 +30,7 @@ export class DynamodbCacheSource extends CacheSource {
           KeyType: 'HASH',
           AttributeName: 'key'
         }],
-        BillingMode: 'PROVISIONED',
-        ProvisionedThroughput: {
-          ReadCapacityUnits: 100,
-          WriteCapacityUnits: 100
-        },
+        BillingMode: 'PAY_PER_REQUEST',
         AttributeDefinitions: [
           { AttributeName: 'key', AttributeType: 'S' }
         ],

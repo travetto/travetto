@@ -14,7 +14,7 @@ if [ ! "$1" == "watch" ]; then
   for f in *.js; do 
     cat $f |\
       sed '/\/\*/,/*\//d' |\
-      perl -pe 's|//.*$||g' |\
+      perl -pe 's|[ ]//[^`]*$||g' |\
       perl -pe 's|^\s+||g' |\
       perl -pe 's|^$||g' \
       > $f.clean
