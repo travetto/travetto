@@ -313,7 +313,6 @@ $ /bin/bash alt/docs/bin/startup.sh
     }
   }
 }
-2020-03-14T04:00:01.510Z info  [./node_modules/@travetto/rest/src/server/server.ts:207] Listening on 3000
 ```
  
 
@@ -327,12 +326,6 @@ curl -XPOST localhost:3000/todo -H 'Content-Type: application/json' -d '{ "text"
 **Terminal: Create Output**
 ```bash
 $ sh alt/docs/bin/create.sh
-
-{
-  "text": "New Todo",
-  "created": "2020-03-14T04:00:02.450Z",
-  "id": "422e793aed76ee063d13feec"
-}
 ```
 
 **Code: Listing Todos by curl**
@@ -343,13 +336,5 @@ curl -XGET localhost:3000/todo -H 'Content-Type: application/json' | jq
 **Terminal: Listing Output**
 ```bash
 $ sh alt/docs/bin/list.sh
-
-[
-  {
-    "id": "422e793aed76ee063d13feec",
-    "text": "New Todo",
-    "created": "2020-03-14T04:00:02.625Z"
-  }
-]
 ```
 
