@@ -326,8 +326,7 @@ First we must start the application:
       model: <span class="token punctuation">{{'{'}}</span> namespace: <span class="token string">'todo'</span>, user: <span class="token string">'root'</span>, password: <span class="token string">'password'</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span>
-<span class="token number">2020</span>-03-14T04:00:01.510Z info  <span class="token punctuation">[</span>./node_modules/@travetto/rest/src/server/server.ts:207<span class="token punctuation">]</span> Listening on <span class="token number">3000</span></code></pre>     
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure> 
 
 next, let's execute <a target="_blank" class="external-link" href="https://curl.haxx.se/">curl</a> requests to interact with the new api
@@ -343,13 +342,7 @@ next, let's execute <a target="_blank" class="external-link" href="https://curl.
       <figcaption class="terminal">Create Output
       
       </figcaption>
-      <pre><code class="language-bash">$ <span class="token function">sh</span> alt/docs/bin/create.sh
-
-<span class="token punctuation">{{'{'}}</span>
-  <span class="token string">"text"</span><span class="token builtin class-name">:</span> <span class="token string">"New Todo"</span>,
-  <span class="token string">"created"</span><span class="token builtin class-name">:</span> <span class="token string">"2020-03-14T04:00:02.450Z"</span>,
-  <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"422e793aed76ee063d13feec"</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
+      <pre><code class="language-bash">$ <span class="token function">sh</span> alt/docs/bin/create.sh</code></pre>     
       </figure>
 
       <figure class="code">
@@ -363,15 +356,7 @@ next, let's execute <a target="_blank" class="external-link" href="https://curl.
       <figcaption class="terminal">Listing Output
       
       </figcaption>
-      <pre><code class="language-bash">$ <span class="token function">sh</span> alt/docs/bin/list.sh
-
-<span class="token punctuation">[</span>
-  <span class="token punctuation">{{'{'}}</span>
-    <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"422e793aed76ee063d13feec"</span>,
-    <span class="token string">"text"</span><span class="token builtin class-name">:</span> <span class="token string">"New Todo"</span>,
-    <span class="token string">"created"</span><span class="token builtin class-name">:</span> <span class="token string">"2020-03-14T04:00:02.625Z"</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">]</span></code></pre>     
+      <pre><code class="language-bash">$ <span class="token function">sh</span> alt/docs/bin/list.sh</code></pre>     
       </figure>
 
 </div>
