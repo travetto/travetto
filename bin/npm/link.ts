@@ -10,6 +10,19 @@ const MOD_ROOT = `${ROOT}/module`;
 const COMMON = ['test', 'doc', 'cli'].map(m => ({ type: 'dev' as const, file: `${MOD_ROOT}/${m}`, dep: `@travetto/${m}`, version: '' }));
 const DEP_TYPES = ['dev', 'prod', 'opt'] as const;
 
+const DOCUMENTED_PEER_DEPS = {
+  'auth-rest': ['app'],
+  'auth-passport': ['app'],
+  cache: ['schema', 'model'],
+  model: ['rest', 'app', 'config'],
+  openapi: ['app'],
+  rest: ['app'],
+  'rest-fastify': ['app'],
+  'rest-koa': ['app'],
+  'rest-express': ['app'],
+  schema: ['rest', 'app', 'config'],
+};
+
 /**
  * Log message around async op
  */
@@ -55,18 +68,6 @@ async function finalizeModule(root: string) {
  * Main Entry point
  */
 export async function run() {
-  // Init lerna
-  await withMessage('Lerna clean', ExecUtil.spawn('npx', ['lerna', 'clean', '--yes'], { shell: true }).result);
-
-  if (process.argv[1] !== 'soft') {
-    await withMessage('Lerna bootstrap', ExecUtil.spawn('npx', ['lerna', 'bootstrap', '--hoist'], { shell: true }).result);
-  }
-
-  // Clear out package-lock
-  try {
-    await fs.unlink(`${ROOT}/package-lock.json`);
-  } catch (e) { }
-
   const packages = (await ExecUtil.spawn(`npx`, ['lerna', 'ls', '-p', '-a']).result).stdout.split(/\n/)
     .filter(x => !!x && x.includes(FsUtil.cwd)).map(x => FsUtil.resolveUnix(x));
 
@@ -76,6 +77,14 @@ export async function run() {
     await withMessage(`- @travetto/${path.basename(pkg)}`.padEnd(35), finalizeModule(pkg));
   }
 
+  await withMessage('Linking Specific Peer Dependencies', async () => {
+    for (const [tgt, value] of Object.entries(DOCUMENTED_PEER_DEPS)) {
+      for (const el of value) {
+        await FsUtil.symlink(`${MOD_ROOT}/${el}`, `${MOD_ROOT}/${tgt}/node_modules/@travetto/${el}`);
+      }
+    }
+  });
+
   await withMessage('vscode-plugin install', async () => {
     const tgt = `${ROOT}/related/vscode-plugin`;
     await ExecUtil.spawn('npm', ['i'], { shell: true, cwd: tgt }).result.catch(err => { });
@@ -83,5 +92,9 @@ export async function run() {
     await FsUtil.mkdirp(`${tgt}/node_modules/@travetto/boot`);
     await FsUtil.symlink(`${MOD_ROOT}/boot/src`, `${tgt}/node_modules/@travetto/boot/src`);
     await FsUtil.symlink(`${MOD_ROOT}/boot/package.json`, `${tgt}/node_modules/@travetto/boot/package.json`);
+    for (const el of ['config', 'doc', 'compiler', 'registry', 'base', 'test', 'app']) {
+      await FsUtil.symlink(`${MOD_ROOT}/${el}`, `${tgt}/node_modules/@travetto/${el}`);
+    }
+    await FsUtil.symlink(`${MOD_ROOT}/cli/bin/travetto.js`, `${tgt}/node_modules/.bin/trv`);
   });
 }
