@@ -66,8 +66,11 @@ async function finalizeModule(root: string) {
   // Handle peer deps
   if (base in DOCUMENTED_PEER_DEPS) {
     for (const el of DOCUMENTED_PEER_DEPS[base as 'rest']) {
-      links += 1;
-      await FsUtil.symlink(`${MOD_ROOT}/${el}`, `${root}/node_modules/@travetto/${el}`);
+      const tgt = `${root}/node_modules/@travetto/${el}`;
+      if (!(await FsUtil.exists(tgt))) {
+        links += 1;
+        await FsUtil.symlink(`${MOD_ROOT}/${el}`, tgt);
+      }
     }
   }
 
