@@ -36,7 +36,8 @@ function withMessage(start: string, fn: Promise<any> | (() => Promise<any>), don
  * @param root
  */
 async function finalizeModule(root: string) {
-  const pkg = `@travetto/${path.basename(root)}`;
+  const base = path.basename(root);
+  const pkg = `@travetto/${base}`;
   // Fetch deps
   const deps = await FrameworkUtil.resolveDependencies({ root, types: DEP_TYPES });
 
@@ -61,6 +62,15 @@ async function finalizeModule(root: string) {
   await FsUtil.symlink(`${MOD_ROOT}/cli/bin/travetto.js`, `${root}/node_modules/.bin/trv`);
   await FsUtil.symlink(`${MOD_ROOT}/cli/bin/travetto.js`, `${root}/node_modules/.bin/travetto`);
   await FsUtil.symlink(`${ROOT}/node_modules/typescript`, `${root}/node_modules/typescript`);
+
+  // Handle peer deps
+  if (base in DOCUMENTED_PEER_DEPS) {
+    for (const el of DOCUMENTED_PEER_DEPS[base as 'rest']) {
+      links += 1;
+      await FsUtil.symlink(`${MOD_ROOT}/${el}`, `${root}/node_modules/@travetto/${el}`);
+    }
+  }
+
   return `finalized ${links} links`;
 }
 
@@ -76,14 +86,6 @@ export async function run() {
   for (const pkg of packages) {
     await withMessage(`- @travetto/${path.basename(pkg)}`.padEnd(35), finalizeModule(pkg));
   }
-
-  await withMessage('Linking Specific Peer Dependencies', async () => {
-    for (const [tgt, value] of Object.entries(DOCUMENTED_PEER_DEPS)) {
-      for (const el of value) {
-        await FsUtil.symlink(`${MOD_ROOT}/${el}`, `${MOD_ROOT}/${tgt}/node_modules/@travetto/${el}`);
-      }
-    }
-  });
 
   await withMessage('vscode-plugin install', async () => {
     const tgt = `${ROOT}/related/vscode-plugin`;
