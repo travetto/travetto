@@ -1,0 +1,37 @@
+{
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@travetto/di": "^1.1.0",
+    "@travetto/registry": "^1.1.0",
+    "@travetto/schema": "^1.1.0"
+  },
+  "title": "Data Modeling Core",
+  "description": "Datastore abstraction for CRUD operations.",
+  "homepage": "https://travetto.io",
+  "keywords": [
+    "datastore",
+    "decorators",
+    "schema",
+    "typescript",
+    "travetto"
+  ],
+  "license": "MIT",
+  "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src",
+    "support",
+    "test/lib"
+  ],
+  "name": "@travetto/model-core",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git"
+  },
+  "version": "1.1.0"
+}
