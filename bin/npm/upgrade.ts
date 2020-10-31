@@ -56,4 +56,6 @@ export async function run() {
   for (const pkg of packages) {
     await updateModule(pkg);
   }
+
+  await updateModule(process.cwd());
 }

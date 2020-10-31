@@ -9,8 +9,8 @@
   "dependencies": {
     "@travetto/config": "^1.1.0",
     "@travetto/di": "^1.1.0",
-    "@types/cookies": "^0.7.4",
-    "@types/express-serve-static-core": "^4.17.12",
+    "@types/cookies": "^0.7.5",
+    "@types/express-serve-static-core": "^4.17.13",
     "cookies": "^0.8.0"
   },
   "devDependencies": {
