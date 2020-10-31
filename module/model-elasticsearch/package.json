@@ -8,13 +8,13 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "~7.4.0",
-    "@travetto/config": "^1.1.0",
-    "@travetto/model": "^1.1.0"
+    "@travetto/config": "^1.1.1",
+    "@travetto/model": "^1.1.1"
   },
   "title": "Elasticsearch Model Source",
   "description": "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.",
   "devDependencies": {
-    "@travetto/app": "^1.1.0"
+    "@travetto/app": "^1.1.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [
@@ -38,5 +38,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/model-elasticsearch"
   },
-  "version": "1.1.0"
+  "version": "1.1.1"
 }

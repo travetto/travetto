@@ -4,7 +4,7 @@
     "name": "Travetto Framework"
   },
   "dependencies": {
-    "@travetto/registry": "^1.1.0"
+    "@travetto/registry": "^1.1.1"
   },
   "title": "Schema",
   "description": "Data type registry for runtime validation, reflection and binding. ",
@@ -35,5 +35,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/schema"
   },
-  "version": "1.1.0"
+  "version": "1.1.1"
 }

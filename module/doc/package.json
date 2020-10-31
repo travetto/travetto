@@ -8,8 +8,8 @@
   },
   "private": true,
   "dependencies": {
-    "@travetto/boot": "^1.1.0",
-    "@travetto/registry": "^1.1.0",
+    "@travetto/boot": "^1.1.2",
+    "@travetto/registry": "^1.1.1",
     "prismjs": "1.20.0"
   },
   "title": "Documentation",
@@ -32,5 +32,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/doc"
   },
-  "version": "1.1.0"
+  "version": "1.1.1"
 }
