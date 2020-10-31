@@ -56,21 +56,25 @@ export class ServiceUtil {
   static async * start(svc: Service) {
     if (!(await this.isRunning(svc))) {
       yield { subtitle: 'Starting' };
-      const promise = new DockerContainer(svc.image)
-        .setInteractive(true)
-        .setDeleteOnFinish(true)
-        .setDaemon(true)
-        .exposePort(svc.port)
-        .addLabel(`trv-${svc.name}`)
-        .addEnvVars(svc.env || {})
-        .setUnref(false)
-        .run(svc.args ?? []);
+      try {
+        const promise = new DockerContainer(svc.image)
+          .setInteractive(true)
+          .setDeleteOnFinish(true)
+          .setDaemon(true)
+          .exposePort(svc.port)
+          .addLabel(`trv-${svc.name}`)
+          .addEnvVars(svc.env || {})
+          .setUnref(false)
+          .run(svc.args ?? []);
 
-      const out = (await promise).stdout;
-      if (!await this.isRunning(svc, 15000)) {
-        yield { failure: 'Failed to start service correctly' };
-      } else {
-        yield { success: `Started ${out.substring(0, 12)}` };
+        const out = (await promise).stdout;
+        if (!await this.isRunning(svc, 15000)) {
+          yield { failure: 'Failed to start service correctly' };
+        } else {
+          yield { success: `Started ${out.substring(0, 12)}` };
+        }
+      } catch (err) {
+        yield { failure: `Failed to run docker` };
       }
     } else {
       yield { subsubtitle: 'Skipping, already running' };

@@ -1,1 +1,0 @@
-FOR /D /R %TMP% %%X IN (c__Users*) DO RMDIR /S /Q "%%X"
