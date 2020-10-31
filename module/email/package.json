@@ -32,7 +32,8 @@
   ],
   "name": "@travetto/email",
   "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/email"
   },
   "version": "1.1.0"
 }

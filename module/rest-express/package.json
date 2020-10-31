@@ -36,7 +36,8 @@
   ],
   "name": "@travetto/rest-express",
   "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-express"
   },
   "version": "1.1.0"
 }

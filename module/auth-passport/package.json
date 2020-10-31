@@ -30,7 +30,8 @@
   ],
   "name": "@travetto/auth-passport",
   "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/auth-passport"
   },
   "version": "1.1.0"
 }

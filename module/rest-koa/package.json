@@ -34,7 +34,8 @@
   ],
   "name": "@travetto/rest-koa",
   "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-koa"
   },
   "version": "1.1.0"
 }
