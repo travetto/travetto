@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/asset": "^1.1.0",
-    "@travetto/config": "^1.1.0",
+    "@travetto/asset": "^1.1.1",
+    "@travetto/config": "^1.1.1",
     "@types/mongodb": "^3.5.32",
     "mongodb": "^3.6.2"
   },
@@ -32,5 +32,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/asset-mongo"
   },
-  "version": "1.1.0"
+  "version": "1.1.1"
 }

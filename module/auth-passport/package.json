@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^1.1.0",
-    "@travetto/config": "^1.1.0",
+    "@travetto/auth-rest": "^1.1.1",
+    "@travetto/config": "^1.1.1",
     "@types/passport": "^1.0.4",
     "passport": "^0.4.1"
   },
@@ -33,5 +33,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/auth-passport"
   },
-  "version": "1.1.0"
+  "version": "1.1.1"
 }

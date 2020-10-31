@@ -9,7 +9,7 @@
   "title": "Worker",
   "description": "Process management utilties, with a focus on inter-process communication",
   "dependencies": {
-    "@travetto/base": "^1.1.0",
+    "@travetto/base": "^1.1.1",
     "@types/generic-pool": "^3.1.9",
     "generic-pool": "^3.7.1"
   },
@@ -32,5 +32,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/worker"
   },
-  "version": "1.1.0"
+  "version": "1.1.1"
 }

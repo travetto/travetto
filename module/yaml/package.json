@@ -15,7 +15,7 @@
     "simple-yaml"
   ],
   "dependencies": {
-    "@travetto/base": "^1.1.0"
+    "@travetto/base": "^1.1.1"
   },
   "license": "MIT",
   "main": "index.ts",
@@ -28,5 +28,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/yaml"
   },
-  "version": "1.1.0"
+  "version": "1.1.1"
 }
