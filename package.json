@@ -1,52 +1,52 @@
 {
-	"author": {
-		"email": "travetto.framework@gmail.com",
-		"name": "Travetto Framework"
-	},
-	"publishConfig": {
-		"access": "restricted"
-	},
-	"name": "@travetto/mono-repo",
-	"license": "MIT",
-	"scripts": {
-		"bootstrap": "./bin/npm/bootstrap.sh",
-		"clean": "./bin/npm/clean.sh",
-		"docs": "./bin/npm/docs.sh",
-		"link": "./bin/npm/link.sh",
-		"lint": "./bin/npm/lint.sh",
-		"prepare": "./bin/npm/prepare.sh",
-		"service": "./bin/npm/service.sh",
-		"test": "./bin/npm/test.sh",
-		"upgrade": "./bin/npm/upgrade.sh",
-		"init": "npm run bootstrap; npm run link",
-		"reinit": "rm -rf node_modules; npm run clean; npm i; npm run init"
-	},
-	"devDependencies": {
-		"@types/faker": "^5.1.0",
-		"@types/mysql": "^2.15.15",
-		"@types/node-forge": "^0.9.5",
-		"@types/nodemailer": "^6.4.0",
-		"@types/passport-facebook": "^2.1.10",
-		"@types/pg": "^7.14.5",
-		"@types/redis": "^2.8.27",
-		"@typescript-eslint/eslint-plugin": "^4.1.1",
-		"@typescript-eslint/parser": "^4.1.1",
-		"@types/aws-serverless-express": "^3.3.3",
-		"@aws-sdk/client-dynamodb": "^1.0.0-gamma.11",
-		"aws-serverless-express": "^3.3.8",
-		"aws-lambda-fastify": "^1.4.4",
-		"eslint": "^7.9.0",
-		"faker": "^5.1.0",
-		"lerna": "~3.22.1",
-		"mysql": "^2.18.1",
-		"node-forge": "^0.10.0",
-		"nodemailer": "^6.4.11",
-		"passport-facebook": "^3.0.0",
-		"pg": "^8.3.3",
-		"redis": "^3.0.2",
-		"source-map-support": "^0.5.19"
-	},
-	"dependencies": {
-		"typescript": "^4.0.3"
-	}
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "name": "@travetto/mono-repo",
+  "license": "MIT",
+  "scripts": {
+    "bootstrap": "./bin/npm/bootstrap.sh",
+    "clean": "./bin/npm/clean.sh",
+    "docs": "./bin/npm/docs.sh",
+    "link": "./bin/npm/link.sh",
+    "lint": "./bin/npm/lint.sh",
+    "prepare": "./bin/npm/prepare.sh",
+    "service": "./bin/npm/service.sh",
+    "test": "./bin/npm/test.sh",
+    "upgrade": "./bin/npm/upgrade.sh",
+    "init": "npm run bootstrap; npm run link",
+    "reinit": "rm -rf node_modules; npm run clean; npm i; npm run init"
+  },
+  "devDependencies": {
+    "@types/faker": "^5.1.4",
+    "@types/mysql": "^2.15.15",
+    "@types/node-forge": "^0.9.5",
+    "@types/nodemailer": "^6.4.0",
+    "@types/passport-facebook": "^2.1.10",
+    "@types/pg": "^7.14.5",
+    "@types/redis": "^2.8.28",
+    "@typescript-eslint/eslint-plugin": "^4.6.0",
+    "@typescript-eslint/parser": "^4.6.0",
+    "@types/aws-serverless-express": "^3.3.3",
+    "@aws-sdk/client-dynamodb": "^1.0.0-rc.4",
+    "aws-serverless-express": "^3.3.8",
+    "aws-lambda-fastify": "^1.4.4",
+    "eslint": "^7.12.1",
+    "faker": "^5.1.0",
+    "lerna": "~3.22.1",
+    "mysql": "^2.18.1",
+    "node-forge": "^0.10.0",
+    "nodemailer": "^6.4.14",
+    "passport-facebook": "^3.0.0",
+    "pg": "^8.4.2",
+    "redis": "^3.0.2",
+    "source-map-support": "^0.5.19"
+  },
+  "dependencies": {
+    "typescript": "^4.0.5"
+  }
 }
