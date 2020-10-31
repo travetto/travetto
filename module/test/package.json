@@ -31,7 +31,8 @@
   ],
   "name": "@travetto/test",
   "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/test"
   },
   "version": "1.1.0"
 }

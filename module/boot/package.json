@@ -35,7 +35,8 @@
   ],
   "name": "@travetto/boot",
   "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/boot"
   },
   "scripts": {
     "postinstall": "node bin/plugin-postinstall"

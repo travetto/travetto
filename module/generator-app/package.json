@@ -26,7 +26,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/generator-app"
   },
   "homepage": "https://travetto.io",
   "keywords": [

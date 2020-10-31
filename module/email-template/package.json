@@ -40,7 +40,8 @@
   "main": "support/application.email.ts",
   "name": "@travetto/email-template",
   "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/email-template"
   },
   "files": [
     "support",

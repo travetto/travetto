@@ -35,7 +35,8 @@
   ],
   "name": "@travetto/model-elasticsearch",
   "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/model-elasticsearch"
   },
   "version": "1.1.0"
 }

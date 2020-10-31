@@ -32,7 +32,8 @@
   ],
   "name": "@travetto/rest-fastify",
   "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-fastify"
   },
   "version": "1.1.0"
 }

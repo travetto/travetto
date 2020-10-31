@@ -30,7 +30,8 @@
   ],
   "name": "@travetto/auth-model",
   "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/auth-model"
   },
   "version": "1.1.0"
 }
