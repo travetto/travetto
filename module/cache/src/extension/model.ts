@@ -44,7 +44,7 @@ export class ModelCacheSource extends CullableCacheSource {
   }
 
   async set(key: string, entry: CacheEntry) {
-    this.cull(); // Don't wait for it
+    // this.cull(); // Don't wait for it
 
     const cloned = CacheSourceUtil.storeAsSafeJSON(entry);
 
