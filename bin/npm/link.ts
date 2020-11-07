@@ -13,8 +13,8 @@ const DEP_TYPES = ['dev', 'prod', 'opt'] as const;
 const DOCUMENTED_PEER_DEPS = {
   'auth-rest': ['app'],
   'auth-passport': ['app'],
-  cache: ['schema', 'model'],
-  model: ['rest', 'app', 'config'],
+  cache: ['schema', 'model-core'],
+  'model-core': ['rest', 'app', 'config'],
   openapi: ['app'],
   rest: ['app'],
   'rest-fastify': ['app'],

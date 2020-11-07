@@ -1,6 +1,6 @@
 import { AppError, Util } from '@travetto/base';
 import { Inject } from '@travetto/di';
-import { ModelService, Query, ModelCore } from '@travetto/model';
+import { ModelCore, ModelType } from '@travetto/model-core';
 import { AuthUtil, Principal, PrincipalSource } from '@travetto/auth';
 import { Class } from '@travetto/registry';
 
@@ -9,10 +9,10 @@ import { RegisteredIdentity } from './identity';
 /**
  * A model-based principal source
  */
-export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
+export class ModelPrincipalSource<T extends ModelType> extends PrincipalSource {
 
   @Inject()
-  private modelService: ModelService;
+  private modelService: ModelCore;
 
   /**
    * Build a Model Principal Source
@@ -34,10 +34,7 @@ export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
    * @param userId The user id to retrieve
    */
   async retrieve(userId: string) {
-    const query = {
-      where: this.fromIdentity({ id: userId })
-    } as Query<T>;
-    const user = await this.modelService.getByQuery(this.cls, query);
+    const user = await this.modelService.getOptional(this.cls, userId);
     return user;
   }
 
@@ -75,13 +72,9 @@ export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
   async register(user: T) {
     const ident = this.toIdentity(user);
 
-    const query = {
-      where: this.fromIdentity({ id: ident.id })
-    } as Query<T>;
+    const existingUsers = await this.modelService.getOptional(this.cls, ident.id);
 
-    const existingUsers = await this.modelService.getAllByQuery(this.cls, query);
-
-    if (existingUsers.length) {
+    if (existingUsers) {
       throw new AppError(`That id is already taken.`, 'data');
     } else {
       const fields = await AuthUtil.generatePassword(ident.password!);
@@ -90,7 +83,7 @@ export class ModelPrincipalSource<T extends ModelCore> extends PrincipalSource {
 
       Object.assign(user, this.fromIdentity(fields));
 
-      const res: T = await this.modelService.save(this.cls, user);
+      const res: T = await this.modelService.create(this.cls, user);
       return res;
     }
   }

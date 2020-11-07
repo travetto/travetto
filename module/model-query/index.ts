@@ -1,4 +1,4 @@
-export * from './src/registry/decorator';
+export * from './src/registry';
 export * from './src/registry/registry';
 export * from './src/registry/types';
 export * from './src/model/base';

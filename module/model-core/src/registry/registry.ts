@@ -9,9 +9,9 @@ import { ModelOptions } from './types';
  */
 class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   /**
-   * All collection names
+   * All stores names
    */
-  collections = new Map<Class, string>();
+  stores = new Map<Class, string>();
   /**
    * All base model classes (inherited from)
    */
@@ -27,7 +27,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<any>> {
-    return { class: cls, indices: [] };
+    return { class: cls };
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
@@ -35,7 +35,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   }
 
   onUninstallFinalize(cls: Class) {
-    this.collections.delete(cls);
+    this.stores.delete(cls);
 
     // Force system to recompute on uninstall
     this.baseModels.clear();
@@ -95,19 +95,19 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   /**
    * Find the base collection for a type
    */
-  getBaseCollection(cls: Class) {
-    return this.getCollectionName(this.getBaseModel(cls));
+  getBaseStore(cls: Class) {
+    return this.getStoreName(this.getBaseModel(cls));
   }
 
   /**
-   * Get name of the collection
+   * Get name of the store
    */
-  getCollectionName(cls: Class) {
-    if (!this.collections.has(cls)) {
+  getStoreName(cls: Class) {
+    if (!this.stores.has(cls)) {
       const config = this.get(cls) ?? this.getOrCreatePending(cls);
-      this.collections.set(cls, (config.collection || cls.name).toLowerCase());
+      this.stores.set(cls, (config.collection || cls.name).toLowerCase());
     }
-    return this.collections.get(cls)!;
+    return this.stores.get(cls)!;
   }
 }
 
