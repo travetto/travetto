@@ -1,4 +1,4 @@
-import { Model } from '../../../src/registry/decorator';
+import { Model } from '../../../src/registry';
 import { BaseModel } from '../../../src/model/base';
 
 @Model()

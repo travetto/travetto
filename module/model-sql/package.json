@@ -9,7 +9,8 @@
   "dependencies": {
     "@travetto/config": "^1.1.1",
     "@travetto/context": "^1.1.1",
-    "@travetto/model": "^1.1.1"
+    "@travetto/model-core": "^1.1.1",
+    "@travetto/model-query": "^1.1.1"
   },
   "peerDependencies": {
     "mysql": "^2.18.1",
