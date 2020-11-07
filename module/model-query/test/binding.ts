@@ -7,7 +7,7 @@ import { Test, Suite, BeforeAll } from '@travetto/test';
 import { TestSource } from './registry';
 import { Person, Address } from './models';
 
-import { ModelService } from '../';
+import { ModelService } from '..';
 
 const street1 = '1234 Fun';
 
