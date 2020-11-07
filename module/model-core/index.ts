@@ -1,13 +1,13 @@
 export * from './src/registry/decorator';
 export * from './src/registry/registry';
 export * from './src/registry/types';
-export * from './src/model/base';
-export * from './src/model/bulk';
-export * from './src/model/core';
-export * from './src/model/query';
-export * from './src/model/where-clause';
-export * from './src/service/model';
-export * from './src/service/source';
-export * from './src/service/verify';
-export * from './src/util/model';
+export * from './src/types/base';
+export * from './src/types/model';
+export * from './src/service/core';
+export * from './src/service/bulk';
+export * from './src/service/change';
+export * from './src/service/expire';
+export * from './src/service/stream';
+
+
 export { ModelController } from './src/extension/rest';

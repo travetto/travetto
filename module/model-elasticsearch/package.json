@@ -9,7 +9,8 @@
   "dependencies": {
     "@elastic/elasticsearch": "~7.4.0",
     "@travetto/config": "^1.1.1",
-    "@travetto/model": "^1.1.1"
+    "@travetto/model-core": "^1.1.1",
+    "@travetto/model-query": "^1.1.1"
   },
   "title": "Elasticsearch Model Source",
   "description": "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.",

@@ -1,8 +1,9 @@
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
+import { ModelType } from '../types/model';
 
 import { ModelRegistry } from './registry';
-import { ModelOptions, IndexConfig } from './types';
+import { ModelOptions } from './types';
 
 /**
  * Model decorator, extends `@Schema`
@@ -10,7 +11,7 @@ import { ModelOptions, IndexConfig } from './types';
  * @augments `@trv:schema/Schema`
  */
 export function Model(conf: Partial<ModelOptions<any>> = {}) {
-  return function <T extends Class>(target: T) {
+  return function <T extends Class<ModelType>>(target: T) {
     // Force registry first, and update with extra information after computing
     ModelRegistry.register(target, conf);
 
@@ -21,18 +22,9 @@ export function Model(conf: Partial<ModelOptions<any>> = {}) {
       } else {
         conf.subType = SchemaRegistry.getSubTypeName(target);
       }
-      conf.collection = ModelRegistry.getBaseCollection(target);
+      conf.collection = ModelRegistry.getBaseStore(target);
     }
     ModelRegistry.register(target, conf);
     return target;
-  };
-}
-
-/**
- * Defines an index on a model
- */
-export function Index(...indices: IndexConfig<any>[]) {
-  return function <T extends Class>(target: T) {
-    return ModelRegistry.register(target, { indices });
   };
 }
