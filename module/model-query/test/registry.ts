@@ -1,7 +1,7 @@
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Injectable } from '@travetto/di';
 
-import { ModelSource, Query, BulkResponse, ModelCore, ModelQuery, PageableModelQuery } from '../';
+import { ModelSource, Query, BulkResponse, ModelCore, ModelQuery, PageableModelQuery } from '..';
 import { BulkOp } from '../src/model/bulk';
 
 @Injectable()
