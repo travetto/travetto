@@ -56,12 +56,12 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
 
   }
 
-  async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
+  async get<T extends ModelType>(cls: Class<T>, id: string) {
     await this.find(cls, id);
     return (await this.getOptional(cls, id))!;
   }
 
-  async getOptional<T extends ModelType>(cls: Class<T>, id: string): Promise<T | undefined> {
+  async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
     const file = await this.resolveName(cls, id);
     if (await FsUtil.exists(file)) {
       const content = await StreamUtil.streamToBuffer(fs.createReadStream(file, 'utf8'));
@@ -76,7 +76,7 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
     }
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, item: T) {
     if (!item.id) {
       item.id = this.generateId();
     }
@@ -90,12 +90,12 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
     return await this.upsert(cls, item);
   }
 
-  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
+  async update<T extends ModelType>(cls: Class<T>, item: T) {
     await this.find(cls, item.id!);
     return await this.upsert(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     await SchemaValidator.validate(item);
 
     if (item.prePersist) {
@@ -108,7 +108,7 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
     return item;
   }
 
-  async partialUpdate<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string): Promise<T> {
+  async partialUpdate<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
 
     if (view) {
       await SchemaValidator.validate(item, view);
@@ -128,18 +128,18 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
     return item as T;
   }
 
-  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
+  async delete<T extends ModelType>(cls: Class<T>, id: string) {
     const file = await this.find(cls, id);
     await fs.promises.unlink(file);
   }
 
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterator<T, any, undefined> {
+  async * list<T extends ModelType>(cls: Class<T>) {
     for await (const [id] of FileModelService.scanFolder(await this.resolveName(cls), '.json')) {
       yield await this.get(cls, id);
     }
   }
 
-  async writeStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta): Promise<void> {
+  async writeStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
     const file = await this.resolveName('_streams', id);
     await Promise.all([
       fs.promises.writeFile(`${file}.meta`, JSON.stringify(meta), 'utf8'),
@@ -147,19 +147,19 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
     ]);
   }
 
-  async readStream(id: string): Promise<NodeJS.ReadableStream> {
+  async readStream(id: string) {
     const file = await this.find('_streams', id, '.bin');
     return fs.createReadStream(file);
   }
 
-  async headStream(id: string): Promise<StreamMeta> {
+  async headStream(id: string) {
     const file = await this.find('_streams', id, '.meta');
     const content = await StreamUtil.streamToBuffer(fs.createReadStream(`${file}.meta`, 'utf8'));
     const text = JSON.parse(content.toString('utf8'));
     return text as StreamMeta;
   }
 
-  async deleteStream(id: string): Promise<boolean> {
+  async deleteStream(id: string) {
     const file = await this.resolveName('_streams', id);
     if (await FsUtil.exists(`${file}.bin`)) {
       await Promise.all([
@@ -172,22 +172,32 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
     }
   }
 
-  async expires<T extends ModelType>(cls: Class<T>, id: string, ttl: number): Promise<void> {
+  async setExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
     const file = await this.find(cls, id, '.expires');
     await fs.promises.writeFile(file, '', 'utf8');
     if (ttl < 1000000) {
       ttl = Date.now() + ttl;
     }
-    await fs.promises.utimes(file, ttl, ttl);
+    await fs.promises.utimes(file, ttl, Date.now());
   }
 
-  async isExpired<T extends ModelType>(cls: Class<T>, id: string): Promise<boolean> {
+  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
     const file = await this.find(cls, id, '.expires');
     const stat = await fs.promises.stat(file);
-    return stat.atimeMs < Date.now();
+    const expiresAt = stat.atimeMs;
+    const issuedAt = stat.mtimeMs;
+    const maxAge = expiresAt - issuedAt;
+    const expired = expiresAt < Date.now();
+    return { expiresAt, issuedAt, maxAge, expired };
   }
 
-  async removeExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
+  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
+    item = await this.upsert(cls, item);
+    await this.expires(cls, item.id!, ttl);
+    return item;
+  }
+
+  async deleteExpired<T extends ModelType>(cls: Class<T>) {
     let number = 0;
     for await (const [id, file] of FileModelService.scanFolder(await this.resolveName(cls), '.expires')) {
       const stat = await fs.promises.stat(file);
