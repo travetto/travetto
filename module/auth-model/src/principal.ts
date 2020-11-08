@@ -72,9 +72,9 @@ export class ModelPrincipalSource<T extends ModelType> extends PrincipalSource {
   async register(user: T) {
     const ident = this.toIdentity(user);
 
-    const existingUsers = await this.modelService.getOptional(this.cls, ident.id);
+    const existingUser = await this.modelService.getOptional(this.cls, ident.id);
 
-    if (existingUsers) {
+    if (existingUser) {
       throw new AppError(`That id is already taken.`, 'data');
     } else {
       const fields = await AuthUtil.generatePassword(ident.password!);

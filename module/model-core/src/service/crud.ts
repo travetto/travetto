@@ -3,8 +3,16 @@ import { ModelType } from '../types/model';
 
 /**
  * Interface for simple CRUD
+ *
+ * @concrete ./internal:ModelCrudSupportTarget
  */
-export interface ModelCore {
+export interface ModelCrudSupport {
+
+  /**
+   * Generate a new uuid
+   */
+  uuid(): string;
+
   /**
    * Get by Id
    * @param id The identifier of the document to retrieve
@@ -38,11 +46,12 @@ export interface ModelCore {
   upsert<T extends ModelType>(cls: Class<T>, item: T): Promise<T>;
 
   /**
-   * Partial Update
+   * Update Partial
    * @param id The document identifier to update
    * @param item The document to partially update.
+   * @param view The schema view to validate against
    */
-  partialUpdate<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string): Promise<T>;
+  updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string): Promise<T>;
 
   /**
    * Delete an item
@@ -53,5 +62,5 @@ export interface ModelCore {
   /**
    * List all items
    */
-  list<T extends ModelType>(cls: Class<T>): AsyncIterator<T>;
+  list<T extends ModelType>(cls: Class<T>): AsyncIterable<T>;
 }
