@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { ModelCore } from './core';
+import { ModelCrudSupport } from './crud';
 import { ModelType } from '../types/model';
 
 interface ExpiryState {
@@ -11,15 +11,17 @@ interface ExpiryState {
 
 /**
  * Support for managing expiration of data
+ *
+ * @concrete ./internal:ModelExpirySupportTarget
  */
-export interface ModelExpirable extends ModelCore {
+export interface ModelExpirySupport extends ModelCrudSupport {
   /**
    * Set expiry time for a record of a given id
    *
    * @param id The identifier of the document
    * @param ttl Time to live in seconds
    */
-  setExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number): Promise<void>;
+  updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number): Promise<void>;
 
   /**
    * Upsert a document with expiry

@@ -1,17 +1,36 @@
 import * as fs from 'fs';
-import { Class } from '@travetto/registry';
+import * as os from 'os';
+
+import { ChangeEvent, Class } from '@travetto/registry';
 import { FsUtil, StreamUtil } from '@travetto/boot';
 import { AppError, Util } from '@travetto/base';
 import { SchemaValidator } from '@travetto/schema';
-import { ModelCore } from '../service/core';
-import { ModelStreamable, StreamMeta } from '../service/stream';
+import { Injectable } from '@travetto/di';
+
+import { ModelCrudSupport } from '../service/crud';
+import { ModelStreamSupport, StreamMeta } from '../service/stream';
 import { ModelType } from '../types/model';
-import { ModelExpirable } from '../service/expire';
+import { ModelExpirySupport } from '../service/expire';
+import { ModelRegistry } from '../registry/registry';
+import { Config } from '../../../rest/node_modules/@travetto/config';
+import { ModelStorageSupport } from '../service/storage';
+
+@Config('model.file')
+export class FileModelConfig {
+  folder: string;
+  namespace: string = '.';
+  async postConstruct() {
+    if (!this.folder) {
+      this.folder = FsUtil.resolveUnix(os.tmpdir(), Util.uuid().substring(0, 10));
+    }
+  }
+}
 
 /**
  * Standard file support
  */
-export class FileModelService implements ModelCore, ModelStreamable, ModelExpirable {
+@Injectable()
+export class FileModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport {
 
   private static async * scanFolder(folder: string, suffix: string) {
     for (const sub of await fs.promises.readdir(folder)) {
@@ -28,18 +47,17 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
    *
    * @param folder
    */
-  constructor(private folder: string) { }
-
-  private generateId() {
-    return Util.uuid();
-  }
+  constructor(private config: FileModelConfig) { }
 
   private async resolveName<T extends ModelType>(cls: Class<T> | string, id?: string, suffix = '.json') {
-    let resolved = FsUtil.resolveUnix(this.folder, typeof cls === 'string' ? cls : cls.name.toLowerCase());
+    const name = typeof cls === 'string' ? cls : ModelRegistry.getStoreName(cls);
+    let resolved = FsUtil.resolveUnix(this.config.folder, this.config.namespace, name);
     if (id) {
       resolved = FsUtil.resolveUnix(resolved, id.substring(0, 3));
     }
-    await FsUtil.mkdirp(resolved);
+    if (!await FsUtil.exists(resolved)) {
+      await FsUtil.mkdirp(resolved);
+    }
     if (id) {
       return FsUtil.resolveUnix(resolved, `${id}${suffix}`);
     } else {
@@ -49,11 +67,15 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
 
   private async find<T extends ModelType>(cls: Class<T> | string, id?: string, suffix: string = '.json') {
     const file = await this.resolveName(cls, id, suffix);
-    if (id && await FsUtil.exists(file)) {
+    if (id && !(await FsUtil.exists(file))) {
       throw new AppError(`${typeof cls === 'string' ? cls : cls.name} not found with id ${id}`, 'notfound');
     }
     return file;
 
+  }
+
+  uuid() {
+    return Util.uuid();
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
@@ -64,7 +86,7 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
   async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
     const file = await this.resolveName(cls, id);
     if (await FsUtil.exists(file)) {
-      const content = await StreamUtil.streamToBuffer(fs.createReadStream(file, 'utf8'));
+      const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
       const text = JSON.parse(content.toString('utf8'));
       const result = cls.from(text);
       if (result.postLoad) {
@@ -78,7 +100,7 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     if (!item.id) {
-      item.id = this.generateId();
+      item.id = this.uuid();
     }
 
     const file = await this.resolveName(cls, item.id);
@@ -96,6 +118,10 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+    if (!item.id) {
+      item.id = this.uuid();
+    }
+
     await SchemaValidator.validate(item);
 
     if (item.prePersist) {
@@ -108,7 +134,7 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
     return item;
   }
 
-  async partialUpdate<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
 
     if (view) {
       await SchemaValidator.validate(item, view);
@@ -116,7 +142,7 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
 
     const existing = await this.get(cls, id);
 
-    item = Util.deepAssign(existing, item);
+    item = Object.assign(existing, item);
 
     if (item.prePersist) {
       await item.prePersist();
@@ -139,7 +165,7 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
     }
   }
 
-  async writeStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
+  async upsertStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
     const file = await this.resolveName('_streams', id);
     await Promise.all([
       fs.promises.writeFile(`${file}.meta`, JSON.stringify(meta), 'utf8'),
@@ -147,12 +173,12 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
     ]);
   }
 
-  async readStream(id: string) {
+  async getStream(id: string) {
     const file = await this.find('_streams', id, '.bin');
     return fs.createReadStream(file);
   }
 
-  async headStream(id: string) {
+  async getStreamMetadata(id: string) {
     const file = await this.find('_streams', id, '.meta');
     const content = await StreamUtil.streamToBuffer(fs.createReadStream(`${file}.meta`, 'utf8'));
     const text = JSON.parse(content.toString('utf8'));
@@ -172,7 +198,7 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
     }
   }
 
-  async setExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
+  async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
     const file = await this.find(cls, id, '.expires');
     await fs.promises.writeFile(file, '', 'utf8');
     if (ttl < 1000000) {
@@ -193,7 +219,7 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
 
   async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
     item = await this.upsert(cls, item);
-    await this.expires(cls, item.id!, ttl);
+    await this.updateExpiry(cls, item.id!, ttl);
     return item;
   }
 
@@ -207,5 +233,13 @@ export class FileModelService implements ModelCore, ModelStreamable, ModelExpira
       }
     }
     return number;
+  }
+
+  async createStorage(): Promise<void> {
+    await FsUtil.mkdirp(FsUtil.resolveUnix(this.config.folder, this.config.namespace));
+  }
+
+  async deleteStorage(): Promise<void> {
+    await FsUtil.unlinkRecursiveSync(FsUtil.resolveUnix(this.config.folder, this.config.namespace));
   }
 }
