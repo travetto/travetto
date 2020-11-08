@@ -7,20 +7,18 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^1.1.1",
     "@travetto/model-core": "^1.1.1",
-    "@travetto/model-query": "^1.1.1",
-    "@types/mongodb": "^3.5.32",
-    "mongodb": "^3.6.2"
+    "@travetto/config": "^1.1.1",
+    "redis": "^3.0.2"
   },
-  "title": "MongoDB Model Support",
-  "description": "Mongo backing for the travetto model module.",
+  "title": "Redis Model Support",
+  "description": "Redis backing for the travetto model module.",
   "homepage": "https://travetto.io",
   "keywords": [
-    "mongo",
+    "typescript",
     "travetto",
-    "database",
-    "typescript"
+    "model",
+    "redis"
   ],
   "license": "MIT",
   "main": "index.ts",
@@ -29,10 +27,10 @@
     "src",
     "support"
   ],
-  "name": "@travetto/model-mongo",
+  "name": "@travetto/model-redis",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/model-mongo"
+    "directory": "module/model-redis"
   },
-  "version": "1.1.1"
+  "version": "1.1.2"
 }

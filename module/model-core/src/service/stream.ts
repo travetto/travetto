@@ -1,4 +1,4 @@
-import { ModelCore } from './core';
+import { ModelCrudSupport } from './crud';
 
 export interface StreamMeta {
   /**
@@ -17,31 +17,33 @@ export interface StreamMeta {
 
 /**
  * Support for NodeJS Streams CRD.  Stream update is not supported.
+ *
+ * @concrete ./internal:ModelStreamSupportTarget
  */
-export interface ModelStreamable extends ModelCore {
+export interface ModelStreamSupport extends ModelCrudSupport {
 
   /**
-   * Write stream to asset store
+   * Upsert stream to storage
    * @param id The identifier of the stream
    * @param stream The actual stream to write
    * @param meta The stream metadata
    */
-  writeStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta): Promise<void>;
+  upsertStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta): Promise<void>;
 
   /**
    * Get stream from asset store
    * @param id The identifier of the stream
    */
-  readStream(id: string): Promise<NodeJS.ReadableStream>;
+  getStream(id: string): Promise<NodeJS.ReadableStream>;
 
   /**
-   * Get info for stream
+   * Get metadata for stream
    * @param id The identifier of the stream
    */
-  headStream(id: string): Promise<StreamMeta>;
+  getStreamMetadata(id: string): Promise<StreamMeta>;
 
   /**
-   * Get info for stream
+   * Delete stream by id
    * @param id The identifier of the stream
    */
   deleteStream(id: string): Promise<boolean>;

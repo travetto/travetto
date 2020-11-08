@@ -7,30 +7,30 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/asset": "^1.1.1",
+    "@travetto/model-core": "^1.1.1",
     "@travetto/config": "^1.1.1",
-    "@types/mongodb": "^3.5.32",
-    "mongodb": "^3.6.2"
+    "@aws-sdk/client-dynamodb": "^1.0.0-rc.4"
   },
-  "title": "MongoDB Asset Source",
-  "description": "Mongo/GridFS backend for the travetto asset module",
+  "title": "DynamoDB Model Support",
+  "description": "DynamoDB backing for the travetto model module.",
   "homepage": "https://travetto.io",
   "keywords": [
-    "mongo",
-    "gridfs-storage",
     "typescript",
-    "travetto"
+    "travetto",
+    "model",
+    "dynamodb"
   ],
   "license": "MIT",
   "main": "index.ts",
   "files": [
     "index.ts",
-    "src"
+    "src",
+    "support"
   ],
-  "name": "@travetto/asset-mongo",
+  "name": "@travetto/model-dynamodb",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/asset-mongo"
+    "directory": "module/model-dynamodb"
   },
-  "version": "1.1.1"
+  "version": "1.1.2"
 }
