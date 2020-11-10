@@ -4,9 +4,9 @@ import { Class, RootRegistry } from '@travetto/registry';
 import { ModelCrudSupport } from '../..';
 import { isStorageSupported } from '../../src/service/internal';
 
-export abstract class BaseModelTest<T extends ModelCrudSupport = ModelCrudSupport> {
+export abstract class BaseModelTest<T extends ModelCrudSupport> {
 
-  constructor(public serviceClass: Class<T>, public configClass: Class<{ namespace: string }>) {
+  constructor(public serviceClass: Class<T>, public configClass: Class<any>) {
   }
 
   get service() {
@@ -16,7 +16,9 @@ export abstract class BaseModelTest<T extends ModelCrudSupport = ModelCrudSuppor
   async init() {
     await RootRegistry.init();
     const config = await DependencyRegistry.getInstance(this.configClass);
-    config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
+    if ('namespace' in config) {
+      config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
+    }
   }
 
   async initDb() {

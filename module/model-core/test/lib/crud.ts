@@ -5,6 +5,7 @@ import { Schema, Text, Precision } from '@travetto/schema';
 
 import { BaseModelTest } from './test.base';
 import { Model, BaseModel } from '../..';
+import { ModelCrudSupport } from '../../src/service/crud';
 
 @Schema()
 class Address {
@@ -75,7 +76,7 @@ async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {
   return out;
 }
 
-export class ModelCrudSuite extends BaseModelTest {
+export class ModelCrudSuite extends BaseModelTest<ModelCrudSupport> {
 
   @BeforeAll()
   async beforeAll() {
