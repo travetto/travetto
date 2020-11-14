@@ -7,6 +7,5 @@ export class RedisModelConfig {
   client: redis.ClientOpts = {};
 
   postConstruct() {
-    this.client = {};
   }
 }

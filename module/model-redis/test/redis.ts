@@ -10,9 +10,9 @@ export class RedisCrudSuite extends ModelCrudSuite {
   }
 }
 
-// @Suite()
-// export class RedisExpirySuite extends ModelExpirySuite {
-//   constructor() {
-//     super(RedisModelService, RedisModelConfig);
-//   }
-// }
+@Suite()
+export class RedisExpirySuite extends ModelExpirySuite {
+  constructor() {
+    super(RedisModelService, RedisModelConfig);
+  }
+}

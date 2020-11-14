@@ -2,10 +2,25 @@ import { Class } from '@travetto/registry';
 import { ModelCrudSupport } from './crud';
 import { ModelType } from '../types/model';
 
-interface ExpiryState {
+/**
+ * Basic state for expiry requests
+ */
+export interface ExpiryState {
+  /**
+   * Expire timestamp in ms
+   */
   expiresAt: number;
+  /**
+   * Issue timestamp in ms
+   */
   issuedAt: number;
+  /**
+   * Is this expired
+   */
   expired: boolean;
+  /**
+   * The specified max age
+   */
   maxAge: number;
 }
 
