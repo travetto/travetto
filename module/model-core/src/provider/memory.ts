@@ -1,7 +1,6 @@
 import { Class } from '@travetto/registry';
 import { StreamUtil } from '@travetto/boot';
-import { AppError, Util } from '@travetto/base';
-import { SchemaValidator } from '@travetto/schema';
+import { Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { ModelCrudSupport } from '../service/crud';
@@ -134,9 +133,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     if (streams.has(id)) {
       streams.delete(id);
       metas.delete(id);
-      return true;
     } else {
-      return false;
+      throw ModelCrudUtil.notFoundError('Stream', id);
     }
   }
 
@@ -146,7 +144,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
     if (!this.expiry.has(id)) {
-      throw new AppError(`No expiry information found for ${cls.name} with id ${id}`, 'notfound');
+      throw ModelCrudUtil.notFoundError('Expiry information', id);
     }
     const { expiresAt, issuedAt } = this.expiry.get(id)!;
     const maxAge = expiresAt - issuedAt;

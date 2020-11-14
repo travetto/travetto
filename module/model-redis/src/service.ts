@@ -43,9 +43,36 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   private wrap = <T>(fn: T): T => (fn as any).bind(this.cl) as T;
 
-  private resolveKey(cls: Class, id?: string) {
-    const key = `${ModelRegistry.getBaseStore(cls)}:${ModelRegistry.getStore(cls)}`;
-    return id ? `${key}:${id}` : key;
+  private resolveKey(cls: Class | string, id?: string) {
+    let key = typeof cls === 'string' ? cls : ModelRegistry.getBaseStore(cls);
+    if (id) {
+      key = `${key}:${id}`;
+    }
+    if (this.config.namespace) {
+      key = `${this.config.namespace}/${key}`;
+    }
+    return key;
+  }
+
+  private async * iterate(prefix: Class | string): AsyncIterable<string[]> {
+    let prevCursor: string | undefined;
+    let done = false;
+    const query = `${this.resolveKey(prefix)}:*`;
+
+    while (!done) {
+      const [cursor, results] = await this.wrap(util.promisify(
+        this.cl.scan as
+        (cursorNum: string, matchOp: 'MATCH', match: string, countOp: 'COUNT', count: string, cb: redis.Callback<[string, string[]]>) => void
+      ))(prevCursor ?? '0', 'MATCH', query, 'COUNT', '100');
+      prevCursor = cursor;
+      if (results.length) {
+        const values = await this.wrap(util.promisify(this.cl.mget as (keys: string[], cb: redis.Callback<(string | null)[]>) => void))(results);
+        yield values.filter(x => !!x) as string[];
+      }
+      if (cursor === '0') {
+        done = true;
+      }
+    }
   }
 
   async postConstruct() {
@@ -82,7 +109,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
-    await this.has(cls, item.id!, 'data');
+    if (item.id) {
+      await this.has(cls, item.id!, 'data');
+    }
     return this.upsert(cls, item);
   }
 
@@ -93,7 +122,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.wrap(util.promisify(this.cl.set))(this.resolveKey(cls, item.id), JSON.stringify(item));
+    const key = this.resolveKey(cls, item.id);
+    await this.wrap(util.promisify(this.cl.set))(key, JSON.stringify(item));
     return item;
   }
 
@@ -111,27 +141,12 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    let prevCursor: string | undefined;
-    let done = false;
-    while (!done) {
-      const [cursor, results] = await this.wrap(util.promisify(
-        this.cl.scan as
-        (cursorNum: string, matchOp: 'MATCH', match: string, countOp: 'COUNT', count: string, cb: redis.Callback<[string, string[]]>) => void
-      ))(prevCursor ?? '0', 'MATCH', `${this.resolveKey(cls)}:*`, 'COUNT', '100');
-      prevCursor = cursor;
-      if (results.length) {
-        const values = await this.wrap(util.promisify(this.cl.mget as (keys: string[], cb: redis.Callback<(string | null)[]>) => void))(results);
-        for (const el of values) {
-          if (el) {
-            const loaded = await ModelCrudUtil.load(cls, el);
-            if (loaded) {
-              yield loaded;
-            }
-          }
+    for await (const bodies of this.iterate(cls)) {
+      for (const body of bodies) {
+        const loaded = await ModelCrudUtil.load(cls, body);
+        if (loaded) {
+          yield loaded;
         }
-      }
-      if (cursor === '0') {
-        done = true;
       }
     }
   }
@@ -164,7 +179,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     const expireKey = `expiry-${this.resolveKey(cls, id)}`;
     const content = await this.wrap(util.promisify(this.cl.get))(expireKey);
     if (content) {
-      return ModelCrudUtil.load(ExpiryMeta, content);
+      return (await ModelCrudUtil.load(ExpiryMeta, content))!;
     } else {
       throw ModelCrudUtil.notFoundError(cls, id);
     }
@@ -175,6 +190,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async deleteStorage() {
-    await this.wrap(util.promisify(this.cl.flushdb))();
+    if (!this.config.namespace) {
+      await this.wrap(util.promisify(this.cl.flushdb))();
+    } else {
+      for await (const ids of this.iterate('')) {
+        if (ids.length) {
+          await this.wrap(util.promisify(this.cl.del) as (...keys: string[]) => Promise<number>)(...ids);
+        }
+      }
+    }
   }
 }

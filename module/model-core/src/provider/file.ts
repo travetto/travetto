@@ -178,9 +178,8 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
         fs.promises.unlink(file),
         fs.promises.unlink(file.replace('.bin', '.meta'))
       ]);
-      return true;
     } else {
-      return false;
+      throw ModelCrudUtil.notFoundError('Stream', id);
     }
   }
 

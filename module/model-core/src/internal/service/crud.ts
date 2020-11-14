@@ -1,7 +1,7 @@
 import { AppError } from '@travetto/base';
 import { Class } from '@travetto/registry';
 import { SchemaValidator } from '@travetto/schema';
-import { ModelCrudSupport } from '../../service/crud';
+import { ModelRegistry } from '../../registry/registry';
 import { ModelType } from '../../types/model';
 
 /**
@@ -13,7 +13,7 @@ export class ModelCrudUtil {
    * @param cls Class to load model for
    * @param input Input as string or plain object
    */
-  static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object | null | undefined): Promise<T> {
+  static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object | null | undefined): Promise<T | undefined> {
     if (!input) {
       return;
     }
@@ -23,7 +23,11 @@ export class ModelCrudUtil {
       } else if (input instanceof Buffer) {
         input = JSON.parse(input.toString('utf8'));
       }
-      const result = cls.from(input as object);
+
+      const result = ModelRegistry.getBaseModel(cls).from(input as object);
+      if (!(result instanceof cls)) {
+        return;
+      }
       if (result.postLoad) {
         await result.postLoad();
       }

@@ -8,34 +8,37 @@ import { ResourceManager } from '@travetto/base';
 
 import { BaseModelSuite } from './test.base';
 import { ModelStreamSupport } from '../../src/service/stream';
-
-async function getHash(stream: NodeJS.ReadableStream) {
-  const hash = crypto.createHash('sha1');
-  hash.setEncoding('hex');
-  await new Promise((res, rej) => {
-    stream.on('end', res);
-    stream.on('error', rej);
-    stream.pipe(hash);
-  });
-  return hash.read() as string;
-}
-
-async function getStream(resource: string) {
-  const file = await ResourceManager.toAbsolutePath(resource);
-  const stat = await fs.promises.stat(file);
-  const hash = await getHash(fs.createReadStream(file));
-
-  return [
-    { size: stat.size, contentType: '', hash },
-    fs.createReadStream(file)
-  ] as const;
-}
+import { FsUtil } from '@travetto/boot';
 
 @Suite({ skip: true })
 export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {
 
+  async getHash(stream: NodeJS.ReadableStream) {
+    const hash = crypto.createHash('sha1');
+    hash.setEncoding('hex');
+    await new Promise((res, rej) => {
+      stream.on('end', res);
+      stream.on('error', rej);
+      stream.pipe(hash);
+    });
+    return hash.read() as string;
+  }
+
+  async getStream(resource: string) {
+    const file = await ResourceManager.toAbsolutePath(resource);
+    const stat = await fs.promises.stat(file);
+    const hash = await this.getHash(fs.createReadStream(file));
+
+    return [
+      { size: stat.size, contentType: '', hash },
+      fs.createReadStream(file)
+    ] as const;
+  }
+
+
   @BeforeAll()
   async beforeAll() {
+    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '..'));
     return super.init();
   }
 
@@ -52,7 +55,7 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
   @Test()
   async writeBasic() {
     const service = await this.service;
-    const [meta, stream] = await getStream('/asset.yml');
+    const [meta, stream] = await this.getStream('/asset.yml');
 
     await service.upsertStream(meta.hash, stream, meta);
 
@@ -63,18 +66,18 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
   @Test()
   async writeStream() {
     const service = await this.service;
-    const [meta, stream] = await getStream('/asset.yml');
+    const [meta, stream] = await this.getStream('/asset.yml');
 
     await service.upsertStream(meta.hash, stream, meta);
 
     const retrieved = await service.getStream(meta.hash);
-    assert(await getHash(retrieved) === meta.hash);
+    assert(await this.getHash(retrieved) === meta.hash);
   }
 
   @Test()
   async writeAndDelete() {
     const service = await this.service;
-    const [meta, stream] = await getStream('/asset.yml');
+    const [meta, stream] = await this.getStream('/asset.yml');
 
     await service.upsertStream(meta.hash, stream, meta);
 
