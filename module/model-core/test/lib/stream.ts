@@ -3,10 +3,10 @@ import * as fs from 'fs';
 import * as crypto from 'crypto';
 // import * as mime from 'mime';
 
-import { AfterEach, BeforeAll, BeforeEach, Test } from '@travetto/test';
+import { AfterEach, BeforeAll, BeforeEach, Suite, Test } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 
-import { BaseModelTest } from './test.base';
+import { BaseModelSuite } from './test.base';
 import { ModelStreamSupport } from '../../src/service/stream';
 
 async function getHash(stream: NodeJS.ReadableStream) {
@@ -29,8 +29,8 @@ async function getStream(resource: string) {
   ] as const;
 }
 
-
-export class ModelStreamSuite extends BaseModelTest<ModelStreamSupport> {
+@Suite({ skip: true })
+export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {
 
   @BeforeAll()
   async beforeAll() {

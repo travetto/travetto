@@ -93,16 +93,16 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   }
 
   /**
-   * Find the base collection for a type
+   * Find the base store for a type
    */
   getBaseStore(cls: Class) {
-    return this.getStoreName(this.getBaseModel(cls));
+    return this.getStore(this.getBaseModel(cls));
   }
 
   /**
-   * Get name of the store
+   * Get the apparent store for a type
    */
-  getStoreName(cls: Class) {
+  getStore(cls: Class) {
     if (!this.stores.has(cls)) {
       const config = this.get(cls) ?? this.getOrCreatePending(cls);
       this.stores.set(cls, (config.collection || cls.name).toLowerCase());
