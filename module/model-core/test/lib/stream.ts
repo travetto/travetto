@@ -39,12 +39,12 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
 
   @BeforeEach()
   async beforeEach() {
-    return this.initDb();
+    return this.createStorage();
   }
 
   @AfterEach()
   async afterEach() {
-    return this.cleanup();
+    return this.deleteStorage();
   }
 
   @Test()

@@ -21,17 +21,17 @@ export abstract class BaseModelSuite<T extends ModelCrudSupport> {
     }
   }
 
-  async initDb() {
-    const mms = await this.service;
-    if (isStorageSupported(mms)) {
-      await mms.createStorage();
+  async createStorage() {
+    const service = await this.service;
+    if (isStorageSupported(service)) {
+      await service.createStorage();
     }
   }
 
-  async cleanup() {
-    const mms = await this.service;
-    if (isStorageSupported(mms)) {
-      await mms.deleteStorage();
+  async deleteStorage() {
+    const service = await this.service;
+    if (isStorageSupported(service)) {
+      await service.deleteStorage();
     }
   }
 }
