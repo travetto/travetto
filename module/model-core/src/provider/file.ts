@@ -3,8 +3,7 @@ import * as os from 'os';
 
 import { Class } from '@travetto/registry';
 import { FsUtil, StreamUtil } from '@travetto/boot';
-import { AppError, Util } from '@travetto/base';
-import { SchemaValidator } from '@travetto/schema';
+import { Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { ModelCrudSupport } from '../service/crud';
@@ -15,6 +14,7 @@ import { ModelRegistry } from '../registry/registry';
 import { Config } from '../../../rest/node_modules/@travetto/config';
 import { ModelStorageSupport } from '../service/storage';
 import { ModelCrudUtil } from '../internal/service/crud';
+import { ModelExpiryUtil } from '../internal/service/expiry';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -109,7 +109,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const file = await this.resolveName(cls, '.json', item.id);
 
     if (await FsUtil.exists(file)) {
-      throw ModelCrudUtil.existsError(cls, item.id);
+      throw ModelCrudUtil.existsError(cls, item.id!);
     }
 
     return await this.upsert(cls, item);
@@ -187,10 +187,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
     const file = await (await this.find(cls, '.json', id)).replace('.json', '.expires');
     await fs.promises.writeFile(file, '', 'utf8');
-    if (ttl < 1000000) {
-      ttl = Date.now() + ttl;
-    }
-    await fs.promises.utimes(file, new Date(ttl), new Date());
+    await fs.promises.utimes(file, ModelExpiryUtil.getExpiresAt(ttl), new Date());
   }
 
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
