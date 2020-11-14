@@ -46,5 +46,5 @@ export interface ModelStreamSupport extends ModelCrudSupport {
    * Delete stream by id
    * @param id The identifier of the stream
    */
-  deleteStream(id: string): Promise<boolean>;
+  deleteStream(id: string): Promise<void>;
 }

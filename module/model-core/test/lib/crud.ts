@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 
+import { AppError } from '@travetto/base';
 import { AfterEach, BeforeAll, BeforeEach, Suite, Test } from '@travetto/test';
 import { Schema, Text, Precision } from '@travetto/schema';
 
@@ -244,7 +245,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(o[0] instanceof Doctor);
     await assert.rejects(
       () => service.update(Engineer, Doctor.from({ ...o[0] }) as any),
-      'Expected object of type Engineer');
+      (e: Error) => /Expected.*type/.test(e.message) || (e instanceof AppError && e.category === 'notfound') ? undefined : e);
 
     await assert.rejects(
       () => service.get(Engineer, o[0].id!),
