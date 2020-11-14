@@ -26,26 +26,26 @@ class EdgeCases {
       alias: 'bob'
     });
 
-    assert((await SchemaValidator.validate(data)).alias === 'bob');
+    assert((await SchemaValidator.validate(OptionalAsUnion, data)).alias === 'bob');
 
     const data2 = OptionalAsUnion.from({
       name: undefined,
       alias: 'bob'
     });
 
-    await assert.rejects(() => SchemaValidator.validate(data2));
+    await assert.rejects(() => SchemaValidator.validate(OptionalAsUnion, data2));
 
     const data3 = OptionalAsUnion.from({
       name: 'bob',
       alias: undefined
     });
 
-    assert((await SchemaValidator.validate(data3)).alias === undefined);
+    assert((await SchemaValidator.validate(OptionalAsUnion, data3)).alias === undefined);
 
     const data4 = OptionalAsUnion.from({
       name: 'bob'
     });
 
-    assert((await SchemaValidator.validate(data4)).alias === undefined);
+    assert((await SchemaValidator.validate(OptionalAsUnion, data4)).alias === undefined);
   }
 }

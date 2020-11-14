@@ -120,6 +120,11 @@ module.exports = {
         filter: { regex: '^__', match: true },
       },
       {
+        selector: 'variable',
+        format: [],
+        filter: { regex: '^__', match: true },
+      },
+      {
         selector: 'property',
         format: ['camelCase', 'UPPER_CASE', 'PascalCase', 'snake_case'],
         leadingUnderscore: 'allow',

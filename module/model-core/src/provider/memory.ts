@@ -11,6 +11,7 @@ import { ModelExpirySupport } from '../service/expire';
 import { ModelRegistry } from '../registry/registry';
 import { Config } from '../../../rest/node_modules/@travetto/config/src/decorator';
 import { ModelStorageSupport } from '../service/storage';
+import { ModelCrudUtil } from '../internal/service/crud';
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -40,9 +41,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     const store = this.getStore(cls);
 
     if (id && errorState && (errorState === 'notfound' ? !store.has(id) : store.has(id))) {
-      throw new AppError(`${typeof cls === 'string' ? cls : cls.name} ${errorState === 'notfound' ? 'not found' : 'found'} with id ${id}`,
-        errorState
-      );
+      throw errorState === 'notfound' ? ModelCrudUtil.notFoundError(cls, id) : ModelCrudUtil.existsError(cls, id);
     }
 
     return store;
@@ -55,7 +54,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async get<T extends ModelType>(cls: Class<T>, id: string) {
     const result = await this.getOptional(cls, id);
     if (!result) {
-      throw new AppError(`${cls.name} was not found with id ${id}`, 'notfound');
+      throw ModelCrudUtil.notFoundError(cls, id);
     }
     return result;
   }
@@ -63,19 +62,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
     const store = this.getStore(cls);
     if (store.has(id)) {
-      const text = JSON.parse(store.get(id)!.toString('utf8'));
-      try {
-        const result = cls.from(text);
-
-        if (result.postLoad) {
-          await result.postLoad();
-        }
-        return result;
-      } catch (e) {
-        if (!(e instanceof AppError && /match expected class/.test(e.message))) {
-          throw e;
-        }
-      }
+      return ModelCrudUtil.load(cls, store.get(id)!);
     }
     return;
   }
@@ -94,15 +81,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
-    if (!item.id) {
-      item.id = this.uuid();
-    }
-
-    await SchemaValidator.validate(cls, item);
-
-    if (item.prePersist) {
-      await item.prePersist();
-    }
+    item = await ModelCrudUtil.preStore(cls, item, this);
 
     const store = this.getStore(cls);
     store.set(item.id!, Buffer.from(JSON.stringify(item)));
@@ -110,23 +89,10 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
-
-    if (view) {
-      await SchemaValidator.validate(cls, item, view);
-    }
-
-    const existing = await this.get(cls, id);
-
-    item = Object.assign(existing, item);
-
-    if (item.prePersist) {
-      await item.prePersist();
-    }
+    item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
 
     const store = this.getStore(cls);
-
     store.set(item.id!, Buffer.from(JSON.stringify(item)));
-
     return item as T;
   }
 

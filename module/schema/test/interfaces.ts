@@ -43,7 +43,7 @@ class ViewsTest {
     let r = User.from({});
 
     try {
-      await SchemaValidator.validate(r);
+      await SchemaValidator.validate(User, r);
       assert.fail('Validation should have failed');
     } catch (e) {
       console.log(e);
@@ -53,7 +53,7 @@ class ViewsTest {
     r = User.from({ address: {} });
 
     try {
-      await SchemaValidator.validate(r);
+      await SchemaValidator.validate(User, r);
       assert.fail('Validation should have failed');
     } catch (e) {
       console.log(e);
@@ -62,7 +62,7 @@ class ViewsTest {
 
     r = User.from({ address: { street1: 'a', mode: 'c' } } as any);
     try {
-      await SchemaValidator.validate(r);
+      await SchemaValidator.validate(User, r);
       assert.fail('Validation should have failed');
     } catch (e) {
       console.log(e);
