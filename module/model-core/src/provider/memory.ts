@@ -12,6 +12,7 @@ import { ModelRegistry } from '../registry/registry';
 import { Config } from '../../../rest/node_modules/@travetto/config/src/decorator';
 import { ModelStorageSupport } from '../service/storage';
 import { ModelCrudUtil } from '../internal/service/crud';
+import { ModelExpiryUtil } from '../internal/service/expiry';
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -140,10 +141,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
-    if (ttl < 1000000) {
-      ttl = Date.now() + ttl;
-    }
-    this.expiry.set(id, { expiresAt: ttl, issuedAt: Date.now() });
+    this.expiry.set(id, { expiresAt: ModelExpiryUtil.getExpiresAt(ttl).getTime(), issuedAt: Date.now() });
   }
 
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {

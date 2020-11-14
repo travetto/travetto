@@ -13,7 +13,7 @@ export class ModelCrudUtil {
    * @param cls Class to load model for
    * @param input Input as string or plain object
    */
-  static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object | null | undefined) {
+  static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object | null | undefined): Promise<T> {
     if (!input) {
       return;
     }
