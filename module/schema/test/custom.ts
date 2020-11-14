@@ -26,8 +26,8 @@ class User {
 }
 
 @Schema()
-@Validator(async (user: User) => {
-  const p = user.password;
+@Validator(async (user: AsyncUser) => {
+  const p = user.passwordSpecial;
   const hasNum = /\d/.test(p);
   const hasSpecial = /[!@#$%%^&*()<>?/,.;':"']/.test(p);
   const noRepeat = !/(.)(\1)/.test(p);
@@ -41,7 +41,7 @@ class User {
   }
 })
 class AsyncUser {
-  password: string;
+  passwordSpecial: string;
 }
 
 @Suite()
@@ -57,8 +57,8 @@ export class CustomTest {
     const u = User.from({
       password: 'orange'
     });
-    await assert.rejects(() => SchemaValidator.validate(u), 'Validation errors');
-    await assert.rejects(() => SchemaValidator.validate(u), (err: ValidationResultError) => {
+    await assert.rejects(() => SchemaValidator.validate(User, u), 'Validation errors');
+    await assert.rejects(() => SchemaValidator.validate(User, u), (err: ValidationResultError) => {
       if (!err.errors.find(x => x.message.includes('A password must'))) {
         return err;
       }
@@ -68,10 +68,10 @@ export class CustomTest {
   @Test()
   async validateCustomAsync() {
     const u = AsyncUser.from({
-      password: 'orange'
+      passwordSpecial: 'orange'
     });
-    await assert.rejects(() => SchemaValidator.validate(u), 'Validation errors');
-    await assert.rejects(() => SchemaValidator.validate(u), (err: ValidationResultError) => {
+    await assert.rejects(() => SchemaValidator.validate(AsyncUser, u), 'Validation errors');
+    await assert.rejects(() => SchemaValidator.validate(AsyncUser, u), (err: ValidationResultError) => {
       if (!err.errors.some(x => x.message.includes('A password must'))) {
         return err;
       }

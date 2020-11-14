@@ -1,6 +1,6 @@
 import { AppError } from '@travetto/base';
 import { Class } from '@travetto/registry';
-import { ModelExpirable, ModelType } from '@travetto/model-core';
+import { ModelExpirySupport, ModelType } from '@travetto/model-core';
 
 import { CacheConfig } from '../types';
 import { CacheSourceUtil } from './util';
@@ -20,7 +20,7 @@ export class CacheService<T extends ModelType>  {
    */
   cullRate = 10 * 60000; // 10 minutes
 
-  constructor(private cls: Class<T>, private modelService: ModelExpirable) { }
+  constructor(private cls: Class<T>, private modelService: ModelExpirySupport) { }
 
   computeKey(params: any) {
     return CacheSourceUtil.computeKey(params);
@@ -39,7 +39,7 @@ export class CacheService<T extends ModelType>  {
       const delta = expiresAt - Date.now();
       const threshold = maxAge / 2;
       if (delta < threshold) {
-        await this.modelService.setExpiry(this.cls, key, maxAge); // Do not wait
+        await this.modelService.updateExpiry(this.cls, key, maxAge); // Do not wait
       }
     }
 

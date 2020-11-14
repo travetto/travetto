@@ -43,7 +43,7 @@ export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: strin
   }
 
   if (SchemaRegistry.has(cls)) {
-    await SchemaValidator.validate(bound, view);
+    await SchemaValidator.validate(cls, bound, view);
   }
 
   return bound;
@@ -85,7 +85,7 @@ export function schemaParamConfig(location: 'body' | 'query', config: Partial<Pa
  * @augments `@trv:schema/Param`
  * @augments `@trv:rest/Param`
  */
-export function SchemaBody<T>(config: Partial<ParamConfig> & { view?: string } = {}) {
+export function SchemaBody(config: Partial<ParamConfig> & { view?: string } = {}) {
   return function (target: any, prop: string | symbol, idx: number) {
     ControllerRegistry.registerEndpointParameter(target.constructor, target.constructor.prototype[prop],
       schemaParamConfig('body', config), idx);
@@ -98,7 +98,7 @@ export function SchemaBody<T>(config: Partial<ParamConfig> & { view?: string } =
  * @augments `@trv:schema/Param`
  * @augments `@trv:rest/Param`
  */
-export function SchemaQuery<T>(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
+export function SchemaQuery(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
   return function (target: any, prop: string | symbol, idx: number) {
     ControllerRegistry.registerEndpointParameter(target.constructor, target.constructor.prototype[prop],
       schemaParamConfig('query', config), idx);
