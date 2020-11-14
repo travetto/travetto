@@ -11,14 +11,16 @@ import { ModelStreamSupport } from '../../src/service/stream';
 
 async function getHash(stream: NodeJS.ReadableStream) {
   const hash = crypto.createHash('sha1');
-  // change to 'binary' if you want a binary hash.
   hash.setEncoding('hex');
-  await new Promise((res, rej) => stream.pipe(hash).on('end', res));
+  await new Promise((res, rej) => {
+    stream.on('end', res);
+    stream.on('error', rej);
+    stream.pipe(hash);
+  });
   return hash.read() as string;
 }
 
 async function getStream(resource: string) {
-  console.log(ResourceManager.getPaths());
   const file = await ResourceManager.toAbsolutePath(resource);
   const stat = await fs.promises.stat(file);
   const hash = await getHash(fs.createReadStream(file));
