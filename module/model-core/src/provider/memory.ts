@@ -53,25 +53,31 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
-    const optional = await this.getOptional(cls, id);
-    if (!optional) {
+    const result = await this.getOptional(cls, id);
+    if (!result) {
       throw new AppError(`${cls.name} was not found with id ${id}`, 'notfound');
     }
-    return optional;
+    return result;
   }
 
   async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
     const store = this.getStore(cls);
     if (store.has(id)) {
       const text = JSON.parse(store.get(id)!.toString('utf8'));
-      const result = cls.from(text);
-      if (result.postLoad) {
-        await result.postLoad();
+      try {
+        const result = cls.from(text);
+
+        if (result.postLoad) {
+          await result.postLoad();
+        }
+        return result;
+      } catch (e) {
+        if (!(e instanceof AppError && /match expected class/.test(e.message))) {
+          throw e;
+        }
       }
-      return result;
-    } else {
-      return;
     }
+    return;
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
@@ -92,7 +98,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       item.id = this.uuid();
     }
 
-    await SchemaValidator.validate(item);
+    await SchemaValidator.validate(cls, item);
 
     if (item.prePersist) {
       await item.prePersist();
@@ -106,7 +112,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
 
     if (view) {
-      await SchemaValidator.validate(item, view);
+      await SchemaValidator.validate(cls, item, view);
     }
 
     const existing = await this.get(cls, id);
@@ -131,7 +137,10 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async * list<T extends ModelType>(cls: Class<T>) {
     for (const id of this.getStore(cls).keys()) {
-      yield await this.get(cls, id);
+      const res = await this.getOptional(cls, id);
+      if (res) {
+        yield res;
+      }
     }
   }
 
@@ -200,6 +209,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async createStorage() {
   }
+
   async deleteStorage() {
     this.expiry.clear();
     this.store.clear();

@@ -27,7 +27,7 @@ class Validation {
       url: 'htt://google'
     });
     try {
-      await SchemaValidator.validate(r);
+      await SchemaValidator.validate(Response, r);
       assert.fail('Validation should have failed');
     } catch (e) {
       console.log(e);
@@ -47,7 +47,7 @@ class Validation {
       responses: []
     });
     try {
-      await SchemaValidator.validate(res);
+      await SchemaValidator.validate(Parent, res);
       assert.fail('Validation should have failed');
     } catch (e) {
       if (e instanceof ValidationResultError) {
@@ -66,7 +66,7 @@ class Validation {
   async minMessage() {
     const o = MinTest.from({ value: 'hello' });
 
-    await SchemaValidator.validate(o);
+    await SchemaValidator.validate(MinTest, o);
   }
 
   @Test('Nested validations should be fine')
@@ -81,7 +81,7 @@ class Validation {
       }
     });
 
-    const o = await SchemaValidator.validate(obj);
+    const o = await SchemaValidator.validate(Nested, obj);
     assert(o !== undefined);
   }
 
@@ -99,7 +99,7 @@ class Validation {
       }
     });
 
-    await SchemaValidator.validate(obj);
+    await SchemaValidator.validate(Nested, obj);
   }
 
   @Test('Custom Validators')
@@ -110,7 +110,7 @@ class Validation {
     });
 
     try {
-      await SchemaValidator.validate(obj);
+      await SchemaValidator.validate(CustomValidated, obj);
       assert(false);
     } catch (e) {
       if (e instanceof ValidationResultError) {
@@ -134,7 +134,7 @@ class Validation {
       }
     }, 'profile');
 
-    await SchemaValidator.validate(obj, 'profile');
+    await SchemaValidator.validate(ViewSpecific, obj, 'profile');
   }
 
   @Test('Regex Array')
@@ -143,14 +143,14 @@ class Validation {
       names: ['abc', 'ac', 'abbbc']
     });
 
-    await SchemaValidator.validate(obj);
+    await SchemaValidator.validate(StringMatches, obj);
 
     const obj2 = StringMatches.from({
       names: ['bc', 'ab', 'bac']
     });
 
     await assert.rejects(
-      () => SchemaValidator.validate(obj2),
+      () => SchemaValidator.validate(StringMatches, obj2),
       ValidationResultError
     );
   }
@@ -161,7 +161,7 @@ class Validation {
 
     });
 
-    await SchemaValidator.validate(o);
+    await SchemaValidator.validate(NotRequiredUndefinable, o);
   }
 
   @Test('date tests')
@@ -169,7 +169,7 @@ class Validation {
 
     await assert.rejects(() => {
       const o = DateTestSchema.from({ date: undefined });
-      return SchemaValidator.validate(o);
+      return SchemaValidator.validate(DateTestSchema, o);
     }, (err: any) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'required')) {
         return err;
@@ -179,7 +179,7 @@ class Validation {
     await assert.rejects(() => {
       // @ts-ignore
       const o = DateTestSchema.from({ date: NaN });
-      return SchemaValidator.validate(o);
+      return SchemaValidator.validate(DateTestSchema, o);
     }, (err: any) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'type')) {
         return err;
@@ -188,7 +188,7 @@ class Validation {
 
     await assert.rejects(() => {
       const o = CustomValidated.from({ age: Number.NaN, age2: 1 });
-      return SchemaValidator.validate(o);
+      return SchemaValidator.validate(CustomValidated, o);
     }, (err: any) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'type')) {
         return err;
@@ -197,7 +197,7 @@ class Validation {
 
     await assert.rejects(() => {
       const o = CustomValidated.from({ age: 1, age2: 1 });
-      return SchemaValidator.validate(o);
+      return SchemaValidator.validate(CustomValidated, o);
     }, (err: any) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'custom')) {
         return err;
@@ -207,7 +207,7 @@ class Validation {
     await assert.rejects(() => {
       // @ts-ignore
       const o = DateTestSchema.from({ date: '' });
-      return SchemaValidator.validate(o);
+      return SchemaValidator.validate(DateTestSchema, o);
     }, (err: any) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'required')) {
         return err;
@@ -218,7 +218,7 @@ class Validation {
   @Test()
   async ensureRange() {
     const v = Grade.from({ score: 5 });
-    await SchemaValidator.validate(v);
+    await SchemaValidator.validate(Grade, v);
   }
 
   @Test()
@@ -251,11 +251,11 @@ class Validation {
     assert(item.all[2] instanceof Aaaz);
 
     assert.rejects(async () => {
-      await SchemaValidator.validate(item);
+      await SchemaValidator.validate(AllAs, item);
     });
 
     try {
-      await SchemaValidator.validate(item);
+      await SchemaValidator.validate(AllAs, item);
     } catch (err) {
       if (err instanceof ValidationResultError) {
         assert(err.errors[0].path === 'all[0].b');
@@ -279,14 +279,16 @@ class Validation {
       zip: 200
     });
 
-    await assert.doesNotReject(() => SchemaValidator.validate(addr));
+    await assert.doesNotReject(() => SchemaValidator.validate(Address, addr));
     addr.zip = '800' as any;
-    await assert.rejects(() => SchemaValidator.validate(addr));
-    await assert.rejects(() => SchemaValidator.validatePartial(addr));
+    await assert.rejects(() => SchemaValidator.validate(Address, addr));
+    await assert.rejects(() => SchemaValidator.validatePartial(Address, addr));
+    // @ts-expect-error
     delete addr.zip;
+    // @ts-expect-error
     delete addr.street1;
-    await assert.rejects(() => SchemaValidator.validate(addr));
-    await assert.doesNotReject(() => SchemaValidator.validatePartial(addr));
+    await assert.rejects(() => SchemaValidator.validate(Address, addr));
+    await assert.doesNotReject(() => SchemaValidator.validatePartial(Address, addr));
   }
 
   // @Test({ skip: false })
@@ -296,7 +298,7 @@ class Validation {
       postal: '30000',
     });
 
-    await SchemaValidator.validate(addr);
+    await SchemaValidator.validate(Address, addr);
   }
 
   @Test()

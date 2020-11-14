@@ -23,7 +23,7 @@ export function isExpirySupported(o: ModelCrudSupport): o is ModelExpirySupport 
  * @param o
  */
 export function isStorageSupported(o: ModelCrudSupport): o is ModelStorageSupport {
-  return o && 'initStorage' in o;
+  return o && 'createStorage' in o;
 }
 
 /**

@@ -1,3 +1,4 @@
+import { AppError } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, Class, ChangeEvent } from '@travetto/registry';
 import { ClassList, FieldConfig, ClassConfig, ALL_VIEW, SchemaConfig, ViewFieldsConfig } from './types';
 import {
@@ -16,6 +17,7 @@ function hasType<T>(o: any): o is { type: Class<T> | string } {
 class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
   subTypes = new Map<Class, Map<string, Class>>();
+  typeKeys = new Map<Class, string>();
   pendingViews = new Map<Class, Map<string, ViewFieldsConfig<any>>>();
 
   constructor() {
@@ -36,10 +38,19 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param cls The base class
    * @param type The sub tye value
    */
-  resolveSubType(cls: Class, type: Class | string) {
-    const typeId = type && (typeof type === 'string' ? type : type.ᚕid);
-    const hasId = this.subTypes.has(cls) && type;
-    return (hasId && this.subTypes.get(cls)!.get(typeId!)!) || cls;
+  resolveSubType(cls: Class, type: Class | string): Class<any> {
+    if (this.subTypes.has(cls)) {
+      const typeId = type && (typeof type === 'string' ? type : type.ᚕid);
+      if (type) {
+        return this.subTypes.get(cls)!.get(typeId) ?? cls;
+      }
+    } else {
+      const expectedType = this.typeKeys.get(cls);
+      if (expectedType && typeof type === 'string' && expectedType !== type) {
+        throw new AppError(`Data of type ${type} does not match expected class type ${expectedType}`, 'data');
+      }
+    }
+    return cls;
   }
 
   /**
@@ -66,6 +77,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       if (!this.subTypes.has(parent)) {
         this.subTypes.set(parent, new Map());
       }
+      this.typeKeys.set(cls, type);
       this.subTypes.get(parent)!.set(type, cls);
       this.subTypes.get(parent)!.set(cls.ᚕid, cls);
       parent = this.getParentClass(parent!)!;
@@ -291,7 +303,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * On schema field change, emit the change event for the whole schema
    * @param cb The function to call on schema field change
    */
-  onFieldChange<T>(callback: (e: FieldChangeEvent) => any): void {
+  onFieldChange(callback: (e: FieldChangeEvent) => any): void {
     SchemaChangeListener.on(FIELD_CHANGE_EVENT, callback);
   }
 

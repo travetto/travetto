@@ -106,7 +106,13 @@ export class FsUtil {
       await fs.stat(pth);
     } catch (e) {
       await this.mkdirp(path.dirname(pth));
-      await fs.mkdir(pth);
+      try {
+        await fs.mkdir(pth);
+      } catch (err) {
+        if (!/already exists/.test(err)) {
+          throw err;
+        }
+      }
     }
   }
 

@@ -86,12 +86,12 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
   @BeforeEach()
   async beforeEach() {
-    return this.initDb();
+    return this.createStorage();
   }
 
   @AfterEach()
   async afterEach() {
-    return this.cleanup();
+    return this.deleteStorage();
   }
 
   @Test('save it')
@@ -243,12 +243,12 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     assert(o[0] instanceof Doctor);
     await assert.rejects(
-      async () => service.update(Engineer, Doctor.from({ ...o[0] }) as any),
+      () => service.update(Engineer, Doctor.from({ ...o[0] }) as any),
       'Expected object of type Engineer');
 
     await assert.rejects(
-      async () => service.get(Engineer, o[0].id!),
-      'Invalid number');
+      () => service.get(Engineer, o[0].id!),
+      'not found');
 
     assert(o[0] instanceof Doctor);
     assert(o[1] instanceof Firefighter);

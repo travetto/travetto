@@ -9,9 +9,9 @@ export class ModelOptions<T> {
    */
   class: Class<T>;
   /**
-   * Collection name
+   * Store name
    */
-  collection?: string;
+  store?: string;
   /**
    * If a sub type, identifier type
    */
