@@ -34,30 +34,30 @@ class PointerSuite {
   async testValidate() {
     try {
       // @ts-ignore
-      await SchemaValidator.validate(Custom.from({ pointer: false }));
+      await SchemaValidator.validate(Custom, Custom.from({ pointer: false }));
       assert(false);
     } catch (err) {
       assert(err.errors?.[0].kind === 'type');
     }
 
     try {
-      await SchemaValidator.validate(Custom.from({ pointer: 1000 }));
+      await SchemaValidator.validate(Custom, Custom.from({ pointer: 1000 }));
       assert(false);
     } catch (err) {
       assert(err.errors?.[0].kind === 'maxlength');
     }
 
     try {
-      await SchemaValidator.validate(Custom.from({}));
+      await SchemaValidator.validate(Custom, Custom.from({}));
       assert(false);
     } catch (err) {
       assert(err.errors?.[0].kind === 'required');
     }
 
     await assert.doesNotReject(async () => {
-      await SchemaValidator.validate(Custom.from({ pointer: 100 }));
-      await SchemaValidator.validate(Custom.from({ pointer: true }));
-      await SchemaValidator.validate(Custom.from({ pointer: 'hello' }));
+      await SchemaValidator.validate(Custom, Custom.from({ pointer: 100 }));
+      await SchemaValidator.validate(Custom, Custom.from({ pointer: true }));
+      await SchemaValidator.validate(Custom, Custom.from({ pointer: 'hello' }));
     });
   }
 }

@@ -5,6 +5,7 @@ import { SchemaRegistry } from '../service/registry';
 import { ValidationError, ValidationKind, ValidationResult } from './types';
 import { Messages } from './messages';
 import { ValidationResultError } from './error';
+import { AppError } from '@travetto/base';
 
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
@@ -205,11 +206,14 @@ export class SchemaValidator {
 
   /**
    * Validate an object against it's constructor's schema
+   * @param cls The class to validate the objects against
    * @param o The object to validate
    * @param view The optional view to limit the scope to
    */
-  static async validate<T>(o: T, view?: string): Promise<T> {
-    let cls = (o as unknown as { constructor: Class<T> }).constructor;
+  static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
+    if (!(o instanceof cls)) {
+      throw new AppError(`Expected object of type ${cls.name}`, 'data');
+    }
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
 
     const config = SchemaRegistry.getViewSchema(cls, view);
@@ -239,23 +243,25 @@ export class SchemaValidator {
 
   /**
    * Validate an entire array of values
+   * @param cls The class to validate the objects against
    * @param obj The values to validate
    * @param view The view to limit by
    */
-  static async validateAll<T>(obj: T[], view?: string): Promise<T[]> {
+  static async validateAll<T>(cls: Class<T>, obj: T[], view?: string): Promise<T[]> {
     return await Promise.all<T>((obj ?? [])
-      .map(o => this.validate(o, view)));
+      .map(o => this.validate(cls, o, view)));
   }
 
   /**
    * Validate partial, ignoring required fields as they are partial
    *
+   * @param cls The class to validate against
    * @param o The value to validate
    * @param view The view to limit by
    */
-  static async validatePartial<T>(o: T, view?: string): Promise<T> {
+  static async validatePartial<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
     try {
-      await this.validate(o, view);
+      await this.validate(cls, o, view);
     } catch (e) {
       if (e instanceof ValidationResultError) { // Don't check required fields
         const errs = e.errors.filter(x => x.kind !== 'required');

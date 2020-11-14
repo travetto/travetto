@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 
-import { ChangeEvent, Class } from '@travetto/registry';
+import { Class } from '@travetto/registry';
 import { FsUtil, StreamUtil } from '@travetto/boot';
 import { AppError, Util } from '@travetto/base';
 import { SchemaValidator } from '@travetto/schema';
@@ -79,23 +79,35 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
+    console!.log('Getting', cls.name, id);
     await this.find(cls, id);
-    return (await this.getOptional(cls, id))!;
+
+    const result = (await this.getOptional(cls, id))!;
+    if (!result) {
+      throw new AppError(`${cls.name} was not found with id ${id}`, 'notfound');
+    }
+    return result;
   }
 
   async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
     const file = await this.resolveName(cls, id);
+
     if (await FsUtil.exists(file)) {
       const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
       const text = JSON.parse(content.toString('utf8'));
-      const result = cls.from(text);
-      if (result.postLoad) {
-        await result.postLoad();
+      try {
+        const result = cls.from(text);
+        if (result.postLoad) {
+          await result.postLoad();
+        }
+        return result;
+      } catch (e) {
+        if (!(e instanceof AppError && /match expected class/.test(e.message))) {
+          throw e;
+        }
       }
-      return result;
-    } else {
-      return;
     }
+    return;
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
@@ -122,7 +134,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       item.id = this.uuid();
     }
 
-    await SchemaValidator.validate(item);
+    await SchemaValidator.validate(cls, item);
 
     if (item.prePersist) {
       await item.prePersist();
@@ -137,7 +149,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
 
     if (view) {
-      await SchemaValidator.validate(item, view);
+      await SchemaValidator.validate(cls, item, view);
     }
 
     const existing = await this.get(cls, id);
@@ -161,7 +173,10 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   async * list<T extends ModelType>(cls: Class<T>) {
     for await (const [id] of FileModelService.scanFolder(await this.resolveName(cls), '.json')) {
-      yield await this.get(cls, id);
+      const res = await this.getOptional(cls, id);
+      if (res) {
+        yield res;
+      }
     }
   }
 
@@ -235,11 +250,11 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     return number;
   }
 
-  async createStorage(): Promise<void> {
+  async createStorage() {
     await FsUtil.mkdirp(FsUtil.resolveUnix(this.config.folder, this.config.namespace));
   }
 
-  async deleteStorage(): Promise<void> {
-    await FsUtil.unlinkRecursiveSync(FsUtil.resolveUnix(this.config.folder, this.config.namespace));
+  async deleteStorage() {
+    await FsUtil.unlinkRecursiveSync(FsUtil.resolveUnix(this.config.folder, this.config.namespace), false);
   }
 }
