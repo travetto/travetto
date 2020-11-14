@@ -6,11 +6,12 @@ import { Config } from '@travetto/config';
 /**
  * S3 Support as an Asset Source
  */
-@Config('s3.asset')
-export class S3AssetConfig {
+@Config('model.s3')
+export class S3ModelConfig {
   region = 'us-east-1'; // AWS Region
   namespace = ''; // S3 Bucket folder
   bucket = ''; // S3 bucket
+  endpoint = ''; // Endpoint url
 
   accessKeyId = EnvUtil.get('AWS_ACCESS_KEY_ID') ?? '';
   secretAccessKey = EnvUtil.get('AWS_SECRET_ACCESS_KEY') ?? '';
@@ -36,6 +37,7 @@ export class S3AssetConfig {
     }
 
     this.config = {
+      endpoint: this.endpoint,
       credentials: {
         accessKeyId: this.accessKeyId,
         secretAccessKey: this.secretAccessKey

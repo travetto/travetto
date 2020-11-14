@@ -6,6 +6,8 @@ export class RedisModelConfig {
 
   client: redis.ClientOpts = {};
 
+  namespace: string;
+
   postConstruct() {
   }
 }

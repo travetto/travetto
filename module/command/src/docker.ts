@@ -50,6 +50,8 @@ export class DockerContainer {
   private tty: boolean = false;
   /** Run in background mode? */
   private daemon: boolean = false;
+  /** Run in privileged mode? */
+  private privileged: boolean = false;
   /** Should the process be unref'd */
   private unref = true;
 
@@ -208,6 +210,15 @@ export class DockerContainer {
   }
 
   /**
+   * Mark execution as privileged
+   */
+  setPrivileged(on?: boolean) {
+    this.privileged = !!on;
+    return this;
+  }
+
+
+  /**
    * Set unref status
    * @param on
    */
@@ -250,6 +261,9 @@ export class DockerContainer {
     }
     if (this.daemon) {
       flags.push('-d');
+    }
+    if (this.privileged) {
+      flags.push('--privileged');
     }
     for (const [k, v] of this.volumes.entries()) {
       flags.push('-v', `${k}:${v}`);

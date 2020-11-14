@@ -6,9 +6,12 @@ import { DockerContainer } from '../../src/docker';
 export type Service = {
   name: string;
   version: string;
-  port: number;
+  port?: number;
+  ports?: number[];
+  privileged?: boolean;
   image: string;
   args?: string[];
+  volumes?: Record<string, string>;
   env?: Record<string, string>;
   require?: string;
 };
@@ -22,7 +25,12 @@ export class ServiceUtil {
    * Determine if service is running
    */
   static async isRunning(svc: Service, timeout = 100) {
-    return CommandUtil.waitForPort(svc.port, timeout).then(x => true, x => false);
+    const port = svc.ports?.[0] ?? svc.port ?? 0;
+    if (port > 0) {
+      return CommandUtil.waitForPort(port, timeout).then(x => true, x => false);
+    } else {
+      return true;
+    }
   }
 
   /**
@@ -57,15 +65,29 @@ export class ServiceUtil {
     if (!(await this.isRunning(svc))) {
       yield { subtitle: 'Starting' };
       try {
-        const promise = new DockerContainer(svc.image)
+        const conatiner = new DockerContainer(svc.image)
           .setInteractive(true)
           .setDeleteOnFinish(true)
           .setDaemon(true)
-          .exposePort(svc.port)
+          .setPrivileged(svc.privileged)
           .addLabel(`trv-${svc.name}`)
-          .addEnvVars(svc.env || {})
-          .setUnref(false)
-          .run(svc.args ?? []);
+          .addEnvVars(svc.env || {});
+
+        if (svc.ports) {
+          for (const port of svc.ports) {
+            conatiner.exposePort(port);
+          }
+        } else if (svc.port) {
+          conatiner.exposePort(svc.port);
+        }
+
+        if (svc.volumes) {
+          for (const [src, target] of Object.entries(svc.volumes)) {
+            conatiner.addVolume(src, target);
+          }
+        }
+
+        const promise = await conatiner.setUnref(false).run(svc.args ?? []);
 
         const out = (await promise).stdout;
         if (!await this.isRunning(svc, 15000)) {
