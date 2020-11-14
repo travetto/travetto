@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 
-import { AfterEach, BeforeAll, BeforeEach, Test } from '@travetto/test';
+import { AfterEach, BeforeAll, BeforeEach, Suite, Test } from '@travetto/test';
 import { Schema, Text, Precision } from '@travetto/schema';
 
-import { BaseModelTest } from './test.base';
+import { BaseModelSuite } from './test.base';
 import { Model, BaseModel } from '../..';
 import { ModelCrudSupport } from '../../src/service/crud';
 
@@ -76,7 +76,8 @@ async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {
   return out;
 }
 
-export class ModelCrudSuite extends BaseModelTest<ModelCrudSupport> {
+@Suite({ skip: true })
+export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
   @BeforeAll()
   async beforeAll() {

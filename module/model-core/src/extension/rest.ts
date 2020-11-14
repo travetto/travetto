@@ -4,10 +4,10 @@ import { schemaParamConfig } from '@travetto/schema/src/extension/rest';
 import { Class } from '@travetto/registry';
 
 import { ModelType } from '../types/model';
-import { ModelCore } from '../service/crud';
+import { ModelCrudSupport } from '../service/crud';
 import { ModelRegistry } from '../registry/registry';
 
-type Svc = { source: ModelCore };
+type Svc = { source: ModelCrudSupport };
 
 /**
  * Provides a basic CRUD controller for a given model:

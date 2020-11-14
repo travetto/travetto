@@ -50,7 +50,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   constructor(private config: FileModelConfig) { }
 
   private async resolveName<T extends ModelType>(cls: Class<T> | string, id?: string, suffix = '.json') {
-    const name = typeof cls === 'string' ? cls : ModelRegistry.getStoreName(cls);
+    const name = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
     let resolved = FsUtil.resolveUnix(this.config.folder, this.config.namespace, name);
     if (id) {
       resolved = FsUtil.resolveUnix(resolved, id.substring(0, 3));
