@@ -4,7 +4,7 @@ import { Class, RootRegistry } from '@travetto/registry';
 import { ModelCrudSupport } from '../..';
 import { isStorageSupported } from '../../src/service/internal';
 
-export abstract class BaseModelTest<T extends ModelCrudSupport> {
+export abstract class BaseModelSuite<T extends ModelCrudSupport> {
 
   constructor(public serviceClass: Class<T>, public configClass: Class<any>) {
   }

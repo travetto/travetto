@@ -1,13 +1,13 @@
 import { Class } from '@travetto/registry';
 import { Schema } from '@travetto/schema';
 import { ModelRegistry } from '../registry/registry';
-import { Model } from './model';
+import { ModelType } from './model';
 
 /**
  * Base model, provides basic functionality dates and subtype support
  */
 @Schema()
-export abstract class BaseModel implements Model {
+export abstract class BaseModel implements ModelType {
 
   id?: string;
   version?: string;

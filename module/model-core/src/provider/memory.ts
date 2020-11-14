@@ -29,7 +29,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   constructor(private config: MemoryModelConfig) { }
 
   private getStore<T extends ModelType>(cls: Class<T> | string) {
-    const key = typeof cls === 'string' ? cls : ModelRegistry.getStoreName(cls);
+    const key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
     if (!this.store.has(key)) {
       this.store.set(key, new Map());
     }
