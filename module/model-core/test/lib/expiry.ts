@@ -7,8 +7,6 @@ import { ModelExpirySupport } from '../../src/service/expire';
 import { BaseModel } from '../../src/types/base';
 import { BaseModelSuite } from './test.base';
 
-const wait = (n: number) => new Promise(res => setTimeout(res, n));
-
 @Model()
 class User extends BaseModel {
 }
@@ -49,7 +47,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     const res = await service.upsertWithExpiry(User, User.from({}), 10);
     assert(res instanceof User);
 
-    await wait(100);
+    await this.wait(100);
 
     const expiry = await service.getExpiry(User, res.id!);
     assert(expiry.expired);
@@ -61,12 +59,12 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     const res = await service.upsertWithExpiry(User, User.from({}), 5000);
     assert(res instanceof User);
 
-    await wait(100);
+    await this.wait(100);
 
     assert(!(await service.getExpiry(User, res.id!)).expired);
     await service.updateExpiry(User, res.id!, 10);
 
-    await wait(100);
+    await this.wait(100);
 
     assert((await service.getExpiry(User, res.id!)).expired);
   }
@@ -94,7 +92,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
       }
 
       // Let expire
-      await wait(50);
+      await this.wait(50);
       await service.deleteExpired(User);
 
       // Recount

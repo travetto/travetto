@@ -10,6 +10,10 @@ export abstract class BaseModelSuite<T extends ModelCrudSupport> {
   constructor(public serviceClass: Class<T>, public configClass: Class<any>) {
   }
 
+  wait(n: number) {
+    return new Promise(res => setTimeout(res, n));
+  }
+
   get service() {
     return DependencyRegistry.getInstance(this.serviceClass) as Promise<T>;
   }
