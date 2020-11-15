@@ -8,7 +8,7 @@ import { Config } from '@travetto/config';
 /**
  * Mongo model config
  */
-@Config('mongo.model')
+@Config('model.mongo')
 export class MongoModelConfig {
   /**
    * Hosts

@@ -1,12 +1,12 @@
 import { InjectableFactory } from '@travetto/di';
 import { MongoModelConfig } from '../../../src/config';
-import { MongoModelSource } from '../../../src/source';
+import { MongoModelService } from '../../../src/service';
 
 export class Init {
   @InjectableFactory({
     primary: true
   })
   static getModelSource(conf: MongoModelConfig) {
-    return new MongoModelSource(conf);
+    return new MongoModelService(conf);
   }
 }
