@@ -1,10 +1,10 @@
 import * as mongo from 'mongodb';
 
-import {
-  WhereClause,
-  ModelRegistry,
-  DistanceUnit
-} from '@travetto/model';
+// import {
+//   WhereClause,
+//   ModelRegistry,
+//   DistanceUnit
+// } from '@travetto/model';
 
 import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
@@ -12,48 +12,48 @@ import { Util } from '@travetto/base';
 /**
  * Converting units to various radians
  */
-const RADIANS_TO: Record<DistanceUnit, number> = {
-  km: 6378,
-  mi: 3963,
-  m: 6378000,
-  ft: 20924640,
-  rad: 1
-};
+// const RADIANS_TO: Record<DistanceUnit, number> = {
+//   km: 6378,
+//   mi: 3963,
+//   m: 6378000,
+//   ft: 20924640,
+//   rad: 1
+// };
 
 /**
  * Basic mongo utils for conforming to the model module
  */
 export class MongoUtil {
 
-  static has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
-  static has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
-  static has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
+  // static has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
+  // static has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
+  // static has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
 
-  /**
-   * Get a where clause with type
-   */
-  static extractTypedWhereClause<T>(cls: Class<T>, o: WhereClause<T>): Record<string, any> {
-    const conf = ModelRegistry.get(cls);
-    if (conf.subType) {
-      o = { $and: [o, { type: conf.subType }] } as WhereClause<T>;
-    }
-    return this.extractWhereClause(o);
-  }
+  // /**
+  //  * Get a where clause with type
+  //  */
+  // static extractTypedWhereClause<T>(cls: Class<T>, o: WhereClause<T>): Record<string, any> {
+  //   const conf = ModelRegistry.get(cls);
+  //   if (conf.subType) {
+  //     o = { $and: [o, { type: conf.subType }] } as WhereClause<T>;
+  //   }
+  //   return this.extractWhereClause(o);
+  // }
 
-  /**
-   * Build mongo where clause
-   */
-  static extractWhereClause<T>(o: WhereClause<T>): Record<string, any> {
-    if (this.has$And(o)) {
-      return { $and: o.$and.map(x => this.extractWhereClause<T>(x)) };
-    } else if (this.has$Or(o)) {
-      return { $or: o.$or.map(x => this.extractWhereClause<T>(x)) };
-    } else if (this.has$Not(o)) {
-      return { $nor: [this.extractWhereClause<T>(o.$not)] };
-    } else {
-      return this.extractSimple(o);
-    }
-  }
+  // /**
+  //  * Build mongo where clause
+  //  */
+  // static extractWhereClause<T>(o: WhereClause<T>): Record<string, any> {
+  //   if (this.has$And(o)) {
+  //     return { $and: o.$and.map(x => this.extractWhereClause<T>(x)) };
+  //   } else if (this.has$Or(o)) {
+  //     return { $or: o.$or.map(x => this.extractWhereClause<T>(x)) };
+  //   } else if (this.has$Not(o)) {
+  //     return { $nor: [this.extractWhereClause<T>(o.$not)] };
+  //   } else {
+  //     return this.extractSimple(o);
+  //   }
+  // }
 
   /**
    * Convert ids from '_id' to 'id'
@@ -99,10 +99,10 @@ export class MongoUtil {
           if (firstKey === '$regex') {
             v.$regex = Util.toRegex(v.$regex);
           } else if (firstKey && '$near' in v) {
-            const dist = v.$maxDistance;
-            const distance = dist / RADIANS_TO[(v.$unit as DistanceUnit ?? 'km')];
-            v.$maxDistance = distance;
-            delete v.$unit;
+            // const dist = v.$maxDistance;
+            // const distance = dist / RADIANS_TO[(v.$unit as DistanceUnit ?? 'km')];
+            // v.$maxDistance = distance;
+            // delete v.$unit;
           } else if (firstKey && '$geoWithin' in v) {
             const coords = v.$geoWithin;
             const first = coords[0];
