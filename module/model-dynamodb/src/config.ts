@@ -3,6 +3,8 @@ import { Config } from '../../rest/node_modules/@travetto/config';
 
 @Config('model.dynamodb')
 export class DynamoDBModelConfig {
-  config: dynamodb.DynamoDBClientConfig = {};
+  config: dynamodb.DynamoDBClientConfig = {
+    endpoint: undefined
+  };
   namespace: string;
 }

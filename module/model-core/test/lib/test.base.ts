@@ -2,6 +2,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { Class, RootRegistry } from '@travetto/registry';
 
 import { ModelCrudSupport } from '../..';
+import { ModelRegistry } from '../../src/registry/registry';
 import { isStorageSupported } from '../../src/service/internal';
 
 export abstract class BaseModelSuite<T extends ModelCrudSupport> {
@@ -25,6 +26,11 @@ export abstract class BaseModelSuite<T extends ModelCrudSupport> {
     const service = await this.service;
     if (isStorageSupported(service)) {
       await service.createStorage();
+      if (service.onModelVisiblityChange) {
+        for (const cls of ModelRegistry.getClasses()) {
+          await service.onModelVisiblityChange({ type: 'added', curr: cls });
+        }
+      }
     }
   }
 

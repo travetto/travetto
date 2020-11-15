@@ -1,2 +1,3 @@
 model.dynamodb:
-  config.endpoint: http://localhost:8000
+  config:
+    endpoint: http://localhost:8000
