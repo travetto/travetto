@@ -7,13 +7,14 @@ import { ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSuppor
 
 import { DynamoDBModelConfig } from './config';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
+import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';
 
 
 /**
  * A model service backed by DynamoDB
  */
 @Injectable()
-export class DynamoDBModelService implements ModelCrudSupport, /*ModelExpirySupport,*/ ModelStorageSupport {
+export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport {
 
   cl: dynamodb.DynamoDB;
 
@@ -29,22 +30,31 @@ export class DynamoDBModelService implements ModelCrudSupport, /*ModelExpirySupp
 
 
   private async putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert') {
-    let conditionExpression: string | undefined;
-
-    if (mode === 'create' || mode === 'update') {
-      conditionExpression = `${mode === 'update' ? 'attribute_exists' : 'attribute_not_exists'}(body)`;
-    }
     try {
-      return await this.cl.putItem({
-        TableName: this.resolveTable(cls),
-        ConditionExpression: conditionExpression,
-        Item: {
-          id: { S: item.id },
-          body: { S: JSON.stringify(item) },
-          updated_at: { S: new Date().toISOString() }
-        },
-        ReturnValues: 'NONE'
-      });
+      if (mode === 'create') {
+        return await this.cl.putItem({
+          TableName: this.resolveTable(cls),
+          ConditionExpression: 'attribute_not_exists(body)',
+          Item: {
+            id: { S: item.id },
+            body: { S: JSON.stringify(item) },
+            updated_at: { S: new Date().toISOString() }
+          },
+          ReturnValues: 'NONE'
+        });
+      } else {
+        return await this.cl.updateItem({
+          TableName: this.resolveTable(cls),
+          ConditionExpression: mode === 'update' ? 'attribute_exists(body)' : undefined,
+          Key: { id: { S: id } },
+          UpdateExpression: 'set body = :body, updated_at = :updated_at',
+          ExpressionAttributeValues: {
+            ':body': { S: JSON.stringify(item) },
+            ':updated_at': { S: new Date().toISOString() }
+          },
+          ReturnValues: 'ALL_NEW'
+        });
+      }
     } catch (err) {
       if (err.name === 'ConditionalCheckFailedException') {
         if (mode === 'create') {
@@ -58,8 +68,7 @@ export class DynamoDBModelService implements ModelCrudSupport, /*ModelExpirySupp
   }
 
   async postConstruct() {
-    this.cl = new dynamodb.DynamoDB(this.config);
-    console!.log(this.config);
+    this.cl = new dynamodb.DynamoDB({ ...this.config.config });
     ShutdownManager.onShutdown(__filename, () => this.cl.destroy());
   }
 
@@ -71,28 +80,18 @@ export class DynamoDBModelService implements ModelCrudSupport, /*ModelExpirySupp
       case 'added': {
         const table = this.resolveTable(e.curr!);
         const { Table: verify } = (await this.cl.describeTable({ TableName: table }).catch(err => ({ Table: undefined })));
+
         if (!verify) {
           await this.cl.createTable({
             TableName: table,
-            KeySchema: [{
-              KeyType: 'HASH',
-              AttributeName: 'id'
-            }, {
-              KeyType: 'RANGE',
-              AttributeName: 'updated_at'
-            }],
+            KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
             BillingMode: 'PAY_PER_REQUEST',
-            AttributeDefinitions: [
-              { AttributeName: 'id', AttributeType: 'S' }
-            ],
+            AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
           });
 
           await this.cl.updateTimeToLive({
             TableName: table,
-            TimeToLiveSpecification: {
-              AttributeName: 'expires_at',
-              Enabled: true
-            }
+            TimeToLiveSpecification: { AttributeName: 'expires_at_', Enabled: true }
           });
         }
         break;
@@ -156,7 +155,7 @@ export class DynamoDBModelService implements ModelCrudSupport, /*ModelExpirySupp
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
-    this.putItem(cls, item.id!, item, 'update');
+    await this.putItem(cls, item.id!, item, 'update');
     return item as T;
   }
 
@@ -179,7 +178,7 @@ export class DynamoDBModelService implements ModelCrudSupport, /*ModelExpirySupp
         TableName: this.resolveTable(cls),
         ExclusiveStartKey: token
       });
-      token = batch.LastEvaluatedKey;
+
       if (batch.Count && batch.Items) {
         for (const el of batch.Items) {
           const res = await ModelCrudUtil.load(cls, el.body.S);
@@ -187,100 +186,59 @@ export class DynamoDBModelService implements ModelCrudSupport, /*ModelExpirySupp
             yield res;
           }
         }
+      }
+
+      if (!batch.Count || !batch.LastEvaluatedKey) {
+        done = true;
       } else {
-        done = false;
+        token = batch.LastEvaluatedKey;
       }
     }
+  }
+
+  async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
+    const expiresAt = ModelExpiryUtil.getExpiresAt(ttl);
+    const res = await this.cl.updateItem({
+      TableName: this.resolveTable(cls),
+      Key: { id: { S: id } },
+      ReturnValues: 'ALL_OLD',
+      UpdateExpression: `set expires_at_ = :expires_at, issued_at_ = :issued_at`,
+      ExpressionAttributeValues: {
+        ':expires_at': { N: `${Math.trunc(expiresAt.getTime() / 1000)}` },
+        ':issued_at': { N: `${Math.trunc(new Date().getTime() / 1000)}` }
+      }
+    });
+    if (!res.Attributes) {
+      throw ModelCrudUtil.notFoundError(cls, id);
+    }
+  }
+
+  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
+    item = await this.upsert(cls, item);
+    await this.updateExpiry(cls, item.id!, ttl);
+    return item;
+  }
+
+  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
+    const res = await this.cl.getItem({
+      TableName: this.resolveTable(cls),
+      Key: { id: { S: id } },
+    });
+    if (!res.Item) {
+      throw ModelCrudUtil.notFoundError(cls, id);
+    }
+    const item = res.Item!;
+    if (!(item.expires_at_ && item.issued_at_)) {
+      throw ModelCrudUtil.notFoundError(cls, id);
+    }
+    const expiresAt = parseInt(`${item.expires_at_.N}`, 10) * 1000;
+    const issuedAt = parseInt(`${item.issued_at_.N}`, 10) * 1000;
+
+    return {
+      issuedAt,
+      expiresAt,
+      expired: expiresAt < Date.now(),
+      maxAge: expiresAt - issuedAt
+    };
   }
 }
-
-/*
-  async get(key: string): Promise<CacheEntry | undefined> {
-    const res = await this.cl.getItem({
-      TableName: this.table,
-      Key: { key: { S: key } }
-    });
-    const val = res.Item;
-    if (val && val.body.S) {
-      const ret = CacheSourceUtil.readAsSafeJSON(val.body.S);
-      return ret;
-    }
-  }
-
-  async has(key: string): Promise<boolean> {
-    return !!(await this.get(key));
-  }
-
-  async set(key: string, entry: CacheEntry): Promise<any> {
-    if (entry.maxAge) {
-      entry.expiresAt = entry.maxAge + Date.now();
-    }
-
-    const cloned = CacheSourceUtil.storeAsSafeJSON(entry);
-
-    await this.cl.putItem({
-      TableName: this.table,
-      Item: {
-        key: { S: key },
-        body: { S: cloned }
-      }
-    });
-
-    if (entry.expiresAt) {
-      await this.touch(key, entry.expiresAt);
-    }
-
-    return CacheSourceUtil.readAsSafeJSON(cloned);
-  }
-
-  async delete(key: string): Promise<boolean> {
-    const res = await this.cl.deleteItem({
-      TableName: this.table,
-      ReturnValues: 'ALL_OLD',
-      Key: { key: { S: key } }
-    });
-    return !!res.Attributes;
-  }
-
-  async isExpired(key: string) {
-    return !(await this.has(key));
-  }
-
-  async touch(key: string, expiresAt: number): Promise<boolean> {
-    const res = await this.cl.updateItem({
-      TableName: this.table,
-      Key: { key: { S: key } },
-      ReturnValues: 'ALL_OLD',
-      AttributeUpdates: {
-        expires: {
-          Action: 'PUT',
-          Value: {
-            N: `${Math.trunc(expiresAt / 1000)}`
-          }
-        }
-      }
-    });
-    return !!res.Attributes;
-  }
-
-  async clear() {
-    for (const key of await this.keys()) {
-      await this.delete(key);
-    }
-  }
-
-  async keys() {
-    const out: string[] = [];
-    let key: string | undefined = '';
-    while (key !== undefined) {
-      const req: dynamodb.ScanCommandOutput = await this.cl.scan({
-        TableName: this.table,
-        AttributesToGet: ['key'],
-        ...(key ? { ExclusiveStartKey: { key: { S: key } } } : {})
-      });
-      out.push(...(req.Items?.map(x => x.key.S!) || []));
-      key = req.LastEvaluatedKey?.key.S;
-    }
-    return out;
-  }
- */

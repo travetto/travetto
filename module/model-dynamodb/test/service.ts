@@ -10,9 +10,9 @@ export class DynamoDBCrudSuite extends ModelCrudSuite {
   }
 }
 
-// @Suite()
-// export class DynamoDBExpirySuite extends ModelExpirySuite {
-//   constructor() {
-//     super(DynamoDBModelService, DynamoDBModelConfig);
-//   }
-// }
+@Suite()
+export class DynamoDBExpirySuite extends ModelExpirySuite {
+  constructor() {
+    super(DynamoDBModelService, DynamoDBModelConfig);
+  }
+}
