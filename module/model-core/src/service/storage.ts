@@ -24,9 +24,9 @@ export interface ModelStorageSupport extends ModelCrudSupport {
   /**
    * An event listener for whenever a model is added, changed or removed
    */
-  onModelVisiblityChange?<T extends ModelType>(e: ChangeEvent<Class<T>>): void;
+  onModelVisiblityChange?<T extends ModelType>(e: ChangeEvent<Class<T>>): Promise<void>;
   /**
    * An event listener for whenever a model schema is changed
    */
-  onModelSchemaChange?(e: SchemaChangeEvent): void;
+  onModelSchemaChange?(e: SchemaChangeEvent): Promise<void>;
 }
