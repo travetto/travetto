@@ -1,6 +1,7 @@
 import { AppError } from '@travetto/base';
 import { Class } from '@travetto/registry';
 import { ValidationResultError } from '@travetto/schema';
+
 import { ModelCrudSupport } from './crud';
 import { ModelType } from '../types/model';
 
@@ -65,7 +66,7 @@ export class BulkProcessError extends AppError {
 /**
  * Determines if model allows for bulk operations
  *
- * @concrete ./internal:ModelBulkSupportTarget
+ * @concrete ../internal/service/common:ModelBulkSupportTarget
  */
 export interface ModelBulkSupport extends ModelCrudSupport {
   processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse>;

@@ -3,7 +3,7 @@ import { SchemaRegistry } from '@travetto/schema';
 import { ModelType } from '../types/model';
 
 import { ModelRegistry } from './registry';
-import { ModelOptions } from './types';
+import { IndexConfig, ModelOptions } from './types';
 
 /**
  * Model decorator, extends `@Schema`
@@ -26,5 +26,15 @@ export function Model(conf: Partial<ModelOptions<any>> = {}) {
     }
     ModelRegistry.register(target, conf);
     return target;
+  };
+}
+
+
+/**
+ * Defines an index on a model
+ */
+export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
+  return function (target: Class<T>) {
+    return ModelRegistry.getOrCreatePending(target).indices!.push(...indices);
   };
 }

@@ -1,42 +1,47 @@
-import { AppError } from '@travetto/base';
+import * as crypto from 'crypto';
 import { Class } from '@travetto/registry';
 import { SchemaValidator } from '@travetto/schema';
 import { ModelRegistry } from '../../registry/registry';
 import { ModelType } from '../../types/model';
+import { TypeMismatchError } from '../../error/type-mismatch';
 
 /**
  * Crud utilities
  */
 export class ModelCrudUtil {
+
+  /**
+   * Provide hash value
+   * @param value Input value
+   * @param length Number of characters to produce
+   */
+  static hashValue(value: string, length = 32) {
+    if (value.length < 32) {
+      value = value.padEnd(32, ' ');
+    }
+    return crypto.createHash('sha1').update(value).digest('hex').substring(0, length);
+  }
+
   /**
    * Load model
    * @param cls Class to load model for
    * @param input Input as string or plain object
    */
-  static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object | null | undefined): Promise<T | undefined> {
-    if (!input) {
-      return;
+  static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object): Promise<T> {
+    if (typeof input === 'string') {
+      input = JSON.parse(input);
+    } else if (input instanceof Buffer) {
+      input = JSON.parse(input.toString('utf8'));
     }
-    try {
-      if (typeof input === 'string') {
-        input = JSON.parse(input);
-      } else if (input instanceof Buffer) {
-        input = JSON.parse(input.toString('utf8'));
-      }
 
-      const result = ModelRegistry.getBaseModel(cls).from(input as object);
-      if (!(result instanceof cls)) {
-        return;
-      }
-      if (result.postLoad) {
-        await result.postLoad();
-      }
-      return result;
-    } catch (e) {
-      if (!(e instanceof AppError && /match expected class/.test(e.message))) {
-        throw e;
-      }
+    const result = ModelRegistry.getBaseModel(cls).from(input as object) as T;
+    if (!(result instanceof cls)) {
+      throw new TypeMismatchError(cls, result.id!, result.type!);
     }
+    if (result.postLoad) {
+      await result.postLoad();
+    }
+    return result;
   }
 
   /**
@@ -73,13 +78,5 @@ export class ModelCrudUtil {
     }
 
     return item as T;
-  }
-
-  static notFoundError(cls: Class | string, id: string) {
-    return new AppError(`${typeof cls === 'string' ? cls : cls.name} with id ${id} not found`, 'notfound');
-  }
-
-  static existsError(cls: Class | string, id: string) {
-    return new AppError(`${typeof cls === 'string' ? cls : cls.name} with id ${id} already exists`, 'data');
   }
 }

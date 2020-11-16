@@ -20,6 +20,8 @@ import { SchemaValidator } from '@travetto/schema';
 
 import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
+import { NotFoundError } from '@travetto/model-core/src/error/not-found';
+import { ExistsError } from '@travetto/model-core/src/error/exists';
 
 function uuid(val: string) {
   // return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
@@ -34,8 +36,8 @@ async function postLoadId<T extends ModelType>(item: T) {
   return item;
 }
 
-async function preInsertId<T extends ModelType>(item: T) {
-  if (item && 'id' in item) {
+function preInsertId<T extends ModelType>(item: T) {
+  if (item && item.id) {
     (item as any)._id = uuid(item.id!);
     delete item.id;
   }
@@ -57,7 +59,10 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
   async postConstruct() {
     this.client = await mongo.MongoClient.connect(this.config.url, this.config.clientOptions);
     this.db = this.client.db();
-    this.bucket = new mongo.GridFSBucket(this.db);
+    this.bucket = new mongo.GridFSBucket(this.db, {
+      bucketName: 'streams',
+      writeConcern: { w: 1 }
+    });
     ShutdownManager.onShutdown(__filename, () => this.client.close());
   }
 
@@ -81,17 +86,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
   }
 
   async deleteStorage() {
-    if (!this.config.namespace) {
-      await this.db.dropDatabase();
-    } else {
-      const remove = [];
-      for (const col of await this.db.collections()) {
-        if (col.namespace.startsWith(this.config.namespace)) {
-          remove.push(this.db.dropCollection(col.collectionName));
-        }
-      }
-      await Promise.all(remove);
-    }
+    await this.db.dropDatabase();
   }
 
   /**
@@ -102,20 +97,15 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
-    const result = await this.getOptional(cls, id);
-    if (!result) {
-      throw ModelCrudUtil.notFoundError(cls, id);
-    }
-    return result;
-  }
-
-  async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
     const store = await this.getStore(cls);
     const result = await store.findOne({ _id: uuid(id), }, {});
-    const res = await ModelCrudUtil.load(cls, result);
-    if (res) {
-      return postLoadId(res);
+    if (result) {
+      const res = await ModelCrudUtil.load(cls, result);
+      if (res) {
+        return postLoadId(res);
+      }
     }
+    throw new NotFoundError(cls, id);
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
@@ -125,7 +115,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     const store = await this.getStore(cls);
     const result = await store.insertOne(cleaned);
     if (result.insertedCount === 0) {
-      throw ModelCrudUtil.existsError(cls, item.id!);
+      throw new ExistsError(cls, item.id!);
     }
     delete (item as any)._id;
     return item;
@@ -136,7 +126,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     const store = await this.getStore(cls);
     const res = await store.replaceOne({ _id: uuid(item.id!) }, item);
     if (res.matchedCount === 0) {
-      throw ModelCrudUtil.notFoundError(cls, item.id!);
+      throw new NotFoundError(cls, item.id!);
     }
     return item;
   }
@@ -180,7 +170,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     const res = await store.findOneAndUpdate({ _id: uuid(id) }, final, { returnOriginal: false });
 
     if (!res.value) {
-      ModelCrudUtil.notFoundError(cls, id);
+      new NotFoundError(cls, id);
     }
 
     return this.get(cls, id);
@@ -190,7 +180,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     const store = await this.getStore(cls);
     const result = await store.deleteOne({ _id: uuid(id) });
     if (result.deletedCount === 0) {
-      throw ModelCrudUtil.notFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     }
   }
 
@@ -210,30 +200,21 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
       metadata: meta
     });
 
-    stream.pipe(writeStream);
-
     await new Promise<any>((resolve, reject) => {
-      stream.on('end', resolve);
+      stream.pipe(writeStream);
+      writeStream.once('finish', resolve);
       stream.on('error', reject);
     });
-
-    let count = 0;
-
-    while (count++ < 5) { // Retry upto 5 times
-      try {
-        await this.getStreamMetadata(id);
-        return;
-      } catch (e) {
-        // Wait for load
-        await new Promise(res => setTimeout(res, 100));
-      }
-    }
-
-    throw ModelCrudUtil.notFoundError('stream', id);
   }
 
   async getStream(id: string) {
-    return this.bucket.openDownloadStreamByName(id);
+    await this.getStreamMetadata(id);
+
+    const res = await this.bucket.openDownloadStreamByName(id);
+    if (!res) {
+      throw new NotFoundError('stream', id);
+    }
+    return res;
   }
 
   async getStreamMetadata(id: string) {
@@ -250,15 +231,12 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
   async deleteStream(id: string) {
     const files = await this.bucket.find({ filename: id }).toArray();
     const [{ _id: bucketId }] = files;
-
-    await new Promise((res, rej) => {
-      this.bucket.delete(bucketId, err => err ? rej(err) : res());
-    });
+    await this.bucket.delete(bucketId);
   }
 
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {
-    const col = await this.getStore(cls);
-    const bulk = col.initializeUnorderedBulkOp({});
+    const store = await this.getStore(cls);
+    const bulk = store.initializeUnorderedBulkOp({ w: 1 });
     const out: BulkResponse = {
       errors: [],
       counts: {
@@ -287,7 +265,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
           .updateOne({ $set: op.upsert });
 
         if (newId) {
-          out.insertedIds.set(i, op.upsert.id!);
+          out.insertedIds.set(i, id.toHexString());
         }
       } else if (op.update) {
         op.update = await ModelCrudUtil.preStore(cls, op.update, this);
@@ -299,6 +277,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
 
     if (operations.length > 0) {
       const res = await bulk.execute({});
+
       for (const el of operations) {
         if (el.insert) {
           postLoadId(el.insert);

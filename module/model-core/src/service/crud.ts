@@ -4,12 +4,13 @@ import { ModelType } from '../types/model';
 /**
  * Interface for simple CRUD
  *
- * @concrete ./internal:ModelCrudSupportTarget
+ * @concrete ../internal/service/common:ModelCrudSupportTarget
  */
 export interface ModelCrudSupport {
 
   /**
-   * Generate a new uuid
+   * Generate a uuid
+   * @param value The optional value to generate a uuid around.  Passing the same value multiple times produces the same output.
    */
   uuid(): string;
 
@@ -18,13 +19,6 @@ export interface ModelCrudSupport {
    * @param id The identifier of the document to retrieve
    */
   get<T extends ModelType>(cls: Class<T>, id: string): Promise<T>;
-
-  /**
-   * Optionally get an item.  If an item is not found, return undefined.
-   *
-   * @param id The id of the document to attempt to fetch.
-   */
-  getOptional<T extends ModelType>(cls: Class<T>, id: string): Promise<T | undefined>;
 
   /**
    * Create new item
