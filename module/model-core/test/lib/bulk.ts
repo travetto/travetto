@@ -83,10 +83,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     assert(res.counts.insert === 4);
     assert(res.insertedIds.size === 4);
 
-    console.log(users);
-
     const res2 = await service.processBulk(User, users.map(u => ({ delete: u })));
     assert(res2.counts.delete === 4);
-    assert(res2.insertedIds.size === 0);
   }
 }

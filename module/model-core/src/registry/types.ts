@@ -21,7 +21,32 @@ export class ModelOptions<T> {
    */
   baseType?: boolean;
   /**
+   * Indices
+   */
+  indices?: IndexConfig<T>[];
+  /**
    * Vendor specific extras
    */
   extra?: object;
+}
+
+/**
+ * Index options
+ */
+export interface IndexConfig<T> {
+
+  /**
+   * Index name
+   */
+  name?: string;
+
+  /**
+   * Fields and sort order
+   */
+  fields: Record<keyof T, -1 | 1>[];
+
+  /**
+   * Is the index unique?
+   */
+  unique?: boolean;
 }

@@ -2,16 +2,17 @@ import { Class } from '@travetto/registry';
 import { StreamUtil } from '@travetto/boot';
 import { Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
+import { Config } from '@travetto/config';
 
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
 import { ModelType } from '../types/model';
 import { ModelExpirySupport } from '../service/expire';
 import { ModelRegistry } from '../registry/registry';
-import { Config } from '../../../rest/node_modules/@travetto/config/src/decorator';
 import { ModelStorageSupport } from '../service/storage';
 import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';
+import { NotFoundError } from '../error/not-found';
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -41,30 +42,25 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     const store = this.getStore(cls);
 
     if (id && errorState && (errorState === 'notfound' ? !store.has(id) : store.has(id))) {
-      throw errorState === 'notfound' ? ModelCrudUtil.notFoundError(cls, id) : ModelCrudUtil.existsError(cls, id);
+      throw errorState === 'notfound' ? new NotFoundError(cls, id) : ModelCrudUtil.existsError(cls, id);
     }
 
     return store;
   }
 
   uuid() {
-    return Util.uuid();
+    return Util.uuid(32);
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
-    const result = await this.getOptional(cls, id);
-    if (!result) {
-      throw ModelCrudUtil.notFoundError(cls, id);
-    }
-    return result;
-  }
-
-  async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
     const store = this.getStore(cls);
     if (store.has(id)) {
-      return ModelCrudUtil.load(cls, store.get(id)!);
+      const res = await ModelCrudUtil.load(cls, store.get(id)!);
+      if (res) {
+        return res;
+      }
     }
-    return;
+    throw new NotFoundError(cls, id);
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
@@ -103,7 +99,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async * list<T extends ModelType>(cls: Class<T>) {
     for (const id of this.getStore(cls).keys()) {
-      const res = await this.getOptional(cls, id);
+      const res = await this.get(cls, id).catch(err => { });
       if (res) {
         yield res;
       }
@@ -134,7 +130,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       streams.delete(id);
       metas.delete(id);
     } else {
-      throw ModelCrudUtil.notFoundError('Stream', id);
+      throw new NotFoundError('Stream', id);
     }
   }
 
@@ -144,7 +140,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
     if (!this.expiry.has(id)) {
-      throw ModelCrudUtil.notFoundError('Expiry information', id);
+      throw new NotFoundError('Expiry information', id);
     }
     const { expiresAt, issuedAt } = this.expiry.get(id)!;
     const maxAge = expiresAt - issuedAt;

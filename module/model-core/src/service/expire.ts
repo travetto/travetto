@@ -27,7 +27,7 @@ export interface ExpiryState {
 /**
  * Support for managing expiration of data
  *
- * @concrete ./internal:ModelExpirySupportTarget
+ * @concrete ../internal/service/common:ModelExpirySupportTarget
  */
 export interface ModelExpirySupport extends ModelCrudSupport {
   /**

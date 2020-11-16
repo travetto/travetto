@@ -2,12 +2,15 @@ import * as s3 from '@aws-sdk/client-s3';
 
 import { StreamUtil } from '@travetto/boot';
 import { ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta, ModelType, ModelRegistry } from '@travetto/model-core';
+import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { Injectable } from '@travetto/di';
+import { Util } from '@travetto/base';
+import { Class } from '@travetto/registry';
+
+import { NotFoundError } from '@travetto/model-core/src/error/not-found';
+import { ExistsError } from '@travetto/model-core/src/error/exists';
 
 import { S3ModelConfig } from './config';
-import { AppError, Util } from '@travetto/base';
-import { Class } from '../../di/node_modules/@travetto/registry';
-import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 
 function toTagSet(metadata: StreamMeta) {
   return (['hash', 'contentType', 'size'] as const)
@@ -116,8 +119,8 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  uuid(): string {
-    return Util.uuid();
+  uuid() {
+    return Util.uuid(32);
   }
 
   async postConstruct() {
@@ -129,31 +132,27 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       await this.client.headObject(this.q(cls, id));
     } catch (err) {
       if (error === 'notfound') {
-        throw ModelCrudUtil.notFoundError(cls, id);
+        throw new NotFoundError(cls, id);
       } else if (error === 'data') {
-        throw ModelCrudUtil.existsError(cls, id);
+        throw new ExistsError(cls, id);
       }
-    }
-  }
-
-  async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
-    try {
-      const result = await this.client.getObject(this.q(cls, id));
-      if (result.Body) {
-        const body = (await StreamUtil.streamToBuffer(result.Body)).toString('utf8');
-        return await ModelCrudUtil.load(cls, body);
-      }
-    } catch (e) {
-      // Check for not found
     }
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
-    const result = await this.getOptional(cls, id);
-    if (!result) {
-      throw ModelCrudUtil.notFoundError(cls, id);
+    try {
+      const result = await this.client.getObject(this.q(cls, id));
+      if (result.Body) {
+        const body = (await StreamUtil.streamToBuffer(result.Body)).toString('utf8');
+        const output = await ModelCrudUtil.load(cls, body);
+        if (output) {
+          return output;
+        }
+      }
+    } catch (e) {
+      // Check for not found
     }
-    return result;
+    throw new NotFoundError(cls, id);
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {

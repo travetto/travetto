@@ -5,16 +5,18 @@ import { Class } from '@travetto/registry';
 import { FsUtil, StreamUtil } from '@travetto/boot';
 import { Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
+import { Config } from '@travetto/config';
 
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
 import { ModelType } from '../types/model';
 import { ModelExpirySupport } from '../service/expire';
 import { ModelRegistry } from '../registry/registry';
-import { Config } from '../../../rest/node_modules/@travetto/config';
 import { ModelStorageSupport } from '../service/storage';
 import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';
+import { NotFoundError } from '../error/not-found';
+import { ExistsError } from '../error/exists';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -71,34 +73,26 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   private async find<T extends ModelType>(cls: Class<T> | string, suffix: Suffix, id?: string) {
     const file = await this.resolveName(cls, suffix, id);
     if (id && !(await FsUtil.exists(file))) {
-      throw ModelCrudUtil.notFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     }
     return file;
 
   }
 
   uuid() {
-    return Util.uuid();
+    return Util.uuid(32);
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
     await this.find(cls, '.json', id);
 
-    const result = (await this.getOptional(cls, id))!;
-    if (!result) {
-      throw ModelCrudUtil.notFoundError(cls, id);
-    }
-    return result;
-  }
-
-  async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
     const file = await this.resolveName(cls, '.json', id);
 
     if (await FsUtil.exists(file)) {
       const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
-      return ModelCrudUtil.load(cls, content);
+      return await ModelCrudUtil.load(cls, content);
     }
-    return;
+    throw new NotFoundError(cls, id);
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
@@ -109,7 +103,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const file = await this.resolveName(cls, '.json', item.id);
 
     if (await FsUtil.exists(file)) {
-      throw ModelCrudUtil.existsError(cls, item.id!);
+      throw new ExistsError(cls, item.id!);
     }
 
     return await this.upsert(cls, item);
@@ -144,7 +138,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   async * list<T extends ModelType>(cls: Class<T>) {
     for await (const [id] of FileModelService.scanFolder(await this.resolveName(cls, '.json'), '.json')) {
-      const res = await this.getOptional(cls, id);
+      const res = await this.get(cls, id).catch(err => { });
       if (res) {
         yield res;
       }
@@ -179,7 +173,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
         fs.promises.unlink(file.replace('.bin', '.meta'))
       ]);
     } else {
-      throw ModelCrudUtil.notFoundError('Stream', id);
+      throw new NotFoundError('Stream', id);
     }
   }
 

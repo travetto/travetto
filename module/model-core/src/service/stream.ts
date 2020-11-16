@@ -18,7 +18,7 @@ export interface StreamMeta {
 /**
  * Support for NodeJS Streams CRD.  Stream update is not supported.
  *
- * @concrete ./internal:ModelStreamSupportTarget
+ * @concrete ../internal/service/common:ModelStreamSupportTarget
  */
 export interface ModelStreamSupport extends ModelCrudSupport {
 
