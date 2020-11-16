@@ -1,8 +1,8 @@
-import type { ModelBulkSupport } from './bulk';
-import { ModelCrudSupport } from './crud';
-import type { ModelExpirySupport } from './expire';
-import type { ModelStorageSupport } from './storage';
-import type { ModelStreamSupport } from './stream';
+import type { ModelBulkSupport } from '../../service/bulk';
+import { ModelCrudSupport } from '../../service/crud';
+import type { ModelExpirySupport } from '../../service/expire';
+import type { ModelStorageSupport } from '../../service/storage';
+import type { ModelStreamSupport } from '../../service/stream';
 
 export class ModelCrudSupportTarget { }
 export class ModelBulkSupportTarget { }

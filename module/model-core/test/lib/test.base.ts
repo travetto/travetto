@@ -3,7 +3,7 @@ import { Class, RootRegistry } from '@travetto/registry';
 
 import { ModelCrudSupport } from '../..';
 import { ModelRegistry } from '../../src/registry/registry';
-import { isStorageSupported } from '../../src/service/internal';
+import { isStorageSupported } from '../../src/internal/service/common';
 
 export abstract class BaseModelSuite<T extends ModelCrudSupport> {
 

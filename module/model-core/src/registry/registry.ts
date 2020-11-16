@@ -27,7 +27,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<any>> {
-    return { class: cls };
+    return { class: cls, indices: [] };
   }
 
   onInstallFinalize<T>(cls: Class<T>) {

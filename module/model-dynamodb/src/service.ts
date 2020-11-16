@@ -8,6 +8,8 @@ import { ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSuppor
 import { DynamoDBModelConfig } from './config';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';
+import { ExistsError } from '@travetto/model-core/src/error/exists';
+import { NotFoundError } from '@travetto/model-core/src/error/not-found';
 
 
 /**
@@ -58,9 +60,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     } catch (err) {
       if (err.name === 'ConditionalCheckFailedException') {
         if (mode === 'create') {
-          throw ModelCrudUtil.existsError(cls, id);
+          throw new ExistsError(cls, id);
         } else if (mode === 'update') {
-          throw ModelCrudUtil.notFoundError(cls, id);
+          throw new NotFoundError(cls, id);
         }
       }
       throw err;
@@ -120,19 +122,18 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
-    const item = await this.getOptional(cls, id);
-    if (!item) {
-      throw ModelCrudUtil.notFoundError(cls, id);
-    }
-    return item;
-  }
-
-  async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
     const res = await this.cl.getItem({
       TableName: this.resolveTable(cls),
       Key: { id: { S: id } }
     });
-    return ModelCrudUtil.load(cls, res.Item?.body.S);
+
+    if (res && res.Item?.body) {
+      const item = await ModelCrudUtil.load(cls, res.Item.body.S!);
+      if (item) {
+        return item;
+      }
+    }
+    throw new NotFoundError(cls, id);
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
@@ -166,7 +167,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       Key: { id: { S: id } }
     });
     if (!res.Attributes) {
-      throw ModelCrudUtil.notFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     }
   }
 
@@ -209,7 +210,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       }
     });
     if (!res.Attributes) {
-      throw ModelCrudUtil.notFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     }
   }
 
@@ -225,11 +226,11 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       Key: { id: { S: id } },
     });
     if (!res.Item) {
-      throw ModelCrudUtil.notFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     }
     const item = res.Item!;
     if (!(item.expires_at_ && item.issued_at_)) {
-      throw ModelCrudUtil.notFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     }
     const expiresAt = parseInt(`${item.expires_at_.N}`, 10) * 1000;
     const issuedAt = parseInt(`${item.issued_at_.N}`, 10) * 1000;

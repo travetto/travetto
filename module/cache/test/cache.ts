@@ -1,11 +1,13 @@
 import * as assert from 'assert';
 
-import { Class } from '@travetto/registry';
-import { Suite, Test, BeforeEach, AfterEach } from '@travetto/test';
+import { Suite, Test, BeforeEach, AfterEach, BeforeAll } from '@travetto/test';
+import { BaseModelSuite } from '@travetto/model-core/test/lib/test.base';
+import { MemoryModelConfig, MemoryModelService, ModelExpirySupport } from '@travetto/model-core';
+import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 
 import { Cache, EvictCache } from '../src/decorator';
-import { CacheSource } from '../src/source/core';
-import { CullableCacheSource } from '../src/source/cullable';
+import { CacheService } from '../src/service';
+import { CacheUtil } from '../src/util';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
@@ -18,9 +20,11 @@ class User {
   }
 }
 
-class CachingService {
+@Injectable()
+class SampleService {
 
-  source: CacheSource;
+  @Inject()
+  source: CacheService;
 
   @Cache('source', { maxAge: 10 })
   async cullable(num: number) {
@@ -74,23 +78,48 @@ class CachingService {
   }
 }
 
-@Suite({ skip: true })
-export abstract class CacheTestSuite {
-
-  service = new CachingService();
+@Suite()
+export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
 
   baseLatency = 10;
 
+  constructor() {
+    super(MemoryModelService, MemoryModelConfig);
+
+  }
+
+  @BeforeAll()
+  async initAll() {
+    await super.init();
+    const cache = await DependencyRegistry.getInstance(CacheService);
+    cache.cullRate = 1000;
+  }
+
+  @BeforeEach()
+  async create() {
+    await super.createStorage();
+  }
+
+  @AfterEach()
+  async delete() {
+    await super.deleteStorage();
+  }
+
+  get cacheService() {
+    return DependencyRegistry.getInstance(SampleService);
+  }
+
   @Test()
   async basic() {
+    const service = await this.cacheService;
     let start = Date.now();
-    let res = await this.service.basic(10);
+    let res = await service.basic(10);
     let diff = Date.now() - start;
     assert(diff > 75);
     assert(res === 20);
 
     start = Date.now();
-    res = await this.service.basic(10);
+    res = await service.basic(10);
     diff = Date.now() - start;
     assert(diff < (100 + this.baseLatency));
     assert(res === 20);
@@ -98,8 +127,10 @@ export abstract class CacheTestSuite {
 
   @Test()
   async aging() {
+    const service = await this.cacheService;
+
     let start = Date.now();
-    let res = await this.service.agesQuickly(10);
+    let res = await service.agesQuickly(10);
     let diff = Date.now() - start;
     assert(diff > 75);
     assert(res === 30);
@@ -107,7 +138,7 @@ export abstract class CacheTestSuite {
     await wait(510);
 
     start = Date.now();
-    res = await this.service.agesQuickly(10);
+    res = await service.agesQuickly(10);
     diff = Date.now() - start;
     assert(diff > 75);
     assert(res === 30);
@@ -115,8 +146,10 @@ export abstract class CacheTestSuite {
 
   @Test()
   async ageWithExtension() {
+    const service = await this.cacheService;
+
     let start = Date.now();
-    let res = await this.service.ageExtension(10);
+    let res = await service.ageExtension(10);
     let diff = Date.now() - start;
     assert(diff > 75);
     assert(res === 30);
@@ -125,7 +158,7 @@ export abstract class CacheTestSuite {
       await wait(55);
 
       start = Date.now();
-      res = await this.service.ageExtension(10);
+      res = await service.ageExtension(10);
       diff = Date.now() - start;
       assert(diff < this.baseLatency);
       assert(res === 30);
@@ -133,7 +166,7 @@ export abstract class CacheTestSuite {
 
     await wait(210);
     start = Date.now();
-    res = await this.service.ageExtension(10);
+    res = await service.ageExtension(10);
     diff = Date.now() - start;
     assert(diff > 75);
     assert(res === 30);
@@ -141,96 +174,77 @@ export abstract class CacheTestSuite {
 
   @Test()
   async complex() {
-    const val = await this.service.complexInput({ a: 5, b: 20 }, 20);
-    const val2 = await this.service.complexInput({ a: 5, b: 20 }, 20);
+    const service = await this.cacheService;
+
+    const val = await service.complexInput({ a: 5, b: 20 }, 20);
+    const val2 = await service.complexInput({ a: 5, b: 20 }, 20);
     assert.deepStrictEqual(val, val2);
 
-    const val3 = await this.service.complexInput({ a: /abc/ }, 20);
-    const val4 = await this.service.complexInput({ a: /cde/ }, 20);
-    const val5 = await this.service.complexInput({ a: /abc/ }, 20);
+    const val3 = await service.complexInput({ a: /abc/ }, 20);
+    const val4 = await service.complexInput({ a: /cde/ }, 20);
+    const val5 = await service.complexInput({ a: /abc/ }, 20);
     assert(val3 !== val4);
     assert.deepStrictEqual(val3, val5);
 
-    assert(this.service.source.computeKey(/abc/) !== this.service.source.computeKey(/cde/));
+    assert(CacheUtil.computeKey(/abc/) !== CacheUtil.computeKey(/cde/));
   }
 
   @Test()
   async customKey() {
-    const val4 = await this.service.customKey({ a: 5, b: 20 }, 20);
-    const val5 = await this.service.customKey({ b: 5, a: 20 }, 30);
+    const service = await this.cacheService;
+
+    const val4 = await service.customKey({ a: 5, b: 20 }, 20);
+    const val5 = await service.customKey({ b: 5, a: 20 }, 30);
     assert(val4 !== val5);
 
-    const val6 = await this.service.customKey({ a: 5, b: 100 }, 50);
+    const val6 = await service.customKey({ a: 5, b: 100 }, 50);
     assert.deepStrictEqual(val4, val6);
   }
 
-  @Test()
-  async culling() {
-    if (this.service.source instanceof CullableCacheSource) {
-      await Promise.all(
-        ' '.repeat(100)
-          .split('')
-          .map((x, i) =>
-            this.service.cullable(i)));
+  // @Test()
+  // async culling() {
+  //   const service = await this.cacheService;
 
-      const local = this.service.source as CullableCacheSource;
-      assert([...(await local.keys())].length > 90);
+  //   if (this.service instanceof CullableCacheSource) {
+  //     await Promise.all(
+  //       ' '.repeat(100)
+  //         .split('')
+  //         .map((x, i) =>
+  //           service.cullable(i)));
 
-      await wait(1000);
+  //     const local = service.source as CullableCacheSource;
+  //     assert([...(await local.keys())].length > 90);
 
-      await local.cull(true);
-      assert([...(await local.keys())].length === 0);
-    }
-  }
+  //     await wait(1000);
+
+  //     await local.cull(true);
+  //     assert([...(await local.keys())].length === 0);
+  //   }
+  // }
 
   @Test()
   async reinstating() {
-    const user = await this.service.getUser('200');
+    const service = await this.cacheService;
+
+    const user = await service.getUser('200');
     assert(user instanceof User);
-    const user2 = await this.service.getUser('200');
+    const user2 = await service.getUser('200');
     assert(user2 instanceof User);
     assert(user !== user2);
   }
 
   @Test()
   async eviction() {
-    await this.service.getUser('200');
+    const service = await this.cacheService;
+
+    await service.getUser('200');
     const start = Date.now();
-    await this.service.getUser('200');
+    await service.getUser('200');
     assert((Date.now() - start) <= this.baseLatency);
 
-    await this.service.deleteUser('200');
+    await service.deleteUser('200');
     const start2 = Date.now();
-    await this.service.getUser('200');
+    await service.getUser('200');
     assert((Date.now() - start2) >= this.baseLatency);
-  }
-}
-
-@Suite({ skip: true })
-export abstract class FullCacheSuite extends CacheTestSuite {
-
-  abstract get source(): Class<CacheSource>;
-
-  getInstance() {
-    return new this.source();
-  }
-
-  @BeforeEach()
-  async postCons() {
-    const source = this.getInstance();
-    this.service.source = source;
-    if (source instanceof CullableCacheSource) {
-      source.cullRate = 1000;
-    }
-    if (source.postConstruct) {
-      await source.postConstruct();
-    }
-  }
-
-  @AfterEach()
-  async cleanup() {
-    if (this.service.source.clear) {
-      await this.service.source.clear();
-    }
   }
 }

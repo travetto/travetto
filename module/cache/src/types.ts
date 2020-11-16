@@ -14,6 +14,11 @@ export interface CoreCacheConfig {
    * A namespace for the specific cache operation
    */
   keySpace?: string;
+
+  /**
+   * How to reconstitute the cached value after JSON.parse
+   */
+  reinstate?: (input: any) => any;
 }
 
 /**

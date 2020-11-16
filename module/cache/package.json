@@ -8,15 +8,11 @@
   },
   "dependencies": {
     "@travetto/compiler": "^1.1.1",
+    "@travetto/di": "^1.1.1",
     "@travetto/model-core": "^1.1.1"
   },
   "title": "Caching",
   "description": "Caching functionality with decorators for declarative use.",
-  "optionalPeerDependencies": {
-    "redis": "^3.0.2",
-    "@types/redis": "^2.8.28",
-    "@aws-sdk/client-dynamodb": "^1.0.0-rc.4"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "typescript",

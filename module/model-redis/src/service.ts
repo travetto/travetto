@@ -10,6 +10,8 @@ import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';
 
 import { RedisModelConfig } from './config';
+import { NotFoundError } from '@travetto/model-core/src/error/not-found';
+import { ExistsError } from '@travetto/model-core/src/error/exists';
 
 @Model()
 class ExpiryMeta implements ModelType, ExpiryState {
@@ -80,32 +82,28 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     ShutdownManager.onShutdown(__filename, () => this.cl.quit());
   }
 
-  uuid(): string {
-    return Util.uuid();
+  uuid() {
+    return Util.uuid(32);
   }
 
   async has<T extends ModelType>(cls: Class<T>, id: string, error?: 'notfound' | 'data') {
     const res = await this.wrap(util.promisify(this.cl.exists as (key: string, cb: redis.Callback<number>) => void))(this.resolveKey(cls, id));
     if (res === 0 && error === 'notfound') {
-      throw ModelCrudUtil.notFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     } else if (res === 1 && error === 'data') {
-      throw ModelCrudUtil.existsError(cls, id);
-    }
-  }
-
-  async getOptional<T extends ModelType>(cls: Class<T>, id: string) {
-    const payload = await this.wrap(util.promisify(this.cl.get))(this.resolveKey(cls, id));
-    if (payload) {
-      return await ModelCrudUtil.load(cls, payload);
+      throw new ExistsError(cls, id);
     }
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
-    const item = await this.getOptional(cls, id);
-    if (!item) {
-      throw ModelCrudUtil.notFoundError(cls, id);
+    const payload = await this.wrap(util.promisify(this.cl.get))(this.resolveKey(cls, id));
+    if (payload) {
+      const item = await ModelCrudUtil.load(cls, payload);
+      if (item) {
+        return item;
+      }
     }
-    return item;
+    throw new NotFoundError(cls, id);
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
@@ -136,7 +134,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
     const count = await this.wrap(util.promisify(this.cl.del as (key: string, cb: redis.Callback<number>) => void))(this.resolveKey(cls, id));
     if (count === 0) {
-      throw ModelCrudUtil.notFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     }
   }
 
@@ -165,7 +163,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     // await this.wrap(util.promisify(this.cl.pexpireat))(expireKey, expires.getTime());
 
     if (!updated) {
-      throw ModelCrudUtil.notFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     }
   }
 
@@ -181,7 +179,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     if (content) {
       return (await ModelCrudUtil.load(ExpiryMeta, content))!;
     } else {
-      throw ModelCrudUtil.notFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     }
   }
 
