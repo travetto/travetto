@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil
+  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil
 } from '@travetto/transformer';
 
 const INJECTABLE_MOD = require.resolve('../src/decorator');
@@ -48,13 +48,29 @@ export class InjectableTransformer {
     const injectArgs = cons &&
       state.fromLiteral(cons.parameters.map(x => InjectableTransformer.processDeclaration(state, x)));
 
+    // Extract all interfaces
+    const interfaces: ts.Node[] = [];
+    for (const impls of node.heritageClauses ?? []) {
+      if (impls.token === ts.SyntaxKind.ImplementsKeyword) {
+        for (const intType of impls.types) {
+          const resolvedType = state.resolveType(intType);
+          if (resolvedType.key === 'external') {
+            const resolved = state.getOrImport(resolvedType);
+            interfaces.push(resolved);
+          }
+        }
+      }
+    }
+
     // Add injectable decorator if not there
     const decl = state.findDecorator(this, node, 'Injectable', INJECTABLE_MOD);
     const args = decl && ts.isCallExpression(decl.expression) ? decl.expression.arguments : [undefined];
 
     return state.factory.updateClassDeclaration(node,
       DecoratorUtil.spliceDecorators(node, decl, [
-        state.createDecorator(INJECTABLE_MOD, 'Injectable', ...args),
+        state.createDecorator(INJECTABLE_MOD, 'Injectable', ...args, LiteralUtil.extendObjectLiteral(ts.factory, {}, {
+          interfaces
+        })),
         state.createDecorator(INJECTABLE_MOD, 'InjectArgs', injectArgs)
       ]),
       node.modifiers,

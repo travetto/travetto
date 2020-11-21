@@ -1,9 +1,10 @@
-import { Injectable } from '@travetto/di';
-import { AppError } from '@travetto/base';
+import { Inject, Injectable } from '@travetto/di';
+import { ModelStreamSupport, StreamMeta, ExistsError, NotFoundError } from '@travetto/model-core';
 
 import { Asset } from './types';
-import { AssetSource } from './source';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
+
+export const AssetModelSymbol = Symbol.for('@trv:asset/model');
 
 /**
  * Services asset CRUD operations.  Takes in a source is defined elsewhere.
@@ -14,7 +15,8 @@ import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
 export class AssetService {
 
   constructor(
-    private source: AssetSource,
+    @Inject(AssetModelSymbol)
+    private store: ModelStreamSupport,
     private namingStrategy?: AssetNamingStrategy) {
     if (!namingStrategy) {
       this.namingStrategy = new SimpleNamingStrategy();
@@ -22,19 +24,19 @@ export class AssetService {
   }
 
   /**
-   * Delete a given path
-   * @param path The path to an asset
+   * Delete a given id
+   * @param id The id to an asset
    */
-  delete(path: string) {
-    return this.source.delete(path);
+  delete(id: string) {
+    return this.store.deleteStream(id);
   }
 
   /**
    * Get the asset info
-   * @param file The file to read
+   * @param id The file to read
    */
-  info(file: string): Promise<Omit<Asset, 'stream'>> {
-    return this.source.info(file);
+  getMetadata(id: string): Promise<StreamMeta> {
+    return this.store.getStreamMetadata(id);
   }
 
   /**
@@ -45,25 +47,28 @@ export class AssetService {
    * @param overwriteIfFound Overwite the asset if found
    * @param strategy The naming strategy to use, defaults to the service's strategy if not provided
    */
-  async write(asset: Asset, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
-
+  async upsert({ stream, ...asset }: Asset & { stream: NodeJS.ReadableStream }, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
     // Apply strategy on save
-    asset.path = (strategy ?? this.namingStrategy!).getPath(asset);
+    const id = (strategy ?? this.namingStrategy!).resolve(asset);
 
     if (!overwriteIfFound) {
       let missing = false;
       try {
-        await this.info(asset.path);
-      } catch  {
-        missing = true;
+        await this.getMetadata(id);
+      } catch (err) {
+        if (err instanceof NotFoundError) {
+          missing = true;
+        } else {
+          throw err;
+        }
       }
       if (!missing) {
-        throw new AppError(`File already exists: ${asset.path}`, 'data');
+        throw new ExistsError('File', id);
       }
     }
 
-    await this.source.write(asset);
-    return asset.path;
+    await this.store.upsertStream(id, stream, asset);
+    return id;
   }
 
   /**
@@ -71,22 +76,11 @@ export class AssetService {
    * are set on the asset.  This can be used as a rudimentary ACL to ensure
    * cross account assets aren't shared.
    *
-   * @param path The path to find.
-   * @param haveTags The tags to to ensure exist
+   * @param id The id to find.
    */
-  async read(path: string, haveTags?: string[]): Promise<Asset> {
-    const info = await this.info(path);
-    if (haveTags) {
-      const fin = new Set(info.metadata.tags);
-      for (const t of haveTags) {
-        if (!fin.has(t)) {
-          throw new AppError('Unable to find asset with specified tags', 'notfound');
-        }
-      }
-    }
-
-    const full: Partial<Asset> = info;
-    full.stream = await this.source.read(path);
-    return full as Asset;
+  async get(id: string): Promise<Asset> {
+    const stream = await this.store.getStream(id);
+    const info = await this.getMetadata(id);
+    return { stream, ...info };
   }
 }

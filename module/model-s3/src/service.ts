@@ -12,26 +12,6 @@ import { ExistsError } from '@travetto/model-core/src/error/exists';
 
 import { S3ModelConfig } from './config';
 
-function toTagSet(metadata: StreamMeta) {
-  return (['hash', 'contentType', 'size'] as const)
-    .filter(x => x in metadata)
-    .map(x => ({
-      Key: x,
-      Value: Buffer.from(JSON.stringify(metadata[x])).toString('base64')
-    }));
-}
-
-function fromTagSet(tags: s3.Tag[]) {
-  const all = ['hash', 'contentType', 'size'];
-  const map = tags
-    .filter(x => all.includes(x.Key!))
-    .reduce((acc, x) => {
-      (acc as any)[x.Key!] = JSON.parse(Buffer.from(x.Value!, 'base64').toString());
-      return acc;
-    }, {} as StreamMeta);
-  return map;
-}
-
 /**
  * Asset source backed by S3
  */
@@ -207,15 +187,15 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       await this.client.putObject(this.q('_stream', id, {
         Body: await StreamUtil.toBuffer(stream),
         ContentType: meta.contentType,
-        ContentLength: meta.size
+        ContentLength: meta.size,
+        Metadata: {
+          ...meta,
+          size: `${meta.size}`
+        }
       }));
     } else {
       await this.writeMultipart(id, stream, meta);
     }
-    // Tag after uploading
-    await this.client.putObjectTagging(this.q('_stream', id, {
-      Tagging: { TagSet: toTagSet(meta) }
-    }));
   }
 
   async getStream(id: string) {
@@ -232,9 +212,15 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async getStreamMetadata(id: string) {
     const query = this.q('_stream', id);
-    const tags = await this.client.getObjectTagging(query);
-
-    return fromTagSet(tags.TagSet!);
+    const obj = await this.client.headObject(query);
+    if (obj) {
+      return {
+        ...obj.Metadata,
+        size: obj.ContentLength!,
+      } as StreamMeta;
+    } else {
+      throw new NotFoundError('_stream', id);
+    }
   }
 
   async deleteStream(id: string) {

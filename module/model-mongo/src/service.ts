@@ -202,8 +202,8 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
 
     await new Promise<any>((resolve, reject) => {
       stream.pipe(writeStream);
-      writeStream.once('finish', resolve);
       stream.on('error', reject);
+      writeStream.once('finish', resolve);
     });
   }
 

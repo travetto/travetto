@@ -222,6 +222,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return {
       class: cls,
       target: cls,
+      interfaces: [],
       dependencies: {
         fields: {},
         cons: []
@@ -282,7 +283,9 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       config.qualifier = Symbol.for(cls.ᚕid);
       this.defaultSymbols.add(config.qualifier);
     }
-
+    if (pconfig.interfaces) {
+      config.interfaces?.push(...pconfig.interfaces);
+    }
     if (pconfig.primary !== undefined) {
       config.primary = pconfig.primary;
     }
@@ -380,6 +383,12 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         ...config.dependencies.fields
       };
 
+      // collect interfaces
+      config.interfaces = [
+        ...parentConfig.interfaces,
+        ...config.interfaces
+      ];
+
       // Inherit cons deps if no constructor defined
       if (config.dependencies.cons === undefined) {
         config.dependencies.cons = parentConfig.dependencies.cons;
@@ -402,6 +411,15 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     this.targetToClass.get(targetId)!.set(config.qualifier, classId);
     this.classToTarget.get(classId)!.set(config.qualifier, targetId);
+
+    // If aliased
+    for (const el of config.interfaces) {
+      if (!this.targetToClass.has(el.ᚕid)) {
+        this.targetToClass.set(el.ᚕid, new Map());
+      }
+      this.targetToClass.get(el.ᚕid)!.set(config.qualifier, classId);
+      this.classToTarget.get(classId)!.set(Symbol.for(el.ᚕid), el.ᚕid);
+    }
 
     // If targeting self (default @Injectable behavior)
     if ((classId === targetId || config.factory) && (parentConfig || parentClass.ᚕabstract)) {

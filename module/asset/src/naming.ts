@@ -10,9 +10,9 @@ export abstract class AssetNamingStrategy {
 
   /**
    * Produce a path for a given asset
-   * @param Asset Get path from an asset
+   * @param asset Get path from an asset
    */
-  abstract getPath(Asset: Asset): string;
+  abstract resolve(asset: Asset): string;
 }
 
 /**
@@ -21,8 +21,8 @@ export abstract class AssetNamingStrategy {
 export class SimpleNamingStrategy implements AssetNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 
-  getPath(asset: Asset) {
-    return `${this.prefix}${asset.path}`;
+  resolve(asset: Asset) {
+    return `${this.prefix}${asset.filename}`;
   }
 }
 
@@ -33,21 +33,21 @@ export class SimpleNamingStrategy implements AssetNamingStrategy {
 export class HashNamingStrategy implements AssetNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 
-  getPath(asset: Asset) {
+  resolve(asset: Asset) {
     let ext = '';
 
     if (asset.contentType) {
       ext = mime.getExtension(asset.contentType)!;
-    } else {
-      const dot = asset.path.indexOf('.');
+    } else if (asset.filename) {
+      const dot = asset.filename.indexOf('.');
       if (dot > 0) {
-        ext = asset.path.substring(dot + 1);
+        ext = asset.filename.substring(dot + 1);
       }
     }
 
     ext = ext ? `.${ext.toLowerCase()}` : '';
 
-    return asset.metadata.hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (all, ...others) =>
+    return asset.hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (all, ...others) =>
       `${this.prefix}${others.slice(0, 5).join('/')}${ext}`);
   }
 }
