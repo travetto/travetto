@@ -13,6 +13,10 @@ export interface StreamMeta {
    * Hash of the file contents.  Different files with the same name, will have the same hash
    */
   hash: string;
+  /**
+   * The original filename of the file
+   */
+  filename: string;
 }
 
 /**
@@ -24,7 +28,7 @@ export interface ModelStreamSupport extends ModelCrudSupport {
 
   /**
    * Upsert stream to storage
-   * @param id The identifier of the stream
+   * @param id The identifier of the stream, not contrained to be a uuid
    * @param stream The actual stream to write
    * @param meta The stream metadata
    */

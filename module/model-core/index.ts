@@ -12,4 +12,8 @@ export * from './src/service/stream';
 export * from './src/provider/file';
 export * from './src/provider/memory';
 
+export * from './src/error/exists';
+export * from './src/error/not-found';
+export * from './src/error/type-mismatch';
+
 export { ModelController } from './src/extension/rest';
