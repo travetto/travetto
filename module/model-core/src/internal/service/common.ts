@@ -1,6 +1,7 @@
 import type { ModelBulkSupport } from '../../service/bulk';
 import { ModelCrudSupport } from '../../service/crud';
 import type { ModelExpirySupport } from '../../service/expire';
+import { ModelIndexedSupport } from '../../service/indexed';
 import type { ModelStorageSupport } from '../../service/storage';
 import type { ModelStreamSupport } from '../../service/stream';
 
@@ -9,6 +10,7 @@ export class ModelBulkSupportTarget { }
 export class ModelStorageSupportTarget { }
 export class ModelExpirySupportTarget { }
 export class ModelStreamSupportTarget { }
+export class ModelIndexedSupportTarget { }
 
 /**
  * Type guard for determining if model is expirable
@@ -40,4 +42,12 @@ export function isStreamSupported(o: ModelCrudSupport): o is ModelStreamSupport 
  */
 export function isBulkSupported(o: ModelCrudSupport): o is ModelBulkSupport {
   return o && 'processBulk' in o;
+}
+
+/**
+ * Type guard for determining if service supports indexed operation
+ * @param o
+ */
+export function isIndexedSupported(o: ModelCrudSupport): o is ModelIndexedSupport {
+  return o && 'getByIndex' in o;
 }

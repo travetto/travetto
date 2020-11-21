@@ -193,7 +193,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   async * list<T extends ModelType>(cls: Class<T>) {
     for await (const batch of this.iterateBucket(cls)) {
       for (const item of batch) {
-        const resolved = await this.getOptional(cls, item.id);
+        const resolved = await this.get(cls, item.id).catch(e => { });
         if (resolved) {
           yield resolved;
         }
