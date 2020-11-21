@@ -1,12 +1,10 @@
 import * as assert from 'assert';
 
-import { AppError } from '@travetto/base';
-import { AfterEach, BeforeAll, BeforeEach, Suite, Test } from '@travetto/test';
-import { Schema, Text, Precision } from '@travetto/schema';
+import { Suite, Test } from '@travetto/test';
+import { Schema, Text, Precision, TypeMismatchError } from '@travetto/schema';
 
 import { BaseModelSuite } from './test.base';
-import { Model, BaseModel } from '../..';
-import { ModelCrudSupport } from '../../src/service/crud';
+import { ModelCrudSupport, Model, BaseModel, NotFoundError } from '../..';
 
 @Schema()
 class Address {
@@ -80,21 +78,6 @@ async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {
 @Suite({ skip: true })
 export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
-  @BeforeAll()
-  async beforeAll() {
-    return super.init();
-  }
-
-  @BeforeEach()
-  async beforeEach() {
-    return this.createStorage();
-  }
-
-  @AfterEach()
-  async afterEach() {
-    return this.deleteStorage();
-  }
-
   @Test('save it')
   async save() {
     const service = await this.service;
@@ -120,7 +103,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     await assert.rejects(async () => {
       await service.get(Person, service.uuid());
-    }, /not found/);
+    }, NotFoundError);
   }
 
   @Test('Verify update')
@@ -245,11 +228,11 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(o[0] instanceof Doctor);
     await assert.rejects(
       () => service.update(Engineer, Doctor.from({ ...o[0] }) as any),
-      (e: Error) => /Expected.*type/.test(e.message) || (e instanceof AppError && e.category === 'notfound') ? undefined : e);
+      (e: Error) => (e instanceof NotFoundError || e instanceof TypeMismatchError) ? undefined : e);
 
     await assert.rejects(
       () => service.get(Engineer, o[0].id!),
-      'not found');
+      NotFoundError);
 
     assert(o[0] instanceof Doctor);
     assert(o[1] instanceof Firefighter);

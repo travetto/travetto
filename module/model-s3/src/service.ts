@@ -1,14 +1,12 @@
 import * as s3 from '@aws-sdk/client-s3';
 
 import { StreamUtil } from '@travetto/boot';
-import { ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta, ModelType, ModelRegistry } from '@travetto/model-core';
+import { ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta, ModelType, ModelRegistry, ExistsError, NotFoundError } from '@travetto/model-core';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { Injectable } from '@travetto/di';
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
-
-import { NotFoundError } from '@travetto/model-core/src/error/not-found';
-import { ExistsError } from '@travetto/model-core/src/error/exists';
+import { TypeMismatchError } from '@travetto/schema';
 
 import { S3ModelConfig } from './config';
 
@@ -129,10 +127,13 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
           return output;
         }
       }
+      throw new NotFoundError(cls, id);
     } catch (e) {
-      // Check for not found
+      if (e.message.startsWith('NoSuchKey')) {
+        e = new NotFoundError(cls, id);
+      }
+      throw e;
     }
-    throw new NotFoundError(cls, id);
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
@@ -172,19 +173,22 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async * list<T extends ModelType>(cls: Class<T>) {
     for await (const batch of this.iterateBucket(cls)) {
-      for (const item of batch) {
-        const resolved = await this.get(cls, item.id).catch(e => { });
-        if (resolved) {
-          yield resolved;
+      for (const { id } of batch) {
+        try {
+          yield await this.get(cls, id);
+        } catch (e) {
+          if (!(e instanceof NotFoundError)) {
+            throw e;
+          }
         }
       }
     }
   }
 
-  async upsertStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta): Promise<void> {
+  async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
     if (meta.size < this.config.chunkSize) { // If bigger than 5 mb
       // Upload to s3
-      await this.client.putObject(this.q('_stream', id, {
+      await this.client.putObject(this.q('_stream', location, {
         Body: await StreamUtil.toBuffer(stream),
         ContentType: meta.contentType,
         ContentLength: meta.size,
@@ -194,13 +198,13 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         }
       }));
     } else {
-      await this.writeMultipart(id, stream, meta);
+      await this.writeMultipart(location, stream, meta);
     }
   }
 
-  async getStream(id: string) {
+  async getStream(location: string) {
     // Read from s3
-    const res = await this.client.getObject(this.q('_stream', id));
+    const res = await this.client.getObject(this.q('_stream', location));
     if (res.Body instanceof Buffer || // Buffer
       typeof res.Body === 'string' || // string
       res.Body && ('pipe' in res.Body) // Stream
@@ -210,21 +214,26 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     throw new Error(`Unable to read type: ${typeof res.Body}`);
   }
 
-  async getStreamMetadata(id: string) {
-    const query = this.q('_stream', id);
+  async getStreamMetadata(location: string) {
+    const query = this.q('_stream', location);
     const obj = await this.client.headObject(query);
     if (obj) {
-      return {
+      const ret = {
         ...obj.Metadata,
         size: obj.ContentLength!,
       } as StreamMeta;
+      if ('contenttype' in ret) {
+        ret['contentType'] = ret['contenttype'];
+        delete ret['contenttype'];
+      }
+      return ret;
     } else {
-      throw new NotFoundError('_stream', id);
+      throw new NotFoundError('_stream', location);
     }
   }
 
-  async deleteStream(id: string) {
-    await this.client.deleteObject(this.q('_stream', id));
+  async deleteStream(location: string) {
+    await this.client.deleteObject(this.q('_stream', location));
   }
 
   async createStorage() {

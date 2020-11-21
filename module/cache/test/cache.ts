@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Suite, Test, BeforeEach, AfterEach, BeforeAll } from '@travetto/test';
+import { Suite, Test, BeforeAll } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model-core/test/lib/test.base';
 import { MemoryModelConfig, MemoryModelService, ModelExpirySupport } from '@travetto/model-core';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
@@ -90,19 +90,8 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
 
   @BeforeAll()
   async initAll() {
-    await super.init();
     const cache = await DependencyRegistry.getInstance(CacheService);
     cache.cullRate = 1000;
-  }
-
-  @BeforeEach()
-  async create() {
-    await super.createStorage();
-  }
-
-  @AfterEach()
-  async delete() {
-    await super.deleteStorage();
   }
 
   get cacheService() {
