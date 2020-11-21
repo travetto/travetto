@@ -50,6 +50,10 @@ export interface InjectableConfig<T = any> extends Core<T> {
     cons?: Dependency<any>[];
     fields: Record<string, Dependency<any>>;
   };
+  /**
+   * List of interface types
+   */
+  interfaces: Class[];
 }
 
 /**
