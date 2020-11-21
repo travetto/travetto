@@ -14,6 +14,8 @@ import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
+import { ModelIndexedSupport } from '../service/indexed';
+import { IndexConfig } from '../registry/types';
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -24,10 +26,11 @@ export class MemoryModelConfig {
  * Standard in-memory support
  */
 @Injectable()
-export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport {
+export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
   private store = new Map<string, Map<string, Buffer>>();
   private expiry = new Map<string, { expiresAt: number, issuedAt: number }>();
+  private indexes = new Map<string, Map<string, string>>();
 
   constructor(private config: MemoryModelConfig) { }
 
@@ -49,6 +52,45 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     return store;
   }
 
+  private computeIndexKey<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>, item: T) {
+    return idx.fields.map((f: any) => {
+      let o: any = item;
+      while (o !== undefined) {
+        const k = Object.keys(f)[0];
+        o = o[k];
+        if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
+          break; // At the bottom
+        } else {
+          f = f[k];
+        }
+      }
+      return `${o}`;
+    }).join('ᚕ');
+  }
+
+  private async removeIndices<T extends ModelType>(cls: Class<T>, id: string) {
+    const item = await this.get(cls, id);
+    for (const idx of ModelRegistry.get(cls).indices ?? []) {
+      this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.delete(this.computeIndexKey(cls, idx, item));
+    }
+  }
+
+  private async writeIndices<T extends ModelType>(cls: Class<T>, item: T) {
+    for (const idx of ModelRegistry.get(cls).indices ?? []) {
+      this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.set(this.computeIndexKey(cls, idx, item), item.id!);
+    }
+  }
+
+
+  private async write<T extends ModelType>(cls: Class<T>, item: T) {
+    const store = this.getStore(cls);
+    await this.removeIndices(cls, item.id!);
+    store.set(item.id!, Buffer.from(JSON.stringify(item)));
+    await this.writeIndices(cls, item);
+    return item;
+  }
+
+  // CRUD Support
   uuid() {
     return Util.uuid(32);
   }
@@ -79,18 +121,12 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-
-    const store = this.getStore(cls);
-    store.set(item.id!, Buffer.from(JSON.stringify(item)));
-    return item;
+    return await this.write(cls, item);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
-
-    const store = this.getStore(cls);
-    store.set(item.id!, Buffer.from(JSON.stringify(item)));
-    return item as T;
+    return await this.write(cls, item) as T;
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
@@ -107,6 +143,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     }
   }
 
+  // Stream Support
   async upsertStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
     const streams = this.getStore('_streams');
     const metas = this.getStore('_streams_meta');
@@ -135,6 +172,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     }
   }
 
+  // Expiry Support
   async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
     this.expiry.set(id, { expiresAt: ModelExpiryUtil.getExpiresAt(ttl).getTime(), issuedAt: Date.now() });
   }
@@ -166,11 +204,32 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     return number;
   }
 
+  // Storage Support
   async createStorage() {
   }
 
   async deleteStorage() {
     this.expiry.clear();
     this.store.clear();
+    this.indexes.clear();
+  }
+
+  // Index Support
+  async createIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>) {
+    this.indexes.set(`${cls.ᚕid}:${idx.name}`, new Map());
+  }
+
+  async deleteIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>) {
+    this.indexes.delete(`${cls.ᚕid}:${idx.name}`);
+  }
+
+  getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> {
+    const id = this.computeIndexKey(cls, ModelRegistry.get(cls).indices!.find(i => i.name === idx)! as IndexConfig<T>, body);
+    const index = this.indexes.get(`${cls.ᚕid}:${idx}`);
+    if (index && index.has(id)) {
+      return this.get(cls, index.get(id)!);
+
+    }
+    throw new NotFoundError(cls, id);
   }
 }
