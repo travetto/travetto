@@ -1,4 +1,5 @@
 import { AppError } from '@travetto/base';
+import { Class } from '@travetto/registry';
 import { ValidationError } from './types';
 
 /**
@@ -14,5 +15,16 @@ export class ValidationResultError extends AppError {
   toConsole() {
     const sub = this.errors.map(x => `\t[ ${x.kind.padEnd(9)}] ${x.path.padEnd(10)} -- ${x.message}`).join('\n');
     return super.toConsole(`${sub}\n`);
+  }
+}
+
+
+/**
+ * Represents when a requested objects's type doesn't match the class being used to request.
+ * Primarily applies to polymorphic types
+ */
+export class TypeMismatchError extends AppError {
+  constructor(cls: Class | string, type: string) {
+    super(`Expected ${typeof cls === 'string' ? cls : cls.name} but found ${type}`, 'data');
   }
 }

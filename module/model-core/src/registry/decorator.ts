@@ -33,8 +33,8 @@ export function Model(conf: Partial<ModelOptions<any>> = {}) {
 /**
  * Defines an index on a model
  */
-export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
-  return function (target: Class<T>) {
-    return ModelRegistry.getOrCreatePending(target).indices!.push(...indices);
+export function Index<T>(...indices: IndexConfig<any>[]): (target: Class<T>) => void {
+  return function (target) {
+    ModelRegistry.getOrCreatePending(target).indices!.push(...indices);
   };
 }

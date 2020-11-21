@@ -24,19 +24,19 @@ export class AssetService {
   }
 
   /**
-   * Delete a given id
-   * @param id The id to an asset
+   * Delete a given location
+   * @param location The location to an asset
    */
-  delete(id: string) {
-    return this.store.deleteStream(id);
+  delete(location: string) {
+    return this.store.deleteStream(location);
   }
 
   /**
    * Get the asset info
-   * @param id The file to read
+   * @param location The location to get metadata for
    */
-  getMetadata(id: string): Promise<StreamMeta> {
-    return this.store.getStreamMetadata(id);
+  getMetadata(location: string) {
+    return this.store.getStreamMetadata(location);
   }
 
   /**
@@ -49,12 +49,12 @@ export class AssetService {
    */
   async upsert({ stream, ...asset }: Asset & { stream: NodeJS.ReadableStream }, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
     // Apply strategy on save
-    const id = (strategy ?? this.namingStrategy!).resolve(asset);
+    const locations = (strategy ?? this.namingStrategy!).resolve(asset);
 
     if (!overwriteIfFound) {
       let missing = false;
       try {
-        await this.getMetadata(id);
+        await this.getMetadata(locations);
       } catch (err) {
         if (err instanceof NotFoundError) {
           missing = true;
@@ -63,12 +63,12 @@ export class AssetService {
         }
       }
       if (!missing) {
-        throw new ExistsError('File', id);
+        throw new ExistsError('File', locations);
       }
     }
 
-    await this.store.upsertStream(id, stream, asset);
-    return id;
+    await this.store.upsertStream(locations, stream, asset);
+    return locations;
   }
 
   /**
@@ -76,11 +76,11 @@ export class AssetService {
    * are set on the asset.  This can be used as a rudimentary ACL to ensure
    * cross account assets aren't shared.
    *
-   * @param id The id to find.
+   * @param location The location to find.
    */
-  async get(id: string): Promise<Asset> {
-    const stream = await this.store.getStream(id);
-    const info = await this.getMetadata(id);
+  async get(location: string): Promise<Asset> {
+    const stream = await this.store.getStream(location);
+    const info = await this.getMetadata(location);
     return { stream, ...info };
   }
 }

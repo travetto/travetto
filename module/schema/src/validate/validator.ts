@@ -4,8 +4,7 @@ import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
 import { ValidationError, ValidationKind, ValidationResult } from './types';
 import { Messages } from './messages';
-import { ValidationResultError } from './error';
-import { AppError } from '@travetto/base';
+import { TypeMismatchError, ValidationResultError } from './error';
 
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
@@ -212,7 +211,7 @@ export class SchemaValidator {
    */
   static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
     if (!(o instanceof cls)) {
-      throw new AppError(`Expected object of type ${cls.name}`, 'data');
+      throw new TypeMismatchError(cls.name, (o as any).constructor.name);
     }
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
 

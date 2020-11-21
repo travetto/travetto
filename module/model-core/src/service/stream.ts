@@ -28,27 +28,27 @@ export interface ModelStreamSupport extends ModelCrudSupport {
 
   /**
    * Upsert stream to storage
-   * @param id The identifier of the stream, not contrained to be a uuid
+   * @param location The location of the stream
    * @param stream The actual stream to write
    * @param meta The stream metadata
    */
-  upsertStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta): Promise<void>;
+  upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta): Promise<void>;
 
   /**
    * Get stream from asset store
-   * @param id The identifier of the stream
+   * @param location The location of the stream
    */
-  getStream(id: string): Promise<NodeJS.ReadableStream>;
+  getStream(location: string): Promise<NodeJS.ReadableStream>;
 
   /**
    * Get metadata for stream
-   * @param id The identifier of the stream
+   * @param location The location of the stream
    */
-  getStreamMetadata(id: string): Promise<StreamMeta>;
+  getStreamMetadata(location: string): Promise<StreamMeta>;
 
   /**
-   * Delete stream by id
-   * @param id The identifier of the stream
+   * Delete stream by location
+   * @param location The location of the stream
    */
-  deleteStream(id: string): Promise<void>;
+  deleteStream(location: string): Promise<void>;
 }

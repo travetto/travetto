@@ -75,6 +75,8 @@ export class AssetUtil {
 
     if (detected) {
       contentType = detected.mime;
+    } else {
+      contentType = mime.getType(pth) ?? contentType;
     }
 
     return contentType;

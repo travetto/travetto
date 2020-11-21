@@ -3,6 +3,7 @@ import { MetadataRegistry, Class } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 
 import { ModelOptions } from './types';
+import { NotFoundError } from '../error/not-found';
 
 /**
  * Registry for all models, built on the Metadata registry
@@ -108,6 +109,17 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
       this.stores.set(cls, (config.store || cls.name).toLowerCase());
     }
     return this.stores.get(cls)!;
+  }
+
+  /**
+   * Get Index
+   */
+  getIndex(cls: Class, name: string) {
+    const cfg = this.get(cls).indices?.find(x => x.name === name);
+    if (!cfg) {
+      throw new NotFoundError(`${cls.name} Index`, `${name}`);
+    }
+    return cfg;
   }
 }
 

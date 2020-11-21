@@ -16,6 +16,7 @@ import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
 import { ModelIndexedSupport } from '../service/indexed';
 import { IndexConfig } from '../registry/types';
+import { ModelIndexedUtil } from '../internal/service/indexed';
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -52,35 +53,24 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     return store;
   }
 
-  private computeIndexKey<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>, item: T) {
-    return idx.fields.map((f: any) => {
-      let o: any = item;
-      while (o !== undefined) {
-        const k = Object.keys(f)[0];
-        o = o[k];
-        if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
-          break; // At the bottom
-        } else {
-          f = f[k];
-        }
-      }
-      return `${o}`;
-    }).join('ᚕ');
-  }
-
   private async removeIndices<T extends ModelType>(cls: Class<T>, id: string) {
-    const item = await this.get(cls, id);
-    for (const idx of ModelRegistry.get(cls).indices ?? []) {
-      this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.delete(this.computeIndexKey(cls, idx, item));
+    try {
+      const item = await this.get(cls, id);
+      for (const idx of ModelRegistry.get(cls).indices ?? []) {
+        this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.delete(ModelIndexedUtil.computeIndexKey(cls, idx, item));
+      }
+    } catch (e) {
+      if (!(e instanceof NotFoundError)) {
+        throw e;
+      }
     }
   }
 
   private async writeIndices<T extends ModelType>(cls: Class<T>, item: T) {
     for (const idx of ModelRegistry.get(cls).indices ?? []) {
-      this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.set(this.computeIndexKey(cls, idx, item), item.id!);
+      this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.set(ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id!);
     }
   }
-
 
   private async write<T extends ModelType>(cls: Class<T>, item: T) {
     const store = this.getStore(cls);
@@ -136,39 +126,42 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async * list<T extends ModelType>(cls: Class<T>) {
     for (const id of this.getStore(cls).keys()) {
-      const res = await this.get(cls, id).catch(err => { });
-      if (res) {
-        yield res;
+      try {
+        yield await this.get(cls, id);
+      } catch (e) {
+        if (!(e instanceof NotFoundError)) {
+          throw e;
+        }
       }
     }
   }
 
   // Stream Support
-  async upsertStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
+  async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
     const streams = this.getStore('_streams');
     const metas = this.getStore('_streams_meta');
-    metas.set(id, Buffer.from(JSON.stringify(meta)));
-    streams.set(id, await StreamUtil.streamToBuffer(stream));
+    metas.set(location, Buffer.from(JSON.stringify(meta)));
+    streams.set(location, await StreamUtil.streamToBuffer(stream));
   }
 
-  async getStream(id: string) {
-    const streams = this.find('_streams', id, 'notfound');
-    return StreamUtil.bufferToStream(streams.get(id)!);
+  async getStream(location: string) {
+    const streams = this.find('_streams', location, 'notfound');
+    return StreamUtil.bufferToStream(streams.get(location)!);
   }
 
-  async getStreamMetadata(id: string) {
-    const metas = this.find('_streams_meta', id, 'notfound');
-    return JSON.parse(metas.get(id)!.toString('utf8')) as StreamMeta;
+  async getStreamMetadata(location: string) {
+    const metas = this.find('_streams_meta', location, 'notfound');
+    return JSON.parse(metas.get(location)!.toString('utf8')) as StreamMeta;
   }
 
-  async deleteStream(id: string) {
+  async deleteStream(location: string) {
     const streams = this.getStore('_streams');
-    const metas = this.getStore('_streams_metas');
-    if (streams.has(id)) {
-      streams.delete(id);
-      metas.delete(id);
+    const metas = this.getStore('_streams_meta');
+    if (streams.has(location)) {
+      streams.delete(location);
+      metas.delete(location);
     } else {
-      throw new NotFoundError('Stream', id);
+      throw new NotFoundError('Stream', location);
     }
   }
 
@@ -219,12 +212,12 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     this.indexes.set(`${cls.ᚕid}:${idx.name}`, new Map());
   }
 
-  async deleteIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>) {
-    this.indexes.delete(`${cls.ᚕid}:${idx.name}`);
-  }
-
   getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> {
-    const id = this.computeIndexKey(cls, ModelRegistry.get(cls).indices!.find(i => i.name === idx)! as IndexConfig<T>, body);
+    const config = ModelRegistry.get(cls).indices!.find(i => i.name === idx);
+    if (!config) {
+      throw new NotFoundError(cls, `Index ${idx}`);
+    }
+    const id = ModelIndexedUtil.computeIndexKey(cls, config, body);
     const index = this.indexes.get(`${cls.ᚕid}:${idx}`);
     if (index && index.has(id)) {
       return this.get(cls, index.get(id)!);

@@ -1,12 +1,12 @@
 import * as assert from 'assert';
 
-import { Test, BeforeAll, Suite, BeforeEach, AfterEach } from '@travetto/test';
+import { Test, Suite } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 import { BaseModelSuite } from '@travetto/model-core/test/lib/test.base';
 import { MemoryModelConfig, MemoryModelService, ModelStreamSupport } from '@travetto/model-core';
+import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 
 import { HashNamingStrategy, AssetService, AssetUtil } from '..';
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { AssetModelSymbol } from '../src/service';
 
 
@@ -18,7 +18,7 @@ class Init {
 }
 
 @Suite()
-export class BaseAssetSourceSuite extends BaseModelSuite<ModelStreamSupport> {
+export class AssetServiceSuite extends BaseModelSuite<ModelStreamSupport> {
 
   constructor() {
     super(MemoryModelService, MemoryModelConfig);
@@ -26,21 +26,6 @@ export class BaseAssetSourceSuite extends BaseModelSuite<ModelStreamSupport> {
 
   get assetService() {
     return DependencyRegistry.getInstance(AssetService);
-  }
-
-  @BeforeAll()
-  init() {
-    return super.init();
-  }
-
-  @BeforeEach()
-  createStorage() {
-    return super.createStorage();
-  }
-
-  @AfterEach()
-  deleteStorage() {
-    return super.deleteStorage();
   }
 
   @Test()
@@ -61,7 +46,7 @@ export class BaseAssetSourceSuite extends BaseModelSuite<ModelStreamSupport> {
     const file = await AssetUtil.fileToAsset(pth);
     const outHashed = await service.upsert(file, false, new HashNamingStrategy());
     const hash = await AssetUtil.hashFile(pth);
-    assert(outHashed.replace(/\//g, '') === hash);
+    assert(outHashed.replace(/\//g, '').replace(/[.][^.]+$/, '') === hash);
   }
 
   @Test()
@@ -84,16 +69,16 @@ export class BaseAssetSourceSuite extends BaseModelSuite<ModelStreamSupport> {
     const service = await this.assetService;
     const pth = await ResourceManager.toAbsolutePath('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
-    await service.upsert(file);
+    const id = await service.upsert(file);
 
-    const out = await service.getMetadata(pth);
+    const out = await service.getMetadata(id);
 
-    assert(out.filename === pth);
+    assert(out.filename === id);
 
-    await service.delete(pth);
+    await service.delete(id);
 
     await assert.rejects(async () => {
-      await service.getMetadata(pth);
+      await service.getMetadata(id);
     });
   }
 }

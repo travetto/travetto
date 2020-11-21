@@ -8,7 +8,9 @@ import {
   StreamMeta,
   BulkOp,
   BulkResponse,
-  ModelBulkSupport
+  ModelBulkSupport,
+  NotFoundError,
+  ExistsError
 } from '@travetto/model-core';
 
 
@@ -20,8 +22,6 @@ import { SchemaValidator } from '@travetto/schema';
 
 import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
-import { NotFoundError } from '@travetto/model-core/src/error/not-found';
-import { ExistsError } from '@travetto/model-core/src/error/exists';
 
 function uuid(val: string) {
   // return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
@@ -187,15 +187,18 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
   async * list<T extends ModelType>(cls: Class<T>) {
     const store = await this.getStore(cls);
     for await (const el of store.find()) {
-      const result = await ModelCrudUtil.load(cls, el);
-      if (result) {
-        yield postLoadId(result);
+      try {
+        yield postLoadId(await ModelCrudUtil.load(cls, el));
+      } catch (e) {
+        if (!(e instanceof NotFoundError)) {
+          throw e;
+        }
       }
     }
   }
 
-  async upsertStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
-    const writeStream = this.bucket.openUploadStream(id, {
+  async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
+    const writeStream = this.bucket.openUploadStream(location, {
       contentType: meta.contentType,
       metadata: meta
     });
@@ -207,18 +210,18 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     });
   }
 
-  async getStream(id: string) {
-    await this.getStreamMetadata(id);
+  async getStream(location: string) {
+    await this.getStreamMetadata(location);
 
-    const res = await this.bucket.openDownloadStreamByName(id);
+    const res = await this.bucket.openDownloadStreamByName(location);
     if (!res) {
-      throw new NotFoundError('stream', id);
+      throw new NotFoundError('stream', location);
     }
     return res;
   }
 
-  async getStreamMetadata(id: string) {
-    const files = await this.bucket.find({ filename: id }, { limit: 1 }).toArray();
+  async getStreamMetadata(location: string) {
+    const files = await this.bucket.find({ filename: location }, { limit: 1 }).toArray();
 
     if (!files || !files.length) {
       throw new Error('Unable to find file');
@@ -228,8 +231,8 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     return f.metadata;
   }
 
-  async deleteStream(id: string) {
-    const files = await this.bucket.find({ filename: id }).toArray();
+  async deleteStream(location: string) {
+    const files = await this.bucket.find({ filename: location }).toArray();
     const [{ _id: bucketId }] = files;
     await this.bucket.delete(bucketId);
   }
