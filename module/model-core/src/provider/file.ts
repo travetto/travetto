@@ -6,6 +6,7 @@ import { FsUtil, StreamUtil } from '@travetto/boot';
 import { Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { TypeMismatchError } from '@travetto/schema';
 
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
@@ -92,6 +93,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
       return await ModelCrudUtil.load(cls, content);
     }
+
     throw new NotFoundError(cls, id);
   }
 
@@ -138,42 +140,45 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   async * list<T extends ModelType>(cls: Class<T>) {
     for await (const [id] of FileModelService.scanFolder(await this.resolveName(cls, '.json'), '.json')) {
-      const res = await this.get(cls, id).catch(err => { });
-      if (res) {
-        yield res;
+      try {
+        yield await this.get(cls, id);
+      } catch (e) {
+        if (!(e instanceof NotFoundError)) {
+          throw e;
+        }
       }
     }
   }
 
-  async upsertStream(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
-    const file = await this.resolveName('_streams', '.bin', id);
+  async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
+    const file = await this.resolveName('_streams', '.bin', location);
     await Promise.all([
       StreamUtil.writeToFile(stream, file),
       fs.promises.writeFile(file.replace('.bin', '.meta'), JSON.stringify(meta), 'utf8')
     ]);
   }
 
-  async getStream(id: string) {
-    const file = await this.find('_streams', '.bin', id);
+  async getStream(location: string) {
+    const file = await this.find('_streams', '.bin', location);
     return fs.createReadStream(file);
   }
 
-  async getStreamMetadata(id: string) {
-    const file = await this.find('_streams', '.meta', id);
+  async getStreamMetadata(location: string) {
+    const file = await this.find('_streams', '.meta', location);
     const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
     const text = JSON.parse(content.toString('utf8'));
     return text as StreamMeta;
   }
 
-  async deleteStream(id: string) {
-    const file = await this.resolveName('_streams', '.bin', id);
+  async deleteStream(location: string) {
+    const file = await this.resolveName('_streams', '.bin', location);
     if (await FsUtil.exists(file)) {
       await Promise.all([
         fs.promises.unlink(file),
         fs.promises.unlink(file.replace('.bin', '.meta'))
       ]);
     } else {
-      throw new NotFoundError('Stream', id);
+      throw new NotFoundError('Stream', location);
     }
   }
 

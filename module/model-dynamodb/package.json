@@ -9,7 +9,8 @@
   "dependencies": {
     "@travetto/model-core": "^1.1.1",
     "@travetto/config": "^1.1.1",
-    "@aws-sdk/client-dynamodb": "^1.0.0-rc.4"
+    "@aws-sdk/client-dynamodb": "^1.0.0-rc.4",
+    "@aws-sdk/util-dynamodb": "^1.0.0-rc.4"
   },
   "title": "DynamoDB Model Support",
   "description": "DynamoDB backing for the travetto model module.",

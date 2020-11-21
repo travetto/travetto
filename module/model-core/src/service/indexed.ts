@@ -19,7 +19,7 @@ export interface ModelIndexedSupport extends ModelCrudSupport, ModelStorageSuppo
   /**
    * Delete index at runtime, used for devevlopment
    */
-  deleteIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): Promise<void>;
+  deleteIndex?<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): Promise<void>;
 
   /**
    * Get entity by index as defined by fields of idx and the body fields

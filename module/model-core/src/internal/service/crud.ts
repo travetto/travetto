@@ -3,7 +3,7 @@ import { Class } from '@travetto/registry';
 import { SchemaValidator } from '@travetto/schema';
 import { ModelRegistry } from '../../registry/registry';
 import { ModelType } from '../../types/model';
-import { TypeMismatchError } from '../../error/type-mismatch';
+import { NotFoundError } from '../../error/not-found';
 
 /**
  * Crud utilities
@@ -35,9 +35,11 @@ export class ModelCrudUtil {
     }
 
     const result = ModelRegistry.getBaseModel(cls).from(input as object) as T;
+
     if (!(result instanceof cls)) {
-      throw new TypeMismatchError(cls, result.id!, result.type!);
+      throw new NotFoundError(cls, result.id!);
     }
+
     if (result.postLoad) {
       await result.postLoad();
     }

@@ -1,14 +1,13 @@
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
-// import * as mime from 'mime';
 
-import { AfterEach, BeforeAll, BeforeEach, Suite, Test } from '@travetto/test';
+import { FsUtil } from '@travetto/boot';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 
 import { BaseModelSuite } from './test.base';
 import { ModelStreamSupport } from '../../src/service/stream';
-import { FsUtil } from '@travetto/boot';
 
 @Suite({ skip: true })
 export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {
@@ -30,7 +29,7 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
     const hash = await this.getHash(fs.createReadStream(file));
 
     return [
-      { size: stat.size, contentType: '', hash },
+      { size: stat.size, contentType: '', hash, filename: resource },
       fs.createReadStream(file)
     ] as const;
   }
@@ -39,17 +38,6 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
   @BeforeAll()
   async beforeAll() {
     ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '..'));
-    return super.init();
-  }
-
-  @BeforeEach()
-  async beforeEach() {
-    return this.createStorage();
-  }
-
-  @AfterEach()
-  async afterEach() {
-    return this.deleteStorage();
   }
 
   @Test()

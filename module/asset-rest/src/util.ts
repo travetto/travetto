@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import * as busboy from 'busboy';
@@ -110,10 +109,10 @@ export class AssetRestUtil {
        * @returns {Asset}
        */
       async render(res: Response) {
-        const stream = asset.stream ?? fs.createReadStream(asset.path);
+        const stream = asset.stream!;
         res.status(200);
         res.setHeader('Content-Type', asset.contentType);
-        res.setHeader('Content-Disposition', `attachment;filename=${asset.path}`);
+        res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
         await new Promise((resolve, reject) => {
           stream.pipe(res[TRV_RAW]);
           res[TRV_RAW].on('error', reject);

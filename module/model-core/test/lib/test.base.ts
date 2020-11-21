@@ -3,7 +3,9 @@ import { Class, RootRegistry } from '@travetto/registry';
 
 import { ModelCrudSupport } from '../..';
 import { ModelRegistry } from '../../src/registry/registry';
-import { isStorageSupported } from '../../src/internal/service/common';
+import { isIndexedSupported, isStorageSupported } from '../../src/internal/service/common';
+import { AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
+import { Model } from '../../src/registry/decorator';
 
 export abstract class BaseModelSuite<T extends ModelCrudSupport> {
 
@@ -18,6 +20,7 @@ export abstract class BaseModelSuite<T extends ModelCrudSupport> {
     return DependencyRegistry.getInstance(this.serviceClass) as Promise<T>;
   }
 
+  @BeforeAll()
   async init() {
     await RootRegistry.init();
     const config = await DependencyRegistry.getInstance(this.configClass);
@@ -26,6 +29,7 @@ export abstract class BaseModelSuite<T extends ModelCrudSupport> {
     }
   }
 
+  @BeforeEach()
   async createStorage() {
     const service = await this.service;
     if (isStorageSupported(service)) {
@@ -35,13 +39,30 @@ export abstract class BaseModelSuite<T extends ModelCrudSupport> {
           await service.onModelVisiblityChange({ type: 'added', curr: cls });
         }
       }
+      if (isIndexedSupported(service)) {
+        for (const cls of ModelRegistry.getClasses()) {
+          const config = ModelRegistry.get(cls);
+          for (const idx of config.indices ?? []) {
+            await service.createIndex(cls, idx);
+          }
+        }
+      }
     }
   }
 
+  @AfterEach()
   async deleteStorage() {
     const service = await this.service;
     if (isStorageSupported(service)) {
       await service.deleteStorage();
+    }
+    if (isIndexedSupported(service) && service.deleteIndex) {
+      for (const cls of ModelRegistry.getClasses()) {
+        const config = ModelRegistry.get(cls);
+        for (const idx of config.indices ?? []) {
+          await service.deleteIndex(cls, idx);
+        }
+      }
     }
   }
 }

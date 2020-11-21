@@ -1,22 +1,48 @@
 import * as dynamodb from '@aws-sdk/client-dynamodb';
 
-import { ShutdownManager, Util } from '@travetto/base';
+import { AppError, ShutdownManager, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { ChangeEvent, Class } from '@travetto/registry';
-import { ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport, ModelType } from '@travetto/model-core';
+import {
+  ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
+  ModelIndexedSupport, ModelType, NotFoundError, ExistsError, IndexConfig
+} from '@travetto/model-core';
 
-import { DynamoDBModelConfig } from './config';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';
-import { ExistsError } from '@travetto/model-core/src/error/exists';
-import { NotFoundError } from '@travetto/model-core/src/error/not-found';
+import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
 
+import { DynamoDBModelConfig } from './config';
+
+/* eslint-disable no-redeclare */
+function toValue(val: string | number | boolean | Date | undefined | null): dynamodb.AttributeValue;
+function toValue(val: any): dynamodb.AttributeValue | undefined {
+  if (val === undefined || val === null || val === '') {
+    return { NULL: true };
+  } else if (typeof val === 'string') {
+    return { S: val };
+  } else if (typeof val === 'number') {
+    return { N: `${val}` };
+  } else if (typeof val === 'boolean') {
+    return { BOOL: val };
+  } else if (val instanceof Date) {
+    return { N: `${val.getTime()}` };
+  }
+}
+/* eslint-enable no-redeclare */
+
+function toEntries<T>(item: T) {
+  return Object.entries(item)
+    .filter(([k, v]) => k !== 'id' && Util.isPrimitive(v))
+    .map(([k, v]) => ({ field: k.endsWith('__') ? k : `${k}__`, var: `:v_${k}`, value: toValue(v) }))
+    .filter(({ value }) => !!value);
+}
 
 /**
  * A model service backed by DynamoDB
  */
 @Injectable()
-export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport {
+export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
   cl: dynamodb.DynamoDB;
 
@@ -30,17 +56,17 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return table;
   }
 
-
   private async putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert') {
+    const entries = toEntries(item);
     try {
       if (mode === 'create') {
         return await this.cl.putItem({
           TableName: this.resolveTable(cls),
           ConditionExpression: 'attribute_not_exists(body)',
           Item: {
-            id: { S: item.id },
-            body: { S: JSON.stringify(item) },
-            updated_at: { S: new Date().toISOString() }
+            id: toValue(item.id),
+            body: toValue(JSON.stringify(item)),
+            ...Object.fromEntries(entries.map(v => [v.field, v.value]))
           },
           ReturnValues: 'NONE'
         });
@@ -49,10 +75,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           TableName: this.resolveTable(cls),
           ConditionExpression: mode === 'update' ? 'attribute_exists(body)' : undefined,
           Key: { id: { S: id } },
-          UpdateExpression: 'set body = :body, updated_at = :updated_at',
+          UpdateExpression: `SET ${[{ var: ':body', field: 'body' }, ...entries]
+            .map(v => `${v.field} = ${v.var}`)
+            .join(', ')}`,
           ExpressionAttributeValues: {
-            ':body': { S: JSON.stringify(item) },
-            ':updated_at': { S: new Date().toISOString() }
+            ':body': toValue(JSON.stringify(item)),
+            ...Object.fromEntries(entries.map(v => [v.var, v.value]))
           },
           ReturnValues: 'ALL_NEW'
         });
@@ -74,6 +102,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     ShutdownManager.onShutdown(__filename, () => this.cl.destroy());
   }
 
+  // Storage
+
   /**
    * An event listener for whenever a model is added, changed or removed
    */
@@ -93,7 +123,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
           await this.cl.updateTimeToLive({
             TableName: table,
-            TimeToLiveSpecification: { AttributeName: 'expires_at_', Enabled: true }
+            TimeToLiveSpecification: { AttributeName: 'internal_expires_at', Enabled: true }
           });
         }
         break;
@@ -114,9 +144,15 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async deleteStorage() {
+    for (const model of ModelRegistry.getClasses()) {
+      await this.cl.deleteTable({
+        TableName: this.resolveTable(model)
+      }).catch(err => { });
+    }
     // Do nothing for now
   }
 
+  // Crud
   uuid(): string {
     return Util.uuid();
   }
@@ -124,14 +160,11 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async get<T extends ModelType>(cls: Class<T>, id: string) {
     const res = await this.cl.getItem({
       TableName: this.resolveTable(cls),
-      Key: { id: { S: id } }
+      Key: { id: toValue(id) }
     });
 
-    if (res && res.Item?.body) {
-      const item = await ModelCrudUtil.load(cls, res.Item.body.S!);
-      if (item) {
-        return item;
-      }
+    if (res && res.Item && res.Item.body) {
+      return await ModelCrudUtil.load(cls, res.Item.body.S!);
     }
     throw new NotFoundError(cls, id);
   }
@@ -182,9 +215,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
       if (batch.Count && batch.Items) {
         for (const el of batch.Items) {
-          const res = await ModelCrudUtil.load(cls, el.body.S);
-          if (res) {
-            yield res;
+          try {
+            yield await ModelCrudUtil.load(cls, el.body.S!);
+          } catch (e) {
+            if (!(e instanceof NotFoundError)) {
+              throw e;
+            }
           }
         }
       }
@@ -197,18 +233,25 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
   }
 
+  // Expiry
   async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
     const expiresAt = ModelExpiryUtil.getExpiresAt(ttl);
+
+    /* eslint-disable @typescript-eslint/naming-convention */
+    const entries = toEntries({
+      internal_expires_at: Math.trunc(expiresAt.getTime() / 1000),
+      internal_issued_at: Math.trunc(new Date().getTime() / 1000)
+    });
+    /* eslint-enable @typescript-eslint/naming-convention */
+
     const res = await this.cl.updateItem({
       TableName: this.resolveTable(cls),
       Key: { id: { S: id } },
       ReturnValues: 'ALL_OLD',
-      UpdateExpression: `set expires_at_ = :expires_at, issued_at_ = :issued_at`,
-      ExpressionAttributeValues: {
-        ':expires_at': { N: `${Math.trunc(expiresAt.getTime() / 1000)}` },
-        ':issued_at': { N: `${Math.trunc(new Date().getTime() / 1000)}` }
-      }
+      UpdateExpression: `SET ${entries.map(v => `${v.field} = ${v.var}`).join(', ')}`,
+      ExpressionAttributeValues: Object.fromEntries(entries.map(v => [v.var, v.value]))
     });
+
     if (!res.Attributes) {
       throw new NotFoundError(cls, id);
     }
@@ -223,17 +266,17 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
     const res = await this.cl.getItem({
       TableName: this.resolveTable(cls),
-      Key: { id: { S: id } },
+      Key: { id: toValue(id) },
     });
     if (!res.Item) {
       throw new NotFoundError(cls, id);
     }
     const item = res.Item!;
-    if (!(item.expires_at_ && item.issued_at_)) {
+    if (!(item.internal_issued_at__ && item.internal_issued_at__)) {
       throw new NotFoundError(cls, id);
     }
-    const expiresAt = parseInt(`${item.expires_at_.N}`, 10) * 1000;
-    const issuedAt = parseInt(`${item.issued_at_.N}`, 10) * 1000;
+    const expiresAt = parseInt(`${item.internal_expires_at__.N}`, 10) * 1000;
+    const issuedAt = parseInt(`${item.internal_issued_at__.N}`, 10) * 1000;
 
     return {
       issuedAt,
@@ -241,5 +284,47 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       expired: expiresAt < Date.now(),
       maxAge: expiresAt - issuedAt
     };
+  }
+
+  // Indexed
+  async createIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>) {
+    const table = await this.cl.describeTable({ TableName: this.resolveTable(cls) });
+    if (table.Table?.GlobalSecondaryIndexes?.find(x => x.IndexName === idx.name)) {
+      return;
+    }
+    await this.cl.updateTable({
+      TableName: this.resolveTable(cls),
+      AttributeDefinitions:
+        ModelIndexedUtil.flattenIndex(cls, idx, '_').fields.map(([key]) => ({ AttributeName: `${key}__`, AttributeType: 'S' })),
+      GlobalSecondaryIndexUpdates: [{
+        Create: {
+          IndexName: idx.name,
+          Projection: {
+            ProjectionType: 'INCLUDE',
+            NonKeyAttributes: ['id']
+          },
+          KeySchema: ModelIndexedUtil.flattenIndex(cls, idx, '_').fields.map(([key, value]) => ({
+            AttributeName: `${key}__`,
+            KeyType: 'HASH'
+          }))
+        }
+      }]
+    });
+  }
+
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const config = ModelIndexedUtil.flattenIndexItem(cls, idx, body, '_');
+    const result = await this.cl.query({
+      TableName: this.resolveTable(cls),
+      IndexName: idx,
+      ProjectionExpression: 'id',
+      KeyConditionExpression: config.map(([key, value]) => `${key}__ = :v_${key}`).join(', '),
+      ExpressionAttributeValues: Object.fromEntries(config.map(([key, value]) => [`:v_${key}`, toValue(value)])),
+    });
+
+    if (result.Items && result.Items[0]) {
+      return this.get(cls, result.Items[0].id.S!);
+    }
+    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
   }
 }

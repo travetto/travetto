@@ -1,4 +1,5 @@
 import { Class } from '@travetto/registry';
+import { ModelType } from '../types/model';
 
 type Primitive = number | boolean | string | Date;
 
@@ -19,7 +20,7 @@ type SortClauseRaw<T> = {
 /**
  * Model options
  */
-export class ModelOptions<T> {
+export class ModelOptions<T extends ModelType> {
   /**
    * Class for model
    */
@@ -49,7 +50,7 @@ export class ModelOptions<T> {
 /**
  * Index options
  */
-export interface IndexConfig<T> {
+export interface IndexConfig<T extends ModelType> {
 
   /**
    * Index name

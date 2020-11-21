@@ -26,7 +26,7 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
   const finalConf = { ...param };
 
   if (finalConf.type !== AssetImpl) {
-    throw new AppError('Cannot use upload decorator with anything but an UploadAsset', 'general');
+    throw new AppError('Cannot use upload decorator with anything but an Asset', 'general');
   }
 
   return function (target: Record<string, any>, propertyKey: string, index: number) {

@@ -2,16 +2,15 @@ import * as redis from 'redis';
 import * as util from 'util';
 
 import { ShutdownManager, Util } from '@travetto/base';
-import { ModelCrudSupport, ModelExpirySupport, ModelRegistry, ExpiryState, ModelType, ModelStorageSupport, Model } from '@travetto/model-core';
+import { ModelCrudSupport, ModelExpirySupport, ModelRegistry, ExpiryState, ModelType, ModelStorageSupport, Model, NotFoundError, ExistsError } from '@travetto/model-core';
 import { Injectable } from '@travetto/di';
 import { Class } from '@travetto/registry';
+import { TypeMismatchError } from '@travetto/schema';
 
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';
 
 import { RedisModelConfig } from './config';
-import { NotFoundError } from '@travetto/model-core/src/error/not-found';
-import { ExistsError } from '@travetto/model-core/src/error/exists';
 
 @Model()
 class ExpiryMeta implements ModelType, ExpiryState {
@@ -141,9 +140,12 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     for await (const bodies of this.iterate(cls)) {
       for (const body of bodies) {
-        const loaded = await ModelCrudUtil.load(cls, body);
-        if (loaded) {
-          yield loaded;
+        try {
+          yield await ModelCrudUtil.load(cls, body);
+        } catch (e) {
+          if (!(e instanceof NotFoundError)) {
+            throw e;
+          }
         }
       }
     }
