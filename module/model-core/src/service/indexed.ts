@@ -7,9 +7,9 @@ import { ModelStorageSupport } from './storage';
 /**
  * Support for simple indexed activity
  *
- * @concrete ../internal/service/common:ModelStreamSupportTarget
+ * @concrete ../internal/service/common:ModelIndexedSupportTarget
  */
-export interface ModelStreamSupport extends ModelCrudSupport, ModelStorageSupport {
+export interface ModelIndexedSupport extends ModelCrudSupport, ModelStorageSupport {
 
   /**
    * Create index at runtime, used for devevlopment

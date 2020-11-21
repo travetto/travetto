@@ -13,6 +13,7 @@ import { ModelStorageSupport } from '../service/storage';
 import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
+import { ExistsError } from '../error/exists';
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -42,7 +43,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     const store = this.getStore(cls);
 
     if (id && errorState && (errorState === 'notfound' ? !store.has(id) : store.has(id))) {
-      throw errorState === 'notfound' ? new NotFoundError(cls, id) : ModelCrudUtil.existsError(cls, id);
+      throw errorState === 'notfound' ? new NotFoundError(cls, id) : new ExistsError(cls, id);
     }
 
     return store;
