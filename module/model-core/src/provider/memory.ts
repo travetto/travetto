@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { ChangeEvent, Class } from '@travetto/registry';
 import { StreamUtil } from '@travetto/boot';
 import { Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
@@ -207,11 +207,18 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     this.indexes.clear();
   }
 
-  // Index Support
-  async createIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>) {
-    this.indexes.set(`${cls.ᚕid}:${idx.name}`, new Map());
+  async onModelVisiblityChange(ev: ChangeEvent<Class>) {
+    switch (ev.type) {
+      case 'added': {
+        for (const idx of ModelRegistry.get(ev.curr!).indices ?? []) {
+          this.indexes.set(`${ev.curr!.ᚕid}:${idx.name}`, new Map());
+        }
+        break;
+      }
+    }
   }
 
+  // Indexed
   getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> {
     const config = ModelRegistry.get(cls).indices!.find(i => i.name === idx);
     if (!config) {

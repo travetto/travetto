@@ -1,6 +1,6 @@
 import * as dynamodb from '@aws-sdk/client-dynamodb';
 
-import { AppError, ShutdownManager, Util } from '@travetto/base';
+import { ShutdownManager, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { ChangeEvent, Class } from '@travetto/registry';
 import {
@@ -15,11 +15,11 @@ import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/inde
 import { DynamoDBModelConfig } from './config';
 
 /* eslint-disable no-redeclare */
-function toValue(val: string | number | boolean | Date | undefined | null): dynamodb.AttributeValue;
-function toValue(val: any): dynamodb.AttributeValue | undefined {
+function toValue(val: string | number | boolean | Date | undefined | null, forceString?: boolean): dynamodb.AttributeValue;
+function toValue(val: any, forceString?: boolean): dynamodb.AttributeValue | undefined {
   if (val === undefined || val === null || val === '') {
     return { NULL: true };
-  } else if (typeof val === 'string') {
+  } else if (typeof val === 'string' || forceString) {
     return { S: val };
   } else if (typeof val === 'number') {
     return { N: `${val}` };
@@ -30,13 +30,6 @@ function toValue(val: any): dynamodb.AttributeValue | undefined {
   }
 }
 /* eslint-enable no-redeclare */
-
-function toEntries<T>(item: T) {
-  return Object.entries(item)
-    .filter(([k, v]) => k !== 'id' && Util.isPrimitive(v))
-    .map(([k, v]) => ({ field: k.endsWith('__') ? k : `${k}__`, var: `:v_${k}`, value: toValue(v) }))
-    .filter(({ value }) => !!value);
-}
 
 /**
  * A model service backed by DynamoDB
@@ -57,30 +50,30 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   private async putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert') {
-    const entries = toEntries(item);
+    const config = ModelRegistry.get(cls);
     try {
       if (mode === 'create') {
-        return await this.cl.putItem({
+        const query = {
           TableName: this.resolveTable(cls),
           ConditionExpression: 'attribute_not_exists(body)',
           Item: {
             id: toValue(item.id),
             body: toValue(JSON.stringify(item)),
-            ...Object.fromEntries(entries.map(v => [v.field, v.value]))
+            ...Object.fromEntries(config.indices?.map(idx => [`${idx.name}__`, toValue(ModelIndexedUtil.computeIndexKey(cls, idx, item))]) ?? [])
           },
           ReturnValues: 'NONE'
-        });
+        };
+        console.log(query);
+        return await this.cl.putItem(query);
       } else {
         return await this.cl.updateItem({
           TableName: this.resolveTable(cls),
           ConditionExpression: mode === 'update' ? 'attribute_exists(body)' : undefined,
           Key: { id: { S: id } },
-          UpdateExpression: `SET ${[{ var: ':body', field: 'body' }, ...entries]
-            .map(v => `${v.field} = ${v.var}`)
-            .join(', ')}`,
+          UpdateExpression: `SET ${['body=:body', ...(config.indices?.map(idx => `${idx.name}__ = :${idx.name}`) ?? [])].join(', ')}`,
           ExpressionAttributeValues: {
             ':body': toValue(JSON.stringify(item)),
-            ...Object.fromEntries(entries.map(v => [v.var, v.value]))
+            ...Object.fromEntries(config.indices?.map(idx => [`:${idx.name}`, toValue(ModelIndexedUtil.computeIndexKey(cls, idx, item))]) ?? [])
           },
           ReturnValues: 'ALL_NEW'
         });
@@ -97,6 +90,25 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
   }
 
+  private computeIndexConfig<T extends ModelType>(cls: Class<T>) {
+    const config = ModelRegistry.get(cls);
+    const attributes = config.indices?.flatMap(idx => ({ AttributeName: `${idx.name}__`, AttributeType: 'S' })) ?? [];
+
+    const indices: dynamodb.GlobalSecondaryIndex[] | undefined = config.indices?.map(idx => ({
+      IndexName: idx.name,
+      Projection: {
+        ProjectionType: 'INCLUDE',
+        NonKeyAttributes: ['id']
+      },
+      KeySchema: [{
+        AttributeName: `${idx.name}__`,
+        KeyType: 'HASH'
+      }]
+    }));
+
+    return { indices, attributes };
+  }
+
   async postConstruct() {
     this.cl = new dynamodb.DynamoDB({ ...this.config.config });
     ShutdownManager.onShutdown(__filename, () => this.cl.destroy());
@@ -108,28 +120,51 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * An event listener for whenever a model is added, changed or removed
    */
   async onModelVisiblityChange?<T extends ModelType>(e: ChangeEvent<Class<T>>) {
+    const cls = (e.curr || e.prev)!;
+    // Don't create tables for non-concrete types
+    if (ModelRegistry.getBaseModel(cls) !== cls) {
+      return;
+    }
+
     switch (e.type) {
       case 'added': {
-        const table = this.resolveTable(e.curr!);
-        const { Table: verify } = (await this.cl.describeTable({ TableName: table }).catch(err => ({ Table: undefined })));
+        const table = this.resolveTable(cls);
+        const idx = this.computeIndexConfig(cls);
 
-        if (!verify) {
-          await this.cl.createTable({
-            TableName: table,
-            KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
-            BillingMode: 'PAY_PER_REQUEST',
-            AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
-          });
+        await this.cl.createTable({
+          TableName: table,
+          KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
+          BillingMode: 'PAY_PER_REQUEST',
+          AttributeDefinitions: [
+            { AttributeName: 'id', AttributeType: 'S' },
+            ...idx.attributes
+          ],
+          GlobalSecondaryIndexes: idx.indices?.length ? idx.indices : undefined
+        });
 
-          await this.cl.updateTimeToLive({
-            TableName: table,
-            TimeToLiveSpecification: { AttributeName: 'internal_expires_at', Enabled: true }
-          });
-        }
+        await this.cl.updateTimeToLive({
+          TableName: table,
+          TimeToLiveSpecification: { AttributeName: 'internal_expires_at', Enabled: true }
+        });
+        break;
+      }
+      case 'changed': {
+        const table = this.resolveTable(cls);
+        const idx = this.computeIndexConfig(cls);
+        // const existing = await this.cl.describeTable({ TableName: table });
+
+        await this.cl.updateTable({
+          TableName: table,
+          AttributeDefinitions: [
+            { AttributeName: 'id', AttributeType: 'S' },
+            ...idx.attributes
+          ],
+          // TODO: Fill out index computation
+        });
         break;
       }
       case 'removing': {
-        const table = this.resolveTable(e.curr!);
+        const table = this.resolveTable(cls);
         const { Table: verify } = (await this.cl.describeTable({ TableName: table }).catch(err => ({ Table: undefined })));
         if (verify) {
           await this.cl.deleteTable({ TableName: table });
@@ -149,7 +184,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         TableName: this.resolveTable(model)
       }).catch(err => { });
     }
-    // Do nothing for now
   }
 
   // Crud
@@ -238,18 +272,18 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const expiresAt = ModelExpiryUtil.getExpiresAt(ttl);
 
     /* eslint-disable @typescript-eslint/naming-convention */
-    const entries = toEntries({
-      internal_expires_at: Math.trunc(expiresAt.getTime() / 1000),
-      internal_issued_at: Math.trunc(new Date().getTime() / 1000)
+    const entries = Object.entries({
+      internal_expires_at: toValue(Math.trunc(expiresAt.getTime() / 1000)),
+      internal_issued_at: toValue(Math.trunc(new Date().getTime() / 1000))
     });
     /* eslint-enable @typescript-eslint/naming-convention */
 
     const res = await this.cl.updateItem({
       TableName: this.resolveTable(cls),
-      Key: { id: { S: id } },
+      Key: { id: toValue(id) },
       ReturnValues: 'ALL_OLD',
-      UpdateExpression: `SET ${entries.map(v => `${v.field} = ${v.var}`).join(', ')}`,
-      ExpressionAttributeValues: Object.fromEntries(entries.map(v => [v.var, v.value]))
+      UpdateExpression: `SET ${entries.map(([k, v]) => `${k}__ = :${k}`).join(', ')}`,
+      ExpressionAttributeValues: Object.fromEntries(entries.map(([k, v]) => [`:${k}`, v]))
     });
 
     if (!res.Attributes) {
@@ -287,42 +321,20 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Indexed
-  async createIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>) {
-    const table = await this.cl.describeTable({ TableName: this.resolveTable(cls) });
-    if (table.Table?.GlobalSecondaryIndexes?.find(x => x.IndexName === idx.name)) {
-      return;
-    }
-    await this.cl.updateTable({
-      TableName: this.resolveTable(cls),
-      AttributeDefinitions:
-        ModelIndexedUtil.flattenIndex(cls, idx, '_').fields.map(([key]) => ({ AttributeName: `${key}__`, AttributeType: 'S' })),
-      GlobalSecondaryIndexUpdates: [{
-        Create: {
-          IndexName: idx.name,
-          Projection: {
-            ProjectionType: 'INCLUDE',
-            NonKeyAttributes: ['id']
-          },
-          KeySchema: ModelIndexedUtil.flattenIndex(cls, idx, '_').fields.map(([key, value]) => ({
-            AttributeName: `${key}__`,
-            KeyType: 'HASH'
-          }))
-        }
-      }]
-    });
-  }
-
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
-    const config = ModelIndexedUtil.flattenIndexItem(cls, idx, body, '_');
-    const result = await this.cl.query({
+    const query = {
       TableName: this.resolveTable(cls),
       IndexName: idx,
       ProjectionExpression: 'id',
-      KeyConditionExpression: config.map(([key, value]) => `${key}__ = :v_${key}`).join(', '),
-      ExpressionAttributeValues: Object.fromEntries(config.map(([key, value]) => [`:v_${key}`, toValue(value)])),
-    });
+      KeyConditionExpression: `${idx}__ = :${idx}`,
+      ExpressionAttributeValues: {
+        [`:${idx}`]: toValue(ModelIndexedUtil.computeIndexKey(cls, idx, body))
+      }
+    };
+    console.log(query);
+    const result = await this.cl.query(query);
 
-    if (result.Items && result.Items[0]) {
+    if (result.Count && result.Items && result.Items[0]) {
       return this.get(cls, result.Items[0].id.S!);
     }
     throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
