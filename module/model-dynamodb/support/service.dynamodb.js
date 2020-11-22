@@ -1,10 +1,4 @@
-try {
-  require('@aws-sdk/client-dynamodb');
-} catch {
-  return module.exports = undefined;
-}
-
-const version = '1.13.3';
+const version = '1.13.5';
 
 module.exports = {
   name: 'dynamodb',
