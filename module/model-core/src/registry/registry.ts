@@ -106,7 +106,8 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   getStore(cls: Class) {
     if (!this.stores.has(cls)) {
       const config = this.get(cls) ?? this.getOrCreatePending(cls);
-      this.stores.set(cls, (config.store || cls.name).toLowerCase());
+      const name = (config.store || cls.ᚕid.replace(/[^A-Za-z0-9\-_]/g, '_')).toLowerCase();
+      this.stores.set(cls, name);
     }
     return this.stores.get(cls)!;
   }

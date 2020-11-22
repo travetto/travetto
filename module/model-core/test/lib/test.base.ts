@@ -39,14 +39,6 @@ export abstract class BaseModelSuite<T extends ModelCrudSupport> {
           await service.onModelVisiblityChange({ type: 'added', curr: cls });
         }
       }
-      if (isIndexedSupported(service)) {
-        for (const cls of ModelRegistry.getClasses()) {
-          const config = ModelRegistry.get(cls);
-          for (const idx of config.indices ?? []) {
-            await service.createIndex(cls, idx);
-          }
-        }
-      }
     }
   }
 
@@ -54,15 +46,12 @@ export abstract class BaseModelSuite<T extends ModelCrudSupport> {
   async deleteStorage() {
     const service = await this.service;
     if (isStorageSupported(service)) {
-      await service.deleteStorage();
-    }
-    if (isIndexedSupported(service) && service.deleteIndex) {
-      for (const cls of ModelRegistry.getClasses()) {
-        const config = ModelRegistry.get(cls);
-        for (const idx of config.indices ?? []) {
-          await service.deleteIndex(cls, idx);
+      if (service.onModelVisiblityChange) {
+        for (const cls of ModelRegistry.getClasses()) {
+          await service.onModelVisiblityChange({ type: 'removing', prev: cls });
         }
       }
+      await service.deleteStorage();
     }
   }
 }

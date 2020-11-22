@@ -22,6 +22,14 @@ class User2 extends BaseModel {
   name: string;
 }
 
+@Model()
+@Index({ name: 'userAge', fields: [{ name: 1 }, { age: 1 }] })
+class User3 extends BaseModel {
+  name: string;
+  age: number;
+  color?: string;
+}
+
 @Suite({ skip: true })
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {
   @Test()
@@ -64,4 +72,22 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await assert.rejects(() => service.getByIndex(User2, 'userName', { name: 'jim' }), NotFoundError);
   }
 
+  @Test()
+  async queryMultiple() {
+    const service = await this.service;
+
+
+    await service.create(User3, User3.from({ name: 'bob', age: 20 }));
+    await service.create(User3, User3.from({ name: 'bob', age: 30, color: 'green' }));
+
+    const found = await service.getByIndex(User3, 'userAge', { name: 'bob', age: 30 });
+
+    assert(found.color === 'green');
+
+    const found2 = await service.getByIndex(User3, 'userAge', { name: 'bob', age: 20 });
+
+    assert(!found2.color);
+
+    await assert.rejects(() => service.getByIndex(User3, 'userAge', { name: 'bob' }));
+  }
 }
