@@ -3,9 +3,9 @@ import * as assert from 'assert';
 import { RootRegistry } from '@travetto/registry';
 import { Schema } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { WhereClause } from '@travetto/model/';
+import type { WhereClause } from '@travetto/model-query';
 
-import { ElasticsearchUtil } from '../src/internal/util';
+import { ElasticsearchQueryUtil } from '../src/internal/query';
 
 @Schema()
 class User {
@@ -53,7 +53,7 @@ export class QueryTest {
 
   @Test()
   async validateQuery() {
-    let out = ElasticsearchUtil.extractSimple({ a: { b: { c: 5 } } });
+    let out = ElasticsearchQueryUtil.extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
     const qry: WhereClause<WhereType> = {
@@ -68,7 +68,7 @@ export class QueryTest {
       ]
     };
 
-    out = ElasticsearchUtil.extractWhereQuery(WhereType, qry);
+    out = ElasticsearchQueryUtil.extractWhereQuery(WhereType, qry);
 
     assert.ok(out.bool);
 
@@ -89,7 +89,7 @@ export class QueryTest {
 
   @Test()
   async translateIds() {
-    const out = ElasticsearchUtil.extractWhereQuery(User, {
+    const out = ElasticsearchQueryUtil.extractWhereQuery(User, {
       $and: [
         { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
       ]
@@ -101,7 +101,7 @@ export class QueryTest {
   @Test()
   async testRegEx() {
 
-    const out = ElasticsearchUtil.extractWhereQuery(User, {
+    const out = ElasticsearchQueryUtil.extractWhereQuery(User, {
       name: {
         $regex: '/google.$/'
       }

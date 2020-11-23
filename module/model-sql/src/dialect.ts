@@ -1,7 +1,8 @@
 import { Class, ChangeEvent } from '@travetto/registry';
 import { SchemaRegistry, FieldConfig, SchemaChangeEvent, Schema } from '@travetto/schema';
 import { Util, AppError } from '@travetto/base';
-import { BulkResponse, SelectClause, Query, SortClause, WhereClause, IndexConfig } from '@travetto/model';
+import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model-query';
+import { BulkResponse, IndexConfig } from '@travetto/model-core';
 
 import { SQLUtil, VisitStack } from './internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from './internal/types';
@@ -399,7 +400,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Generate WHERE field clause
    */
-  getWhereFieldSQL<T>(stack: VisitStack[], o: Record<string, any>): any {
+  getWhereFieldSQL(stack: VisitStack[], o: Record<string, any>): any {
     const items = [];
     const { foreignMap, localMap } = SQLUtil.getFieldsByLocation(stack);
     const SQL_OPS = this.SQL_OPS;
@@ -691,7 +692,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       return [key as string, typeof val === 'number' ? val === 1 : (!!val)];
     });
     const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
-    return `CREATE ${idx.options && idx.options.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.ident(table)} (${fields
+    return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.ident(table)} (${fields
       .map(([name, sel]) => `${this.ident(name)} ${sel ? 'ASC' : 'DESC'}`)
       .join(', ')});`;
   }

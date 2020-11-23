@@ -207,7 +207,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     this.indexes.clear();
   }
 
-  async onModelVisiblityChange(ev: ChangeEvent<Class>) {
+  async onModelVisibilityChange(ev: ChangeEvent<Class>) {
     switch (ev.type) {
       case 'added': {
         for (const idx of ModelRegistry.get(ev.curr!).indices ?? []) {

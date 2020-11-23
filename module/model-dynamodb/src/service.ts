@@ -119,7 +119,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   /**
    * An event listener for whenever a model is added, changed or removed
    */
-  async onModelVisiblityChange?<T extends ModelType>(e: ChangeEvent<Class<T>>) {
+  async onModelVisibilityChange?<T extends ModelType>(e: ChangeEvent<Class<T>>) {
     const cls = (e.curr || e.prev)!;
     // Don't create tables for non-concrete types
     if (ModelRegistry.getBaseModel(cls) !== cls) {
@@ -331,7 +331,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         [`:${idx}`]: toValue(ModelIndexedUtil.computeIndexKey(cls, idx, body))
       }
     };
-    console.log(query);
+
     const result = await this.cl.query(query);
 
     if (result.Count && result.Items && result.Items[0]) {

@@ -4,7 +4,7 @@ import { Config } from '@travetto/config';
 /**
  * SQL Model Config
  */
-@Config('sql.model')
+@Config('model.sql')
 export class SQLModelConfig {
   /**
    * Host to connect to

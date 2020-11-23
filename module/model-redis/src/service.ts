@@ -5,7 +5,6 @@ import { ShutdownManager, Util } from '@travetto/base';
 import { ModelCrudSupport, ModelExpirySupport, ModelRegistry, ExpiryState, ModelType, ModelStorageSupport, Model, NotFoundError, ExistsError } from '@travetto/model-core';
 import { Injectable } from '@travetto/di';
 import { Class } from '@travetto/registry';
-import { TypeMismatchError } from '@travetto/schema';
 
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';

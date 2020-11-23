@@ -1,12 +1,12 @@
 import { InjectableFactory } from '@travetto/di';
 import { ElasticsearchModelConfig } from '../../../src/config';
-import { ElasticsearchModelSource } from '../../../src/source';
+import { ElasticsearchModelService } from '../../../src/service';
 
 export class Init {
   @InjectableFactory({
     primary: true
   })
   static getModelSource(conf: ElasticsearchModelConfig) {
-    return new ElasticsearchModelSource(conf);
+    return new ElasticsearchModelService(conf);
   }
 }

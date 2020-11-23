@@ -2,9 +2,10 @@ import * as assert from 'assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { ElasticsearchUtil } from '../src/internal/util';
-import { Model, BaseModel } from '@travetto/model';
+import { Model, BaseModel } from '@travetto/model-core';
 import { Currency, Integer, Precision, Float, Text, Schema } from '@travetto/schema';
+
+import { ElasticsearchSchemaUtil } from '../src/internal/schema';
 
 @Schema()
 class Address {
@@ -29,6 +30,8 @@ class SimpleNested {
 
 @Model()
 class Numerical {
+  id: string;
+
   @Currency()
   money: number;
 
@@ -52,7 +55,7 @@ class SchemaSuite {
 
   @Test('verifySchema')
   async verifySchema() {
-    const schema = ElasticsearchUtil.generateSourceSchema(Person);
+    const schema = ElasticsearchSchemaUtil.generateSourceSchema(Person);
     assert(schema === {
       properties: {
         id: { type: 'keyword' },
@@ -75,7 +78,7 @@ class SchemaSuite {
       dynamic: false
     });
 
-    const schema2 = ElasticsearchUtil.generateSourceSchema(SimpleNested);
+    const schema2 = ElasticsearchSchemaUtil.generateSourceSchema(SimpleNested);
     assert(schema2 === {
       properties: {
         id: { type: 'keyword' },
@@ -98,7 +101,7 @@ class SchemaSuite {
 
   @Test('Numeric schema')
   async testNumericSchema() {
-    const schema3 = ElasticsearchUtil.generateSourceSchema(Numerical);
+    const schema3 = ElasticsearchSchemaUtil.generateSourceSchema(Numerical);
     assert(schema3.properties.money.type === 'scaled_float');
     assert(schema3.properties.whole.type === 'integer');
     assert(schema3.properties.big.type === 'double');

@@ -54,7 +54,7 @@ export class TransformerState implements State {
   resolveExternalType(node: ts.Node) {
     const resolved = this.resolveType(node);
     if (resolved.key !== 'external') {
-      throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}`);
+      throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${node.getSourceFile().fileName}`);
     }
     return resolved;
   }

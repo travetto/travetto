@@ -8,7 +8,7 @@ import { ModelStorageSupport } from './storage';
  *
  * @concrete ../internal/service/common:ModelIndexedSupportTarget
  */
-export interface ModelIndexedSupport extends ModelCrudSupport, ModelStorageSupport {
+export interface ModelIndexedSupport extends ModelCrudSupport {
   /**
    * Get entity by index as defined by fields of idx and the body fields
    * @param cls The type to search by

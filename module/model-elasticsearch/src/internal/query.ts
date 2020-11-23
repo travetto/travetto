@@ -1,5 +1,5 @@
 import { Util } from '@travetto/base';
-import { Point, WhereClause, ModelRegistry, SelectClause, SortClause } from '@travetto/model';
+import { WhereClause, SelectClause, SortClause } from '@travetto/model-query';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
 import { EsSchemaConfig } from './types';
@@ -11,7 +11,7 @@ const has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
 /**
  * Support tools for dealing with elasticsearch specific requirements
  */
-export class ElasticsearchUtil {
+export class ElasticsearchQueryUtil {
 
   /**
    * Convert `a.b.c` to `a : { b : { c : ... }}`
@@ -35,7 +35,7 @@ export class ElasticsearchUtil {
    * Build include/exclude from the select clause
    */
   static getSelect<T>(clause: SelectClause<T>) {
-    const simp = ElasticsearchUtil.extractSimple(clause);
+    const simp = this.extractSimple(clause);
     const include: string[] = [];
     const exclude: string[] = [];
     for (const k of Object.keys(simp)) {
@@ -55,7 +55,7 @@ export class ElasticsearchUtil {
    */
   static getSort<T>(sort: SortClause<T>[]) {
     return sort.map(x => {
-      const o = ElasticsearchUtil.extractSimple(x);
+      const o = this.extractSimple(x);
       const k = Object.keys(o)[0];
       const v = o[k] as (boolean | -1 | 1);
       if (v === 1 || v === true) {
@@ -213,134 +213,5 @@ export class ElasticsearchUtil {
     } else {
       return this.extractWhereTermQuery(o, cls, config);
     }
-  }
-
-  /**
-   * Build the update script for a given object
-   */
-  static generateUpdateScript(o: any, path: string = '', arr = false) {
-    const ops: string[] = [];
-    const out = {
-      params: {} as Record<string, any>,
-      lang: 'painless',
-      source: ''
-    };
-    for (const x of Object.keys(o ?? {})) {
-      if (!path && (x === '_id' || x === 'id')) {
-        continue;
-      }
-      const prop = arr ? `${path}[${x}]` : `${path}${path ? '.' : ''}${x}`;
-      if (o[x] === undefined || o[x] === null) {
-        ops.push(`ctx._source.${path}${path ? '.' : ''}remove("${x}")`);
-      } else if (Util.isPrimitive(o[x]) || Array.isArray(o[x])) {
-        const param = prop.toLowerCase().replace(/[^a-z0-9_$]/g, '_');
-        ops.push(`ctx._source.${prop} = params.${param}`);
-        out.params[param] = o[x];
-      } else {
-        ops.push(`ctx._source.${prop} = ctx._source.${prop} == null ? [:] : ctx._source.${prop}`);
-        const sub = this.generateUpdateScript(o[x], prop);
-        ops.push(sub.source);
-        Object.assign(out.params, sub.params);
-      }
-    }
-    out.source = ops.join(';');
-
-    return out;
-  }
-
-  /**
-   * Build one or more schemas depending on the polymorphic state
-   */
-  static generateSourceSchema(cls: Class, config?: EsSchemaConfig) {
-    return ModelRegistry.get(cls).baseType ?
-      this.generateAllSourceSchema(cls, config) :
-      this.generateSingleSourceSchema(cls, config);
-  }
-
-  /**
-   * Generate all schemas
-   */
-  static generateAllSourceSchema(cls: Class, config?: EsSchemaConfig) {
-    const allTypes = ModelRegistry.getClassesByBaseType(cls);
-    return allTypes.reduce((acc, scls) => {
-      Util.deepAssign(acc, this.generateSingleSourceSchema(scls, config));
-      return acc;
-    }, {} as Record<string, any>);
-  }
-
-  /**
-   * Build a schema for a given class
-   */
-  static generateSingleSourceSchema<T>(cls: Class<T>, config?: EsSchemaConfig): Record<string, any> {
-    const schema = SchemaRegistry.getViewSchema(cls);
-
-    const props: Record<string, any> = {};
-
-    for (const field of schema.fields) {
-      const conf = schema.schema[field];
-
-      if (conf.type === Point) {
-        props[field] = { type: 'geo_point' };
-      } else if (conf.type === Number) {
-        let prop: Record<string, any> = { type: 'integer' };
-        if (conf.precision) {
-          const [digits, decimals] = conf.precision;
-          if (decimals) {
-            if ((decimals + digits) < 16) {
-              prop = { type: 'scaled_float', ['scaling_factor']: decimals };
-            } else {
-              if (digits < 6 && decimals < 9) {
-                prop = { type: 'half_float' };
-              } else if (digits > 20) {
-                prop = { type: 'double' };
-              } else {
-                prop = { type: 'float' };
-              }
-            }
-          } else if (digits) {
-            if (digits <= 2) {
-              prop = { type: 'byte' };
-            } else if (digits <= 4) {
-              prop = { type: 'short' };
-            } else if (digits <= 9) {
-              prop = { type: 'integer' };
-            } else {
-              prop = { type: 'long' };
-            }
-          }
-        }
-        props[field] = prop;
-      } else if (conf.type === Date) {
-        props[field] = { type: 'date', format: 'date_optional_time' };
-      } else if (conf.type === Boolean) {
-        props[field] = { type: 'boolean' };
-      } else if (conf.type === String) {
-        let text = {};
-        if (conf.specifier && conf.specifier.startsWith('text')) {
-          text = {
-            fields: {
-              text: { type: 'text' }
-            }
-          };
-          if (config && config.caseSensitive) {
-            Util.deepAssign(text, {
-              fields: {
-                ['text_cs']: { type: 'text', analyzer: 'whitespace' }
-              }
-            });
-          }
-        }
-        props[field] = { type: 'keyword', ...text };
-      } else if (conf.type === Object) {
-        props[field] = { type: 'object', dynamic: true };
-      } else if (SchemaRegistry.has(conf.type)) {
-        props[field] = {
-          type: conf.array ? 'nested' : 'object',
-          ...this.generateSingleSourceSchema(conf.type, config)
-        };
-      }
-    }
-
-    return { properties: props, dynamic: false };
   }
 }

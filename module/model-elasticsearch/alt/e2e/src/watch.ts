@@ -1,9 +1,9 @@
-import { Model, ModelCore, ModelSource } from '@travetto/model';
+import { Model, ModelType } from '@travetto/model-core';
 import { Schema } from '@travetto/schema';
 import { Application } from '@travetto/app';
 import { InjectableFactory, Inject } from '@travetto/di';
 
-import { ElasticsearchModelSource, ElasticsearchModelConfig } from '../../..';
+import { ElasticsearchModelService, ElasticsearchModelConfig } from '../../..';
 
 @Schema()
 class Address {
@@ -15,7 +15,7 @@ class Address {
 }
 
 @Model()
-class Person implements ModelCore {
+class Person implements ModelType {
   id?: string;
   name: string;
   age: number;
@@ -24,15 +24,15 @@ class Person implements ModelCore {
 }
 
 @Model()
-class Employee implements ModelCore {
+class Employee implements ModelType {
   id?: string;
   name: string;
 }
 
 export class Conf {
   @InjectableFactory()
-  static getSource(config: ElasticsearchModelConfig): ModelSource {
-    return new ElasticsearchModelSource(config);
+  static getSource(config: ElasticsearchModelConfig) {
+    return new ElasticsearchModelService(config);
   }
 }
 
@@ -40,20 +40,20 @@ export class Conf {
 export class Service {
 
   @Inject()
-  src: ModelSource;
+  src: ElasticsearchModelService;
 
   async run() {
-    await this.src.save(Person, Person.from({ name: 'bob', age: 10, gender: 'm', }));
-    await this.src.save(Employee, Employee.from({ name: 'bob2' }));
+    await this.src.create(Person, Person.from({ name: 'bob', age: 10, gender: 'm', }));
+    await this.src.create(Employee, Employee.from({ name: 'bob2' }));
 
-    const res = await (this.src as ElasticsearchModelSource).getRawMultiQuery([Employee, Person], {
-      where: {
-        name: {
-          $regex: /.*/
-        }
-      }
-    });
+    // const res = await this.src.getRawMultiQuery([Employee, Person], {
+    //   where: {
+    //     name: {
+    //       $regex: /.*/
+    //     }
+    //   }
+    // });
 
-    console.log(res);
+    // console.log(res);
   }
 }

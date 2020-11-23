@@ -5,7 +5,7 @@ import { EsSchemaConfig } from './internal/types';
 /**
  * Elasticsearch model config
  */
-@Config('elasticsearch.model')
+@Config('model.elasticsearch')
 export class ElasticsearchModelConfig {
   /**
    * List of hosts to support

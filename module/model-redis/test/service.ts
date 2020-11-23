@@ -1,7 +1,8 @@
 import { Suite } from '@travetto/test';
-import { RedisModelConfig, RedisModelService } from '..';
 import { ModelCrudSuite } from '@travetto/model-core/test/lib/crud';
 import { ModelExpirySuite } from '@travetto/model-core/test/lib/expiry';
+
+import { RedisModelConfig, RedisModelService } from '..';
 
 @Suite()
 export class RedisCrudSuite extends ModelCrudSuite {
