@@ -63,7 +63,7 @@ export class ModelIndexedUtil {
           f = f[k];
         }
       }
-      return [parts.join(separator), `${o}`] as [key: string, value: string];
+      return [parts.join(separator), o] as [key: string, value: any];
     });
   }
 

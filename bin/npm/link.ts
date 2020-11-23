@@ -74,7 +74,7 @@ async function finalizeModule(root: string) {
     }
   }
 
-  return `finalized ${links} links`;
+  return `finalized ${`${links}`.padStart(3, ' ')} links`;
 }
 
 /**
