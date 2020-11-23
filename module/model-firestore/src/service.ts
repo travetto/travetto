@@ -13,7 +13,7 @@ import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/inde
 
 import { FirestoreModelConfig } from './config';
 
-const toSimple = (inp: any, missingValue = null) => {
+const toSimple = (inp: any, missingValue: any = null): any => {
   if (inp === undefined || inp === null) {
     return missingValue;
   } else if (Array.isArray(inp)) {
@@ -23,7 +23,7 @@ const toSimple = (inp: any, missingValue = null) => {
   } else if (Util.isPrimitive(inp)) {
     return inp;
   } else if (inp instanceof Map) {
-    return Object.fromEntries(inp.entries().map(([k, v]) => [k, toSimple(v, missingValue)]));
+    return Object.fromEntries([...inp.entries()].map(([k, v]) => [k, toSimple(v, missingValue)]));
   } else {
     return Object.fromEntries(Object.entries(inp)
       .filter(([k, v]) => !Util.isFunction(v))
@@ -68,7 +68,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   /**
    * An event listener for whenever a model is added, changed or removed
    */
-  async onModelVisiblityChange?<T extends ModelType>(e: ChangeEvent<Class<T>>) {
+  async onModelVisibilityChange?<T extends ModelType>(e: ChangeEvent<Class<T>>) {
     const cls = (e.curr || e.prev)!;
     // Don't create tables for non-concrete types
     if (ModelRegistry.getBaseModel(cls) !== cls) {
@@ -80,7 +80,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       case 'changed': break;
       case 'removing': {
         for await (const el of this.list(cls)) {
-          await this.delete(cls, el.id);
+          await this.delete(cls, el.id!);
         }
       }
     }
@@ -103,7 +103,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     const res = await this.getCollection(cls).doc(id).get();
 
     if (res && res.exists) {
-      return await ModelCrudUtil.load(cls, res.data());
+      return await ModelCrudUtil.load(cls, res.data()!);
     }
     throw new NotFoundError(cls, id);
   }
@@ -127,7 +127,6 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
-
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
     await this.getCollection(cls).doc(id!).set(toSimple(item, firebase.firestore.FieldValue.delete()), { merge: true });
     return this.get(cls, id);
@@ -154,7 +153,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     const res = ModelIndexedUtil.flattenIndexItem(cls, idx, body);
     const query = res.reduce((q, [k, v]) =>
-      q.where(k, '==', v), this.getCollection(cls));
+      q.where(k, '==', v), this.getCollection(cls) as firebase.firestore.Query);
 
     const item = await query.get();
 

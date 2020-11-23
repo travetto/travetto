@@ -1,5 +1,4 @@
-import { Model } from '../../../src/registry';
-import { BaseModel } from '../../../src/model/base';
+import { Model, BaseModel } from '@travetto/model-core';
 
 @Model()
 export class User extends BaseModel {

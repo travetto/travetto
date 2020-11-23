@@ -1,4 +1,4 @@
-import { Model, ModelCore, ModelService } from '@travetto/model';
+import { Model, ModelType, ModelCrudSupport } from '@travetto/model-core';
 import { Schema } from '@travetto/schema';
 import { Application, AppUtil } from '@travetto/app';
 import { Inject } from '@travetto/di';
@@ -15,7 +15,7 @@ class Address {
 }
 
 @Model()
-class Person implements ModelCore {
+class Person implements ModelType {
   id?: string;
   name: string;
   age: number;
@@ -24,7 +24,7 @@ class Person implements ModelCore {
 }
 
 @Model()
-class Employee implements ModelCore {
+class Employee implements ModelType {
   id?: string;
   name: string;
 }
@@ -33,15 +33,15 @@ class Employee implements ModelCore {
 export class Service {
 
   @Inject()
-  src: ModelService;
+  src: ModelCrudSupport;
 
   @Inject()
   context: AsyncContext;
 
   @WithAsyncContext({})
   async run() {
-    await this.src.save(Person, Person.from({ name: 'bob', age: 10, gender: 'm', }));
-    await this.src.save(Employee, Employee.from({ name: 'bob2' }));
+    await this.src.create(Person, Person.from({ name: 'bob', age: 10, gender: 'm', }));
+    await this.src.create(Employee, Employee.from({ name: 'bob2' }));
     return AppUtil.waitHandle();
   }
 }

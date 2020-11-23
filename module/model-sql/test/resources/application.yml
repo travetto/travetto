@@ -1,5 +1,4 @@
-sql:
-  model:
-    database: app
-    user: root
-    password: password
+model.sql:
+  database: app
+  user: root
+  password: password

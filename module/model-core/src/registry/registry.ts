@@ -1,6 +1,7 @@
 import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry, Class } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { ModelOptions } from './types';
 import { NotFoundError } from '../error/not-found';
@@ -106,7 +107,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   getStore(cls: Class) {
     if (!this.stores.has(cls)) {
       const config = this.get(cls) ?? this.getOrCreatePending(cls);
-      const name = (config.store || cls.ᚕid.replace(/[^A-Za-z0-9\-_]/g, '_')).toLowerCase();
+      const name = (config.store || `${cls.name}_${SystemUtil.naiveHash(cls.ᚕid)}`.toLowerCase());
       this.stores.set(cls, name);
     }
     return this.stores.get(cls)!;
