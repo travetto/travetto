@@ -7,7 +7,7 @@ export type Service = {
   name: string;
   version: string;
   port?: number;
-  ports?: number[];
+  ports?: Record<number, number>;
   privileged?: boolean;
   image: string;
   args?: string[];
@@ -25,7 +25,7 @@ export class ServiceUtil {
    * Determine if service is running
    */
   static async isRunning(svc: Service, timeout = 100) {
-    const port = svc.ports?.[0] ?? svc.port ?? 0;
+    const port = svc.ports ? +Object.keys(svc.ports)[0] : (svc.port ?? 0);
     if (port > 0) {
       return CommandUtil.waitForPort(port, timeout).then(x => true, x => false);
     } else {
@@ -74,8 +74,8 @@ export class ServiceUtil {
           .addEnvVars(svc.env || {});
 
         if (svc.ports) {
-          for (const port of svc.ports) {
-            conatiner.exposePort(port);
+          for (const [pub, pri] of Object.entries(svc.ports)) {
+            conatiner.exposePort(+pub, +pri);
           }
         } else if (svc.port) {
           conatiner.exposePort(svc.port);

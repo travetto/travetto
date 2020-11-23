@@ -9,16 +9,16 @@
   "dependencies": {
     "@travetto/model-core": "^1.1.1",
     "@travetto/config": "^1.1.1",
-    "@aws-sdk/client-dynamodb": "^1.0.0-rc.4"
+    "firebase-admin": "^9.4.1"
   },
-  "title": "DynamoDB Model Support",
-  "description": "DynamoDB backing for the travetto model module.",
+  "title": "Firestore Model Support",
+  "description": "Firestore backing for the travetto model module.",
   "homepage": "https://travetto.io",
   "keywords": [
     "typescript",
     "travetto",
     "model",
-    "dynamodb"
+    "firestore"
   ],
   "license": "MIT",
   "main": "index.ts",
@@ -27,10 +27,10 @@
     "src",
     "support"
   ],
-  "name": "@travetto/model-dynamodb",
+  "name": "@travetto/model-firestore",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/model-dynamodb"
+    "directory": "module/model-firestore"
   },
   "version": "1.1.2"
 }

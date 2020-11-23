@@ -1,0 +1,3 @@
+model.firestore:
+  emulator: localhost:7000
+  projectId: trv-local-dev
