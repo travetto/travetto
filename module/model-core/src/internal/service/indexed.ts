@@ -14,6 +14,32 @@ export class ModelIndexedUtil {
   private static _cache = new Map<string, FlattenedConfig>();
 
   /**
+   * Project item via index
+   * @param cls Type to get index for
+   * @param idx Index config
+   */
+  static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, emptyValue = null) {
+    const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
+    return cfg.fields.reduce((res: any, f: any) => {
+      let o: any = item;
+      let sub: any = res;
+
+      while (sub !== undefined) {
+        const k = Object.keys(f)[0];
+        o = o !== undefined ? o[k] : o;
+        if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
+          sub[k] = o ?? emptyValue;
+          break; // At the bottom
+        } else {
+          sub = sub[k] ?? {};
+          f = f[k];
+        }
+      }
+      return res;
+    }, {} as any);
+  }
+
+  /**
    * Get flattened index
    * @param cls Type to get index for
    * @param idx Index config

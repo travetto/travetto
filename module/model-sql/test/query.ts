@@ -2,15 +2,11 @@ import * as assert from 'assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { Schema, FieldConfig } from '@travetto/schema';
-import { Test, BeforeAll } from '@travetto/test';
-import { WhereClause, ModelService } from '@travetto/model';
+import { Test, BeforeAll, Suite } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
-import { VisitStack } from '../../src/internal/util';
-import { SQLDialect } from '../../src/dialect';
-import { TestUtil } from '../lib/util';
-import { DialectSuite as Suite } from '../decorator';
-import { SQLModelSource } from '../../src/source';
+import { VisitStack } from '../src/internal/util';
+import { SQLModelService } from '../src/service';
 
 @Schema()
 class User {
@@ -48,26 +44,25 @@ class WhereType {
   age: number;
 }
 
-@Suite()
-export abstract class QueryTest {
+@Suite({ skip: true })
+export abstract class BaseQueryTest {
 
   get service() {
-    return DependencyRegistry.getInstance(ModelService);
+    return DependencyRegistry.getInstance(SQLModelService);
   }
 
   @BeforeAll()
   async beforeAll() {
     await RootRegistry.init();
-    await TestUtil.init(this);
   }
 
   get dialect() {
-    return this.service.then(s => (s['source'] as SQLModelSource)['dialect']);
+    return this.service.then(s => s.dialect);
   }
 
   @Test()
   async validateQuery() {
-    const qry: WhereClause<WhereType> = {
+    const qry = {
       $and: [
         { a: { b: { c: 5 } } },
         { d: { e: true } },

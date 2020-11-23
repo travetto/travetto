@@ -1,6 +1,7 @@
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
-import { ModelRegistry, ModelCore, SelectClause, SortClause } from '@travetto/model';
+import { SelectClause, SortClause } from '@travetto/model-query';
+import { ModelRegistry, ModelType } from '@travetto/model-core';
 import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
@@ -168,7 +169,7 @@ export class SQLUtil {
   /**
    * Process a schema instance by visiting it synchronously.  This is synchronous to prevent concurrent calls from breaking
    */
-  static visitSchemaInstance<T extends ModelCore>(cls: Class<T>, instance: T, handler: VisitHandler<any, VisitInstanceNode<any>>) {
+  static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T, handler: VisitHandler<any, VisitInstanceNode<any>>) {
     const pathObj: any[] = [instance];
     this.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: (config) => {
@@ -298,7 +299,7 @@ export class SQLUtil {
   static buildTable(list: VisitStack[]) {
     const top = list[list.length - 1];
     if (!top[TABLE_SYM]) {
-      top[TABLE_SYM] = list.map((el, i) => i === 0 ? ModelRegistry.getBaseCollection(el.type) : el.name).join('_');
+      top[TABLE_SYM] = list.map((el, i) => i === 0 ? ModelRegistry.getStore(el.type) : el.name).join('_');
     }
     return top[TABLE_SYM]!;
   }

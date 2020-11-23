@@ -34,9 +34,9 @@ export abstract class BaseModelSuite<T extends ModelCrudSupport> {
     const service = await this.service;
     if (isStorageSupported(service)) {
       await service.createStorage();
-      if (service.onModelVisiblityChange) {
+      if (service.onModelVisibilityChange) {
         for (const cls of ModelRegistry.getClasses()) {
-          await service.onModelVisiblityChange({ type: 'added', curr: cls });
+          await service.onModelVisibilityChange({ type: 'added', curr: cls });
         }
       }
     }
@@ -46,9 +46,9 @@ export abstract class BaseModelSuite<T extends ModelCrudSupport> {
   async deleteStorage() {
     const service = await this.service;
     if (isStorageSupported(service)) {
-      if (service.onModelVisiblityChange) {
+      if (service.onModelVisibilityChange) {
         for (const cls of ModelRegistry.getClasses()) {
-          await service.onModelVisiblityChange({ type: 'removing', prev: cls });
+          await service.onModelVisibilityChange({ type: 'removing', prev: cls });
         }
       }
       await service.deleteStorage();

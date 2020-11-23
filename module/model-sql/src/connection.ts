@@ -63,7 +63,7 @@ export interface ConnectionAware<C = any> {
  */
 export async function withConnection<V extends ConnectionAware, R>(
   self: V,
-  fn: (this: V, ...args: any[]) => R,
+  fn: (this: V, ...argv: any[]) => R,
   args: any[] = []
 ): Promise<R> {
   const ogConn = self.conn.active; // See if there is an existing conn
@@ -81,13 +81,36 @@ export async function withConnection<V extends ConnectionAware, R>(
   }
 }
 
+
+/**
+ * Run a function with a valid sql connection available.  Relies on @travetto/context.
+ */
+export async function* withConnectionIterator<V extends ConnectionAware, R>(
+  self: V,
+  fn: (this: V, ...argv: any[]) => AsyncGenerator<R>,
+  args: any[] = []
+): AsyncGenerator<R> {
+  const ogConn = self.conn.active; // See if there is an existing conn
+  const top = !ogConn;
+  if (top) {
+    let conn;
+    try {
+      conn = await self.conn.acquire();
+      yield* fn.apply(self, args);
+    } finally {
+      await self.conn.release(conn);
+    }
+  } else {
+    yield* fn.apply(self, args);
+  }
+}
 /**
  * Run a function within a valid sql transaction.  Relies on @travetto/context.
  */
 export async function withTransaction<V extends ConnectionAware, R>(
   self: V,
   mode: TransactionType,
-  fn: (this: V, ...args: any[]) => R,
+  fn: (this: V, ...argv: any[]) => R,
   args: any[] = []
 ): Promise<R> {
   const ctx = self.conn.asyncContext;
@@ -131,6 +154,18 @@ export function Connected<T extends ConnectionAware>() {
     const og = desc.value!;
     desc.value = function (this: T, ...args: any[]) {
       return withConnection(this, og, args);
+    };
+  };
+}
+
+/**
+ * Decorator to ensure a method runs with a valid connection
+ */
+export function ConnectedIterator<T extends ConnectionAware>() {
+  return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(this: T, ...args: any[]) => AsyncGenerator<any>>) {
+    const og = desc.value!;
+    desc.value = async function* (this: T, ...args: any[]) {
+      yield* withConnectionIterator(this, og, args);
     };
   };
 }
