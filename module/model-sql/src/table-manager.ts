@@ -4,8 +4,9 @@ import { ChangeEvent, Class } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
 
 import { SQLModelConfig } from './config';
-import { Connected, Transactional, withTransaction } from './connection';
-import { SQLDialect } from './dialect';
+import { Connected, Transactional } from './connection/decorator';
+import { SQLDialect } from './dialect/base';
+import { SQLUtil, VisitStack } from './internal/util';
 
 /**
  * Manage creation/updating of all tables
@@ -29,7 +30,7 @@ export class TableManager {
   @Connected()
   @Transactional()
   private async onFieldChange(ev: SchemaChangeEvent) {
-    return this.dialect.handleFieldChange(ev);
+    return this.handleFieldChange(ev);
   }
 
   /**
@@ -45,7 +46,7 @@ export class TableManager {
     if (indices) {
       for (const op of this.dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {
-          await withTransaction(this, 'isolated', this.exec, [op]);
+          await this.dialect.conn.runWithTransaction('isolated', () => this.exec(op));
         } catch (e) {
           if (!/\bexists|duplicate\b/i.test(e.message)) {
             throw e;
@@ -78,7 +79,7 @@ export class TableManager {
    */
   @WithAsyncContext({})
   async onSchemaChange(ev: SchemaChangeEvent) {
-    if (this.dialect.handleFieldChange(ev)) {
+    if (this.handleFieldChange(ev)) {
       try {
         await this.onFieldChange(ev);
       } catch (e) {
@@ -106,5 +107,24 @@ export class TableManager {
       case 'removing': await this.dropTables(cls); break;
       case 'added': await this.createTables(cls); break;
     }
+  }
+
+  /**
+   * Listen to field change and update the schema as needed
+   */
+  async handleFieldChange(e: SchemaChangeEvent): Promise<void> {
+    const rootStack = SQLUtil.classToStack(e.cls);
+
+    const changes = e.change.subs.reduce((acc, v) => {
+      const path = v.path.map(f => ({ ...f }));
+      for (const ev of v.fields) {
+        acc[ev.type].push([...rootStack, ...path, { ...(ev.type === 'removing' ? ev.prev : ev.curr)! }]);
+      }
+      return acc;
+    }, { added: [], changed: [], removing: [] } as Record<ChangeEvent<any>['type'], VisitStack[][]>);
+
+    await Promise.all(changes.added.map(v => this.dialect.executeSQL(this.dialect.getAddColumnSQL(v))));
+    await Promise.all(changes.changed.map(v => this.dialect.executeSQL(this.dialect.getModifyColumnSQL(v))));
+    await Promise.all(changes.removing.map(v => this.dialect.executeSQL(this.dialect.getDropColumnSQL(v))));
   }
 }

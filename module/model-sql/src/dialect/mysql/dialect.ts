@@ -2,11 +2,11 @@
 import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
-import { WhereClause } from '@travetto/model';
+// import { WhereClause } from '@travetto/model';
 
 
 import { SQLModelConfig } from '../../config';
-import { SQLDialect } from '../../dialect';
+import { SQLDialect } from '../base';
 import { VisitStack } from '../../internal/util';
 import { MySQLConnection } from './connection';
 
@@ -71,24 +71,6 @@ export class MySQLDialect extends SQLDialect {
   }
 
   /**
-   * Simple query execution
-   */
-  async executeSQL<T = any>(query: string): Promise<{ count: number, records: T[] }> {
-    return new Promise<{ count: number, records: T[] }>((res, rej) => {
-      console.debug(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
-      this.conn.active.query(query, (err, results, fields) => {
-        if (err) {
-          console.debug(err);
-          rej(err);
-        } else {
-          const records = Array.isArray(results) ? [...results].map(v => ({ ...v })) : [{ ...results }] as T[];
-          res({ records, count: results.affectedRows });
-        }
-      });
-    });
-  }
-
-  /**
    * Define column modification
    */
   getModifyColumnSQL(stack: VisitStack[]) {
@@ -99,7 +81,7 @@ export class MySQLDialect extends SQLDialect {
   /**
    * Add root alias to delete clause
    */
-  getDeleteSQL(stack: VisitStack[], where?: WhereClause<any>) {
+  getDeleteSQL(stack: VisitStack[], where?: /* WhereClause<any>*/ any) {
     const sql = super.getDeleteSQL(stack, where);
     return sql.replace(/\bDELETE\b/g, `DELETE ${this.rootAlias}`);
   }

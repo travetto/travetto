@@ -23,7 +23,7 @@ export class ConsoleCapture {
   }
 
   static end() {
-    const ret = this.out;
+    const ret = this.out ?? {};
     this.out = {};
     ConsoleManager.clear();
     return Object.fromEntries(Object.entries(ret).map(([k, v]) => [k, v.join('\n')]));

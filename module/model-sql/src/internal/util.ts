@@ -20,7 +20,6 @@ export type VisitStack = {
  * Utilities for dealing with SQL operations
  */
 export class SQLUtil {
-  static readonly ROOT_ALIAS = '_ROOT';
 
   static schemaFieldsCache = new Map<Class, {
     local: FieldConfig[];

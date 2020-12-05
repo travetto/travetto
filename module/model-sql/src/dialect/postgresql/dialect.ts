@@ -4,7 +4,7 @@ import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 
 import { SQLModelConfig } from '../../config';
-import { SQLDialect } from '../../dialect';
+import { SQLDialect } from '../base';
 import { VisitStack } from '../../internal/util';
 import { PostgreSQLConnection } from './connection';
 
@@ -45,15 +45,6 @@ export class PostgreSQLDialect extends SQLDialect {
 
   ident(field: FieldConfig | string) {
     return `"${typeof field === 'string' ? field : field.name}"`;
-  }
-
-  /**
-   * Simple query execution
-   */
-  async executeSQL<T = any>(query: string): Promise<{ count: number, records: T[] }> {
-    console.debug(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
-    const out = await this.conn.active.query(query);
-    return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as T[] };
   }
 
   /**

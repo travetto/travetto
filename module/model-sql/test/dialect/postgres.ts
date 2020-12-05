@@ -15,7 +15,7 @@ class Config {
   @InjectableFactory({ primary: true })
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
     return new PostgreSQLDialect(ctx, config);
-  }
+  } 
 }
 
 @WithSuiteContext()

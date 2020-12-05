@@ -1,11 +1,12 @@
-import { Class, ChangeEvent } from '@travetto/registry';
-import { SchemaRegistry, FieldConfig, SchemaChangeEvent, Schema } from '@travetto/schema';
+import { Class } from '@travetto/registry';
+import { SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
 import { Util, AppError } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model-core';
 
-import { SQLUtil, VisitStack } from './internal/util';
-import { DeleteWrapper, InsertWrapper, DialectState } from './internal/types';
+import { SQLUtil, VisitStack } from '../internal/util';
+import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
+import { Connection } from '../connection/base';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
 const has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
@@ -125,7 +126,7 @@ export abstract class SQLDialect implements DialectState {
 
   regexWordBoundary = '\\b';
 
-  rootAlias = SQLUtil.ROOT_ALIAS;
+  rootAlias = '_ROOT';
 
   aliasCache = new Map<Class, Map<string, Alias>>();
 
@@ -142,17 +143,16 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Get connection
    */
-  abstract get conn(): any;
+  abstract get conn(): Connection<any>;
 
   /**
    * Hash a value
    */
   abstract hash(inp: string): string;
 
-  /**
-   * Run SQL Query
-   */
-  abstract executeSQL<T>(sql: string): Promise<{ count: number, records: T[] }>;
+  executeSQL<T>(sql: string) {
+    return this.conn.execute<T>(this.conn.active, sql);
+  }
 
   /**
    * Identify a name or field (escape it)
@@ -263,25 +263,6 @@ export abstract class SQLDialect implements DialectState {
   }
 
   /**
-   * Listen to field change and update the schema as needed
-   */
-  async handleFieldChange(e: SchemaChangeEvent): Promise<void> {
-    const rootStack = SQLUtil.classToStack(e.cls);
-
-    const changes = e.change.subs.reduce((acc, v) => {
-      const path = v.path.map(f => ({ ...f }));
-      for (const ev of v.fields) {
-        acc[ev.type].push([...rootStack, ...path, { ...(ev.type === 'removing' ? ev.prev : ev.curr)! }]);
-      }
-      return acc;
-    }, { added: [], changed: [], removing: [] } as Record<ChangeEvent<any>['type'], VisitStack[][]>);
-
-    await Promise.all(changes.added.map(v => this.executeSQL(this.getAddColumnSQL(v))));
-    await Promise.all(changes.changed.map(v => this.executeSQL(this.getModifyColumnSQL(v))));
-    await Promise.all(changes.removing.map(v => this.executeSQL(this.getDropColumnSQL(v))));
-  }
-
-  /**
    * Remove a sql column
    */
   getDropColumnSQL(stack: VisitStack[]) {
@@ -367,7 +348,7 @@ export abstract class SQLDialect implements DialectState {
     SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: ({ descend, path }) => {
         const table = resolve(path);
-        clauses.set(table, { alias: SQLUtil.ROOT_ALIAS, path });
+        clauses.set(table, { alias: this.rootAlias, path });
         return descend();
       },
       onSub: ({ descend, config, path }) => {
