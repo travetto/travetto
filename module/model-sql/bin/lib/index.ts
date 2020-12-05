@@ -6,8 +6,8 @@ export async function getSchemas(clear = true) {
   await PhaseManager.init();
 
   const { DependencyRegistry } = await import('@travetto/di');
-  const { ModelRegistry } = await import('../../src/dialect/mysql/node_modules/@travetto/model');
-  const { SQLDialect } = await import('../../src/dialect');
+  const { ModelRegistry } = await import('@travetto/model-core');
+  const { SQLDialect } = await import('../../src/dialect/base');
 
   const src = (await DependencyRegistry.getInstance(SQLDialect));
 
@@ -19,7 +19,7 @@ export async function getSchemas(clear = true) {
       drops.push(...src.getDropAllTablesSQL(cls));
     }
     creates.push(...src.getCreateAllTablesSQL(cls));
-    creates.push(...src.getCreateAllIndicesSQL(cls, ModelRegistry.get(cls).indices));
+    creates.push(...src.getCreateAllIndicesSQL(cls, ModelRegistry.get(cls).indices!));
   }
 
   return [...drops, ...creates];

@@ -4,16 +4,15 @@ import {
 } from '@travetto/model-core';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { Class, ChangeEvent } from '@travetto/registry';
-import { Util } from '@travetto/base';
 import { SchemaChangeEvent } from '@travetto/schema';
 import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { Query, WhereClause } from '@travetto/model-query';
 
 import { SQLModelConfig } from './config';
-import { Connected, ConnectedIterator, Transactional } from './connection';
+import { Connected, ConnectedIterator, Transactional } from './connection/decorator';
 import { SQLUtil } from './internal/util';
-import { SQLDialect } from './dialect';
+import { SQLDialect } from './dialect/base';
 import { TableManager } from './table-manager';
 
 /**
@@ -107,7 +106,6 @@ export class SQLModelService implements ModelCrudSupport, ModelStorageSupport, M
   async createStorage() { }
   async deleteStorage() { }
 
-  @Connected()
   @Transactional()
   async create<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     await ModelCrudUtil.preStore(cls, item, this);
@@ -117,14 +115,12 @@ export class SQLModelService implements ModelCrudSupport, ModelStorageSupport, M
     return item;
   }
 
-  @Connected()
   @Transactional()
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     await this.delete(cls as Class<T & { id: string }>, item.id!);
     return await this.create(cls, item);
   }
 
-  @Connected()
   @Transactional()
   async upsert<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     try {
@@ -137,8 +133,6 @@ export class SQLModelService implements ModelCrudSupport, ModelStorageSupport, M
     return await this.create(cls, item);
   }
 
-
-  @Connected()
   @Transactional()
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>): Promise<T> {
     const final = await ModelCrudUtil.naivePartialUpdate(cls, item, undefined, () => this.get(cls, id));
@@ -162,7 +156,6 @@ export class SQLModelService implements ModelCrudSupport, ModelStorageSupport, M
     }
   }
 
-  @Connected()
   @Transactional()
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
     const count = await this.dialect.deleteAndGetCount(cls, { where: { id } } as any);
@@ -171,7 +164,6 @@ export class SQLModelService implements ModelCrudSupport, ModelStorageSupport, M
     }
   }
 
-  @Connected()
   @Transactional()
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse> {
     const deleteOps = operations.map(x => x.delete).filter(x => !!x) as T[];
