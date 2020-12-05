@@ -3,32 +3,22 @@ import * as mysql from 'mysql';
 
 import { ShutdownManager } from '@travetto/base';
 import { AsyncContext } from '@travetto/context';
-import { ConnectionSupport } from '../../connection';
+import { Connection } from '../../connection/base';
 import { SQLModelConfig } from '../../config';
-
-const isFn = (o: any): o is Function => o && 'bind' in o;
-
-const asAsync = <V = void, T = any>(ctx: T, prop: keyof T) => {
-  const val = ctx[prop];
-  if (isFn(val)) {
-    const fn = val.bind(ctx) as (cb: (err: any, val?: any) => void) => void;
-    return new Promise<V>((res, rej) => fn((e, v) => e ? rej(e) : res(v)));
-  } else {
-    throw new Error(`Invalid async function: ${prop}`);
-  }
-};
 
 /**
  * Connection support for mysql
  */
-export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> {
+export class MySQLConnection extends Connection<mysql.PoolConnection> {
 
   pool: mysql.Pool;
 
   constructor(
-    private context: AsyncContext,
+    context: AsyncContext,
     private config: SQLModelConfig
-  ) { }
+  ) {
+    super(context);
+  }
 
   async init() {
     this.pool = mysql.createPool({
@@ -60,43 +50,27 @@ export class MySQLConnection implements ConnectionSupport<mysql.PoolConnection> 
     return res;
   }
 
-  get asyncContext() {
-    return this.context.get<{ connection: mysql.PoolConnection }>('connection');
+  async execute<T = any>(conn: mysql.Connection, query: string): Promise<{ count: number, records: T[] }> {
+    return new Promise<{ count: number, records: T[] }>((res, rej) => {
+      console.debug(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
+      conn.query(query, (err, results, fields) => {
+        if (err) {
+          console.debug(err);
+          rej(err);
+        } else {
+          const records = Array.isArray(results) ? [...results].map(v => ({ ...v })) : [{ ...results }] as T[];
+          res({ records, count: results.affectedRows });
+        }
+      });
+    });
   }
 
-  get active(): mysql.PoolConnection {
-    return this.asyncContext.connection;
+  acquire() {
+    return new Promise<mysql.PoolConnection>((res, rej) =>
+      this.pool.getConnection((err, conn) => err ? rej(err) : res(conn)));
   }
 
-  /**
-  * Acquire conn
-  */
-  async acquire() {
-    const res = await asAsync<mysql.PoolConnection>(this.pool, 'getConnection');
-    if (!this.active) {
-      this.asyncContext.connection = res;
-    }
-    return res;
-  }
-
-  /**
-   * Release conn
-   */
   release(conn: mysql.PoolConnection) {
-    if (conn) {
-      if (this.active === conn) {
-        this.context.clear('connection');
-      }
-      this.pool.releaseConnection(conn);
-    }
+    this.pool.releaseConnection(conn);
   }
-
-  // Transaction operations
-  startTx = () => asAsync(this.active, 'beginTransaction');
-  commit = () => asAsync(this.active, 'commit');
-  rollback = () => asAsync(this.active, 'rollback');
-
-  startNestedTx = async (id: string) => { await this.active.query(`SAVEPOINT ${id}`); };
-  commitNested = async (id: string) => { await this.active.query(`RELEASE SAVEPOINT ${id}`); };
-  rollbackNested = async (id: string) => { await this.active.query(`ROLLBACK TO ${id}`); };
 }

@@ -2,25 +2,28 @@
 import * as pg from 'pg';
 
 import { ShutdownManager } from '@travetto/base';
-import { AsyncContext } from '@travetto/context';
-import { ConnectionSupport, withConnection, withTransaction } from '../../connection';
+import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { Connection } from '../../connection/base';
 import { SQLModelConfig } from '../../config';
 
 /**
  * Connection support for postgresql
  */
-export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
+export class PostgreSQLConnection extends Connection<pg.PoolClient> {
 
   pool: pg.Pool;
 
   constructor(
-    private context: AsyncContext,
+    context: AsyncContext,
     private config: SQLModelConfig
-  ) { }
+  ) {
+    super(context);
+  }
 
   /**
    * Initializes connection and establishes crypto extension for use with hashing
    */
+  @WithAsyncContext()
   async init() {
     this.pool = new pg.Pool({
       user: this.config.user,
@@ -31,56 +34,27 @@ export class PostgreSQLConnection implements ConnectionSupport<pg.PoolClient> {
       ...(this.config.options || {})
     });
 
-    try {
-      await this.context.run(() =>
-        withConnection({ conn: this }, () =>
-          withTransaction({ conn: this }, 'required', () =>
-            this.active.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;'))));
-    } catch (err) {
-      // swallow
-    }
+    await this.runWithActive(() =>
+      this.runWithTransaction('required', () =>
+        this.execute(this.active, 'CREATE EXTENSION IF NOT EXISTS pgcrypto;')
+      )
+    );
 
     // Close postgres
     ShutdownManager.onShutdown(__filename, () => this.pool.end());
   }
 
-  get asyncContext() {
-    return this.context.get<{ connection: pg.PoolClient }>('connection');
+  async execute<T = any>(conn: pg.PoolClient, query: string): Promise<{ count: number, records: T[] }> {
+    console.debug(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
+    const out = await conn.query(query);
+    return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as T[] };
   }
 
-  get active(): pg.PoolClient {
-    return this.asyncContext.connection;
+  acquire() {
+    return this.pool.connect();
   }
 
-  /**
-  * Acquire conn
-  */
-  async acquire() {
-    const res = await this.pool.connect();
-    if (!this.active) {
-      this.asyncContext.connection = res;
-    }
-    return res;
-  }
-
-  /**
-   * Release conn
-   */
   release(conn: pg.PoolClient) {
-    if (conn) {
-      if (this.active === conn) {
-        this.context.clear('connection');
-      }
-      conn.release();
-    }
+    conn.release();
   }
-
-  // Transaction operations
-  startTx = async () => { await this.active.query('BEGIN'); };
-  commit = async () => { await this.active.query('COMMIT'); };
-  rollback = async () => { await this.active.query('ROLLBACK'); };
-
-  startNestedTx = async (id: string) => { await this.active.query(`SAVEPOINT ${id}`); };
-  commitNested = async (id: string) => { await this.active.query(`RELEASE SAVEPOINT ${id}`); };
-  rollbackNested = async (id: string) => { await this.active.query(`ROLLBACK TO ${id}`); };
 }

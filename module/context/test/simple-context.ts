@@ -30,7 +30,6 @@ class VerifyContext {
   @Test()
   @WithAsyncContext({})
   async nextContext() {
-    console.log(this.context['threads'].size);
     assert(this.context.get().name === undefined);
   }
 
@@ -52,9 +51,28 @@ class VerifyContext {
     assert(attempts.length === 10);
 
     await Promise.all(attempts.map(x => this.context.run(x)));
+  }
 
-    assert(this.context.storageState.size === 0);
-    assert(this.context['active'] === 0);
-    assert(this.context['threads'].size === 0);
+
+  @Test()
+  async concurrentDivergent() {
+
+    const contexts: any[] = [];
+
+    await Promise.all([1, 2].map(async (__, i) => {
+      await this.context.run(async () => {
+        this.context.get().name = `test-${i}`;
+        if (i === 1) {
+          this.context.get().age = 30;
+        }
+        await new Promise(r => setTimeout(r, 20));
+        await this.context.run(async () => {
+          contexts.push(JSON.parse(JSON.stringify(this.context.get())));
+        }, { color: 'green' });
+      }, { age: 20, name: 'bob' });
+    }));
+
+    assert(contexts[0] === { age: 20, name: 'test-0', color: 'green' });
+    assert(contexts[1] === { age: 30, name: 'test-1', color: 'green' });
   }
 }

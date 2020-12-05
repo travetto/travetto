@@ -16,14 +16,15 @@ function Wrapped(this: Promise<any>, ex: any) {
   this.then = prom.then.bind(prom);
   this.catch = prom.catch.bind(prom);
   this.finally = prom.finally.bind(prom);
-  this.then(() => this.status = 'ok',
-    () => this.status = 'error');
+  this.then(() => prom.status = 'ok',
+    () => prom.status = 'error');
 
   if (PromiseCapture.pending) {
     PromiseCapture.pending.push(prom);
   }
 }
 
+Wrapped.allSettled = Promise.allSettled.bind(Promise);
 Wrapped.race = Promise.race.bind(Promise);
 Wrapped.all = Promise.all.bind(Promise);
 Wrapped.resolve = Promise.resolve.bind(Promise);
@@ -40,7 +41,7 @@ export class PromiseCapture {
    */
   static start() {
     this.pending = [];
-    global.Promise = Wrapped;
+    global.Promise = Wrapped as unknown as typeof Promise;
   }
 
   /**
@@ -49,6 +50,7 @@ export class PromiseCapture {
   static async resolvePending(pending: Promise<any>[]) {
     if (pending.length) {
       let final: Error | undefined;
+      console.debug('Resolving', this.pending.length);
       await Promise.all(pending).catch(err => final = err);
 
       // If any return in an error, make that the final result
@@ -60,6 +62,7 @@ export class PromiseCapture {
    * Stop the capture
    */
   static stop() {
+    console.debug('Stopping', this.pending.length);
     // Restore the promise
     global.Promise = og;
     return this.resolvePending(this.pending.filter(x => x.status === undefined));
