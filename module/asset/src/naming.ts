@@ -3,16 +3,17 @@ import * as mime from 'mime';
 import { Asset } from './types';
 
 /**
- * Standard class for an asset naming strateigy
+ * Standard class for an asset naming strategy
+ * @concrete ./internal/types:AssetNamingStrategyImpl
  */
-export abstract class AssetNamingStrategy {
+export interface AssetNamingStrategy {
   readonly prefix: string;
 
   /**
    * Produce a path for a given asset
    * @param asset Get path from an asset
    */
-  abstract resolve(asset: Asset): string;
+  resolve(asset: Asset): string;
 }
 
 /**
