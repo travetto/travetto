@@ -24,7 +24,7 @@
   "title": "Email Templating",
   "description": "Email templating module",
   "devDependencies": {
-    "@types/js-beautify": "^1.11.0",
+    "@types/js-beautify": "^1.13.1",
     "js-beautify": "^1.13.0"
   },
   "homepage": "https://travetto.io",
