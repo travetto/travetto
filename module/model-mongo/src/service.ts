@@ -10,11 +10,12 @@ import {
   BulkResponse,
   ModelBulkSupport,
   NotFoundError,
-  ExistsError
+  ExistsError,
+  ModelIndexedSupport
 } from '@travetto/model-core';
 
 
-import { Class } from '@travetto/registry';
+import { ChangeEvent, Class } from '@travetto/registry';
 import { ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
@@ -22,6 +23,7 @@ import { SchemaValidator } from '@travetto/schema';
 
 import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
+import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
 
 function uuid(val: string) {
   // return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
@@ -47,7 +49,7 @@ function preInsertId<T extends ModelType>(item: T) {
  * Mongo-based model source
  */
 @Injectable()
-export class MongoModelService implements ModelCrudSupport, ModelStorageSupport, ModelBulkSupport, ModelStreamSupport {
+export class MongoModelService implements ModelCrudSupport, ModelStorageSupport, ModelBulkSupport, ModelStreamSupport, ModelIndexedSupport {
 
   private client: mongo.MongoClient;
   private db: mongo.Db;
@@ -73,20 +75,30 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     return new mongo.ObjectId().toHexString();
   }
 
-  /**
-   * Initialize db, setting up indicies
-   */
-  async createStorage() {
-    // Establish geo indices
-    const promises: Promise<any>[] = [];
-    for (const model of ModelRegistry.getClasses()) {
-      // promises.push(...this.establishIndices(model));
-    }
-    await Promise.all(promises);
-  }
+  async createStorage() { }
 
   async deleteStorage() {
     await this.db.dropDatabase();
+  }
+
+  async establishIndices<T extends ModelType>(cls: Class<T>) {
+    const indices = ModelRegistry.get(cls).indices ?? [];
+    await Promise.all(indices.map(idx => {
+      const combined = Object.assign({}, ...idx.fields);
+      console.debug('Creating index', combined, { unique: idx.unique });
+      return this.getStore(cls)
+        .then(col => col.createIndex(combined, { unique: idx.unique }));
+    }));
+  }
+
+  async onModelVisibilityChange(ev: ChangeEvent<Class>) {
+    switch (ev.type) {
+      case 'added':
+      case 'changed': {
+        await this.establishIndices(ev.curr!);
+        break;
+      }
+    }
   }
 
   /**
@@ -309,5 +321,14 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     }
 
     return out;
+  }
+
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const store = await this.getStore(cls);
+    const result = await store.findOne(ModelIndexedUtil.projectIndex(cls, idx, body, null));
+    if (!result) {
+      throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
+    }
+    return await ModelCrudUtil.load(cls, result);
   }
 }

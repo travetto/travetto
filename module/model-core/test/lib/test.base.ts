@@ -3,9 +3,8 @@ import { Class, RootRegistry } from '@travetto/registry';
 
 import { ModelCrudSupport } from '../..';
 import { ModelRegistry } from '../../src/registry/registry';
-import { isIndexedSupported, isStorageSupported } from '../../src/internal/service/common';
+import { isStorageSupported } from '../../src/internal/service/common';
 import { AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
-import { Model } from '../../src/registry/decorator';
 
 export abstract class BaseModelSuite<T extends ModelCrudSupport> {
 
