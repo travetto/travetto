@@ -38,8 +38,7 @@ export class UtilTest {
     const png = await ResourceManager.toAbsolutePath('google');
     const asset = await AssetUtil.fileToAsset(png);
     assert(asset.contentType === 'image/png');
-    assert(asset.path === png);
+    assert(asset.filename === png);
     assert(asset.size === fs.statSync(png).size);
   }
-
 }
