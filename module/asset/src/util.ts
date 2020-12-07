@@ -25,7 +25,7 @@ export class AssetUtil {
     const str = fs.createReadStream(pth);
     const hashStream = str.pipe(hasher);
 
-    await new Promise((res, rej) => {
+    await new Promise<void>((res, rej) => {
       hashStream.on('finish', e => e ? rej(e) : res());
     });
     return hasher.read().toString() as string;

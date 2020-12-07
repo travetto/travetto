@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { ModelStreamSupport, StreamMeta, ExistsError, NotFoundError } from '@travetto/model-core';
+import { ModelStreamSupport, ExistsError, NotFoundError } from '@travetto/model-core';
 
 import { Asset } from './types';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
@@ -15,9 +15,9 @@ export const AssetModelSymbol = Symbol.for('@trv:asset/model');
 export class AssetService {
 
   constructor(
-    @Inject(AssetModelSymbol)
-    private store: ModelStreamSupport,
-    private namingStrategy?: AssetNamingStrategy) {
+    @Inject(AssetModelSymbol) private store: ModelStreamSupport,
+    private namingStrategy?: AssetNamingStrategy
+  ) {
     if (!namingStrategy) {
       this.namingStrategy = new SimpleNamingStrategy();
     }
@@ -49,12 +49,12 @@ export class AssetService {
    */
   async upsert({ stream, ...asset }: Asset & { stream: NodeJS.ReadableStream }, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
     // Apply strategy on save
-    const locations = (strategy ?? this.namingStrategy!).resolve(asset);
+    const location = (strategy ?? this.namingStrategy!).resolve(asset);
 
     if (!overwriteIfFound) {
       let missing = false;
       try {
-        await this.getMetadata(locations);
+        await this.getMetadata(location);
       } catch (err) {
         if (err instanceof NotFoundError) {
           missing = true;
@@ -63,12 +63,12 @@ export class AssetService {
         }
       }
       if (!missing) {
-        throw new ExistsError('File', locations);
+        throw new ExistsError('Asset', location);
       }
     }
 
-    await this.store.upsertStream(locations, stream, asset);
-    return locations;
+    await this.store.upsertStream(location, stream, asset);
+    return location;
   }
 
   /**
