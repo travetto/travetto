@@ -8,6 +8,9 @@ import { ElasticsearchModelConfig } from './config';
 import { ElasticsearchSchemaUtil } from './internal/schema';
 import { EsIdentity } from './internal/types';
 
+/**
+ * Manager for elasticsearch indices and schemas
+ */
 export class IndexManager {
 
   private indexToAlias = new Map<string, string>();
@@ -79,13 +82,9 @@ export class IndexManager {
         body: {
           mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
           settings: this.config.indexCreate
-        }
+        },
+        ...(alias ? { aliases: { [ident.index]: {} } } : {})
       });
-      if (alias) {
-        this.indexToAlias.set(concreteIndex, ident.index);
-        this.aliasToIndex.set(ident.index, concreteIndex);
-        await this.client.indices.putAlias({ index: concreteIndex, name: ident.index });
-      }
       console.debug(`Index ${ident.index} created`);
       console.debug('Index', JSON.stringify({
         mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,

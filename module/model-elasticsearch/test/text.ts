@@ -4,7 +4,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { LongText, Text, Schema } from '@travetto/schema';
 
-import { ElasticsearchUtil } from '../src/internal/query';
+import { ElasticsearchSchemaUtil } from '../src/internal/schema';
 
 @Schema()
 class TextAble {
@@ -25,7 +25,7 @@ export class TextTestSuite {
 
   @Test()
   async validateTextSchema() {
-    const schema = ElasticsearchUtil.generateSingleSourceSchema(TextAble);
+    const schema = ElasticsearchSchemaUtil.generateSingleSourceSchema(TextAble);
 
     assert(schema.properties);
     assert(schema.properties.bio);
