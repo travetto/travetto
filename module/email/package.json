@@ -9,13 +9,13 @@
   "dependencies": {
     "@travetto/config": "^1.1.1",
     "@travetto/di": "^1.1.1",
-    "@types/mustache": "^4.0.1",
-    "mustache": "^4.0.1"
+    "@types/mustache": "^4.1.0",
+    "mustache": "^4.1.0"
   },
   "title": "Email",
   "description": "Email transmission module.",
   "optionalPeerDependencies": {
-    "nodemailer": "^6.4.14",
+    "nodemailer": "^6.4.16",
     "@types/nodemailer": "^6.4.0"
   },
   "homepage": "https://travetto.io",
