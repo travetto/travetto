@@ -1,12 +1,14 @@
 import * as s3 from '@aws-sdk/client-s3';
 
 import { StreamUtil } from '@travetto/boot';
-import { ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta, ModelType, ModelRegistry, ExistsError, NotFoundError } from '@travetto/model-core';
+import {
+  ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
+  ModelType, ModelRegistry, ExistsError, NotFoundError
+} from '@travetto/model-core';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { Injectable } from '@travetto/di';
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
-import { TypeMismatchError } from '@travetto/schema';
 
 import { S3ModelConfig } from './config';
 
@@ -253,6 +255,6 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         }
       });
     }
-    // await this.client.deleteBucket({ Bucket: this.config.bucket });
+    await this.client.deleteBucket({ Bucket: this.config.bucket });
   }
 }
