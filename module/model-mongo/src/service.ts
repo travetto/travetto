@@ -16,23 +16,32 @@ import {
 
 
 import { ChangeEvent, Class } from '@travetto/registry';
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
+import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
 import { SchemaValidator } from '@travetto/schema';
 
 import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
-import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
 
 function uuid(val: string) {
-  // return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
-  return new mongo.ObjectId(val);
+  return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
+}
+
+function idToString(id: string | mongo.ObjectID | mongo.Binary) {
+  if (typeof id === 'string') {
+    return id;
+  } else if (id instanceof mongo.ObjectID) {
+    return id.toHexString();
+  } else {
+    return id.buffer.toString('hex');
+  }
 }
 
 async function postLoadId<T extends ModelType>(item: T) {
   if (item && '_id' in item) {
-    item.id = (item as any)._id.toHexString();
+    item.id = idToString((item as any)._id);
     delete (item as any)._id;
   }
   return item;
@@ -72,7 +81,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
    * Build a mongo identifier
    */
   uuid() {
-    return new mongo.ObjectId().toHexString();
+    return Util.uuid();
   }
 
   async createStorage() { }
@@ -272,7 +281,6 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
         bulk.insert(preInsertId(op.insert));
       } else if (op.upsert) {
         const newId = !op.upsert.id;
-
         op.upsert = await ModelCrudUtil.preStore(cls, op.upsert, this);
         const id = uuid(op.upsert.id!);
         bulk.find({ _id: id })
@@ -280,7 +288,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
           .updateOne({ $set: op.upsert });
 
         if (newId) {
-          out.insertedIds.set(i, id.toHexString());
+          out.insertedIds.set(i, op.upsert.id!);
         }
       } else if (op.update) {
         op.update = await ModelCrudUtil.preStore(cls, op.update, this);
@@ -299,7 +307,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
         }
       }
       for (const { index, _id } of res.getUpsertedIds() as { index: number, _id: mongo.ObjectID }[]) {
-        out.insertedIds.set(index, _id.toHexString());
+        out.insertedIds.set(index, idToString(_id));
       }
 
       if (out.counts) {
