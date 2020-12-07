@@ -2,12 +2,16 @@ import * as redis from 'redis';
 import * as util from 'util';
 
 import { ShutdownManager, Util } from '@travetto/base';
-import { ModelCrudSupport, ModelExpirySupport, ModelRegistry, ExpiryState, ModelType, ModelStorageSupport, Model, NotFoundError, ExistsError } from '@travetto/model-core';
+import {
+  ModelCrudSupport, ModelExpirySupport, ModelRegistry, ExpiryState, ModelType, ModelStorageSupport,
+  Model, NotFoundError, ExistsError, ModelIndexedSupport
+} from '@travetto/model-core';
 import { Injectable } from '@travetto/di';
 import { Class } from '@travetto/registry';
 
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';
+import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
 
 import { RedisModelConfig } from './config';
 
@@ -35,7 +39,7 @@ class ExpiryMeta implements ModelType, ExpiryState {
  * A model service backed by redis
  */
 @Injectable()
-export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport {
+export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
   cl: redis.RedisClient;
 
@@ -72,6 +76,24 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       if (cursor === '0') {
         done = true;
       }
+    }
+  }
+
+  private async store<T extends ModelType>(cls: Class<T>, item: T) {
+    const key = this.resolveKey(cls, item.id);
+    const config = ModelRegistry.get(cls);
+    // Store with indices
+    if (config.indices?.length) {
+      const multi = this.cl.multi();
+      multi.set(key, JSON.stringify(item));
+
+      for (const idx of config.indices) {
+        multi.hmset(this.resolveKey(cls, idx.name), ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id!);
+      }
+
+      return new Promise<void>((resolve, reject) => multi.exec(err => err ? reject(err) : resolve()));
+    } else {
+      return await this.wrap(util.promisify(this.cl.set))(key, JSON.stringify(item));
     }
   }
 
@@ -118,14 +140,13 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    const key = this.resolveKey(cls, item.id);
-    await this.wrap(util.promisify(this.cl.set))(key, JSON.stringify(item));
+    await this.store(cls, item);
     return item;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
-    await this.wrap(util.promisify(this.cl.set))(this.resolveKey(cls, item.id), JSON.stringify(item));
+    await this.store(cls, item);
     return item as T;
   }
 
@@ -198,5 +219,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
         }
       }
     }
+  }
+
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const key = ModelIndexedUtil.computeIndexKey(cls, idx, body);
+    const id = await this.wrap(util.promisify(this.cl.hget))(this.resolveKey(cls, idx), key);
+    return this.get(cls, id);
   }
 }
