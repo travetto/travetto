@@ -2,11 +2,12 @@ import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model-core/test/lib/test.base';
-import { MemoryModelConfig, MemoryModelService, ModelExpirySupport } from '@travetto/model-core';
-import { DependencyRegistry, Inject, Injectable, InjectableFactory } from '@travetto/di';
+import { ModelExpirySupport } from '@travetto/model-core';
+import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
+import { RootRegistry } from '@travetto/registry';
 
 import { Cache, EvictCache } from '../src/decorator';
-import { CacheModelSymbol, CacheService } from '../src/service';
+import { CacheService } from '../src/service';
 import { CacheUtil } from '../src/util';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
@@ -19,14 +20,6 @@ class User {
     Object.assign(this, values);
   }
 }
-
-class Config {
-  @InjectableFactory(CacheModelSymbol)
-  static getModel(config: MemoryModelConfig) {
-    return new MemoryModelService(config);
-  }
-}
-
 
 @Injectable()
 class SampleService {
@@ -86,28 +79,25 @@ class SampleService {
   }
 }
 
-@Suite()
-export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
+@Suite({ skip: true })
+export abstract class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
 
   baseLatency = 10;
 
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
-
   @BeforeAll()
   async initAll() {
-    // const cache = await DependencyRegistry.getInstance(CacheService);
-    // cache.cullRate = 1000;
+    await RootRegistry.init();
+    const cache = await DependencyRegistry.getInstance(CacheService);
+    cache.cullRate = this.baseLatency + 50;
   }
 
-  get cacheService() {
+  get testService() {
     return DependencyRegistry.getInstance(SampleService);
   }
 
   @Test()
   async basic() {
-    const service = await this.cacheService;
+    const service = await this.testService;
     let start = Date.now();
     let res = await service.basic(10);
     let diff = Date.now() - start;
@@ -123,7 +113,7 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
 
   @Test()
   async aging() {
-    const service = await this.cacheService;
+    const service = await this.testService;
 
     let start = Date.now();
     let res = await service.agesQuickly(10);
@@ -131,7 +121,7 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
     assert(diff > 75);
     assert(res === 30);
 
-    await wait(510);
+    await this.wait(510);
 
     start = Date.now();
     res = await service.agesQuickly(10);
@@ -142,7 +132,7 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
 
   @Test()
   async ageWithExtension() {
-    const service = await this.cacheService;
+    const service = await this.testService;
 
     let start = Date.now();
     let res = await service.ageExtension(10);
@@ -151,16 +141,16 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
     assert(res === 30);
 
     for (let i = 0; i < 2; i += 1) {
-      await wait(55);
+      await this.wait(55);
 
       start = Date.now();
       res = await service.ageExtension(10);
       diff = Date.now() - start;
-      assert(diff < this.baseLatency);
+      assert(diff < (100 + this.baseLatency));
       assert(res === 30);
     }
 
-    await wait(210);
+    await this.wait(210);
     start = Date.now();
     res = await service.ageExtension(10);
     diff = Date.now() - start;
@@ -170,7 +160,7 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
 
   @Test()
   async complex() {
-    const service = await this.cacheService;
+    const service = await this.testService;
 
     const val = await service.complexInput({ a: 5, b: 20 }, 20);
     const val2 = await service.complexInput({ a: 5, b: 20 }, 20);
@@ -182,12 +172,12 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
     assert(val3 !== val4);
     assert.deepStrictEqual(val3, val5);
 
-    assert(CacheUtil.toSafeJSON(/abc/) !== CacheUtil.toSafeJSON(/cde/));
+    assert(CacheUtil.toSafeJSON(/abc/, true) !== CacheUtil.toSafeJSON(/cde/, true));
   }
 
   @Test()
   async customKey() {
-    const service = await this.cacheService;
+    const service = await this.testService;
 
     const val4 = await service.customKey({ a: 5, b: 20 }, 20);
     const val5 = await service.customKey({ b: 5, a: 20 }, 30);
@@ -199,7 +189,7 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
 
   // @Test()
   // async culling() {
-  //   const service = await this.cacheService;
+  //   const service = await this.testService;
 
   //   if (this.service instanceof CullableCacheSource) {
   //     await Promise.all(
@@ -220,7 +210,7 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
 
   @Test()
   async reinstating() {
-    const service = await this.cacheService;
+    const service = await this.testService;
 
     const user = await service.getUser('200');
     assert(user instanceof User);
@@ -231,16 +221,16 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
 
   @Test()
   async eviction() {
-    const service = await this.cacheService;
+    const service = await this.testService;
 
     await service.getUser('200');
     const start = Date.now();
     await service.getUser('200');
-    assert((Date.now() - start) <= this.baseLatency);
+    assert((Date.now() - start) <= (this.baseLatency + 100));
 
     await service.deleteUser('200');
     const start2 = Date.now();
     await service.getUser('200');
-    assert((Date.now() - start2) >= this.baseLatency);
+    assert((Date.now() - start2) >= 100);
   }
 }

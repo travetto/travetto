@@ -2,12 +2,6 @@ import * as ts from 'typescript';
 
 import { TransformerState, DecoratorMeta, OnMethod } from '@travetto/transformer';
 
-const CACHE_UTIL = 'CacheUtil';
-
-interface CacheState {
-  util: ts.Identifier;
-}
-
 /**
  * Transform the cache headers
  */
@@ -16,28 +10,16 @@ export class CacheTransformer {
   static key = '@trv:cache';
 
   /**
-   * Manage state for access to cache functions
-   */
-  static initState(state: TransformerState & CacheState) {
-    if (!state.util) {
-      const util = state.importFile(require.resolve('../src/util')).ident;
-      state.util = util;
-    }
-  }
-
-  /**
    * When `@Cache` and `@Evict` are present
    */
   @OnMethod('Cache', 'Evict')
-  static instrumentCache(state: TransformerState & CacheState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
+  static instrumentCache(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
 
     const isCache = !!state.findDecorator(this, node, 'Cache');
     const dec = dm?.dec;
 
     // If valid function
     if (dec && ts.isCallExpression(dec.expression)) {
-      this.initState(state);
-
       const params = dec.expression.arguments;
       const id = params[0] as ts.Identifier;
       let config = params.length > 1 ? params[1] : state.fromLiteral({});

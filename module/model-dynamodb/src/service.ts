@@ -11,6 +11,7 @@ import {
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model-core/src/internal/service/storage';
 
 import { DynamoDBModelConfig } from './config';
 
@@ -111,6 +112,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async postConstruct() {
     this.cl = new dynamodb.DynamoDB({ ...this.config.config });
+    ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onShutdown(__filename, () => this.cl.destroy());
   }
 

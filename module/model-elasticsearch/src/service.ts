@@ -7,6 +7,7 @@ import {
 } from '@travetto/model-core';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model-core/src/internal/service/storage';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Util, ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
@@ -47,6 +48,7 @@ export class ElasticsearchModelService implements ModelCrudSupport, ModelIndexed
       ...(this.config.options || {})
     });
     await this.client.cluster.health({});
+    ModelStorageUtil.registerModelChangeListener(this);
     this.manager = new IndexManager(this.config, this.client);
     ShutdownManager.onShutdown(__filename, () => this.client.close());
   }

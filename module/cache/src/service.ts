@@ -1,5 +1,4 @@
-import { AppError } from '@travetto/base';
-import { ModelExpirySupport, ModelRegistry } from '@travetto/model-core';
+import { Model, ModelExpirySupport, NotFoundError } from '@travetto/model-core';
 import { Schema, Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 
@@ -9,7 +8,9 @@ import { CacheUtil } from './util';
 
 export const CacheModelSymbol = Symbol.for('@trv:cache/model');
 
-@Schema()
+const INFINITE_MAX_AGE = new Date('10000-01-01').getTime();
+
+@Model({ for: CacheModelSymbol })
 export class CacheType {
   id?: string;
   @Text()
@@ -32,11 +33,6 @@ export class CacheService {
   cullRate = 10 * 60000; // 10 minutes
 
   constructor(@Inject(CacheModelSymbol) private modelService: ModelExpirySupport) { }
-
-  postConstruct() {
-    // Manually install model on demand
-    ModelRegistry.install(CacheType, { type: 'added', curr: CacheType });
-  }
 
   async getAndCheckAge(config: CacheConfig, id: string) {
     if (this.modelService.deleteExpired) {
@@ -64,15 +60,12 @@ export class CacheService {
   }
 
   async setWithAge(config: CacheConfig, id: string, entry: any) {
-    let store: CacheType;
-
     entry = CacheUtil.toSafeJSON(entry);
 
-    if (config.maxAge) {
-      store = await this.modelService.upsertWithExpiry(CacheType, { id, entry }, config.maxAge);
-    } else {
-      store = await this.modelService.upsert(CacheType, { id, entry });
-    }
+    const store = await this.modelService.upsertWithExpiry(CacheType,
+      CacheType.from({ id, entry }),
+      config.maxAge ?? INFINITE_MAX_AGE
+    );
 
     return CacheUtil.fromSafeJSON(store.entry);
   }
@@ -83,7 +76,7 @@ export class CacheService {
     try {
       res = await this.getAndCheckAge(config, id);
     } catch (err) {
-      if (!(err instanceof CacheError) && !(err instanceof AppError && err.category !== 'notfound')) {
+      if (!(err instanceof CacheError) && !(err instanceof NotFoundError)) {
         throw err;
       }
     }

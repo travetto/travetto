@@ -1,11 +1,6 @@
 import { CacheService } from './service';
 import { CoreCacheConfig, CacheConfig } from './types';
 
-type ValidCacheFields<T> = {
-  [K in keyof T]:
-  (T[K] extends CacheService ? K : never)
-}[keyof T];
-
 type TypedMethodDecorator<T, U> = (target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => U>) => void;
 
 /**
@@ -14,7 +9,7 @@ type TypedMethodDecorator<T, U> = (target: T, propertyKey: string, descriptor: T
  * @param config The additional cache configuration
  * @augments `@trv:cache/Cache`
  */
-export function Cache<U, F extends ValidCacheFields<U>>(
+export function Cache<F extends string, U extends Record<F, CacheService>>(
   field: F, config: CacheConfig = {}): (
     target: U, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => Promise<any>>
   ) => void {
@@ -28,6 +23,8 @@ export function Cache<U, F extends ValidCacheFields<U>>(
  * @param config The additional cache configuration
  * @augments `@trv:cache/Evict`
  */
-export function EvictCache<U>(field: ValidCacheFields<U>, config: CoreCacheConfig = {}): TypedMethodDecorator<U, Promise<any>> {
+export function EvictCache<F extends string, U extends Record<F, CacheService>>(
+  field: F, config: CoreCacheConfig = {}
+): TypedMethodDecorator<U, Promise<any>> {
   return function (target: U, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => Promise<any>>) { };
 }

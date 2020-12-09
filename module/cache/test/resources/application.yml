@@ -1,0 +1,8 @@
+model.dynamodb:
+  config:
+    endpoint: http://localhost:8000
+
+model.redis:
+  client:
+    host: localhost
+    port: 6379
