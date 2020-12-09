@@ -232,4 +232,17 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     }
     throw new NotFoundError(cls, id);
   }
+
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const config = ModelRegistry.get(cls).indices!.find(i => i.name === idx);
+    if (!config) {
+      throw new NotFoundError(cls, `Index ${idx}`);
+    }
+    const id = ModelIndexedUtil.computeIndexKey(cls, config, body);
+    const index = this.indexes.get(`${cls.ᚕid}:${idx}`);
+    if (index && index.has(id)) {
+      index.delete(id);
+    }
+    throw new NotFoundError(cls, id);
+  }
 }
