@@ -6,8 +6,6 @@ const CACHE_UTIL = 'CacheUtil';
 
 interface CacheState {
   util: ts.Identifier;
-  cache: ts.PropertyAccessExpression;
-  evict: ts.PropertyAccessExpression;
 }
 
 /**
@@ -24,8 +22,6 @@ export class CacheTransformer {
     if (!state.util) {
       const util = state.importFile(require.resolve('../src/util')).ident;
       state.util = util;
-      state.cache = state.createAccess(util, CACHE_UTIL, 'cache');
-      state.evict = state.createAccess(util, CACHE_UTIL, 'evict');
     }
   }
 
@@ -61,6 +57,8 @@ export class CacheTransformer {
         node.body!
       );
 
+      const target = state.factory.createElementAccessExpression(state.factory.createThis(), id);
+
       // Return new method calling evict or cache depending on decorator.
       return state.factory.updateMethodDeclaration(
         node,
@@ -74,15 +72,17 @@ export class CacheTransformer {
         node.type,
         state.factory.createBlock([
           state.factory.createReturnStatement(
-            state.factory.createCallExpression(isCache ? state.cache : state.evict, undefined, [
-              config,
-              state.factory.createElementAccessExpression(state.factory.createThis(), id),
-              state.factory.createThis(),
-              fn,
-              state.factory.createArrayLiteralExpression([
-                state.factory.createSpreadElement(state.createIdentifier('arguments'))
-              ])
-            ] as (readonly ts.Expression[]))
+            state.factory.createCallExpression(
+              state.factory.createPropertyAccessExpression(target, isCache ? 'cache' : 'evict'),
+              undefined,
+              [
+                config,
+                state.factory.createThis(),
+                fn,
+                state.factory.createArrayLiteralExpression([
+                  state.factory.createSpreadElement(state.createIdentifier('arguments'))
+                ])
+              ] as (readonly ts.Expression[]))
           )
         ])
       );

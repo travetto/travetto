@@ -3,10 +3,10 @@ import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model-core/test/lib/test.base';
 import { MemoryModelConfig, MemoryModelService, ModelExpirySupport } from '@travetto/model-core';
-import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
+import { DependencyRegistry, Inject, Injectable, InjectableFactory } from '@travetto/di';
 
 import { Cache, EvictCache } from '../src/decorator';
-import { CacheService } from '../src/service';
+import { CacheModelSymbol, CacheService } from '../src/service';
 import { CacheUtil } from '../src/util';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
@@ -17,6 +17,13 @@ class User {
   }
   constructor(values: any) {
     Object.assign(this, values);
+  }
+}
+
+class Config {
+  @InjectableFactory(CacheModelSymbol)
+  static getModel(config: MemoryModelConfig) {
+    return new MemoryModelService(config);
   }
 }
 
@@ -86,13 +93,12 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
 
   constructor() {
     super(MemoryModelService, MemoryModelConfig);
-
   }
 
   @BeforeAll()
   async initAll() {
-    const cache = await DependencyRegistry.getInstance(CacheService);
-    cache.cullRate = 1000;
+    // const cache = await DependencyRegistry.getInstance(CacheService);
+    // cache.cullRate = 1000;
   }
 
   get cacheService() {

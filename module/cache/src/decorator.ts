@@ -14,8 +14,8 @@ type TypedMethodDecorator<T, U> = (target: T, propertyKey: string, descriptor: T
  * @param config The additional cache configuration
  * @augments `@trv:cache/Cache`
  */
-export function Cache<U>(
-  field: ValidCacheFields<U>, config: CacheConfig = {}): (
+export function Cache<U, F extends ValidCacheFields<U>>(
+  field: F, config: CacheConfig = {}): (
     target: U, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => Promise<any>>
   ) => void {
   return function (target: U, propertyKey: string, descriptor: TypedPropertyDescriptor<(...params: any[]) => Promise<any>>) { };
