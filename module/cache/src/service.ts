@@ -1,11 +1,13 @@
 import { AppError } from '@travetto/base';
 import { ModelExpirySupport, ModelRegistry } from '@travetto/model-core';
 import { Schema, Text } from '@travetto/schema';
-import { Injectable } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 
 import { CacheConfig } from './types';
 import { CacheError } from './error';
 import { CacheUtil } from './util';
+
+export const CacheModelSymbol = Symbol.for('@trv:cache/model');
 
 @Schema()
 export class CacheType {
@@ -29,7 +31,7 @@ export class CacheService {
    */
   cullRate = 10 * 60000; // 10 minutes
 
-  constructor(private modelService: ModelExpirySupport) { }
+  constructor(@Inject(CacheModelSymbol) private modelService: ModelExpirySupport) { }
 
   postConstruct() {
     // Manually install model on demand
