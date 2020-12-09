@@ -20,6 +20,7 @@ class User {
   }
 }
 
+
 @Injectable()
 class SampleService {
 
@@ -175,7 +176,7 @@ export class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
     assert(val3 !== val4);
     assert.deepStrictEqual(val3, val5);
 
-    assert(CacheUtil.computeKey(/abc/) !== CacheUtil.computeKey(/cde/));
+    assert(CacheUtil.toSafeJSON(/abc/) !== CacheUtil.toSafeJSON(/cde/));
   }
 
   @Test()
