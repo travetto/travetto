@@ -12,6 +12,7 @@ import { Class } from '@travetto/registry';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model-core/src/internal/service/storage';
 
 import { RedisModelConfig } from './config';
 
@@ -99,6 +100,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async postConstruct() {
     this.cl = new redis.RedisClient(this.config.client);
+    ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onShutdown(__filename, () => this.cl.quit());
   }
 

@@ -45,6 +45,10 @@ export class ModelOptions<T extends ModelType> {
    * Vendor specific extras
    */
   extra?: object;
+  /**
+   * Which provider is this for
+   */
+  for?: symbol;
 }
 
 /**

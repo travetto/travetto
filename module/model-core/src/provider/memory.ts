@@ -15,8 +15,8 @@ import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
 import { ModelIndexedSupport } from '../service/indexed';
-import { IndexConfig } from '../registry/types';
 import { ModelIndexedUtil } from '../internal/service/indexed';
+import { ModelStorageUtil } from '../internal/service/storage';
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -81,6 +81,10 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     store.set(item.id!, Buffer.from(JSON.stringify(item)));
     await this.writeIndices(cls, item);
     return item;
+  }
+
+  postConstruct() {
+    ModelStorageUtil.registerModelChangeListener(this);
   }
 
   // CRUD Support

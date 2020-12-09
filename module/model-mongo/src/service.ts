@@ -20,6 +20,7 @@ import { ShutdownManager, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model-core/src/internal/service/storage';
 import { SchemaValidator } from '@travetto/schema';
 
 import { MongoUtil } from './internal/util';
@@ -74,6 +75,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
       bucketName: 'streams',
       writeConcern: { w: 1 }
     });
+    ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onShutdown(__filename, () => this.client.close());
   }
 
