@@ -339,4 +339,24 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
     throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
   }
+
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const query = {
+      TableName: this.resolveTable(cls),
+      IndexName: idx,
+      ProjectionExpression: 'id',
+      KeyConditionExpression: `${idx}__ = :${idx}`,
+      ExpressionAttributeValues: {
+        [`:${idx}`]: toValue(ModelIndexedUtil.computeIndexKey(cls, idx, body))
+      }
+    };
+
+    const result = await this.cl.query(query);
+
+    if (result.Count && result.Items && result.Items[0]) {
+      await this.delete(cls, result.Items[0].id.S!);
+      return;
+    }
+    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
+  }
 }
