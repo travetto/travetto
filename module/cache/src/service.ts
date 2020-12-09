@@ -36,12 +36,10 @@ export class CacheService {
     ModelRegistry.install(CacheType, { type: 'added', curr: CacheType });
   }
 
-  async getAndCheckAge(config: CacheConfig, key: string) {
+  async getAndCheckAge(config: CacheConfig, id: string) {
     if (this.modelService.deleteExpired) {
       await this.cull();
     }
-
-    const id = this.modelService.uuid(key);
 
     const { expiresAt, expired, maxAge } = await this.modelService.getExpiry(CacheType, id);
 
@@ -63,9 +61,8 @@ export class CacheService {
     return CacheUtil.fromSafeJSON(res.entry);
   }
 
-  async setWithAge(config: CacheConfig, key: string, entry: any) {
+  async setWithAge(config: CacheConfig, id: string, entry: any) {
     let store: CacheType;
-    const id = this.modelService.uuid(key);
 
     entry = CacheUtil.toSafeJSON(entry);
 
@@ -78,11 +75,11 @@ export class CacheService {
     return CacheUtil.fromSafeJSON(store.entry);
   }
 
-  async getOptional(config: CacheConfig, key: string) {
+  async getOptional(config: CacheConfig, id: string) {
     let res: any;
 
     try {
-      res = await this.getAndCheckAge(config, key);
+      res = await this.getAndCheckAge(config, id);
     } catch (err) {
       if (!(err instanceof CacheError) && !(err instanceof AppError && err.category !== 'notfound')) {
         throw err;
@@ -104,11 +101,42 @@ export class CacheService {
   }
 
   /**
-   * Evict an entry by key
-   * @param key The key to evict
+   * Cache the function output
+   *
+   * @param config Cache configuration
+   * @param target Object to run as context
+   * @param fn Function to execute
+   * @param params input parameters
    */
-  async evict(key: string) {
-    const id = this.modelService.uuid(key);
-    return this.modelService.delete(CacheType, id);
+  async cache(config: CacheConfig, target: any, fn: Function, params: any[]) {
+    const id = CacheUtil.generateKey(config, params);
+
+    let res = await this.getOptional(config, id);
+
+    if (res === undefined) {
+      const data = await fn.apply(target, params);
+      res = await this.setWithAge(config, id, data);
+    }
+
+    if (config.reinstate) { // Reinstate result value if needed
+      res = config.reinstate(res);
+    }
+
+    return res;
+  }
+
+  /**
+   * Evict value from cache
+   *
+   * @param config Cache config
+   * @param target Object to run as context
+   * @param fn Function to execute
+   * @param params Input params to the function
+   */
+  async evict(config: CacheConfig, target: any, fn: Function, params: any[]) {
+    const id = CacheUtil.generateKey(config, params);
+    const val = await fn.apply(target, params);
+    await this.modelService.delete(CacheType, id);
+    return val;
   }
 }

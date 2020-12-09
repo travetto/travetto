@@ -1,21 +1,11 @@
 import * as crypto from 'crypto';
 import { Util } from '@travetto/base';
-import { CacheService } from './service';
-import { CacheConfig, CoreCacheConfig } from './types';
+import { CoreCacheConfig } from './types';
 
 /**
  * Standard cache utilities
  */
 export class CacheUtil {
-
-  /**
-   * Compute a cache key off the input params for a function
-   * @params The params to use to compute the key
-   */
-  static computeKey(params: any) {
-    const value = this.toSafeJSON(params, true);
-    return crypto.createHash('sha1').update(value).digest('hex');
-  }
 
   /**
    * Convert value to safe JSON for persistance
@@ -48,49 +38,7 @@ export class CacheUtil {
   static generateKey(config: CoreCacheConfig, params: any[]) {
     const input = config.params?.(params) ?? params;
     const keyParams = config.key?.(...input) ?? input;
-    return `${config.keySpace!}_${this.computeKey(keyParams)}`;
-  }
-
-  /**
-   * Cache the function output
-   *
-   * @param config Cache configuration
-   * @param cache Actual cache source
-   * @param target Object to run as context
-   * @param fn Function to execute
-   * @param params input parameters
-   */
-  static async cache(config: CacheConfig, cache: CacheService, target: any, fn: Function, params: any[]) {
-    const key = this.generateKey(config, params);
-
-    let res = await cache.getOptional(config, key);
-
-    if (res === undefined) {
-      const data = await fn.apply(target, params);
-      res = await cache.setWithAge(config, key, data);
-    }
-
-
-    if (config.reinstate) { // Reinstate result value if needed
-      res = config.reinstate(res);
-    }
-
-    return res;
-  }
-
-  /**
-   * Evict value from cache
-   *
-   * @param config Cache config
-   * @param cache  Cache source
-   * @param target Object to run as context
-   * @param fn Function to execute
-   * @param params Input params to the function
-   */
-  static async evict(config: CacheConfig, cache: CacheService, target: any, fn: Function, params: any[]) {
-    const key = this.generateKey(config, params);
-    const val = await fn.apply(target, params);
-    await cache.evict(key);
-    return val;
+    const key = `${config.keySpace!}_${this.toSafeJSON(keyParams)}`;
+    return crypto.createHash('sha1').update(key).digest('hex').substring(0, 32); // Force to uuid
   }
 }
