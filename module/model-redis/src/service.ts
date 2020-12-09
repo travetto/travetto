@@ -221,9 +221,22 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
+  // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     const key = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const id = await this.wrap(util.promisify(this.cl.hget))(this.resolveKey(cls, idx), key);
-    return this.get(cls, id);
+    if (id) {
+      return this.get(cls, id);
+    }
+    throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
+  }
+
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const key = ModelIndexedUtil.computeIndexKey(cls, idx, body);
+    const id = await this.wrap(util.promisify(this.cl.hget))(this.resolveKey(cls, idx), key);
+    if (id) {
+      return this.delete(cls, id);
+    }
+    throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
   }
 }

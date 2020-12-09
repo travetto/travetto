@@ -269,6 +269,7 @@ export class ElasticsearchModelService implements ModelCrudSupport, ModelIndexed
     return out;
   }
 
+  // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     const res: SearchResponse<T> = await this.client.search({
       index: this.manager.getIdentity(cls).index,
@@ -280,5 +281,18 @@ export class ElasticsearchModelService implements ModelCrudSupport, ModelIndexed
       throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
     }
     return postLoad(await ModelCrudUtil.load(cls, res.body.hits.hits[0]._source));
+  }
+
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const res = await this.client.deleteByQuery({
+      index: this.manager.getIdentity(cls).index,
+      body: {
+        query: ElasticsearchQueryUtil.extractWhereTermQuery(ModelIndexedUtil.projectIndex(cls, idx, body, null), cls)
+      }
+    });
+    if (res.body.deleted) {
+      return;
+    }
+    throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
   }
 }

@@ -331,6 +331,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     return out;
   }
 
+  // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     const store = await this.getStore(cls);
     const result = await store.findOne(ModelIndexedUtil.projectIndex(cls, idx, body, null));
@@ -338,5 +339,14 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
       throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
     }
     return await ModelCrudUtil.load(cls, result);
+  }
+
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const store = await this.getStore(cls);
+    const result = await store.deleteOne(ModelIndexedUtil.projectIndex(cls, idx, body, null));
+    if (result.deletedCount) {
+      return;
+    }
+    throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
   }
 }

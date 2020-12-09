@@ -163,4 +163,18 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
     throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
   }
+
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const res = ModelIndexedUtil.flattenIndexItem(cls, idx, body);
+    const query = res.reduce((q, [k, v]) =>
+      q.where(k, '==', v), this.getCollection(cls) as firebase.firestore.Query);
+
+    const item = await query.get();
+
+    if (item && !item.empty) {
+      return this.delete(cls, item.docs[0].id!);
+    }
+
+    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
+  }
 }
