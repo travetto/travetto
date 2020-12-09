@@ -30,17 +30,20 @@ export class MemoryModelConfig {
 export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
   private store = new Map<string, Map<string, Buffer>>();
-  private expiry = new Map<string, { expiresAt: number, issuedAt: number }>();
+  private expiry = new Map<string, Map<string, { expiresAt: number, issuedAt: number }>>();
   private indexes = new Map<string, Map<string, string>>();
 
   constructor(private config: MemoryModelConfig) { }
 
-  private getStore<T extends ModelType>(cls: Class<T> | string) {
+  private getStore<T extends ModelType>(cls: Class<T> | string): Map<string, Buffer>;
+  private getStore<T extends ModelType>(cls: Class<T> | string, prop: 'store'): Map<string, Buffer>;
+  private getStore<T extends ModelType>(cls: Class<T> | string, prop: 'expiry'): Map<string, { expiresAt: number, issuedAt: number }>;
+  private getStore<T extends ModelType>(cls: Class<T> | string, prop: 'expiry' | 'store' = 'store') {
     const key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
-    if (!this.store.has(key)) {
-      this.store.set(key, new Map());
+    if (!this[prop].has(key)) {
+      this[prop].set(key, new Map());
     }
-    return this.store.get(key)!;
+    return this[prop].get(key)!;
   }
 
   private find<T extends ModelType>(cls: Class<T> | string, id?: string, errorState?: 'data' | 'notfound') {
@@ -167,14 +170,16 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   // Expiry Support
   async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
-    this.expiry.set(id, { expiresAt: ModelExpiryUtil.getExpiresAt(ttl).getTime(), issuedAt: Date.now() });
+    const store = this.getStore(cls, 'expiry');
+    store.set(id, { expiresAt: ModelExpiryUtil.getExpiresAt(ttl).getTime(), issuedAt: Date.now() });
   }
 
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    if (!this.expiry.has(id)) {
+    const store = this.getStore(cls, 'expiry');
+    if (!store.has(id)) {
       throw new NotFoundError('Expiry information', id);
     }
-    const { expiresAt, issuedAt } = this.expiry.get(id)!;
+    const { expiresAt, issuedAt } = store.get(id)!;
     const maxAge = expiresAt - issuedAt;
     const expired = expiresAt < Date.now();
     return { expiresAt, issuedAt, maxAge, expired };
@@ -188,7 +193,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async deleteExpired<T extends ModelType>(cls: Class<T>) {
     let number = 0;
-    for await (const [id, { expiresAt }] of this.expiry.entries()) {
+    const store = this.getStore(cls, 'expiry');
+    for await (const [id, { expiresAt }] of store.entries()) {
       if (expiresAt < Date.now()) {
         await this.delete(cls, id);
         number += 1;
