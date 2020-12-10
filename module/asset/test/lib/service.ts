@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
-import { Test, Suite } from '@travetto/test';
+import { FsUtil } from '@travetto/boot/src';
+import { Test, Suite, BeforeAll } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 import { BaseModelSuite } from '@travetto/model-core/test/lib/test.base';
 import { DependencyRegistry } from '@travetto/di';
@@ -13,6 +14,11 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
 
   get assetService() {
     return DependencyRegistry.getInstance(AssetService);
+  }
+
+  @BeforeAll()
+  async setup() {
+    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '..'));
   }
 
   @Test()

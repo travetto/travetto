@@ -36,7 +36,7 @@ export class ModelPrincipalSource<T extends ModelType> extends PrincipalSource {
    * @param userId The user id to retrieve
    */
   async retrieve(userId: string) {
-    return await this.modelService.get(this.cls, userId);
+    return await this.modelService.get<T>(this.cls, userId);
   }
 
   /**
