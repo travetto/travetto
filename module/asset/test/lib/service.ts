@@ -6,7 +6,7 @@ import { BaseModelSuite } from '@travetto/model-core/test/lib/test.base';
 import { DependencyRegistry } from '@travetto/di';
 import { ModelStreamSupport } from '@travetto/model-core';
 
-import { HashNamingStrategy, AssetService, AssetUtil } from '..';
+import { HashNamingStrategy, AssetService, AssetUtil } from '../..';
 
 @Suite({ skip: true })
 export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSupport> {

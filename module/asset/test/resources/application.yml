@@ -1,3 +1,0 @@
-model.s3:
-  bucket: trvavetto-test
-  endpoint: http://localhost:4566
