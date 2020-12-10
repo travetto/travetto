@@ -1,5 +1,5 @@
 import { Model, ModelExpirySupport, NotFoundError } from '@travetto/model-core';
-import { Schema, Text } from '@travetto/schema';
+import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 
 import { CacheConfig } from './types';

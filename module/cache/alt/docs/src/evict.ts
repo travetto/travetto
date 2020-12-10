@@ -1,11 +1,12 @@
-import { MemoryCacheSource } from '../../../src/source/memory';
+import { MemoryModelService } from '@travetto/model-core';
 import { Cache, EvictCache } from '../../../src/decorator';
+import { CacheService } from '../../../src/service';
 
 class User { }
 
 export class UserService {
 
-  myCache = new MemoryCacheSource();
+  myCache = new CacheService(new MemoryModelService({ namespace: '' }));
   database: any;
 
   @Cache('myCache', { keySpace: 'user.id' })

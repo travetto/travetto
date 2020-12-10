@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
 import { Model } from '../../src/registry/decorator';
-import { ModelExpirySupport } from '../../src/service/expire';
+import { ModelExpirySupport } from '../../src/service/expiry';
 import { BaseModel } from '../../src/types/base';
 import { BaseModelSuite } from './test.base';
 

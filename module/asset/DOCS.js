@@ -1,13 +1,13 @@
 const { doc: d, Install, Code, Section, SnippetLink, Snippet } = require('@travetto/doc');
 const { Injectable } = require('@travetto/di');
 
-const { AssetNamingStrategy, AssetService, AssetSource } = require('.');
+const { AssetNamingStrategy, AssetService } = require('.');
 
 const AssetLink = SnippetLink('Asset', './src/types.ts', /interface Asset/);
 
 exports.text = d`
 
-The asset module requires an ${AssetSource} to provide functionality for reading and writing files. You will need to select one of the available providers to serve as your ${AssetSource}.
+The asset module requires an ${ModelStreamSupport} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${ModelStreamSupport}, or you can roll your own.
 
 ${Install('provider', `@travetto/asset-{provider}`)}
 
