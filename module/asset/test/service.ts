@@ -3,26 +3,13 @@ import * as assert from 'assert';
 import { Test, Suite } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 import { BaseModelSuite } from '@travetto/model-core/test/lib/test.base';
-import { MemoryModelConfig, MemoryModelService, ModelStreamSupport } from '@travetto/model-core';
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
+import { DependencyRegistry } from '@travetto/di';
+import { ModelStreamSupport } from '@travetto/model-core';
 
 import { HashNamingStrategy, AssetService, AssetUtil } from '..';
-import { AssetModelSymbol } from '../src/service';
 
-
-class Init {
-  @InjectableFactory(AssetModelSymbol)
-  static modelProvider(config: MemoryModelConfig) {
-    return new MemoryModelService(config);
-  }
-}
-
-@Suite()
-export class AssetServiceSuite extends BaseModelSuite<ModelStreamSupport> {
-
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+@Suite({ skip: true })
+export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSupport> {
 
   get assetService() {
     return DependencyRegistry.getInstance(AssetService);

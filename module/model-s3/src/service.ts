@@ -1,4 +1,5 @@
 import * as s3 from '@aws-sdk/client-s3';
+import type { MetadataBearer } from '@aws-sdk/types';
 
 import { StreamUtil } from '@travetto/boot';
 import {
@@ -7,10 +8,14 @@ import {
 } from '@travetto/model-core';
 import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
 import { Injectable } from '@travetto/di';
-import { Util } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
 import { S3ModelConfig } from './config';
+
+function isMetadataBearer(o: any): o is MetadataBearer {
+  return '$metadata' in o;
+}
 
 /**
  * Asset source backed by S3
@@ -131,8 +136,10 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       }
       throw new NotFoundError(cls, id);
     } catch (e) {
-      if (e.message.startsWith('NoSuchKey')) {
-        e = new NotFoundError(cls, id);
+      if (isMetadataBearer(e)) {
+        if (e.$metadata.httpStatusCode === 404) {
+          e = new NotFoundError(cls, id);
+        }
       }
       throw e;
     }
@@ -213,12 +220,26 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     ) {
       return StreamUtil.toStream(res.Body);
     }
-    throw new Error(`Unable to read type: ${typeof res.Body}`);
+    throw new AppError(`Unable to read type: ${typeof res.Body}`);
+  }
+
+  async headStream(location: string) {
+    const query = this.q('_stream', location);
+    try {
+      return await this.client.headObject(query);
+    } catch (e) {
+      if (isMetadataBearer(e)) {
+        if (e.$metadata.httpStatusCode === 404) {
+          e = new NotFoundError('_stream', location);
+        }
+      }
+      throw e;
+    }
   }
 
   async getStreamMetadata(location: string) {
-    const query = this.q('_stream', location);
-    const obj = await this.client.headObject(query);
+    const obj = await this.headStream(location);
+
     if (obj) {
       const ret = {
         ...obj.Metadata,
