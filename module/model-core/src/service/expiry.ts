@@ -1,5 +1,6 @@
 import { Class } from '@travetto/registry';
 import { ModelType } from '../types/model';
+import { ModelBasicSupport } from './basic';
 
 /**
  * Basic state for expiry requests
@@ -28,21 +29,7 @@ export interface ExpiryState {
  *
  * @concrete ../internal/service/common:ModelExpirySupportTarget
  */
-export interface ModelExpirySupport {
-
-  /**
-   * Get by Id
-   * @param id The identifier of the document to retrieve
-   * @throws {NotFoundError} When an item is not found
-   */
-  get<T extends ModelType>(cls: Class<T>, id: string): Promise<T>;
-
-  /**
-   * Delete an item
-   * @param id The id of the document to delete
-   * @throws {NotFoundError} When an item is not found
-   */
-  delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void>;
+export interface ModelExpirySupport extends ModelBasicSupport {
 
   /**
    * Set expiry time for a record of a given id

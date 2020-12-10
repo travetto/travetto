@@ -1,5 +1,3 @@
-import { ModelCrudSupport } from './crud';
-
 export interface StreamMeta {
   /**
    * File size
