@@ -1,13 +1,13 @@
 import { Class } from '@travetto/registry';
 import { ModelType } from '../types/model';
-import { ModelCrudSupport } from './crud';
+import { ModelBasicSupport } from './basic';
 
 /**
  * Support for simple indexed activity
  *
  * @concrete ../internal/service/common:ModelIndexedSupportTarget
  */
-export interface ModelIndexedSupport extends ModelCrudSupport {
+export interface ModelIndexedSupport extends ModelBasicSupport {
   /**
    * Get entity by index as defined by fields of idx and the body fields
    * @param cls The type to search by

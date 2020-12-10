@@ -1,7 +1,7 @@
 import { ChangeEvent, Class } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
-import { ModelCrudSupport } from './crud';
 import { ModelType } from '../types/model';
+import { ModelBasicSupport } from './basic';
 
 /**
  * This interface defines the behavior for dealing with the
@@ -12,7 +12,7 @@ import { ModelType } from '../types/model';
  *
  * @concrete ../internal/service/common:ModelStorageSupportTarget
  */
-export interface ModelStorageSupport extends ModelCrudSupport {
+export interface ModelStorageSupport extends ModelBasicSupport {
   /**
    * Initialize storage
    */
