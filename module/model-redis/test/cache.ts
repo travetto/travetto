@@ -1,10 +1,10 @@
-// @file-if @travetto/model-redis
+// @file-if @travetto/cache
 
 import { InjectableFactory } from '@travetto/di';
-import { RedisModelService, RedisModelConfig } from '@travetto/model-redis';
+import { RedisModelService, RedisModelConfig } from '..';
 import { Suite } from '@travetto/test';
-import { CacheModelSymbol } from '../../src/service';
-import { CacheTestSuite } from '../cache';
+import { CacheModelSymbol } from '@travetto/cache';
+import { CacheServiceSuite } from '@travetto/cache/test/lib/service';
 
 class Config {
   @InjectableFactory(CacheModelSymbol)
@@ -14,7 +14,7 @@ class Config {
 }
 
 @Suite()
-export class RedisCacheSuite extends CacheTestSuite {
+export class RedisCacheSuite extends CacheServiceSuite {
   constructor() {
     super(RedisModelService, RedisModelConfig);
   }

@@ -1,18 +1,20 @@
 import { AppError, Util } from '@travetto/base';
 import { Inject } from '@travetto/di';
-import { ModelCore, ModelType } from '@travetto/model-core';
+import { ModelCrudSupport, ModelType, NotFoundError } from '@travetto/model-core';
 import { AuthUtil, Principal, PrincipalSource } from '@travetto/auth';
 import { Class } from '@travetto/registry';
 
 import { RegisteredIdentity } from './identity';
+
+export const AuthModelSymbol = Symbol.for('@trv:auth-model/model');
 
 /**
  * A model-based principal source
  */
 export class ModelPrincipalSource<T extends ModelType> extends PrincipalSource {
 
-  @Inject()
-  private modelService: ModelCore;
+  @Inject(AuthModelSymbol)
+  private modelService: ModelCrudSupport;
 
   /**
    * Build a Model Principal Source
@@ -34,8 +36,7 @@ export class ModelPrincipalSource<T extends ModelType> extends PrincipalSource {
    * @param userId The user id to retrieve
    */
   async retrieve(userId: string) {
-    const user = await this.modelService.getOptional(this.cls, userId);
-    return user;
+    return await this.modelService.get(this.cls, userId);
   }
 
   /**
@@ -54,7 +55,7 @@ export class ModelPrincipalSource<T extends ModelType> extends PrincipalSource {
    */
   async authenticate(userId: string, password: string) {
     const user = await this.retrieve(userId);
-    const ident = this.toIdentity(user);
+    const ident = await this.toIdentity(user);
 
     const hash = await AuthUtil.generateHash(password, ident.salt);
     if (hash !== ident.hash) {
@@ -72,11 +73,14 @@ export class ModelPrincipalSource<T extends ModelType> extends PrincipalSource {
   async register(user: T) {
     const ident = this.toIdentity(user);
 
-    const existingUser = await this.modelService.getOptional(this.cls, ident.id);
+    try {
+      await this.retrieve(ident.id);
+      throw new AppError('That id is already taken.', 'data');
+    } catch (e) {
+      if (!(e instanceof NotFoundError)) {
+        throw e;
+      }
 
-    if (existingUser) {
-      throw new AppError(`That id is already taken.`, 'data');
-    } else {
       const fields = await AuthUtil.generatePassword(ident.password!);
 
       ident.password = undefined; // Clear it out on set
