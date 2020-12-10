@@ -34,9 +34,6 @@ export class KoaRestServer extends RestServer<koa> {
     return app;
   }
 
-  /**
-   * Use during development to remove routes
-   */
   async unregisterRoutes(key: string | symbol) {
     // Delete previous
     const pos = this.raw.middleware.findIndex(x => (x as { key?: symbol | string }).key === key);
@@ -45,9 +42,6 @@ export class KoaRestServer extends RestServer<koa> {
     }
   }
 
-  /**
-   * Register routes, is used during development for live-reloading as well
-   */
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
     const router = new kRouter(path !== '/' ? { prefix: path } : {});
 

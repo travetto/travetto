@@ -5,7 +5,6 @@ export const TRV_RAW = Symbol.for('@trv:rest/raw');
 export const TRV_ORIG = Symbol.for('@trv:rest/original');
 export const TRV_ADDED_HEADERS: unique symbol = Symbol.for('@trv:rest/headers');
 
-
 export type HeaderMap = Record<string, (string | (() => string))>;
 
 export type PathType = string | RegExp;

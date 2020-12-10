@@ -1,8 +1,8 @@
-import { RestTestCommon } from '@travetto/rest/test/lib/rest-common';
+import { RestServerSuite } from '@travetto/rest/test/lib/server';
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class FastifyRestCoreLambdaTest extends RestTestCommon {
+export class FastifyRestCoreLambdaTest extends RestServerSuite {
   constructor() {
     super(true);
   }

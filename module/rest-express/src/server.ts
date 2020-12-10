@@ -38,9 +38,6 @@ export class ExpressRestServer extends RestServer<express.Application> {
     return app;
   }
 
-  /**
-   * Remove routes
-   */
   async unregisterRoutes(key: string | symbol) {
     const routes = (this.raw._router.stack as RouteStack[]);
     const pos = routes.findIndex(x => x.handle.key === key);
@@ -49,9 +46,6 @@ export class ExpressRestServer extends RestServer<express.Application> {
     }
   }
 
-  /**
-   * Register or update routes
-   */
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
@@ -88,9 +82,6 @@ export class ExpressRestServer extends RestServer<express.Application> {
     }
   }
 
-  /**
-   * Listen to the application
-   */
   async listen() {
     let raw: express.Application | https.Server = this.raw;
     if (this.config.ssl.active) {
