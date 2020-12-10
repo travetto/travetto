@@ -1,15 +1,14 @@
-import { Suite } from '@travetto/test';
-import { ModelCrudSuite } from '@travetto/model-core/test/lib/crud';
-import { ModelBulkSuite } from '@travetto/model-core/test/lib/bulk';
+// @file-if @travetto/auth-model
 
 import { InjectableFactory } from '@travetto/di';
+import { Suite } from '@travetto/test';
+import { AuthModelSymbol } from '@travetto/auth-model';
+import { AuthModelServiceSuite } from '@travetto/auth-model/test/lib/service';
 import { AsyncContext } from '@travetto/context';
 import { WithSuiteContext } from '@travetto/context/test/lib/suite-context';
 
-
 import { SQLModelConfig, SQLModelService } from '../..';
 import { PostgreSQLDialect } from '../../src/dialect/postgresql/dialect';
-import { BaseQueryTest } from '../query';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -18,23 +17,18 @@ class Config {
   }
 }
 
-@WithSuiteContext()
-@Suite()
-export class PostgreSQLCrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
+class Init {
+  @InjectableFactory(AuthModelSymbol)
+  static modelProvider(svc: SQLModelService) {
+    return svc;
   }
 }
 
+
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLBulkSuite extends ModelBulkSuite {
+export class PostgreSQLAuthModelServiceSuite extends AuthModelServiceSuite {
   constructor() {
     super(SQLModelService, SQLModelConfig);
   }
-}
-
-@Suite()
-export class PostgreSQLQueryTest extends BaseQueryTest {
-
 }

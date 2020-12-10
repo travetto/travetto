@@ -112,15 +112,17 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     this.client = new s3.S3(this.config.config);
   }
 
-  async has<T extends ModelType>(cls: Class<T>, id: string, error?: 'notfound' | 'data') {
+  async head<T extends ModelType>(cls: Class<T>, id: string) {
     try {
       await this.client.headObject(this.q(cls, id));
-    } catch (err) {
-      if (error === 'notfound') {
-        throw new NotFoundError(cls, id);
-      } else if (error === 'data') {
-        throw new ExistsError(cls, id);
+      return true;
+    } catch (e) {
+      if (isMetadataBearer(e)) {
+        if (e.$metadata.httpStatusCode === 404) {
+          return false;
+        }
       }
+      throw e;
     }
   }
 
@@ -147,13 +149,17 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     if (item.id) {
-      await this.has(cls, item.id!, 'data');
+      if (await this.head(cls, item.id!)) {
+        throw new ExistsError(cls, item.id!);
+      }
     }
     return this.upsert(cls, item);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
-    await this.has(cls, item.id!, 'notfound');
+    if (!(await this.head(cls, item.id!))) {
+      throw new NotFoundError(cls, item.id!);
+    }
     return this.upsert(cls, item);
   }
 
@@ -176,7 +182,9 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    await this.has(cls, id);
+    if (!(await this.head(cls, id!))) {
+      throw new NotFoundError(cls, id);
+    }
     await this.client.deleteObject(this.q(cls, id));
   }
 
@@ -276,6 +284,6 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         }
       });
     }
-    await this.client.deleteBucket({ Bucket: this.config.bucket });
+    // await this.client.deleteBucket({ Bucket: this.config.bucket });
   }
 }
