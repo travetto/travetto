@@ -1,6 +1,5 @@
 import type { ModelBulkSupport } from '../../service/bulk';
-import { ModelCrudSupport } from '../../service/crud';
-import type { ModelExpirySupport } from '../../service/expire';
+import type { ModelExpirySupport } from '../../service/expiry';
 import { ModelIndexedSupport } from '../../service/indexed';
 import type { ModelStorageSupport } from '../../service/storage';
 import type { ModelStreamSupport } from '../../service/stream';
@@ -16,7 +15,7 @@ export class ModelIndexedSupportTarget { }
  * Type guard for determining if model is expirable
  * @param o
  */
-export function isExpirySupported(o: ModelCrudSupport): o is ModelExpirySupport {
+export function isExpirySupported(o: any): o is ModelExpirySupport {
   return o && 'getExpiry' in o;
 }
 
@@ -24,7 +23,7 @@ export function isExpirySupported(o: ModelCrudSupport): o is ModelExpirySupport 
  * Type guard for determining if service supports storage operation
  * @param o
  */
-export function isStorageSupported(o: ModelCrudSupport): o is ModelStorageSupport {
+export function isStorageSupported(o: any): o is ModelStorageSupport {
   return o && 'createStorage' in o;
 }
 
@@ -32,7 +31,7 @@ export function isStorageSupported(o: ModelCrudSupport): o is ModelStorageSuppor
  * Type guard for determining if service supports streaming operation
  * @param o
  */
-export function isStreamSupported(o: ModelCrudSupport): o is ModelStreamSupport {
+export function isStreamSupported(o: any): o is ModelStreamSupport {
   return o && 'getStream' in o;
 }
 
@@ -40,7 +39,7 @@ export function isStreamSupported(o: ModelCrudSupport): o is ModelStreamSupport 
  * Type guard for determining if service supports streaming operation
  * @param o
  */
-export function isBulkSupported(o: ModelCrudSupport): o is ModelBulkSupport {
+export function isBulkSupported(o: any): o is ModelBulkSupport {
   return o && 'processBulk' in o;
 }
 
@@ -48,6 +47,6 @@ export function isBulkSupported(o: ModelCrudSupport): o is ModelBulkSupport {
  * Type guard for determining if service supports indexed operation
  * @param o
  */
-export function isIndexedSupported(o: ModelCrudSupport): o is ModelIndexedSupport {
+export function isIndexedSupported(o: any): o is ModelIndexedSupport {
   return o && 'getByIndex' in o;
 }

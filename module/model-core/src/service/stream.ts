@@ -24,7 +24,7 @@ export interface StreamMeta {
  *
  * @concrete ../internal/service/common:ModelStreamSupportTarget
  */
-export interface ModelStreamSupport extends ModelCrudSupport {
+export interface ModelStreamSupport {
 
   /**
    * Upsert stream to storage

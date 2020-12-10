@@ -6,7 +6,7 @@ export * from './src/types/model';
 export * from './src/service/bulk';
 export * from './src/service/crud';
 export * from './src/service/indexed';
-export * from './src/service/expire';
+export * from './src/service/expiry';
 export * from './src/service/storage';
 export * from './src/service/stream';
 

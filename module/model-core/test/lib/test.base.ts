@@ -1,12 +1,11 @@
 import { DependencyRegistry } from '@travetto/di';
 import { Class, RootRegistry } from '@travetto/registry';
-
-import { ModelCrudSupport } from '../..';
-import { ModelRegistry } from '../../src/registry/registry';
-import { isStorageSupported } from '../../src/internal/service/common';
 import { AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
 
-export abstract class BaseModelSuite<T extends ModelCrudSupport> {
+import { ModelRegistry } from '../../src/registry/registry';
+import { isStorageSupported } from '../../src/internal/service/common';
+
+export abstract class BaseModelSuite<T> {
 
   constructor(public serviceClass: Class<T>, public configClass: Class<any>) {
   }

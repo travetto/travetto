@@ -1,5 +1,7 @@
-import { MemoryCacheSource } from '../../../src/source/memory';
+import { MemoryModelService } from '@travetto/model-core';
+
 import { Cache } from '../../../src/decorator';
+import { CacheService } from '../../../src/service';
 
 async function request(url: string) {
   let value;
@@ -9,7 +11,9 @@ async function request(url: string) {
 
 export class Worker {
 
-  myCache = new MemoryCacheSource();
+  myCache = new CacheService(
+    new MemoryModelService({ namespace: '' })
+  );
 
   @Cache('myCache', { maxAge: 1000 })
   async calculateExpensiveResult(expression: string) {
