@@ -6,6 +6,7 @@ import * as awsServerlessExpress from 'aws-serverless-express';
 
 import { Injectable } from '@travetto/di';
 import { RestServer } from '@travetto/rest/src/server/server';
+import { RestLambdaSymbol } from '@travetto/rest/src/internal/lambda';
 import { ConfigManager } from '@travetto/config';
 
 import { ExpressRestServer } from '../../server';
@@ -14,7 +15,7 @@ import { ExpressRestServer } from '../../server';
  * Aws Lambda Rest Server
  */
 @Injectable({
-  qualifier: Symbol.for('@trv:rest/aws-lambda'),
+  qualifier: RestLambdaSymbol,
   target: RestServer
 })
 export class AwsLambdaRestServer extends ExpressRestServer {
