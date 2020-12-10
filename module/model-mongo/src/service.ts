@@ -247,7 +247,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     const files = await this.bucket.find({ filename: location }, { limit: 1 }).toArray();
 
     if (!files || !files.length) {
-      throw new Error('Unable to find file');
+      throw new NotFoundError('stream', location);
     }
 
     const [f] = files;
