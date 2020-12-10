@@ -11,7 +11,7 @@ import { TypeMismatchError } from '@travetto/schema';
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
 import { ModelType } from '../types/model';
-import { ModelExpirySupport } from '../service/expire';
+import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/registry';
 import { ModelStorageSupport } from '../service/storage';
 import { ModelCrudUtil } from '../internal/service/crud';

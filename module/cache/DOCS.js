@@ -1,8 +1,6 @@
 const { doc: d, Code, Section, List, inp, meth, Mod, SubSection, lib } = require('@travetto/doc');
-const { CacheSource } = require('./src/source/core');
 const { Cache, EvictCache } = require('./src/decorator');
-const { MemoryCacheSource } = require('./src/source/memory');
-const { FileCacheSource } = require('./src/source/file');
+const { CacheService, CacheModelSymbol } = require('./src/service');
 
 exports.text = d`
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without ${Mod('di')}.  The code aims to handle use cases surrounding common/basic usage.
@@ -10,9 +8,9 @@ Provides a foundational structure for integrating caching at the method level.  
 ${Section('Decorators')}
 The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into JSON.  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.
 
-Additionally, to use the decorators you will need to have a ${CacheSource} object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.
+Additionally, to use the decorators you will need to have a ${CacheService} object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.
 
-${Cache} is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. ${lib.Redis}, ${lib.Memcached}), only asynchronous methods are supported. Though if you do have a cache source that is synchronous, you can use it directly to support synchronous workloads.
+${Cache} is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. ${lib.Redis}, ${lib.Memcached}), only asynchronous methods are supported.
 
 ${Code('Using decorators to cache expensive async call', 'alt/docs/src/async.ts')}
 
@@ -39,27 +37,10 @@ Additionally, there is support for planned eviction via the ${EvictCache} decora
 
 ${Code('Using decorators to cache/evict user access', 'alt/docs/src/evict.ts')}
 
-${Section('Building a Custom Source')}
+${Section('Extending the Cache Service')}
 
-The module comes with a ${MemoryCacheSource} and a ${FileCacheSource}. The module also has extension for a ${lib.Redis} source and ${Mod('model')}-backed source.
+By design, the ${CacheService} relies solely on the ${Lib('model-core')} module.  Specifically on the ModelExpirySupport.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any ModelService that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the ModelService to be registered using the CacheModelSymbol:
 
-${Code('Cache Source Structure', CacheSource.ᚕfile, true)}
+${Code('Registering a Custom Model Source', 'alt/docs/src/custom.ts')}
 
-For the source, all abstract methods must be implemented. All of the more complex logic is implemented in other methods within the base ${CacheSource}.   The structure follows that of the javascript ${inp`Map`} class for consistency. All that is needed is basic input/output support:
-
-${List(
-  d`${meth`get(key: string)`} - Fetch entry from source, and return in the structure of an entry, ready to go`,
-  d`${meth`has(key: string)`} - Indicates whether or not the key exists`,
-  d`${meth`set(key: string, entry: CacheEntry)`} - Sources entry, given ${inp`key`}.`,
-  d`${meth`delete (key: string)`} - Removes entry by key`,
-  d`${meth`isExpired(key: string)`} - Determines if entry is expired`,
-  d`${meth`touch(key: string, expiresAt: number)`} - Updates expiry information to date provided`,
-  d`${meth`keys()`} - Returns list of all keys in the source`,
-)}
-
-Additionally, for setting/getting the burden is on the source author to properly serialize/deserialize as needed.  This is a low level detail and cannot be accounted for in a generic way.
-
-${Code('MemoryCacheSource', MemoryCacheSource.ᚕfile)}
-
-The memory source is simple but illustrates the structure well.
 `;
