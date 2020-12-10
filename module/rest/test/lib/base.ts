@@ -2,11 +2,12 @@ import * as qs from 'querystring';
 import * as fetch from 'node-fetch';
 
 import { DependencyRegistry } from '@travetto/di';
-import { ApplicationHandle } from '@travetto/app';
 import { RootRegistry } from '@travetto/registry';
 import { Util } from '@travetto/base';
 
 import type { RestServer } from '../../src/server/server';
+import { ServerHandle } from '../../src/types';
+import { RestLambdaSymbol } from '../../src/internal/lambda';
 
 const toMultiValue = (o: Record<string, string> | undefined) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, [v]]));
 const baseLambdaEvent = { resource: '/{proxy+}' };
@@ -20,9 +21,9 @@ const baseLambdaContext = {
   protocol: 'HTTP/1.1'
 };
 
-export abstract class BaseRestTest {
+export abstract class BaseRestSuite {
 
-  private handle: ApplicationHandle | undefined;
+  private handle: ServerHandle | undefined;
   private server: RestServer<any>;
   private port: number = -1;
   private awsLambda: boolean = false;
@@ -71,7 +72,7 @@ export abstract class BaseRestTest {
         }
       }
     } else {
-      this.server = await DependencyRegistry.getInstance(rest.RestServer, Symbol.for('@trv:rest/aws-lambda'));
+      this.server = await DependencyRegistry.getInstance(rest.RestServer, RestLambdaSymbol);
       this.handle = await this.server.run();
     }
   }

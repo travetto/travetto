@@ -1,11 +1,11 @@
 import * as assert from 'assert';
-import { Test, BeforeAll, AfterAll } from '@travetto/test';
+import { Test, BeforeAll, AfterAll, Suite } from '@travetto/test';
 
 import { Controller } from '../../src/decorator/controller';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';
 import { Path, Query } from '../../src/decorator/param';
 import { Request, Response } from '../../src/types';
-import { BaseRestTest } from './rest-base';
+import { BaseRestSuite } from './base';
 
 
 @Controller('/test')
@@ -37,7 +37,8 @@ class TestController {
   }
 }
 
-export abstract class RestTestCommon extends BaseRestTest {
+@Suite({ skip: true })
+export abstract class RestServerSuite extends BaseRestSuite {
 
   @BeforeAll()
   async before() { return this.initServer(); }

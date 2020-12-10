@@ -32,16 +32,10 @@ export class FastifyRestServer extends RestServer<FastifyInstance> {
     return app;
   }
 
-  /**
-   * Fastify does not support live reload, this will just log at runtime
-   */
   async unregisterRoutes(key: string | symbol) {
     console.debug('Fastify does not allow for route reloading');
   }
 
-  /**
-   * Register routes, does not support live reload
-   */
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
     if (this.listening) { // Does not support live reload
       return;
