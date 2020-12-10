@@ -11,5 +11,5 @@ export abstract class IdentitySource {
    * @param req The travetto request
    * @param res The travetto response
    */
-  abstract async authenticate(req: Request, res: Response): Promise<Identity | undefined>;
+  abstract authenticate(req: Request, res: Response): Promise<Identity | undefined>;
 }

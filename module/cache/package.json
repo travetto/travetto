@@ -25,7 +25,8 @@
   "files": [
     "index.ts",
     "src",
-    "support"
+    "support",
+    "test/lib"
   ],
   "name": "@travetto/cache",
   "repository": {

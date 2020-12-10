@@ -1,10 +1,10 @@
-// @file-if @travetto/model-dynamodb
+// @file-if @travetto/cache
 
 import { InjectableFactory } from '@travetto/di';
-import { DynamoDBModelService, DynamoDBModelConfig } from '@travetto/model-dynamodb';
+import { DynamoDBModelService, DynamoDBModelConfig } from '..';
 import { Suite } from '@travetto/test';
-import { CacheModelSymbol } from '../../src/service';
-import { CacheTestSuite } from '../cache';
+import { CacheModelSymbol } from '@travetto/cache';
+import { CacheServiceSuite } from '@travetto/cache/test/lib/service';
 
 class Config {
   @InjectableFactory(CacheModelSymbol)
@@ -14,7 +14,7 @@ class Config {
 }
 
 @Suite()
-export class DynamodbCacheSuite extends CacheTestSuite {
+export class DynamoDBCacheSuite extends CacheServiceSuite {
   baseLatency = 100;
 
   constructor() {

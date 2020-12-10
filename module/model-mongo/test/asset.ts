@@ -1,10 +1,11 @@
-// @file-if mongodb
+// @file-if @travetto/asset
 
 import { InjectableFactory } from '@travetto/di';
-import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 import { Suite } from '@travetto/test';
-import { AssetModelSymbol } from '../../src/service';
-import { AssetServiceSuite } from '../service';
+import { AssetModelSymbol } from '@travetto/asset';
+import { AssetServiceSuite } from '@travetto/asset/test/lib/service';
+
+import { MongoModelConfig, MongoModelService } from '..';
 
 class Init {
   @InjectableFactory(AssetModelSymbol)

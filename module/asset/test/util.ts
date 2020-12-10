@@ -20,7 +20,7 @@ export class UtilTest {
 
   @Test()
   async detectFileType() {
-    const png = await ResourceManager.toAbsolutePath('google.png');
+    const png = await ResourceManager.toAbsolutePath('logo.png');
     const fileType = (await AssetUtil.detectFileType(png))!;
     assert(fileType.ext === 'png');
     assert(fileType.mime === 'image/png');
@@ -28,14 +28,19 @@ export class UtilTest {
 
   @Test()
   async resolveFileType() {
-    const png = await ResourceManager.toAbsolutePath('google');
+    const file = await ResourceManager.toAbsolutePath('logo.png');
+    await fs.promises.copyFile(file, file.replace(/[.]png$/, ''));
+    const png = await ResourceManager.toAbsolutePath('logo');
     const result = await AssetUtil.resolveFileType(png);
     assert(result === 'image/png');
   }
 
   @Test()
   async fileToAsset() {
-    const png = await ResourceManager.toAbsolutePath('google');
+    const file = await ResourceManager.toAbsolutePath('logo.png');
+    await fs.promises.copyFile(file, file.replace(/[.]png$/, ''));
+
+    const png = await ResourceManager.toAbsolutePath('logo');
     const asset = await AssetUtil.fileToAsset(png);
     assert(asset.contentType === 'image/png');
     assert(asset.filename === png);

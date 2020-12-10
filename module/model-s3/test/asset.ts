@@ -1,10 +1,11 @@
-// @file-if @aws-sdk/client-s3
+// @file-if @travetto/asset
 
 import { InjectableFactory } from '@travetto/di';
-import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
 import { Suite } from '@travetto/test';
-import { AssetModelSymbol } from '../../src/service';
-import { AssetServiceSuite } from '../service';
+import { AssetModelSymbol } from '@travetto/asset';
+import { AssetServiceSuite } from '@travetto/asset/test/lib/service';
+
+import { S3ModelConfig, S3ModelService } from '..';
 
 class Init {
   @InjectableFactory(AssetModelSymbol)
@@ -12,7 +13,6 @@ class Init {
     return new S3ModelService(config);
   }
 }
-
 
 @Suite()
 export class S3AssetServiceSuite extends AssetServiceSuite {

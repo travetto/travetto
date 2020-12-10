@@ -6,9 +6,9 @@ import { ModelExpirySupport } from '@travetto/model-core';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
-import { Cache, EvictCache } from '../src/decorator';
-import { CacheService } from '../src/service';
-import { CacheUtil } from '../src/util';
+import { Cache, EvictCache } from '../../src/decorator';
+import { CacheService } from '../../src/service';
+import { CacheUtil } from '../../src/util';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
@@ -80,7 +80,7 @@ class SampleService {
 }
 
 @Suite({ skip: true })
-export abstract class CacheTestSuite extends BaseModelSuite<ModelExpirySupport> {
+export abstract class CacheServiceSuite extends BaseModelSuite<ModelExpirySupport> {
 
   baseLatency = 10;
 

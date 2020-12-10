@@ -1,20 +1,20 @@
 import { InjectableFactory } from '@travetto/di';
-import { MemoryModelConfig, MemoryModelService } from '@travetto/model-core';
+import { FileModelConfig, FileModelService } from '@travetto/model-core';
 import { Suite } from '@travetto/test';
 import { AssetModelSymbol } from '../../src/service';
 import { AssetServiceSuite } from '../lib/service';
 
 class Init {
   @InjectableFactory(AssetModelSymbol)
-  static modelProvider(config: MemoryModelConfig) {
-    return new MemoryModelService(config);
+  static modelProvider(config: FileModelConfig) {
+    return new FileModelService(config);
   }
 }
 
 
 @Suite()
-export class MemoryAssetServiceSuite extends AssetServiceSuite {
+export class FileAssetServiceSuite extends AssetServiceSuite {
   constructor() {
-    super(MemoryModelService, MemoryModelConfig);
+    super(FileModelService, FileModelConfig);
   }
 }
