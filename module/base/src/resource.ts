@@ -75,7 +75,7 @@ class $ResourceManager {
    * Provide an absolute path for a resource identifier
    * @param rel The relative path of a resource
    */
-  async toAbsolutePath(rel: string) {
+  async findAbsolute(rel: string) {
     rel = cleanPath(rel);
     await this.find(rel);
     return this.cache.get(rel)!;
@@ -85,7 +85,7 @@ class $ResourceManager {
    * Provide an absolute path for a resource identifier, synchronously
    * @param rel The relative path of a resource
    */
-  toAbsolutePathSync(rel: string) {
+  findAbsoluteSync(rel: string) {
     rel = cleanPath(rel);
     this.findSync(rel);
     return this.cache.get(rel)!;
@@ -169,7 +169,7 @@ class $ResourceManager {
    * @param pth The path to read
    * @param options The options to determine the read behavior
    */
-  async readToStream(pth: string, options?: Parameters<typeof fs.createReadStream>[1]) {
+  async readStream(pth: string, options?: Parameters<typeof fs.createReadStream>[1]) {
     pth = await this.find(pth);
     return fs.createReadStream(pth, options);
   }
@@ -179,7 +179,7 @@ class $ResourceManager {
    * @param pattern Pattern to search against
    * @param base The base folder to start searching from
    */
-  async findAllByPattern(pattern: RegExp, base: string = '') {
+  async findAll(pattern: RegExp, base: string = '') {
     const out: string[] = [];
     const found = new Set<string>();
 
@@ -199,7 +199,7 @@ class $ResourceManager {
    * @param pattern Pattern to search against
    * @param base The base folder to start searching from
    */
-  findAllByPatternSync(pattern: RegExp, base: string = '') {
+  findAllSync(pattern: RegExp, base: string = '') {
     const out: string[] = [];
     const found = new Set<string>();
 

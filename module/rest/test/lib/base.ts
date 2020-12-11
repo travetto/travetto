@@ -1,5 +1,6 @@
 import * as qs from 'querystring';
 import * as fetch from 'node-fetch';
+import FormData from 'formdata-node';
 
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -8,6 +9,8 @@ import { Util } from '@travetto/base';
 import type { RestServer } from '../../src/server/server';
 import { ServerHandle } from '../../src/types';
 import { RestLambdaSymbol } from '../../src/internal/lambda';
+import { StreamUtil } from '@travetto/boot';
+
 
 const toMultiValue = (o: Record<string, string> | undefined) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, [v]]));
 const baseLambdaEvent = { resource: '/{proxy+}' };
@@ -79,11 +82,24 @@ export abstract class BaseRestSuite {
 
   async makeRequst(method: 'get' | 'post' | 'patch' | 'put' | 'delete' | 'options', path: string, { query, headers, body }: {
     query?: Record<string, any>;
-    body?: Record<string, any>;
+    body?: Record<string, any> | FormData;
     headers?: Record<string, string>;
   } = {}) {
     const httpMethod = method.toUpperCase();
     let resp: { status: number, body: any, headers: [string, string | string[]][] };
+
+    let buffer: Buffer | undefined;
+    if (body) {
+      if (body instanceof Buffer) {
+        buffer = body;
+      } else if (body instanceof FormData) {
+        buffer = await StreamUtil.toBuffer(body.stream);
+      } else {
+        headers = headers || {};
+        headers['Content-Type'] = headers['Content-Type'] ?? 'application/json';
+        buffer = Buffer.from(JSON.stringify(body));
+      }
+    }
 
     if (!this.awsLambda) {
       let q = '';
@@ -93,7 +109,7 @@ export abstract class BaseRestSuite {
       const res = await fetch(`${this.url}${path}${q}`, {
         method: httpMethod,
         headers,
-        body: body ? JSON.stringify(body) : undefined
+        body: buffer
       });
       const out = await res.json();
       resp = { status: res.status, body: out, headers: [...res.headers] };
@@ -105,7 +121,7 @@ export abstract class BaseRestSuite {
         queryStringParameters: query,
         headers,
         isBase64Encoded: true,
-        body: body ? Buffer.from(JSON.stringify(body)).toString('base64') : body,
+        body: buffer ? buffer.toString('base64') : buffer,
         multiValueQueryStringParameters: toMultiValue(query),
         multiValueHeaders: toMultiValue(headers),
         requestContext: { ...baseLambdaContext, path, httpMethod }

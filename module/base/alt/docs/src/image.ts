@@ -12,6 +12,6 @@ export async function findSingleImage() {
  * Find all .gif files under the imsages folder
  */
 export async function findAllImages() {
-  const imagePaths = await ResourceManager.findAllByPattern(/[.]gif$/, 'images/');
+  const imagePaths = await ResourceManager.findAll(/[.]gif$/, 'images/');
   return imagePaths;
 }

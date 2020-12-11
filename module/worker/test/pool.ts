@@ -20,7 +20,7 @@ export class PoolExecTest {
     });
 
     const pool = new WorkPool(() =>
-      WorkUtil.spawnedWorker(ResourceManager.toAbsolutePathSync('simple.child-launcher.js'), {
+      WorkUtil.spawnedWorker(ResourceManager.findAbsoluteSync('simple.child-launcher.js'), {
         handlers: {
           init: channel => channel.listenOnce('ready'),
           async execute(channel, inp: string) {
