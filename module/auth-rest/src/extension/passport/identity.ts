@@ -1,8 +1,9 @@
+// @file-if passport
 import * as passport from 'passport';
 
 import { Identity } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
-import { IdentitySource } from '@travetto/auth-rest';
+import { IdentitySource } from '../../identity';
 
 interface PassportAuthOptions {
   state?: ((req: Request) => any) | Record<string, any>;

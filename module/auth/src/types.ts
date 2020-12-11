@@ -1,3 +1,5 @@
+import { AuthContext } from './context';
+
 /**
  * A user principal, including permissions and details, does not imply
  * authentication
@@ -29,4 +31,14 @@ export interface Identity extends Principal {
    * The source of the identity verification
    */
   source: string;
+}
+
+
+/**
+ * Definition of a principal source, authorizers an identity into a principal
+ *
+ * @concrete ./internal:PrincipalSourceTarget
+ */
+export interface PrincipalSource {
+  authorize(ident: Identity): Promise<AuthContext<Principal>>;
 }

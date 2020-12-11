@@ -1,7 +1,7 @@
 import { AppError, Util } from '@travetto/base';
 import { Inject } from '@travetto/di';
 import { ModelCrudSupport, ModelType, NotFoundError } from '@travetto/model-core';
-import { AuthUtil, Principal, PrincipalSource } from '@travetto/auth';
+import { AuthContext, AuthUtil, Principal, PrincipalSource } from '@travetto/auth';
 import { Class } from '@travetto/registry';
 
 import { RegisteredIdentity } from './identity';
@@ -11,7 +11,7 @@ export const AuthModelSymbol = Symbol.for('@trv:auth-model/model');
 /**
  * A model-based principal source
  */
-export class ModelPrincipalSource<T extends ModelType> extends PrincipalSource {
+export class ModelPrincipalSource<T extends ModelType> implements PrincipalSource {
 
   @Inject(AuthModelSymbol)
   private modelService: ModelCrudSupport;
@@ -27,9 +27,7 @@ export class ModelPrincipalSource<T extends ModelType> extends PrincipalSource {
     private cls: Class<T>,
     public toIdentity: (t: T) => RegisteredIdentity,
     public fromIdentity: (t: Partial<RegisteredIdentity>) => Partial<T>,
-  ) {
-    super();
-  }
+  ) { }
 
   /**
    * Retrieve user by id
@@ -138,5 +136,9 @@ export class ModelPrincipalSource<T extends ModelType> extends PrincipalSource {
     await this.modelService.update(this.cls, user);
 
     return ident;
+  }
+
+  async authorize(ident: RegisteredIdentity) {
+    return new AuthContext(ident, await this.resolvePrincipal(ident));
   }
 }
