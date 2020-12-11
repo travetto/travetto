@@ -25,6 +25,11 @@ class TestController {
     return { query: age };
   }
 
+  @Put('/body')
+  withBody(req: Request) {
+    return { body: req.body.age };
+  }
+
   @Delete('/cookie')
   withCookie(req: Request, res: Response) {
     res.cookies.set('flavor', 'oreo');
@@ -73,6 +78,17 @@ export abstract class RestServerSuite extends BaseRestSuite {
       }
     }), /Number/i);
   }
+
+  @Test()
+  async postBody() {
+    const { body: ret } = await this.makeRequst('put', '/test/body', {
+      body: {
+        age: 20
+      }
+    });
+    assert(ret === { body: 20 });
+  }
+
 
   @Test()
   async testCookie(res: Response) {

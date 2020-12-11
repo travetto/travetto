@@ -18,7 +18,7 @@ export class DockerIOTest {
 
     const { process: proc, result: prom } = await container.exec(['gm', 'convert', '-resize', '100x50', '-', '-']);
 
-    (await ResourceManager.readToStream('/download.jpeg')).pipe(proc.stdin!);
+    (await ResourceManager.readStream('/download.jpeg')).pipe(proc.stdin!);
 
     assert(true);
 

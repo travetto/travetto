@@ -22,7 +22,7 @@ export class ConfigUtil {
       acc[k] = v;
       return acc;
     }, {} as Record<string, number>);
-    return ResourceManager.findAllByPatternSync(/[.]ya?ml$/)
+    return ResourceManager.findAllSync(/[.]ya?ml$/)
       .map(file => ({ file, profile: path.basename(file).replace(/[.]ya?ml$/, '') }))
       .filter(({ profile }) => profile in profileIndex)
       .sort((a, b) => profileIndex[a.profile] - profileIndex[b.profile]);

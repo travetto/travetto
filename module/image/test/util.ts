@@ -25,7 +25,7 @@ class ImageUtilTest {
 
   @Test('compress png')
   async compressPng() {
-    const imgStream = await ResourceManager.readToStream('google.png');
+    const imgStream = await ResourceManager.readStream('google.png');
     const imgBuffer = await ResourceManager.read('google.png');
 
     const out = await ImageUtil.optimize('png', imgStream);
@@ -40,7 +40,7 @@ class ImageUtilTest {
 
   @Test('compress jpeg')
   async compressJpeg() {
-    const imgStream = await ResourceManager.readToStream('lincoln.jpg');
+    const imgStream = await ResourceManager.readStream('lincoln.jpg');
     const imgBuffer = await ResourceManager.read('lincoln.jpg');
 
     const out = await ImageUtil.optimize('jpeg', imgStream);
@@ -54,7 +54,7 @@ class ImageUtilTest {
 
   @Test('resizeToFile')
   async resizeToFile() {
-    const imgStream = await ResourceManager.readToStream('lincoln.jpg');
+    const imgStream = await ResourceManager.readStream('lincoln.jpg');
     const out = await ImageUtil.resize(imgStream, {
       w: 50,
       h: 50,

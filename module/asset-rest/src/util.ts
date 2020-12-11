@@ -20,7 +20,7 @@ export class AssetRestUtil {
   /**
    * Stream file to disk, and verify types in the process.  Produce an asset as the output
    */
-  static async streamToLocalAsset(data: NodeJS.ReadableStream, fileName: string, allowedTypes: string[], excludedTypes: string[]) {
+  static async toLocalAsset(data: NodeJS.ReadableStream | Buffer, fileName: string, allowedTypes: string[], excludedTypes: string[]) {
     const uniqueDir = FsUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
     await FsUtil.mkdirp(uniqueDir); // TODO: Unique dir for each file? Use random file, and override metadata
     const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(fileName));
@@ -48,7 +48,7 @@ export class AssetRestUtil {
     if (matches && matches.length) {
       return matches[1];
     } else {
-      const [, type] = (req.header('content-type') as string).split('/');
+      const [, type] = (req.header('content-type') as string)?.split('/') ?? [];
       return `file-upload.${type}`;
     }
   }
@@ -62,7 +62,7 @@ export class AssetRestUtil {
 
     if (!/multipart|urlencoded/i.test(req.header('content-type') as string)) {
       const filename = this.getFileName(req);
-      return this.streamToLocalAsset(req[TRV_RAW], filename, allowedTypes, excludedTypes)
+      return this.toLocalAsset(req.body ?? req[TRV_RAW], filename, allowedTypes, excludedTypes)
         .then(file => ({ file }));
     } else {
       return new Promise<AssetMap>((resolve, reject) => {
@@ -78,7 +78,7 @@ export class AssetRestUtil {
         uploader.on('file', async (fieldName, stream, fileName, encoding, mimeType) => {
           console.debug('Uploading file', fieldName, fileName, encoding, mimeType);
           uploads.push(
-            this.streamToLocalAsset(stream, fileName, allowedTypes, excludedTypes)
+            this.toLocalAsset(stream, fileName, allowedTypes, excludedTypes)
               .then(res => mapping[fieldName] = res)
           );
         });

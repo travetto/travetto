@@ -27,7 +27,10 @@ export class FastifyRestServer extends RestServer<FastifyInstance> {
     const app = fastify(fastConf);
     app.register(require('fastify-compress'));
     app.register(require('fastify-formbody'));
-    app.addContentTypeParser('multipart/form-data;', (_r, _p, done) => done(null));
+
+    // Allow everything else to be treated as a stream
+    // @ts-expect-error
+    app.addContentTypeParser(['*'], (_r, _p, done) => done());
 
     return app;
   }

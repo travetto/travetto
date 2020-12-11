@@ -38,7 +38,7 @@ export class FastifyServerUtil {
         body: reqs.body,
         session: reqs.session,
         headers: reqs.headers as Record<string, string | string[]>,
-        files: {},
+        files: undefined,
         auth: undefined,
         pipe: reqs.raw.pipe.bind(reqs.raw),
         on: reqs.raw.on.bind(reqs.raw)

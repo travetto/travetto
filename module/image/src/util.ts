@@ -100,7 +100,7 @@ export class ImageUtil {
     const out = AppCache.toEntryName(pth);
 
     if (!(await FsUtil.exists(out))) {
-      let stream: Buffer | NodeJS.ReadableStream = await ResourceManager.readToStream(rel);
+      let stream: Buffer | NodeJS.ReadableStream = await ResourceManager.readStream(rel);
       if (/[.]png$/.test(pth)) {
         stream = await this.optimize('png', stream);
       } else if (/[.]jpe?g$/i.test(pth)) {

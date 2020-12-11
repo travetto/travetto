@@ -24,7 +24,7 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
   @Test()
   async writeBasic() {
     const service = await this.assetService;
-    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
+    const pth = await ResourceManager.findAbsolute('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
 
     const out = await service.upsert(file);
@@ -35,7 +35,7 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
   @Test()
   async writeHashed() {
     const service = await this.assetService;
-    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
+    const pth = await ResourceManager.findAbsolute('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const outHashed = await service.upsert(file, false, new HashNamingStrategy());
     const hash = await AssetUtil.hashFile(pth);
@@ -45,7 +45,7 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
   @Test()
   async writeAndGet() {
     const service = await this.assetService;
-    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
+    const pth = await ResourceManager.findAbsolute('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     await service.upsert(file);
 
@@ -60,7 +60,7 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
   @Test()
   async writeAndDelete() {
     const service = await this.assetService;
-    const pth = await ResourceManager.toAbsolutePath('/asset.yml');
+    const pth = await ResourceManager.findAbsolute('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const id = await service.upsert(file);
 
