@@ -24,7 +24,7 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
   }
 
   async getStream(resource: string) {
-    const file = await ResourceManager.toAbsolutePath(resource);
+    const file = await ResourceManager.findAbsolute(resource);
     const stat = await fs.promises.stat(file);
     const hash = await this.getHash(fs.createReadStream(file));
 

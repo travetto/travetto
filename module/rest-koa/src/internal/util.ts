@@ -22,11 +22,11 @@ export class KoaServerUtil {
         path: ctx.request.path,
         query: ctx.request.query,
         params: ctx.params,
-        body: ctx.request.body,
+        body: (ctx.request.rawBody || ctx.request.length) ? ctx.request.body : undefined,
         session: ctx.session,
         headers: ctx.request.headers,
         cookies: ctx.cookies,
-        files: {},
+        files: undefined,
         auth: undefined,
         pipe: ctx.req.pipe.bind(ctx.req),
         on: ctx.req.on.bind(ctx.req)

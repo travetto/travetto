@@ -27,10 +27,10 @@ export class TemplateUtil {
   static async findAllTemplates() {
     const { ResourceManager } = await import('@travetto/base');
 
-    return (await ResourceManager.findAllByPattern(this.TPL_EXT))
+    return (await ResourceManager.findAll(this.TPL_EXT))
       .sort()
       .map(path => ({
-        path: ResourceManager.toAbsolutePathSync(path),
+        path: ResourceManager.findAbsoluteSync(path),
         key: path.replace(this.TPL_EXT, '')
       }));
   }

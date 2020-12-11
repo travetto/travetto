@@ -55,7 +55,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async postConstruct() {
     firebase.initializeApp({
-      ...(this.config.credential ? { credential: firebase.credential.cert(await ResourceManager.toAbsolutePath(this.config.credential)) } : undefined),
+      ...(this.config.credential ? { credential: firebase.credential.cert(await ResourceManager.findAbsolute(this.config.credential)) } : undefined),
       projectId: this.config.projectId,
       databaseURL: this.config.databaseURL
     });

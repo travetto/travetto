@@ -22,7 +22,7 @@ export class StreamUtilTest {
 
   @Test()
   async streamToBuffer() {
-    const stream = fs.createReadStream(await ResourceManager.toAbsolutePath('test.js'));
+    const stream = fs.createReadStream(await ResourceManager.findAbsolute('test.js'));
     const text = (await StreamUtil.streamToBuffer(stream)).toString('utf8');
     assert(text.length > 1);
     assert(text.includes('Hello World'));
@@ -41,7 +41,7 @@ export class StreamUtilTest {
 
     assert((await StreamUtil.toBuffer(unit8)).toString('utf8') === 'abcde');
 
-    const stream = fs.createReadStream(await ResourceManager.toAbsolutePath('test.js'));
+    const stream = fs.createReadStream(await ResourceManager.findAbsolute('test.js'));
     assert((await StreamUtil.toBuffer(stream)).length > 10);
   }
 
@@ -63,7 +63,7 @@ export class StreamUtilTest {
 
   @Test()
   async waitForCompletion() {
-    const state = ExecUtil.fork(await ResourceManager.toAbsolutePath('long.js'), ['100000'], { stdio: 'pipe' });
+    const state = ExecUtil.fork(await ResourceManager.findAbsolute('long.js'), ['100000'], { stdio: 'pipe' });
     const stream = await StreamUtil.waitForCompletion(state.process.stdout!, () => state.result);
     const output = (await StreamUtil.toBuffer(stream)).toString('utf8').split(/\n/g);
     assert(output.length >= 100000);
