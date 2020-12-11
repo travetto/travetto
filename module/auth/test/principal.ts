@@ -3,8 +3,8 @@ import * as assert from 'assert';
 import { AppError } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 
-import { PrincipalSource } from '../src/principal';
-import { Identity, Principal } from '../src/types';
+import { PrincipalSource, Identity, Principal } from '../src/types';
+import { AuthContext } from '../src/context';
 
 const USERS: Record<string, Principal> = {
   a: {
@@ -14,12 +14,15 @@ const USERS: Record<string, Principal> = {
   }
 };
 
-class CustomSource extends PrincipalSource {
+class CustomSource implements PrincipalSource {
   async resolvePrincipal(ident: Identity): Promise<Principal> {
     if (!(ident.id in USERS)) {
       throw new AppError('User is not found', 'notfound');
     }
     return USERS[ident.id];
+  }
+  async authorize(ident: Identity) {
+    return new AuthContext(ident, await this.resolvePrincipal(ident));
   }
 }
 

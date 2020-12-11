@@ -1,12 +1,12 @@
+// @file-if passport
 import * as passport from 'passport';
 
 import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
-import { AuthInterceptor } from '@travetto/auth-rest';
 
-interface Handler {
-  (req: Request, res: Response, next: Function): any;
-}
+import { AuthInterceptor } from '../../interceptor';
+
+type Handler = (req: Request, res: Response, next: Function) => any;
 
 // @ts-expect-error
 const authenticator = (passport as passport.Authenticator<Handler>);
@@ -22,8 +22,6 @@ export class PassportInterceptor extends RestInterceptor {
   after = [AuthInterceptor];
 
   async intercept(req: Request, res: Response) {
-    await new Promise((resolve, reject) => {
-      this.init(req, res, () => resolve());
-    });
+    await new Promise<void>((resolve) => this.init(req, res, resolve));
   }
 }

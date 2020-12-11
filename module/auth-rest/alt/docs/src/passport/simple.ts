@@ -1,5 +1,5 @@
 import { Controller, Get, Redirect, Post, Request } from '@travetto/rest';
-import { Authenticate, Authenticated, Unauthenticated } from '@travetto/auth-rest';
+import { Authenticate, Authenticated, Unauthenticated } from '../../../..';
 
 import { FB_AUTH } from './conf';
 
