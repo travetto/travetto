@@ -22,9 +22,9 @@ const DOCUMENTED_PEER_DEPS = {
   'model-sql': ['auth-model'],
   openapi: ['app'],
   rest: ['app'],
-  'rest-fastify': ['app', 'asset-rest'],
-  'rest-koa': ['app', 'asset-rest'],
-  'rest-express': ['app', 'asset-rest'],
+  'rest-fastify': ['app', 'asset-rest', 'rest-session', 'schema'],
+  'rest-koa': ['app', 'asset-rest', 'rest-session', 'schema'],
+  'rest-express': ['app', 'asset-rest', 'rest-session', 'schema'],
   schema: ['rest', 'app', 'config'],
 };
 

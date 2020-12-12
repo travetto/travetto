@@ -5,11 +5,11 @@ import FormData from 'formdata-node';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { Util } from '@travetto/base';
+import { StreamUtil } from '@travetto/boot';
 
 import type { RestServer } from '../../src/server/server';
 import { ServerHandle } from '../../src/types';
 import { RestLambdaSymbol } from '../../src/internal/lambda';
-import { StreamUtil } from '@travetto/boot';
 
 
 const toMultiValue = (o: Record<string, string> | undefined) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, [v]]));
@@ -23,6 +23,19 @@ const baseLambdaContext = {
   resourcePath: '/{proxy+}',
   protocol: 'HTTP/1.1'
 };
+
+async function getOutput(t: string | Promise<string>) {
+  try {
+    t = await t;
+  } catch {
+    return undefined;
+  }
+  try {
+    return JSON.parse(t);
+  } catch (e) {
+    return t;
+  }
+}
 
 export abstract class BaseRestSuite {
 
@@ -62,16 +75,14 @@ export abstract class BaseRestSuite {
 
       this.handle = await this.server.run();
 
-      if (!this.awsLambda) {
-        const start = Date.now();
+      const start = Date.now();
 
-        while ((Date.now() - start) < 5000) {
-          try {
-            await fetch(this.url);
-            return; // We good
-          } catch {
-            await new Promise(res => setTimeout(res, 100));
-          }
+      while ((Date.now() - start) < 5000) {
+        try {
+          await fetch(this.url);
+          return; // We good
+        } catch {
+          await new Promise(res => setTimeout(res, 100));
         }
       }
     } else {
@@ -111,8 +122,7 @@ export abstract class BaseRestSuite {
         headers,
         body: buffer
       });
-      const out = await res.json();
-      resp = { status: res.status, body: out, headers: [...res.headers] };
+      resp = { status: res.status, body: await getOutput(res.text()), headers: [...res.headers] };
     } else {
       const res = await (this.server as any).handle({
         ...baseLambdaEvent,
@@ -127,7 +137,7 @@ export abstract class BaseRestSuite {
         requestContext: { ...baseLambdaContext, path, httpMethod }
       });
       const outText = res.isBase64Encoded ? Buffer.from(res.body, 'base64').toString('utf8') : res.body;
-      const out = JSON.parse(outText);
+      const out = await getOutput(outText);
       if (res.statusCode >= 300) {
         throw out;
       }
