@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 import { EnvUtil } from '@travetto/boot/src/env';
 import { ConsoleManager } from '@travetto/base/src/console';
-import { TransformerState, OnCall, CoreUtil, LiteralUtil } from '@travetto/transformer';
+import { TransformerId, TransformerState, OnCall, CoreUtil, LiteralUtil } from '@travetto/transformer';
 
 /**
  * Allows for removal of debug log messages depending on whether app is running
@@ -10,7 +10,7 @@ import { TransformerState, OnCall, CoreUtil, LiteralUtil } from '@travetto/trans
  */
 export class LoggerTransformer {
 
-  static key = '@trv:log';
+  static [TransformerId] = '@trv:log';
 
   @OnCall()
   static onDebugCall(state: TransformerState, node: ts.CallExpression) {

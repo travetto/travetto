@@ -18,21 +18,21 @@ interface Tester {
 /**
  * File scanning utilities, with a focus on application execution
  */
-export class ScanApp {
+class $ScanApp {
 
-  private static INDEX = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
+  private INDEX = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
 
-  private static moduleMatcherSimple: RegExp;
+  private moduleMatcherSimple: RegExp;
 
   /**
    * List of primary app folders to search
    */
-  static mainAppFolders = new Set(['src']);
+  mainAppFolders = new Set(['src']);
 
   /**
    * List of modules to not traverse into
    */
-  static modAppExclude = new Set([
+  modAppExclude = new Set([
     // This drives the init process, so cannot happen in a support file
     ...(AppManifest.hasProfile('test') ? [] : ['@travetto/test']),
     '@travetto/cli', '@travetto/boot', '@travetto/doc'
@@ -42,7 +42,7 @@ export class ScanApp {
    * Compute index for a scan entry
    * @param entry
    */
-  static computeIndex(entry: ScanEntry, moduleMatcher: RegExp) {
+  computeIndex(entry: ScanEntry, moduleMatcher: RegExp) {
     const file = entry.module;
     if (file.includes('node_modules')) {
       if (moduleMatcher.test(file)) { // External module
@@ -76,7 +76,7 @@ export class ScanApp {
   /**
    * Get the map of all modules currently supported in the application
    */
-  static get index() {
+  get index() {
     if (this.INDEX.size === 0) {
       this.INDEX.set('.', { base: FsUtil.cwd, files: new Map() });
 
@@ -112,7 +112,7 @@ export class ScanApp {
   /**
    * Clears the app scanning cache
    */
-  static reset() {
+  reset() {
     this.INDEX.clear();
   }
 
@@ -120,7 +120,7 @@ export class ScanApp {
    * Find search keys
    * @param roots App paths
    */
-  static getPaths(roots: string[]) {
+  getPaths(roots: string[]) {
     if (!this.moduleMatcherSimple) {
       this.moduleMatcherSimple = new RegExp(`(@travetto|${EnvUtil.getExtModules('!').join('|')})`);
     }
@@ -134,7 +134,7 @@ export class ScanApp {
    * @param paths The root paths to check
    * @param folder The folder to check into
    */
-  static findFolders(config: FindConfig) {
+  findFolders(config: FindConfig) {
     const all: string[] = [];
     const paths = 'paths' in config ? config.paths : this.getPaths(config.roots || AppManifest.roots);
     for (const key of paths) {
@@ -156,7 +156,7 @@ export class ScanApp {
    * @param folder The folder to check into
    * @param filter The filter to determine if this is a valid support file
    */
-  static findFiles(config: FindConfig) {
+  findFiles(config: FindConfig) {
     const { filter, folder } = config;
     if (folder === 'src') {
       config.includeIndex = config.includeIndex ?? true;
@@ -195,7 +195,7 @@ export class ScanApp {
    * Find source files for a given set of paths
    * @param roots List of all app root paths
    */
-  static findAppSourceFiles(config: Pick<AppFindConfig, 'roots'> = {}) {
+  findAppSourceFiles(config: Pick<AppFindConfig, 'roots'> = {}) {
     const all: SimpleEntry[][] = [
       this.findFiles({ folder: 'src', roots: config.roots }),
     ];
@@ -207,3 +207,5 @@ export class ScanApp {
     return all.flat();
   }
 }
+
+export const ScanApp = new $ScanApp();

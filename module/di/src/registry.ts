@@ -173,7 +173,6 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     const instancePromise = this.construct(target, qualifier);
     this.instancePromises.get(classId)!.set(qualifier, instancePromise);
-
     const instance = await instancePromise;
     this.instances.get(classId)!.set(qualifier, instance);
 
@@ -238,7 +237,6 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.verifyInitialized();
 
     const { id: classId, qualifier } = this.resolveTarget(target, qual);
-
     if (!this.instances.has(classId) || !this.instances.get(classId)!.has(qualifier)) {
       await this.createInstance(target, qualifier); // Wait for proxy
     }

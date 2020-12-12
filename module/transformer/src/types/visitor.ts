@@ -22,8 +22,10 @@ export type TransformPhase = 'before' | 'after';
 
 export type TransformerType = 'class' | 'method' | 'property' | 'parameter' | 'static-method' | 'call' | 'function';
 
+export const TransformerId = Symbol.for('@trv:transformer/id');
+
 export type Transformer = {
-  key: string;
+  [TransformerId]: string;
   name: string;
 };
 

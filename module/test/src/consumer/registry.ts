@@ -4,9 +4,9 @@ import { TestConsumer } from './types';
 /**
  * Test Results Handler Registry
  */
-export class TestConsumerRegistry {
-  private static registered = new Map<string, Class<TestConsumer>>();
-  private static primary: Class<TestConsumer>;
+class $TestConsumerRegistry {
+  private registered = new Map<string, Class<TestConsumer>>();
+  private primary: Class<TestConsumer>;
 
   /**
    * Add a new consumer
@@ -14,7 +14,7 @@ export class TestConsumerRegistry {
    * @param cls The consumer class
    * @param isDefault Set as the default consumer
    */
-  static add(type: string, cls: Class<TestConsumer>, isDefault = false) {
+  add(type: string, cls: Class<TestConsumer>, isDefault = false) {
     if (isDefault) {
       this.primary = cls;
     }
@@ -25,7 +25,7 @@ export class TestConsumerRegistry {
    * Retrieve a registered consumer
    * @param type The unique identifier
    */
-  static get(type: string) {
+  get(type: string) {
     return this.registered.get(type);
   }
 
@@ -33,12 +33,14 @@ export class TestConsumerRegistry {
    * Get a consumer instance that supports summarization
    * @param consumer The consumer identifier or the actual consumer
    */
-  static getInstance(consumer: string | TestConsumer): TestConsumer {
+  getInstance(consumer: string | TestConsumer): TestConsumer {
     return typeof consumer === 'string' ?
       new (this.get(consumer) || this.primary)() :
       consumer;
   }
 }
+
+export const TestConsumerRegistry = new $TestConsumerRegistry();
 
 /**
  * Registers a class a valid test consumer

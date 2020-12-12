@@ -26,12 +26,12 @@ type Listener = { name: string, handler: Function, final?: boolean };
  * If the application receives another SIGTERM/SIGINT while shutting down,
  * it will shutdown immediately.
  */
-export class ShutdownManager {
-  private static listeners: Listener[] = [];
-  private static shutdownCode = -1;
-  private static unhandled: UnhandledHandler[] = [];
+class $ShutdownManager {
+  private listeners: Listener[] = [];
+  private shutdownCode = -1;
+  private unhandled: UnhandledHandler[] = [];
 
-  private static async getAvailableListeners(exitCode: number) {
+  private async getAvailableListeners(exitCode: number) {
     const promises: Promise<any>[] = [];
 
     // Get valid listeners depending on lifecycle
@@ -64,7 +64,7 @@ export class ShutdownManager {
     return promises;
   }
 
-  static async executeAsync(exitCode: number = 0, err?: any) {
+  async executeAsync(exitCode: number = 0, err?: any) {
 
     if (this.shutdownCode > 0) { // Killed twice
       if (exitCode > 0) { // Handle force kill
@@ -107,14 +107,14 @@ export class ShutdownManager {
   /**
    * Begin shutdown process with a given exit code and possible error
    */
-  static execute(exitCode: number = 0, err?: any) {
+  execute(exitCode: number = 0, err?: any) {
     this.executeAsync(exitCode, err); // Fire and forget
   }
 
   /**
    * Hook into the process to override the shutdown behavior
    */
-  static register() {
+  register() {
     process.exit = this.execute.bind(this) as (() => never); // NOTE: We do not actually throw an error the first time, to allow for graceful shutdown
     process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
@@ -128,15 +128,15 @@ export class ShutdownManager {
    * Register to handle closeable on shutdown
    * @param closeable
    */
-  static onShutdown(closeable: Closeable): void;
+  onShutdown(closeable: Closeable): void;
   /**
    * Register a shutdown handler
    * @param name  Name to log
    * @param handler Actual code
    * @param final If this should be run an attempt to shutdown or only on the final shutdown
    */
-  static onShutdown(name: string, handler: Function, final?: boolean): void;
-  static onShutdown(nameOrCloseable: string | Closeable, handler?: Function, final = false) {
+  onShutdown(name: string, handler: Function, final?: boolean): void;
+  onShutdown(nameOrCloseable: string | Closeable, handler?: Function, final = false) {
     let name: string;
     if (typeof nameOrCloseable !== 'string') {
       name = nameOrCloseable.name ?? nameOrCloseable.constructor.name;
@@ -156,7 +156,7 @@ export class ShutdownManager {
    * @param handler Listener for all uncaught exceptions if valid
    * @param position Handler list priority
    */
-  static onUnhandled(handler: UnhandledHandler, position = -1) {
+  onUnhandled(handler: UnhandledHandler, position = -1) {
     if (position < 0) {
       this.unhandled.push(handler);
     } else {
@@ -169,7 +169,7 @@ export class ShutdownManager {
    * Remove handler for unhandled exceptions
    * @param handler The handler to remove
    */
-  static removeUnhandledHandler(handler: UnhandledHandler) {
+  removeUnhandledHandler(handler: UnhandledHandler) {
     const index = this.unhandled.indexOf(handler);
     if (index >= 0) {
       this.unhandled.splice(index, 1);
@@ -179,7 +179,7 @@ export class ShutdownManager {
   /**
    * Listen for an unhandled event, as a promise
    */
-  static listenForUnhandled(): Promise<void> & { cancel: () => void } {
+  listenForUnhandled(): Promise<void> & { cancel: () => void } {
     const uncaught = Util.resolvablePromise() as ReturnType<(typeof Util)['resolvablePromise']> & { cancel?: () => void };
     const cancel = this.onUnhandled(err => { uncaught.reject(err); return true; }, 0);
     uncaught.cancel = () => {
@@ -194,7 +194,7 @@ export class ShutdownManager {
    * Converts uncaught exception to a thrown error
    * @param fn The function to wrap
    */
-  static async captureUnhandled<U>(fn: Function): Promise<U> {
+  async captureUnhandled<U>(fn: Function): Promise<U> {
     const uncaught = this.listenForUnhandled();
     try {
       return (await Promise.race([uncaught, fn()])) as U;
@@ -203,3 +203,5 @@ export class ShutdownManager {
     }
   }
 }
+
+export const ShutdownManager = new $ShutdownManager();

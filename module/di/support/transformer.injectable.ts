@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil
+  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, TransformerId
 } from '@travetto/transformer';
 
 const INJECTABLE_MOD = require.resolve('../src/decorator');
@@ -11,7 +11,7 @@ const INJECTABLE_MOD = require.resolve('../src/decorator');
  */
 export class InjectableTransformer {
 
-  static key = '@trv:di';
+  static [TransformerId] = '@trv:di';
 
   /**
    * Handle a specific declaration param/property

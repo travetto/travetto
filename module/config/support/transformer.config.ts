@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerState, DecoratorMeta, OnProperty, OnClass, AfterClass } from '@travetto/transformer';
+import { TransformerState, DecoratorMeta, OnProperty, OnClass, AfterClass, TransformerId } from '@travetto/transformer';
 
 const hasConfig = Symbol.for('@trv:config/exists');
 
@@ -16,7 +16,7 @@ interface AutoState {
  */
 export class ConfigTransformer {
 
-  static key = '@trv:config';
+  static [TransformerId] = '@trv:config';
 
   @OnClass('Config')
   static startConfigClass(state: AutoState & TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {

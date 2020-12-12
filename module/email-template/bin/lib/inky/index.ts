@@ -3,15 +3,15 @@ import { InkyComponentFactory } from './factory';
 /**
  * Inky factory entry
  */
-export class Inky {
-  static defaultFactory = new InkyComponentFactory();
+class $Inky {
+  defaultFactory = new InkyComponentFactory();
 
   /**
    * Render markdown to HTML
    * @param text Text to convert
    * @param factory Optional component factory, default is the inky set
    */
-  static render(text: string, factory?: InkyComponentFactory) {
+  render(text: string, factory?: InkyComponentFactory) {
     factory = factory ?? this.defaultFactory;
     // Extract raws
     const raws: string[] = [];
@@ -49,3 +49,5 @@ export class Inky {
     return res;
   }
 }
+
+export const Inky = new $Inky();

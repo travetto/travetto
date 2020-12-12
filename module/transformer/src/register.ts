@@ -1,25 +1,25 @@
 import * as ts from 'typescript';
-import { DecoratorMeta, NodeTransformer, State, TransformPhase, TransformerType, Transformer } from './types/visitor';
+import { DecoratorMeta, NodeTransformer, State, TransformPhase, TransformerType, Transformer, TransformerId } from './types/visitor';
 
-const HANDLERS = Symbol.for('@trv:transformer/handlers');
+const HandlersProp = Symbol.for('@trv:transformer/handlers');
 
-type TransformerWithHandlers = Transformer & { [HANDLERS]?: NodeTransformer[] };
+type TransformerWithHandlers = Transformer & { [HandlersProp]?: NodeTransformer[] };
 
 /**
  * Get all transformers
  * @param obj Object to search for transformers
  */
 export function getAllTransformers(obj: any) {
-  return Object.values(obj).flatMap((x: any) => x[HANDLERS] as NodeTransformer[] ?? []);
+  return Object.values(obj).flatMap((x: any) => x[HandlersProp] as NodeTransformer[] ?? []);
 }
 
 // Store handlers in class
 function storeHandler(cls: TransformerWithHandlers, fn: Function, phase: TransformPhase, type: TransformerType, target?: string[]) {
   if (target) {
-    target = target.map(x => x.startsWith('@') ? x : `${cls.key}/${x}`);
+    target = target.map(x => x.startsWith('@') ? x : `${cls[TransformerId]}/${x}`);
   }
-  cls[HANDLERS] = cls[HANDLERS] ?? [];
-  cls[HANDLERS]!.push({ key: `${cls.key}/${fn.name}`, [phase]: fn.bind(cls), type, target });
+  cls[HandlersProp] = cls[HandlersProp] ?? [];
+  cls[HandlersProp]!.push({ key: `${cls[TransformerId]}/${fn.name}`, [phase]: fn.bind(cls), type, target });
 }
 
 /**

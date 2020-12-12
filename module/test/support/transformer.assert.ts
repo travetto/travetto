@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { FsUtil } from '@travetto/boot';
-import { TransformerState, OnCall, DeclarationUtil, CoreUtil } from '@travetto/transformer';
+import { TransformerState, OnCall, DeclarationUtil, CoreUtil, TransformerId } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
@@ -89,7 +89,7 @@ interface Command {
  */
 export class AssertTransformer {
 
-  static key = '@trv:test';
+  static [TransformerId] = '@trv:test';
 
   /**
    * Resolves optoken to syntax kind.  Relies on `ts`

@@ -9,14 +9,12 @@ import { RestConfig } from './config';
 import { RouteUtil } from '../util/route';
 import { RestInterceptor } from '../interceptor/interceptor';
 import { ControllerRegistry } from '../registry/registry';
-import { RestInterceptorTarget } from '../internal/types';
+import { GlobalRoute, RestInterceptorTarget } from '../internal/types';
 
 /**
  * The rest server
  */
 export abstract class RestServer<T = any> {
-
-  static GLOBAL = '___GLOBAL___';
 
   @Inject()
   config: RestConfig;
@@ -185,7 +183,7 @@ export abstract class RestServer<T = any> {
       method: 'all', path: '*'
     };
     route.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, route);
-    await this.registerRoutes(RestServer.GLOBAL, '/', [route]);
+    await this.registerRoutes(GlobalRoute, '/', [route]);
   }
 
   /**
@@ -197,7 +195,7 @@ export abstract class RestServer<T = any> {
       return;
     }
 
-    await this.unregisterRoutes(RestServer.GLOBAL);
+    await this.unregisterRoutes(GlobalRoute);
   }
 
   /**

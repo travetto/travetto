@@ -1,11 +1,11 @@
 import * as util from 'util';
 import * as ts from 'typescript';
 
-import { TransformerState, OnMethod } from '../../..';
+import { TransformerId, TransformerState, OnMethod } from '../../..';
 
 export class MakeUpper {
 
-  static key = '@trv:transformer-test';
+  static [TransformerId] = '@trv:transformer-test';
 
   @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration) {

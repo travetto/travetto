@@ -6,7 +6,7 @@ import { ExecutionError } from './error';
  */
 export class Timeout extends ExecutionError {
 
-  private id: NodeJS.Timer;
+  private id: NodeJS.Timer | undefined;
   private promise = Util.resolvablePromise();
 
   constructor(private duration: number, op: string = 'Operation') {
@@ -17,9 +17,11 @@ export class Timeout extends ExecutionError {
    * Stop timeout from firing
    */
   cancel() {
-    clearTimeout(this.id);
-    this.promise.resolve();
-    delete this.id;
+    if (this.id) {
+      clearTimeout(this.id);
+      this.promise.resolve();
+      delete this.id;
+    }
   }
 
   /**

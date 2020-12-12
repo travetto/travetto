@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnClass, OnMethod, ParamDocumentation, DeclDocumentation, DocUtil, DecoratorUtil
+  TransformerState, OnClass, OnMethod, ParamDocumentation, DeclDocumentation, DocUtil, DecoratorUtil, TransformerId
 } from '@travetto/transformer';
 
 import { ParamConfig } from '../src/types';
@@ -14,7 +14,7 @@ const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
  */
 export class RestTransformer {
 
-  static key = '@trv:rest';
+  static [TransformerId] = '@trv:rest';
 
   /**
    * Get base parameter config
