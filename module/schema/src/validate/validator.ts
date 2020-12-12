@@ -129,7 +129,7 @@ export class SchemaValidator {
       return [{ kind: 'type', type: field.type.name.toLowerCase() }];
     }
 
-    if (field.type.validateSchema) {
+    if (field.type?.validateSchema) {
       const kind = field.type.validateSchema(value);
       switch (kind) {
         case undefined: break;
