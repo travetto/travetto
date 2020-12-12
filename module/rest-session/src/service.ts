@@ -1,8 +1,9 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { EnvUtil } from '@travetto/boot';
-import { CacheSource, MemoryCacheSource } from '@travetto/cache';
+import { CacheService } from '@travetto/cache';
 import { Util, AppError } from '@travetto/base';
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model-core';
 
 import { TRV_SESSION } from './internal/types';
 import { Session } from './types';
@@ -31,18 +32,18 @@ export class RestSessionService {
    * Cache for storing the session
    */
   @Inject({ qualifier: SESSION_CACHE, optional: true })
-  cacheSource: CacheSource<Session>;
+  cacheSource: CacheService;
 
   /**
    * Initialize store if none defined
    */
   async postConstruct() {
     if (this.cacheSource === undefined) {
-      this.cacheSource = new MemoryCacheSource<Session>();
+      this.cacheSource = new CacheService(new MemoryModelService(new MemoryModelConfig()));
       if (!EnvUtil.isProd()) {
-        console.warn('MemoryCacheSource is not intended for production session use');
+        console.warn('No session cache defined, falling back to in-memory cache. This is not intended for production session use');
       } else {
-        throw new AppError('MemoryCacheSource is not intended for production session use', 'general');
+        throw new AppError('In-memory cache is not intended for production session use', 'general');
       }
     }
   }
@@ -54,7 +55,7 @@ export class RestSessionService {
     if (session.isExpired()) { // Time has passed
       return false;
     }
-    return !!(await this.cacheSource.has(session.key));
+    return !!(await this.cacheSource.getOptional(session.key));
   }
 
   /**
