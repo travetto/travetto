@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 import { CookiesInterceptor, RestInterceptor, Request, Response } from '@travetto/rest';
-
+import { AsyncContextInterceptor } from '@travetto/context'; // @line-if @travetto-context
 import { RestSessionService } from './service';
 
 /**
@@ -8,11 +8,11 @@ import { RestSessionService } from './service';
  * request/response depending on session existence and state change
  */
 @Injectable()
-export class SessionInterceptor extends RestInterceptor {
+export class SessionInterceptor implements RestInterceptor {
 
   after = [
     CookiesInterceptor,
-    require('@travetto/context').AsyncContextInterceptor, // @line-if @travetto/context
+    AsyncContextInterceptor, // @line-if @travetto/context
   ];
 
   @Inject()

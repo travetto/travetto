@@ -1,4 +1,4 @@
-import { ModelService } from '@travetto/model';
+import { MongoModelService } from '@travetto/model-mongo';
 import { Injectable, Inject } from '@travetto/di';
 import { Todo, TodoSearch } from './model';
 
@@ -6,29 +6,27 @@ import { Todo, TodoSearch } from './model';
 export class TodoService {
 
   @Inject()
-  private modelService: ModelService;
+  private modelService: MongoModelService;
 
   async add(todo: Todo) {
     todo.created = new Date();
-    const saved = await this.modelService.save(Todo, todo);
+    const saved = await this.modelService.create(Todo, todo);
     return saved;
   }
 
   async get(id: string) {
-    return this.modelService.getById(Todo, id);
+    return this.modelService.get(Todo, id);
   }
 
   async getAll(search: TodoSearch) {
-    return this.modelService.getAllByQuery(Todo, search);
+    return await this.modelService.list(Todo);
   }
 
   async complete(id: string, completed = true) {
-    return this.modelService.updatePartial(Todo,
-      Todo.from({ id, completed })
-    );
+    return this.modelService.updatePartial(Todo, id, Todo.from({ completed }));
   }
 
   async remove(id: string) {
-    return this.modelService.deleteById(Todo, id);
+    return this.modelService.delete(Todo, id);
   }
 }

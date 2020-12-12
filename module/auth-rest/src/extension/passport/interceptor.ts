@@ -15,7 +15,7 @@ const authenticator = (passport as passport.Authenticator<Handler>);
  * Passport rest interceptor
  */
 @Injectable()
-export class PassportInterceptor extends RestInterceptor {
+export class PassportInterceptor implements RestInterceptor {
 
   private init = authenticator.initialize();
 
