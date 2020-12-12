@@ -7,7 +7,6 @@ import { Path, Query } from '../../src/decorator/param';
 import { Request, Response } from '../../src/types';
 import { BaseRestSuite } from './base';
 
-
 @Controller('/test')
 class TestController {
   @Get('/json')
@@ -91,7 +90,7 @@ export abstract class RestServerSuite extends BaseRestSuite {
 
 
   @Test()
-  async testCookie(res: Response) {
+  async testCookie() {
     const { body: ret, headers } = await this.makeRequst('delete', '/test/cookie', {
       headers: {
         Cookie: `orange=yummy`

@@ -1,11 +1,11 @@
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { ContextProvider } from '@travetto/rest';
 
+
 /**
- * Session data, will basically be a key/value map
+ * @concrete ./internal/types:SessionDataTarget
  */
-@ContextProvider((c, req) => req.session.data)
-export class SessionData {
+export interface SessionData {
   [key: string]: any;
 }
 

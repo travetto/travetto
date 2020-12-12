@@ -78,7 +78,7 @@ export class BindUtil {
    * @param val The provided value
    */
   static coerceType<T>(conf: FieldConfig, val: any): T | null | undefined {
-    if (conf.type.bindSchema) {
+    if (conf.type?.bindSchema) {
       val = conf.type.bindSchema(val);
     } else {
       val = Util.coerceType(val, conf.type, false);
