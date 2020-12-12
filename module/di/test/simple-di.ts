@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { Suite, Test, BeforeEach, BeforeAll } from '@travetto/test';
+import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Class, RootRegistry } from '@travetto/registry';
 
 import { DependencyRegistry } from '../src/registry';
@@ -7,7 +7,7 @@ import { DependencyRegistry } from '../src/registry';
 import {
   ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT,
   CUSTOM_DATABASE, Database, CUSTOM_EMPTY, BasePattern,
-  SpecificPattern
+  SpecificPattern, InterfaceType, BaseType, BaseTypeTarget, CUSTOM_INTERFACE
 } from './deps';
 
 import { DbConfig } from './config';
@@ -154,5 +154,22 @@ class DiTest2 {
     const specInst = await DependencyRegistry.getInstance(SpecificPattern);
 
     assert(specInst instanceof SpecificPattern);
+  }
+
+  @Test('interface injection')
+  async intInjection() {
+    const types = DependencyRegistry.getCandidateTypes(BaseTypeTarget);
+    assert(types.length > 0);
+
+    const spec = DependencyRegistry.getCandidateTypes(InterfaceType);
+    assert(spec.length > 0);
+
+    assert(types[0] === spec[0]);
+
+    const specInst = await DependencyRegistry.getInstance(BaseTypeTarget);
+    assert(specInst instanceof InterfaceType);
+
+    const customInst = await DependencyRegistry.getInstance(BaseTypeTarget, CUSTOM_INTERFACE);
+    assert(customInst instanceof InterfaceType);
   }
 }

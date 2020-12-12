@@ -4,6 +4,9 @@ import { ExecUtil } from '@travetto/boot';
 import { ActivationTarget } from '../core/types';
 import { Workspace } from '../core/workspace';
 
+/**
+ * Base feature structure
+ */
 export abstract class BaseFeature implements ActivationTarget {
 
   static isModule = true;

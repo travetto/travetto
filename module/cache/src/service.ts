@@ -34,7 +34,7 @@ export class CacheService {
 
   constructor(@Inject(CacheModelSymbol) private modelService: ModelExpirySupport) { }
 
-  async getAndCheckAge(config: CacheConfig, id: string) {
+  async get(id: string, extendOnAccess = true) {
     if (this.modelService.deleteExpired) {
       await this.cull();
     }
@@ -47,7 +47,7 @@ export class CacheService {
     }
 
     // If half way to eviction, not perfect, but will reduce the amount of unnecessary updates
-    if (config.extendOnAccess) {
+    if (extendOnAccess) {
       const delta = expiresAt - Date.now();
       const threshold = maxAge / 2;
       if (delta < threshold) {
@@ -59,22 +59,26 @@ export class CacheService {
     return CacheUtil.fromSafeJSON(res.entry);
   }
 
-  async setWithAge(config: CacheConfig, id: string, entry: any) {
+  async set(id: string, entry: any, maxAge = INFINITE_MAX_AGE) {
     entry = CacheUtil.toSafeJSON(entry);
 
     const store = await this.modelService.upsertWithExpiry(CacheType,
       CacheType.from({ id, entry }),
-      config.maxAge ?? INFINITE_MAX_AGE
+      maxAge ?? INFINITE_MAX_AGE
     );
 
     return CacheUtil.fromSafeJSON(store.entry);
   }
 
-  async getOptional(config: CacheConfig, id: string) {
+  async delete(id: string) {
+    await this.modelService.delete(CacheType, id);
+  }
+
+  async getOptional(id: string, extendOnAccess = true) {
     let res: any;
 
     try {
-      res = await this.getAndCheckAge(config, id);
+      res = await this.get(id, extendOnAccess);
     } catch (err) {
       if (!(err instanceof CacheError) && !(err instanceof NotFoundError)) {
         throw err;
@@ -106,11 +110,11 @@ export class CacheService {
   async cache(config: CacheConfig, target: any, fn: Function, params: any[]) {
     const id = CacheUtil.generateKey(config, params);
 
-    let res = await this.getOptional(config, id);
+    let res = await this.getOptional(id, config.extendOnAccess);
 
     if (res === undefined) {
       const data = await fn.apply(target, params);
-      res = await this.setWithAge(config, id, data);
+      res = await this.set(id, data, config.maxAge);
     }
 
     if (config.reinstate) { // Reinstate result value if needed
@@ -131,7 +135,7 @@ export class CacheService {
   async evict(config: CacheConfig, target: any, fn: Function, params: any[]) {
     const id = CacheUtil.generateKey(config, params);
     const val = await fn.apply(target, params);
-    await this.modelService.delete(CacheType, id);
+    await this.delete(id);
     return val;
   }
 }

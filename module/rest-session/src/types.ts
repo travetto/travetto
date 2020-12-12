@@ -1,6 +1,5 @@
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { ContextProvider } from '@travetto/rest';
-import { CacheEntry } from '@travetto/cache';
 
 /**
  * Session data, will basically be a key/value map
@@ -14,7 +13,7 @@ export class SessionData {
  * Full session object, with metadata
  */
 @ContextProvider((c, req) => req.session)
-export class Session<T = any> implements CacheEntry {
+export class Session<T = any>  {
   /**
    * The expiry time when the session was loaded
    */
