@@ -3,7 +3,7 @@ import { RestInterceptor } from '../../../src/interceptor/interceptor';
 import { Response, Request } from '../../../src/types';
 
 @Injectable()
-export class LoggingInterceptor extends RestInterceptor {
+export class LoggingInterceptor implements RestInterceptor {
   async intercept(req: Request, res: Response, next: () => Promise<any>) {
     const start = Date.now();
     try {

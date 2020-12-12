@@ -9,7 +9,6 @@
   "dependencies": {
     "@travetto/config": "^1.1.1",
     "@travetto/model-core": "^1.1.1",
-    "@travetto/model-query": "^1.1.1",
     "@types/mongodb": "^3.6.1",
     "mongodb": "^3.6.3"
   },
