@@ -13,7 +13,7 @@ const isRenderable = (o: any): o is Renderable => !!o['render'];
  * Serialization interceptor
  */
 @Injectable()
-export class SerializeInterceptor extends RestInterceptor {
+export class SerializeInterceptor implements RestInterceptor {
 
   /**
    * Set outbound content type if not defined

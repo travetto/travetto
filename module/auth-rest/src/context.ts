@@ -66,7 +66,7 @@ export class AuthContextService {
    */
   clear(req?: Request) {
     if (this.context) {
-      this.context.clear(CTX_SYM);
+      this.context.set(CTX_SYM, undefined);
     }
     if (req) {
       delete req.auth;
