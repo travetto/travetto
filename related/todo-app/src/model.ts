@@ -1,4 +1,4 @@
-import { Model } from '@travetto/model';
+import { Model } from '@travetto/model-core';
 import { Schema } from '@travetto/schema';
 
 @Model()

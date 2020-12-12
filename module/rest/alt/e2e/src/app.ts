@@ -1,6 +1,7 @@
 import { Injectable } from '@travetto/di';
 import { Application } from '@travetto/app';
 import { RouteConfig, RestServer, RestInterceptor } from '../../..';
+import { ServerHandle } from '../../../src/types';
 
 type Inner = {
   use(factory: any): void;
@@ -20,7 +21,7 @@ class DummyServer extends RestServer<Inner> {
 
   listen() {
     console.log('Listening');
-    return {};
+    return {} as ServerHandle;
   }
 
   async registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[]) {

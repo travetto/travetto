@@ -7,7 +7,7 @@ class Appender {
 }
 
 @Injectable()
-export class LoggingInterceptor extends RestInterceptor {
+export class LoggingInterceptor implements RestInterceptor {
 
   constructor(private appender: Appender) {
     super();

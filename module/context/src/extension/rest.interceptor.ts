@@ -9,7 +9,7 @@ import { AsyncContext } from '../service';
  * Enables access to contextual data when running in a rest application
  */
 @Injectable()
-export class AsyncContextInterceptor extends RestInterceptor {
+export class AsyncContextInterceptor implements RestInterceptor {
 
   after = [GetCacheInterceptor];
 

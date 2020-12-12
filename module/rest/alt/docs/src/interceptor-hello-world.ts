@@ -4,7 +4,7 @@ import { Request, Response } from '../../../src/types';
 import { SerializeInterceptor } from '../../../src/interceptor/serialize';
 
 @Injectable()
-export class HelloWorldInterceptor extends RestInterceptor {
+export class HelloWorldInterceptor implements RestInterceptor {
 
   after = [SerializeInterceptor];
 

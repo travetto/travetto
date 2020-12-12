@@ -16,7 +16,12 @@ export class TodoController {
    */
   @Get('/')
   async getAll(@SchemaQuery() search: TodoSearch) {
-    return this.svc.getAll(search);
+    const itr = await this.svc.getAll(search);
+    const out = [];
+    for await (const item of itr) {
+      out.push(item);
+    }
+    return out;
   }
 
   /**
