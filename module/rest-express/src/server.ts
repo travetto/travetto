@@ -6,6 +6,7 @@ import * as compression from 'compression';
 import { EnvUtil } from '@travetto/boot';
 import { Injectable } from '@travetto/di';
 import { RouteUtil, RestServer, ParamConfig, RouteConfig, RouteHandler, TRV_RAW } from '@travetto/rest';
+import { GlobalRoute } from '@travetto/rest/src/internal/types';
 
 import { RouteStack } from './internal/types';
 
@@ -56,7 +57,7 @@ export class ExpressRestServer extends RestServer<express.Application> {
     }
 
     // Register options handler for each controller
-    if (key !== RestServer.GLOBAL) {
+    if (key !== GlobalRoute) {
       const optionHandler = RouteUtil.createRouteHandler(
         this.interceptors,
         {
@@ -74,7 +75,7 @@ export class ExpressRestServer extends RestServer<express.Application> {
     router.key = key;
     this.raw.use(path, router);
 
-    if (this.listening && key !== RestServer.GLOBAL) {
+    if (this.listening && key !== GlobalRoute) {
       if (!EnvUtil.isReadonly()) {
         await this.unregisterGlobal();
       }

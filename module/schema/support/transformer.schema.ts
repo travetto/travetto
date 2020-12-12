@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil
+  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, TransformerId
 } from '@travetto/transformer';
 import { SchemaTransformUtil } from './lib';
 
@@ -19,7 +19,7 @@ const COMMON_MOD = require.resolve('../src/decorator/common');
  */
 export class SchemaTransformer {
 
-  static key = '@trv:schema';
+  static [TransformerId] = '@trv:schema';
 
   /**
    * Track schema on start

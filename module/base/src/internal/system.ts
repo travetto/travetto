@@ -6,7 +6,7 @@ import { FsUtil } from '@travetto/boot';
  */
 export class SystemUtil {
 
-  private static modCache = new Map<string, string>();
+  private static MOD_CACHE = new Map<string, string>();
 
   /**
    * A fast and naive hash, used for detecting changes in code
@@ -89,8 +89,8 @@ export class SystemUtil {
   static computeModule(fileName: string) {
     fileName = path.resolve(fileName);
 
-    if (this.modCache.has(fileName)) {
-      return this.modCache.get(fileName)!;
+    if (this.MOD_CACHE.has(fileName)) {
+      return this.MOD_CACHE.get(fileName)!;
     }
 
     let mod = fileName.replace(/\.(t|j)s$/, ''); // Drop ext
@@ -121,7 +121,7 @@ export class SystemUtil {
     }
 
     const name = `${ns}/${mod}`;
-    this.modCache.set(fileName, name);
+    this.MOD_CACHE.set(fileName, name);
     return name;
   }
 

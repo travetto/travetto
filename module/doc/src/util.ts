@@ -9,6 +9,29 @@ const PKG_ROOT = FsUtil.resolveUnix(fs.realpathSync(__dirname), '..', '..');
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 const IMPORT_REL = /^import.*\.\.\/\.\./;
 
+class DocState {
+  baseline = new Date(`${new Date().getFullYear()}-03-14T00:00:00.000`).getTime();
+  _s = 37;
+  ids: Record<string, string> = {};
+
+  rng() {
+    this._s = Math.sin(this._s) * 10000;
+    return this._s - Math.floor(this._s);
+  }
+
+  getDate(d: string) {
+    this.baseline += this.rng() * 1000;
+    return new Date(this.baseline).toISOString();
+  }
+
+  getId(id: string) {
+    if (!this.ids[id]) {
+      this.ids[id] = ' '.repeat(id.length).split('').map(x => Math.trunc(this.rng() * 16).toString(16)).join('');
+    }
+    return this.ids[id];
+  }
+}
+
 export class DocUtil {
   static DEC_CACHE: Record<string, boolean> = {};
   static EXT_TO_LANG: Record<string, string> = {
@@ -18,32 +41,13 @@ export class DocUtil {
     sh: 'bash',
   };
 
-  static baseline = new Date(`${new Date().getFullYear()}-03-14T00:00:00.000`).getTime();
-  static _s = 37;
-  static ids: Record<string, string> = {};
+  static DOC_STATE = new DocState();
 
   static PACKAGES = new Map(
     fs.readdirSync(PKG_ROOT)
       .filter(x => !x.startsWith('.'))
       .map(x => [x, require(`${PKG_ROOT}/${x}/package.json`) as Record<string, any>])
   );
-
-  static rng() {
-    this._s = Math.sin(this._s) * 10000;
-    return this._s - Math.floor(this._s);
-  }
-
-  static getDate(d: string) {
-    this.baseline += this.rng() * 1000;
-    return new Date(this.baseline).toISOString();
-  }
-
-  static getId(id: string) {
-    if (!this.ids[id]) {
-      this.ids[id] = ' '.repeat(id.length).split('').map(x => Math.trunc(this.rng() * 16).toString(16)).join('');
-    }
-    return this.ids[id];
-  }
 
   static run(cmd: string, args: string[], config: { cwd?: string } = {}) {
     if (cmd === 'travetto') {
@@ -64,8 +68,8 @@ export class DocUtil {
         // eslint-disable-next-line no-control-regex
         .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
         .replace(new RegExp(FsUtil.cwd, 'g'), '.')
-        .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.getDate.bind(this))
-        .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.getId.bind(this))
+        .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.DOC_STATE.getDate.bind(this))
+        .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.DOC_STATE.getId.bind(this))
         .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);
     } catch (err) {
       return err.message;

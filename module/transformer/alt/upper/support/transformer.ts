@@ -1,10 +1,10 @@
 import * as ts from 'typescript';
 
-import { OnProperty, TransformerState, OnMethod, OnClass } from '../../..';
+import { OnProperty, TransformerState, OnMethod, OnClass, TransformerId } from '../../..';
 
 export class MakeUpper {
 
-  static key = '@trv:transformer-test';
+  static [TransformerId] = '@trv:transformer-test';
 
   @OnProperty()
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration) {

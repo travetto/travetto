@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { TransformerState, OnMethod, OnClass, AfterClass, DecoratorUtil, OnFunction } from '@travetto/transformer';
+import { TransformerState, OnMethod, OnClass, AfterClass, DecoratorUtil, OnFunction, TransformerId } from '@travetto/transformer';
 
 const REGISTER_MOD = require.resolve('../src/decorator');
 
@@ -20,7 +20,7 @@ interface RegisterInfo {
  */
 export class RegisterTransformer {
 
-  static key = '@trv:registry';
+  static [TransformerId] = '@trv:registry';
 
   /**
    * Hash each class

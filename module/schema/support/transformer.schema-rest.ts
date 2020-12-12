@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerState, OnParameter, DecoratorMeta, OnMethod, DocUtil, DecoratorUtil, DeclarationUtil, AnyType } from '@travetto/transformer';
+import { TransformerState, OnParameter, DecoratorMeta, OnMethod, DocUtil, DecoratorUtil, DeclarationUtil, AnyType, TransformerId } from '@travetto/transformer';
 import { SchemaTransformUtil } from './lib';
 
 const ENDPOINT_DEC_FILE = (() => { try { return require.resolve('@travetto/rest/src/decorator/endpoint'); } catch { } })()!;
@@ -12,7 +12,7 @@ const ENDPOINT_DEC_FILE = (() => { try { return require.resolve('@travetto/rest/
  */
 export class SchemaRestTransformer {
 
-  static key = '@trv:schema';
+  static [TransformerId] = '@trv:schema';
 
   /**
    * Find the render method of a type if provided

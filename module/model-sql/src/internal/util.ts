@@ -21,7 +21,7 @@ export type VisitStack = {
  */
 export class SQLUtil {
 
-  static schemaFieldsCache = new Map<Class, {
+  static SCHEMA_FIELDS_CACHE = new Map<Class, {
     local: FieldConfig[];
     localMap: Record<string, FieldConfig>;
     foreign: FieldConfig[];
@@ -64,8 +64,8 @@ export class SQLUtil {
     const top = stack[stack.length - 1];
     const cls = SchemaRegistry.get(top.type);
 
-    if (cls && this.schemaFieldsCache.has(cls.class)) {
-      return this.schemaFieldsCache.get(cls.class)!;
+    if (cls && this.SCHEMA_FIELDS_CACHE.has(cls.class)) {
+      return this.SCHEMA_FIELDS_CACHE.get(cls.class)!;
     }
 
     if (!cls) { // If a simple type, it is it's own field
@@ -104,7 +104,7 @@ export class SQLUtil {
     ret.local.reduce((acc, f) => (acc[f.name] = f) && acc, ret.localMap);
     ret.foreign.reduce((acc, f) => (acc[f.name] = f) && acc, ret.foreignMap);
 
-    this.schemaFieldsCache.set(cls.class, ret);
+    this.SCHEMA_FIELDS_CACHE.set(cls.class, ret);
 
     return ret;
   }

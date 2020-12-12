@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { ExternalType, AnyType } from './resolver/types';
-import { State, DecoratorMeta, Transformer } from './types/visitor';
+import { State, DecoratorMeta, Transformer, TransformerId } from './types/visitor';
 
 
 import { TypeResolver } from './resolver/service';
@@ -229,7 +229,7 @@ export class TransformerState implements State {
    * @param file
    */
   findDecorator(cls: Transformer, node: ts.Node, name: string, file?: string) {
-    const target = `${cls.key}/${name}`;
+    const target = `${cls[TransformerId]}/${name}`;
     return this.getDecoratorList(node)
       .find(x => x.targets?.includes(target) && (file ? x.name === name && x.file === file : true))?.dec;
   }
