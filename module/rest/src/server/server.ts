@@ -9,6 +9,7 @@ import { RestConfig } from './config';
 import { RouteUtil } from '../util/route';
 import { RestInterceptor } from '../interceptor/interceptor';
 import { ControllerRegistry } from '../registry/registry';
+import { RestInterceptorTarget } from '../internal/types';
 
 /**
  * The rest server
@@ -106,10 +107,10 @@ export abstract class RestServer<T = any> {
    * Get the list of installed interceptors
    */
   async getInterceptors() {
-    const interceptors = DependencyRegistry.getCandidateTypes(RestInterceptor as Class);
+    const interceptors = DependencyRegistry.getCandidateTypes(RestInterceptorTarget);
     const instances: RestInterceptor[] = [];
     for (const op of interceptors) {
-      instances.push(await DependencyRegistry.getInstance(op.target, op.qualifier));
+      instances.push(await DependencyRegistry.getInstance<RestInterceptor>(op.target, op.qualifier));
     }
 
     const ordered = instances.map(x => ({ key: x.constructor, before: x.before, after: x.after, target: x }));

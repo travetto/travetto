@@ -10,7 +10,7 @@ import { verify } from '../verify';
 /**
  * Auth context store via JWT
  */
-export class JWTAuthContextEncoder extends AuthContextEncoder {
+export class JWTAuthContextEncoder implements AuthContextEncoder {
 
   private accessor: ValueAccessor;
 
@@ -30,7 +30,6 @@ export class JWTAuthContextEncoder extends AuthContextEncoder {
      */
     location: 'cookie' | 'header'
   ) {
-    super();
     this.accessor = new ValueAccessor(name, location);
   }
 
@@ -39,7 +38,6 @@ export class JWTAuthContextEncoder extends AuthContextEncoder {
    */
   async write(ctx: AuthContext, req: Request, res: Response) {
     if (ctx) {
-      console.log(ctx.principal);
       const expires = ctx.principal.expires || new Date(Date.now() + (1000 * 60 * 60 * 24 * 365));
       const body: Pick<AuthContext, 'identity' | 'principal'> & { exp: number } = {
         ...ctx, exp: Math.trunc(expires.getTime() / 1000)

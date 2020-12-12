@@ -6,3 +6,5 @@ export class RequestCls { }
 
 @ContextProvider((__: any, rq: Request, rs: Response) => rs)
 export class ResponseCls { }
+
+export class RestInterceptorTarget { }

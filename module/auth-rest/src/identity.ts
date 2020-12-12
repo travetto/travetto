@@ -3,13 +3,15 @@ import { Identity } from '@travetto/auth';
 
 /**
  * Identity source to support authentication
+ *
+ * @concrete ./internal/types:IdentitySourceTarget
  */
-export abstract class IdentitySource {
+export interface IdentitySource {
   /**
    * Verify the information from the request, authenticate into an Identity
    *
    * @param req The travetto request
    * @param res The travetto response
    */
-  abstract authenticate(req: Request, res: Response): Promise<Identity | undefined>;
+  authenticate(req: Request, res: Response): Promise<Identity | undefined>;
 }

@@ -12,7 +12,7 @@ interface PassportAuthOptions {
 /**
  * Identity source via passport
  */
-export class PassportIdentitySource<U> extends IdentitySource {
+export class PassportIdentitySource<U> implements IdentitySource {
 
   /**
    * Process request read state from query
@@ -62,7 +62,6 @@ export class PassportIdentitySource<U> extends IdentitySource {
     private passportAuthenticateOptions: passport.AuthenticateOptions = {},
     private extraOptions: PassportAuthOptions = {}
   ) {
-    super();
     passport.use(this.strategyName, this.strategy);
   }
 

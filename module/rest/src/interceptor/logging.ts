@@ -58,7 +58,7 @@ export class RestLogRoutesConfig {
  * Logging interceptor, to show activity for all requests
  */
 @Injectable()
-export class LoggingInterceptor extends RestInterceptor {
+export class LoggingInterceptor implements RestInterceptor {
 
   static matchRoute(controller: Partial<ControllerConfig>, route: RouteConfig, paths: RouteCheck[]) {
     return paths.some(({ base, sub }) => {

@@ -6,6 +6,7 @@ import { AuthContext } from '@travetto/auth/src/context';
 import { PrincipalSource } from '@travetto/auth';
 
 import { IdentitySource } from './identity';
+import { IdentitySourceTarget } from './internal/types';
 
 /**
  * Auth service to allow for rest-based interaction
@@ -19,8 +20,8 @@ export class AuthService {
 
   async postConstruct() {
     // Find all identity sources
-    for (const source of DependencyRegistry.getCandidateTypes(IdentitySource as Class<IdentitySource>)) {
-      const dep = await DependencyRegistry.getInstance(IdentitySource, source.qualifier);
+    for (const source of DependencyRegistry.getCandidateTypes(IdentitySourceTarget as Class<IdentitySource>)) {
+      const dep = await DependencyRegistry.getInstance<IdentitySource>(IdentitySourceTarget, source.qualifier);
       this.identitySources.set(source.qualifier.toString(), dep);
     }
   }

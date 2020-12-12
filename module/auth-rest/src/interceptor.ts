@@ -30,7 +30,6 @@ export class AuthInterceptor extends RestInterceptor {
   @Inject()
   contextStore?: AuthContextEncoder;
 
-
   /**
    * Determines the current route is applicable for the interceptor
    * @param route The route to check
@@ -39,7 +38,6 @@ export class AuthInterceptor extends RestInterceptor {
   applies() {
     return !!this.contextStore;
   }
-
 
   async configure(req: Request, res: Response) {
     req.logout = async function () { delete this.auth; };
