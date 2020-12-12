@@ -8,6 +8,22 @@ export class SpecificPattern extends BasePattern {
 
 }
 
+export class BaseTypeTarget { }
+
+/**
+ * @concrete .:BaseTypeTarget
+ */
+export interface BaseType {
+  age: number;
+}
+
+@Injectable()
+export class InterfaceType implements BaseType {
+  get age() {
+    return 20;
+  }
+}
+
 @Injectable()
 export class Database {
   @Inject() dbConfig: DbConfig<any, any>;
@@ -54,6 +70,7 @@ export class ServiceInherit2 extends ServiceInherit {
 export const CUSTOM_SERVICE_INHERIT = Symbol.for('Custom');
 export const CUSTOM_DATABASE = Symbol.for('CUSTOM DB');
 export const CUSTOM_EMPTY = Symbol.for('Custom EMPTY');
+export const CUSTOM_INTERFACE = Symbol.for('CustomInterface');
 
 class TestConfig {
   @InjectableFactory(CUSTOM_EMPTY)
@@ -88,5 +105,10 @@ class TestConfig {
     const ret = new Database();
     ret.dbConfig = config;
     return ret;
+  }
+
+  @InjectableFactory(CUSTOM_INTERFACE)
+  static getIntType() {
+    return new InterfaceType();
   }
 }
