@@ -5,22 +5,24 @@ import { ResourceManager } from '@travetto/base';
 
 /**
  * Mail templating engine
+ *
+ * @concrete ./internal/types:MailTemplateEngineTarget
  */
-export abstract class MailTemplateEngine {
+export interface MailTemplateEngine {
   /**
   * Resolved nested templates
   */
-  abstract resolveNested(template: string): Promise<string>;
+  resolveNested(template: string): Promise<string>;
 
   /**
    * Interpolate a string with a given context, useful for simple messages
    */
-  abstract template(text: string, ctx: Record<string, any>): Promise<string> | string;
+  template(text: string, ctx: Record<string, any>): Promise<string> | string;
 }
 
 
 @Injectable()
-export class MustacheTemplateEngine extends MailTemplateEngine {
+export class MustacheTemplateEngine implements MailTemplateEngine {
 
   /**
    * Resolved nested templates

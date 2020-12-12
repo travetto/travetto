@@ -11,7 +11,7 @@ import { SessionConfig } from '../config';
  * encoding the expiry time, when transport is set to cookie.
  */
 @Injectable()
-export class RequetSessionEncoder extends SessionEncoder {
+export class RequetSessionEncoder implements SessionEncoder {
 
   @Inject()
   config: SessionConfig;

@@ -49,7 +49,7 @@ export class RestCookieConfig implements cookies.SetOption {
  * Loads cookies from the request, verifies, exposes, and then signs and sets
  */
 @Injectable()
-export class CookiesInterceptor extends RestInterceptor {
+export class CookiesInterceptor implements RestInterceptor {
 
   after = [CorsInterceptor];
   before = [GetCacheInterceptor];

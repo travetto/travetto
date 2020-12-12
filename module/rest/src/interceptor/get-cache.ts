@@ -9,7 +9,7 @@ import { CorsInterceptor } from './cors';
  * Determines if we should cache all get requests
  */
 @Injectable()
-export class GetCacheInterceptor extends RestInterceptor {
+export class GetCacheInterceptor implements RestInterceptor {
 
   after = [CorsInterceptor];
 

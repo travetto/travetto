@@ -36,7 +36,7 @@ export class RestCorsConfig {
  * Interceptor that will provide cors support across all requests
  */
 @Injectable()
-export class CorsInterceptor extends RestInterceptor {
+export class CorsInterceptor implements RestInterceptor {
 
   @Inject()
   corsConfig: RestCorsConfig;

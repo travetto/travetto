@@ -5,8 +5,10 @@ import { ControllerConfig } from '../registry/types';
 
 /**
  * Basic interceptor structure
+ *
+ * @concrete ../internal/types:RestInterceptorTarget
  */
-export abstract class RestInterceptor {
+export interface RestInterceptor {
   /**
    * This interceptor must run after these
    */
@@ -29,5 +31,5 @@ export abstract class RestInterceptor {
    * @param res Outbound response
    * @param next
    */
-  abstract intercept(req: Request, res: Response, next?: () => Promise<any>): Promise<any> | void;
+  intercept(req: Request, res: Response, next?: () => Promise<any>): Promise<any> | void;
 }

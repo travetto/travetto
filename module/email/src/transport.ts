@@ -2,15 +2,17 @@ import { MessageOptions, SentMessage } from './types';
 
 /**
  * Default mail transport
+ *
+ * @concrete ./internal/types:MailTransportTarget
  */
-export abstract class MailTransport {
-  abstract send(mail: MessageOptions): Promise<SentMessage>;
+export interface MailTransport {
+  send(mail: MessageOptions): Promise<SentMessage>;
 }
 
 /**
  * Transport that consumes messages without sending
  */
-export class NullTransport extends MailTransport {
+export class NullTransport implements MailTransport {
   async send(mail: MessageOptions): Promise<SentMessage> {
     return {};
   }

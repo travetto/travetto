@@ -9,7 +9,7 @@ import { AuthContextEncoder } from '@travetto/auth-rest';
  * store for the auth context.
  */
 @Injectable()
-export class SessionAuthContextEncoder extends AuthContextEncoder {
+export class SessionAuthContextEncoder implements AuthContextEncoder {
 
   key = '__auth_context__'; // Must be serializable, so it cannot be a symbol
   loaded = false;
