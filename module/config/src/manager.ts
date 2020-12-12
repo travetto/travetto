@@ -5,11 +5,11 @@ import { ConfigUtil, Nested } from './internal/util';
 /**
  * Manager for application configuration
  */
-export class ConfigManager {
+class $ConfigManager {
 
-  private static initialized: boolean = false;
-  private static storage = {};   // Lowered, and flattened
-  private static redactedKeys = [
+  private initialized: boolean = false;
+  private storage = {};   // Lowered, and flattened
+  private redactedKeys = [
     'passphrase.*',
     'password.*',
     'credential.*',
@@ -26,7 +26,7 @@ export class ConfigManager {
       - Resource {env}.yml
       - Environment vars -> Overrides everything (happens at bind time)
   */
-  static init() {
+  init() {
     if (this.initialized) {
       return;
     }
@@ -37,7 +37,7 @@ export class ConfigManager {
   /**
    * Load all config files
    */
-  static load() {
+  load() {
     this.reset();
     const files = ConfigUtil.fetchOrderedConfigs();
 
@@ -53,14 +53,14 @@ export class ConfigManager {
   /**
    * Get a sub tree of the config, or everything if key is not passed
    */
-  static get(key?: string) {
+  get(key?: string) {
     return this.bindTo({}, key);
   }
 
   /**
    * Get a sub tree with sensitive fields redacted
    */
-  static getSecure(key?: string) {
+  getSecure(key?: string) {
     return ConfigUtil.sanitizeValuesByKey(this.get(key), [
       ...this.redactedKeys,
       this.get('config')?.redacted ?? []
@@ -70,28 +70,30 @@ export class ConfigManager {
   /**
    * Output to JSON
    */
-  static toJSON() {
+  toJSON() {
     return this.storage;
   }
 
   /**
    * Reset
    */
-  static reset() {
+  reset() {
     this.storage = {};
   }
 
   /**
    * Update config with a full subtree
    */
-  static putAll(data: Nested) {
+  putAll(data: Nested) {
     Util.deepAssign(this.storage, ConfigUtil.breakDownKeys(data), 'coerce');
   }
 
   /**
    * Apply config subtree to a given object
    */
-  static bindTo(obj: any, key?: string): Record<string, any> {
+  bindTo(obj: any, key?: string): Record<string, any> {
     return ConfigUtil.bindTo(this.storage, obj, key);
   }
 }
+
+export const ConfigManager = new $ConfigManager();

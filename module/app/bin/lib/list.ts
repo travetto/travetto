@@ -12,9 +12,9 @@ import type { ApplicationConfig } from '../../src/types';
 /**
  * Utilities to fetch list of applications
  */
-export class AppListManager {
+export class CliAppListUtil {
 
-  private static cacheConfig = 'app-cache.json';
+  private static CACHE_CONFIG = 'app-cache.json';
 
   static getRoots() {
     // Initialize up to compiler
@@ -60,7 +60,7 @@ export class AppListManager {
    */
   static storeList(items: ApplicationConfig[]) {
     const toStore = items.map(x => ({ ...x, target: undefined }));
-    AppCache.writeEntry(this.cacheConfig, JSON.stringify(toStore));
+    AppCache.writeEntry(this.CACHE_CONFIG, JSON.stringify(toStore));
   }
 
   /**
@@ -77,7 +77,7 @@ export class AppListManager {
       }
       return items;
     } catch (e) {
-      AppCache.removeExpiredEntry(this.cacheConfig, true);
+      AppCache.removeExpiredEntry(this.CACHE_CONFIG, true);
       throw e;
     }
   }
@@ -86,8 +86,8 @@ export class AppListManager {
    * Read list
    */
   static async readList(): Promise<ApplicationConfig[] | undefined> {
-    if (AppCache.hasEntry(this.cacheConfig)) {
-      return JSON.parse(AppCache.readEntry(this.cacheConfig)) as ApplicationConfig[];
+    if (AppCache.hasEntry(this.CACHE_CONFIG)) {
+      return JSON.parse(AppCache.readEntry(this.CACHE_CONFIG)) as ApplicationConfig[];
     }
   }
 

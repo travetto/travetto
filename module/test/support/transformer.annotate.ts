@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnMethod, OnClass, CoreUtil, DecoratorUtil
+  TransformerState, DecoratorMeta, OnMethod, OnClass, CoreUtil, DecoratorUtil, TransformerId
 } from '@travetto/transformer';
 
 /**
@@ -9,7 +9,7 @@ import {
  */
 export class AnnotationTransformer {
 
-  static key = '@trv:test';
+  static [TransformerId] = '@trv:test';
 
   /**
    * Build source annotation, indicating line ranges

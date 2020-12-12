@@ -8,3 +8,5 @@ export class RequestCls { }
 export class ResponseCls { }
 
 export class RestInterceptorTarget { }
+
+export const GlobalRoute = Symbol.for('@trv:rest/global-route');

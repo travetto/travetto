@@ -6,6 +6,7 @@ import * as kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
 import { RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
+import { GlobalRoute } from '@travetto/rest/src/internal/types';
 
 import { KoaServerUtil } from './internal/util';
 import Router = require('koa-router');
@@ -63,7 +64,7 @@ export class KoaRestServer extends RestServer<koa> {
     this.raw.use(middleware);
 
     // If already running and not global routes, re-register
-    if (this.listening && key !== RestServer.GLOBAL) {
+    if (this.listening && key !== GlobalRoute) {
       await this.unregisterGlobal();
       await this.registerGlobal();
     }

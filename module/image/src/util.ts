@@ -32,7 +32,7 @@ export class ImageUtil {
   /**
    * Resize/conversion util
    */
-  static converter = new CommandService({
+  static CONVERTER = new CommandService({
     containerImage: 'v4tech/imagemagick',
     localCheck: ['convert', ['--version']]
   });
@@ -40,7 +40,7 @@ export class ImageUtil {
   /**
    * Compressor
    */
-  static pngCompressor = new CommandService({
+  static PNG_COMPRESSOR = new CommandService({
     containerImage: 'agregad/pngquant',
     localCheck: ['pngquant', ['-h']]
   });
@@ -48,7 +48,7 @@ export class ImageUtil {
   /**
    * Compressor
    */
-  static jpegCompressor = new CommandService({
+  static JPEG_COMPRESSOR = new CommandService({
     containerImage: 'shomatan/jpegoptim:1.4.4',
     localCheck: ['jpegotim', ['-h']]
   });
@@ -60,7 +60,7 @@ export class ImageUtil {
   static resize(image: NodeJS.ReadableStream, options: ImageOptions): Promise<NodeJS.ReadableStream>;
   static resize(image: Buffer, options: ImageOptions): Promise<Buffer>;
   static async resize(image: ImageType, options: ImageOptions): Promise<NodeJS.ReadableStream | Buffer> {
-    const state = await this.converter.exec(
+    const state = await this.CONVERTER.exec(
       'convert', '-resize', `${options.w ?? ''}x${options.h ?? ''}`,
       '-auto-orient',
       ...(options.optimize ? ['-strip', '-quality', '86'] : []),
@@ -78,12 +78,12 @@ export class ImageUtil {
     let stream;
     switch (format) {
       case 'png': {
-        stream = await this.pngCompressor.exec(
+        stream = await this.PNG_COMPRESSOR.exec(
           'pngquant', '--quality', '40-80', '--speed', '1', '--force', '-');
         break;
       }
       case 'jpeg': {
-        stream = await this.jpegCompressor.exec('jpegoptim', '-m70', '-s', '--stdin', '--stdout');
+        stream = await this.JPEG_COMPRESSOR.exec('jpegoptim', '-m70', '-s', '--stdin', '--stdout');
         break;
       }
     }

@@ -6,10 +6,10 @@ import { ConfigUtil } from './config';
  * Utils for interacting with editors
  */
 export class EditorUtil {
-  static lastFile = '';
+  static LAST_FILE = '';
 
   static async renderFile(file: string) {
-    file = TemplateUtil.TPL_EXT.test(file) ? file : this.lastFile;
+    file = TemplateUtil.TPL_EXT.test(file) ? file : this.LAST_FILE;
     if (file) {
       process.send!({
         type: 'changed',

@@ -1,13 +1,13 @@
 import * as ts from 'typescript';
 
-import { TransformerState, DecoratorMeta, OnMethod } from '@travetto/transformer';
+import { TransformerState, DecoratorMeta, OnMethod, TransformerId } from '@travetto/transformer';
 
 /**
  * Transform the cache headers
  */
 export class CacheTransformer {
 
-  static key = '@trv:cache';
+  static [TransformerId] = '@trv:cache';
 
   /**
    * When `@Cache` and `@Evict` are present

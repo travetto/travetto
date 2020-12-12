@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnClass, CoreUtil, DecoratorUtil
+  TransformerState, DecoratorMeta, OnClass, CoreUtil, DecoratorUtil, TransformerId
 } from '@travetto/transformer';
 
 /**
@@ -9,7 +9,7 @@ import {
  */
 export class ApplicationTransformer {
 
-  static key = '@trv:app';
+  static [TransformerId] = '@trv:app';
 
   /**
    * Computes an `AppParameter` state from a TypeScript ParameterDeclaration

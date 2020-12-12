@@ -1,7 +1,7 @@
 import { CliUtil } from '@travetto/cli/src/util';
 import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 
-import { AppListManager } from './list';
+import { CliAppListUtil } from './list';
 import { ApplicationParameter } from '../../src/types';
 
 
@@ -22,7 +22,7 @@ export class RunUtil {
    * loading framework and compiling
    */
   static async getRunner(name: string, ...sub: string[]) {
-    const app = await AppListManager.findByName(name);
+    const app = await CliAppListUtil.findByName(name);
 
     if (!app) {
       throw new Error(`'Unknown application ${name}`);
