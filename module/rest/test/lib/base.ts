@@ -95,7 +95,7 @@ export abstract class BaseRestSuite {
     }
   }
 
-  async makeRequst(method: 'get' | 'post' | 'patch' | 'put' | 'delete' | 'options', path: string, { throwOnError, query, headers, body }: {
+  async makeRequst(method: 'get' | 'post' | 'patch' | 'put' | 'delete' | 'options', path: string, { throwOnError = true, query, headers, body }: {
     query?: Record<string, any>;
     body?: Record<string, any> | FormData;
     headers?: Record<string, string>;
@@ -143,7 +143,7 @@ export abstract class BaseRestSuite {
       });
       const outText = res.isBase64Encoded ? Buffer.from(res.body, 'base64').toString('utf8') : res.body;
       const out = await getOutput(outText);
-      if (res.statusCode >= 300) {
+      if (throwOnError && res.statusCode >= 400) {
         throw out;
       }
       resp = {

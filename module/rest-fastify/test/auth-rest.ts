@@ -4,8 +4,8 @@ import { AuthRestServerSuite } from '@travetto/auth-rest/test/lib/server';
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class ExpressAuthRestTest extends AuthRestServerSuite {
+export class FastifyAuthRestTest extends AuthRestServerSuite {
   constructor() {
-    super(3002);
+    super(3003);
   }
 }
