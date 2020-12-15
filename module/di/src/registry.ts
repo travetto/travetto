@@ -440,6 +440,15 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         this.targetToClass.set(classId, new Map());
       }
       this.targetToClass.get(classId)!.set(PRIMARY, classId);
+
+      // Register primary if only one interface provided and no parent config
+      if (config.interfaces.length === 1 && !parentConfig) {
+        const [intf] = config.interfaces;
+        if (!this.targetToClass.has(intf.ᚕid)) {
+          this.targetToClass.set(intf.ᚕid, new Map());
+        }
+        this.targetToClass.get(intf.ᚕid)!.set(PRIMARY, classId);
+      }
     }
 
     return config;

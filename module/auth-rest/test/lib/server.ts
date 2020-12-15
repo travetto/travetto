@@ -14,7 +14,9 @@ import { AuthContextEncoder } from '../../src/encoder';
 const TEST_AUTH = Symbol.for('TEST_AUTH');
 
 
-@Injectable()
+@Injectable({
+  primary: true
+})
 class AuthorizationEncoder implements AuthContextEncoder {
   async encode(req: Request, res: Response, ctx: AuthContext) {
     const value = Buffer
