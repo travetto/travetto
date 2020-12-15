@@ -16,7 +16,7 @@ export class AuthService {
   identitySources = new Map<string, IdentitySource>();
 
   @Inject()
-  principalSource: PrincipalSource;
+  principalSource?: PrincipalSource;
 
   async postConstruct() {
     // Find all identity sources
@@ -43,7 +43,11 @@ export class AuthService {
         const idp = this.identitySources.get(source.toString())!;
         const ident = await idp.authenticate(req, res);
         if (ident) { // Multi-step login process
-          return await this.principalSource.authorize(ident);
+          if (this.principalSource) {
+            return await this.principalSource.authorize(ident);
+          } else {
+            return new AuthContext(ident, ident);
+          }
         } else {
           return;
         }
