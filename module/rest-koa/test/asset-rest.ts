@@ -1,3 +1,5 @@
+// @file-if @travetto/asset-rest
+
 import { AssetRestServerSuite } from '@travetto/asset-rest/test/lib/server';
 import { Suite } from '@travetto/test';
 

@@ -6,6 +6,6 @@ import { Suite } from '@travetto/test';
 @Suite()
 export class KoaRestSessionTest extends RestSessionServerSuite {
   constructor() {
-    super(3002);
+    super(3004);
   }
 }
