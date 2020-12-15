@@ -1,4 +1,5 @@
 import { PrincipalSource, Identity } from '@travetto/auth';
+import { AuthContext } from '@travetto/auth/src/context';
 import { InjectableFactory } from '@travetto/di';
 
 import { IdentitySource } from '../../..';
@@ -14,11 +15,11 @@ export class AppConfig {
 
   @InjectableFactory()
   static principalSource(): PrincipalSource {
-    return new (class extends PrincipalSource {
-      async resolvePrincipal(ident: Identity) {
-        return ident;
+    return new class implements PrincipalSource {
+      async authorize(ident: Identity) {
+        return new AuthContext(ident, ident);
       }
-    })();
+    }();
   }
 
   @InjectableFactory(SIMPLE_AUTH)

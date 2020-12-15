@@ -95,10 +95,11 @@ export abstract class BaseRestSuite {
     }
   }
 
-  async makeRequst(method: 'get' | 'post' | 'patch' | 'put' | 'delete' | 'options', path: string, { query, headers, body }: {
+  async makeRequst(method: 'get' | 'post' | 'patch' | 'put' | 'delete' | 'options', path: string, { throwOnError, query, headers, body }: {
     query?: Record<string, any>;
     body?: Record<string, any> | FormData;
     headers?: Record<string, string>;
+    throwOnError?: boolean;
   } = {}) {
     const httpMethod = method.toUpperCase();
     let resp: { status: number, body: any, headers: [string, string | string[]][] };
@@ -152,12 +153,15 @@ export abstract class BaseRestSuite {
         ]
       };
     }
-    if (resp.status >= 300) {
-      const err = new AppError('Failure');
-      Object.assign(err, resp.body);
-      throw err;
+    if (resp.status >= 400) {
+      if (throwOnError) {
+        const err = new AppError(resp.body?.message ?? 'Error');
+        Object.assign(err, resp.body);
+        throw err;
+      }
     }
     return {
+      status: resp.status,
       body: resp.body,
       headers: Object.fromEntries(resp.headers.map(([k, v]) =>
         [k.toLowerCase(), Array.isArray(v) ? v[0] : v]))

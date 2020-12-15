@@ -20,7 +20,7 @@ export class SampleAuth {
   @Get('/self')
   @Authenticated()
   async getSelf(req: Request) {
-    return req.auth.principal;
+    return req.auth?.principal;
   }
 
   @Get('/logout')

@@ -37,7 +37,7 @@ export interface Identity extends Principal {
 /**
  * Definition of a principal source, authorizers an identity into a principal
  *
- * @concrete ./internal:PrincipalSourceTarget
+ * @concrete ./internal/types:PrincipalSourceTarget
  */
 export interface PrincipalSource {
   authorize(ident: Identity): Promise<AuthContext<Principal>>;
