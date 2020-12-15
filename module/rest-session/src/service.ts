@@ -107,10 +107,10 @@ export class RestSessionService {
 
     // If not destroying, write to response, and store in cache source
     if (session.action !== 'destroy') {
-      if (session.action === 'create' || (!session.action && session.isChanged())) {
+      if (session.action === 'create') {
         session = new Session({
           key: Util.uuid(),
-          issuedAt: Date.now(),
+          issuedAt: session?.issuedAt ?? Date.now(),
           maxAge: this.config.maxAge,
           data: session.data
         });

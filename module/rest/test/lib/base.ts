@@ -4,7 +4,7 @@ import FormData from 'formdata-node';
 
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
-import { Util } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 
 import type { RestServer } from '../../src/server/server';
@@ -55,6 +55,10 @@ export abstract class BaseRestSuite {
 
   get url() {
     return `http://localhost:${this.port}`;
+  }
+
+  async wait(n: number) {
+    return new Promise(r => setTimeout(r, n));
   }
 
   async initServer() {
@@ -149,7 +153,9 @@ export abstract class BaseRestSuite {
       };
     }
     if (resp.status >= 300) {
-      throw resp.body;
+      const err = new AppError('Failure');
+      Object.assign(err, resp.body);
+      throw err;
     }
     return {
       body: resp.body,
