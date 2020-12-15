@@ -17,7 +17,7 @@ export class SessionAuthContextEncoder implements AuthContextEncoder {
   /**
    * Build an auth context on top of the session
    */
-  read(req: Request) {
+  async read(req: Request) {
     if (req.session) {
       let val = req.session.data[this.key];
       if (val && val.constructor !== AuthContext) {
@@ -30,7 +30,7 @@ export class SessionAuthContextEncoder implements AuthContextEncoder {
   /**
    * Persist the auth context to the session
    */
-  write(ctx: AuthContext, req: Request, res: Response) {
+  async write(ctx: AuthContext, req: Request, res: Response) {
     if (req.session) {
       if (ctx && ctx.principal) {
         req.session.data[this.key] = ctx;

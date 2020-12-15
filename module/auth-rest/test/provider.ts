@@ -7,7 +7,7 @@ import { Identity } from '@travetto/auth';
 
 import { IdentitySource } from '../';
 
-class SimpleIdentitySource extends IdentitySource {
+class SimpleIdentitySource implements IdentitySource {
   toContext(user: { id: string, username: string }) {
     return {
       id: user.id,

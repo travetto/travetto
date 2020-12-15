@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 import { CookiesInterceptor, RestInterceptor, Request, Response } from '@travetto/rest';
-import { AsyncContextInterceptor } from '@travetto/context'; // @line-if @travetto-context
+import { AsyncContextInterceptor } from '@travetto/context'; // @line-if @travetto/context
 import { RestSessionService } from './service';
 
 /**
