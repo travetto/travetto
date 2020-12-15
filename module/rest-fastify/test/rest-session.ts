@@ -6,6 +6,6 @@ import { Suite } from '@travetto/test';
 @Suite()
 export class FastifyRestSessionTest extends RestSessionServerSuite {
   constructor() {
-    super(3002);
+    super(3003);
   }
 }
