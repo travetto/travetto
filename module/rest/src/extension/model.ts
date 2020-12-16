@@ -1,11 +1,13 @@
-// @file-if @travetto/rest
-import { ControllerRegistry, paramConfig } from '@travetto/rest';
-import { schemaParamConfig } from '@travetto/schema/src/extension/rest';
+// @file-if @travetto/model-core
+// @file-if @travetto/schema
+
 import { Class } from '@travetto/registry';
 
-import { ModelType } from '../types/model';
-import { ModelCrudSupport } from '../service/crud';
-import { ModelRegistry } from '../registry/registry';
+import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model-core';
+import { schemaParamConfig } from '@travetto/schema/src/extension/rest';
+
+import { ControllerRegistry } from '../registry/registry';
+import { paramConfig } from '../decorator/param';
 
 type Svc = { source: ModelCrudSupport };
 
