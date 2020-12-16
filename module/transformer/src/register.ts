@@ -16,7 +16,8 @@ export function getAllTransformers(obj: any) {
 // Store handlers in class
 function storeHandler(cls: TransformerWithHandlers, fn: Function, phase: TransformPhase, type: TransformerType, target?: string[]) {
   if (target) {
-    target = target.map(x => x.startsWith('@') ? x : `${cls[TransformerId]}/${x}`);
+    const ns = cls[TransformerId].split('/')[0]; // Everything before the '/'
+    target = target.map(x => x.startsWith('@') ? x : `${ns}/${x}`);
   }
   cls[HandlersProp] = cls[HandlersProp] ?? [];
   cls[HandlersProp]!.push({ key: `${cls[TransformerId]}/${fn.name}`, [phase]: fn.bind(cls), type, target });

@@ -15,5 +15,3 @@ export * from './src/provider/memory';
 
 export * from './src/error/exists';
 export * from './src/error/not-found';
-
-export { ModelController } from './src/extension/rest';
