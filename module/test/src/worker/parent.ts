@@ -6,7 +6,7 @@ import { TestConsumer } from '../consumer/types';
 /**
  *  Produce a handler for the child worker
  */
-export function buildWorkManager(consumer: TestConsumer) {
+export function buildWorkManager(consumer: TestConsumer, mode: RunEvent['mode'] = 'standard') {
   /**
    * Spawn a child
    */
@@ -33,7 +33,8 @@ export function buildWorkManager(consumer: TestConsumer) {
         // Listen for child to complete
         const complete = channel.listenOnce(Events.RUN_COMPLETE);
         // Start test
-        channel.send(Events.RUN, typeof event === 'string' ? { file: event } : event);
+        event = typeof event === 'string' ? { file: event } : event;
+        channel.send(Events.RUN, { ...event, mode });
 
         // Wait for complete
         const { error } = await complete;

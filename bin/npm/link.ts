@@ -12,20 +12,13 @@ const DEP_TYPES = ['dev', 'prod', 'opt'] as const;
 
 const DOCUMENTED_PEER_DEPS = {
   'auth-rest': ['app'],
-  'model-core': ['app', 'rest', 'config'],
-  'model-dynamodb': ['auth-model', 'cache'],
-  'model-elasticsearch': ['auth-model'],
-  'model-firestore': ['auth-model'],
-  'model-mongo': ['asset', 'auth-model', 'cache'],
-  'model-redis': ['auth-model', 'cache'],
-  'model-s3': ['asset', 'auth-model', 'cache'],
-  'model-sql': ['auth-model'],
+  'model-core': ['app', 'config'],
   openapi: ['app'],
   rest: ['app'],
-  'rest-fastify': ['app', 'auth', 'context', 'asset-rest', 'auth-rest', 'rest-session', 'schema'],
-  'rest-koa': ['app', 'auth', 'context', 'asset-rest', 'auth-rest', 'rest-session', 'schema'],
-  'rest-express': ['app', 'auth', 'context', 'asset-rest', 'auth-rest', 'rest-session', 'schema'],
-  schema: ['rest', 'app', 'config'],
+  'rest-fastify': ['app'],
+  'rest-koa': ['app'],
+  'rest-express': ['app'],
+  schema: ['app', 'config'],
 };
 
 /**
