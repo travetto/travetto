@@ -1,17 +1,19 @@
-// @file-if @travetto/rest
-import { ControllerRegistry, Request, ParamConfig, ExtractFn } from '@travetto/rest';
+// @file-if @travetto/schema
+import { SchemaRegistry, BindUtil, SchemaValidator } from '@travetto/schema';
+
 import { Util, AppError } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
-import { SchemaRegistry } from '../service/registry';
-import { BindUtil } from '../bind-util';
-import { SchemaValidator } from '../validate/validator';
+import { ControllerRegistry } from '../registry/registry';
+import { Request, ParamConfig } from '../types';
+import { ExtractFn } from '../util/param';
 
-const QUERY_SCHEMA: unique symbol = Symbol.for('@trv:schema/rest-query');
+const QUERY_SCHEMA: unique symbol = Symbol.for('@trv:rest/schema-query');
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Travetto {
+    // eslint-disable-next-line no-shadow
     interface Request {
       [QUERY_SCHEMA]: Record<string, any>;
     }
@@ -82,7 +84,6 @@ export function schemaParamConfig(location: 'body' | 'query', config: Partial<Pa
 /**
  * Define as the request body as being defined by a schema
  * @param config The schema configuration
- * @augments `@trv:schema/Param`
  * @augments `@trv:rest/Param`
  */
 export function SchemaBody(config: Partial<ParamConfig> & { view?: string } = {}) {
@@ -95,7 +96,6 @@ export function SchemaBody(config: Partial<ParamConfig> & { view?: string } = {}
 /**
  * Define the query parameters as a schema class
  * @param config The schema configuration
- * @augments `@trv:schema/Param`
  * @augments `@trv:rest/Param`
  */
 export function SchemaQuery(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {

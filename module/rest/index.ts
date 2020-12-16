@@ -22,3 +22,7 @@ export * from './src/types';
 export * from './src/util/param';
 export * from './src/util/route';
 
+// Named export needed for proxying
+export { ModelController } from './src/extension/model';
+// Named export needed for proxying
+export { SchemaBody, SchemaQuery } from './src/extension/schema';
