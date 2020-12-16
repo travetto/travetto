@@ -1,22 +1,22 @@
 // @file-if @travetto/auth-model
 
 import { InjectableFactory } from '@travetto/di';
-import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
+import { S3ModelConfig, S3ModelService } from '../..';
 import { Suite } from '@travetto/test';
 import { AuthModelSymbol } from '@travetto/auth-model';
 import { AuthModelServiceSuite } from '@travetto/auth-model/test/lib/service';
 
 class Init {
   @InjectableFactory(AuthModelSymbol)
-  static modelProvider(config: ElasticsearchModelConfig) {
-    return new ElasticsearchModelService(config);
+  static modelProvider(config: S3ModelConfig) {
+    return new S3ModelService(config);
   }
 }
 
 
 @Suite()
-export class ElasticsearchAuthModelServiceSuite extends AuthModelServiceSuite {
+export class S3AuthModelServiceSuite extends AuthModelServiceSuite {
   constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
+    super(S3ModelService, S3ModelConfig);
   }
 }

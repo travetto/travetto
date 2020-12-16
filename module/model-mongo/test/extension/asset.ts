@@ -5,7 +5,7 @@ import { Suite } from '@travetto/test';
 import { AssetModelSymbol } from '@travetto/asset';
 import { AssetServiceSuite } from '@travetto/asset/test/lib/service';
 
-import { MongoModelConfig, MongoModelService } from '..';
+import { MongoModelConfig, MongoModelService } from '../..';
 
 class Init {
   @InjectableFactory(AssetModelSymbol)
