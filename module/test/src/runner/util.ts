@@ -36,8 +36,8 @@ export class TestUtil {
   /**
    * Find all valid test files given the globs
    */
-  static async getTests(globs: RegExp[]) {
-    const files = ScanApp.findFiles({ paths: AppManifest.roots, folder: 'test' })
+  static async getTests(globs: RegExp[], root = 'test') {
+    const files = ScanApp.findFiles({ paths: AppManifest.roots, folder: root })
       .filter(f => globs.some(g => g.test(f.module)));
 
     const validFiles = files
