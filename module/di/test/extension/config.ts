@@ -1,8 +1,8 @@
 // @file-if @travetto/config
 import { Config } from '@travetto/config';
 
-import { Injectable, Inject } from '../src/decorator';
-import { Util } from './util';
+import { Injectable, Inject } from '../../src/decorator';
+import { Util } from '../util';
 
 @Injectable()
 export class Empty {
