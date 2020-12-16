@@ -16,14 +16,8 @@ export class Runner {
 
   constructor(private state: RunState) { }
 
-  /**
-   * Find all available test files
-   */
-  async getFiles() {
-    const { args } = this.state; // strip off node and worker name
-    // Glob to module path
-    const files = await TestUtil.getTests(args.map(x => new RegExp(FsUtil.toUnix(x))));
-    return files;
+  get patterns() {
+    return this.state.args.map(x => new RegExp(FsUtil.toUnix(x)));
   }
 
   /**
@@ -32,7 +26,8 @@ export class Runner {
   async runFiles() {
     const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
 
-    const files = await this.getFiles();
+    const files = (await TestUtil.getTests(this.patterns))
+      .filter(x => !x.includes('/extension/')); // Do not include extensions
 
     console.debug('Running', files);
 
@@ -67,10 +62,38 @@ export class Runner {
   }
 
   /**
+   * Run all files
+   */
+  async runExtensions() {
+    const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
+
+    const files = await TestUtil.getTests(this.patterns, 'test/extension');
+
+    console.debug('Running', files);
+
+    await PhaseManager.create('test').run();
+
+    const pool = new WorkPool(buildWorkManager.bind(null, consumer, 'extension'), {
+      idleTimeoutMillis: 10000,
+      min: 1,
+      max: 1
+    }); // One at a time
+
+    consumer.onStart();
+
+    await pool
+      .process(new IterableInputSource(files))
+      .finally(() => pool.shutdown());
+
+    return consumer.summarizeAsBoolean();
+  }
+
+  /**
    * Run the runner, based on the inputs passed to the constructor
    */
   async run() {
     switch (this.state.mode) {
+      case 'extension': return await this.runExtensions();
       case 'single': return await this.runSingle();
       default: return await this.runFiles();
     }
