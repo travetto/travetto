@@ -1,7 +1,7 @@
 // @file-if @travetto/cache
 
 import { InjectableFactory } from '@travetto/di';
-import { RedisModelService, RedisModelConfig } from '..';
+import { RedisModelService, RedisModelConfig } from '../..';
 import { Suite } from '@travetto/test';
 import { CacheModelSymbol } from '@travetto/cache';
 import { CacheServiceSuite } from '@travetto/cache/test/lib/service';

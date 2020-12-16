@@ -1,22 +1,22 @@
 // @file-if @travetto/auth-model
 
 import { InjectableFactory } from '@travetto/di';
-import { FirestoreModelConfig, FirestoreModelService } from '..';
+import { ElasticsearchModelConfig, ElasticsearchModelService } from '../..';
 import { Suite } from '@travetto/test';
 import { AuthModelSymbol } from '@travetto/auth-model';
 import { AuthModelServiceSuite } from '@travetto/auth-model/test/lib/service';
 
 class Init {
   @InjectableFactory(AuthModelSymbol)
-  static modelProvider(config: FirestoreModelConfig) {
-    return new FirestoreModelService(config);
+  static modelProvider(config: ElasticsearchModelConfig) {
+    return new ElasticsearchModelService(config);
   }
 }
 
 
 @Suite()
-export class FirestoreAuthModelServiceSuite extends AuthModelServiceSuite {
+export class ElasticsearchAuthModelServiceSuite extends AuthModelServiceSuite {
   constructor() {
-    super(FirestoreModelService, FirestoreModelConfig);
+    super(ElasticsearchModelService, ElasticsearchModelConfig);
   }
 }

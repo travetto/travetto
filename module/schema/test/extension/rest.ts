@@ -4,9 +4,9 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Controller, Redirect, Post, ControllerRegistry, RouteUtil, Get, SerializeInterceptor, MethodOrAll } from '@travetto/rest';
 import { RootRegistry } from '@travetto/registry';
 
-import { SchemaBody, SchemaQuery } from '../src/extension/rest';
-import { Schema } from '../src/decorator/schema';
-import { SchemaRegistry } from '../src/service/registry';
+import { SchemaBody, SchemaQuery } from '../../src/extension/rest';
+import { Schema } from '../../src/decorator/schema';
+import { SchemaRegistry } from '../../src/service/registry';
 
 interface UserShape {
   id: number | undefined;
