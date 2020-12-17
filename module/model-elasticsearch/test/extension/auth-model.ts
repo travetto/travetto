@@ -1,10 +1,11 @@
 // @file-if @travetto/auth-model
 
 import { InjectableFactory } from '@travetto/di';
-import { ElasticsearchModelConfig, ElasticsearchModelService } from '../..';
 import { Suite } from '@travetto/test';
 import { AuthModelSymbol } from '@travetto/auth-model';
 import { AuthModelServiceSuite } from '@travetto/auth-model/test/lib/service';
+
+import { ElasticsearchModelConfig, ElasticsearchModelService } from '../..';
 
 class Init {
   @InjectableFactory(AuthModelSymbol)

@@ -13,6 +13,7 @@ type Module = {
   _compile?(contents: string, file: string): any;
 } & NodeJS.Module;
 
+// eslint-disable-next-line no-redeclare
 const Module = Mod as unknown as Module;
 type DepResolveConfig = { root?: string, types?: DepType[] | (readonly DepType[]), maxDepth?: number };
 type DepType = 'prod' | 'dev' | 'opt' | 'peer' | 'optPeer';

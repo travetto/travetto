@@ -13,9 +13,6 @@
   },
   "title": "Data Model Querying",
   "description": "Datastore abstraction for advanced query support.",
-  "optionalPeerDependencies": {
-    "@travetto/rest": "^1.1.1"
-  },
   "homepage": "https://travetto.io",
   "keywords": [
     "datastore",
