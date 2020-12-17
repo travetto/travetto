@@ -4,8 +4,8 @@
 import { Class } from '@travetto/registry';
 
 import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model-core';
-import { schemaParamConfig } from '@travetto/schema/src/extension/rest';
 
+import { schemaParamConfig } from './schema';
 import { ControllerRegistry } from '../registry/registry';
 import { paramConfig } from '../decorator/param';
 

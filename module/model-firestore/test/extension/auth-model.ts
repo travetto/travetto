@@ -1,10 +1,11 @@
 // @file-if @travetto/auth-model
 
 import { InjectableFactory } from '@travetto/di';
-import { FirestoreModelConfig, FirestoreModelService } from '../..';
 import { Suite } from '@travetto/test';
 import { AuthModelSymbol } from '@travetto/auth-model';
 import { AuthModelServiceSuite } from '@travetto/auth-model/test/lib/service';
+
+import { FirestoreModelConfig, FirestoreModelService } from '../..';
 
 class Init {
   @InjectableFactory(AuthModelSymbol)

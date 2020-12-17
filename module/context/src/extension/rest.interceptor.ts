@@ -20,7 +20,7 @@ export class AsyncContextInterceptor implements RestInterceptor {
     return !ConfigManager.get('rest.context').disabled;
   }
 
-  async intercept(req: Request, res: Response, next: () => Promise<void>) {
+  intercept(req: Request, res: Response, next: () => Promise<void>) {
     return this.context.run(next);
   }
 }

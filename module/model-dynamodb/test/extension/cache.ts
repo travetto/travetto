@@ -1,10 +1,11 @@
 // @file-if @travetto/cache
 
 import { InjectableFactory } from '@travetto/di';
-import { DynamoDBModelService, DynamoDBModelConfig } from '../..';
 import { Suite } from '@travetto/test';
 import { CacheModelSymbol } from '@travetto/cache';
 import { CacheServiceSuite } from '@travetto/cache/test/lib/service';
+
+import { DynamoDBModelService, DynamoDBModelConfig } from '../..';
 
 class Config {
   @InjectableFactory(CacheModelSymbol)

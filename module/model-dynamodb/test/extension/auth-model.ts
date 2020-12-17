@@ -1,10 +1,11 @@
 // @file-if @travetto/auth-model
 
 import { InjectableFactory } from '@travetto/di';
-import { DynamoDBModelConfig, DynamoDBModelService } from '..';
 import { Suite } from '@travetto/test';
 import { AuthModelSymbol } from '@travetto/auth-model';
 import { AuthModelServiceSuite } from '@travetto/auth-model/test/lib/service';
+
+import { DynamoDBModelConfig, DynamoDBModelService } from '../..';
 
 class Init {
   @InjectableFactory(AuthModelSymbol)
