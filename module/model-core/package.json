@@ -11,9 +11,6 @@
     "@travetto/registry": "^1.1.0",
     "@travetto/schema": "^1.1.0"
   },
-  "optionalPeerDependencies": {
-    "@travetto/rest": "^1.1.1"
-  },
   "title": "Data Modeling Core",
   "description": "Datastore abstraction for core operations.",
   "homepage": "https://travetto.io",
