@@ -1,13 +1,14 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnClass, OnMethod, ParamDocumentation, DeclDocumentation, DocUtil, DecoratorUtil, TransformerId
+  TransformerState, OnClass, OnMethod, DeclDocumentation, DocUtil, DecoratorUtil, TransformerId, DecoratorMeta
 } from '@travetto/transformer';
+import { RestTransformUtil } from './lib';
 
-import { ParamConfig } from '../src/types';
 
 const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
 const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
+const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
 
 /**
  * Handle @Controller, @Endpoint
@@ -16,73 +17,45 @@ export class RestTransformer {
 
   static [TransformerId] = '@trv:rest';
 
-  /**
-   * Get base parameter config
-   */
-  static getParameterConfig(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation): Partial<ParamConfig> {
-    const pName = node.name.getText();
-
-    const decConfig: Partial<ParamConfig> = { name: pName };
-    const commentConfig = (comments.params ?? []).find(x => x.name === decConfig.name) || {} as Partial<ParamDocumentation>;
-
-    return {
-      description: decConfig.name!,
-      defaultValue: node.initializer,
-      ...commentConfig,
-      ...decConfig,
-      required: !(node.questionToken || node.initializer)
-    };
-  }
-
-  /**
-   * Compute the parameter type
-   */
-  static getParameterType(state: TransformerState, node: ts.ParameterDeclaration) {
-
-    let paramType = state.resolveType(node);
-    let array = false;
-    let defaultType = 'Query';
-
-    switch (paramType.key) {
-      case 'literal': {
-        array = paramType.ctor === Array;
-        if (array) {
-          paramType = paramType.typeArguments?.[0] ?? { key: 'literal', ctor: Object, name: 'object' };
-        }
-        break;
-      }
-      // White list pointer types as context
-      case 'external': defaultType = 'Context'; break;
-      case 'union': paramType = { key: 'literal', ctor: Object, name: 'object' };
-    }
-
-    const type = state.typeToIdentifier(paramType)!;
-    return { array, type, defaultType };
-  }
 
   /**
    * Handle endpoint parameter
    */
-  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation) {
+  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation, dm?: DecoratorMeta) {
     const pDec = state.findDecorator(this, node, 'Param');
     let pDecArg = DecoratorUtil.getPrimaryArgument(pDec)!;
     if (pDecArg && ts.isStringLiteral(pDecArg)) {
       pDecArg = state.fromLiteral({ name: pDecArg });
     }
 
-    const { type, array, defaultType } = this.getParameterType(state, node);
+    const { type, array, defaultType } = RestTransformUtil.getParameterType(state, node);
     const common = {
-      ...this.getParameterConfig(state, node, comments),
+      ...RestTransformUtil.getParameterConfig(state, node, comments),
       type,
       ...(array ? { array: true } : {})
     };
 
     const conf = state.extendObjectLiteral(common, pDecArg);
+
+    // Support SchemaQuery/SchemaBody wih interfaces
+    if (dm && /Schema(Query|Body)/.test(dm.name ?? '')) { // If Interfaces are already loaded
+      const resolved = state.resolveType(node.type!);
+      if (resolved.key === 'shape') { // If dealing with an interface or a shape
+        const id = RestTransformUtil.toConcreteType(state, resolved, node) as ts.Identifier;
+        const extra = state.extendObjectLiteral({ type: id });
+        const primary = DecoratorUtil.getPrimaryArgument(dm.dec);
+        DecoratorUtil.spliceDecorators(
+          node, dm.dec,
+          [state.createDecorator(dm.file!, dm.name!, primary ? state.extendObjectLiteral(primary, extra) : extra)]
+        );
+      }
+    }
+
     const decs = (node.decorators ?? []).filter(x => x !== pDec);
 
-    if (!pDec) { // Handle default
+    if (!pDec) { // Handle default, missing
       decs.push(state.createDecorator(PARAM_DEC_FILE, defaultType, conf));
-    } else if (ts.isCallExpression(pDec.expression)) {
+    } else if (ts.isCallExpression(pDec.expression)) { // if it does exist, update
       decs.push(state.factory.createDecorator(
         state.factory.createCallExpression(
           pDec.expression.expression,
@@ -133,6 +106,15 @@ export class RestTransformer {
       }
 
       nParams = state.factory.createNodeArray(params);
+    }
+
+    // If we have a valid response type, declare it
+    const returnType = RestTransformUtil.resolveReturnType(state, node);
+    if (returnType.type) {
+      newDecls.push(state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', state.fromLiteral({
+        ...returnType,
+        title: comments.return
+      })));
     }
 
     if (newDecls.length || nParams !== node.parameters) {
