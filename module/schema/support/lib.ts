@@ -9,19 +9,19 @@ const COMMON_MOD = require.resolve('../src/decorator/common');
 export class SchemaTransformUtil {
 
   /**
-   * Produce final type given transformer type
+   * Produce concrete type given transformer type
    */
-  static toFinalType(state: TransformerState, type: AnyType, node: ts.Node, root: ts.Node = node): ts.Expression {
+  static toConcreteType(state: TransformerState, type: AnyType, node: ts.Node, root: ts.Node = node): ts.Expression {
     switch (type.key) {
-      case 'pointer': return this.toFinalType(state, type.target, node, root);
+      case 'pointer': return this.toConcreteType(state, type.target, node, root);
       case 'external': {
         const res = state.getOrImport(type);
         return res;
       }
-      case 'tuple': return state.fromLiteral(type.subTypes.map(x => this.toFinalType(state, x, node, root)!));
+      case 'tuple': return state.fromLiteral(type.subTypes.map(x => this.toConcreteType(state, x, node, root)!));
       case 'literal': {
         if ((type.ctor === Array || type.ctor === Set) && type.typeArguments?.length) {
-          return state.fromLiteral([this.toFinalType(state, type.typeArguments[0], node, root)]);
+          return state.fromLiteral([this.toConcreteType(state, type.typeArguments[0], node, root)]);
         } else if (type.ctor) {
           return state.createIdentifier(type.ctor.name!);
         }
@@ -66,13 +66,12 @@ export class SchemaTransformUtil {
       }
       case 'union': {
         if (type.commonType) {
-          return this.toFinalType(state, type.commonType, node, root);
+          return this.toConcreteType(state, type.commonType, node, root);
         }
       }
     }
     return state.createIdentifier('Object');
   }
-
 
   /**
    * Compute property information from declaration
@@ -99,7 +98,7 @@ export class SchemaTransformUtil {
       }
     }
 
-    const resolved = this.toFinalType(state, typeExpr, node, root);
+    const resolved = this.toConcreteType(state, typeExpr, node, root);
     const params: ts.Expression[] = resolved ? [resolved] : [];
 
     if (properties.length) {
