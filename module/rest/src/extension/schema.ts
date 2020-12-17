@@ -41,7 +41,7 @@ export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: strin
     const resolved = SchemaRegistry.get(cls).class; // Get actual class separate from decorator value
     bound = BindUtil.bindSchema(resolved, obj, view);
   } catch (e) {
-    throw new AppError(`Supplied data is incompatible with ${cls.ᚕid}: ${e.message}`);
+    throw new AppError(`Supplied data is incompatible with ${cls.ᚕid}: ${e.message}`, 'data');
   }
 
   if (SchemaRegistry.has(cls)) {
