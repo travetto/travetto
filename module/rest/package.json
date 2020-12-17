@@ -18,6 +18,8 @@
   },
   "optionalPeerDependencies": {
     "@travetto/app": "^1.1.0-rc.0",
+    "@travetto/schema": "^1.1.0-rc.0",
+    "@travetto/model-core": "^1.1.0-rc.0",
     "node-forge": "^0.10.0",
     "@types/node-forge": "^0.9.5"
   },
