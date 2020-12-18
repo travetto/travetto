@@ -99,7 +99,7 @@ export class TapEmitter implements TestConsumer {
       if (test.status === 'failed') {
         if (test.error && test.error.stack && !test.error.stack.includes('AssertionError')) {
           const err = ErrorUtil.deserializeError(test.error);
-          this.logMeta({ error: err.toConsole?.() ?? err });
+          this.logMeta({ error: err.toJSON?.() ?? err });
         }
       }
 
@@ -123,7 +123,7 @@ export class TapEmitter implements TestConsumer {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.enhancer.failure(err instanceof Error ? err.toConsole() : `${err}`) as string);
+        this.log(this.enhancer.failure(err instanceof Error ? err.toJSON() : `${err}`) as string);
       }
     }
 

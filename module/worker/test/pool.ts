@@ -28,7 +28,7 @@ export class PoolExecTest {
             channel.send('request', { data: inp });
 
             const { data } = await res;
-            console.log('Sent', inp, 'Received', data);
+            console.log('Request Complete', { input: inp, output: data });
 
             assert(inp + inp === data);
           }

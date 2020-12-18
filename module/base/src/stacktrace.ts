@@ -2,10 +2,6 @@ import { FsUtil, EnvUtil } from '@travetto/boot';
 
 /**
  * General tools for manipulating stack traces.
- *
- * The stacktrace handler will not override the global behavior,
- * but relies on the `.toConsole` method for processing the stacktrace
- * before providing it to the console.
  */
 export class StacktraceUtil {
 

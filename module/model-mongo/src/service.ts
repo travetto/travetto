@@ -96,7 +96,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
     const indices = ModelRegistry.get(cls).indices ?? [];
     await Promise.all(indices.map(idx => {
       const combined = Object.assign({}, ...idx.fields);
-      console.debug('Creating index', combined, { unique: idx.unique });
+      console.debug('Creating index', { index: combined, unique: idx.unique });
       return this.getStore(cls)
         .then(col => col.createIndex(combined, { unique: idx.unique }));
     }));

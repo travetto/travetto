@@ -44,7 +44,7 @@ export class Simple {
 
   @Post('/age4')
   async age4(@Body() obj: any) {
-    console.log(obj);
+    console.log('Request', obj as Record<string, string>);
   }
 
   @Get('/map')

@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { TransformerState, OnMethod, OnClass, AfterClass, DecoratorUtil, OnFunction, TransformerId } from '@travetto/transformer';
+import { TransformerState, OnMethod, OnClass, AfterClass, DecoratorUtil, TransformerId, AfterFunction } from '@travetto/transformer';
 
 const REGISTER_MOD = require.resolve('../src/decorator');
 
@@ -98,8 +98,12 @@ export class RegisterTransformer {
   /**
    * Give proper functions a file name
    */
-  @OnFunction()
-  static registerFunction(state: TransformerState & RegisterInfo, node: ts.FunctionDeclaration) {
+  @AfterFunction()
+  static registerFunction(state: TransformerState & RegisterInfo, node: ts.FunctionDeclaration | ts.FunctionExpression) {
+    if (!ts.isFunctionDeclaration(node)) {
+      return node;
+    }
+
     if (node.name && /^[A-Z]/.test(node.name.escapedText.toString())) {
       // If we have a class like function
       state.addStatement(

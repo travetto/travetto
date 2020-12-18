@@ -180,13 +180,11 @@
 //         this.aliasToIndex.set(ident.index, concreteIndex);
 //         await this.client.indices.putAlias({ index: concreteIndex, name: ident.index });
 //       }
-//       console.debug(`Index ${ident.index} created`);
 //       console.debug('Index', JSON.stringify({
 //         mappings: MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
 //         settings: this.config.indexCreate
 //       }, null, 2));
 //     } catch (e) {
-//       console.debug(`Index ${ident.index} already created`);
 //     }
 //     return concreteIndex;
 //   }

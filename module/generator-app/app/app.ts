@@ -56,7 +56,7 @@ export class TravettoGenerator extends Generator {
         verifyDestination(this.destinationPath('package.json'));
       }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to verify destination', { error: err });
       process.exit(1);
     }
 

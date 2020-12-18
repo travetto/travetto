@@ -18,5 +18,5 @@ class Person {
 }
 
 setTimeout(() => {
-  console.log(Person);
+  console.log(Person.toString());
 }, 1000);

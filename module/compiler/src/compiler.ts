@@ -59,7 +59,7 @@ class $Compiler {
       this.transpile = (tsf: string) => this.cache.readEntry(tsf);
     }
 
-    console.debug('Initialized', (Date.now() - start) / 1000);
+    console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
   }
 
   /**
@@ -89,7 +89,7 @@ class $Compiler {
    * Notify of an add/remove/change event
    */
   notify(type: 'added' | 'removed' | 'changed', fileName: string) {
-    console.debug(`File ${type}`, fileName);
+    console.debug('File Event', { type, fileName: fileName.replace(FsUtil.cwd, '.') });
     this.emitter.emit(type, fileName);
   }
 

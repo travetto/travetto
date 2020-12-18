@@ -1,6 +1,8 @@
 import * as ts from 'typescript';
+import * as fs from 'fs';
 
 import { ConsoleManager } from '@travetto/base/src/console';
+import { AppCache } from '@travetto/boot';
 
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
 import { LogUtil } from './util/log';
@@ -26,7 +28,7 @@ export class VisitorFactory<S extends State = State> {
       return 'class';
     } else if (ts.isParameter(node)) {
       return 'parameter';
-    } else if (ts.isFunctionDeclaration(node)) {
+    } else if (ts.isFunctionDeclaration(node) || (ts.isFunctionExpression(node) && !ts.isArrowFunction(node))) {
       return 'function';
     }
   }
@@ -36,7 +38,7 @@ export class VisitorFactory<S extends State = State> {
   constructor(
     private getState: (context: ts.TransformationContext, src: ts.SourceFile) => S,
     transformers: NodeTransformer<S, any, any>[],
-    private logTarget = '!compiler.log'
+    private logTarget = 'compiler.log'
   ) {
     this.init(transformers);
   }
@@ -74,8 +76,16 @@ export class VisitorFactory<S extends State = State> {
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
-        ConsoleManager.setFile(this.logTarget, { processArgs: (__, args) => LogUtil.collapseNodes(args) }); // Suppress logging into an output file
-        console.debug(process.pid, 'Processing', file.fileName);
+        const c = new console.Console({
+          stdout: fs.createWriteStream(AppCache.toEntryName(this.logTarget), { flags: 'a' }),
+          inspectOptions: { depth: 4 },
+        });
+
+        ConsoleManager.set({
+          onLog: (level, ctx, args) => c[level](level, ctx, ...LogUtil.collapseNodes(args))
+        });
+
+        console.debug('Processing', { file: file.fileName, pid: process.pid });
         const state = this.getState(context, file);
         let ret = this.visit(state, context, file);
 
@@ -99,7 +109,7 @@ export class VisitorFactory<S extends State = State> {
         }
         return state.finalize(ret);
       } catch (e) {
-        console.error(e.stack);
+        console.error('Failed transforming', { error: e });
         throw e;
       } finally {
         ConsoleManager.clear(); // Reset logging

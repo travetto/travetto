@@ -42,7 +42,7 @@ class $ConfigManager {
     const files = ConfigUtil.fetchOrderedConfigs();
 
     if (files.length) {
-      console.debug('Found configurations for', files.map(x => x.profile));
+      console.debug('Found configurations for', { files: files.map(x => x.profile) });
     }
 
     for (const f of files) {

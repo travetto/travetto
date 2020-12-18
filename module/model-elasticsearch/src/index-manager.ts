@@ -85,13 +85,13 @@ export class IndexManager {
         },
         ...(alias ? { aliases: { [ident.index]: {} } } : {})
       });
-      console.debug(`Index ${ident.index} created`);
-      console.debug('Index', JSON.stringify({
+      console.debug('Index created', { index: ident.index });
+      console.debug('Index Config', {
         mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
         settings: this.config.indexCreate
-      }, null, 2));
+      });
     } catch (e) {
-      console.debug(`Index ${ident.index} already created`);
+      console.debug('Index already created', { index: ident.index });
     }
     return concreteIndex;
   }
@@ -113,7 +113,7 @@ export class IndexManager {
    * When the model changes
    */
   async onModelChange(e: ChangeEvent<Class>) {
-    console.debug('Model Changed', e);
+    console.debug('Model Changed', { type: e.type, target: (e.curr ?? e.prev)?.ᚕid });
 
     if (!this.config.autoCreate) {
       return;
@@ -204,7 +204,7 @@ export class IndexManager {
 
   async createStorage() {
     // PreCreate indexes if missing
-    console.debug('Create Storage', this.config.autoCreate);
+    console.debug('Create Storage', { autoCreate: this.config.autoCreate });
     await this.computeAliasMappings(true);
   }
 

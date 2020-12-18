@@ -147,7 +147,7 @@ export class ElasticsearchModelService implements ModelCrudSupport, ModelIndexed
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, data: Partial<T>) {
     const script = ElasticsearchSchemaUtil.generateUpdateScript(data);
 
-    console.debug('Partial Script', script);
+    console.debug('Partial Script', { script });
 
     await this.client.update({
       ...this.manager.getIdentity(cls),

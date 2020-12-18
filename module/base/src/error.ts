@@ -32,15 +32,6 @@ export class AppError extends Error {
   }
 
   /**
-   * Console pretty printing
-   * @param sub The sub object to decoratore
-   */
-  toConsole(sub?: string) {
-    sub = sub || (this.payload ? `${JSON.stringify(this.payload, null, 2)}\n` : '');
-    return super.toConsole!(sub);
-  }
-
-  /**
    * The format of the JSON output
    * @param extra Extra data to build into the context
    */

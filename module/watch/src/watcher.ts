@@ -28,6 +28,7 @@ export interface Watcher {
 /**
  * Standard watcher built on node fs libs
  */
+// eslint-disable-next-line no-redeclare
 export class Watcher extends EventEmitter {
 
   private watched = new Map<string, ScanEntry>();
@@ -117,7 +118,7 @@ export class Watcher extends EventEmitter {
     }
 
     try {
-      console.debug('Watching Directory', entry.file);
+      console.debug('Watching Directory', { directory: entry.file });
       // const watcher = fs.watch(FsUtil.resolveUnix(entry.file), { persistent: false }, () => this.processDirectoryChange(entry);
       const watcher = ts.sys.watchDirectory!(FsUtil.resolveUnix(entry.file), () => this.processDirectoryChange(entry), false);
 
@@ -167,7 +168,7 @@ export class Watcher extends EventEmitter {
           case ts.FileWatcherEventKind.Deleted: this.emit('removed', entry); break;
         }
       } catch (err) {
-        console.error('Error in watching', entry.file);
+        console.warn('Error in watching', { file: entry.file });
       }
     };
 
@@ -181,7 +182,7 @@ export class Watcher extends EventEmitter {
    */
   private unwatchFile(entry: ScanEntry) {
     if (this.files.has(entry.file)) {
-      console.debug('Unwatching File', entry.file);
+      console.debug('Unwatching File', { file: entry.file });
 
       this.files.get(entry.file)!.close();
       this.files.delete(entry.file);
@@ -193,7 +194,7 @@ export class Watcher extends EventEmitter {
    */
   private unwatchDirectory(entry: ScanEntry) {
     if (this.directories.has(entry.file)) {
-      console.debug('Unwatching Directory', entry.file);
+      console.debug('Unwatching Directory', { directory: entry.file });
 
       for (const child of (entry.children ?? [])) {
         this.unwatch(child.file);
@@ -257,7 +258,7 @@ export class Watcher extends EventEmitter {
    */
   emit(type: string, payload?: any) {
     if (!this.suppress) {
-      console.debug('Watch Event', type, payload && payload.file);
+      console.debug('Watch Event', { type, file: payload?.file.replace(FsUtil.cwd, '.') });
       if (type !== 'error' && type !== 'end') {
         super.emit('all', { event: type, entry: payload });
       }

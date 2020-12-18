@@ -17,7 +17,7 @@ export class Simple {
 
   @Get('/age')
   async age() {
-    console.log(53);
+    console.log('Age', { age: 53 });
   }
 
   @Get('/age2')

@@ -114,7 +114,7 @@ export abstract class RestServer<T = any> {
     const ordered = instances.map(x => ({ key: x.constructor, before: x.before, after: x.after, target: x }));
     const sorted = SystemUtil.computeOrdering(ordered).map(x => x.target);
 
-    console.debug('Sorting interceptors', sorted.length, sorted.map(x => x.constructor.name));
+    console.debug('Sorting interceptors', { count: sorted.length, names: sorted.map(x => x.constructor.name) });
     return sorted;
   }
 
@@ -123,7 +123,7 @@ export abstract class RestServer<T = any> {
    * @param e The change event
    */
   async onControllerChange(e: ChangeEvent<Class>) {
-    console.debug('Registry event', e);
+    console.debug('Registry event', { type: e.type, target: (e.curr ?? e.prev)?.ᚕid });
     if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
       await this.unregisterController(e.prev);
     }
@@ -151,7 +151,7 @@ export abstract class RestServer<T = any> {
     }
 
     await this.registerRoutes(config.class.ᚕid, config.basePath, config.endpoints);
-    console.debug('Registering Controller Instance', config.class.ᚕid, config.basePath, config.endpoints.length);
+    console.debug('Registering Controller Instance', { id: config.class.ᚕid, path: config.basePath, endpointCount: config.endpoints.length });
   }
 
   /**
@@ -203,7 +203,7 @@ export abstract class RestServer<T = any> {
    */
   async run(): Promise<ServerHandle> {
     await this.init();
-    console.info(`Listening on ${this.config.port}`);
+    console.info('Listening', { port: this.config.port });
     const listener = await this.listen();
     this.listening = true;
     return listener;

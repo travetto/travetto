@@ -99,16 +99,18 @@ export class LoggingInterceptor implements RestInterceptor {
       const reqLog = {
         method: req.method,
         path: req.baseUrl ? `${req.baseUrl}${req.path}`.replace(/\/+/, '/') : req.path,
-        query: req.query,
-        params: req.params,
+        query: req.query as Record<string, string>,
+        params: req.params as Record<string, string>,
         statusCode: res.statusCode,
         duration
       };
 
-      if (reqLog.statusCode < 400) {
-        console.info(`Request`, reqLog);
+      if (res.statusCode < 400) {
+        console.info('Request', { ...reqLog });
+      } else if (res.statusCode < 500) {
+        console.warn('Request', { ...reqLog });
       } else {
-        console.error(`Request`, reqLog);
+        console.error('Request', { ...reqLog });
       }
     }
   }

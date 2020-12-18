@@ -10,6 +10,6 @@ export class SystemInitiatedContext {
     uid: 20
   })
   async runJob(name: string) {
-    console.log(`User=${this.context.get().user}, jobName=${name}`);
+    console.log('Running', { user: this.context.get().user, jobName: name });
   }
 }

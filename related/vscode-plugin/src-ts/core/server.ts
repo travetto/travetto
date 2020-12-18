@@ -22,7 +22,7 @@ export class ProcessServer {
 
   start() {
     if (!this.running) {
-      console.log('Starting', this.path, ...this.args);
+      console.log('Starting', { path: this.path, args: this.args });
       this.emitter.emit('pre-start');
       this.state = ExecUtil.spawn(this.path, this.args, this.opts);
 
@@ -51,7 +51,7 @@ export class ProcessServer {
 
   stop() {
     if (this.running) {
-      console.log('Stopping', this.path, ...this.args);
+      console.log('Stopping', { path: this.path, args: this.args });
       this.respawn = false;
       this.emitter.emit('pre-stop');
       this.state.process.kill();

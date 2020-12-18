@@ -1,5 +1,8 @@
 import './error';
 
+type Primitive = number | boolean | string | Date | undefined | null | string[] | number[] | Error;
+type MessageContext = Record<string, Primitive | Record<string, Primitive>>;
+
 declare global {
   type Fn<I extends any[] = any[], V = any> = {
     (...args: I): V;
@@ -11,7 +14,7 @@ declare global {
      * Provide a representation that is suitable for logging
      * @param sub
      */
-    toConsole(sub?: any): any;
+    toJSON(sub?: any): any;
   }
   interface Map<K, V> {
     /**
@@ -26,11 +29,35 @@ declare global {
     toJSON(): any;
   }
   interface Console {
-    /**
-     * Log at a fatal level
-     * @param msg The message to log
-     * @param extra The additional parameters to log
+    log(msg: string, context?: MessageContext): void;
+    /** 
+     * Cannot properly serialize complex types to structured output (e.g. JSON)
+     * @deprecated 
      */
-    fatal(msg?: string, ...extra: any[]): void;
+    log(...args: any[]): void;
+    info(msg: string, context?: MessageContext): void;
+    /** 
+     * Cannot properly serialize complex types to structured output (e.g. JSON)
+     * @deprecated 
+     */
+    info(...args: any[]): void;
+    debug(msg: string, context?: MessageContext): void;
+    /** 
+     * Cannot properly serialize complex types to structured output (e.g. JSON)
+     * @deprecated 
+     */
+    debug(...args: any[]): void;
+    warn(msg: string, context?: MessageContext | { error?: any }): void;
+    /** 
+     * Cannot properly serialize complex types to structured output (e.g. JSON)
+     * @deprecated 
+     */
+    warn(...args: any[]): void;
+    error(msg: string, context?: MessageContext | { error?: any }): void;
+    /** 
+     * Cannot properly serialize complex types to structured output (e.g. JSON)
+     * @deprecated 
+     */
+    error(...args: any[]): void;
   }
 }

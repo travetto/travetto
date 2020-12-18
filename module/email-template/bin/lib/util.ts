@@ -6,6 +6,7 @@ import { MarkdownUtil } from './markdown';
 import { StyleUtil } from './style';
 import { ImageUtil } from './image';
 import { FsUtil } from '@travetto/boot';
+import type { MailTemplateEngine } from '@travetto/email';
 
 type Parts = 'html' | 'text' | 'subject';
 const PARTS = (['html', 'subject', 'text'] as const);
@@ -68,9 +69,9 @@ export class TemplateUtil {
   static async compile(tpl: string, root: string) {
     const { ResourceManager } = await import('@travetto/base');
     const { DependencyRegistry } = await import('@travetto/di');
-    const { MailTemplateEngine } = await import('@travetto/email');
+    const { MailTemplateEngineTarget } = await import('@travetto/email/src/internal/types');
 
-    const engine = await DependencyRegistry.getInstance(MailTemplateEngine);
+    const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);
 
     // Wrap with body
     tpl = (await ResourceManager.read('email/wrapper.html', 'utf8')).replace('<!-- BODY -->', tpl);
@@ -111,10 +112,10 @@ export class TemplateUtil {
     const compiled = Object.fromEntries(await Promise.all(files.map(([k, f]) => fs.readFile(f, 'utf8').then(c => [k, c]))));
 
     // Let the engine template
-    const { MailTemplateEngine } = await import('@travetto/email');
+    const { MailTemplateEngineTarget } = await import('@travetto/email/src/internal/types');
     const { DependencyRegistry } = await import('@travetto/di');
 
-    const engine = await DependencyRegistry.getInstance(MailTemplateEngine);
+    const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);
     return engine.template(compiled[format], context);
   }
 
@@ -146,12 +147,12 @@ export class TemplateUtil {
         !/[.]compiled[.]/.test(x) && (
           /[.](html|scss|css|png|jpe?g|gif|yml)$/.test(x)
         )
-    }).on('changed', async ({ file: f }) => {
-      console.log('Contents changed', f);
-      if (this.TPL_EXT.test(f)) {
-        await this.compileToDisk(f);
+    }).on('changed', async ({ file }) => {
+      console.log('Contents changed', { file });
+      if (this.TPL_EXT.test(file)) {
+        await this.compileToDisk(file);
         if (cb) {
-          cb(f);
+          cb(file);
         }
       } else {
         await this.compileAllToDisk();

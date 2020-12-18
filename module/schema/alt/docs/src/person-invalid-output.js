@@ -8,6 +8,6 @@ process.env.TRV_ROOTS = 'alt/docs';
   try {
     await validate();
   } catch (err) {
-    console.log(err);
+    console.error('Failed to validate', { error: err, age: 20 });
   }
 })();

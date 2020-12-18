@@ -34,7 +34,7 @@ class $AppCache extends FileCache {
         // Only care if it's source, otherwise might be dynamically cached data without backing file
         if (full.endsWith('.ts') || full.endsWith('.js')) {
           // Cannot remove file, source is missing
-          console.debug('Cannot read', e.message);
+          console.warn('Cannot read', { error: e });
         }
       }
     }
