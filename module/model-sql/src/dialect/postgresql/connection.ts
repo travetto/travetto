@@ -45,7 +45,7 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
   }
 
   async execute<T = any>(conn: pg.PoolClient, query: string): Promise<{ count: number, records: T[] }> {
-    console.debug(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
+    console.debug('Executing query', { query });
     const out = await conn.query(query);
     return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as T[] };
   }

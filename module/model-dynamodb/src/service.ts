@@ -64,7 +64,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           },
           ReturnValues: 'NONE'
         };
-        console.log(query);
+        console.debug('Querying', { query } as unknown as Record<string, string>);
         return await this.cl.putItem(query);
       } else {
         return await this.cl.updateItem({

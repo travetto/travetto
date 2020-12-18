@@ -44,7 +44,7 @@ export class Person {
 export class Response {
 
   questionId: string;
-  answer?: any;
+  answer?: string | boolean | number | string[];
 
   @Alias('correct', 'is_valid')
   valid?: boolean;

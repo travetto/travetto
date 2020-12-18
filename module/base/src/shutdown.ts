@@ -45,19 +45,19 @@ class $ShutdownManager {
       const { name, handler } = listener;
 
       try {
-        console.debug(`Starting ${name}`);
+        console.debug('Starting', { name });
         const res = handler();
         if (res && res.then) {
           // If a promise, queue for handling
           promises.push(res as Promise<any>);
           res
-            .then(() => console.debug(`Completed shut down ${name}`))
-            .catch((e: any) => console.error(`Failed shut down of ${name}`, e));
+            .then(() => console.debug('Completed', { name }))
+            .catch((e: any) => console.error('Failed', { error: e, name }));
         } else {
-          console.debug(`Completed shut down ${name}`);
+          console.debug('Completed', { name });
         }
       } catch (e) {
-        console.error(`Failed shut down of ${name}`, e);
+        console.error('Failed', { name, error: e });
       }
     }
 
@@ -79,8 +79,7 @@ class $ShutdownManager {
     try {
       // If the err is not an exit code
       if (err && typeof err !== 'number') {
-        console.warn(err);
-        console.debug(err.stack);
+        console.warn('Error on shutdown', { error: err });
       }
 
       // Get list of all pending listeners
@@ -96,7 +95,7 @@ class $ShutdownManager {
       }
 
     } catch (e) {
-      console.error(e);
+      console.warn('Error on shutdown', { error: e });
     }
 
     if (this.shutdownCode >= 0) {

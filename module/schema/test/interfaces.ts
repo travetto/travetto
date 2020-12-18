@@ -46,7 +46,7 @@ class ViewsTest {
       await SchemaValidator.validate(User, r);
       assert.fail('Validation should have failed');
     } catch (e) {
-      console.log(e);
+      console.warn('Validation Failed', { error: e });
       assert(findError(e.errors, 'address', 'is required'));
     }
 
@@ -56,7 +56,7 @@ class ViewsTest {
       await SchemaValidator.validate(User, r);
       assert.fail('Validation should have failed');
     } catch (e) {
-      console.log(e);
+      console.warn('Validation Failed', { error: e });
       assert(findError(e.errors, 'address.street1', 'is required'));
     }
 
@@ -65,7 +65,7 @@ class ViewsTest {
       await SchemaValidator.validate(User, r);
       assert.fail('Validation should have failed');
     } catch (e) {
-      console.log(e);
+      console.warn('Validation Failed', { error: e });
       assert(findError(e.errors, 'address.mode', 'is only allowed to be'));
     }
   }

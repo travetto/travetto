@@ -1,5 +1,7 @@
-import { ConsoleManager } from '../console';
-import { Console } from 'console';
+import { StacktraceUtil } from '../stacktrace';
+
+type Primitive = number | boolean | string | Date | undefined | null | string[] | number[] | Error;
+export declare type MessageContext = Record<string, Primitive | Record<string, Primitive>>;
 
 // Enable maps to be serialized as json
 Map.prototype.toJSON = function (this: Map<any, any>) {
@@ -15,12 +17,12 @@ Set.prototype.toJSON = function (this: Set<any>) {
   return [...this.values()];
 };
 
-// Add .toConsole to the default Error as well
-Error.prototype.toConsole = function (mid: any = '') {
-  return ConsoleManager.formatError(this, mid);
-};
-
-// Add .fatal to the console prototype
-Console.prototype.fatal = function (msg?: string, ...args: any[]) {
-  return this.error(msg, ...args);
+// Add .toJSON to the default Error as well
+Error.prototype.toJSON = function (extra?: Record<string, any>) {
+  const stack = StacktraceUtil.simplifyStack(this);
+  return {
+    message: this.message,
+    ...extra,
+    stack: stack.substring(stack.indexOf('\n') + 1)
+  };
 };

@@ -147,7 +147,6 @@ module.exports = {
                     "log",
                     "warn",
                     "dir",
-                    "fatal",
                     "timeLog",
                     "trace",
                     "assert",

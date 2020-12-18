@@ -4,7 +4,6 @@ import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 import { CliAppListUtil } from './list';
 import { ApplicationParameter } from '../../src/types';
 
-
 /**
  * Supporting app execution
  */
@@ -48,8 +47,8 @@ export class RunUtil {
     }
 
     // Pause outputting
-    const events: [any, any][] = [];
-    ConsoleManager.set({ invoke(a, b) { events.push([a, b]); } });
+    const events: [any, any, any[]][] = [];
+    ConsoleManager.set({ onLog: (a, b, c) => events.push([a, b, c]) });
 
     // Finish registration
     await PhaseManager.initAfter('@trv:compiler/load');
@@ -60,7 +59,7 @@ export class RunUtil {
 
     // Output on success
     ConsoleManager.clear();
-    events.forEach(([a, b]) => ConsoleManager.invoke(a, ...b));
+    events.forEach(([a, b, c]) => ConsoleManager.invoke(a, b, ...c));
 
     return () => ApplicationRegistry.run(name, sub);
   }

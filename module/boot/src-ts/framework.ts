@@ -161,7 +161,7 @@ export class FrameworkUtil {
           }
         } catch (err) {
           if (!dep.startsWith('@types') && type !== 'opt' && type !== 'optPeer') {
-            console.error('Unable to resolve', dep);
+            console.error('Unable to resolve', { type, dependency: dep });
           }
         }
       }

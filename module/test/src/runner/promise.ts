@@ -50,7 +50,7 @@ export class PromiseCapture {
   static async resolvePending(pending: Promise<any>[]) {
     if (pending.length) {
       let final: Error | undefined;
-      console.debug('Resolving', this.pending.length);
+      console.debug('Resolving', { pending: this.pending.length });
       await Promise.all(pending).catch(err => final = err);
 
       // If any return in an error, make that the final result
@@ -62,7 +62,7 @@ export class PromiseCapture {
    * Stop the capture
    */
   static stop() {
-    console.debug('Stopping', this.pending.length);
+    console.debug('Stopping', { pending: this.pending.length });
     // Restore the promise
     global.Promise = og;
     return this.resolvePending(this.pending.filter(x => x.status === undefined));

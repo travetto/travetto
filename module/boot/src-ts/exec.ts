@@ -3,6 +3,7 @@ import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 import { StreamUtil } from './stream';
 
 declare module 'worker_threads' {
+  // eslint-disable-next-line no-shadow
   interface WorkerOptions {
     argv?: any[];
   }
@@ -224,7 +225,7 @@ export class ExecUtil {
           if (c > 0) {
             const msg = Buffer.concat(stderr).toString();
             if (!options.minimal) {
-              console.error(msg);
+              console.warn(msg);
               process.exit(c);
             } else {
               rej(msg);

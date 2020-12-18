@@ -84,7 +84,7 @@ export class TableManager {
         await this.onFieldChange(ev);
       } catch (e) {
         // Failed to change
-        console.error('Unable to change field', e);
+        console.error('Unable to change field', { error: e });
       }
     }
   }

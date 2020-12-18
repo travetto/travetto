@@ -4,9 +4,9 @@ require('@travetto/base')
   .then(() => {
     require('./watch');
     require('.').SchemaRegistry.onFieldChange((e) => {
-      console.log('Field', e);
+      console.log('Field', { type: e.type, target: (e.curr ?? e.prev) });
     });
     require('.').SchemaRegistry.onSchemaChange((e) => {
-      console.log('Schema', e);
+      console.log('Schema', { type: e.type, target: (e.curr ?? e.prev).ᚕid });
     });
   });

@@ -85,7 +85,7 @@ export class WorkspaceResultsManager {
     if (file) {
       if (!this.results.has(file)) {
         const rm = new DocumentResultsManager(file);
-        console.debug('Generating results manager for ', file);
+        console.debug('Generating results manager', { file });
         this.results.set(file, rm);
       }
       return this.results.get(file)!;

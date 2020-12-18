@@ -68,7 +68,7 @@ class Simple {
 
     assert.doesNotThrow(() => {
       const c = 5;
-      console.log(c);
+      console.log('Success', { value: c });
     });
 
     await assert.rejects(async () => {
@@ -77,7 +77,7 @@ class Simple {
 
     await assert.doesNotReject(async () => {
       const c = 5;
-      console.log(c);
+      console.log('Success', { value: c });
     });
 
     assert.throws(() => {
@@ -89,7 +89,7 @@ class Simple {
     assert.throws(() => {
       assert.throws(() => {
         const c = 5;
-        console.log(c);
+        console.log('Success', { value: c });
       });
     });
 
@@ -101,7 +101,7 @@ class Simple {
     await assert.rejects(async () => {
       await assert.rejects(async () => {
         const c = 5;
-        console.log(c);
+        console.log('Success', { value: c });
       });
     });
   }

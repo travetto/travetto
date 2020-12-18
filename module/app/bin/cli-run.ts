@@ -62,7 +62,7 @@ export class AppRunPlugin extends BasePlugin {
         await runner();
         process.exit(0);
       } catch (err) {
-        console.error(err);
+        console.error('Failed application run', { error: err });
         process.exit(1);
       }
     }

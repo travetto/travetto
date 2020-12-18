@@ -1,7 +1,7 @@
-import { EventEmitter } from 'events';
 import { ScanEntry } from '@travetto/boot';
-
+import { EventEmitter } from 'events';
 import { Watcher, WatcherOptions } from './watcher';
+
 
 export interface FilePresenceManager {
   on(type: 'all', handlder: (payload: { event: string, entry: ScanEntry }) => void): this;
@@ -21,6 +21,7 @@ type Opts = WatcherOptions & {
  * Tracks file changes for the application roots,
  * and handles multiple file roots.
  */
+// eslint-disable-next-line no-redeclare
 export class FilePresenceManager extends EventEmitter {
   private watchers = new Map<string, Watcher>();
 

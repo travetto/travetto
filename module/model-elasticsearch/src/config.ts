@@ -46,7 +46,7 @@ export class ElasticsearchModelConfig {
    * Build final hosts
    */
   postConstruct() {
-    console.debug('Constructed', this);
+    console.debug('Constructed', { config: this });
     this.hosts = this.hosts
       .map(x => x.includes(':') ? x : `${x}:${this.port}`)
       .map(x => x.startsWith('http') ? x : `http://${x}`);

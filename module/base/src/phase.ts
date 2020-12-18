@@ -85,7 +85,7 @@ export class PhaseManager {
       this.initializers = this.initializers.slice(start, end + 1);
     }
 
-    console.debug('Preparing phase', this.scope, this.initializers.map(x => x.key));
+    console.debug('Preparing phase', { scope: this.scope, initializers: this.initializers.map(x => x.key) });
 
     return this;
   }
@@ -97,7 +97,7 @@ export class PhaseManager {
     for (const i of this.initializers) {
       const start = Date.now();
       await i.action();
-      console.debug(this.scope, 'Phase', i.key, Date.now() - start);
+      console.debug('Phase', { scope: this.scope, key: i.key, duration: Date.now() - start });
     }
   }
 }

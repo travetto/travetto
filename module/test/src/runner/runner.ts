@@ -29,7 +29,7 @@ export class Runner {
     const files = (await TestUtil.getTests(this.patterns))
       .filter(x => !x.includes('/extension/')); // Do not include extensions
 
-    console.debug('Running', files);
+    console.debug('Running', { files });
 
     await PhaseManager.create('test').run();
 
@@ -69,7 +69,7 @@ export class Runner {
 
     const files = await TestUtil.getTests(this.patterns, 'test/extension');
 
-    console.debug('Running', files);
+    console.debug('Running', { files });
 
     await PhaseManager.create('test').run();
 

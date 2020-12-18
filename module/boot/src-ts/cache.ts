@@ -99,7 +99,7 @@ export class FileCache {
       try {
         FsUtil.unlinkRecursiveSync(this.cacheDir);
         if (!quiet) {
-          console.debug(`Deleted ${this.cacheDir}`);
+          console.debug('Deleted', { cacheDir: this.cacheDir });
         }
         this.cache.clear(); // Clear it out
       } catch (e) {

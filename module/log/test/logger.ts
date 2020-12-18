@@ -19,7 +19,7 @@ class LoggerTest {
     const events: LogEvent[] = [];
     Logger.listen('test', e => events.push(e));
     (function (ᚕlg) {
-      console.log('Hello', 1, 2, 3);
+      console.log('Hello', { args: [1, 2, 3] });
     })((payload: any, ...args: any[]) => Logger.invoke(payload, args));
     assert(events.length === 1);
     assert(events[0].message === 'Hello');

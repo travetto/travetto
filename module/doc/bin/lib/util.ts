@@ -31,7 +31,7 @@ export class CliDocUtil {
     const { Renderers } = await import('../..');
     const renderer = Renderers[fmt as keyof typeof Renderers];
     if (!renderer) {
-      console.error('Format unknown', fmt);
+      console.error('Format unknown', { fmt });
       process.exit(1);
     }
     return renderer;

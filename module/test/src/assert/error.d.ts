@@ -1,5 +1,5 @@
 declare module "assert" {
   interface AssertionError {
-    toConsole(): string;
+    toJSON(): Record<string, any>;
   }
 }

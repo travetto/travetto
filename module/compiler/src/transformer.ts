@@ -31,16 +31,16 @@ export class TransformerManager {
       this.transformers.push(...getAllTransformers(require(entry.file)));
     }
 
-    console.debug('Transformers',
-      ...this.transformers.map(x => {
+    console.debug('Transformers', {
+      order: this.transformers.map(x => {
         const flags = [
           ...(x.target ? [] : ['all']),
           ...(x.before ? ['before'] : []),
           ...(x.after ? ['after'] : [])
         ];
-        return `\n\t[${x.type}] ${x.key} - ${flags.join(' ')}`;
+        return { type: x.type, key: x.key, flags: flags.join(' ') };
       })
-    );
+    });
 
     // Prepare a new visitor factory with a given type checker
   }

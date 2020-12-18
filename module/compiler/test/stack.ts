@@ -25,7 +25,7 @@ class StackTest {
       assert(e.stack.includes('inner1'));
       assert(e.stack.includes('inner2'));
       assert(e.stack.includes('inner3'));
-      console.log(e);
+      console.error('Error', { error: e });
     }
   }
 }

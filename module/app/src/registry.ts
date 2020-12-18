@@ -1,5 +1,3 @@
-import * as util from 'util';
-
 import { EnvUtil, FsUtil } from '@travetto/boot';
 import { AppManifest, ShutdownManager } from '@travetto/base';
 import { ConfigManager } from '@travetto/config';
@@ -30,11 +28,14 @@ class $ApplicationRegistry {
   logInit(config: ApplicationConfig) {
 
     // Log startup
-    console.log('Running application', config.name, config.filename.replace(/^.*node_modules\//, '').replace(FsUtil.cwd, '.'));
-    console.log(`Configured`, util.inspect({
+    console.log('Running application', {
+      name: config.name,
+      filename: config.filename.replace(/^.*node_modules\//, '').replace(FsUtil.cwd, '.')
+    });
+    console.log('Configured', {
       app: AppManifest.toJSON(),
       config: EnvUtil.isProd() ? ConfigManager.getSecure() : ConfigManager.get()
-    }, false, 10, true));
+    });
   }
 
   /**

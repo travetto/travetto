@@ -6,19 +6,19 @@ import { RootRegistry } from '@travetto/registry';
 
 import { ApplicationRegistry } from '../src/registry';
 import { Application } from '../src/decorator';
-import { ApplicationHandle } from '../src/types';
+import { Waitable } from '../src/types';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
 @Application('test')
 class TestApp {
   async run(age: number, optional?: 'a' | 'b') {
-    console.log(age, optional);
+    console.log('Running', { age, optional });
   }
 }
 
 @Application('closeable')
-class CloseableApp implements ApplicationHandle {
+class CloseableApp implements Waitable {
   running = false;
 
   async wait() {

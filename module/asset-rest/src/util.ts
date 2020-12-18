@@ -76,7 +76,7 @@ export class AssetRestUtil {
         });
 
         uploader.on('file', async (fieldName, stream, fileName, encoding, mimeType) => {
-          console.debug('Uploading file', fieldName, fileName, encoding, mimeType);
+          console.debug('Uploading file', { fieldName, fileName, encoding, mimeType });
           uploads.push(
             this.toLocalAsset(stream, fileName, allowedTypes, excludedTypes)
               .then(res => mapping[fieldName] = res)

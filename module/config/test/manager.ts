@@ -97,7 +97,7 @@ export class ManagerTest {
   @Test()
   async verifyTopLevelKeys() {
     ConfigManager.putAll(YamlUtil.parse(SAMPLE_YAML));
-    console.log(ConfigManager.get());
+    console.log('Configuration', ConfigManager.get() as Record<string, string>);
     const conf = new Test2Config();
     ConfigManager.bindTo(conf, 'test.beta');
     assert(conf.values.length === 3);

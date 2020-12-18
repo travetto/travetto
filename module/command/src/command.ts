@@ -98,7 +98,7 @@ export class CommandService {
   async run(...args: string[]) {
     const container = await this.getRunContainer();
     const [cmd, ...rest] = (container ? this.config.containerCommand : this.config.localCommand)(args);
-    console.debug('Running command', cmd, rest, !!container);
+    console.debug('Running command', { cmd, rest, container: !!container });
 
     if (container) {
       return container.setEntryPoint(cmd).run(rest);

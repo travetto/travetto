@@ -14,7 +14,7 @@ export class Weird {
 
   @Get('/age')
   async age() {
-    console.log(55);
+    console.log('age', { value: 55 });
   }
 
   @Get('/age2')
