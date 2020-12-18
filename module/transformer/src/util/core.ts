@@ -29,9 +29,9 @@ export class CoreUtil {
   /**
    * Find the primary argument of a call expression, or decorator.
    */
-  static getPrimaryArgument<T extends ts.Expression = ts.Expression>(node: ts.CallExpression | undefined): T | undefined {
-    if (node && node!.arguments && node!.arguments.length) {
-      return node.arguments[0] as T;
+  static getArgument<T extends ts.Expression = ts.Expression>(node: ts.CallExpression | undefined, position = 0): T | undefined {
+    if (node && node!.arguments && node!.arguments.length >= position + 1) {
+      return node.arguments[position] as T;
     }
     return;
   }

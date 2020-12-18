@@ -15,12 +15,8 @@ Error.prototype.render = function (this: Error & { status?: number, statusCode?:
   res.status(status);
 
   if (status === 500) {
-    console.error(this);
+    console.error(this.message, { error: this });
   }
 
-  const payload = this instanceof AppError ?
-    this.toJSON!({ status }) :
-    { message: this.message, status, type: this.name };
-
-  res.json(payload);
+  res.json(this.toJSON({ status }));
 };

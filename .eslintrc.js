@@ -82,7 +82,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
-        varsIgnorePattern: '^(__|[A-Z])[A-Za-z0-9]',
+        varsIgnorePattern: '^(__|[A-Z])[A-Za-z0-9]*',
         args: 'none'
       }
     ],
@@ -177,7 +177,6 @@ module.exports = {
         allow: [
           'log',
           'warn',
-          'fatal',
           'trace',
           'debug',
           'info',

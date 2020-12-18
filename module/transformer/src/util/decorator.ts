@@ -39,6 +39,6 @@ export class DecoratorUtil {
    * Find the primary argument of a call expression, or decorator.
    */
   static getPrimaryArgument<T extends ts.Expression = ts.Expression>(node: ts.Decorator | undefined): T | undefined {
-    return CoreUtil.getPrimaryArgument(node && ts.isCallExpression(node.expression) ? node.expression : undefined);
+    return CoreUtil.getArgument(node && ts.isCallExpression(node.expression) ? node.expression : undefined);
   }
 }

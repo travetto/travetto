@@ -7,11 +7,10 @@ import { MailTransport } from '../transport';
 /**
  * Nodemailer transport, takes in a transport factory as the input
  */
-export class NodemailerTransport extends MailTransport {
+export class NodemailerTransport implements MailTransport {
   private transport: nodemailer.Transporter;
 
   constructor(transportFactory: nodemailer.Transport) {
-    super();
     this.transport = nodemailer.createTransport(transportFactory);
   }
 
@@ -26,7 +25,7 @@ export class NodemailerTransport extends MailTransport {
     };
 
     if (res.rejected?.length) {
-      console.error(`Unable to send emails to ${res.rejected?.length} recipients`);
+      console.error('Unable to send emails', { recipientCount: res.rejected?.length });
     }
 
     return res;

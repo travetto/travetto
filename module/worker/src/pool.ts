@@ -83,7 +83,7 @@ export class WorkPool<X, T extends Worker<X>> {
       return res;
     } catch (e) {
       if (this.createErrors++ > opts.max!) { // If error count is bigger than pool size, we broke
-        console.error(e);
+        console.error('Failed in creating pool', { error: e });
         process.exit(1);
       }
       throw e;
@@ -96,7 +96,7 @@ export class WorkPool<X, T extends Worker<X>> {
    * Destroy the worker
    */
   async destroy(worker: T) {
-    console.debug(`[${process.pid}] Destroying ${worker.id}`);
+    console.debug('Destroying', { pid: process.pid, worker: worker.id });
     return worker.destroy();
   }
 
@@ -104,7 +104,7 @@ export class WorkPool<X, T extends Worker<X>> {
    * Free worker on completion
    */
   async release(worker: T) {
-    console.debug(`[${process.pid}] Releasing ${worker.id}`);
+    console.debug('Releasing', { pid: process.pid, worker: worker.id });
     try {
       if (worker.active) {
         if (worker.release) {
@@ -127,7 +127,7 @@ export class WorkPool<X, T extends Worker<X>> {
 
     while (await src.hasNext()) {
       const worker = (await this.pool.acquire())!;
-      console.debug(`[${process.pid}] Acquired ${worker.id}`);
+      console.debug('Acquired', { pid: process.pid, worker: worker.id });
       const nextInput = await src.next();
 
       const completion = worker.execute(nextInput)

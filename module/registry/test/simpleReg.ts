@@ -16,7 +16,7 @@ export class RegistryTest {
     const MethodListener = new MethodSource(RootRegistry);
 
     MethodListener.on(e => {
-      console.log('Method changed', e);
+      console.log('Method changed', { type: e.type, target: (e.curr ?? e.prev) });
     });
 
     console.log('hi');

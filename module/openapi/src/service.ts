@@ -71,7 +71,7 @@ export class OpenApiService {
    * Persist to local file
    */
   async persist() {
-    console.debug('Generating OpenAPI spec file', this.apiSpecConfig.output);
+    console.debug('Generating OpenAPI Spec', { output: this.apiSpecConfig.output });
 
     const output = this.apiSpecConfig.output.endsWith('.json') ?
       JSON.stringify(this.spec, undefined, 2) :

@@ -8,7 +8,6 @@ This module provides logging functionality, building upon ${BaseConsole} in the 
 
 The supported operations are:
 ${List(
-  d`${meth`console.fatal`} which logs at the ${inp`FATAL`} level`,
   d`${meth`console.error`} which logs at the ${inp`ERROR`} level`,
   d`${meth`console.warn`} which logs at the ${inp`WARN`} level`,
   d`${meth`console.info`} which logs at the ${inp`INFO`} level`,

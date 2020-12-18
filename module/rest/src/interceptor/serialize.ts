@@ -46,7 +46,7 @@ export class SerializeInterceptor implements RestInterceptor {
           this.setContentTypeIfUndefined(res, 'text/plain');
           res.send(output);
         } else {
-          const payload = ('toJSON' in output) ? output.toJSON() : output;
+          const payload = output.toJSON?.() ?? output;
           this.setContentTypeIfUndefined(res, 'application/json');
           res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
         }

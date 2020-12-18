@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import { AppCache } from '@travetto/boot';
 import { CliUtil } from '@travetto/cli/src/util';
 import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 import type { RunState } from '../../src/runner/types';
@@ -8,8 +10,14 @@ const ENV_EXT = { TRV_LOG_TIME: 0 };
 
 async function customLogs() {
   const { ConsoleManager } = await import('@travetto/base');
-  ConsoleManager.setFile(`!test-worker.${process.pid}.log`, {
-    processArgs: (payload, args: any[]) => [process.pid, ...args]
+
+  const c = new console.Console({
+    stdout: fs.createWriteStream(AppCache.toEntryName(`test-worker.${process.pid}.log`), { flags: 'a' }),
+    inspectOptions: { depth: 4 },
+  });
+
+  ConsoleManager.set({
+    onLog: (level, ctx, args: any[]) => c[level](process.pid, ctx, ...args)
   });
 }
 

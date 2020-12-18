@@ -96,7 +96,7 @@ export abstract class RestServerSuite extends BaseRestSuite {
         Cookie: `orange=yummy`
       }
     });
-    console.log(headers);
+    console.log('Headers', { headers });
     assert(/flavor.*oreo/.test(headers['set-cookie']));
     assert(ret === { cookie: 'yummy' });
   }

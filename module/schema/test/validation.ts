@@ -30,7 +30,7 @@ class Validation {
       await SchemaValidator.validate(Response, r);
       assert.fail('Validation should have failed');
     } catch (e) {
-      console.log(e);
+      console.warn('Validation Failed', { error: e });
       assert(findError(e.errors, 'url', 'not a valid url'));
       assert(findError(e.errors, 'timestamp', 'is required'));
     }

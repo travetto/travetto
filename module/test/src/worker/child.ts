@@ -43,7 +43,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    * When we receive a command from the parent
    */
   async onCommand(event: RunEvent & { type: string }) {
-    console.debug('on message', event);
+    console.debug('on message', { ...event });
 
     if (event.type === Events.INIT) { // On request to init, start initialization
       await this.onInitCommand();
@@ -74,7 +74,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    */
   async resetForRun() {
     // Clear require cache of all data loaded minus base framework pieces
-    console.debug('Resetting', Object.keys(require.cache).length);
+    console.debug('Resetting', { fileCount: Object.keys(require.cache).length });
 
     // Reload registries, test and root
     await PhaseManager.create('reset').run();
@@ -85,7 +85,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       if (!/support\/(transformer|phase)[.]/.test(file) && !file.includes('/alt/')) {
         const worked = this.compiler.unload(file);
         if (worked) {
-          console.debug(`[${process.pid}]`, 'Unloading', file);
+          console.debug('Unloading', { pid: process.pid, file });
         }
       }
     }
@@ -113,7 +113,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
     const { Runner } = await import(`../runner/runner`);
 
-    console.debug('*Running*', event.file);
+    console.debug('Running', { file: event.file });
 
     await new Runner({
       format: 'exec',

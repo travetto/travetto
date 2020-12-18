@@ -21,7 +21,7 @@ export function watch($Compiler: Class<typeof Compiler>) {
 
       ShutdownManager.onUnhandled(err => {
         if (err && (err.message ?? '').includes('Cannot find module')) { // Handle module reloading
-          console.error(err);
+          console.error('Cannot find module', { error: err });
           return true;
         }
       }, 0);

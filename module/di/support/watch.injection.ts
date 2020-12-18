@@ -29,11 +29,13 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
       if (!this.proxies.get(classId)!.has(qualifier)) {
         proxy = new RetargettingProxy(instance);
         this.proxies.get(classId)!.set(qualifier, proxy);
-        console.debug('Registering proxy', target.ᚕid, qualifier);
+        console.debug('Registering proxy', { id: target.ᚕid, qualifier: qualifier.toString() });
       } else {
         proxy = this.proxies.get(classId)!.get(qualifier)!;
         proxy.setTarget(instance);
-        console.debug('Updating target', target.ᚕid, qualifier, instance);
+        console.debug('Updating target', {
+          id: target.ᚕid, qualifier: qualifier.toString(), instanceType: (instance as any).constructor.name as string
+        });
       }
 
       return proxy.get();

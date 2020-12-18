@@ -15,5 +15,5 @@ import { FsUtil } from '@travetto/boot/src';
 
   const { ConfigManager } = await import('../../../src/manager');
   ConfigManager.init();
-  console.log(ConfigManager.get());
+  console.log('Config', ConfigManager.get() as Record<string, string>);
 }());

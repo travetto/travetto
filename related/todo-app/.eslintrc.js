@@ -172,7 +172,6 @@ module.exports = {
         allow: [
           'log',
           'warn',
-          'fatal',
           'trace',
           'debug',
           'info',

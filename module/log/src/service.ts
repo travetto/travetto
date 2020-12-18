@@ -1,17 +1,27 @@
 import { ColorUtil, EnvUtil } from '@travetto/boot';
-import { ConsoleManager, LogLevel, ConsoleContext, AppManifest } from '@travetto/base';
+import { ConsoleManager, LogLevel, AppManifest } from '@travetto/base';
+import { SystemUtil } from '@travetto/base/src/internal/system';
+import { MessageContext } from '@travetto/base/src/internal/global-types';
 
-import { LogEvent, LogLevels } from './types';
+import { Appender, Formatter, LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
+import { JsonFormatter } from './formatter/json';
 import { ConsoleAppender } from './appender/console';
 import { LogUtil } from './util';
 
 const DEFAULT = Symbol.for('@trv:log/default');
 
+type LineContext = { file: string, line: number, scope?: string };
+
 /**
  * Logger service
  */
 class $Logger {
+
+  /**
+   * Should we enrich the console by default
+   */
+  private readonly logFormat: 'line' | 'json' = EnvUtil.get('TRV_LOG_FORMAT', 'line') as 'line';
 
   /**
    * Listeners for logging events
@@ -30,6 +40,7 @@ class $Logger {
    * Which log levels to exclude
    */
   private exclude: Partial<Record<LogLevel, boolean>> = { debug: true };
+
   /**
    * Initialize
    */
@@ -42,24 +53,13 @@ class $Logger {
       }
     }
 
-    // Base logger, for free
-    const formatter = new LineFormatter({
-      colorize: ColorUtil.colorize,
-      timestamp: ConsoleManager.timestamp
-    });
-
-    // Register default listener
-    this.listen(DEFAULT, LogUtil.buildListener(
-      formatter,
-      new ConsoleAppender({ method: 'log' }),
-      ({ level: x }) => x === 'info' || x === 'debug')
-    );
-
-    this.listen(DEFAULT, LogUtil.buildListener(
-      formatter,
-      new ConsoleAppender({ method: 'error' }),
-      ({ level: x }) => x === 'error' || x === 'warn' || x === 'fatal')
-    );
+    // Build default formatter
+    let formatter: Formatter;
+    switch (this.logFormat) {
+      case 'line': formatter = new LineFormatter(); break;
+      case 'json': formatter = new JsonFormatter(); break;
+    }
+    this.listenDefault(formatter);
 
     ConsoleManager.set(this, true); // Make default
   }
@@ -70,6 +70,15 @@ class $Logger {
   listen(key: string | symbol, handler: (ev: LogEvent) => void) {
     this.listenerMap.set(key, handler);
     this.listeners.push(handler);
+  }
+
+  /**
+   * Set default listener
+   * @param formatter
+   * @param appender Defaults to console appender unless specified
+   */
+  listenDefault(formatter: Formatter, appender?: Appender) {
+    this.listen(DEFAULT, LogUtil.buildListener(formatter, appender ?? new ConsoleAppender()));
   }
 
   /**
@@ -101,29 +110,30 @@ class $Logger {
   /**
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
-  invoke(event: ConsoleContext & Partial<LogEvent>, rest: any[]): void {
-    if (!('message' in event)) {
-      const message = (rest.length && typeof rest[0] === 'string') ? rest.shift() : undefined;
-      event.message = message;
-    }
+  onLog(level: LogLevel, { file, line, scope }: LineContext, [message, context, ...args]: [string, MessageContext, ...any[]]): void {
+    level = (level in LogLevels) ? level : 'info';
 
-    if (rest.length && !event.args) {
-      event.args = rest;
-    }
+    const category = SystemUtil.computeModule(file);
 
-    event.level = (event.level in LogLevels) ? event.level : 'info';
-
-    if ((event.level in this.exclude) || (event.level in this.filters && !this.filters[event.level]!(event.category!))) {
+    if ((level in this.exclude) || (category && level in this.filters && !this.filters[level]!(category))) {
       return;
     }
 
-    event.timestamp = Date.now();
-
-    // Use sliced values
-    event.args = (event.args ?? []).slice(0);
+    // Allow for controlled order of event properties
+    const finalEvent: LogEvent = {
+      level,
+      message,
+      category,
+      timestamp: new Date().toISOString(),
+      file,
+      line,
+      context,
+      scope,
+      args: args.length ? args : undefined
+    };
 
     for (const l of this.listeners) {
-      l(event as LogEvent);
+      l(finalEvent);
     }
   }
 }

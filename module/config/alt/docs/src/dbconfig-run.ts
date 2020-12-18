@@ -7,5 +7,5 @@ import { DBConfig } from './dbconfig';
   await ConfigManager.init();
   const obj = new DBConfig();
   (obj as any).postConstruct();
-  console.log(obj);
+  console.log('DBConfig', { ...obj });
 })();

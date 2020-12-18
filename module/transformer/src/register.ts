@@ -37,7 +37,7 @@ export function OnCall(...target: string[]) {
  */
 export function OnFunction(...target: string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
-    inst: Transformer, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.FunctionDeclaration) => R>
+    inst: Transformer, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.FunctionDeclaration | ts.FunctionExpression) => R>
   ) => storeHandler(inst, d.value!, 'before', 'function', target);
 }
 
@@ -100,7 +100,7 @@ export function AfterCall(...target: string[]) {
  */
 export function AfterFunction(...target: string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
-    inst: Transformer, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.FunctionDeclaration) => R>
+    inst: Transformer, __: any, d: TypedPropertyDescriptor<(state: S, node: ts.FunctionDeclaration | ts.FunctionExpression) => R>
   ) => storeHandler(inst, d.value!, 'after', 'function', target);
 }
 

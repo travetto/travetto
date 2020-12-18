@@ -30,11 +30,11 @@ export class Database {
   @Inject({ optional: true }) altConfig: AltConfig;
 
   postConstruct() {
-    console.log('Creating database', this.dbConfig.getUrl());
+    console.log('Creating database', { url: this.dbConfig.getUrl() });
   }
 
   query() {
-    console.log('Getting 350', this.dbConfig.getUrl());
+    console.log('Getting 350', { url: this.dbConfig.getUrl() });
   }
 }
 
@@ -42,7 +42,7 @@ export class Database {
 export class Service {
 
   constructor(public db: Database) {
-    console.log('Creating service', db);
+    console.log('Creating service', { database: db.dbConfig });
   }
 
   doWork() {
@@ -83,13 +83,13 @@ class TestConfig {
   static getNewEmpty() {
     const out = new Empty();
     out.age = 20;
-    console.log('Custom EMPTY 1', out);
+    console.log('Custom EMPTY 1', { out });
     return out;
   }
 
   @InjectableFactory(CUSTOM_SERVICE_INHERIT)
   static getObject(@Inject(SERVICE_INHERIT_2) svc: ServiceInherit) {
-    console.log('Did I find service 2', svc, svc?.db);
+    console.log('Did I find service 2', { svc, db: svc?.db });
     const out: ServiceInherit = new ServiceInherit2(svc?.db ?? new Database());
     out.age = 11;
     return out;
@@ -97,7 +97,7 @@ class TestConfig {
 
   @InjectableFactory(CUSTOM_DATABASE)
   static getCustomDB(@Inject(CUSTOM_EMPTY) empty: Empty) {
-    console.log('Custom EMPTY 2', empty);
+    console.log('Custom EMPTY 2', { empty });
     const config = new DbConfig();
     config.temp = 'any';
     config.empty = empty;

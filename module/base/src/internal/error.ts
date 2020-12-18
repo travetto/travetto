@@ -78,7 +78,7 @@ export class ErrorUtil {
         error[k] = (e as SerializedError)[k];
       }
       error.$ = true;
-      error.message = e instanceof Error ? e.toConsole() : e.message;
+      error.message = e instanceof Error ? e.toJSON() : e.message;
       error.stack = e.stack;
       error.name = e.name;
     }

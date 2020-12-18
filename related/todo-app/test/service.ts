@@ -1,31 +1,24 @@
 import * as assert from 'assert';
 
-import { Suite, Test, BeforeAll, AfterAll } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
-import { ModelSource } from '@travetto/model';
+import { BaseModelSuite } from '@travetto/model-core/test/lib/test.base';
 // import { BaseSQLModelTest } from '@travetto/model-sql/support/test.model-sql';
 
 import { TodoService } from '../src/service';
 import { Todo } from '../src/model';
+import { ModelCrudSupport } from '@travetto/model-core';
 
 @Suite()
-export class TodoTest {
+export class TodoTest extends BaseModelSuite<ModelCrudSupport> {
 
-  @BeforeAll()
-  async init() {
-    await RootRegistry.init();
-  }
-
-  @AfterAll()
-  async destroy() {
-    const source = await DependencyRegistry.getInstance(ModelSource);
-    return source.clearDatabase();
+  get svc() {
+    return DependencyRegistry.getInstance(TodoService);
   }
 
   @Test('Create todo')
   async create() {
-    const svc = await DependencyRegistry.getInstance(TodoService);
+    const svc = await this.svc;
 
     const test = Todo.from({
       text: 'Sample Task'
@@ -38,7 +31,7 @@ export class TodoTest {
 
   @Test('Complete todo')
   async complete() {
-    const svc = await DependencyRegistry.getInstance(TodoService);
+    const svc = await this.svc;
 
     const test = Todo.from({
       text: 'Sample Task'
@@ -56,7 +49,7 @@ export class TodoTest {
 
   @Test('Delete todo')
   async remove() {
-    const svc = await DependencyRegistry.getInstance(TodoService);
+    const svc = await this.svc;
 
     const test = Todo.from({
       text: 'Sample Task'

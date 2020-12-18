@@ -4,7 +4,7 @@ export function work() {
   try {
     1 / 0;
   } catch (e) {
-    console.error(e);
+    console.error('Divide by zero', { error: e });
   }
   console.debug('End Work');
 }

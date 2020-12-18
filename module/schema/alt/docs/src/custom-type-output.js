@@ -16,7 +16,7 @@ process.env.TRV_ROOTS = 'alt/docs';
   try {
     await SchemaValidator.validate(la);
   } catch (err) {
-    console.log(err);
+    console.warn('Validation Failed', { error: err });
   }
 })();
 

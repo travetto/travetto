@@ -9,9 +9,9 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
 
   constructor(proc: T) {
     this.proc = proc;
-    console.debug(`[${this.id}] Constructed Execution`);
+    console.debug('Constructed Execution', { pid: this.id });
     this.listen((e) => { // Log in one place
-      console.debug(`[${this.parentId}] Received [${this.id}] ${e.type}`);
+      console.debug('Received', { pid: this.parentId, id: this.id, type: e.type });
     });
   }
 
@@ -37,7 +37,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
    * Send data to the parent
    */
   send(eventType: string, data?: any) {
-    console.debug(`[${this.parentId}] Sending [${this.id}] ${eventType}`);
+    console.debug('Sending', { pid: this.parentId, id: this.id, eventType });
     if (!this.proc) {
       throw new Error('this.proc was not defined');
     } else if (this.proc.send) {
@@ -125,7 +125,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
    */
   async destroy() {
     if (this.proc) {
-      console.debug(`[${this.parentId}] Killing [${this.id}]`);
+      console.debug('Killing', { pid: this.parentId, id: this.id });
     }
     this.release();
     delete this.proc;
@@ -136,7 +136,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
    */
   release() {
     if (this.proc) {
-      console.debug(`[${this.parentId}] Released [${this.id}]`);
+      console.debug('Released', { pid: this.parentId, id: this.id });
       this.proc.removeAllListeners('message');
     }
   }

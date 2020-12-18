@@ -1,19 +1,19 @@
+import { LogLevel } from '@travetto/base';
 import { Appender } from '../types';
 
 /**
  * Console logging config
  */
 export interface ConsoleAppenderOpts {
-  method: 'log' | 'error';
 }
 
 /**
  * Console.output
  */
 export class ConsoleAppender implements Appender {
-  constructor(private opts: ConsoleAppenderOpts) { }
+  constructor(private opts: ConsoleAppenderOpts = {}) { }
 
-  append(message: string) {
-    console![this.opts.method](message);
+  append(level: LogLevel, message: string) {
+    console![level](message);
   }
 }

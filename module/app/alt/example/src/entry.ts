@@ -13,6 +13,6 @@ class EpTest {
   el: Element;
 
   run(age = 5, format: 'html' | 'pdf' = 'html') {
-    console.debug('Entry point for the win', age, typeof age, format);
+    console.debug('Entry point for the win', { age, typeOfAge: typeof age, format });
   }
 }

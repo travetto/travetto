@@ -50,7 +50,7 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
    */
   static async sendEmail(file: string, to: string, context: Record<string, any>) {
     try {
-      console.log(`Sending email to ${to}`);
+      console.log('Sending email', { to });
       // Let the engine template
       const svc = await this.getMailService();
       if (!svc) {
@@ -59,12 +59,12 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
 
       const key = file.replace(TemplateUtil.TPL_EXT, '').replace(/^.*?\/resources\//, '/');
       const info = await svc.sendCompiled(key, { to, context });
-      console.log(`Sent email to ${to}`);
+      console.log('Sent email', { to });
 
       const senderConfig = await ConfigUtil.getSenderConfig();
       return senderConfig.host?.includes('ethereal') ? { url: require('nodemailer').getTestMessageUrl(info) } : {};
     } catch (e) {
-      console.log(`Failed to send email to ${to}`, e.message);
+      console.warn('Failed to send email', { to, error: e as Error });
       throw e;
     }
   }

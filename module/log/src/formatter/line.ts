@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { FsUtil, ColorUtil } from '@travetto/boot';
+import { FsUtil, ColorUtil, EnvUtil } from '@travetto/boot';
 
 import { LogEvent, Formatter } from '../types';
 
@@ -9,10 +9,9 @@ import { LogEvent, Formatter } from '../types';
  */
 export const STYLES = {
   info: ColorUtil.makeColorer('white'),
-  error: ColorUtil.makeColorer('red'),
   debug: ColorUtil.makeColorer('yellow'),
   warn: ColorUtil.makeColorer('magenta'),
-  fatal: ColorUtil.makeColorer('cyan', 'inverse'),
+  error: ColorUtil.makeColorer('cyan', 'inverse'),
   timestamp: ColorUtil.makeColorer('white', 'bold'),
   location: ColorUtil.makeColorer('blue')
 };
@@ -26,7 +25,6 @@ export interface LineFormatterOpts {
   align?: boolean;
   level?: boolean;
   location?: boolean;
-  fullCategory?: boolean;
 }
 
 /**
@@ -35,12 +33,22 @@ export interface LineFormatterOpts {
 export class LineFormatter implements Formatter {
   private opts: LineFormatterOpts;
 
-  constructor(opts: LineFormatterOpts) {
+  constructor(opts: LineFormatterOpts = {}) {
     this.opts = {
-      colorize: true, timestamp: 'ms', align: true, level: true, location: true,
-      fullCategory: true,
+      colorize: ColorUtil.colorize,
+      timestamp: EnvUtil.isValueOrFalse('TRV_LOG_TIME', ['s', 'ms'] as const, 'ms'),
+      align: true, level: true, location: true,
       ...opts
     };
+  }
+
+  pretty(ev: LogEvent, o: any) {
+    return util.inspect(o, {
+      showHidden: ev.level === 'debug',
+      depth: ev.level === 'debug' ? 4 : 2,
+      colors: this.opts.colorize !== false,
+      breakLength: 100
+    });
   }
 
   /**
@@ -48,17 +56,17 @@ export class LineFormatter implements Formatter {
    */
   format(ev: LogEvent) {
     const opts = this.opts;
-    let out = '';
+    const out = [];
 
     if (opts.timestamp) {
-      let timestamp = new Date(ev.timestamp).toISOString();
+      let timestamp = ev.timestamp;
       if (opts.timestamp === 's') {
         timestamp = timestamp.replace(/[.]\d{3}/, '');
       }
       if (opts.colorize) {
         timestamp = STYLES.timestamp(timestamp);
       }
-      out = `${out}${timestamp} `;
+      out.push(timestamp);
     }
 
     if (opts.level) {
@@ -69,42 +77,31 @@ export class LineFormatter implements Formatter {
       if (opts.align) {
         level += ' '.repeat(5 - ev.level.length);
       }
-      out = `${out}${level} `;
+      out.push(level);
     }
 
     if (ev.file && opts.location) {
       let ns = ev.category;
-      if (opts.fullCategory || !ev.file.includes('node_modules')) {
+      if (!ev.file.includes('node_modules')) {
         ns = ev.file.replace(FsUtil.cwd, '.');
       }
       let loc = ev.line ? `${ns}:${ev.line}` : ns;
       if (opts.colorize) {
         loc = STYLES.location(loc);
       }
-      out = `${out}[${loc}] `;
+      out.push(`[${loc}]`);
     }
 
-    let message = ev.message;
+    out.push(ev.message);
 
-    if (ev.args && ev.args.length) {
-      const args = ev.args.slice(0);
-      if (message) {
-        args.unshift(message);
-      }
-
-      message = args.map((x: any) =>
-        (typeof x === 'string' || x instanceof Error) ? x :
-          util.inspect(x,
-            ev.level === 'debug',
-            ev.level === 'debug' ? 4 : 2,
-            opts.colorize !== false
-          )
-      ).join(' ');
+    if (ev.context) {
+      out.push(this.pretty(ev, ev.context));
     }
 
-    if (message) {
-      out = `${out}${message} `;
+    if (ev.args) {
+      out.push(...ev.args.map(a => this.pretty(ev, a)).join(' '));
     }
-    return out.substring(0, out.length - 1);
+
+    return out.join(' ');
   }
 }

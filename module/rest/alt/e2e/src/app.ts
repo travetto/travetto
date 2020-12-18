@@ -14,7 +14,7 @@ class DummyServer extends RestServer<Inner> {
   async createRaw() {
     return {
       use(val: any) {
-        console.log('Using', val);
+        console.log('Using', { val });
       }
     };
   }
@@ -25,11 +25,11 @@ class DummyServer extends RestServer<Inner> {
   }
 
   async registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[]) {
-    console.log('Registering Controller', path, endpoints.length);
+    console.log('Registering Controller', { path, endpoints: endpoints.length });
   }
 
   registerInterceptor(inter: RestInterceptor) {
-    console.log('Registering Interceptor', inter.constructor.name);
+    console.log('Registering Interceptor', { name: inter.constructor.name });
   }
 
   async unregisterRoutes(key: string | symbol) {

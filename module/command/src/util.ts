@@ -17,9 +17,9 @@ export class CommandUtil {
   static async waitForHttp(url: string, ms = 5000) {
     const start = Date.now();
     const port = /:\d+/.test(url) ? parseInt(url.replace(/.*:(\d+).*/, (all, p) => p), 10) : (url.startsWith('https') ? 443 : 80);
-    console.debug('Waiting for port', port);
+    console.debug('Waiting for port', { port });
     await this.waitForPort(port, ms);
-    console.debug('Acquired port', port);
+    console.debug('Acquired port', { port });
 
     while ((Date.now() - start) < ms) {
       const status = await new Promise<number>((resolve) => {

@@ -9,7 +9,7 @@ export class LoggingInterceptor implements RestInterceptor {
     try {
       await next();
     } finally {
-      console.log(`Request took ${Date.now() - start}ms`);
+      console.log('Request complete', { time: Date.now() - start });
     }
   }
 }

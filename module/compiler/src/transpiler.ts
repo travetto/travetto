@@ -100,7 +100,7 @@ export class Transpiler {
    */
   private getProgram(forFile?: string): ts.Program {
     if (!this.program || (forFile && !this.rootNames.has(forFile))) {
-      console.debug(`Loading program ${this.rootNames.size}`, forFile);
+      console.debug('Loading program', { size: this.rootNames.size, src: forFile });
       if (forFile) {
         this.rootNames.add(forFile);
       }
@@ -121,7 +121,7 @@ export class Transpiler {
    */
   private _transpile(fileName: string, force = false) {
     if (force || !this.cache.hasEntry(fileName)) {
-      console.debug('Emitting', fileName.replace(`${FsUtil.cwd}/`, ''));
+      console.debug('Emitting', { fileName: fileName.replace(`${FsUtil.cwd}/`, '') });
 
       const prog = this.getProgram(fileName);
       const result = prog.emit(
@@ -157,7 +157,7 @@ export class Transpiler {
     // Let's see if they are really different
     const hash = SystemUtil.naiveHash(content);
     if (hash === this.hashes.get(fileName)) {
-      console.debug(`Contents Unchanged: ${fileName}`);
+      console.debug('Contents Unchanged', { fileName });
       return false;
     }
     return true;
@@ -200,7 +200,7 @@ export class Transpiler {
    */
   unload(fileName: string, unlink = true) {
     if (this.contents.has(fileName)) {
-      console.debug('Unloading', fileName.replace(FsUtil.cwd, ''), unlink);
+      console.debug('Unloading', { fileName: fileName.replace(FsUtil.cwd, ''), unlink });
 
       this.cache.removeExpiredEntry(fileName, unlink);
 

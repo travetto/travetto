@@ -2,9 +2,10 @@
  * @concrete SpecialType
  */
 export type SpecialType = string | number | true;
+// eslint-disable-next-line no-shadow, no-redeclare
 export const SpecialType = class SpecialType {
   static validateSchema(input: any) {
-    console.log('Validating schema', input);
+    console.log('Validating schema', { input });
     if (input !== undefined) {
       switch (typeof input) {
         case 'boolean': {

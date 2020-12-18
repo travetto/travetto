@@ -52,10 +52,10 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
 
   async execute<T = any>(conn: mysql.Connection, query: string): Promise<{ count: number, records: T[] }> {
     return new Promise<{ count: number, records: T[] }>((res, rej) => {
-      console.debug(`\n${'-'.repeat(20)} \nExecuting query\n`, query, '\n', '-'.repeat(20));
+      console.debug('Executing Query', { query });
       conn.query(query, (err, results, fields) => {
         if (err) {
-          console.debug(err);
+          console.debug('Failed query', { error: err });
           rej(err);
         } else {
           const records = Array.isArray(results) ? [...results].map(v => ({ ...v })) : [{ ...results }] as T[];
@@ -71,6 +71,6 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
   }
 
   release(conn: mysql.PoolConnection) {
-    this.pool.releaseConnection(conn);
+    conn.release();
   }
 }

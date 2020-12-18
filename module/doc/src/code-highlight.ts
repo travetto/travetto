@@ -41,7 +41,7 @@ export function highlight(text: string, lang: string) {
       .replace(/(@\s*<span[^>]*)function("\s*>)/g, (a, pre, post) => `${pre}meta${post}`)
       .replace(/[{}]/g, a => `{{'${a}'}}`);
   } catch (e) {
-    console.error(e.stack);
+    console.error(e.message as string, { error: e });
   }
 }
 

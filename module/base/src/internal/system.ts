@@ -98,7 +98,7 @@ export class SystemUtil {
 
     if (!mod.includes(FsUtil.cwd)) {
       ns = '@sys';
-      mod = mod.replace(/\/+/g, '.');
+      mod = mod.replace(/\/+/g, '/');
     } else {
       [, mod] = mod.split(`${FsUtil.cwd}/`);
       if (mod.includes('node_modules')) {
@@ -109,14 +109,14 @@ export class SystemUtil {
           if (rest[0] === 'src') {
             rest.shift();
           }
-          mod = rest.join('.');
+          mod = rest.join('/');
         } else {
           ns = `@npm`;
         }
       } else {
         const [ns1, ...rest] = mod.split(/\/+/);
         ns = ns1;
-        mod = rest.join('.');
+        mod = rest.join('/');
       }
     }
 

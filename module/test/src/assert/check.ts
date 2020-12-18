@@ -241,10 +241,6 @@ export class AssertCheck {
    * Look for any unhandled exceptions
    */
   static checkUnhandled(test: TestConfig, err: Error | assert.AssertionError) {
-    if (Util.hasToJSON(err)) {
-      delete err.toJSON; // Do not allow the value to propagate as JSON
-    }
-
     let line = AssertUtil.getPositionOfError(err, test.file).line;
     if (line === 1) {
       line = test.lines.start;

@@ -14,7 +14,7 @@ export class WatchTest {
     const w = new Watcher(__dirname);
     w
       .on('all', ({ event, entry }) => {
-        console.log(event, entry.file);
+        console.log('Recevied event', { type: event, file: entry.file });
         found.push([event, entry.file]);
       });
 

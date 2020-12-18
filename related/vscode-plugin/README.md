@@ -9,6 +9,7 @@ The currently supported features are:
    
    *  Real-time test evaluation and debugging
    *  Application launching with parameters
+   *  Terminal integration for framework links
    *  Miscellaneous utilities
 
 ## Testing

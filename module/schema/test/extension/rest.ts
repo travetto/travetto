@@ -219,7 +219,7 @@ export class RestTest {
   @Test()
   async verifyShapeAll() {
     const ep = RestTest.getEndpoint('/allShapes', 'get');
-    console.log(ep.responseType);
+    console.log(`${ep.responseType}`);
   }
 
   @Test()

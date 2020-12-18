@@ -16,11 +16,11 @@ export class LogUtil {
     if (filter) {
       return (ev: LogEvent) => {
         if (filter(ev)) {
-          appender.append(formatter.format(ev));
+          appender.append(ev.level, formatter.format(ev));
         }
       };
     } else {
-      return (ev: LogEvent) => appender.append(formatter.format(ev));
+      return (ev: LogEvent) => appender.append(ev.level, formatter.format(ev));
     }
   }
 

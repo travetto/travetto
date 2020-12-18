@@ -15,7 +15,7 @@ const pool = new WorkPool(() =>
         channel.send('request', { data: inp }); // Send request
 
         const { data } = await res; // Get answer
-        console.log('Sent', inp, 'Received', data);
+        console.log('Request complete', { input: inp, output: data });
 
         if (!(inp + inp === data)) {
           // Ensure the answer is double the input

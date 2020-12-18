@@ -368,14 +368,14 @@ export class DockerContainer {
    * Destroy container, mark as runaway if needed
    */
   async destroy(runAway: boolean = false) {
-    console.debug('Destroying', this.image, this.container);
+    console.debug('Destroying', { image: this.image, container: this.container });
     this.runAway = this.runAway || runAway;
 
     try {
       await ExecUtil.spawn(this.dockerCmd, ['kill', this.container]).result;
     } catch (e) { /* ignore */ }
 
-    console.debug('Removing', this.image, this.container);
+    console.debug('Removing', { image: this.image, container: this.container });
 
     try {
       await ExecUtil.spawn(this.dockerCmd, ['rm', '-fv', this.container]).result;
@@ -398,7 +398,7 @@ export class DockerContainer {
       ExecUtil.execSync(`${this.dockerCmd} kill ${this.container}`);
     } catch (e) { /* ignore */ }
 
-    console.debug('Removing', this.image, this.container);
+    console.debug('Removing', { image: this.image, container: this.container });
 
     try {
       ExecUtil.execSync(`${this.dockerCmd} rm -fv ${this.container}`);
@@ -430,7 +430,7 @@ export class DockerContainer {
    * Cleanup a container, delete all temp volumes
    */
   async cleanup() {
-    console.debug('Cleaning', this.image, this.container);
+    console.debug('Cleaning', { image: this.image, container: this.container });
 
     await Promise.all(
       Object.keys(this.tempVolumes)
@@ -442,7 +442,7 @@ export class DockerContainer {
    * Cleanup synchronously, for shutdown
    */
   cleanupSync() {
-    console.debug('Cleaning', this.image, this.container);
+    console.debug('Cleaning', { image: this.image, container: this.container });
 
     for (const vol of Object.keys(this.tempVolumes)) {
       FsUtil.unlinkRecursiveSync(vol, true);

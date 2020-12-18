@@ -84,7 +84,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
         });
       }
     } catch (err) {
-      console.error(err);
+      console.warn('Summarization Error', { error: err });
     }
   }
 }

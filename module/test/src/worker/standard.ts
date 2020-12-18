@@ -22,7 +22,7 @@ export class StandardWorker {
       const res = await new Runner(opts).run();
       return res ? 0 : 1;
     } catch (e) {
-      console.error(e);
+      console.error('Test Worker Failed', { error: e });
       return 1;
     }
   }

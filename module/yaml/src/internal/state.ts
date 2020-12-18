@@ -107,7 +107,6 @@ export class State {
     if (this.top instanceof MapBlock) {
       const [ind, field] = this.fields.pop()! ?? [];
       if ('indent' in node && this.top.indent !== ind) {
-        console.log(node, this.top);
         throw this.buildError('Unable to set value, incorrect nesting');
       }
       this.top.consume(node, field);
