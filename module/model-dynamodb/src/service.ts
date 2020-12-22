@@ -113,7 +113,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   async postConstruct() {
     this.cl = new dynamodb.DynamoDB({ ...this.config.config });
     ModelStorageUtil.registerModelChangeListener(this);
-    ShutdownManager.onShutdown(__filename, () => this.cl.destroy());
+    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.cl.destroy());
   }
 
   // Storage
