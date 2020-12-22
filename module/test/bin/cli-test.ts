@@ -17,7 +17,7 @@ export class TestPlugin extends BasePlugin {
       .arguments('[regexes...]')
       .option('-f, --format <format>', 'Output format for test results', /^(tap|json|noop|exec|event|xunit)$/, 'tap')
       .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, `${Math.min(4, os.cpus().length - 1)}`)
-      .option('-m, --mode <mode>', 'Test run mode', /^(single|extension)$/, '');
+      .option('-m, --mode <mode>', 'Test run mode', /^(single|extension|standard)$/, 'standard');
   }
 
   async action(args: string[]) {
@@ -40,11 +40,11 @@ export class TestPlugin extends BasePlugin {
       case 'extension': {
         state.concurrency = 1;
         if (args.length === 0) {
-          state.args = ['test/.*'];
+          state.args = ['test-extension/.*'];
         }
         break;
       }
-      case undefined: {
+      case 'standard': {
         if (args.length === 0) {
           state.args = ['test/.*'];
         } else if (state.concurrency === 1) {
@@ -61,7 +61,7 @@ export class TestPlugin extends BasePlugin {
 
   complete() {
     const formats = ['tap', 'json', 'event', 'xunit'];
-    const modes = ['single', 'extension'];
+    const modes = ['single', 'extension', 'standard'];
     return {
       '': ['--format', '--mode'],
       '--format': formats,

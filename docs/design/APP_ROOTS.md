@@ -11,7 +11,8 @@ Module Structure
   
 ## Test
 * test/
-  * lib
+  * resources/
+* test-extension/ (For testing extension based code)
   * resources/
 
 ## Library (node_modules/@travetto/{x})
@@ -19,7 +20,7 @@ Module Structure
 * bin/lib - CLI Support Libraries
 * support/ - Phase support as well as AST transformer support
 * index.ts - Root index for loading
-* test/lib - Shared libraries for testing
+* test-lib/ - Shared libraries for testing
 
 App Running
 -----------------------------
@@ -47,3 +48,4 @@ Test Running
 ## Config
 * (root)/resources/*.yml
 * (root)/test/resources/*.yml
+* (root)/test-extension/resources/*.yml

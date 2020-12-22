@@ -1,6 +1,6 @@
 import { Suite } from '@travetto/test';
-import { ModelCrudSuite } from '@travetto/model-core/test/lib/crud';
-import { ModelIndexedSuite } from '@travetto/model-core/test/lib/indexed';
+import { ModelCrudSuite } from '@travetto/model-core/test-lib/crud';
+import { ModelIndexedSuite } from '@travetto/model-core/test-lib/indexed';
 
 import { FirestoreModelConfig, FirestoreModelService } from '..';
 

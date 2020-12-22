@@ -27,7 +27,7 @@
   "files": [
     "index.ts",
     "src",
-    "test/lib",
+    "test-lib",
     "test/resources"
   ],
   "name": "@travetto/asset",
