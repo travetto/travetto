@@ -6,7 +6,6 @@ import { Class, RootRegistry } from '@travetto/registry';
 import { BindUtil } from '../src/bind-util';
 import { Address } from './models/address';
 import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple } from './models/binding';
-import { Context } from '@travetto/base/src/internal/global-types';
 
 @Suite('Data Binding')
 class DataBinding {

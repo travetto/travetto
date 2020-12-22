@@ -6,7 +6,7 @@ import { Config } from '@travetto/config';
 
 import { RouteConfig, Request, Response } from '../types';
 import { RestConfig } from '../server/config';
-import { RestInterceptor } from './interceptor';
+import { RestInterceptor } from './types';
 import { CorsInterceptor } from './cors';
 import { GetCacheInterceptor } from './get-cache';
 

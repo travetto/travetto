@@ -4,7 +4,7 @@ import { TestConsumer } from '../types';
 import { TestEvent } from '../../model/event';
 import { TestResult } from '../../model/test';
 import { SuiteResult } from '../../model/suite';
-import { TestRegistry } from '../../registry/registry';
+import { SuiteRegistry } from '../../registry/suite';
 
 /**
  * Cumulative Summary consumer
@@ -26,7 +26,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
       require(test.file);
       this.state[test.classId] = this.state[test.classId] ?? {};
       this.state[test.classId][test.methodName] = test.status;
-      const SuiteCls = TestRegistry.getClasses().find(x =>
+      const SuiteCls = SuiteRegistry.getClasses().find(x =>
         x.ᚕid === test.classId
       )!;
       return this.computeTotal(SuiteCls);
@@ -49,7 +49,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    * Compute totals
    */
   computeTotal(cls: Class) {
-    const suite = TestRegistry.get(cls);
+    const suite = SuiteRegistry.get(cls);
     const total = suite.tests.reduce((acc, x) => {
       const status = this.state[x.classId][x.methodName] ?? 'unknown';
       acc[status] += 1;

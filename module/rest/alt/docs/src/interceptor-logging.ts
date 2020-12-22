@@ -1,6 +1,6 @@
 import { Injectable } from '@travetto/di';
 import { Request, Response } from '../../../src/types';
-import { RestInterceptor } from '../../../src/interceptor/interceptor';
+import { RestInterceptor } from '../../../src/interceptor/types';
 
 class Appender {
   write(...args: any[]): void { }

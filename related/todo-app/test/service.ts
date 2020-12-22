@@ -3,14 +3,18 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { BaseModelSuite } from '@travetto/model-core/test/lib/test.base';
-// import { BaseSQLModelTest } from '@travetto/model-sql/support/test.model-sql';
+import { ModelCrudSupport } from '@travetto/model-core';
+import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 
 import { TodoService } from '../src/service';
 import { Todo } from '../src/model';
-import { ModelCrudSupport } from '@travetto/model-core';
 
 @Suite()
 export class TodoTest extends BaseModelSuite<ModelCrudSupport> {
+
+  constructor() {
+    super(MongoModelService, MongoModelConfig);
+  }
 
   get svc() {
     return DependencyRegistry.getInstance(TodoService);

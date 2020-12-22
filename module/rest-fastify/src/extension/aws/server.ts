@@ -3,7 +3,7 @@ import type * as lambda from 'aws-lambda';
 import { FastifyInstance } from 'fastify';
 
 import { Injectable } from '@travetto/di';
-import { RestServer } from '@travetto/rest/src/server/server';
+import { RestServer } from '@travetto/rest/src/server/base';
 import { RestLambdaSymbol } from '@travetto/rest/src/internal/lambda';
 import { ConfigManager } from '@travetto/config';
 

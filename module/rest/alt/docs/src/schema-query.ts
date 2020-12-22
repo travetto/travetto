@@ -1,7 +1,6 @@
-// @file-if @travetto/rest
-import { Controller, Get } from '@travetto/rest';
-import { SchemaQuery } from '../../../src/extension/rest';
-import { Schema } from '../../../src/decorator/schema';
+// @file-if @travetto/schema
+import { Schema } from '@travetto/schema';
+import { Controller, Get, SchemaQuery } from '../../..';
 
 @Schema()
 class SearchParams {

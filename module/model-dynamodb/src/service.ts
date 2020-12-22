@@ -15,7 +15,6 @@ import { ModelStorageUtil } from '@travetto/model-core/src/internal/service/stor
 
 import { DynamoDBModelConfig } from './config';
 
-/* eslint-disable no-redeclare */
 function toValue(val: string | number | boolean | Date | undefined | null, forceString?: boolean): dynamodb.AttributeValue;
 function toValue(val: any, forceString?: boolean): dynamodb.AttributeValue | undefined {
   if (val === undefined || val === null || val === '') {
@@ -30,7 +29,6 @@ function toValue(val: any, forceString?: boolean): dynamodb.AttributeValue | und
     return { N: `${val.getTime()}` };
   }
 }
-/* eslint-enable no-redeclare */
 
 /**
  * A model service backed by DynamoDB

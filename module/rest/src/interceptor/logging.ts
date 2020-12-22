@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { Request, Response, RouteConfig } from '../types';
-import { RestInterceptor } from './interceptor';
+import { RestInterceptor } from './types';
 import { ControllerConfig } from '../registry/types';
 
 interface RouteCheck {

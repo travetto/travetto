@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { ControllerRegistry } from '../registry/registry';
+import { ControllerRegistry } from '../registry/controller';
 import { ControllerDecorator } from '../registry/types';
 
 /**

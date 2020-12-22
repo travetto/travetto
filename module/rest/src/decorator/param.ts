@@ -1,5 +1,5 @@
 import { ParamConfig } from '../types';
-import { ControllerRegistry } from '../registry/registry';
+import { ControllerRegistry } from '../registry/controller';
 import { ParamUtil, ExtractFn } from '../util/param';
 
 const EXTRACTORS: Record<ParamConfig['location'], ExtractFn> = {

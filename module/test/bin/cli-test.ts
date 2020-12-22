@@ -4,7 +4,7 @@ import * as os from 'os';
 import { FsUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
-import type { RunState } from '../src/runner/types';
+import type { RunState } from '../src/execute/types';
 
 /**
  * Launch test framework and execute tests

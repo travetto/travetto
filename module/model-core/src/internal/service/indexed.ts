@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { ModelRegistry } from '../../registry/registry';
+import { ModelRegistry } from '../../registry/model';
 import { IndexConfig } from '../../registry/types';
 import { ModelType } from '../../types/model';
 

@@ -6,7 +6,7 @@ import { Class } from '@travetto/registry';
 import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model-core';
 
 import { schemaParamConfig } from './schema';
-import { ControllerRegistry } from '../registry/registry';
+import { ControllerRegistry } from '../registry/controller';
 import { paramConfig } from '../decorator/param';
 
 type Svc = { source: ModelCrudSupport };

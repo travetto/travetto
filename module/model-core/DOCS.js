@@ -107,18 +107,4 @@ ${Code('Query language with more complex needs',
 
 ${SubSection('Regular Expression')}
 
-When querying with regular expressions,patterns can be specified as ${inp`'strings'`} or as ${inp`/patterns/`}.  The latter allows for the case insensitive modifier: ${inp`/pattern/i`}.  Supporting the insensitive flag is up to the underlying model implementation.
-
-<!-- SUB -->
-
-${Section('Extension - Rest')}
-
-To facilitate common RESTful patterns, the module exposes  ${Mod('rest')} support in the form of ${ModelController}.
-
-
-${Code('ModelController example', 'alt/docs/src/model-controller.ts')}
-
-is a shorthand that is equal to:
-
-${Code('Comparable UserController, built manually', 'alt/docs/src/controller.ts')}
-  `;
+When querying with regular expressions,patterns can be specified as ${inp`'strings'`} or as ${inp`/patterns/`}.  The latter allows for the case insensitive modifier: ${inp`/pattern/i`}.  Supporting the insensitive flag is up to the underlying model implementation.  `;

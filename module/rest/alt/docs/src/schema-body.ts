@@ -1,7 +1,6 @@
-// @file-if @travetto/rest
-import { Controller, Post } from '@travetto/rest';
-import { SchemaBody } from '../../../src/extension/rest';
-import { Schema } from '../../../src/decorator/schema';
+// @file-if @travetto/schema
+import { Schema } from '@travetto/schema';
+import { Controller, Post, SchemaBody } from '../../..';
 
 @Schema()
 class User {

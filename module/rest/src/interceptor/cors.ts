@@ -2,7 +2,7 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 
 import { Request, Response, RouteConfig } from '../types';
-import { RestInterceptor } from './interceptor';
+import { RestInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
 
 /**

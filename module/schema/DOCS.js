@@ -5,7 +5,6 @@ const {
 } = require('./src/decorator/field');
 const { Schema } = require('./src/decorator/schema');
 const { Describe } = require('./src/decorator/common');
-const { SchemaBody, SchemaQuery } = require('./src/extension/rest');
 
 exports.text = d`
 This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
@@ -108,23 +107,6 @@ When the validator is executed, it has access to the entire object, and you can 
 
 ${Snippet('Validation Error Structure', './src/validate/types.ts', /interface ValidationError/, /^\}/)}
 
-${Section('Extension - Rest')}
-
-The module provides high level access for ${Mod('rest')} support, via decorators, for validating and typing request bodies.
-
-${SchemaBody} provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
-
-${Code(d`Using ${SchemaBody.name} for POST requests`, 'alt/docs/src/schema-body.ts')}
-
-${SchemaQuery} provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
-
-${Code(d`Using ${SchemaQuery.name} for GET requests`, 'alt/docs/src/schema-query.ts')}
-
-Addtionally, ${SchemaQuery} and ${SchemaBody} can also be used with ${inp`interface`}s and ${inp`type`} literals in lieu of classes. This is best suited for simple types:
-
-${Code(d`Using ${SchemaQuery.name} with a type literal`, 'alt/docs/src/schema-query-type.ts')}
-
-
 ${Section('Extension - Generation')}
 In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward.  The generation utility is built upon ${lib.Faker}, mapping data types, and various field names into specific ${lib.Faker} generation routines.
 
@@ -159,7 +141,7 @@ When working with the schema, the basic types are easily understood, but some of
 To that end, the module supports two concepts:
 
 ${SubSection('Type Adapters')}
-This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the ${Mod('model')} module handles geo data.
+This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the ${Mod('model-query')} module handles geo data.
 
 ${Code('Simple Custom Type', 'alt/docs/src/custom-type.ts')}
 

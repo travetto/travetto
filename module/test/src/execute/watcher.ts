@@ -3,7 +3,7 @@ import * as os from 'os';
 import { RootRegistry, MethodSource, Class } from '@travetto/registry';
 import { WorkPool, IterableInputSource, DynamicAsyncIterator } from '@travetto/worker';
 
-import { TestRegistry } from '../registry/registry';
+import { SuiteRegistry } from '../registry/suite';
 import { buildWorkManager } from '../worker/parent';
 import { RunEvent } from '../worker/types';
 import { TestConsumerRegistry } from '../consumer/registry';
@@ -25,8 +25,8 @@ export class TestWatcher {
     const itr = new DynamicAsyncIterator<RunEvent>();
     const src = new IterableInputSource(itr);
 
-    await TestRegistry.init();
-    TestRegistry.listen(RootRegistry);
+    await SuiteRegistry.init();
+    SuiteRegistry.listen(RootRegistry);
 
     const consumer = new CumulativeSummaryConsumer(TestConsumerRegistry.getInstance(format));
     const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
@@ -41,7 +41,7 @@ export class TestWatcher {
         consumer.removeClass(cls.ᚕid);
         return;
       }
-      const conf = TestRegistry.getByClassAndMethod(cls, method)!;
+      const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
       if (e.type !== 'removing') {
         if (conf) {
           itr.add({

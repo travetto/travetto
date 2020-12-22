@@ -1,5 +1,5 @@
 const { doc: d, Mod, Section, Snippet, Code, lib } = require('@travetto/doc');
-const { RestServer } = require('@travetto/rest/src/server/server');
+const { RestServer } = require('@travetto/rest/src/server/base');
 
 exports.text = d`
 The module is an ${lib.Express} provider for the ${Mod('rest')} module.  This module provides an implementation of ${RestServer} for automatic injection in the default Rest server.

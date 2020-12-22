@@ -1,10 +1,10 @@
 const { doc: d, lib, inp, Terminal, List, Note, Section, Mod, Ref, meth, Code, Execute, pth } = require('@travetto/doc');
 const { AppCache } = require('@travetto/boot');
 
-const BaseConsole = Ref('ConsoleManager', '@travetto/base/src/console.ts');
+const ConsoleManager = Ref('ConsoleManager', '@travetto/base/src/console.ts');
 
 exports.text = d`
-This module provides logging functionality, building upon ${BaseConsole} in the ${Mod('base')} module.  This is all ultimately built upon ${lib.Console} operations. 
+This module provides logging functionality, building upon ${ConsoleManager} in the ${Mod('base')} module.  This is all ultimately built upon ${lib.Console} operations. 
 
 The supported operations are:
 ${List(

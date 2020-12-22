@@ -1,5 +1,5 @@
 import { Injectable } from '@travetto/di';
-import { RestInterceptor } from '../../../src/interceptor/interceptor';
+import { RestInterceptor } from '../../../src/interceptor/types';
 import { Response, Request } from '../../../src/types';
 
 @Injectable()

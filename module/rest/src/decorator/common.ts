@@ -1,6 +1,6 @@
 import { AppError } from '@travetto/base';
 import { HeaderMap, Request, RouteHandler } from '../types';
-import { ControllerRegistry } from '../registry/registry';
+import { ControllerRegistry } from '../registry/controller';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator } from '../registry/types';
 
 const MIN = 1000 * 60;

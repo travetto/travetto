@@ -5,7 +5,7 @@ import { FsUtil, EnvUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
-import { TestRegistry } from '../registry/registry';
+import { SuiteRegistry } from '../registry/suite';
 import { TestConfig, TestResult } from '../model/test';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { TestConsumer } from '../consumer/types';
@@ -29,7 +29,7 @@ export class TestExecutor {
    * This method should never throw under any circumstances.
    */
   private static _executeTestMethod(test: TestConfig): Promise<Error | undefined> {
-    const suite = TestRegistry.get(test.class);
+    const suite = SuiteRegistry.get(test.class);
     const promCleanup = Util.resolvablePromise();
 
     // Ensure all the criteria below are satisfied before moving forward
@@ -231,10 +231,10 @@ export class TestExecutor {
     }
 
     // Initialize registry (after loading the above)
-    await TestRegistry.init();
+    await SuiteRegistry.init();
 
     // Convert inbound arguments to specific tests to run
-    const params = TestRegistry.getRunParams(file, ...args);
+    const params = SuiteRegistry.getRunParams(file, ...args);
 
     // If running specific suites
     if ('suites' in params) {

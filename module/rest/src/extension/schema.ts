@@ -4,7 +4,7 @@ import { SchemaRegistry, BindUtil, SchemaValidator } from '@travetto/schema';
 import { Util, AppError } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
-import { ControllerRegistry } from '../registry/registry';
+import { ControllerRegistry } from '../registry/controller';
 import { Request, ParamConfig } from '../types';
 import { ExtractFn } from '../util/param';
 
