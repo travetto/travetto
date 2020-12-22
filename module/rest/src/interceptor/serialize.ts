@@ -1,7 +1,7 @@
 import { AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
-import { RestInterceptor } from './interceptor';
+import { RestInterceptor } from './types';
 import { LoggingInterceptor } from './logging';
 
 import { Response, Request, TRV_ADDED_HEADERS } from '../types';

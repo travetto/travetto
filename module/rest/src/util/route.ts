@@ -1,6 +1,6 @@
 import { Request, Response, Filter, RouteConfig, TRV_ADDED_HEADERS } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
-import { RestInterceptor } from '../interceptor/interceptor';
+import { RestInterceptor } from '../interceptor/types';
 
 import { ParamUtil } from './param';
 

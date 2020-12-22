@@ -5,7 +5,7 @@ import { WorkPool, IterableInputSource } from '@travetto/worker';
 import { TestExecutor } from './executor';
 import { buildWorkManager } from '../worker/parent';
 
-import { TestUtil } from './util';
+import { RunnerUtil } from './util';
 import { RunState } from './types';
 import { RunnableTestConsumer } from '../consumer/types/runnable';
 
@@ -26,7 +26,7 @@ export class Runner {
   async runFiles() {
     const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
 
-    const files = (await TestUtil.getTests(this.patterns))
+    const files = (await RunnerUtil.getTestFiles(this.patterns))
       .filter(x => !x.includes('/extension/')); // Do not include extensions
 
     console.debug('Running', { files });
@@ -67,7 +67,7 @@ export class Runner {
   async runExtensions() {
     const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
 
-    const files = await TestUtil.getTests(this.patterns, 'test/extension');
+    const files = await RunnerUtil.getTestFiles(this.patterns, 'test/extension');
 
     console.debug('Running', { files });
 

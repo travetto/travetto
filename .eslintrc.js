@@ -198,7 +198,8 @@ module.exports = {
     'no-irregular-whitespace': 'error',
     'no-multiple-empty-lines': 'error',
     'no-new-wrappers': 'error',
-    'no-redeclare': 'error',
+    'no-redeclare': 'off',
+    '@typescript-eslint/no-redeclare': 'error',
     'no-shadow': [
       'error',
       {

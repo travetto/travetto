@@ -1,5 +1,5 @@
 import { Class } from '@travetto/registry';
-import { TestRegistry } from '../registry/registry';
+import { SuiteRegistry } from '../registry/suite';
 import { SuiteConfig } from '../model/suite';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
@@ -25,14 +25,14 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
   }
 
   return ((target: Class<any>) => {
-    TestRegistry.register(target, { description: (description as string), ...extra });
+    SuiteRegistry.register(target, { description: (description as string), ...extra });
     return target;
   }) as ClassDecorator;
 }
 
 function listener(phase: SuitePhase) {
   return (inst: any, prop: string, descriptor: PropertyDescriptor) => {
-    TestRegistry.registerPendingListener(inst.constructor, descriptor.value, phase);
+    SuiteRegistry.registerPendingListener(inst.constructor, descriptor.value, phase);
     return descriptor;
   };
 }

@@ -2,8 +2,6 @@ const { doc: d, Mod, Section, Code, inp, lib, List, SubSection, fld } = require(
 const { Model } = require('./src/registry/decorator');
 const { ModelService } = require('./src/service/model');
 const { ModelSource } = require('./src/service/source');
-const { ModelController } = require('./src/extension/rest');
-
 
 exports.text = d`
 This module provides a clean interface to data model persistence, modification and retrieval.  This module builds heavily upon the ${Mod('schema')}, which is used for data model validation.
@@ -108,17 +106,4 @@ ${Code('Query language with more complex needs',
 ${SubSection('Regular Expression')}
 
 When querying with regular expressions,patterns can be specified as ${inp`'strings'`} or as ${inp`/patterns/`}.  The latter allows for the case insensitive modifier: ${inp`/pattern/i`}.  Supporting the insensitive flag is up to the underlying model implementation.
-
-<!-- SUB -->
-
-${Section('Extension - Rest')}
-
-To facilitate common RESTful patterns, the module exposes  ${Mod('rest')} support in the form of ${ModelController}.
-
-
-${Code('ModelController example', 'alt/docs/src/model-controller.ts')}
-
-is a shorthand that is equal to:
-
-${Code('Comparable UserController, built manually', 'alt/docs/src/controller.ts')}
-  `;
+`;

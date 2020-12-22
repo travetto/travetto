@@ -2,10 +2,12 @@ const { doc: d, Mod, Snippet, SnippetLink, Code, Section, SubSection, meth } = r
 const { Context } = require('@travetto/rest/src/decorator/param');
 const { Cache, MemoryCacheSource } = require('@travetto/cache');
 
-const { Session, SessionData, SessionEncoder } = require('.');
+const { Session } = require('.');
 const { RequetSessionEncoder } = require('./src/encoder/request');
 
 const Request = SnippetLink(`Request`, './src/types.d.ts', /interface Request/);
+const SessionData = SnippetLink(`SessionData`, './src/types.ts', /interface SessionData/);
+const SessionEncoder = SnippetLink(`SessionEncoder`, './src/encoder/types.ts', /interface SessionEncoder/);
 
 exports.text = d`
 
@@ -29,7 +31,7 @@ ${SubSection('Building an Encoder')}
 
 Encoders are pieces that enable you read/write the session state from the request/response.  This allows for sessions to be read/written to cookies, headers, url parameters, etc. The structure for the encoder is fairly straightforward:
 
-${Code('Encoder structure', SessionEncoder.ᚕfile)}
+${Code('Encoder structure', SessionEncoder.link)}
 
 The encoder will ${meth`encode`} the session into the response, as a string.  The ${meth`decode`} operation will then read that string and either produce a session identifier (a string) or a fully defined ${Session} object.  This allows for storing the session data externally or internal to the app, and referencing it by a session identifier.
 

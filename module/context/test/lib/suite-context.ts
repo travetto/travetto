@@ -1,6 +1,6 @@
 import { DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/registry';
-import { TestRegistry } from '@travetto/test';
+import { SuiteRegistry } from '@travetto/test';
 
 import { AsyncContext } from '../../src/service';
 
@@ -10,12 +10,12 @@ import { AsyncContext } from '../../src/service';
  */
 export function WithSuiteContext(data: any = {}) {
   return (target: Class) => {
-    TestRegistry.register(target, {
+    SuiteRegistry.register(target, {
       beforeEach: [async function (this: any) {
         if (!this.__initialized) {
           this.__initialized = true;
           const ctx = await DependencyRegistry.getInstance(AsyncContext);
-          for (const t of TestRegistry.get(target).tests) {
+          for (const t of SuiteRegistry.get(target).tests) {
             const og = this[t.methodName] as Function;
             // eslint-disable-next-line no-shadow
             const fn = function (this: any) {

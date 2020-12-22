@@ -5,8 +5,8 @@ export const init = {
   key: '@trv:test/rest',
   before: ['@trv:registry/reset'],
   action: async () => {
-    const { TestRegistry } = await import('../src/registry/registry');
+    const { SuiteRegistry } = await import('../src/registry/suite');
     // Clear the registry
-    await TestRegistry.reset();
+    await SuiteRegistry.reset();
   }
 };

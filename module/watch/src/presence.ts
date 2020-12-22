@@ -21,7 +21,6 @@ type Opts = WatcherOptions & {
  * Tracks file changes for the application roots,
  * and handles multiple file roots.
  */
-// eslint-disable-next-line no-redeclare
 export class FilePresenceManager extends EventEmitter {
   private watchers = new Map<string, Watcher>();
 

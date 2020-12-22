@@ -4,7 +4,6 @@ const { Application } = require('@travetto/app');
 const { Controller } = require('./src/decorator/controller');
 const { Get, Post, Put, Delete, Patch, Head, Options } = require('./src/decorator/endpoint');
 const { Path, Query, Body, Context, Param, Header } = require('./src/decorator/param');
-const { RestInterceptor } = require('./src/interceptor/interceptor');
 const { CorsInterceptor, RestCorsConfig } = require('./src/interceptor/cors');
 const { GetCacheInterceptor } = require('./src/interceptor/get-cache');
 const { LoggingInterceptor } = require('./src/interceptor/logging');
@@ -13,10 +12,14 @@ const { CookiesInterceptor, RestCookieConfig } = require('./src/interceptor/cook
 const { DefaultRestApplication } = require('./support/application.rest');
 const { RestConfig } = require('./src/server/config');
 
-
 const Request = SnippetLink(`Request`, './src/types.d.ts', /interface Request/);
 const Response = SnippetLink(`Response`, './src/types.d.ts', /interface Response/);
 const ResourceManager = Ref('ResourceManager', `@travetto/base/src/resource.ts`);
+
+const RestInterceptor = SnippetLink('RestInterceptor', './src/interceptors/types.ts', /interface RestInterceptor/);
+
+const { ModelController } = require('./src/extension/rest');
+const { SchemaBody, SchemaQuery } = require('./src/extension/schema');
 
 exports.text = d`
 
@@ -183,4 +186,34 @@ The module provides support basic support with AWS lambdas. When using one of th
 ${Section('Packaging Lambdas')}
 
 ${Execute('Invoking a Package Build', 'travetto', ['pack', 'rest/lambda', '-h'])}
+
+
+${Section('Extension - Schema')}
+
+The module provides high level access for ${Mod('schema')} support, via decorators, for validating and typing request bodies.
+
+${SchemaBody} provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+
+${Code(d`Using ${SchemaBody.name} for POST requests`, 'alt/docs/src/schema-body.ts')}
+
+${SchemaQuery} provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+
+${Code(d`Using ${SchemaQuery.name} for GET requests`, 'alt/docs/src/schema-query.ts')}
+
+Addtionally, ${SchemaQuery} and ${SchemaBody} can also be used with ${inp`interface`}s and ${inp`type`} literals in lieu of classes. This is best suited for simple types:
+
+${Code(d`Using ${SchemaQuery.name} with a type literal`, 'alt/docs/src/schema-query-type.ts')}
+
+
+${Section('Extension - Rest')}
+
+To facilitate common RESTful patterns, the module exposes  ${Mod('rest')} support in the form of ${ModelController}.
+
+
+${Code('ModelController example', 'alt/docs/src/controller-with-model.ts')}
+
+is a shorthand that is equal to:
+
+${Code('Comparable UserController, built manually', 'alt/docs/src/controller-without-model.ts')}
+
 `;

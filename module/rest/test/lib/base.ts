@@ -7,7 +7,7 @@ import { RootRegistry } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 
-import type { RestServer } from '../../src/server/server';
+import type { RestServer } from '../../src/server/base';
 import { ServerHandle } from '../../src/types';
 import { RestLambdaSymbol } from '../../src/internal/lambda';
 

@@ -1,5 +1,5 @@
 const { doc: d, lib, Mod, Section, Snippet, Code } = require('@travetto/doc');
-const { RestServer } = require('@travetto/rest/src/server/server');
+const { RestServer } = require('@travetto/rest/src/server/base');
 
 
 exports.text = d`
