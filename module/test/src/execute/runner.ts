@@ -26,8 +26,7 @@ export class Runner {
   async runFiles() {
     const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
 
-    const files = (await RunnerUtil.getTestFiles(this.patterns))
-      .filter(x => !x.includes('/extension/')); // Do not include extensions
+    const files = (await RunnerUtil.getTestFiles(this.patterns));
 
     console.debug('Running', { files });
 
@@ -67,7 +66,7 @@ export class Runner {
   async runExtensions() {
     const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
 
-    const files = await RunnerUtil.getTestFiles(this.patterns, 'test/extension');
+    const files = await RunnerUtil.getTestFiles(this.patterns, 'test-extension');
 
     console.debug('Running', { files });
 
@@ -95,7 +94,7 @@ export class Runner {
     switch (this.state.mode) {
       case 'extension': return await this.runExtensions();
       case 'single': return await this.runSingle();
-      default: return await this.runFiles();
+      case 'standard': return await this.runFiles();
     }
   }
 }

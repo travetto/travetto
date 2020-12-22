@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import type { Compiler } from '@travetto/compiler';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager, ScanApp, AppManifest } from '@travetto/base';
@@ -99,6 +100,12 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     console.debug('Run');
 
     if (event.mode === 'extension') {
+      const header = await fs.promises.readFile(event.file!, 'utf8');
+      const exts = header
+        .split(/\n/)
+        .filter(l => l.includes('@file-if'))
+        .flatMap(x => x.split('@file-if')[1].trim());
+      throw new Error(exts.join(', '));
       // Prepare node_modules
     }
 

@@ -2,8 +2,8 @@ import * as assert from 'assert';
 
 import { StreamUtil } from '@travetto/boot';
 import { Suite, Test } from '@travetto/test';
-import { ModelCrudSuite } from '@travetto/model-core/test/lib/crud';
-import { ModelStreamSuite } from '@travetto/model-core/test/lib/stream';
+import { ModelCrudSuite } from '@travetto/model-core/test-lib/crud';
+import { ModelStreamSuite } from '@travetto/model-core/test-lib/stream';
 import { S3ModelConfig } from '../src/config';
 import { S3ModelService } from '../src/service';
 

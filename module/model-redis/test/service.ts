@@ -1,7 +1,7 @@
 import { Suite } from '@travetto/test';
-import { ModelCrudSuite } from '@travetto/model-core/test/lib/crud';
-import { ModelExpirySuite } from '@travetto/model-core/test/lib/expiry';
-import { ModelIndexedSuite } from '@travetto/model-core/test/lib/indexed';
+import { ModelCrudSuite } from '@travetto/model-core/test-lib/crud';
+import { ModelExpirySuite } from '@travetto/model-core/test-lib/expiry';
+import { ModelIndexedSuite } from '@travetto/model-core/test-lib/indexed';
 
 import { RedisModelConfig, RedisModelService } from '..';
 
