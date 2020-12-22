@@ -60,7 +60,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       databaseURL: this.config.databaseURL
     });
     this.cl = firebase.firestore();
-    ShutdownManager.onShutdown(__filename, () => this.cl.terminate());
+    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.cl.terminate());
   }
 
   // Storage

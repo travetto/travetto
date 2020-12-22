@@ -50,7 +50,7 @@ export class ElasticsearchModelService implements ModelCrudSupport, ModelIndexed
     await this.client.cluster.health({});
     ModelStorageUtil.registerModelChangeListener(this);
     this.manager = new IndexManager(this.config, this.client);
-    ShutdownManager.onShutdown(__filename, () => this.client.close());
+    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.close());
   }
 
   uuid() {

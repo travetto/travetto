@@ -76,7 +76,7 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
       writeConcern: { w: 1 }
     });
     ModelStorageUtil.registerModelChangeListener(this);
-    ShutdownManager.onShutdown(__filename, () => this.client.close());
+    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.close());
   }
 
   /**
