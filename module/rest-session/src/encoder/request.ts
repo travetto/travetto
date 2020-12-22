@@ -1,7 +1,7 @@
 import { Request, Response } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
 
-import { SessionEncoder } from './encoder';
+import { SessionEncoder } from './types';
 import { Session } from '../types';
 import { SessionConfig } from '../config';
 

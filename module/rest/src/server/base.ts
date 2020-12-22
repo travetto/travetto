@@ -7,8 +7,8 @@ import { EnvUtil } from '@travetto/boot';
 import { RouteConfig, Request, RouteHandler, ParamConfig, ServerHandle } from '../types';
 import { RestConfig } from './config';
 import { RouteUtil } from '../util/route';
-import { RestInterceptor } from '../interceptor/interceptor';
-import { ControllerRegistry } from '../registry/registry';
+import { RestInterceptor } from '../interceptor/types';
+import { ControllerRegistry } from '../registry/controller';
 import { GlobalRoute, RestInterceptorTarget } from '../internal/types';
 
 /**

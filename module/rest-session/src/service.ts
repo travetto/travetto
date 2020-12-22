@@ -8,7 +8,7 @@ import { MemoryModelConfig, MemoryModelService } from '@travetto/model-core';
 import { TRV_SESSION } from './internal/types';
 import { Session } from './types';
 import { SessionConfig } from './config';
-import { SessionEncoder } from './encoder/encoder';
+import { SessionEncoder } from './encoder/types';
 
 export const SESSION_CACHE = Symbol.for('@trv:session/cache');
 

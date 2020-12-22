@@ -1,6 +1,6 @@
 import { MethodOrAll, PathType, RouteHandler } from '../types';
 
-import { ControllerRegistry } from '../registry/registry';
+import { ControllerRegistry } from '../registry/controller';
 import { EndpointConfig, EndpointIOType, EndpointDecorator } from '../registry/types';
 
 function Endpoint(method: MethodOrAll, path: PathType = '/', extra: Partial<EndpointConfig> = {}) {

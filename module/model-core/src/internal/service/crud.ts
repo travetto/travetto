@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { Class } from '@travetto/registry';
 import { SchemaValidator } from '@travetto/schema';
-import { ModelRegistry } from '../../registry/registry';
+import { ModelRegistry } from '../../registry/model';
 import { ModelType } from '../../types/model';
 import { NotFoundError } from '../../error/not-found';
 

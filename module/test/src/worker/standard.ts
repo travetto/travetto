@@ -1,5 +1,5 @@
 import { PhaseManager } from '@travetto/base';
-import { RunState } from '../runner/types';
+import { RunState } from '../execute/types';
 
 /**
  * Standard worker, used for direct runs from the command line
@@ -10,10 +10,10 @@ export class StandardWorker {
    */
   static async run(opts: RunState) {
     try {
-      const { Runner } = await import('../runner/runner');
-      const { TestUtil } = await import('../runner/util');
+      const { Runner } = await import('../execute/runner');
+      const { RunnerUtil } = await import('../execute/util');
 
-      TestUtil.registerCleanup('runner');
+      RunnerUtil.registerCleanup('runner');
 
       // Init the app
       await PhaseManager.initAfter('@trv:registry/init');

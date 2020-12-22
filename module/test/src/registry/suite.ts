@@ -3,9 +3,9 @@ import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';
 
 /**
- * Test registry
+ * Test Suite registry
  */
-class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
+class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
 
   /**
    * Find all valid tests (ignoring abstract)
@@ -122,4 +122,4 @@ class $TestRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   }
 }
 
-export const TestRegistry = new $TestRegistry();
+export const SuiteRegistry = new $SuiteRegistry();

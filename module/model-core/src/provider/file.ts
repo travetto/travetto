@@ -6,13 +6,12 @@ import { FsUtil, StreamUtil } from '@travetto/boot';
 import { Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { TypeMismatchError } from '@travetto/schema';
 
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
 import { ModelType } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
-import { ModelRegistry } from '../registry/registry';
+import { ModelRegistry } from '../registry/model';
 import { ModelStorageSupport } from '../service/storage';
 import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';

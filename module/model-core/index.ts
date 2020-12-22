@@ -1,5 +1,5 @@
 export * from './src/registry/decorator';
-export * from './src/registry/registry';
+export * from './src/registry/model';
 export * from './src/registry/types';
 export * from './src/types/base';
 export * from './src/types/model';

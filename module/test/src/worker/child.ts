@@ -29,8 +29,8 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    * Start the worker
    */
   async activate() {
-    const { TestUtil } = await import('../runner/util');
-    TestUtil.registerCleanup('worker');
+    const { RunnerUtil } = await import('../execute/util');
+    RunnerUtil.registerCleanup('worker');
 
     // Listen for inbound requests
     this.listen(this.onCommand.bind(this));
@@ -111,7 +111,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
     await PhaseManager.initAfter('@trv:registry/init');
 
-    const { Runner } = await import(`../runner/runner`);
+    const { Runner } = await import(`../execute/runner`);
 
     console.debug('Running', { file: event.file });
 

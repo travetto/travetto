@@ -5,7 +5,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Query, Header, Path, Context } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
-import { ControllerRegistry } from '../src/registry/registry';
+import { ControllerRegistry } from '../src/registry/controller';
 import { MethodOrAll, Request, Response } from '../src/types';
 import { ParamUtil } from '../src/util/param';
 

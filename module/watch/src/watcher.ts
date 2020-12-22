@@ -28,7 +28,6 @@ export interface Watcher {
 /**
  * Standard watcher built on node fs libs
  */
-// eslint-disable-next-line no-redeclare
 export class Watcher extends EventEmitter {
 
   private watched = new Map<string, ScanEntry>();

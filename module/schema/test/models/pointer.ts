@@ -1,9 +1,9 @@
 /**
- * @concrete SpecialType
+ * @concrete SpecialTypeTarget
  */
 export type SpecialType = string | number | true;
-// eslint-disable-next-line no-shadow, no-redeclare
-export const SpecialType = class SpecialType {
+
+export class SpecialTypeTarget {
   static validateSchema(input: any) {
     console.log('Validating schema', { input });
     if (input !== undefined) {
@@ -29,4 +29,4 @@ export const SpecialType = class SpecialType {
   static bindSchema(input: any) {
     return input;
   }
-};
+}
