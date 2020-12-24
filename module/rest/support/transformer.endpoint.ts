@@ -6,9 +6,9 @@ import {
 import { RestTransformUtil } from './lib';
 
 
-const PARAM_DEC_FILE = require.resolve('../src/decorator/param');
-const COMMON_DEC_FILE = require.resolve('../src/decorator/common');
-const ENDPOINT_DEC_FILE = require.resolve('../src/decorator/endpoint');
+const PARAM_DEC_FILE = '@travetto/rest/src/decorator/param';
+const COMMON_DEC_FILE = '@travetto/rest/src/decorator/common';
+const ENDPOINT_DEC_FILE = '@travetto/rest/src/decorator/endpoint';
 
 /**
  * Handle @Controller, @Endpoint

@@ -50,7 +50,7 @@ export class TranspileUtil {
     const [, sign, env, key] = token.match(/(-|\+)?([$])?(.*)/)!;
     const minus = sign === '-';
     if (env) {
-      return { minus, key, valid: minus ? EnvUtil.isFalse(key) : EnvUtil.isTrue(key) };
+      return { minus, key, valid: minus ? EnvUtil.isFalse(key) : (EnvUtil.isSet(key) && !EnvUtil.isFalse(key)) };
     } else {
       try {
         require.resolve(key);
@@ -98,12 +98,16 @@ export class TranspileUtil {
       const baseTsconfig = FsUtil.resolveUnix(__dirname, '..', 'tsconfig.json');
       // Fallback to base tsconfig if not found in local folder
       const config = FsUtil.existsSync(projTsconfig) ? projTsconfig : baseTsconfig;
+      const srcRoot = EnvUtil.get('TRV_DEV_ROOT', FsUtil.cwd);
       const json = ts.readJsonConfigFile(config, ts.sys.readFile);
       this[OPTS] = {
-        ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options,
-        rootDir: FsUtil.cwd,
-        outDir: FsUtil.cwd,
-        sourceRoot: FsUtil.cwd
+        ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, srcRoot).options,
+        rootDir: srcRoot,
+        outDir: srcRoot,
+        sourceRoot: srcRoot,
+        paths: {
+          '@travetto/*': process.env.TRV_DEV_ROOT ? [`${srcRoot}/*`] : []
+        }
       };
     }
     return this[OPTS];
@@ -111,17 +115,17 @@ export class TranspileUtil {
 
   /**
    * Check transpilation errors
-   * @param fileName The name of the file
+   * @param filename The name of the file
    * @param diagnostics The diagnostic errors
    */
-  static checkTranspileErrors(fileName: string, diagnostics: readonly any[]) {
+  static checkTranspileErrors(filename: string, diagnostics: readonly any[]) {
     if (diagnostics && diagnostics.length) {
       const errors = diagnostics.slice(0, 5).map(diag => {
         const ts: typeof tsi = require('typescript');
         const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
           const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
-          return ` @ ${diag.file.fileName.replace(`${FsUtil.cwd}/`, '')}(${line + 1}, ${character + 1}): ${message}`;
+          return ` @ ${diag.file.fileName.replace(FsUtil.cwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
         } else {
           return ` ${message}`;
         }
@@ -130,7 +134,7 @@ export class TranspileUtil {
       if (diagnostics.length > 5) {
         errors.push(`${diagnostics.length - 5} more ...`);
       }
-      throw new Error(`Transpiling ${fileName.replace(`${FsUtil.cwd}/`, '')} failed: \n${errors.join('\n')}`);
+      throw new Error(`Transpiling ${filename.replace(FsUtil.cwd, '.')} failed: \n${errors.join('\n')}`);
     }
   }
 
@@ -144,17 +148,17 @@ export class TranspileUtil {
 
   /**
    * Pre-processes a typescript file before transpilation
-   * @param fileName The file to preprocess
+   * @param filename The file to preprocess
    * @param contents The file contents to process
    */
-  static preProcess(fileName: string, contents?: string) {
-    let fileContents = contents ?? fs.readFileSync(fileName, 'utf-8');
+  static preProcess(filename: string, contents?: string) {
+    let fileContents = contents ?? fs.readFileSync(filename, 'utf-8');
 
     // Resolve macro
-    fileContents = this.resolveMacros(fileName, fileContents);
+    fileContents = this.resolveMacros(filename, fileContents);
 
     for (const preProcessor of this.PRE_PROCESSORS) {
-      fileContents = preProcessor(fileName, fileContents);
+      fileContents = preProcessor(filename, fileContents);
     }
 
     return fileContents;
@@ -165,17 +169,17 @@ export class TranspileUtil {
    * @param phase The load/compile phase to care about
    * @param tsf The typescript filename
    * @param err The error produced
-   * @param fileName The relative filename
+   * @param filename The relative filename
    */
-  static handlePhaseError(phase: 'load' | 'compile' | 'transpile', tsf: string, err: Error, fileName = tsf.replace(`${FsUtil.cwd}/`, '')) {
+  static handlePhaseError(phase: 'load' | 'compile' | 'transpile', tsf: string, err: Error, filename = tsf.replace(FsUtil.cwd, '.')) {
     if (phase === 'compile' &&
       (err.message.startsWith('Cannot find module') || err.message.startsWith('Unable to load'))
     ) {
-      err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${fileName}]` : `from ${fileName}`}`);
+      err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${filename}]` : `from ${filename}`}`);
     }
 
-    if (EnvUtil.isWatch() && !fileName.includes('/node_modules/') && !fileName.startsWith('test/')) {
-      console.trace(`Unable to ${phase} ${fileName}: stubbing out with error proxy.`, err.message);
+    if (EnvUtil.isWatch() && !filename.includes('/node_modules/') && !filename.startsWith('test/')) {
+      console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
       return this.getErrorModule(err.message);
     }
 

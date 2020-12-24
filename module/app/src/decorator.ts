@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { Class } from '@travetto/registry';
 import { FsUtil } from '@travetto/boot';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { ApplicationConfig, ApplicationParameter, AppClass } from './types';
 import { ApplicationRegistry } from './registry';
@@ -40,12 +41,10 @@ export function Application(
       out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] ?? {}), name: x.name! }) as ApplicationParameter);
     }
 
-    const module = target.ᚕfile.replace(`${FsUtil.cwd}/`, '');
+    const module = SystemUtil.convertFileToModule(target.ᚕfile);
 
-    // If root is in node_modules or is 'src', default to local
-    // * This supports apps being run from modules vs locally
-    out.root = /^(node_modules|src|support)\//.test(module) ? '.' :
-      module.split('/src')[0];
+    // If running an alt app, then follow it's root, otherwise, cwd
+    out.root = /^[.]\/alt/.test(module) ? module.split('/src')[0] : '.';
 
     ApplicationRegistry.register(out.name, out as ApplicationConfig);
     return target;

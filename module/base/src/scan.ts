@@ -1,4 +1,4 @@
-import { ScanEntry, FsUtil, EnvUtil } from '@travetto/boot';
+import { ScanEntry, FsUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { AppManifest } from './manifest';
 
@@ -21,8 +21,6 @@ interface Tester {
 class $ScanApp {
 
   private _index = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
-
-  private moduleMatcherSimple: RegExp;
 
   /**
    * List of primary app folders to search
@@ -80,12 +78,9 @@ class $ScanApp {
     if (this._index.size === 0) {
       this._index.set('.', { base: FsUtil.cwd, files: new Map() });
 
-      const moduleMatcher = new RegExp(
-        `^.*node_modules\/((?:@travetto\/[^/]+)|${EnvUtil.getExtModules('!').join('|') || '#'})(\/?.*?)$`
-      );
+      for (const el of FrameworkUtil.scan(x => x.endsWith('.ts') && !x.endsWith('.d.ts'))) {
+        const res = this.computeIndex(el, /^.*node_modules\/(@travetto\/[^/]+)(\/.*?)?$/);
 
-      for (const el of FrameworkUtil.scan(x => !x.endsWith('.d.ts') && x.endsWith('.ts'))) {
-        const res = this.computeIndex(el, moduleMatcher);
         if (!res) {
           continue;
         }
@@ -121,12 +116,9 @@ class $ScanApp {
    * @param roots App paths
    */
   getPaths(roots: string[]) {
-    if (!this.moduleMatcherSimple) {
-      this.moduleMatcherSimple = new RegExp(`(@travetto|${EnvUtil.getExtModules('!').join('|')})`);
-    }
     return [...this.index.keys()]
       // If a module
-      .filter(key => (this.moduleMatcherSimple.test(key) && !this.modAppExclude.has(key)) || roots.includes(key));
+      .filter(key => (/@travetto/.test(key) && !this.modAppExclude.has(key)) || roots.includes(key));
   }
 
   /**

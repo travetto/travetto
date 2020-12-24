@@ -2,9 +2,9 @@ import * as ts from 'typescript';
 import { AnyType, DocUtil, TransformerState } from '@travetto/transformer';
 import { Util } from '@travetto/base';
 
-const SCHEMA_MOD = require.resolve('../src/decorator/schema');
-const FIELD_MOD = require.resolve('../src/decorator/field');
-const COMMON_MOD = require.resolve('../src/decorator/common');
+const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
+const FIELD_MOD = '@travetto/schema/src/decorator/field';
+const COMMON_MOD = '@travetto/schema/src/decorator/common';
 
 export class SchemaTransformUtil {
 
@@ -14,10 +14,7 @@ export class SchemaTransformUtil {
   static toConcreteType(state: TransformerState, type: AnyType, node: ts.Node, root: ts.Node = node): ts.Expression {
     switch (type.key) {
       case 'pointer': return this.toConcreteType(state, type.target, node, root);
-      case 'external': {
-        const res = state.getOrImport(type);
-        return res;
-      }
+      case 'external': return state.getOrImport(type);
       case 'tuple': return state.fromLiteral(type.subTypes.map(x => this.toConcreteType(state, x, node, root)!));
       case 'literal': {
         if ((type.ctor === Array || type.ctor === Set) && type.typeArguments?.length) {

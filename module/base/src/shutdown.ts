@@ -139,7 +139,7 @@ class $ShutdownManager {
     let name: string;
     if (typeof nameOrCloseable !== 'string') {
       name = nameOrCloseable.name ?? nameOrCloseable.constructor.name;
-      handler = nameOrCloseable.close;
+      handler = nameOrCloseable.close.bind(nameOrCloseable);
     } else {
       name = nameOrCloseable;
       handler = handler!;

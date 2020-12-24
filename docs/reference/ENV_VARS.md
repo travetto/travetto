@@ -5,7 +5,6 @@ The common environment variables throughout the code base:
 * `TRV_PROFILES`=['application'] - Additional profiles to run app under
 * `TRV_ROOTS` = ['.']            - The root of the application search space
 * `TRV_RESOURCE_ROOTS` = ['.']   - The root of resource searching
-* `TRV_MOD_ROOTS` = []           - Additional module paths for auto loading
 * `TRV_WATCH` = 0|1              - Wether or not to run the program in watch mode
 * `TRV_READONLY` = 0|1            - Should compilation be supported, forced to false in PROD.  Defaults to 1
 
@@ -24,9 +23,9 @@ The common environment variables throughout the code base:
 * `TRV_DOCKER` = 0|any           - Docker support, if non-zero, acts as the docker namespace.  If `0`, disables running if docker should even be considered when running a command service, defaults to `undefined`
 
 ## Framework
-* `TRV_DEV` = 0|1                - If we are in development mode, 
+* `TRV_DEV_ROOT` = `module/`     - The root folder for all modules, when in dev mode
 * `TRV_CACHE` = cwd              - The output directory for compilation, defaults to `.trv_cache` of the cwd
 * `TRV_SHUTDOWN_WAIT` = 2s       - The max time to wait for shutdown to finish after initial SIGINT, default `2s`
-* `TRV_BOOT` = ''                - The location of the boot module location, primarily used for dev on the boot module
+* `TRV_MODULES` = []             - The list of additional npm modules to treat as framework modules
 
 Anything not prefixed with `TRV_`, is a standard env var that we are leveraging

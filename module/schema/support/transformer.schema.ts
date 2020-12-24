@@ -11,8 +11,8 @@ interface AutoState {
   [inSchema]?: boolean;
 }
 
-const SCHEMA_MOD = require.resolve('../src/decorator/schema');
-const COMMON_MOD = require.resolve('../src/decorator/common');
+const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
+const COMMON_MOD = '@travetto/schema/src/decorator/common';
 
 /**
  * Processes `@Schema` to register class as a valid Schema

@@ -1,8 +1,9 @@
 import * as ts from 'typescript';
 
+import { SystemUtil } from '@travetto/base/src/internal/system';
+
 import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, TransformerId } from './types/visitor';
-
 
 import { TypeResolver } from './resolver/service';
 import { ImportManager } from './importer';
@@ -19,10 +20,12 @@ export class TransformerState implements State {
   private imports: ImportManager;
   private decorators = new Map<string, ts.PropertyAccessExpression>();
   added = new Map<number, ts.Statement[]>();
+  module: string;
 
   constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker) {
     this.imports = new ImportManager(source, factory);
     this.resolver = new TypeResolver(checker);
+    this.module = SystemUtil.convertFileToModule(this.source.fileName);
   }
 
   /**
@@ -118,6 +121,7 @@ export class TransformerState implements State {
       dec,
       ident,
       file: decl?.getSourceFile().fileName,
+      module: SystemUtil.convertFileToModule(decl?.getSourceFile().fileName), // All decorators will be absolute
       targets: DocUtil.readAugments(this.resolver.getType(ident)),
       name: ident ?
         ident.escapedText! as string :
@@ -216,21 +220,24 @@ export class TransformerState implements State {
     return CoreUtil.createStaticField(this.factory, name, val);
   }
 
+  /**
+   * Ceate identifier from node or text
+   * @param name
+   */
   createIdentifier(name: string | { getText(): string }) {
     return this.factory.createIdentifier(typeof name === 'string' ? name : name.getText());
   }
-
 
   /**
    * Find decorator, relative to registered key
    * @param state
    * @param node
    * @param name
-   * @param file
+   * @param module
    */
-  findDecorator(cls: Transformer, node: ts.Node, name: string, file?: string) {
+  findDecorator(cls: Transformer, node: ts.Node, name: string, module?: string) {
     const target = `${cls[TransformerId]}/${name}`;
     return this.getDecoratorList(node)
-      .find(x => x.targets?.includes(target) && (file ? x.name === name && x.file === file : true))?.dec;
+      .find(x => x.targets?.includes(target) && (module ? x.name === name && x.module === module : true))?.dec;
   }
 }

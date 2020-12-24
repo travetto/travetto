@@ -20,16 +20,16 @@ export class RunUtil {
    * Execute running of an application, by name.  Setting important environment variables before
    * loading framework and compiling
    */
-  static async getRunner(name: string, ...sub: string[]) {
+  static async run(name: string, ...sub: string[]) {
     const app = await CliAppListUtil.findByName(name);
 
     if (!app) {
-      throw new Error(`'Unknown application ${name}`);
+      throw new Error(`Unknown application ${name}`);
     }
 
     CliUtil.initAppEnv({
       // If standard app, don't add root/profile
-      ... (/^([.]|.*node_modules.*)/.test(app.root) ? {} : { roots: [app.root], profiles: [app.name] }),
+      ... (/^[.]\/alt/.test(app.root) ? { roots: [app.root], profiles: [app.name] } : {}),
       watch: true
     });
 
@@ -61,13 +61,6 @@ export class RunUtil {
     ConsoleManager.clear();
     events.forEach(([a, b, c]) => ConsoleManager.invoke(a, b, ...c));
 
-    return () => ApplicationRegistry.run(name, sub);
-  }
-
-  /**
-   * Run support
-   */
-  static async run(name: string, ...args: any[]) {
-    return (await this.getRunner(name, ...args))();
+    return await ApplicationRegistry.run(name, sub);
   }
 }

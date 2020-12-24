@@ -1,7 +1,8 @@
 import './error';
 
-type Primitive = number | boolean | string | Date | undefined | null | string[] | number[] | Error;
-type MessageContext = Record<string, Primitive | Record<string, Primitive>>;
+type Primitive = number | boolean | string | Date | Error;
+type PrimitiveNested = Primitive | Primitive[] | Primitive[][] | undefined | null;
+type MessageContext = Record<string, PrimitiveNested | Record<string, PrimitiveNested>>;
 
 declare global {
   type Fn<I extends any[] = any[], V = any> = {

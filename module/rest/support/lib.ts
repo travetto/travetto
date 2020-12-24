@@ -2,7 +2,8 @@ import * as ts from 'typescript';
 import { AnyType, DeclarationUtil, DeclDocumentation, ParamDocumentation, TransformerState } from '@travetto/transformer';
 import { ParamConfig } from '../src/types';
 import { LiteralType, ShapeType } from '@travetto/transformer/src/resolver/types';
-const { SchemaTransformUtil } = require('@travetto/schema/support/lib') ??// @file-if @travetto/schema
+const { SchemaTransformUtil } =
+  require('@travetto/schema/support/lib') ?? // @line-if @travetto/schema
   {};
 
 /**
@@ -152,7 +153,8 @@ export class RestTransformUtil {
     if (SchemaTransformUtil) {
       return SchemaTransformUtil.toConcreteType(state, type, node, root);
     } else {
-      throw new Error('Interface/shape types are not supported by default, please install @travetto/schema to allow for their usage');
+      console.warn('Interface/shape types are not supported by default, please install @travetto/schema to allow for their usage');
+      return state.factory.createIdentifier('Object');
     }
   }
 }

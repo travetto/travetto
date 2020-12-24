@@ -1,8 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 
-import { FileCache, TranspileUtil, FsUtil } from '@travetto/boot';
-import { FrameworkUtil } from '@travetto/boot/src/framework';
+import { FileCache, TranspileUtil, EnvUtil, FsUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';
@@ -39,13 +38,13 @@ export class Transpiler {
   /**
    * Read file from disk, using the transpile pre-processor on .ts files
    */
-  private readFile(fileName: string) {
-    let content = ts.sys.readFile(fileName);
+  private readFile(filename: string) {
+    let content = ts.sys.readFile(filename);
     if (content === undefined) {
-      throw new Error(`Unable to read file ${fileName}`);
+      throw new Error(`Unable to read file ${filename}`);
     }
-    if (!fileName.endsWith('.d.ts') && fileName.endsWith('.ts')) {
-      content = TranspileUtil.preProcess(fileName, content);
+    if (filename.endsWith('.ts') && !filename.endsWith('.d.ts')) {
+      content = TranspileUtil.preProcess(filename, content);
     }
     return content;
   }
@@ -53,18 +52,18 @@ export class Transpiler {
   /**
    * Write file to disk, and set value in cache as well
    */
-  private writeFile(fileName: string, content: string) {
-    fileName = FsUtil.toUnixTs(fileName);
-    this.contents.set(fileName, content);
-    this.hashes.set(fileName, SystemUtil.naiveHash(content));
-    this.cache.writeEntry(fileName, content);
+  private writeFile(filename: string, content: string) {
+    filename = FsUtil.toUnixTs(filename);
+    this.contents.set(filename, content);
+    this.hashes.set(filename, SystemUtil.naiveHash(content));
+    this.cache.writeEntry(filename, content);
   }
 
   /**
    * See if a file exists
    */
-  private fileExists(fileName: string) {
-    return this.contents.has(fileName) || ts.sys.fileExists(fileName);
+  private fileExists(filename: string) {
+    return this.contents.has(filename) || ts.sys.fileExists(filename);
   }
 
   /**
@@ -73,20 +72,19 @@ export class Transpiler {
   private getHost(): ts.CompilerHost {
     const host: ts.CompilerHost = {
       readFile: f => this.readFile(f),
-      realpath: FrameworkUtil.resolvePath,
-      writeFile: this.writeFile.bind(this),
+      writeFile: (f, c) => this.writeFile(f, c),
       fileExists: f => this.fileExists(f),
       getDefaultLibFileName: (opts) => ts.getDefaultLibFileName(opts),
       getCurrentDirectory: () => FsUtil.cwd,
       getCanonicalFileName: x => x,
       getNewLine: () => ts.sys.newLine,
       useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
-      getSourceFile: (fileName: string, languageVersion: ts.ScriptTarget, _, shouldCreateNewSourceFile?: boolean) => {
-        if (!this.sources.has(fileName) || shouldCreateNewSourceFile) {
-          const content = this.readFile(fileName)!;
-          this.sources.set(fileName, ts.createSourceFile(fileName, content ?? '', languageVersion));
+      getSourceFile: (filename: string, languageVersion: ts.ScriptTarget, _, shouldCreateNewSourceFile?: boolean) => {
+        if (!this.sources.has(filename) || shouldCreateNewSourceFile) {
+          const content = this.readFile(filename)!;
+          this.sources.set(filename, ts.createSourceFile(filename, content ?? '', languageVersion));
         }
-        return this.sources.get(fileName);
+        return this.sources.get(filename);
       },
       getDefaultLibLocation: () => path.dirname(ts.getDefaultLibFilePath(TranspileUtil.compilerOptions)),
     };
@@ -119,27 +117,27 @@ export class Transpiler {
   /**
    * Perform actual transpilation
    */
-  private _transpile(fileName: string, force = false) {
-    if (force || !this.cache.hasEntry(fileName)) {
-      console.debug('Emitting', { fileName: fileName.replace(`${FsUtil.cwd}/`, '') });
+  private _transpile(filename: string, force = false) {
+    if (force || !this.cache.hasEntry(filename)) {
+      console.debug('Emitting', { filename: filename.replace(FsUtil.cwd, '.') });
 
-      const prog = this.getProgram(fileName);
+      const prog = this.getProgram(filename);
       const result = prog.emit(
-        prog.getSourceFile(fileName),
+        prog.getSourceFile(filename),
         undefined,
         undefined,
         false,
         this.transformerManager.getTransformers()
       );
 
-      TranspileUtil.checkTranspileErrors(fileName, result.diagnostics);
+      TranspileUtil.checkTranspileErrors(filename, result.diagnostics);
       // Save writing for typescript program (`writeFile`)
     } else {
-      const cached = this.cache.readEntry(fileName);
-      this.contents.set(fileName, cached);
+      const cached = this.cache.readEntry(filename);
+      this.contents.set(filename, cached);
     }
 
-    return this.contents.get(fileName)!;
+    return this.contents.get(filename)!;
   }
 
   /**
@@ -153,11 +151,11 @@ export class Transpiler {
   /**
    * See if a file's hash code has changed
    */
-  hashChanged(fileName: string, content: string) {
+  hashChanged(filename: string, content: string) {
     // Let's see if they are really different
     const hash = SystemUtil.naiveHash(content);
-    if (hash === this.hashes.get(fileName)) {
-      console.debug('Contents Unchanged', { fileName });
+    if (hash === this.hashes.get(filename)) {
+      console.debug('Contents Unchanged', { filename });
       return false;
     }
     return true;
@@ -180,17 +178,17 @@ export class Transpiler {
   /**
    * Get the transpiled content
    */
-  transpile(fileName: string, force = false) {
+  transpile(filename: string, force = false) {
     // Do not typecheck the support code
-    if (SIMPLE_COMPILATION.test(fileName)) {
-      return TranspileUtil.transpile(fileName, force);
+    if (SIMPLE_COMPILATION.test(filename)) {
+      return TranspileUtil.transpile(filename, force);
     }
 
     try {
-      return this._transpile(fileName, force);
+      return this._transpile(filename, force);
     } catch (err) {
-      const errContent = TranspileUtil.handlePhaseError('transpile', fileName, err);
-      this.contents.set(fileName, errContent);
+      const errContent = TranspileUtil.handlePhaseError('transpile', filename, err);
+      this.contents.set(filename, errContent);
       return errContent;
     }
   }
@@ -198,17 +196,17 @@ export class Transpiler {
   /**
    * Unload a file from the transpiler
    */
-  unload(fileName: string, unlink = true) {
-    if (this.contents.has(fileName)) {
-      console.debug('Unloading', { fileName: fileName.replace(FsUtil.cwd, ''), unlink });
+  unload(filename: string, unlink = true) {
+    if (this.contents.has(filename)) {
+      console.debug('Unloading', { filename: filename.replace(FsUtil.cwd, ''), unlink });
 
-      this.cache.removeExpiredEntry(fileName, unlink);
+      this.cache.removeExpiredEntry(filename, unlink);
 
-      if (unlink && this.hashes.has(fileName)) {
-        this.hashes.delete(fileName);
+      if (unlink && this.hashes.has(filename)) {
+        this.hashes.delete(filename);
       }
-      this.sources.delete(fileName);
-      this.rootNames.delete(fileName);
+      this.sources.delete(filename);
+      this.rootNames.delete(filename);
     }
   }
 

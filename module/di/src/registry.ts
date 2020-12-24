@@ -195,7 +195,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.instances.get(classId)!.delete(qualifier);
     this.instancePromises.get(classId)!.delete(qualifier);
     this.classToTarget.get(cls.ᚕid)!.delete(qualifier);
-    console.debug('On uninstall', { id: cls.ᚕid, qualifier, classId });
+    console.debug('On uninstall', { id: cls.ᚕid, qualifier: qualifier.toString(), classId });
   }
 
   /**

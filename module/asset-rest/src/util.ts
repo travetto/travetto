@@ -20,10 +20,10 @@ export class AssetRestUtil {
   /**
    * Stream file to disk, and verify types in the process.  Produce an asset as the output
    */
-  static async toLocalAsset(data: NodeJS.ReadableStream | Buffer, fileName: string, allowedTypes: string[], excludedTypes: string[]) {
+  static async toLocalAsset(data: NodeJS.ReadableStream | Buffer, filename: string, allowedTypes: string[], excludedTypes: string[]) {
     const uniqueDir = FsUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
     await FsUtil.mkdirp(uniqueDir); // TODO: Unique dir for each file? Use random file, and override metadata
-    const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(fileName));
+    const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(filename));
 
     await StreamUtil.writeToFile(data, uniqueLocal);
 
@@ -43,8 +43,8 @@ export class AssetRestUtil {
    * Parse filename from the request headers
    */
   static getFileName(req: Request) {
-    const fileNameExtract = /filename[*]?=["]?([^";]*)["]?/;
-    const matches = (req.header('content-disposition') as string ?? '').match(fileNameExtract);
+    const filenameExtract = /filename[*]?=["]?([^";]*)["]?/;
+    const matches = (req.header('content-disposition') as string ?? '').match(filenameExtract);
     if (matches && matches.length) {
       return matches[1];
     } else {
@@ -75,10 +75,10 @@ export class AssetRestUtil {
           }
         });
 
-        uploader.on('file', async (fieldName, stream, fileName, encoding, mimeType) => {
-          console.debug('Uploading file', { fieldName, fileName, encoding, mimeType });
+        uploader.on('file', async (fieldName, stream, filename, encoding, mimeType) => {
+          console.debug('Uploading file', { fieldName, filename, encoding, mimeType });
           uploads.push(
-            this.toLocalAsset(stream, fileName, allowedTypes, excludedTypes)
+            this.toLocalAsset(stream, filename, allowedTypes, excludedTypes)
               .then(res => mapping[fieldName] = res)
           );
         });

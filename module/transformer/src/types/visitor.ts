@@ -6,6 +6,7 @@ import * as ts from 'typescript';
 export type DecoratorMeta = {
   dec: ts.Decorator;
   ident: ts.Identifier;
+  module?: string;
   file?: string;
   targets?: string[];
   name?: string;
@@ -13,6 +14,7 @@ export type DecoratorMeta = {
 
 export type State = {
   source: ts.SourceFile;
+  module: string;
   added: Map<number, ts.Statement[]>;
   getDecoratorList(node: ts.Node): DecoratorMeta[];
   finalize(src: ts.SourceFile): ts.SourceFile;

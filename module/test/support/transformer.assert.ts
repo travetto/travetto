@@ -139,7 +139,7 @@ export class AssertTransformer {
    */
   static initState(state: TransformerState & AssertState) {
     if (!state[ASSERT]) {
-      const assrt = state.importFile(require.resolve('../src/assert/check')).ident;
+      const assrt = state.importFile('@travetto/test/src/assert/check').ident;
       state[ASSERT] = {
         assert: assrt,
         assertCheck: CoreUtil.createAccess(state.factory, assrt, ASSERT_UTIL, 'check'),

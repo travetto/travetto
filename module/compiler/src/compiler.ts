@@ -76,9 +76,9 @@ class $Compiler {
   /**
    * Remove file from require.cache, and possible the file system
    */
-  unload(fileName: string, unlink = false) {
-    this.transpiler.unload(fileName, unlink); // Remove source
-    const native = FsUtil.toNative(fileName);
+  unload(filename: string, unlink = false) {
+    this.transpiler.unload(filename, unlink); // Remove source
+    const native = FsUtil.toNative(filename);
     if (native in require.cache) {
       delete require.cache[native]; // Remove require cached element
       return true;
@@ -88,9 +88,9 @@ class $Compiler {
   /**
    * Notify of an add/remove/change event
    */
-  notify(type: 'added' | 'removed' | 'changed', fileName: string) {
-    console.debug('File Event', { type, fileName: fileName.replace(FsUtil.cwd, '.') });
-    this.emitter.emit(type, fileName);
+  notify(type: 'added' | 'removed' | 'changed', filename: string) {
+    console.debug('File Event', { type, filename: filename.replace(FsUtil.cwd, '.') });
+    this.emitter.emit(type, filename);
   }
 
   /**
@@ -120,30 +120,30 @@ class $Compiler {
   /**
    * Unload if file is known
    */
-  added(fileName: string) {
-    if (fileName in require.cache) { // if already loaded
-      this.unload(fileName);
+  added(filename: string) {
+    if (filename in require.cache) { // if already loaded
+      this.unload(filename);
     }
-    require(fileName);
-    this.notify('added', fileName);
+    require(filename);
+    this.notify('added', filename);
   }
 
   /**
    * Handle when a file is removed during watch
    */
-  removed(fileName: string) {
-    this.unload(fileName, true);
-    this.notify('removed', fileName);
+  removed(filename: string) {
+    this.unload(filename, true);
+    this.notify('removed', filename);
   }
 
   /**
    * When a file changes during watch
    */
-  changed(fileName: string) {
-    if (this.transpiler.hashChanged(fileName, fs.readFileSync(fileName, 'utf8'))) {
-      this.unload(fileName);
-      require(fileName);
-      this.notify('changed', fileName);
+  changed(filename: string) {
+    if (this.transpiler.hashChanged(filename, fs.readFileSync(filename, 'utf8'))) {
+      this.unload(filename);
+      require(filename);
+      this.notify('changed', filename);
     }
   }
 }

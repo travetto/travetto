@@ -104,7 +104,7 @@ export class CliUtil {
    * @param clear Should the entire line be cleared?
    */
   static async rewriteLine(stream: NodeJS.WritableStream, text?: string, clear = false) {
-    await new Promise(r => readline.cursorTo(stream, 0, undefined, () => {
+    await new Promise<void>(r => readline.cursorTo(stream, 0, undefined, () => {
       if (clear) {
         readline.clearLine(stream, 0);
       }

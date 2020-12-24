@@ -24,7 +24,7 @@ export class CompilerCompilePlugin extends BasePlugin {
       process.env.TRV_CACHE = this._cmd.output;
     }
 
-    const { AppCache } = await import(`@travetto/boot`);
+    const { AppCache } = await import('@travetto/boot');
     const path = this._cmd.output ?? AppCache.cacheDir;
 
     if (this._cmd.clean) {

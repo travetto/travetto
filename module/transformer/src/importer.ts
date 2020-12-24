@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import { basename } from 'path';
 
 import { FsUtil } from '@travetto/boot';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { AnyType, ExternalType } from './resolver/types';
 import { ImportUtil } from './util/import';
@@ -37,7 +38,9 @@ export class ImportManager {
   /**
    * Import a file if needed, and record it's identifier
    */
-  importFile(file: string) {
+  importFile(file: string, base?: string) {
+    file = SystemUtil.convertFileToModule(file, base);
+
     if (!file.endsWith('.d.ts') && !this.newImports.has(file)) {
       const id = this.getId(file);
 
@@ -59,7 +62,7 @@ export class ImportManager {
   importFromResolved(...types: AnyType[]) {
     for (const type of types) {
       if (type.key === 'external' && type.source && type.source !== this.source.fileName) {
-        this.importFile(type.source);
+        this.importFile(type.source, this.source.fileName);
       }
       switch (type.key) {
         case 'external':
@@ -84,7 +87,7 @@ export class ImportManager {
         const imptStmt = this.factory.createImportDeclaration(
           undefined, undefined,
           this.factory.createImportClause(false, undefined, this.factory.createNamespaceImport(ident)),
-          this.factory.createStringLiteral(path.replace(/^.*node_modules\//, '').replace(FsUtil.cwd, '@app'))
+          this.factory.createStringLiteral(path)
         );
         return imptStmt;
       });
@@ -94,7 +97,7 @@ export class ImportManager {
         ...file.statements.filter((x: ts.Statement & { remove?: boolean }) => !x.remove) // Exclude culled imports
       ]);
     } catch (err) { // Missing import
-      const out = new Error(`${err.message} in ${file.fileName.replace(`${FsUtil.cwd}/`, '')}`);
+      const out = new Error(`${err.message} in ${file.fileName.replace(FsUtil.cwd, '.')}`);
       out.stack = err.stack;
       throw out;
     }
@@ -114,7 +117,7 @@ export class ImportManager {
     if (type.source === this.source.fileName) {
       return factory.createIdentifier(type.name!);
     } else {
-      const { ident } = this.imports.get(type.source) ?? this.importFile(type.source);
+      const { ident } = this.imports.get(type.source) ?? this.importFile(type.source, this.source.fileName);
       return factory.createPropertyAccessExpression(ident, type.name!);
     }
   }
