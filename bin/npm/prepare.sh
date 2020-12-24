@@ -13,7 +13,7 @@ if [ ! "$1" == "watch" ]; then
   pushd module/boot/src > /dev/null
   for f in *.js; do 
     cat $f |\
-      sed '/\/\*/,/*\//d' |\
+      sed '/\/\*[* ]/,/*\//d' |\
       perl -pe 's|[ ]//[^`]*$||g' |\
       perl -pe 's|^\s+||g' |\
       perl -pe 's|^$||g' \

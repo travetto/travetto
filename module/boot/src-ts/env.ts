@@ -3,6 +3,8 @@
  */
 export class EnvUtil {
 
+  private static DYNAMIC_MODULES: Map<string, string>;
+
   /**
    * Get, check for key as passed, as all upper and as all lowercase
    * @param k The environment key to search for
@@ -145,15 +147,16 @@ export class EnvUtil {
   }
 
   /**
-   * Get module roots
+   * Get dynamic modules
    */
-  static getExtModules(...extra: string[]) {
-    // TODO: Move out
-    // Need a way to determine list of eligible modules, do not want to scan at startup
-    let roots: string[] | undefined;
-    try {
-      roots = require(`${process.cwd()}/package.json`)['@travetto:modules'];
-    } catch { }
-    return this.getList('TRV_MOD_ROOTS', roots || ['!']);
+  static getDynamicModules() {
+    if (this.DYNAMIC_MODULES === undefined) {
+      this.DYNAMIC_MODULES = new Map(
+        this.getList('TRV_MODULES')
+          .map(x => x.split(/\s*=\s*/) as [string, string])
+          .map(([k, v]) => [k, v ?? require.resolve(k)])
+      );
+    }
+    return this.DYNAMIC_MODULES;
   }
 }

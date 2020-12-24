@@ -2,7 +2,6 @@ import * as ts from 'typescript';
 import { resolve as pathResolve } from 'path';
 
 import { FsUtil } from '@travetto/boot';
-import { FrameworkUtil } from '@travetto/boot/src/framework';
 
 import { Import } from '../types/shared';
 
@@ -33,8 +32,7 @@ export class ImportUtil {
 
     for (const stmt of src.statements) {
       if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
-        let path = this.optionalResolve(stmt.moduleSpecifier.text, base);
-        path = FrameworkUtil.resolvePath(path);
+        const path = this.optionalResolve(stmt.moduleSpecifier.text, base);
 
         if (stmt.importClause) {
           if (stmt.importClause.namedBindings) {

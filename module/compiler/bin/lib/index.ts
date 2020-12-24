@@ -42,6 +42,6 @@ export class CompileCliUtil {
     const { PhaseManager } = await import('@travetto/base');
 
     // Standard compile
-    PhaseManager.init('@trv:compiler/compile');
+    await PhaseManager.init('@trv:compiler/compile');
   }
 }

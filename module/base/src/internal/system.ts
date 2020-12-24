@@ -83,52 +83,73 @@ export class SystemUtil {
     return out;
   }
 
+
+  /**
+   * Convert a file name, to a proper module reference for importing, and comparing
+   * @param file
+   * @param base
+   */
+  static convertFileToModule(file: string, base?: string): string;
+  static convertFileToModule(file: undefined, base?: string): undefined;
+  static convertFileToModule(file: string | undefined, base?: string) {
+    file = file?.replace(FsUtil.cwd, '.')
+      .replace(/^.*node_modules/, '')
+      .replace(process.env.TRV_DEV_ROOT!, '@travetto') // @line-if $TRV_DEV_ROOT
+      .replace(/[.](t|j)s$/, '');
+
+    if (
+      file?.startsWith('.') &&
+      base && (
+        !base.startsWith('@travetto') &&
+        !base.includes('node_modules')
+      )
+    ) { // Relative path
+      const fileDir = path.dirname(FsUtil.resolveUnix(file));
+      const baseDir = path.dirname(FsUtil.resolveUnix(base));
+      file = `${path.relative(fileDir, baseDir) || '.'}/${path.basename(file)}`;
+    }
+
+    return file;
+  }
+
   /**
    * Compute internal module name from file name
    */
-  static computeModule(fileName: string) {
-    fileName = path.resolve(fileName);
+  static computeModule(filename: string) {
+    filename = FsUtil.resolveUnix(filename);
 
-    if (this.MOD_CACHE.has(fileName)) {
-      return this.MOD_CACHE.get(fileName)!;
+    if (this.MOD_CACHE.has(filename)) {
+      return this.MOD_CACHE.get(filename)!;
     }
 
-    let mod = fileName.replace(/\.(t|j)s$/, ''); // Drop ext
+    let mod = this.convertFileToModule(filename);
+
     let ns: string;
 
-    if (!mod.includes(FsUtil.cwd)) {
-      ns = '@sys';
-      mod = mod.replace(/\/+/g, '/');
-    } else {
-      [, mod] = mod.split(`${FsUtil.cwd}/`);
-      if (mod.includes('node_modules')) {
-        mod = mod.replace(/.*node_modules(.*node_modules)?\/+/, '');
-        if (mod.startsWith('@travetto')) { // If scoped
-          const [, ns2, ...rest] = mod.split(/\/+/);
-          ns = `@trv:${ns2}`;
-          if (rest[0] === 'src') {
-            rest.shift();
-          }
-          mod = rest.join('/');
-        } else {
-          ns = `@npm`;
-        }
-      } else {
-        const [ns1, ...rest] = mod.split(/\/+/);
-        ns = ns1;
-        mod = rest.join('/');
+    if (mod.startsWith('@travetto')) {
+      const [, ns2, ...rest] = mod.split(/\/+/);
+      ns = `@trv:${ns2}`;
+      if (rest[0] === 'src') {
+        rest.shift();
       }
+      mod = rest.join('/');
+    } else if (!mod.startsWith('.')) {
+      ns = `@npm`;
+    } else {
+      const [ns1, ...rest] = mod.split(/\/+/);
+      ns = ns1;
+      mod = rest.join('/');
     }
 
     const name = `${ns}/${mod}`;
-    this.MOD_CACHE.set(fileName, name);
+    this.MOD_CACHE.set(filename, name);
     return name;
   }
 
   /**
    * Compute internal class-module name from file name
    */
-  static computeModuleClass(fileName: string, clsName: string) {
-    return `${this.computeModule(fileName)}￮${clsName}`;
+  static computeModuleClass(filename: string, clsName: string) {
+    return `${this.computeModule(filename)}￮${clsName}`;
   }
 }

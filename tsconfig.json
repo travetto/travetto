@@ -1,10 +1,11 @@
 {
-  "exclude": [
-    "module/**",
-    "sample/**"
-  ],
   "extends": "./module/boot/tsconfig.json",
   "compilerOptions": {
-    "rootDir": "bin/",
+    "rootDir": ".",
+    "paths": {
+      "@travetto/*": [
+        "./module/*"
+      ]
+    }
   }
 }

@@ -10,11 +10,6 @@ import { RestServer } from '../src/server/base';
 export class DefaultRestApplication {
   constructor(private server: RestServer) { }
   async run() {
-    const handle = await this.server.run();
-    return {
-      name: this.constructor.ᚕid,
-      close: () => new Promise<void>(res => handle.close(() => res())),
-      wait: () => new Promise<void>(res => handle.on('close', res))
-    };
+    return this.server.run();
   }
 }

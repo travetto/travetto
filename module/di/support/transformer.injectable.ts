@@ -4,7 +4,7 @@ import {
   TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, TransformerId
 } from '@travetto/transformer';
 
-const INJECTABLE_MOD = require.resolve('../src/decorator');
+const INJECTABLE_MOD = '@travetto/di/src/decorator';
 
 /**
  * Injectable/Injection transformer

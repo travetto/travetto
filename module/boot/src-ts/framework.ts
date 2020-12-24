@@ -16,7 +16,9 @@ type Module = {
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 const Module = Mod as unknown as Module;
 type DepResolveConfig = { root?: string, types?: DepType[] | (readonly DepType[]), maxDepth?: number };
-type DepType = 'prod' | 'dev' | 'opt' | 'peer' | 'optPeer';
+
+export type ResolvedDep = { file: string, type: DepType, dep: string, version: string };
+export type DepType = 'prod' | 'dev' | 'opt' | 'peer' | 'optPeer';
 
 const DEP_MAPPING = {
   prod: 'dependencies',
@@ -26,78 +28,38 @@ const DEP_MAPPING = {
   optPeer: 'optionalPeerDependencies'
 };
 
-// Pre installation of resolution rules
-const pkg = (() => { try { return require(FsUtil.resolveUnix('package.json')); } catch { return {}; } })();
-
 /**
  * Framework specific utilities
  */
 export class FrameworkUtil {
-
-  private static readonly DEV_CACHE = {
-    boot: FsUtil.resolveUnix(__dirname, '..'),
-    [(pkg.name || '').split('/')[1]]: FsUtil.cwd // Initial
-  };
-
-  /**
-   * Only called in Framework dev mode
-   * @param pth The full path to translate
-   * @param mod The module to check against
-   */
-  static resolveDev(p: string, mod?: Module) {
-    let pth = p;
-    if (mod) {
-      try {
-        pth = Module._resolveFilename!(pth, mod);
-      } catch { }
-    }
-
-    pth = FsUtil.toUnix(pth);
-
-    if (/travetto[^/]*\/module\/[^/]+\/bin/.test(pth) && !pth.startsWith(FsUtil.cwd)) { // Convert bin from framework module
-      pth = `${FsUtil.cwd}/node_modules/@travetto/${pth.split(/\/module\//)[1]}`;
-    }
-
-    // If relative or framework
-    if (pth.includes('@travetto')) {
-      // Fetch current module's name
-      // Handle self references
-      pth = pth.replace(/^(.*\/?@travetto)\/([^/]+)(\/[^@]*)?$/g, (all, pre, name, rest) => {
-        if (!(name in this.DEV_CACHE)) {
-          const base = `${FsUtil.cwd}/node_modules/@travetto/${name}`;
-          this.DEV_CACHE[name] = FsUtil.existsSync(base) ? base : `${pre}/${name}`;
-        }
-        return `${this.DEV_CACHE[name]}${rest ? `/${rest}` : ''}`;
-      })
-        .replace(/\/\/+/g, '/'); // De-dupe
-    }
-
-    return pth;
-  }
-
-  /**
-   * Standard path resolver
-   */
-  // eslint-disable-next-line @typescript-eslint/member-ordering
-  static resolvePath = EnvUtil.isTrue('TRV_DEV') ?
-    (a: string, b?: any) => FrameworkUtil.resolveDev(a, b) :
-    (x: string) => x;
 
   /**
   * Scan the framework for folder/files only the framework should care about
   * @param testFile The test to determine if a file is desired
   */
   static scan(testFile?: (x: string) => boolean, base = FsUtil.cwd) {
-    const extModRegex = EnvUtil.getExtModules('!').map(x => x.replace(/\/.*$/, a => `(\\${a})?`)).join('|');
-    const matcher = new RegExp(`^node_modules\/(@travetto|${extModRegex})`);
     const out = ScanFs.scanDirSync({
       testFile,
       testDir: x => // Ensure its a valid folder or module folder
         /^node_modules[/]?$/.test(x) ||  // Top level node_modules
-        (matcher.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
-        !x.includes('node_modules'), // non module file
-      resolvePath: this.resolvePath
+        (/^node_modules\/@travetto/.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
+        !x.includes('node_modules') // non module file
     }, base);
+
+    // Load dynamic modules with mappings
+    for (const [dep, pth] of EnvUtil.getDynamicModules()) {
+      out.push(
+        ...ScanFs.scanDirSync({
+          testFile,
+          testDir: x => !x.includes('node_modules'),
+        }, pth)
+          .map(d => {
+            d.module = d.module.includes('node_modules') ?
+              d.module : d.file.replace(pth, `node_modules/${dep}`);
+            return d;
+          })
+      ); // Read from module
+    }
 
     return out;
   }
@@ -107,7 +69,7 @@ export class FrameworkUtil {
    * @param dep
    * @param root
    */
-  static async resolveDependencyPackageJson(dep: string, root: string) {
+  static resolveDependencyPackageJson(dep: string, root: string) {
     const paths = [root, ...(require.resolve.paths(root) || [])];
     let folder: string;
     try {
@@ -116,7 +78,7 @@ export class FrameworkUtil {
     } catch {
       folder = require.resolve(dep, { paths });
       folder = path.dirname(FsUtil.resolveUnix(root, folder));
-      while (!(await FsUtil.exists(`${folder}/package.json`))) {
+      while (!FsUtil.existsSync(`${folder}/package.json`)) {
         const next = path.dirname(folder);
         if (folder === next) {
           throw new Error(`Unable to resolve dependency: ${dep}`);
@@ -130,15 +92,14 @@ export class FrameworkUtil {
   /**
    * Get list of all production dependencies and their folders, for a given package
    */
-  static async resolveDependencies({
+  static resolveDependencies({
     root = FsUtil.cwd,
     types = ['prod'],
     maxDepth = Number.MAX_SAFE_INTEGER
   }: DepResolveConfig) {
-    // Copy over prod node_modules
     const pending = [[root, 0]] as [string, number][];
     const foundSet = new Set<string>();
-    const found: { file: string, type: DepType, dep: string, version: string }[] = [];
+    const found: ResolvedDep[] = [];
     while (pending.length) {
       const [top, depth] = pending.shift()!;
       if (depth > maxDepth) { // Ignore if greater than valid max depth
@@ -147,13 +108,17 @@ export class FrameworkUtil {
       const p = require(`${top}/package.json`) as Record<string, Record<string, string>> & { name: string };
       const deps = [] as (readonly [name: string, type: DepType, version: string])[];
       for (const type of types) {
-        if (type !== 'dev' || (process.env.TRV_DEV && p.name.startsWith('@travetto')) || maxDepth === 0) {
+        if (
+          type !== 'dev' ||
+          p.name.startsWith('@travetto') || // @line-if $TRV_DEV_ROOT
+          maxDepth === 0
+        ) {
           deps.push(...Object.entries(p[DEP_MAPPING[type]] ?? {}).map(([name, version]) => [name, type as DepType, version] as const));
         }
       }
       for (const [dep, type, version] of deps) {
         try {
-          const resolved = this.resolvePath(await this.resolveDependencyPackageJson(dep, top));
+          const resolved = this.resolveDependencyPackageJson(dep, top);
 
           if (!foundSet.has(resolved)) {
             foundSet.add(resolved);

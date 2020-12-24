@@ -4,7 +4,7 @@ import type { Class } from '@travetto/registry';
 type OrProm<T> = T | Promise<T>;
 
 /** A pattern that can be waited on */
-export type Waitable = { wait(): Promise<any> };
+export type Waitable = { wait(): Promise<any> } | { on(event: 'close', cb: Function): any };
 export type AppClass = {
   run(...args: any[]): OrProm<Waitable | Closeable | void | undefined>;
 };

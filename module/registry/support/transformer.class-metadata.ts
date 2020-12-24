@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { TransformerState, OnMethod, OnClass, AfterClass, DecoratorUtil, TransformerId, AfterFunction } from '@travetto/transformer';
 
-const REGISTER_MOD = require.resolve('../src/decorator');
+const REGISTER_MOD = '@travetto/registry/src/decorator';
 
 const methods = Symbol.for('@trv:registry/methods');
 const cls = Symbol.for('@trv:registry/class');
@@ -53,7 +53,7 @@ export class RegisterTransformer {
    */
   @AfterClass()
   static registerClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
-    if (state.source.fileName === REGISTER_MOD) {  // Cannot process self
+    if (state.module === REGISTER_MOD) {  // Cannot process self
       return node;
     }
 

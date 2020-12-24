@@ -6,8 +6,8 @@
 function init() {
   const cwd = process.cwd();
   try { require(`${cwd}/.env`); } catch { }
-  const root = (process.env.TRV_BOOT || '').replace(/^[.]/, cwd) || __dirname;
-  require(`${root}/src/compile`).CompileUtil.init();
+  process.env.TRV_DEV_ROOT && require(`${process.env.TRV_DEV_ROOT}/dev-register`);
+  require('@travetto/boot/src/compile').CompileUtil.init();
 }
 
 if (!global.trvInit) { // Register once, and mark

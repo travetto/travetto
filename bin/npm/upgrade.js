@@ -1,23 +1,24 @@
-import * as fs from 'fs';
+const fs = require('fs');
 
-import { ExecUtil } from '../../module/boot/src/exec';
-import { FsUtil } from '../../module/boot/src/fs';
+const { ExecUtil } = require('../../module/boot/src/exec');
+const { FsUtil } = require('../../module/boot/src/fs');
 
 /**
  * Take a monorepo module, and project out symlinks for all necessary dependencies
- * @param root
+ * @param root {string}
  */
-async function updateModule(root: string) {
+async function updateModule(root) {
   // Fetch deps
   const pkg = require(`${root}/package.json`);
 
   process.stdout.write(`- ${pkg.name}`.padEnd(35));
 
   const resolved = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'optionalPeerDependencies']
-    .flatMap(type =>
+    .map(/** @param type {string} */ type =>
       Object.entries(pkg[type] ?? {})
-        .map(([dep, version]) => ({ dep, type, version })) as { dep: string, type: string, version: string }[]
+        .map(/** @param inp {[string, string]} */([dep, version]) => ({ dep, type, version }))
     )
+    .reduce((all, items) => all.push(...items))
     .filter(x => !x.dep.startsWith('@travetto'))
     .filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
     .map(({ dep, type, version }) =>

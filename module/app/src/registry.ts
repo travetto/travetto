@@ -76,6 +76,8 @@ class $ApplicationRegistry {
       }
       if ('wait' in target) {
         await target.wait(); // Wait for close signal
+      } else if ('on' in target) {
+        await new Promise<void>(res => target.on('close', res));
       }
     }
   }
