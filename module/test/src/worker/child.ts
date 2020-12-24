@@ -99,16 +99,6 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     this.runs += 1;
     console.debug('Run');
 
-    if (event.mode === 'extension') {
-      const header = await fs.promises.readFile(event.file!, 'utf8');
-      const exts = header
-        .split(/\n/)
-        .filter(l => l.includes('@file-if'))
-        .flatMap(x => x.split('@file-if')[1].trim());
-      throw new Error(exts.join(', '));
-      // Prepare node_modules
-    }
-
     if (this.runs > 1) {
       await this.resetForRun();
     }
@@ -128,9 +118,5 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       args: [event.file!, event.class!, event.method!],
       concurrency: 1
     }).run();
-
-    if (event.mode === 'extension') {
-      // Reset node_modules
-    }
   }
 }

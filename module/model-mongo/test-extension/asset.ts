@@ -3,7 +3,7 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { AssetModelSymbol } from '@travetto/asset';
-import { AssetServiceSuite } from '@travetto/asset//service';
+import { AssetServiceSuite } from '@travetto/asset/test-support/service';
 
 import { MongoModelConfig, MongoModelService } from '..';
 

@@ -1,10 +1,10 @@
 import { Suite } from '@travetto/test';
-import { ModelCrudSuite } from '@travetto/model-core/test-lib/crud';
-import { ModelBulkSuite } from '@travetto/model-core/test-lib/bulk';
+import { ModelCrudSuite } from '@travetto/model-core/test-support/crud';
+import { ModelBulkSuite } from '@travetto/model-core/test-support/bulk';
 
 import { InjectableFactory } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
-import { WithSuiteContext } from '@travetto/context/test-lib/suite-context';
+import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 
 import { SQLModelConfig, SQLModelService } from '../..';
 import { MySQLDialect } from '../../src/dialect/mysql/dialect';

@@ -21,7 +21,6 @@ export function isBasicSupported(o: any): o is ModelBulkSupport {
   return o && 'create' in o;
 }
 
-
 /**
  * Type guard for determining if service supports crud operations
  * @param o

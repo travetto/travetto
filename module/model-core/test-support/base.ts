@@ -2,8 +2,8 @@ import { DependencyRegistry } from '@travetto/di';
 import { Class, RootRegistry } from '@travetto/registry';
 import { AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
 
-import { ModelRegistry } from '../../src/registry/model';
-import { isStorageSupported } from '../../src/internal/service/common';
+import { ModelRegistry } from '../src/registry/model';
+import { isStorageSupported } from '../src/internal/service/common';
 
 export abstract class BaseModelSuite<T> {
 

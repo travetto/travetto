@@ -3,8 +3,8 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { AuthModelSymbol } from '@travetto/auth-model';
-import { AuthModelServiceSuite } from '@travetto/auth-model//service';
-import { WithSuiteContext } from '@travetto/context//suite-context';
+import { AuthModelServiceSuite } from '@travetto/auth-model/test-support/service';
+import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 import { AsyncContext } from '@travetto/context';
 
 import { SQLModelConfig, SQLModelService } from '..';

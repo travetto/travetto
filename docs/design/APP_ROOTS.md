@@ -20,7 +20,7 @@ Module Structure
 * bin/lib - CLI Support Libraries
 * support/ - Phase support as well as AST transformer support
 * index.ts - Root index for loading
-* test-lib/ - Shared libraries for testing
+* test-support/ - Shared libraries for testing
 
 App Running
 -----------------------------

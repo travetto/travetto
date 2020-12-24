@@ -3,9 +3,9 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { AuthModelSymbol } from '@travetto/auth-model';
-import { AuthModelServiceSuite } from '@travetto/auth-model//service';
+import { AuthModelServiceSuite } from '@travetto/auth-model/test-support/service';
 import { AsyncContext } from '@travetto/context';
-import { WithSuiteContext } from '@travetto/context//suite-context';
+import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 
 import { SQLModelConfig, SQLModelService } from '..';
 import { PostgreSQLDialect } from '../src/dialect/postgresql/dialect';

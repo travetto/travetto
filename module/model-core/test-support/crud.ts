@@ -3,8 +3,8 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { Schema, Text, Precision, TypeMismatchError } from '@travetto/schema';
 
-import { BaseModelSuite } from './test.base';
-import { ModelCrudSupport, Model, BaseModel, NotFoundError } from '../..';
+import { BaseModelSuite } from './base';
+import { ModelCrudSupport, Model, BaseModel, NotFoundError } from '..';
 
 @Schema()
 class Address {

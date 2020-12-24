@@ -14,9 +14,9 @@ const OPTS = Symbol.for('@trv:compiler/options');
 export class TranspileUtil {
   private static [OPTS]: any;
 
-  private static preProcessors: Preprocessor[] = [];
+  private static PRE_PROCESSORS: Preprocessor[] = [];
 
-  static readonly ext = '.ts';
+  static readonly EXT = '.ts';
 
   /**
    * Build error module
@@ -139,7 +139,7 @@ export class TranspileUtil {
    * @param fn The preprocessor to add
    */
   static addPreProcessor(fn: Preprocessor) {
-    this.preProcessors.unshift(fn);
+    this.PRE_PROCESSORS.unshift(fn);
   }
 
   /**
@@ -153,7 +153,7 @@ export class TranspileUtil {
     // Resolve macro
     fileContents = this.resolveMacros(fileName, fileContents);
 
-    for (const preProcessor of this.preProcessors) {
+    for (const preProcessor of this.PRE_PROCESSORS) {
       fileContents = preProcessor(fileName, fileContents);
     }
 
@@ -224,6 +224,6 @@ export class TranspileUtil {
    */
   static reset() {
     AppCache.reset();
-    this.preProcessors = [];
+    this.PRE_PROCESSORS = [];
   }
 }

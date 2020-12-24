@@ -1,4 +1,4 @@
-// import { BasePolymorphismSuite } from '@travetto/model/test-lib/source/polymorphism';
+// import { BasePolymorphismSuite } from '@travetto/model/test-support/source/polymorphism';
 // import { Suite, BeforeAll } from '@travetto/test';
 
 // import { MongoModelConfig } from '../../src/config';
