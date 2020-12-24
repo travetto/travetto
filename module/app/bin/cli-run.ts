@@ -41,7 +41,6 @@ export class AppRunPlugin extends BasePlugin {
    * Main action
    */
   async action(app: string, args: string[]) {
-    let runner;
     try {
       // Find app
       const selected = await CliAppListUtil.findByName(app);
@@ -52,19 +51,16 @@ export class AppRunPlugin extends BasePlugin {
       } else {
         await CliUtil.initAppEnv({ env: this._cmd.env, profiles: this._cmd.profile, resourceRoots: this._cmd.resource, watch: true });
         // Run otherwise
-        runner = await RunUtil.getRunner(app, ...args);
+        try {
+          await RunUtil.run(app, ...args);
+          process.exit(0);
+        } catch (err) {
+          console.error('Failed application run', { error: err });
+          process.exit(1);
+        }
       }
     } catch (err) {
       await this.showHelp(err, `\nUsage: ${HelpUtil.getAppUsage((await CliAppListUtil.findByName(app))!)}`);
-    }
-    if (runner) {
-      try {
-        await runner();
-        process.exit(0);
-      } catch (err) {
-        console.error('Failed application run', { error: err });
-        process.exit(1);
-      }
     }
   }
 

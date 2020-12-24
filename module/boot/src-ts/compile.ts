@@ -2,8 +2,8 @@
 import * as Mod from 'module';
 
 import { TranspileUtil } from './transpile';
-import { FrameworkUtil } from './framework';
 import { FsUtil } from './fs';
+import { EnvUtil } from './env';
 
 type Module = {
   loaded?: boolean;
@@ -27,6 +27,7 @@ declare const global: {
  */
 export class CompileUtil {
   private static ogModuleLoad = Module._load!.bind(Module);
+  private static ogResolveFilename = Module._resolveFilename!.bind(Module);
   private static moduleHandlers: ((name: string, o: any) => any)[] = [];
 
   /**
@@ -65,6 +66,22 @@ export class CompileUtil {
   }
 
   /**
+   * Resolve filename for dev mode
+   */
+  private static devResolveFilename(p: string, m: Module) {
+    if (p.includes('@travetto')) {
+      const [, key, sub] = p.match(/^.*(@travetto\/[^/]+)(\/?.*)?$/) ?? [];
+      const match = EnvUtil.getDynamicModules().get(key!);
+      if (match) {
+        p = `${match}${sub! ?? ''}`;
+      } else if (key === require(FsUtil.resolveUnix('package.json')).name) {
+        return FsUtil.resolveUnix(sub);
+      }
+    }
+    return this.ogResolveFilename(p, m);
+  }
+
+  /**
    * Compile and Transpile .ts file to javascript
    * @param m node module
    * @param tsf filename
@@ -99,15 +116,16 @@ export class CompileUtil {
     // Registering unix conversion to use for filenames
     global.ᚕsrc = FsUtil.toUnixTs;
 
+    // Only do for dev
+    Module._resolveFilename = this.devResolveFilename.bind(this); // @line-if $TRV_DEV_ROOT
+
     // Tag output to indicate it was succefully processed by the framework
     TranspileUtil.addPreProcessor((__, contents) =>
       `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`);
 
-    const resolve = FrameworkUtil.resolvePath;
-
     // Supports bootstrapping with framework resolution
-    Module._load = (req, p) => this.onModuleLoad(resolve(req, p), p);
-    require.extensions[TranspileUtil.EXT] = (m, tsf) => this.compile(m, resolve(tsf));
+    Module._load = (req, p) => this.onModuleLoad(req, p);
+    require.extensions[TranspileUtil.EXT] = (m, tsf) => this.compile(m, Module._resolveFilename!(tsf, Module));
 
     global.trvInit = this;
   }
@@ -132,6 +150,7 @@ export class CompileUtil {
     delete require.extensions[TranspileUtil.EXT];
     delete global.trvInit;
     Module._load = this.ogModuleLoad;
+    Module._resolveFilename = this.ogResolveFilename;
 
     TranspileUtil.reset();
   }

@@ -2,11 +2,9 @@ import * as path from 'path';
 import { promises as fs } from 'fs';
 
 import { ExecUtil, FsUtil, ScanFs } from '@travetto/boot';
-import { FrameworkUtil, } from '@travetto/boot/src/framework';
+import { FrameworkUtil, DepType } from '@travetto/boot/src/framework';
 
 import { PackUtil } from './util';
-
-type DepTypes = Parameters<(typeof FrameworkUtil)['resolveDependencies']>[0]['types'];
 
 const MODULE_DIRS = ['src', 'bin', 'support', 'resources', 'index.ts', 'package.json', 'tsconfig.json'];
 
@@ -75,7 +73,7 @@ export class AssembleUtil {
   /**
    * Copy over all prod dependnecies
    */
-  static async copyDependencies(workspace: string, types: DepTypes = ['prod', 'opt', 'optPeer']) {
+  static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'optPeer']) {
     for (const el of await FrameworkUtil.resolveDependencies({ types })) {
       const sub = el.file.replace(/.*?node_modules/, 'node_modules');
       const tgt = FsUtil.resolveUnix(workspace, sub);

@@ -83,7 +83,7 @@ export class LoggerTransformer {
           LiteralUtil.fromLiteral(state.factory, {
             file: state.getFilenameAsSrc(),
             line: state.source.getLineAndCharacterOfPosition(node.getStart()).line + 1,
-            scope: state.scope.map(x => x.name).join(':'),
+            scope: state.scope?.map(x => x.name).join(':'),
           }),
           ...node.arguments.slice(2) // Drop log level, and previous context from base/console support
         ]);
