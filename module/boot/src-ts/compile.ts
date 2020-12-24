@@ -12,6 +12,7 @@ type Module = {
   _compile?(contents: string, file: string): any;
 } & NodeJS.Module;
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 const Module = Mod as unknown as Module;
 
 declare const global: {
@@ -42,7 +43,7 @@ export class CompileUtil {
         if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
           try {
             const p = Module._resolveFilename!(request, parent);
-            if (p && p.endsWith(TranspileUtil.ext)) {
+            if (p && p.endsWith(TranspileUtil.EXT)) {
               throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
             }
           } catch (err) {
@@ -106,7 +107,7 @@ export class CompileUtil {
 
     // Supports bootstrapping with framework resolution
     Module._load = (req, p) => this.onModuleLoad(resolve(req, p), p);
-    require.extensions[TranspileUtil.ext] = (m, tsf) => this.compile(m, resolve(tsf));
+    require.extensions[TranspileUtil.EXT] = (m, tsf) => this.compile(m, resolve(tsf));
 
     global.trvInit = this;
   }
@@ -128,7 +129,7 @@ export class CompileUtil {
       return;
     }
 
-    delete require.extensions[TranspileUtil.ext];
+    delete require.extensions[TranspileUtil.EXT];
     delete global.trvInit;
     Module._load = this.ogModuleLoad;
 

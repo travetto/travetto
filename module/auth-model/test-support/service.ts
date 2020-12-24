@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { AppError } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { BaseModelSuite } from '@travetto/model-core/test-lib/test.base';
+import { BaseModelSuite } from '@travetto/model-core/test-support/base';
 import { ModelCrudSupport, BaseModel, Model } from '@travetto/model-core';
 
 import { ModelPrincipalSource, RegisteredIdentity } from '..';

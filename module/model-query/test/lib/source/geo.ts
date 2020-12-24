@@ -4,7 +4,7 @@ import { AfterEach, BeforeEach, Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
 import { Point, Model, ModelService } from '../../..';
-import { BaseModelTest } from '../test.base';
+import { BaseModelTest } from '../base';
 
 @Model()
 class Location {

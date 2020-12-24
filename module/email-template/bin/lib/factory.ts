@@ -12,18 +12,18 @@ export interface ComponentFactory {
 /**
  * Registry for tagging components
  */
-export class TagRegistry {
-  private static data: Map<any, Record<string, (node: Node) => string>> = new Map();
+class $TagRegistry {
+  private data: Map<any, Record<string, (node: Node) => string>> = new Map();
 
-  static id(cls: any) {
+  id(cls: any) {
     return cls && cls.constructor !== Function ? cls.constructor : cls;
   }
 
-  static getTag(tag: string | Node, ns: string) {
+  getTag(tag: string | Node, ns: string) {
     return (typeof tag === 'string' ? tag : Parse5Adapter.getTagName(tag)).replace(new RegExp(`^${ns}`), '');
   }
 
-  static register(cls: any, name: string, fn: (node: Node) => string) {
+  register(cls: any, name: string, fn: (node: Node) => string) {
     cls = this.id(cls);
     if (!this.data.has(cls)) {
       this.data.set(cls, {});
@@ -31,16 +31,18 @@ export class TagRegistry {
     this.data.get(cls)![name] = fn;
   }
 
-  static resolve(cls: any, tag: string) {
+  resolve(cls: any, tag: string) {
     cls = this.id(cls);
     return this.data.get(cls)?.[tag];
   }
 
-  static has(cls: any, tag: string) {
+  has(cls: any, tag: string) {
     cls = this.id(cls);
     return !!this.data.get(cls)?.[tag];
   }
 }
+
+export const TagRegistry = new $TagRegistry();
 
 /**
  * Tag Decorator

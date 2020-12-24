@@ -11,7 +11,7 @@ export const init = {
 
     // If we should treat test as source files (pre-compile, watching)
     if (EnvUtil.isTrue('TRV_TEST_COMPILE')) {
-      ScanApp.mainAppFolders.add('test');
+      ScanApp.mainAppFolders.add('test-support');
     }
   }
 };

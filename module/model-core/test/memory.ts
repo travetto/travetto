@@ -1,9 +1,9 @@
 import { Suite } from '@travetto/test';
 import { MemoryModelConfig, MemoryModelService } from '../src/provider/memory';
-import { ModelCrudSuite } from './lib/crud';
-import { ModelExpirySuite } from './lib/expiry';
-import { ModelStreamSuite } from './lib/stream';
-import { ModelIndexedSuite } from './lib/indexed';
+import { ModelCrudSuite } from '../test-support/crud';
+import { ModelExpirySuite } from '../test-support/expiry';
+import { ModelStreamSuite } from '../test-support/stream';
+import { ModelIndexedSuite } from '../test-support/indexed';
 
 @Suite()
 export class MemoryCrudSuite extends ModelCrudSuite {

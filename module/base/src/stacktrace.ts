@@ -5,9 +5,9 @@ import { FsUtil, EnvUtil } from '@travetto/boot';
  */
 export class StacktraceUtil {
 
-  private static filters: string[] = [];
+  private static FILTERS: string[] = [];
 
-  private static filterRegex: RegExp = /./g;
+  private static FILTER_REGEX: RegExp = /./g;
 
   /**
    * Initialize
@@ -36,9 +36,9 @@ export class StacktraceUtil {
    * @param names List files to exclude from the stack traces
    */
   static addStackFilters(...names: string[]) {
-    if (this.filters) {
-      this.filters.push(...names);
-      this.filterRegex = new RegExp(`(${this.filters.map(x => x.replace(/[().\[\]|?]/g, z => `\\${z}`)).join('|')})`);
+    if (this.FILTERS) {
+      this.FILTERS.push(...names);
+      this.FILTER_REGEX = new RegExp(`(${this.FILTERS.map(x => x.replace(/[().\[\]|?]/g, z => `\\${z}`)).join('|')})`);
     }
   }
 
@@ -46,8 +46,8 @@ export class StacktraceUtil {
    * Unset all filters
    */
   static clearStackFilters() {
-    this.filters = [];
-    this.filterRegex = /##/;
+    this.FILTERS = [];
+    this.FILTER_REGEX = /##/;
   }
 
   /**
@@ -58,7 +58,7 @@ export class StacktraceUtil {
   static simplifyStack(err: Error | string, filter = true): string {
     let lastLocation: string = '';
     const body = (typeof err === 'string' ? err : err.stack!).replace(/\\/g, '/').split('\n')
-      .filter(x => !filter || !this.filters.length || !this.filterRegex.test(x)) // Exclude framework boilerplate
+      .filter(x => !filter || !this.FILTERS.length || !this.FILTER_REGEX.test(x)) // Exclude framework boilerplate
       .reduce((acc, line) => {
         const [, location] = line.split(FsUtil.cwd);
 
@@ -73,7 +73,7 @@ export class StacktraceUtil {
         return acc;
       }, [] as string[])
       .map(x => x
-        .replace(`${FsUtil.cwd}/`, '')
+        .replace(`${FsUtil.cwd}/`, './')
         .replace(/^[\/]+/, '')
       );
 

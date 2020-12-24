@@ -27,7 +27,7 @@
   "files": [
     "index.ts",
     "src",
-    "test-lib"
+    "test-support"
   ],
   "name": "@travetto/auth-model",
   "repository": {

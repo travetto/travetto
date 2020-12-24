@@ -15,9 +15,9 @@ export class WorkUtil {
       args?: string[];
       opts?: ExecutionOptions;
       handlers: {
-        init?: (channel: ParentCommChannel) => Promise<any>;
-        execute: (channel: ParentCommChannel, input: X) => Promise<any>;
-        destroy?: (channel: ParentCommChannel) => Promise<any>;
+        init?: (ch: ParentCommChannel) => Promise<any>;
+        execute: (ch: ParentCommChannel, input: X) => Promise<any>;
+        destroy?: (ch: ParentCommChannel) => Promise<any>;
       };
     }
   ): Worker<X> {

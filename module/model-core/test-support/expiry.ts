@@ -2,10 +2,10 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { Model } from '../../src/registry/decorator';
-import { ModelExpirySupport } from '../../src/service/expiry';
-import { BaseModel } from '../../src/types/base';
-import { BaseModelSuite } from './test.base';
+import { Model } from '../src/registry/decorator';
+import { ModelExpirySupport } from '../src/service/expiry';
+import { BaseModel } from '../src/types/base';
+import { BaseModelSuite } from './base';
 
 @Model()
 class User extends BaseModel {
@@ -61,30 +61,23 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
       // Create
       await Promise.all(
         ' '.repeat(10).split('')
-          .map((x, i) => service.upsertWithExpiry(User, User.from({}), 5000 + i))
+          .map((x, i) => service.upsertWithExpiry(User, User.from({}), 1000 + i))
       );
 
-      // Count
-      let total = 0;
-      for await (const __el of await service.list(User)) {
-        total += 1;
-      }
-      assert(total === 10);
+      let total;
+      // Let expire
+      await this.wait(1);
 
-      // Reset expiry low
-      for await (const el of await service.list(User)) {
-        await service.updateExpiry(User, el.id!, 10);
-      }
+      total = await service.deleteExpired(User);
+      assert(total === 0);
 
       // Let expire
-      await this.wait(50);
-      await service.deleteExpired(User);
+      await this.wait(1100);
 
-      // Recount
-      total = 0;
-      for await (const __el of await service.list(User)) {
-        total += 1;
-      }
+      total = await service.deleteExpired(User);
+      assert(total === 10);
+
+      total = await service.deleteExpired(User);
       assert(total === 0);
     }
   }

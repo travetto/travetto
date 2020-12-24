@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Controller, Get, Body, Post, Put, Query, Request } from '@travetto/rest';
-import { BaseRestSuite } from '@travetto/rest//base';
+import { BaseRestSuite } from '@travetto/rest/test-support/base';
 import { AfterAll, BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 

@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { FsUtil } from '@travetto/boot/src';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
-import { BaseModelSuite } from '@travetto/model-core//test.base';
+import { BaseModelSuite } from '@travetto/model-core/base';
 import { DependencyRegistry } from '@travetto/di';
 import { ModelStreamSupport } from '@travetto/model-core';
 

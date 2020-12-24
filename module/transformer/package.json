@@ -22,7 +22,7 @@
   "files": [
     "index.ts",
     "src",
-    "test-lib",
+    "test-support",
     "support",
     "tsconfig.json"
   ],

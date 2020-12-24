@@ -51,7 +51,7 @@ class $Compiler {
     const start = Date.now();
     this.active = true;
 
-    require.extensions[TranspileUtil.ext] = this.compile.bind(this);
+    require.extensions[TranspileUtil.EXT] = this.compile.bind(this);
 
     if (!EnvUtil.isReadonly()) {
       this.transpiler.init();

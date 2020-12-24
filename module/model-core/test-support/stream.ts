@@ -6,8 +6,8 @@ import { FsUtil } from '@travetto/boot';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 
-import { BaseModelSuite } from './test.base';
-import { ModelStreamSupport } from '../../src/service/stream';
+import { BaseModelSuite } from './base';
+import { ModelStreamSupport } from '../src/service/stream';
 
 @Suite({ skip: true })
 export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {

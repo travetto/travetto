@@ -1,4 +1,4 @@
-// import { BaseNestedSuite } from '@travetto/model/test-lib/source/nested';
+// import { BaseNestedSuite } from '@travetto/model/test-support/source/nested';
 // import { Suite, BeforeAll } from '@travetto/test';
 // import { MongoModelConfig } from '../../src/config';
 // import { MongoModelSource } from '../../src/service';

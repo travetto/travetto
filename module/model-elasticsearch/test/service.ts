@@ -1,7 +1,7 @@
 import { Suite } from '@travetto/test';
-import { ModelCrudSuite } from '@travetto/model-core/test-lib/crud';
-import { ModelBulkSuite } from '@travetto/model-core/test-lib/bulk';
-import { ModelIndexedSuite } from '@travetto/model-core/test-lib/indexed';
+import { ModelCrudSuite } from '@travetto/model-core/test-support/crud';
+import { ModelBulkSuite } from '@travetto/model-core/test-support/bulk';
+import { ModelIndexedSuite } from '@travetto/model-core/test-support/indexed';
 
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
 

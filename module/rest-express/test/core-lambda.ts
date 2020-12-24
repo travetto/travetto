@@ -1,4 +1,4 @@
-import { RestServerSuite } from '@travetto/rest/test-lib/server';
+import { RestServerSuite } from '@travetto/rest/test-support/server';
 import { Suite } from '@travetto/test';
 
 @Suite()

@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { FsUtil } from '@travetto/boot';
-import { TranformerTestUtil } from '../test-lib/util';
+import { TranformerTestUtil } from '../test-support/util';
 
 @Suite()
 export class TypesTransformSuite {

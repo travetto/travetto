@@ -7,9 +7,9 @@ import { RootRegistry } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 
-import type { RestServer } from '../../src/server/base';
-import { ServerHandle } from '../../src/types';
-import { RestLambdaSymbol } from '../../src/internal/lambda';
+import type { RestServer } from '../src/server/base';
+import { ServerHandle } from '../src/types';
+import { RestLambdaSymbol } from '../src/internal/lambda';
 
 
 const toMultiValue = (o: Record<string, string> | undefined) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, [v]]));
@@ -64,7 +64,7 @@ export abstract class BaseRestSuite {
   async initServer() {
     await RootRegistry.init();
 
-    const rest = await import('../..');
+    const rest = await import('..');
 
     Object.assign(
       await DependencyRegistry.getInstance(rest.RestCookieConfig),

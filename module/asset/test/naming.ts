@@ -23,7 +23,7 @@ export class NamingStrategyTest {
     const resolved3 = strategy3.resolve({
       filename: '/orange'
     } as Asset);
-    assert(resolved3 === '/test//orange');
+    assert(resolved3 === '/test/test-support/orange');
   }
 
   @Test()

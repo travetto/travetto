@@ -12,5 +12,5 @@ export async function validate() {
     }
   });
 
-  await SchemaValidator.validate(person);
+  await SchemaValidator.validate(Person, person);
 }

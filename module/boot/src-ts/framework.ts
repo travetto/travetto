@@ -34,7 +34,7 @@ const pkg = (() => { try { return require(FsUtil.resolveUnix('package.json')); }
  */
 export class FrameworkUtil {
 
-  private static readonly devCache = {
+  private static readonly DEV_CACHE = {
     boot: FsUtil.resolveUnix(__dirname, '..'),
     [(pkg.name || '').split('/')[1]]: FsUtil.cwd // Initial
   };
@@ -63,11 +63,11 @@ export class FrameworkUtil {
       // Fetch current module's name
       // Handle self references
       pth = pth.replace(/^(.*\/?@travetto)\/([^/]+)(\/[^@]*)?$/g, (all, pre, name, rest) => {
-        if (!(name in this.devCache)) {
+        if (!(name in this.DEV_CACHE)) {
           const base = `${FsUtil.cwd}/node_modules/@travetto/${name}`;
-          this.devCache[name] = FsUtil.existsSync(base) ? base : `${pre}/${name}`;
+          this.DEV_CACHE[name] = FsUtil.existsSync(base) ? base : `${pre}/${name}`;
         }
-        return `${this.devCache[name]}${rest ? `/${rest}` : ''}`;
+        return `${this.DEV_CACHE[name]}${rest ? `/${rest}` : ''}`;
       })
         .replace(/\/\/+/g, '/'); // De-dupe
     }
@@ -88,7 +88,8 @@ export class FrameworkUtil {
   * @param testFile The test to determine if a file is desired
   */
   static scan(testFile?: (x: string) => boolean, base = FsUtil.cwd) {
-    const matcher = new RegExp(`^node_modules\/(@travetto|${EnvUtil.getExtModules('!').map(x => x.replace(/\/.*$/, a => `(\\${a})?`)).join('|')})`);
+    const extModRegex = EnvUtil.getExtModules('!').map(x => x.replace(/\/.*$/, a => `(\\${a})?`)).join('|');
+    const matcher = new RegExp(`^node_modules\/(@travetto|${extModRegex})`);
     const out = ScanFs.scanDirSync({
       testFile,
       testDir: x => // Ensure its a valid folder or module folder
