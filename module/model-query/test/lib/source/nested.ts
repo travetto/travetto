@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { AfterEach, BeforeEach, Test } from '@travetto/test';
 import { Schema, Text } from '@travetto/schema';
 
-import { BaseModelTest } from '../test.base';
+import { BaseModelTest } from '../base';
 import { Model, ModelCore } from '../../..';
 
 @Schema()

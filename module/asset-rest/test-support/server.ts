@@ -6,10 +6,10 @@ import { FsUtil, StreamUtil } from '@travetto/boot';
 import { AssetUtil, Asset } from '@travetto/asset';
 import { ResourceManager } from '@travetto/base';
 import { Controller, Post } from '@travetto/rest';
-import { BaseRestSuite } from '@travetto/rest//base';
+import { BaseRestSuite } from '@travetto/rest/test-support/base';
 import { AfterAll, BeforeAll, Suite, Test } from '@travetto/test';
 
-import { Upload } from '../../src/decorator';
+import { Upload } from '../src/decorator';
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -56,7 +56,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
 
   @BeforeAll()
   async setup() {
-    const src = await import('@travetto/asset//service');
+    const src = await import('@travetto/asset/test-support/service');
     ResourceManager.addPath(FsUtil.resolveUnix(src.AssetServiceSuite.ᚕfile, '..', '..'));
   }
 

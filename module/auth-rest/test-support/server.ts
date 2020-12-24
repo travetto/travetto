@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Controller, Get, Post, Redirect, Request, Response } from '@travetto/rest';
-import { BaseRestSuite } from '@travetto/rest//base';
+import { BaseRestSuite } from '@travetto/rest/test-support/base';
 import { AfterAll, BeforeAll, Suite, Test } from '@travetto/test';
 import { Injectable, InjectableFactory } from '@travetto/di';
 import { AppError } from '@travetto/base';
@@ -100,7 +100,7 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
 
   @Test()
   async testGoodAuth() {
-    const { headers, status } = await this.makeRequst('post', '/test/auth/login', {
+    const { status } = await this.makeRequst('post', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'super-user',

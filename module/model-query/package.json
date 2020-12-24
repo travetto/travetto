@@ -28,7 +28,7 @@
     "index.ts",
     "src",
     "support",
-    "test-lib"
+    "test-support"
   ],
   "name": "@travetto/model-query",
   "repository": {

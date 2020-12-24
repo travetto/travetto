@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { BaseModelSuite } from '@travetto/model-core//test.base';
+import { BaseModelSuite } from '@travetto/model-core/base';
 import { ModelExpirySupport } from '@travetto/model-core';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';

@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 import { Test, BeforeAll, AfterAll, Suite } from '@travetto/test';
 
-import { Controller } from '../../src/decorator/controller';
-import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';
-import { Path, Query } from '../../src/decorator/param';
-import { Request, Response } from '../../src/types';
+import { Controller } from '../src/decorator/controller';
+import { Get, Post, Put, Delete, Patch } from '../src/decorator/endpoint';
+import { Path, Query } from '../src/decorator/param';
+import { Request, Response } from '../src/types';
 import { BaseRestSuite } from './base';
 
 @Controller('/test')

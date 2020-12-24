@@ -2,11 +2,11 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { Index, Model } from '../../src/registry/decorator';
-import { BaseModel } from '../../src/types/base';
-import { ModelIndexedSupport } from '../../src/service/indexed';
-import { BaseModelSuite } from './test.base';
-import { NotFoundError } from '../../src/error/not-found';
+import { Index, Model } from '../src/registry/decorator';
+import { BaseModel } from '../src/types/base';
+import { ModelIndexedSupport } from '../src/service/indexed';
+import { BaseModelSuite } from './base';
+import { NotFoundError } from '../src/error/not-found';
 
 @Model()
 @Index({
@@ -75,7 +75,6 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   @Test()
   async queryMultiple() {
     const service = await this.service;
-
 
     await service.create(User3, User3.from({ name: 'bob', age: 20 }));
     await service.create(User3, User3.from({ name: 'bob', age: 30, color: 'green' }));

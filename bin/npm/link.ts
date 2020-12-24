@@ -12,13 +12,13 @@ const DEP_TYPES = ['dev', 'prod', 'opt'] as const;
 
 const DOCUMENTED_PEER_DEPS = {
   'auth-rest': ['app'],
-  'model-core': ['app', 'config'],
+  'model-core': ['app'],
   openapi: ['app'],
   rest: ['app'],
   'rest-fastify': ['app'],
   'rest-koa': ['app'],
   'rest-express': ['app'],
-  schema: ['app', 'config'],
+  schema: ['app'],
 };
 
 /**

@@ -20,7 +20,7 @@ interface Tester {
  */
 class $ScanApp {
 
-  private INDEX = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
+  private _index = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
 
   private moduleMatcherSimple: RegExp;
 
@@ -77,8 +77,8 @@ class $ScanApp {
    * Get the map of all modules currently supported in the application
    */
   get index() {
-    if (this.INDEX.size === 0) {
-      this.INDEX.set('.', { base: FsUtil.cwd, files: new Map() });
+    if (this._index.size === 0) {
+      this._index.set('.', { base: FsUtil.cwd, files: new Map() });
 
       const moduleMatcher = new RegExp(
         `^.*node_modules\/((?:@travetto\/[^/]+)|${EnvUtil.getExtModules('!').join('|') || '#'})(\/?.*?)$`
@@ -93,27 +93,27 @@ class $ScanApp {
         const { mod, sub } = res;
 
         if (el.stats.isDirectory() || el.stats.isSymbolicLink()) {
-          if (!this.INDEX.has(mod)) {
-            this.INDEX.set(mod, { base: el.file, files: new Map() });
+          if (!this._index.has(mod)) {
+            this._index.set(mod, { base: el.file, files: new Map() });
           }
         } else if (sub === 'index.ts') {
-          this.INDEX.get(mod)!.index = el;
+          this._index.get(mod)!.index = el;
         } else {
-          if (!this.INDEX.get(mod)!.files.has(sub)) {
-            this.INDEX.get(mod)!.files.set(sub, []);
+          if (!this._index.get(mod)!.files.has(sub)) {
+            this._index.get(mod)!.files.set(sub, []);
           }
-          this.INDEX.get(mod)!.files.get(sub)!.push({ file: el.file, module: el.module });
+          this._index.get(mod)!.files.get(sub)!.push({ file: el.file, module: el.module });
         }
       }
     }
-    return this.INDEX;
+    return this._index;
   }
 
   /**
    * Clears the app scanning cache
    */
   reset() {
-    this.INDEX.clear();
+    this._index.clear();
   }
 
   /**

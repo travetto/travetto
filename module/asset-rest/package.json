@@ -28,7 +28,7 @@
   "files": [
     "index.ts",
     "src",
-    "test-lib"
+    "test-support"
   ],
   "name": "@travetto/asset-rest",
   "repository": {

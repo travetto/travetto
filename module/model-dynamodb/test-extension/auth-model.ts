@@ -3,7 +3,7 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { AuthModelSymbol } from '@travetto/auth-model';
-import { AuthModelServiceSuite } from '@travetto/auth-model//service';
+import { AuthModelServiceSuite } from '@travetto/auth-model/test-support/service';
 
 import { DynamoDBModelConfig, DynamoDBModelService } from '..';
 
