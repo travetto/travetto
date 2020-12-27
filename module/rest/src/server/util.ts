@@ -98,7 +98,6 @@ export class RestServerUtil {
     return res as T;
   }
 
-
   /**
    * Generate SSL key pair on demand
    * @param subj The subject for the app

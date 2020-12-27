@@ -68,7 +68,6 @@ class $AppManifest {
       Object.assign(this, { version, name, license, author, description });
     } catch { }
 
-
     this.travetto = require('../package.json').version; // Travetto version
     this.env = EnvUtil.getEnv();
     this.profiles = ['application', ...EnvUtil.getList('TRV_PROFILES'), this.env];

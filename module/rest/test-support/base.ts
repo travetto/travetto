@@ -11,7 +11,6 @@ import type { RestServer } from '../src/server/base';
 import { ServerHandle } from '../src/types';
 import { RestLambdaSymbol } from '../src/internal/lambda';
 
-
 const toMultiValue = (o: Record<string, string> | undefined) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, [v]]));
 const baseLambdaEvent = { resource: '/{proxy+}' };
 const baseLambdaContext = {
@@ -51,7 +50,6 @@ export abstract class BaseRestSuite {
       this.port = lambdaOrPort;
     }
   }
-
 
   get url() {
     return `http://localhost:${this.port}`;

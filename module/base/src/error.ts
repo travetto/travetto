@@ -1,6 +1,5 @@
 /// <reference path="./internal/global-types.d.ts" />
 
-
 import { ErrorCategory } from './internal/error';
 export { ErrorCategory } from './internal/error'; // Re-export
 

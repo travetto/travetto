@@ -42,7 +42,6 @@ class $AssertCapture extends EventEmitter {
     };
   }
 
-
   add(a: CaptureAssert) {
     return super.emit('assert', a);
   }

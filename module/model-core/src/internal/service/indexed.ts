@@ -93,7 +93,6 @@ export class ModelIndexedUtil {
     });
   }
 
-
   /**
    * Compute index key as a single value
    * @param cls Class to get index for

@@ -14,7 +14,6 @@ class Init {
   }
 }
 
-
 @Suite()
 export class FirestoreAuthModelServiceSuite extends AuthModelServiceSuite {
   constructor() {

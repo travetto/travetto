@@ -29,7 +29,6 @@ export function Model(conf: Partial<ModelOptions<any>> = {}) {
   };
 }
 
-
 /**
  * Defines an index on a model
  */

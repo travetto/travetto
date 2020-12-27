@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { ActivationTarget } from './types';
 import { Workspace } from './workspace';
 
-
 interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {
   isModule?: boolean;
   new(namespace?: string, sub?: string): T;

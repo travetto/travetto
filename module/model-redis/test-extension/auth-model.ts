@@ -14,7 +14,6 @@ class Init {
   }
 }
 
-
 @Suite()
 export class RedisAuthModelServiceSuite extends AuthModelServiceSuite {
   constructor() {

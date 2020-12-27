@@ -425,7 +425,6 @@ export abstract class BaseSimpleSourceSuite extends BaseModelTest {
     assert(none.length === 0);
   }
 
-
   @Test('verify all operators')
   async testArrayAll() {
     const service = await this.service;

@@ -1,7 +1,6 @@
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { ContextProvider } from '@travetto/rest';
 
-
 /**
  * @concrete ./internal/types:SessionDataTarget
  */

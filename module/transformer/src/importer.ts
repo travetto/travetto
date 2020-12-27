@@ -14,7 +14,6 @@ import { Import } from './types/shared';
  */
 export class ImportManager {
 
-
   private newImports = new Map<string, Import>();
   private imports: Map<string, Import>;
   private idx: Record<string, number> = {};

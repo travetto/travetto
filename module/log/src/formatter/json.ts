@@ -1,6 +1,5 @@
 import { LogEvent, Formatter } from '../types';
 
-
 /**
  * JSON Options
  */

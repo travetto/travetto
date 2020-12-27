@@ -16,7 +16,6 @@ export class RecursiveTransformSuite {
     assert(output.includes('TreeNode'));
   }
 
-
   @Test()
   async transformTree2() {
     const output = await TranformerTestUtil.compile(

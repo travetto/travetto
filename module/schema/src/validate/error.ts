@@ -13,7 +13,6 @@ export class ValidationResultError extends AppError {
   }
 }
 
-
 /**
  * Represents when a requested objects's type doesn't match the class being used to request.
  * Primarily applies to polymorphic types

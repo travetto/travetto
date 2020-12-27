@@ -72,7 +72,6 @@ class SimpleComponentTest {
     assert(cleanseTemplate(input) === cleanseOutput(expected));
   }
 
-
   @Test('creates a horizontal rule that you can attach classes to')
   testHLine() {
     const input = `<h-line class="dotted">`;

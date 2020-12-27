@@ -41,7 +41,6 @@ export class ParserTest {
   b
   c
 
-
   d`);
 
     assert(output === [`a b c\n\nd`]);

@@ -19,7 +19,6 @@ export class TableManager {
     private dialect: SQLDialect
   ) { }
 
-
   private exec<T = any>(sql: string) {
     return this.dialect.executeSQL<T>(sql);
   }

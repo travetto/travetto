@@ -131,7 +131,6 @@ export class DocUtil {
       return this.DEC_CACHE[key];
     }
 
-
     const text = fs.readFileSync(FsUtil.resolveUnix(file), 'utf8')
       .split(/\n/g);
 

@@ -79,7 +79,7 @@ class $ScanApp {
       this._index.set('.', { base: FsUtil.cwd, files: new Map() });
 
       for (const el of FrameworkUtil.scan(x => x.endsWith('.ts') && !x.endsWith('.d.ts'))) {
-        const res = this.computeIndex(el, /^.*node_modules\/(@travetto\/[^/]+)(\/.*?)?$/);
+        const res = this.computeIndex(el, /^.*node_modules\/(@travetto\/[^/]+)(\/.*)?$/);
 
         if (!res) {
           continue;
@@ -87,10 +87,12 @@ class $ScanApp {
 
         const { mod, sub } = res;
 
+        if (!this._index.has(mod)) {
+          this._index.set(mod, { base: el.file, files: new Map() });
+        }
+
         if (el.stats.isDirectory() || el.stats.isSymbolicLink()) {
-          if (!this._index.has(mod)) {
-            this._index.set(mod, { base: el.file, files: new Map() });
-          }
+          // Do nothing
         } else if (sub === 'index.ts') {
           this._index.get(mod)!.index = el;
         } else {

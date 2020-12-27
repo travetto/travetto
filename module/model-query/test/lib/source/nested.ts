@@ -31,7 +31,6 @@ export abstract class BaseNestedSuite extends BaseModelTest {
     return this.reinit();
   }
 
-
   @Test()
   async verifyQuery() {
     const service = await this.service;

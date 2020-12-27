@@ -54,7 +54,7 @@ export class TestExecutor {
   static failFile(consumer: TestConsumer, file: string, err: Error) {
     const name = path.basename(file);
     const classId = SystemUtil.computeModuleClass(file, name);
-    const suite = { class: { name }, classId, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
+    const suite = { class: { name }, classId, duration: 0, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
     err.message = err.message.replace(FsUtil.cwd, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });

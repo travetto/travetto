@@ -1,6 +1,6 @@
 // @file-if @travetto/schema
 import * as assert from 'assert';
-import { Suite, Test } from '@travetto/test';
+import { AfterAll, BeforeAll, Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry } from '@travetto/schema';
 
 import { Controller, Redirect, Post, Get, SchemaBody, SchemaQuery, MethodOrAll, ControllerRegistry } from '..';
@@ -94,15 +94,20 @@ class SchemaAPI {
   }
 }
 
-
 function getEndpoint(path: string, method: MethodOrAll) {
   return ControllerRegistry.get(SchemaAPI)
     .endpoints.find(x => x.path === path && x.method === method)!;
 }
 
-
-@Suite()
+@Suite({ skip: true })
 export abstract class SchemaRestServerSuite extends BaseRestSuite {
+
+  @BeforeAll()
+  async before() { return this.initServer(); }
+
+  @AfterAll()
+  async after() { return this.destroySever(); }
+
 
   @Test()
   async verifyBody() {
@@ -112,13 +117,13 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
 
     assert(res.body.name === user.name);
 
-    res = await this.makeRequst('post', '/test/schema/user', { body: { id: 'orange' } });
+    res = await this.makeRequst('post', '/test/schema/user', { body: { id: 'orange' }, throwOnError: false });
 
     assert(res.status === 400);
     assert(/Validation errors have occurred/.test(res.body.message));
     assert(res.body.errors[0].path === 'id');
 
-    res = await this.makeRequst('post', '/test/schema/user', { body: { id: 0, name: 'bob', age: 'a' } });
+    res = await this.makeRequst('post', '/test/schema/user', { body: { id: 0, name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res.status === 400);
     assert(/Validation errors have occurred/.test(res.body.message));
@@ -133,13 +138,13 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
 
     assert(res.body.name === user.name);
 
-    res = await this.makeRequst('get', '/test/schema/user', { query: { id: 'orange' } });
+    res = await this.makeRequst('get', '/test/schema/user', { query: { id: 'orange' }, throwOnError: false });
 
     assert(res.status === 400);
     assert(/Validation errors have occurred/.test(res.body.message));
     assert(res.body.errors[0].path === 'id');
 
-    res = await this.makeRequst('get', '/test/schema/user', { query: { id: 0, name: 'bob', age: 'a' } });
+    res = await this.makeRequst('get', '/test/schema/user', { query: { id: 0, name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res.status === 400);
     assert(/Validation errors have occurred/.test(res.body.message));
@@ -154,13 +159,13 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
 
     assert(res.body.name === user.name);
 
-    res = await this.makeRequst('get', '/test/schema/interface', { query: { id: 'orange' } });
+    res = await this.makeRequst('get', '/test/schema/interface', { query: { id: 'orange' }, throwOnError: false });
 
     assert(res.status === 400);
     assert(/Validation errors have occurred/.test(res.body.message));
     assert(res.body.errors[0].path === 'id');
 
-    res = await this.makeRequst('get', '/test/schema/interface', { query: { id: 0, name: 'bob', age: 'a' } });
+    res = await this.makeRequst('get', '/test/schema/interface', { query: { id: 0, name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res.status === 400);
     assert(/Validation errors have occurred/.test(res.body.message));

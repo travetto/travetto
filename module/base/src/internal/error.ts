@@ -31,7 +31,6 @@ const { fromCode, fromCategory } = ERROR_CATEGORIES_WITH_CODES.reduce(
   }
 );
 
-
 /**
  * Common error utilities
  */
@@ -62,7 +61,6 @@ export class ErrorUtil {
     }
     return 500;
   }
-
 
   /**
    *  Prepare error for transmission

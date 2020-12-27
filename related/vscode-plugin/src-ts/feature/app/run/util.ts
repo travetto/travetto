@@ -20,7 +20,6 @@ export class AppSelectorUtil {
     return out ? `${'\u00A0'.repeat(4)}${out}` : out;
   }
 
-
   /**
    * Build application parameters for quick pick
    * @param choice
@@ -108,7 +107,6 @@ export class AppSelectorUtil {
 
     return selected;
   }
-
 
   /**
    * Handle application choices

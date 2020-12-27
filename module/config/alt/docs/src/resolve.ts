@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { FsUtil } from '@travetto/boot/src';
 
-
 (async function run() {
   fs.readFileSync(FsUtil.resolveUnix(__dirname, '..', 'resources', 'env.properties'), 'utf8')
     .split(/\n/g)

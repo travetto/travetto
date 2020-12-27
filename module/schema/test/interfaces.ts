@@ -37,7 +37,6 @@ class ViewsTest {
     assert(SchemaRegistry.get(User).views[ALL_VIEW].schema.address.type);
   }
 
-
   @Test('Url and message')
   async urlAndMessage() {
     let r = User.from({});

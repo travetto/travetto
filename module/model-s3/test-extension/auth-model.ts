@@ -14,7 +14,6 @@ class Init {
   }
 }
 
-
 @Suite()
 export class S3AuthModelServiceSuite extends AuthModelServiceSuite {
   constructor() {

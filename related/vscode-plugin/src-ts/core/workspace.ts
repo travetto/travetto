@@ -105,7 +105,6 @@ export class Workspace {
     };
   }
 
-
   /**
    * See if an entity is an editor
    * @param o

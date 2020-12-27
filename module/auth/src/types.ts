@@ -33,7 +33,6 @@ export interface Identity extends Principal {
   source: string;
 }
 
-
 /**
  * Definition of a principal source, authorizers an identity into a principal
  *

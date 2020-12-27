@@ -137,7 +137,6 @@ export class InkyComponentFactory implements ComponentFactory {
     return `<span id="summary" style="${SUMMARY_STYLE}">${inner}</span>`;
   }
 
-
   @Tag('h-line')
   hLine(element: Node) {
     const attrs = HtmlUtil.getAttrMap(element);

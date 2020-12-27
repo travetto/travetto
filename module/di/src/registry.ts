@@ -229,7 +229,6 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     };
   }
 
-
   /**
    * Get an instance by type and qualifier
    */

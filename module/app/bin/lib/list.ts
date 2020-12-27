@@ -53,7 +53,6 @@ export class CliAppListUtil {
     return (await this.getList())?.find(x => x.name === name);
   }
 
-
   /**
    * Store list of cached items
    * @param items

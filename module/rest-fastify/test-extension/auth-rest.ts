@@ -11,7 +11,6 @@ export class FastifyAuthRestTest extends AuthRestServerSuite {
   }
 }
 
-
 @Suite()
 export class FastifyLambdaAuthRestTest extends AuthRestServerSuite {
   constructor() {

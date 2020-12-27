@@ -14,7 +14,6 @@ import {
   ModelIndexedSupport
 } from '@travetto/model-core';
 
-
 import { ChangeEvent, Class } from '@travetto/registry';
 import { ShutdownManager, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';

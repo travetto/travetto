@@ -69,7 +69,6 @@ export function ResponseType(responseType: EndpointIOType) {
   } as EndpointDecorator;
 }
 
-
 /**
  * Defines the supported request body type
  * @param requestType The type of the request body

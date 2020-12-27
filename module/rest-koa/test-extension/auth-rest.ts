@@ -11,7 +11,6 @@ export class KoaAuthRestTest extends AuthRestServerSuite {
   }
 }
 
-
 @Suite()
 export class KoaLambdaAuthRestTest extends AuthRestServerSuite {
   constructor() {

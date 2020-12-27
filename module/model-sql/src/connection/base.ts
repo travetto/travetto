@@ -6,7 +6,6 @@ const IN_TX = Symbol.for('@trv:model/sql-transaction');
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 
-
 /**
  * Connection is a common enough pattern, that it can
  * be separated out to allow for differences in connection
@@ -101,7 +100,6 @@ export abstract class Connection<C = any> {
       }
     });
   }
-
 
   /**
    * Run a function within a valid sql transaction.  Relies on @travetto/context.

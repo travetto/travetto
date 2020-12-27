@@ -30,7 +30,6 @@ export abstract class BaseGeoTestSuite extends BaseModelTest {
     return this.reinit();
   }
 
-
   @Test('Test within')
   async testWithin() {
     const svc = await DependencyRegistry.getInstance(ModelService);

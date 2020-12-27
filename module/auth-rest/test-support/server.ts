@@ -13,7 +13,6 @@ import { AuthContextEncoder } from '../src/encoder';
 
 const TEST_AUTH = Symbol.for('TEST_AUTH');
 
-
 @Injectable({
   primary: true
 })

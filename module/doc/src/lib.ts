@@ -17,7 +17,6 @@ export const JSON = Library('JSON', 'https://www.json.org');
 export const TAP = Library('TAP 13', 'https://testanything.org/tap-version-13-specification.html');
 export const XUnit = Library('xUnit', 'https://en.wikipedia.org/wiki/XUnit');
 
-
 // Info
 export const DependencyInjection = Library(`Dependency injection`, 'https://en.wikipedia.org/wiki/Dependency_injection');
 export const OpenAPI = Library('OpenAPI', 'https://github.com/OAI/OpenAPI-Specification');
@@ -70,7 +69,6 @@ export const Elasticsearch = Library('elasticsearch', 'https://elastic.co');
 export const SQL = Library('SQL', 'https://en.wikipedia.org/wiki/SQL');
 export const MySQL = Library('MySQL', 'https://www.mysql.com/');
 export const Postgres = Library('Postgres', 'https://postgresql.org');
-
 
 // Rest
 export const Express = Library(`express`, 'https://expressjs.com');

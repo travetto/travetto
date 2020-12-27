@@ -5,7 +5,6 @@ import { Workspace } from '../../../core/workspace';
 import { DocumentResultsManager } from './document';
 import { TestEvent, StatusUnknown, RemoveEvent } from './types';
 
-
 /**
  * Manages results for the entire workspace, including the statusbar
  */

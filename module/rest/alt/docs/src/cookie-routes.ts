@@ -5,7 +5,6 @@ import { Get } from '../../../src/decorator/endpoint';
 import { Request, Response } from '../../../src/types';
 import { Query } from '../../../src/decorator/param';
 
-
 @Controller('/simple')
 export class SimpleRoutes {
 

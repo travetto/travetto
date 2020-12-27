@@ -27,7 +27,6 @@ export class Simple {
     return `/simple/id => ${user.first.toLowerCase()}`;
   }
 
-
   @Post('/name')
   async createName(@Body() person: { name: string }) {
     await this.service.update({ name: person.name });

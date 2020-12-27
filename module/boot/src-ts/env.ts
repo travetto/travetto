@@ -1,3 +1,5 @@
+import { FsUtil } from './fs';
+
 /**
  * Basic utils for reading environment variables
  */
@@ -154,7 +156,7 @@ export class EnvUtil {
       this.DYNAMIC_MODULES = new Map(
         this.getList('TRV_MODULES')
           .map(x => x.split(/\s*=\s*/) as [string, string])
-          .map(([k, v]) => [k, v ?? require.resolve(k)])
+          .map(([k, v]) => [k, v ?? FsUtil.resolveUnix('node_modules', k)])
       );
     }
     return this.DYNAMIC_MODULES;

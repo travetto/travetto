@@ -20,7 +20,6 @@ export interface MailTemplateEngine {
   template(text: string, ctx: Record<string, any>): Promise<string> | string;
 }
 
-
 @Injectable()
 export class MustacheTemplateEngine implements MailTemplateEngine {
 

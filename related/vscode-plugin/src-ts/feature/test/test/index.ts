@@ -9,7 +9,6 @@ import { BaseFeature } from '../../base';
 import { WorkspaceResultsManager } from './workspace';
 import { TestEvent } from './types';
 
-
 /**
  * Test Runner Feature
  */

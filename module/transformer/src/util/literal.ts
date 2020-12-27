@@ -112,7 +112,6 @@ export class LiteralUtil {
     return ret;
   }
 
-
   /**
    * Get a value from the an object expression
    */

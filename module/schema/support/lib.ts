@@ -1,6 +1,5 @@
 import * as ts from 'typescript';
 import { AnyType, DocUtil, TransformerState } from '@travetto/transformer';
-import { Util } from '@travetto/base';
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
 const FIELD_MOD = '@travetto/schema/src/decorator/field';
@@ -25,40 +24,33 @@ export class SchemaTransformUtil {
         break;
       }
       case 'shape': {
-        // Determine type name
-        let name = type.name && !type.name.startsWith('_') ? type.name : '';
-        if (!name && (node as any).name?.escapedText) {
-          name = `${(node as any).name.escapedText}`;
-        }
-        // Determine type unique ident
-        let unique: string = Util.uuid(type.name ? 5 : 10);
-        try {
-          unique = `${ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line}_${node.getEnd() - node.getStart()}`;
-        } catch { }
+        const uniqueId = state.generateUniqueIdentifier(node, type);
 
         // Build class on the fly
-        const id = state.createIdentifier(`${name}_${unique}ᚕsyn`);
-        const cls = state.factory.createClassDeclaration(
-          [
-            state.createDecorator(SCHEMA_MOD, 'Schema'),
-            state.createDecorator(COMMON_MOD, 'Describe',
-              state.fromLiteral({
-                title: type.name,
-                description: type.comment
-              })
+        const [id, existing] = state.createSyntheticIdentifier(uniqueId);
+        if (!existing) {
+          const cls = state.factory.createClassDeclaration(
+            [
+              state.createDecorator(SCHEMA_MOD, 'Schema'),
+              state.createDecorator(COMMON_MOD, 'Describe',
+                state.fromLiteral({
+                  title: type.name,
+                  description: type.comment
+                })
+              )
+            ],
+            [], id, [], [],
+            Object.entries(type.fieldTypes).map(([k, v]) =>
+              this.computeProperty(state, state.factory.createPropertyDeclaration(
+                [], [], k,
+                v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+                undefined, undefined
+              ), v, root)
             )
-          ],
-          [], id, [], [],
-          Object.entries(type.fieldTypes).map(([k, v]) =>
-            this.computeProperty(state, state.factory.createPropertyDeclaration(
-              [], [], k,
-              v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
-              undefined, undefined
-            ), v, root)
-          )
-        );
-        cls.getText = () => '';
-        state.addStatement(cls, root || node);
+          );
+          cls.getText = () => '';
+          state.addStatement(cls, root || node);
+        }
         return id;
       }
       case 'union': {
