@@ -11,7 +11,6 @@ class Init {
   }
 }
 
-
 @Suite()
 export class FileAuthModelServiceSuite extends AuthModelServiceSuite {
   constructor() {

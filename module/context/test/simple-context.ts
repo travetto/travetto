@@ -53,7 +53,6 @@ class VerifyContext {
     await Promise.all(attempts.map(x => this.context.run(x)));
   }
 
-
   @Test()
   async concurrentDivergent() {
 

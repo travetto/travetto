@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { Workspace } from './workspace';
 import { ParamConfig } from './types';
 
-
 /**
  * Input parameter with metadata
  */
@@ -67,7 +66,6 @@ export class ParameterSelector {
 
     return qp;
   }
-
 
   /**
    * Convert input to resolvable value

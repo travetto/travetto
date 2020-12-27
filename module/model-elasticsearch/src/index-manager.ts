@@ -18,7 +18,6 @@ export class IndexManager {
 
   private identities = new Map<Class, EsIdentity>();
 
-
   constructor(private config: ElasticsearchModelConfig, private client: es.Client) { }
 
   getStore(cls: Class) {

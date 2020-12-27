@@ -11,7 +11,6 @@ export class ExpressAuthRestTest extends AuthRestServerSuite {
   }
 }
 
-
 @Suite()
 export class ExpressLambdaAuthRestTest extends AuthRestServerSuite {
   constructor() {

@@ -7,7 +7,6 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 import { CliDocUtil } from './lib/util';
 
-
 /**
  * Command line support for generating module docs.
  */

@@ -7,7 +7,6 @@ import type { RunState } from '../../src/execute/types';
 const DEF_ENV = { env: 'test', debug: '0', resourceRoots: ['test'], profiles: ['test'] };
 const ENV_EXT = { TRV_LOG_TIME: 0 };
 
-
 async function customLogs() {
   const { ConsoleManager } = await import('@travetto/base');
 
@@ -44,7 +43,7 @@ export async function runTestsDirect(...args: string[]) {
 
   return runTests({
     args,
-    format: 'tap',
+    format: process.env.TRV_TEST_FORMAT ?? 'tap',
     mode: 'single',
     concurrency: 1
   });

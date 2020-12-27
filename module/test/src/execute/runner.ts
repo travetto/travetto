@@ -1,6 +1,8 @@
-import { FsUtil } from '@travetto/boot';
+import * as fs from 'fs';
+import { ExecUtil, FsUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TestExecutor } from './executor';
 import { buildWorkManager } from '../worker/parent';
@@ -72,17 +74,32 @@ export class Runner {
 
     await PhaseManager.create('test').run();
 
-    const pool = new WorkPool(buildWorkManager.bind(null, consumer, 'extension'), {
-      idleTimeoutMillis: 10000,
-      min: 1,
-      max: 1
-    }); // One at a time
+    for (const f of files) {
+      const modules = (await fs.promises.readFile(f, 'utf8'))
+        .split(/\n/g)
+        .filter(l => l.includes('@file-if'))
+        .map(x => x.split('@file-if')[1].trim())
+        .filter(x => x.startsWith('@travetto'))
+        .map(m => [
+          m,
+          FsUtil.resolveUnix('node_modules', m)
+            .replace(/.*node_modules\/@travetto/, process.env.TRV_DEV_ROOT!) // @line-if $TRV_DEV_ROOT
+        ])
+        .map(([k, v]) => `${k}=${v}`)
+        .join(',');
 
-    consumer.onStart();
+      const cache = `.trv_cache_${SystemUtil.naiveHash(modules)}`;
 
-    await pool
-      .process(new IterableInputSource(files))
-      .finally(() => pool.shutdown());
+      const proc = ExecUtil.fork(require.resolve('../../bin/plugin-test'), [f], {
+        env: {
+          TRV_TEST_FORMAT: 'exec',
+          TRV_CACHE: cache,
+          TRV_MODULES: modules
+        }
+      });
+      proc.process.on('message', e => consumer.onEvent(e));
+      await proc.result;
+    }
 
     return consumer.summarizeAsBoolean();
   }

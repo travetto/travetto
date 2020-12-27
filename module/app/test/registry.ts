@@ -36,7 +36,6 @@ class CloseableApp implements Waitable {
   }
 }
 
-
 @Suite()
 export class RegistryTest {
 

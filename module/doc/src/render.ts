@@ -20,7 +20,6 @@ function titleCase(a: string) {
   return `${a.charAt(0).toUpperCase()}${a.substr(1)}`;
 }
 
-
 const TOKENS: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': `{{'{'}}`, '}': `{{'}'}}` };
 
 function clean(a?: string) {
@@ -162,7 +161,6 @@ export const Html: Renderer = {
   wrap: (x, module) => `<div class="documentation">\n${x}\n</div>`
     .replace(/%MOD%/g, module)
 };
-
 
 export const Renderers = {
   md: Markdown,

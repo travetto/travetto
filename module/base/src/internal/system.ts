@@ -83,7 +83,6 @@ export class SystemUtil {
     return out;
   }
 
-
   /**
    * Convert a file name, to a proper module reference for importing, and comparing
    * @param file

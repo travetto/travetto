@@ -88,7 +88,6 @@ export abstract class RestServerSuite extends BaseRestSuite {
     assert(ret === { body: 20 });
   }
 
-
   @Test()
   async testCookie() {
     const { body: ret, headers } = await this.makeRequst('delete', '/test/cookie', {

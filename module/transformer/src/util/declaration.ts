@@ -53,7 +53,6 @@ export class DeclarationUtil {
     return this.getPrimaryDeclaration(this.getDeclarations(node));
   }
 
-
   /**
    * Resolve the `ts.ObjectFlags`
    */

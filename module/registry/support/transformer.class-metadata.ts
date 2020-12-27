@@ -73,7 +73,7 @@ export class RegisterTransformer {
         state.fromLiteral(state[cls]!),
         state.extendObjectLiteral(state[methods] || {}),
         state.fromLiteral(isAbstract),
-        state.fromLiteral(name.endsWith('ᚕsyn'))
+        state.fromLiteral(name.endsWith(TransformerState.SYNTHETIC_EXT))
       ]
     );
 

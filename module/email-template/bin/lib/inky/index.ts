@@ -34,7 +34,6 @@ class $Inky {
     let res = out
       .replace(/###RAW(\d+)###/g, (all, i) => raws[parseInt(i, 10)]);
 
-
     // Get Subject
     const headerTop: string[] = [];
     const bodyTop: string[] = [];

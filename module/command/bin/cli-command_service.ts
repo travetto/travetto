@@ -5,7 +5,6 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { ServiceUtil } from './lib/service';
 
-
 /**
  * `npx trv service`
  *

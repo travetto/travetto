@@ -2,7 +2,6 @@ import { ScanEntry } from '@travetto/boot';
 import { EventEmitter } from 'events';
 import { Watcher, WatcherOptions } from './watcher';
 
-
 export interface FilePresenceManager {
   on(type: 'all', handlder: (payload: { event: string, entry: ScanEntry }) => void): this;
   on(type: 'added', handlder: (entry: ScanEntry) => void): this;
