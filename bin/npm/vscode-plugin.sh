@@ -1,11 +1,12 @@
-MOD_ROOT=`pwd`/module
 ROOT=`pwd`
-VSCODE_ROOT=`pwd`/related/vscode-plugin
+MOD_ROOT=${ROOT}/module
+VSCODE_ROOT=${ROOT}/related/vscode-plugin
 VSCODE_NM=${VSCODE_ROOT}/node_modules
+
+rm -rf $VSCODE_NM
 
 # Configure vscode plugin
 cd $VSCODE_ROOT
-rm -rf node_modules/
 npm  i
 
 # Handle boot
