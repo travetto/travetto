@@ -19,6 +19,7 @@
     "test": "./bin/npm/test.sh",
     "upgrade": "./bin/npm/upgrade.sh",
     "init": "npm run bootstrap; npm run link",
+    "vscode-plugin": "./bin/npm/vscode-plugin.sh",
     "reinit": "rm -rf node_modules; npm run clean; npm i; npm run init"
   },
   "devDependencies": {

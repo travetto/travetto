@@ -104,8 +104,7 @@ class $Compiler {
    * Compile a file, follows the same shape as `Module._compile`
    */
   compile(m: NodeModule, tsf: string) {
-    const content = this.transpile(tsf)
-      .replace(new RegExp(`(require.*)(${'@'}${'app'})`, 'mg'), (all, pre) => `${pre}${FsUtil.cwd}`);
+    const content = this.transpile(tsf);
     return CompileUtil.compileJavascript(m, content, tsf);
   }
 
