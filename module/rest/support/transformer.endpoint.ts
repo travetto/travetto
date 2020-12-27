@@ -1,10 +1,9 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnClass, OnMethod, DeclDocumentation, DocUtil, DecoratorUtil, TransformerId, DecoratorMeta
+  TransformerState, OnClass, OnMethod, DeclDocumentation, DocUtil, DecoratorUtil, TransformerId
 } from '@travetto/transformer';
 import { RestTransformUtil } from './lib';
-
 
 const PARAM_DEC_FILE = '@travetto/rest/src/decorator/param';
 const COMMON_DEC_FILE = '@travetto/rest/src/decorator/common';
@@ -17,17 +16,17 @@ export class RestTransformer {
 
   static [TransformerId] = '@trv:rest';
 
-
   /**
    * Handle endpoint parameter
    */
-  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation, dm?: DecoratorMeta) {
+  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation) {
     const pDec = state.findDecorator(this, node, 'Param');
     let pDecArg = DecoratorUtil.getPrimaryArgument(pDec)!;
     if (pDecArg && ts.isStringLiteral(pDecArg)) {
       pDecArg = state.fromLiteral({ name: pDecArg });
     }
 
+    const dm = pDec ? state.getDecoratorMeta(pDec) : undefined;
     const { type, array, defaultType } = RestTransformUtil.getParameterType(state, node);
     const common = {
       ...RestTransformUtil.getParameterConfig(state, node, comments),
@@ -35,19 +34,14 @@ export class RestTransformer {
       ...(array ? { array: true } : {})
     };
 
-    const conf = state.extendObjectLiteral(common, pDecArg);
+    let conf = state.extendObjectLiteral(common, pDecArg);
 
     // Support SchemaQuery/SchemaBody wih interfaces
     if (dm && /Schema(Query|Body)/.test(dm.name ?? '')) { // If Interfaces are already loaded
       const resolved = state.resolveType(node.type!);
       if (resolved.key === 'shape') { // If dealing with an interface or a shape
         const id = RestTransformUtil.toConcreteType(state, resolved, node) as ts.Identifier;
-        const extra = state.extendObjectLiteral({ type: id });
-        const primary = DecoratorUtil.getPrimaryArgument(dm.dec);
-        DecoratorUtil.spliceDecorators(
-          node, dm.dec,
-          [state.createDecorator(dm.file!, dm.name!, primary ? state.extendObjectLiteral(primary, extra) : extra)]
-        );
+        conf = state.extendObjectLiteral(conf, { type: id });
       }
     }
 

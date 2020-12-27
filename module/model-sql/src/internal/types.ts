@@ -27,7 +27,6 @@ export interface DialectState {
   idxField: FieldConfig;
 }
 
-
 export type VisitState = { path: VisitStack[] };
 
 /**

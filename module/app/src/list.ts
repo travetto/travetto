@@ -21,7 +21,6 @@ export class AppListUtil {
         (a.root === '.' ? -1 : 1));
   }
 
-
   /**
    * Scan source code for apps
    */

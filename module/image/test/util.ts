@@ -37,7 +37,6 @@ class ImageUtilTest {
     assert(imgBuffer.length >= optimized.length);
   }
 
-
   @Test('compress jpeg')
   async compressJpeg() {
     const imgStream = await ResourceManager.readStream('lincoln.jpg');

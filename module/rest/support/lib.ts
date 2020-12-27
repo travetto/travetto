@@ -2,9 +2,10 @@ import * as ts from 'typescript';
 import { AnyType, DeclarationUtil, DeclDocumentation, ParamDocumentation, TransformerState } from '@travetto/transformer';
 import { ParamConfig } from '../src/types';
 import { LiteralType, ShapeType } from '@travetto/transformer/src/resolver/types';
-const { SchemaTransformUtil } =
-  require('@travetto/schema/support/lib') ?? // @line-if @travetto/schema
-  {};
+import { SchemaTransformUtil } from '@travetto/schema/support/lib'; // @line-if @travetto/schema
+/* // @line-if !@travetto/schema
+const SchemaTransformUtil = undefined;
+*/ // @line-if !@travetto/schema
 
 /**
  * Support tools for transforming rest endpoints
@@ -53,7 +54,6 @@ export class RestTransformUtil {
     const type = state.typeToIdentifier(paramType)!;
     return { array, type, defaultType };
   }
-
 
   /**
    * Find the render method of a type if provided

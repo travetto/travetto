@@ -43,7 +43,6 @@ class ParamController {
   @Get('/job/output2')
   async jobOutput2(@Query({ ...OPTIONAL, name: 'optional' }) time: Date) { }
 
-
   /**
    * @param name User's name
    */

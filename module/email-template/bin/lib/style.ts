@@ -18,7 +18,6 @@ export class StyleUtil {
     return result.css.toString();
   }
 
-
   /**
    * Get compiled styles
    */

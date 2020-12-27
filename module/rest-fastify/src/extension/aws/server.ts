@@ -9,7 +9,6 @@ import { ConfigManager } from '@travetto/config';
 
 import { FastifyRestServer } from '../../server';
 
-
 const awsLambdaFastify = require('aws-lambda-fastify') as (
   (app: FastifyInstance, binaryMimeTypes?: string[])
     => (event: lambda.APIGatewayProxyEvent, context: lambda.Context) => void // eslint-disable-line

@@ -6,7 +6,6 @@ import { DependencyRegistry } from '../src/registry';
 
 import { Injectable, InjectableFactory } from '../src/decorator';
 
-
 abstract class Common { }
 @Injectable()
 class SubCommonA extends Common { }
@@ -24,7 +23,6 @@ class SubCommonWithPrimaryA extends CommonWithPrimary { }
 
 @Injectable()
 class SubCommonWithPrimaryB extends CommonWithPrimary { }
-
 
 abstract class CommonWithCustom { }
 @Injectable(Symbol.for('blah'))
@@ -58,7 +56,6 @@ class PrimaryFactory {
     }();
   }
 }
-
 
 @Suite('complex-di')
 class ComplexDiTest {

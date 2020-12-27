@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import type { Compiler } from '@travetto/compiler';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager, ScanApp, AppManifest } from '@travetto/base';

@@ -4,7 +4,6 @@ import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 // import { WhereClause } from '@travetto/model';
 
-
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../base';
 import { VisitStack } from '../../internal/util';

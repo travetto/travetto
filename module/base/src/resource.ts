@@ -111,7 +111,6 @@ class $ResourceManager {
     throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`, 'notfound');
   }
 
-
   /**
    * Find a given resource and return it's location, synchronously
    * @param pth The relative path of a resource to find

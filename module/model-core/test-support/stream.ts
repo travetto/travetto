@@ -34,7 +34,6 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
     ] as const;
   }
 
-
   @BeforeAll()
   async beforeAll() {
     ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '..'));

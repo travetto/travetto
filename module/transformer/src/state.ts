@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 
 import { SystemUtil } from '@travetto/base/src/internal/system';
+import { Util } from '@travetto/base';
 
 import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, TransformerId } from './types/visitor';
@@ -16,8 +17,11 @@ import { CoreUtil, LiteralUtil } from './util';
  * Transformer runtime state
  */
 export class TransformerState implements State {
+  static SYNTHETIC_EXT = 'ᚕsyn';
+
   private resolver: TypeResolver;
   private imports: ImportManager;
+  private syntheticIdentifiers = new Map<string, ts.Identifier>();
   private decorators = new Map<string, ts.PropertyAccessExpression>();
   added = new Map<number, ts.Statement[]>();
   module: string;
@@ -239,5 +243,44 @@ export class TransformerState implements State {
     const target = `${cls[TransformerId]}/${name}`;
     return this.getDecoratorList(node)
       .find(x => x.targets?.includes(target) && (module ? x.name === name && x.module === module : true))?.dec;
+  }
+
+  /**
+   * Generate unique identifier for node
+   * @param node
+   * @param type
+   */
+  generateUniqueIdentifier(node: ts.Node, type: AnyType) {
+    let unique: string;
+    try {
+      // Tie to source location if possible
+      const tgt = DeclarationUtil.getPrimaryDeclarationNode(type.original!);
+      unique = `${ts.getLineAndCharacterOfPosition(tgt.getSourceFile(), tgt.getStart()).line}_${tgt.getEnd() - tgt.getStart()}`;
+      if (tgt.getSourceFile().fileName !== this.source.fileName) { // if in same file
+        unique = `${SystemUtil.naiveHash(tgt.getSourceFile().fileName)}_${unique}`;
+      }
+    } catch {
+      // Determine type unique ident
+      unique = Util.uuid(type.name ? 5 : 10);
+    }
+    // Otherwise read name with uuid
+    let name = type.name && !type.name.startsWith('_') ? type.name : '';
+    if (!name && (node as any).name?.escapedText) {
+      name = `${(node as any).name.escapedText}`;
+    }
+    return `${name}_${unique}`;
+  }
+
+  /**
+   * Register synthetic idetnifier
+   */
+  createSyntheticIdentifier(id: string) {
+    id = `${id}${TransformerState.SYNTHETIC_EXT}`;
+    let exists = true;
+    if (!this.syntheticIdentifiers.has(id)) {
+      this.syntheticIdentifiers.set(id, this.factory.createIdentifier(id));
+      exists = false;
+    }
+    return [this.syntheticIdentifiers.get(id), exists] as [id: ts.Identifier, exists: boolean];
   }
 }

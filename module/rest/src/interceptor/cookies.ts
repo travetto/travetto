@@ -71,7 +71,6 @@ export class CookiesInterceptor implements RestInterceptor {
       this.cookieConfig.domain = this.restConfig.hostname;
     }
 
-
     // Patch all cookies to default to the cookie values
     const set = cookies.prototype.set;
     const get = cookies.prototype.get;

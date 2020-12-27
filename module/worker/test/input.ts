@@ -59,7 +59,6 @@ export class InputSourceTest {
     assert(!(await src.hasNext()));
   }
 
-
   @Test()
   async eventSource() {
     const items = [1, 2, 3];

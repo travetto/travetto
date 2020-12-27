@@ -5,7 +5,6 @@ import { Controller, Post, Body } from '@travett/rest';
 import { AsyncContext } from '../../../src/service';
 import { Preferences } from './model';
 
-
 class PreferenceService {
   private context: AsyncContext;
 
@@ -16,7 +15,6 @@ class PreferenceService {
     return userId;
   }
 }
-
 
 @Controller('/user')
 class PrefRoutes {

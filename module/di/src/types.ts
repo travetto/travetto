@@ -16,7 +16,6 @@ interface Core<T = any> {
   qualifier: symbol;
 }
 
-
 /**
  * State of a Dependency
  */

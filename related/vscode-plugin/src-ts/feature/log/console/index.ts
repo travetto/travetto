@@ -17,7 +17,7 @@ interface Link extends vscode.TerminalLink {
 @Activatible('log')
 export class CleanFeature extends BaseFeature {
 
-  base = fs.existsSync(Workspace.resolve('node_modules/@travetto')) ? './node_modules/@travetto' : './module';
+  base = fs.existsSync(Workspace.resolve('module/boot/package.json')) ? './module' : './node_modules/@travetto';
 
   /**
    * Handle a terminal link being clicked

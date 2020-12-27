@@ -65,7 +65,6 @@ export class WorkPool<X, T extends Worker<X>> {
     ShutdownManager.onShutdown(`worker.pool.${this.constructor.name}`, () => this.shutdown());
   }
 
-
   /**
    * Creates and tracks new worker
    */

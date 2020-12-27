@@ -36,7 +36,6 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async writeAndRead() {
     const service = await this.service;
 
-
     await service.create(User, User.from({ name: 'bob1' }));
     await service.create(User, User.from({ name: 'bob2' }));
 
@@ -45,7 +44,6 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     });
 
     assert(found1.name === 'bob1');
-
 
     const found2 = await service.getByIndex(User, 'userName', {
       name: 'bob2'

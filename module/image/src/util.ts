@@ -53,7 +53,6 @@ export class ImageUtil {
     localCheck: ['jpegotim', ['-h']]
   });
 
-
   /**
    * Resize image using image magick
    */
