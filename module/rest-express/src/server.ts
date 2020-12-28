@@ -5,7 +5,7 @@ import * as compression from 'compression';
 
 import { EnvUtil } from '@travetto/boot';
 import { Injectable } from '@travetto/di';
-import { RouteUtil, RestServer, ParamConfig, RouteConfig, RouteHandler, TRV_RAW } from '@travetto/rest';
+import { RouteUtil, RestServer, ParamConfig, RouteConfig, RouteHandler, NodeRequestSym } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
 
 import { RouteStack } from './internal/types';
@@ -24,11 +24,11 @@ export class ExpressRestServer extends RestServer<express.Application> {
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.raw({ type: 'image/*' }));
     app.use((
-      req: express.Request & { [TRV_RAW]?: express.Request },
-      res: express.Response & { [TRV_RAW]?: express.Response },
+      req: express.Request & { [NodeRequestSym]?: express.Request },
+      res: express.Response & { [NodeRequestSym]?: express.Response },
       next) => {
-      req[TRV_RAW] = req; // Express objects match the framework structure
-      res[TRV_RAW] = res;
+      req[NodeRequestSym] = req; // Express objects match the framework structure
+      res[NodeRequestSym] = res;
       next();
     });
 

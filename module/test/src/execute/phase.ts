@@ -5,7 +5,7 @@ import { TestConsumer } from '../consumer/types';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
 
-export const BREAKOUT = Symbol.for('@trv:test/breakout');
+export const TestBreakoutSym = Symbol.for('@trv:test/breakout');
 
 const TEST_PHASE_TIMEOUT = EnvUtil.getTime('TRV_TEST_PHASE_TIMEOUT', 15, 's');
 
@@ -52,7 +52,7 @@ export class TestPhaseManager {
       const res = await this.triggerSuiteError(`[[${phase}]]`, error);
       this.result.tests.push(res);
       this.result.failed++;
-      throw BREAKOUT;
+      throw TestBreakoutSym;
     }
   }
 
@@ -84,7 +84,7 @@ export class TestPhaseManager {
 
     this.progress = [];
 
-    if (err !== BREAKOUT) {
+    if (err !== TestBreakoutSym) {
       const res = await this.triggerSuiteError('all', err);
       this.result.tests.push(res);
       this.result.failed++;

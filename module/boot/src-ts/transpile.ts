@@ -6,13 +6,13 @@ import { AppCache } from './app-cache';
 
 type Preprocessor = (name: string, contents: string) => string;
 
-const OPTS = Symbol.for('@trv:compiler/options');
+const CompilerOptionsSym = Symbol.for('@trv:compiler/options');
 
 /**
  * Standard transpilation utilities, with support for basic text filters
  */
 export class TranspileUtil {
-  private static [OPTS]: any;
+  private static [CompilerOptionsSym]: any; // Untyped so that the typescript typings do not make it into the API
 
   private static PRE_PROCESSORS: Preprocessor[] = [];
 
@@ -92,7 +92,7 @@ export class TranspileUtil {
    * Get loaded compiler options
    */
   static get compilerOptions(): any {
-    if (!this[OPTS]) {
+    if (!this[CompilerOptionsSym]) {
       const ts: typeof tsi = require('typescript');
       const projTsconfig = FsUtil.resolveUnix('tsconfig.json');
       const baseTsconfig = FsUtil.resolveUnix(__dirname, '..', 'tsconfig.json');
@@ -100,7 +100,7 @@ export class TranspileUtil {
       const config = FsUtil.existsSync(projTsconfig) ? projTsconfig : baseTsconfig;
       const srcRoot = EnvUtil.get('TRV_DEV_ROOT', FsUtil.cwd);
       const json = ts.readJsonConfigFile(config, ts.sys.readFile);
-      this[OPTS] = {
+      this[CompilerOptionsSym] = {
         ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, srcRoot).options,
         rootDir: srcRoot,
         outDir: srcRoot,
@@ -110,7 +110,7 @@ export class TranspileUtil {
         }
       };
     }
-    return this[OPTS];
+    return this[CompilerOptionsSym];
   }
 
   /**

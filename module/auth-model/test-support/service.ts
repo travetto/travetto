@@ -7,10 +7,10 @@ import { BaseModelSuite } from '@travetto/model-core/test-support/base';
 import { ModelCrudSupport, BaseModel, Model } from '@travetto/model-core';
 
 import { ModelPrincipalSource, RegisteredIdentity } from '..';
-import { AuthModelSymbol } from '../src/principal';
+import { AuthModelSym } from '../src/principal';
 
 @Model({
-  for: AuthModelSymbol
+  for: AuthModelSym
 })
 class User extends BaseModel {
   password?: string;

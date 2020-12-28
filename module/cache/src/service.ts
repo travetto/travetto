@@ -6,11 +6,11 @@ import { CacheConfig } from './types';
 import { CacheError } from './error';
 import { CacheUtil } from './util';
 
-export const CacheModelSymbol = Symbol.for('@trv:cache/model');
+export const CacheModelSym = Symbol.for('@trv:cache/model');
 
 const INFINITE_MAX_AGE = new Date('10000-01-01').getTime();
 
-@Model({ for: CacheModelSymbol })
+@Model({ for: CacheModelSym })
 export class CacheType {
   id?: string;
   @Text()
@@ -32,7 +32,7 @@ export class CacheService {
    */
   cullRate = 10 * 60000; // 10 minutes
 
-  constructor(@Inject(CacheModelSymbol) private modelService: ModelExpirySupport) { }
+  constructor(@Inject(CacheModelSym) private modelService: ModelExpirySupport) { }
 
   async get(id: string, extendOnAccess = true) {
     if (this.modelService.deleteExpired) {

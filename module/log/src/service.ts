@@ -1,4 +1,4 @@
-import { ColorUtil, EnvUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/boot';
 import { ConsoleManager, LogLevel, AppManifest } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { MessageContext } from '@travetto/base/src/internal/global-types';
@@ -9,7 +9,7 @@ import { JsonFormatter } from './formatter/json';
 import { ConsoleAppender } from './appender/console';
 import { LogUtil } from './util';
 
-const DEFAULT = Symbol.for('@trv:log/default');
+const DefaultLoggerSym = Symbol.for('@trv:log/default');
 
 type LineContext = { file: string, line: number, scope?: string };
 
@@ -78,7 +78,7 @@ class $Logger {
    * @param appender Defaults to console appender unless specified
    */
   listenDefault(formatter: Formatter, appender?: Appender) {
-    this.listen(DEFAULT, LogUtil.buildListener(formatter, appender ?? new ConsoleAppender()));
+    this.listen(DefaultLoggerSym, LogUtil.buildListener(formatter, appender ?? new ConsoleAppender()));
   }
 
   /**

@@ -5,12 +5,12 @@ import { CacheService } from '@travetto/cache';
 import { Util, AppError } from '@travetto/base';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-core';
 
-import { TRV_SESSION } from './internal/types';
+import { SessionSym } from './internal/types';
 import { Session } from './types';
 import { SessionConfig } from './config';
 import { SessionEncoder } from './encoder/types';
 
-export const SESSION_CACHE = Symbol.for('@trv:session/cache');
+export const SessionCacheSym = Symbol.for('@trv:session/cache');
 
 /**
  * Rest service for supporting the session and managing the session state
@@ -31,7 +31,7 @@ export class RestSessionService {
   /**
    * Cache for storing the session
    */
-  @Inject({ qualifier: SESSION_CACHE, optional: true })
+  @Inject({ qualifier: SessionCacheSym, optional: true })
   cacheSource: CacheService;
 
   /**
@@ -86,10 +86,10 @@ export class RestSessionService {
       session = session instanceof Session ? session : new Session(session);
 
       if (await this.validate(session)) {
-        req[TRV_SESSION] = session;
+        req[SessionSym] = session;
       } else {
         await this.cacheSource.delete(session.key); // Invalid session, nuke it
-        req[TRV_SESSION] = new Session({ action: 'destroy' });
+        req[SessionSym] = new Session({ action: 'destroy' });
       }
     }
   }
@@ -99,7 +99,7 @@ export class RestSessionService {
    */
   async storeToExternal(req: Request, res: Response) {
 
-    let session: Session | undefined = req[TRV_SESSION]; // Do not create automatically
+    let session: Session | undefined = req[SessionSym]; // Do not create automatically
 
     if (!session) {
       return;
@@ -141,10 +141,10 @@ export class RestSessionService {
     Object.defineProperties(req, {
       session: {
         get(this: Request) {
-          if (!(TRV_SESSION in this) || this[TRV_SESSION].action === 'destroy') {
-            this[TRV_SESSION] = new Session({ action: 'create', data: {} });
+          if (!(SessionSym in this) || this[SessionSym].action === 'destroy') {
+            this[SessionSym] = new Session({ action: 'create', data: {} });
           }
-          return this[TRV_SESSION];
+          return this[SessionSym];
         },
         enumerable: true,
         configurable: false

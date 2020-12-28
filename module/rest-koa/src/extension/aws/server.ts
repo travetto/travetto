@@ -6,7 +6,7 @@ import * as awsServerlessExpress from 'aws-serverless-express';
 
 import { Injectable } from '@travetto/di';
 import { RestServer } from '@travetto/rest/src/server/base';
-import { RestLambdaSymbol } from '@travetto/rest/src/internal/lambda';
+import { RestLambdaSym } from '@travetto/rest/src/internal/lambda';
 import { ConfigManager } from '@travetto/config';
 
 import { KoaRestServer } from '../../server';
@@ -15,7 +15,7 @@ import { KoaRestServer } from '../../server';
  * Aws Lambda Rest Server
  */
 @Injectable({
-  qualifier: RestLambdaSymbol,
+  qualifier: RestLambdaSym,
   target: RestServer
 })
 export class AwsLambdaRestServer extends KoaRestServer {

@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { AuthContext } from '@travetto/auth';
 import { AsyncContext } from '@travetto/context';
 
-const CTX_SYM = Symbol.for('@trv:auth-rest/context');
+const AuthContextSym = Symbol.for('@trv:auth-rest/context');
 
 /**
  * Integration with the context service, to allow for tracking of
@@ -24,7 +24,7 @@ export class AuthContextService {
    */
   set(ctx: AuthContext, req?: Request) {
     if (this.context) {
-      this.context.set(CTX_SYM, ctx);
+      this.context.set(AuthContextSym, ctx);
     }
     if (req) {
       req.auth = ctx;
@@ -42,7 +42,7 @@ export class AuthContextService {
     if (req) {
       return req.auth;
     } else if (this.context) {
-      const ctx = this.context.get<AuthContext>(CTX_SYM);
+      const ctx = this.context.get<AuthContext>(AuthContextSym);
       if (!ctx) {
         throw new AppError('Auth context is not present, please authenticate first', 'authentication');
       }
@@ -66,7 +66,7 @@ export class AuthContextService {
    */
   clear(req?: Request) {
     if (this.context) {
-      this.context.set(CTX_SYM, undefined);
+      this.context.set(AuthContextSym, undefined);
     }
     if (req) {
       delete req.auth;

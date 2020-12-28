@@ -1,8 +1,8 @@
 import { Util } from '@travetto/base';
 import { AsyncContext } from '@travetto/context';
 
-const ACTIVE = Symbol.for('@trv:model/sql-active');
-const IN_TX = Symbol.for('@trv:model/sql-transaction');
+const ContextActiveSym = Symbol.for('@trv:model/sql-active');
+const TxActiveSym = Symbol.for('@trv:model/sql-transaction');
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 
@@ -21,14 +21,14 @@ export abstract class Connection<C = any> {
    * Get active connection
    */
   get active(): C {
-    return this.context.get()[ACTIVE] as C;
+    return this.context.get()[ContextActiveSym] as C;
   }
 
   /**
    * Get active tx state
    */
   get activeTx() {
-    return !!this.context.get()[IN_TX] as boolean;
+    return !!this.context.get()[TxActiveSym] as boolean;
   }
 
   /**
@@ -66,7 +66,7 @@ export abstract class Connection<C = any> {
 
     return await this.context.run(async () => {
       try {
-        this.context.set(ACTIVE, await this.acquire());
+        this.context.set(ContextActiveSym, await this.acquire());
         return op();
       } finally {
         if (this.active) {
@@ -91,7 +91,7 @@ export abstract class Connection<C = any> {
     const self = this;
     yield* this.context.iterate(async function* () {
       try {
-        self.context.set(ACTIVE, await self.acquire());
+        self.context.set(ContextActiveSym, await self.acquire());
         yield* op();
       } finally {
         if (self.active) {
@@ -122,7 +122,7 @@ export abstract class Connection<C = any> {
       }
     } else {
       return this.runWithActive(() => {
-        this.context.set(IN_TX, true);
+        this.context.set(TxActiveSym, true);
         return this.runWithTransaction('force', op);
       });
     }

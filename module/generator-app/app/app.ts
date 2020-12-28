@@ -49,7 +49,7 @@ export class TravettoGenerator extends Generator {
       name = res.name;
     }
 
-    this.destinationRoot(FsUtil.resolveUnix(EnvUtil.get('TRV_GEN_CWD')!, name));
+    this.destinationRoot(FsUtil.resolveUnix(EnvUtil.get('INIT_CWD')!, name));
 
     try {
       if (!EnvUtil.isTrue('TRV_GEN_NO_VERIFY')) {

@@ -19,9 +19,9 @@ export class StacktraceUtil {
       '(native)',
       'internal',
       'tslib',
-      '@travetto/boot', // @line-if $TRV_DEV_ROOT
-      '@travetto/context', // @line-if $TRV_DEV_ROOT
-      '@travetto/watch', // @line-if $TRV_DEV_ROOT
+      '@travetto/boot', // @line-if -$TRV_DEV_ROOT
+      '@travetto/context', // @line-if -$TRV_DEV_ROOT
+      '@travetto/watch', // @line-if -$TRV_DEV_ROOT
       'typescript',
       'source-map-support.js'
     );

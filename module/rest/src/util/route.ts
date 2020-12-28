@@ -1,4 +1,4 @@
-import { Request, Response, Filter, RouteConfig, TRV_ADDED_HEADERS } from '../types';
+import { Request, Response, Filter, RouteConfig, HeadersAddedSym } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { RestInterceptor } from '../interceptor/types';
 
@@ -64,7 +64,7 @@ export class RouteUtil {
 
     if (headers && Object.keys(headers).length > 0) {
       filterChain.unshift((async (__: Request, res: Response, next: () => Promise<any>) => {
-        res[TRV_ADDED_HEADERS] = { ...headers };
+        res[HeadersAddedSym] = { ...headers };
         return next();
       }));
     }

@@ -1,1 +1,1 @@
-export const RestLambdaSymbol = Symbol.for('@trv:rest/aws-lambda');
+export const RestLambdaSym = Symbol.for('@trv:rest/aws-lambda');

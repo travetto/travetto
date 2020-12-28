@@ -105,7 +105,10 @@ export class SystemUtil {
     ) { // Relative path
       const fileDir = path.dirname(FsUtil.resolveUnix(file));
       const baseDir = path.dirname(FsUtil.resolveUnix(base));
-      file = `${path.relative(fileDir, baseDir) || '.'}/${path.basename(file)}`;
+      file = `${path.relative(baseDir, fileDir) || '.'}/${path.basename(file)}`;
+      if (/^[A-Za-z]/.test(file)) {
+        file = `./${file}`;
+      }
     }
 
     return file;

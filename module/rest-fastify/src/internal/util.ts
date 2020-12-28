@@ -1,17 +1,18 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { RestServerUtil } from '@travetto/rest';
-import { TRV_ORIG, TRV_RAW, Request, Response } from '@travetto/rest/src/types';
+import { NodeResponseSym, NodeRequestSym, ProviderRequestSym, ProviderResponseSym, Request } from '@travetto/rest/src/types';
 
-const TRV_KEY = Symbol.for('@trv:rest-fastify/req');
+const RequestSym = Symbol.for('@trv:rest-fastify/req');
+const ResponseSym = Symbol.for('@trv:rest-fastify/res');
 
 type FRequest = FastifyRequest & {
-  [TRV_KEY]?: Travetto.Request;
+  [RequestSym]?: Travetto.Request;
   session?: Record<string, any>;
 };
 
 type FResponse = FastifyReply & {
-  [TRV_KEY]?: Travetto.Response;
+  [ResponseSym]?: Travetto.Response;
 };
 
 /**
@@ -22,14 +23,14 @@ export class FastifyServerUtil {
    * Build a Travetto Request from a Fastify Request
    */
   static getRequest(reqs: FRequest) {
-    if (!reqs[TRV_KEY]) {
+    if (!reqs[RequestSym]) {
       let [path] = (reqs.raw!.url ?? '').split(/[#?]/g);
       if (!path.startsWith('/')) {
         path = `/${path}`;
       }
-      reqs[TRV_KEY] = RestServerUtil.decorateRequest({
-        [TRV_ORIG]: reqs,
-        [TRV_RAW]: reqs.raw,
+      reqs[RequestSym] = RestServerUtil.decorateRequest({
+        [ProviderRequestSym]: reqs,
+        [NodeRequestSym]: reqs.raw,
         protocol: (reqs.raw.socket && 'encrypted' in reqs.raw.socket) ? 'https' : 'http',
         method: reqs.raw.method as Request['method'],
         path,
@@ -44,17 +45,17 @@ export class FastifyServerUtil {
         on: reqs.raw.on.bind(reqs.raw)
       });
     }
-    return reqs[TRV_KEY]!;
+    return reqs[RequestSym]!;
   }
 
   /**
    * Build a Travetto Response from a Fastify Reply
    */
   static getResponse(reply: FResponse) {
-    if (!reply[TRV_KEY]) {
-      reply[TRV_KEY] = RestServerUtil.decorateResponse({
-        [TRV_ORIG]: reply,
-        [TRV_RAW]: reply.raw,
+    if (!reply[ResponseSym]) {
+      reply[ResponseSym] = RestServerUtil.decorateResponse({
+        [ProviderResponseSym]: reply,
+        [NodeResponseSym]: reply.raw,
         get headersSent() {
           return reply.sent;
         },
@@ -86,6 +87,6 @@ export class FastifyServerUtil {
       });
     }
 
-    return reply[TRV_KEY]!;
+    return reply[ResponseSym]!;
   }
 }

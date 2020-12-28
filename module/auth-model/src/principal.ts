@@ -6,14 +6,14 @@ import { Class } from '@travetto/registry';
 
 import { RegisteredIdentity } from './identity';
 
-export const AuthModelSymbol = Symbol.for('@trv:auth-model/model');
+export const AuthModelSym = Symbol.for('@trv:auth-model/model');
 
 /**
  * A model-based principal source
  */
 export class ModelPrincipalSource<T extends ModelType> implements PrincipalSource {
 
-  @Inject(AuthModelSymbol)
+  @Inject(AuthModelSym)
   private modelService: ModelCrudSupport;
 
   /**
