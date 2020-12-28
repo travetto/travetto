@@ -11,7 +11,7 @@ export interface ManagedExtra {
 type TargetId = string;
 type ClassId = string;
 
-const PRIMARY = Symbol.for('@trv:di/primary');
+const PrimaryCandidateSym = Symbol.for('@trv:di/primary');
 
 /**
  * Dependency registry
@@ -49,8 +49,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     } else {
       const resolved = [...qualifiers.keys()];
       if (!qualifier) {
-        if (qualifiers.has(PRIMARY)) {
-          qualifier = PRIMARY;
+        if (qualifiers.has(PrimaryCandidateSym)) {
+          qualifier = PrimaryCandidateSym;
         } else {
           const filtered = resolved.filter(x => !!x).filter(x => this.defaultSymbols.has(x));
           if (filtered.length === 1) {
@@ -427,7 +427,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
 
       if (config.primary) {
-        this.targetToClass.get(parentId)!.set(PRIMARY, classId);
+        this.targetToClass.get(parentId)!.set(PrimaryCandidateSym, classId);
       }
 
       this.targetToClass.get(parentId)!.set(config.qualifier, classId);
@@ -438,7 +438,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       if (!this.targetToClass.has(classId)) {
         this.targetToClass.set(classId, new Map());
       }
-      this.targetToClass.get(classId)!.set(PRIMARY, classId);
+      this.targetToClass.get(classId)!.set(PrimaryCandidateSym, classId);
 
       // Register primary if only one interface provided and no parent config
       if (config.interfaces.length === 1 && !parentConfig) {
@@ -446,7 +446,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         if (!this.targetToClass.has(intf.ᚕid)) {
           this.targetToClass.set(intf.ᚕid, new Map());
         }
-        this.targetToClass.get(intf.ᚕid)!.set(PRIMARY, classId);
+        this.targetToClass.get(intf.ᚕid)!.set(PrimaryCandidateSym, classId);
       }
     }
 

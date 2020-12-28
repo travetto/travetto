@@ -8,21 +8,21 @@ import { ControllerRegistry } from '../registry/controller';
 import { Request, ParamConfig } from '../types';
 import { ExtractFn } from '../util/param';
 
-const QUERY_SCHEMA: unique symbol = Symbol.for('@trv:rest/schema-query');
+const QuerySchemaSym: unique symbol = Symbol.for('@trv:rest/schema-query');
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Travetto {
     // eslint-disable-next-line no-shadow
     interface Request {
-      [QUERY_SCHEMA]: Record<string, any>;
+      [QuerySchemaSym]: Record<string, any>;
     }
   }
 }
 
 const EXTRACTORS: Record<'body' | 'query', ExtractFn> = {
   body: (c, r) => r.body,
-  query: (c, r) => r[QUERY_SCHEMA] && r[QUERY_SCHEMA][c.name!]
+  query: (c, r) => r[QuerySchemaSym] && r[QuerySchemaSym][c.name!]
 };
 
 /**
@@ -69,9 +69,9 @@ export function schemaParamConfig(location: 'body' | 'query', config: Partial<Pa
     resolve: location === 'query' ?
       async (req: Request) => {
         const cls = SchemaRegistry.get(config.type!).class;
-        req[QUERY_SCHEMA] = req[QUERY_SCHEMA] || {};
+        req[QuerySchemaSym] = req[QuerySchemaSym] || {};
         const exploded = BindUtil.expandPaths(req.query);
-        req[QUERY_SCHEMA][config.name!] = await getSchemaInstance(config.key ? exploded[config.key] : exploded, cls!, config.view!);
+        req[QuerySchemaSym][config.name!] = await getSchemaInstance(config.key ? exploded[config.key] : exploded, cls!, config.view!);
       } :
       async (req: Request) => {
         const cls = SchemaRegistry.get(config.type!).class;

@@ -1,5 +1,5 @@
 import { Session } from './types';
-import { TRV_SESSION } from './internal/types';
+import { SessionSym } from './internal/types';
 
 /**
  * Declare the session on the request
@@ -7,7 +7,7 @@ import { TRV_SESSION } from './internal/types';
 declare global {
   namespace Travetto {
     interface Request {
-      [TRV_SESSION]: Session;
+      [SessionSym]: Session;
       readonly session: Session;
     }
   }

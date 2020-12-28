@@ -1,7 +1,7 @@
 import 'express-serve-static-core';
 import { SetOption, GetOption } from 'cookies';
 import { IncomingMessage, ServerResponse } from 'http';
-import { TRV_RAW, TRV_ORIG, TRV_ADDED_HEADERS, HeaderMap } from './types';
+import { NodeRequestSym, NodeResponseSym, ProviderRequestSym, ProviderResponseSym, HeadersAddedSym, HeaderMap } from './types';
 
 declare global {
   namespace Travetto {
@@ -13,11 +13,11 @@ declare global {
       /**
        * The original request of the underlying framework
        */
-      [TRV_ORIG]?: any;
+      [ProviderRequestSym]?: any;
       /**
        * The raw http Incoming Message object
        */
-      [TRV_RAW]: IncomingMessage;
+      [NodeRequestSym]: IncomingMessage;
       /**
        * The http method
        */
@@ -89,15 +89,15 @@ declare global {
       /**
        * The underlying request object
        */
-      [TRV_ORIG]?: any;
+      [ProviderResponseSym]?: any;
       /**
        * The raw http server response object
        */
-      [TRV_RAW]: ServerResponse;
+      [NodeResponseSym]: ServerResponse;
       /**
        * The additional headers for this request, provided by controllers/route config
        */
-      [TRV_ADDED_HEADERS]?: HeaderMap;
+      [HeadersAddedSym]?: HeaderMap;
       /**
        * Outbound status code
        */

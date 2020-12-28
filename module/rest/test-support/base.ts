@@ -9,7 +9,7 @@ import { StreamUtil } from '@travetto/boot';
 
 import type { RestServer } from '../src/server/base';
 import { ServerHandle } from '../src/types';
-import { RestLambdaSymbol } from '../src/internal/lambda';
+import { RestLambdaSym } from '../src/internal/lambda';
 
 const toMultiValue = (o: Record<string, string> | undefined) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, [v]]));
 const baseLambdaEvent = { resource: '/{proxy+}' };
@@ -88,7 +88,7 @@ export abstract class BaseRestSuite {
         }
       }
     } else {
-      this.server = await DependencyRegistry.getInstance(rest.RestServer, RestLambdaSymbol);
+      this.server = await DependencyRegistry.getInstance(rest.RestServer, RestLambdaSym);
       this.handle = await this.server.run();
     }
   }

@@ -11,14 +11,16 @@ export class TestLernaPlugin extends BasePlugin {
   name = 'test:lerna';
 
   init(cmd: commander.Command) {
-    return cmd.option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, `${Math.min(4, os.cpus().length - 1)}`);
+    return cmd
+      .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, `${Math.min(4, os.cpus().length - 1)}`)
+      .option('-m, --mode <mode>', 'Test mode', /^standard|extension$/, 'standard');
   }
 
   async action() {
     const child = ExecUtil.spawn('npx', [
       'lerna', '--no-sort',
       'exec', '--no-bail', '--stream', '--',
-      'npx', 'trv', 'test', '-f', 'event', '-c', '2'
+      'npx', 'trv', 'test', '-f', 'event', '-m', this._cmd.mode, '-c', '2'
     ], { shell: true, rawOutput: true, cwd: FsUtil.resolveUnix(__dirname, '..', '..') });
 
     const { RunnableTestConsumer } = await import('../src/consumer/types/runnable');

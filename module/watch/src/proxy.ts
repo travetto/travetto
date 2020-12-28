@@ -1,4 +1,4 @@
-const IS_PROXIED = Symbol.for('@trv:watch/proxy');
+const IsProxiedSym = Symbol.for('@trv:watch/proxy');
 
 /**
  * Handler for for proxying modules while watching
@@ -46,7 +46,7 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   has(target: T, prop: PropertyKey) {
-    if (prop === IS_PROXIED) {
+    if (prop === IsProxiedSym) {
       return true;
     }
     // @ts-expect-error
@@ -83,7 +83,7 @@ interface Proxy<T> { }
  */
 export class RetargettingProxy<T> {
   static isProxied(o: any): o is RetargettingProxy<any> {
-    return o && IS_PROXIED in o;
+    return o && IsProxiedSym in o;
   }
 
   private handler: RetargettingHandler<T>;
