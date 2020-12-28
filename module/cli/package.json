@@ -13,7 +13,7 @@
   "title": "Command Line Interface",
   "dependencies": {
     "@travetto/base": "^1.1.1",
-    "commander": "^6.2.0"
+    "commander": "^6.2.1"
   },
   "description": "CLI infrastructure for travetto framework",
   "homepage": "https://travetto.io",
