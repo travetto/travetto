@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/command": "^1.1.2"
+    "@travetto/command": "^2.0.0-alpha.0"
   },
   "title": "Image",
   "description": "Image support, resizing, and optimization",

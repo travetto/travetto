@@ -7,10 +7,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^1.1.1",
-    "@travetto/context": "^1.1.1",
-    "@travetto/model-core": "^1.1.1",
-    "@travetto/model-query": "^1.1.1"
+    "@travetto/config": "^2.0.0-alpha.0",
+    "@travetto/context": "^2.0.0-alpha.0",
+    "@travetto/model-core": "^2.0.0-alpha.0",
+    "@travetto/model-query": "^2.0.0-alpha.0"
   },
   "peerDependencies": {
     "mysql": "^2.18.1",
@@ -19,7 +19,7 @@
   "title": "SQL Model Source",
   "description": "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "devDependencies": {
-    "@travetto/app": "^1.1.1"
+    "@travetto/app": "^2.0.0-alpha.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [

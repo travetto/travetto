@@ -7,10 +7,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth": "^1.1.1",
-    "@travetto/config": "^1.1.1",
-    "@travetto/context": "^1.1.1",
-    "@travetto/rest": "^1.1.1"
+    "@travetto/auth": "^2.0.0-alpha.0",
+    "@travetto/config": "^2.0.0-alpha.0",
+    "@travetto/context": "^2.0.0-alpha.0",
+    "@travetto/rest": "^2.0.0-alpha.0"
   },
   "optionalPeerDependencies": {
     "@types/passport": "^1.0.4",

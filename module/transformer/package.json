@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^1.1.1"
+    "@travetto/base": "^2.0.0-alpha.0"
   },
   "title": "Transformation",
   "description": "Functionality for AST transformations, with transformer registration, and general utils",

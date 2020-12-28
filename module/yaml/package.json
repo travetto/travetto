@@ -15,7 +15,7 @@
     "simple-yaml"
   ],
   "dependencies": {
-    "@travetto/base": "^1.1.1"
+    "@travetto/base": "^2.0.0-alpha.0"
   },
   "license": "MIT",
   "main": "index.ts",

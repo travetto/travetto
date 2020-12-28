@@ -9,8 +9,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^1.0.0-rc.10",
     "@aws-sdk/credential-provider-ini": "^1.0.0-rc.10",
-    "@travetto/model-core": "^1.1.1",
-    "@travetto/config": "^1.1.1"
+    "@travetto/model-core": "^2.0.0-alpha.0",
+    "@travetto/config": "^2.0.0-alpha.0"
   },
   "title": "S3 Model Support",
   "description": "S3 backing for the travetto model module.",
