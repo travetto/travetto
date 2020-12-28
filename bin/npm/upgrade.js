@@ -18,7 +18,7 @@ async function updateModule(root) {
       Object.entries(pkg[type] ?? {})
         .map(/** @param inp {[string, string]} */([dep, version]) => ({ dep, type, version }))
     )
-    .reduce((all, items) => all.push(...items))
+    .reduce((all, items) => all.concat(items), [])
     .filter(x => !x.dep.startsWith('@travetto'))
     .filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
     .map(({ dep, type, version }) =>
@@ -47,7 +47,7 @@ async function updateModule(root) {
 /**
  * Main Entry point
  */
-export async function run() {
+async function run() {
   const packages = (await ExecUtil.spawn(`npx`, ['lerna', 'ls', '-p', '-a']).result).stdout.split(/\n/)
     .filter(x => !!x && x.includes(FsUtil.cwd))
     .map(x => FsUtil.resolveUnix(x));
@@ -60,3 +60,6 @@ export async function run() {
 
   await updateModule(process.cwd());
 }
+
+
+module.exports = { run };
