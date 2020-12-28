@@ -7,10 +7,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^1.1.1",
-    "@travetto/rest": "^1.1.1",
-    "@travetto/schema": "^1.1.1",
-    "@travetto/yaml": "^1.1.1",
+    "@travetto/config": "^2.0.0-alpha.0",
+    "@travetto/rest": "^2.0.0-alpha.0",
+    "@travetto/schema": "^2.0.0-alpha.0",
+    "@travetto/yaml": "^2.0.0-alpha.0",
     "openapi3-ts": "^1.4.0"
   },
   "title": "OpenAPI Specification",

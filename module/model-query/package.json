@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^1.1.1",
-    "@travetto/schema": "^1.1.1",
-    "@travetto/model-core": "^1.1.1"
+    "@travetto/di": "^2.0.0-alpha.0",
+    "@travetto/schema": "^2.0.0-alpha.0",
+    "@travetto/model-core": "^2.0.0-alpha.0"
   },
   "title": "Data Model Querying",
   "description": "Datastore abstraction for advanced query support.",

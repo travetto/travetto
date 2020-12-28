@@ -7,13 +7,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/auth": "^1.1.1",
-    "@travetto/model-core": "^1.1.1"
+    "@travetto/auth": "^2.0.0-alpha.0",
+    "@travetto/model-core": "^2.0.0-alpha.0"
   },
   "title": "Model Auth Source",
   "description": "Model-based authentication and registration support for the travetto framework",
   "optionalPeerDependencies": {
-    "@travetto/auth-rest": "^1.1.0-rc.0"
+    "@travetto/auth-rest": "^2.0.0-alpha.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [

@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/cache": "^1.1.3",
-    "@travetto/config": "^1.1.1",
-    "@travetto/rest": "^1.1.1"
+    "@travetto/cache": "^2.0.0-alpha.0",
+    "@travetto/config": "^2.0.0-alpha.0",
+    "@travetto/rest": "^2.0.0-alpha.0"
   },
   "title": "REST Session",
   "description": "Session provider for the travetto rest module.",
