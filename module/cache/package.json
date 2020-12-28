@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/compiler": "^1.1.1",
-    "@travetto/di": "^1.1.1",
-    "@travetto/model-core": "^1.1.1"
+    "@travetto/compiler": "^2.0.0-alpha.0",
+    "@travetto/di": "^2.0.0-alpha.0",
+    "@travetto/model-core": "^2.0.0-alpha.0"
   },
   "title": "Caching",
   "description": "Caching functionality with decorators for declarative use.",

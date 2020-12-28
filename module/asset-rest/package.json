@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/asset": "^1.1.1",
-    "@travetto/config": "^1.1.1",
-    "@travetto/rest": "^1.1.1",
+    "@travetto/asset": "^2.0.0-alpha.0",
+    "@travetto/config": "^2.0.0-alpha.0",
+    "@travetto/rest": "^2.0.0-alpha.0",
     "@types/busboy": "^0.2.3",
     "busboy": "^0.3.1",
     "mime-match": "^1.0.2"

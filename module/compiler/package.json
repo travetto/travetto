@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^1.1.1",
-    "@travetto/transformer": "^1.1.1",
-    "@travetto/watch": "^1.1.1"
+    "@travetto/base": "^2.0.0-alpha.0",
+    "@travetto/transformer": "^2.0.0-alpha.0",
+    "@travetto/watch": "^2.0.0-alpha.0"
   },
   "title": "Compiler",
   "description": "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.",
