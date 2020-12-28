@@ -1,2 +1,2 @@
 #!/bin/sh
-node -r './bin/npm/.env.js' -e 'require("./bin/npm/upgrade").run()'
+node -r './bin/util/.env.js' -e 'require("./bin/util/upgrade").run()'

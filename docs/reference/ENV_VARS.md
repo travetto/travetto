@@ -6,7 +6,9 @@ The common environment variables throughout the code base:
 * `TRV_ROOTS` = ['.']            - The root of the application search space
 * `TRV_RESOURCE_ROOTS` = ['.']   - The root of resource searching
 * `TRV_WATCH` = 0|1              - Wether or not to run the program in watch mode
-* `TRV_READONLY` = 0|1            - Should compilation be supported, forced to false in PROD.  Defaults to 1
+* `TRV_READONLY` = 0|1           - Should compilation be supported, forced to false in PROD.  Defaults to 1
+* `TRV_MODULES` = []             - The list of additional npm modules to treat as framework modules
+* `TRV_REQUIRES` = []            - List of additional scripts to require before executing the primary registration
 
 ## Logging 
 * `TRV_DEBUG` = 0|*              - Outputs all console.debug messages, defaults to `*` in dev, and `off` in prod.  Will inherit from `DEBUG` if not specified.
@@ -26,6 +28,5 @@ The common environment variables throughout the code base:
 * `TRV_DEV_ROOT` = `module/`     - The root folder for all modules, when in dev mode
 * `TRV_CACHE` = cwd              - The output directory for compilation, defaults to `.trv_cache` of the cwd
 * `TRV_SHUTDOWN_WAIT` = 2s       - The max time to wait for shutdown to finish after initial SIGINT, default `2s`
-* `TRV_MODULES` = []             - The list of additional npm modules to treat as framework modules
 
 Anything not prefixed with `TRV_`, is a standard env var that we are leveraging
