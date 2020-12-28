@@ -1,14 +1,14 @@
 # Bash Autocompletion
 _travetto()
 {
-    local TRV_COMP="${PWD}/node_modules/.bin/travetto";
-    local CUR=${COMP_WORDS[COMP_CWORD]}    
-    if [ -f "$TRV_COMP" ]; then
-      local WORDS=`${TRV_COMP} complete ${COMP_WORDS[@]:1}`
-      if [[ -z "$WORDS" ]]; then
+    local trv="${PWD}/node_modules/.bin/travetto";
+    local cur=${COMP_WORDS[COMP_CWORD]}    
+    if [ -f "$trv" ]; then
+      local words=`${trv} complete ${COMP_WORDS[@]:1}`
+      if [[ -z "$words" ]]; then
         COMPREPLY=( )
       else
-      COMPREPLY=( $(compgen  -W "$WORDS" -- $CUR) )
+      COMPREPLY=( $(compgen  -W "$words" -- $cur) )
       fi
     else
       COMPREPLY=( )
