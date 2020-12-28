@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as busboy from 'busboy';
 import match = require('mime-match');
 
-import { Request, Response, TRV_RAW } from '@travetto/rest';
+import { Request, Response, NodeRequestSym, NodeResponseSym } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 import { AppError } from '@travetto/base';
 import { FsUtil, StreamUtil } from '@travetto/boot';
@@ -62,7 +62,7 @@ export class AssetRestUtil {
 
     if (!/multipart|urlencoded/i.test(req.header('content-type') as string)) {
       const filename = this.getFileName(req);
-      return this.toLocalAsset(req.body ?? req[TRV_RAW], filename, allowedTypes, excludedTypes)
+      return this.toLocalAsset(req.body ?? req[NodeRequestSym], filename, allowedTypes, excludedTypes)
         .then(file => ({ file }));
     } else {
       return new Promise<AssetMap>((resolve, reject) => {
@@ -114,10 +114,10 @@ export class AssetRestUtil {
         res.setHeader('Content-Type', asset.contentType);
         res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
         await new Promise((resolve, reject) => {
-          stream.pipe(res[TRV_RAW]);
-          res[TRV_RAW].on('error', reject);
-          res[TRV_RAW].on('drain', resolve);
-          res[TRV_RAW].on('close', resolve);
+          stream.pipe(res[NodeResponseSym]);
+          res[NodeResponseSym].on('error', reject);
+          res[NodeResponseSym].on('drain', resolve);
+          res[NodeResponseSym].on('close', resolve);
         });
       }
     };

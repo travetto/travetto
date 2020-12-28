@@ -2,7 +2,7 @@ import { Controller, Get, Post, Redirect, Context, Request } from '@travetto/res
 import { Authenticate, Authenticated, Unauthenticated } from '@travetto/auth-rest';
 import { AuthContext } from '@travetto/auth';
 
-import { BASIC } from './auth.config';
+import { BasicAuthSym } from './auth.config';
 
 /**
  * Auth API
@@ -11,7 +11,7 @@ import { BASIC } from './auth.config';
 export class ApiController {
 
   @Post('/login')
-  @Authenticate(BASIC)
+  @Authenticate(BasicAuthSym)
   async getAll() {
     return new Redirect('/auth/self', 301);
   }

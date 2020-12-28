@@ -47,21 +47,21 @@ const METHODS: Record<string, Function[]> = {
 
 const OP_TOKEN_TO_NAME = new Map<number, string>();
 
-const ASSERT = Symbol.for('@trv:test/assert');
-const isTest = Symbol.for('@trv:test/valid');
+const AssertSym = Symbol.for('@trv:test/assert');
+const IsTestSym = Symbol.for('@trv:test/valid');
 
 /**
  * Assert transformation state
  */
 interface AssertState {
-  [ASSERT]?: {
+  [AssertSym]?: {
     assert: ts.Identifier;
     hasAssertCall?: boolean;
     assertCheck: ts.PropertyAccessExpression;
     checkThrow: ts.PropertyAccessExpression;
     checkThrowAsync: ts.PropertyAccessExpression;
   };
-  [isTest]?: boolean;
+  [IsTestSym]?: boolean;
 }
 
 /**
@@ -138,9 +138,9 @@ export class AssertTransformer {
    * Initialize transformer state
    */
   static initState(state: TransformerState & AssertState) {
-    if (!state[ASSERT]) {
+    if (!state[AssertSym]) {
       const assrt = state.importFile('@travetto/test/src/assert/check').ident;
-      state[ASSERT] = {
+      state[AssertSym] = {
         assert: assrt,
         assertCheck: CoreUtil.createAccess(state.factory, assrt, ASSERT_UTIL, 'check'),
         checkThrow: CoreUtil.createAccess(state.factory, assrt, ASSERT_UTIL, 'checkThrow'),
@@ -159,7 +159,7 @@ export class AssertTransformer {
     const firstText = first!.getText();
 
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
-    const check = state.factory.createCallExpression(state[ASSERT]!.assertCheck, undefined, state.factory.createNodeArray([
+    const check = state.factory.createCallExpression(state[AssertSym]!.assertCheck, undefined, state.factory.createNodeArray([
       state.fromLiteral({
         file: state.getFilenameAsSrc(),
         line: state.fromLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
@@ -182,7 +182,7 @@ export class AssertTransformer {
 
     this.initState(state);
     return state.factory.createCallExpression(
-      /reject/i.test(key) ? state[ASSERT]!.checkThrowAsync : state[ASSERT]!.checkThrow,
+      /reject/i.test(key) ? state[AssertSym]!.checkThrowAsync : state[AssertSym]!.checkThrow,
       undefined,
       state.factory.createNodeArray([
         state.fromLiteral({
@@ -275,14 +275,14 @@ export class AssertTransformer {
   @OnCall()
   static onAssertCall(state: TransformerState & AssertState, node: ts.CallExpression) {
     // If not in test mode, see if file is valid
-    if (state[isTest] === undefined) {
+    if (state[IsTestSym] === undefined) {
       const name = FsUtil.toUnix(state.source.fileName);
       // Only apply to test files, allowing for inheriting from module test files as well
-      state[isTest] = /\/(test|test-support|test-extension)\//.test(name) && !name.includes('/test/src/');
+      state[IsTestSym] = /\/(test|test-support|test-extension)\//.test(name) && !name.includes('/test/src/');
     }
 
     // Only check in test mode
-    if (!state[isTest]) {
+    if (!state[IsTestSym]) {
       return node;
     }
 

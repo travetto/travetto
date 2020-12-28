@@ -4,7 +4,7 @@ import { InjectableFactory } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { AppError } from '@travetto/base';
 
-export const BASIC = Symbol.for('AUTH_BASIC');
+export const BasicAuthSym = Symbol.for('AUTH_BASIC');
 
 class AuthConfig {
   @InjectableFactory()
@@ -16,7 +16,7 @@ class AuthConfig {
     }();
   }
 
-  @InjectableFactory(BASIC)
+  @InjectableFactory(BasicAuthSym)
   static getIdentitySource(): IdentitySource {
     return new class extends IdentitySource {
       async authenticate(req: Request, res: Response) {
