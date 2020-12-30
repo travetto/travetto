@@ -72,9 +72,9 @@ export class LiteralUtil {
     } else if (val.kind === ts.SyntaxKind.NullKeyword) {
       return null;
     } else if (ts.isStringLiteral(val)) {
-      return val.getText().substring(1, val.getText().length - 1);
+      return val.text;
     } else if (ts.isNumericLiteral(val)) {
-      const txt = val.getText();
+      const txt = val.text;
       if (txt.includes('.')) {
         return parseFloat(txt);
       } else {

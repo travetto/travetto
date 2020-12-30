@@ -91,10 +91,10 @@ export class SystemUtil {
   static convertFileToModule(file: string, base?: string): string;
   static convertFileToModule(file: undefined, base?: string): undefined;
   static convertFileToModule(file: string | undefined, base?: string) {
-    file = file?.replace(FsUtil.cwd, '.')
-      .replace(/^.*node_modules/, '')
-      .replace(process.env.TRV_DEV_ROOT!, '@travetto') // @line-if $TRV_DEV_ROOT
-      .replace(/[.](t|j)s$/, '');
+    file = file?.replace(/[.](t|j)s$/, '')
+      .replace(`${process.env.TRV_DEV}/module`, '@travetto') // @line-if $TRV_DEV
+      .replace(FsUtil.cwd, '.')
+      .replace(/^.*node_modules\//, '');
 
     if (
       file?.startsWith('.') &&

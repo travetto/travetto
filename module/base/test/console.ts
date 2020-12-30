@@ -13,7 +13,7 @@ export class ConsoleManagerTest {
     ConsoleManager.set({
       onLog: (level, ctx, args) => logs.push({ level, ctx, args })
     });
-    (ᚕlg as any)('info', 'a', 'b', 'c');
+    (ᚕlg as any)('info', {}, 'a', 'b', 'c');
     assert(logs.length === 1);
     assert(logs[0].args === ['a', 'b', 'c']);
   }

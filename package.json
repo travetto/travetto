@@ -18,7 +18,7 @@
     "service": "./bin/npm/service.sh",
     "test": "./bin/npm/test.sh",
     "upgrade": "./bin/npm/upgrade.sh",
-    "init": "npm run bootstrap; npm run link",
+    "init": "npm run bootstrap; npm run link; npm run vscode-plugin",
     "vscode-plugin": "./bin/npm/vscode-plugin.sh",
     "reinit": "rm -rf node_modules; npm run clean; npm i; npm run init"
   },

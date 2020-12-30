@@ -80,12 +80,6 @@ export class Runner {
         .filter(l => l.includes('@file-if'))
         .map(x => x.split('@file-if')[1].trim())
         .filter(x => x.startsWith('@travetto'))
-        .map(m => [
-          m,
-          FsUtil.resolveUnix('node_modules', m)
-            .replace(/.*node_modules\/@travetto/, process.env.TRV_DEV_ROOT!) // @line-if $TRV_DEV_ROOT
-        ])
-        .map(([k, v]) => `${k}=${v}`)
         .join(',');
 
       const cache = `.trv_cache_${SystemUtil.naiveHash(modules)}`;

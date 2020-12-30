@@ -1,5 +1,6 @@
-const root = process.env.TRV_DEV_ROOT;
-const { FsUtil } = require(`${root}/boot/src/fs`);
+const requireDev = (m) => require(m.replace('@travetto', `${process.env.TRV_DEV}/module`));
+
+const { FsUtil } = requireDev('@travetto/boot/src/fs');
 
 /**
  * Gather all dependencies of a given module
@@ -8,7 +9,7 @@ const { FsUtil } = require(`${root}/boot/src/fs`);
 function readDeps() {
   const existing = (process.env.TRV_MODULES ?? '').trim().split(/\s*,\s*/).map(x => x.split('='));
 
-  const { dependencies, devDependencies } = require(`${FsUtil.cwd}/package.json`);
+  const { name, dependencies, devDependencies } = require(FsUtil.resolveUnix('package.json'));
   const keys = [
     ...existing.filter(([k, v]) => k.startsWith('@travetto')).map(([k, v]) => k),
     '@travetto/test', '@travetto/cli', '@travetto/app', '@travetto/log', // Givens
@@ -21,10 +22,9 @@ function readDeps() {
 
   while (keys.length) {
     const top = keys.shift();
-    const path = top.replace('@travetto', root);
-    final.set(top, path);
-    const deps = Object.keys(require(`${path}/package.json`).dependencies ?? {})
-      .filter(x => x.startsWith('@travetto'));
+    final.set(top, null);
+    const deps = Object.keys(requireDev(`${top}/package.json`).dependencies ?? {})
+      .filter(x => x.startsWith('@travetto') && x !== name);
 
     for (const sub of deps) {
       if (!final.has(sub)) {
@@ -39,7 +39,7 @@ function readDeps() {
   ]);
 }
 
-const { FileCache } = require(`${root}/boot/src/cache`);
+const { FileCache } = requireDev('@travetto/boot/src/cache');
 const cache = new FileCache(process.env.TRV_CACHE ?? '.trv_cache');
 cache.init();
 const content = cache.getOrSet('dev-modules.json', () => JSON.stringify(readDeps()));
@@ -47,4 +47,4 @@ const resolved = Object.entries(JSON.parse(content));
 process.env.TRV_MODULES = resolved.map(x => x.join('=')).join(',');
 
 // Force install
-require(`${root}/boot/src/compile`).CompileUtil.init();
+requireDev(`@travetto/boot/src/compile`).CompileUtil.init();

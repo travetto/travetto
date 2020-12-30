@@ -110,7 +110,6 @@ export class FrameworkUtil {
       for (const type of types) {
         if (
           type !== 'dev' ||
-          p.name.startsWith('@travetto') || // @line-if $TRV_DEV_ROOT
           maxDepth === 0
         ) {
           deps.push(...Object.entries(p[DEP_MAPPING[type]] ?? {}).map(([name, version]) => [name, type as DepType, version] as const));

@@ -14,21 +14,21 @@ class UtilTest {
     assert(filter === undefined);
 
     filter = LogUtil.buildFilter('@app:*');
-    assert(filter!('src/'));
+    assert(filter!('./src/'));
 
     filter = LogUtil.buildFilter('@app');
-    assert(filter!('src/'));
+    assert(filter!('./src/'));
 
     filter = LogUtil.buildFilter('@app:sub/*');
-    assert(!filter!('src/sub'));
-    assert(filter!('src/sub/2'));
+    assert(!filter!('./src/sub'));
+    assert(filter!('./src/sub/2'));
 
     filter = LogUtil.buildFilter('@app:sub');
-    assert(!filter!('src/sub'));
-    assert(filter!('src/sub/2'));
+    assert(!filter!('./src/sub'));
+    assert(filter!('./src/sub/2'));
 
     filter = LogUtil.buildFilter('@app:sub,-@app:sub/2');
-    assert(filter!('src/sub/@'));
-    assert(!filter!('src/sub/2'));
+    assert(filter!('./src/sub/@'));
+    assert(!filter!('./src/sub/2'));
   }
 }

@@ -19,6 +19,20 @@ export class TranspileUtil {
   static readonly EXT = '.ts';
 
   /**
+   * Gets the dev compiler options
+   */
+  private static get devCompilerOptions() {
+    return {
+      paths: {
+        '@travetto/*': [`${process.env.TRV_DEV}/module/*`]
+      },
+      rootDir: process.env.TRV_DEV!,
+      outDir: process.env.TRV_DEV!,
+      sourceRoot: process.env.TRV_DEV!,
+    } as Record<string, any>;
+  }
+
+  /**
    * Build error module
    * @param message Error message to show
    * @param isModule Is the error a module that should have been loaded
@@ -98,16 +112,13 @@ export class TranspileUtil {
       const baseTsconfig = FsUtil.resolveUnix(__dirname, '..', 'tsconfig.json');
       // Fallback to base tsconfig if not found in local folder
       const config = FsUtil.existsSync(projTsconfig) ? projTsconfig : baseTsconfig;
-      const srcRoot = EnvUtil.get('TRV_DEV_ROOT', FsUtil.cwd);
       const json = ts.readJsonConfigFile(config, ts.sys.readFile);
       this[CompilerOptionsSym] = {
-        ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, srcRoot).options,
-        rootDir: srcRoot,
-        outDir: srcRoot,
-        sourceRoot: srcRoot,
-        paths: {
-          '@travetto/*': process.env.TRV_DEV_ROOT ? [`${srcRoot}/*`] : []
-        }
+        ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options,
+        rootDir: FsUtil.cwd,
+        outDir: FsUtil.cwd,
+        sourceRoot: FsUtil.cwd,
+        ...this.devCompilerOptions // @line-if $TRV_DEV
       };
     }
     return this[CompilerOptionsSym];

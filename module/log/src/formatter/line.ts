@@ -45,7 +45,7 @@ export class LineFormatter implements Formatter {
   pretty(ev: LogEvent, o: any) {
     return util.inspect(o, {
       showHidden: ev.level === 'debug',
-      depth: ev.level === 'debug' ? 4 : 2,
+      depth: 4,
       colors: this.opts.colorize !== false,
       breakLength: 100
     });
