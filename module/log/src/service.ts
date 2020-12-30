@@ -68,6 +68,7 @@ class $Logger {
    * Add log event listener
    */
   listen(key: string | symbol, handler: (ev: LogEvent) => void) {
+    this.removeListener(key);
     this.listenerMap.set(key, handler);
     this.listeners.push(handler);
   }

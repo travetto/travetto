@@ -20,10 +20,10 @@ class LoggerTest {
     Logger.listen('test', e => events.push(e));
     (function (ᚕlg) {
       console.log('Hello', { args: [1, 2, 3] });
-    })((payload: any, ...args: any[]) => Logger.invoke(payload, args));
+    })((level: string, ctx: any, message: string, payload: any) => Logger.onLog(level as 'debug', ctx, [message, payload]));
     assert(events.length === 1);
     assert(events[0].message === 'Hello');
-    assert.deepStrictEqual(events[0].args, [1, 2, 3]);
+    assert.deepStrictEqual(events[0].context, { args: [1, 2, 3] });
   }
 
   @Test('Formatter')

@@ -37,8 +37,8 @@ export class LogUtil {
     if (cleaned.startsWith('@app')) {
       const [, sfx] = cleaned.match(/^@app(?::(.*)?)?$/)!;
       for (const el of AppManifest.roots) {
-        const sub = SystemUtil.computeModule(FsUtil.resolveUnix(FsUtil.cwd, el, 'src'));
-        filter.push(`${sub}${sfx || ''}`);
+        const sub = [el, 'src', sfx ?? ''].filter(x => !!x).join('/');
+        filter.push(sub);
       }
     } else {
       filter.push(cleaned);
@@ -66,8 +66,8 @@ export class LogUtil {
       config[key].push(...filter); // Listen to src by default if not explicit
     }
 
-    const incRe = new RegExp(`^(${inc.join('|').replace(/[*]/g, '.*')})`);
-    const excRe = new RegExp(`^(${exc.join('|').replace(/[*]/g, '.*')})`);
+    const incRe = new RegExp(`^(${inc.join('|').replace(/[.]/g, '[.]').replace(/[*]/g, '.*')})`);
+    const excRe = new RegExp(`^(${exc.join('|').replace(/[.]/g, '[.]').replace(/[*]/g, '.*')})`);
 
     if (inc.length && exc.length) {
       return (x: string) => incRe.test(x) && !excRe.test(x);

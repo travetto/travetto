@@ -1,13 +1,14 @@
 ROOT=`pwd`
+ROOT_NM=${ROOT}/node_modules
 MOD_ROOT=${ROOT}/module
 VSCODE_ROOT=${ROOT}/related/vscode-plugin
 VSCODE_NM=${VSCODE_ROOT}/node_modules
 
-rm -rf $VSCODE_NM
-
 # Configure vscode plugin
 cd $VSCODE_ROOT
-npm  i
+
+mkdir -p ${VSCODE_NM}/@types
+mkdir -p ${VSCODE_NM}/.bin
 
 # Handle boot
 rm -rf ${VSCODE_NM}/@travetto/boot
@@ -15,10 +16,12 @@ mkdir -p ${VSCODE_NM}/@travetto/boot
 cp -r ${MOD_ROOT}/boot/src ${VSCODE_NM}/@travetto/boot/src
 cp ${MOD_ROOT}/boot/package.json ${VSCODE_NM}/@travetto/boot/package.json
 
-# Link in modules
-for el in 'config' 'doc' 'compiler' 'registry' 'base' 'test' 'app'; do
-  ln -sf ${MOD_ROOT}/${el} ${VSCODE_NM}/@travetto/${el}
+for x in source-map-support tslib typescript buffer-from; do 
+  cp -r $ROOT_NM/$x ${VSCODE_NM}
 done
-
-# Setup cli
-ln -sf ${MOD_ROOT}/cli/bin/travetto.js  ${VSCODE_NM}/.bin/trv
+for x in source-map-support node; do 
+  cp -r $ROOT_NM/@types/$x ${VSCODE_NM}/@types
+done
+for x in tsc; do 
+  cp -r $ROOT_NM/.bin/$x ${VSCODE_NM}/.bin
+done

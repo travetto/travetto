@@ -48,7 +48,7 @@ class $AppCache extends FileCache {
     return FsUtil.resolveUnix(
       super.fromEntryName(cached)
         .replace(/_._/g, 'node_modules/@travetto')
-        .replace('node_modules/@travetto', process.env.TRV_DEV_ROOT!) // @line-if $TRV_DEV_ROOT
+        .replace('node_modules/@travetto', `${process.env.TRV_DEV}/module`) // @line-if $TRV_DEV
     ).replace(/[.]js$/, '.ts');
   }
 
@@ -58,7 +58,7 @@ class $AppCache extends FileCache {
    */
   toEntryName(local: string) {
     return super.toEntryName(local.replace(FsUtil.cwd, '')
-      .replace(process.env.TRV_DEV_ROOT!, 'node_modules/@travetto') // @line-if $TRV_DEV_ROOT
+      .replace(`${process.env.TRV_DEV}/module`, 'node_modules/@travetto') // @line-if $TRV_DEV
       .replace(/node_modules\/@travetto/g, '_._')
     ).replace(/[.]ts$/, '.js');
   }

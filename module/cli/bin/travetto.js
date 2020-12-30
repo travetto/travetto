@@ -3,7 +3,7 @@
 /**
  * Handle if cli is install globally
  */
-if (!process.env.TRV_DEV_ROOT) {
+if (!process.env.TRV_DEV) {
   const { FsUtil } = require('@travetto/boot/src/fs');
   if (!FsUtil.toUnix(__filename).includes(FsUtil.cwd)) { // If the current file is not under the working directory
     console.error('The @travetto/cli is not intended to be installed globally.  Please install it within your local project');

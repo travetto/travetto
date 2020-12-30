@@ -22,6 +22,8 @@ declare const global: {
   ᚕsrc: (f: string) => string;
 };
 
+let PKG: { name: string, main: string };
+
 /**
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
@@ -74,8 +76,13 @@ export class CompileUtil {
       const match = EnvUtil.getDynamicModules().get(key!);
       if (match) {
         p = `${match}${sub! ?? ''}`;
-      } else if (key === require(FsUtil.resolveUnix('package.json')).name) {
-        return FsUtil.resolveUnix(sub);
+      } else {
+        if (!PKG) {
+          PKG = require(FsUtil.resolveUnix('package.json'));
+        }
+        if (key === PKG.name) {
+          p = FsUtil.resolveUnix(sub ? `./${sub}` : PKG.main);
+        }
       }
     }
     return this.ogResolveFilename(p, m);
@@ -117,7 +124,7 @@ export class CompileUtil {
     global.ᚕsrc = FsUtil.toUnixTs;
 
     // Only do for dev
-    Module._resolveFilename = this.devResolveFilename.bind(this); // @line-if $TRV_DEV_ROOT
+    Module._resolveFilename = this.devResolveFilename.bind(this); // @line-if $TRV_DEV
 
     // Tag output to indicate it was succefully processed by the framework
     TranspileUtil.addPreProcessor((__, contents) =>
