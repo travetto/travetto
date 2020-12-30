@@ -156,7 +156,10 @@ export class EnvUtil {
       this.DYNAMIC_MODULES = new Map(
         this.getList('TRV_MODULES')
           .map(x => x.split(/\s*=\s*/) as [string, string])
-          .map(([k, v]) => [k, v ?? FsUtil.resolveUnix('node_modules', k)])
+          .map(([k, v]) => [k, v ||
+            (k.startsWith('@travetto') ? k.replace(/@travetto/, `${process.env.TRV_DEV}/module`) : '') || // @line-if $TRV_DEV
+            FsUtil.resolveUnix('node_modules', k)
+          ])
       );
     }
     return this.DYNAMIC_MODULES;
