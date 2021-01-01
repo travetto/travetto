@@ -7,7 +7,7 @@ export class Context {
   app: { name: string };
 
   template = '';
-  frameworkVersion = require('@travetto/base/package.json').version.replace(/[.]\d+$/, '.0');
+  frameworkVersion = require('@travetto/boot/package.json').version.replace(/[.]\d+$/, '.0');
   frameworkDependencies: string[] = [];
   peerDependencies: string[] = [];
   modules: Record<string, boolean> = {};
