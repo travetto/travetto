@@ -22,13 +22,14 @@ export class TranspileUtil {
    * Gets the dev compiler options
    */
   private static get devCompilerOptions() {
+    const root = process.env.TRV_DEV_ROOT || process.env.TRV_DEV;
     return {
       paths: {
-        '@travetto/*': [`${process.env.TRV_DEV}/module/*`]
+        '@travetto/*': [`${process.env.TRV_DEV}/*`]
       },
-      rootDir: process.env.TRV_DEV!,
-      outDir: process.env.TRV_DEV!,
-      sourceRoot: process.env.TRV_DEV!,
+      rootDir: root,
+      outDir: root,
+      sourceRoot: root,
     } as Record<string, any>;
   }
 
@@ -118,7 +119,7 @@ export class TranspileUtil {
         rootDir: FsUtil.cwd,
         outDir: FsUtil.cwd,
         sourceRoot: FsUtil.cwd,
-        ...this.devCompilerOptions // @line-if $TRV_DEV
+        ...(process.env.TRV_DEV ? this.devCompilerOptions : {})
       };
     }
     return this[CompilerOptionsSym];

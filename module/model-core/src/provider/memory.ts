@@ -198,9 +198,10 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async deleteExpired<T extends ModelType>(cls: Class<T>) {
     let number = 0;
     const store = this.getStore(cls, 'expiry');
-    for await (const [id, { expiresAt }] of store.entries()) {
+    for await (const [id, { expiresAt }] of [...store.entries()]) {
       if (expiresAt < Date.now()) {
         await this.delete(cls, id);
+        store.delete(id);
         number += 1;
       }
     }

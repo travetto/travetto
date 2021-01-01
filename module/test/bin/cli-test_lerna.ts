@@ -23,17 +23,21 @@ export class TestLernaPlugin extends BasePlugin {
       'npx', 'trv', 'test', '-f', 'event', '-m', this._cmd.mode, '-c', '2'
     ], { shell: true, rawOutput: true, cwd: FsUtil.resolveUnix(__dirname, '..', '..') });
 
-    const { RunnableTestConsumer } = await import('../src/consumer/types/runnable');
-    const { TapEmitter } = await import('../src/consumer/types/tap');
+    const { TestConsumerRegistry } = await import('../src/consumer/registry');
+    await TestConsumerRegistry.manualInit();
 
-    const tap = new TapEmitter();
-    const consumer = new RunnableTestConsumer(tap!);
+    const emitter = await TestConsumerRegistry.getInstance(process.env.TRV_TEST_FORMAT || 'tap');
+    const { RunnableTestConsumer } = await import('../src/consumer/types/runnable');
+
+    const consumer = new RunnableTestConsumer(emitter);
 
     readline.createInterface({ input: child.process.stdout!, output: process.stdout, terminal: false })
       .on('line', line => {
         const [, name, body] = line.match(/^(\S+):\s+(.*)\s*$/)!;
         try {
-          tap.setNamespace(name);
+          if ('setNamespace' in emitter) {
+            (emitter as any).setNamespace(name);
+          }
           consumer.onEvent(JSON.parse(body));
         } catch {
           console!.error('Failed on', body);

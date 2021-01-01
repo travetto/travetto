@@ -10,7 +10,7 @@
   "license": "MIT",
   "scripts": {
     "bootstrap": "./bin/npm/bootstrap.sh",
-    "clean": "./bin/npm/clean.sh",
+    "clean": "./bin/npm/clean.sh && npm run prepare",
     "docs": "./bin/npm/docs.sh",
     "link": "./bin/npm/link.sh",
     "lint": "./bin/npm/lint.sh",
