@@ -1,6 +1,7 @@
 import { DependencyRegistry } from '@travetto/di';
 import { Class, RootRegistry } from '@travetto/registry';
 import { AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
+import { ResourceManager } from '@travetto/base';
 
 import { ModelRegistry } from '../src/registry/model';
 import { isStorageSupported } from '../src/internal/service/common';
@@ -20,6 +21,9 @@ export abstract class BaseModelSuite<T> {
 
   @BeforeAll()
   async init() {
+    // Track self
+    ResourceManager.addPath(__dirname);
+
     await RootRegistry.init();
     const config = await DependencyRegistry.getInstance(this.configClass);
     if ('namespace' in config) {

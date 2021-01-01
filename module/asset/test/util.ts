@@ -1,11 +1,18 @@
 import * as fs from 'fs';
 import * as assert from 'assert';
-import { Suite, Test } from '@travetto/test';
+
+import { FsUtil } from '@travetto/boot/src';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 import { AssetUtil } from '../src/util';
 
 @Suite()
 export class UtilTest {
+
+  @BeforeAll()
+  async init() {
+    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '..', 'test-support'));
+  }
 
   @Test()
   async hashFile() {

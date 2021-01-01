@@ -1,11 +1,11 @@
 import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-core';
 import { Suite } from '@travetto/test';
-import { CacheModelSymbol } from '../../src/service';
+import { CacheModelSym } from '../../src/service';
 import { CacheServiceSuite } from '../../test-support/service';
 
 class Config {
-  @InjectableFactory(CacheModelSymbol)
+  @InjectableFactory(CacheModelSym)
   static getModel(config: MemoryModelConfig) {
     return new MemoryModelService(config);
   }

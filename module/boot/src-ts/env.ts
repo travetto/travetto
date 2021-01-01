@@ -157,7 +157,7 @@ export class EnvUtil {
         this.getList('TRV_MODULES')
           .map(x => x.split(/\s*=\s*/) as [string, string])
           .map(([k, v]) => [k, v ||
-            (k.startsWith('@travetto') ? k.replace(/@travetto/, `${process.env.TRV_DEV}/module`) : '') || // @line-if $TRV_DEV
+            k.replace(/^@travetto/, m => process.env.TRV_DEV || m) ||
             FsUtil.resolveUnix('node_modules', k)
           ])
       );

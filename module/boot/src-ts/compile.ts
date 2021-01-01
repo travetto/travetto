@@ -124,7 +124,9 @@ export class CompileUtil {
     global.ᚕsrc = FsUtil.toUnixTs;
 
     // Only do for dev
-    Module._resolveFilename = this.devResolveFilename.bind(this); // @line-if $TRV_DEV
+    if (process.env.TRV_DEV) {
+      Module._resolveFilename = this.devResolveFilename.bind(this);
+    }
 
     // Tag output to indicate it was succefully processed by the framework
     TranspileUtil.addPreProcessor((__, contents) =>

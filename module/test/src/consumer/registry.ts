@@ -1,3 +1,4 @@
+import { ScanFs } from '@travetto/boot/src';
 import { Class } from '@travetto/registry';
 import { TestConsumer } from './types';
 
@@ -7,6 +8,17 @@ import { TestConsumer } from './types';
 class $TestConsumerRegistry {
   private registered = new Map<string, Class<TestConsumer>>();
   private primary: Class<TestConsumer>;
+
+  /**
+   * Manual initialization when running oustide of the bootstrap process
+   */
+  async manualInit() {
+    for (const entry of await ScanFs.scanDir({ testDir: f => true, testFile: f => f.includes('types/') }, __dirname)) {
+      if (entry.stats.isFile()) {
+        require(entry.file);
+      }
+    }
+  }
 
   /**
    * Add a new consumer
