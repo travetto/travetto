@@ -2,17 +2,17 @@
 import { Application } from '@travetto/app';
 import { RestServer, Controller, Get, Context } from '@travetto/rest';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { ModelCacheSource, CacheSource } from '@travetto/cache';
-import { ModelService } from '@travetto/model';
+import { CacheService } from '@travetto/cache';
+import { ModelExpirySupport } from '@travetto/model-core';
 
-import { SessionCacheSymbol, SessionData, Session } from '../../..';
+import { SessionCacheSym, SessionData, Session } from '../../..';
 
 @Application('e2e')
 export class App {
 
-  @InjectableFactory(SessionCacheSymbol)
-  static getSessionSource(service: ModelService): CacheSource {
-    return new ModelCacheSource(service);
+  @InjectableFactory(SessionCacheSym)
+  static getSessionSource(service: ModelExpirySupport): CacheService {
+    return new CacheService(service);
   }
 
   @Inject()

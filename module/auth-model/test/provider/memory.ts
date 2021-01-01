@@ -1,11 +1,11 @@
 import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-core';
 import { Suite } from '@travetto/test';
-import { AuthModelSymbol } from '../../src/principal';
+import { AuthModelSym } from '../../src/principal';
 import { AuthModelServiceSuite } from '../../test-support/service';
 
 class Init {
-  @InjectableFactory(AuthModelSymbol)
+  @InjectableFactory(AuthModelSym)
   static modelProvider(config: MemoryModelConfig) {
     return new MemoryModelService(config);
   }

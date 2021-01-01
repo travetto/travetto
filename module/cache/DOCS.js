@@ -1,6 +1,6 @@
 const { doc: d, Code, Section, List, inp, meth, Mod, SubSection, lib } = require('@travetto/doc');
 const { Cache, EvictCache } = require('./src/decorator');
-const { CacheService, CacheModelSymbol } = require('./src/service');
+const { CacheService, CacheModelSym } = require('./src/service');
 
 exports.text = d`
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without ${Mod('di')}.  The code aims to handle use cases surrounding common/basic usage.
@@ -39,7 +39,7 @@ ${Code('Using decorators to cache/evict user access', 'alt/docs/src/evict.ts')}
 
 ${Section('Extending the Cache Service')}
 
-By design, the ${CacheService} relies solely on the ${Lib('model-core')} module.  Specifically on the ModelExpirySupport.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any ModelService that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the ModelService to be registered using the CacheModelSymbol:
+By design, the ${CacheService} relies solely on the ${Lib('model-core')} module.  Specifically on the ModelExpirySupport.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any ModelService that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the ModelService to be registered using the CacheModelSym:
 
 ${Code('Registering a Custom Model Source', 'alt/docs/src/custom.ts')}
 

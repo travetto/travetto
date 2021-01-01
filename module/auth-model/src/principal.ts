@@ -72,22 +72,24 @@ export class ModelPrincipalSource<T extends ModelType> implements PrincipalSourc
     const ident = this.toIdentity(user);
 
     try {
-      await this.retrieve(ident.id);
-      throw new AppError('That id is already taken.', 'data');
+      if (ident.id) {
+        await this.retrieve(ident.id);
+        throw new AppError('That id is already taken.', 'data');
+      }
     } catch (e) {
       if (!(e instanceof NotFoundError)) {
         throw e;
       }
-
-      const fields = await AuthUtil.generatePassword(ident.password!);
-
-      ident.password = undefined; // Clear it out on set
-
-      Object.assign(user, this.fromIdentity(fields));
-
-      const res: T = await this.modelService.create(this.cls, user);
-      return res;
     }
+
+    const fields = await AuthUtil.generatePassword(ident.password!);
+
+    ident.password = undefined; // Clear it out on set
+
+    Object.assign(user, this.fromIdentity(fields));
+
+    const res: T = await this.modelService.create(this.cls, user);
+    return res;
   }
 
   /**

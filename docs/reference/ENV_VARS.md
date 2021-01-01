@@ -25,7 +25,8 @@ The common environment variables throughout the code base:
 * `TRV_DOCKER` = 0|any           - Docker support, if non-zero, acts as the docker namespace.  If `0`, disables running if docker should even be considered when running a command service, defaults to `undefined`
 
 ## Framework
-* `TRV_DEV` = `./`               - The root folder for the git repo
+* `TRV_DEV` = `./module`         - The folder for local travetto modules
+* `TRV_DEV_ROOT` = `./`          - The source folder for local travetto checkout
 * `TRV_CACHE` = cwd              - The output directory for compilation, defaults to `.trv_cache` of the cwd
 * `TRV_SHUTDOWN_WAIT` = 2s       - The max time to wait for shutdown to finish after initial SIGINT, default `2s`
 

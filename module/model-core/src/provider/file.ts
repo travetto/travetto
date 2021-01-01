@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as os from 'os';
+import * as path from 'path';
 
 import { Class } from '@travetto/registry';
 import { FsUtil, StreamUtil } from '@travetto/boot';
@@ -58,16 +59,17 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const name = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
     let resolved = FsUtil.resolveUnix(this.config.folder, this.config.namespace, name);
     if (id) {
-      resolved = FsUtil.resolveUnix(resolved, id.substring(0, 3));
+      resolved = FsUtil.resolveUnix(resolved, id.replace(/^[/]/, '').substring(0, 3));
     }
-    if (!await FsUtil.exists(resolved)) {
-      await FsUtil.mkdirp(resolved);
-    }
+    let dir = resolved;
     if (id) {
-      return FsUtil.resolveUnix(resolved, `${id}${suffix}`);
-    } else {
-      return resolved;
+      resolved = FsUtil.resolveUnix(resolved, `${id}${suffix}`);
+      dir = path.dirname(resolved);
     }
+    if (!await FsUtil.exists(dir)) {
+      await FsUtil.mkdirp(dir);
+    }
+    return resolved;
   }
 
   private async find<T extends ModelType>(cls: Class<T> | string, suffix: Suffix, id?: string) {
@@ -76,7 +78,6 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       throw new NotFoundError(cls, id);
     }
     return file;
-
   }
 
   uuid() {
@@ -209,6 +210,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       const stat = await fs.promises.stat(file);
       if (stat.atimeMs < Date.now()) {
         await this.delete(cls, id);
+        await fs.promises.unlink(file); // Remove expired file
         number += 1;
       }
     }

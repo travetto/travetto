@@ -50,6 +50,8 @@ class SystemUtilTests {
 
   @Test()
   async buildModuleName() {
+    const og = process.env.TRV_DEV;
+    process.env.TRV_DEV = '@@@@';
     const modName = SystemUtil.computeModule(__filename);
     assert(modName === './test/system-util');
 
@@ -61,6 +63,7 @@ class SystemUtilTests {
 
     const modName4 = SystemUtil.computeModule(`${__dirname}/node_modules/lodash/test`);
     assert(modName4 === '@npm/lodash/test');
+    process.env.TRV_DEV = og;
   }
 
   @Test()

@@ -1,4 +1,4 @@
 model.redis:
   client:
     host: localhost
-    port: 6369
+    port: 6379

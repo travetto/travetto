@@ -9,9 +9,9 @@ exports.handler = async (event, context) => {
     await DependencyRegistry.init();
 
     const { RestServer } = require('@travetto/rest');
-    const { RestLambdaSymbol } = require('@travetto/rest/src/internal/lambda');
+    const { RestLambdaSym } = require('@travetto/rest/src/internal/lambda');
 
-    inst = await DependencyRegistry.getInstance(RestServer, RestLambdaSymbol);
+    inst = await DependencyRegistry.getInstance(RestServer, RestLambdaSym);
     await inst.run();
   }
   return inst.handle(event, context);

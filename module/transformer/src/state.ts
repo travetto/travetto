@@ -242,7 +242,7 @@ export class TransformerState implements State {
   findDecorator(cls: Transformer, node: ts.Node, name: string, module?: string) {
     const target = `${cls[TransformerId]}/${name}`;
     return this.getDecoratorList(node)
-      .find(x => x.targets?.includes(target) && (module ? x.name === name && x.module === module : true))?.dec;
+      .find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.dec;
   }
 
   /**

@@ -40,6 +40,7 @@ export class ParserTest {
   a
   b
   c
+  
 
   d`);
 

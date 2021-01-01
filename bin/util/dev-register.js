@@ -1,4 +1,4 @@
-const requireDev = (m) => require(m.replace('@travetto', `${process.env.TRV_DEV}/module`));
+const requireDev = (m) => require(m.replace('@travetto', process.env.TRV_DEV));
 
 const { FsUtil } = requireDev('@travetto/boot/src/fs');
 
@@ -24,7 +24,7 @@ function readDeps() {
     const top = keys.shift();
     final.set(top, null);
     const deps = Object.keys(requireDev(`${top}/package.json`).dependencies ?? {})
-      .filter(x => x.startsWith('@travetto') && x !== name);
+      .filter(x => x.startsWith('@travetto'));
 
     for (const sub of deps) {
       if (!final.has(sub)) {
@@ -34,7 +34,7 @@ function readDeps() {
   }
 
   return Object.fromEntries([
-    ...final.entries(),
+    ...[...final.entries()].filter(([k, v]) => k !== name),
     ...existing.filter(([k, v]) => !k.startsWith('@travetto'))
   ]);
 }
