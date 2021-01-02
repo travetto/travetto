@@ -1,7 +1,14 @@
+import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { Util } from '@travetto/base';
-import { WhereClause, SelectClause, SortClause } from '@travetto/model-query';
+import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
+import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
+import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
+import { ModelRegistry } from '@travetto/model/src/registry/model';
+import { ModelType } from '@travetto/model/src/types/model';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
+import { SearchResponse } from '../types';
+
 import { EsSchemaConfig } from './types';
 
 const has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
@@ -213,5 +220,81 @@ export class ElasticsearchQueryUtil {
     } else {
       return this.extractWhereTermQuery(o, cls, config);
     }
+  }
+
+  /**
+   * Build a base search object from a class and a query
+   */
+  static getSearchObject<T extends ModelType>(cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, subTypeAware?: boolean): Search {
+    query.where = query.where ? (typeof query.where === 'string' ? QueryLanguageParser.parseToQuery(query.where) : query.where) : {};
+
+    if (subTypeAware) {
+      const conf = ModelRegistry.get(cls);
+      if (conf.subType) {
+        const filterClause = { type: conf.subType };
+        query.where = (Object.keys(query.where!).length > 0 ? { $and: [query.where, filterClause] } : filterClause) as WhereClause<T>;
+      }
+    }
+
+    QueryVerifier.verify(cls, query); // Verify
+
+    const q = this.extractWhereQuery(cls, query.where as WhereClause<T>, config);
+    const search: Search = {
+      body: q ? { query: q } : {}
+    };
+
+    const sort = query.sort;
+
+    if (query.select) {
+      const [inc, exc] = this.getSelect(query.select);
+      if (inc.length) {
+        search._source_includes = inc;
+      }
+      if (exc.length) {
+        search._source_excludes = exc;
+      }
+    }
+
+    if (sort) {
+      search.sort = this.getSort(sort);
+    }
+
+    if (query.offset && typeof query.offset === 'number') {
+      search.from = query.offset;
+    }
+
+    if (query.limit) {
+      search.size = query.limit;
+    }
+
+    return search;
+  }
+
+
+  /**
+   * Safely load the data, excluding ids if needed
+   */
+  static cleanIdRemoval<T>(req: Search, results: SearchResponse<T>): T[] {
+    const out: T[] = [];
+
+    const toArr = <V>(x: V | V[] | undefined) => (x ? (Array.isArray(x) ? x : [x]) : []);
+
+    // determine if id
+    const select = [
+      toArr(req._source_includes),
+      toArr(req._source_excludes)
+    ];
+    const includeId = select[0].includes('_id') || (select[0].length === 0 && !select[1].includes('_id'));
+
+    for (const r of results.body.hits.hits) {
+      const obj = r._source;
+      if (includeId) {
+        // @ts-ignore
+        obj._id = r._id;
+      }
+      out.push(obj);
+    }
+
+    return out;
   }
 }

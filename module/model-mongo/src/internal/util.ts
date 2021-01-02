@@ -4,6 +4,7 @@ import { Class } from '@travetto/registry';
 import { Util } from '@travetto/base';
 import { DistanceUnit, WhereClause } from '@travetto/model-query';
 import { ModelRegistry } from '@travetto/model/src/registry/model';
+import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 
 /**
  * Converting units to various radians
@@ -28,12 +29,14 @@ export class MongoUtil {
   /**
    * Get a where clause with type
    */
-  static extractTypedWhereClause<T>(cls: Class<T>, o: WhereClause<T>): Record<string, any> {
+  static getWhereClause<T>(cls: Class<T>, o: WhereClause<T> | string | undefined): WhereClause<T> {
+    let q = o ? (typeof o === 'string' ? QueryLanguageParser.parseToQuery(o) as WhereClause<T> : o) : {};
+
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
-      o = { $and: [o, { type: conf.subType }] } as WhereClause<T>;
+      q = { $and: [q, { type: conf.subType }] };
     }
-    return this.extractWhereClause(o);
+    return q;
   }
 
   /**

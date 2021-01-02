@@ -1,4 +1,5 @@
 import { Suite } from '@travetto/test';
+
 import { ModelCrudSuite } from '@travetto/model/test-support/crud';
 import { ModelBulkSuite } from '@travetto/model/test-support/bulk';
 import { ModelIndexedSuite } from '@travetto/model/test-support/indexed';

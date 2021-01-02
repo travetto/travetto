@@ -197,6 +197,9 @@ export class SchemaFakerUtil {
     const out: Record<string, any> = {};
 
     for (const f of cfg.fields) {
+      if (f === 'type' || f === 'id') { // Do not set primary fields
+        continue;
+      }
       const fieldConfig = cfg.schema[f];
       if (!fieldConfig.required && (Math.random() < .5)) {
         continue;

@@ -1,17 +1,19 @@
 import * as es from '@elastic/elasticsearch';
-import { Index, Update } from '@elastic/elasticsearch/api/requestParams';
+import { Index, Update, Search, DeleteByQuery } from '@elastic/elasticsearch/api/requestParams';
 
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport,
-  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError
+  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError,
 } from '@travetto/model';
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Util, ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { SchemaChangeEvent } from '@travetto/schema';
+import { SchemaChangeEvent, SchemaConfig, SchemaRegistry } from '@travetto/schema';
+import { ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport, PageableModelQuery, Query, ValidStringFields } from '@travetto/model-query';
+
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { ElasticsearchModelConfig } from './config';
 import { EsIdentity, EsBulkError } from './internal/types';
@@ -19,6 +21,9 @@ import { ElasticsearchQueryUtil } from './internal/query';
 import { ElasticsearchSchemaUtil } from './internal/schema';
 import { IndexManager } from './index-manager';
 import { SearchResponse } from './types';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
+import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
+import { ModelRegistry } from '@travetto/model/src/registry/model';
 
 /**
  * Convert _id to id
@@ -35,12 +40,27 @@ function postLoad<T extends ModelType>(o: T) {
  * Elasticsearch model source.
  */
 @Injectable()
-export class ElasticsearchModelService implements ModelCrudSupport, ModelIndexedSupport, ModelStorageSupport, ModelBulkSupport {
+export class ElasticsearchModelService implements
+  ModelCrudSupport, ModelIndexedSupport,
+  ModelStorageSupport, ModelBulkSupport,
+  ModelQuerySupport, ModelQueryCrudSupport,
+  ModelQueryFacetSupport {
 
   client: es.Client;
   manager: IndexManager;
 
   constructor(private config: ElasticsearchModelConfig) { }
+
+  /**
+   * Directly run the search
+   */
+  async execSearch<T>(cls: Class<T>, search: Search<any>): Promise<SearchResponse<T>> {
+    const res = await this.client.search({
+      ...this.manager.getIdentity(cls),
+      ...search
+    });
+    return res as SearchResponse<T>;
+  }
 
   async postConstruct() {
     this.client = new es.Client({
@@ -162,8 +182,7 @@ export class ElasticsearchModelService implements ModelCrudSupport, ModelIndexed
   }
 
   async * list<T extends ModelType>(cls: Class<T>) {
-    let search: SearchResponse<T> = await this.client.search({
-      ...this.manager.getIdentity(cls),
+    let search: SearchResponse<T> = await this.execSearch(cls, {
       scroll: '2m',
       size: 100,
       body: {
@@ -273,8 +292,7 @@ export class ElasticsearchModelService implements ModelCrudSupport, ModelIndexed
 
   // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
-    const res: SearchResponse<T> = await this.client.search({
-      index: this.manager.getIdentity(cls).index,
+    const res: SearchResponse<T> = await this.execSearch(cls, {
       body: {
         query: ElasticsearchQueryUtil.extractWhereTermQuery(ModelIndexedUtil.projectIndex(cls, idx, body, null), cls)
       }
@@ -296,5 +314,122 @@ export class ElasticsearchModelService implements ModelCrudSupport, ModelIndexed
       return;
     }
     throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
+  }
+
+  // Query
+  async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
+    const req = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, true);
+    const results = await this.execSearch(cls, req);
+    const items = ElasticsearchQueryUtil.cleanIdRemoval(req, results);
+    return Promise.all(items.map(m => ModelCrudUtil.load(cls, m).then(postLoad)));
+  }
+
+  async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T> {
+    return ModelQueryUtil.verifyGetSingleCounts(cls, await this.query(cls, { ...query, limit: failOnMany ? 2 : 1 }));
+  }
+
+  async queryCount<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
+    const req = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig, true);
+    const res = (await this.execSearch(cls, req)).body.hits.total;
+    return res ? typeof res === 'number' ? res : (res as any).value : undefined;
+  }
+
+  // Query Crud
+  async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
+    const { body: res } = await this.client.deleteByQuery({
+      ...this.manager.getIdentity(cls),
+      refresh: true,
+      ...ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig)
+    } as DeleteByQuery);
+    return res.deleted ?? 0;
+  }
+
+  async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>) {
+
+    const script = ElasticsearchSchemaUtil.generateUpdateScript(data);
+
+    const { body: res } = await this.client.updateByQuery({
+      ...this.manager.getIdentity(cls),
+      refresh: true,
+      body: {
+        query: ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig).body.query,
+        script
+      }
+    });
+
+    return res.updated;
+  }
+
+  // Query Facet
+  /**
+   * Build query to support searching multiple fields
+   */
+  buildSuggestQuery<T extends ModelType>(
+    cls: Class<T>, field: ValidStringFields<T>, q?: string,
+    filter?: Query<T>
+  ) {
+    const spec = SchemaRegistry.getViewSchema(cls).schema[field as keyof SchemaConfig].specifier;
+    const text = spec && spec.startsWith('text');
+
+    if (!text) {
+      console.warn(`${cls.ᚕid}.${field} is not registered as @Text, reverting to keyword search`);
+    }
+
+    const searchObj = ElasticsearchQueryUtil.getSearchObject(cls, filter ?? {});
+    const conf = ModelRegistry.get(cls);
+
+    return {
+      ...searchObj,
+      ...this.manager.getIdentity(cls),
+      body: {
+        query: {
+          bool: {
+            must: [
+              searchObj.body.query ?? { ['match_all']: {} },
+              ...(q ? [{ ['match_phrase_prefix']: { [text ? `${field}.text` : field]: { query: q } } }] : [])
+            ],
+            ...(conf.subType ? { filter: { term: { type: conf.subType } } } : {})
+          }
+        }
+      },
+      size: filter?.limit ?? 10
+    };
+  }
+
+  async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    const search = this.buildSuggestQuery(cls, field, prefix, query);
+    const res = await this.execSearch(cls, search);
+    const safe = ElasticsearchQueryUtil.cleanIdRemoval<T>(search, res);
+    const combined = ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, safe, (x, v) => v, query && query.limit);
+    return Promise.all(combined.map(m => ModelCrudUtil.load(cls, m).then(postLoad)));
+  }
+
+  async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    const search = this.buildSuggestQuery(cls, field, prefix, {
+      // @ts-ignore
+      select: { [field]: 1 },
+      ...query
+    });
+    const res = await this.execSearch(cls, search);
+    const safe = ElasticsearchQueryUtil.cleanIdRemoval(search, res);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, safe, x => x, query && query.limit);
+  }
+
+  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+    const q = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
+
+    const search = {
+      ...this.manager.getIdentity(cls),
+      body: {
+        query: q.body.query ?? { ['match_all']: {} },
+        aggs: { [field]: { terms: { field, size: 100 } } }
+      },
+      size: 0
+    };
+
+    const res = await this.execSearch(cls, search);
+    const { buckets } = res.body.aggregations[field];
+    const out = buckets.map(b => ({ key: b.key, count: b.doc_count }));
+    return out;
   }
 }

@@ -1,7 +1,7 @@
 /**
  * Point as [number,number] with validation and binding support
  *
- * @concrete ../internal/model:Point
+ * @concrete ../internal/model/point:PointImpl
  */
 export type Point = [number, number];
 

@@ -4,6 +4,7 @@ import { Reindex } from '@elastic/elasticsearch/api/requestParams';
 import { ModelRegistry, ModelType } from '@travetto/model';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
+
 import { ElasticsearchModelConfig } from './config';
 import { ElasticsearchSchemaUtil } from './internal/schema';
 import { EsIdentity } from './internal/types';
@@ -80,9 +81,9 @@ export class IndexManager {
         index: concreteIndex,
         body: {
           mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
-          settings: this.config.indexCreate
-        },
-        ...(alias ? { aliases: { [ident.index]: {} } } : {})
+          settings: this.config.indexCreate,
+          ...(alias ? { aliases: { [ident.index]: {} } } : {})
+        }
       });
       console.debug('Index created', { index: ident.index });
       console.debug('Index Config', {
@@ -90,7 +91,7 @@ export class IndexManager {
         settings: this.config.indexCreate
       });
     } catch (e) {
-      console.debug('Index already created', { index: ident.index });
+      console.warn('Index already created', { index: ident.index, error: e });
     }
     return concreteIndex;
   }
@@ -203,13 +204,15 @@ export class IndexManager {
 
   async createStorage() {
     // PreCreate indexes if missing
-    console.debug('Create Storage', { autoCreate: this.config.autoCreate });
+    console.debug('Create Storage', { autoCreate: this.config.autoCreate, idx: this.getNamespacedIndex('*') });
     await this.computeAliasMappings(true);
   }
 
   async deleteStorage() {
+    console.debug('Deleting storage', { idx: this.getNamespacedIndex('*') });
     await this.client.indices.delete({
-      index: this.getNamespacedIndex('*'),
+      index: this.getNamespacedIndex('*')
     });
+    await this.computeAliasMappings(true);
   }
 }
