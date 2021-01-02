@@ -13,21 +13,23 @@ import {
   ExistsError,
   ModelIndexedSupport
 } from '@travetto/model';
-import { ModelQuery, ModelQuerySupport, PageableModelQuery } from '@travetto/model-query';
+import { ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport, PageableModelQuery, Query, ValidStringFields, WhereClause } from '@travetto/model-query';
 
 import { ChangeEvent, Class } from '@travetto/registry';
 import { ShutdownManager, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { SchemaValidator } from '@travetto/schema';
+import { ALL_VIEW, FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
+import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
+import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 
 import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
+import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
 
 function uuid(val: string) {
   return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
@@ -58,6 +60,16 @@ function preInsertId<T extends ModelType>(item: T) {
   }
   return item;
 }
+
+function prepareQuery<T, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U) {
+  query.where = MongoUtil.getWhereClause(cls, query.where);
+  QueryVerifier.verify(cls, query);
+  return {
+    query: query as U & { where: WhereClause<T> },
+    filter: MongoUtil.extractWhereClause(query.where)
+  } as const;
+}
+
 /**
  * Mongo-based model source
  */
@@ -65,9 +77,8 @@ function preInsertId<T extends ModelType>(item: T) {
 export class MongoModelService implements
   ModelCrudSupport, ModelStorageSupport,
   ModelBulkSupport, ModelStreamSupport,
-  ModelIndexedSupport, ModelQuerySupport
-// ModelQueryFacetSupport, ModelQueryCrudSupport
-{
+  ModelIndexedSupport, ModelQuerySupport,
+  ModelQueryCrudSupport, ModelQueryFacetSupport {
 
   private client: mongo.MongoClient;
   private db: mongo.Db;
@@ -100,6 +111,23 @@ export class MongoModelService implements
     await this.db.dropDatabase();
   }
 
+  async establishGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls) {
+    const fields = SchemaRegistry.has(cls) ?
+      Object.values(SchemaRegistry.get(cls).views[ALL_VIEW].schema) :
+      [];
+    for (const field of fields) {
+      if (SchemaRegistry.has(field.type)) {
+        // Recurse
+        await this.establishGeoIndices(field.type, [...path, field], root);
+      } else if (field.type === PointImpl) {
+        const col = await this.getStore(root);
+        const name = [...path, field].map(x => x.name).join('.');
+        console.debug('Creating geo-index', { cls: root.ᚕid, name });
+        await col.createIndex({ [name]: '2d' });
+      }
+    }
+  }
+
   async establishIndices<T extends ModelType>(cls: Class<T>) {
     const indices = ModelRegistry.get(cls).indices ?? [];
     await Promise.all(indices.map(idx => {
@@ -108,6 +136,8 @@ export class MongoModelService implements
       return this.getStore(cls)
         .then(col => col.createIndex(combined, { unique: idx.unique }));
     }));
+
+    await this.establishGeoIndices(cls);
   }
 
   async onModelVisibilityChange(ev: ChangeEvent<Class>) {
@@ -362,14 +392,9 @@ export class MongoModelService implements
 
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     const col = await this.getStore(cls);
-
-    const q = query.where ? (typeof query.where === 'string' ? QueryLanguageParser.parseToQuery(query.where) : query.where) : undefined;
-
-    const projected = MongoUtil.extractTypedWhereClause(cls, q ?? {});
-
-    console.debug('Query', { query });
-
-    let cursor = col.find<T>(projected);
+    const { filter } = prepareQuery(cls, query);
+    console.info('Query', JSON.stringify(query, null, 2));
+    let cursor = col.find<T>(filter);
     if (query.select) {
       const select = Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select);
       // Remove id if not explicitly defined, and selecting fields directly
@@ -398,14 +423,76 @@ export class MongoModelService implements
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     const col = await this.getStore(cls);
-    const q = query.where ? (typeof query.where === 'string' ? QueryLanguageParser.parseToQuery(query.where) : query.where) : undefined;
-    const projected = MongoUtil.extractTypedWhereClause(cls, q ?? {});
-    console.debug('Query', { query });
-    return col.countDocuments(projected);
+    const { filter } = prepareQuery(cls, query);
+    return col.countDocuments(filter);
   }
 
   async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany = false): Promise<T> {
-    const results = await this.query(cls, query);
+    const results = await this.query(cls, { ...query, limit: failOnMany ? 2 : 1 });
     return ModelQueryUtil.verifyGetSingleCounts(cls, results, failOnMany);
+  }
+
+  async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
+    const col = await this.getStore(cls);
+    const { filter } = prepareQuery(cls, query);
+    const res = await col.deleteMany(filter);
+    return res.deletedCount ?? 0;
+  }
+
+  async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>) {
+    const col = await this.getStore(cls);
+
+    const items = MongoUtil.extractSimple(data);
+    const final = Object.entries(items).reduce((acc, [k, v]) => {
+      if (v === null || v === undefined) {
+        acc.$unset = acc.$unset ?? {};
+        acc.$unset[k] = v;
+      } else {
+        acc.$set = acc.$set ?? {};
+        acc.$set[k] = v;
+      }
+      return acc;
+    }, {} as Record<string, any>);
+
+    const { filter } = prepareQuery(cls, query);
+    const res = await col.updateMany(filter, final);
+    return res.matchedCount;
+  }
+
+  async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
+    const results = await this.query(cls, q);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a) => a, query && query.limit);
+  }
+
+  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+    const col = await this.getStore(cls);
+    const pipeline: object[] = [{
+      $group: {
+        _id: `$${field}`,
+        count: {
+          $sum: 1
+        }
+      }
+    }];
+
+    if (query && query.where) {
+      pipeline.unshift({
+        $match: prepareQuery(cls, query).filter
+      });
+    }
+
+    const result = await col.aggregate(pipeline).toArray();
+
+    return result.map((val: any) => ({
+      key: val._id,
+      count: val.count
+    })).sort((a, b) => b.count - a.count);
+  }
+
+  async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    const q = ModelQuerySuggestUtil.getSuggestQuery(cls, field, prefix, query);
+    const results = await this.query(cls, q);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query && query.limit);
   }
 }

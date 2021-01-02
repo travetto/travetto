@@ -1,4 +1,4 @@
-elasticsearch.model:
+model.elasticsearch:
   schema: "sample-test"
   schemaConfig:
     caseSensitive: true

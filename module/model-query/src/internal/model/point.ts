@@ -1,6 +1,6 @@
 import { Util } from '@travetto/base';
 
-export class Point {
+export class PointImpl {
   static validateSchema(input: any) {
     const ret = this.bindSchema(input);
     return ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';

@@ -1,12 +1,15 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
+import { Index, Model } from '@travetto/model';
+
 import { ModelCrudSuite } from '@travetto/model/test-support/crud';
 import { ModelStreamSuite } from '@travetto/model/test-support/stream';
 import { ModelBulkSuite } from '@travetto/model/test-support/bulk';
 import { ModelIndexedSuite } from '@travetto/model/test-support/indexed';
 import { ModelQuerySuite } from '@travetto/model-query/test-support/query';
-import { Index, Model } from '@travetto/model';
+import { ModelQueryCrudSuite } from '@travetto/model-query/test-support/crud';
+import { ModelQueryFacetSuite } from '@travetto/model-query/test-support/facet';
 
 import { MongoModelConfig, MongoModelService } from '..';
 
@@ -58,6 +61,20 @@ export class MongoIndexedSuite extends ModelIndexedSuite {
 
 @Suite()
 export class MongoQuerySuite extends ModelQuerySuite {
+  constructor() {
+    super(MongoModelService, MongoModelConfig);
+  }
+}
+
+@Suite()
+export class MongoQueryCrudSuite extends ModelQueryCrudSuite {
+  constructor() {
+    super(MongoModelService, MongoModelConfig);
+  }
+}
+
+@Suite()
+export class MongoQueryFacetSuite extends ModelQueryFacetSuite {
   constructor() {
     super(MongoModelService, MongoModelConfig);
   }

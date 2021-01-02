@@ -1,3 +1,4 @@
+import { WhereClause } from '../../model/where-clause';
 import { QueryLanguageTokenizer } from './tokenizer';
 import { Node, Token, ClauseNode, UnaryNode, Literal, GroupNode, OP_TRANSLATION, ArrayNode } from './types';
 
@@ -153,15 +154,15 @@ export class QueryLanguageParser {
   /**
    * Convert Query AST to output
    */
-  static convert(node: Node): any {
+  static convert<T = any>(node: Node): any {
     switch (node.type) {
       case 'unary': {
         const un = node as UnaryNode;
-        return { [`$${un.op}`]: this.convert(un.value) };
+        return { [`$${un.op!}`]: this.convert(un.value) };
       }
       case 'group': {
         const gn = node as GroupNode;
-        return { [`$${gn.op}`]: gn.value.map(x => this.convert(x)) };
+        return { [`$${gn.op!}`]: gn.value.map(x => this.convert(x)) };
       }
       case 'clause': {
         const cn = node as ClauseNode;

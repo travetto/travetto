@@ -157,7 +157,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
         age: -1
       }]
     });
-    assert(all[0].age > all[1].age);
+    assert(all[0].age >= all[1].age);
   }
 
 
@@ -176,6 +176,8 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     }
 
     await this.saveAll(Location, toAdd);
+
+    assert(await svc.queryCount(Location, {}) === 25);
 
     const ret = await svc.query(Location, {
       limit: 100,
