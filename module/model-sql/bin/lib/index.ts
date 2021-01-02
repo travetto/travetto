@@ -6,7 +6,7 @@ export async function getSchemas(clear = true) {
   await PhaseManager.init();
 
   const { DependencyRegistry } = await import('@travetto/di');
-  const { ModelRegistry } = await import('@travetto/model-core');
+  const { ModelRegistry } = await import('@travetto/model');
   const { SQLDialect } = await import('../../src/dialect/base');
 
   const src = (await DependencyRegistry.getInstance(SQLDialect));

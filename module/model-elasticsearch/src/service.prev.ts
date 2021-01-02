@@ -12,7 +12,7 @@
 //   ValidStringFields
 // } from '@travetto/model-query';
 // import { ModelCrudSupport, ModelRegistry, BulkOp, BulkResponse, BulkProcessError,
-// ModelBulkSupport, ModelIndexedSupport, ModelType, ModelStorageSupport } from '@travetto/model-core';
+// ModelBulkSupport, ModelIndexedSupport, ModelType, ModelStorageSupport } from '@travetto/model';
 // import { Class, ChangeEvent } from '@travetto/registry';
 // import { Util, AppError } from '@travetto/base';
 // import { Injectable } from '@travetto/di';

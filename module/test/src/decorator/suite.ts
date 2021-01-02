@@ -25,7 +25,11 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
   }
 
   return ((target: Class<any>) => {
-    SuiteRegistry.register(target, { description: (description as string), ...extra });
+    const cfg = { description: (description as string), ...extra };
+    if (target.ᚕabstract) {
+      cfg.skip = true;
+    }
+    SuiteRegistry.register(target, cfg);
     return target;
   }) as ClassDecorator;
 }

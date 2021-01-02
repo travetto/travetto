@@ -4,10 +4,10 @@ import { Index, Update } from '@elastic/elasticsearch/api/requestParams';
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError
-} from '@travetto/model-core';
-import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
-import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model-core/src/internal/service/storage';
+} from '@travetto/model';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { Util, ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';

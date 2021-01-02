@@ -6,12 +6,12 @@ import { ChangeEvent, Class } from '@travetto/registry';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
   ModelIndexedSupport, ModelType, NotFoundError, ExistsError, IndexConfig
-} from '@travetto/model-core';
+} from '@travetto/model';
 
-import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
-import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';
-import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model-core/src/internal/service/storage';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { DynamoDBModelConfig } from './config';
 

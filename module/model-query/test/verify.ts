@@ -3,10 +3,11 @@ import * as assert from 'assert';
 import { Class, RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { ValidationResultError, Schema } from '@travetto/schema';
-import { DependencyRegistry } from '@travetto/di';
+import { Model, ModelType, BaseModel } from '@travetto/model';
 
-import { Model, ModelQuery, ModelCore, BaseModel, QueryVerifierService, Query } from '..';
-import { QueryLanguageParser } from '../src/internal/query-lang/parser';
+import { ModelQuery, Query } from '..';
+import { QueryLanguageParser } from '../src/internal/query/parser';
+import { QueryVerifier } from '../src/internal/query/verifier';
 
 @Schema()
 class Preferences {
@@ -36,17 +37,15 @@ export class VerifyTest {
 
   @Test()
   async verifyModelCore() {
-    const verifier = await DependencyRegistry.getInstance(QueryVerifierService);
-
     const test = <T>(cls: Class<T>) => {
-      const t: Query<ModelCore> = {
+      const t: Query<ModelType> = {
         where: {
           id: {
             $eq: '5'
           }
         }
       };
-      verifier.verify(cls, t as Query<T>);
+      QueryVerifier.verify(cls, t as Query<T>);
     };
 
     assert.doesNotThrow(() => test(ModelUser));
@@ -55,8 +54,6 @@ export class VerifyTest {
 
   @Test()
   async verifyNested() {
-    const verifier = await DependencyRegistry.getInstance(QueryVerifierService);
-
     const query: ModelQuery<User> = {
       where: {
         id: 5,
@@ -68,28 +65,26 @@ export class VerifyTest {
       }
     };
 
-    verifier.verify(User, query);
+    QueryVerifier.verify(User, query);
   }
 
   @Test()
   async verifyQueryString() {
-    const verifier = await DependencyRegistry.getInstance(QueryVerifierService);
-
     const test = <T>(cls: Class<T>) => {
-      const t: Query<ModelCore> = {
+      const t: Query<ModelType> = {
         where: QueryLanguageParser.parseToQuery('id == "5"')
       };
-      verifier.verify(cls, t as Query<T>);
+      QueryVerifier.verify(cls, t as Query<T>);
     };
 
     assert.doesNotThrow(() => test(ModelUser));
     assert.throws(() => test(User), ValidationResultError);
 
     const test2 = <T>(cls: Class<T>) => {
-      const t: Query<ModelCore> = {
+      const t: Query<ModelType> = {
         where: QueryLanguageParser.parseToQuery('email ~ /bob.*/')
       };
-      verifier.verify(cls, t as Query<T>);
+      QueryVerifier.verify(cls, t as Query<T>);
     };
 
     assert.doesNotThrow(() => test2(ModelUser));
@@ -98,10 +93,8 @@ export class VerifyTest {
 
   @Test()
   async verifyQueryRegex() {
-    const verifier = await DependencyRegistry.getInstance(QueryVerifierService);
-
     assert.doesNotThrow(() => {
-      verifier.verify(User, {
+      QueryVerifier.verify(User, {
         where: {
           email: {
             $regex: '.*'
@@ -113,12 +106,10 @@ export class VerifyTest {
 
   @Test()
   async verifyArrayOperationsWithEmpty() {
-    const verifier = await DependencyRegistry.getInstance(QueryVerifierService);
-
     for (const op of ['$in', '$nin', '$all', '$elemMatch']) {
 
       assert.throws(() => {
-        verifier.verify(User, {
+        QueryVerifier.verify(User, {
           where: {
             email: {
               [op]: []

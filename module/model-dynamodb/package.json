@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/model-core": "^2.0.0-alpha.0",
+    "@travetto/model": "^2.0.0-alpha.0",
     "@travetto/config": "^2.0.0-alpha.0",
     "@aws-sdk/client-dynamodb": "^1.0.0-rc.10"
   },

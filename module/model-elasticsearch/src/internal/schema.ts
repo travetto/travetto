@@ -1,5 +1,5 @@
 import { Util } from '@travetto/base';
-import { ModelRegistry } from '@travetto/model-core';
+import { ModelRegistry } from '@travetto/model';
 import { Point } from '@travetto/model-query';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';

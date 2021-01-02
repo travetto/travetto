@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { BaseModelSuite } from '@travetto/model-core/test-support/base';
-import { ModelExpirySupport } from '@travetto/model-core';
+import { BaseModelSuite } from '@travetto/model/test-support/base';
+import { ModelExpirySupport } from '@travetto/model';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
@@ -79,7 +79,7 @@ class SampleService {
   }
 }
 
-@Suite({ skip: true })
+@Suite()
 export abstract class CacheServiceSuite extends BaseModelSuite<ModelExpirySupport> {
 
   baseLatency = 10;

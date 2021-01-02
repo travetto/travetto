@@ -1,22 +1,9 @@
-import { Util } from '@travetto/base';
-
 /**
  * Point as [number,number] with validation and binding support
  *
- * @concrete Point
+ * @concrete ../internal/model:Point
  */
 export type Point = [number, number];
-export const Point = class Point {
-  static validateSchema(input: any) {
-    const ret = this.bindSchema(input);
-    return ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
-  }
-  static bindSchema(input: any): [number, number] | undefined {
-    if (Array.isArray(input) && input.length === 2) {
-      return input.map(x => Util.coerceType(x, Number, false)) as [number, number];
-    }
-  }
-};
 
 export type Primitive = number | boolean | string | Date | Point;
 export type PrimitiveArray = Primitive[];
@@ -102,3 +89,12 @@ export type WhereClauseRaw<T> =
  * Full where clause, typed against the input type T
  */
 export type WhereClause<T> = WhereClauseRaw<RetainFields<T>>;
+
+/**
+ * Provides all the valid string type fields from a given type T
+ */
+export type ValidStringFields<T> = {
+  [K in keyof T]:
+  (T[K] extends (String | string | string[] | String[] | undefined) ? K : never) // eslint-disable-line @typescript-eslint/ban-types
+}[keyof T];
+

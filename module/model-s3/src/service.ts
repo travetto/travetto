@@ -5,8 +5,8 @@ import { StreamUtil } from '@travetto/boot';
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
   ModelType, ModelRegistry, ExistsError, NotFoundError
-} from '@travetto/model-core';
-import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
+} from '@travetto/model';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { Injectable } from '@travetto/di';
 import { AppError, Util } from '@travetto/base';
 import { Class } from '@travetto/registry';

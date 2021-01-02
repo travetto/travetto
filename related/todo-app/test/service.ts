@@ -2,8 +2,8 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
-import { BaseModelSuite } from '@travetto/model-core/test-support/base';
-import { ModelCrudSupport } from '@travetto/model-core';
+import { BaseModelSuite } from '@travetto/model/test-support/base';
+import { ModelCrudSupport } from '@travetto/model';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 
 import { TodoService } from '../src/service';

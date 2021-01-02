@@ -44,7 +44,7 @@ class WhereType {
   age: number;
 }
 
-@Suite({ skip: true })
+@Suite()
 export abstract class BaseQueryTest {
 
   get service() {

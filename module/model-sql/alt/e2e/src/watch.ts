@@ -1,4 +1,4 @@
-import { Model, ModelType, ModelCrudSupport } from '@travetto/model-core';
+import { Model, ModelType, ModelCrudSupport } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 import { Application, AppUtil } from '@travetto/app';
 import { Inject } from '@travetto/di';

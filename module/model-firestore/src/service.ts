@@ -6,10 +6,10 @@ import { ChangeEvent, Class } from '@travetto/registry';
 import {
   ModelCrudSupport, ModelRegistry, ModelStorageSupport,
   ModelIndexedSupport, ModelType, NotFoundError
-} from '@travetto/model-core';
+} from '@travetto/model';
 
-import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
-import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 
 import { FirestoreModelConfig } from './config';
 

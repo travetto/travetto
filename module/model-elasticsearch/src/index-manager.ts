@@ -1,7 +1,7 @@
 import * as es from '@elastic/elasticsearch';
 import { Reindex } from '@elastic/elasticsearch/api/requestParams';
 
-import { ModelRegistry, ModelType } from '@travetto/model-core';
+import { ModelRegistry, ModelType } from '@travetto/model';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
 import { ElasticsearchModelConfig } from './config';

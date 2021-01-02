@@ -1,5 +1,5 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
-import { ModelRegistry, ModelType } from '@travetto/model-core';
+import { ModelRegistry, ModelType } from '@travetto/model';
 import { ChangeEvent, Class } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
 

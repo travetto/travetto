@@ -9,7 +9,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "~7.4.0",
     "@travetto/config": "^2.0.0-alpha.0",
-    "@travetto/model-core": "^2.0.0-alpha.0",
+    "@travetto/model": "^2.0.0-alpha.0",
     "@travetto/model-query": "^2.0.0-alpha.0"
   },
   "title": "Elasticsearch Model Source",

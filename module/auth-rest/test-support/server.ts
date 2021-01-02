@@ -76,7 +76,7 @@ class TestAuthController {
   }
 }
 
-@Suite({ skip: true })
+@Suite()
 export abstract class AuthRestServerSuite extends BaseRestSuite {
 
   @BeforeAll()

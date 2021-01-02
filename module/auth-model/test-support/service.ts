@@ -3,8 +3,8 @@ import * as assert from 'assert';
 import { AppError } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { BaseModelSuite } from '@travetto/model-core/test-support/base';
-import { ModelCrudSupport, BaseModel, Model } from '@travetto/model-core';
+import { BaseModelSuite } from '@travetto/model/test-support/base';
+import { ModelCrudSupport, BaseModel, Model } from '@travetto/model';
 
 import { ModelPrincipalSource, RegisteredIdentity } from '..';
 import { AuthModelSym } from '../src/principal';
@@ -39,7 +39,7 @@ class TestConfig {
   }
 }
 
-@Suite({ skip: true })
+@Suite()
 export abstract class AuthModelServiceSuite extends BaseModelSuite<ModelCrudSupport> {
 
   get principalSource() {

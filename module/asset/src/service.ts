@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { ModelStreamSupport, ExistsError, NotFoundError } from '@travetto/model-core';
+import { ModelStreamSupport, ExistsError, NotFoundError } from '@travetto/model';
 
 import { Asset } from './types';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';

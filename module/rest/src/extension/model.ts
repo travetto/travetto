@@ -1,9 +1,9 @@
-// @file-if @travetto/model-core
+// @file-if @travetto/model
 // @file-if @travetto/schema
 
 import { Class } from '@travetto/registry';
 
-import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model-core';
+import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model';
 
 import { schemaParamConfig } from './schema';
 import { ControllerRegistry } from '../registry/controller';

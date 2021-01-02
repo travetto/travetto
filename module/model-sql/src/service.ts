@@ -1,9 +1,9 @@
 import {
   ModelType,
   BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport, NotFoundError, ModelRegistry,
-} from '@travetto/model-core';
-import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
-import { ModelStorageUtil } from '@travetto/model-core/src/internal/service/storage';
+} from '@travetto/model';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { Class, ChangeEvent } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
 import { AsyncContext } from '@travetto/context';

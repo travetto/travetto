@@ -1,4 +1,4 @@
-import { Model, ModelType } from '@travetto/model-core';
+import { Model, ModelType } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 import { Application } from '@travetto/app';
 import { InjectableFactory, Inject } from '@travetto/di';

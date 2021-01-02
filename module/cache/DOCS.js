@@ -39,7 +39,7 @@ ${Code('Using decorators to cache/evict user access', 'alt/docs/src/evict.ts')}
 
 ${Section('Extending the Cache Service')}
 
-By design, the ${CacheService} relies solely on the ${Lib('model-core')} module.  Specifically on the ModelExpirySupport.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any ModelService that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the ModelService to be registered using the CacheModelSym:
+By design, the ${CacheService} relies solely on the ${Lib('model')} module.  Specifically on the ModelExpirySupport.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any ModelService that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the ModelService to be registered using the CacheModelSym:
 
 ${Code('Registering a Custom Model Source', 'alt/docs/src/custom.ts')}
 
