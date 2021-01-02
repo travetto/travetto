@@ -7,6 +7,8 @@ import { ModelRegistry } from '../src/registry/model';
 import { isBulkSupported, isCrudSupported, isStorageSupported } from '../src/internal/service/common';
 import { ModelType } from '../src/types/model';
 
+let first = true;
+
 export abstract class BaseModelSuite<T> {
 
   constructor(public serviceClass: Class<T>, public configClass: Class<any>) {
@@ -43,9 +45,13 @@ export abstract class BaseModelSuite<T> {
     ResourceManager.addPath(__dirname);
 
     await RootRegistry.init();
-    const config = await DependencyRegistry.getInstance(this.configClass);
-    if ('namespace' in config) {
-      config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
+
+    if (first) {
+      const config = await DependencyRegistry.getInstance(this.configClass);
+      if ('namespace' in config) {
+        config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
+      }
+      first = false;
     }
   }
 
@@ -55,9 +61,8 @@ export abstract class BaseModelSuite<T> {
     if (isStorageSupported(service)) {
       await service.createStorage();
       if (service.onModelVisibilityChange) {
-        for (const cls of ModelRegistry.getClasses()) {
-          await service.onModelVisibilityChange({ type: 'added', curr: cls });
-        }
+        await Promise.all(ModelRegistry.getClasses().map(m =>
+          service.onModelVisibilityChange!({ type: 'added', curr: m })));
       }
     }
   }
@@ -67,9 +72,8 @@ export abstract class BaseModelSuite<T> {
     const service = await this.service;
     if (isStorageSupported(service)) {
       if (service.onModelVisibilityChange) {
-        for (const cls of ModelRegistry.getClasses()) {
-          await service.onModelVisibilityChange({ type: 'removing', prev: cls });
-        }
+        await Promise.all(ModelRegistry.getClasses().map(m =>
+          service.onModelVisibilityChange!({ type: 'removing', prev: m })));
       }
       await service.deleteStorage();
     }

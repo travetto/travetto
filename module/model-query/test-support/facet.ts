@@ -9,7 +9,7 @@ import { Person } from './types';
 import { ModelQueryFacetSupport } from '../src/service/facet';
 
 @Suite()
-export class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFacetSupport & ModelCrudSupport> {
+export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFacetSupport & ModelCrudSupport> {
 
   private async loadPeople() {
     const names = ['Bob', 'Bo', 'Barry', 'Rob', 'Robert', 'Robbie'];
@@ -82,10 +82,7 @@ export class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFacetSupport 
     assert(results.length === 2);
     assert(results[0].count >= results[1].count);
 
-    const genders = { m: 0, f: 0 };
-    for (const el of people) {
-      genders[el.gender] += 1;
-    }
+    const genders = people.reduce((acc, p) => { (acc[p.gender] += 1); return acc; }, { m: 0, f: 0 });
 
     assert(results.find(x => x.key === 'm')!.count === genders.m);
     assert(results.find(x => x.key === 'f')!.count === genders.f);

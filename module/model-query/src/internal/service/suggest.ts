@@ -6,7 +6,7 @@ import { ValidStringFields, WhereClauseRaw } from '../../model/where-clause';
 /**
  * Tools for building suggestion queries
  */
-export class QuerySuggestUtil {
+export class ModelQuerySuggestUtil {
 
   /**
    * Build regex for suggesting

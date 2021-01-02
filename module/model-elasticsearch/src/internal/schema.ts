@@ -1,8 +1,9 @@
 import { Util } from '@travetto/base';
 import { ModelRegistry } from '@travetto/model';
-import { Point } from '@travetto/model-query';
+import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
+
 import { EsSchemaConfig } from './types';
 
 const VERSION = require('@elastic/elasticsearch/package.json').version;
@@ -78,7 +79,7 @@ export class ElasticsearchSchemaUtil {
     for (const field of schema.fields) {
       const conf = schema.schema[field];
 
-      if (conf.type === Point) {
+      if (conf.type === PointImpl) {
         props[field] = { type: 'geo_point' };
       } else if (conf.type === Number) {
         let prop: Record<string, any> = { type: 'integer' };
