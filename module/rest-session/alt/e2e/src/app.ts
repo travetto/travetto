@@ -3,7 +3,7 @@ import { Application } from '@travetto/app';
 import { RestServer, Controller, Get, Context } from '@travetto/rest';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { CacheService } from '@travetto/cache';
-import { ModelExpirySupport } from '@travetto/model-core';
+import { ModelExpirySupport } from '@travetto/model';
 
 import { SessionCacheSym, SessionData, Session } from '../../..';
 

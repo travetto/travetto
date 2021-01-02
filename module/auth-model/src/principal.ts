@@ -1,6 +1,6 @@
 import { AppError, Util } from '@travetto/base';
 import { Inject } from '@travetto/di';
-import { ModelCrudSupport, ModelType, NotFoundError } from '@travetto/model-core';
+import { ModelCrudSupport, ModelType, NotFoundError } from '@travetto/model';
 import { AuthContext, AuthUtil, Principal, PrincipalSource } from '@travetto/auth';
 import { Class } from '@travetto/registry';
 

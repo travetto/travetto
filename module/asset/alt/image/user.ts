@@ -1,5 +1,5 @@
-// @file-if @travetto/model-core
-import { Model } from '@travetto/model-core';
+// @file-if @travetto/model
+import { Model } from '@travetto/model';
 
 @Model()
 export class User {

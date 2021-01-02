@@ -3,7 +3,7 @@ import { Request, Response } from '@travetto/rest';
 import { EnvUtil } from '@travetto/boot';
 import { CacheService } from '@travetto/cache';
 import { Util, AppError } from '@travetto/base';
-import { MemoryModelConfig, MemoryModelService } from '@travetto/model-core';
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
 
 import { SessionSym } from './internal/types';
 import { Session } from './types';

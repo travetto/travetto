@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
-import { ModelBulkSupport } from '@travetto/model-core';
+import { ModelBulkSupport } from '@travetto/model';
 import { User } from './user';
 
 @Injectable()

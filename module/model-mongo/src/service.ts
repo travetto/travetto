@@ -12,15 +12,19 @@ import {
   NotFoundError,
   ExistsError,
   ModelIndexedSupport
-} from '@travetto/model-core';
+} from '@travetto/model';
+import { ModelQuery, ModelQuerySupport, PageableModelQuery } from '@travetto/model-query';
 
 import { ChangeEvent, Class } from '@travetto/registry';
 import { ShutdownManager, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
-import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model-core/src/internal/service/storage';
 import { SchemaValidator } from '@travetto/schema';
+
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 
 import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
@@ -58,7 +62,12 @@ function preInsertId<T extends ModelType>(item: T) {
  * Mongo-based model source
  */
 @Injectable()
-export class MongoModelService implements ModelCrudSupport, ModelStorageSupport, ModelBulkSupport, ModelStreamSupport, ModelIndexedSupport {
+export class MongoModelService implements
+  ModelCrudSupport, ModelStorageSupport,
+  ModelBulkSupport, ModelStreamSupport,
+  ModelIndexedSupport, ModelQuerySupport
+// ModelQueryFacetSupport, ModelQueryCrudSupport
+{
 
   private client: mongo.MongoClient;
   private db: mongo.Db;
@@ -349,5 +358,54 @@ export class MongoModelService implements ModelCrudSupport, ModelStorageSupport,
       return;
     }
     throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
+  }
+
+  async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
+    const col = await this.getStore(cls);
+
+    const q = query.where ? (typeof query.where === 'string' ? QueryLanguageParser.parseToQuery(query.where) : query.where) : undefined;
+
+    const projected = MongoUtil.extractTypedWhereClause(cls, q ?? {});
+
+    console.debug('Query', { query });
+
+    let cursor = col.find<T>(projected);
+    if (query.select) {
+      const select = Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select);
+      // Remove id if not explicitly defined, and selecting fields directly
+      if (!select['_id']) {
+        const values = new Set([...Object.values(select)]);
+        if (values.has(1) || values.has(true)) {
+          select['_id'] = false;
+        }
+      }
+      cursor.project(select);
+    }
+
+    if (query.sort) {
+      cursor = cursor.sort(Object.assign({}, ...query.sort.map(x => MongoUtil.extractSimple(x))));
+    }
+
+    cursor = cursor.limit(Math.trunc(query.limit ?? 200));
+
+    if (query.offset && typeof query.offset === 'number') {
+      cursor = cursor.skip(Math.trunc(query.offset ?? 0));
+    }
+
+    const items = await cursor.toArray();
+    return await Promise.all(items.map(r => ModelCrudUtil.load(cls, r).then(postLoadId)));
+  }
+
+  async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
+    const col = await this.getStore(cls);
+    const q = query.where ? (typeof query.where === 'string' ? QueryLanguageParser.parseToQuery(query.where) : query.where) : undefined;
+    const projected = MongoUtil.extractTypedWhereClause(cls, q ?? {});
+    console.debug('Query', { query });
+    return col.countDocuments(projected);
+  }
+
+  async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany = false): Promise<T> {
+    const results = await this.query(cls, query);
+    return ModelQueryUtil.verifyGetSingleCounts(cls, results, failOnMany);
   }
 }

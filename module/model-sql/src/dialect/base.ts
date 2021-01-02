@@ -2,7 +2,7 @@ import { Class } from '@travetto/registry';
 import { SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
 import { Util, AppError } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model-query';
-import { BulkResponse, IndexConfig } from '@travetto/model-core';
+import { BulkResponse, IndexConfig } from '@travetto/model';
 
 import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';

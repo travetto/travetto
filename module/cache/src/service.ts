@@ -1,4 +1,4 @@
-import { Model, ModelExpirySupport, NotFoundError } from '@travetto/model-core';
+import { Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 

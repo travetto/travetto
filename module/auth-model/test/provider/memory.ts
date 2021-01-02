@@ -1,5 +1,5 @@
 import { InjectableFactory } from '@travetto/di';
-import { MemoryModelConfig, MemoryModelService } from '@travetto/model-core';
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
 import { Suite } from '@travetto/test';
 import { AuthModelSym } from '../../src/principal';
 import { AuthModelServiceSuite } from '../../test-support/service';

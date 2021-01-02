@@ -41,7 +41,7 @@ class TestController {
   }
 }
 
-@Suite({ skip: true })
+@Suite()
 export abstract class RestServerSuite extends BaseRestSuite {
 
   @BeforeAll()

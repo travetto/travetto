@@ -1,7 +1,7 @@
 import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 import { SelectClause, SortClause } from '@travetto/model-query';
-import { ModelRegistry, ModelType } from '@travetto/model-core';
+import { ModelRegistry, ModelType } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';

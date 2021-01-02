@@ -8,8 +8,8 @@ export async function getSchemas() {
   await PhaseManager.init();
 
   const { DependencyRegistry } = await import('@travetto/di');
-  const { ModelRegistry, } = await import('@travetto/model-core');
-  const { ModelStorageSupportTarget } = await import('@travetto/model-core/src/internal/service/common');
+  const { ModelRegistry, } = await import('@travetto/model');
+  const { ModelStorageSupportTarget } = await import('@travetto/model/src/internal/service/common');
 
   const src = (await DependencyRegistry.getInstance<ElasticsearchModelService>(ModelStorageSupportTarget));
 

@@ -5,14 +5,14 @@ import { ShutdownManager, Util } from '@travetto/base';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ExpiryState, ModelType, ModelStorageSupport,
   Model, NotFoundError, ExistsError, ModelIndexedSupport
-} from '@travetto/model-core';
+} from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class } from '@travetto/registry';
 
-import { ModelCrudUtil } from '@travetto/model-core/src/internal/service/crud';
-import { ModelExpiryUtil } from '@travetto/model-core/src/internal/service/expiry';
-import { ModelIndexedUtil } from '@travetto/model-core/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model-core/src/internal/service/storage';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { RedisModelConfig } from './config';
 

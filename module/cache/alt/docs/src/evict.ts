@@ -1,4 +1,4 @@
-import { MemoryModelService } from '@travetto/model-core';
+import { MemoryModelService } from '@travetto/model';
 import { Cache, EvictCache } from '../../../src/decorator';
 import { CacheService } from '../../../src/service';
 
