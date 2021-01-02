@@ -1,5 +1,5 @@
 import { InjectableFactory } from '@travetto/di';
-import { ModelExpirySupport } from '@travetto/model-core';
+import { ModelExpirySupport } from '@travetto/model';
 import { CacheModelSym } from '../../../src/service';
 
 class Config {

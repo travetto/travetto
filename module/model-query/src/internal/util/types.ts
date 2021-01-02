@@ -1,7 +1,6 @@
 import { FieldConfig } from '@travetto/schema';
 import { Class } from '@travetto/registry';
-
-import { Point } from '../../model/where-clause';
+import { PointImpl } from '@travetto/schema/alt/docs/src/custom-type';
 
 const st = (t: string, arr: boolean = false) => new Set([arr ? `${t}[]` : t]);
 
@@ -42,7 +41,7 @@ export class TypeUtil {
       case Number: return 'number';
       case Boolean: return 'boolean';
       case Date: return 'Date';
-      case Point: return 'Point';
+      case PointImpl: return 'Point';
       default: {
         if ('type' in f && f.array) {
           return this.getDeclaredType(f.type);

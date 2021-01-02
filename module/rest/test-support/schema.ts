@@ -99,7 +99,7 @@ function getEndpoint(path: string, method: MethodOrAll) {
     .endpoints.find(x => x.path === path && x.method === method)!;
 }
 
-@Suite({ skip: true })
+@Suite()
 export abstract class SchemaRestServerSuite extends BaseRestSuite {
 
   @BeforeAll()

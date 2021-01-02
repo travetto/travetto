@@ -1,6 +1,7 @@
 import { Suite, Test, BeforeEach, ShouldThrow } from '@travetto/test';
-import { DependencyRegistry } from '../src/registry';
 import { RootRegistry } from '@travetto/registry';
+
+import { DependencyRegistry } from '../src/registry';
 
 @Suite('cycle', { skip: true })
 class CycleTest {

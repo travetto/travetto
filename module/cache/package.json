@@ -9,7 +9,7 @@
   "dependencies": {
     "@travetto/compiler": "^2.0.0-alpha.0",
     "@travetto/di": "^2.0.0-alpha.0",
-    "@travetto/model-core": "^2.0.0-alpha.0"
+    "@travetto/model": "^2.0.0-alpha.0"
   },
   "title": "Caching",
   "description": "Caching functionality with decorators for declarative use.",

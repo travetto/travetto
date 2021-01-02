@@ -1,4 +1,4 @@
-import { StreamMeta } from '@travetto/model-core';
+import { StreamMeta } from '@travetto/model';
 
 /**
  * A retrieval/storable asset

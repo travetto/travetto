@@ -1,6 +1,6 @@
-// @file-if @travetto/model-core
+// @file-if @travetto/model
 import { Inject } from '@travetto/di';
-import { ModelCrudSupport } from '@travetto/model-core';
+import { ModelCrudSupport } from '@travetto/model';
 
 import { User } from './user';
 import { Path, Controller, SchemaBody, Get, Request, Delete, Post, Put } from '../../..';

@@ -44,7 +44,7 @@ async function getForm(files: Record<string, string>, content: string) {
   return form;
 }
 
-@Suite({ skip: true })
+@Suite()
 export abstract class AssetRestServerSuite extends BaseRestSuite {
 
   @BeforeAll()

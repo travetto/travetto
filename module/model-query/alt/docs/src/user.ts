@@ -1,4 +1,4 @@
-import { Model, BaseModel } from '@travetto/model-core';
+import { Model, BaseModel } from '@travetto/model';
 
 @Model()
 export class User extends BaseModel {

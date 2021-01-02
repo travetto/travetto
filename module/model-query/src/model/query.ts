@@ -17,20 +17,19 @@ type SortClauseRaw<T> = {
 type QueryOptionsRaw<T> = {
   sort?: SortClauseRaw<T>[];
   limit?: number;
-  offset?: number;
+  offset?: number | string;
 };
 
 type QueryMain<T> = {
   select?: SelectClauseRaw<T>;
-  where?: WhereClauseRaw<T>;
+  where?: WhereClauseRaw<T> | string;
   // TODO: Add grouping in later
   // group?: GroupClauseRaw<T>;
 };
 
 type QueryRaw<T> = QueryMain<T> & QueryOptionsRaw<T>;
-type ModelQueryRaw<T> = { where?: WhereClauseRaw<T> };
+type ModelQueryRaw<T> = QueryMain<T>;
 type PageableModelQueryRaw<T> = ModelQueryRaw<T> & QueryOptionsRaw<T>;
-type PageableModelQueryStringQueryRaw<T> = QueryOptionsRaw<T> & { query: string };
 
 /**
  * Type of a full query
@@ -60,7 +59,3 @@ export type GroupClause<T> = GroupClauseRaw<RetainFields<T>>;
  * Model query, requiring a model object
  */
 export type ModelQuery<T> = ModelQueryRaw<RetainFields<T>>;
-/**
- * Pageable query with support for querying by query string
- */
-export type PageableModelQueryStringQuery<T> = PageableModelQueryStringQueryRaw<RetainFields<T>>;

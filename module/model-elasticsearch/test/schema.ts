@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Model, BaseModel } from '@travetto/model-core';
+import { Model, BaseModel } from '@travetto/model';
 import { Currency, Integer, Precision, Float, Text, Schema } from '@travetto/schema';
 
 import { ElasticsearchSchemaUtil } from '../src/internal/schema';
