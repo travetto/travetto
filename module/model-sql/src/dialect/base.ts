@@ -3,6 +3,7 @@ import { SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
 import { Util, AppError } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
+import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 
 import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
@@ -75,6 +76,7 @@ export abstract class SQLDialect implements DialectState {
    */
   COLUMN_TYPES = {
     JSON: '',
+    POINT: 'POINT',
     BOOLEAN: 'BOOLEAN',
     TINYINT: 'TINYINT',
     SMALLINT: 'SMALLINT',
@@ -183,6 +185,8 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Date) {
       const [day, time] = (value as Date).toISOString().split(/[T.]/);
       return this.quote(`${day} ${time}`);
+    } else if (conf.type === PointImpl) {
+      return `point(${value[0]},${value[1]})`;
     } else if (conf.type === Object) {
       return this.quote(JSON.stringify(value).replace(/[']/g, `''`));
     }
@@ -227,6 +231,8 @@ export abstract class SQLDialect implements DialectState {
       } else {
         type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(conf.maxlength ? conf.maxlength.n : this.DEFAULT_STRING_LEN);
       }
+    } else if (conf.type === PointImpl) {
+      type = this.COLUMN_TYPES.POINT;
     } else if (conf.type === Object) {
       type = this.COLUMN_TYPES.JSON;
     }
@@ -249,7 +255,7 @@ export abstract class SQLDialect implements DialectState {
    * Delete query and return count removed
    */
   async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>) {
-    const { count } = await this.executeSQL(this.getDeleteSQL(SQLUtil.classToStack(cls), query.where));
+    const { count } = await this.executeSQL(this.getDeleteSQL(SQLUtil.classToStack(cls), query.where as WhereClause<T>));
     return count;
   }
 
@@ -504,7 +510,7 @@ export abstract class SQLDialect implements DialectState {
   getWhereSQL<T>(cls: Class<T>, where?: WhereClause<T>): string {
     return !where || !Object.keys(where).length ?
       '' :
-      `WHERE ${this.getWhereGroupingSQL(cls, where)}`;
+      `WHERE ${this.getWhereGroupingSQL(cls, where as WhereClause<T>)}`;
   }
 
   /**
@@ -582,7 +588,7 @@ LEFT OUTER JOIN ${from} ON
     return `
 ${this.getSelectSQL(cls, query.select)}
 ${this.getFromSQL(cls)}
-${this.getWhereSQL(cls, query.where)}
+${this.getWhereSQL(cls, query.where as WhereClause<T>)}
 ${this.getGroupBySQL(cls, query)}${sortFields ? `, ${sortFields}` : ''}
 ${this.getOrderBySQL(cls, query.sort)}
 ${this.getLimitSQL(cls, query)}`;
@@ -782,7 +788,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
     const { type } = stack[stack.length - 1];
     const { localMap } = SQLUtil.getFieldsByLocation(stack);
     return `
-UPDATE ${this.table(stack)}
+UPDATE ${this.table(stack)} ${this.rootAlias}
 SET
   ${Object
         .entries(data)
@@ -824,7 +830,7 @@ ${orderBy};`;
     return `
 SELECT COUNT(DISTINCT ${this.rootAlias}.id) as total
 ${this.getFromSQL(cls)}
-${this.getWhereSQL(cls, query.where)}`;
+${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
   }
 
   async fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]> {
