@@ -72,8 +72,9 @@ export abstract class BaseModelSuite<T> {
     const service = await this.service;
     if (isStorageSupported(service)) {
       if (service.onModelVisibilityChange) {
-        await Promise.all(ModelRegistry.getClasses().map(m =>
-          service.onModelVisibilityChange!({ type: 'removing', prev: m })));
+        for (const m of ModelRegistry.getClasses()) {
+          await service.onModelVisibilityChange!({ type: 'removing', prev: m });
+        }
       }
       await service.deleteStorage();
     }

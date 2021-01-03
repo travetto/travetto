@@ -10,6 +10,8 @@ import { Location, Names, Note, Person, SimpleList } from './types';
 @Suite()
 export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {
 
+  supportsGeo = true;
+
   @Test('verify word boundary')
   async testWordBoundary() {
     const service = await this.service;
@@ -163,6 +165,10 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
   @Test('Test within')
   async testWithin() {
+    if (!this.supportsGeo) {
+      return;
+    }
+
     const svc = await this.service;
 
     const toAdd = [];

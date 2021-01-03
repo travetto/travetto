@@ -133,10 +133,10 @@ export abstract class Connection<C = any> {
    */
   async startTx(conn: C, transactionId?: string) {
     if (transactionId) {
-      return this.execute(conn, `SAVEPOINT ${transactionId}`);
+      return this.execute(conn, `SAVEPOINT ${transactionId};`);
     } else {
       await this.execute(conn, 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED;');
-      await this.execute(conn, 'BEGIN');
+      await this.execute(conn, 'BEGIN;');
     }
   }
 
@@ -145,9 +145,9 @@ export abstract class Connection<C = any> {
    */
   commitTx(conn: C, transactionId?: string) {
     if (transactionId) {
-      return this.execute(conn, `RELEASE SAVEPOINT ${transactionId}`);
+      return this.execute(conn, `RELEASE SAVEPOINT ${transactionId};`);
     } else {
-      return this.execute(conn, 'COMMIT');
+      return this.execute(conn, 'COMMIT;');
     }
   }
 
@@ -156,9 +156,9 @@ export abstract class Connection<C = any> {
    */
   rollbackTx(conn: C, transactionId?: string) {
     if (transactionId) {
-      return this.execute(conn, `ROLLBACK TO ${transactionId}`);
+      return this.execute(conn, `ROLLBACK TO ${transactionId};`);
     } else {
-      return this.execute(conn, 'ROLLBACK');
+      return this.execute(conn, 'ROLLBACK;');
     }
   }
 }
