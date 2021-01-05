@@ -9,14 +9,14 @@ const { FsUtil } = require('../../module/boot/src/fs');
  */
 async function updateModule(root) {
   // Fetch deps
-  const pkg = require(`${root}/package.json`);
+  /** @type {Record<string, Record<string, string>>} */ const pkg = require(`${root}/package.json`);
 
   process.stdout.write(`- ${pkg.name}`.padEnd(35));
 
   const resolved = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'optionalPeerDependencies']
-    .map(/** @param type {string} */ type =>
+    .map(type =>
       Object.entries(pkg[type] ?? {})
-        .map(/** @param inp {[string, string]} */([dep, version]) => ({ dep, type, version }))
+        .map(([dep, version]) => ({ dep, type, version }))
     )
     .reduce((all, items) => all.concat(items), [])
     .filter(x => !x.dep.startsWith('@travetto'))
