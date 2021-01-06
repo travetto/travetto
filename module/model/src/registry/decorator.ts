@@ -10,8 +10,12 @@ import { IndexConfig, ModelOptions } from './types';
  *
  * @augments `@trv:schema/Schema`
  */
-export function Model(conf: Partial<ModelOptions<any>> = {}) {
+export function Model(conf: Partial<ModelOptions<any>> | string = {}) {
   return function <T extends Class<ModelType>>(target: T) {
+    if (typeof conf === 'string') {
+      conf = { store: conf };
+    }
+
     // Force registry first, and update with extra information after computing
     ModelRegistry.register(target, conf);
 

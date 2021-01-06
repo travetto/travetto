@@ -4,6 +4,14 @@ import { ModelCrudSuite } from '../test-support/crud';
 import { ModelExpirySuite } from '../test-support/expiry';
 import { ModelStreamSuite } from '../test-support/stream';
 import { ModelIndexedSuite } from '../test-support/indexed';
+import { ModelBasicSuite } from '../test-support/basic';
+
+@Suite()
+export class MemoryBasicSuite extends ModelBasicSuite {
+  constructor() {
+    super(MemoryModelService, MemoryModelConfig);
+  }
+}
 
 @Suite()
 export class MemoryCrudSuite extends ModelCrudSuite {

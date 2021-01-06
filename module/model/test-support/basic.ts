@@ -1,15 +1,13 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Schema, Text, Precision } from '@travetto/schema';
 
 import { BaseModelSuite } from './base';
 import { ModelCrudSupport, Model, BaseModel, NotFoundError } from '..';
 
-@Model()
+@Model('basic_person')
 class Person extends BaseModel {
-  @Text() name: string;
-  @Precision(3, 0)
+  name: string;
   age: number;
   gender: 'm' | 'f';
 }
@@ -32,7 +30,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
 
     const single = await service.get(Person, person.id!);
     assert(single !== undefined);
-    assert(single.age === 23);
+    assert(single.age === 25);
 
     await assert.rejects(async () => {
       await service.get(Person, service.uuid());
