@@ -3,6 +3,14 @@ import { FileModelConfig, FileModelService } from '../src/provider/file';
 import { ModelCrudSuite } from '../test-support/crud';
 import { ModelExpirySuite } from '../test-support/expiry';
 import { ModelStreamSuite } from '../test-support/stream';
+import { ModelBasicSuite } from '../test-support/basic';
+
+@Suite()
+export class FileBasicSuite extends ModelBasicSuite {
+  constructor() {
+    super(FileModelService, FileModelConfig);
+  }
+}
 
 @Suite()
 export class FileCrudSuite extends ModelCrudSuite {

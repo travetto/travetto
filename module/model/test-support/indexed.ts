@@ -8,7 +8,7 @@ import { ModelIndexedSupport } from '../src/service/indexed';
 import { BaseModelSuite } from './base';
 import { NotFoundError } from '../src/error/not-found';
 
-@Model({ store: 'index_user' })
+@Model('index_user')
 @Index({
   name: 'userName',
   fields: [{ name: 1 }]
@@ -17,7 +17,7 @@ class User extends BaseModel {
   name?: string;
 }
 
-@Model({ store: 'index_user_2' })
+@Model('index_user_2')
 class User2 extends BaseModel {
   name: string;
 }
