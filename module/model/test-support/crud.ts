@@ -215,8 +215,8 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(res.time instanceof Date);
   }
 
-  @Test('Verify save and find and deserialize')
-  async testPolymorphism() {
+  @Test('Polymorphic create and find')
+  async polymorphicCreateAndFind() {
     const service = await this.service;
     const people = [
       Doctor.from({ name: 'bob', specialty: 'feet' }),
@@ -226,9 +226,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const o = await Promise.all(people.map(p => service.create(Worker, p)));
 
     assert(o[0] instanceof Doctor);
-    await assert.rejects(
-      () => service.update(Engineer, Doctor.from({ ...o[0] }) as any),
-      (e: Error) => (e instanceof NotFoundError || e instanceof TypeMismatchError) ? undefined : e);
 
     await assert.rejects(
       () => service.get(Engineer, o[0].id!),
@@ -273,4 +270,62 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(engineers2.length === 2);
   }
 
+  @Test('Polymorphic upsert and delete')
+  async polymorphicUpsertAndDelete() {
+    const service = await this.service;
+    const people = [
+      Doctor.from({ name: 'bob', specialty: 'feet' }),
+      Firefighter.from({ name: 'rob', firehouse: 20 }),
+      Engineer.from({ name: 'cob', major: 'oranges' })
+    ];
+
+    await this.saveAll(Worker, people);
+
+    assert(await service.get(Worker, people[0].id!) instanceof Doctor);
+    assert(await service.get(Worker, people[1].id!) instanceof Firefighter);
+
+    const update = new Date();
+
+    await assert.rejects(
+      () =>
+        service.upsert(Doctor, Doctor.from({
+          id: people[1].id!, name: 'drob', specialty: 'eyes'
+        })),
+      TypeMismatchError
+    );
+
+    await assert.rejects(
+      () => service.update(Engineer, Doctor.from({ ...people[0] }) as any),
+      (e: Error) => (e instanceof NotFoundError || e instanceof TypeMismatchError) ? undefined : e);
+
+    const res = await service.upsert(Doctor, Doctor.from({
+      id: people[0].id!, name: 'drob', specialty: 'eyes'
+    }));
+
+    assert(res.updatedDate!.getTime() > update.getTime());
+
+
+    // Delete by wrong class
+    await assert.rejects(
+      () => service.delete(Doctor, people[1].id!),
+      NotFoundError
+    );
+
+    // Delete by base class
+    await service.delete(Worker, people[1].id!);
+
+    await assert.rejects(
+      () => service.delete(Worker, people[1].id!),
+      NotFoundError
+    );
+
+    // Delete by proper class
+    await service.delete(Doctor, people[0].id!);
+
+    // Delete by any subtype when id is missing
+    await assert.rejects(
+      () => service.delete(Firefighter, people[0].id!),
+      NotFoundError
+    );
+  }
 }

@@ -15,7 +15,7 @@ class Person extends BaseModel {
 @Suite()
 export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
 
-  @Test('save it')
+  @Test('create, read, delete')
   async create() {
     const service = await this.service;
 
