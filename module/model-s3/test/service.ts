@@ -2,10 +2,18 @@ import * as assert from 'assert';
 
 import { StreamUtil } from '@travetto/boot';
 import { Suite, Test } from '@travetto/test';
+import { ModelBasicSuite } from '@travetto/model/test-support/basic';
 import { ModelCrudSuite } from '@travetto/model/test-support/crud';
 import { ModelStreamSuite } from '@travetto/model/test-support/stream';
 import { S3ModelConfig } from '../src/config';
 import { S3ModelService } from '../src/service';
+
+@Suite()
+export class S3BasicSuite extends ModelBasicSuite {
+  constructor() {
+    super(S3ModelService, S3ModelConfig);
+  }
+}
 
 @Suite()
 export class S3CrudSuite extends ModelCrudSuite {
@@ -33,6 +41,7 @@ export class S3StreamSuite extends ModelStreamSuite {
     const hash = await this.getHash(await StreamUtil.bufferToStream(buffer));
 
     await service.upsertStream(hash, await StreamUtil.bufferToStream(buffer), {
+      filename: 'Random.bin',
       contentType: 'binary/octet-stream',
       size: buffer.length,
       hash

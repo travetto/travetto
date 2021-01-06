@@ -1,8 +1,18 @@
 import { Suite } from '@travetto/test';
+
+import { ModelBasicSuite } from '@travetto/model/test-support/basic';
 import { ModelCrudSuite } from '@travetto/model/test-support/crud';
 import { ModelIndexedSuite } from '@travetto/model/test-support/indexed';
 
 import { FirestoreModelConfig, FirestoreModelService } from '..';
+
+@Suite()
+export class FirestoreBasicSuite extends ModelBasicSuite {
+  constructor() {
+    super(FirestoreModelService, FirestoreModelConfig);
+  }
+}
+
 
 @Suite()
 export class FirestoreCrudSuite extends ModelCrudSuite {

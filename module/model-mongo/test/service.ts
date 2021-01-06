@@ -3,12 +3,20 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { Index, Model } from '@travetto/model';
 
+import { ModelBasicSuite } from '@travetto/model/test-support/basic';
 import { ModelCrudSuite } from '@travetto/model/test-support/crud';
 import { ModelStreamSuite } from '@travetto/model/test-support/stream';
 import { ModelBulkSuite } from '@travetto/model/test-support/bulk';
 import { ModelIndexedSuite } from '@travetto/model/test-support/indexed';
 
 import { MongoModelConfig, MongoModelService } from '..';
+
+@Suite()
+export class MongoBasicSuite extends ModelBasicSuite {
+  constructor() {
+    super(MongoModelService, MongoModelConfig);
+  }
+}
 
 @Suite()
 export class MongoCrudSuite extends ModelCrudSuite {
