@@ -22,7 +22,6 @@ export function Model(conf: Partial<ModelOptions<any>> = {}) {
       } else {
         conf.subType = SchemaRegistry.getSubTypeName(target);
       }
-      conf.store = ModelRegistry.getBaseStore(target);
     }
     ModelRegistry.register(target, conf);
     return target;

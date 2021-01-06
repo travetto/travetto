@@ -29,7 +29,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   private resolveKey(cls: Class | string, id?: string) {
-    let key = typeof cls === 'string' ? cls : ModelRegistry.getBaseStore(cls);
+    let key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
     if (id) {
       key = `${key}:${id}`;
     }
