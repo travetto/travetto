@@ -8,7 +8,7 @@ cast on return appropriately.  If requesting a specific class (create, update, d
 With respect to interfaces:
 
 * - Means the method supports polymorphism input (base or sub class)
-@ - Means the method supports only sub class activity
+@ - Means the method supports requires concrete class instances
 
 ## ModelBasicSupport
 - [*] get    - Will check and cast the type properly on retrieval.  If type doesn't match, throw not found

@@ -1,7 +1,7 @@
 import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry, Class } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { AppError } from '@travetto/base';
 
 import { ModelOptions } from './types';
 import { NotFoundError } from '../error/not-found';
@@ -22,10 +22,29 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
    * Indexed base model classes to all subclasses
    */
   baseModelGrouped = new Map<Class, Class[]>();
+  /**
+   * Default mapping of classes by class name or
+   * by requested store name.  This is the state at the
+   * start of the application.
+   */
+  intialModelNameMapping = new Map<string, Class[]>();
 
   constructor() {
     // Listen to schema and dependency
     super(SchemaRegistry, DependencyRegistry);
+  }
+
+  getInitialNameMapping() {
+    if (this.intialModelNameMapping.size === 0) {
+      for (const cls of this.getClasses()) {
+        const store = this.get(cls).store ?? cls.name;
+        if (!this.intialModelNameMapping.has(store)) {
+          this.intialModelNameMapping.set(store, []);
+        }
+        this.intialModelNameMapping.get(store)!.push(cls);
+      }
+    }
+    return this.intialModelNameMapping;
   }
 
   createPending(cls: Class): Partial<ModelOptions<any>> {
@@ -95,19 +114,33 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
   }
 
   /**
-   * Find the base store for a type
+   * Get the apparent store for a type, handling polymorphism when appropriate
    */
-  getBaseStore(cls: Class) {
-    return this.getStore(this.getBaseModel(cls));
-  }
-
-  /**
-   * Get the apparent store for a type
-   */
-  getStore(cls: Class) {
+  getStore(cls: Class): string {
     if (!this.stores.has(cls)) {
       const config = this.get(cls) ?? this.getOrCreatePending(cls);
-      const name = (config.store || `${cls.name}_${SystemUtil.naiveHash(cls.ᚕid)}`.toLowerCase());
+      if (config.subType) {
+        return this.getStore(this.getBaseModel(cls));
+      }
+
+
+      const name = config.store ?? cls.name;
+
+      const candidates = this.getInitialNameMapping().get(name) || [];
+
+      // Don't allow two models with same class name, or same store name
+      if (candidates.length > 1) {
+        if (config.store) {
+          throw new AppError('Duplicate models with same store name', 'general', {
+            classes: candidates.map(x => x.ᚕid)
+          });
+        } else {
+          throw new AppError('Duplicate models with same class name, but no store name provided', 'general', {
+            classes: candidates.map(x => x.ᚕid)
+          });
+        }
+      }
+
       this.stores.set(cls, name);
     }
     return this.stores.get(cls)!;

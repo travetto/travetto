@@ -49,7 +49,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   private wrap = <T>(fn: T): T => (fn as any).bind(this.cl) as T;
 
   private resolveKey(cls: Class | string, id?: string) {
-    let key = typeof cls === 'string' ? cls : ModelRegistry.getBaseStore(cls);
+    let key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
     if (id) {
       key = `${key}:${id}`;
     }
