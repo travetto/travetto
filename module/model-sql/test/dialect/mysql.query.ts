@@ -1,15 +1,15 @@
 import { Suite } from '@travetto/test';
+import { AsyncContext } from '@travetto/context';
+import { InjectableFactory } from '@travetto/di';
 
 import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 import { ModelQuerySuite } from '@travetto/model-query/test-support/query';
 import { ModelQueryCrudSuite } from '@travetto/model-query/test-support/crud';
 import { ModelQueryFacetSuite } from '@travetto/model-query/test-support/facet';
 
-import { AsyncContext } from '@travetto/context';
-import { InjectableFactory } from '@travetto/di';
-
 import { SQLModelConfig, SQLModelService } from '../..';
 import { MySQLDialect } from '../../src/dialect/mysql/dialect';
+import { BaseQueryTest } from '../query';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -42,3 +42,6 @@ export class MysqlQueryFacetSuite extends ModelQueryFacetSuite {
     super(SQLModelService, SQLModelConfig);
   }
 }
+
+@Suite()
+export class MySQLQueryTest extends BaseQueryTest { }
