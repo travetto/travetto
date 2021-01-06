@@ -13,7 +13,7 @@
     "@travetto/rest": "^2.0.0-alpha.0"
   },
   "optionalPeerDependencies": {
-    "@types/passport": "^1.0.4",
+    "@types/passport": "^1.0.5",
     "passport": "^0.4.1"
   },
   "title": "Rest Auth",
