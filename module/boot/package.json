@@ -38,8 +38,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/boot"
   },
-  "scripts": {
-    "postinstall": "node bin/plugin-postinstall"
-  },
   "version": "2.0.0-alpha.0"
 }

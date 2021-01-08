@@ -23,6 +23,10 @@ if [ ! "$1" == "watch" ]; then
   popd > /dev/null
 fi
 
+# Link register
+mkdir -p node_modules/@travetto/boot
+ln -sf module/boot/register.js node_modules/@travetto/boot/register.js
+
 # Wait for all background jobs
 if [ "$1" == "watch" ]; then
   for job in `jobs -p`; do  

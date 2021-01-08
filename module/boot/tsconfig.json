@@ -5,7 +5,7 @@
     "strict": true,
     "strictPropertyInitialization": false,
     "sourceMap": false,
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "inlineSourceMap": true,
     "lib": [
       "es2020"
