@@ -9,18 +9,17 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
-    "bootstrap": "./bin/npm/bootstrap.sh",
-    "clean": "./bin/npm/clean.sh && npm run prepare",
+    "hoist": "./bin/npm/hoist.sh",
+    "clean": "./bin/npm/clean.sh",
     "docs": "./bin/npm/docs.sh",
-    "link": "./bin/npm/link.sh",
     "lint": "./bin/npm/lint.sh",
-    "prepare": "./bin/npm/prepare.sh",
+    "boot": "./bin/npm/boot.sh",
     "service": "./bin/npm/service.sh",
     "test": "./bin/npm/test.sh",
     "upgrade": "./bin/npm/upgrade.sh",
-    "init": "npm run bootstrap; npm run link; npm run vscode-plugin",
+    "init": "npm run clean; npm run hoist; npm run boot; npm run vscode-plugin",
     "vscode-plugin": "./bin/npm/vscode-plugin.sh",
-    "reinit": "rm -rf node_modules; npm run clean; npm i; npm run init"
+    "reinit": "npm ci; npm run init"
   },
   "devDependencies": {
     "@types/faker": "^5.1.5",
