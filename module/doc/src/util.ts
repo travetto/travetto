@@ -51,8 +51,7 @@ export class DocUtil {
 
   static run(cmd: string, args: string[], config: { cwd?: string } = {}) {
     if (cmd === 'travetto') {
-      args.unshift(cmd);
-      cmd = `npx`;
+      cmd = `trv`;
     } else if (/.*[.][tj]s$/.test(cmd)) {
       args.unshift('-r', '@travetto/boot/register', cmd);
       cmd = `node`;
@@ -68,8 +67,8 @@ export class DocUtil {
         // eslint-disable-next-line no-control-regex
         .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
         .replace(new RegExp(FsUtil.cwd, 'g'), '.')
-        .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.DOC_STATE.getDate.bind(this))
-        .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.DOC_STATE.getId.bind(this))
+        .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.DOC_STATE.getDate.bind(this.DOC_STATE))
+        .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.DOC_STATE.getId.bind(this.DOC_STATE))
         .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);
     } catch (err) {
       return err.message;
@@ -182,7 +181,7 @@ export class DocUtil {
     let line = 0;
     if (file.startsWith('@')) {
       file = require.resolve(file);
-    } else if (/^([.][/]|src|alt)/.test(file)) {
+    } else if (/^([.][/]|src|doc)/.test(file)) {
       if (!file.startsWith('.')) {
         file = `./${file}`;
       }

@@ -30,7 +30,6 @@ export interface ApplicationParameter {
  */
 export interface ApplicationConfig<T extends AppClass = AppClass> {
   name: string; // App name
-  root: string; // App root location
   filename: string; // Location of file for app
   description?: string;
   start: number; // Start of app

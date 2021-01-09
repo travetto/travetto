@@ -6,9 +6,9 @@ In the desire to provide a minimal footprint, the framework provides a minimal $
 
 ${Ref(YamlUtil.name, './src/util.ts')} is the main access point for this module, and will expose two method, ${meth`parse`} and ${meth`serialize`}.
 
-${Code('Simple YAML Parsing', 'alt/docs/src/parse.ts')}
-${Execute('Simple YAML Parsing', 'alt/docs/src/parse.ts')}
+${Code('Simple YAML Parsing', 'doc/parse.ts')}
+${Execute('Simple YAML Parsing', 'doc/parse.ts')}
 
-${Code('Simple YAML Serialization', 'alt/docs/src/serialize.ts')}
-${Execute('Simple YAML Serialization', 'alt/docs/src/serialize.ts')}
+${Code('Simple YAML Serialization', 'doc/serialize.ts')}
+${Execute('Simple YAML Serialization', 'doc/serialize.ts')}
 `;

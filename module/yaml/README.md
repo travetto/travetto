@@ -14,7 +14,7 @@ In the desire to provide a minimal footprint, the framework provides a minimal [
 
 **Code: Simple YAML Parsing**
 ```typescript
-import { YamlUtil } from '@travetto/yaml/src/util';
+import { YamlUtil } from '@travetto/yaml';
 
 const obj = YamlUtil.parse(`
 name: Source
@@ -33,7 +33,7 @@ console.log(JSON.stringify(obj, null, 2));
 
 **Terminal: Simple YAML Parsing**
 ```bash
-$ alt/docs/src/parse.ts -r @travetto/boot/register alt/docs/src/parse.ts
+$ doc/parse.ts -r @travetto/boot/register doc/parse.ts
 
 {
   "name": "Source",
@@ -59,7 +59,7 @@ $ alt/docs/src/parse.ts -r @travetto/boot/register alt/docs/src/parse.ts
 
 **Code: Simple YAML Serialization**
 ```typescript
-import { YamlUtil } from '@travetto/yaml/src/util';
+import { YamlUtil } from '@travetto/yaml';
 
 const text = YamlUtil.serialize({
   name: 'Source',
@@ -80,7 +80,7 @@ console.log(text);
 
 **Terminal: Simple YAML Serialization**
 ```bash
-$ alt/docs/src/serialize.ts -r @travetto/boot/register alt/docs/src/serialize.ts
+$ doc/serialize.ts -r @travetto/boot/register doc/serialize.ts
 
 name: Source
 age: 20

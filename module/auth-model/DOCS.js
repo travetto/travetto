@@ -10,13 +10,13 @@ A registered identity extends the base concept of an identity, by adding in addi
 
 ${Snippet('Registered Identity', './src/identity.ts', /interface RegisteredIdentity/, /^[}]/)}
 
-${Code('A valid user model', 'alt/docs/src/model.ts')}
+${Code('A valid user model', 'doc/model.ts')}
 
 ${Section('Configuration')}
 
 Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogeonized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
 
-${Code('Principal Source configuration', 'alt/docs/src/config.ts')}
+${Code('Principal Source configuration', 'doc/config.ts')}
 
-${Code('Sample usage', 'alt/docs/src/usage.ts')}
+${Code('Sample usage', 'doc/usage.ts')}
 `;

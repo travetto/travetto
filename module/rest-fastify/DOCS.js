@@ -7,7 +7,7 @@ The module is an ${lib.Fastify} provider for the ${Mod('rest')} module.  This mo
 
 ${Section('Customizing Rest App')}
 
-${Code('Customizing the Fastify App', 'alt/docs/src/customize.ts')}
+${Code('Customizing the Fastify App', 'doc/customize.ts')}
 
 ${Section('Default Middleware')}
 When working with an ${lib.Fastify} applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:

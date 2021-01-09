@@ -13,13 +13,13 @@ ${List(
   d`Spin up a container and run multiple executions against it.  In this format, the container, once started, will be scheduled to terminate on ${cls`Shutdown`} of the application.`
 )}
 
-${Code('Launching nginx and wait for connect', 'alt/docs/src/docker.ts')}
+${Code('Launching nginx and wait for connect', 'doc/docker.ts')}
 
 ${Section('Command Service')}
 
 While docker containers provide a high level of flexibility, performance can be an issue.  ${CommandService} is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
 
-${Code('Command Service example, using pngquant', 'alt/docs/src/service.ts')}
+${Code('Command Service example, using pngquant', 'doc/service.ts')}
 
 ${Section('CLI - command:service')}
 
@@ -29,7 +29,7 @@ ${Execute('Command Service', 'travetto', ['command:service', '--help'])}
 
 A sample of all services available to the entire framework:
 
-${Terminal('All Services', DocUtil.run('sh', ['./bin/npm/service.sh', 'status'], { cwd: FsUtil.resolveUnix(__dirname, '..', '..') }))}
+${Terminal('All Services', DocUtil.run('sh', ['./bin/util/service.js', 'status'], { cwd: FsUtil.resolveUnix(__dirname, '..', '..') }))}
 
 ${SubSection('Defining new Services')}
 

@@ -62,7 +62,7 @@ At runtime the resolved config would be:
 ```bash
 $ alt/docs/src/resolve.ts -r @travetto/boot/register alt/docs/src/resolve.ts
 
-{
+Config {
   database: {
     host: 'prod - host - db',
     creds: { user: 'admin - user', password: '%secret%' },

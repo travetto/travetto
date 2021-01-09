@@ -38,7 +38,7 @@ Additionally, the module is predicated upon ${Mod('di')}, and so all standard in
 
 ${lib.JSDoc} comments can also be used to define the ${inp`title`} attribute.
 
-${Code('Basic Controller Registration', 'alt/docs/src/simple-controller.ts')}
+${Code('Basic Controller Registration', 'doc/simple-controller.ts')}
 
 ${Section('Routes: Endpoints')}
 
@@ -68,7 +68,7 @@ ${lib.JSDoc} comments can also be used to define the ${inp`title`} attribute, as
 
 Additionally, the return type of the method will also be used to describe the ${inp`responseType`} if not specified manually.
 
-${Code('Controller with Sample Route', 'alt/docs/src/simple-route.ts')}
+${Code('Controller with Sample Route', 'doc/simple-route.ts')}
 
 ${Note(d`In development mode the module supports hot reloading of ${inp`class`}es.  Routes can be added/modified/removed at runtime.`)}
 
@@ -93,7 +93,7 @@ ${List(
 
 ${lib.JSDoc} comments can also be used to describe parameters using ${inp`@param`} tags in the comment.
 
-${Code('Full-fledged Controller with Routes', 'alt/docs/src/simple-full.ts')}
+${Code('Full-fledged Controller with Routes', 'doc/simple-full.ts')}
 
 ${Section('Input/Output')}
 
@@ -118,7 +118,7 @@ ${Section('Interceptors')}
 
 ${RestInterceptor}s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
-${Code(`A Trivial Intereptor`, 'alt/docs/src/interceptor-hello-world.ts')}
+${Code(`A Trivial Intereptor`, 'doc/interceptor-hello-world.ts')}
 
 ${Note(`The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after reuirements to ensure the appropriate order of execution.`)}
 
@@ -131,7 +131,7 @@ ${Ordered(
   ${Snippet('Cookies Config', RestCookieConfig.ᚕfile, /class.*Config/, /^\}/)}`,
   d`${GetCacheInterceptor} - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting ${inp`res.disableGetCache: true`} in your config.`,
   d`${LoggingInterceptor} - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so\n
-  ${Code('Control Logging', 'alt/docs/resources/log.yml')}`,
+  ${Code('Control Logging', 'doc/resources/log.yml')}`,
 )}
 
 ${Section('Creating and Running an App')}
@@ -142,25 +142,25 @@ ${Install('Installing app support', `@travett/app`)}
 
 To customize a REST server, you may need to construct an entry point using the ${Application} decorator. This could look like:
 
-${Code('Application entry point for Rest Applications', 'alt/docs/src/custom-app.ts')}
+${Code('Application entry point for Rest Applications', 'doc/custom-app.ts')}
 
 And using the pattern established in the ${Mod('app')} module, you would run your program using ${Command(`npx travetto run custom`)}.
 
 ${Section('Custom Interceptors')}
 Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the ${Mod('di')} by extending the ${RestInterceptor} class.  The interceptors are tied to the defined ${Request} and ${Response} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
-${Code('Defining a new Interceptor', 'alt/docs/src/interceptor-logging.ts')}
+${Code('Defining a new Interceptor', 'doc/interceptor-logging.ts')}
 
 A ${inp`next`} parameter is also available to allow for controlling the flow of the request, either by stopping the flow of interceptors, or being able to determine when a request starts, and when it is ending.
 
-${Code('Defining a fully controlled Interceptor', 'alt/docs/src/interceptor-controlled.ts')}
+${Code('Defining a fully controlled Interceptor', 'doc/interceptor-controlled.ts')}
 
 Currently ${Mod('asset-rest')} is implemented in this fashion, as well as ${Mod('auth-rest')}.
 
 ${Section('Cookie Support')}
 Express/Koa/Fastify all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using ${lib.Cookies}.  This functionality is exposed onto the ${Request}/${Response} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
-${Code('Sample Cookie Usage', 'alt/docs/src/cookie-routes.ts')}
+${Code('Sample Cookie Usage', 'doc/cookie-routes.ts')}
 
 ${Section(`SSL Support`)}
 
@@ -194,15 +194,15 @@ The module provides high level access for ${Mod('schema')} support, via decorato
 
 ${SchemaBody} provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
 
-${Code(d`Using ${SchemaBody.name} for POST requests`, 'alt/docs/src/schema-body.ts')}
+${Code(d`Using ${SchemaBody.name} for POST requests`, 'doc/schema-body.ts')}
 
 ${SchemaQuery} provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
-${Code(d`Using ${SchemaQuery.name} for GET requests`, 'alt/docs/src/schema-query.ts')}
+${Code(d`Using ${SchemaQuery.name} for GET requests`, 'doc/schema-query.ts')}
 
 Addtionally, ${SchemaQuery} and ${SchemaBody} can also be used with ${inp`interface`}s and ${inp`type`} literals in lieu of classes. This is best suited for simple types:
 
-${Code(d`Using ${SchemaQuery.name} with a type literal`, 'alt/docs/src/schema-query-type.ts')}
+${Code(d`Using ${SchemaQuery.name} with a type literal`, 'doc/schema-query-type.ts')}
 
 
 ${Section('Extension - Rest')}
@@ -210,10 +210,10 @@ ${Section('Extension - Rest')}
 To facilitate common RESTful patterns, the module exposes  ${Mod('rest')} support in the form of ${ModelController}.
 
 
-${Code('ModelController example', 'alt/docs/src/controller-with-model.ts')}
+${Code('ModelController example', 'doc/controller-with-model.ts')}
 
 is a shorthand that is equal to:
 
-${Code('Comparable UserController, built manually', 'alt/docs/src/controller-without-model.ts')}
+${Code('Comparable UserController, built manually', 'doc/controller-without-model.ts')}
 
 `;

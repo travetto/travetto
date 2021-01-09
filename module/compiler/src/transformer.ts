@@ -24,8 +24,7 @@ export class TransformerManager {
     }
 
     // Modules
-    const found = ScanApp.findFiles({ folder: 'support', filter: /\/transformer.*[.]ts/ })
-      .filter(x => !x.module.startsWith('alt')); // Exclude alt if they ever show up
+    const found = ScanApp.findCommonFiles({ folder: 'support', filter: /\/transformer.*[.]ts/ });
 
     for (const entry of found) { // Exclude based on blacklist
       this.transformers.push(...getAllTransformers(require(entry.file)));

@@ -4,6 +4,7 @@ const { Injectable } = require('@travetto/di');
 const { AssetNamingStrategy, AssetService } = require('.');
 
 const AssetLink = SnippetLink('Asset', './src/types.ts', /interface Asset/);
+const ModelStreamSupport = SnippetLink('ModuleStreamSupport', '@travetto/model/src/service/stream.ts', /interface ModelStreamSupport/);
 
 exports.text = d`
 
@@ -13,7 +14,7 @@ ${Install('provider', `@travetto/asset-{provider}`)}
 
 Reading of and writing assets uses the ${AssetService}.  Below you can see an example dealing with a user's profile image.
 
-${Code('User Profile Images', './alt/image/src/user-profile.ts')}
+${Code('User Profile Images', './doc/user-profile.ts')}
 
 ${Section('Naming Strategies')}
 
@@ -33,5 +34,5 @@ ${Code('Asset Structure', './src/types.ts')}
 
 To get the asset information, you would call:
 
-${Code('Fetching Asset Info', './alt/image/src/user-profile-tags.ts')}
+${Code('Fetching Asset Info', './doc/user-profile-tags.ts')}
 `;

@@ -12,7 +12,7 @@ ${Section('Custom Transformer')}
 
 Below is an example of a transformer that uppercases all ${inp`class`}, ${inp`method`} and ${inp`param`} declarations.  This will break any code that depends upon it as we are redefining all the identifiers at compile time.  
 
-${Code('Sample Transformer - Upper case all declarations', 'alt/upper/support/transformer.ts')}
+${Code('Sample Transformer - Upper case all declarations', 'doc/support/transformer.ts')}
 
 ${Note('This should be a strong indicator that it is very easy to break code in unexpected ways.')}
 `;

@@ -49,7 +49,7 @@ ${Section('Images')}
 
 When referencing an image from the ${pth`resources`} folder in a template, e.g.
 
-${Code('Sample Image Reference', 'alt/docs/resources/email/sample-image.html')}
+${Code('Sample Image Reference', 'doc/resources/email/sample-image.html')}
 
 The image will be extracted out and embedded in the email as a multi part message.  This allows for compression and optimization of images as well as externalizing resources that may not be immediately public.  The currently supported set of image types are:
 
@@ -89,7 +89,7 @@ ${List(
 
 ${Section('Templating Example')}
 
-${Code('Example inky template with mustache support', 'alt/docs/resources/email/example.email.html')}
+${Code('Example inky template with mustache support', 'doc/resources/email/example.email.html')}
 
 which will then interpolate the context to replace ${inp`left`} and ${inp`right`}, and compile to a final html output. When using ${lib.Mustache} expressions, make sure to use ${inp`{{{ }}}`}, triple braces on complex text, to prevent ${lib.Mustache} from escaping any characters.
 
@@ -97,11 +97,11 @@ ${Section(`Example inky template with partials`)}
 
 Given two files, ${pth`resources/email/welcome.html`} and ${pth`resources/email/footer.hml`}
 
-${Code('resources/email/welcome.html', `alt/docs/resources/email/welcome.email.html`)}
+${Code('resources/email/welcome.html', `doc/resources/email/welcome.email.html`)}
 
-${Code('resources/email/footer.html', `alt/docs/resources/email/footer.html`)}
+${Code('resources/email/footer.html', `doc/resources/email/footer.html`)}
 
 The final template will render as:
 
-${Execute('Final Output, with styling removed', 'alt/docs/src/render.ts')}
+${Execute('Final Output, with styling removed', 'doc/render.ts')}
 `;

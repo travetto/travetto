@@ -17,7 +17,7 @@ For example:
 **Code: Example of Application target**
 ```typescript
 import { Injectable, Inject } from '@travetto/di';
-import { Application } from '@travetto/app/src/decorator';
+import { Application } from '@travetto/app';
 
 @Injectable()
 class Server {
@@ -48,12 +48,12 @@ The arguments specified in the `run` method are extracted via code transformatio
 
 **Code: Simple Entry Point with Parameters**
 ```typescript
-import { Application } from '@travetto/app/src/decorator';
+import { Application } from '@travetto/app';
 
 @Application('simple-domain')
 class SimpleApp {
   async run(domain: string, port = 3000) {
-    console.log('Launching', domain, 'on port', port);
+    console.log('Launching', { domain, port });
   }
 }
 ```
@@ -64,7 +64,7 @@ The run command allows for invocation of applications as defined by the [@Applic
 
 **Terminal: CLI Run Help**
 ```bash
-$ travetto travetto run --help
+$ travetto run --help
 
 Usage:  run [options] [application] [args...]
 
@@ -79,31 +79,31 @@ Available Applications:
    ● complex 
      ----------------------------------------
      usage: complex domain:string port:number
-     file:  alt/example/src/complex.ts
-
-   ● test-eptest 
-     --------------------------------------------------------
-     usage: test-eptest [age:number=5] [format:html|pdf=html]
-     file:  alt/example/src/entry.ts
+     file:  doc/complex.ts
 
    ● simple 
-     ------------------------------
-     usage: simple 
-     file:  alt/simple/src/entry.ts
+     ----------------------------------------------
+     usage: simple domain:string [port:number=3000]
+     file:  doc/simple.ts
 
    ● simple-domain 
      -----------------------------------------------------
      usage: simple-domain domain:string [port:number=3000]
-     file:  alt/simple/src/domain.ts
+     file:  doc/domain.ts
+
+   ● test-eptest 
+     --------------------------------------------------------
+     usage: test-eptest [age:number=5] [format:html|pdf=html]
+     file:  doc/entry.ts
 ```
 
 Running without specifying an application ``, will display all the available apps, and would look like:
 
 **Terminal: Sample CLI Output**
 ```bash
-$ travetto travetto run
+$ travetto run
 
-Usage: travetto run [options] [application] [args...]
+Usage: trv run [options] [application] [args...]
 
 Options:
   -e, --env [env]                 Application environment (dev|prod|<any>)
@@ -116,22 +116,22 @@ Available Applications:
    ● complex 
      ----------------------------------------
      usage: complex domain:string port:number
-     file:  alt/example/src/complex.ts
-
-   ● test-eptest 
-     --------------------------------------------------------
-     usage: test-eptest [age:number=5] [format:html|pdf=html]
-     file:  alt/example/src/entry.ts
+     file:  doc/complex.ts
 
    ● simple 
-     ------------------------------
-     usage: simple 
-     file:  alt/simple/src/entry.ts
+     ----------------------------------------------
+     usage: simple domain:string [port:number=3000]
+     file:  doc/simple.ts
 
    ● simple-domain 
      -----------------------------------------------------
      usage: simple-domain domain:string [port:number=3000]
-     file:  alt/simple/src/domain.ts
+     file:  doc/domain.ts
+
+   ● test-eptest 
+     --------------------------------------------------------
+     usage: test-eptest [age:number=5] [format:html|pdf=html]
+     file:  doc/entry.ts
 ```
 
 To invoke the `simple` application, you need to pass `domain` where port is optional with a default.
@@ -139,31 +139,29 @@ To invoke the `simple` application, you need to pass `domain` where port is opti
 
 **Terminal: Invoke Simple**
 ```bash
-$ travetto travetto run simple-domain mydomain.biz 4000
+$ travetto run simple-domain mydomain.biz 4000
 
-Running application simple-domain ./alt/simple/src/domain.ts
-Configured {
+2021-03-14T05:00:00.618Z info  [@trv:app/registry:31] Running application { name: 'simple-domain', filename: './doc/domain.ts' }
+2021-03-14T05:00:00.837Z info  [@trv:app/registry:35] Configured {
   app: {
     watch: true,
     readonly: false,
-    travetto: '1.1.0',
+    travetto: '2.0.0',
     name: '@travetto/app',
-    version: '1.1.0',
+    version: '2.0.0',
     license: 'MIT',
     description: 'Application registration/management and run support.',
-    author: {
-      email: 'travetto.framework@gmail.com',
-      name: 'Travetto Framework'
-    },
+    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
     env: 'dev',
-    profiles: [ 'application', 'simple-domain', 'dev' ],
-    roots: [ '.', './alt/simple' ],
-    resourceRoots: [ '.', './alt/simple' ],
+    profiles: [ 'application', 'dev' ],
+    localSourceFolders: [ 'doc' ],
+    commonSourceFolders: [ 'src' ],
+    resourceRoots: [ '.', 'doc' ],
     debug: { status: false, value: undefined }
   },
   config: {}
 }
-Launching mydomain.biz on port 4000
+2021-03-14T05:00:01.510Z info  [@trv:app/doc/domain:6] Launching { domain: 'mydomain.biz', port: 4000 }
 ```
 
 ## Type Checking
@@ -172,10 +170,19 @@ The parameters to `run` will be type checked, to ensure proper evaluation.
 
 **Terminal: Invoke Simple with bad port**
 ```bash
-$ travetto travetto run simple-domain mydomain.biz orange
+$ travetto run simple-domain mydomain.biz orange
 
-Command failed: npx travetto run simple-domain mydomain.biz orange
-Invalid parameter port: Received orange, but exepcted number
+Command failed: trv run simple-domain mydomain.biz orange
+Failed application run {
+  error: Error: Invalid parameter port: Received orange, but exepcted number
+      at Function.enforceParamType (/home/tim/Code/travetto/module/app/src/util.ts:19:13)
+      at /home/tim/Code/travetto/module/app/src/registry.ts:46:79
+      at Array.map (<anonymous>)
+      at $ApplicationRegistry.resolveParameters (/home/tim/Code/travetto/module/app/src/registry.ts:46:24)
+      at Function.run (/home/tim/Code/travetto/module/app/bin/lib/run.ts:54:31)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at AppRunPlugin.action (/home/tim/Code/travetto/module/app/bin/cli-run.ts:55:11)
+}
 ```
 
 The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) 
@@ -209,7 +216,7 @@ import { Application } from '@travetto/app';
 })
 class Complex {
   async run(domain: string, port: number) {
-    console.debug('Launching', domain, 'on port', port);
+    console.debug('Launching', { domain, port });
   }
 }
 ```

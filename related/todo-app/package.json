@@ -10,7 +10,6 @@
   "keywords": [],
   "description": "",
   "dependencies": {
-    "@travetto/boot": "^2.0.0-alpha.0",
     "@travetto/log": "^2.0.0-alpha.0",
     "@travetto/cli": "^2.0.0-alpha.0",
     "@travetto/app": "^2.0.0-alpha.0",

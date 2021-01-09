@@ -22,17 +22,17 @@ A test suite is a collection of individual tests.  All test suites are classes w
 
 A simple example would be:
 
-${Code('Example Test Suite', 'alt/docs/src/example.ts')}
+${Code('Example Test Suite', 'doc/example.ts')}
 
 
 ${Section('Assertions')}
 A common aspect of the tests themselves are the assertions that are made.  ${lib.Node} provides a built-in ${lib.Assert} library.  The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions.  For example:
 
-${Code('Example assertion for deep comparison', 'alt/docs/src/test/assert-example.ts')}
+${Code('Example assertion for deep comparison', 'doc/test/assert-example.ts')}
 
 would translate to:
 
-${Code('Transpiled test Code', AppCache.readEntry('alt/docs/src/test/assert-example.ts'), false, 'javascript')}
+${Code('Transpiled test Code', AppCache.readEntry('doc/test/assert-example.ts'), false, 'javascript')}
 
 This would ultimately produce the error like:
 
@@ -63,10 +63,10 @@ In addition to the standard operations, there is support for throwing/rejecting 
 
 ${List(
   d`${meth`throws`}/${meth`doesNotThrow`} is for catching synchronous rejections
-  ${Code('Throws vs Does Not Throw', 'alt/docs/src/throws.ts')}
+  ${Code('Throws vs Does Not Throw', 'doc/throws.ts')}
   `,
   d`${meth`rejects`}/${meth`doesNotReject`} is for catching asynchronous rejections
-  ${Code('Rejects vs Does Not Reject', 'alt/docs/src/rejects.ts')}
+  ${Code('Rejects vs Does Not Reject', 'doc/rejects.ts')}
   `
 )}
 
@@ -77,7 +77,7 @@ ${List(
   `A function to allow for whatever custom verification of the error is needed`,
 )}
 
-${Code('Example of different Error matching paradigms', 'alt/docs/src/error-types.ts')}
+${Code('Example of different Error matching paradigms', 'doc/error-types.ts')}
 
 ${Section('Running Tests')}
 

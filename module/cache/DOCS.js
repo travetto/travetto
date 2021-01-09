@@ -12,7 +12,7 @@ Additionally, to use the decorators you will need to have a ${CacheService} obje
 
 ${Cache} is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. ${lib.Redis}, ${lib.Memcached}), only asynchronous methods are supported.
 
-${Code('Using decorators to cache expensive async call', 'alt/docs/src/async.ts')}
+${Code('Using decorators to cache expensive async call', 'doc/async.ts')}
 
 ${SubSection(d`${Cache}`)}
 
@@ -35,12 +35,12 @@ ${SubSection(d`${EvictCache}`)}
 
 Additionally, there is support for planned eviction via the ${EvictCache} decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same ${inp`keySpace`} and ${inp`key`} to compute the expected key.
 
-${Code('Using decorators to cache/evict user access', 'alt/docs/src/evict.ts')}
+${Code('Using decorators to cache/evict user access', 'doc/evict.ts')}
 
 ${Section('Extending the Cache Service')}
 
 By design, the ${CacheService} relies solely on the ${Lib('model')} module.  Specifically on the ModelExpirySupport.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any ModelService that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the ModelService to be registered using the CacheModelSym:
 
-${Code('Registering a Custom Model Source', 'alt/docs/src/custom.ts')}
+${Code('Registering a Custom Model Source', 'doc/custom.ts')}
 
 `;

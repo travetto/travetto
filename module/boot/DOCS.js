@@ -55,7 +55,7 @@ Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${meth`spawn`} and ${
 
 A simple example would be:
 
-${Code('Running a directory listing via ls', 'alt/docs/src/exec.ts')}
+${Code('Running a directory listing via ls', 'doc/exec.ts')}
 
 As you can see, the call returns not only the child process information, but the ${inp`Promise`} to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
 

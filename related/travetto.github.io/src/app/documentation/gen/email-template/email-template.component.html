@@ -56,7 +56,7 @@ When referencing an image from the <code class="item path">resources</code> fold
 
       <figure class="code">
       <figcaption class="code">Sample Image Reference
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email-template/alt/docs/resources/email/sample-image.html">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email-template/doc/resources/email/sample-image.html">Source</a></cite>
       </figcaption>
       <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>/email/logo.png<span class="token punctuation">"</span></span><span class="token punctuation">></span></span></code></pre>     
       </figure>
@@ -78,7 +78,7 @@ The module provides <a class="module-link" href="/docs/cli" title="CLI infrastru
       <figcaption class="terminal">Running template compilation
       
       </figcaption>
-      <pre><code class="language-bash">$ travetto travetto email:compile -h
+      <pre><code class="language-bash">$ travetto email:compile -h
 
 Usage:  email:compile <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
@@ -109,7 +109,7 @@ Templating emails is achieved through a combination of multiple libraries, speci
 
       <figure class="code">
       <figcaption class="code">Example inky template with mustache support
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email-template/alt/docs/resources/email/example.email.html">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email-template/doc/resources/email/example.email.html">Source</a></cite>
       </figcaption>
       <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}left{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Bob<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
@@ -125,7 +125,7 @@ Given two files, <code class="item path">resources/email/welcome.html</code> and
 
       <figure class="code">
       <figcaption class="code">resources/email/welcome.html
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email-template/alt/docs/resources/email/welcome.email.html">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email-template/doc/resources/email/welcome.email.html">Source</a></cite>
       </figcaption>
       <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
@@ -138,7 +138,7 @@ Given two files, <code class="item path">resources/email/welcome.html</code> and
 
       <figure class="code">
       <figcaption class="code">resources/email/footer.html
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email-template/alt/docs/resources/email/footer.html">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email-template/doc/resources/email/footer.html">Source</a></cite>
       </figcaption>
       <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
   This is a footer
@@ -152,9 +152,9 @@ The final template will render as:
       <figcaption class="terminal">Final Output, with styling removed
       
       </figcaption>
-      <pre><code class="language-bash">$ alt/docs/src/render.ts -r @travetto/boot/register alt/docs/src/render.ts
+      <pre><code class="language-bash">$ doc/render.ts -r @travetto/boot/register doc/render.ts
 
-<span class="token operator">&lt;</span><span class="token operator">!</span>DOCTYPE html<span class="token operator">></span><span class="token operator">&lt;</span>html<span class="token operator">></span>
+<span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:email-template/doc/render:11<span class="token punctuation">]</span> <span class="token operator">&lt;</span><span class="token operator">!</span>DOCTYPE html<span class="token operator">></span><span class="token operator">&lt;</span>html<span class="token operator">></span>
 
 <span class="token operator">&lt;</span>body<span class="token operator">></span>
 

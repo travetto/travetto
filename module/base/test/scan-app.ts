@@ -7,7 +7,7 @@ import { ScanApp } from '../src/scan';
 class ScanTests {
   @Test()
   testFind() {
-    const files = ScanApp.findAppSourceFiles();
+    const files = ScanApp.findAllSourceFiles();
 
     assert(files.some(x => x.file.endsWith('src/scan.ts')));
   }

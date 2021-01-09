@@ -15,10 +15,7 @@ export class AppListUtil {
    * @param items
    */
   static async sortList(items: ApplicationConfig[]) {
-    return items.sort((a, b) =>
-      a.root === b.root ?
-        a.name.localeCompare(b.name) :
-        (a.root === '.' ? -1 : 1));
+    return items.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /**
@@ -27,14 +24,14 @@ export class AppListUtil {
   static async buildList() {
 
     // Load all packaged applications
-    for (const { file } of ScanApp.findFiles({ folder: 'support', filter: /application[.].*[.]ts/ })) {
+    for (const { file } of ScanApp.findCommonFiles({ folder: 'support', filter: /application[.].*[.]ts/ })) {
       try {
         require(file);
       } catch { }
     }
 
     // Load app files
-    ScanApp.findAppSourceFiles()
+    ScanApp.findAllSourceFiles()
       .filter(x => fs.readFileSync(x.file, 'utf-8').includes('@Application'))
       .forEach(x => require(x.file)); // Only load files that are candidates
 

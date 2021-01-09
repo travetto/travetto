@@ -25,15 +25,15 @@ Below is an example of a transformer that uppercases all <code class="item input
 
       <figure class="code">
       <figcaption class="code">Sample Transformer - Upper case all declarations
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/transformer/alt/upper/support/transformer.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/transformer/doc/support/transformer.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> ts <span class="token keyword">from</span> <span class="token string">'typescript'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> OnProperty<span class="token punctuation">,</span> TransformerState<span class="token punctuation">,</span> OnMethod<span class="token punctuation">,</span> OnClass <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/transformer'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> OnProperty<span class="token punctuation">,</span> TransformerState<span class="token punctuation">,</span> OnMethod<span class="token punctuation">,</span> OnClass<span class="token punctuation">,</span> TransformerId <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/transformer'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MakeUpper</span> <span class="token punctuation">{{'{'}}</span>
 
-  <span class="token keyword">static</span> key <span class="token operator">=</span> <span class="token string">'@trv:transformer-test'</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token punctuation">[</span>TransformerId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'@trv:transformer-test'</span><span class="token punctuation">;</span>
 
   @<span class="token meta">OnProperty</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">handleProperty</span><span class="token punctuation">(</span><span class="token parameter">state<span class="token operator">:</span> TransformerState<span class="token punctuation">,</span> node<span class="token operator">:</span> ts<span class="token punctuation">.</span>PropertyDeclaration</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>

@@ -11,11 +11,11 @@ The most common way of utilizing the context, is via the ${WithAsyncContext} dec
 
 The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain.
 
-${Code('Usage of context within a service', 'alt/docs/src/usage.ts')}
+${Code('Usage of context within a service', 'doc/usage.ts')}
 
 The decorator also allows for a priming of the contextual information.  This is generally useful for system generated operations that are not initiated by a user.
 
-${Code('Usage of context within a service', 'alt/docs/src/usage-primed.ts')}
+${Code('Usage of context within a service', 'doc/usage-primed.ts')}
 
 ${Section('Extension - Rest')}
 

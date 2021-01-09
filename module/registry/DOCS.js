@@ -23,7 +23,7 @@ ${Ordered(
 
 This flow ensures all files are loaded and processed before application starts. A sample registry could like:
 
-${Code('Sample Registry', 'alt/docs/src/registry.ts')}
+${Code('Sample Registry', 'doc/registry.ts')}
 
 The registry is a ${MetadataReg} that similar to the ${SchemaReg} and the ${DependencyReg}.
 

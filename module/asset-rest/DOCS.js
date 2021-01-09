@@ -8,5 +8,5 @@ Once the files are uploaded, they are exposed on ${Mod('rest')}'s request object
 
 A simple example:
 
-${Code('Rest controller with upload support', 'alt/e2e/src/simple-controller.ts')}
+${Code('Rest controller with upload support', './doc/simple-controller.ts')}
 `;

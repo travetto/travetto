@@ -38,18 +38,18 @@ export class FrameworkUtil {
   * @param testFile The test to determine if a file is desired
   */
   static scan(testFile?: (x: string) => boolean, base = FsUtil.cwd) {
-    const out = ScanFs.scanDirSync({
+    const out = [ScanFs.scanDirSync({
       testFile,
       testDir: x => // Ensure its a valid folder or module folder
         /^node_modules[/]?$/.test(x) ||  // Top level node_modules
         (/^node_modules\/@travetto/.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
         !x.includes('node_modules') // non module file
-    }, base);
+    }, base)];
 
     // Load dynamic modules with mappings
     for (const [dep, pth] of EnvUtil.getDynamicModules()) {
       out.push(
-        ...ScanFs.scanDirSync({
+        ScanFs.scanDirSync({
           testFile,
           testDir: x => !x.includes('node_modules'),
         }, pth)
@@ -61,7 +61,7 @@ export class FrameworkUtil {
       ); // Read from module
     }
 
-    return out;
+    return out.flat();
   }
 
   /**

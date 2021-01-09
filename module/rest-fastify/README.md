@@ -8,7 +8,7 @@
 npm install @travetto/rest-fastify
 ```
 
-The module is an [fastify](https://www.fastify.io/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/master/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestServer](https://github.com/travetto/travetto/tree/master/module/rest/src/server/server.ts#L16) for automatic injection in the default Rest server.
+The module is an [fastify](https://www.fastify.io/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/master/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestServer](https://github.com/travetto/travetto/tree/master/module/rest/src/server/base.ts#L17) for automatic injection in the default Rest server.
 
 ## Customizing Rest App
 
@@ -29,7 +29,7 @@ class CustomRestServer extends FastifyRestServer {
     });
 
     //  apply to all requests
-    app.use(limiter);
+    app.register(limiter);
 
     return app;
   }
@@ -44,8 +44,11 @@ When working with an [fastify](https://www.fastify.io/) applications, the module
 const app = fastify(fastConf);
     app.register(require('fastify-compress'));
     app.register(require('fastify-formbody'));
-    app.addContentTypeParser('multipart/form-data;', (_r, _p, done) => done(null));
+
+    // Allow everything else to be treated as a stream
+    // @ts-expect-error
+    app.addContentTypeParser(['*'], (_r, _p, done) => done());
 ```
 
 ## Extension - AWS Lambda
-The [fastify](https://www.fastify.io/) module supports integration with [aws-lambda-fastify](https://github.com/fastify/aws-lambda-fastify/blob/master/README.md) when installed.  This produces an instance of [RestServer](https://github.com/travetto/travetto/tree/master/module/rest/src/server/server.ts#L16) that is able to integrate with AWS appropriately. 
+The [fastify](https://www.fastify.io/) module supports integration with [aws-lambda-fastify](https://github.com/fastify/aws-lambda-fastify/blob/master/README.md) when installed.  This produces an instance of [RestServer](https://github.com/travetto/travetto/tree/master/module/rest/src/server/base.ts#L17) that is able to integrate with AWS appropriately. 

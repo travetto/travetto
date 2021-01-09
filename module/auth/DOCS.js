@@ -1,8 +1,8 @@
 const { doc: d, Mod, Code, inp, SnippetLink, Section, Method, List } = require('@travetto/doc');
 const { AuthContext } = require('./src/context');
-const { PrincipalSource } = require('./src/principal');
 const { AuthUtil } = require('./src/util');
 
+const PrincipalSource = SnippetLink('PrincipalSource', './src/types.ts', /interface PrincipalSource/);
 const Principal = SnippetLink('Principal', './src/types.ts', /interface Principal/);
 const Identity = SnippetLink('Identity', './src/types.ts', /interface Identity/);
 

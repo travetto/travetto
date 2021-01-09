@@ -62,7 +62,7 @@ export class PhaseManager {
    * @param after Starting point, exclusive
    */
   load(upto?: string, after?: string) {
-    const found = ScanApp.findFiles({ folder: 'support', filter: new RegExp(`phase[.]${this.scope}(.*?)[.]ts`) });
+    const found = ScanApp.findCommonFiles({ folder: 'support', filter: new RegExp(`phase[.]${this.scope}(.*?)[.]ts`) });
 
     // Load all support files
     const initFiles = found.map(x => require(x.file));

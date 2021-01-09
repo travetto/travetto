@@ -27,11 +27,7 @@ export class RunUtil {
       throw new Error(`Unknown application ${name}`);
     }
 
-    CliUtil.initAppEnv({
-      // If standard app, don't add root/profile
-      ... (/^[.]\/alt/.test(app.root) ? { roots: [app.root], profiles: [app.name] } : {}),
-      watch: true
-    });
+    CliUtil.initAppEnv({ watch: true });
 
     await CompileCliUtil.compile();
 

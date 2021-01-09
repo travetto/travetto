@@ -1,0 +1,25 @@
+import { MemoryModelService } from '@travetto/model';
+import { Cache, EvictCache, CacheService } from '@travetto/cache';
+
+class User { }
+
+export class UserService {
+
+  myCache = new CacheService(new MemoryModelService({ namespace: '' }));
+  database: any;
+
+  @Cache('myCache', { keySpace: 'user.id' })
+  async getUser(id: string) {
+    return this.database.lookupUser(id);
+  }
+
+  @EvictCache('myCache', { keySpace: 'user.id', params: user => [user.id] })
+  async updateUser(user: User) {
+    this.database.updateUser(user);
+  }
+
+  @EvictCache('myCache', { keySpace: 'user.id' })
+  async deleteUser(userId: string) {
+    this.database.deleteUser(userId);
+  }
+}

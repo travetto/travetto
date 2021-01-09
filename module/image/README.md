@@ -17,7 +17,7 @@ The utility's primary structure revolves around the [CommandService](https://git
 import * as fs from 'fs';
 
 import { StreamUtil } from '@travetto/boot';
-import { ImageUtil } from '@travetto/image/src/util';
+import { ImageUtil } from '@travetto/image';
 
 export class ResizeService {
   async resizeImage(imgPath: string, width: number, height: number): Promise<string> {

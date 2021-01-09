@@ -6,7 +6,7 @@ The module is an ${lib.Express} provider for the ${Mod('rest')} module.  This mo
 
 ${Section('Customizing Rest App')}
 
-${Code('Customizing the Express App', 'alt/docs/src/customize.ts')}
+${Code('Customizing the Express App', 'doc/customize.ts')}
 
 ${Section('Default Middleware')}
 When working with an ${lib.Express} applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:

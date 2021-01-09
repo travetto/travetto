@@ -3,7 +3,6 @@ import { FsUtil, EnvUtil } from '@travetto/boot';
  * General purpose information about the application.  Derived from the app's package.json
  */
 class $AppManifest {
-
   /**
    * Env
    */
@@ -45,14 +44,19 @@ class $AppManifest {
   readonly profiles: string[];
 
   /**
-   * Additional locations for the application search paths
-   */
-  readonly roots: string[];
-
-  /**
    * List of all resource roots
    */
   readonly resourceRoots: string[];
+
+  /**
+   * List of common source folders
+   */
+  readonly commonSourceFolders: string[];
+
+  /**
+   * List of local source folders
+   */
+  readonly localSourceFolders: string[];
 
   /**
    * Debug state
@@ -74,15 +78,9 @@ class $AppManifest {
 
     this.profileSet = new Set(this.profiles);
 
-    this.roots = [FsUtil.cwd, ...EnvUtil.getList('TRV_ROOTS')]
-      .filter(x => !!x)
-      .map(x => FsUtil.resolveUnix(x).replace(FsUtil.cwd, '.'))
-      .filter((x, i, all) => i === 0 || x !== all[i - 1]); // De-dupe
-
-    this.resourceRoots = [
-      ...this.roots,
-      ...EnvUtil.getList('TRV_RESOURCE_ROOTS')
-    ];
+    this.commonSourceFolders = ['src', ...EnvUtil.getList('TRV_SRC_COMMON')];
+    this.localSourceFolders = [...EnvUtil.getList('TRV_SRC_LOCAL')];
+    this.resourceRoots = ['.', ...EnvUtil.getList('TRV_RESOURCES')];
 
     // Compute the debug state
     const status = EnvUtil.isSet('TRV_DEBUG') ? !EnvUtil.isFalse('TRV_DEBUG') : !EnvUtil.isProd();
@@ -98,8 +96,8 @@ class $AppManifest {
   toJSON() {
     return ([
       'travetto', 'name', 'version', 'license', 'description',
-      'author', 'env', 'profiles', 'roots', 'resourceRoots',
-      'debug'
+      'author', 'env', 'profiles', 'localSourceFolders',
+      'commonSourceFolders', 'resourceRoots', 'debug'
     ] as const)
       .reduce((acc, k) => {
         acc[k] = this[k];

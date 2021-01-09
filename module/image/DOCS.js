@@ -8,5 +8,5 @@ This module provides functionality for image resizing, and png optimization. Thi
 
 The utility's primary structure revolves around the ${CommandService} from the ${Mod('command')} module.  The ${CommandService}  allows for declaration of a local executable, and a fall-back docker container (mainly meant for development).  The ${ImageUtil} utilizes ${lib.ImageMagick}, ${lib.PngQuant}, and  ${lib.JpegOptim} as the backing for image resizing and png compression, respectively.
 
-${Code('Simple Image Resize', 'alt/docs/src/resize.ts')}
+${Code('Simple Image Resize', 'doc/resize.ts')}
 `;

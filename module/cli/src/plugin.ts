@@ -70,6 +70,7 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
   static async loadAllPlugins(op?: (p: BasePlugin) => any | Promise<any>) {
     return Promise.all(
       [...this.getPluginMapping().keys()]
+        .sort((a, b) => a.localeCompare(b))
         .map(k => this.loadPlugin(k, op))
     );
   }

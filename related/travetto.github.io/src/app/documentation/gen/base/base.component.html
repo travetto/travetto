@@ -49,13 +49,13 @@ A simple example of finding specific <code class="item path">.config</code> file
 
       <figure class="code">
       <figcaption class="code">Looking for all .config files with the prefix defined by svc
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/base/alt/docs/src/find.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/base/doc/find.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ScanApp <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/scan'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ScanApp <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">processServiceConfigs</span><span class="token punctuation">(</span><span class="token parameter">svc<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">const</span> svcConfigs <span class="token operator">=</span> <span class="token keyword">await</span> ScanApp<span class="token punctuation">.</span><span class="token function">findFiles</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> filter<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">RegExp</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>svc<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">.*[.]config$/</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> svcConfigs <span class="token operator">=</span> <span class="token keyword">await</span> ScanApp<span class="token punctuation">.</span><span class="token function">findCommonFiles</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> filter<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">RegExp</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>svc<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">.*[.]config$/</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> conf <span class="token keyword">of</span> svcConfigs<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token comment">// Do work</span>
 
@@ -72,9 +72,9 @@ Resource management, loading of files, and other assets at runtime is a common p
 
       <figure class="code">
       <figcaption class="code">Finding Images
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/base/alt/docs/src/image.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/base/doc/image.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ResourceManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/resource'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ResourceManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * Find a single image, first one wins by resource path order
@@ -88,7 +88,7 @@ Resource management, loading of files, and other assets at runtime is a common p
  * Find all .gif files under the imsages folder
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">findAllImages</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">const</span> imagePaths <span class="token operator">=</span> <span class="token keyword">await</span> ResourceManager<span class="token punctuation">.</span><span class="token function">findAllByPattern</span><span class="token punctuation">(</span><span class="token regex">/[.]gif$/</span><span class="token punctuation">,</span> <span class="token string">'images/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> imagePaths <span class="token operator">=</span> <span class="token keyword">await</span> ResourceManager<span class="token punctuation">.</span><span class="token function">findAll</span><span class="token punctuation">(</span><span class="token regex">/[.]gif$/</span><span class="token punctuation">,</span> <span class="token string">'images/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">return</span> imagePaths<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
@@ -123,9 +123,9 @@ An example would be something like <code class="item path">phase.init.ts</code> 
 
 <h2 id="common-application-error-class">Common Application Error Class</h2>
 
-While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L10">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
+While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L10">AppError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9">AppError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
 <ul> <li><code class="item input">general</code> - General purpose errors</li>
  <li><code class="item input">system</code> - Synonym for <code class="item input">general</code></li>
  <li><code class="item input">data</code> - Data format, content, etc are incorrect. Generally correlated to bad input.</li>
@@ -143,9 +143,9 @@ As a registered shutdown handler, you can do.
 
       <figure class="code">
       <figcaption class="code">Registering a shutdown handler
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/base/alt/docs/src/shutdown.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/base/doc/shutdown.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ShutdownManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/shutdown'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ShutdownManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">registerShutdownHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   ShutdownManager<span class="token punctuation">.</span><span class="token function">onShutdown</span><span class="token punctuation">(</span><span class="token string">'handler-name'</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
@@ -162,9 +162,9 @@ From a test scenario:
 
       <figure class="code">
       <figcaption class="code">Tracking asynchronous behavior
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/base/alt/docs/src/stack-test.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/base/doc/stack-test.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> StacktraceUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base/src/stacktrace'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> StacktraceUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">function</span> <span class="token function">inner3</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'Uh oh'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -196,14 +196,17 @@ Will produce the following stack trace:
       <figcaption class="terminal">tack trace from async errors
       
       </figcaption>
-      <pre><code class="language-bash">$ ./alt/docs/src/stack-test.ts -r @travetto/boot/register ./alt/docs/src/stack-test.ts
+      <pre><code class="language-bash">$ ./doc/stack-test.ts -r @travetto/boot/register ./doc/stack-test.ts
 
 Error: Uh oh
-    at inner3 <span class="token punctuation">(</span>alt/docs/src/stack-test.ts:4:9<span class="token punctuation">)</span>
-    at inner2 <span class="token punctuation">(</span>alt/docs/src/stack-test.ts:8:16<span class="token punctuation">)</span>
-    at inner1 <span class="token punctuation">(</span>alt/docs/src/stack-test.ts:12:16<span class="token punctuation">)</span>
-    at <span class="token builtin class-name">test</span> <span class="token punctuation">(</span>alt/docs/src/stack-test.ts:16:9<span class="token punctuation">)</span>
-    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>alt/docs/src/stack-test.ts:24:1<span class="token punctuation">)</span></code></pre>     
+    at inner3 <span class="token punctuation">(</span>./doc/stack-test.ts:4:9<span class="token punctuation">)</span>
+    at inner2 <span class="token punctuation">(</span>./doc/stack-test.ts:8:16<span class="token punctuation">)</span>
+    at inner1 <span class="token punctuation">(</span>./doc/stack-test.ts:12:16<span class="token punctuation">)</span>
+    at <span class="token builtin class-name">test</span> <span class="token punctuation">(</span>./doc/stack-test.ts:16:9<span class="token punctuation">)</span>
+    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>./doc/stack-test.ts:24:1<span class="token punctuation">)</span>
+    at Function.compileJavascript <span class="token punctuation">(</span>/home/tim/Code/travetto/module/boot/src-ts/compile.ts:106:16<span class="token punctuation">)</span>
+    at Function.compile <span class="token punctuation">(</span>/home/tim/Code/travetto/module/boot/src-ts/compile.ts:97:17<span class="token punctuation">)</span>
+    at Object.require.extensions.<span class="token operator">&lt;</span>computed<span class="token operator">></span> <span class="token punctuation">[</span>as .ts<span class="token punctuation">]</span> <span class="token punctuation">(</span>/home/tim/Code/travetto/module/boot/src-ts/compile.ts:137:62<span class="token punctuation">)</span></code></pre>     
       </figure>
 
 The needed functionality cannot be loaded until <code class="item method">init.action</code> executes, and so must be required only at that time.

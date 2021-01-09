@@ -80,9 +80,9 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     await PhaseManager.create('reset').run();
     await ShutdownManager.executeAsync(-1);
 
-    const paths = ScanApp.getPaths(AppManifest.roots).filter(x => !FIXED_MODULES.has(x));
+    const paths = ScanApp.getPaths().filter(x => !FIXED_MODULES.has(x));
     for (const { file } of ScanApp.findFiles({ paths, includeIndex: true })) {
-      if (!/support\/(transformer|phase)[.]/.test(file) && !file.includes('/alt/')) {
+      if (!/support\/(transformer|phase)[.]/.test(file)) {
         const worked = this.compiler.unload(file);
         if (worked) {
           console.debug('Unloading', { pid: process.pid, file });

@@ -6,7 +6,7 @@ exports.text = d`
 
 This provides a ${lib.S3} implementation of the ${AssetSource} which is a backend for the ${Mod('asset')} module.  
 
-${Code('S3 backend wiring', 'alt/docs/src/config.ts')}
+${Code('S3 backend wiring', 'doc/config.ts')}
 
 There is a default configuration that you can easily use, with some sensible defaults. 
  

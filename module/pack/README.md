@@ -12,7 +12,7 @@ npm install @travetto/pack
 
 **Terminal: Pack usage**
 ```bash
-$ travetto travetto pack --help
+$ travetto pack --help
 
 Usage:  pack [options] [mode]
 
@@ -74,7 +74,7 @@ assemble:
 
 **Terminal: Assemble Usage**
 ```bash
-$ travetto travetto pack:assemble --help
+$ travetto pack:assemble --help
 
 Usage:  pack:assemble [options] [mode]
 
@@ -98,7 +98,7 @@ zip:
 
 **Terminal: Zip Usage**
 ```bash
-$ travetto travetto pack:zip --help
+$ travetto pack:zip --help
 
 Usage:  pack:zip [options] [mode]
 
