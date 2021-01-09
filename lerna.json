@@ -3,8 +3,7 @@
   "packages": [
     "module/*",
     "related/todo-app",
-    "related/generator-app",
-    "related/vscode-plugin"
+    "related/generator-app"
   ],
   "version": "independent"
 }

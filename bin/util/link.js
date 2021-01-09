@@ -1,15 +1,29 @@
-const { FsUtil } = require('../../module/boot/src/fs');
+#!/usr/bin/env -S npx @arcsine/nodesh
+/// @ts-check
+/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
 
-// Link register
-FsUtil.mkdirpSync('node_modules/@travetto/boot');
-FsUtil.symlinkSync(
-  FsUtil.resolveUnix('module/boot/register.js'),
-  FsUtil.resolveUnix('node_modules/@travetto/boot/register.js')
-);
+const fs = require('fs');
+const path = require('path');
 
-// Link cli
-FsUtil.mkdirpSync('.bin');
-FsUtil.symlinkSync(
-  FsUtil.resolveUnix('module/cli/bin/travetto.js'),
-  FsUtil.resolveUnix('.bin/trv')
-);
+async function mkdirp(d) {
+  const parts = d.split(path.sep);
+  for (let i = 1; i < parts.length; i++) {
+    try {
+      await fs.promises.mkdir(parts.slice(0, i + 1).join(path.sep))
+    } catch { }
+  }
+}
+
+[
+  ['module/boot/register.js', 'node_modules/@travetto/boot/register.js'],
+  ['module/boot/travetto.js', '.bin/trv']
+]
+  .$map(a => a.map(v => path.resolve(v)))
+  .$forEach(async ([s, d]) => {
+    await mkdirp(path.dirname(d));
+    try {
+      await fs.promises.stat(d);
+    } catch {
+      await fs.promises.symlink(s, d);
+    }
+  });

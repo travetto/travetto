@@ -1,13 +1,11 @@
-const { FsUtil } = require('../../module/boot/src/fs');
-const { ScanFs } = require('../../module/boot/src/scan');
+#!/usr/bin/env -S npx @arcsine/nodesh
+/// @ts-check
+/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
 
-// Clean
-ScanFs.scanDirSync({
-  testDir: x =>
-    !/(node_modules|[.]trv_cache)/.test(x) ||
-    /([.]trv_cache[^/]+|node_modules)$/.test(x)
-}, FsUtil.resolveUnix('module'))
-  .filter(x => x.stats.isDirectory() &&
-    /([.]trv_cache[^/]+|node_modules)$/.test(x.file)
-  )
-  .map(x => FsUtil.unlinkRecursiveSync(x.file));
+// Clean cache
+'{module,related}/*/.trv_cache*'
+  .$dir({ allowHidden: true, type: 'dir' })
+  .$filter(x => !x.includes('node_modules'))
+  .$collect()
+  .$map(f => $exec('rm', ['-rf', ...f]))
+  .$stdout;

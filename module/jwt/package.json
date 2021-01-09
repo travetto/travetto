@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@travetto/base": "^2.0.0-alpha.0",
-    "@types/jws": "^3.2.2",
+    "@types/jws": "^3.2.3",
     "jws": "^4.0.0"
   }
 }
