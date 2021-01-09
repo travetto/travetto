@@ -60,6 +60,15 @@ export class EnvUtilTest {
   }
 
   @Test()
+  verifyGetMap() {
+    process.env.mapped = 'a=1,b=2,c=3,d=';
+    assert(EnvUtil.getEntries('mapped') === [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
+
+    process.env.mapped = 'a#1,b#2,c#3,d#';
+    assert(EnvUtil.getEntries('mapped', '#') === [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
+  }
+
+  @Test()
   verifyPresence() {
     process.env.found = 'y';
 

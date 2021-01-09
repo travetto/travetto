@@ -61,5 +61,8 @@ async function run() {
   await updateModule(process.cwd());
 }
 
-
 module.exports = { run };
+
+if (require.main === module) {
+  run();
+}
