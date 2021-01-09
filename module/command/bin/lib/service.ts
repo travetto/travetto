@@ -1,4 +1,3 @@
-import { EnvUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
@@ -130,15 +129,10 @@ export class ServiceUtil {
    * Find all services
    */
   static findAll() {
-    const extra = EnvUtil.getList('TRV_SVC_FILES');
     const all = FrameworkUtil
       .scan(x => /support\/service[.].*?[.]js$/.test(x))
       .filter(x => x.stats.isFile())
       .map(x => require(x.file) as Service);
-
-    for (const e of extra) {
-      all.push(require(e) as Service);
-    }
 
     return all.filter(x => !!x).map(x => {
       x.version = `${x.version}`;

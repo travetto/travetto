@@ -5,6 +5,7 @@ temp/
 build/
 api-client/
 sample/dummy/
+.bin/
 
 .DS_STORE
 *.compiled.*
@@ -14,4 +15,5 @@ lerna-debug.log
 *.lerna_backup
 npm-debug.log
 email-dev-context.json
+
 **/test-support/resources/logo

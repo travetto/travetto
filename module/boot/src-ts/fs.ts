@@ -190,4 +190,17 @@ export class FsUtil {
       await fs.lstat(linkPath); // Ensure created
     }
   }
+
+  /**
+   * Symlink, with some platform specific support, synchronously
+   */
+  static async symlinkSync(actual: string, linkPath: string) {
+    try {
+      fss.lstatSync(linkPath);
+    } catch (e) {
+      const file = fss.statSync(actual).isFile();
+      fss.symlinkSync(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
+      fss.lstatSync(linkPath); // Ensure created
+    }
+  }
 }
