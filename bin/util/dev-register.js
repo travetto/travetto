@@ -12,7 +12,9 @@ function readDeps() {
   const { name, dependencies, devDependencies } = require(FsUtil.resolveUnix('package.json'));
   const keys = [
     ...existing.filter(([k, v]) => k.startsWith('@travetto')).map(([k, v]) => k),
-    '@travetto/test', '@travetto/cli', '@travetto/app', '@travetto/log', // Givens
+    '@travetto/test', '@travetto/cli',
+    '@travetto/doc',
+    '@travetto/app', '@travetto/log', // Givens
     ...Object.keys(dependencies || {}),
     ...Object.keys(devDependencies || {})
   ]

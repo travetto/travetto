@@ -11,6 +11,7 @@ module.exports = {
   plugins: [
     '@typescript-eslint'
   ],
+  globals: ['$argv'],
   rules: {
     '@typescript-eslint/array-type': 'error',
     '@typescript-eslint/explicit-function-return-type': 'off',
