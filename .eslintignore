@@ -1,9 +1,11 @@
 node_modules/
-# test/
-**/*.d.ts
-module/boot/src
+dist/
+api-client/
+out/
+*.d.ts
+*.spec.ts
+DOCS.js
+
+module/boot/src/*.js
 module/boot/index.js
-module/generator-app/templates
-sample/**/api-client/
-module/*/DOCS.js
-related/*/DOCS.js
+related/generator-app/templates

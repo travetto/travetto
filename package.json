@@ -9,17 +9,15 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
-    "hoist": "./bin/npm/hoist.sh",
-    "clean": "./bin/npm/clean.sh",
+    "service": "node ./bin/util/service",
+    "test": "cd module/test; trv test:lerna",
+    "upgrade": "node ./bin/util/upgrade",
+    "lint": "npx eslint --ext .js --ext .ts .",
     "docs": "./bin/npm/docs.sh",
-    "lint": "./bin/npm/lint.sh",
-    "boot": "./bin/npm/boot.sh",
-    "service": "./bin/npm/service.sh",
-    "test": "./bin/npm/test.sh",
-    "upgrade": "./bin/npm/upgrade.sh",
-    "init": "npm run clean; npm run hoist; npm run boot; npm run vscode-plugin",
-    "vscode-plugin": "./bin/npm/vscode-plugin.sh",
-    "reinit": "npm ci; npm run init"
+    "boot": "cd module/boot; npm run build",
+    "hoist": "npx lerna bootstrap --hoist",
+    "init": "npm run hoist; npm run boot; node bin/util/clean; node bin/util/link",
+    "vscode-plugin": "./bin/npm/vscode-plugin.sh"
   },
   "devDependencies": {
     "@types/faker": "^5.1.5",

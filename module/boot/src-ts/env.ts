@@ -32,6 +32,21 @@ export class EnvUtil {
   }
 
   /**
+   * Read value as a comma-separated list of pairs separated by '='
+   * @param k The environment key to search for
+   */
+  static getEntries(k: string, sep = '=') {
+    return (this.get(k) ?? '')
+      .split(/[, ]+/g)
+      .map(x => x.trim())
+      .filter(x => !!x)
+      .map(x => {
+        const [p, v] = x.split(sep);
+        return [p, v || undefined] as [string, string];
+      });
+  }
+
+  /**
    * Read value as an integer
    * @param k The environment key to search for
    * @param def The default value if the key isn't found
@@ -154,8 +169,7 @@ export class EnvUtil {
   static getDynamicModules() {
     if (this.DYNAMIC_MODULES === undefined) {
       this.DYNAMIC_MODULES = new Map(
-        this.getList('TRV_MODULES')
-          .map(x => x.split(/\s*=\s*/) as [string, string])
+        this.getEntries('TRV_MODULES')
           .map(([k, v]) => [k, v ||
             k.replace(/^@travetto/, m => process.env.TRV_DEV || m) ||
             FsUtil.resolveUnix('node_modules', k)
