@@ -3,7 +3,7 @@
 out/test/
 test/
 src-ts/
-**/*.map
+*.map
 .gitignore
 tsconfig.json
 vsc-extension-quickstart.md
@@ -14,10 +14,10 @@ node_modules/buffer-from/
 node_modules/@types/
 node_modules/**/*.d.ts
 node_modules/**/*.html
-out/node_modules/@travetto/boot/src/*.d.ts
-out/node_modules/@travetto/boot/tsconfig.json
-out/node_modules/@travetto/boot/{README.md,LICENSE}
-out/node_modules/@travetto/boot/bin/
+node_modules/@travetto/boot/
+!node_modules/@travetto/boot/src/*.js
+!node_modules/@travetto/boot/index.js
+!node_modules/@travetto/boot/package.json
 .trv_*/
 images/*.gif
 .eslintignore
