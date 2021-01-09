@@ -16,8 +16,7 @@
     "docs": "./bin/npm/docs.sh",
     "boot": "cd module/boot; npm run build",
     "hoist": "npx lerna bootstrap --hoist",
-    "init": "npm run hoist; npm run boot; node bin/util/clean; node bin/util/link",
-    "vscode-plugin": "./bin/npm/vscode-plugin.sh"
+    "init": "npm run hoist; npm run boot; node bin/util/clean; node bin/util/link"
   },
   "devDependencies": {
     "@types/faker": "^5.1.5",

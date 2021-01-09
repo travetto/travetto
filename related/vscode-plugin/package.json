@@ -41,10 +41,11 @@
     "CHANGELOG.md"
   ],
   "devDependencies": {
-    "vscode": "^1.1.37"
+    "@types/vscode": "^1.50.0"
   },
   "dependencies": {
-    "@travetto/boot": "^2.0.0-alpha.0"
+    "@travetto/boot": "file://../../module/boot",
+    "source-map-support": "^0.5.19"
   },
   "activationEvents": [
     "workspaceContains:module/boot/src-ts",
