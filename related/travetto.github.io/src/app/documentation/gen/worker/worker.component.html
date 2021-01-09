@@ -24,10 +24,9 @@ Below is a pool that will convert images on demand, while queuing as needed.
 
       <figure class="code">
       <figcaption class="code">Image processing queue, with a fixed batch/pool size
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/worker/alt/docs/src/images.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/worker/doc/images.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ExecUtil<span class="token punctuation">,</span> ExecutionState <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
-
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Worker<span class="token punctuation">,</span> WorkPool<span class="token punctuation">,</span> IterableInputSource<span class="token punctuation">,</span> DynamicAsyncIterator <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/worker'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">ImageProcessor</span> <span class="token keyword">implements</span> <span class="token class-name">Worker</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
@@ -102,9 +101,9 @@ A common pattern is to want to model a sub process as a worker, to be a valid ca
       args<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
       opts<span class="token operator">?</span><span class="token operator">:</span> ExecutionOptions<span class="token punctuation">;</span>
       handlers<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
-        init<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">channel<span class="token operator">:</span> ParentCommChannel</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
-        <span class="token function-variable function">execute</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">channel<span class="token operator">:</span> ParentCommChannel<span class="token punctuation">,</span> input<span class="token operator">:</span> <span class="token constant">X</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
-        destroy<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">channel<span class="token operator">:</span> ParentCommChannel</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
+        init<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">ch<span class="token operator">:</span> ParentCommChannel</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
+        <span class="token function-variable function">execute</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">ch<span class="token operator">:</span> ParentCommChannel<span class="token punctuation">,</span> input<span class="token operator">:</span> <span class="token constant">X</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
+        destroy<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">ch<span class="token operator">:</span> ParentCommChannel</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">)</span><span class="token operator">:</span> Worker<span class="token operator">&lt;</span><span class="token constant">X</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
@@ -133,13 +132,10 @@ When creating your work, via process spawning, you will need to provide the scri
 
       <figure class="code">
       <figcaption class="code">Spawning Pool
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/worker/alt/docs/src/spawner.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/worker/doc/spawner.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WorkUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/worker/src/util'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WorkPool<span class="token punctuation">,</span> WorkUtil<span class="token punctuation">,</span> IterableInputSource <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/worker'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FsUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WorkPool <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/worker/src/pool'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> IterableInputSource <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/worker/src/input/iterable'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">const</span> pool <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WorkPool</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span>
   WorkUtil<span class="token punctuation">.</span>spawnedWorker<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">(</span>FsUtil<span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>__dirname<span class="token punctuation">,</span> <span class="token string">'spawned.js'</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
@@ -152,7 +148,7 @@ When creating your work, via process spawning, you will need to provide the scri
         channel<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token string">'request'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> data<span class="token operator">:</span> inp <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Send request</span>
 
         <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> data <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">;</span> <span class="token comment">// Get answer</span>
-        <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Sent'</span><span class="token punctuation">,</span> inp<span class="token punctuation">,</span> <span class="token string">'Received'</span><span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Request complete'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> input<span class="token operator">:</span> inp<span class="token punctuation">,</span> output<span class="token operator">:</span> data <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span>inp <span class="token operator">+</span> inp <span class="token operator">===</span> data<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
           <span class="token comment">// Ensure the answer is double the input</span>
@@ -168,11 +164,11 @@ pool<span class="token punctuation">.</span><span class="token function">process
 
       <figure class="code">
       <figcaption class="code">Spawned Worker
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/worker/alt/docs/src/spawned.js">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/worker/doc/spawned.js">Source</a></cite>
       </figcaption>
       <pre><code class="language-javascript"><span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@travetto/boot/register'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@travetto/base'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>PhaseManager<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> ChildCommChannel <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'../../..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> ChildCommChannel <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
   <span class="token keyword">const</span> exec <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ChildCommChannel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
@@ -191,13 +187,13 @@ pool<span class="token punctuation">.</span><span class="token function">process
       <figcaption class="terminal">Output
       
       </figcaption>
-      <pre><code class="language-bash">$ ./alt/docs/src/spawner.ts -r @travetto/boot/register ./alt/docs/src/spawner.ts
+      <pre><code class="language-bash">$ ./doc/spawner.ts -r @travetto/boot/register ./doc/spawner.ts
 
-Sent <span class="token number">1</span> Received <span class="token number">2</span>
-Sent <span class="token number">2</span> Received <span class="token number">4</span>
-Sent <span class="token number">3</span> Received <span class="token number">6</span>
-Sent <span class="token number">4</span> Received <span class="token number">8</span>
-Sent <span class="token number">5</span> Received <span class="token number">10</span></code></pre>     
+Request complete <span class="token punctuation">{{'{'}}</span> input: <span class="token number">1</span>, output: <span class="token number">2</span> <span class="token punctuation">{{'}'}}</span>
+Request complete <span class="token punctuation">{{'{'}}</span> input: <span class="token number">2</span>, output: <span class="token number">4</span> <span class="token punctuation">{{'}'}}</span>
+Request complete <span class="token punctuation">{{'{'}}</span> input: <span class="token number">3</span>, output: <span class="token number">6</span> <span class="token punctuation">{{'}'}}</span>
+Request complete <span class="token punctuation">{{'{'}}</span> input: <span class="token number">4</span>, output: <span class="token number">8</span> <span class="token punctuation">{{'}'}}</span>
+Request complete <span class="token punctuation">{{'{'}}</span> input: <span class="token number">5</span>, output: <span class="token number">10</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 </div>

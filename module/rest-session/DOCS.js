@@ -17,7 +17,7 @@ ${Snippet('Session Structure', 'src/types.ts', /class Session\b/, /^\}/, true)}
 
 A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the ${Context} parameter as ${Session} and ${SessionData} respectively.  Iit can also be accessed via the ${Request} as a session property.
 
-${Code('Sample Session Usage', 'alt/docs/src/usage.ts')}
+${Code('Sample Session Usage', 'doc/usage.ts')}
 
 This usage should be comparable to express, koa and mostly every other framework.
 

@@ -1,84 +1,90 @@
+#!/usr/bin/env -S npx @arcsine/nodesh
+/// @ts-check
+/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
+
+const path = require('path');
 const fs = require('fs');
 
-const { FsUtil } = require('../../module/boot/src/fs');
-const { ExecUtil } = require('../../module/boot/src/exec');
+const commander = path.resolve('node_modules/commander/index.js');
+const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
 
-const commander = FsUtil.resolveUnix('node_modules/commander/index.js');
+// Update commander
+[
+  commander
+    .$read()
+    .$replace(/(process[.]stdout[.]columns \|\|).*;/g, (_, k) => `${k} 140;`)
+    .$writeFinal(commander),
 
-function page(p) {
-  return FsUtil.resolveUnix(`related/travetto.github.io/src/${p}`);
-}
+  'Restarting Mongodb'
+    .$tap(console.log)
+    .$exec('npm', { args: ['run', 'service', 'resetart', 'mongodb'], singleValue: true })
+    .$collect(),
 
-async function run() {
+  'Building out Overview docs'
+    .$tap(console.log)
+    .$map(() =>
+      // Overview
+      `<div class="documentation">`
+        .$concat(
+          $exec('npx', ['markdown-to-html', '--flavor', 'gfm', 'README.md'])
+            .$filter(x => !/<p.*<img/.test(x) && !/<sub/.test(x)),
+        )
+        .$concat([
+          `</div>
+          <app-module-chart></app-module-chart>`
+        ])
+        .$write(page('app/documentation/overview/overview.component.html'))
+    )
+    .$collect(),
 
-  console.log('Updating commander for worker activities');
-  fs.writeFileSync(
-    commander,
-    fs.readFileSync(commander, 'utf8')
-      .replace(/(process[.]stdout[.]columns \|\|).*;/g, (_, k) => `${k} ${process.stdout.getWindowSize()[0]};`)
-  );
+  'Building out Guide docs'
+    .$tap(console.log)
+    .$exec('trv', {
+      args: ['doc', '-o', page('guide/guide.component.html'), '-o', './README.md'],
+      spawn: {
+        cwd: 'related/todo-app',
+        env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc' }
+      }
+    })
+    .$tap(console.log)
+    .$collect(),
 
-  // Startup mongo
-  console.log('Restarting Mongodb');
-  await ExecUtil.spawn(
-    'npm',
-    ['run', 'service', 'restart', 'mongodb'],
-    { stdio: 'pipe' }
-  ).result;
+  'Building out Guide docs'
+    .$tap(console.log)
+    .$exec('trv', {
+      args: ['doc', '-o', page('app/documentation/vscode-plugin/vscode-plugin.component.html'), '-o', './README.md'],
+      spawn: {
+        cwd: 'related/vscode-plugin',
+        env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc' }
+      }
+    })
+    .$tap(console.log)
+    .$collect(),
 
-  console.log('Building out Overview docs');
-  const res = (await (await ExecUtil.spawn(
-    'npx',
-    ['markdown-to-html', '--flavor', 'gfm', 'README.md']
-  )).result).stdout;
+  'Copying Plugin images'
+    .$tap(console.log)
+    .$map(() => fs.promises.mkdir(page('assets/images/vscode-plugin')).catch(err => { }))
+    .$flatMap(() => 'related/vscode-plugin/images/**/*.{jpg,png}'.$dir())
+    .$map(img => fs.promises.copyFile(img, page(`assets/images/vscode-plugin/${path.basename(img)}`)).then(x => 1))
+    .$collect(),
 
-  fs.writeFileSync(page('app/documentation/overview/overview.component.html'),
-    `<div class="documentation">
-      ${res
-      .split(/\n/g)
-      .filter(x => !/<p.*<img/.test(x) && !/<sub/.test(x))
-      .join('\n')
+  'Building out Module docs'
+    .$tap(console.log)
+    .$flatMap(() => 'module/*/DOCS.js'.$dir())
+    .$parallel(f =>
+      $exec('trv', {
+        args: [
+          'doc',
+          '-o', page('app/documentation/gen/%MOD/%MOD.component.html'),
+          '-o', './README.md'
+        ],
+        spawn: {
+          cwd: path.dirname(f),
+          env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc' }
+        }
+      }), {
+      concurrent: 1
     }
-      </div>
-      <app-module-chart></app-module-chart>`
-  );
-
-  console.log('Building out Guide docs');
-  await ExecUtil.spawn(
-    'trv', ['doc', '-o', page('guide/guide.component.html'), '-o', './README.md'],
-    {
-      cwd: FsUtil.resolveUnix('related/todo-app'),
-      stdio: [0, 1, 2]
-    }
-  ).result;
-
-  console.log('Building out Plugin docs');
-  await ExecUtil.spawn(
-    'trv', ['doc', '-o', page('app/documentation/vscode-plugin/vscode-plugin.component.html'), '-o', './README.md'],
-    {
-      cwd: FsUtil.resolveUnix('related/vscode-plugin'),
-      stdio: [0, 1, 2]
-    }
-  ).result;
-
-  console.log('Copying Plugin images');
-  await FsUtil.mkdirp(page('assets/images/vscode-plugin'));
-  await FsUtil.copyRecursiveSync(FsUtil.resolveUnix('related/vscode-plugin/images'), page('assets/images/vscode-plugin'));
-
-  console.log('Building out Module docs');
-  await ExecUtil.spawn(
-    'npx',
-    [
-      'lerna', 'exec',
-      '--no-sort', '--stream',
-      '--no-bail', '--no-private',
-      '--',
-      'trv', 'doc',
-      '-o', page('app/documentation/gen/%MOD/%MOD.component.html'),
-      '-o', './README.md'
-    ],
-    { stdio: [0, 1, 2] }
-  ).result;
-}
-
-run();
+    )
+    .$tap(console.log)
+].$forEach(() => { })

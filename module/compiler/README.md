@@ -28,7 +28,7 @@ When dealing with transformers, logging is somewhat tricky as the compiler execu
 
 **Terminal: Compiler usage**
 ```bash
-$ travetto travetto compile --help
+$ travetto compile --help
 
 Usage:  compile [options]
 

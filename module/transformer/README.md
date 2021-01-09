@@ -22,11 +22,11 @@ Below is an example of a transformer that uppercases all `class`, `method` and `
 ```typescript
 import * as ts from 'typescript';
 
-import { OnProperty, TransformerState, OnMethod, OnClass } from '@travetto/transformer';
+import { OnProperty, TransformerState, OnMethod, OnClass, TransformerId } from '@travetto/transformer';
 
 export class MakeUpper {
 
-  static key = '@trv:transformer-test';
+  static [TransformerId] = '@trv:transformer-test';
 
   @OnProperty()
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration) {

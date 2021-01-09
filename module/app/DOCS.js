@@ -11,14 +11,14 @@ With the application, the ${meth`run`} method is the entry point that will be in
 
 For example:
 
-${Code(d`Example of ${Application.name} target`, 'alt/simple/src/entry.ts')}
+${Code(d`Example of ${Application.name} target`, 'doc/entry-simple.ts')}
 
 Additionally, the ${Application} decorator exposes some additional functionality, which can be used to launch the application.
 
 ${Section(d`${meth`.run()`} Arguments`)}
 The arguments specified in the ${meth`run`} method are extracted via code transformation, and are able to be bound when invoking the application.  Whether from the command line or a plugin, the parameters will be mapped to the inputs of ${meth`run`}.  For instance:
   
-${Code(d`Simple Entry Point with Parameters`, 'alt/simple/src/domain.ts')}
+${Code(d`Simple Entry Point with Parameters`, 'doc/domain.ts')}
 
 ${Section('CLI - run')}
 
@@ -52,5 +52,5 @@ ${List(
   
 Customizing the types is done by name, and allows for greater control:
   
-${Code('Complex Entry Point with Customization', 'alt/example/src/complex.ts')}
+${Code('Complex Entry Point with Customization', 'doc/complex.ts')}
 `;

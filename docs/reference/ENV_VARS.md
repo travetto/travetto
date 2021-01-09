@@ -3,8 +3,7 @@ The common environment variables throughout the code base:
 ## General App
 * `TRV_ENV` = dev|prod|any       - Environment to deploy, listens to `NODE_ENV` if not `TRV_ENV` is not specified.
 * `TRV_PROFILES`=['application'] - Additional profiles to run app under
-* `TRV_ROOTS` = ['.']            - The root of the application search space
-* `TRV_RESOURCE_ROOTS` = ['.']   - The root of resource searching
+* `TRV_RESOURCES` = ['.']        - The folders of resource searching
 * `TRV_WATCH` = 0|1              - Wether or not to run the program in watch mode
 * `TRV_READONLY` = 0|1           - Should compilation be supported, forced to false in PROD.  Defaults to 1
 * `TRV_MODULES` = []             - The list of additional npm modules to treat as framework modules

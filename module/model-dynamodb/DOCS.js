@@ -1,5 +1,5 @@
-const { doc: d, lib, Mod, Code, inp, SnippetLink } = require('../model-redis/node_modules/@travetto/doc');
-const { ModelSource } = require('../model-redis/node_modules/@travetto/model/src/service/source');
+const { doc: d, lib, Mod, Code, inp, SnippetLink } = require('@travetto/doc');
+const { ModelSource } = require('@travetto/model/src/service/source');
 const { MongoModelConfig } = require('./src/config');
 
 const ResourceManager = SnippetLink('ResourceManager', '@travetto/base/src/resource.ts', /class [$]Resource/);
@@ -9,7 +9,7 @@ This module provides an ${lib.MongoDB}-based implementation of ${ModelSource} fo
 
 Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the ${Mod('di')} module.
 
-${Code('Wiring up a custom Model Source', 'alt/docs/src/source.ts')}
+${Code('Wiring up a custom Model Source', 'doc/source.ts')}
 
 where the ${MongoModelConfig} is defined by:
 

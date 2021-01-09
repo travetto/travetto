@@ -103,7 +103,7 @@ The module provides a plugin for the [Command Line Interface](https://github.com
 
 **Terminal: OpenAPI usage**
 ```bash
-$ travetto travetto openapi:spec --help
+$ travetto openapi:spec --help
 
 Usage:  openapi:spec [options]
 

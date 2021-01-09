@@ -6,7 +6,7 @@ The module is an ${lib.Koa} provider for the ${Mod('rest')} module.  This module
 
 ${Section('Customizing Rest App')}
 
-${Code('Customizing the Koa App', 'alt/docs/src/customize.ts')}
+${Code('Customizing the Koa App', 'doc/customize.ts')}
 
 ${Section('Default Middleware')}
 When working with an ${lib.Koa} applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:

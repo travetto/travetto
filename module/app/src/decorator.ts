@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { Class } from '@travetto/registry';
 import { FsUtil } from '@travetto/boot';
-import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { ApplicationConfig, ApplicationParameter, AppClass } from './types';
 import { ApplicationRegistry } from './registry';
@@ -40,11 +39,6 @@ export function Application(
     if (params) {
       out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] ?? {}), name: x.name! }) as ApplicationParameter);
     }
-
-    const module = SystemUtil.convertFileToModule(target.ᚕfile);
-
-    // If running an alt app, then follow it's root, otherwise, cwd
-    out.root = /^[.]\/alt/.test(module) ? module.split('/src')[0] : '.';
 
     ApplicationRegistry.register(out.name, out as ApplicationConfig);
     return target;

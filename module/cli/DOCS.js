@@ -16,7 +16,7 @@ ${Section('Extending')}
 
 Extending the ${inp`cli`} is fairly straightforward.  It is built upon ${lib.Commander}, with a plugin model that is extensible:
 
-${Code('Echo Plugin', 'alt/docs/bin/cli-echo.ts')}
+${Code('Echo Plugin', 'doc/cli-echo.ts')}
 
 With the corresponding output:
 

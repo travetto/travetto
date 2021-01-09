@@ -26,17 +26,17 @@ ${Section('A Complete Example')}
 
 A more complete example setup would look like:
 
-${Config('resources/application.yml', 'alt/docs/resources/application.yml')}
+${Config('resources/application.yml', 'doc/resources/application.yml')}
 
-${Config('resources/prod.yml', 'alt/docs/resources/prod.yml')}
+${Config('resources/prod.yml', 'doc/resources/prod.yml')}
 
 with environment variables
 
-${Config('Environment variables', 'alt/docs/resources/env.properties', 'properties')}
+${Config('Environment variables', 'doc/resources/env.properties', 'properties')}
 
 At runtime the resolved config would be:
 
-${Execute('Runtime Resolution', 'alt/docs/src/resolve.ts')}
+${Execute('Runtime Resolution', 'doc/resolve.ts')}
 
 
 ${Section('Secrets')}
@@ -47,10 +47,10 @@ The ${ConfigManager} service provides direct access to all of the loaded configu
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 
-${Code('Database config object', 'alt/docs/src/dbconfig.ts')}
+${Code('Database config object', 'doc/dbconfig.ts')}
 
 Using the above config files, the resultant object would be:
 
-${Execute('Resolved database config', 'alt/docs/src/dbconfig-run.ts')}
+${Execute('Resolved database config', 'doc/dbconfig-run.ts')}
 
 `;

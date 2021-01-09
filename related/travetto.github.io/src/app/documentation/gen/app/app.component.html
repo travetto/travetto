@@ -21,10 +21,10 @@ For example:
 
       <figure class="code">
       <figcaption class="code">Example of Application target
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/app/alt/simple/src/entry.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/app/doc/entry-simple.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app/src/decorator'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
 
 @<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">Server</span> <span class="token punctuation">{{'{'}}</span>
@@ -55,14 +55,14 @@ The arguments specified in the <code class="item method">run</code> method are e
 
       <figure class="code">
       <figcaption class="code">Simple Entry Point with Parameters
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/app/alt/simple/src/domain.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/app/doc/domain.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app/src/decorator'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
 
 @<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'simple-domain'</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">SimpleApp</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">async</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token parameter">domain<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> port <span class="token operator">=</span> <span class="token number">3000</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Launching'</span><span class="token punctuation">,</span> domain<span class="token punctuation">,</span> <span class="token string">'on port'</span><span class="token punctuation">,</span> port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Launching'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> domain<span class="token punctuation">,</span> port <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
@@ -75,7 +75,7 @@ The run command allows for invocation of applications as defined by the <a targe
       <figcaption class="terminal">CLI Run Help
       
       </figcaption>
-      <pre><code class="language-bash">$ travetto travetto run --help
+      <pre><code class="language-bash">$ travetto run --help
 
 Usage:  run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
@@ -90,22 +90,22 @@ Available Applications:
    ● complex
      ----------------------------------------
      usage: complex domain:string port:number
-     file:  alt/example/src/complex.ts
-
-   ● test-eptest
-     --------------------------------------------------------
-     usage: test-eptest <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
-     file:  alt/example/src/entry.ts
+     file:  doc/complex.ts
 
    ● simple
-     ------------------------------
-     usage: simple
-     file:  alt/simple/src/entry.ts
+     ----------------------------------------------
+     usage: simple domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
+     file:  doc/simple.ts
 
    ● simple-domain
      -----------------------------------------------------
      usage: simple-domain domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
-     file:  alt/simple/src/domain.ts</code></pre>     
+     file:  doc/domain.ts
+
+   ● test-eptest
+     --------------------------------------------------------
+     usage: test-eptest <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
+     file:  doc/entry.ts</code></pre>     
       </figure>
 
 Running without specifying an application <code class="item command"></code>, will display all the available apps, and would look like:
@@ -114,9 +114,9 @@ Running without specifying an application <code class="item command"></code>, wi
       <figcaption class="terminal">Sample CLI Output
       
       </figcaption>
-      <pre><code class="language-bash">$ travetto travetto run
+      <pre><code class="language-bash">$ travetto run
 
-Usage: travetto run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+Usage: trv run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
   -e, --env <span class="token punctuation">[</span>env<span class="token punctuation">]</span>                 Application environment <span class="token punctuation">(</span>dev<span class="token operator">|</span>prod<span class="token operator">|</span><span class="token operator">&lt;</span>any<span class="token operator">></span><span class="token punctuation">)</span>
@@ -129,22 +129,22 @@ Available Applications:
    ● complex
      ----------------------------------------
      usage: complex domain:string port:number
-     file:  alt/example/src/complex.ts
-
-   ● test-eptest
-     --------------------------------------------------------
-     usage: test-eptest <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
-     file:  alt/example/src/entry.ts
+     file:  doc/complex.ts
 
    ● simple
-     ------------------------------
-     usage: simple
-     file:  alt/simple/src/entry.ts
+     ----------------------------------------------
+     usage: simple domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
+     file:  doc/simple.ts
 
    ● simple-domain
      -----------------------------------------------------
      usage: simple-domain domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
-     file:  alt/simple/src/domain.ts</code></pre>     
+     file:  doc/domain.ts
+
+   ● test-eptest
+     --------------------------------------------------------
+     usage: test-eptest <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
+     file:  doc/entry.ts</code></pre>     
       </figure>
 
 To invoke the <code class="item input">simple</code> application, you need to pass <code class="item input">domain</code> where port is optional with a default.
@@ -154,31 +154,29 @@ To invoke the <code class="item input">simple</code> application, you need to pa
       <figcaption class="terminal">Invoke Simple
       
       </figcaption>
-      <pre><code class="language-bash">$ travetto travetto run simple-domain mydomain.biz <span class="token number">4000</span>
+      <pre><code class="language-bash">$ travetto run simple-domain mydomain.biz <span class="token number">4000</span>
 
-Running application simple-domain ./alt/simple/src/domain.ts
-Configured <span class="token punctuation">{{'{'}}</span>
+<span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:31<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'simple-domain'</span>, filename: <span class="token string">'./doc/domain.ts'</span> <span class="token punctuation">{{'}'}}</span>
+<span class="token number">2021</span>-03-14T05:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:35<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
   app: <span class="token punctuation">{{'{'}}</span>
     watch: true,
     readonly: false,
-    travetto: <span class="token string">'1.1.0'</span>,
+    travetto: <span class="token string">'2.0.0'</span>,
     name: <span class="token string">'@travetto/app'</span>,
-    version: <span class="token string">'1.1.0'</span>,
+    version: <span class="token string">'2.0.0'</span>,
     license: <span class="token string">'MIT'</span>,
     description: <span class="token string">'Application registration/management and run support.'</span>,
-    author: <span class="token punctuation">{{'{'}}</span>
-      email: <span class="token string">'travetto.framework@gmail.com'</span>,
-      name: <span class="token string">'Travetto Framework'</span>
-    <span class="token punctuation">{{'}'}}</span>,
+    author: <span class="token punctuation">{{'{'}}</span> email: <span class="token string">'travetto.framework@gmail.com'</span>, name: <span class="token string">'Travetto Framework'</span> <span class="token punctuation">{{'}'}}</span>,
     env: <span class="token string">'dev'</span>,
-    profiles: <span class="token punctuation">[</span> <span class="token string">'application'</span>, <span class="token string">'simple-domain'</span>, <span class="token string">'dev'</span> <span class="token punctuation">]</span>,
-    roots: <span class="token punctuation">[</span> <span class="token string">'.'</span>, <span class="token string">'./alt/simple'</span> <span class="token punctuation">]</span>,
-    resourceRoots: <span class="token punctuation">[</span> <span class="token string">'.'</span>, <span class="token string">'./alt/simple'</span> <span class="token punctuation">]</span>,
+    profiles: <span class="token punctuation">[</span> <span class="token string">'application'</span>, <span class="token string">'dev'</span> <span class="token punctuation">]</span>,
+    localSourceFolders: <span class="token punctuation">[</span> <span class="token string">'doc'</span> <span class="token punctuation">]</span>,
+    commonSourceFolders: <span class="token punctuation">[</span> <span class="token string">'src'</span> <span class="token punctuation">]</span>,
+    resourceRoots: <span class="token punctuation">[</span> <span class="token string">'.'</span>, <span class="token string">'doc'</span> <span class="token punctuation">]</span>,
     debug: <span class="token punctuation">{{'{'}}</span> status: false, value: undefined <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-Launching mydomain.biz on port <span class="token number">4000</span></code></pre>     
+<span class="token number">2021</span>-03-14T05:00:01.510Z info  <span class="token punctuation">[</span>@trv:app/doc/domain:6<span class="token punctuation">]</span> Launching <span class="token punctuation">{{'{'}}</span> domain: <span class="token string">'mydomain.biz'</span>, port: <span class="token number">4000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <h2 id="type-checking">Type Checking</h2>
@@ -189,10 +187,19 @@ The parameters to <code class="item method">run</code> will be type checked, to 
       <figcaption class="terminal">Invoke Simple with bad port
       
       </figcaption>
-      <pre><code class="language-bash">$ travetto travetto run simple-domain mydomain.biz orange
+      <pre><code class="language-bash">$ travetto run simple-domain mydomain.biz orange
 
-Command failed: npx travetto run simple-domain mydomain.biz orange
-Invalid parameter port: Received orange, but exepcted number</code></pre>     
+Command failed: trv run simple-domain mydomain.biz orange
+Failed application run <span class="token punctuation">{{'{'}}</span>
+  error: Error: Invalid parameter port: Received orange, but exepcted number
+      at Function.enforceParamType <span class="token punctuation">(</span>/home/tim/Code/travetto/module/app/src/util.ts:19:13<span class="token punctuation">)</span>
+      at /home/tim/Code/travetto/module/app/src/registry.ts:46:79
+      at Array.map <span class="token punctuation">(</span><span class="token operator">&lt;</span>anonymous<span class="token operator">></span><span class="token punctuation">)</span>
+      at <span class="token variable">$ApplicationRegistry</span>.resolveParameters <span class="token punctuation">(</span>/home/tim/Code/travetto/module/app/src/registry.ts:46:24<span class="token punctuation">)</span>
+      at Function.run <span class="token punctuation">(</span>/home/tim/Code/travetto/module/app/bin/lib/run.ts:54:31<span class="token punctuation">)</span>
+      at processTicksAndRejections <span class="token punctuation">(</span>internal/process/task_queues.js:93:5<span class="token punctuation">)</span>
+      at AppRunPlugin.action <span class="token punctuation">(</span>/home/tim/Code/travetto/module/app/bin/cli-run.ts:55:11<span class="token punctuation">)</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 The types are inferred from the <code class="item method">.run()</code> method parameters, but can be overridden in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24">@Application</a> 
@@ -208,7 +215,7 @@ Customizing the types is done by name, and allows for greater control:
 
       <figure class="code">
       <figcaption class="code">Complex Entry Point with Customization
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/app/alt/example/src/complex.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/app/doc/complex.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
 
@@ -227,7 +234,7 @@ Customizing the types is done by name, and allows for greater control:
 <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">Complex</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">async</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token parameter">domain<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> port<span class="token operator">:</span> <span class="token builtin">number</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">'Launching'</span><span class="token punctuation">,</span> domain<span class="token punctuation">,</span> <span class="token string">'on port'</span><span class="token punctuation">,</span> port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">'Launching'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> domain<span class="token punctuation">,</span> port <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>

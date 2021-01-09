@@ -23,22 +23,23 @@ As is the custom, modules are able to register their own cli extensions as scrip
       <figcaption class="terminal">General Usage
       
       </figcaption>
-      <pre><code class="language-bash">$ travetto travetto --help
+      <pre><code class="language-bash">$ travetto --help
 
 Usage:  <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
 
 Options:
-  -V, --version                output the version number
-  -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -V, --version                          output the version number
+  -h, --help                             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Commands:
-  <span class="token builtin class-name">echo</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
   clean <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
   compile <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
   doc <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+  <span class="token builtin class-name">echo</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+  run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
   <span class="token builtin class-name">test</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>regexes<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
   test:lerna <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
-  <span class="token builtin class-name">help</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  <span class="token builtin class-name">help</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>                         display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 
 This will show all the available options/choices that are exposed given the currently installed modules.
@@ -86,7 +87,7 @@ With the corresponding output:
       <figcaption class="terminal">Echo Plugin Help
       
       </figcaption>
-      <pre><code class="language-bash">$ travetto travetto <span class="token builtin class-name">echo</span> --help
+      <pre><code class="language-bash">$ travetto <span class="token builtin class-name">echo</span> --help
 
 Usage:  <span class="token builtin class-name">echo</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
@@ -101,7 +102,7 @@ And actually using it:
       <figcaption class="terminal">Echo Plugin Run
       
       </figcaption>
-      <pre><code class="language-bash">$ travetto travetto <span class="token builtin class-name">echo</span> -u bOb rOb DRoP
+      <pre><code class="language-bash">$ travetto <span class="token builtin class-name">echo</span> -u bOb rOb DRoP
 
 <span class="token punctuation">[</span> <span class="token string">'BOB'</span>, <span class="token string">'ROB'</span>, <span class="token string">'DROP'</span> <span class="token punctuation">]</span></code></pre>     
       </figure>

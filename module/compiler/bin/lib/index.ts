@@ -33,14 +33,7 @@ export class CompileCliUtil {
    * Compile All
    */
   static async compileAll() {
-    const { FsUtil } = await import('@travetto/boot');
-    const alt = FsUtil.resolveUnix('alt');
-    if (FsUtil.existsSync(alt)) {
-      process.env.TRV_ROOTS = fs.readdirSync(alt).map(x => `./alt/${x}`).join(',');
-    }
-
     const { PhaseManager } = await import('@travetto/base');
-
     // Standard compile
     await PhaseManager.init('@trv:compiler/compile');
   }

@@ -20,7 +20,6 @@ Below is a pool that will convert images on demand, while queuing as needed.
 **Code: Image processing queue, with a fixed batch/pool size**
 ```typescript
 import { ExecUtil, ExecutionState } from '@travetto/boot';
-
 import { Worker, WorkPool, IterableInputSource, DynamicAsyncIterator } from '@travetto/worker';
 
 class ImageProcessor implements Worker<string> {
@@ -93,9 +92,9 @@ export class WorkUtil {
       args?: string[];
       opts?: ExecutionOptions;
       handlers: {
-        init?: (channel: ParentCommChannel) => Promise<any>;
-        execute: (channel: ParentCommChannel, input: X) => Promise<any>;
-        destroy?: (channel: ParentCommChannel) => Promise<any>;
+        init?: (ch: ParentCommChannel) => Promise<any>;
+        execute: (ch: ParentCommChannel, input: X) => Promise<any>;
+        destroy?: (ch: ParentCommChannel) => Promise<any>;
       };
     }
   ): Worker<X> {
@@ -124,11 +123,8 @@ When creating your work, via process spawning, you will need to provide the scri
 
 **Code: Spawning Pool**
 ```typescript
-import { WorkUtil } from '@travetto/worker/src/util';
+import { WorkPool, WorkUtil, IterableInputSource } from '@travetto/worker';
 import { FsUtil } from '@travetto/boot';
-
-import { WorkPool } from '@travetto/worker/src/pool';
-import { IterableInputSource } from '@travetto/worker/src/input/iterable';
 
 const pool = new WorkPool(() =>
   WorkUtil.spawnedWorker<string>(FsUtil.resolveUnix(__dirname, 'spawned.js'), {
@@ -141,7 +137,7 @@ const pool = new WorkPool(() =>
         channel.send('request', { data: inp }); // Send request
 
         const { data } = await res; // Get answer
-        console.log('Sent', inp, 'Received', data);
+        console.log('Request complete', { input: inp, output: data });
 
         if (!(inp + inp === data)) {
           // Ensure the answer is double the input
@@ -159,7 +155,7 @@ pool.process(new IterableInputSource([1, 2, 3, 4, 5])).then(x => pool.shutdown()
 ```javascript
 require('@travetto/boot/register');
 require('@travetto/base').PhaseManager.init().then(async () => {
-  const { ChildCommChannel } = require('../../..');
+  const { ChildCommChannel } = require('..');
 
   const exec = new ChildCommChannel();
 
@@ -176,12 +172,12 @@ require('@travetto/base').PhaseManager.init().then(async () => {
 
 **Terminal: Output**
 ```bash
-$ ./alt/docs/src/spawner.ts -r @travetto/boot/register ./alt/docs/src/spawner.ts
+$ ./doc/spawner.ts -r @travetto/boot/register ./doc/spawner.ts
 
-Sent 1 Received 2
-Sent 2 Received 4
-Sent 3 Received 6
-Sent 4 Received 8
-Sent 5 Received 10
+Request complete { input: 1, output: 2 }
+Request complete { input: 2, output: 4 }
+Request complete { input: 3, output: 6 }
+Request complete { input: 4, output: 8 }
+Request complete { input: 5, output: 10 }
 ```
 

@@ -18,7 +18,7 @@ The only provided ${InputSource} is the ${IterableInputSource} which supports al
 
 Below is a pool that will convert images on demand, while queuing as needed.
 
-${Code('Image processing queue, with a fixed batch/pool size', 'alt/docs/src/images.ts')}
+${Code('Image processing queue, with a fixed batch/pool size', 'doc/images.ts')}
 
 Once a pool is constructed, it can be shutdown by calling the ${meth`.shutdown()`} method, and awaiting the result.
 
@@ -33,9 +33,9 @@ ${Code('Spawned Worker', 'src/util.ts')}
 
 When creating your work, via process spawning, you will need to provide the script (and any other features you would like in ${inp`SpawnConfig`}).   Additionally you must, at a minimum, provide functionality to run whenever an input element is up for grabs in the input source.  This method will be provided the communication channel (${ParentCommChannel}) and the input value.  A simple example could look like:
 
-${Code('Spawning Pool', 'alt/docs/src/spawner.ts')}
+${Code('Spawning Pool', 'doc/spawner.ts')}
 
-${Code('Spawned Worker', './alt/docs/src/spawned.js')}
+${Code('Spawned Worker', './doc/spawned.js')}
 
-${Execute('Output', './alt/docs/src/spawner.ts')}
+${Execute('Output', './doc/spawner.ts')}
 `;

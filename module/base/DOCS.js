@@ -50,13 +50,13 @@ The framework does a fair amount of file system scanning to auto - load files. I
 
 A simple example of finding specific ${pth`.config`} files in your codebase:
 
-${Code('Looking for all .config files with the prefix defined by svc', 'alt/docs/src/find.ts')}
+${Code('Looking for all .config files with the prefix defined by svc', 'doc/find.ts')}
 
 ${Section('Application Resources')}
 
 Resource management, loading of files, and other assets at runtime is a common pattern that the ${ResourceManagerLink} encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
 
-${Code('Finding Images', 'alt/docs/src/image.ts')}
+${Code('Finding Images', 'doc/image.ts')}
 
 ${Section('Lifecycle Support')}
 
@@ -96,18 +96,18 @@ ${Section('Shutdown')}
 Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides ${meth`process.exit`} to properly handle ${inp`SIGKILL`} and ${inp`SIGINT`}, with a default threshold of 3 seconds. In the advent of a ${inp`SIGTERM`} signal, the code exits immediately without any cleanup.
 
 As a registered shutdown handler, you can do.
-${Code('Registering a shutdown handler', 'alt/docs/src/shutdown.ts')}
+${Code('Registering a shutdown handler', 'doc/shutdown.ts')}
 
 ${Section('Stacktrace')}
 The built in stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  
 
 From a test scenario:
 
-${Code('Tracking asynchronous behavior', 'alt/docs/src/stack-test.ts')}
+${Code('Tracking asynchronous behavior', 'doc/stack-test.ts')}
 
 Will produce the following stack trace:
 
-${Execute('tack trace from async errors', './alt/docs/src/stack-test.ts')}
+${Execute('tack trace from async errors', './doc/stack-test.ts')}
 
 The needed functionality cannot be loaded until ${meth`init.action`} executes, and so must be required only at that time.
 

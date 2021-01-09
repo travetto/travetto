@@ -62,5 +62,5 @@ ${Ordered(
 
 Given the ordering, its clear to see that a project can define it's own configuration at the root of the project with ${pth`pack.config.yml`}. Any defaults can be overidden.
 
-${Code('Example pack.config.yml', './alt/docs/pack.config.yml')}
+${Code('Example pack.config.yml', 'doc/pack.config.yml')}
 `;

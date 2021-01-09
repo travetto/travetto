@@ -122,20 +122,20 @@ This functionality allows the program to opt in the typescript compiler.  This a
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L57">ScanFs</a> provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 <h2 id="process-execution">Process Execution</h2>
-Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L78">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
+Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L79">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 
       <figure class="code">
       <figcaption class="code">Running a directory listing via ls
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/boot/alt/docs/src/exec.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/boot/doc/exec.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ExecUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot/src'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ExecUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">executeListing</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> result <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> ExecUtil<span class="token punctuation">.</span><span class="token function">spawn</span><span class="token punctuation">(</span><span class="token string">'ls'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">const</span> final <span class="token operator">=</span> <span class="token keyword">await</span> result<span class="token punctuation">;</span>
-  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>final<span class="token punctuation">.</span>stdout<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token string">'\n'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Listing'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> lines<span class="token operator">:</span> final<span class="token punctuation">.</span>stdout<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token string">'\n'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -162,7 +162,7 @@ The module provides the ability to clear the compilation cache to handle any inc
       <figcaption class="terminal">Clean operation
       
       </figcaption>
-      <pre><code class="language-bash">$ travetto travetto clean --help
+      <pre><code class="language-bash">$ travetto clean --help
 
 Usage:  clean <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 

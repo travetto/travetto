@@ -23,11 +23,11 @@ ${List(
 
 The ${inp`title`} will be picked up from the ${lib.JSDoc} comments, and additionally all fields can be set using the ${Describe} decorator.
 
-${Code('Sample User Schema', 'alt/docs/src/user.ts')}
+${Code('Sample User Schema', 'doc/user.ts')}
 
 From this schema, the registry would have the following information:
 
-${Config('User schemas as a YAML file', 'alt/docs/resources/user.yml')}
+${Config('User schemas as a YAML file', 'doc/resources/user.yml')}
 
 
 ${SubSection('Fields')}
@@ -71,15 +71,15 @@ At runtime, once a schema is registered, a programmer can utilize this structure
 ${SubSection('Binding')}
 Binding is a very simple operation, as it takes in a class registered as as ${Schema} and a JS object that will be the source of the binding. Given the schema:
 
-${Code('Sub Schemas via Address', 'alt/docs/src/person.ts')}
+${Code('Sub Schemas via Address', 'doc/person.ts')}
 
 A binding operation could look like:
 
-${Code('Binding from JSON to Schema', 'alt/docs/src/person-binding.ts')}
+${Code('Binding from JSON to Schema', 'doc/person-binding.ts')}
 
 and the output would be a ${inp`Person`} instance with the following structure
 
-${Execute('Sample data output after binding', 'alt/docs/src/person-output.js')}
+${Execute('Sample data output after binding', 'doc/person-output.js')}
 
 ${Note(`Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.`)}
 
@@ -87,21 +87,21 @@ ${SubSection('Validation')}
 
 Validation is very similar to binding, but instead of attempting to assign values, any mismatch or violation of the schema will result in errors. All errors will be collected and returned. Given the same schema as above,
 
-${Code('Sub Schemas via Address', 'alt/docs/src/person.ts')}
+${Code('Sub Schemas via Address', 'doc/person.ts')}
 
 But now with an invalid json object
 
-${Code('Read Person, and validate', 'alt/docs/src/person-binding-invalid.ts')}
+${Code('Read Person, and validate', 'doc/person-binding-invalid.ts')}
 
 would produce an exception similar to following structure
 
-${Execute('Sample error output', 'alt/docs/src/person-invalid-output.js')}
+${Execute('Sample error output', 'doc/person-invalid-output.js')}
 
 ${SubSection('Custom Validators')}
 
 Within the schema framework, it is possible to add custom validators class level.  This allows for more flexibility when dealing with specific situations (e.g. password requirements or ensuring two fields match)
 
-${Code('Password Validator', 'alt/docs/src/password-validator.ts')}
+${Code('Password Validator', 'doc/password-validator.ts')}
 
 When the validator is executed, it has access to the entire object, and you can check any of the values.  The validator expects an object of a specific structure if you are looking to indicate an error has occurred.
 
@@ -133,7 +133,7 @@ ${Snippet('Supported Mappings', './src/extension/faker.ts', /NAMES_TO_TYPE/, /\}
 
 An example of this would be:
 
-${Code('More complex Schema, used with Faker', 'alt/docs/src/faker.ts')}
+${Code('More complex Schema, used with Faker', 'doc/faker.ts')}
 
 ${Section('Custom Types')}
 When working with the schema, the basic types are easily understood, but some of ${lib.Typescript}'s more complex constructs are too complex to automate cleanly.
@@ -143,7 +143,7 @@ To that end, the module supports two concepts:
 ${SubSection('Type Adapters')}
 This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the ${Mod('model-query')} module handles geo data.
 
-${Code('Simple Custom Type', 'alt/docs/src/custom-type.ts')}
+${Code('Simple Custom Type', 'doc/custom-type.ts')}
 
 What you can see here is that the ${inp`Point`} type is now backed by a class that supports:
 
@@ -152,9 +152,9 @@ ${List(
   d`${meth`bindSchema`} - Will run during binding to ensure correct behavior.`,
 )}
 
-${Code('Simple Custom Type Usage', 'alt/docs/src/custom-type-usage.ts')}
+${Code('Simple Custom Type Usage', 'doc/custom-type-usage.ts')}
 
 All that happens now, is the type is exported, and the class above is able to properly handle point as an ${inp`[x, y]`} tuple.  All standard binding and validation patterns are supported, and type enforcement will work as expected.
 
-${Execute('Custom Type Validation', 'alt/docs/src/custom-type-output.js')};
+${Execute('Custom Type Validation', 'doc/custom-type-output.js')};
 `;
