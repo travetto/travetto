@@ -1,4 +1,4 @@
-import { ShutdownManager } from '@travetto/base';
+import { AppManifest, ShutdownManager } from '@travetto/base';
 import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
 import { CompileUtil, FsUtil } from '@travetto/boot';
 import type { Class } from '@travetto/registry';
@@ -46,8 +46,8 @@ export function watch($Compiler: Class<typeof Compiler>) {
       });
 
       this.presence = new FilePresenceManager(
-        this.roots
-          .flatMap(x => x === '.' ? [`${x}/src`, `${x}/test`] : [`${x}/src`])
+        [...AppManifest.localSourceFolders]
+          .map(x => `./${x}`)
           .filter(x => FsUtil.existsSync(x)),
         {
           ignoreInitial: true,

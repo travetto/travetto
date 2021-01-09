@@ -16,22 +16,23 @@ As is the custom, modules are able to register their own cli extensions as scrip
 
 **Terminal: General Usage**
 ```bash
-$ travetto travetto --help
+$ travetto --help
 
 Usage:  [options] [command]
 
 Options:
-  -V, --version                output the version number
-  -h, --help                   display help for command
+  -V, --version                          output the version number
+  -h, --help                             display help for command
 
 Commands:
-  echo [options] [args...]
   clean [options]
   compile [options]
   doc [options]
+  echo [options] [args...]
+  run [options] [application] [args...]
   test [options] [regexes...]
   test:lerna [options]
-  help [command]               display help for command
+  help [command]                         display help for command
 ```
 
 This will show all the available options/choices that are exposed given the currently installed modules.
@@ -75,7 +76,7 @@ With the corresponding output:
 
 **Terminal: Echo Plugin Help**
 ```bash
-$ travetto travetto echo --help
+$ travetto echo --help
 
 Usage:  echo [options] [args...]
 
@@ -88,7 +89,7 @@ And actually using it:
 
 **Terminal: Echo Plugin Run**
 ```bash
-$ travetto travetto echo -u bOb rOb DRoP
+$ travetto echo -u bOb rOb DRoP
 
 [ 'BOB', 'ROB', 'DROP' ]
 ```

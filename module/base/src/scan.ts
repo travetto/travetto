@@ -1,14 +1,10 @@
-import { ScanEntry, FsUtil } from '@travetto/boot';
+import { ScanEntry, FsUtil, EnvUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { AppManifest } from './manifest';
 
 type SimpleEntry = Pick<ScanEntry, 'module' | 'file'>;
 
-type FindConfig =
-  { folder?: string, filter?: Tester, paths: string[], includeIndex?: boolean } |
-  { folder?: string, filter?: Tester, roots?: string[], includeIndex?: boolean };
-
-type AppFindConfig = { folder?: string, filter?: Tester, roots?: string[] };
+type FindConfig = { folder?: string, filter?: Tester, paths: string[], includeIndex?: boolean };
 
 interface Tester {
   source: string;
@@ -23,16 +19,11 @@ class $ScanApp {
   private _index = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
 
   /**
-   * List of primary app folders to search
-   */
-  mainAppFolders = new Set(['src']);
-
-  /**
    * List of modules to not traverse into
    */
-  modAppExclude = new Set([
+  modSourceExclude = new Set([
     // This drives the init process, so cannot happen in a support file
-    ...(AppManifest.hasProfile('test') ? [] : ['@travetto/test']),
+    ...EnvUtil.getList('TRV_SRC_COMMON_EXCLUDE'),
     '@travetto/cli', '@travetto/boot', '@travetto/doc'
   ]);
 
@@ -53,16 +44,6 @@ class $ScanApp {
           const [sub] = file.split(`${mod}/`)[1].split('/');
           return { mod, sub };
         }
-      }
-    } else if (/^alt(\/.*)$/.test(file)) { // Alt app
-      if (file === 'alt') {
-        return;
-      }
-      const [, mod, sub] = file.match(/^(.*alt\/[^\/]+)\/?(?:([^/]+)(?:\/(.*)))?$/)!;
-      if (entry.stats.isDirectory() || entry.stats.isSymbolicLink()) {
-        return { mod: `./${mod}`, sub: '' };
-      } else {
-        return { mod: `./${mod}`, sub };
       }
     } else { // Core app
       const mod = '.';
@@ -117,37 +98,14 @@ class $ScanApp {
    * Find search keys
    * @param roots App paths
    */
-  getPaths(roots: string[]) {
-    return [...this.index.keys()]
-      // If a module
-      .filter(key => (/@travetto/.test(key) && !this.modAppExclude.has(key)) || roots.includes(key));
-  }
-
-  /**
-   * Find all folders for the given root paths
-   * @param paths The root paths to check
-   * @param folder The folder to check into
-   */
-  findFolders(config: FindConfig) {
-    const all: string[] = [];
-    const paths = 'paths' in config ? config.paths : this.getPaths(config.roots || AppManifest.roots);
-    for (const key of paths) {
-      if (this.index.has(key)) {
-        if (config.folder) {
-          all.push(FsUtil.resolveUnix(this.index.get(key)!.base, config.folder));
-        } else {
-          all.push(this.index.get(key)!.base);
-        }
-      }
-    }
-    return all;
-
+  getPaths() {
+    return [...this.index.keys()].filter(key => !this.modSourceExclude.has(key));
   }
 
   /**
    * Find files from the index
-   * @param paths The main application paths to check
-   * @param folder The folder to check into
+   * @param paths The paths to check
+   * @param folder The sub-folder to check into
    * @param filter The filter to determine if this is a valid support file
    */
   findFiles(config: FindConfig) {
@@ -155,10 +113,9 @@ class $ScanApp {
     if (folder === 'src') {
       config.includeIndex = config.includeIndex ?? true;
     }
-    const paths = 'paths' in config ? config.paths : this.getPaths(config.roots || AppManifest.roots);
     const all: SimpleEntry[][] = [];
     const idx = this.index;
-    for (const key of paths) {
+    for (const key of config.paths) {
       if (idx.has(key)) {
         const tgt = idx.get(key)!;
         if (folder) {
@@ -186,17 +143,33 @@ class $ScanApp {
   }
 
   /**
-   * Find source files for a given set of paths
-   * @param roots List of all app root paths
+   * Find shared files
+   * @param folder The sub-folder to check into
+   * @param filter The filter to determine if this is a valid support file
    */
-  findAppSourceFiles(config: Pick<AppFindConfig, 'roots'> = {}) {
-    const all: SimpleEntry[][] = [
-      this.findFiles({ folder: 'src', roots: config.roots }),
-    ];
-    for (const folder of this.mainAppFolders) {
-      if (folder !== 'src') {
-        all.push(this.findFiles({ folder, paths: config.roots || AppManifest.roots }));
-      }
+  findCommonFiles(config: Omit<FindConfig, 'paths'>) {
+    return this.findFiles({ ...config, paths: this.getPaths() });
+  }
+
+  /**
+   * Find local files
+   * @param folder The sub-folder to check into
+   * @param filter The filter to determine if this is a valid support file
+   */
+  findLocalFiles(config: Omit<FindConfig, 'paths'>) {
+    return this.findFiles({ ...config, paths: ['.'] });
+  }
+
+  /**
+   * Find source files for a given set of paths
+   */
+  findAllSourceFiles() {
+    const all: SimpleEntry[][] = [];
+    for (const folder of AppManifest.commonSourceFolders) {
+      all.push(this.findCommonFiles({ folder }));
+    }
+    for (const folder of AppManifest.localSourceFolders) {
+      all.push(this.findLocalFiles({ folder }));
     }
     return all.flat();
   }

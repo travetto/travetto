@@ -8,7 +8,7 @@ A standard API for sending and rendering emails. The mail transport must be defi
 
 To expose the necessary email transport, the following pattern is commonly used:
 
-${Code('Declaring the null transport for development', 'alt/docs/src/null.ts')}
+${Code('Declaring the null transport for development', 'doc/null.ts')}
 
 Given the amorphous nature of transports, the ${inp`transport`} field in ${MailConfig} is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
 
@@ -25,9 +25,9 @@ ${Section('Nodmailer - Extension')}
 
 Given the integration with ${lib.NodeMailer}, all extensions should be usable out of the box. The primary ${lib.NodeMailer} modules are provided (assuming dependencies are installed):
 
-${Code(d`${inp`sendmail`} to send all messages via the sendmail operation`, 'alt/docs/src/sendmail.ts')}
+${Code(d`${inp`sendmail`} to send all messages via the sendmail operation`, 'doc/sendmail.ts')}
 
-${Code(d`${inp`smtp`} to send all messages via the smtp operation`, 'alt/docs/src/smtp.ts')}
+${Code(d`${inp`smtp`} to send all messages via the smtp operation`, 'doc/smtp.ts')}
 
-${Code(d`${inp`ses`} to send all messages via the ses operation`, 'alt/docs/src/ses.ts')}
+${Code(d`${inp`ses`} to send all messages via the ses operation`, 'doc/ses.ts')}
 `;

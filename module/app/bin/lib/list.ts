@@ -16,15 +16,6 @@ export class CliAppListUtil {
 
   private static CACHE_CONFIG = 'app-cache.json';
 
-  static getRoots() {
-    // Initialize up to compiler
-    const roots = ['.'];
-    try {
-      roots.push(...fs.readdirSync(FsUtil.resolveUnix('alt')).map(x => `alt/${x}`));
-    } catch { }
-    return roots;
-  }
-
   /**
    * Compile code, and look for `@Application` annotations
    */
@@ -120,7 +111,7 @@ export class CliAppListUtil {
    * Handles plugin response
    */
   static async run(mode?: string) {
-    CliUtil.initAppEnv({ roots: this.getRoots() });
+    CliUtil.initAppEnv({});
     const list = mode === 'build' ? this.buildList() : this.getList();
     CliUtil.pluginResponse((await list) ?? []);
   }

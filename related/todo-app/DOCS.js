@@ -4,7 +4,7 @@ const {
 } = require('@travetto/doc');
 const { Model } = require('@travetto/model');
 
-const ModelCore = SnippetLink('ModelCore', '@travetto/model/src/model/core.ts', /./);
+const ModelType = SnippetLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 
 exports.header = false;
 exports.toc = 'Overview';
@@ -50,7 +50,7 @@ Create the file ${pth`src/model.ts`}
 
 ${Code('Models', 'src/model.ts')}
 
-as you can see, the model structure is simple.  Everything that uses the ${Model} services needs to implement ${ModelCore}.
+as you can see, the model structure is simple.  Everything that uses the ${Model} services needs to implement ${ModelType}.
 
 ${Section('Building the Service Layer')}
 
@@ -87,17 +87,17 @@ ${Section('Running the App')}
 
 First we must start the application:
 
-${Execute('Application Startup', '/bin/bash', ['alt/docs/bin/startup.sh'])} ${Hidden(DocUtil.run('/bin/bash', ['alt/docs/bin/run-server.sh']))}
+${Execute('Application Startup', '/bin/bash', ['doc/startup.sh'])} ${Hidden(DocUtil.run('/bin/bash', ['doc/run-server.sh']))}
 
 next, let's execute ${lib.Curl} requests to interact with the new api
 
-${Code('Creating Todo by curl', 'alt/docs/bin/create.sh')}
+${Code('Creating Todo by curl', 'doc/create.sh')}
 
-${Execute('Create Output', 'sh', ['alt/docs/bin/create.sh'])}
+${Execute('Create Output', 'sh', ['doc/create.sh'])}
 
-${Code('Listing Todos by curl', 'alt/docs/bin/list.sh')}
+${Code('Listing Todos by curl', 'doc/list.sh')}
 
-${Execute('Listing Output', 'sh', ['alt/docs/bin/list.sh'])}
+${Execute('Listing Output', 'sh', ['doc/list.sh'])}
 `;
 
-DocUtil.run('/bin/bash', ['alt/docs/bin/stop-server.sh']);
+DocUtil.run('/bin/bash', ['doc/stop-server.sh']);

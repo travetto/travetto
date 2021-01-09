@@ -12,6 +12,7 @@ The currently supported features are:
 ${List(
   'Real-time test evaluation and debugging',
   'Application launching with parameters',
+  'Terminal integration for framework links',
   'Miscellaneous utilities',
 )}
 

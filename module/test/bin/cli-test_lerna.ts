@@ -20,7 +20,7 @@ export class TestLernaPlugin extends BasePlugin {
     const child = ExecUtil.spawn('npx', [
       'lerna', '--no-sort',
       'exec', '--no-bail', '--stream', '--',
-      'npx', 'trv', 'test', '-f', 'event', '-m', this._cmd.mode, '-c', '2'
+      'trv', 'test', '-f', 'event', '-m', this._cmd.mode, '-c', '2'
     ], { shell: true, rawOutput: true, cwd: FsUtil.resolveUnix(__dirname, '..', '..') });
 
     const { TestConsumerRegistry } = await import('../src/consumer/registry');

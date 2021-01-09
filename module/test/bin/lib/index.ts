@@ -21,7 +21,11 @@ async function customLogs() {
 }
 
 async function load() {
-  await CompileCliUtil.compile(undefined, { TRV_TEST_COMPILE: '1' });
+  await CompileCliUtil.compile(undefined, {
+    TRV_SRC_COMMON_EXCLUDE: '@travetto/test',
+    TRV_SRC_COMMON: 'test-support',
+    TRV_SRC_LOCAL: 'test'
+  });
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.init('@trv:compiler/load');
 }
@@ -59,7 +63,14 @@ export async function worker() {
 }
 
 export async function watchTests(format: string = 'tap') {
-  CliUtil.initAppEnv({ ...DEF_ENV, watch: true, envExtra: { ...ENV_EXT, TRV_TEST_COMPILE: 1 } });
+  CliUtil.initAppEnv({
+    ...DEF_ENV, watch: true, envExtra: {
+      ...ENV_EXT,
+      TRV_SRC_COMMON_EXCLUDE: '@travetto/test',
+      TRV_SRC_COMMON: 'test-support',
+      TRV_SRC_LOCAL: 'test'
+    }
+  });
 
   // Compile everything inline, don't delegate
   const { PhaseManager } = await import('@travetto/base');

@@ -37,21 +37,21 @@ All of the logging instrumentation occurs at transpilation time.  All ${meth`con
 
 A sample of the instrumentation would be:
 
-${Code('Sample logging at various levels', 'alt/docs/src/transpile.ts')}
+${Code('Sample logging at various levels', 'doc/transpile.ts')}
 
-${Code('Sample After Transpilation', AppCache.readEntry('alt/docs/src/transpile.ts'), false, 'javascript')}
+${Code('Sample After Transpilation', AppCache.readEntry('doc/transpile.ts'), false, 'javascript')}
 
 And when in ${inp`prod`} mode transforms into:
 
-${Code('Sample After Transpilation, in Prod', AppCache.readEntry('alt/docs/src/transpile-prod.ts'), false, 'javascript')}
+${Code('Sample After Transpilation, in Prod', AppCache.readEntry('doc/transpile-prod.ts'), false, 'javascript')}
 
 ${Section('Sample Output')}
 
 The logging output, as indicated provides context for location of invocation. Given the file ${pth`test/simple.ts`}:
 
-${Code('Various log levels', 'alt/docs/src/output.ts')}
+${Code('Various log levels', 'doc/output.ts')}
 
 The corresponding output would be
 
-${Execute('Logging output', 'alt/docs/src/output.ts')}
+${Execute('Logging output', 'doc/output.ts')}
 `;

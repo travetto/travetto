@@ -73,7 +73,7 @@ The module provides [Command Line Interface](https://github.com/travetto/travett
 
 **Terminal: Running template compilation**
 ```bash
-$ travetto travetto email:compile -h
+$ travetto email:compile -h
 
 Usage:  email:compile [options]
 
@@ -141,9 +141,9 @@ The final template will render as:
 
 **Terminal: Final Output, with styling removed**
 ```bash
-$ alt/docs/src/render.ts -r @travetto/boot/register alt/docs/src/render.ts
+$ doc/render.ts -r @travetto/boot/register doc/render.ts
 
-<!DOCTYPE html><html>
+2021-03-14T05:00:00.618Z info  [@trv:email-template/doc/render:11] <!DOCTYPE html><html>
 
 <body>
 

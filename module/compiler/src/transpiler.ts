@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 
-import { FileCache, TranspileUtil, EnvUtil, FsUtil } from '@travetto/boot';
+import { FileCache, TranspileUtil, FsUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';

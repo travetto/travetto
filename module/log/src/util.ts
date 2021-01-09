@@ -1,6 +1,4 @@
-import { FsUtil } from '@travetto/boot';
 import { AppManifest } from '@travetto/base';
-import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { LogEvent, Formatter, Appender } from './types';
 
@@ -36,10 +34,8 @@ export class LogUtil {
     // Auto wildcard for modules
     if (cleaned.startsWith('@app')) {
       const [, sfx] = cleaned.match(/^@app(?::(.*)?)?$/)!;
-      for (const el of AppManifest.roots) {
-        const sub = [el, 'src', sfx ?? ''].filter(x => !!x).join('/');
-        filter.push(sub);
-      }
+      const sub = ['.', 'src', sfx ?? ''].filter(x => !!x).join('/');
+      filter.push(sub);
     } else {
       filter.push(cleaned);
     }

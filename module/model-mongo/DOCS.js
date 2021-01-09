@@ -9,7 +9,7 @@ This module provides an ${lib.MongoDB}-based implementation of ${ModelSource} fo
 
 Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the ${Mod('di')} module.
 
-${Code('Wiring up a custom Model Source', 'alt/docs/src/source.ts')}
+${Code('Wiring up a custom Model Source', 'doc/source.ts')}
 
 where the ${MongoModelConfig} is defined by:
 
