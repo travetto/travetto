@@ -1,4 +1,4 @@
-import { ExecUtil } from '../src';
+import { ExecUtil } from '@travetto/boot';
 
 export async function executeListing() {
   const { result } = ExecUtil.spawn('ls');

@@ -1,7 +1,7 @@
 import { Util } from '@travetto/base';
 
 /**
- * @concrete PointImpl
+ * @concrete .:PointImpl
  */
 export type Point = [number, number];
 

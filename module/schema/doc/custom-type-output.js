@@ -1,11 +1,10 @@
 process.env.TRV_ENV = 'prod';
-process.env.TRV_ROOTS = 'alt/docs';
 
 (async function () {
-  const { PhaseManager } = require('@travetto/base/index.ts');
+  const { PhaseManager } = require('@travetto/base');
   await PhaseManager.init();
   const { LocationAware } = require('./custom-type-usage.ts');
-  const { SchemaValidator } = require('../../../src/validate/validator.ts');
+  const { SchemaValidator } = require('../src/validate/validator.ts');
 
   const la = LocationAware.from({
     name: 'bob',
@@ -14,9 +13,9 @@ process.env.TRV_ROOTS = 'alt/docs';
   });
 
   try {
-    await SchemaValidator.validate(la);
+    await SchemaValidator.validate(LocationAware, la);
   } catch (err) {
-    console.warn('Validation Failed', { error: err });
+    console.warn('Validation Failed', JSON.stringify(err, null, 2));
   }
 })();
 

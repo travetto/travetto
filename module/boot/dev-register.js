@@ -1,3 +1,12 @@
+const defaultMods = ['@travetto/test', '@travetto/cli', '@travetto/doc', '@travetto/app', '@travetto/log'];
+const existing = (process.env.TRV_MODULES || '');
+const cleaned = existing.replace(/(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g, (a, m) => {
+  if (!defaultMods.includes(m)) {
+    defaultMods.push(m);
+  }
+  return '';
+});
+
 /**
  * Gather all dependencies of a given module
  * @param {string} root
@@ -6,7 +15,7 @@ function readDeps() {
   const path = require('path');
   const { name, dependencies, devDependencies } = require(path.resolve('package.json'));
   const keys = [
-    '@travetto/test', '@travetto/cli', '@travetto/doc', '@travetto/app', '@travetto/log', // Givens
+    ...defaultMods, // Givens
     ...Object.keys(dependencies || {}),
     ...Object.keys(devDependencies || {})
   ]
@@ -32,9 +41,9 @@ function readDeps() {
 const { FileCache } = require('./src/cache');
 const cache = new FileCache(process.env.TRV_CACHE ?? '.trv_cache');
 cache.init();
-const content = cache.getOrSet('dev-modules.json', () => JSON.stringify(readDeps()));
+const content = cache.getOrSet(`dev-modules.${existing.length}.json`, () => JSON.stringify(readDeps()));
 const resolved = Object.entries(JSON.parse(content));
-process.env.TRV_MODULES = `${process.env.TRV_MODULES || ''},${resolved.map(x => x.join('=')).join(',')}`;
+process.env.TRV_MODULES = `${cleaned},${resolved.map(x => x.join('=')).join(',')}`;
 
 // Force install
 require(`./src/compile`).CompileUtil.init();

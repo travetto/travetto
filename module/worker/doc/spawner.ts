@@ -23,4 +23,6 @@ const pool = new WorkPool(() =>
   })
 );
 
-pool.process(new IterableInputSource([1, 2, 3, 4, 5])).then(x => pool.shutdown());
+if (process.argv.pop() === 'top') {
+  pool.process(new IterableInputSource([1, 2, 3, 4, 5])).then(x => pool.shutdown());
+}

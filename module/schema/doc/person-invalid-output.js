@@ -7,6 +7,6 @@ process.env.TRV_ENV = 'prod';
   try {
     await validate();
   } catch (err) {
-    console.error('Failed to validate', { error: err, age: 20 });
+    console.warn('Validation Failed', JSON.stringify(err, null, 2));
   }
 })();

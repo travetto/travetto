@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "../..",
+    "paths": {
+      "@travetto/boot": [
+        ".."
+      ],
+      "@travetto/doc": [
+        "../../doc"
+      ]
+    }
+  }
+}
