@@ -4,35 +4,45 @@ import { FsUtil, EnvUtil } from '@travetto/boot';
  */
 class $AppManifest {
   /**
-   * Env
-   */
-  private readonly env: string;
-
-  /**
    * App profiles with indexing
    */
   private readonly profileSet: Set<string>;
 
   /**
+   * Env
+   */
+  readonly env: string;
+
+  /**
+   * Are we in production
+   */
+  readonly prod: boolean;
+
+  /**
    * Travetto Version
    */
   readonly travetto: string;
+
   /**
    * App Version
    */
   readonly version: string;
+
   /**
    * App Name
    */
   readonly name = 'untitled';
+
   /**
    * App License
    */
   readonly license?: string;
+
   /**
    * App description
    */
   readonly description = 'A Travetto application';
+
   /**
    * App author
    */
@@ -64,6 +74,11 @@ class $AppManifest {
   readonly commonSourceExcludeModules: Set<string>;
 
   /**
+   * Amount of time to wait at shutdown
+   */
+  readonly shutdownWait: number;
+
+  /**
    * Debug state
    */
   readonly debug: {
@@ -78,9 +93,13 @@ class $AppManifest {
     } catch { }
 
     this.travetto = require('../package.json').version; // Travetto version
-    this.env = EnvUtil.getEnv();
-    this.profiles = ['application', ...EnvUtil.getList('TRV_PROFILES'), this.env];
+    this.env = EnvUtil.get('TRV_ENV', EnvUtil.get('NODE_ENV', 'dev'))
+      .replace(/^production$/i, 'prod')
+      .replace(/^development$/i, 'dev')
+      .toLowerCase();
+    this.prod = this.env === 'prod';
 
+    this.profiles = ['application', ...EnvUtil.getList('TRV_PROFILES'), this.env];
     this.profileSet = new Set(this.profiles);
 
     this.commonSourceFolders = ['src', ...EnvUtil.getList('TRV_SRC_COMMON')];
@@ -92,9 +111,10 @@ class $AppManifest {
 
     this.localSourceFolders = [...EnvUtil.getList('TRV_SRC_LOCAL')];
     this.resourceFolders = ['resources', ...EnvUtil.getList('TRV_RESOURCES')];
+    this.shutdownWait = EnvUtil.getTime('TRV_SHUTDOWN_WAIT', 2, 's');
 
     // Compute the debug state
-    const status = EnvUtil.isSet('TRV_DEBUG') ? !EnvUtil.isFalse('TRV_DEBUG') : !EnvUtil.isProd();
+    const status = EnvUtil.isSet('TRV_DEBUG') ? !EnvUtil.isFalse('TRV_DEBUG') : !this.prod;
     this.debug = {
       status,
       value: (status ? EnvUtil.get('TRV_DEBUG') : '') || undefined
@@ -107,13 +127,15 @@ class $AppManifest {
   toJSON() {
     return ([
       'travetto', 'name', 'version', 'license', 'description',
-      'author', 'env', 'profiles', 'localSourceFolders',
-      'commonSourceFolders', 'resourceFolders', 'debug'
+      'author', 'env', 'prod', 'profiles', 'localSourceFolders',
+      'commonSourceFolders', 'resourceFolders', 'debug',
+      'shutdownWait',
     ] as const)
       .reduce((acc, k) => {
         acc[k] = this[k];
         return acc;
       }, {
+        dynamicModules: EnvUtil.getDynamicModules(),
         watch: EnvUtil.isWatch(),
         readonly: EnvUtil.isReadonly()
       } as Record<string, any>);

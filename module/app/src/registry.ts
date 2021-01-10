@@ -34,7 +34,7 @@ class $ApplicationRegistry {
     });
     console.log('Configured', {
       app: AppManifest.toJSON(),
-      config: EnvUtil.isProd() ? ConfigManager.getSecure() : ConfigManager.get()
+      config: AppManifest.prod ? ConfigManager.getSecure() : ConfigManager.get()
     });
   }
 

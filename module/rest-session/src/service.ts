@@ -1,8 +1,7 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
-import { EnvUtil } from '@travetto/boot';
 import { CacheService } from '@travetto/cache';
-import { Util, AppError } from '@travetto/base';
+import { Util, AppError, AppManifest } from '@travetto/base';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
 
 import { SessionSym } from './internal/types';
@@ -40,7 +39,7 @@ export class RestSessionService {
   async postConstruct() {
     if (this.cacheSource === undefined) {
       this.cacheSource = new CacheService(new MemoryModelService(new MemoryModelConfig()));
-      if (!EnvUtil.isProd()) {
+      if (!AppManifest.prod) {
         console.warn('No session cache defined, falling back to in-memory cache. This is not intended for production session use');
       } else {
         throw new AppError('In-memory cache is not intended for production session use', 'general');

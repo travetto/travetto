@@ -1,4 +1,5 @@
-import { FsUtil, EnvUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
+import { AppManifest } from './manifest';
 
 /**
  * General tools for manipulating stack traces.
@@ -26,7 +27,7 @@ export class StacktraceUtil {
       'source-map-support.js'
     );
 
-    if (!EnvUtil.isProd()) {
+    if (!AppManifest.prod) {
       Error.stackTraceLimit = 50;
     }
   }

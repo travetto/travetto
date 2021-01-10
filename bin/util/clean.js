@@ -4,11 +4,9 @@
 
 // Clean cache
 [
-  'module/*/node_modules'
-    .$dir({ type: 'dir' }),
-  'related/*/node_modules'
+  '{module,related}/*/node_modules'
     .$dir({ type: 'dir' })
-    .$filter(f => /travetto|vscode/.test(f)),
+    .$filter(f => /related\/(travetto|vscode)/.test(f)),
   '{module,related}/*/.trv_cache*'
     .$dir({ allowHidden: true, type: 'dir' })
 ]

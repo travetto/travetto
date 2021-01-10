@@ -5,7 +5,7 @@ import { FsUtil } from './fs';
  */
 export class EnvUtil {
 
-  private static DYNAMIC_MODULES: Map<string, string>;
+  private static DYNAMIC_MODULES: Record<string, string>;
 
   /**
    * Get, check for key as passed, as all upper and as all lowercase
@@ -133,23 +133,6 @@ export class EnvUtil {
   }
 
   /**
-   * Get the environment
-   */
-  static getEnv() {
-    return this.get('TRV_ENV', this.get('NODE_ENV', 'dev'))
-      .replace(/^production$/i, 'prod')
-      .replace(/^development$/i, 'dev')
-      .toLowerCase();
-  }
-
-  /**
-   * Determine if app is in prod mode or not
-   */
-  static isProd() {
-    return this.getEnv() === 'prod';
-  }
-
-  /**
    * Is the app in watch mode?
    */
   static isWatch() {
@@ -160,7 +143,7 @@ export class EnvUtil {
    * Can use compile
    */
   static isReadonly() {
-    return this.isProd() || this.isTrue('TRV_READONLY');
+    return /^prod(uction)$/i.test(EnvUtil.get('TRV_ENV', '')) || this.isTrue('TRV_READONLY');
   }
 
   /**
@@ -168,7 +151,7 @@ export class EnvUtil {
    */
   static getDynamicModules() {
     if (this.DYNAMIC_MODULES === undefined) {
-      this.DYNAMIC_MODULES = new Map(
+      this.DYNAMIC_MODULES = Object.fromEntries(
         this.getEntries('TRV_MODULES')
           .map(([k, v]) => [k, v ||
             k.replace(/^@travetto/, m => process.env.TRV_DEV || m) ||

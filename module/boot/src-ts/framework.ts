@@ -47,7 +47,7 @@ export class FrameworkUtil {
     }, base)];
 
     // Load dynamic modules with mappings
-    for (const [dep, pth] of EnvUtil.getDynamicModules()) {
+    for (const [dep, pth] of Object.entries(EnvUtil.getDynamicModules())) {
       out.push(
         ScanFs.scanDirSync({
           testFile,

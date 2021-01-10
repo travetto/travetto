@@ -83,7 +83,7 @@ export class RestConfig {
   async getKeys() {
     if (this.ssl.active) {
       if (!this.ssl.keys) {
-        if (EnvUtil.isProd()) {
+        if (EnvUtil.isReadonly()) {
           throw new AppError('Cannot use test keys in production', 'permissions');
         }
         return RestServerUtil.generateSslKeyPair();

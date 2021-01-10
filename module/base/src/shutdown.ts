@@ -1,10 +1,8 @@
-import { EnvUtil } from '@travetto/boot';
 import { Util } from './util';
 import { SystemUtil } from './internal/system';
+import { AppManifest } from './manifest';
 
 const ogExit = process.exit;
-
-const SHUTDOWN_WAIT = EnvUtil.getTime('TRV_SHUTDOWN_WAIT', 2, 's');
 
 export type Closeable = {
   close(cb?: Function): any;
@@ -89,7 +87,7 @@ class $ShutdownManager {
       if (promises.length) {
         const finalRun = Promise.race([
           ...promises,
-          new Promise((r, rej) => setTimeout(() => rej(new Error('Timeout on shutdown')), SHUTDOWN_WAIT))
+          new Promise((r, rej) => setTimeout(() => rej(new Error('Timeout on shutdown')), AppManifest.shutdownWait))
         ]);
         await finalRun;
       }
