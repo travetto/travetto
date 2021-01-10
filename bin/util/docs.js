@@ -17,8 +17,9 @@ const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
 
   'Restarting Mongodb'
     .$tap(console.log)
-    .$exec('npm', { args: ['run', 'service', 'resetart', 'mongodb'], singleValue: true })
-    .$collect(),
+    .$map(() =>
+      require('child_process').spawnSync('npm', ['run', 'service', 'restart', 'mongodb'], { stdio: 'inherit', encoding: 'utf8' })
+    ),
 
   'Building out Overview docs'
     .$tap(console.log)
@@ -34,29 +35,22 @@ const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
           <app-module-chart></app-module-chart>`
         ])
         .$write(page('app/documentation/overview/overview.component.html'))
-    )
-    .$collect(),
+    ),
 
   'Building out Guide docs'
     .$tap(console.log)
     .$exec('trv', {
-      args: ['doc', '-o', page('guide/guide.component.html'), '-o', './README.md'],
-      spawn: {
-        cwd: 'related/todo-app',
-        env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc/resources' }
-      }
+      args: ['doc', '-o', page('app/guide/guide.component.html'), '-o', './README.md'],
+      spawn: { cwd: 'related/todo-app' }
     })
     .$tap(console.log)
     .$collect(),
 
-  'Building out Guide docs'
+  'Building out Plugin docs'
     .$tap(console.log)
     .$exec('trv', {
       args: ['doc', '-o', page('app/documentation/vscode-plugin/vscode-plugin.component.html'), '-o', './README.md'],
-      spawn: {
-        cwd: 'related/vscode-plugin',
-        env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc/resources' }
-      }
+      spawn: { cwd: 'related/vscode-plugin' }
     })
     .$tap(console.log)
     .$collect(),
@@ -70,21 +64,39 @@ const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
 
   'Building out Module docs'
     .$tap(console.log)
-    .$flatMap(() => 'module/*/DOCS.js'.$dir())
-    .$parallel(f =>
-      $exec('trv', {
-        args: [
-          'doc',
-          '-o', page('app/documentation/gen/%MOD/%MOD.component.html'),
-          '-o', './README.md'
-        ],
-        spawn: {
-          cwd: path.dirname(f),
-          env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc/resources' }
-        }
-      }), {
-      concurrent: 1
-    }
+    .$flatMap(() => 'module/*/doc.ts'.$dir())
+    .$parallel(
+      async f => {
+        const mod = f.replace(/^(.*module|related)\/([^/]+)(.*)$/, (_, a, b) => `@travetto/${b}`);
+        const mods = await f.$read()
+          .$tokens(/@travetto\/[^/' `;\n]+/)
+          .$filter(x => /^@[a-z\/0-9]+$/.test(x) && x !== mod)
+          .$sort()
+          .$unique();
+
+        console.log('Documenting', mod, mods);
+
+        return $exec('trv', {
+          args: [
+            'doc',
+            '-o', page('app/documentation/gen/%MOD/%MOD.component.html'),
+            '-o', './README.md'
+          ],
+          spawn: {
+            shell: true,
+            detached: true,
+            cwd: path.dirname(f),
+            env: {
+              ...process.env,
+              TRV_MODULES: mods.join(',')
+            }
+          }
+        })
+      },
+      {
+        concurrent: 6
+      }
     )
+    .$notEmpty()
     .$tap(console.log)
 ].$forEach(() => { })

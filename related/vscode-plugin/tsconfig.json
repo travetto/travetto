@@ -2,10 +2,18 @@
   "extends": "../../module/boot/tsconfig.json",
   "compilerOptions": {
     "importHelpers": false,
-    "outDir": "out"
+    "outDir": "out",
+    "paths": {
+      "@travetto/doc": [
+        "../../module/doc"
+      ],
+      "@travetto/test": [
+        "../../module/test"
+      ]
+    }
   },
   "exclude": [
     "node_modules",
     ".vscode-test"
-  ]
+  ],
 }
