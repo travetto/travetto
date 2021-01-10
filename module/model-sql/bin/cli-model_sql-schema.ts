@@ -11,12 +11,11 @@ export class SqlSchemaPlugin extends BasePlugin {
 
   init(cmd: commander.Command) {
     return cmd
-      .option('-a, --app [app]', 'Application root to export, (default: .)')
       .option('-c, --clear [clear]', 'Whether or not to generate DROP statements first (default: true)', CliUtil.isBoolean);
   }
 
   async action() {
-    CliUtil.initAppEnv({ env: 'prod', roots: [this._cmd.app] });
+    CliUtil.initAppEnv({ env: 'prod' });
 
     const clear = this._cmd.clear === undefined ? true : CliUtil.isTrue(this._cmd.clear);
 

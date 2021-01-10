@@ -46,7 +46,7 @@ class $AppManifest {
   /**
    * List of all resource roots
    */
-  readonly resourceRoots: string[];
+  readonly resourceFolders: string[];
 
   /**
    * List of common source folders
@@ -57,6 +57,11 @@ class $AppManifest {
    * List of local source folders
    */
   readonly localSourceFolders: string[];
+
+  /**
+   * List of modules to not traverse into
+   */
+  readonly commonSourceExcludeModules: Set<string>;
 
   /**
    * Debug state
@@ -79,8 +84,14 @@ class $AppManifest {
     this.profileSet = new Set(this.profiles);
 
     this.commonSourceFolders = ['src', ...EnvUtil.getList('TRV_SRC_COMMON')];
+    this.commonSourceExcludeModules = new Set([
+      // This drives the init process, so cannot happen in a support file
+      ...EnvUtil.getList('TRV_SRC_COMMON_EXCLUDE'),
+      '@travetto/cli', '@travetto/boot', '@travetto/doc'
+    ]);
+
     this.localSourceFolders = [...EnvUtil.getList('TRV_SRC_LOCAL')];
-    this.resourceRoots = ['.', ...EnvUtil.getList('TRV_RESOURCES')];
+    this.resourceFolders = ['resources', ...EnvUtil.getList('TRV_RESOURCES')];
 
     // Compute the debug state
     const status = EnvUtil.isSet('TRV_DEBUG') ? !EnvUtil.isFalse('TRV_DEBUG') : !EnvUtil.isProd();
@@ -97,7 +108,7 @@ class $AppManifest {
     return ([
       'travetto', 'name', 'version', 'license', 'description',
       'author', 'env', 'profiles', 'localSourceFolders',
-      'commonSourceFolders', 'resourceRoots', 'debug'
+      'commonSourceFolders', 'resourceFolders', 'debug'
     ] as const)
       .reduce((acc, k) => {
         acc[k] = this[k];
