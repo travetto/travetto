@@ -17,7 +17,7 @@ function readDeps() {
   while (keys.length) {
     const top = keys.shift();
     final.set(top, null);
-    const deps = require(`${top.replace(/@tavetto/, process.env.TRV_DEV)}/package.json`).dependencies ?? {};
+    const deps = require(`${top.replace(/@travetto/, process.env.TRV_DEV)}/package.json`).dependencies ?? {};
 
     for (const sub of Object.keys(deps)) {
       if (sub.startsWith('@travetto') && !final.has(sub)) {

@@ -105,7 +105,6 @@ class $AppManifest {
     this.commonSourceFolders = ['src', ...EnvUtil.getList('TRV_SRC_COMMON')];
     this.commonSourceExcludeModules = new Set([
       // This drives the init process, so cannot happen in a support file
-      ...EnvUtil.getList('TRV_SRC_COMMON_EXCLUDE'),
       '@travetto/cli', '@travetto/boot', '@travetto/doc'
     ]);
 
