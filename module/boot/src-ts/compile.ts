@@ -73,7 +73,7 @@ export class CompileUtil {
   private static devResolveFilename(p: string, m: Module) {
     if (p.includes('@travetto')) {
       const [, key, sub] = p.match(/^.*(@travetto\/[^/]+)(\/?.*)?$/) ?? [];
-      const match = EnvUtil.getDynamicModules().get(key!);
+      const match = EnvUtil.getDynamicModules()[key!];
       if (match) {
         p = `${match}${sub! ?? ''}`;
       } else {
