@@ -2,6 +2,8 @@
 /// @ts-check
 /// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
 
+const fs = require('fs');
+
 $exec('npx', ['lerna', 'ls', '-p', '-a'])
   .$notEmpty()
   .$filter(x => x.includes(process.cwd()))
@@ -43,7 +45,7 @@ $exec('npx', ['lerna', 'ls', '-p', '-a'])
           .$collect()
           .$map(async (all) => {
             if (all.length > 0) {
-              await JSON.stringify(pkg, undefined, 2).$write(`${m}/package.json`);
+              await JSON.stringify(pkg, undefined, 2).$stream('binary').pipe(fs.createWriteStream(`${m}/package.json`));
             }
             return `.${m.split(process.cwd())[1].padEnd(30)} updated ${all.length} dependencies - ${all.join(', ') || 'None'}`;
           })

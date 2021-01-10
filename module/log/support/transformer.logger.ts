@@ -1,7 +1,6 @@
 import * as ts from 'typescript';
 
-import { EnvUtil } from '@travetto/boot/src/env';
-import { ConsoleManager } from '@travetto/base';
+import { ConsoleManager, AppManifest } from '@travetto/base';
 import {
   TransformerId, TransformerState, OnCall, CoreUtil, LiteralUtil,
   OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction
@@ -75,7 +74,7 @@ export class LoggerTransformer {
     if (arg) {
       // Okay since we create the object ourselves in ConsoleManager
       const level = LiteralUtil.toLiteral(arg, false);
-      if (EnvUtil.isProd() && level === 'debug') {
+      if (AppManifest.prod && level === 'debug') {
         return state.createIdentifier('undefined'); // Lose debug logging if in prod
       } else {
         return state.factory.updateCallExpression(node, node.expression, node.typeArguments, [
