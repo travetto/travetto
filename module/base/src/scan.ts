@@ -1,4 +1,4 @@
-import { ScanEntry, FsUtil, EnvUtil } from '@travetto/boot';
+import { ScanEntry, FsUtil } from '@travetto/boot';
 import { FrameworkUtil } from '@travetto/boot/src/framework';
 import { AppManifest } from './manifest';
 
@@ -14,24 +14,15 @@ interface Tester {
 /**
  * File scanning utilities, with a focus on application execution
  */
-class $ScanApp {
+export class ScanApp {
 
-  private _index = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
-
-  /**
-   * List of modules to not traverse into
-   */
-  modSourceExclude = new Set([
-    // This drives the init process, so cannot happen in a support file
-    ...EnvUtil.getList('TRV_SRC_COMMON_EXCLUDE'),
-    '@travetto/cli', '@travetto/boot', '@travetto/doc'
-  ]);
+  private static _INDEX = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
 
   /**
    * Compute index for a scan entry
    * @param entry
    */
-  computeIndex(entry: ScanEntry, moduleMatcher: RegExp) {
+  static computeIndex(entry: ScanEntry, moduleMatcher: RegExp) {
     const file = entry.module;
     if (file.includes('node_modules')) {
       if (moduleMatcher.test(file)) { // External module
@@ -55,9 +46,9 @@ class $ScanApp {
   /**
    * Get the map of all modules currently supported in the application
    */
-  get index() {
-    if (this._index.size === 0) {
-      this._index.set('.', { base: FsUtil.cwd, files: new Map() });
+  static get index() {
+    if (this._INDEX.size === 0) {
+      this._INDEX.set('.', { base: FsUtil.cwd, files: new Map() });
 
       for (const el of FrameworkUtil.scan(x => x.endsWith('.ts') && !x.endsWith('.d.ts'))) {
         const res = this.computeIndex(el, /^.*node_modules\/(@travetto\/[^/]+)(\/.*)?$/);
@@ -68,38 +59,38 @@ class $ScanApp {
 
         const { mod, sub } = res;
 
-        if (!this._index.has(mod)) {
-          this._index.set(mod, { base: el.file, files: new Map() });
+        if (!this._INDEX.has(mod)) {
+          this._INDEX.set(mod, { base: el.file, files: new Map() });
         }
 
         if (el.stats.isDirectory() || el.stats.isSymbolicLink()) {
           // Do nothing
         } else if (sub === 'index.ts') {
-          this._index.get(mod)!.index = el;
+          this._INDEX.get(mod)!.index = el;
         } else {
-          if (!this._index.get(mod)!.files.has(sub)) {
-            this._index.get(mod)!.files.set(sub, []);
+          if (!this._INDEX.get(mod)!.files.has(sub)) {
+            this._INDEX.get(mod)!.files.set(sub, []);
           }
-          this._index.get(mod)!.files.get(sub)!.push({ file: el.file, module: el.module });
+          this._INDEX.get(mod)!.files.get(sub)!.push({ file: el.file, module: el.module });
         }
       }
     }
-    return this._index;
+    return this._INDEX;
   }
 
   /**
    * Clears the app scanning cache
    */
-  reset() {
-    this._index.clear();
+  static reset() {
+    this._INDEX.clear();
   }
 
   /**
    * Find search keys
    * @param roots App paths
    */
-  getPaths() {
-    return [...this.index.keys()].filter(key => !this.modSourceExclude.has(key));
+  static getPaths() {
+    return [...this.index.keys()].filter(key => !AppManifest.commonSourceExcludeModules.has(key));
   }
 
   /**
@@ -108,7 +99,7 @@ class $ScanApp {
    * @param folder The sub-folder to check into
    * @param filter The filter to determine if this is a valid support file
    */
-  findFiles(config: FindConfig) {
+  static findFiles(config: FindConfig) {
     const { filter, folder } = config;
     if (folder === 'src') {
       config.includeIndex = config.includeIndex ?? true;
@@ -147,7 +138,7 @@ class $ScanApp {
    * @param folder The sub-folder to check into
    * @param filter The filter to determine if this is a valid support file
    */
-  findCommonFiles(config: Omit<FindConfig, 'paths'>) {
+  static findCommonFiles(config: Omit<FindConfig, 'paths'>) {
     return this.findFiles({ ...config, paths: this.getPaths() });
   }
 
@@ -156,14 +147,14 @@ class $ScanApp {
    * @param folder The sub-folder to check into
    * @param filter The filter to determine if this is a valid support file
    */
-  findLocalFiles(config: Omit<FindConfig, 'paths'>) {
+  static findLocalFiles(config: Omit<FindConfig, 'paths'>) {
     return this.findFiles({ ...config, paths: ['.'] });
   }
 
   /**
    * Find source files for a given set of paths
    */
-  findAllSourceFiles() {
+  static findAllSourceFiles() {
     const all: SimpleEntry[][] = [];
     for (const folder of AppManifest.commonSourceFolders) {
       all.push(this.findCommonFiles({ folder }));
@@ -174,5 +165,3 @@ class $ScanApp {
     return all.flat();
   }
 }
-
-export const ScanApp = new $ScanApp();

@@ -10,12 +10,11 @@ export class EsSchemaPlugin extends BasePlugin {
   name = 'model:es-schema';
 
   init(cmd: commander.Command) {
-    return cmd
-      .option('-a, --app [app]', 'Application to export, (default: .)');
+    return cmd;
   }
 
   async action() {
-    CliUtil.initAppEnv({ env: 'prod', roots: [this._cmd.app] });
+    CliUtil.initAppEnv({ env: 'prod' });
     const { getSchemas } = await import('./lib');
     console!.log(JSON.stringify(await getSchemas(), null, 2));
   }

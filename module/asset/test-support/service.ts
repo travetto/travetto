@@ -18,7 +18,7 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
 
   @BeforeAll()
   async setup() {
-    ResourceManager.addPath(FsUtil.resolveUnix(__dirname));
+    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, 'resources'));
   }
 
   @Test()

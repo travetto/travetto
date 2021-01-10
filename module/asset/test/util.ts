@@ -11,7 +11,7 @@ export class UtilTest {
 
   @BeforeAll()
   async init() {
-    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '..', 'test-support'));
+    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '..', 'test-support', 'resources'));
   }
 
   @Test()
