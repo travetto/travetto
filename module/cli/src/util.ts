@@ -10,8 +10,7 @@ export interface AppEnv {
   env?: string;
   watch?: boolean;
   debug?: string;
-  roots?: string[];
-  resourceRoots?: string[];
+  resources?: string[];
   profiles?: string[];
   envExtra?: Record<string, any>;
 }
@@ -85,12 +84,12 @@ export class CliUtil {
   /**
    * Initialize the app environment
    */
-  static initAppEnv({ env, watch, roots, resourceRoots, profiles, debug, envExtra }: AppEnv) {
+  static initAppEnv({ env, watch, resources, profiles, debug, envExtra }: AppEnv) {
     process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
     Object.assign(process.env, envExtra ?? {}, {
       NODE_ENV: EnvUtil.isProd() ? 'production' : 'development',
       TRV_WATCH: `${watch === undefined ? EnvUtil.getBoolean('TRV_WATCH') : watch}`,
-      TRV_RESOURCES: join(EnvUtil.getList('TRV_RESOURCES', resourceRoots)),
+      TRV_RESOURCES: join(EnvUtil.getList('TRV_RESOURCES', resources)),
       TRV_PROFILES: join(EnvUtil.getList('TRV_PROFILES', profiles)),
       TRV_DEBUG: EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', debug ?? (EnvUtil.isProd() ? '0' : '')))
     });

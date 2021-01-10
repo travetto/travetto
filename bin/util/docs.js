@@ -43,7 +43,7 @@ const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
       args: ['doc', '-o', page('guide/guide.component.html'), '-o', './README.md'],
       spawn: {
         cwd: 'related/todo-app',
-        env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc' }
+        env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc/resources' }
       }
     })
     .$tap(console.log)
@@ -55,7 +55,7 @@ const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
       args: ['doc', '-o', page('app/documentation/vscode-plugin/vscode-plugin.component.html'), '-o', './README.md'],
       spawn: {
         cwd: 'related/vscode-plugin',
-        env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc' }
+        env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc/resources' }
       }
     })
     .$tap(console.log)
@@ -80,7 +80,7 @@ const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
         ],
         spawn: {
           cwd: path.dirname(f),
-          env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc' }
+          env: { ...process.env, TRV_SRC_LOCAL: 'doc', TRV_RESOURCES: 'doc/resources' }
         }
       }), {
       concurrent: 1

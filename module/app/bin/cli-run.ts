@@ -34,7 +34,7 @@ export class AppRunPlugin extends BasePlugin {
       .allowUnknownOption()
       .option('-e, --env [env]', 'Application environment (dev|prod|<any>)')
       .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [] as string[])
-      .option('-r, --resource [resourcesRoot]', 'Specify additional resource root locations', (v, ls) => { ls.push(v); return ls; }, [] as string[]);
+      .option('-r, --resource [resources]', 'Specify additional resource locations', (v, ls) => { ls.push(v); return ls; }, [] as string[]);
   }
 
   /**
@@ -49,7 +49,7 @@ export class AppRunPlugin extends BasePlugin {
       if (!selected) {
         return await this.showHelp(app ? `${app} is an unknown application` : '');
       } else {
-        await CliUtil.initAppEnv({ env: this._cmd.env, profiles: this._cmd.profile, resourceRoots: this._cmd.resource, watch: true });
+        await CliUtil.initAppEnv({ env: this._cmd.env, profiles: this._cmd.profile, resources: this._cmd.resource, watch: true });
         // Run otherwise
         try {
           await RunUtil.run(app, ...args);

@@ -6,6 +6,7 @@ import { ResourceManager } from '@travetto/base';
 import { ModelRegistry } from '../src/registry/model';
 import { isBulkSupported, isCrudSupported, isStorageSupported } from '../src/internal/service/common';
 import { ModelType } from '../src/types/model';
+import { FsUtil } from '@travetto/boot/src';
 
 let first = true;
 
@@ -42,7 +43,7 @@ export abstract class BaseModelSuite<T> {
   @BeforeAll()
   async init() {
     // Track self
-    ResourceManager.addPath(__dirname);
+    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, 'resources'));
 
     await RootRegistry.init();
 

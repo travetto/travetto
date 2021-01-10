@@ -16,7 +16,7 @@ class $ResourceManager {
 
   private paths: string[] = [];
 
-  constructor(private rootPaths: string[], private folder = 'resources') {
+  constructor(private rootPaths: string[]) {
     this.init();
   }
 
@@ -24,7 +24,7 @@ class $ResourceManager {
     this.paths.push(...this.rootPaths);
 
     this.paths = this.paths
-      .map(x => FsUtil.resolveUnix(x, this.folder))
+      .map(x => FsUtil.resolveUnix(x))
       .filter(x => FsUtil.existsSync(x));
   }
 
@@ -53,8 +53,8 @@ class $ResourceManager {
    * @param searchPath Path to look through
    * @param full Is the path fully qualified or should it be relative to the cwd
    */
-  addPath(searchPath: string, full = false) {
-    this.paths.push(FsUtil.resolveUnix(searchPath, full ? '' : this.folder));
+  addPath(searchPath: string) {
+    this.paths.push(FsUtil.resolveUnix(searchPath));
   }
 
   /**
@@ -214,4 +214,4 @@ class $ResourceManager {
   }
 }
 
-export const ResourceManager = new $ResourceManager(AppManifest.resourceRoots);
+export const ResourceManager = new $ResourceManager(AppManifest.resourceFolders);
