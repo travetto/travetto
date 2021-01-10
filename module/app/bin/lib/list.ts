@@ -6,6 +6,7 @@ import { CliUtil } from '@travetto/cli/src/util';
 import { AppCache } from '@travetto/boot/src/app-cache';
 import { FsUtil } from '@travetto/boot/src/fs';
 import { ExecUtil } from '@travetto/boot/src/exec';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import type { ApplicationConfig } from '../../src/types';
 
@@ -14,7 +15,7 @@ import type { ApplicationConfig } from '../../src/types';
  */
 export class CliAppListUtil {
 
-  private static CACHE_CONFIG = 'app-cache.json';
+  private static CACHE_CONFIG = `app-cache-${SystemUtil.naiveHash(EnvUtil.get('TRV_SRC_LOCAL', ''))}.json`;
 
   /**
    * Compile code, and look for `@Application` annotations

@@ -22,7 +22,6 @@ async function customLogs() {
 
 async function load() {
   await CompileCliUtil.compile(undefined, {
-    TRV_SRC_COMMON_EXCLUDE: '@travetto/test',
     TRV_SRC_COMMON: 'test-support',
     TRV_SRC_LOCAL: 'test'
   });
@@ -66,7 +65,6 @@ export async function watchTests(format: string = 'tap') {
   CliUtil.initAppEnv({
     ...DEF_ENV, watch: true, envExtra: {
       ...ENV_EXT,
-      TRV_SRC_COMMON_EXCLUDE: '@travetto/test',
       TRV_SRC_COMMON: 'test-support',
       TRV_SRC_LOCAL: 'test'
     }

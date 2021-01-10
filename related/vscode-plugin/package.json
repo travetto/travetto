@@ -31,9 +31,7 @@
     "vscode:prepublish": "npm run compile",
     "package": "vsce package",
     "compile": "npx tsc -p ./",
-    "watch": "npx tsc -watch -p ./",
-    "postinstall": "node ../../node_modules/vscode/bin/install",
-    "test": "npm run compile && node ../../node_modules/vscode/bin/test"
+    "watch": "npx tsc -watch -p ./"
   },
   "files": [
     "src-ts/",
@@ -41,7 +39,7 @@
     "CHANGELOG.md"
   ],
   "devDependencies": {
-    "@types/vscode": "^1.50.0"
+    "@types/vscode": "^1.50.0",
   },
   "dependencies": {
     "@travetto/boot": "file://../../module/boot",
