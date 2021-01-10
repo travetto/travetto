@@ -69,6 +69,8 @@ export const Elasticsearch = Library('elasticsearch', 'https://elastic.co');
 export const SQL = Library('SQL', 'https://en.wikipedia.org/wiki/SQL');
 export const MySQL = Library('MySQL', 'https://www.mysql.com/');
 export const Postgres = Library('Postgres', 'https://postgresql.org');
+export const DynamoDB = Library('DynamoDB', 'https://aws.amazon.com/dynamodb/');
+export const Firestore = Library('Firestore', 'https://firebase.google.com/docs/firestore');
 
 // Rest
 export const Express = Library(`express`, 'https://expressjs.com');

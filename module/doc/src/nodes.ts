@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 import { FsUtil } from '@travetto/boot';
 import { DocUtil } from './util';
 
@@ -37,17 +39,24 @@ export function SnippetLink(title: Content, file: string, startPattern: RegExp) 
   return $n('file', { title: $c(title), link: $c(res.file), line: res.line });
 }
 
-export function Execute(title: Content, cmd: string, args: string[] = [], cwd = FsUtil.cwd) {
+export function Execute(title: Content, cmd: string, args: string[] = [], cwd?: string) {
+  if (cmd === 'travetto') {
+    cmd = `trv`;
+  } else {
+    cmd = DocUtil.resolveFile(cmd).resolved.replace(FsUtil.cwd, '.');
+    if (/.*\/doc\/.*[.][tj]s$/.test(cmd)) {
+      args.unshift('-r', '@travetto/boot/register', cmd);
+      cmd = `node`;
+    }
+  }
   const script = DocUtil.run(cmd, args, { cwd });
   return Terminal(title, `$ ${cmd} ${args.join(' ')}\n\n${script}`);
 }
 
-export function Mod(name: string) {
-  const config = DocUtil.PACKAGES.get(name);
-  if (!config) {
-    throw new Error(`Module ${name} is unknown`);
-  }
-  return $n('mod', { title: $c(config.title), link: $c(`@travetto/${name}`), description: $c(config.description) });
+export function Mod(folder: string) {
+  const pkg = JSON.parse(fs.readFileSync(`${folder}/package.json`, 'utf8'));
+  const { description, title } = pkg;
+  return $n('mod', { title: $c(title), link: $c(folder), description: $c(description) });
 }
 
 export function Ref(title: Content, file: string) {
@@ -72,7 +81,10 @@ export function Header(folder: string, install = true) {
 
 export function Snippet(title: Content, file: string, startPattern: RegExp, endPattern?: RegExp, outline?: boolean) {
   const res = DocUtil.resolveSnippet(file, startPattern, endPattern, outline);
-  return $n('code', { title: $c(title), content: $c(res.text), line: res.line, file: $c(res.file), language: res.language });
+  return $n('code', {
+    title: $c(title), content: $c(res.text), line: res.line, file: $c(res.file), language: res.language,
+    link: SnippetLink(title, file, startPattern)
+  });
 }
 
 export function Install(title: Content, pkg: Content) {

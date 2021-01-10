@@ -1,1 +1,1 @@
-curl -XGET localhost:3000/todo -H 'Content-Type: application/json' | jq
+curl -s -XGET localhost:3000/todo -H 'Content-Type: application/json' | jq

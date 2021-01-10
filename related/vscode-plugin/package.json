@@ -39,7 +39,7 @@
     "CHANGELOG.md"
   ],
   "devDependencies": {
-    "@types/vscode": "^1.50.0",
+    "@types/vscode": "^1.50.0"
   },
   "dependencies": {
     "@travetto/boot": "file://../../module/boot",
