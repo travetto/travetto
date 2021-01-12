@@ -4,10 +4,14 @@
 
 // Clean cache
 [
-  '{module,related}/*/node_modules'
+  'module/*/node_modules'
+    .$dir({ type: 'dir' }),
+  'related/*/node_modules'
     .$dir({ type: 'dir' })
     .$filter(f => /related\/(travetto|vscode)/.test(f)),
-  '{module,related}/*/.trv_cache*'
+  'module/*/.trv_cache*'
+    .$dir({ allowHidden: true, type: 'dir' }),
+  'related/*/.trv_cache*'
     .$dir({ allowHidden: true, type: 'dir' })
 ]
   .$flatten()

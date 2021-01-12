@@ -31,7 +31,7 @@ export class AppListUtil {
     }
 
     // Load app files
-    ScanApp.findAllSourceFiles()
+    ScanApp.findSourceFiles()
       .filter(x => fs.readFileSync(x.file, 'utf-8').includes('@Application'))
       .forEach(x => require(x.file)); // Only load files that are candidates
 

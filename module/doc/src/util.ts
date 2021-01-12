@@ -51,7 +51,6 @@ export class DocUtil {
         stdio: 'pipe',
         env: {
           ...process.env,
-          TRV_SRC_LOCAL: 'doc',
           TRV_DEBUG: '0'
         }
       });
