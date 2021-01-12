@@ -10,7 +10,7 @@ ${Code('S3 backend wiring', 'doc/config.ts')}
 
 There is a default configuration that you can easily use, with some sensible defaults. 
  
-${Code('S3 Configuration', 'doc/src/config.ts')}
+${Code('S3 Configuration', 'src/config.ts')}
 
 Additionally, you can see that the class is registered with the ${Config} annotation, and so these values can be overridden using the standard ${mod.Config} resolution paths. 
 

@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import { ExecUtil } from '@travetto/boot/src/exec';
 import { EnvUtil } from '@travetto/boot/src/env';
 import { CliUtil } from '@travetto/cli/src/util';

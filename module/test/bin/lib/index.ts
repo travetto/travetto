@@ -21,10 +21,10 @@ async function customLogs() {
 }
 
 async function load() {
-  await CompileCliUtil.compile(undefined, {
-    TRV_SRC_COMMON: 'test-support',
-    TRV_SRC_LOCAL: 'test'
-  });
+  process.env.TRV_SRC_LOCAL = '^test';
+  process.env.TRV_SRC_COMMON = 'test-support';
+
+  await CompileCliUtil.compile();
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.init('@trv:compiler/load');
 }

@@ -35,14 +35,23 @@ function readDeps() {
     }
   }
 
-  return Object.fromEntries([...final.entries()].filter(([k, v]) => k !== name));
+  return {
+    env: {
+      TIME: Date.now(),
+      ...Object.fromEntries(Object
+        .entries(process.env)
+        .filter(([k]) => k.startsWith('TRV_'))
+        .sort((a, b) => a[0].localeCompare(b[0]))),
+    },
+    entries: Object.fromEntries([...final.entries()].filter(([k, v]) => k !== name))
+  };
 }
 
 const { FileCache } = require('./src/cache');
 const cache = new FileCache(process.env.TRV_CACHE ?? '.trv_cache');
 cache.init();
-const content = cache.getOrSet(`dev-modules.${existing.length}.json`, () => JSON.stringify(readDeps()));
-const resolved = Object.entries(JSON.parse(content));
+const content = cache.getOrSet(`dev-modules.${existing.length}.json`, () => JSON.stringify(readDeps(), null, 2));
+const resolved = Object.entries(JSON.parse(content).entries);
 process.env.TRV_MODULES = `${cleaned},${resolved.map(x => x.join('=')).join(',')}`;
 
 // Force install
