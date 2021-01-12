@@ -154,14 +154,17 @@ export class ScanApp {
   /**
    * Find source files for a given set of paths
    */
-  static findAllSourceFiles() {
+  static findSourceFiles(this: typeof ScanApp, mode: 'all' | 'required' = 'all') {
     const all: SimpleEntry[][] = [];
-    for (const folder of AppManifest.commonSourceFolders) {
-      all.push(this.findCommonFiles({ folder }));
-    }
-    for (const folder of AppManifest.localSourceFolders) {
-      all.push(this.findLocalFiles({ folder }));
-    }
+    const getAll = (src: string[], cmd: (typeof this)['findCommonFiles'] | (typeof this)['findLocalFiles']) => {
+      for (const folder of src.filter(x => mode === 'all' || !x.startsWith('^'))) {
+        all.push(cmd.call(this, { folder: folder.replace('^', '') })
+          .filter(x => mode !== 'required' || !x.module.includes('.opt'))
+        );
+      }
+    };
+    getAll(AppManifest.commonSourceFolders, this.findCommonFiles);
+    getAll(AppManifest.localSourceFolders, this.findLocalFiles);
     return all.flat();
   }
 }

@@ -13,12 +13,11 @@ export class CliDocUtil {
    * Initialize for doc gen
    */
   static async init() {
-    await CompileCliUtil.compile(undefined, {
-      TRV_SRC_LOCAL: 'doc'
-    });
-
-    process.env.TRV_SRC_LOCAL = '';
+    process.env.TRV_SRC_LOCAL = '^doc';
     process.env.TRV_RESOURCES = 'doc/resources';
+
+    await CompileCliUtil.compile();
+
     process.env.TRV_DEBUG = '0';
     process.env.TRV_LOG_PLAIN = '1';
 

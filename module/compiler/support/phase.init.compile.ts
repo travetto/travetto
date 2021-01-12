@@ -15,7 +15,7 @@ export const init = {
     const { ScanApp } = await import('@travetto/base');
     const { Compiler } = await import('../src/compiler');
 
-    for (const x of ScanApp.findAllSourceFiles()) {
+    for (const x of ScanApp.findSourceFiles()) {
       if (!AppCache.hasEntry(x.file)) {
         Compiler.transpile(x.file); // Transpile all the desired files
       }

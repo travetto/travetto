@@ -8,6 +8,8 @@ const fs = require('fs');
 const commander = path.resolve('node_modules/commander/index.js');
 const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
 
+const target = $argv[0];
+
 // Update commander
 [
   commander
@@ -21,81 +23,72 @@ const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
       require('child_process').spawnSync('npm', ['run', 'service', 'restart', 'mongodb'], { stdio: 'inherit', encoding: 'utf8' })
     ),
 
-  'Building out Overview docs'
-    .$tap(console.log)
-    .$map(() =>
-      // Overview
-      `<div class="documentation">`
-        .$concat(
-          $exec('npx', ['markdown-to-html', '--flavor', 'gfm', 'README.md'])
-            .$filter(x => !/<p.*<img/.test(x) && !/<sub/.test(x)),
-        )
-        .$concat([
-          `</div>
+  target ? undefined :
+    'Building out Overview docs'
+      .$tap(console.log)
+      .$map(() =>
+        // Overview
+        `<div class="documentation">`
+          .$concat(
+            $exec('npx', ['markdown-to-html', '--flavor', 'gfm', 'README.md'])
+              .$filter(x => !/<p.*<img/.test(x) && !/<sub/.test(x)),
+          )
+          .$concat([
+            `</div>
           <app-module-chart></app-module-chart>`
-        ])
-        .$write(page('app/documentation/overview/overview.component.html'))
-    ),
+          ])
+          .$write(page('app/documentation/overview/overview.component.html'))
+      ),
 
-  'Building out Guide docs'
-    .$tap(console.log)
-    .$exec('trv', {
-      args: ['doc', '-o', page('app/guide/guide.component.html'), '-o', './README.md'],
-      spawn: { cwd: 'related/todo-app' }
-    })
-    .$tap(console.log)
-    .$collect(),
+  target ? undefined :
+    'Copying Plugin images'
+      .$tap(console.log)
+      .$map(() => fs.promises.mkdir(page('assets/images/vscode-plugin')).catch(err => { }))
+      .$flatMap(() => 'related/vscode-plugin/images/**/*.{jpg,png}'.$dir())
+      .$map(img => fs.promises.copyFile(img, page(`assets/images/vscode-plugin/${path.basename(img)}`)).then(x => 1))
+      .$collect(),
 
-  'Building out Plugin docs'
-    .$tap(console.log)
-    .$exec('trv', {
-      args: ['doc', '-o', page('app/documentation/vscode-plugin/vscode-plugin.component.html'), '-o', './README.md'],
-      spawn: { cwd: 'related/vscode-plugin' }
-    })
-    .$tap(console.log)
-    .$collect(),
-
-  'Copying Plugin images'
-    .$tap(console.log)
-    .$map(() => fs.promises.mkdir(page('assets/images/vscode-plugin')).catch(err => { }))
-    .$flatMap(() => 'related/vscode-plugin/images/**/*.{jpg,png}'.$dir())
-    .$map(img => fs.promises.copyFile(img, page(`assets/images/vscode-plugin/${path.basename(img)}`)).then(x => 1))
-    .$collect(),
-
-  'Building out Module docs'
-    .$tap(console.log)
-    .$flatMap(() => 'module/*/doc.ts'.$dir())
-    .$parallel(
-      async f => {
-        const mod = f.replace(/^(.*module|related)\/([^/]+)(.*)$/, (_, a, b) => `@travetto/${b}`);
-        const mods = await f.$read()
-          .$tokens(/@travetto\/[^/' `;\n]+/)
-          .$filter(x => /^@[a-z\/0-9]+$/.test(x) && x !== mod)
-          .$sort()
-          .$unique();
-
-        console.log('Documenting', mod, mods);
-
-        return $exec('trv', {
-          args: [
-            'doc',
-            '-o', page('app/documentation/gen/%MOD/%MOD.component.html'),
-            '-o', './README.md'
-          ],
+  [
+    { mod: 'todo-app', html: 'app/guide/guide.component.html', title: 'Building out Guide docs', dir: 'related/todo-app', mods: [] },
+    { mod: 'vscode-plugin', html: 'app/documentation/vscode-plugin/vscode-plugin.component.html', title: 'Building out Plugin docs', dir: 'related/vscode-plugin', mods: [] },
+  ]
+    .$concat(
+      'module/*/doc.ts'.$dir()
+        .$filter(f => !f.includes('worker'))
+        .$map(async f => {
+          const mod = f.replace(/^(.*module|related)\/([^/]+)(.*)$/, (_, a, b) => `@travetto/${b}`);
+          const mods = await f.$read()
+            .$tokens(/@travetto\/[^/' `;\n]+/)
+            .$filter(x => /^@[a-z\/0-9]+$/.test(x) && x !== mod)
+            .$sort()
+            .$unique();
+          return {
+            mod: mod.split('/')[1],
+            mods,
+            title: `Building out ${mod} docs`,
+            html: 'app/documentation/gen/%MOD/%MOD.component.html',
+            dir: path.dirname(f)
+          };
+        })
+    )
+    .$filter(x => target ? x.mod === target : !x.mod.includes('worker'))
+    .$parallel(({ html, title, dir, mods }) =>
+      title
+        .$tap(console.log)
+        .$exec('trv', {
+          args: ['doc', '-o', page(html), '-o', './README.md'],
           spawn: {
             shell: true,
             detached: true,
-            cwd: path.dirname(f),
+            cwd: dir,
             env: {
               ...process.env,
               TRV_MODULES: mods.join(',')
             }
           }
-        })
-      },
-      {
-        concurrent: 6
-      }
+
+        }),
+      { concurrent: 4 }
     )
     .$notEmpty()
     .$tap(console.log)

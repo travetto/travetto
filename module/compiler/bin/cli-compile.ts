@@ -33,7 +33,7 @@ export class CompilerCompilePlugin extends BasePlugin {
     }
 
     try {
-      await CompileCliUtil.compile(path);
+      await CompileCliUtil.compile(path, process.env as Record<string, string>);
 
       if (!this._cmd.quiet) {
         console!.log(color`${{ success: 'Successfully' }} wrote to ${{ path }}`);
