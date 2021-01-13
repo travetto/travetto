@@ -65,7 +65,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       })));
     }
 
-    config.instance = new config.class();
+    config.instance = new (config.class as new (...args: any[]) => any)();
     config.tests = tests as TestConfig[];
 
     if (!config.description) {

@@ -1,9 +1,7 @@
 /**
  * A basic class, as defined by it's constructor
  */
-export interface Class<T = any> {
-  new(...args: any[]): T;
-}
+export type Class<T = any> = abstract new (...args: any[]) => T;
 
 /**
  * A change event

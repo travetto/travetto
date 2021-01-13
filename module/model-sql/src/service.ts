@@ -147,14 +147,14 @@ export class SQLModelService implements
 
   @Transactional()
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    await this.delete(cls as Class<T & { id: string }>, item.id!);
+    await this.delete(cls, item.id!);
     return await this.create(cls, item);
   }
 
   @Transactional()
   async upsert<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     try {
-      await this.delete(cls as Class<T & { id: string }>, item.id!);
+      await this.delete(cls, item.id!);
     } catch (err) {
       if (!(err instanceof NotFoundError)) {
         throw err;

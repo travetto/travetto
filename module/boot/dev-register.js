@@ -1,11 +1,11 @@
 const defaultMods = ['@travetto/test', '@travetto/cli', '@travetto/doc', '@travetto/app', '@travetto/log'];
 const existing = (process.env.TRV_MODULES || '');
-const cleaned = existing.replace(/(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g, (a, m) => {
+const cleaned = existing.replace(/,*(@travetto\/[a-z0-9-]+)(=[a-zA-Z/_.0-9]*)?/g, (a, m) => {
   if (!defaultMods.includes(m)) {
     defaultMods.push(m);
   }
   return '';
-});
+}).replace(/,+/g, ',');
 
 /**
  * Gather all dependencies of a given module
@@ -50,7 +50,7 @@ function readDeps() {
 const { FileCache } = require('./src/cache');
 const cache = new FileCache(process.env.TRV_CACHE ?? '.trv_cache');
 cache.init();
-const content = cache.getOrSet(`dev-modules.${existing.length}.json`, () => JSON.stringify(readDeps(), null, 2));
+const content = cache.getOrSet(`dev-modules.json`, () => JSON.stringify(readDeps(), null, 2));
 const resolved = Object.entries(JSON.parse(content).entries);
 process.env.TRV_MODULES = `${cleaned},${resolved.map(x => x.join('=')).join(',')}`;
 

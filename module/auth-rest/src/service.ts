@@ -20,7 +20,7 @@ export class AuthService {
 
   async postConstruct() {
     // Find all identity sources
-    for (const source of DependencyRegistry.getCandidateTypes(IdentitySourceTarget as Class<IdentitySource>)) {
+    for (const source of DependencyRegistry.getCandidateTypes<IdentitySource>(IdentitySourceTarget)) {
       const dep = await DependencyRegistry.getInstance<IdentitySource>(IdentitySourceTarget, source.qualifier);
       this.identitySources.set(source.qualifier.toString(), dep);
     }

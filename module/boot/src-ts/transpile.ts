@@ -132,7 +132,7 @@ export class TranspileUtil {
    */
   static checkTranspileErrors(filename: string, diagnostics: readonly any[]) {
     if (diagnostics && diagnostics.length) {
-      const errors = diagnostics.slice(0, 5).map(diag => {
+      const errors: string[] = diagnostics.slice(0, 5).map(diag => {
         const ts: typeof tsi = require('typescript');
         const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {

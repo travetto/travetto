@@ -139,7 +139,7 @@ class DataBinding {
         names: ['1', '2', '3'],
         age: 30
       }
-    ].map(v => (BasePoly as Class).from(v));
+    ].map(v => BasePoly.from(v));
 
     assert(items);
     assert(items.length === 2);

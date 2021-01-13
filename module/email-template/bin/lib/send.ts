@@ -1,5 +1,4 @@
 import { MailService } from '@travetto/email/src/service';
-import { Class } from '@travetto/registry';
 import { TemplateUtil } from './util';
 import { ConfigUtil } from './config';
 
@@ -15,7 +14,8 @@ export class SendUtil {
    */
   static async getMailService() {
     if (!this._svc) {
-      const { MailService: M, MailTransport, NodemailerTransport } = await import('@travetto/email');
+      const { MailService: M, NodemailerTransport } = await import('@travetto/email');
+      const { MailTransportTarget } = await import('@travetto/email/src/internal/types');
       const { DependencyRegistry } = await import('@travetto/di');
 
       const senderConfig = await ConfigUtil.getSenderConfig();
@@ -24,13 +24,13 @@ export class SendUtil {
         const cls = class { };
         DependencyRegistry.registerFactory({
           fn: () => new NodemailerTransport(senderConfig as unknown as any),
-          target: MailTransport as unknown as Class,
+          target: MailTransportTarget,
           src: cls,
           id: 'nodemailer',
         });
 
         DependencyRegistry.install(cls, { curr: cls, type: 'added' });
-      } else if (!DependencyRegistry.getCandidateTypes(MailTransport as unknown as Class).length) {
+      } else if (!DependencyRegistry.getCandidateTypes(MailTransportTarget).length) {
         const errorMessage = `
 Please configure your email setup and/or credentials for testing. In the file \`email/dev.yml\`, you can specify \`sender\` configuration.
 Email sending will not work until the above is fixed. A sample configuration would look like:     

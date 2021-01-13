@@ -143,7 +143,7 @@ class DiTest2 {
 
   @Test('abstract inheritance')
   async absTract() {
-    const types = DependencyRegistry.getCandidateTypes(BasePattern as Class<any>);
+    const types = DependencyRegistry.getCandidateTypes(BasePattern);
     assert(types.length > 0);
 
     const spec = DependencyRegistry.getCandidateTypes(SpecificPattern);
