@@ -43,7 +43,8 @@ export class EnvUtil {
       .map(x => {
         const [p, v] = x.split(sep);
         return [p, v || undefined] as [string, string];
-      });
+      })
+      .filter(([k, v]) => !!k);
   }
 
   /**
