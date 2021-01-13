@@ -1,3 +1,4 @@
+import { Util } from '@travetto/base';
 import { Class } from '@travetto/registry';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
@@ -12,9 +13,9 @@ import { TypeMismatchError, ValidationResultError } from './error';
  * @param o The value to use for the polymorphic check
  */
 function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
-  if (base.ᚕid) {
+  if (Util.isFunction(base)) {
     return SchemaRegistry.getViewSchema(
-      SchemaRegistry.resolveSubTypeForInstance(base as Class<T>, o), undefined).schema;
+      SchemaRegistry.resolveSubTypeForInstance(base, o), undefined).schema;
   } else {
     return base as SchemaConfig;
   }

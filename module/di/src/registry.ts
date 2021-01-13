@@ -129,7 +129,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // Create instance
     const inst = managed.factory ?
       managed.factory(...consValues) :
-      new managed.class(...consValues);
+      new (managed.class as new (...args: any[]) => T)(...consValues);
 
     // Compute fields to be auto-wired
     const fieldKeys = Object.keys(managed.dependencies.fields!)

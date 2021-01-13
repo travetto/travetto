@@ -91,7 +91,7 @@ export class ElasticsearchQueryUtil {
       if (Util.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
-          const inner = this.extractWhereTermQuery(top, declaredType as Class<any>, config, `${sPath}.`);
+          const inner = this.extractWhereTermQuery(top, declaredType, config, `${sPath}.`);
           items.push(declaredSchema.array ?
             { nested: { path: sPath, query: inner } } :
             inner
