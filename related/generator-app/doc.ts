@@ -8,7 +8,7 @@ ${Header(__dirname, false)}
 
 A simple ${lib.Yeoman} generator for scaffolding a reference project.  To get started, you need to make sure:
 
-${Install(`Setting up yeoman and the generator`, `
+${Install('Setting up yeoman and the generator', `
 $ npm i -g yo #Ensure yeoman is installed globally
 $ npm i -g @travetto/generator-app #Ensure this yeoman generator is installed
 $ git config --global.username <Username> #Set your git username

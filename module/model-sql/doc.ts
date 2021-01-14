@@ -31,7 +31,7 @@ ${Code('Wiring up a custom Model Source', 'doc/source.ts')}
 
 where the ${SQLModelConfig} is defined by:
 
-${Code(`Structure of SQLModelConfig`, SQLModelConfig.ᚕfile)}
+${Code('Structure of SQLModelConfig', SQLModelConfig.ᚕfile)}
 
 and can be overridden via environment variables or config files, as defined in ${mod.Config}.
 
@@ -39,5 +39,5 @@ ${Section('CLI - model:sql-schema')}
 
 The module provides the ability to generate the full ${lib.SQL} schema from all the various ${Model}s within the application.  This is useful for being able to generate the appropriate ${lib.SQL} commands to define your schemas in production.
 
-${Execute('Running schema generate', 'travetto', ['model:sql-schema', '--help'])}
+${Execute('Running schema generate', 'trv', ['model:sql-schema', '--help'])}
 `;

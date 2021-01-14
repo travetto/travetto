@@ -13,8 +13,8 @@ ${List(
   'Interfaces for standard security primitive',
   d`Patterns for producing a ${Principal}`,
   d`Common security-related utilities for ${List(
-    `Checking permissions`,
-    `Generating passwords`
+    'Checking permissions',
+    'Generating passwords'
   )}`
 )}
 
@@ -29,10 +29,10 @@ Comparatively, ${Identity} is defined as an authenticated user session that can 
 
 Overall, the structure is simple, but drives home the primary use cases of the framework.  The goals are:
 ${List(
-  `Be able to identify a user uniquely`,
-  `To have a reference to a user's set of permissions`,
-  `To have access to the raw principal`,
-  `To have access to the raw identity`,
+  'Be able to identify a user uniquely',
+  'To have a reference to a user's set of permissions',
+  'To have access to the raw principal',
+  'To have access to the raw identity',
 )}
 
 ${Section('Customization')}
@@ -54,12 +54,12 @@ ${Method('permissionSetChecker')} is probably the only functionality that needs 
 ${List(
   d`The user is logged in  ${List(
     d`If ${inp`matchAll`} is false: ${List(
-      `The user does not have any permissions in the exclusion list`,
-      `The include list is empty, or the user has at least one permission in the include list.`
+      'The user does not have any permissions in the exclusion list',
+      'The include list is empty, or the user has at least one permission in the include list.'
     )}`,
     d`Else ${List(
-      `The user does not have all permissions in the exclusion list`,
-      `The include list is empty, or the user has all permissions in the include list.`
+      'The user does not have all permissions in the exclusion list',
+      'The include list is empty, or the user has all permissions in the include list.'
     )}`
   )}`
 )}`;

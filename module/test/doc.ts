@@ -74,8 +74,8 @@ ${List(
 Additionally, the ${meth`throws`}/${meth`rejects`} assertions take in a secondary parameter to allow for specification of the type of error expected.  This can be:
 ${List(
   `A regular expression or string to match against the error's message`,
-  `A class to ensure the returned error is an instance of the class passed in`,
-  `A function to allow for whatever custom verification of the error is needed`,
+  'A class to ensure the returned error is an instance of the class passed in',
+  'A function to allow for whatever custom verification of the error is needed',
 )}
 
 ${Code('Example of different Error matching paradigms', 'doc/error-types.ts')}
@@ -84,7 +84,7 @@ ${Section('Running Tests')}
 
 To run the tests you can either call the ${mod.Cli} by invoking
 
-${Execute('Test Help Output', 'travetto', ['test', '--help'])}
+${Execute('Test Help Output', 'trv', ['test', '--help'])}
 
 The regexes are the patterns of tests you want to run, and all tests must be found under the ${pth`test/`} folder.
 

@@ -15,9 +15,9 @@ import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies'
 import { DefaultRestApplication } from './support/application.rest';
 import { RestConfig } from './src/server/config';
 
-const Request = SnippetLink(`Request`, 'src/types.d.ts', /interface Request/);
-const Response = SnippetLink(`Response`, 'src/types.d.ts', /interface Response/);
-const ResourceManager = Ref('ResourceManager', `@travetto/base/src/resource.ts`);
+const Request = SnippetLink('Request', 'src/types.d.ts', /interface Request/);
+const Response = SnippetLink('Response', 'src/types.d.ts', /interface Response/);
+const ResourceManager = Ref('ResourceManager', '@travetto/base/src/resource.ts');
 
 const RestInterceptor = SnippetLink('RestInterceptor', 'src/interceptor/types.ts', /interface RestInterceptor/);
 
@@ -102,9 +102,9 @@ ${Section('Input/Output')}
 
 The module provides standard structure for rendering content on the response.  This includes:
 ${List(
-  `JSON`,
-  `String responses`,
-  `Files`
+  'JSON',
+  'String responses',
+  'Files'
 )}
 
 Per the ${mod.Base} module, the following types automatically have rest support as well:
@@ -121,9 +121,9 @@ ${Section('Interceptors')}
 
 ${RestInterceptor}s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
-${Code(`A Trivial Intereptor`, 'doc/interceptor-hello-world.ts')}
+${Code('A Trivial Intereptor', 'doc/interceptor-hello-world.ts')}
 
-${Note(`The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after reuirements to ensure the appropriate order of execution.`)}
+${Note('The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after reuirements to ensure the appropriate order of execution.')}
 
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 ${Ordered(
@@ -141,13 +141,13 @@ ${Section('Creating and Running an App')}
 
 By default, the framework provices a default ${Application} at ${DefaultRestApplication} that will follow default behaviors, and spin up the REST server.  You will need to install the ${mod.App} module to execute.  
 
-${Install('Installing app support', `@travett/app`)}
+${Install('Installing app support', '@travett/app')}
 
 To customize a REST server, you may need to construct an entry point using the ${Application} decorator. This could look like:
 
 ${Code('Application entry point for Rest Applications', 'doc/custom-app.ts')}
 
-And using the pattern established in the ${mod.App} module, you would run your program using ${Command(`npx travetto run custom`)}.
+And using the pattern established in the ${mod.App} module, you would run your program using ${Command('npx travetto run custom')}.
 
 ${Section('Custom Interceptors')}
 Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the ${mod.Di} by extending the ${RestInterceptor} class.  The interceptors are tied to the defined ${Request} and ${Response} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
@@ -165,13 +165,13 @@ Express/Koa/Fastify all have their own cookie implementations that are common fo
 
 ${Code('Sample Cookie Usage', 'doc/cookie-routes.ts')}
 
-${Section(`SSL Support`)}
+${Section('SSL Support')}
 
 Additionally the framework supports SSL out of the box, by allowing you to specify your public and private keys for the cert.  In dev mode, the framework will also automatically generate a self-signed cert if:
 ${List(
-  `SSL support is configured`,
+  'SSL support is configured',
   d`${lib.NodeForge} is installed`,
-  `No keys provided`
+  'No keys provided'
 )}
 
 This is useful for local development where you implicitly trust the cert.
@@ -188,7 +188,7 @@ The module provides support basic support with AWS lambdas. When using one of th
 
 ${Section('Packaging Lambdas')}
 
-${Execute('Invoking a Package Build', 'travetto', ['pack', 'rest/lambda', '-h'])}
+${Execute('Invoking a Package Build', 'trv', ['pack', 'rest/lambda', '-h'])}
 
 
 ${Section('Extension - Schema')}

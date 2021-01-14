@@ -8,7 +8,7 @@ As is the custom, modules are able to register their own cli extensions as scrip
 
 ${Section('General')}
 
-${Execute('General Usage', 'travetto', ['--help'])}
+${Execute('General Usage', 'trv', ['--help'])}
 
 This will show all the available options/choices that are exposed given the currently installed modules.
 
@@ -20,10 +20,10 @@ ${Code('Echo Plugin', 'doc/bin/cli-echo.ts')}
 
 With the corresponding output:
 
-${Execute('Echo Plugin Help', 'travetto', ['echo', '--help'])}
+${Execute('Echo Plugin Help', 'trv', ['echo', '--help'])}
 
 And actually using it:
 
-${Execute('Echo Plugin Run', 'travetto', ['echo', '-u', 'bOb', 'rOb', 'DRoP'])}
+${Execute('Echo Plugin Run', 'trv', ['echo', '-u', 'bOb', 'rOb', 'DRoP'])}
 
 `;

@@ -115,25 +115,25 @@ ${List(
 
 ${Section('Known Issues')}
 
-${List(`None`)}
+${List('None')}
 
 ${Section('Release Notes')}
 
 ${SubSection('1.1.x')}
 ${List(
-  `Introduced the email template functionality`
+  'Introduced the email template functionality'
 )}
 
 ${SubSection('1.0.x')}
 ${List(
-  `Complete rewrite of plugin`,
-  `Test framework integration completely inverted, and majority of logic offloaded to framework`
+  'Complete rewrite of plugin',
+  'Test framework integration completely inverted, and majority of logic offloaded to framework'
 )}
 
 ${SubSection('0.5.x')}
 ${List(
-  `Introduced application launching`,
-  `Resolved test stability issues`,
-  `Introduced clean functionality`,
+  'Introduced application launching',
+  'Resolved test stability issues',
+  'Introduced clean functionality',
 )}
 `;

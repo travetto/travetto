@@ -25,11 +25,11 @@ ${Section('CLI - command:service')}
 
 The module provides the ability to start/stop/restart services as ${lib.Docker} containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targetted individually or handled as a group.
 
-${Execute('Command Service', 'travetto', ['command:service', '--help'])}
+${Execute('Command Service', 'trv', ['command:service', '--help'])}
 
 A sample of all services available to the entire framework:
 
-${Terminal('All Services', DocUtil.run('sh', ['./bin/util/service.js', 'status'], { cwd: FsUtil.resolveUnix(__dirname, '..', '..') }))}
+${Terminal('All Services', DocUtil.run('./bin/util/service.js', ['status'], { cwd: FsUtil.resolveUnix(__dirname, '..', '..') }))}
 
 ${SubSection('Defining new Services')}
 

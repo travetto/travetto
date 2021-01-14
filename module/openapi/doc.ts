@@ -22,7 +22,7 @@ ${Section('CLI - openapi:spec')}
 
 The module provides a plugin for the ${mod.Cli} to allow scripting file generation.
 
-${Execute('OpenAPI usage', 'travetto', ['openapi:spec', '--help'])}
+${Execute('OpenAPI usage', 'trv', ['openapi:spec', '--help'])}
 
 The command will run your application, in non-server mode, to collect all the routes and model information, to produce the ${pth`openapi.yml`}.  Once produced, the code will store the output in the specified location.
 

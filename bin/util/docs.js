@@ -8,7 +8,11 @@ const fs = require('fs');
 const commander = path.resolve('node_modules/commander/index.js');
 const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
 
-const target = $argv[0];
+let target = $argv[0];
+const root = path.resolve(__dirname, '..', '..');
+if (target.startsWith(root)) {
+  target = target.split(root)[1].split('/').pop();
+}
 
 // Update commander
 [
@@ -16,12 +20,6 @@ const target = $argv[0];
     .$read()
     .$replace(/(process[.]stdout[.]columns \|\|).*;/g, (_, k) => `${k} 140;`)
     .$writeFinal(commander),
-
-  'Restarting Mongodb'
-    .$tap(console.log)
-    .$map(() =>
-      require('child_process').spawnSync('npm', ['run', 'service', 'restart', 'mongodb'], { stdio: 'inherit', encoding: 'utf8' })
-    ),
 
   target ? undefined :
     'Building out Overview docs'
@@ -72,8 +70,16 @@ const target = $argv[0];
         })
     )
     .$filter(x => target ? x.mod === target : !x.mod.includes('worker'))
-    .$parallel(({ html, title, dir, mods }) =>
+    .$parallel(({ mod, html, title, dir, mods }) =>
       title
+        .$flatMap(x => mod !== 'todo-app' ? [x] :
+          'Restarting Mongodb'
+            .$tap(console.log)
+            .$map(() => {
+              require('child_process').spawnSync('npm', ['run', 'service', 'restart', 'mongodb'], { stdio: 'inherit', encoding: 'utf8' });
+              return x;
+            })
+        )
         .$tap(console.log)
         .$exec('trv', {
           args: ['doc', '-o', page(html), '-o', './README.md'],
