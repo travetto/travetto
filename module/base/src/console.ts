@@ -63,10 +63,6 @@ class $ConsoleManager {
    * Modify typescript file to point to the Console Manager
    */
   private instrument(filename: string, fileContents: string) {
-    // Ignore framework /bin/ folders only
-    if (filename.includes('/bin/')) {
-      return fileContents; // Skip cli
-    }
     // Insert filename into all log statements for all components
     let line = 1;
     fileContents = fileContents.replace(CONSOLE_RE, (a, cmd, lvl) => {

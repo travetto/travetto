@@ -7,7 +7,6 @@
     "access": "public"
   },
   "bin": {
-    "travetto": "bin/travetto.js",
     "trv": "bin/travetto.js"
   },
   "title": "Command Line Interface",

@@ -329,7 +329,7 @@ $ ./doc/startup.sh
     env: 'dev',
     prod: false,
     profiles: [ 'application', 'dev' ],
-    localSourceFolders: [ 'doc' ],
+    localSourceFolders: [ '^doc' ],
     commonSourceFolders: [ 'src' ],
     resourceFolders: [ 'resources', 'doc/resources' ],
     debug: { status: false, value: undefined },

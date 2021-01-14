@@ -32,7 +32,7 @@ ${Snippet('Structure of auth property on the request', './src/typings.d.ts', /in
 
 This allows for any filters/middleware to access this information without deeper knowledge of the framework itself.  Also, for performance benefits, the auth context can be stored in the user session as a means to minimize future lookups. If storing the entire principal in the session, it is best to keep the principal as small as possible.
 
-When authenticating, with a multi-step process, it is useful to share information between steps.  The ${Method(`loginContext`)} property is intended to be a location in which that information is persisted. Currently only ${lib.Passport} support is included, when dealing with multi-step logins.
+When authenticating, with a multi-step process, it is useful to share information between steps.  The ${Method('loginContext')} property is intended to be a location in which that information is persisted. Currently only ${lib.Passport} support is included, when dealing with multi-step logins.
 
 ${Section('Patterns for Integration')}
 Every external framework integration relies upon the ${IdentitySource} contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
@@ -73,9 +73,9 @@ ${Code('Sample Facebook/passport config', 'doc/passport/conf.ts')}
 
 As you can see, ${PassportIdentitySource} will take care of the majority of the work, and all that is required is:
 ${List(
-  `Provide the name of the strategy (should be unique)`,
+  'Provide the name of the strategy (should be unique)',
   d`Provide the strategy instance. ${Note('you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework')}`,
-  `The conversion functions which defines the mapping between external and local identities.`
+  'The conversion functions which defines the mapping between external and local identities.'
 )}
 
 After that, the provider is no different than any other, and can be used accordingly.  Additionally, because ${lib.Passport} runs first, in it's entirety, you can use the provider as you normally would any ${lib.Passport} middleware.

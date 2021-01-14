@@ -5,9 +5,9 @@ import { Cache, CacheService } from '@travetto/cache';
 import { Session } from '.';
 import { RequetSessionEncoder } from './src/encoder/request';
 
-const Request = SnippetLink(`Request`, 'src/types.d.ts', /interface Request/);
-const SessionData = SnippetLink(`SessionData`, 'src/types.ts', /interface SessionData/);
-const SessionEncoder = SnippetLink(`SessionEncoder`, 'src/encoder/types.ts', /interface SessionEncoder/);
+const Request = SnippetLink('Request', 'src/types.d.ts', /interface Request/);
+const SessionData = SnippetLink('SessionData', 'src/types.ts', /interface SessionData/);
+const SessionEncoder = SnippetLink('SessionEncoder', 'src/encoder/types.ts', /interface SessionEncoder/);
 
 exports.text = d`
 

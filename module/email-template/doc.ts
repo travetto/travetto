@@ -63,7 +63,7 @@ ${SubSection('CLI Compilation')}
 
 The module provides ${mod.Cli} support for email template compilation also. Running
 
-${Execute(`Running template compilation`, `travetto`, [`email:compile`, '-h'])}
+${Execute('Running template compilation', 'trv', ['email:compile', '-h'])}
 
 Will convert all ${pth`.email.html`} files into the appropriate ${pth`.compiled.html`}, ${pth`.compiled.text`} and ${pth`.compiled.subject`} files.  These will be used during the running of the application.  By default these files are added to the ${pth`.gitignore`} as they are generally not intended to be saved but to be generated during the build process.
 
@@ -93,13 +93,13 @@ ${Code('Example inky template with mustache support', 'doc/resources/email/examp
 
 which will then interpolate the context to replace ${inp`left`} and ${inp`right`}, and compile to a final html output. When using ${lib.Mustache} expressions, make sure to use ${inp`{{{ }}}`}, triple braces on complex text, to prevent ${lib.Mustache} from escaping any characters.
 
-${Section(`Example inky template with partials`)}
+${Section('Example inky template with partials')}
 
 Given two files, ${pth`resources/email/welcome.html`} and ${pth`resources/email/footer.hml`}
 
-${Code('resources/email/welcome.html', `doc/resources/email/welcome.email.html`)}
+${Code('resources/email/welcome.html', 'doc/resources/email/welcome.email.html')}
 
-${Code('resources/email/footer.html', `doc/resources/email/footer.html`)}
+${Code('resources/email/footer.html', 'doc/resources/email/footer.html')}
 
 The final template will render as:
 
