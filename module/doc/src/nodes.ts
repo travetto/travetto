@@ -39,17 +39,15 @@ export function SnippetLink(title: Content, file: string, startPattern: RegExp) 
   return $n('file', { title: $c(title), link: $c(res.file), line: res.line });
 }
 
-export function Execute(title: Content, cmd: string, args: string[] = [], cwd?: string) {
-  if (cmd === 'travetto') {
-    cmd = `trv`;
-  } else {
+export function Execute(title: Content, cmd: string, args: string[] = [], cfg: Parameters<(typeof DocUtil)['run']>[2] = {}) {
+  if (cmd !== 'trv') {
     cmd = DocUtil.resolveFile(cmd).resolved.replace(FsUtil.cwd, '.');
     if (/.*\/doc\/.*[.][tj]s$/.test(cmd)) {
       args.unshift('-r', '@travetto/boot/register', cmd);
       cmd = `node`;
     }
   }
-  const script = DocUtil.run(cmd, args, { cwd });
+  const script = DocUtil.run(cmd, args, cfg);
   return Terminal(title, `$ ${cmd} ${args.join(' ')}\n\n${script}`);
 }
 

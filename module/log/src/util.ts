@@ -1,5 +1,3 @@
-import { AppManifest } from '@travetto/base';
-
 import { LogEvent, Formatter, Appender } from './types';
 
 /**

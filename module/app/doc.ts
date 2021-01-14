@@ -23,21 +23,25 @@ ${Section('CLI - run')}
 
 The run command allows for invocation of applications as defined by the ${Application} decorator.  Additionally, the environment can manually be specified (dev, test, prod).
 
-${Execute('CLI Run Help', 'travetto', ['run', '--help'])}
+${Execute('CLI Run Help', 'trv', ['run', '--help'])}
 
-Running without specifying an application ${Command('travetto', 'run')}, will display all the available apps, and would look like:
+Running without specifying an application ${Command('trv', 'run')}, will display all the available apps, and would look like:
 
-${Execute('Sample CLI Output', 'travetto', ['run'])}
+${Execute('Sample CLI Output', 'trv', ['run'])}
 
 To invoke the ${inp`simple`} application, you need to pass ${inp`domain`} where port is optional with a default.
   
-${Execute('Invoke Simple', 'travetto', ['run', 'simple-domain', 'mydomain.biz', '4000'])}
+${Execute('Invoke Simple', 'trv', ['run', 'simple-domain', 'mydomain.biz', '4000'], {
+  env: { TRV_SRC_LOCAL: 'doc' }
+})}
 
-${Section(`Type Checking`)}
+${Section('Type Checking')}
 
 The parameters to ${meth`run`} will be type checked, to ensure proper evaluation.
 
-${Execute('Invoke Simple with bad port', 'travetto', ['run', 'simple-domain', 'mydomain.biz', 'orange'])}
+${Execute('Invoke Simple with bad port', 'trv', ['run', 'simple-domain', 'mydomain.biz', 'orange'], {
+  env: { TRV_SRC_LOCAL: 'doc' }
+})}
 
 The types are inferred from the ${meth`.run()`} method parameters, but can be overridden in the ${Application} 
 annotation to support customization. Only primitive types are supported:

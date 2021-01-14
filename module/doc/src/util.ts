@@ -41,9 +41,9 @@ export class DocUtil {
 
   static DOC_STATE = new DocState();
 
-  static run(cmd: string, args: string[], config: { cwd?: string } = {}) {
+  static run(cmd: string, args: string[], config: { env?: Record<string, string>, cwd?: string } = {}) {
     try {
-      const res = spawnSync(`${cmd} ${args.join(' ')}`, {
+      const res = spawnSync(cmd, args, {
         encoding: 'utf8',
         cwd: config.cwd,
         shell: '/bin/bash',
@@ -51,15 +51,17 @@ export class DocUtil {
         stdio: 'pipe',
         env: {
           ...process.env,
-          TRV_DEBUG: '0'
+          TRV_DEBUG: '0',
+          ...(config.env ?? {})
         }
       });
 
       if (res.error) {
-        return res.error.message;
+        throw res.error;
       }
 
-      return res.stdout.toString().trim()
+      const output = res.stdout.toString() || res.stderr.toString();
+      return output.trim()
         // eslint-disable-next-line no-control-regex
         .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
         .replace(new RegExp(FsUtil.cwd, 'g'), '.')

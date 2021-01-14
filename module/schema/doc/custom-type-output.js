@@ -1,4 +1,5 @@
 process.env.TRV_ENV = 'prod';
+process.env.TRV_SRC_LOCAL = 'doc';
 
 (async function () {
   const { PhaseManager } = require('@travetto/base');

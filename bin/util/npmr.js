@@ -20,7 +20,7 @@ function findPackage(cmd) {
   }
 }
 
-const [cmd = '', ...args] = process.argv.slice(2);
+const [cmd = '', ...args] = process.argv.slice(2).map(x => x == '.' ? process.cwd() : x);
 const cwd = findPackage(cmd) ?? process.cwd();
 
 try {

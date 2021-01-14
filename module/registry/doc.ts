@@ -17,7 +17,7 @@ The primary flow occurs on initialization of the application. At that point, the
 
 ${Ordered(
   d`Initialize ${RootReg} and will automatically register/load all relevant files`,
-  `As files are imported, decorators within the files will record various metadata relevant to the respective registries`,
+  'As files are imported, decorators within the files will record various metadata relevant to the respective registries',
   d`When all files are processed, the ${RootReg} is finished, and it will signal to anything waiting on registered data that its free to use it.`,
 )}
 

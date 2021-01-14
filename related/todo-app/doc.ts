@@ -56,10 +56,10 @@ ${Section('Building the Service Layer')}
 
 Next we establish the functionality for the service layer. The operations we need are:
 ${List(
-  `Create a new todo`,
-  `Complete a todo`,
-  `Remove a todo`,
-  `Get all todos`,
+  'Create a new todo',
+  'Complete a todo',
+  'Remove a todo',
+  'Get all todos',
 )}
 
 Now we need to create ${pth`src/service.ts`}

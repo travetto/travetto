@@ -4,7 +4,7 @@ import { pth, doc as d, mod, Code, inp, Terminal, Section, List, Execute, SubSec
 exports.text = d`
 ${Section('CLI - pack')} 
 
-${Execute('Pack usage', 'travetto', ['pack', '--help'])}
+${Execute('Pack usage', 'trv', ['pack', '--help'])}
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. The pack operation is actually a wrapper around multiple sub-operations that are run in series to produce the desired final structure for deployment.  The currently support operations are:
 
@@ -23,7 +23,7 @@ ${Ordered(
   'Copying Dependencies - Computes the prod depedencies and copies them into the new workspace',
   'Copying App Content - Copies over application content (src/resources/support/bin)',
   'Excluding Pre-Compile Files - Any files that should be excluded pre-compilation, are removed',
-  `Compiling - Compiles the code in the new workspace, isolating it from your local development`,
+  'Compiling - Compiles the code in the new workspace, isolating it from your local development',
   'Excluding Post-Compile Files - Removes any files that should be excluded, post compilation',
   'Copying Added Content - Adds in any additional content that is not in the standard locations',
   'Removing Empty Folders - Purge all empty folders, recursively',
@@ -34,7 +34,7 @@ ${Ordered(
 
 ${Snippet('Assemble Default Config', 'bin/pack.config.yml', /assemble:/, /[.]d[.]ts/)}
 
-${Execute('Assemble Usage', 'travetto', ['pack:assemble', '--help'])}
+${Execute('Assemble Usage', 'trv', ['pack:assemble', '--help'])}
 
 ${SubSection('CLI - pack:zip')}
 
@@ -42,14 +42,14 @@ Zip is an optional step, that can run post assembly.  The only configuration it 
 
 ${Snippet('Zip Default Config', 'bin/pack.config.yml', /zip:/, /output/)}
 
-${Execute('Zip Usage', 'travetto', ['pack:zip', '--help'])}
+${Execute('Zip Usage', 'trv', ['pack:zip', '--help'])}
 
 ${SubSection('Modes')}
 Various modules may provide customizations to the default ${pth`pack.config.yml`} to allow for easy integration with the packing process.  A simple example of this is via the ${mod.Rest} module, for how to publish lambda packages.
 
 ${Code('Rest, pack.lambda.yml', '@travetto/rest/support/pack.lambda.yml')}
 
-${Terminal('Invoking Pack with Mode', `npx travetto pack <mode>`)}
+${Terminal('Invoking Pack with Mode', 'npx travetto pack <mode>')}
 
 ${SubSection('Configuration')}
 By default the following paths are searched for configuration (in the following order):

@@ -80,5 +80,5 @@ ${Section('CLI - clean')}
 
 The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
 
-${Execute('Clean operation', 'travetto', ['clean', '--help'])}
+${Execute('Clean operation', 'trv', ['clean', '--help'])}
 `;
