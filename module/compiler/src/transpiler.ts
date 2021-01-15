@@ -6,8 +6,6 @@ import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';
 
-const SIMPLE_COMPILATION = /support\/(transformer|phase|watch|lib)[.].+/;
-
 /**
  * Handles all transpilation from TS to JS.
  * Manages the source code and typescript relationship.
@@ -179,11 +177,6 @@ export class Transpiler {
    * Get the transpiled content
    */
   transpile(filename: string, force = false) {
-    // Do not typecheck the support code
-    if (SIMPLE_COMPILATION.test(filename)) {
-      return TranspileUtil.transpile(filename, force);
-    }
-
     try {
       return this._transpile(filename, force);
     } catch (err) {
@@ -198,7 +191,7 @@ export class Transpiler {
    */
   unload(filename: string, unlink = true) {
     if (this.contents.has(filename)) {
-      console.debug('Unloading', { filename: filename.replace(FsUtil.cwd, ''), unlink });
+      console.debug('Unloading', { filename: filename.replace(FsUtil.cwd, '.'), unlink });
 
       this.cache.removeExpiredEntry(filename, unlink);
 
