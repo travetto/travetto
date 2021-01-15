@@ -47,7 +47,7 @@ const routes: Routes = [
     BrowserModule,
     HttpClientModule,
     DocumentationModule,
-    RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled' }),
+    RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled', relativeLinkResolution: 'legacy' }),
     BrowserAnimationsModule,
     SharedModule
   ],
