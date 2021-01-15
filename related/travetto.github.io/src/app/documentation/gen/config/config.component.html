@@ -71,7 +71,15 @@ At runtime the resolved config would be:
       <figcaption class="terminal">Runtime Resolution
       
       </figcaption>
-      <pre><code class="language-bash">$ node -r @travetto/boot/register ./doc/resolve.ts</code></pre>     
+      <pre><code class="language-bash">$ node -r @travetto/boot/register ./doc/resolve.ts
+
+Config <span class="token punctuation">{{'{'}}</span>
+  database: <span class="token punctuation">{{'{'}}</span>
+    host: <span class="token string">'localhost'</span>,
+    creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'test'</span>, password: <span class="token string">'%secret%'</span> <span class="token punctuation">{{'}'}}</span>,
+    port: <span class="token string">'1234'</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <h2 id="secrets">Secrets</h2>

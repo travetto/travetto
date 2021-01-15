@@ -189,6 +189,17 @@ The parameters to `run` will be type checked, to ensure proper evaluation.
 **Terminal: Invoke Simple with bad port**
 ```bash
 $ trv run simple-domain mydomain.biz orange
+
+Failed application run {
+  error: Error: Invalid parameter port: Received orange, but exepcted number
+      at Function.enforceParamType (./src/util.ts:19:13)
+      at ./src/registry.ts:46:79
+      at Array.map (<anonymous>)
+      at $ApplicationRegistry.resolveParameters (./src/registry.ts:46:24)
+      at Function.run (./bin/lib/run.ts:54:31)
+      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at AppRunPlugin.action (./bin/cli-run.ts:55:11)
+}
 ```
 
 The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) 

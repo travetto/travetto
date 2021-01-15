@@ -7,7 +7,7 @@ exports.text = d`
 ${lib.DependencyInjection} is a framework primitive.  When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of ${lib.Typescript} and type erasure of interfaces, dependency injection only supports ${inp`class`}es as type signafiers. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.
 
 ${Section('Declaration')}
-The ${Injectable} and ${InjectableFactory} decorators provide the registration of dependencies.   Dependency declaration revolves around exposing ${inp`class`}es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various backends (e.g. ${Ref('MongoModelService', '@travetto/model-mongo/src/service.ts')} provides itself as an injectable candidate for ${Ref('ModelCrudSupport', '@travetto/model/src/service/crud.ts')}.
+The ${Injectable} and ${InjectableFactory} decorators provide the registration of dependencies.   Dependency declaration revolves around exposing ${inp`class`}es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various implementations (e.g. ${Ref('MongoModelService', '@travetto/model-mongo/src/service.ts')} provides itself as an injectable candidate for ${Ref('ModelCrudSupport', '@travetto/model/src/service/crud.ts')}.
 
 ${Code(d`Example ${Injectable.name}`, 'doc/injectable.ts')}
 

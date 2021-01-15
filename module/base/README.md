@@ -185,7 +185,17 @@ Will produce the following stack trace:
 
 **Terminal: tack trace from async errors**
 ```bash
-$ ./stack-test.ts
+$ node -r @travetto/boot/register ./doc/stack-test.ts
+
+Error: Uh oh  
+    at inner3 (./doc/stack-test.ts:4:9)  
+    at inner2 (./doc/stack-test.ts:8:16)  
+    at inner1 (./doc/stack-test.ts:12:16)  
+    at test (./doc/stack-test.ts:16:9)  
+    at Object.<anonymous> (./doc/stack-test.ts:24:1)  
+    at Function.compileJavascript (/home/tim/Code/travetto/module/boot/src-ts/compile.ts:106:16)  
+    at Function.compile (/home/tim/Code/travetto/module/boot/src-ts/compile.ts:97:17)  
+    at Object.require.extensions.<computed> [as .ts] (/home/tim/Code/travetto/module/boot/src-ts/compile.ts:137:62)
 ```
 
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
