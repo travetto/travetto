@@ -1,8 +1,7 @@
-import * as fs from 'fs';
-import { FsUtil } from '@travetto/boot/src';
+import { ResourceManager } from '@travetto/base';
 
 (async function run() {
-  fs.readFileSync(FsUtil.resolveUnix(__dirname, '..', 'resources', 'env.properties'), 'utf8')
+  ResourceManager.readSync('env.properties', 'utf8')
     .split(/\n/g)
     .map(x => x.split(/\s*=\s*/))
     .reduce((a, [k, v]) => {

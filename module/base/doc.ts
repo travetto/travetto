@@ -107,7 +107,7 @@ ${Code('Tracking asynchronous behavior', 'doc/stack-test.ts')}
 
 Will produce the following stack trace:
 
-${Execute('tack trace from async errors', 'stack-test.ts')}
+${Execute('tack trace from async errors', 'doc/stack-test.ts')}
 
 The needed functionality cannot be loaded until ${meth`init.action`} executes, and so must be required only at that time.
 

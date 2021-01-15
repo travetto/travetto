@@ -205,7 +205,18 @@ The parameters to <code class="item method">run</code> will be type checked, to 
       <figcaption class="terminal">Invoke Simple with bad port
       
       </figcaption>
-      <pre><code class="language-bash">$ trv run simple-domain mydomain.biz orange</code></pre>     
+      <pre><code class="language-bash">$ trv run simple-domain mydomain.biz orange
+
+Failed application run <span class="token punctuation">{{'{'}}</span>
+  error: Error: Invalid parameter port: Received orange, but exepcted number
+      at Function.enforceParamType <span class="token punctuation">(</span>./src/util.ts:19:13<span class="token punctuation">)</span>
+      at ./src/registry.ts:46:79
+      at Array.map <span class="token punctuation">(</span><span class="token operator">&lt;</span>anonymous<span class="token operator">></span><span class="token punctuation">)</span>
+      at <span class="token variable">$ApplicationRegistry</span>.resolveParameters <span class="token punctuation">(</span>./src/registry.ts:46:24<span class="token punctuation">)</span>
+      at Function.run <span class="token punctuation">(</span>./bin/lib/run.ts:54:31<span class="token punctuation">)</span>
+      at processTicksAndRejections <span class="token punctuation">(</span>internal/process/task_queues.js:93:5<span class="token punctuation">)</span>
+      at AppRunPlugin.action <span class="token punctuation">(</span>./bin/cli-run.ts:55:11<span class="token punctuation">)</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 The types are inferred from the <code class="item method">.run()</code> method parameters, but can be overridden in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24">@Application</a> 
