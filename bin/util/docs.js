@@ -10,7 +10,7 @@ const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
 
 let target = $argv[0];
 const root = path.resolve(__dirname, '..', '..');
-if (target.startsWith(root)) {
+if (target && target.startsWith(root)) {
   target = target.split(root)[1].split('/').pop();
 }
 
@@ -31,10 +31,7 @@ if (target.startsWith(root)) {
             $exec('npx', ['markdown-to-html', '--flavor', 'gfm', 'README.md'])
               .$filter(x => !/<p.*<img/.test(x) && !/<sub/.test(x)),
           )
-          .$concat([
-            `</div>
-          <app-module-chart></app-module-chart>`
-          ])
+          .$concat(['</div>\n<app-module-chart></app-module-chart>'])
           .$write(page('app/documentation/overview/overview.component.html'))
       ),
 
@@ -57,7 +54,7 @@ if (target.startsWith(root)) {
           const mod = f.replace(/^(.*module|related)\/([^/]+)(.*)$/, (_, a, b) => `@travetto/${b}`);
           const mods = await f.$read()
             .$tokens(/@travetto\/[^/' `;\n]+/)
-            .$filter(x => /^@[a-z\/0-9]+$/.test(x) && x !== mod)
+            .$filter(x => /^@[a-z\/0-9-]+$/.test(x) && x !== mod)
             .$sort()
             .$unique();
           return {

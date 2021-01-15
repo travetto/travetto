@@ -8,13 +8,10 @@ import { PAGES } from './pages';
 import { OverviewComponent } from './overview/overview.component';
 import { VSCodePluginComponent } from './vscode-plugin/vscode-plugin.component';
 import { AssetComponent } from './gen/asset/asset.component';
-import { AssetMongoComponent } from './gen/asset-mongo/asset-mongo.component';
-import { AssetS3Component } from './gen/asset-s3/asset-s3.component';
 import { AssetRestComponent } from './gen/asset-rest/asset-rest.component';
 import { AuthComponent } from './gen/auth/auth.component';
 import { AuthModelComponent } from './gen/auth-model/auth-model.component';
 import { AuthRestComponent } from './gen/auth-rest/auth-rest.component';
-import { AuthPassportComponent } from './gen/auth-passport/auth-passport.component';
 import { BaseComponent } from './gen/base/base.component';
 import { CompilerComponent } from './gen/compiler/compiler.component';
 import { ConfigComponent } from './gen/config/config.component';
@@ -51,6 +48,10 @@ import { OpenapiComponent } from './gen/openapi/openapi.component';
 import { CommandComponent } from './gen/command/command.component';
 import { WatchComponent } from './gen/watch/watch.component';
 import { PackComponent } from './gen/pack/pack.component';
+import { ModelDynamodbComponent } from './gen/model-dynamodb/model-dynamodb.component';
+import { ModelRedisComponent } from './gen/model-redis/model-redis.component';
+import { ModelS3Component } from './gen/model-s3/model-s3.component';
+import { ModelFirestoreComponent } from './gen/model-firestore/model-firestore.component';
 
 @NgModule({
   imports: [
@@ -73,13 +74,10 @@ import { PackComponent } from './gen/pack/pack.component';
     OverviewComponent,
     VSCodePluginComponent,
     AssetComponent,
-    AssetMongoComponent,
-    AssetS3Component,
     AssetRestComponent,
     AuthComponent,
     AuthModelComponent,
     AuthRestComponent,
-    AuthPassportComponent,
     BaseComponent,
     CompilerComponent,
     ConfigComponent,
@@ -114,7 +112,11 @@ import { PackComponent } from './gen/pack/pack.component';
     WatchComponent,
     ImageComponent,
     TransformerComponent,
-    PackComponent
+    PackComponent,
+    ModelDynamodbComponent,
+    ModelRedisComponent,
+    ModelS3Component,
+    ModelFirestoreComponent
   ]
 })
 export class DocumentationModule { }

@@ -61,6 +61,14 @@ At runtime the resolved config would be:
 **Terminal: Runtime Resolution**
 ```bash
 $ node -r @travetto/boot/register ./doc/resolve.ts
+
+Config {
+  database: {
+    host: 'localhost',
+    creds: { user: 'test', password: '%secret%' },
+    port: '1234'
+  }
+}
 ```
 
 ## Secrets
