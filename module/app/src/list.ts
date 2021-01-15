@@ -23,14 +23,6 @@ export class AppListUtil {
    */
   static async buildList() {
 
-    // Load all packaged applications
-    for (const { file } of ScanApp.findCommonFiles({ folder: 'support', filter: /application[.].*[.]ts/ })) {
-      try {
-        require(file);
-      } catch { }
-    }
-
-    // Load app files
     ScanApp.findSourceFiles()
       .filter(x => fs.readFileSync(x.file, 'utf-8').includes('@Application'))
       .forEach(x => require(x.file)); // Only load files that are candidates

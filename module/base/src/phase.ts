@@ -1,5 +1,8 @@
+import { TranspileUtil } from '@travetto/boot';
+
 import { ScanApp } from './scan';
 import { SystemUtil } from './internal/system';
+
 interface Initializer {
   action: Function;
   key: string;
@@ -63,6 +66,11 @@ export class PhaseManager {
    */
   load(upto?: string, after?: string) {
     const found = ScanApp.findCommonFiles({ folder: 'support', filter: new RegExp(`phase[.]${this.scope}(.*?)[.]ts`) });
+
+    // Ensure we transpile all files
+    for (const el of found) {
+      TranspileUtil.transpile(el.file);
+    }
 
     // Load all support files
     const initFiles = found.map(x => require(x.file));

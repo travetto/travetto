@@ -36,12 +36,6 @@ export class RunUtil {
 
     await PhaseManager.init('@trv:compiler/load');
 
-    // Load app if in support folder
-    if (app.filename.includes('support')) {
-      const mod = app.filename.replace(/.*node_modules\//, '');
-      require(mod);
-    }
-
     // Pause outputting
     const events: [any, any, any[]][] = [];
     ConsoleManager.set({ onLog: (a, b, c) => events.push([a, b, c]) });

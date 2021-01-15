@@ -12,7 +12,7 @@ import { GetCacheInterceptor } from './src/interceptor/get-cache';
 import { LoggingInterceptor } from './src/interceptor/logging';
 import { SerializeInterceptor } from './src/interceptor/serialize';
 import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies';
-import { DefaultRestApplication } from './support/application.rest';
+import { DefaultRestApplication } from './src/internal/application.rest';
 import { RestConfig } from './src/server/config';
 
 const Request = SnippetLink('Request', 'src/types.d.ts', /interface Request/);
