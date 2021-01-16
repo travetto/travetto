@@ -74,10 +74,10 @@ export class CookiesInterceptor implements RestInterceptor {
     // Patch all cookies to default to the cookie values
     const set = cookies.prototype.set;
     const get = cookies.prototype.get;
-    cookies.prototype.set = function (key: string, value?: any, opts: any = {}) {
+    cookies.prototype.set = function (key: string, value?: string, opts: cookies.SetOption = {}) {
       return set.call(this, key, value, { ...self, ...opts });
     };
-    cookies.prototype.get = function (key: string, opts: any = {}) {
+    cookies.prototype.get = function (key: string, opts: Partial<cookies.GetOption> & { secure?: boolean } = {}) {
       if (key.endsWith('.sig')) {
         opts.secure = false;
         opts.signed = false;

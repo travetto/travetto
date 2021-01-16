@@ -9,19 +9,19 @@ export class WorkUtil {
   /**
    * Create a process channel worker from a given spawn config
    */
-  static spawnedWorker<X>(
+  static spawnedWorker<V, X>(
     command: string,
     { args, opts, handlers }: {
       args?: string[];
       opts?: ExecutionOptions;
       handlers: {
-        init?: (ch: ParentCommChannel) => Promise<any>;
-        execute: (ch: ParentCommChannel, input: X) => Promise<any>;
-        destroy?: (ch: ParentCommChannel) => Promise<any>;
+        init?: (ch: ParentCommChannel<V>) => Promise<unknown | void>;
+        execute: (ch: ParentCommChannel<V>, input: X) => Promise<unknown | void>;
+        destroy?: (ch: ParentCommChannel<V>) => Promise<unknown | void>;
       };
     }
   ): Worker<X> {
-    const channel = new ParentCommChannel(
+    const channel = new ParentCommChannel<V>(
       ExecUtil.fork(command, args, {
         ...(opts ?? {})
       })

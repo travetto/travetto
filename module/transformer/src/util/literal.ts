@@ -22,11 +22,11 @@ export class LiteralUtil {
   static fromLiteral(factory: ts.NodeFactory, val: undefined): ts.Identifier;
   static fromLiteral(factory: ts.NodeFactory, val: null): ts.NullLiteral;
   static fromLiteral(factory: ts.NodeFactory, val: object): ts.ObjectLiteralExpression;
-  static fromLiteral(factory: ts.NodeFactory, val: any[]): ts.ArrayLiteralExpression;
+  static fromLiteral(factory: ts.NodeFactory, val: unknown[]): ts.ArrayLiteralExpression;
   static fromLiteral(factory: ts.NodeFactory, val: string | boolean | number): ts.LiteralExpression;
-  static fromLiteral(factory: ts.NodeFactory, val: any) {
-    if (val && val.kind) { // If already a node
-      return val;
+  static fromLiteral(factory: ts.NodeFactory, val: unknown): ts.Node {
+    if (val && (val as ts.Expression).kind) { // If already a node
+      return val as ts.Node;
     } else if (Array.isArray(val)) {
       val = factory.createArrayLiteralExpression(val.map(v => this.fromLiteral(factory, v)));
     } else if (val === undefined) {
@@ -40,25 +40,26 @@ export class LiteralUtil {
     } else if (typeof val === 'boolean') {
       val = val ? factory.createTrue() : factory.createFalse();
     } else if (val === String || val === Number || val === Boolean || val === Date || val === RegExp) {
-      val = factory.createIdentifier(val.name);
+      val = factory.createIdentifier((val as Function).name);
     } else {
+      const ov = val as object;
       const pairs: ts.PropertyAssignment[] = [];
-      for (const k of Object.keys(val)) {
-        if (val[k] !== undefined) {
+      for (const k of Object.keys(ov) as (keyof typeof ov)[]) {
+        if (ov[k] !== undefined) {
           pairs.push(
-            factory.createPropertyAssignment(k, this.fromLiteral(factory, val[k]))
+            factory.createPropertyAssignment(k, this.fromLiteral(factory, ov[k]))
           );
         }
       }
       return factory.createObjectLiteralExpression(pairs);
     }
-    return val;
+    return val as ts.Expression;
   }
 
   /**
    * Convert a `ts.Node` to a JS literal
    */
-  static toLiteral(val: ts.Node, strict = true): any {
+  static toLiteral(val: ts.Node, strict = true): unknown {
     if (!val) {
       throw new Error('Val is not defined');
     } else if (ts.isArrayLiteralExpression(val)) {
@@ -85,7 +86,7 @@ export class LiteralUtil {
     } else if (val.kind === ts.SyntaxKind.TrueKeyword) {
       return true;
     } else if (ts.isObjectLiteralExpression(val)) {
-      const out: Record<string, any> = {};
+      const out: Record<string, unknown> = {};
       for (const pair of val.properties) {
         if (ts.isPropertyAssignment(pair)) {
           out[pair.name.getText()] = this.toLiteral(pair.initializer, strict);

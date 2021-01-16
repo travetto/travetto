@@ -54,7 +54,7 @@ export class ColorUtil {
    * @param styles Text styles to apply
    * @param value The value to color
    */
-  static color(textColor: keyof typeof ColorUtil.COLORS, styles: (keyof typeof ColorUtil.STYLES)[], value: any): string {
+  static color(textColor: keyof typeof ColorUtil.COLORS, styles: (keyof typeof ColorUtil.STYLES)[], value: unknown): string | unknown {
     if (this.colorize && value !== undefined && value !== null && value !== '') {
       for (const style of [this.COLORS[textColor], ...styles.map(s => this.STYLES[s])]) {
         value = `\x1b[${style[0]}m${value}\x1b[${style[1]}m`;
@@ -85,7 +85,7 @@ export class ColorUtil {
      * color`${{title: 'Main Title'}} is ${{subtitle: 'Sub Title}}`
      * ```
      */
-    return (values: TemplateStringsArray, ...keys: (Partial<Record<keyof T, any>> | string)[]) => {
+    return (values: TemplateStringsArray, ...keys: (Partial<Record<keyof T, string>> | string)[]) => {
       if (keys.length === 0) {
         return values[0];
       } else {
@@ -96,7 +96,7 @@ export class ColorUtil {
               throw new Error('Invalid template variable, one and only one key should be specified');
             }
             const k = subKeys[0];
-            el = palette[k](el[k]);
+            el = palette[k](el[k]!);
           }
           return `${values[i] ?? ''}${el ?? ''}`;
         });

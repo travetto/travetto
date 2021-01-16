@@ -67,7 +67,7 @@ export class AssetRestUtil {
     } else {
       return new Promise<AssetMap>((resolve, reject) => {
         const mapping: AssetMap = {};
-        const uploads: Promise<any>[] = [];
+        const uploads: Promise<Asset>[] = [];
         const uploader = new busboy({
           headers: req.headers,
           limits: {

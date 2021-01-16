@@ -7,7 +7,7 @@ abstract class BaseResponse implements Partial<Response> {
   /**
    * Produce JSON as the output
    */
-  json(this: Response, val: any) {
+  json(this: Response, val: unknown) {
     this.setHeader('Content-Type', 'application/json');
     this.send(val);
   }
@@ -80,7 +80,7 @@ export class RestServerUtil {
    * Add base request as support for the provided
    * @param req Inbound request
    */
-  static decorateRequest<T extends Request>(req: Partial<T> & Record<string, any>): T {
+  static decorateRequest<T extends Request>(req: Partial<T> & Record<string, unknown>): T {
     delete req.redirect;
     Object.setPrototypeOf(req, BaseRequest.prototype);
     req.url = req.path;
@@ -93,7 +93,7 @@ export class RestServerUtil {
    * Add base response as support for the provided
    * @param req Outbound response
    */
-  static decorateResponse<T extends Response>(res: Partial<T> & Record<string, any>): T {
+  static decorateResponse<T extends Response>(res: Partial<T> & Record<string, unknown>): T {
     Object.setPrototypeOf(res, BaseResponse.prototype);
     return res as T;
   }

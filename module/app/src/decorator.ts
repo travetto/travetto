@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { FsUtil } from '@travetto/boot';
 
 import { ApplicationConfig, ApplicationParameter, AppClass } from './types';

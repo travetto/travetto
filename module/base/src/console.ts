@@ -7,14 +7,14 @@ export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
 type LineContext = { file: string, line: number };
 
 interface ConsoleListener {
-  onLog<T extends LineContext>(context: LogLevel, ctx: T, args: any[]): void;
+  onLog<T extends LineContext>(context: LogLevel, ctx: T, args: unknown[]): void;
 }
 
 const CONSOLE_RE = /(\bconsole[.](debug|info|warn|log|error)[(])|\n/g;
 
 function wrap(target: Console): ConsoleListener {
   return {
-    onLog(level: LogLevel, ctx: LineContext, args: any[]) {
+    onLog(level: LogLevel, ctx: LineContext, args: unknown[]) {
       return target[level](...args);
     }
   };
@@ -80,7 +80,7 @@ class $ConsoleManager {
   /**
    * Handle direct call in lieu of the console.* commands
    */
-  invoke(level: LogLevel, ctx: any, ...args: any[]) {
+  invoke(level: LogLevel, ctx: LineContext, ...args: unknown[]) {
     if (this.exclude.has(level)) {
       return; // Do nothing
     }

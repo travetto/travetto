@@ -37,7 +37,7 @@ export class RunUtil {
     await PhaseManager.init('@trv:compiler/load');
 
     // Pause outputting
-    const events: [any, any, any[]][] = [];
+    const events: [string, { line: number, file: string }, (string | number | Error | Date | object)[]][] = [];
     ConsoleManager.set({ onLog: (a, b, c) => events.push([a, b, c]) });
 
     // Finish registration
@@ -49,7 +49,7 @@ export class RunUtil {
 
     // Output on success
     ConsoleManager.clear();
-    events.forEach(([a, b, c]) => ConsoleManager.invoke(a, b, ...c));
+    events.forEach(([a, b, c]) => ConsoleManager.invoke(a as 'debug', b, ...c));
 
     return await ApplicationRegistry.run(name, sub);
   }

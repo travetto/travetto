@@ -1,5 +1,5 @@
 import { RetargettingProxy } from '@travetto/watch';
-import { Class } from '@travetto/registry/src/types';
+import { Class, ClassInstance } from '@travetto/base';
 
 import type { DependencyRegistry } from '../src/registry';
 import type { ClassTarget } from '../src/types';
@@ -13,7 +13,7 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
    * Extending the $DependencyRegistry class to add some functionality for watching
    */
   const Cls = class extends $DependencyRegistry {
-    private proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<any>>>();
+    private proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<unknown>>>();
 
     /**
      * Proxy the created instance
@@ -31,10 +31,10 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
         this.proxies.get(classId)!.set(qualifier, proxy);
         console.debug('Registering proxy', { id: target.ᚕid, qualifier: qualifier.toString() });
       } else {
-        proxy = this.proxies.get(classId)!.get(qualifier)!;
+        proxy = this.proxies.get(classId)!.get(qualifier)! as RetargettingProxy<T>;
         proxy.setTarget(instance);
         console.debug('Updating target', {
-          id: target.ᚕid, qualifier: qualifier.toString(), instanceType: (instance as any).constructor.name as string
+          id: target.ᚕid, qualifier: qualifier.toString(), instanceType: (instance as unknown as ClassInstance<T>).constructor.name as string
         });
       }
 

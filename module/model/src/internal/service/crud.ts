@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { SchemaValidator } from '@travetto/schema';
 import { ModelRegistry } from '../../registry/model';
 import { ModelType } from '../../types/model';

@@ -11,13 +11,13 @@ import { SessionData, SessionConfig } from '..';
 class TestController {
 
   @Get('/')
-  get(data: SessionData): any {
+  get(data: SessionData): SessionData {
     data.age = (data.age ?? 0) + 1;
     return data;
   }
 
   @Post('/complex')
-  withParam(@Body() payload: any, data: SessionData) {
+  withParam(@Body() payload: unknown, data: SessionData) {
     data.payload = payload;
   }
 

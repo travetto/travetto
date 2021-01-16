@@ -19,7 +19,7 @@ export const USER_CONFIG = ['pack.config.yml', 'pack.config.yaml'].map(x => FsUt
  */
 export class PackUtil {
 
-  private static _defaultConfigs: Record<string, any>[];
+  private static _defaultConfigs: Record<string, Partial<CommonConfig>>[];
   private static _modes: { key: string, file: string }[];
 
   /**
@@ -27,7 +27,7 @@ export class PackUtil {
    */
   static async modeList() {
     if (!this._modes) {
-      this._modes = FrameworkUtil.scan(f => /\/support\/pack[.].*[.]ya?ml/.test(f))
+      this._modes = FrameworkUtil.scan(f => /support\/pack[.].*[.]ya?ml/.test(f))
         .filter(x => x.stats.isFile())
         .map(x => {
           const [, mod, name] = x.module.match(/.*@travetto\/([^/]+)\/.*pack[.]([^.]+).ya?ml/) ?? [];
@@ -41,7 +41,7 @@ export class PackUtil {
   /**
    * Get Config
    */
-  static async getConfigs(): Promise<Record<string, any>[]> {
+  static async getConfigs(): Promise<Record<string, Partial<CommonConfig>>[]> {
     if (!this._defaultConfigs) {
       const allModes = await this.modeList();
       const mode = allModes.find(x => process.argv.find(a => a === x.key));
@@ -49,8 +49,8 @@ export class PackUtil {
         if (!f || !FsUtil.existsSync(f)) {
           return; // Skip missing
         }
-        return YamlUtil.parse(readFileSync(f, 'utf8')) as Record<string, any>;
-      }).filter(x => !!x) as Record<string, any>[];
+        return YamlUtil.parse(readFileSync(f, 'utf8'));
+      }).filter(x => !!x) as Record<string, Partial<CommonConfig>>[];
     }
     return this._defaultConfigs;
   }
@@ -113,7 +113,7 @@ export class PackUtil {
   /**
    * Run operation with logging
    */
-  static async runOperation<T extends CommonConfig, K extends string>(op: PackOperation<T, K>, cfg: T, indent = 0) {
+  static async runOperation<T extends CommonConfig>(op: PackOperation<T>, cfg: T, indent = 0) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const spacer = ' '.repeat(indent);
     const flags = Object.fromEntries(op.flags.map(([, , , f]) => [f, cfg[f]]).filter(x => x[0] !== 'workspace'));

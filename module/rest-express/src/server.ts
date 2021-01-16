@@ -64,7 +64,7 @@ export class ExpressRestServer extends RestServer<express.Application> {
           method: 'options',
           path: '*',
           handler: this.globalHandler as RouteHandler,
-          params: [{ extract: (__, r: any) => r } as ParamConfig]
+          params: [{ extract: (__, r: unknown) => r } as ParamConfig]
         }
       );
 

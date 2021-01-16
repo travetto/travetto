@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 
-import { Class, ChangeSource, ChangeEvent } from '../types';
+import { Class } from '@travetto/base';
+import { ChangeSource, ChangeEvent } from '../types';
 
 /**
  * Change source specific to individual methods of classes.  Useful
@@ -50,7 +51,7 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
     }
   }
 
-  on(callback: (e: ChangeEvent<[Class<any>, Function]>) => void): this {
+  on(callback: (e: ChangeEvent<[Class, Function]>) => void): this {
     this.events.on('change', callback);
     return this;
   }

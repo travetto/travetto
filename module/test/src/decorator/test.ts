@@ -1,3 +1,5 @@
+import { ClassInstance } from '@travetto/base';
+
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig } from '../model/test';
 
@@ -18,7 +20,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
   for (const r of rest) {
     Object.assign(extra, r);
   }
-  return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
+  return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
     SuiteRegistry.registerField(inst.constructor, descriptor.value, {
       ...extra,
       file: inst.constructor.ᚕfile,
@@ -33,7 +35,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
  * @param state The parameters to use for checking if the response is valid
  */
 export function ShouldThrow(state: TestConfig['shouldThrow']): MethodDecorator {
-  return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
+  return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
     SuiteRegistry.registerField(inst.constructor, descriptor.value, { shouldThrow: state });
     return descriptor;
   };
@@ -44,7 +46,7 @@ export function ShouldThrow(state: TestConfig['shouldThrow']): MethodDecorator {
  * @param ms Max time to wait
  */
 export function Timeout(ms: number): MethodDecorator {
-  return (inst: any, prop: string | symbol, descriptor: PropertyDescriptor) => {
+  return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
     SuiteRegistry.registerField(inst.constructor, descriptor.value, { timeout: ms });
     return descriptor;
   };

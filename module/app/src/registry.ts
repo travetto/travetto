@@ -1,7 +1,6 @@
-import { EnvUtil, FsUtil } from '@travetto/boot';
-import { AppManifest, ShutdownManager } from '@travetto/base';
+import { FsUtil } from '@travetto/boot';
+import { Class, AppManifest, ShutdownManager } from '@travetto/base';
 import { ConfigManager } from '@travetto/config';
-import { Class } from '@travetto/registry';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 
 import { ApplicationConfig } from './types';
@@ -57,7 +56,7 @@ class $ApplicationRegistry {
   async run(name: string, args: string[]) {
     const config = this.applications.get(name);
     if (!config) {
-      throw new InjectionError(`Application not found`, { ᚕid: name } as Class<any>);
+      throw new InjectionError(`Application not found`, { ᚕid: name } as Class);
     }
 
     const typed = this.resolveParameters(config, args);

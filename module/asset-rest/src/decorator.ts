@@ -1,8 +1,7 @@
 /// <reference path="./typings.d.ts" />
 
-import { AppError } from '@travetto/base';
+import { Class, AppError, ClassInstance } from '@travetto/base';
 import { ControllerRegistry, Request, ParamConfig, ControllerConfig } from '@travetto/rest';
-import { Class } from '@travetto/registry';
 import { AssetImpl } from '@travetto/asset/src/internal/types';
 import { DependencyRegistry } from '@travetto/di';
 
@@ -29,7 +28,7 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
     throw new AppError('Cannot use upload decorator with anything but an Asset', 'general');
   }
 
-  return function (target: Record<string, any>, propertyKey: string, index: number) {
+  return function (target: ClassInstance, propertyKey: string, index: number) {
     const handler = target.constructor.prototype[propertyKey];
     ControllerRegistry.registerEndpointParameter(target.constructor as Class, handler, {
       ...param as ParamConfig,

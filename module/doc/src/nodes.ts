@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { FsUtil } from '@travetto/boot';
 import { DocUtil } from './util';
 
-interface DocNode { _type: string }
+export interface DocNode { _type: string }
 type Content = DocNode | string;
 
 export const Text = (text: string) => ({ _type: 'text' as const, content: text });
@@ -15,11 +15,11 @@ function $c(val: DocNode | string | undefined): DocNode | undefined;
 function $c(val: string | DocNode | undefined): DocNode | undefined {
   return val === undefined ? undefined : typeof val === 'string' ? Text(val) : val;
 }
-const $n = <T extends string, U extends Record<string, any>>(t: T, vals: U) => ({ _type: t, ...vals } as { _type: T } & U);
+const $n = <T extends string, U extends Record<string, unknown>>(t: T, vals: U) => ({ _type: t, ...vals } as { _type: T } & U);
 
 export const Group = (node: DocNode | DocNode[]) => $n('group', { nodes: [node].flat() });
 export const Method = (content: Content) => $n('method', { content: $c(content) });
-export const Command = (script: Content, ...args: Content[]) => $n('command', { content: [script, ...args] });
+export const Command = (script: Content, ...args: Content[]) => $n('command', { content: $c([script, ...args].join(' ')) });
 export const Terminal = (title: Content, script: string) => $n('terminal', { title: $c(title), content: $c(script), language: 'bash' });
 export const Hidden = (content: Content) => $n('hidden', { content: $c(content) });
 export const Input = (content: Content) => $n('input', { content: $c(content) });

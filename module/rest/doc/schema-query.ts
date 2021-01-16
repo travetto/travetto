@@ -11,7 +11,9 @@ class SearchParams {
 @Controller('/user')
 class UserController {
 
-  private service: any;
+  private service: {
+    search(query: SearchParams): Promise<number[]>;
+  };
 
   @Get('/search')
   async search(@SchemaQuery() query: SearchParams) {

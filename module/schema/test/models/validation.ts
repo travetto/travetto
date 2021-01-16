@@ -63,7 +63,7 @@ export class Response {
   @Trimmed()
   questionId: string;
 
-  answer?: any;
+  answer?: unknown;
 
   valid?: boolean;
 

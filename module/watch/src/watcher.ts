@@ -22,7 +22,7 @@ export interface Watcher {
   on(type: 'removed', handlder: (entry: ScanEntry) => void): this;
   on(type: 'removedDir', handlder: (entry: ScanEntry) => void): this;
   on(type: 'changed', handlder: (entry: ScanEntry) => void): this;
-  on(type: string | symbol, handler: (...payload: any[]) => void): this;
+  on(type: string | symbol, handler: (payload: ScanEntry | { event: string, entry: ScanEntry }) => void): this;
 }
 
 /**
@@ -157,7 +157,7 @@ export class Watcher extends EventEmitter {
     //   }
     // });
 
-    const poller = (_: any, kind: number) => {
+    const poller = (_: unknown, kind: number) => {
       const stats = fs.lstatSync(entry.file);
       entry.stats = stats;
       try {
@@ -255,10 +255,10 @@ export class Watcher extends EventEmitter {
   /**
    * Emit change to file
    */
-  emit(type: string, payload?: any) {
+  emit(type: string, payload?: ScanEntry | Error) {
     if (!this.suppress) {
-      console.debug('Watch Event', { type, file: payload?.file.replace(FsUtil.cwd, '.') });
       if (type !== 'error' && type !== 'end') {
+        console.debug('Watch Event', { type, file: (payload as ScanEntry)?.file.replace(FsUtil.cwd, '.') });
         super.emit('all', { event: type, entry: payload });
       }
       super.emit(type, payload);

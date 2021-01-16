@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 
 import { RouteConfig, Request, Response } from '../types';
 import { ControllerConfig } from '../registry/types';
@@ -31,5 +31,5 @@ export interface RestInterceptor {
    * @param res Outbound response
    * @param next
    */
-  intercept(req: Request, res: Response, next?: () => Promise<any>): Promise<any> | void;
+  intercept(req: Request, res: Response, next?: () => Promise<unknown | void> | unknown): Promise<unknown | void> | void | unknown;
 }

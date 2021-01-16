@@ -36,7 +36,7 @@ export class PluginManager {
   /**
    * Load plugin module
    */
-  static async loadPlugin(cmd: string, op?: (p: BasePlugin) => any): Promise<BasePlugin> {
+  static async loadPlugin(cmd: string, op?: (p: BasePlugin) => unknown): Promise<BasePlugin> {
     const command = cmd.replace(/:/g, '_');
     const f = this.getPluginMapping().get(command)!;
     if (!f) {
@@ -50,7 +50,7 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
       }
       throw new Error(`Unknown command: ${cmd}`);
     }
-    for (const v of Object.values(require(f)) as { new(...args: any[]): any }[]) {
+    for (const v of Object.values(require(f)) as { new(...args: unknown[]): unknown }[]) {
       try {
         const inst = new v();
         if (inst instanceof BasePlugin) {
@@ -67,7 +67,7 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
   /**
    * Load all available plugins
    */
-  static async loadAllPlugins(op?: (p: BasePlugin) => any | Promise<any>) {
+  static async loadAllPlugins(op?: (p: BasePlugin) => unknown | Promise<unknown>) {
     return Promise.all(
       [...this.getPluginMapping().keys()]
         .sort((a, b) => a.localeCompare(b))

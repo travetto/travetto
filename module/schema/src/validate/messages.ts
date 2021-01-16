@@ -1,7 +1,7 @@
 /**
  * List of validation messages
  */
-export const Messages = new Map<any, string>(Object.entries({
+export const Messages = new Map<string, string>(Object.entries({
   default: '{path} is not valid',
   type: '{path} is not a valid {type}',
   required: '{path} is required',

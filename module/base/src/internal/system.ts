@@ -1,6 +1,12 @@
 import * as path from 'path';
 import { FsUtil } from '@travetto/boot';
 
+export type Orderable<T> = {
+  after?: T[];
+  before?: T[];
+  key: T;
+};
+
 /**
  * Set of internal system utilities
  */
@@ -26,11 +32,7 @@ export class SystemUtil {
    * Produces a satisfied ordering for a list of orderable elements
    */
   static computeOrdering<T,
-    U extends {
-      after?: T[];
-      before?: T[];
-      key: T;
-    },
+    U extends Orderable<T>,
     V extends {
       after: Set<T>;
       key: T;

@@ -6,7 +6,11 @@ class User { }
 export class UserService {
 
   myCache = new CacheService(new MemoryModelService({ namespace: '' }));
-  database: any;
+  database: {
+    lookupUser(id: string): Promise<User>;
+    deleteUser(id: string): Promise<void>;
+    updateUser(user: User): Promise<User>;
+  };
 
   @Cache('myCache', { keySpace: 'user.id' })
   async getUser(id: string) {

@@ -65,7 +65,7 @@ export abstract class BasePlugin {
    * Action target of the command
    * @param args Cli args
    */
-  abstract action(...args: any[]): void | Promise<void>;
+  abstract action(...args: unknown[]): void | Promise<void>;
 
   /**
    * Return tab completion information

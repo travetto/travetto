@@ -1,5 +1,4 @@
-import { AppError } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, AppError } from '@travetto/base';
 import { ValidationError } from './types';
 
 /**

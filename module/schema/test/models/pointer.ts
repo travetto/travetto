@@ -4,7 +4,7 @@
 export type SpecialType = string | number | true;
 
 export class SpecialTypeTarget {
-  static validateSchema(input: any) {
+  static validateSchema(input: unknown) {
     console.log('Validating schema', { input });
     if (input !== undefined) {
       switch (typeof input) {
@@ -26,7 +26,7 @@ export class SpecialTypeTarget {
       }
     }
   }
-  static bindSchema(input: any) {
+  static bindSchema(input: unknown) {
     return input;
   }
 }

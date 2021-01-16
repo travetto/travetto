@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { ScanFs } from '@travetto/boot';
+import { ScanFs, ScanHandler } from '@travetto/boot';
 
 import { Watcher } from '../src/watcher';
 
@@ -22,7 +22,7 @@ export class WatchTest {
 
     w.close();
 
-    const expected = ScanFs.scanDirSync({} as any, __dirname).filter(x => !x.stats.isDirectory());
+    const expected = ScanFs.scanDirSync({}, __dirname).filter(x => !x.stats.isDirectory());
     assert(found.filter(x => x[0] === 'added').length === expected.length);
     assert(found.filter(x => expected.find(y => y.file === x[1])).length === expected.length);
   }

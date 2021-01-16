@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 
 import { TestConsumer } from '../types';
 import { TestEvent } from '../../model/event';

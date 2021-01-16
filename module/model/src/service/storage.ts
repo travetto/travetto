@@ -1,4 +1,5 @@
-import { ChangeEvent, Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
+import { ChangeEvent } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
 import { ModelType } from '../types/model';
 import { ModelBasicSupport } from './basic';

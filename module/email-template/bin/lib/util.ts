@@ -100,7 +100,7 @@ export class TemplateUtil {
   /**
    * Resolve template
    */
-  static async resolveTemplate(file: string, format: Parts, context: Record<string, any>) {
+  static async resolveTemplate(file: string, format: Parts, context: Record<string, unknown>) {
 
     const files = this.getOutputs(file);
     const missing = await Promise.all(files.map(x => FsUtil.exists(x[1])));
@@ -123,7 +123,7 @@ export class TemplateUtil {
    * Render
    * @param file
    */
-  static async resolveCompiledTemplate(file: string, context: Record<string, any>) {
+  static async resolveCompiledTemplate(file: string, context: Record<string, unknown>) {
     return Object.fromEntries(
       await Promise.all(
         PARTS.map(k =>

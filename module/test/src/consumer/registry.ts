@@ -1,5 +1,5 @@
 import { ScanFs } from '@travetto/boot/src';
-import { Class } from '@travetto/registry';
+import { Class, ConcreteClass } from '@travetto/base';
 import { TestConsumer } from './types';
 
 /**
@@ -47,7 +47,7 @@ class $TestConsumerRegistry {
    */
   getInstance(consumer: string | TestConsumer): TestConsumer {
     return typeof consumer === 'string' ?
-      new (this.get(consumer) || this.primary)() :
+      new ((this.get(consumer) ?? this.primary) as ConcreteClass)() :
       consumer;
   }
 }

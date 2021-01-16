@@ -1,13 +1,13 @@
-import { Util } from '@travetto/base';
+import { Util, SimpleType } from '@travetto/base';
 
-import { ConfigUtil, Nested } from './internal/util';
+import { ConfigUtil } from './internal/util';
 
 /**
  * Manager for application configuration
  */
 class $ConfigManager {
 
-  private initialized: boolean = false;
+  private initialized?: boolean = false;
   private storage = {};   // Lowered, and flattened
   private redactedKeys = [
     'passphrase.*',
@@ -54,7 +54,7 @@ class $ConfigManager {
    * Get a sub tree of the config, or everything if key is not passed
    */
   get(key?: string) {
-    return this.bindTo({}, key);
+    return this.bindTo({} as Record<string, SimpleType>, key);
   }
 
   /**
@@ -63,7 +63,7 @@ class $ConfigManager {
   getSecure(key?: string) {
     return ConfigUtil.sanitizeValuesByKey(this.get(key), [
       ...this.redactedKeys,
-      this.get('config')?.redacted ?? []
+      (this.get('config')?.redacted ?? []) as string[]
     ].flat());
   }
 
@@ -84,14 +84,14 @@ class $ConfigManager {
   /**
    * Update config with a full subtree
    */
-  putAll(data: Nested) {
+  putAll(data: SimpleType) {
     Util.deepAssign(this.storage, ConfigUtil.breakDownKeys(data), 'coerce');
   }
 
   /**
    * Apply config subtree to a given object
    */
-  bindTo(obj: any, key?: string): Record<string, any> {
+  bindTo<T extends object>(obj: T, key?: string): T {
     return ConfigUtil.bindTo(this.storage, obj, key);
   }
 }

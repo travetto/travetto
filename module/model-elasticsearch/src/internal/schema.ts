@@ -1,12 +1,13 @@
-import { Util } from '@travetto/base';
+import { Class, Util } from '@travetto/base';
 import { ModelRegistry } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
-import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types';
 
 const VERSION = require('@elastic/elasticsearch/package.json').version;
+
+type SchemaType = { properties: Record<string, unknown>, dynamic: boolean };
 
 /**
  * Utils for ES Schema management
@@ -18,10 +19,10 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build the update script for a given object
    */
-  static generateUpdateScript(o: any, path: string = '', arr = false) {
+  static generateUpdateScript(o: Record<string, unknown>, path: string = '', arr = false) {
     const ops: string[] = [];
     const out = {
-      params: {} as Record<string, any>,
+      params: {} as Record<string, unknown>,
       lang: 'painless',
       source: ''
     };
@@ -38,7 +39,7 @@ export class ElasticsearchSchemaUtil {
         out.params[param] = o[x];
       } else {
         ops.push(`ctx._source.${prop} = ctx._source.${prop} == null ? [:] : ctx._source.${prop}`);
-        const sub = this.generateUpdateScript(o[x], prop);
+        const sub = this.generateUpdateScript(o[x] as Record<string, unknown>, prop);
         ops.push(sub.source);
         Object.assign(out.params, sub.params);
       }
@@ -65,16 +66,16 @@ export class ElasticsearchSchemaUtil {
     return allTypes.reduce((acc, scls) => {
       Util.deepAssign(acc, this.generateSingleSourceSchema(scls, config));
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as SchemaType);
   }
 
   /**
    * Build a schema for a given class
    */
-  static generateSingleSourceSchema<T>(cls: Class<T>, config?: EsSchemaConfig): Record<string, any> {
+  static generateSingleSourceSchema<T>(cls: Class<T>, config?: EsSchemaConfig): SchemaType {
     const schema = SchemaRegistry.getViewSchema(cls);
 
-    const props: Record<string, any> = {};
+    const props: Record<string, unknown> = {};
 
     for (const field of schema.fields) {
       const conf = schema.schema[field];
@@ -82,7 +83,7 @@ export class ElasticsearchSchemaUtil {
       if (conf.type === PointImpl) {
         props[field] = { type: 'geo_point' };
       } else if (conf.type === Number) {
-        let prop: Record<string, any> = { type: 'integer' };
+        let prop: Record<string, unknown> = { type: 'integer' };
         if (conf.precision) {
           const [digits, decimals] = conf.precision;
           if (decimals) {

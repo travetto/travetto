@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Path, Query, SchemaBody, SchemaQuery, Patch } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete, Path, Query, SchemaBody, SchemaQuery } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 
 import { TodoService } from './service';

@@ -62,7 +62,7 @@ export class MarkdownUtil {
     const output: string[] = [];
 
     const doc = parse5.parse(simple);
-    const listMode: any = [];
+    const listMode: (string | number)[] = [];
 
     HtmlUtil.visit(doc, (node, descend) => {
       const attrs = HtmlUtil.getAttrMap(node);
@@ -124,7 +124,7 @@ export class MarkdownUtil {
           const top = listMode[listMode.length - 1];
           if (typeof top === 'number') {
             output.push(`${top}. `);
-            listMode[listMode.length - 1]++;
+            (listMode[listMode.length - 1] as number)++;
           } else {
             output.push(top, ' ');
           }

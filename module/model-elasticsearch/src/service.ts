@@ -5,8 +5,8 @@ import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError,
 } from '@travetto/model';
-import { Class, ChangeEvent } from '@travetto/registry';
-import { Util, ShutdownManager } from '@travetto/base';
+import { ChangeEvent } from '@travetto/registry';
+import { Class, Util, ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { SchemaChangeEvent, SchemaConfig, SchemaRegistry } from '@travetto/schema';
 import { ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport, PageableModelQuery, Query, ValidStringFields } from '@travetto/model-query';
@@ -25,13 +25,15 @@ import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
 import { ModelRegistry } from '@travetto/model/src/registry/model';
 
+type WithId<T> = T & { _id?: string };
+
 /**
  * Convert _id to id
  */
 function postLoad<T extends ModelType>(o: T) {
   if ('_id' in o) {
-    o.id = (o as any)['_id'];
-    delete (o as any)['_id'];
+    o.id = (o as WithId<T>)._id;
+    delete (o as WithId<T>)._id;
   }
   return o;
 }
@@ -54,7 +56,7 @@ export class ElasticsearchModelService implements
   /**
    * Directly run the search
    */
-  async execSearch<T>(cls: Class<T>, search: Search<any>): Promise<SearchResponse<T>> {
+  async execSearch<T>(cls: Class<T>, search: Search<unknown>): Promise<SearchResponse<T>> {
     const res = await this.client.search({
       ...this.manager.getIdentity(cls),
       ...search
@@ -223,12 +225,12 @@ export class ElasticsearchModelService implements
     const body = operations.reduce((acc, op) => {
 
       const esIdent = this.manager.getIdentity((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls }).constructor as Class);
-      const ident = ElasticsearchSchemaUtil.MAJOR_VER < 7 ?
+      const ident = (ElasticsearchSchemaUtil.MAJOR_VER < 7 ?
         { _index: esIdent.index, _type: esIdent.type } :
-        { _index: esIdent.index };
+        { _index: esIdent.index }) as { _index: string };
 
       if (op.delete) {
-        acc.push({ ['delete']: { ...ident, _id: op.delete.id } });
+        acc.push({ delete: { ...ident, _id: op.delete.id } });
       } else if (op.insert) {
         acc.push({ create: { ...ident, _id: op.insert.id } }, op.insert);
         delete op.insert.id;
@@ -240,7 +242,7 @@ export class ElasticsearchModelService implements
         delete op.update.id;
       }
       return acc;
-    }, [] as Record<string, any>[]);
+    }, [] as (T | Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>> | { doc: T })[]);
 
     const { body: res } = await this.client.bulk({
       body,
@@ -330,8 +332,8 @@ export class ElasticsearchModelService implements
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
     const req = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig, true);
-    const res = (await this.execSearch(cls, req)).body.hits.total;
-    return res ? typeof res === 'number' ? res : (res as any).value : undefined;
+    const res = (await this.execSearch(cls, req)).body.hits.total as (number | { value: number } | undefined);
+    return res ? typeof res === 'number' ? res : res.value : 0;
   }
 
   // Query Crud
@@ -428,7 +430,7 @@ export class ElasticsearchModelService implements
     };
 
     const res = await this.execSearch(cls, search);
-    const { buckets } = res.body.aggregations[field];
+    const { buckets } = res.body.aggregations[field as string];
     const out = buckets.map(b => ({ key: b.key, count: b.doc_count }));
     return out;
   }

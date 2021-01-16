@@ -1,7 +1,7 @@
 import { Injectable } from '@travetto/di';
 import { ExpressRestServer } from '@travetto/rest-express';
 
-declare let rateLimit: any;
+declare let rateLimit: (config: { windowMs: number, max: number }) => ((req: Express.Request, res: Express.Response) => void);
 
 @Injectable({ primary: true })
 class CustomRestServer extends ExpressRestServer {

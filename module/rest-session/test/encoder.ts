@@ -4,6 +4,7 @@ import * as assert from 'assert';
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
+import { Request, Response } from '@travetto/rest';
 
 import { RequetSessionEncoder } from '../src/encoder/request';
 import { Session } from '../src/types';
@@ -24,13 +25,13 @@ export class EncoderTest {
     const config = await DependencyRegistry.getInstance(SessionConfig);
     config.transport = 'header';
 
-    const headers: Record<string, any> = {};
+    const headers: Record<string, string> = {};
 
-    await instance.encode({} as any, {
-      setHeader(key: string, value: any) {
+    await instance.encode({} as Request, {
+      setHeader(key: string, value: string) {
         headers[key] = value;
       }
-    } as any, new Session({
+    } as Response, new Session({
       key: 'true',
       data: {
         data: 'hello'
@@ -46,13 +47,13 @@ export class EncoderTest {
     const config = await DependencyRegistry.getInstance(SessionConfig);
     config.transport = 'header';
 
-    const headers: Record<string, any> = {};
+    const headers: Record<string, string> = {};
 
-    await instance.encode({} as any, {
-      setHeader(key: string, value: any) {
+    await instance.encode({} as Request, {
+      setHeader(key: string, value: string) {
         headers[key] = value;
       }
-    } as any, null);
+    } as Response, null);
 
     assert(headers[config.keyName] === undefined);
   }

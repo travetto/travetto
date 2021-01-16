@@ -7,7 +7,7 @@ import { ModelExpirySupport } from '../src/service/expiry';
 import { BaseModel } from '../src/types/base';
 import { BaseModelSuite } from './base';
 
-@Model()
+@Model('expiry-user')
 class User extends BaseModel {
 }
 

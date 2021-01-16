@@ -5,7 +5,7 @@ export interface CoreCacheConfig {
   /**
    * A method for converting the input params into the final set of param keys
    */
-  params?: (...params: any[]) => any[];
+  params?: (...params: any[]) => unknown[];
   /**
    * Takes in a set of params and produce the unique cache key
    */
@@ -18,7 +18,7 @@ export interface CoreCacheConfig {
   /**
    * How to reconstitute the cached value after JSON.parse
    */
-  reinstate?: (input: any) => any;
+  reinstate?: (input: unknown) => unknown;
 }
 
 /**

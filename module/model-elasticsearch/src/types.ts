@@ -1,5 +1,5 @@
 type Agg =
-  Record<any, {
+  Record<string, {
     buckets: { doc_count: number, key: string }[];
   }>;
 

@@ -111,7 +111,7 @@ class $Logger {
   /**
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
-  onLog(level: LogLevel, { file, line, scope }: LineContext, [message, context, ...args]: [string, MessageContext, ...any[]]): void {
+  onLog(level: LogLevel, { file, line, scope }: LineContext, [message, context, ...args]: [string, MessageContext, ...unknown[]]): void {
     level = (level in LogLevels) ? level : 'info';
 
     const category = SystemUtil.computeModule(file);

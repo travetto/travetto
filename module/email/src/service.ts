@@ -39,7 +39,7 @@ export class MailService {
   /**
    * Send a pre compiled email that has a relevant html, subject and optional text file associated
    */
-  async sendCompiled(key: string, msg: Omit<MessageOptions, 'html' | 'text' | 'subject'>): Promise<any> {
+  async sendCompiled(key: string, msg: Omit<MessageOptions, 'html' | 'text' | 'subject'>): Promise<unknown> {
     if (!EnvUtil.isReadonly() || !this.compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         ResourceManager.read(`${key}.compiled.html`, 'utf8'),
@@ -55,7 +55,7 @@ export class MailService {
   /**
    * Send a single message
    */
-  async send(msg: MessageOptions): Promise<any> {
+  async send(msg: MessageOptions): Promise<unknown> {
     // Template if context is provided
     if (msg.context) {
       const [html, text, subject] = await Promise.all([

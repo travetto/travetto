@@ -13,16 +13,16 @@ export class RouteUtil {
    * Create a full filter chain given the provided filters
    * @param filters Filters to chain
    */
-  static createFilterChain(filters: (Filter | RestInterceptor['intercept'])[]): Filter<Promise<any>> {
+  static createFilterChain(filters: (Filter | RestInterceptor['intercept'])[]): Filter {
     const max = filters.length - 1;
-    return function filterChain(req: Request, res: Response, idx: number = 0): Promise<any> | any {
-      const it = filters[idx];
-      const next = idx === max ? (x?: any) => x : filterChain.bind(null, req, res, idx + 1);
+    return function filterChain(req: Request, res: Response, idx: number = 0): Promise<unknown | void> | unknown {
+      const it = filters[idx]!;
+      const next = idx === max ? (x?: unknown) => x : filterChain.bind(null, req, res, idx + 1);
       if (it.length === 3) {
         return it(req, res, next);
       } else {
-        const out = it(req, res);
-        return out?.then(next) ?? next();
+        const out = (it as Filter)(req, res);
+        return (out as Promise<unknown>)?.then(next) ?? next();
       }
     };
   }
@@ -36,7 +36,7 @@ export class RouteUtil {
   static createRouteHandler(
     interceptors: RestInterceptor[],
     route: RouteConfig | EndpointConfig,
-    router: Partial<ControllerConfig> = {}): Filter<any> {
+    router: Partial<ControllerConfig> = {}): Filter {
 
     const handlerBound = async (req: Request, res: Response) => {
       const params = ParamUtil.extractParams(route.params, req, res);
@@ -63,7 +63,7 @@ export class RouteUtil {
     ];
 
     if (headers && Object.keys(headers).length > 0) {
-      filterChain.unshift((async (__: Request, res: Response, next: () => Promise<any>) => {
+      filterChain.unshift((async (__: Request, res: Response, next: () => Promise<unknown | void>) => {
         res[HeadersAddedSym] = { ...headers };
         return next();
       }));

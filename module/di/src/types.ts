@@ -1,11 +1,11 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 
-export type ClassTarget<T> = Class<T> | Function;
+export type ClassTarget<T = unknown> = Class<T> | Function;
 
 /**
  * State of a Dependency
  */
-interface Core<T = any> {
+interface Core<T = unknown> {
   /**
    * Actual reference to a Class
    */
@@ -19,7 +19,7 @@ interface Core<T = any> {
 /**
  * State of a Dependency
  */
-export interface Dependency<T = any> extends Core<T> {
+export interface Dependency<T = unknown> extends Core<T> {
   /**
    * Whether or not the dependency is optional
    */
@@ -29,7 +29,7 @@ export interface Dependency<T = any> extends Core<T> {
 /**
  * Injectable configuration
  */
-export interface InjectableConfig<T = any> extends Core<T> {
+export interface InjectableConfig<T = unknown> extends Core<T> {
   /**
    * Reference for the class
    */
@@ -37,7 +37,7 @@ export interface InjectableConfig<T = any> extends Core<T> {
   /**
    * Factory function for the injectable
    */
-  factory?: (...args: any[]) => T;
+  factory?: (...args: unknown[]) => T;
   /**
    * Is this the primary instance
    */
@@ -46,8 +46,8 @@ export interface InjectableConfig<T = any> extends Core<T> {
    * List of dependencies as fields or as constructor arguments
    */
   dependencies: {
-    cons?: Dependency<any>[];
-    fields: Record<string, Dependency<any>>;
+    cons?: Dependency[];
+    fields: Record<string, Dependency>;
   };
   /**
    * List of interface types
@@ -58,7 +58,7 @@ export interface InjectableConfig<T = any> extends Core<T> {
 /**
  * Factory configuration
  */
-export interface InjectableFactoryConfig<T> extends Core<T> {
+export interface InjectableFactoryConfig<T = unknown> extends Core<T> {
   /**
    * Src of the factory method
    */
@@ -70,5 +70,5 @@ export interface InjectableFactoryConfig<T> extends Core<T> {
   /**
    * List of all dependencies as function arguments
    */
-  dependencies?: Dependency<any>[];
+  dependencies?: Dependency[];
 }

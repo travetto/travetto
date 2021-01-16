@@ -12,7 +12,7 @@ export class MockService {
 
   }
 
-  async fetchImage(path: string, opts: Record<string, any>) {
+  async fetchImage(path: string, opts: object) {
 
   }
 }

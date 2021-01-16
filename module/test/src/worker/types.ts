@@ -3,7 +3,7 @@
  */
 export type RunEvent = {
   file?: string;
-  error?: any;
+  error?: unknown;
   class?: string;
   method?: string;
   mode?: 'extension' | 'standard';

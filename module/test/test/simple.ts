@@ -1,16 +1,16 @@
 import { Suite, Test, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../';
 import * as assert from 'assert';
 
-let a: any = 0; a = 1;
+let a: unknown = 0; a = 1;
 
 const BIG = { age: 5 };
 const BIGGER: object = { age: 6 };
 
 class Alt {
-  includes(o: any): boolean {
+  includes(o: unknown): boolean {
     return true;
   }
-  test(o: any): boolean {
+  test(o: unknown): boolean {
     return true;
   }
 }
@@ -122,7 +122,7 @@ class Simple {
 
     assert.throws(() => {
       throw new Error('Big Error');
-    }, (err: any) =>
+    }, (err: Error) =>
       err.message.startsWith('Big') && err.message.length > 4 ? undefined : err
     );
   }

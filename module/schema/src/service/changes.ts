@@ -1,4 +1,5 @@
-import { ChangeEvent, Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
+import { ChangeEvent } from '@travetto/registry';
 import { FieldConfig, ALL_VIEW, ClassConfig } from './types';
 import { EventEmitter } from 'events';
 

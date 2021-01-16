@@ -1,3 +1,4 @@
+import { Class } from '@travetto/base';
 import { ConfigManager } from './manager';
 
 /**
@@ -6,9 +7,9 @@ import { ConfigManager } from './manager';
  * @augments `@trv:config/Config`
  * @augments `@trv:di/Injectable`
  */
-export function Config(ns: string, depTarget?: new (...args: any[]) => any, name: string = '') {
+export function Config(ns: string, depTarget?: Class, name: string = '') {
 
-  return (target: new (...args: any[]) => any) => {
+  return (target: Class) => {
     const og = target.prototype.postConstruct;
 
     target.prototype.postConstruct = function () {

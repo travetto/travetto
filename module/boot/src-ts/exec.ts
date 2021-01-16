@@ -5,7 +5,7 @@ import { StreamUtil } from './stream';
 declare module 'worker_threads' {
   // eslint-disable-next-line no-shadow
   interface WorkerOptions {
-    argv?: any[];
+    argv?: string[];
   }
 }
 
@@ -44,7 +44,7 @@ export interface ExecutionResult {
  */
 export interface ExecutionState {
   process: ChildProcess;
-  result: Promise<ExecutionResult>;
+  result: Promise<ExecutionResult> & { catchAsResult(): Promise<ExecutionResult> };
 }
 
 /**
@@ -103,13 +103,13 @@ export class ExecUtil {
    * @param options The options to use to ehance the process
    * @param cmd The command being run
    */
-  static enhanceProcess(p: ChildProcess, options: ExecutionOptions, cmd: string) {
+  static enhanceProcess(p: ChildProcess, options: ExecutionOptions, cmd: string): ExecutionState['result'] {
     const timeout = options.timeout;
 
     const prom = new Promise<ExecutionResult>((resolve, reject) => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
-      let timer: any;
+      let timer: NodeJS.Timeout;
       let done = false;
       const finish = function (result: Omit<ExecutionResult, 'stderr' | 'stdout'>) {
         if (done) {
@@ -130,7 +130,7 @@ export class ExecUtil {
           process.exit(final.code);
         } else if (!final.valid) {
           const err = new Error(`Error executing ${cmd}: ${final.message || final.stderr || final.stdout || 'failed'}`);
-          (err as any).meta = final;
+          (err as unknown as { meta: ExecutionResult }).meta = final;
           reject(err);
         } else {
           resolve(final);
@@ -164,7 +164,9 @@ export class ExecUtil {
       }
     });
 
-    return prom;
+    const res = prom as ExecutionState['result'];
+    res.catchAsResult = () => res.catch(e => (e as { meta: ExecutionResult }).meta);
+    return res;
   }
 
   /**
@@ -198,7 +200,7 @@ export class ExecUtil {
    * @param args The arguments to pass in
    * @param options The worker options
    */
-  static worker<T = any>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
+  static worker<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
     if (!file.endsWith('.js')) {
       file = require.resolve(file);
     }

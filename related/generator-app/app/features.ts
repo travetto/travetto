@@ -5,7 +5,7 @@ export type Feature = {
   addons?: Feature[];
   choices?: Feature[];
   external?: boolean;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   default?: string;
 };
 

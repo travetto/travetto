@@ -8,6 +8,7 @@ import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../base';
 import { VisitStack } from '../../internal/util';
 import { MySQLConnection } from './connection';
+import { WhereClause } from '@travetto/model-query';
 
 /**
  * MYSQL Dialect for the SQL Model Source
@@ -80,7 +81,7 @@ export class MySQLDialect extends SQLDialect {
   /**
    * Add root alias to delete clause
    */
-  getDeleteSQL(stack: VisitStack[], where?: /* WhereClause<any>*/ any) {
+  getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>) {
     const sql = super.getDeleteSQL(stack, where);
     return sql.replace(/\bDELETE\b/g, `DELETE ${this.rootAlias}`);
   }

@@ -1,6 +1,7 @@
 import * as os from 'os';
 
-import { RootRegistry, MethodSource, Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
+import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, IterableInputSource, DynamicAsyncIterator } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';

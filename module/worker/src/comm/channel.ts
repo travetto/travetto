@@ -1,9 +1,13 @@
 import { ChildProcess } from 'child_process';
 
+function isPromise(o: unknown): o is Promise<unknown> {
+  return !!o && 'catch' in (o as object);
+}
+
 /**
  * Channel that represents communication between parent/child
  */
-export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any, U extends { type: string } = V & { type: string }> {
+export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unknown, U extends { type: string } = V & { type: string }> {
 
   proc: T | undefined;
 
@@ -36,7 +40,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
   /**
    * Send data to the parent
    */
-  send(eventType: string, data?: any) {
+  send(eventType: string, data?: Record<string, unknown>) {
     console.debug('Sending', { pid: this.parentId, id: this.id, eventType });
     if (!this.proc) {
       throw new Error('this.proc was not defined');
@@ -51,8 +55,8 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
    * Listen for an event, once
    */
   listenOnce(eventType: string): Promise<U>;
-  listenOnce(eventType: string, callback: (e: U) => any): void;
-  listenOnce(eventType: string, callback?: (e: U) => any) {
+  listenOnce(eventType: string, callback: (e: U) => unknown | void): void;
+  listenOnce(eventType: string, callback?: (e: U) => unknown | void) {
     if (callback) {
       return this.listenFor(eventType, (d, kill) => {
         kill!();
@@ -71,7 +75,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
   /**
    * Remove a specific listener
    */
-  removeListener(fn: (e: U) => any) {
+  removeListener(fn: (e: U) => unknown | void) {
     if (this.proc) {
       this.proc.removeListener('message', fn);
     }
@@ -80,7 +84,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
   /**
    * Listen for a specific message type
    */
-  listenFor(eventType: string, callback: (e: U, complete: Function) => any) {
+  listenFor(eventType: string, callback: (e: U, complete: Function) => unknown | void) {
     const fn = (event: U, kill: Function) => {
       if (event.type === eventType) {
         callback(event, kill);
@@ -92,14 +96,14 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
   /**
    * Listen, and return a handle to remove listener when desired
    */
-  listen(handler: (e: U, complete: Function) => any) {
+  listen(handler: (e: U, complete: Function) => unknown | void) {
     if (!this.proc) {
       return;
     }
 
     const holder: { fn?(e: U): void } = {};
 
-    const kill = (e?: any) => {
+    const kill = (e?: unknown) => {
       this.removeListener(holder.fn!);
     };
 
@@ -107,7 +111,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = any
       let res;
       try {
         res = handler(e, kill);
-        if (res && res.catch) {
+        if (isPromise(res)) {
           res.catch(kill);
         }
       } catch (err) {

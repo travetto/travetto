@@ -1,5 +1,5 @@
-import { AppError } from '@travetto/base';
-import { MetadataRegistry, RootRegistry, Class, ChangeEvent } from '@travetto/registry';
+import { Class, AppError } from '@travetto/base';
+import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 import { ClassList, FieldConfig, ClassConfig, ALL_VIEW, SchemaConfig, ViewFieldsConfig } from './types';
 import {
   SchemaChangeListener,
@@ -7,8 +7,8 @@ import {
   SCHEMA_CHANGE_EVENT, FIELD_CHANGE_EVENT
 } from './changes';
 
-function hasType<T>(o: any): o is { type: Class<T> | string } {
-  return 'type' in o && o.type;
+function hasType<T>(o: unknown): o is { type: Class<T> | string } {
+  return !!o && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
 }
 
 /**
@@ -18,7 +18,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
   subTypes = new Map<Class, Map<string, Class>>();
   typeKeys = new Map<Class, string>();
-  pendingViews = new Map<Class, Map<string, ViewFieldsConfig<any>>>();
+  pendingViews = new Map<Class, Map<string, ViewFieldsConfig<unknown>>>();
 
   constructor() {
     super(RootRegistry);
@@ -38,7 +38,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param cls The base class
    * @param type The sub tye value
    */
-  resolveSubType(cls: Class, type: Class | string): Class<any> {
+  resolveSubType(cls: Class, type: Class | string): Class {
     if (this.subTypes.has(cls)) {
       const typeId = type && (typeof type === 'string' ? type : type.ᚕid);
       if (type) {
@@ -147,7 +147,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (!this.pendingViews.has(target)) {
       this.pendingViews.set(target, new Map());
     }
-    this.pendingViews.get(target)!.set(view, fields);
+    this.pendingViews.get(target)!.set(view, fields as ViewFieldsConfig<unknown>);
   }
 
   /**
@@ -210,14 +210,14 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    */
   finalizeViews<T>(target: Class<T>, conf: ClassConfig) {
     const allViewConf = conf.views![ALL_VIEW];
-    const pending = this.pendingViews.get(target) ?? new Map();
+    const pending = this.pendingViews.get(target) ?? new Map<string, ViewFieldsConfig<unknown>>();
     this.pendingViews.delete(target);
 
     for (const [view, fields] of pending.entries()) {
-      const withoutSet = fields.without ? new Set(fields.without as string[]) : undefined;
+      const withoutSet = 'without' in fields ? new Set(fields.without as string[]) : undefined;
       const fieldList = withoutSet ?
         allViewConf.fields.filter(x => !withoutSet.has(x)) :
-        fields.with as string[];
+        ('with' in fields ? fields.with as string[] : []);
 
       conf.views![view] = {
         fields: fieldList as string[],
@@ -303,7 +303,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * On schema field change, emit the change event for the whole schema
    * @param cb The function to call on schema field change
    */
-  onFieldChange(callback: (e: FieldChangeEvent) => any): void {
+  onFieldChange(callback: (e: FieldChangeEvent) => unknown): void {
     SchemaChangeListener.on(FIELD_CHANGE_EVENT, callback);
   }
 

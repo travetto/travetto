@@ -11,19 +11,21 @@ const HS: AlgType[] = ['HS256', 'HS384', 'HS512'];
 /**
  * Verify signature types
  */
-function verifyTypes(o: any): o is Payload {
+function verifyTypes(o: unknown) {
+  const p = o as Payload;
+
   for (const [t, f] of [
     ['string', ['iss', 'sub', 'jti', 'kid']],
     ['number', ['iat', 'nbf', 'exp']]
   ]) {
     for (const k of f) {
-      if (k in o && typeof o[k] !== t) {
-        throw new JWTError(`invalid payload claim, "${k}" should be of type ${t}, but was ${typeof o[k]}`);
+      if (k in p && typeof p[k] !== t) {
+        throw new JWTError(`invalid payload claim, "${k}" should be of type ${t}, but was ${typeof p[k]}`);
       }
     }
   }
-  if ('aud' in o && !((typeof o.aud === 'string') || Array.isArray(o.aud))) {
-    throw new JWTError(`invalid payload claim, "aud" should be of type string|string[], but was ${typeof o.aud}`);
+  if ('aud' in p && !((typeof p.aud === 'string') || Array.isArray(p.aud))) {
+    throw new JWTError(`invalid payload claim, "aud" should be of type string|string[], but was ${typeof p.aud}`);
   }
   return o;
 }

@@ -38,8 +38,8 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
   /**
    * Support some basic type support for JSON data
    */
-  typeCast(field: Parameters<Exclude<mysql.TypeCast, boolean>>[0], next: () => void) {
-    const res: any = next();
+  typeCast(field: Parameters<Exclude<mysql.TypeCast, boolean>>[0], next: () => unknown) {
+    const res = next();
     if (typeof res === 'string' && (field.type === 'JSON' || field.type === 'BLOB')) {
       if (res.charAt(0) === '{' && res.charAt(res.length - 1) === '}') {
         try {
@@ -50,7 +50,7 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
     return res;
   }
 
-  async execute<T = any>(conn: mysql.Connection, query: string): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(conn: mysql.Connection, query: string): Promise<{ count: number, records: T[] }> {
     return new Promise<{ count: number, records: T[] }>((res, rej) => {
       console.debug('Executing Query', { query });
       conn.query(query, (err, results, fields) => {

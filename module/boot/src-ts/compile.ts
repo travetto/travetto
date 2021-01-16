@@ -7,9 +7,9 @@ import { EnvUtil } from './env';
 
 type Module = {
   loaded?: boolean;
-  _load?(req: string, parent: Module): any;
+  _load?(req: string, parent: Module): unknown;
   _resolveFilename?(req: string, parent: Module): string;
-  _compile?(contents: string, file: string): any;
+  _compile?(contents: string, file: string): unknown;
 } & NodeJS.Module;
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
@@ -30,15 +30,15 @@ let PKG: { name: string, main: string };
 export class CompileUtil {
   private static ogModuleLoad = Module._load!.bind(Module);
   private static ogResolveFilename = Module._resolveFilename!.bind(Module);
-  private static moduleHandlers: ((name: string, o: any) => any)[] = [];
+  private static moduleHandlers: ((name: string, o: unknown) => unknown)[] = [];
 
   /**
    * When a module load is requested
    * @param request path to file
    * @param parent parent Module
    */
-  private static onModuleLoad(request: string, parent: Module): any {
-    let mod: any;
+  private static onModuleLoad(request: string, parent: Module): unknown {
+    let mod: unknown;
     try {
       mod = this.ogModuleLoad.apply(null, [request, parent]);
       if (parent && !parent.loaded) { // Standard ts compiler output
@@ -144,7 +144,7 @@ export class CompileUtil {
    *
    * @param handler The code to run on post module load
    */
-  static addModuleHandler(handler: (name: string, o: any) => any) {
+  static addModuleHandler(handler: (name: string, o: unknown) => unknown) {
     this.moduleHandlers.push(handler);
   }
 

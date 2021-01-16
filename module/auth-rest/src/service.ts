@@ -1,7 +1,6 @@
-import { AppError } from '@travetto/base';
+import { AppError, Class } from '@travetto/base';
 import { Request, Response } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { Class } from '@travetto/registry';
 import { AuthContext } from '@travetto/auth/src/context';
 import { PrincipalSource } from '@travetto/auth';
 
@@ -20,7 +19,7 @@ export class AuthService {
 
   async postConstruct() {
     // Find all identity sources
-    for (const source of DependencyRegistry.getCandidateTypes<IdentitySource>(IdentitySourceTarget)) {
+    for (const source of DependencyRegistry.getCandidateTypes<IdentitySource>(IdentitySourceTarget as unknown as Class<IdentitySource>)) {
       const dep = await DependencyRegistry.getInstance<IdentitySource>(IdentitySourceTarget, source.qualifier);
       this.identitySources.set(source.qualifier.toString(), dep);
     }

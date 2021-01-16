@@ -46,7 +46,7 @@ export class InjectableTransformer {
   static registerInjectable(state: TransformerState, node: ts.ClassDeclaration) {
     const cons = node.members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
     const injectArgs = cons &&
-      state.fromLiteral(cons.parameters.map(x => InjectableTransformer.processDeclaration(state, x)));
+      state.fromLiteral(cons.parameters.map(x => this.processDeclaration(state, x)));
 
     // Extract all interfaces
     const interfaces: ts.Node[] = [];
@@ -114,7 +114,7 @@ export class InjectableTransformer {
     const dec = dm?.dec;
 
     // Extract config
-    const dependencies = node.parameters.map(x => InjectableTransformer.processDeclaration(state, x));
+    const dependencies = node.parameters.map(x => this.processDeclaration(state, x));
 
     // Read target from config or resolve
     let target;

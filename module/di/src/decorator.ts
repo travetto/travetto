@@ -1,9 +1,9 @@
-import { Class } from '@travetto/registry';
+import { Class, ClassInstance } from '@travetto/base';
 
 import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry } from './registry';
 
-function extractSymbolOrConfig<T extends { qualifier?: symbol }>(args: any[]) {
+function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Partial<InjectConfig> | undefined)[]) {
   let out = {} as T;
   if (args) {
     if (Array.isArray(args)) {
@@ -26,22 +26,22 @@ function extractSymbolOrConfig<T extends { qualifier?: symbol }>(args: any[]) {
  *
  * @augments `@trv:di/Injectable`
  */
-export function Injectable(first?: Partial<InjectableConfig<any>> | symbol, ...args: (Partial<InjectableConfig<any>> | undefined)[]): ClassDecorator {
-  return (target: Class | any) => {
-    const config = extractSymbolOrConfig([first, ...args]) as Partial<InjectableConfig<any>>;
+export function Injectable(first?: Partial<InjectableConfig> | symbol, ...args: (Partial<InjectableConfig> | undefined)[]) {
+  return <T>(target: Class) => {
+    const config = collapseConfig(first, ...args) as Partial<InjectableConfig>;
 
     config.class = target;
-    DependencyRegistry.registerClass(target, config as InjectableConfig<any>);
+    DependencyRegistry.registerClass(target, config as InjectableConfig);
     return target;
   };
 }
 
 export type InjectConfig = { qualifier?: symbol, optional?: boolean };
 
-export function InjectArgs(configs?: InjectConfig[][]): ClassDecorator {
-  return (target: any) => {
+export function InjectArgs(configs?: InjectConfig[][]) {
+  return (target: Class) => {
     DependencyRegistry.registerConstructor(target,
-      configs?.map(x => extractSymbolOrConfig(x)));
+      configs?.map(x => collapseConfig(...x)));
   };
 }
 
@@ -50,14 +50,13 @@ export function InjectArgs(configs?: InjectConfig[][]): ClassDecorator {
  *
  * @augments `@trv:di/Inject`
  */
-export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | undefined)[]): ParameterDecorator & PropertyDecorator {
-
-  return (target: any, propertyKey: string | symbol, idx?: number) => {
+export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | undefined)[]) {
+  return (target: unknown, propertyKey: string | symbol, idx?: number) => {
     if (typeof idx !== 'number') { // Only register if on property
-      const config: InjectConfig = extractSymbolOrConfig([first, ...args]);
+      const config: InjectConfig = collapseConfig(first, ...args);
 
       DependencyRegistry.registerProperty(
-        target.constructor,
+        (target as ClassInstance).constructor,
         propertyKey as string,
         config as Dependency);
     }
@@ -69,14 +68,12 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
  *
  * @augments `@trv:di/InjectableFactory`
  */
-export function InjectableFactory(first?: Partial<InjectableFactoryConfig<any>> | symbol,
-  ...args: (Partial<InjectableFactoryConfig<any>> | undefined)[]): MethodDecorator {
-
-  return (target: any, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
-    const config: InjectableFactoryConfig<any> = extractSymbolOrConfig([first, ...args]);
+export function InjectableFactory(first?: Partial<InjectableFactoryConfig> | symbol, ...args: (Partial<InjectableFactoryConfig> | undefined)[]) {
+  return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
+    const config: InjectableFactoryConfig = collapseConfig(first, ...args);
     DependencyRegistry.registerFactory({
       ...config,
-      dependencies: config.dependencies?.map(x => extractSymbolOrConfig(x as unknown as any[])),
+      dependencies: config.dependencies?.map(x => Array.isArray(x) ? collapseConfig(...x) : collapseConfig(x)),
       fn: descriptor.value,
       id: `${target.ᚕid}#${property.toString()}`
     });

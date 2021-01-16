@@ -5,11 +5,11 @@ import { AppManifest } from './manifest';
 const ogExit = process.exit;
 
 export type Closeable = {
-  close(cb?: Function): any;
+  close(cb?: Function): unknown;
   name?: string;
 };
 
-type UnhandledHandler = (err: Error, prom?: Promise<any>) => boolean | undefined | void;
+type UnhandledHandler = (err: Error, prom?: Promise<unknown>) => boolean | undefined | void;
 type Listener = { name: string, handler: Function, final?: boolean };
 
 /**
@@ -30,7 +30,7 @@ class $ShutdownManager {
   private unhandled: UnhandledHandler[] = [];
 
   private async getAvailableListeners(exitCode: number) {
-    const promises: Promise<any>[] = [];
+    const promises: Promise<unknown>[] = [];
 
     // Get valid listeners depending on lifecycle
     const listeners = this.listeners.filter(x => exitCode >= 0 || !x.final);
@@ -47,10 +47,10 @@ class $ShutdownManager {
         const res = handler();
         if (res && res.then) {
           // If a promise, queue for handling
-          promises.push(res as Promise<any>);
+          promises.push(res as Promise<unknown>);
           res
             .then(() => console.debug('Completed', { name }))
-            .catch((e: any) => console.error('Failed', { error: e, name }));
+            .catch((e: unknown) => console.error('Failed', { error: e, name }));
         } else {
           console.debug('Completed', { name });
         }
@@ -62,7 +62,7 @@ class $ShutdownManager {
     return promises;
   }
 
-  async executeAsync(exitCode: number = 0, err?: any) {
+  async executeAsync(exitCode: number = 0, err?: unknown) {
 
     if (this.shutdownCode > 0) { // Killed twice
       if (exitCode > 0) { // Handle force kill
@@ -104,7 +104,7 @@ class $ShutdownManager {
   /**
    * Begin shutdown process with a given exit code and possible error
    */
-  execute(exitCode: number = 0, err?: any) {
+  execute(exitCode: number = 0, err?: unknown) {
     this.executeAsync(exitCode, err); // Fire and forget
   }
 

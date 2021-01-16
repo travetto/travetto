@@ -9,7 +9,7 @@ export interface FilePresenceManager {
   on(type: 'removed', handlder: (entry: ScanEntry) => void): this;
   on(type: 'removedDir', handlder: (entry: ScanEntry) => void): this;
   on(type: 'changed', handlder: (entry: ScanEntry) => void): this;
-  on(type: string | symbol, handler: (...payload: any[]) => void): this;
+  on(type: string | symbol, handler: (payload: ScanEntry | { event: string, entry: ScanEntry }) => void): this;
 }
 
 type Opts = WatcherOptions & {

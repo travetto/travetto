@@ -1,6 +1,6 @@
 import { Util } from '@travetto/base';
 
-type SerializableType = Error & { stack?: any } | RegExp | Function | Set<any> | Map<string, any> | number | boolean | null | string | object;
+type SerializableType = (Error & { stack: SerializableType }) | RegExp | Function | Set<unknown> | Map<string, unknown> | number | boolean | null | string | object;
 
 /**
  * Handles serialization of object to YAML output
