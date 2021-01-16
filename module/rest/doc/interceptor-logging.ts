@@ -2,7 +2,7 @@ import { Request, Response, RestInterceptor } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
 class Appender {
-  write(...args: any[]): void { }
+  write(...args: unknown[]): void { }
 }
 
 @Injectable()

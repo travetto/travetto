@@ -7,7 +7,7 @@ import { BaseModel } from '../src/types/base';
 import { ModelBulkSupport } from '../src/service/bulk';
 import { BaseModelSuite } from './base';
 
-@Model()
+@Model('bulk-user')
 class User extends BaseModel {
   name?: string;
 }

@@ -1,13 +1,19 @@
+import { ClassInstance } from '@travetto/base';
+
 import { MethodOrAll, PathType, RouteHandler } from '../types';
 
 import { ControllerRegistry } from '../registry/controller';
-import { EndpointConfig, EndpointIOType, EndpointDecorator } from '../registry/types';
+import { EndpointConfig, EndpointIOType } from '../registry/types';
 
 function Endpoint(method: MethodOrAll, path: PathType = '/', extra: Partial<EndpointConfig> = {}) {
-  return function (target: any, prop: symbol | string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
-    const ret = ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { method, path, ...extra });
+  return function <T>(target: T, prop: symbol | string,
+    descriptor: TypedPropertyDescriptor<RouteHandler>
+  ) {
+    const ret = ControllerRegistry.registerPendingEndpoint(
+      (target as unknown as ClassInstance).constructor, descriptor, { method, path, ...extra }
+    );
     return ret;
-  } as EndpointDecorator;
+  };
 }
 
 /**
@@ -64,9 +70,9 @@ export function Options(path?: PathType) { return Endpoint('options', path); }
  * @param responseType The desired response mime type
  */
 export function ResponseType(responseType: EndpointIOType) {
-  return function (target: any, property: string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
+  return function <T>(target: ClassInstance<T>, property: string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
     return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { responseType });
-  } as EndpointDecorator;
+  };
 }
 
 /**
@@ -74,7 +80,7 @@ export function ResponseType(responseType: EndpointIOType) {
  * @param requestType The type of the request body
  */
 export function RequestType(requestType: EndpointIOType) {
-  return function (target: any, property: string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
+  return function <T>(target: ClassInstance<T>, property: string, descriptor: TypedPropertyDescriptor<RouteHandler>) {
     return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, { requestType });
-  } as EndpointDecorator;
+  };
 }

@@ -18,7 +18,7 @@ class TestRunnerFeature extends BaseFeature {
   private server: ProcessServer;
   private consumer = new WorkspaceResultsManager(vscode.window);
   private cacheDir = `${Workspace.path}/.trv_cache_plugin`;
-  private codeLensUpdated: (e: void) => any;
+  private codeLensUpdated: (e: void) => unknown;
 
   constructor(
     module?: string,

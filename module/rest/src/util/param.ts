@@ -1,15 +1,14 @@
-import { AppError, Util } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, AppError, Util } from '@travetto/base';
 
 import { ParamConfig, Request, Response } from '../types';
 
-export type ExtractFn = (c: ParamConfig, req: Request, res: Response) => any;
+export type ExtractFn = (c: ParamConfig, req: Request, res: Response) => unknown;
 
 /**
  * Parameter utils
  */
 export class ParamUtil {
-  static CONTEXT_REGISTRY = new Map<Class<any>, ExtractFn>();
+  static CONTEXT_REGISTRY = new Map<Class, ExtractFn>();
 
   /**
    * Get the provider for a given input
@@ -19,7 +18,7 @@ export class ParamUtil {
   static provider(type: Class, fn: ExtractFn): Function;
   static provider(fnOrType: ExtractFn): Function;
   static provider(fnOrType: ExtractFn | Class, fn?: ExtractFn) {
-    return (target: any) => this.registerContext(target, fnOrType, fn);
+    return (target: Class) => this.registerContext(target, fnOrType, fn);
   }
 
   /**
@@ -56,14 +55,14 @@ export class ParamUtil {
    * @param config The param config
    * @param paramValue The value provided
    */
-  static convertValue(config: ParamConfig, paramValue: any) {
+  static convertValue(config: ParamConfig, paramValue: unknown) {
     if (paramValue !== undefined && paramValue !== null) {
       try {
         if (config.array) {
           if (!Array.isArray(paramValue)) {
             paramValue = [paramValue];
           }
-          paramValue = paramValue.map((x: any) => Util.coerceType(x, config.type));
+          paramValue = (paramValue as unknown[]).map(x => Util.coerceType(x, config.type));
         } else {
           paramValue = Util.coerceType(paramValue, config.type);
         }
@@ -81,7 +80,7 @@ export class ParamUtil {
    * @param res The response
    */
   static extractParams(configs: ParamConfig[], req: Request, res: Response) {
-    const params: any[] = [];
+    const params: unknown[] = [];
     for (const config of configs) {
       let paramValue = config.extract(config, req, res);
       if (paramValue === undefined) {

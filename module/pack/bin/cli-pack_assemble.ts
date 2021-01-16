@@ -1,4 +1,4 @@
 import { BasePackPlugin } from './pack-base';
-import { Assemble } from './operation/assemble';
+import { Assemble, AssembleConfig } from './operation/assemble';
 
-export class PackAssemblePlugin extends BasePackPlugin { operation = Assemble; }
+export class PackAssemblePlugin extends BasePackPlugin<AssembleConfig> { operation = Assemble; }

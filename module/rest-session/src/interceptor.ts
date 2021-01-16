@@ -18,7 +18,7 @@ export class SessionInterceptor implements RestInterceptor {
   @Inject()
   service: RestSessionService;
 
-  async intercept(req: Request, res: Response, next: () => Promise<any>) {
+  async intercept(req: Request, res: Response, next: () => Promise<unknown>) {
     try {
       this.service.configure(req);
       await this.service.loadFromExternal(req);

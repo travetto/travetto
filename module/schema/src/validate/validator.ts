@@ -1,5 +1,4 @@
-import { Util } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Util, Class, ClassInstance } from '@travetto/base';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
@@ -65,7 +64,7 @@ export class SchemaValidator {
           }
         } else {
           for (let i = 0; i < val.length; i++) {
-            const subErrors = this.validateField(fieldSchema, val[i], o);
+            const subErrors = this.validateField(fieldSchema, val[i]);
             errors.push(...this.prepareErrors(`${path}[${i}]`, subErrors));
           }
         }
@@ -73,7 +72,7 @@ export class SchemaValidator {
         const subErrors = this.validateSchema(resolveSchema(type, val), val, path);
         errors.push(...subErrors);
       } else {
-        const fieldErrors = this.validateField(fieldSchema, val, o);
+        const fieldErrors = this.validateField(fieldSchema, val);
         errors.push(...this.prepareErrors(path, fieldErrors));
       }
     }
@@ -87,11 +86,11 @@ export class SchemaValidator {
    * @param key The bounds to check
    * @param value The value to validate
    */
-  static validateRange(field: FieldConfig, key: 'min' | 'max', value: any) {
+  static validateRange(field: FieldConfig, key: 'min' | 'max', value: string | number | Date) {
     const f = field[key]!;
     if (typeof f.n === 'number') {
       if (typeof value !== 'number') {
-        value = parseInt(value, 10);
+        value = parseInt(value as string, 10);
       }
       if (field.type === Date) {
         value = new Date(value);
@@ -117,7 +116,7 @@ export class SchemaValidator {
    * @param field The config of the field to validate
    * @param value The actual value
    */
-  static validateField(field: FieldConfig, value: any, parent: any): ValidationResult[] {
+  static validateField(field: FieldConfig, value: unknown): ValidationResult[] {
     const criteria: ValidationKind[] = [];
 
     if (
@@ -152,15 +151,15 @@ export class SchemaValidator {
       criteria.push('maxlength');
     }
 
-    if (field.enum && !field.enum.values.includes(value)) {
+    if (field.enum && !field.enum.values.includes(value as string)) {
       criteria.push('enum');
     }
 
-    if (field.min && this.validateRange(field, 'min', value)) {
+    if (field.min && this.validateRange(field, 'min', value as number)) {
       criteria.push('min');
     }
 
-    if (field.max && this.validateRange(field, 'max', value)) {
+    if (field.max && this.validateRange(field, 'max', value as number)) {
       criteria.push('max');
     }
 
@@ -212,7 +211,7 @@ export class SchemaValidator {
    */
   static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
     if (!(o instanceof cls)) {
-      throw new TypeMismatchError(cls.name, (o as any).constructor.name);
+      throw new TypeMismatchError(cls.name, (o as unknown as ClassInstance).constructor.name);
     }
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
 

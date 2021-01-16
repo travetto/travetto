@@ -1,8 +1,9 @@
 import { EventEmitter } from 'events';
 
+import { Class } from '@travetto/base';
 import { Compiler } from '@travetto/compiler';
 
-import { Class, ChangeSource, ChangeEvent } from '../types';
+import { ChangeSource, ChangeEvent } from '../types';
 import { PendingRegister } from '../decorator';
 
 /**
@@ -45,7 +46,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Listen for a single file, and process all the classes within
    */
-  protected async handleFileChanges(file: string, classes: Class<any>[] = []) {
+  protected async handleFileChanges(file: string, classes: Class[] = []) {
     const next = new Map(classes.map(cls => [cls.ᚕid, cls] as [string, Class]));
 
     let prev = new Map<string, Class>();

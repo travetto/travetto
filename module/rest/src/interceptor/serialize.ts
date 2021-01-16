@@ -1,4 +1,4 @@
-import { AppError } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { RestInterceptor } from './types';
@@ -7,7 +7,7 @@ import { LoggingInterceptor } from './logging';
 import { Response, Request, HeadersAddedSym } from '../types';
 import { Renderable } from '../response/renderable';
 
-const isRenderable = (o: any): o is Renderable => !!o['render'];
+const isRenderable = (o: unknown): o is Renderable => !!o && 'render' in (o as object);
 
 /**
  * Serialization interceptor
@@ -32,7 +32,7 @@ export class SerializeInterceptor implements RestInterceptor {
    * @param res Outbound response
    * @param output The value to output
    */
-  static async sendOutput(req: Request, res: Response, output: any) {
+  static async sendOutput(req: Request, res: Response, output: unknown) {
     if (!res.headersSent) {
       if (output) {
         if (res[HeadersAddedSym]) {
@@ -46,7 +46,7 @@ export class SerializeInterceptor implements RestInterceptor {
           this.setContentTypeIfUndefined(res, 'text/plain');
           res.send(output);
         } else {
-          const payload = output.toJSON?.() ?? output;
+          const payload = Util.hasToJSON(output) ? output.toJSON() : output;
           this.setContentTypeIfUndefined(res, 'application/json');
           res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
         }
@@ -59,7 +59,7 @@ export class SerializeInterceptor implements RestInterceptor {
 
   after = [LoggingInterceptor];
 
-  async intercept(req: Request, res: Response, next: (() => Promise<any>)): Promise<any> {
+  async intercept(req: Request, res: Response, next: () => Promise<void | unknown>) {
     try {
       const output = await next();
       await SerializeInterceptor.sendOutput(req, res, output);

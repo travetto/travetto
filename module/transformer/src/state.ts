@@ -13,6 +13,14 @@ import { DecoratorUtil } from './util/decorator';
 import { DeclarationUtil } from './util/declaration';
 import { CoreUtil, LiteralUtil } from './util';
 
+function hasOriginal(n: unknown): n is { original: ts.Node } {
+  return !!n && !(n as { parent?: unknown }).parent && !!(n as { original: unknown }).original;
+}
+
+function hasEscapedName(n: unknown): n is { name: { escapedText: string } } {
+  return !!n && !!(n as { name?: { escapedText?: string } }).name?.escapedText;
+}
+
 /**
  * Transformer runtime state
  */
@@ -158,8 +166,8 @@ export class TransformerState implements State {
     const stmts = this.source.statements.slice(0);
     let idx = stmts.length;
     let n = before;
-    if (n && !n.parent && (n as any).original) {
-      n = (n as any).original;
+    if (hasOriginal(n)) {
+      n = n.original;
     }
     while (n && !ts.isSourceFile(n.parent)) {
       n = n.parent;
@@ -197,10 +205,10 @@ export class TransformerState implements State {
   fromLiteral(val: undefined): ts.Identifier;
   fromLiteral(val: null): ts.NullLiteral;
   fromLiteral(val: object): ts.ObjectLiteralExpression;
-  fromLiteral(val: any[]): ts.ArrayLiteralExpression;
+  fromLiteral(val: unknown[]): ts.ArrayLiteralExpression;
   fromLiteral(val: string | boolean | number): ts.LiteralExpression;
-  fromLiteral(val: any) {
-    return LiteralUtil.fromLiteral(this.factory, val);
+  fromLiteral(val: unknown): ts.Node {
+    return LiteralUtil.fromLiteral(this.factory, val as object);
   }
 
   /**
@@ -265,8 +273,8 @@ export class TransformerState implements State {
     }
     // Otherwise read name with uuid
     let name = type.name && !type.name.startsWith('_') ? type.name : '';
-    if (!name && (node as any).name?.escapedText) {
-      name = `${(node as any).name.escapedText}`;
+    if (!name && hasEscapedName(node)) {
+      name = `${node.name.escapedText}`;
     }
     return `${name}_${unique}`;
   }

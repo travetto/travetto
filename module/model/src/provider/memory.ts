@@ -1,6 +1,6 @@
-import { ChangeEvent, Class } from '@travetto/registry';
+import { ChangeEvent } from '@travetto/registry';
 import { StreamUtil } from '@travetto/boot';
-import { Util } from '@travetto/base';
+import { Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 

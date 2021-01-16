@@ -21,4 +21,4 @@ export type TestResultsEnhancer = typeof COLOR_ENHANCER;
  * Dummy enhancer does nothing
  */
 export const DUMMY_ENHANCER = (Object.keys(COLOR_ENHANCER) as (keyof typeof COLOR_ENHANCER)[])
-  .reduce((acc, k) => (acc[k] = (x: any) => `${x}`) && acc, {} as TestResultsEnhancer);
+  .reduce((acc, k) => (acc[k] = (x: unknown) => `${x}`) && acc, {} as TestResultsEnhancer);

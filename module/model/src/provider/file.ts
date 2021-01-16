@@ -2,9 +2,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { Class } from '@travetto/registry';
 import { FsUtil, StreamUtil } from '@travetto/boot';
-import { Util } from '@travetto/base';
+import { Class, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 

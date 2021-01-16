@@ -1,5 +1,4 @@
-import { Class } from '@travetto/registry';
-import { AppError } from '@travetto/base';
+import { Class, AppError } from '@travetto/base';
 
 /**
  * Common model utils, that should be usable by end users

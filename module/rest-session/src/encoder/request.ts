@@ -16,7 +16,7 @@ export class RequetSessionEncoder implements SessionEncoder {
   @Inject()
   config: SessionConfig;
 
-  async encode(req: Request, res: Response, session: Session<any> | null): Promise<void> {
+  async encode(req: Request, res: Response, session: Session | null): Promise<void> {
     if (session && session.data) {
       if (this.config.transport === 'cookie') {
         res.cookies.set(this.config.keyName, session.key, {

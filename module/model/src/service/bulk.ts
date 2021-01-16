@@ -1,5 +1,4 @@
-import { AppError } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, AppError } from '@travetto/base';
 import { ValidationResultError } from '@travetto/schema';
 
 import { ModelCrudSupport } from './crud';
@@ -21,7 +20,7 @@ export interface BulkResponse {
   /**
    * Errors returned
    */
-  errors: any[];
+  errors: unknown[];
   /**
    * Ids that were added
    */
@@ -49,7 +48,7 @@ export class BulkProcessError extends AppError {
   /**
    * Provide full results back, with validation errors
    */
-  toJSON(extra: Record<string, any> = {}) {
+  toJSON(extra: Record<string, unknown> = {}) {
     return {
       ...extra,
       message: this.message,

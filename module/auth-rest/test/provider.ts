@@ -35,7 +35,10 @@ class SimpleIdentitySource implements IdentitySource {
 export class IdentitySourceTest {
   @Test()
   async validateIdentitySource() {
-    const ctx = await new SimpleIdentitySource().authenticate({ body: { username: 'test', password: 'test' } } as any, undefined as any);
+    const ctx = await new SimpleIdentitySource().authenticate(
+      { body: { username: 'test', password: 'test' } } as Request,
+      {} as Response
+    );
     assert(ctx.id === 'test');
   }
 }

@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry/src/types';
+import type { Class } from '@travetto/base';
 import { TestCore } from './common';
 
 export type ThrowableError = string | RegExp | Function;
@@ -10,7 +10,7 @@ export interface TestConfig extends TestCore {
   /**
    * The Class it's a part of
    */
-  class: Class<any>;
+  class: Class;
   /**
    * The test's method name
    */
@@ -44,11 +44,11 @@ export interface Assertion {
   /**
    * Provided value
    */
-  actual?: any;
+  actual?: unknown;
   /**
    * Expected value
    */
-  expected?: any;
+  expected?: unknown;
   /**
    * Operator
    */

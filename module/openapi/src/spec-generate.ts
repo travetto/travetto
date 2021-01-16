@@ -1,7 +1,7 @@
 import { SchemaObject, OpenAPIObject, SchemasObject, ParameterObject, OperationObject } from 'openapi3-ts';
 
 import { ControllerRegistry, EndpointClassType, EndpointIOType, EndpointConfig, ControllerConfig, ParamConfig } from '@travetto/rest';
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { SchemaRegistry, ALL_VIEW, FieldConfig } from '@travetto/schema';
 
 import { ApiSpecConfig } from './config';
@@ -60,7 +60,7 @@ export class SpecGenerateUtil {
    * Get the type for a given class
    */
   static getType(cls: Class, state: PartialSpec) {
-    const out: Record<string, any> = {};
+    const out: Record<string, unknown> = {};
     // Handle nested types
     if (SchemaRegistry.has(cls)) {
       out.$ref = `${DEFINITION}/${this.processSchema(cls, state)}`;

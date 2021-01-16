@@ -19,7 +19,7 @@ export class XunitEmitter implements TestConsumer {
   /**
    * Process metadata information (e.g. logs)
    */
-  buildMeta(obj: any) {
+  buildMeta(obj: Record<string, unknown>) {
     if (!obj) {
       return '';
     }

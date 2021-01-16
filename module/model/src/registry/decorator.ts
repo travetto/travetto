@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { SchemaRegistry } from '@travetto/schema';
 import { ModelType } from '../types/model';
 
@@ -10,8 +10,8 @@ import { IndexConfig, ModelOptions } from './types';
  *
  * @augments `@trv:schema/Schema`
  */
-export function Model(conf: Partial<ModelOptions<any>> | string = {}) {
-  return function <T extends Class<ModelType>>(target: T) {
+export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
+  return function <T extends ModelType>(target: Class<T>): Class<T> {
     if (typeof conf === 'string') {
       conf = { store: conf };
     }
@@ -35,8 +35,8 @@ export function Model(conf: Partial<ModelOptions<any>> | string = {}) {
 /**
  * Defines an index on a model
  */
-export function Index<T>(...indices: IndexConfig<any>[]): (target: Class<T>) => void {
-  return function (target) {
+export function Index<T>(...indices: IndexConfig<T>[]) {
+  return function (target: Class<T>) {
     ModelRegistry.getOrCreatePending(target).indices!.push(...indices);
   };
 }

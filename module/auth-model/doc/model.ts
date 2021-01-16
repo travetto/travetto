@@ -5,7 +5,7 @@ import { RegisteredIdentity } from '@travetto/auth-model';
 export class User extends BaseModel implements RegisteredIdentity {
   id: string;
   source: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   password?: string;
   salt: string;
   hash: string;

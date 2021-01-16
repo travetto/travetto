@@ -1,5 +1,5 @@
 import { FieldConfig } from '@travetto/schema';
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { PointImpl } from '../model/point';
 
 const st = (t: string, arr: boolean = false) => new Set([arr ? `${t}[]` : t]);
@@ -53,7 +53,7 @@ export class TypeUtil {
   /**
    * Get the actual type of a given field, only for primitive types
    */
-  static getActualType(v: any): string {
+  static getActualType(v: unknown): string {
     const type = typeof v;
     if (['string', 'number', 'boolean'].includes(type)) {
       return type;

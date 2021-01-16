@@ -1,6 +1,5 @@
-import { Class } from '@travetto/registry';
 import { SchemaRegistry, ValidationResultError, ValidationError } from '@travetto/schema';
-import { Util } from '@travetto/base';
+import { Class, Util } from '@travetto/base';
 
 import { ModelQuery, Query, PageableModelQuery } from '../../model/query';
 
@@ -17,9 +16,9 @@ interface State {
 }
 
 interface ProcessingHandler {
-  preMember?(state: State, value: any): boolean;
-  onSimpleType(state: State, type: SimpleType, value: any, isArray: boolean): void;
-  onComplexType?(state: State, cls: Class<any>, value: any, isArray: boolean): boolean | undefined;
+  preMember?(state: State, value: unknown): boolean;
+  onSimpleType(state: State, type: SimpleType, value: unknown, isArray: boolean): void;
+  onComplexType?(state: State, cls: Class, value: unknown, isArray: boolean): boolean | undefined;
 }
 
 // const TOP_LEVEL_OPS = new Set(['$and', '$or', '$not']);
@@ -110,7 +109,7 @@ class $QueryVerifier {
   /**
    * Check operator clause
    */
-  checkOperatorClause(state: State, declaredType: SimpleType, value: any, allowed: Record<string, Set<string>>, isArray: boolean) {
+  checkOperatorClause(state: State, declaredType: SimpleType, value: unknown, allowed: Record<string, Set<string>>, isArray: boolean) {
     if (isArray) {
       if (Array.isArray(value)) {
         // Handle array literal
@@ -176,7 +175,7 @@ class $QueryVerifier {
    */
   processWhereClause<T>(st: State, cls: Class<T>, passed: object) {
     return this.processGenericClause(st, cls, passed, {
-      preMember: (state: State, value: any) => {
+      preMember: (state: State, value: Record<string, unknown>) => {
         const keys = Object.keys(value);
         const firstKey = keys[0];
 
@@ -206,7 +205,7 @@ class $QueryVerifier {
         }
         return false;
       },
-      onSimpleType: (state: State, type: SimpleType, value: any, isArray: boolean) => {
+      onSimpleType: (state: State, type: SimpleType, value: unknown, isArray: boolean) => {
         this.checkOperatorClause(state, type, value, TypeUtil.OPERATORS[type], isArray);
       },
       onComplexType: (state: State, subCls: Class<T>, subVal: T, isArray: boolean): boolean => false
@@ -295,7 +294,7 @@ class $QueryVerifier {
         continue;
       }
 
-      const val = (query as Query<any>)[key];
+      const val = (query as Query<unknown>)[key];
       const subState = state.extend(key);
 
       if (Array.isArray(val)) {

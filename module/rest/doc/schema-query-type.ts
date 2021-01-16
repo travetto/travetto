@@ -9,7 +9,9 @@ type Paging = {
 @Controller('/user')
 class UserController {
 
-  private service: any;
+  private service: {
+    search(query: Paging): Promise<number>;
+  };
 
   @Get('/search')
   async search(@SchemaQuery() query: Paging = { page: 0, pageSize: 100 }) {

@@ -6,26 +6,26 @@ import { color } from '@travetto/cli/src/color';
 import { FsUtil } from '@travetto/boot';
 
 import { PackUtil } from './lib/util';
-import { PackOperation } from './lib/types';
+import { CommonConfig, PackOperation } from './lib/types';
 
 /**
  * Supports packing a project into a directory, ready for archiving
  */
-export abstract class BasePackPlugin extends BasePlugin {
+export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin {
 
   /**
    * Package stage name
    */
-  abstract get operation(): PackOperation<any, any>;
+  abstract get operation(): PackOperation<C>;
 
   get name() {
     return this.operation.key ? `pack:${this.operation.key}` : 'pack';
   }
 
-  async resolveConfigs(extra: Record<string, any> = {}) {
-    const out = [...(await PackUtil.getConfigs()), extra]
-      .map(x => this.operation.key ? x[this.operation.key] : x)
-      .reduce((acc, l) => this.operation.extend(acc, l ?? {}), {});
+  async resolveConfigs(extra: Partial<C> | Record<string, C> = {}): Promise<C> {
+    const out: C = [...(await PackUtil.getConfigs()), extra]
+      .map(x => this.operation.key && this.operation.key in x ? ((x as Record<string, C>)[this.operation.key] as C) : x as C)
+      .reduce((acc, l) => this.operation.extend(acc, l ?? {}), {} as C);
     out.workspace = out.workspace ?? FsUtil.resolveUnix(os.tmpdir(),
       `pack_${require(FsUtil.resolveUnix('package.json')).name}`
         .toLowerCase()
@@ -41,7 +41,7 @@ export abstract class BasePackPlugin extends BasePlugin {
 
     cmd = cmd.arguments('[mode]');
     for (const [f, d, fn, prop] of this.operation.flags) {
-      cmd = fn ? cmd.option(f, d, fn, flags[prop]) : cmd.option(f, d, flags[prop]);
+      cmd = fn ? cmd.option<unknown>(f, d, fn, flags[prop]) : cmd.option(f, d, flags[prop] as unknown as string);
     }
     return cmd;
   }
@@ -66,6 +66,6 @@ export abstract class BasePackPlugin extends BasePlugin {
 
   async action() {
     const resolved = await this.resolveConfigs(this.operation.key ? { [this.operation.key]: this._cmd.opts() } : this._cmd.opts());
-    return PackUtil.runOperation(this.operation, resolved);
+    return PackUtil.runOperation(this.operation, resolved as C);
   }
 }

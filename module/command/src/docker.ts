@@ -81,7 +81,7 @@ export class DockerContainer {
   /**
    * Run a a docker command
    */
-  private runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: any[]) {
+  private runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: string[]) {
     const state = ExecUtil.spawn(this.dockerCmd, [op, ...(args ?? [])], { shell: this.tty });
     return (op !== 'run' && op !== 'exec') ? this.watchForEviction(state, true) : state;
   }
@@ -335,7 +335,7 @@ export class DockerContainer {
   /**
    * Run a container
    */
-  async run(args?: any[], flags?: string[]) {
+  async run(args?: string[], flags?: string[]) {
 
     if (!this.deleteOnFinish) {
       // Kill existing

@@ -1,6 +1,7 @@
 import { TestConsumer } from '../types';
 import { TestResultsSummarizer } from './summarizer';
 import { TestConsumerRegistry } from '../registry';
+import { TestEvent } from '../../model/event';
 
 /**
  * Test consumer with support for multiple nested consumers, and summarization
@@ -34,7 +35,7 @@ export class RunnableTestConsumer implements TestConsumer {
     }
   }
 
-  onEvent(e: any) {
+  onEvent(e: TestEvent) {
     if (this.results) {
       this.results.onEvent(e);
     }

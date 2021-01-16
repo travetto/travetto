@@ -3,7 +3,7 @@ import { Injectable } from '@travetto/di';
 
 @Injectable()
 export class LoggingInterceptor implements RestInterceptor {
-  async intercept(req: Request, res: Response, next: () => Promise<any>) {
+  async intercept(req: Request, res: Response, next: () => Promise<unknown>) {
     const start = Date.now();
     try {
       await next();

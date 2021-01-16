@@ -44,7 +44,7 @@ export class EnvUtil {
         const [p, v] = x.split(sep);
         return [p, v || undefined] as [string, string];
       })
-      .filter(([k, v]) => !!k);
+      .filter(([p, v]) => !!p);
   }
 
   /**
@@ -160,6 +160,9 @@ export class EnvUtil {
             FsUtil.resolveUnix('node_modules', k)
           ])
       );
+      if (process.env.TRV_DEV) { // If in dev, inject into dependencies
+        Object.assign(require(`${FsUtil.cwd}/package.json`)['dependencies'], this.DYNAMIC_MODULES);
+      }
     }
     return this.DYNAMIC_MODULES;
   }

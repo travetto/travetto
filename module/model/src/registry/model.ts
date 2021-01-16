@@ -1,15 +1,16 @@
 import { SchemaRegistry } from '@travetto/schema';
-import { MetadataRegistry, Class } from '@travetto/registry';
+import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { AppError } from '@travetto/base';
+import { AppError, Class } from '@travetto/base';
 
 import { ModelOptions } from './types';
 import { NotFoundError } from '../error/not-found';
+import { ModelType } from '../types/model';
 
 /**
  * Registry for all models, built on the Metadata registry
  */
-class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
+class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   /**
    * All stores names
    */
@@ -47,7 +48,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<any>> {
     return this.intialModelNameMapping;
   }
 
-  createPending(cls: Class): Partial<ModelOptions<any>> {
+  createPending(cls: Class): Partial<ModelOptions<ModelType>> {
     return { class: cls, indices: [] };
   }
 

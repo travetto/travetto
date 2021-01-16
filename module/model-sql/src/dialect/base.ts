@@ -1,6 +1,5 @@
-import { Class } from '@travetto/registry';
 import { SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
-import { Util, AppError } from '@travetto/base';
+import { Class, Util, AppError } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
@@ -8,10 +7,11 @@ import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
 import { Connection } from '../connection/base';
+import { ModelType } from '@travetto/model/src/types/model';
 
-const has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
-const has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
-const has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
+const has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
+const has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);
+const has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$not' in (o as object);
 
 interface Alias {
   alias: string;
@@ -23,7 +23,7 @@ class Total {
   total: number;
 }
 
-function makeField(name: string, type: Class, required: boolean, extra: any) {
+function makeField(name: string, type: Class, required: boolean, extra: Partial<FieldConfig>) {
   return {
     name,
     owner: null,
@@ -145,7 +145,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Get connection
    */
-  abstract get conn(): Connection<any>;
+  abstract get conn(): Connection<unknown>;
 
   /**
    * Hash a value
@@ -168,7 +168,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Convert value to SQL valid representation
    */
-  resolveValue(conf: FieldConfig, value: any) {
+  resolveValue(conf: FieldConfig, value: unknown) {
     if (value === undefined || value === null) {
       return 'NULL';
     } else if (conf.type === String) {
@@ -176,7 +176,7 @@ export abstract class SQLDialect implements DialectState {
         const src = Util.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
         return this.quote(src);
       } else {
-        return this.quote(value);
+        return this.quote(value as string);
       }
     } else if (conf.type === Boolean) {
       return `${value ? 'TRUE' : 'FALSE'}`;
@@ -185,7 +185,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Date) {
       const [day, time] = (value as Date).toISOString().split(/[T.]/);
       return this.quote(`${day} ${time}`);
-    } else if (conf.type === PointImpl) {
+    } else if (conf.type === PointImpl && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;
     } else if (conf.type === Object) {
       return this.quote(JSON.stringify(value).replace(/[']/g, `''`));
@@ -387,7 +387,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Generate WHERE field clause
    */
-  getWhereFieldSQL(stack: VisitStack[], o: Record<string, any>): any {
+  getWhereFieldSQL(stack: VisitStack[], o: Record<string, unknown>): string {
     const items = [];
     const { foreignMap, localMap } = SQLUtil.getFieldsByLocation(stack);
     const SQL_OPS = this.SQL_OPS;
@@ -439,7 +439,7 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$regex': {
-              const re = Util.toRegex(v);
+              const re = Util.toRegex(v as string);
               const src = re.source;
               const ins = re.flags && re.flags.includes('i');
 
@@ -594,7 +594,7 @@ ${this.getOrderBySQL(cls, query.sort)}
 ${this.getLimitSQL(cls, query)}`;
   }
 
-  getCreateTableSQL(stack: VisitStack[]) {
+  getCreateTableSQL(stack: VisitStack[]): string {
     const config = stack[stack.length - 1];
     const parent = stack.length > 1;
     const array = parent && config.array;
@@ -648,7 +648,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Get all table creat queries for a class
    */
-  getCreateAllTablesSQL(cls: Class<any>): string[] {
+  getCreateAllTablesSQL(cls: Class): string[] {
     const out: string[] = [];
     SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
@@ -687,7 +687,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Drop all tables for a given class
    */
-  getDropAllTablesSQL(cls: Class<any>): string[] {
+  getDropAllTablesSQL(cls: Class): string[] {
     const out: string[] = [];
     SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
@@ -784,7 +784,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
   /**
    * Simple data base updates
    */
-  getUpdateSQL(stack: VisitStack[], data: any, where?: WhereClause<any>) {
+  getUpdateSQL(stack: VisitStack[], data: Record<string, unknown>, where?: WhereClause<unknown>) {
     const { type } = stack[stack.length - 1];
     const { localMap } = SQLUtil.getFieldsByLocation(stack);
     return `
@@ -797,7 +797,7 @@ SET
   ${this.getWhereSQL(type, where)};`;
   }
 
-  getDeleteSQL(stack: VisitStack[], where?: WhereClause<any>) {
+  getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>): string {
     const { type } = stack[stack.length - 1];
     return `
 DELETE
@@ -834,10 +834,10 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
   }
 
   async fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]> {
-    const stack: Record<string, any>[] = [];
+    const stack: Record<string, unknown>[] = [];
     const selectStack: (SelectClause<T> | undefined)[] = [];
 
-    const buildSet = (children: any[], field?: any) => SQLUtil.collectDependents(this, stack[stack.length - 1], children, field);
+    const buildSet = (children: unknown[], field?: FieldConfig) => SQLUtil.collectDependents(this, stack[stack.length - 1], children, field);
 
     await SQLUtil.visitSchema(SchemaRegistry.get(cls), {
       onRoot: async (config) => {
@@ -867,7 +867,7 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
 
         // If children and selection exists
         if (ids.length && (!subSelectTop || sel)) {
-          const { records: children } = await this.executeSQL<any[]>(this.getSelectRowsByIdsSQL(
+          const { records: children } = await this.executeSQL<unknown[]>(this.getSelectRowsByIdsSQL(
             path,
             ids,
             sel
@@ -904,7 +904,7 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
    * Delete all ids
    */
   async deleteByIds(stack: VisitStack[], ids: string[]) {
-    return this.deleteAndGetCount(stack[stack.length - 1].type, {
+    return this.deleteAndGetCount<ModelType>(stack[stack.length - 1].type, {
       where: {
         [stack.length === 1 ? this.idField.name : this.pathField.name]: {
           $in: ids
@@ -934,7 +934,7 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
 
     // Adding deletes
     if (upserts.length || updates.length) {
-      const idx: any = this.idField.name;
+      const idx = this.idField.name;
 
       await Promise.all([
         ...upserts.filter(x => x.stack.length === 1).map(i =>

@@ -8,7 +8,7 @@ const ResponseSym = Symbol.for('@trv:rest-fastify/res');
 
 type FRequest = FastifyRequest & {
   [RequestSym]?: Travetto.Request;
-  session?: Record<string, any>;
+  session?: Travetto.Request['session'];
 };
 
 type FResponse = FastifyReply & {
@@ -74,7 +74,7 @@ export class FastifyServerUtil {
           reply.send(data);
         },
         on: reply.raw.on.bind(reply.raw),
-        end: (val?: any) => {
+        end: (val?: unknown) => {
           if (val) {
             reply.send(val);
           }

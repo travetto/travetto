@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { ModelType } from '@travetto/model';
 
 import { ModelQuery, PageableModelQuery } from '../model/query';

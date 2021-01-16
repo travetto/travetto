@@ -8,9 +8,9 @@ import { EnvUtil } from './env';
 
 type Module = {
   loaded?: boolean;
-  _load?(req: string, parent: Module): any;
+  _load?(req: string, parent: Module): unknown;
   _resolveFilename?(req: string, parent: Module): string;
-  _compile?(contents: string, file: string): any;
+  _compile?(contents: string, file: string): unknown;
 } & NodeJS.Module;
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare

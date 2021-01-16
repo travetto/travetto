@@ -1,6 +1,7 @@
 import { AuthContext } from '@travetto/auth';
 import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
+import { Identity } from '@travetto/auth/src/types';
 
 import { AsyncContextInterceptor } from '@travetto/context'; // @line-if @travetto/context
 import { SessionInterceptor } from '@travetto/rest-session'; // @line-if @travetto/rest-session
@@ -53,10 +54,10 @@ export class AuthInterceptor implements RestInterceptor {
     };
   }
 
-  async intercept(req: Request, res: Response, next: () => Promise<any>) {
+  async intercept(req: Request, res: Response, next: () => Promise<unknown>) {
     try {
       const ctx = (await this.encoder?.decode(req))
-        || new AuthContext(undefined as any);
+        || new AuthContext(undefined as unknown as Identity);
       this.context.set(ctx, req);
 
       await this.configure(req, res);

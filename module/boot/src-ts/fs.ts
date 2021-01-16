@@ -1,6 +1,6 @@
 import * as fss from 'fs';
 import * as path from 'path';
-import { ExecUtil } from './exec';
+import { ExecUtil, ExecutionResult } from './exec';
 
 const fs = fss.promises;
 
@@ -152,7 +152,7 @@ export class FsUtil {
    */
   static unlinkRecursive(pth: string, ignore = false) {
     const prom = ExecUtil.spawn(...this.unlinkCommand(pth)).result;
-    return ignore ? prom.catch(e => e.meta) : prom;
+    return ignore ? prom.catchAsResult() : prom;
   }
 
   /**

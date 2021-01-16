@@ -23,7 +23,7 @@ export class SendUtil {
       if (senderConfig) {
         const cls = class { };
         DependencyRegistry.registerFactory({
-          fn: () => new NodemailerTransport(senderConfig as unknown as any),
+          fn: () => new NodemailerTransport(senderConfig as ConstructorParameters<typeof NodemailerTransport>[0]),
           target: MailTransportTarget,
           src: cls,
           id: 'nodemailer',
@@ -48,7 +48,7 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
   /**
    * Resolve template
    */
-  static async sendEmail(file: string, to: string, context: Record<string, any>) {
+  static async sendEmail(file: string, to: string, context: Record<string, unknown>) {
     try {
       console.log('Sending email', { to });
       // Let the engine template

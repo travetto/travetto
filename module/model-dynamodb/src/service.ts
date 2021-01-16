@@ -1,11 +1,11 @@
 import * as dynamodb from '@aws-sdk/client-dynamodb';
 
-import { ShutdownManager, Util } from '@travetto/base';
+import { Class, ShutdownManager, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { ChangeEvent, Class } from '@travetto/registry';
+import { ChangeEvent } from '@travetto/registry';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
-  ModelIndexedSupport, ModelType, NotFoundError, ExistsError, IndexConfig
+  ModelIndexedSupport, ModelType, NotFoundError, ExistsError
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -16,11 +16,11 @@ import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { DynamoDBModelConfig } from './config';
 
 function toValue(val: string | number | boolean | Date | undefined | null, forceString?: boolean): dynamodb.AttributeValue;
-function toValue(val: any, forceString?: boolean): dynamodb.AttributeValue | undefined {
+function toValue(val: unknown, forceString?: boolean): dynamodb.AttributeValue | undefined {
   if (val === undefined || val === null || val === '') {
     return { NULL: true };
   } else if (typeof val === 'string' || forceString) {
-    return { S: val };
+    return { S: val as string };
   } else if (typeof val === 'number') {
     return { N: `${val}` };
   } else if (typeof val === 'boolean') {
@@ -41,7 +41,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   constructor(private config: DynamoDBModelConfig) { }
 
   private resolveTable(cls: Class) {
-    let table = ModelRegistry.getStore(cls);
+    let table = ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
     if (this.config.namespace) {
       table = `${this.config.namespace}_${table}`;
     }

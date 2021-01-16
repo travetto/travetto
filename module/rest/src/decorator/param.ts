@@ -1,3 +1,5 @@
+import { ClassInstance } from '@travetto/base';
+
 import { ParamConfig } from '../types';
 import { ControllerRegistry } from '../registry/controller';
 import { ParamUtil, ExtractFn } from '../util/param';
@@ -30,7 +32,7 @@ export const paramConfig = (location: ParamConfig['location'], extra: string | P
  */
 export function Param(location: ParamConfig['location'], extra: string | Partial<ParamConfig>) {
   const param = paramConfig(location, extra);
-  return (target: any, propertyKey: string | symbol, idx: number) => {
+  return (target: ClassInstance, propertyKey: string | symbol, idx: number) => {
     const handler = target.constructor.prototype[propertyKey];
     ControllerRegistry.registerEndpointParameter(target.constructor, handler, param, idx);
   };

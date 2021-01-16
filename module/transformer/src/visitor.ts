@@ -37,7 +37,7 @@ export class VisitorFactory<S extends State = State> {
 
   constructor(
     private getState: (context: ts.TransformationContext, src: ts.SourceFile) => S,
-    transformers: NodeTransformer<S, any, any>[],
+    transformers: NodeTransformer<S, TransformerType, ts.Node>[],
     private logTarget = 'compiler.log'
   ) {
     this.init(transformers);
@@ -46,7 +46,7 @@ export class VisitorFactory<S extends State = State> {
   /**
    * Initialize internal mapping given a list of transformers
    */
-  private init(transformers: NodeTransformer<S, any, any>[]) {
+  private init(transformers: NodeTransformer<S, TransformerType, ts.Node>[]) {
     for (const trn of transformers) {
       if (!this.transformers.has(trn.type)) {
         this.transformers.set(trn.type, {});

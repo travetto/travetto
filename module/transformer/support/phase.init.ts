@@ -1,6 +1,6 @@
 import { TranspileUtil } from '@travetto/boot';
 
-declare const global: { ts: any }; // Used for transformers
+declare const global: { ts: unknown }; // Used for transformers
 
 /**
  * Responsible for initializing the transformer support

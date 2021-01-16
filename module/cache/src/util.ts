@@ -12,13 +12,13 @@ export class CacheUtil {
    * @param value The value to make safe for storage
    * @param all Should functions and regex be included
    */
-  static toSafeJSON(value: any, all = false) {
+  static toSafeJSON(value: unknown, all = false) {
     if (value === null || value === undefined) {
       return value;
     }
 
     const replacer = all ?
-      ((key: string, val: any) => (Util.isFunction(val) || val instanceof RegExp) ? val?.source : val) :
+      ((key: string, val: unknown) => (Util.isFunction(val) || val instanceof RegExp) ? (val as RegExp)?.source : val) :
       undefined;
 
     return Buffer.from(JSON.stringify(value, replacer), 'utf8').toString('base64');
@@ -35,7 +35,7 @@ export class CacheUtil {
   /**
    * Generate key given config, cache source and input params
    */
-  static generateKey(config: CoreCacheConfig, params: any[]) {
+  static generateKey(config: CoreCacheConfig, params: unknown[]) {
     const input = config.params?.(params) ?? params;
     const keyParams = config.key?.(...input) ?? input;
     const key = `${config.keySpace!}_${this.toSafeJSON(keyParams)}`;

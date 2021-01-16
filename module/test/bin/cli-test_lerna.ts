@@ -1,8 +1,13 @@
 import * as commander from 'commander';
 import * as os from 'os';
 import * as readline from 'readline';
+
 import { FsUtil, ExecUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
+
+function hasNamespace(o: unknown): o is { setNamespace(ns: string): void } {
+  return !!o && 'setNamespace' in (o as object);
+}
 
 /**
  * Launch test framework for monorepo and execute tests
@@ -35,8 +40,8 @@ export class TestLernaPlugin extends BasePlugin {
       .on('line', line => {
         const [, name, body] = line.match(/^(\S+):\s+(.*)\s*$/)!;
         try {
-          if ('setNamespace' in emitter) {
-            (emitter as any).setNamespace(name);
+          if (hasNamespace(emitter)) {
+            emitter.setNamespace(name);
           }
           consumer.onEvent(JSON.parse(body));
         } catch {

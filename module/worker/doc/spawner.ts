@@ -2,7 +2,7 @@ import { WorkPool, WorkUtil, IterableInputSource } from '@travetto/worker';
 import { FsUtil } from '@travetto/boot';
 
 const pool = new WorkPool(() =>
-  WorkUtil.spawnedWorker<string>(FsUtil.resolveUnix(__dirname, 'spawned.js'), {
+  WorkUtil.spawnedWorker<{ data: string }, string>(FsUtil.resolveUnix(__dirname, 'spawned.js'), {
     handlers: {
       async init(channel) {
         return channel.listenOnce('ready'); // Wait for child to indicate it is ready

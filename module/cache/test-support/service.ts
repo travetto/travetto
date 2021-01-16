@@ -13,10 +13,10 @@ import { CacheUtil } from '../src/util';
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
 class User {
-  static from(obj: any) {
+  static from(obj: unknown) {
     return new User(obj);
   }
-  constructor(values: any) {
+  constructor(values: unknown) {
     Object.assign(this, values);
   }
 }
@@ -51,13 +51,13 @@ class SampleService {
   }
 
   @Cache('source')
-  async complexInput(config: any, size: number) {
+  async complexInput(config: object, size: number) {
     await wait(100);
     return { length: Object.keys(config).length, size };
   }
 
   @Cache('source', { key: config => config.a })
-  async customKey(config: any, size: number) {
+  async customKey(config: object, size: number) {
     await wait(100);
     return { length: Object.keys(config).length, size };
   }

@@ -94,13 +94,13 @@ export class RestTransformUtil {
    * @param state
    * @param node
    */
-  static resolveReturnType(state: TransformerState, node: ts.MethodDeclaration, retType?: AnyType): Record<string, any> {
+  static resolveReturnType(state: TransformerState, node: ts.MethodDeclaration, retType?: AnyType): Record<string, unknown> {
 
     // Process returnType
     retType = retType || state.resolveReturnType(node);
 
     // IF we have a winner, declare response type
-    const type: Record<string, any> = {};
+    const type: Record<string, unknown> = {};
 
     while (retType?.key === 'literal' && retType.typeArguments?.length) {
       if (retType.ctor === Array || retType.ctor === Set) {

@@ -2,9 +2,10 @@ import {
   ModelType,
   BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport, NotFoundError, ModelRegistry,
 } from '@travetto/model';
+import { Util, Class } from '@travetto/base';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { Class, ChangeEvent } from '@travetto/registry';
+import { ChangeEvent } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
 import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
@@ -19,7 +20,6 @@ import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query
 import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
-import { Util } from '@travetto/base';
 
 function prepareQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): ModelQuery<T> & { where: WhereClause<T> } {
 
@@ -86,14 +86,14 @@ export class SQLModelService implements
 
     // Get all upsert ids
     const all = toCheck.size ?
-      (await this.exec(
+      (await this.exec<ModelType>(
         this.dialect.getSelectRowsByIdsSQL(
           SQLUtil.classToStack(cls), [...toCheck.keys()], [this.dialect.idField]
         )
       )).records : [];
 
     for (const el of all) {
-      toCheck.delete(el.id);
+      toCheck.delete(el.id!);
     }
 
     for (const [el, idx] of toCheck.entries()) {
@@ -103,7 +103,7 @@ export class SQLModelService implements
     return addedIds;
   }
 
-  private exec<T = any>(sql: string) {
+  private exec<T = unknown>(sql: string) {
     return this.dialect.executeSQL<T>(sql);
   }
 
@@ -232,8 +232,8 @@ export class SQLModelService implements
 
   @Connected()
   async queryCount<T extends ModelType>(cls: Class<T>, builder: ModelQuery<T>): Promise<number> {
-    const { records } = await this.exec<T>(this.dialect.getQueryCountSQL(cls, await prepareQuery(cls, builder)));
-    return +(records[0] as any).total;
+    const { records } = await this.exec<{ total: string | number }>(this.dialect.getQueryCountSQL(cls, await prepareQuery(cls, builder)));
+    return +records[0].total;
   }
 
   @Connected()
@@ -283,7 +283,7 @@ export class SQLModelService implements
       `ORDER BY ${ttl} DESC`
     );
 
-    const results = await this.exec(q.join('\n'));
+    const results = await this.exec<{ key: string, count: number }>(q.join('\n'));
     return results.records.map(x => {
       x.count = Util.coerceType(x.count, Number);
       return x;

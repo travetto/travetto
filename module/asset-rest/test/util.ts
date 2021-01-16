@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
+import { Request } from '@travetto/rest';
 import { AssetRestUtil } from '../src/util';
 
 @Suite()
@@ -16,7 +17,7 @@ export class UtilTest {
       }
     };
 
-    assert(AssetRestUtil.getFileName(req as any) === 'hello-world');
+    assert(AssetRestUtil.getFileName(req as Request) === 'hello-world');
 
     const req2 = {
       header(key: string) {
@@ -27,7 +28,7 @@ export class UtilTest {
       }
     };
 
-    assert(AssetRestUtil.getFileName(req2 as any) === 'hello-world');
+    assert(AssetRestUtil.getFileName(req2 as Request) === 'hello-world');
 
     const req3 = {
       header(key: string) {
@@ -37,6 +38,6 @@ export class UtilTest {
       }
     };
 
-    assert(AssetRestUtil.getFileName(req3 as any) === 'file-upload.png');
+    assert(AssetRestUtil.getFileName(req3 as Request) === 'file-upload.png');
   }
 }

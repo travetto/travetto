@@ -15,7 +15,7 @@ export class UserController {
    */
   @Get('/:name')
   async getByName(@Path() name: string): Promise<User> {
-    return undefined as any;
+    return undefined as unknown as User;
   }
 
   /**
@@ -25,7 +25,7 @@ export class UserController {
    */
   @Get('/age/:age')
   async getByAge(@Path() age: number = 20): Promise<User[]> {
-    return undefined as any;
+    return undefined as unknown as User[];
   }
 
   /**
@@ -40,7 +40,7 @@ export class UserController {
   @Post('/')
 
   async createUser(@SchemaBody() user: User): Promise<User> {
-    return undefined as any;
+    return undefined as unknown as User;
   }
 
   /**

@@ -19,7 +19,7 @@ export interface ValidationError {
   /**
    * The value provided
    */
-  value?: any;
+  value?: unknown;
   /**
    * Regular expression to match
    */
@@ -45,7 +45,7 @@ export interface ValidationResult {
   /**
    * The value provided
    */
-  value?: any;
+  value?: unknown;
   /**
    * The type function or name
    */

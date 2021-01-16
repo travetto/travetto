@@ -1,7 +1,7 @@
 import { DependencyRegistry } from '@travetto/di';
-import { Class, RootRegistry } from '@travetto/registry';
+import { RootRegistry } from '@travetto/registry';
 import { AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
-import { ResourceManager } from '@travetto/base';
+import { Class, ResourceManager } from '@travetto/base';
 
 import { ModelRegistry } from '../src/registry/model';
 import { isBulkSupported, isCrudSupported, isStorageSupported } from '../src/internal/service/common';
@@ -12,7 +12,7 @@ let first = true;
 
 export abstract class BaseModelSuite<T> {
 
-  constructor(public serviceClass: Class<T>, public configClass: Class<any>) {
+  constructor(public serviceClass: Class<T>, public configClass: Class) {
   }
 
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]) {

@@ -41,7 +41,7 @@ test.alpha:
 @Suite()
 export class ManagerTest {
 
-  envCopy: any;
+  envCopy: NodeJS.ProcessEnv;
 
   private reinit() {
     delete ConfigManager['initialized'];
@@ -133,6 +133,6 @@ panda.user: bob
 
     const all = ConfigManager.getSecure();
     assert(all.panda?.user === '***');
-    assert(all.config.s3.secretAccessKey === '***');
+    assert(all.config?.s3.secretAccessKey === '***');
   }
 }

@@ -23,6 +23,30 @@ const baseLambdaContext = {
   protocol: 'HTTP/1.1'
 };
 
+type LambdaHandler = {
+  handle(config: {
+    resource: string;
+    path: string;
+    httpMethod: string;
+    isBase64Encoded?: boolean;
+    body?: Buffer | string;
+    queryStringParameters?: Record<string, string>;
+    multiValueQueryStringParameters?: Record<string, string[]>;
+    headers?: Record<string, string>;
+    multiValueHeaders?: Record<string, string[]>;
+    requestContext?: (typeof baseLambdaContext) & {
+      path: string;
+      httpMethod: string;
+    };
+  }): {
+    isBase64Encoded: boolean;
+    statusCode: number;
+    body?: string;
+    headers?: Record<string, string>;
+    multiValueHeaders?: Record<string, string[]>;
+  };
+};
+
 async function getOutput(t: string | Promise<string>) {
   try {
     t = await t;
@@ -39,7 +63,7 @@ async function getOutput(t: string | Promise<string>) {
 export abstract class BaseRestSuite {
 
   private handle: ServerHandle | undefined;
-  private server: RestServer<any>;
+  private server: RestServer<unknown>;
   private port: number = -1;
   private awsLambda: boolean = false;
 
@@ -94,13 +118,13 @@ export abstract class BaseRestSuite {
   }
 
   async makeRequst(method: 'get' | 'post' | 'patch' | 'put' | 'delete' | 'options', path: string, { throwOnError = true, query, headers, body }: {
-    query?: Record<string, any>;
-    body?: Record<string, any> | FormData;
+    query?: Record<string, string>;
+    body?: Record<string, unknown> | FormData;
     headers?: Record<string, string>;
     throwOnError?: boolean;
   } = {}) {
     const httpMethod = method.toUpperCase();
-    let resp: { status: number, body: any, headers: [string, string | string[]][] };
+    let resp: { status: number, body?: string | { message: string }, headers: [string, string | string[]][] };
 
     let buffer: Buffer | undefined;
     if (body) {
@@ -127,7 +151,7 @@ export abstract class BaseRestSuite {
       });
       resp = { status: res.status, body: await getOutput(res.text()), headers: [...res.headers] };
     } else {
-      const res = await (this.server as any).handle({
+      const res = await (this.server as unknown as LambdaHandler).handle({
         ...baseLambdaEvent,
         path,
         httpMethod,
@@ -139,7 +163,7 @@ export abstract class BaseRestSuite {
         multiValueHeaders: toMultiValue(headers),
         requestContext: { ...baseLambdaContext, path, httpMethod }
       });
-      const outText = res.isBase64Encoded ? Buffer.from(res.body, 'base64').toString('utf8') : res.body;
+      const outText = res.isBase64Encoded ? Buffer.from(res.body!, 'base64').toString('utf8') : res.body!;
       const out = await getOutput(outText);
       if (throwOnError && res.statusCode >= 400) {
         throw out;
@@ -153,14 +177,14 @@ export abstract class BaseRestSuite {
     }
     if (resp.status >= 400) {
       if (throwOnError) {
-        const err = new AppError(resp.body?.message ?? 'Error');
+        const err = new AppError((resp.body as { message: string }).message ?? 'Error');
         Object.assign(err, resp.body);
         throw err;
       }
     }
     return {
       status: resp.status,
-      body: resp.body,
+      body: resp.body as any,
       headers: Object.fromEntries(resp.headers.map(([k, v]) =>
         [k.toLowerCase(), Array.isArray(v) ? v[0] : v]))
     };

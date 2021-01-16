@@ -36,7 +36,7 @@ class AsyncSignTest {
 
   @Test('should not apply claims to the original payload object (mutatePayload defaults to false)')
   async testClaimsImmutable() {
-    const originalPayload: Record<string, any> = { foo: 'bar' };
+    const originalPayload: Record<string, unknown> = { foo: 'bar' };
     await jwt.sign({ ...originalPayload, nbf: 60, exp: 600 }, { key });
     assert(originalPayload.nbf === undefined);
     assert(originalPayload.exp === undefined);

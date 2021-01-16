@@ -4,7 +4,7 @@ import { CliUtil } from '@travetto/cli/src/util';
 import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 import type { RunState } from '../../src/execute/types';
 
-const DEF_ENV = { env: 'test', debug: '0', resources: ['test/resource'], profiles: ['test'] };
+const DEF_ENV = { env: 'test', debug: '0', resources: ['test/resources'], profiles: ['test'] };
 const ENV_EXT = { TRV_LOG_TIME: 0 };
 
 async function customLogs() {
@@ -16,7 +16,7 @@ async function customLogs() {
   });
 
   ConsoleManager.set({
-    onLog: (level, ctx, args: any[]) => c[level](process.pid, ctx, ...args)
+    onLog: (level, ctx, args: unknown[]) => c[level](process.pid, ctx, ...args)
   });
 }
 

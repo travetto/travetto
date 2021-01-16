@@ -2,10 +2,16 @@
 const path = require('path');
 const cp = require('child_process');
 
-function findPackage(cmd) {
+/**
+ * Find which package a command lives in
+ * @param {string} cmd
+ * @returns
+ */
+function findPackage(toFind) {
   let dir = process.cwd();
+  // eslint-disable-next-line no-constant-condition
   while (true) {
-    let old = dir;
+    const old = dir;
     dir = path.dirname(dir);
     if (old === dir) {
       return;
@@ -13,14 +19,14 @@ function findPackage(cmd) {
     try {
       require.resolve(`${dir}/package.json`);
       const pkg = require(`${dir}/package.json`);
-      if (pkg.scripts && (!cmd || pkg.scripts[cmd])) {
+      if (pkg.scripts && (!toFind || pkg.scripts[toFind])) {
         return dir;
       }
     } catch { }
   }
 }
 
-const [cmd = '', ...args] = process.argv.slice(2).map(x => x == '.' ? process.cwd() : x);
+const [cmd = '', ...args] = process.argv.slice(2).map(x => x === '.' ? process.cwd() : x);
 const cwd = findPackage(cmd) ?? process.cwd();
 
 try {

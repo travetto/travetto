@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 import { RestServerUtil } from '../src/server/util';
 
 @Suite()

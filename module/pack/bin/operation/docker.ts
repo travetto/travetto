@@ -11,7 +11,7 @@ export interface DockerConfig extends CommonConfig {
   env: Record<string, string>;
 }
 
-export const Docker: PackOperation<DockerConfig, 'docker'> = {
+export const Docker: PackOperation<DockerConfig> = {
   key: 'docker',
   title: 'Docker-izing',
   flags: [

@@ -1,7 +1,8 @@
 import { DependencyRegistry } from '@travetto/di';
-import { MetadataRegistry, Class } from '@travetto/registry';
+import { Class, ClassInstance } from '@travetto/base';
+import { MetadataRegistry } from '@travetto/registry';
 
-import { EndpointConfig, ControllerConfig, EndpointDecorator, ControllerDecorator } from './types';
+import { EndpointConfig, ControllerConfig } from './types';
 import { Filter, RouteHandler, ParamConfig } from '../types';
 
 /**
@@ -49,7 +50,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param cls Controller class
    * @param handler Route handler
    */
-  getOrCreateEndpointConfig(cls: Class, handler: RouteHandler) {
+  getOrCreateEndpointConfig<T>(cls: Class<T>, handler: RouteHandler) {
     const fieldConf = this.getOrCreatePendingField(cls, handler) as EndpointConfig;
     return fieldConf;
   }
@@ -95,13 +96,13 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param fn The filter to call
    */
   createFilterDecorator(fn: Filter) {
-    return ((target: any, prop: string, descriptor: TypedPropertyDescriptor<RouteHandler>) => {
+    return (<T>(target: Class<T> | T, prop: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) => {
       if (prop) {
-        this.registerEndpointFilter(target.constructor, descriptor.value!, fn);
+        this.registerEndpointFilter((target as unknown as ClassInstance<T>).constructor, descriptor!.value!, fn);
       } else {
-        this.registerControllerFilter(target, fn);
+        this.registerControllerFilter(target as Class<T>, fn);
       }
-    }) as (ControllerDecorator & EndpointDecorator);
+    });
   }
 
   /**

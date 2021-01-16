@@ -1,11 +1,11 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { ModelRegistry } from '../../registry/model';
-import { IndexConfig } from '../../registry/types';
+import { IndexConfig, SortClauseRaw } from '../../registry/types';
 import { ModelType } from '../../types/model';
 
 type Flattened = [field: string, dir: 1 | -1 | boolean];
 
-type FlattenedConfig = Omit<IndexConfig<any>, 'fields'> & { fields: Flattened[] };
+type FlattenedConfig = Omit<IndexConfig<ModelType>, 'fields'> & { fields: Flattened[] };
 
 /**
  * Utils for working with indexed model services
@@ -20,23 +20,23 @@ export class ModelIndexedUtil {
    */
   static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, emptyValue = null) {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
-    return cfg.fields.reduce((res: any, f: any) => {
-      let o: any = item;
-      let sub: any = res;
+    return cfg.fields.reduce((res: Record<string, unknown>, f: Record<string, unknown>) => {
+      let o: Record<string, unknown> | undefined = item;
+      let sub: Record<string, unknown> = res;
 
       while (sub !== undefined) {
         const k = Object.keys(f)[0];
-        o = o !== undefined ? o[k] : o;
+        o = (o !== undefined ? o[k] : o) as Record<string, unknown> | undefined;
         if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
           sub[k] = o ?? emptyValue;
           break; // At the bottom
         } else {
-          sub = sub[k] ?? {};
-          f = f[k];
+          sub = (sub[k] ?? {}) as Record<string, unknown>;
+          f = f[k] as Record<string, unknown>;
         }
       }
       return res;
-    }, {} as any);
+    }, {} as Record<string, unknown>);
   }
 
   /**
@@ -51,11 +51,11 @@ export class ModelIndexedUtil {
       const fields: [string, 1 | -1 | boolean][] = [];
       for (const el of cfg.fields) {
         let parts = [];
-        let sub: any = el;
+        let sub: SortClauseRaw<unknown> = el;
         for (; ;) {
           const subKey = Object.keys(sub)[0];
           parts.push(subKey);
-          sub = sub[subKey] as any;
+          sub = sub[subKey as (keyof typeof sub)] as SortClauseRaw<unknown>;
           if (typeof sub === 'number' || typeof sub === 'boolean') {
             fields.push([parts.join(separator), sub as true]);
             parts = [];
@@ -76,20 +76,21 @@ export class ModelIndexedUtil {
    */
   static flattenIndexItem<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: T, separator = '.') {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
-    return cfg.fields.map((f: any) => {
-      let o: any = item;
+    return cfg.fields.map((f: SortClauseRaw<unknown>) => {
+      let o = item as Record<string, unknown>;
       const parts = [];
       while (o !== undefined) {
         const k = Object.keys(f)[0];
-        o = o[k];
+        o = (o[k] as Record<string, unknown>);
         parts.push(k);
-        if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
+        const fk = k as (keyof typeof f);
+        if (typeof f[fk] === 'boolean' || typeof f[fk] === 'number') {
           break; // At the bottom
         } else {
-          f = f[k];
+          f = f[fk];
         }
       }
-      return [parts.join(separator), o] as [key: string, value: any];
+      return [parts.join(separator), o] as [key: string, value: unknown];
     });
   }
 
@@ -101,15 +102,16 @@ export class ModelIndexedUtil {
    */
   static computeIndexKey<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: T, separator = 'ᚕ') {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
-    return cfg.fields.map((f: any) => {
-      let o: any = item;
+    return cfg.fields.map((f: SortClauseRaw<unknown>) => {
+      let o = item as Record<string, unknown>;
       while (o !== undefined) {
         const k = Object.keys(f)[0];
-        o = o[k];
-        if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
+        o = o[k] as Record<string, unknown>;
+        const fk = k as keyof typeof f;
+        if (typeof f[fk] === 'boolean' || typeof f[fk] === 'number') {
           break; // At the bottom
         } else {
-          f = f[k];
+          f = f[fk];
         }
       }
       return `${o}`;

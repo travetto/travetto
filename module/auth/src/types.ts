@@ -16,7 +16,7 @@ export interface Principal {
   /**
    * Supplemental details
    */
-  details: Record<string, any>;
+  details: any;
   /**
    * Date of expiration
    */

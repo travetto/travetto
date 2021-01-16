@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 
 import { PAGES } from './pages';
 import { Router, NavigationEnd } from '@angular/router';
