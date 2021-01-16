@@ -1,7 +1,8 @@
-import { AppError } from '@travetto/base';
+import { Class, ClassInstance, AppError } from '@travetto/base';
+
 import { HeaderMap, Request, RouteHandler } from '../types';
 import { ControllerRegistry } from '../registry/controller';
-import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator } from '../registry/types';
+import { EndpointConfig, ControllerConfig, DescribableConfig } from '../registry/types';
 
 const MIN = 1000 * 60;
 const HOUR = MIN * 60;
@@ -11,13 +12,13 @@ const UNIT_MAPPING = { s: 1000, ms: 1, m: MIN, h: HOUR, d: DAY, w: DAY * 7, y: D
 type Units = keyof (typeof UNIT_MAPPING);
 
 function register(config: Partial<EndpointConfig | ControllerConfig>) {
-  return function (target: any, property?: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) {
+  return function <T>(target: T | Class<T>, property?: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) {
     if (descriptor) {
-      return ControllerRegistry.registerPendingEndpoint(target.constructor, descriptor, config);
+      return ControllerRegistry.registerPendingEndpoint((target as ClassInstance).constructor, descriptor, config);
     } else {
-      return ControllerRegistry.registerPending(target, config);
+      return ControllerRegistry.registerPending(target as Class, config);
     }
-  } as (EndpointDecorator & ClassDecorator);
+  };
 }
 
 /**

@@ -15,7 +15,7 @@ class Basic {
 
 @Config('a')
 export class DbConfig<A, B> extends Basic {
-  temp: any;
+  temp: unknown;
 
   constructor() {
     super();

@@ -5,6 +5,6 @@ import { DBConfig } from './dbconfig';
 (async function () {
   await ConfigManager.init();
   const obj = new DBConfig();
-  (obj as any).postConstruct();
+  (obj as unknown as { postConstruct(): void }).postConstruct();
   console.log('DBConfig', { ...obj });
 })();

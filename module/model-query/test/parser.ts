@@ -5,6 +5,8 @@ import { WhereClause } from '../src/model/where-clause';
 import { QueryLanguageParser } from '../src/internal/query/parser';
 import { QueryLanguageTokenizer } from '../src/internal/query/tokenizer';
 
+type UserType = { user: { address: { state: String, city: string }, role: string } };
+
 @Suite('Query String Tests')
 export class QueryStringTest {
 
@@ -65,7 +67,7 @@ export class QueryStringTest {
         },
         { e: { $eq: 10 } }
       ]
-    } as any as WhereClause<any>);
+    } as WhereClause<unknown>);
   }
 
   @Test('Parse Complex Boolean')
@@ -96,7 +98,7 @@ export class QueryStringTest {
         },
         { e: { $eq: 10 } }
       ]
-    } as any as WhereClause<any>);
+    } as WhereClause<unknown>);
   }
 
   @Test('Parse Negation')
@@ -107,7 +109,7 @@ export class QueryStringTest {
         { A: { $eq: 5 } },
         { $not: { B: { $eq: 6 } } }
       ]
-    } as any as WhereClause<any>);
+    } as WhereClause<unknown>);
   }
 
   @Test('Parse Dotted Fields')
@@ -123,7 +125,7 @@ export class QueryStringTest {
           ]
         }
       ]
-    } as any as WhereClause<any>);
+    } as WhereClause<unknown>);
   }
 
   @Test('Parse Unique Outputs')
@@ -131,27 +133,27 @@ export class QueryStringTest {
     const res = QueryLanguageParser.parseToQuery('a.b.c in [1,2,3]');
     assert.deepStrictEqual(res, {
       a: { b: { c: { $in: [1, 2, 3] } } }
-    } as any as WhereClause<any>);
+    } as WhereClause<unknown>);
 
     const res3 = QueryLanguageParser.parseToQuery('a.b.c not-in [1,2,3]');
     assert.deepStrictEqual(res3, {
       a: { b: { c: { $nin: [1, 2, 3] } } }
-    } as any as WhereClause<any>);
+    } as WhereClause<unknown>);
 
     const res1 = QueryLanguageParser.parseToQuery('a.b.c == null');
     assert.deepStrictEqual(res1, {
       a: { b: { c: { $exists: false } } }
-    } as any as WhereClause<any>);
+    } as WhereClause<unknown>);
 
     const res2 = QueryLanguageParser.parseToQuery('a.b.c != null');
     assert.deepStrictEqual(res2, {
       a: { b: { c: { $exists: true } } }
-    } as any as WhereClause<any>);
+    } as WhereClause<unknown>);
   }
 
   @Test('Parse complex')
   async parseComplex() {
-    const res = QueryLanguageParser.parseToQuery(
+    const res = QueryLanguageParser.parseToQuery<UserType>(
       `user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')`);
     assert(res === {
       $and: [
@@ -168,12 +170,14 @@ export class QueryStringTest {
 
   @Test('Parse Regex')
   async parseRegex() {
-    const res = QueryLanguageParser.parseToQuery(`user.role ~ /^admin/`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res: any = QueryLanguageParser.parseToQuery<UserType>(`user.role ~ /^admin/`);
     assert(res === { user: { role: { $regex: /^admin/ } } });
     assert(res.user.role.$regex instanceof RegExp);
     assert(res.user.role.$regex.toString() === '/^admin/');
 
-    const res2 = QueryLanguageParser.parseToQuery(`user.role ~ 'admin'`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res2: any = QueryLanguageParser.parseToQuery<UserType>(`user.role ~ 'admin'`);
     assert(res2 === { user: { role: { $regex: /^admin/ } } });
     assert(res2.user.role.$regex instanceof RegExp);
     assert(res2.user.role.$regex.toString() === '/^admin/');
@@ -181,7 +185,8 @@ export class QueryStringTest {
 
   @Test('Parse Regex with flags')
   async parseRegexWithFlags() {
-    const res = QueryLanguageParser.parseToQuery(`user.role ~ /^admin/i`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res: any = QueryLanguageParser.parseToQuery<UserType>(`user.role ~ /^admin/i`);
     assert(res === { user: { role: { $regex: /^admin/i } } });
     assert(res.user.role.$regex instanceof RegExp);
     assert(res.user.role.$regex.toString() === '/^admin/i');
@@ -193,7 +198,8 @@ export class QueryStringTest {
 
   @Test('Parse Regex with word boundaries')
   async parseRegexWithWordBoundaries() {
-    const res = QueryLanguageParser.parseToQuery(`user.role ~ /\badmin\b/i`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res: any = QueryLanguageParser.parseToQuery<UserType>(`user.role ~ /\badmin\b/i`);
     assert(res.user.role.$regex instanceof RegExp);
     assert(res.user.role.$regex.toString() === '/\badmin\b/i');
   }

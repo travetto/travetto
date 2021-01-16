@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { ValidatorFn } from '../validate/types';
 
 export const ALL_VIEW = '__all';
@@ -62,7 +62,7 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * Global validators
    */
-  validators: ValidatorFn<any, any>[];
+  validators: ValidatorFn<unknown, unknown>[];
 }
 
 /**
@@ -72,7 +72,7 @@ export interface FieldConfig extends DescribableConfig {
   /**
    * Owner class
    */
-  owner: Class<any>;
+  owner: Class;
   /**
    * Field name
    */
@@ -84,9 +84,9 @@ export interface FieldConfig extends DescribableConfig {
   /**
    * Specific type for the field, with optional binding/validation support
    */
-  type: Class<any> & {
-    bindSchema?(input: any): undefined | any;
-    validateSchema?(input: any): string | undefined;
+  type: Class & {
+    bindSchema?(input: unknown): undefined | unknown;
+    validateSchema?(input: unknown): string | undefined;
   };
   /**
    * Is the field an array
@@ -127,7 +127,7 @@ export interface FieldConfig extends DescribableConfig {
   /**
    * Enumerated values
    */
-  enum?: { values: any[], message: string };
+  enum?: { values: (string | number | boolean)[], message: string };
 }
 
 export type ViewFieldsConfig<T> = { with: (keyof T)[] } | { without: (keyof T)[] };

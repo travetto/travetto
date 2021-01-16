@@ -1,5 +1,4 @@
-import { Util } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, ClassInstance, ConcreteClass, Util } from '@travetto/base';
 import { SchemaRegistry } from './service/registry';
 import { FieldConfig, ALL_VIEW } from './service/types';
 
@@ -13,7 +12,7 @@ export class BindUtil {
    */
   static register() {
     const proto = Object.getPrototypeOf(Function);
-    proto.from = function (data: any, view?: string) {
+    proto.from = function (data: object | ClassInstance, view?: string) {
       return BindUtil.bindSchema(this, data, view);
     };
   }
@@ -25,8 +24,8 @@ export class BindUtil {
    *
    * @param obj The object to convert
    */
-  static expandPaths(obj: Record<string, any>) {
-    const out: Record<string, any> = {};
+  static expandPaths(obj: Record<string, unknown>) {
+    const out: Record<string, unknown> = {};
     for (const k of Object.keys(obj)) {
       const val = obj[k];
       const parts = k.split('.');
@@ -42,13 +41,13 @@ export class BindUtil {
         if (!(name in sub)) {
           sub[name] = typeof key === 'number' ? [] : {};
         }
-        sub = sub[name];
+        sub = sub[name] as Record<string, unknown>;
 
         if (idx && key !== undefined) {
           if (sub[key] === undefined) {
             sub[key] = {};
           }
-          sub = sub[key];
+          sub = sub[key] as Record<string, unknown>;
         }
       }
 
@@ -61,9 +60,9 @@ export class BindUtil {
         let key = arr ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
         if (sub[name] === undefined) {
           sub[name] = (typeof key === 'string') ? {} : [];
-          sub = sub[name];
+          sub = sub[name] as Record<string, unknown>;
           if (key === undefined) {
-            key = sub.length;
+            key = sub.length as number;
           }
           sub[key!] = val;
         }
@@ -77,7 +76,7 @@ export class BindUtil {
    * @param conf The field config to coerce to
    * @param val The provided value
    */
-  static coerceType<T>(conf: FieldConfig, val: any): T | null | undefined {
+  static coerceType<T>(conf: FieldConfig, val: unknown): T | null | undefined {
     if (conf.type?.bindSchema) {
       val = conf.type.bindSchema(val);
     } else {
@@ -102,16 +101,16 @@ export class BindUtil {
    */
   static bindSchema<T>(cons: Class<T>, data?: undefined, view?: string): undefined;
   static bindSchema<T>(cons: Class<T>, data?: null, view?: string): null;
-  static bindSchema<T>(cons: Class<T>, data?: any, view?: string): T;
-  static bindSchema<T>(cons: Class<T>, data?: any, view?: string): T | null | undefined {
+  static bindSchema<T>(cons: Class<T>, data?: object | T, view?: string): T;
+  static bindSchema<T>(cons: Class<T>, data?: object | T, view?: string): T | null | undefined {
     if (data === null || data === undefined) {
       return data;
     }
-    const cls = SchemaRegistry.resolveSubTypeForInstance(cons, data);
+    const cls = SchemaRegistry.resolveSubTypeForInstance(cons, data) as Class<T>;
     if (data instanceof cls) {
-      return data;
+      return data as T;
     } else {
-      return this.bindSchemaToObject(cls, new cls(), data, view);
+      return this.bindSchemaToObject(cls, new (cls as ConcreteClass<T>)(), data as object, view);
     }
   }
 
@@ -122,7 +121,7 @@ export class BindUtil {
    * @param data The data to bind
    * @param view The desired view
    */
-  static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: any, view?: string): T {
+  static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: object, view?: string): T {
     view = view ?? ALL_VIEW;
 
     if (!!data) {
@@ -131,7 +130,7 @@ export class BindUtil {
       // If no configuration
       if (!conf) {
         for (const k of Object.keys(data) as (keyof typeof obj)[]) {
-          obj[k] = data[k];
+          obj[k] = data[k as keyof typeof data];
         }
       } else {
 
@@ -158,7 +157,7 @@ export class BindUtil {
             continue;
           }
 
-          let v = data[inboundField];
+          let v = data[inboundField as keyof typeof data] as unknown;
 
           if (v !== undefined && v !== null) {
             const config = viewConf.schema[schemaFieldName];
@@ -169,19 +168,19 @@ export class BindUtil {
             }
 
             if (SchemaRegistry.has(config.type)) {
-              if (config.array) {
-                v = v.map((el: any) => this.bindSchema(config.type, el));
+              if (config.array && Array.isArray(v)) {
+                v = v.map(el => this.bindSchema(config.type, el));
               } else {
                 v = this.bindSchema(config.type, v);
               }
-            } else if (config.array) {
-              v = v.map((el: any) => this.coerceType(config, el));
+            } else if (config.array && Array.isArray(v)) {
+              v = v.map(el => this.coerceType(config, el));
             } else {
               v = this.coerceType(config, v);
             }
           }
 
-          obj[schemaFieldName as keyof typeof obj] = v;
+          obj[schemaFieldName as keyof typeof obj] = v as (typeof obj)[keyof typeof obj];
         }
       }
     }

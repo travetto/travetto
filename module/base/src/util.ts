@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import { Class, ClassInstance } from './types';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 
@@ -6,7 +7,7 @@ const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
  * Common utilities for object detection/manipulation
  */
 export class Util {
-  private static deepAssignRaw(a: any, b: any, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
+  private static deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;
     const isArrA = Array.isArray(a);
@@ -14,7 +15,7 @@ export class Util {
     const isSimpA = !isEmptyA && this.isSimple(a);
     const isSimpB = !isEmptyB && this.isSimple(b);
 
-    let ret: any;
+    let ret: unknown;
 
     if (isEmptyA || isEmptyB) { // If no `a`, `b` always wins
       if (mode === 'replace' || b === null || !isEmptyB) {
@@ -33,8 +34,10 @@ export class Util {
         if (mode === 'replace') {
           ret = b;
         } else {
-          for (let i = 0; i < b.length; i++) {
-            ret[i] = this.deepAssignRaw(ret[i], b[i], mode);
+          const retArr = ret as unknown[];
+          const bArr = b as unknown[];
+          for (let i = 0; i < bArr.length; i++) {
+            retArr[i] = this.deepAssignRaw(retArr[i], bArr[i], mode);
           }
         }
       } else if (isSimpB) { // Scalars
@@ -45,14 +48,16 @@ export class Util {
           if (mode === 'strict') { // Bail on strict
             throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
           } else if (mode === 'coerce') { // Force on coerce
-            ret = this.coerceType(b, a.constructor, false);
+            ret = this.coerceType(b, (a as ClassInstance).constructor, false);
           }
         }
       } else { // Object merge
         ret = a;
+        const bObj = b as Record<string, unknown>;
+        const retObj = ret as Record<string, unknown>;
 
-        for (const key of Object.keys(b)) {
-          ret[key] = this.deepAssignRaw(ret[key], b[key], mode);
+        for (const key of Object.keys(bObj)) {
+          retObj[key] = this.deepAssignRaw(retObj[key], bObj[key], mode);
         }
       }
     }
@@ -63,7 +68,7 @@ export class Util {
    * Has to JSON
    * @param o Object to check
    */
-  static hasToJSON = (o: any): o is { toJSON?(): any } => 'toJSON' in o;
+  static hasToJSON = (o: unknown): o is { toJSON(): unknown } => !!o && 'toJSON' in (o as object);
 
   /**
    * Create regex from string, including flags
@@ -86,13 +91,13 @@ export class Util {
    * @param type Class to coerce to (String, Boolean, Number, Date, RegEx, Object)
    * @param strict Should a failure to coerce throw an error?
    */
-  static coerceType(input: any, type: typeof String, strict?: boolean): string;
-  static coerceType(input: any, type: typeof Number, strict?: boolean): number;
-  static coerceType(input: any, type: typeof Boolean, strict?: boolean): boolean;
-  static coerceType(input: any, type: typeof Date, strict?: boolean): Date;
-  static coerceType(input: any, type: typeof RegExp, strict?: boolean): RegExp;
-  static coerceType<T>(input: any, type: { new(...args: any[]): T }, strict?: boolean): T;
-  static coerceType(input: any, type: any, strict = true) {
+  static coerceType(input: unknown, type: typeof String, strict?: boolean): string;
+  static coerceType(input: unknown, type: typeof Number, strict?: boolean): number;
+  static coerceType(input: unknown, type: typeof Boolean, strict?: boolean): boolean;
+  static coerceType(input: unknown, type: typeof Date, strict?: boolean): Date;
+  static coerceType(input: unknown, type: typeof RegExp, strict?: boolean): RegExp;
+  static coerceType<T>(input: unknown, type: Class<T>, strict?: boolean): T;
+  static coerceType(input: unknown, type: Class<unknown>, strict = true) {
     // Do nothing
     if (input === null || input === undefined) {
       return input;
@@ -105,7 +110,7 @@ export class Util {
     switch (type) {
       case Date: {
         const res = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
-          new Date(parseInt(input, 10)) : new Date(input);
+          new Date(parseInt(input as string, 10)) : new Date(input as Date);
         if (strict && Number.isNaN(res.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
         }
@@ -159,15 +164,15 @@ export class Util {
    * Clone top level properties to a new object
    * @param o Object to clone
    */
-  static shallowClone(a: any) {
-    return Array.isArray(a) ? a.slice(0) : (this.isSimple(a) ? a : { ...a });
+  static shallowClone(a: unknown) {
+    return Array.isArray(a) ? a.slice(0) : (this.isSimple(a) ? a : { ...(a as {}) });
   }
 
   /**
    * Is a value of primitive type
    * @param el Value to check
    */
-  static isPrimitive(el: any): el is (string | boolean | number | RegExp) {
+  static isPrimitive(el: unknown): el is (string | boolean | number | RegExp) {
     const type = typeof el;
     return el !== null && el !== undefined && (type === 'string' || type === 'boolean' || type === 'number' || el instanceof RegExp || el instanceof Date);
   }
@@ -176,7 +181,7 @@ export class Util {
    * Is a value a plain JS object, created using {}
    * @param obj Object to check
    */
-  static isPlainObject(obj: any): obj is Record<string, any> {
+  static isPlainObject(obj: unknown): obj is Record<string, unknown> {
     return typeof obj === 'object' // separate from primitives
       && obj !== undefined
       && obj !== null         // is obvious
@@ -188,7 +193,7 @@ export class Util {
    * Is a value a function
    * @param o Object to check
    */
-  static isFunction(o: any): o is Function {
+  static isFunction(o: unknown): o is Function {
     const proto = o && Object.getPrototypeOf(o);
     return proto && (proto === Function.prototype || proto.constructor.name === 'AsyncFunction');
   }
@@ -197,14 +202,15 @@ export class Util {
    * Is a value a class
    * @param o Object to check
    */
-  static isClass(o: any) {
-    return o && o.prototype && o.prototype.constructor !== Object.getPrototypeOf(Function);
+  static isClass(o: unknown) {
+    return !!(o as object) && !!(o as { prototype: unknown }).prototype &&
+      (o as { prototype: { constructor: unknown } }).prototype.constructor !== Object.getPrototypeOf(Function);
   }
 
   /**
    * Is simple, as a primitive, function or class
    */
-  static isSimple(a: any) {
+  static isSimple(a: unknown) {
     return this.isPrimitive(a) || this.isFunction(a) || this.isClass(a);
   }
 
@@ -238,7 +244,7 @@ export class Util {
    * Produce a promise that is externally resolvable
    */
   static resolvablePromise<T = void>() {
-    let ops: { resolve: (v?: T) => void, reject: (err?: any) => void };
+    let ops: { resolve: (v?: T) => void, reject: (err?: unknown) => void };
     const prom = new Promise((resolve, reject) => ops = { resolve, reject });
     Object.assign(prom, ops!);
     return prom as Promise<T> & (typeof ops);

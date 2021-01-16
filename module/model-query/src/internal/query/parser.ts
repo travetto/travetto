@@ -1,12 +1,12 @@
-import { WhereClause } from '../../model/where-clause';
+import { WhereClauseRaw } from '../../model/where-clause';
 import { QueryLanguageTokenizer } from './tokenizer';
 import { Node, Token, ClauseNode, UnaryNode, Literal, GroupNode, OP_TRANSLATION, ArrayNode } from './types';
 
 /**
  * Determine if a token is boolean
  */
-function isBoolean(o: any): o is Token & { type: 'boolean' } {
-  return o && o.type && o.type === 'boolean';
+function isBoolean(o: unknown): o is Token & { type: 'boolean' } {
+  return !!o && (o as { type: string }).type === 'boolean';
 }
 
 /**
@@ -154,21 +154,21 @@ export class QueryLanguageParser {
   /**
    * Convert Query AST to output
    */
-  static convert<T = any>(node: Node): any {
+  static convert<T = unknown>(node: Node): WhereClauseRaw<T> {
     switch (node.type) {
       case 'unary': {
         const un = node as UnaryNode;
-        return { [`$${un.op!}`]: this.convert(un.value) };
+        return { [`$${un.op!}`]: this.convert(un.value) } as WhereClauseRaw<T>;
       }
       case 'group': {
         const gn = node as GroupNode;
-        return { [`$${gn.op!}`]: gn.value.map(x => this.convert(x)) };
+        return { [`$${gn.op!}`]: gn.value.map(x => this.convert(x)) } as WhereClauseRaw<T>;
       }
       case 'clause': {
         const cn = node as ClauseNode;
         const parts = cn.field!.split('.');
-        const top: any = {};
-        let sub = top;
+        const top: WhereClauseRaw<T> = {};
+        let sub = top as Record<string, unknown>;
         for (const p of parts) {
           sub = sub[p] = {};
         }
@@ -190,7 +190,7 @@ export class QueryLanguageParser {
   /**
    * Tokenize and parse text
    */
-  static parseToQuery(text: string) {
+  static parseToQuery<T = unknown>(text: string): WhereClauseRaw<T> {
     const tokens = QueryLanguageTokenizer.tokenize(text);
     const node = this.parse(tokens);
     return this.convert(node);

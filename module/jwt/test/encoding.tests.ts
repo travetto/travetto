@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Suite, Test, ShouldThrow } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 
 import * as jwt from '..';
 

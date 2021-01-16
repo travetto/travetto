@@ -9,7 +9,7 @@ async function mkdirp(d) {
   const parts = d.split(path.sep);
   for (let i = 1; i < parts.length; i++) {
     try {
-      await fs.promises.mkdir(parts.slice(0, i + 1).join(path.sep))
+      await fs.promises.mkdir(parts.slice(0, i + 1).join(path.sep));
     } catch { }
   }
 }

@@ -1,8 +1,9 @@
+import { SimpleType } from '@travetto/base';
 import { Node } from './node';
 
-export interface Block<T = any> extends Node<T> {
+export interface Block<T extends SimpleType = SimpleType> extends Node<T> {
   indent: number;
-  consume?(node: Node<any>, ...extra: any[]): void;
+  consume?(node: Node, ...extra: unknown[]): void;
 }
 
 export class TextBlock implements Block<string> {
@@ -28,18 +29,18 @@ export class TextBlock implements Block<string> {
   }
 }
 
-export class ListBlock implements Block<Node[]> {
-  constructor(public indent: number, public value: Node[] = []) { }
+export class ListBlock implements Block<SimpleType[]> {
+  constructor(public indent: number, public value: SimpleType[] = []) { }
 
-  consume(node: Node<any>) {
+  consume(node: Node) {
     this.value.push(node.value);
   }
 }
 
-export class MapBlock implements Block<Record<string, Node>> {
-  constructor(public indent: number, public value: Record<string, Node> = {}) { }
+export class MapBlock implements Block<Record<string, SimpleType>> {
+  constructor(public indent: number, public value: Record<string, SimpleType> = {}) { }
 
-  consume(node: Node<any>, key: string) {
+  consume(node: Node, key: string) {
     this.value[key] = node.value;
   }
 }

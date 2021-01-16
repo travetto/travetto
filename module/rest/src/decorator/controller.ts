@@ -1,6 +1,5 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { ControllerRegistry } from '../registry/controller';
-import { ControllerDecorator } from '../registry/types';
 
 /**
  * Decorator to register a new rest controller
@@ -8,10 +7,10 @@ import { ControllerDecorator } from '../registry/types';
  * @augments `@trv:rest/Controller`
  */
 export function Controller(path = '') {
-  return function (target: Class) {
+  return function <T>(target: Class<T>) {
     ControllerRegistry.registerPending(target, {
       basePath: path,
       class: target,
     });
-  } as ControllerDecorator;
+  };
 }

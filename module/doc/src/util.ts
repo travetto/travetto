@@ -107,7 +107,7 @@ export class DocUtil {
   }
 
   static isDecorator(name: string, file: string) {
-    const { resolved } = this.resolveFile(file)
+    const { resolved } = this.resolveFile(file);
 
     const key = `${name}:${resolved}`;
     if (key in this.DEC_CACHE) {

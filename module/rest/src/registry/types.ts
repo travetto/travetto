@@ -1,5 +1,5 @@
-import { Class } from '@travetto/registry';
-import { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
+import { Class } from '@travetto/base';
+import { Filter, HeaderMap, RouteConfig } from '../types';
 
 export interface EndpointClassType {
   type: Class;
@@ -39,7 +39,7 @@ interface CoreConfig {
   /**
    * The actual class instance
    */
-  instance?: any;
+  instance?: unknown;
   /**
    * List of filters to run on request
    */
@@ -88,12 +88,4 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
    * List of all endpoints
    */
   endpoints: EndpointConfig[];
-}
-
-export interface EndpointDecorator<T = any> {
-  (target: any, prop: string | symbol, descriptor: TypedPropertyDescriptor<RouteHandler<T>>): TypedPropertyDescriptor<RouteHandler<T>> | undefined;
-}
-
-export interface ControllerDecorator<T = any> {
-  (target: Class<T>): Class<T> | undefined;
 }

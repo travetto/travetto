@@ -203,7 +203,7 @@ export const TypeBuilder: {
         }
 
         const sourceFile = DeclarationUtil.getDeclarations(type)
-          ?.find(x => ts.getAllJSDocTags(x, (t): t is any => t.tagName.getText() === 'concrete').length)
+          ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
           ?.getSourceFile().fileName as string;
 
         if (source === '.') {

@@ -45,7 +45,7 @@ export class QueryLanguageTokenizer {
   private static processToken(state: TokenizeState, mode?: TokenType) {
     const text = state.text.substring(state.start, state.pos);
     const res = TOKEN_MAPPING[text.toLowerCase()];
-    let value: any = text;
+    let value: unknown = text;
     if (!res && state.mode === 'literal') {
       if (/^["']/.test(text)) {
         value = text.substring(1, text.length - 1)

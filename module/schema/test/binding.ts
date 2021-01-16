@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
-import { Class, RootRegistry } from '@travetto/registry';
+import { RootRegistry } from '@travetto/registry';
 
 import { BindUtil } from '../src/bind-util';
 import { Address } from './models/address';
@@ -79,7 +79,7 @@ class DataBinding {
       street1: 'a',
       street2: 'b',
       unit: '20'
-    } as any);
+    });
     assert(res.unit === '20');
   }
 
@@ -87,9 +87,11 @@ class DataBinding {
   validateAliases() {
     const res = Response.from({
       correct: true,
+      // @ts-expect-error
       status: 'orange',
+      // @ts-expect-error
       valid: 'true'
-    } as any);
+    });
 
     console.log('Response', { ...res });
 
@@ -126,7 +128,7 @@ class DataBinding {
 
   @Test('Should handle polymorphic structure')
   validatePolymorphism() {
-    const items: any[] = [
+    const items: (Poly1 | Poly2)[] = [
       {
         type: 'poly1',
         name: 'bob',
@@ -139,7 +141,7 @@ class DataBinding {
         names: ['1', '2', '3'],
         age: 30
       }
-    ].map(v => BasePoly.from(v));
+    ].map(v => BasePoly.from(v) as Poly1);
 
     assert(items);
     assert(items.length === 2);
@@ -204,7 +206,8 @@ class DataBinding {
     assert(simple2.street1 === null);
 
     const simple3 = Address.from({
-      street1: null as any,
+      // @ts-expect-error
+      street1: null,
       street2: undefined
     });
 

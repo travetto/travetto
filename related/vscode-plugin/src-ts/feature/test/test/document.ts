@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
+import { SuiteConfig } from '../../../../../../module/test/src/model/suite';
 
 import { Decorations } from './decoration';
 import {
@@ -13,8 +14,8 @@ import {
 
 const diagColl = vscode.languages.createDiagnosticCollection('Travetto');
 
-function isDisposable(o: any): o is { _disposed: boolean } {
-  return '_disposed' in o;
+function isDisposable(o: unknown): o is { _disposed: boolean } {
+  return !!o && '_disposed' in (o as object);
 }
 
 /**
@@ -155,7 +156,7 @@ export class DocumentResultsManager {
           if (as.status !== 'failed' || as.src.classId === 'unknown') {
             continue;
           }
-          const { bodyFirst } = Decorations.buildErrorHover(as.src as ErrorHoverAssertion);
+          const { bodyFirst } = Decorations.buildErrorHover(as.src as unknown as ErrorHoverAssertion);
           const rng = as.decoration!.range;
 
           document = document || this.findDocument(this.file);
@@ -197,13 +198,13 @@ export class DocumentResultsManager {
    * @param decoration UI Decoration
    * @param src
    */
-  store(level: Level, key: string, status: StatusUnknown, decoration: vscode.DecorationOptions, src?: any) {
+  store(level: Level, key: string, status: StatusUnknown, decoration: vscode.DecorationOptions, src?: Assertion | SuiteResult | SuiteConfig | TestResult | TestEvent) {
     switch (level) {
       case 'assertion': {
         const el = this.results.test[key];
         const groups: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
 
-        el.assertions.push({ status, decoration, src });
+        el.assertions.push({ status, decoration, src: src as Assertion });
 
         for (const a of el.assertions) {
           groups[a.status].push(a.decoration);
@@ -216,7 +217,7 @@ export class DocumentResultsManager {
       }
       case 'suite': {
         const el = this.results.suite[key];
-        el.src = src;
+        el.src = src as SuiteResult;
         el.status = status;
         el.decoration = decoration;
 
@@ -227,7 +228,7 @@ export class DocumentResultsManager {
       }
       case 'test': {
         const el = this.results.test[key];
-        el.src = src;
+        el.src = src as TestResult;
         el.status = status;
         el.decoration = decoration;
         this.setStyle(el.styles[status], [decoration]);
@@ -254,7 +255,7 @@ export class DocumentResultsManager {
    */
   reset(level: Exclude<Level, 'assertion'>, key: string) {
     const existing = this.results[level][key];
-    const base: ResultState<any> = {
+    const base: ResultState<unknown> = {
       status: 'unknown',
       styles: this.genStyles(level),
       src: (existing && existing.src)
@@ -329,7 +330,7 @@ export class DocumentResultsManager {
       switch (e.type) {
         case 'suite': {
           this.reset('suite', e.suite.classId);
-          this.store('suite', e.suite.classId, 'unknown', Decorations.buildSuite(e.suite), e.suite);
+          this.store('suite', e.suite.classId, 'unknown', Decorations.buildSuite(e.suite), e.suite as SuiteResult);
 
           for (const test of Object.values(this.results.test).filter(x => x.src.classId === e.suite.classId)) {
             this.reset('test', `${test.src.classId}:${test.src.methodName}`);
@@ -341,7 +342,7 @@ export class DocumentResultsManager {
           const key = `${e.test.classId}:${e.test.methodName}`;
           this.reset('test', key);
           const dec = Decorations.buildTest(e.test);
-          this.store('test', key, 'unknown', dec, e.test);
+          this.store('test', key, 'unknown', dec, e.test as TestResult);
           break;
         }
       }

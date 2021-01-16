@@ -38,7 +38,7 @@ export interface MessageOptions {
   html: string;
   text?: string;
   subject?: string;
-  context?: Record<string, any>; // For templating
+  context?: Record<string, unknown>; // For templating
 
   from?: string | Address;
   sender?: string | Address;

@@ -1,9 +1,4 @@
 /**
- * A basic class, as defined by it's constructor
- */
-export type Class<T = any> = abstract new (...args: any[]) => T;
-
-/**
  * A change event
  */
 export interface ChangeEvent<T> {
@@ -16,7 +11,7 @@ export interface ChangeEvent<T> {
  * Change source
  */
 export interface ChangeSource<T> {
-  init(): Promise<any>;
-  on(callback: (e: ChangeEvent<T>) => any): void;
+  init(): Promise<unknown>;
+  on(callback: (e: ChangeEvent<T>) => unknown): void;
   reset(): void;
 }

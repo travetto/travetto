@@ -1,13 +1,12 @@
 import * as redis from 'redis';
 import * as util from 'util';
 
-import { ShutdownManager, Util } from '@travetto/base';
+import { Class, ShutdownManager, Util } from '@travetto/base';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ExpiryState, ModelType, ModelStorageSupport,
   Model, NotFoundError, ExistsError, ModelIndexedSupport
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class } from '@travetto/registry';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
@@ -46,7 +45,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   constructor(private config: RedisModelConfig) { }
 
-  private wrap = <T>(fn: T): T => (fn as any).bind(this.cl) as T;
+  private wrap = <T>(fn: T): T => (fn as unknown as Function).bind(this.cl) as T;
 
   private resolveKey(cls: Class | string, id?: string) {
     let key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);

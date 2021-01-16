@@ -1,7 +1,8 @@
 import { Injectable } from '@travetto/di';
 import { FastifyRestServer } from '@travetto/rest-fastify';
+import { FastifyPluginAsync } from 'fastify';
 
-declare let rateLimit: any;
+declare let rateLimit: (config: { windowMs: number, max: number }) => FastifyPluginAsync;
 
 @Injectable({ primary: true })
 class CustomRestServer extends FastifyRestServer {

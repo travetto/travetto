@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/registry/src/types';
+import type { Class } from '@travetto/base';
 
 type DeepPartial<T> = {
   [P in keyof T]?: (T[P] extends (number | string | Date | boolean | undefined) ? (T[P] | undefined) :

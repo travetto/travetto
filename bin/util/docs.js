@@ -67,32 +67,33 @@ if (target && target.startsWith(root)) {
         })
     )
     .$filter(x => target ? x.mod === target : !x.mod.includes('worker'))
-    .$parallel(({ mod, html, title, dir, mods }) =>
-      title
-        .$flatMap(x => mod !== 'todo-app' ? [x] :
-          'Restarting Mongodb'
-            .$tap(console.log)
-            .$map(() => {
-              require('child_process').spawnSync('npm', ['run', 'service', 'restart', 'mongodb'], { stdio: 'inherit', encoding: 'utf8' });
-              return x;
-            })
-        )
-        .$tap(console.log)
-        .$exec('trv', {
-          args: ['doc', '-o', page(html), '-o', './README.md'],
-          spawn: {
-            shell: true,
-            detached: true,
-            cwd: dir,
-            env: {
-              ...process.env,
-              TRV_MODULES: mods.join(',')
+    .$parallel(
+      ({ mod, html, title, dir, mods }) =>
+        title
+          .$flatMap(x => mod !== 'todo-app' ? [x] :
+            'Restarting Mongodb'
+              .$tap(console.log)
+              .$map(() => {
+                require('child_process').spawnSync('npm', ['run', 'service', 'restart', 'mongodb'], { stdio: 'inherit', encoding: 'utf8' });
+                return x;
+              })
+          )
+          .$tap(console.log)
+          .$exec('trv', {
+            args: ['doc', '-o', page(html), '-o', './README.md'],
+            spawn: {
+              shell: true,
+              detached: true,
+              cwd: dir,
+              env: {
+                ...process.env,
+                TRV_MODULES: mods.join(',')
+              }
             }
-          }
 
-        }),
+          }),
       { concurrent: 4 }
     )
     .$notEmpty()
     .$tap(console.log)
-].$forEach(() => { })
+].$forEach(() => { });

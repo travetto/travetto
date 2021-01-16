@@ -84,7 +84,9 @@ export class Transpiler {
         }
         return this.sources.get(filename);
       },
-      getDefaultLibLocation: () => path.dirname(ts.getDefaultLibFilePath(TranspileUtil.compilerOptions)),
+      getDefaultLibLocation: () => path.dirname(ts.getDefaultLibFilePath(
+        TranspileUtil.compilerOptions as ts.CompilerOptions
+      )),
     };
     return host;
   }
@@ -102,7 +104,7 @@ export class Transpiler {
       }
       this.program = ts.createProgram({
         rootNames: [...this.rootNames],
-        options: TranspileUtil.compilerOptions,
+        options: TranspileUtil.compilerOptions as ts.CompilerOptions,
         host: this.host,
         oldProgram: this.program
       });
@@ -128,7 +130,7 @@ export class Transpiler {
         this.transformerManager.getTransformers()
       );
 
-      TranspileUtil.checkTranspileErrors(filename, result.diagnostics);
+      TranspileUtil.checkTranspileErrors(filename, result.diagnostics as []);
       // Save writing for typescript program (`writeFile`)
     } else {
       const cached = this.cache.readEntry(filename);

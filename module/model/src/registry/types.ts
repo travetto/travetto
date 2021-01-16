@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { ModelType } from '../types/model';
 
 type Primitive = number | boolean | string | Date;
@@ -12,10 +12,12 @@ type ValidFieldNames<T> = {
 
 type RetainFields<T> = Pick<T, ValidFieldNames<T>>;
 
-type SortClauseRaw<T> = {
+export type SortClauseRaw<T> = {
   [P in keyof T]?:
   T[P] extends object ? SortClauseRaw<RetainFields<T[P]>> : (1 | -1 | boolean);
 };
+
+type SortClause<T> = SortClauseRaw<RetainFields<T>>;
 
 /**
  * Model options
@@ -64,7 +66,7 @@ export interface IndexConfig<T extends ModelType> {
   /**
    * Fields and sort order
    */
-  fields: SortClauseRaw<T>[];
+  fields: SortClause<T>[];
 
   /**
    * Is the index unique?

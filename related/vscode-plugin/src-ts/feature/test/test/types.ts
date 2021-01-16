@@ -61,8 +61,8 @@ export interface TestResult extends TestConfig {
 }
 
 export interface Assertion {
-  expected?: any;
-  actual?: any;
+  expected?: unknown;
+  actual?: unknown;
   operator?: string;
   file: string;
   classId: string;
@@ -85,10 +85,10 @@ export type Level = TestEvent['type'];
 
 export interface ErrorHoverAssertion {
   message: string;
-  expected?: any;
-  actual?: any;
+  expected?: unknown;
+  actual?: unknown;
   operator?: string;
-  error: Error & SMap<any>;
+  error: Error & SMap<unknown>;
 }
 
 export type RemoveEvent = {

@@ -11,7 +11,9 @@ class User {
 @Controller('/user')
 class UserController {
 
-  private service: any;
+  private service: {
+    update(user: User): Promise<User>;
+  };
 
   @Post('/saveUser')
   async save(@SchemaBody() user: User) {

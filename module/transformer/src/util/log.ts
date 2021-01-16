@@ -14,14 +14,14 @@ export class LogUtil {
   /**
    * Clean up `ts.Node` contents for logging
    */
-  static collapseNodes(all: any[]) {
+  static collapseNodes(all: unknown[]) {
     return all.map(x => this.collapseNode(x));
   }
 
   /**
    * Clean up `ts.Node` contents for logging
    */
-  static collapseNode(x: any, cache: Set<string> = new Set()): any {
+  static collapseNode(x: unknown, cache: Set<unknown> = new Set()): unknown {
     if (!x || Util.isPrimitive(x)) {
       return x;
     }
@@ -35,13 +35,14 @@ export class LogUtil {
     if (Array.isArray(x)) {
       return x.map(v => this.collapseNode(v, cache));
     } else {
-      const out: Record<string, any> = {};
-      for (const key of Object.keys(x)) {
-        if (Util.isFunction(x[key]) || exclude.has(key) || x[key] === undefined) {
+      const ox = x as object;
+      const out: Record<string, unknown> = {};
+      for (const key of Object.keys(ox) as (keyof typeof x)[]) {
+        if (Util.isFunction(ox[key]) || exclude.has(key) || ox[key] === undefined) {
           continue;
         }
         try {
-          out[key] = this.collapseNode(x[key], cache);
+          out[key] = this.collapseNode(ox[key], cache);
         } catch (err) {
           return undefined;
         }

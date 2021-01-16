@@ -21,9 +21,9 @@ a:
   e:
     g: test`);
 
-    const broken: any = ConfigUtil.breakDownKeys(data);
-    assert(broken['a.b.c'] === undefined);
-    assert(broken['a.b'] === undefined);
+    const broken = ConfigUtil.breakDownKeys(data) as { a: { b: { c: number[], d: string }, e: { g: string } } };
+    assert((broken as Record<string, unknown>)['a.b.c'] === undefined);
+    assert((broken as Record<string, unknown>)['a.b'] === undefined);
 
     assert.ok(broken.a);
     assert.ok(broken.a.b);
@@ -37,11 +37,11 @@ a:
 
   @Test()
   bindTo() {
-    const res = ConfigUtil.bindTo({ a: { b: { c: '5' } } }, {}, 'a.b');
+    const res = ConfigUtil.bindTo<{ c?: string }>({ a: { b: { c: '5' } } }, {}, 'a.b');
     assert(res.c === '5');
     process.env.A_B_C = '20';
 
-    const res2 = ConfigUtil.bindTo({ a: { b: { c: '5' } } }, {}, 'a.b');
+    const res2 = ConfigUtil.bindTo<{ c?: string }>({ a: { b: { c: '5' } } }, {}, 'a.b');
     assert(res2.c === '20');
   }
 

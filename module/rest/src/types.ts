@@ -1,5 +1,4 @@
-import { Closeable } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, Closeable } from '@travetto/base';
 
 export const NodeRequestSym = Symbol.for('@trv:rest/node-request');
 export const NodeResponseSym = Symbol.for('@trv:rest/node-response');
@@ -16,11 +15,10 @@ export type Response = Travetto.Response;
 
 export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'trace' | 'all';
 
-export type RouteHandler<T = any> = (...args: any[]) => Promise<T> | T | void;
+export type RouteHandler = (...args: any[]) => any;
+export type Filter = (req: Request, res: Response) => any;
 
-export type Filter<T = any> = (req: Request, res: Response) => Promise<T> | T | void;
-
-export type ServerHandle = Closeable & { on(type: 'close', callback: () => void): any };
+export type ServerHandle = Closeable & { on(type: 'close', callback: () => void): unknown | void };
 
 /**
  * Param configuration
@@ -57,14 +55,14 @@ export interface ParamConfig {
   /**
    * Default value for the field
    */
-  defaultValue?: any;
+  defaultValue?: unknown;
   /**
    * Extract the value from request
    * @param config Param configuration
    * @param req The request
    * @param res The response
    */
-  extract(config: ParamConfig, req?: Request, res?: Response): any;
+  extract(config: ParamConfig, req?: Request, res?: Response): unknown;
 }
 
 /**
@@ -74,7 +72,7 @@ export interface RouteConfig {
   /**
    * Instance the route is for
    */
-  instance?: any;
+  instance?: unknown;
   /**
    * The HTTP method the route is for
    */

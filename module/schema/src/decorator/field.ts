@@ -1,35 +1,29 @@
+import { ClassInstance } from '@travetto/base';
+
 import { SchemaRegistry } from '../service/registry';
 import { CommonRegExp } from '../validate/regexp';
 import { ClassList, FieldConfig } from '../service/types';
 
-function prop(obj: Record<string, any>) {
-  return (t: any, k: string) => {
+function prop(obj: Record<string, unknown>) {
+  return (t: ClassInstance, k: string) => {
     SchemaRegistry.registerPendingFieldFacet(t.constructor, k, obj);
   };
 }
 
 const stringArrProp = prop as
-  (obj: Record<string, any>) => <T extends Partial<Record<K, string | any[]>>, K extends string>(t: T, k: K) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | unknown[]>>, K extends string>(t: T, k: K) => void;
 
 const stringArrStringProp = prop as
-  (obj: Record<string, any>) => <T extends Partial<Record<K, string | string[]>>, K extends string>(t: T, k: K) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | string[]>>, K extends string>(t: T, k: K) => void;
 
 const numberProp = prop as
-  (obj: Record<string, any>) => <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K) => void;
 
 const stringNumberProp = prop as
-  (obj: Record<string, any>) => <T extends Partial<Record<K, string | number>>, K extends string>(t: T, k: K) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | number>>, K extends string>(t: T, k: K) => void;
 
 const dateNumberProp = prop as
-  (obj: Record<string, any>) => <T extends Partial<Record<K, Date | number>>, K extends string>(t: T, k: K) => void;
-
-function enumKeys(c: any): string[] {
-  if (Array.isArray(c) && typeof c[0] === 'string') {
-    return c;
-  } else {
-    return Object.values(c).filter((x: any) => typeof x === 'string') as string[];
-  }
-}
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, Date | number>>, K extends string>(t: T, k: K) => void;
 
 /**
  * Registering a field
@@ -38,7 +32,7 @@ function enumKeys(c: any): string[] {
  * @augments `@trv:schema/Field`
  */
 export function Field(type: ClassList, config?: Partial<FieldConfig>) {
-  return (f: any, p: string) => {
+  return (f: ClassInstance, p: string) => {
     SchemaRegistry.registerPendingFieldConfig(f.constructor, p, type);
     if (config) {
       SchemaRegistry.registerPendingFieldFacet(f.constructor, p, config);
@@ -65,8 +59,7 @@ export function Required(active = true, message?: string) { return prop({ requir
  * @param message The error message to show when the constraint fails
  * @augments `@trv:schema/Field`
  */
-export function Enum(vals: string[] | any, message?: string) {
-  const values = enumKeys(vals);
+export function Enum(values: string[], message?: string) {
   message = message || `{path} is only allowed to be "${values.join('" or "')}"`;
   return stringNumberProp({ enum: { values, message } });
 }
@@ -186,5 +179,5 @@ export function Currency() { return Precision(13, 2); }
  * @augments `@trv:schema/Ignore`
  */
 export function Ignore(): PropertyDecorator {
-  return (target: any, property: string | symbol) => { };
+  return (target: Object, property: string | symbol) => { };
 }

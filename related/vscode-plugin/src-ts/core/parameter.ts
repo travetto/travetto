@@ -149,7 +149,7 @@ export class ParameterSelector {
       case 'string':
       default: {
         switch (conf.param.subtype) {
-          case 'choice': return this.getQuickPickList(conf, conf.param.meta.choices);
+          case 'choice': return this.getQuickPickList(conf, conf.param.meta?.choices ?? []);
           case 'file': return this.getFile(conf);
           default: return this.getQuickInput(conf);
         }

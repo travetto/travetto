@@ -1,6 +1,7 @@
 import { EnvUtil } from '@travetto/boot';
 import { DependencyRegistry } from '@travetto/di';
-import { ChangeEvent, Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
+import { ChangeEvent } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
 import { ModelRegistry } from '../../registry/model';
 import { ModelStorageSupport } from '../../service/storage';

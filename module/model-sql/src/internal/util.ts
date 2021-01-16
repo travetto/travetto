@@ -1,5 +1,4 @@
-import { Util } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, Util } from '@travetto/base';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/schema';

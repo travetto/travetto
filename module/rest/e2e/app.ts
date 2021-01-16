@@ -4,16 +4,16 @@ import { RouteConfig, RestServer, RestInterceptor } from '..';
 import { ServerHandle } from '../src/types';
 
 type Inner = {
-  use(factory: any): void;
+  use(factory: unknown): void;
 };
 
 @Injectable()
 class DummyServer extends RestServer<Inner> {
-  raw: any = {};
+  raw: Inner;
 
   async createRaw() {
     return {
-      use(val: any) {
+      use(val: unknown) {
         console.log('Using', { val });
       }
     };

@@ -9,14 +9,16 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
   ],
   plugins: [
-    '@typescript-eslint'
+    '@typescript-eslint',
+    // 'unused-imports'
   ],
-  globals: ['$argv'],
+  globals: { $argv: 'readonly', $exec: 'readonly' },
   rules: {
+    // 'unused-imports/no-unused-imports-ts': 'error',
     '@typescript-eslint/array-type': 'error',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/explicit-member-accessibility': [
       'off',
       {

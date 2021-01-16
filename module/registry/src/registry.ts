@@ -1,6 +1,8 @@
 import { EventEmitter } from 'events';
 
-import { Class, ChangeSource, ChangeEvent } from './types';
+import { Class } from '@travetto/base';
+
+import { ChangeSource, ChangeEvent } from './types';
 
 /**
  * Base registry class, designed to listen to changes over time
@@ -14,7 +16,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Initializing promises
    */
-  protected initialized?: Promise<any>;
+  protected initialized?: Promise<unknown>;
   /**
    * Event emitter, to broadcast event changes
    */
@@ -53,7 +55,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Run initialization
    */
-  protected async runInit(): Promise<any> {
+  protected async runInit(): Promise<void> {
     try {
       this.resolved = false;
       console.debug('Initializing', { id: this.constructor.ᚕid, uid: this._uid });
@@ -96,7 +98,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Initialize, with a built-in latch to prevent concurrent initializations
    */
-  async init(): Promise<any> {
+  async init(): Promise<unknown> {
     console.debug('Trying to initialize', { id: this.constructor.ᚕid, uid: this._uid, initialized: this.initialized });
 
     if (!this.initialized) {
@@ -175,14 +177,14 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Register additional listeners
    */
-  on<T>(callback: (e: ChangeEvent<Class>) => any): void {
+  on<T>(callback: (e: ChangeEvent<Class>) => unknown): void {
     this.events.on('change', callback);
   }
 
   /**
    * Remove listeners
    */
-  off<T>(callback: (e: ChangeEvent<Class>) => any) {
+  off<T>(callback: (e: ChangeEvent<Class>) => unknown) {
     this.events.off('change', callback);
   }
 

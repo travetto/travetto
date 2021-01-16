@@ -1,8 +1,8 @@
 import { Util, ShutdownManager } from '@travetto/base';
 import { Timeout } from './timeout';
 
-function canCancel(o: any): o is { cancel(): any } {
-  return o && 'cancel' in o;
+function canCancel(o: unknown): o is { cancel(): unknown } {
+  return !!o && 'cancel' in (o as object);
 }
 
 /**
@@ -10,7 +10,7 @@ function canCancel(o: any): o is { cancel(): any } {
  */
 export class Barrier {
   private support = [] as string[];
-  private barriers = new Map<string, Promise<any>>([]);
+  private barriers = new Map<string, Promise<unknown>>([]);
 
   constructor(
     timeout?: number,
@@ -27,7 +27,7 @@ export class Barrier {
   /**
    * Add a new barrier
    */
-  add(p: (() => Promise<any>) | Promise<any>, support = false) {
+  add(p: (() => Promise<unknown>) | Promise<unknown>, support = false) {
     if (!('then' in p)) {
       p = p();
     }

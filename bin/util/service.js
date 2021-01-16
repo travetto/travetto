@@ -14,5 +14,5 @@
       },
       stdio: [0, 1, 2],
       cwd: 'module/command'
-    })
+    });
   });

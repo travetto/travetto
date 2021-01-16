@@ -1,4 +1,6 @@
-import { MetadataRegistry, Class } from '@travetto/registry';
+import { Class, ConcreteClass } from '@travetto/base';
+import { MetadataRegistry } from '@travetto/registry';
+
 import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';
 
@@ -65,7 +67,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       })));
     }
 
-    config.instance = new (config.class as new (...args: any[]) => any)();
+    config.instance = new (config.class as ConcreteClass)();
     config.tests = tests as TestConfig[];
 
     if (!config.description) {

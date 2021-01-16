@@ -19,5 +19,7 @@ export interface ParamConfig {
   subtype?: string;
   def?: string | boolean | number;
   optional?: boolean;
-  meta?: any;
+  meta?: {
+    choices?: string[];
+  };
 }

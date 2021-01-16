@@ -1,7 +1,6 @@
-import { AppManifest, ShutdownManager } from '@travetto/base';
+import { AppManifest, Class, ShutdownManager } from '@travetto/base';
 import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
 import { CompileUtil, FsUtil } from '@travetto/boot';
-import type { Class } from '@travetto/registry';
 
 import { Compiler } from '../src/compiler';
 
@@ -14,9 +13,9 @@ export function watch($Compiler: Class<typeof Compiler>) {
    */
   const Cls = class extends $Compiler {
     presence: FilePresenceManager;
-    modules = new Map<string, RetargettingProxy<any>>();
+    modules = new Map<string, RetargettingProxy<unknown>>();
 
-    constructor(...args: any[]) {
+    constructor(...args: unknown[]) {
       super(...args);
 
       ShutdownManager.onUnhandled(err => {

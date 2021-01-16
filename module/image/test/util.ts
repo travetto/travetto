@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 
-import { StreamUtil, FsUtil } from '@travetto/boot';
+import { StreamUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
 import { ImageUtil } from '../src/util';
 

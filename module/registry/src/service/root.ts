@@ -1,6 +1,7 @@
+import { Class } from '@travetto/base';
 import { Registry } from '../registry';
 import { ClassSource } from '../source/class-source';
-import { Class, ChangeEvent } from '../types';
+import { ChangeEvent } from '../types';
 
 /**
  * The root registry that controls all registries

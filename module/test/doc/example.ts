@@ -5,7 +5,10 @@ import { Suite, Test } from '@travetto/test';
 @Suite()
 class SimpleTest {
 
-  private complexService: any;
+  private complexService: {
+    doLongOp(): Promise<number>;
+    getText(): string;
+  };
 
   @Test()
   async test1() {

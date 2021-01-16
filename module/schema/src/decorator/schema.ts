@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { SchemaRegistry } from '../service/registry';
 import { ViewFieldsConfig } from '../service/types';
 import { ValidatorFn } from '../validate/types';
@@ -8,11 +8,11 @@ import { ValidatorFn } from '../validate/types';
  *
  * @augments `@trv:schema/Schema`
  */
-export function Schema(): ClassDecorator { // Auto is used during compilation
-  return (<T>(target: Class<T>): Class<T> => {
+export function Schema() { // Auto is used during compilation
+  return <T>(target: Class<T>): Class<T> => {
     SchemaRegistry.getOrCreatePending(target);
     return target;
-  }) as ClassDecorator;
+  };
 }
 
 /**
@@ -22,7 +22,7 @@ export function Schema(): ClassDecorator { // Auto is used during compilation
  */
 export function Validator<T>(fn: ValidatorFn<T, string>) {
   return (target: Class<T>) => {
-    SchemaRegistry.getOrCreatePending(target).validators!.push(fn);
+    SchemaRegistry.getOrCreatePending(target).validators!.push(fn as ValidatorFn<unknown, unknown>);
   };
 }
 

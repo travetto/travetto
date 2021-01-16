@@ -39,7 +39,7 @@ export class TapEmitter implements TestConsumer {
   /**
    * Output supplemental data (e.g. logs)
    */
-  logMeta(obj: any) {
+  logMeta(obj: Record<string, unknown>) {
     let body = YamlUtil.serialize(obj);
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.enhancer.objectInspect(body)}\n...`);

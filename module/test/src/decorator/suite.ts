@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class, ClassInstance } from '@travetto/base';
 import { SuiteRegistry } from '../registry/suite';
 import { SuiteConfig } from '../model/suite';
 
@@ -24,7 +24,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
     Object.assign(extra, r);
   }
 
-  return ((target: Class<any>) => {
+  return ((target: Class) => {
     const cfg = { description: (description as string), ...extra };
     if (target.ᚕabstract) {
       cfg.skip = true;
@@ -35,7 +35,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
 }
 
 function listener(phase: SuitePhase) {
-  return (inst: any, prop: string, descriptor: PropertyDescriptor) => {
+  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor) => {
     SuiteRegistry.registerPendingListener(inst.constructor, descriptor.value, phase);
     return descriptor;
   };

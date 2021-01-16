@@ -12,7 +12,7 @@ export interface SessionData {
  * Full session object, with metadata
  */
 @ContextProvider((c, req) => req.session)
-export class Session<T = any>  {
+export class Session<T = unknown>  {
   /**
    * The expiry time when the session was loaded
    */

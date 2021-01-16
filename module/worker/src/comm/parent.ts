@@ -6,7 +6,7 @@ import { ProcessCommChannel } from './channel';
 /**
  * Parent channel
  */
-export class ParentCommChannel<U = any> extends ProcessCommChannel<ChildProcess, U> {
+export class ParentCommChannel<U = unknown> extends ProcessCommChannel<ChildProcess, U> {
 
   private complete: ExecutionState['result'];
 

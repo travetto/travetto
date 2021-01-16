@@ -1,5 +1,4 @@
-import { AppError } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, AppError } from '@travetto/base';
 
 /**
  * Represents when a data item already exists

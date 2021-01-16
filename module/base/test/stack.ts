@@ -21,7 +21,7 @@ class StackTest {
 
   async inner5() {
     return new Promise(
-      (res: any, rej) => setTimeout(() => this.inner4().then(res, rej), 1)
+      (res, rej) => setTimeout(() => this.inner4().then(res, rej), 1)
     );
   }
 

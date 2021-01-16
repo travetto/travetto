@@ -1,12 +1,11 @@
-import { Closeable } from '@travetto/base';
-import type { Class } from '@travetto/registry';
+import type { Class, Closeable } from '@travetto/base';
 
 type OrProm<T> = T | Promise<T>;
 
 /** A pattern that can be waited on */
-export type Waitable = { wait(): Promise<any> } | { on(event: 'close', cb: Function): any };
+export type Waitable = { wait(): Promise<unknown> } | { on(event: 'close', cb: Function): unknown };
 export type AppClass = {
-  run(...args: any[]): OrProm<Waitable | Closeable | void | undefined>;
+  run(...args: unknown[]): OrProm<Waitable | Closeable | void | undefined>;
 };
 
 /**
@@ -19,7 +18,7 @@ export interface ApplicationParameter {
   subtype?: string; // For string, something like date or choice
   meta?: {
     choices: string[]; // Applies if subtype is choice
-    [key: string]: any;
+    [key: string]: unknown;
   };
   def?: string; // Default value
   optional?: boolean; // Indicates if field is required or not

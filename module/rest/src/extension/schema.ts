@@ -1,8 +1,6 @@
 // @file-if @travetto/schema
 import { SchemaRegistry, BindUtil, SchemaValidator } from '@travetto/schema';
-
-import { Util, AppError } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, ClassInstance, Util, AppError } from '@travetto/base';
 
 import { ControllerRegistry } from '../registry/controller';
 import { Request, ParamConfig } from '../types';
@@ -15,7 +13,7 @@ declare global {
   namespace Travetto {
     // eslint-disable-next-line no-shadow
     interface Request {
-      [QuerySchemaSym]: Record<string, any>;
+      [QuerySchemaSym]: Record<string, unknown>;
     }
   }
 }
@@ -31,7 +29,7 @@ const EXTRACTORS: Record<'body' | 'query', ExtractFn> = {
  * @param cls The class to create an instance for
  * @param view The view to bind with
  */
-export async function getSchemaInstance<T>(obj: any, cls: Class<T>, view?: string) {
+export async function getSchemaInstance<T>(obj: T | object, cls: Class<T>, view?: string) {
   if (!Util.isPlainObject(obj)) {
     throw new AppError(`Object is missing or wrong type: ${obj}`, 'data');
   }
@@ -87,7 +85,7 @@ export function schemaParamConfig(location: 'body' | 'query', config: Partial<Pa
  * @augments `@trv:rest/Param`
  */
 export function SchemaBody(config: Partial<ParamConfig> & { view?: string } = {}) {
-  return function (target: any, prop: string | symbol, idx: number) {
+  return function (target: ClassInstance, prop: string | symbol, idx: number) {
     ControllerRegistry.registerEndpointParameter(target.constructor, target.constructor.prototype[prop],
       schemaParamConfig('body', config), idx);
   };
@@ -99,7 +97,7 @@ export function SchemaBody(config: Partial<ParamConfig> & { view?: string } = {}
  * @augments `@trv:rest/Param`
  */
 export function SchemaQuery(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
-  return function (target: any, prop: string | symbol, idx: number) {
+  return function (target: ClassInstance, prop: string | symbol, idx: number) {
     ControllerRegistry.registerEndpointParameter(target.constructor, target.constructor.prototype[prop],
       schemaParamConfig('query', config), idx);
   };

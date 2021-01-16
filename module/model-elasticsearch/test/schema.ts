@@ -101,7 +101,9 @@ class SchemaSuite {
 
   @Test('Numeric schema')
   async testNumericSchema() {
-    const schema3 = ElasticsearchSchemaUtil.generateSourceSchema(Numerical);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const schema3: any = ElasticsearchSchemaUtil.generateSourceSchema(Numerical);
+
     assert(schema3.properties.money.type === 'scaled_float');
     assert(schema3.properties.whole.type === 'integer');
     assert(schema3.properties.big.type === 'double');

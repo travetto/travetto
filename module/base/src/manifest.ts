@@ -1,4 +1,5 @@
 import { FsUtil, EnvUtil } from '@travetto/boot';
+
 /**
  * General purpose information about the application.  Derived from the app's package.json
  */
@@ -6,7 +7,7 @@ class $AppManifest {
   /**
    * App profiles with indexing
    */
-  private readonly profileSet: Set<string>;
+  readonly #profileSet: Set<string>;
 
   /**
    * Env
@@ -91,26 +92,15 @@ class $AppManifest {
       const { version, name, license, author, description } = require(pkgLoc);
       Object.assign(this, { version, name, license, author, description });
     } catch { }
-
     this.travetto = require('../package.json').version; // Travetto version
+
     this.env = EnvUtil.get('TRV_ENV', EnvUtil.get('NODE_ENV', 'dev'))
       .replace(/^production$/i, 'prod')
       .replace(/^development$/i, 'dev')
       .toLowerCase();
     this.prod = this.env === 'prod';
-
     this.profiles = ['application', ...EnvUtil.getList('TRV_PROFILES'), this.env];
-    this.profileSet = new Set(this.profiles);
-
-    this.commonSourceFolders = ['src', ...EnvUtil.getList('TRV_SRC_COMMON')];
-    this.commonSourceExcludeModules = new Set([
-      // This drives the init process, so cannot happen in a support file
-      '@travetto/cli', '@travetto/boot', '@travetto/doc'
-    ]);
-
-    this.localSourceFolders = [...EnvUtil.getList('TRV_SRC_LOCAL')];
-    this.resourceFolders = ['resources', ...EnvUtil.getList('TRV_RESOURCES')];
-    this.shutdownWait = EnvUtil.getTime('TRV_SHUTDOWN_WAIT', 2, 's');
+    this.#profileSet = new Set(this.profiles);
 
     // Compute the debug state
     const status = EnvUtil.isSet('TRV_DEBUG') ? !EnvUtil.isFalse('TRV_DEBUG') : !this.prod;
@@ -118,33 +108,36 @@ class $AppManifest {
       status,
       value: (status ? EnvUtil.get('TRV_DEBUG') : '') || undefined
     };
+
+    this.commonSourceFolders = ['src', ...EnvUtil.getList('TRV_SRC_COMMON')];
+    this.localSourceFolders = [...EnvUtil.getList('TRV_SRC_LOCAL')];
+    this.resourceFolders = ['resources', ...EnvUtil.getList('TRV_RESOURCES')];
+
+    this.commonSourceExcludeModules = new Set([
+      // This drives the init process, so cannot happen in a support file
+      '@travetto/cli', '@travetto/boot', '@travetto/doc'
+    ]);
+    this.shutdownWait = EnvUtil.getTime('TRV_SHUTDOWN_WAIT', 2, 's');
   }
 
   /**
    * Generate to JSON
    */
   toJSON() {
-    return ([
-      'travetto', 'name', 'version', 'license', 'description',
-      'author', 'env', 'prod', 'profiles', 'localSourceFolders',
-      'commonSourceFolders', 'resourceFolders', 'debug',
-      'shutdownWait',
-    ] as const)
-      .reduce((acc, k) => {
-        acc[k] = this[k];
-        return acc;
-      }, {
-        dynamicModules: EnvUtil.getDynamicModules(),
-        watch: EnvUtil.isWatch(),
-        readonly: EnvUtil.isReadonly()
-      } as Record<string, any>);
+    const out: Record<string, unknown> = {
+      ...this as Record<string, unknown>,
+      dynamicModules: EnvUtil.getDynamicModules(),
+      watch: EnvUtil.isWatch(),
+      readonly: EnvUtil.isReadonly()
+    };
+    return out;
   }
 
   /**
    * Will return true if a profile is active
    */
   hasProfile(name: string) {
-    return this.profileSet.has(name);
+    return this.#profileSet.has(name);
   }
 }
 

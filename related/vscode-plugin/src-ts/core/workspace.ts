@@ -109,8 +109,8 @@ export class Workspace {
    * See if an entity is an editor
    * @param o
    */
-  static isEditor(o: any): o is vscode.TextEditor {
-    return 'document' in o;
+  static isEditor(o: unknown): o is vscode.TextEditor {
+    return !!o && 'document' in (o as object);
   }
 
   /**

@@ -170,7 +170,7 @@ class Validation {
     await assert.rejects(() => {
       const o = DateTestSchema.from({ date: undefined });
       return SchemaValidator.validate(DateTestSchema, o);
-    }, (err: any) => {
+    }, (err: unknown) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'required')) {
         return err;
       }
@@ -180,7 +180,7 @@ class Validation {
       // @ts-ignore
       const o = DateTestSchema.from({ date: NaN });
       return SchemaValidator.validate(DateTestSchema, o);
-    }, (err: any) => {
+    }, (err: unknown) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'type')) {
         return err;
       }
@@ -189,7 +189,7 @@ class Validation {
     await assert.rejects(() => {
       const o = CustomValidated.from({ age: Number.NaN, age2: 1 });
       return SchemaValidator.validate(CustomValidated, o);
-    }, (err: any) => {
+    }, (err: unknown) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'type')) {
         return err;
       }
@@ -198,7 +198,7 @@ class Validation {
     await assert.rejects(() => {
       const o = CustomValidated.from({ age: 1, age2: 1 });
       return SchemaValidator.validate(CustomValidated, o);
-    }, (err: any) => {
+    }, (err: unknown) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'custom')) {
         return err;
       }
@@ -208,7 +208,7 @@ class Validation {
       // @ts-ignore
       const o = DateTestSchema.from({ date: '' });
       return SchemaValidator.validate(DateTestSchema, o);
-    }, (err: any) => {
+    }, (err: unknown) => {
       if (!(err instanceof ValidationResultError && err.errors[0].kind === 'required')) {
         return err;
       }
@@ -280,7 +280,8 @@ class Validation {
     });
 
     await assert.doesNotReject(() => SchemaValidator.validate(Address, addr));
-    addr.zip = '800' as any;
+    // @ts-expect-error
+    addr.zip = '800';
     await assert.rejects(() => SchemaValidator.validate(Address, addr));
     await assert.rejects(() => SchemaValidator.validatePartial(Address, addr));
     // @ts-expect-error

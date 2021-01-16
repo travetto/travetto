@@ -13,7 +13,9 @@ export class QueryTest {
 
   @Test()
   async validateQuery() {
-    let out = MongoUtil.extractSimple({ a: { b: { c: 5 } } });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let out: any = MongoUtil.extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
     type Type = { a: { d: number, b: { c: number } }, d: { e: boolean }, g: { z: string[] }, name: number, age: number };
@@ -45,7 +47,8 @@ export class QueryTest {
 
   @Test()
   async translateIds() {
-    const out = MongoUtil.extractWhereClause<User>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const out: any = MongoUtil.extractWhereClause<User>({
       $and: [
         { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
       ]
@@ -56,7 +59,8 @@ export class QueryTest {
 
   @Test()
   async translateRegex() {
-    const out = MongoUtil.extractWhereClause<User>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const out: any = MongoUtil.extractWhereClause<User>({
       name: { $regex: '/google.$/' }
     });
 

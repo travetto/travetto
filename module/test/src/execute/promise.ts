@@ -11,7 +11,7 @@ declare global {
 /**
  * Promise stub to track creation
  */
-function Wrapped(this: Promise<any>, ex: any) {
+function Wrapped(this: Promise<unknown>, ex: (res: (v: unknown) => unknown, rej?: (err: unknown) => unknown) => void) {
   const prom = new og(ex);
   this.then = prom.then.bind(prom);
   this.catch = prom.catch.bind(prom);
@@ -34,7 +34,7 @@ Wrapped.reject = Promise.reject.bind(Promise);
  * Promise watcher, to catch any unfinished promises
  */
 export class PromiseCapture {
-  static pending: Promise<any>[];
+  static pending: Promise<unknown>[];
 
   /**
    * Swap method and track progress
@@ -47,7 +47,7 @@ export class PromiseCapture {
   /**
    * Wait for all promises to resolve
    */
-  static async resolvePending(pending: Promise<any>[]) {
+  static async resolvePending(pending: Promise<unknown>[]) {
     if (pending.length) {
       let final: Error | undefined;
       console.debug('Resolving', { pending: this.pending.length });

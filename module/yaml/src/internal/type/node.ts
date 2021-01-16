@@ -1,6 +1,6 @@
-import { Util } from '@travetto/base';
+import { SimpleType, Util } from '@travetto/base';
 
-export interface Node<T = any> {
+export interface Node<T extends SimpleType = SimpleType> {
   value: T;
 }
 
@@ -33,8 +33,8 @@ export class NullNode implements Node<null> {
   value: null = null;
 }
 
-export class JSONNode implements Node<any> {
-  value: any;
+export class JSONNode implements Node {
+  value: SimpleType;
 
   constructor(token: string) {
     this.value = JSON.parse(token);

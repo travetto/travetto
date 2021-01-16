@@ -75,7 +75,7 @@ export class TestPhaseManager {
   /**
    * On error, handle stubbing out error for the phases in progress
    */
-  async onError(err: any) {
+  async onError(err: Error | typeof TestBreakoutSym) {
     for (const ph of this.progress) {
       try {
         await this.runPhase(ph === 'all' ? 'afterAll' : 'afterEach');

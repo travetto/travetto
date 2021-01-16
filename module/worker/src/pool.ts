@@ -10,11 +10,11 @@ import { InputSource } from './input/types';
  */
 export interface Worker<X> {
   active: boolean;
-  id: any;
-  init?(): Promise<any>;
-  execute(input: X): Promise<any>;
-  destroy(): Promise<any>;
-  release?(): any;
+  id: unknown;
+  init?(): Promise<unknown>;
+  execute(input: X): Promise<unknown>;
+  destroy(): Promise<void>;
+  release?(): unknown;
 }
 
 /**
@@ -122,7 +122,7 @@ export class WorkPool<X, T extends Worker<X>> {
    * Process a given input source
    */
   async process(src: InputSource<X>) {
-    const pending = new Set<Promise<any>>();
+    const pending = new Set<Promise<unknown>>();
 
     while (await src.hasNext()) {
       const worker = (await this.pool.acquire())!;

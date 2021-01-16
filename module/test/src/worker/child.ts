@@ -1,6 +1,6 @@
 import type { Compiler } from '@travetto/compiler';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
-import { PhaseManager, ShutdownManager, ScanApp, AppManifest } from '@travetto/base';
+import { PhaseManager, ShutdownManager, ScanApp } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
 import { Events, RunEvent } from './types';
@@ -14,7 +14,7 @@ const FIXED_MODULES = new Set([
   'worker', 'command',
   'log', 'jwt', 'image',
   'test',
-].map(x => `@travetto/${x}`));
+].map(x => `@travetto/${x}` as string));
 
 /**
  * Child Worker for the Test Runner.  Receives events as commands

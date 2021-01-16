@@ -57,7 +57,7 @@ export class KoaServerUtil {
           ctx.body = b;
         },
         on: ctx.res.on.bind(ctx.res),
-        end: (val?: any) => {
+        end: (val?: unknown) => {
           if (val) {
             ctx.body = val;
           }

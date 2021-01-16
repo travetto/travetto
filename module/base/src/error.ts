@@ -21,7 +21,7 @@ export class AppError extends Error {
   constructor(
     public message: string,
     public category: ErrorCategory = 'general',
-    public payload?: Record<string, any>,
+    public payload?: Record<string, unknown>,
     stack?: string
 
   ) {
@@ -34,7 +34,7 @@ export class AppError extends Error {
    * The format of the JSON output
    * @param extra Extra data to build into the context
    */
-  toJSON(extra: Record<string, any> = {}) {
+  toJSON(extra: Record<string, unknown> = {}) {
     return {
       ...extra,
       ...(this.payload ?? {}),

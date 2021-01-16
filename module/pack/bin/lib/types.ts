@@ -3,8 +3,8 @@ export type CommonConfig = {
   active?: boolean;
 };
 
-export type PackOperation<T extends CommonConfig, K extends string = string> = {
-  key: K;
+export type PackOperation<T extends CommonConfig> = {
+  key: string;
   title: string;
   flags: [cli: string, description: string, test: undefined | ((inp: string) => boolean), prop: (keyof T)][];
   extend(a: T, b: Partial<T>): T;

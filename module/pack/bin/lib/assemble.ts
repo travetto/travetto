@@ -75,7 +75,10 @@ export class AssembleUtil {
    */
   static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'optPeer']) {
     for (const el of await FrameworkUtil.resolveDependencies({ types })) {
-      const sub = el.file.replace(/.*?node_modules/, 'node_modules');
+      const sub = el.file
+        .replace(/.*?node_modules/, 'node_modules')
+        .replace(`${process.env.TRV_DEV}`, 'node_modules/@travetto');
+
       const tgt = FsUtil.resolveUnix(workspace, sub);
       await FsUtil.mkdirp(path.dirname(tgt));
 
@@ -88,7 +91,7 @@ export class AssembleUtil {
       }
     }
     await fs.copyFile(
-      FsUtil.resolveUnix('node_modules/@travetto/boot/register.js'),
+      FsUtil.resolveUnix(require.resolve('@travetto/boot/register.js')),
       FsUtil.resolveUnix(workspace, 'node_modules/@travetto/boot/register.js')
     );
   }
@@ -98,7 +101,7 @@ export class AssembleUtil {
    */
   static async compileWorkspace(root: string, cacheDir: string) {
     await ExecUtil.spawn(`node`, ['./node_modules/@travetto/cli/bin/travetto.js', 'compile'],
-      { cwd: root, env: { TRV_CACHE: cacheDir } }).result;
+      { cwd: root, env: { TRV_CACHE: cacheDir, TRV_MODULES: '', TRV_DEV: '', TRV_REQUIRES: '' } }).result;
   }
 
   /**

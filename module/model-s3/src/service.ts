@@ -8,13 +8,12 @@ import {
 } from '@travetto/model';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { Injectable } from '@travetto/di';
-import { AppError, Util } from '@travetto/base';
-import { Class } from '@travetto/registry';
+import { Class, AppError, Util } from '@travetto/base';
 
 import { S3ModelConfig } from './config';
 
-function isMetadataBearer(o: any): o is MetadataBearer {
-  return '$metadata' in o;
+function isMetadataBearer(o: unknown): o is MetadataBearer {
+  return !!o && '$metadata' in (o as object);
 }
 
 /**

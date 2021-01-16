@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 
-import { ShutdownManager, ScanApp, AppManifest } from '@travetto/base';
+import { ShutdownManager, ScanApp } from '@travetto/base';
 
 /**
  * Simple Test Utilities

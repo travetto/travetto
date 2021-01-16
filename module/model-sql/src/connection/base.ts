@@ -1,8 +1,8 @@
 import { Util } from '@travetto/base';
 import { AsyncContext } from '@travetto/context';
 
-const ContextActiveSym = Symbol.for('@trv:model/sql-active');
-const TxActiveSym = Symbol.for('@trv:model/sql-transaction');
+const ContextActiveSym: unique symbol = Symbol.for('@trv:model/sql-active');
+const TxActiveSym: unique symbol = Symbol.for('@trv:model/sql-transaction');
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 
@@ -11,7 +11,7 @@ export type TransactionType = 'required' | 'isolated' | 'force';
  * be separated out to allow for differences in connection
  * vs querying.
  */
-export abstract class Connection<C = any> {
+export abstract class Connection<C = unknown> {
 
   constructor(public readonly context: AsyncContext) {
 
@@ -21,14 +21,14 @@ export abstract class Connection<C = any> {
    * Get active connection
    */
   get active(): C {
-    return this.context.get()[ContextActiveSym] as C;
+    return this.context.get(ContextActiveSym) as C;
   }
 
   /**
    * Get active tx state
    */
   get activeTx() {
-    return !!this.context.get()[TxActiveSym] as boolean;
+    return !!this.context.get(TxActiveSym) as boolean;
   }
 
   /**
@@ -41,7 +41,7 @@ export abstract class Connection<C = any> {
    * @param rawConnection
    * @param query
    */
-  abstract execute<T = any>(rawConnection: C, query: string): Promise<{ records: T[], count: number }>;
+  abstract execute<T = unknown>(rawConnection: C, query: string): Promise<{ records: T[], count: number }>;
 
   /**
    * Acquire new connection
@@ -59,15 +59,15 @@ export abstract class Connection<C = any> {
    * @param op
    * @param args
    */
-  async runWithActive<R>(op: () => Promise<R>) {
+  async runWithActive<R>(op: () => Promise<R>): Promise<R> {
     if (this.active) {
       return op();
     }
 
-    return await this.context.run(async () => {
+    return this.context.run(async () => {
       try {
         this.context.set(ContextActiveSym, await this.acquire());
-        return op();
+        return await op();
       } finally {
         if (this.active) {
           this.release(this.active);
@@ -114,7 +114,7 @@ export abstract class Connection<C = any> {
           await this.commitTx(this.active, txId);
           return res;
         } catch (err) {
-          await this.rollbackTx(this.active, txId);
+          try { await this.rollbackTx(this.active, txId); } catch { }
           throw err;
         }
       } else {

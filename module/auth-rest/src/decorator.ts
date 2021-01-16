@@ -1,4 +1,4 @@
-import { ControllerRegistry, EndpointDecorator } from '@travetto/rest';
+import { ControllerRegistry } from '@travetto/rest';
 import { AppError } from '@travetto/base';
 import { AuthUtil } from '@travetto/auth';
 
@@ -9,7 +9,7 @@ import { AuthUtil } from '@travetto/auth';
  */
 export function Authenticate(source: symbol, ...sources: symbol[]) {
   const computed = [source, ...sources];
-  return ControllerRegistry.createFilterDecorator(req => req.login(computed)) as EndpointDecorator;
+  return ControllerRegistry.createFilterDecorator(req => req.login(computed));
 }
 
 /**

@@ -38,9 +38,9 @@ export const Markdown: Renderer = {
     return lines.join('\n');
   },
   render(c: AllChildren) {
-    const recurse = (s: any) => this.render(s);
-    const link = (s: any, ctx?: any) =>
-      `${this.render(s)
+    const recurse = (s: AllChildren | n.DocNode) => this.render(s as AllChildren);
+    const link = (s: n.DocNode, ctx: { _type: string, line?: number }) =>
+      `${recurse(s)
         .replace(ROOT, '%GIT%')
         .replace('@travetto/', `%GIT%/module/`)}${ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
@@ -98,9 +98,9 @@ export const Html: Renderer = {
 </div></div>${content}`;
   },
   render(c: AllChildren) {
-    const recurse = (s: any) => this.render(s);
-    const link = (s: any, ctx?: any) =>
-      `${this.render(s)
+    const recurse = (s: AllChildren | n.DocNode) => this.render(s as AllChildren);
+    const link = (s: n.DocNode, ctx: { _type: string, line?: number }) =>
+      `${recurse(s)
         .replace(/@travetto\/([^.]+)$/, (_, x) => `/docs/${x}`)
         .replace(ROOT, '%GIT%')
         .replace(/^images\//, '/assets/images/%MOD%/')

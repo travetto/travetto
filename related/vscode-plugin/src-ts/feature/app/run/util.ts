@@ -27,9 +27,9 @@ export class AppSelectorUtil {
   static buildAppParams(choice: AppChoice) {
     const out = choice.params
       .map((x, i) => {
-        let val = choice.inputs[i] !== undefined ? choice.inputs[i] : (x.meta && x.meta.choices ? x.meta.choices.join(',') : x.def);
+        let val = choice.inputs[i] !== undefined ? choice.inputs[i] : (x.meta?.choices?.join(',') ?? x.def);
         if (x.subtype === 'file' && val) {
-          val = val.replace(Workspace.path, '.');
+          val = `${val}`.replace(Workspace.path, '.');
         }
         return `${x.title || x.name}${val !== undefined ? `=${val}` : ''}`;
       })

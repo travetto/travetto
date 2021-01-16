@@ -1,8 +1,7 @@
 // @file-if @travetto/model
 // @file-if @travetto/schema
 
-import { Class } from '@travetto/registry';
-
+import { Class } from '@travetto/base';
 import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model';
 
 import { schemaParamConfig } from './schema';
@@ -23,14 +22,14 @@ type Svc = { source: ModelCrudSupport };
  */
 export function ModelController<T extends ModelType>(path: string, cls: Class<T>) {
   function getCls() {
-    return ModelRegistry.get(cls).class;
+    return ModelRegistry.get(cls).class as Class<T>;
   }
 
   return (target: Class<Svc>) => {
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
         target, function getById(this: Svc, id: string) {
-          return this.source.get(getCls(), id);
+          return this.source.get<ModelType>(getCls(), id);
         }),
       {
         description: `Get ${cls.name} by id`,
@@ -45,7 +44,7 @@ export function ModelController<T extends ModelType>(path: string, cls: Class<T>
 
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
-        target, function update(this: Svc, body: any) {
+        target, function update(this: Svc, body: ModelType) {
           return this.source.update(getCls(), body);
         }),
       {
@@ -59,7 +58,7 @@ export function ModelController<T extends ModelType>(path: string, cls: Class<T>
 
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
-        target, function create(this: Svc, body: any) {
+        target, function create(this: Svc, body: ModelType) {
           return this.source.create(getCls(), body);
         }),
       {

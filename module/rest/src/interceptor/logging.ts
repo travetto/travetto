@@ -88,7 +88,7 @@ export class LoggingInterceptor implements RestInterceptor {
     return check;
   }
 
-  async intercept(req: Request, res: Response, next: () => Promise<any>) {
+  async intercept(req: Request, res: Response, next: () => Promise<void | unknown>) {
     const start = Date.now();
 
     try {

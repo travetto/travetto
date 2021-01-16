@@ -12,7 +12,7 @@ export interface AppEnv {
   debug?: string;
   resources?: string[];
   profiles?: string[];
-  envExtra?: Record<string, any>;
+  envExtra?: Record<string, unknown>;
 }
 
 const join = (items: string[]) => [...new Set(items)].join(',');
@@ -169,7 +169,7 @@ export class CliUtil {
   /**
    * Return plugin data depending on how it has been called
    */
-  static pluginResponse(obj: any) {
+  static pluginResponse(obj: unknown) {
     parentPort ? parentPort.postMessage(obj) : console.log(JSON.stringify(obj));
     return obj;
   }

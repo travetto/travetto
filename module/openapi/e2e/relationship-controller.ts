@@ -15,7 +15,7 @@ export class RelationshipController {
    */
   @Get('/:name')
   async getByName(@Path() name: string): Promise<User> {
-    return undefined as any;
+    return new User();
   }
 
   /**
@@ -24,12 +24,12 @@ export class RelationshipController {
    */
   @Get('/')
   async getAll(@SchemaQuery() search: UserSearch): Promise<User[]> {
-    return search as any;
+    return [];
   }
 
   @Post('/')
   async createUser(@SchemaBody() user: User): Promise<User> {
-    return undefined as any;
+    return new User();
   }
 
   /**

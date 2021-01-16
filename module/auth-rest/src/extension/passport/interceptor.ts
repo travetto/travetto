@@ -6,7 +6,7 @@ import { Injectable } from '@travetto/di';
 
 import { AuthInterceptor } from '../../interceptor';
 
-type Handler = (req: Request, res: Response, next: Function) => any;
+type Handler = (req: Request, res: Response, next: Function) => unknown;
 
 // @ts-expect-error
 const authenticator = (passport as passport.Authenticator<Handler>);

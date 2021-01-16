@@ -27,7 +27,7 @@ class TestConfig {
     return new ModelPrincipalSource<User>(
       User,
       (u) => ({
-        ...(u as any as RegisteredIdentity),
+        ...(u as unknown as RegisteredIdentity),
         details: u,
         permissions: u.permissions ?? [],
         source: 'model'

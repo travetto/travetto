@@ -1,19 +1,19 @@
 import { Search } from '@elastic/elasticsearch/api/requestParams';
-import { Util } from '@travetto/base';
+
+import { Class, Util } from '@travetto/base';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
 import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
 import { ModelRegistry } from '@travetto/model/src/registry/model';
 import { ModelType } from '@travetto/model/src/types/model';
-import { Class } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
-import { SearchResponse } from '../types';
 
+import { SearchResponse } from '../types';
 import { EsSchemaConfig } from './types';
 
-const has$And = (o: any): o is ({ $and: WhereClause<any>[] }) => '$and' in o;
-const has$Or = (o: any): o is ({ $or: WhereClause<any>[] }) => '$or' in o;
-const has$Not = (o: any): o is ({ $not: WhereClause<any> }) => '$not' in o;
+const has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
+const has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);
+const has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$not' in (o as object);
 
 /**
  * Support tools for dealing with elasticsearch specific requirements
@@ -23,13 +23,13 @@ export class ElasticsearchQueryUtil {
   /**
    * Convert `a.b.c` to `a : { b : { c : ... }}`
    */
-  static extractSimple<T>(o: T, path: string = ''): Record<string, any> {
-    const out: Record<string, any> = {};
-    const sub = o as Record<string, any>;
+  static extractSimple<T>(o: T, path: string = ''): Record<string, unknown> {
+    const out: Record<string, unknown> = {};
+    const sub = o as Record<string, unknown>;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subPath = `${path}${key}`;
-      if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
+      if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key] as object)[0].startsWith('$')) {
         Object.assign(out, this.extractSimple(sub[key], `${subPath}.`));
       } else {
         out[subPath] = sub[key];
@@ -47,7 +47,7 @@ export class ElasticsearchQueryUtil {
     const exclude: string[] = [];
     for (const k of Object.keys(simp)) {
       const nk = k === 'id' ? '_id' : k;
-      const v: (1 | 0 | boolean) = simp[k];
+      const v = simp[k] as (1 | 0 | boolean);
       if (v === 0 || v === false) {
         exclude.push(nk);
       } else {
@@ -76,7 +76,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Extract specific term for a class, and a given field
    */
-  static extractWhereTermQuery<T>(o: Record<string, any>, cls: Class<T>, config?: EsSchemaConfig, path: string = ''): any {
+  static extractWhereTermQuery<T>(o: Record<string, unknown>, cls: Class<T>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
     const items = [];
     const schema = SchemaRegistry.getViewSchema(cls).schema;
 
@@ -144,7 +144,7 @@ export class ElasticsearchQueryUtil {
             case '$gt':
             case '$gte':
             case '$lte': {
-              const out: any = {};
+              const out: Record<string, unknown> = {};
               for (const k of Object.keys(top)) {
                 out[k.replace(/^[$]/, '')] = top[k];
               }
@@ -152,7 +152,7 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$regex': {
-              const pattern = Util.toRegex(v);
+              const pattern = Util.toRegex(v as string);
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
                   `${sPath}.text_cs` :
@@ -178,7 +178,7 @@ export class ElasticsearchQueryUtil {
               let dist = top.$maxDistance;
               let unit = top.$unit ?? 'm';
               if (unit === 'rad') {
-                dist = 6378.1 * dist;
+                dist = 6378.1 * (dist as number);
                 unit = 'km';
               }
               items.push({
@@ -210,7 +210,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Build query from the where clause
    */
-  static extractWhereQuery<T>(cls: Class<T>, o: WhereClause<T>, config?: EsSchemaConfig): Record<string, any> {
+  static extractWhereQuery<T>(cls: Class<T>, o: WhereClause<T>, config?: EsSchemaConfig): Record<string, unknown> {
     if (has$And(o)) {
       return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(cls, x, config)) } };
     } else if (has$Or(o)) {

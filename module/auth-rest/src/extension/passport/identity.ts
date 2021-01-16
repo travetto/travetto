@@ -3,10 +3,12 @@ import * as passport from 'passport';
 
 import { Identity } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
+import { Util } from '@travetto/base';
+
 import { IdentitySource } from '../../identity';
 
 interface PassportAuthOptions {
-  state?: ((req: Request) => any) | Record<string, any>;
+  state?: ((req: Request) => Record<string, unknown>) | Record<string, unknown>;
 }
 
 /**
@@ -37,7 +39,7 @@ export class PassportIdentitySource<U> implements IdentitySource {
    * @param state The passport auth config state
    */
   static processExtraOptions(req: Request, { state }: PassportAuthOptions): Partial<passport.AuthenticateOptions> {
-    const stateRec = state && state.call ? state.call(null, req) : (state ?? {});
+    const stateRec = Util.isFunction(state) ? state.call(null, req) : (state ?? {});
     const json = JSON.stringify({ referrer: req.header('referrer'), ...stateRec });
 
     return {
@@ -98,7 +100,7 @@ export class PassportIdentitySource<U> implements IdentitySource {
       throw err;
     } else {
       // Remove profile fields from passport
-      const du = user as U & { _json: any, _raw: any, source: any };
+      const du = user as U & { _json: unknown, _raw: unknown, source: unknown };
       delete du._json;
       delete du._raw;
       delete du.source;

@@ -34,7 +34,7 @@ export class Simple {
 
   @Get('/age2')
   async age2() {
-    return (this.service.fetch().middle! as any).toUpperCase();
+    return this.service.fetch().middle!.toUpperCase();
   }
 
   @Get('/age3')
@@ -43,8 +43,8 @@ export class Simple {
   }
 
   @Post('/age4')
-  async age4(@Body() obj: any) {
-    console.log('Request', obj as Record<string, string>);
+  async age4(@Body() obj: Record<string, string>) {
+    console.log('Request', obj);
   }
 
   @Get('/map')

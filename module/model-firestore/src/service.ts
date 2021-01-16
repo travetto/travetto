@@ -1,8 +1,8 @@
 import * as firebase from 'firebase-admin';
 
-import { ResourceManager, ShutdownManager, Util } from '@travetto/base';
+import { ResourceManager, ShutdownManager, Util, Class, AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { ChangeEvent, Class } from '@travetto/registry';
+import { ChangeEvent } from '@travetto/registry';
 import {
   ModelCrudSupport, ModelRegistry, ModelStorageSupport,
   ModelIndexedSupport, ModelType, NotFoundError
@@ -13,7 +13,7 @@ import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 
 import { FirestoreModelConfig } from './config';
 
-const toSimple = (inp: any, missingValue: any = null): any => {
+const toSimple = (inp: unknown, missingValue: unknown = null): unknown => {
   if (inp === undefined || inp === null) {
     return missingValue;
   } else if (Array.isArray(inp)) {
@@ -25,11 +25,14 @@ const toSimple = (inp: any, missingValue: any = null): any => {
   } else if (inp instanceof Map) {
     return Object.fromEntries([...inp.entries()].map(([k, v]) => [k, toSimple(v, missingValue)]));
   } else {
-    return Object.fromEntries(Object.entries(inp)
+    return Object.fromEntries(Object.entries(inp as object)
       .filter(([k, v]) => !Util.isFunction(v))
       .map(([k, v]) => [k, toSimple(v, missingValue)]));
   }
 };
+
+const toSimpleObj = <T>(inp: T, missingValue: unknown = null) =>
+  toSimple(inp, missingValue) as Record<string, unknown>;
 
 /**
  * A model service backed by Firestore
@@ -110,25 +113,25 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.getCollection(cls).doc(item.id!).create(toSimple(item));
+    await this.getCollection(cls).doc(item.id!).create(toSimpleObj(item));
     return item;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.getCollection(cls).doc(item.id!).update(toSimple(item));
+    await this.getCollection(cls).doc(item.id!).update(toSimpleObj(item));
     return item;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.getCollection(cls).doc(item.id!).set(toSimple(item));
+    await this.getCollection(cls).doc(item.id!).set(toSimpleObj(item));
     return item;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
-    await this.getCollection(cls).doc(id!).set(toSimple(item, firebase.firestore.FieldValue.delete()), { merge: true });
+    await this.getCollection(cls).doc(id!).set(toSimpleObj(item, firebase.firestore.FieldValue.delete()), { merge: true });
     return this.get(cls, id);
   }
 

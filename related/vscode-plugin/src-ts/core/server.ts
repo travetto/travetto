@@ -16,7 +16,7 @@ export class ProcessServer {
     process.on('exit', this.stop.bind(this));
   }
 
-  on(type: string, handler: (event: any) => void) {
+  on(type: string, handler: (event: unknown) => void) {
     this.emitter.on(type, handler);
   }
 
@@ -63,7 +63,7 @@ export class ProcessServer {
     return this.state && this.state.process && !this.state.process.killed;
   }
 
-  emitMessage(type: string, payload: Record<string, any> = {}) {
+  emitMessage(type: string, payload: Record<string, unknown> = {}) {
     if (!this.running) {
       throw new Error('Server is not running');
     }
@@ -71,14 +71,14 @@ export class ProcessServer {
     this.state.process.send({ type, ...payload });
   }
 
-  onMessage(types: string | (string | undefined)[], callback: (type: string, payload: Record<string, any>) => void) {
+  onMessage(types: string | (string | undefined)[], callback: (type: string, payload: Record<string, unknown>) => void) {
     if (!this.running) {
       throw new Error('Server is not running');
     }
 
     types = (Array.isArray(types) ? types : [types]).filter(x => !!x);
 
-    const handler = async (msg: { type: string } & Record<string, any>) => {
+    const handler = async (msg: { type: string } & Record<string, unknown>) => {
       if (types.includes(msg.type) || types.includes('*')) {
         callback(msg.type, msg);
 
@@ -89,14 +89,14 @@ export class ProcessServer {
     return this.state.process.off.bind(this.state.process, 'message', handler);
   }
 
-  onceMessage(types: string | (string | undefined)[], callback: (type: string, payload: Record<string, any>) => void) {
+  onceMessage(types: string | (string | undefined)[], callback: (type: string, payload: Record<string, unknown>) => void) {
     const handler = this.onMessage(types, (type: string, payload) => {
       handler();
       callback(type, payload);
     });
   }
 
-  emitMessageAndWaitFor<U>(type: string, payload: Record<string, any>, waitType: string, errType?: string): Promise<U> {
+  emitMessageAndWaitFor<U>(type: string, payload: Record<string, unknown>, waitType: string, errType?: string): Promise<U> {
     const prom = new Promise<U>((resolve, reject) => {
       const remove = this.onMessage([waitType, errType], (resType, msg) => {
         remove();

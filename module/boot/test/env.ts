@@ -6,7 +6,7 @@ import { EnvUtil } from '../src';
 @Suite()
 export class EnvUtilTest {
 
-  private env: any;
+  private env?: NodeJS.ProcessEnv;
 
   @BeforeEach()
   copy() {
@@ -15,8 +15,10 @@ export class EnvUtilTest {
 
   @AfterEach()
   restore() {
-    process.env = this.env;
-    delete this.env;
+    if (this.env) {
+      process.env = this.env;
+      delete this.env;
+    }
   }
 
   @Test()

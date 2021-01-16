@@ -1,10 +1,7 @@
 import * as path from 'path';
 
-import { ResourceManager, Util, AppManifest } from '@travetto/base';
+import { SimpleType, ResourceManager, Util, AppManifest, ClassInstance, AppError } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
-
-type Prim = number | string | boolean | null;
-export type Nested = { [key: string]: Prim | Prim[] | Nested };
 
 /**
  * Simple Config Utilities
@@ -31,25 +28,28 @@ export class ConfigUtil {
   /**
    * Parse config file from YAML into JSON
    */
-  static getConfigFileAsData(file: string, ns: string = '') {
+  static getConfigFileAsData(file: string, ns: string = ''): Record<string, SimpleType> {
     const data = ResourceManager.readSync(file, 'utf8');
     const doc = YamlUtil.parse(data);
-    return ns ? { [ns]: doc } : doc;
+    return ns ? { [ns]: doc } : doc as Record<string, SimpleType>;
   }
 
   /**
    * Break down dotted keys into proper objects with nesting
    */
-  static breakDownKeys(data: Nested) {
+  static breakDownKeys(data: SimpleType): Record<string, SimpleType> {
+    if (!Util.isPlainObject(data)) {
+      throw new AppError('Only objects are supported for breaking keys down');
+    }
     for (const key of Object.keys(data)) {
       if (Util.isPlainObject(data[key])) {
-        this.breakDownKeys(data[key] as Nested);
+        this.breakDownKeys(data[key]);
       }
       if (key.includes('.')) {
         const parts = key.split('.');
         const top = parts[0];
         const subTop = {};
-        let sub: any = subTop;
+        let sub: Record<string, SimpleType> = subTop;
 
         while (parts.length > 1) {
           sub = (sub[parts.shift()!] = {});
@@ -66,20 +66,21 @@ export class ConfigUtil {
   /**
   * Break down dotted keys into proper objects with nesting
   */
-  static toFullKeys(data: Nested, prefix: string = '') {
-    const out: Record<string, any> = {};
+  static toFullKeys(data: Record<string, SimpleType> | SimpleType[], prefix: string = '') {
+    const out: Record<string, SimpleType> = {};
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;
       if (Util.isPlainObject(value)) {
         Object.assign(out,
-          this.toFullKeys(value as Nested, `${pre}.`)
+          this.toFullKeys(value, `${pre}.`)
         );
       } else if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
-          if (Util.isPlainObject(value[i]) || Array.isArray(value[i])) {
-            Object.assign(out, this.toFullKeys(value[i], `${pre}[${i}].`));
+          const v = value[i];
+          if (Util.isPlainObject(v) || Array.isArray(v)) {
+            Object.assign(out, this.toFullKeys(v, `${pre}[${i}].`));
           } else {
-            out[`${pre}[${i}]`] = value[i];
+            out[`${pre}[${i}]`] = v;
           }
         }
       } else {
@@ -92,26 +93,26 @@ export class ConfigUtil {
   /**
    * Coerce the input type to match the existing field type
    */
-  static coerce(a: any, val: any): any {
+  static coerce(a: unknown, val: unknown): SimpleType {
     if (a === 'null' && typeof val !== 'string') {
       return null;
     }
 
     if (val === null || val === undefined) {
-      return a;
+      return a as null;
     }
 
     if (Array.isArray(val)) {
       return `${a}`.split(',').map(x => x.trim()).map(x => this.coerce(x, val[0]));
     }
 
-    return Util.coerceType(a, val.constructor, false);
+    return Util.coerceType(a, (val as ClassInstance).constructor, false);
   }
 
   /**
    * Find the key using case insensitive search
    */
-  static getKeyName(key: string, data: Record<string, any>) {
+  static getKeyName(key: string, data: object) {
     key = key.trim();
     const match = new RegExp(key, 'i');
     const next = Object.keys(data).find(x => match.test(x));
@@ -122,7 +123,7 @@ export class ConfigUtil {
    * Bind the environment variables onto an object structure when they match by name.
    * Will split on _ to handle nesting appropriately
    */
-  static bindEnvByKey(obj: Nested, key?: string) {
+  static bindEnvByKey(obj: object, key?: string) {
     // Handle process.env on bind as the structure we need may not
     // fully exist until the config has been created
     const matcher = !key ? /./ : new RegExp(`^${key.replace(/[.]/g, '_')}`, 'i'); // Check is case insensitive
@@ -136,7 +137,7 @@ export class ConfigUtil {
   /**
    * Take a split env var and bind to the object
    */
-  static bindEnvByParts(data: Nested, parts: string[], value: Prim) {
+  static bindEnvByParts(data: object, parts: string[], value: SimpleType) {
     parts = parts.slice(0);
 
     let key = parts.pop()!;
@@ -151,7 +152,7 @@ export class ConfigUtil {
       if (!next) {
         return false;
       } else {
-        data = data[next] as Nested;
+        data = data[next as keyof typeof data];
       }
     }
 
@@ -160,7 +161,7 @@ export class ConfigUtil {
     }
 
     key = this.getKeyName(key, data) || (/^[A-Z_0-9]+$/.test(key) ? key.toLowerCase() : key);
-    data[key] = this.coerce(value, data[key]);
+    (data as Record<string, SimpleType>)[key] = this.coerce(value, data[key as keyof typeof data])!;
 
     return true;
   }
@@ -168,13 +169,13 @@ export class ConfigUtil {
   /**
    * Bind `src` to `target`
    */
-  static bindTo(src: any, target: any, key?: string) {
+  static bindTo<T extends object>(src: Record<string, SimpleType>, target: T, key?: string): T {
     const keys = (key ? key.split('.') : []);
-    let sub: any = src;
+    let sub: Record<string, SimpleType> = src;
 
     while (keys.length && sub) {
       const next = keys.shift()!;
-      sub = sub[next];
+      sub = sub[next] as Record<string, SimpleType>;
     }
 
     if (sub) {
@@ -197,7 +198,7 @@ export class ConfigUtil {
   /**
    * Sanitize payload
    */
-  static sanitizeValuesByKey(obj: any, patterns: string[]) {
+  static sanitizeValuesByKey<T extends Record<string, SimpleType>>(obj: T, patterns: string[]): T {
     const regex = this.buildRedactRegex(patterns);
 
     const full = this.toFullKeys(obj);
@@ -206,6 +207,6 @@ export class ConfigUtil {
         full[k] = '*'.repeat(value.length);
       }
     }
-    return this.breakDownKeys(full);
+    return this.breakDownKeys(full) as T;
   }
 }

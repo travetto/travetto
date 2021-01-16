@@ -1,4 +1,4 @@
 import { BasePackPlugin } from './pack-base';
-import { Docker } from './operation/docker';
+import { Docker, DockerConfig } from './operation/docker';
 
-export class PackDockerPlugin extends BasePackPlugin { operation = Docker; }
+export class PackDockerPlugin extends BasePackPlugin<DockerConfig> { operation = Docker; }

@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry/src/types';
+import type { Class } from '@travetto/base';
 
 import { TestConfig, TestResult } from './test';
 import { SuiteCore } from './common';
@@ -18,7 +18,7 @@ export interface SuiteConfig extends SuiteCore {
   /**
    * Actual class instance
    */
-  instance: any;
+  instance: unknown;
   /**
    * List of tests to run
    */

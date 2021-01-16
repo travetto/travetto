@@ -39,7 +39,7 @@ export class SampleAuth {
    * Simple Echo
    */
   @Post('/')
-  async echo(req: Request): Promise<Record<string, any>> {
+  async echo(req: Request): Promise<object> {
     return req.body;
   }
 }

@@ -11,7 +11,7 @@ function finalize(path: string) {
 }
 
 export class TravettoGenerator extends Generator {
-  constructor(args: string[], options: any) {
+  constructor(args: string[], options: Record<string, unknown>) {
     super(args, options);
 
     this.option('template', { type: String, default: 'todo' });
@@ -97,7 +97,7 @@ export class TravettoGenerator extends Generator {
   async _resolveFeatures(context: Context, features: Feature[], chosen = false) {
     for (const feat of features) {
       if (!chosen) {
-        const ans: any = await this.prompt([{
+        const ans = await this.prompt<{ choice: boolean | string }>([{
           type: 'confirm',
           name: 'choice',
           message: `Include ${feat.title} support?`

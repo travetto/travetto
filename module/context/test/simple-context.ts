@@ -56,7 +56,7 @@ class VerifyContext {
   @Test()
   async concurrentDivergent() {
 
-    const contexts: any[] = [];
+    const contexts: unknown[] = [];
 
     await Promise.all([1, 2].map(async (__, i) => {
       await this.context.run(async () => {

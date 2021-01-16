@@ -50,7 +50,7 @@ export interface LogEvent {
   /**
    * Log arguments
    */
-  args?: any[];
+  args?: unknown[];
 }
 
 /**

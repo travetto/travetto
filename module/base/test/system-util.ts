@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 
-import { SystemUtil } from '../src/internal/system';
+import { Orderable, SystemUtil } from '../src/internal/system';
 
 class Test2 { }
 
@@ -11,7 +11,7 @@ class SystemUtilTests {
 
   @Test()
   orderDependents() {
-    const items: any = [
+    const items: Orderable<string>[] = [
       {
         key: 'first'
       },
@@ -41,7 +41,7 @@ class SystemUtilTests {
     const ordered = order.map(x => x.key);
     assert(ordered === ['first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
 
-    items.unshift({ key: 'tenth', before: 'second' });
+    items.unshift({ key: 'tenth', before: ['second'] });
 
     const order2 = SystemUtil.computeOrdering(items);
     const ordered2 = order2.map(x => x.key);

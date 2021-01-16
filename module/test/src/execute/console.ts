@@ -14,7 +14,7 @@ export class ConsoleCapture {
     ConsoleManager.set(this);
   }
 
-  static onLog(level: LogLevel, ctx: { file: string, line: number }, args: any[]) {
+  static onLog(level: LogLevel, ctx: { file: string, line: number }, args: unknown[]) {
     (this.out[level] = this.out[level] ?? []).push(
       args
         .map((x => typeof x === 'string' ? x : util.inspect(x, false, 4)))

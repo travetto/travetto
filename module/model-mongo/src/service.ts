@@ -15,8 +15,8 @@ import {
 } from '@travetto/model';
 import { ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport, PageableModelQuery, Query, ValidStringFields, WhereClause } from '@travetto/model-query';
 
-import { ChangeEvent, Class } from '@travetto/registry';
-import { ShutdownManager, Util } from '@travetto/base';
+import { ChangeEvent } from '@travetto/registry';
+import { ShutdownManager, Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { ALL_VIEW, FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
@@ -30,6 +30,8 @@ import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
+
+type WithId<T> = T & { _id?: mongo.Binary };
 
 function uuid(val: string) {
   return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
@@ -47,15 +49,15 @@ function idToString(id: string | mongo.ObjectID | mongo.Binary) {
 
 async function postLoadId<T extends ModelType>(item: T) {
   if (item && '_id' in item) {
-    item.id = idToString((item as any)._id);
-    delete (item as any)._id;
+    item.id = idToString((item as WithId<T>)._id!);
+    delete (item as WithId<T>)._id;
   }
   return item;
 }
 
 function preInsertId<T extends ModelType>(item: T) {
   if (item && item.id) {
-    (item as any)._id = uuid(item.id!);
+    (item as WithId<T>)._id = uuid(item.id!);
     delete item.id;
   }
   return item;
@@ -154,7 +156,7 @@ export class MongoModelService implements
    * Get mongo collection
    */
   async getStore<T extends ModelType>(cls: Class<T>): Promise<mongo.Collection> {
-    return this.db.collection(ModelRegistry.getStore(cls));
+    return this.db.collection(ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
@@ -171,14 +173,14 @@ export class MongoModelService implements
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     const cleaned = await ModelCrudUtil.preStore(cls, item, this);
-    (item as any)._id = uuid(item.id!);
+    (item as WithId<T>)._id = uuid(item.id!);
 
     const store = await this.getStore(cls);
     const result = await store.insertOne(cleaned);
     if (result.insertedCount === 0) {
       throw new ExistsError(cls, item.id!);
     }
-    delete (item as any)._id;
+    delete (item as WithId<T>)._id;
     return item;
   }
 
@@ -214,19 +216,19 @@ export class MongoModelService implements
       await item.prePersist();
     }
 
-    let final: any = item;
+    let final: Record<string, unknown> = item;
 
     const items = MongoUtil.extractSimple(final);
     final = Object.entries(items).reduce((acc, [k, v]) => {
       if (v === null || v === undefined) {
-        acc.$unset = acc.$unset ?? {};
-        acc.$unset[k] = v;
+        const o = (acc.$unset = acc.$unset ?? {}) as Record<string, unknown>;
+        o[k] = v;
       } else {
-        acc.$set = acc.$set ?? {};
-        acc.$set[k] = v;
+        const o = (acc.$set = acc.$set ?? {}) as Record<string, unknown>;
+        o[k] = v;
       }
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, unknown>);
 
     const res = await store.findOneAndUpdate({ _id: uuid(id) }, final, { returnOriginal: false });
 
@@ -264,7 +266,7 @@ export class MongoModelService implements
       metadata: meta
     });
 
-    await new Promise<any>((resolve, reject) => {
+    await new Promise<unknown>((resolve, reject) => {
       stream.pipe(writeStream);
       stream.on('error', reject);
       writeStream.once('finish', resolve);
@@ -359,7 +361,7 @@ export class MongoModelService implements
 
       if (res.hasWriteErrors()) {
         out.errors = res.getWriteErrors();
-        for (const err of out.errors) {
+        for (const err of out.errors as { index: number }[]) {
           const op = operations[err.index];
           const k = Object.keys(op)[0] as keyof BulkResponse['counts'];
           out.counts[k] -= 1;
@@ -445,14 +447,14 @@ export class MongoModelService implements
     const items = MongoUtil.extractSimple(data);
     const final = Object.entries(items).reduce((acc, [k, v]) => {
       if (v === null || v === undefined) {
-        acc.$unset = acc.$unset ?? {};
-        acc.$unset[k] = v;
+        const o = (acc.$unset = acc.$unset ?? {}) as Record<string, unknown>;
+        o[k] = v;
       } else {
-        acc.$set = acc.$set ?? {};
-        acc.$set[k] = v;
+        const o = (acc.$set = acc.$set ?? {}) as Record<string, unknown>;
+        o[k] = v;
       }
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, unknown>);
 
     const { filter } = prepareQuery(cls, query);
     const res = await col.updateMany(filter, final);
@@ -484,7 +486,7 @@ export class MongoModelService implements
 
     const result = await col.aggregate(pipeline).toArray();
 
-    return result.map((val: any) => ({
+    return result.map((val: ({ _id: string, count: number })) => ({
       key: val._id,
       count: val.count
     })).sort((a, b) => b.count - a.count);

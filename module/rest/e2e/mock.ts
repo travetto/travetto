@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@travetto/di';
+import { Injectable } from '@travetto/di';
 
 class User {
   constructor(public first: string, public last: string, public middle?: string) { }

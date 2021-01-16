@@ -156,10 +156,10 @@ export class ScanApp {
    */
   static findSourceFiles(this: typeof ScanApp, mode: 'all' | 'required' = 'all') {
     const all: SimpleEntry[][] = [];
-    const getAll = (src: string[], cmd: (typeof this)['findCommonFiles'] | (typeof this)['findLocalFiles']) => {
+    const getAll = (src: string[], cmd: (typeof this)['findCommonFiles' | 'findLocalFiles']) => {
       for (const folder of src.filter(x => mode === 'all' || !x.startsWith('^'))) {
         all.push(cmd.call(this, { folder: folder.replace('^', '') })
-          .filter(x => mode !== 'required' || !x.module.includes('.opt'))
+          .filter(x => mode === 'all' || !x.module.includes('.opt'))
         );
       }
     };

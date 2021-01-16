@@ -3,7 +3,7 @@ import { Connection, TransactionType } from './base';
 /**
  * Indicating something is aware of connections
  */
-export interface ConnectionAware<C = any> {
+export interface ConnectionAware<C = unknown> {
   conn: Connection<C>;
 }
 

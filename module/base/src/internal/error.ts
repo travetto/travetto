@@ -1,4 +1,4 @@
-export type SerializedError = { $?: any, message: string, stack?: string, name: string };
+export type SerializedError = { $?: boolean, message: string, stack?: string, name: string };
 
 /**
  * Mapping from error category to standard http error codes
@@ -72,8 +72,8 @@ export class ErrorUtil {
 
     if (e) {
       error = {} as SerializedError;
-      for (const k of Object.keys(e) as (keyof SerializedError)[]) {
-        error[k] = (e as SerializedError)[k];
+      for (const k of Object.keys(e) as ['name' | 'message']) {
+        error[k] = e[k];
       }
       error.$ = true;
       error.message = e instanceof Error ? e.toJSON() : e.message;
@@ -92,8 +92,8 @@ export class ErrorUtil {
   static deserializeError(e: Error | SerializedError | undefined) {
     if (e && '$' in e) {
       const err = new Error();
-      for (const k of Object.keys(e) as (keyof Error)[]) {
-        err[k] = e[k as keyof typeof e];
+      for (const k of Object.keys(e) as ['name' | 'message']) {
+        err[k] = e[k];
       }
       err.message = e.message;
       err.stack = e.stack;

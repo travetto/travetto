@@ -1,6 +1,7 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ModelRegistry, ModelType } from '@travetto/model';
-import { ChangeEvent, Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
+import { ChangeEvent } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
 
 import { SQLModelConfig } from './config';
@@ -19,7 +20,7 @@ export class TableManager {
     private dialect: SQLDialect
   ) { }
 
-  private exec<T = any>(sql: string) {
+  private exec<T = unknown>(sql: string) {
     return this.dialect.executeSQL<T>(sql);
   }
 
@@ -37,7 +38,7 @@ export class TableManager {
    */
   @Connected()
   @Transactional()
-  private async createTables(cls: Class<any>): Promise<void> {
+  private async createTables(cls: Class): Promise<void> {
     for (const op of this.dialect.getCreateAllTablesSQL(cls)) {
       await this.exec(op);
     }
@@ -45,7 +46,7 @@ export class TableManager {
     if (indices) {
       for (const op of this.dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {
-          await this.dialect.conn.runWithTransaction('isolated', () => this.exec(op));
+          this.exec(op);
         } catch (e) {
           if (!/\bexists|duplicate\b/i.test(e.message)) {
             throw e;
@@ -60,7 +61,7 @@ export class TableManager {
    */
   @Connected()
   @Transactional()
-  private async dropTables(cls: Class<any>): Promise<void> {
+  private async dropTables(cls: Class): Promise<void> {
     for (const op of this.dialect.getDropAllTablesSQL(cls)) {
       await this.exec(op);
     }
@@ -120,7 +121,7 @@ export class TableManager {
         acc[ev.type].push([...rootStack, ...path, { ...(ev.type === 'removing' ? ev.prev : ev.curr)! }]);
       }
       return acc;
-    }, { added: [], changed: [], removing: [] } as Record<ChangeEvent<any>['type'], VisitStack[][]>);
+    }, { added: [], changed: [], removing: [] } as Record<ChangeEvent<unknown>['type'], VisitStack[][]>);
 
     await Promise.all(changes.added.map(v => this.dialect.executeSQL(this.dialect.getAddColumnSQL(v))));
     await Promise.all(changes.changed.map(v => this.dialect.executeSQL(this.dialect.getModifyColumnSQL(v))));

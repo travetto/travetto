@@ -1,7 +1,7 @@
 // @file-if faker
 import * as faker from 'faker';
 
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 
 import { CommonRegExp } from '../validate/regexp';
 import { FieldConfig } from '../service/types';
@@ -21,7 +21,7 @@ const between = (fromDays: number, toDays: number) =>
  */
 export class SchemaFakerUtil {
 
-  static STRING_RE_TO_TYPE: [RegExp, () => any][] = [
+  static STRING_RE_TO_TYPE: [RegExp, () => string][] = [
     [CommonRegExp.email, faker.internet.email],
     [CommonRegExp.url, faker.internet.url],
     [CommonRegExp.telephone, faker.phone.phoneNumber],
@@ -31,7 +31,7 @@ export class SchemaFakerUtil {
   /**
    * Mapping of field types to faker utils
    */
-  static NAMES_TO_TYPE: Record<string, [RegExp, () => any][]> = {
+  static NAMES_TO_TYPE = {
     string: [
       [/^(image|img).*url$/, faker.image.imageUrl],
       [/^url$/, faker.internet.url],
@@ -56,12 +56,12 @@ export class SchemaFakerUtil {
       [/(image|img)/, faker.image.image],
       [/^company(name)?$/, faker.company.companyName],
       [/(desc|description)$/, () => faker.lorem.sentences(10)]
-    ],
+    ] as [RegExp, () => string][],
     date: [
       [/dob|birth/, () => faker.date.past(60)],
       [/creat(e|ion)/, () => between(-200, -100)],
       [/(update|modif(y|ied))/, () => between(-100, -50)]
-    ]
+    ] as [RegExp, () => Date][],
   };
 
   /**
@@ -164,7 +164,7 @@ export class SchemaFakerUtil {
    * Get a value for a field config
    * @param cfg Field config
    */
-  static getValue(cfg: FieldConfig, subArray = false): any {
+  static getValue(cfg: FieldConfig, subArray = false): unknown {
     if (!subArray && cfg.array) {
       return this.getArrayValue(cfg);
     } else if (cfg.enum) {
@@ -194,7 +194,7 @@ export class SchemaFakerUtil {
    */
   static generate<T>(cls: Class<T>, view?: string) {
     const cfg = SchemaRegistry.getViewSchema(cls, view);
-    const out: Record<string, any> = {};
+    const out: Record<string, unknown> = {};
 
     for (const f of cfg.fields) {
       if (f === 'type' || f === 'id') { // Do not set primary fields

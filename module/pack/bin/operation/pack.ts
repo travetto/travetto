@@ -11,11 +11,12 @@ const ops = {
   [Docker.key]: Docker
 } as const;
 
-type AllConfig = CommonConfig & {
-  [k in keyof typeof ops]: ReturnType<(typeof ops)[k]['extend']>;
-};
+export type AllConfig = CommonConfig &
+{ assemble: Parameters<typeof Assemble['exec']>[0] } &
+{ zip: Parameters<typeof Zip['exec']>[0] } &
+{ docker: Parameters<typeof Docker['exec']>[0] };
 
-export const Pack: PackOperation<AllConfig, ''> = {
+export const Pack: PackOperation<AllConfig> = {
   key: '',
   title: 'Packing',
   flags: [

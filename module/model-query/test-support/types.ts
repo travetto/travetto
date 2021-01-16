@@ -9,7 +9,7 @@ export class Address {
   @Text() street2?: string;
 }
 
-@Model()
+@Model('query-person')
 export class Person extends BaseModel {
   @Text() name: string;
   @Precision(3, 0)
@@ -18,13 +18,13 @@ export class Person extends BaseModel {
   address: Address;
 }
 
-@Model()
+@Model('query-simple')
 export class Simple {
   id?: string;
   name: string;
 }
 
-@Model()
+@Model('query-simple-list')
 export class SimpleList {
   id?: string;
   names: string[];

@@ -9,7 +9,7 @@ export interface ZipConfig extends CommonConfig {
   output: string;
 }
 
-export const Zip: PackOperation<ZipConfig, 'zip'> = {
+export const Zip: PackOperation<ZipConfig> = {
   key: 'zip',
   title: 'Zipping',
   flags: [

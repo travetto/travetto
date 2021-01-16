@@ -87,7 +87,7 @@ export class ParameterTest {
         query: {
           age: '20'
         }
-      } as any, {} as any)
+      } as unknown as Request, {} as Response)
     );
 
     assert.throws(() => {
@@ -96,7 +96,7 @@ export class ParameterTest {
         query: {
           age: 'blue'
         }
-      } as any, {} as any);
+      } as unknown as Request, {} as Response);
     });
   }
 
@@ -107,13 +107,13 @@ export class ParameterTest {
     assert.doesNotThrow(() =>
       ParamUtil.extractParams(ep.params, {
         header: (key: string) => key
-      } as any, {} as any)
+      } as unknown as Request, {} as Response)
     );
 
     assert.throws(() => {
       ParamUtil.extractParams(ep.params, {
         header: (key: string) => { }
-      } as any, {} as any);
+      } as unknown as Request, {} as Response);
     });
 
   }
@@ -126,20 +126,20 @@ export class ParameterTest {
       ParamUtil.extractParams(ep.params, {
         query: {},
         params: { id: '5' }
-      } as any, {} as any)
+      } as unknown as Request, {} as Response)
     );
 
     assert.throws(() =>
       ParamUtil.extractParams(ep.params, {
         query: { age: 'blue' },
         params: { id: '5' }
-      } as any, {} as any), 'Incorrect type'
+      } as unknown as Request, {} as Response), 'Incorrect type'
     );
 
     assert.throws(() =>
       ParamUtil.extractParams(ep.params, {
         params: {}, query: {}
-      } as any, {} as any), /Missing.*\bid/i
+      } as unknown as Request, {} as Response), /Missing.*\bid/i
     );
   }
 
@@ -148,7 +148,7 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/req/res', 'post');
     const req = { path: '/path' };
     const res = { status: 200 };
-    const items = ParamUtil.extractParams(ep.params, req as any, res as any);
+    const items = ParamUtil.extractParams(ep.params, req as unknown as Request, res as unknown as Response);
 
     assert(req === items[0]);
     assert(res === items[1]);
@@ -159,8 +159,8 @@ export class ParameterTest {
   async testAliasing() {
     const ep = ParameterTest.getEndpoint('/alias', 'post');
     assert(ep.params[0].description === 'User name');
-    assert(ParamUtil.extractParams(ep.params, { query: { nm: 'blue' } } as any, {} as any) === ['green']);
-    assert(ParamUtil.extractParams(ep.params, { query: { name: 'blue' } } as any, {} as any) === ['blue']);
+    assert(ParamUtil.extractParams(ep.params, { query: { nm: 'blue' } } as unknown as Request, {} as Response) === ['green']);
+    assert(ParamUtil.extractParams(ep.params, { query: { name: 'blue' } } as unknown as Request, {} as Response) === ['blue']);
 
     const ep2 = ParameterTest.getEndpoint('/alias2', 'post');
     assert(ep2.params[0].description === 'User\'s name');
@@ -178,18 +178,18 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/array', 'post');
     const ep2 = ParameterTest.getEndpoint('/array2', 'post');
 
-    assert(ParamUtil.extractParams(ep2.params, { query: { values: 'no' } } as any, {} as any) === [[false]]);
-    assert(ParamUtil.extractParams(ep2.params, { query: { values: ['no', 'yes'] } } as any, {} as any) === [[false, true]]);
+    assert(ParamUtil.extractParams(ep2.params, { query: { values: 'no' } } as unknown as Request, {} as Response) === [[false]]);
+    assert(ParamUtil.extractParams(ep2.params, { query: { values: ['no', 'yes'] } } as unknown as Request, {} as Response) === [[false, true]]);
 
-    assert(ParamUtil.extractParams(ep.params, { query: { values: '0' } } as any, {} as any) === [[0]]);
-    assert(ParamUtil.extractParams(ep.params, { query: { values: ['5', '3'] } } as any, {} as any) === [[5, 3]]);
+    assert(ParamUtil.extractParams(ep.params, { query: { values: '0' } } as unknown as Request, {} as Response) === [[0]]);
+    assert(ParamUtil.extractParams(ep.params, { query: { values: ['5', '3'] } } as unknown as Request, {} as Response) === [[5, 3]]);
   }
 
   @Test()
   async realWorld() {
     const ep = ParameterTest.getEndpoint('/job/output/:jobId', 'get');
-    assert.doesNotThrow(() => ParamUtil.extractParams(ep.params, { params: { jobId: '5' }, query: {} } as any, {} as any));
-    assert.throws(() => ParamUtil.extractParams(ep.params, { params: {}, query: {} } as any, {} as any), /missing path/i);
-    assert.throws(() => ParamUtil.extractParams(ep.params, { params: { jobId: '5' }, query: { time: 'blue' } } as any, {} as any), 'Incorrect type');
+    assert.doesNotThrow(() => ParamUtil.extractParams(ep.params, { params: { jobId: '5' }, query: {} } as unknown as Request, {} as Response));
+    assert.throws(() => ParamUtil.extractParams(ep.params, { params: {}, query: {} } as unknown as Request, {} as Response), /missing path/i);
+    assert.throws(() => ParamUtil.extractParams(ep.params, { params: { jobId: '5' }, query: { time: 'blue' } } as unknown as Request, {} as Response), 'Incorrect type');
   }
 }

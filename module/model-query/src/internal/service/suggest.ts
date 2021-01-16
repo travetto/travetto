@@ -1,5 +1,5 @@
 import { ModelType } from '@travetto/model';
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { PageableModelQuery, Query, SelectClause } from '../../model/query';
 import { ValidStringFields, WhereClauseRaw } from '../../model/where-clause';
 

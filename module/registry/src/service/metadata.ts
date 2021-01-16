@@ -1,7 +1,7 @@
-import { Util } from '@travetto/base';
+import { Class, Util } from '@travetto/base';
 
 import { Registry } from '../registry';
-import { Class, ChangeEvent } from '../types';
+import { ChangeEvent } from '../types';
 
 function id(cls: string | Class): string {
   return cls && typeof cls !== 'string' ? cls.ᚕid : cls;
@@ -10,7 +10,7 @@ function id(cls: string | Class): string {
 /**
  * Metadata registry
  */
-export abstract class MetadataRegistry<C extends { class: Class }, M = any, F = Function> extends Registry {
+export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, F = Function> extends Registry {
 
   static id = id;
 
@@ -93,8 +93,8 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = any, F = 
   /**
    * Trigger initial install, moves pending to finalized (active)
    */
-  initialInstall(): any {
-    return Array.from(this.pending.values()).map(x => x.class);
+  initialInstall(): Class[] {
+    return Array.from(this.pending.values()).map(x => x.class as Class).filter(x => !!x);
   }
 
   /**

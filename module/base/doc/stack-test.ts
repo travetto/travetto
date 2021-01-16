@@ -16,9 +16,9 @@ async function test() {
   await inner1();
 }
 
-process.on('unhandledRejection', (err: any) => {
+process.on('unhandledRejection', (err: unknown) => {
   StacktraceUtil.init();
-  console!.log(StacktraceUtil.simplifyStack(err));
+  console!.log(StacktraceUtil.simplifyStack(err as Error));
 });
 
 test();

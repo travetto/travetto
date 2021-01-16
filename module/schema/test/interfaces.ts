@@ -59,7 +59,8 @@ class ViewsTest {
       assert(findError(e.errors, 'address.street1', 'is required'));
     }
 
-    r = User.from({ address: { street1: 'a', mode: 'c' } } as any);
+    // @ts-expect-error
+    r = User.from({ address: { street1: 'a', mode: 'c' } });
     try {
       await SchemaValidator.validate(User, r);
       assert.fail('Validation should have failed');

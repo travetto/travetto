@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const IsProxiedSym = Symbol.for('@trv:watch/proxy');
 
 /**
@@ -22,12 +23,12 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
     return !!Object.preventExtensions(this.target);
   }
 
-  apply(target: T, thisArg: any, argArray?: any): any {
+  apply(target: T, thisArg: T, argArray?: any): any {
     // @ts-expect-error
     return this.target.apply(thisArg, argArray);
   }
 
-  construct(target: T, argArray: any, newTarget?: any) {
+  construct(target: T, argArray: any[], newTarget?: any) {
     // @ts-expect-error
     return new this.target(...argArray);
   }
@@ -59,8 +60,8 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
     return true;
   }
 
-  ownKeys(target: T): PropertyKey[] {
-    const keys = ([] as PropertyKey[])
+  ownKeys(target: T): (string | symbol)[] {
+    const keys = ([] as (string | symbol)[])
       .concat(Object.getOwnPropertyNames(this.target))
       .concat(Object.getOwnPropertySymbols(this.target));
     return keys;
@@ -82,8 +83,8 @@ interface Proxy<T> { }
  * Generate Retargetting Proxy
  */
 export class RetargettingProxy<T> {
-  static isProxied(o: any): o is RetargettingProxy<any> {
-    return o && IsProxiedSym in o;
+  static isProxied(o: unknown): o is RetargettingProxy<unknown> {
+    return !!o && IsProxiedSym in (o as object);
   }
 
   private handler: RetargettingHandler<T>;

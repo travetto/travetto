@@ -59,11 +59,11 @@ export class CacheService {
     return CacheUtil.fromSafeJSON(res.entry);
   }
 
-  async set(id: string, entry: any, maxAge = INFINITE_MAX_AGE) {
-    entry = CacheUtil.toSafeJSON(entry);
+  async set(id: string, entry: unknown, maxAge = INFINITE_MAX_AGE) {
+    const entryText = CacheUtil.toSafeJSON(entry);
 
     const store = await this.modelService.upsertWithExpiry(CacheType,
-      CacheType.from({ id, entry }),
+      CacheType.from({ id, entry: entryText! }),
       maxAge ?? INFINITE_MAX_AGE
     );
 
@@ -75,7 +75,7 @@ export class CacheService {
   }
 
   async getOptional(id: string, extendOnAccess = true) {
-    let res: any;
+    let res: unknown;
 
     try {
       res = await this.get(id, extendOnAccess);
@@ -107,7 +107,7 @@ export class CacheService {
    * @param fn Function to execute
    * @param params input parameters
    */
-  async cache(config: CacheConfig, target: any, fn: Function, params: any[]) {
+  async cache(config: CacheConfig, target: unknown, fn: Function, params: unknown[]) {
     const id = CacheUtil.generateKey(config, params);
 
     let res = await this.getOptional(id, config.extendOnAccess);
@@ -132,7 +132,7 @@ export class CacheService {
    * @param fn Function to execute
    * @param params Input params to the function
    */
-  async evict(config: CacheConfig, target: any, fn: Function, params: any[]) {
+  async evict(config: CacheConfig, target: unknown, fn: Function, params: unknown[]) {
     const id = CacheUtil.generateKey(config, params);
     const val = await fn.apply(target, params);
     await this.delete(id);

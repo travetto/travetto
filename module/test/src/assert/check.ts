@@ -3,7 +3,7 @@
 import * as assert from 'assert';
 
 import { FsUtil } from '@travetto/boot';
-import { Util, AppError } from '@travetto/base';
+import { Util, AppError, ClassInstance, Class } from '@travetto/base';
 
 import { ThrowableError, TestConfig } from '../model/test';
 import { AssertCapture, CaptureAssert } from './capture';
@@ -22,7 +22,7 @@ export class AssertCheck {
    * @param positive Is the check positive or negative
    * @param args The arguments passed in
    */
-  static check(assertion: CaptureAssert, positive: boolean, ...args: any[]) {
+  static check(assertion: CaptureAssert, positive: boolean, ...args: unknown[]) {
     let fn = assertion.operator;
     assertion.operator = ASSERT_FN_OPERATOR[fn];
 
@@ -32,47 +32,37 @@ export class AssertCheck {
     };
 
     // Invert check for negative
-    const asrt = positive ? assert : (x: any, msg?: string) => assert(!x, msg);
+    const asrt = positive ? assert : (x: unknown, msg?: string) => assert(!x, msg);
 
     // Check fn to call
     if (fn === 'fail') {
       if (args.length > 1) {
-        assertion.actual = args[0];
-        assertion.expected = args[1];
-        assertion.message = args[2];
-        assertion.operator = args[3];
+        [assertion.actual, assertion.expected, assertion.message, assertion.operator] = args as [unknown, unknown, string, string];
       } else {
-        assertion.message = args[0];
+        [assertion.message] = args as [string];
       }
     } else if (/throw|reject/i.test(fn)) {
       assertion.operator = fn;
       if (typeof args[1] !== 'string') {
-        assertion.expected = args[1];
-        assertion.message = args[2];
+        [, assertion.expected, assertion.message] = args as [unknown, unknown, string];
       } else {
-        assertion.message = args[1];
+        [, assertion.message] = args as [unknown, string];
       }
     } else if (fn === 'ok' || fn === 'assert') {
-      assertion.actual = args[0];
-      assertion.message = args[1];
+      fn = assertion.operator = 'ok';
+      [assertion.actual, assertion.message] = args as [unknown, string];
       assertion.expected = { toClean: () => positive ? 'truthy' : 'falsy' };
       common.state = 'should be';
-      fn = assertion.operator = 'ok';
     } else if (fn === 'includes') {
       assertion.operator = fn;
-      assertion.message = args[2];
-      assertion.expected = args[0];
-      assertion.actual = args[1];
+      [assertion.expected, assertion.actual, assertion.message] = args as [unknown, unknown, string];
     } else if (fn === 'instanceof') {
-      assertion.expected = args[1];
-      assertion.actual = (args[0] === null || args[0] === undefined) ? args[0] : args[0].constructor;
-      assertion.message = args[2];
       assertion.operator = fn;
+      [assertion.actual, assertion.expected, assertion.message] = args as [unknown, unknown, string];
+      assertion.actual = (assertion.actual as ClassInstance)?.constructor;
     } else { // Handle unknown
       assertion.operator = fn ?? '';
-      assertion.message = args[2];
-      assertion.expected = args[1];
-      assertion.actual = args[0];
+      [assertion.actual, assertion.expected, assertion.message] = args as [unknown, unknown, string];
     }
 
     try {
@@ -85,23 +75,25 @@ export class AssertCheck {
         assertion.expected = AssertUtil.cleanValue(assertion.expected);
       }
 
+      const [actual, expected, message] = args as [unknown, unknown, string];
+
       // Actually run the assertion
       switch (fn) {
-        case 'instanceof': asrt(args[0] instanceof args[1], args[2]); break;
-        case 'in': asrt(args[0] in args[1], args[2]); break;
-        case 'lessThan': asrt(args[0] < args[1], args[2]); break;
-        case 'lessThanEqual': asrt(args[0] <= args[1], args[2]); break;
-        case 'greaterThan': asrt(args[0] > args[1], args[2]); break;
-        case 'greaterThanEqual': asrt(args[0] >= args[1], args[2]); break;
-        case 'ok': asrt.apply(null, args as [any, string]); break; // eslint-disable-line prefer-spread
+        case 'instanceof': asrt(actual instanceof (expected as Class), message); break;
+        case 'in': asrt((actual as string) in (expected as object), message); break;
+        case 'lessThan': asrt((actual as number) < (expected as number), message); break;
+        case 'lessThanEqual': asrt((actual as number) <= (expected as number), message); break;
+        case 'greaterThan': asrt((actual as number) > (expected as number), message); break;
+        case 'greaterThanEqual': asrt((actual as number) >= (expected as number), message); break;
+        case 'ok': asrt.apply(null, args as [unknown, string]); break; // eslint-disable-line prefer-spread
         default:
           if (fn && assert[fn as keyof typeof assert]) { // Assert call
             if (/not/i.test(fn)) {
               common.state = 'should not';
             }
-            assert[fn as 'ok'].apply(null, args as [string]);
-          } else if (args[1] && fn && args[1][fn]) { // Method call
-            asrt(args[1][fn](args[0]));
+            assert[fn as 'ok'].apply(null, args as [boolean, string | undefined]);
+          } else if (expected && !!(expected as Record<string, Function>)[fn]) { // Dotted Method call (e.g. assert.rejects)
+            asrt((expected as typeof assert)[fn as 'ok'](actual));
           }
       }
 
@@ -114,7 +106,7 @@ export class AssertCheck {
           assertion.message = (OP_MAPPING[fn] ?? `{state} be {expected}`);
         }
         assertion.message = assertion.message
-          .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || assertion[k as keyof typeof assertion])
+          .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || assertion[k as keyof typeof assertion] as string)
           .replace(/not not/g, ''); // Handle double negatives
         assertion.error = e;
         e.message = assertion.message;
@@ -207,7 +199,7 @@ export class AssertCheck {
    * @param shouldThrow Should this action reject
    * @param message Message to share on failure
    */
-  static async checkThrowAsync(assertion: CaptureAssert, positive: boolean, action: Function | Promise<any>, shouldThrow?: ThrowableError, message?: string) {
+  static async checkThrowAsync(assertion: CaptureAssert, positive: boolean, action: Function | Promise<unknown>, shouldThrow?: ThrowableError, message?: string) {
     let missed: Error | undefined;
 
     try {

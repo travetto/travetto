@@ -12,7 +12,7 @@ class Address {
   @Text() street2?: string;
 }
 
-@Model()
+@Model('crud-person')
 class Person extends BaseModel {
   @Text() name: string;
   @Precision(3, 0)
@@ -154,7 +154,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     assert(o3.name === 'oscar');
     assert(o3.age === 20);
-    assert(o3.gender === 'f' as any);
+    assert(o3.gender === 'f');
     assert(o3.address.street1 === 'changed\n');
     assert(!('street2' in o3.address));
   }
@@ -295,7 +295,8 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     );
 
     await assert.rejects(
-      () => service.update(Engineer, Doctor.from({ ...people[0] }) as any),
+      // @ts-expect-error
+      () => service.update(Engineer, Doctor.from({ ...people[0] })),
       (e: Error) => (e instanceof NotFoundError || e instanceof TypeMismatchError) ? undefined : e);
 
     const res = await service.upsert(Doctor, Doctor.from({

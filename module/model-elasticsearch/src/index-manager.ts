@@ -1,8 +1,9 @@
 import * as es from '@elastic/elasticsearch';
 import { Reindex } from '@elastic/elasticsearch/api/requestParams';
 
+import { Class } from '@travetto/base';
 import { ModelRegistry, ModelType } from '@travetto/model';
-import { ChangeEvent, Class } from '@travetto/registry';
+import { ChangeEvent } from '@travetto/registry';
 import { SchemaChangeEvent } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config';
@@ -22,7 +23,7 @@ export class IndexManager {
   constructor(private config: ElasticsearchModelConfig, private client: es.Client) { }
 
   getStore(cls: Class) {
-    return ModelRegistry.getStore(cls)!;
+    return ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
   }
 
   /**

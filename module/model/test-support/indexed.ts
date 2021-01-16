@@ -14,7 +14,7 @@ import { NotFoundError } from '../src/error/not-found';
   fields: [{ name: 1 }]
 })
 class User extends BaseModel {
-  name?: string;
+  name: string;
 }
 
 @Model('index_user_2')

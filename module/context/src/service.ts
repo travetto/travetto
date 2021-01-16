@@ -5,7 +5,7 @@ import { AppError } from '@travetto/base';
 
 const { AsyncLocalStorage } = asyncHooks;
 
-type Ctx = Record<string | symbol, any>;
+type Ctx = Record<string | symbol, unknown>;
 
 /**
  * Async context using `asyncHooks`
@@ -39,8 +39,8 @@ export class AsyncContext {
   /**
    * Get entire context or a portion by key
    */
-  get<T = any>(key: string | symbol): T;
-  get(): any;
+  get<T = unknown>(key: string | symbol): T;
+  get(): Record<string | symbol, unknown>;
   get<T>(key?: string | symbol) {
     const root = this.store();
     if (key) {
@@ -53,9 +53,9 @@ export class AsyncContext {
   /**
    * Set entire context or a portion by key
    */
-  set(key: string | symbol, val: any): void;
+  set(key: string | symbol, val: unknown): void;
   set(val: Ctx): void;
-  set(keyOrVal: string | symbol | Ctx, valWithKey?: any) {
+  set(keyOrVal: string | symbol | Ctx, valWithKey?: unknown) {
     if (valWithKey) {
       this.get()[keyOrVal as string] = valWithKey;
     } else {
@@ -66,7 +66,7 @@ export class AsyncContext {
   /**
    * Run an async function and ensure the context is available during execution
    */
-  async run(fn: () => Promise<any>, init: any = {}) {
+  async run<T = unknown>(fn: () => Promise<T>, init: Ctx = {}): Promise<T> {
     if (this.alStorage.getStore()) {
       init = { ...this.store(), ...init };
     }
@@ -86,7 +86,7 @@ export class AsyncContext {
   /**
    * Run an async function and ensure the context is available during execution
    */
-  async * iterate(fn: () => AsyncGenerator<any>, init: any = {}) {
+  async * iterate<T>(fn: () => AsyncGenerator<T>, init: Ctx = {}): AsyncGenerator<T> {
     if (this.alStorage.getStore()) {
       init = { ...this.store(), ...init };
     }

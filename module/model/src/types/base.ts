@@ -1,4 +1,4 @@
-import { Class } from '@travetto/registry';
+import { Class } from '@travetto/base';
 import { Schema } from '@travetto/schema';
 import { ModelRegistry } from '../registry/model';
 import { ModelType } from './model';

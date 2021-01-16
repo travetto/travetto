@@ -28,7 +28,7 @@ export class StreamUtil {
       const data: Buffer[] = [];
       stream.on('data', d => data.push(d));
       stream.on('error', rej);
-      stream.on('end', (err: any) => {
+      stream.on('end', (err: unknown) => {
         err ? rej(err) : res(Buffer.concat(data));
       });
     });
@@ -81,14 +81,14 @@ export class StreamUtil {
    * @param stream The stream to wait for
    * @param waitUntil The function to track completion before the stream is done
    */
-  static async waitForCompletion(stream: NodeJS.ReadableStream, waitUntil: () => Promise<any>) {
+  static async waitForCompletion(stream: NodeJS.ReadableStream, waitUntil: () => Promise<unknown>) {
     const ogListen = stream.addListener;
 
     // Allow for process to end before calling end handler
-    stream.on = stream.addListener = function (this: NodeJS.ReadableStream, type: string, handler: (...params: any[]) => void) {
+    stream.on = stream.addListener = function (this: NodeJS.ReadableStream, type: string, handler: (...params: unknown[]) => void) {
       let outHandler = handler;
       if (type === 'end') {
-        outHandler = async (...params: any[]) => {
+        outHandler = async (...params: unknown[]) => {
           await waitUntil();
           handler(...params);
         };

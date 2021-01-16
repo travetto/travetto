@@ -1,7 +1,7 @@
-import { AppManifest, AppError } from '@travetto/base';
+import { Class, AppManifest, AppError } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { DependencyRegistry, Inject } from '@travetto/di';
-import { Class, ChangeEvent } from '@travetto/registry';
+import { ChangeEvent } from '@travetto/registry';
 import { EnvUtil } from '@travetto/boot';
 
 import { RouteConfig, Request, RouteHandler, ParamConfig, ServerHandle } from '../types';
@@ -14,7 +14,7 @@ import { GlobalRoute, RestInterceptorTarget } from '../internal/types';
 /**
  * The rest server
  */
-export abstract class RestServer<T = any> {
+export abstract class RestServer<T = unknown> {
 
   @Inject()
   config: RestConfig;
@@ -177,7 +177,7 @@ export abstract class RestServer<T = any> {
     }
 
     const route: RouteConfig = {
-      params: [{ extract: (c: any, r: any) => r } as ParamConfig],
+      params: [{ extract: (c: unknown, r: unknown) => r } as ParamConfig],
       instance: {},
       handler: this.globalHandler as RouteHandler,
       method: 'all', path: '*'

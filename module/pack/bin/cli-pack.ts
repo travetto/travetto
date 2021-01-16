@@ -1,4 +1,4 @@
 import { BasePackPlugin } from './pack-base';
-import { Pack } from './operation/pack';
+import { Pack, AllConfig } from './operation/pack';
 
-export class PackPlugin extends BasePackPlugin { operation = Pack; }
+export class PackPlugin extends BasePackPlugin<AllConfig> { operation = Pack; }

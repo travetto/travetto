@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { FsUtil, ColorUtil, EnvUtil } from '@travetto/boot';
+import { ColorUtil, EnvUtil } from '@travetto/boot';
 
 import { LogEvent, Formatter } from '../types';
 
@@ -42,7 +42,7 @@ export class LineFormatter implements Formatter {
     };
   }
 
-  pretty(ev: LogEvent, o: any) {
+  pretty(ev: LogEvent, o: unknown) {
     return util.inspect(o, {
       showHidden: ev.level === 'debug',
       depth: 4,

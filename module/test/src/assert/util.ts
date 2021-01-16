@@ -1,20 +1,23 @@
 import * as util from 'util';
 
 import { FsUtil } from '@travetto/boot';
-import { Util } from '@travetto/base';
+import { Class, ClassInstance, Util } from '@travetto/base';
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
+
+function isCleanable(o: unknown): o is { toClean(): unknown } {
+  return !!o && !!(o as { toClean: unknown }).toClean;
+}
 
 /**
  * Assertion utilities
  */
 export class AssertUtil {
-
   /**
    * Clean a value for displaying in the output
    */
-  static cleanValue(val: any) {
-    if (val && val.toClean) {
+  static cleanValue(val: unknown) {
+    if (isCleanable(val)) {
       return val.toClean();
     } else if (val === null || val === undefined
       || (!(val instanceof RegExp) && Util.isPrimitive(val))
@@ -22,8 +25,9 @@ export class AssertUtil {
     ) {
       return JSON.stringify(val);
     } else {
-      if (val.ᚕid || !val.constructor || (!val.constructor.ᚕid && Util.isFunction(val))) { // If a function, show name
-        return val.name;
+      const subV = val as (Class | ClassInstance);
+      if (subV.ᚕid || !subV.constructor || (!subV.constructor.ᚕid && Util.isFunction(subV))) { // If a function, show name
+        return subV.name;
       } else { // Else inspect
         return util.inspect(val, false, 1).replace(/\n/g, ' ');
       }

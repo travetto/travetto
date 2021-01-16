@@ -1,13 +1,13 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Class, RootRegistry } from '@travetto/registry';
+import { RootRegistry } from '@travetto/registry';
 
 import { DependencyRegistry } from '../src/registry';
 
 import {
   ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT,
   CUSTOM_DATABASE, Database, CUSTOM_EMPTY, BasePattern,
-  SpecificPattern, InterfaceType, BaseType, BaseTypeTarget, CUSTOM_INTERFACE
+  SpecificPattern, InterfaceType, BaseTypeTarget, CUSTOM_INTERFACE
 } from './deps';
 
 import { DbConfig } from './config';
