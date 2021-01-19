@@ -14,12 +14,12 @@ export class ConfigUtil {
    * - profiles.yml
    * - env.yml
    */
-  static fetchOrderedConfigs() {
+  static async fetchOrderedConfigs() {
     const profileIndex = AppManifest.profiles.reduce((acc, k, v) => {
       acc[k] = v;
       return acc;
     }, {} as Record<string, number>);
-    return ResourceManager.findAllSync(/[.]ya?ml$/)
+    return (await ResourceManager.findAll(/[.]ya?ml$/))
       .map(file => ({ file, profile: path.basename(file).replace(/[.]ya?ml$/, '') }))
       .filter(({ profile }) => profile in profileIndex)
       .sort((a, b) => profileIndex[a.profile] - profileIndex[b.profile]);
@@ -28,8 +28,8 @@ export class ConfigUtil {
   /**
    * Parse config file from YAML into JSON
    */
-  static getConfigFileAsData(file: string, ns: string = ''): Record<string, SimpleType> {
-    const data = ResourceManager.readSync(file, 'utf8');
+  static async getConfigFileAsData(file: string, ns: string = ''): Promise<Record<string, SimpleType>> {
+    const data = await ResourceManager.read(file, 'utf8');
     const doc = YamlUtil.parse(data);
     return ns ? { [ns]: doc } : doc as Record<string, SimpleType>;
   }

@@ -46,8 +46,8 @@ export class ExecUtilTest {
   }
 
   @Test()
-  execSync() {
-    const output = ExecUtil.execSync(`${process.argv0} ${ResourceManager.findAbsoluteSync('test.js')}`);
+  async execSync() {
+    const output = ExecUtil.execSync(`${process.argv0} ${await ResourceManager.findAbsolute('test.js')}`);
     assert(output === 'Hello World');
   }
 

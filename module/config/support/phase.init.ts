@@ -6,6 +6,6 @@ export const init = {
   after: ['@trv:base/init'],
   action: async () => {
     const { ConfigManager } = await import('../src/manager');
-    ConfigManager.init();
+    await ConfigManager.init();
   }
 };
