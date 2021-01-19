@@ -82,16 +82,6 @@ class $ResourceManager {
   }
 
   /**
-   * Provide an absolute path for a resource identifier, synchronously
-   * @param rel The relative path of a resource
-   */
-  findAbsoluteSync(rel: string) {
-    rel = cleanPath(rel);
-    this.findSync(rel);
-    return this.cache.get(rel)!;
-  }
-
-  /**
    * Find a given resource and return it's location
    * @param pth The relative path of a resource to find
    */
@@ -103,26 +93,6 @@ class $ResourceManager {
 
     for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
       if (await FsUtil.exists(f)) {
-        this.cache.set(pth, f);
-        return f;
-      }
-    }
-
-    throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`, 'notfound');
-  }
-
-  /**
-   * Find a given resource and return it's location, synchronously
-   * @param pth The relative path of a resource to find
-   */
-  findSync(pth: string) {
-    pth = cleanPath(pth);
-    if (this.cache.has(pth)) {
-      return this.cache.get(pth)!;
-    }
-
-    for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
-      if (FsUtil.existsSync(f)) {
         this.cache.set(pth, f);
         return f;
       }
@@ -148,22 +118,6 @@ class $ResourceManager {
   }
 
   /**
-   * Read a resource, mimicking fs.read, and doing it synchronously
-   * @param pth The path to read
-   */
-  readSync(pth: string): Buffer;
-  readSync(pth: string, options: 'utf8' | 'utf-8' | { encoding: 'utf8' | 'utf-8' }): string;
-  /**
-   * Read a resource, mimicking fs.read, and doing it synchronously
-   * @param pth The path to read
-   * @param options The options to determine the read behavior
-   */
-  readSync(pth: string, options?: string | { encoding?: string, flag?: string }) {
-    pth = this.findSync(pth);
-    return fs.readFileSync(pth, options);
-  }
-
-  /**
    * Read a resource as a stream, mimicking fs.readStream
    * @param pth The path to read
    * @param options The options to determine the read behavior
@@ -184,26 +138,6 @@ class $ResourceManager {
 
     for (const root of this.paths) {
       const results = await ScanFs.scanDir({ testFile: x => pattern.test(x) },
-        FsUtil.resolveUnix(root, base));
-
-      for (const r of results) {
-        this.scanEntry(base, found, out, r);
-      }
-    }
-    return out;
-  }
-
-  /**
-   * Find all resources by a specific pattern, synchronously
-   * @param pattern Pattern to search against
-   * @param base The base folder to start searching from
-   */
-  findAllSync(pattern: RegExp, base: string = '') {
-    const out: string[] = [];
-    const found = new Set<string>();
-
-    for (const root of this.paths) {
-      const results = ScanFs.scanDirSync({ testFile: x => pattern.test(x) },
         FsUtil.resolveUnix(root, base));
 
       for (const r of results) {
