@@ -43,15 +43,15 @@ export class ManagerTest {
 
   envCopy: NodeJS.ProcessEnv;
 
-  private reinit() {
+  private async reinit() {
     delete ConfigManager['initialized'];
-    ConfigManager.init();
+    await ConfigManager.init();
   }
 
   @BeforeEach()
-  before() {
+  async before() {
     this.envCopy = { ...process.env };
-    this.reinit();
+    await this.reinit();
   }
 
   @AfterEach()
@@ -69,7 +69,7 @@ export class ManagerTest {
   @Test()
   async verifyEnv() {
     process.env.DB_MYSQL_NAME = 'Roger';
-    this.reinit();
+    await this.reinit();
 
     const conf = new TestConfig();
     ConfigManager.bindTo(conf, 'db.mysql');
@@ -85,7 +85,7 @@ export class ManagerTest {
     assert(conf.anonHosts === ['a', 'b']);
 
     process.env.MODEL_MONGO_ANONHOSTS = 'a,b,c,d';
-    this.reinit();
+    await this.reinit();
 
     const newConf = new TestConfig();
     ConfigManager.bindTo(newConf, 'model.mongo');
@@ -110,7 +110,7 @@ export class ManagerTest {
   @Test()
   async environmentOverrideFalse() {
     process.env.NAME_ACTIVE = 'false';
-    this.reinit();
+    await this.reinit();
 
     const res = ConfigManager.bindTo(new NameConfig(), 'name');
 
@@ -119,7 +119,7 @@ export class ManagerTest {
 
   @Test()
   testSecret() {
-    this.reinit();
+    await this.reinit();
 
     ConfigManager.putAll(YamlUtil.parse(`
 --

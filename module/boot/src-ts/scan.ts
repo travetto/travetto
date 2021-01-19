@@ -124,26 +124,6 @@ export class ScanFs {
   }
 
   /**
-   * Scan folders multiple times, once per handler, and union the results
-   * @param handlers Handlers to search with
-   * @param base The starting point
-   */
-  static async bulkScanDir(handlers: ScanHandler[], base: string) {
-    const res = await Promise.all(handlers.map(x => this.scanDir(x, base)));
-    const names = new Set();
-    const out: ScanEntry[] = [];
-    for (const ls of res) {
-      for (const e of ls) {
-        if (!names.has(e.file)) {
-          names.add(e.file);
-          out.push(e);
-        }
-      }
-    }
-    return out;
-  }
-
-  /**
    * Same as scanDir, but synchronous
    * @param handler Handler to search with
    * @param base The starting point
@@ -188,25 +168,6 @@ export class ScanFs {
             (dir.children = dir.children ?? []).push(subEntry);
             out.push(subEntry);
           }
-        }
-      }
-    }
-    return out;
-  }
-
-  /**
-   * Scan folders multiple times, once per handler, and union the results, synchronously
-   * @param handlers Handlers to search with
-   * @param base The starting point
-   */
-  static bulkScanDirSync(handlers: ScanHandler[], base: string) {
-    const names = new Set();
-    const out = [];
-    for (const h of handlers) {
-      for (const e of this.scanDirSync(h, base)) {
-        if (!names.has(e.file)) {
-          names.add(e.file);
-          out.push(e);
         }
       }
     }

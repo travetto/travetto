@@ -26,27 +26,27 @@ class $ConfigManager {
       - Resource {env}.yml
       - Environment vars -> Overrides everything (happens at bind time)
   */
-  init() {
+  async init() {
     if (this.initialized) {
       return;
     }
     this.initialized = true;
-    this.load();
+    await this.load();
   }
 
   /**
    * Load all config files
    */
-  load() {
+  async load() {
     this.reset();
-    const files = ConfigUtil.fetchOrderedConfigs();
+    const files = await ConfigUtil.fetchOrderedConfigs();
 
     if (files.length) {
       console.debug('Found configurations for', { files: files.map(x => x.profile) });
     }
 
     for (const f of files) {
-      this.putAll(ConfigUtil.getConfigFileAsData(f.file));
+      this.putAll(await ConfigUtil.getConfigFileAsData(f.file));
     }
   }
 
