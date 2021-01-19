@@ -27,7 +27,7 @@ export class RunUtil {
       throw new Error(`Unknown application ${name}`);
     }
 
-    CliUtil.initAppEnv({ watch: true });
+    CliUtil.initEnv({ watch: true });
 
     await CompileCliUtil.compile();
 

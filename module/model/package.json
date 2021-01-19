@@ -25,6 +25,7 @@
   "main": "index.ts",
   "files": [
     "index.ts",
+    "bin",
     "src",
     "support",
     "test-support"

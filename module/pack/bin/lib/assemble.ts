@@ -1,9 +1,9 @@
 import * as path from 'path';
 import { promises as fs } from 'fs';
 
-import { ExecUtil, FsUtil, ScanFs } from '@travetto/boot';
-import { FrameworkUtil, DepType } from '@travetto/boot/src/framework';
+import { EnvUtil, ExecUtil, FsUtil, ScanFs } from '@travetto/boot';
 
+import { DependenciesUtil, DepType } from './depdencies';
 import { PackUtil } from './util';
 
 const MODULE_DIRS = ['src', 'bin', 'support', 'resources', 'index.ts', 'package.json', 'tsconfig.json'];
@@ -74,7 +74,12 @@ export class AssembleUtil {
    * Copy over all prod dependnecies
    */
   static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'optPeer']) {
-    for (const el of await FrameworkUtil.resolveDependencies({ types })) {
+
+    if (process.env.TRV_DEV) { // If in dev, inject Dynamic Modules into dependencies
+      Object.assign(require(`${FsUtil.cwd}/package.json`)['dependencies'], EnvUtil.getDynamicModules());
+    }
+
+    for (const el of await DependenciesUtil.resolveDependencies({ types })) {
       const sub = el.file
         .replace(/.*?node_modules/, 'node_modules')
         .replace(`${process.env.TRV_DEV}`, 'node_modules/@travetto');
