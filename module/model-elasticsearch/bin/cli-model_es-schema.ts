@@ -14,7 +14,7 @@ export class EsSchemaPlugin extends BasePlugin {
   }
 
   async action() {
-    CliUtil.initAppEnv({ env: 'prod' });
+    CliUtil.initEnv({ env: 'prod' });
     const { getSchemas } = await import('./lib');
     console!.log(JSON.stringify(await getSchemas(), null, 2));
   }

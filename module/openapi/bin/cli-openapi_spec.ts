@@ -14,7 +14,7 @@ export class OpenApiSpecPlugin extends BasePlugin {
   }
 
   async action() {
-    CliUtil.initAppEnv({ watch: false, debug: '0', envExtra: { API_SPEC_OUTPUT: this._cmd.output } });
+    CliUtil.initEnv({ watch: false, debug: '0', envExtra: { API_SPEC_OUTPUT: this._cmd.output } });
     const result = await ExecUtil.worker(require.resolve('./plugin-openapi_spec')).message;
 
     if (this._cmd.output === '-' || !this._cmd.output) {

@@ -34,14 +34,14 @@ async function load() {
  * @param opts
  */
 export async function runTests(opts: RunState) {
-  CliUtil.initAppEnv({ ...DEF_ENV, envExtra: ENV_EXT, watch: false });
+  CliUtil.initEnv({ ...DEF_ENV, envExtra: ENV_EXT, watch: false });
   await load();
   const { StandardWorker } = await import('../../src/worker/standard');
   return StandardWorker.run(opts);
 }
 
 export async function runTestsDirect(...args: string[]) {
-  CliUtil.initAppEnv({ ...DEF_ENV, envExtra: ENV_EXT });
+  CliUtil.initEnv({ ...DEF_ENV, envExtra: ENV_EXT });
   await load();
 
   return runTests({
@@ -53,7 +53,7 @@ export async function runTestsDirect(...args: string[]) {
 }
 
 export async function worker() {
-  CliUtil.initAppEnv({ ...DEF_ENV, envExtra: ENV_EXT });
+  CliUtil.initEnv({ ...DEF_ENV, envExtra: ENV_EXT });
   await customLogs();
   await load();
 
@@ -62,7 +62,7 @@ export async function worker() {
 }
 
 export async function watchTests(format: string = 'tap') {
-  CliUtil.initAppEnv({
+  CliUtil.initEnv({
     ...DEF_ENV, watch: true, envExtra: {
       ...ENV_EXT,
       TRV_SRC_COMMON: 'test-support',

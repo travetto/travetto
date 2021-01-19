@@ -15,7 +15,7 @@ export class SqlSchemaPlugin extends BasePlugin {
   }
 
   async action() {
-    CliUtil.initAppEnv({ env: 'prod' });
+    CliUtil.initEnv({ env: 'prod' });
 
     const clear = this._cmd.clear === undefined ? true : CliUtil.isTrue(this._cmd.clear);
 
