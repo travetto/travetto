@@ -23,8 +23,7 @@
     "index.ts",
     "src",
     "test-support",
-    "support",
-    "tsconfig.json"
+    "support"
   ],
   "name": "@travetto/transformer",
   "repository": {
