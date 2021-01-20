@@ -112,8 +112,12 @@ export class CliAppListUtil {
    * Handles plugin response
    */
   static async run(mode?: string) {
-    CliUtil.initEnv({});
-    const list = mode === 'build' ? this.buildList() : this.getList();
-    CliUtil.pluginResponse((await list) ?? []);
+    try {
+      CliUtil.initEnv({});
+      const list = mode === 'build' ? this.buildList() : this.getList();
+      CliUtil.pluginResponse((await list) ?? []);
+    } catch (err) {
+      CliUtil.pluginResponse(err);
+    }
   }
 }

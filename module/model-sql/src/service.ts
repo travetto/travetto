@@ -11,15 +11,16 @@ import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport, PageableModelQuery, ValidStringFields, WhereClause } from '@travetto/model-query';
 
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
+import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
+import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
+import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
+
 import { SQLModelConfig } from './config';
 import { Connected, ConnectedIterator, Transactional } from './connection/decorator';
 import { SQLUtil } from './internal/util';
 import { SQLDialect } from './dialect/base';
 import { TableManager } from './table-manager';
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
-import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
-import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
 
 function prepareQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): ModelQuery<T> & { where: WhereClause<T> } {
 

@@ -1,8 +1,8 @@
 import * as fs from 'fs';
-import { ScanApp } from '@travetto/base';
+import { SourceIndex } from '@travetto/boot';
 
 export async function processServiceConfigs(svc: string) {
-  const svcConfigs = await ScanApp.findCommonFiles({ filter: new RegExp(`${svc}.*[.]config$/`) });
+  const svcConfigs = await SourceIndex.find({ filter: new RegExp(`${svc}.*[.]config$/`) });
   for (const conf of svcConfigs) {
     // Do work
 

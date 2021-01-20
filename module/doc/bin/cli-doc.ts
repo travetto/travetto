@@ -5,7 +5,7 @@ import * as path from 'path';
 import { FsUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
-import { CliDocUtil } from './lib/util';
+import { DocCliUtil } from './lib/util';
 
 /**
  * Command line support for generating module docs.
@@ -21,25 +21,25 @@ export class DocPlugin extends BasePlugin {
   }
 
   async action() {
-    await CliDocUtil.init();
+    await DocCliUtil.init();
 
     if (this._cmd.output) {
 
       const writers = await Promise.all((this._cmd.output as string[]).map(async (out) => {
-        const renderer = await CliDocUtil.getRenderer(path.extname(out) ?? this._cmd.format);
-        const finalName = await CliDocUtil.getOutputLoc(out);
+        const renderer = await DocCliUtil.getRenderer(path.extname(out) ?? this._cmd.format);
+        const finalName = await DocCliUtil.getOutputLoc(out);
         return { renderer, finalName };
       }));
 
       const write = async () => {
         for (const { renderer, finalName } of writers) {
-          const content = await CliDocUtil.generate('doc.ts', renderer);
+          const content = await DocCliUtil.generate('doc.ts', renderer);
           fs.writeFileSync(finalName, content, 'utf8');
         }
       };
 
       if (this._cmd.watch) {
-        await CliDocUtil.watchFile('doc.ts', write);
+        await DocCliUtil.watchFile('doc.ts', write);
       } else {
         try {
           await write();
@@ -48,7 +48,7 @@ export class DocPlugin extends BasePlugin {
         }
       }
     } else {
-      console.log(await CliDocUtil.getRenderer(this._cmd.format));
+      console.log(await DocCliUtil.getRenderer(this._cmd.format));
     }
   }
 }

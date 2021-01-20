@@ -6,7 +6,6 @@ import { RootRegistry } from '@travetto/registry';
 
 import { ApplicationRegistry } from '../src/registry';
 import { Application } from '../src/decorator';
-import { Waitable } from '../src/types';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
@@ -18,7 +17,7 @@ class TestApp {
 }
 
 @Application('closeable')
-class CloseableApp implements Waitable {
+class CloseableApp {
   running = false;
 
   async wait() {

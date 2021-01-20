@@ -1,6 +1,7 @@
 import * as fss from 'fs';
 import * as path from 'path';
-import { ExecUtil, ExecutionResult } from './exec';
+
+import { ExecUtil } from './exec';
 
 const fs = fss.promises;
 

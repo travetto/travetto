@@ -76,7 +76,9 @@ export class AssembleUtil {
   static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'optPeer']) {
 
     if (process.env.TRV_DEV) { // If in dev, inject Dynamic Modules into dependencies
-      Object.assign(require(`${FsUtil.cwd}/package.json`)['dependencies'], EnvUtil.getDynamicModules());
+      const mods = { ...EnvUtil.getDynamicModules() };
+      ['@travetto/doc', '@travetto/test', '@travetto/pack'].forEach(x => delete mods[x]);
+      Object.assign(require(`${FsUtil.cwd}/package.json`)['dependencies'], mods);
     }
 
     for (const el of await DependenciesUtil.resolveDependencies({ types })) {
@@ -106,7 +108,7 @@ export class AssembleUtil {
    */
   static async compileWorkspace(root: string, cacheDir: string) {
     await ExecUtil.spawn(`node`, ['./node_modules/@travetto/cli/bin/travetto.js', 'compile'],
-      { cwd: root, env: { TRV_CACHE: cacheDir, TRV_MODULES: '', TRV_DEV: '', TRV_REQUIRES: '' } }).result;
+      { cwd: root, env: { TRV_CACHE: cacheDir, TRV_MODULES: '', TRV_DEV: '', TRV_REQUIRES: '' }, stdio: ['pipe', 'pipe', 2] }).result;
   }
 
   /**

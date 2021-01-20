@@ -37,5 +37,6 @@ export interface ApplicationConfig<T extends AppClass = AppClass> {
   targetId: string; // The class id
   target?: Class<T>; // The actual class of the app
   generatedTime?: number;
+  watch?: boolean; // Should the application be watched by default
 }
 

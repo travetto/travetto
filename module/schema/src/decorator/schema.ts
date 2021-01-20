@@ -9,7 +9,7 @@ import { ValidatorFn } from '../validate/types';
  * @augments `@trv:schema/Schema`
  */
 export function Schema() { // Auto is used during compilation
-  return <T>(target: Class<T>): Class<T> => {
+  return <T, U extends Class<T>>(target: U): U => {
     SchemaRegistry.getOrCreatePending(target);
     return target;
   };

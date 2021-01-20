@@ -60,19 +60,13 @@ class $AppManifest {
   readonly resourceFolders: string[];
 
   /**
-   * List of common source folders
+   * List of source folders
    */
-  readonly commonSourceFolders: string[];
-
-  /**
-   * List of local source folders
-   */
-  readonly localSourceFolders: string[];
-
-  /**
-   * List of modules to not traverse into
-   */
-  readonly commonSourceExcludeModules: Set<string>;
+  readonly sourceFolders: {
+    common: string[];
+    local: string[];
+    excludeModules: Set<string>;
+  };
 
   /**
    * Amount of time to wait at shutdown
@@ -109,14 +103,13 @@ class $AppManifest {
       value: (status ? EnvUtil.get('TRV_DEBUG') : '') || undefined
     };
 
-    this.commonSourceFolders = ['src', ...EnvUtil.getList('TRV_SRC_COMMON')];
-    this.localSourceFolders = [...EnvUtil.getList('TRV_SRC_LOCAL')];
+    this.sourceFolders = {
+      common: ['src', ...EnvUtil.getList('TRV_SRC_COMMON')],
+      local: [...EnvUtil.getList('TRV_SRC_LOCAL')],
+      excludeModules: new Set(['@travetto/cli', '@travetto/doc', '@travetto/boot'])
+    };
     this.resourceFolders = ['resources', ...EnvUtil.getList('TRV_RESOURCES')];
 
-    this.commonSourceExcludeModules = new Set([
-      // This drives the init process, so cannot happen in a support file
-      '@travetto/cli', '@travetto/boot', '@travetto/doc'
-    ]);
     this.shutdownWait = EnvUtil.getTime('TRV_SHUTDOWN_WAIT', 2, 's');
   }
 
