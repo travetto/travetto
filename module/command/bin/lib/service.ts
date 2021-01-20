@@ -129,14 +129,13 @@ export class ServiceUtil {
    * Find all services
    */
   static findAll() {
-    const all = FrameworkUtil
+    return FrameworkUtil
       .scan(x => /support\/service[.].*?[.]js$/.test(x))
-      .filter(x => x.stats.isFile())
-      .map(x => require(x.file) as Service);
-
-    return all.filter(x => !!x).map(x => {
-      x.version = `${x.version}`;
-      return x;
-    });
+      .map(x => require(x.file) as Service)
+      .filter(x => !!x)
+      .map(x => {
+        x.version = `${x.version}`;
+        return x;
+      });
   }
 }

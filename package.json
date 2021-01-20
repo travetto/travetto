@@ -17,8 +17,8 @@
     "lint": "npx eslint --ext .js --ext .ts .",
     "docs": "./bin/util/docs.js",
     "boot": "cd module/boot; npm run build",
-    "hoist": "npx lerna bootstrap --hoist",
-    "init": "npm run hoist; npm run boot; npm run clean; npm run link"
+    "lerna": "npx lerna bootstrap --hoist",
+    "init": "npm run lerna; npm run boot; npm run clean; npm run link"
   },
   "devDependencies": {
     "@types/faker": "^5.1.5",

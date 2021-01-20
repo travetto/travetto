@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 
-import { FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil, EnvUtil } from '@travetto/boot';
-import { ScanApp } from '@travetto/base';
+import { SourceIndex, FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil, EnvUtil } from '@travetto/boot';
+import { AppManifest } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
 import { Transpiler } from './transpiler';
@@ -25,7 +25,7 @@ class $Compiler {
      */
     protected cache: FileCache = AppCache,
   ) {
-    this.rootFiles = new Set(ScanApp.findSourceFiles('required').map(x => x.file));
+    this.rootFiles = new Set(SourceIndex.findByFolders(AppManifest.sourceFolders, 'required').map(x => x.file));
     this.transpiler = new Transpiler(this.cache, this.rootFiles);
   }
 
@@ -65,7 +65,7 @@ class $Compiler {
     if (!EnvUtil.isReadonly()) {
       this.transpiler.reset();
     }
-    ScanApp.reset();
+    SourceIndex.reset();
     this.active = false;
   }
 

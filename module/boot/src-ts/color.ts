@@ -54,13 +54,16 @@ export class ColorUtil {
    * @param styles Text styles to apply
    * @param value The value to color
    */
-  static color(textColor: keyof typeof ColorUtil.COLORS, styles: (keyof typeof ColorUtil.STYLES)[], value: unknown): string | unknown {
-    if (this.colorize && value !== undefined && value !== null && value !== '') {
+  static color(textColor: keyof typeof ColorUtil.COLORS, styles: (keyof typeof ColorUtil.STYLES)[], value: unknown): string | null | undefined {
+    if (value === undefined || value === null || value === '') {
+      return value;
+    }
+    if (this.colorize) {
       for (const style of [this.COLORS[textColor], ...styles.map(s => this.STYLES[s])]) {
         value = `\x1b[${style[0]}m${value}\x1b[${style[1]}m`;
       }
     }
-    return value;
+    return `${value}`;
   }
 
   /**
@@ -78,7 +81,7 @@ export class ColorUtil {
    *
    * @param palette The list of supported keys for the string template
    */
-  static makeTemplate<T extends Record<string, (text: string) => string>>(palette: T) {
+  static makeTemplate<T extends Record<string, (text: string) => ReturnType<(typeof ColorUtil)['color']>>>(palette: T) {
     /**
      * @example
      * ```
@@ -96,7 +99,7 @@ export class ColorUtil {
               throw new Error('Invalid template variable, one and only one key should be specified');
             }
             const k = subKeys[0];
-            el = palette[k](el[k]!);
+            el = palette[k](el[k]!)!;
           }
           return `${values[i] ?? ''}${el ?? ''}`;
         });

@@ -11,7 +11,7 @@ import { IndexConfig, ModelOptions } from './types';
  * @augments `@trv:schema/Schema`
  */
 export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
-  return function <T extends ModelType>(target: Class<T>): Class<T> {
+  return function <T extends ModelType, U extends Class<T>>(target: U): U {
     if (typeof conf === 'string') {
       conf = { store: conf };
     }

@@ -9,7 +9,7 @@ const PRIMARY_BRANCH = EnvUtil.get('TRV_DOC_BRANCH') ||
 const REPO = (require(`${FsUtil.cwd}/package.json`).repository?.url || '').split(/[.]git$/)[0];
 const GIT_SRC_ROOT = `${REPO}/tree/${PRIMARY_BRANCH}`;
 
-export class CliDocUtil {
+export class DocCliUtil {
   /**
    * Initialize for doc gen
    */

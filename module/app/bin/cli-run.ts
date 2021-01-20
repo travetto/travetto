@@ -49,10 +49,10 @@ export class AppRunPlugin extends BasePlugin {
       if (!selected) {
         return await this.showHelp(app ? `${app} is an unknown application` : '');
       } else {
-        await CliUtil.initEnv({ env: this._cmd.env, profiles: this._cmd.profile, resources: this._cmd.resource, watch: true });
+        await CliUtil.initEnv({ env: this._cmd.env, profiles: this._cmd.profile, resources: this._cmd.resource, watch: selected.watch });
         // Run otherwise
         try {
-          await RunUtil.run(app, ...args);
+          await RunUtil.run(selected, ...args);
           process.exit(0);
         } catch (err) {
           console.error('Failed application run', { error: err });

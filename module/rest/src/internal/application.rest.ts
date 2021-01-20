@@ -5,7 +5,8 @@ import { RestServer } from '../server/base';
  * Default application entrypoint
  */
 @Application('rest', {
-  description: 'Default rest application entrypoint'
+  description: 'Default rest application entrypoint',
+  watch: true
 })
 export class DefaultRestApplication {
   constructor(private server: RestServer) { }
