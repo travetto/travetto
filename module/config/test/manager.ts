@@ -118,7 +118,7 @@ export class ManagerTest {
   }
 
   @Test()
-  testSecret() {
+  async testSecret() {
     await this.reinit();
 
     ConfigManager.putAll(YamlUtil.parse(`

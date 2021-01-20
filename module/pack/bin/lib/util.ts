@@ -28,11 +28,10 @@ export class PackUtil {
   static async modeList() {
     if (!this._modes) {
       this._modes = FrameworkUtil.scan(f => /support\/pack[.].*[.]ya?ml/.test(f))
-        .filter(x => x.stats.isFile())
         .map(x => {
           const [, mod, name] = x.module.match(/.*@travetto\/([^/]+)\/.*pack[.]([^.]+).ya?ml/) ?? [];
           const key = x.module.includes('compiler/bin') ? `<default>` : `${mod}/${name}`;
-          return { key, file: x.module };
+          return { key, file: x.file };
         });
     }
     return this._modes;

@@ -27,7 +27,7 @@ function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Par
  * @augments `@trv:di/Injectable`
  */
 export function Injectable(first?: Partial<InjectableConfig> | symbol, ...args: (Partial<InjectableConfig> | undefined)[]) {
-  return <T>(target: Class) => {
+  return <T extends Class>(target: T) => {
     const config = collapseConfig(first, ...args) as Partial<InjectableConfig>;
 
     config.class = target;
@@ -39,7 +39,7 @@ export function Injectable(first?: Partial<InjectableConfig> | symbol, ...args: 
 export type InjectConfig = { qualifier?: symbol, optional?: boolean };
 
 export function InjectArgs(configs?: InjectConfig[][]) {
-  return (target: Class) => {
+  return <T extends Class>(target: T) => {
     DependencyRegistry.registerConstructor(target,
       configs?.map(x => collapseConfig(...x)));
   };

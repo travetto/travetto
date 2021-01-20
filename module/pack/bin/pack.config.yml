@@ -27,13 +27,14 @@ assemble:
     - .eslintrc
     - .npmignore
     - .*.yml
-    - cache/*.log
+    - cache/compiler.*.log
     - node_modules/lodash/lodash.min.js
+    - node_modules/source-map-support/node_modules/source-map
     - node_modules/source-map-support/browser-source-map-support.js
     - node_modules/bson/browser_build/
     - node_modules/**/tsconfig.json
     - node_modules/**/tsconfig.*.json
-    - node_modules/@travetto/*/DOCS.js
+    - node_modules/@travetto/*/doc.ts
     - node_modules/typescript/
     - node_modules/@types/
     - ^./node_modules/@travetto/**/*.ts

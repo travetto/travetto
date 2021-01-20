@@ -128,7 +128,7 @@ export class TranspileUtil {
         outDir: FsUtil.cwd,
         sourceRoot: FsUtil.cwd,
         ...(process.env.TRV_DEV ? this.devCompilerOptions : {})
-      };
+      } as tsi.CompilerOptions;
     }
     return this[CompilerOptionsSym];
   }
@@ -198,7 +198,7 @@ export class TranspileUtil {
       err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${filename}]` : `from ${filename}`}`);
     }
 
-    if (EnvUtil.isWatch() && !filename.includes('/node_modules/') && !filename.startsWith('test/')) {
+    if (EnvUtil.isWatch() && !filename.startsWith('test/')) {
       console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
       return this.getErrorModule(err.message);
     }

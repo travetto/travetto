@@ -239,7 +239,15 @@ export class ExecUtil {
     );
 
     const message = new Promise<T>((r, rej) => {
-      worker.once('message', d => result.then(() => r(d)));
+      worker.once('message', d => result.then(() => {
+        if (d && 'stack' in d && 'message' in d) {
+          const err = new Error(d['message']);
+          err.stack = d['stack'];
+          rej(err);
+        } else {
+          r(d);
+        }
+      }));
       result.catch(rej);
     });
 

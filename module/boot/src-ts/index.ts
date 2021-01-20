@@ -5,6 +5,7 @@ export * from './color';
 export * from './stream';
 export * from './env';
 export * from './fs';
+export * from './source';
 export * from './scan';
 export * from './compile';
 export * from './transpile';

@@ -1,21 +1,13 @@
-import * as commander from 'commander';
-
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BaseModelPlugin } from './lib/base-cli-plugin';
+import { CliModelExportUtil } from './lib/export';
 
 /**
  * CLI Entry point for exporting model schemas
  */
-export class ModelExportPlugin extends BasePlugin {
+export class ModelExportPlugin extends BaseModelPlugin {
   name = 'model:export';
 
-  init(cmd: commander.Command) {
-    return cmd
-      .option('-e, --env [env]', 'Application environment (dev|prod|<other>)')
-      .arguments('[provider] [models...');
-  }
-
-  async action() {
-    const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.init();
+  async run(provider: string, models: string[]) {
+    CliModelExportUtil.export(provider, models);
   }
 }

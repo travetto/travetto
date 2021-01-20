@@ -45,7 +45,7 @@ export function watch($Compiler: Class<typeof Compiler>) {
       });
 
       this.presence = new FilePresenceManager(
-        [...AppManifest.localSourceFolders]
+        [...AppManifest.sourceFolders.local]
           .map(x => `./${x}`)
           .filter(x => FsUtil.existsSync(x)),
         {

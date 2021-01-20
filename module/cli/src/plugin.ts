@@ -1,4 +1,4 @@
-import { FrameworkUtil } from '@travetto/boot/src/framework';
+import { SourceIndex } from '@travetto/boot';
 
 import { color } from './color';
 import { BasePlugin } from './plugin-base';
@@ -8,9 +8,8 @@ const PLUGIN_PACKAGE = [
   [/^compile$/, 'compiler', true],
   [/^test(:lerna)?$/, 'test', false],
   [/^command:service$/, 'command', true],
-  [/^model:sql-schema$/, 'model-sql', true],
+  [/^model:(install|export)$/, 'model', true],
   [/^openapi:(spec|client)$/, 'openapi', true],
-  [/^model:es-schema$/, 'model-elasticserch', true],
   [/^email:(compile|dev)$/, 'email-template', false],
   [/^pack(:assemble|:zip|:docker)?$/, 'pack', false],
 ] as [patt: RegExp, pkg: string, prod: boolean][];
@@ -25,10 +24,8 @@ export class PluginManager {
    */
   static getPluginMapping() {
     const all = new Map<string, string>();
-    for (const { file, stats } of FrameworkUtil.scan(f => /bin\/cli-/.test(f))) {
-      if (stats.isFile()) {
-        all.set(file.replace(/^.*\/bin\/.+?-(.*?)[.][^.]*$/, (_, f) => f), file);
-      }
+    for (const { file } of SourceIndex.find({ folder: 'bin', filter: /bin\/cli-/ })) {
+      all.set(file.replace(/^.*\/bin\/.+?-(.*?)[.][^.]*$/, (_, f) => f), file);
     }
     return all;
   }

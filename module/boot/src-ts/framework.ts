@@ -1,51 +1,40 @@
-// @ts-ignore
-import * as Mod from 'module';
-
-import { FsUtil } from './fs';
-import { ScanFs } from './scan';
 import { EnvUtil } from './env';
+import { FsUtil } from './fs';
+import { ScanEntry, ScanFs } from './scan';
 
-type Module = {
-  loaded?: boolean;
-  _load?(req: string, parent: Module): unknown;
-  _resolveFilename?(req: string, parent: Module): string;
-  _compile?(contents: string, file: string): unknown;
-} & NodeJS.Module;
+const isStandardDir = (x: string) =>
+  /^node_modules[/]?$/.test(x) ||  // Top level node_modules
+  (/^node_modules\/@travetto/.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
+  !x.includes('node_modules'); // non module file
+const isModuleDir = (x: string) => !x.includes('node_modules');
+const processModule = (dep: string, pth: string, e: ScanEntry) => {
+  e.module = e.module.includes('node_modules') ? e.module : e.file.replace(pth, `node_modules/${dep}`);
+  return e;
+};
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-const Module = Mod as unknown as Module;
+export type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 
 /**
  * Framework specific utilities
  */
 export class FrameworkUtil {
-
   /**
    * Scan the framework for folder/files only the framework should care about
    * @param testFile The test to determine if a file is desired
    */
-  static scan(testFile?: (x: string) => boolean, base = FsUtil.cwd) {
-    const out = [ScanFs.scanDirSync({
-      testFile,
-      testDir: x => // Ensure its a valid folder or module folder
-        /^node_modules[/]?$/.test(x) ||  // Top level node_modules
-        (/^node_modules\/@travetto/.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
-        !x.includes('node_modules') // non module file
-    }, base)];
+  static scan(test: ScanTest) {
+    const cleaned = 'test' in test ? test.test.bind(test) : test;
 
-    // Load dynamic modules with mappings
-    for (const [dep, pth] of Object.entries(EnvUtil.getDynamicModules())) {
-      out.push(
-        ScanFs.scanDirSync({
-          testFile,
-          testDir: x => !x.includes('node_modules'),
-        }, pth)
-          .map(d => {
-            d.module = d.module.includes('node_modules') ?
-              d.module : d.file.replace(pth, `node_modules/${dep}`);
-            return d;
-          })
-      ); // Read from module
+    // Folders to check
+    const folders = [
+      { testFile: cleaned, testDir: isStandardDir, base: FsUtil.cwd, map: (e: ScanEntry) => e },
+      ...Object.entries(EnvUtil.getDynamicModules()).map(([dep, pth]) => (
+        { testFile: cleaned, testDir: isModuleDir, base: pth, map: (e: ScanEntry) => processModule(dep, pth, e) }
+      ))
+    ];
+    const out: ScanEntry[][] = [];
+    for (const { testFile, testDir, base, map } of folders) {
+      out.push(ScanFs.scanDirSync({ testFile, testDir }, base).map(map).filter(x => x.stats.isFile()));
     }
 
     return out.flat();

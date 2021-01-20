@@ -5,9 +5,10 @@ export const init = {
   key: '@trv:compiler/load',
   after: ['@trv:compiler/compile'],
   action: async () => {
-    const { ScanApp } = await import('@travetto/base');
+    const { SourceIndex } = await import('@travetto/boot');
+    const { AppManifest } = await import('@travetto/base');
 
-    for (const { file } of ScanApp.findSourceFiles('required')) {
+    for (const { file } of SourceIndex.findByFolders(AppManifest.sourceFolders, 'required')) {
       require(file); // Scan all files as compiler source root
     }
   }

@@ -73,7 +73,7 @@ export class LoggerTransformer {
     const arg = CoreUtil.getArgument(node);
     if (arg) {
       // Okay since we create the object ourselves in ConsoleManager
-      const level = LiteralUtil.toLiteral(arg, false);
+      const level = LiteralUtil.toLiteral(arg, false) as string;
       if (AppManifest.prod && level === 'debug') {
         return state.createIdentifier('undefined'); // Lose debug logging if in prod
       } else {

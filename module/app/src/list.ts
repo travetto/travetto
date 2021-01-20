@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 
-import { ScanApp } from '@travetto/base';
+import { SourceIndex } from '@travetto/boot';
+import { AppManifest } from '@travetto/base/src/manifest';
 
 import { ApplicationConfig } from './types';
 import { ApplicationRegistry } from './registry';
@@ -23,7 +24,7 @@ export class AppListUtil {
    */
   static async buildList() {
 
-    ScanApp.findSourceFiles()
+    SourceIndex.findByFolders(AppManifest.sourceFolders)
       .filter(x => fs.readFileSync(x.file, 'utf-8').includes('@Application'))
       .forEach(x => require(x.file)); // Only load files that are candidates
 

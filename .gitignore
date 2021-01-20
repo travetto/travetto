@@ -6,6 +6,7 @@ build/
 api-client/
 sample/dummy/
 .bin/
+dist/
 
 .DS_STORE
 *.compiled.*

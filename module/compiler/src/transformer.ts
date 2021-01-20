@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { ScanApp } from '@travetto/base';
+import { SourceIndex } from '@travetto/boot';
 
 import {
   NodeTransformer, VisitorFactory, TransformerState, getAllTransformers
@@ -24,7 +24,7 @@ export class TransformerManager {
     }
 
     // Modules
-    const found = ScanApp.findCommonFiles({ folder: 'support', filter: /\/transformer.*[.]ts/ });
+    const found = SourceIndex.find({ folder: 'support', filter: /\/transformer.*[.]ts/ });
 
     for (const entry of found) { // Exclude based on blacklist
       this.transformers.push(...getAllTransformers(require(entry.file)));
