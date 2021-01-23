@@ -8,6 +8,11 @@ import { FsUtil } from '@travetto/boot';
 import { PackUtil } from './lib/util';
 import { CommonConfig, PackOperation } from './lib/types';
 
+const packName = `pack_${require(FsUtil.resolveUnix('package.json')).name}`
+  .toLowerCase()
+  .replace(/[^a-z]+/g, '_')
+  .replace(/_+/g, '_');
+
 /**
  * Supports packing a project into a directory, ready for archiving
  */
@@ -26,12 +31,7 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
     const out: C = [...(await PackUtil.getConfigs()), extra]
       .map(x => this.operation.key && this.operation.key in x ? ((x as Record<string, C>)[this.operation.key] as C) : x as C)
       .reduce((acc, l) => this.operation.extend(acc, l ?? {}), {} as C);
-    out.workspace = out.workspace ?? FsUtil.resolveUnix(os.tmpdir(),
-      `pack_${require(FsUtil.resolveUnix('package.json')).name}`
-        .toLowerCase()
-        .replace(/[^a-z]+/g, '_')
-        .replace(/_+/, '_')
-    );
+    out.workspace = out.workspace ?? FsUtil.resolveUnix(os.tmpdir(), packName);
     out.active = true;
     return out;
   }
@@ -52,8 +52,8 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
     const out = [];
     if (lines.length) {
       out.push('', color`${{ title: 'Available Pack Modes:' }}`);
-      for (const { key, file } of lines) {
-        out.push(color`  * ${{ input: `${key}` }} [${{ path: file }}]`);
+      for (const { name, file } of lines) {
+        out.push(color`  * ${{ input: `${name}` }} [${{ path: file }}]`);
       }
       out.push('');
     }
@@ -61,7 +61,7 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
   }
 
   async complete() {
-    return { '': (await PackUtil.modeList()).map(x => x.key) };
+    return { '': (await PackUtil.modeList()).map(x => x.name!) };
   }
 
   async action() {

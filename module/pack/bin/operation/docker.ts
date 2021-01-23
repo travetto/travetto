@@ -7,8 +7,8 @@ import { CommonConfig, PackOperation } from '../lib/types';
 export interface DockerConfig extends CommonConfig {
   image: string;
   tag: string[];
-  port?: string[];
-  env: Record<string, string>;
+  port?: (string | number)[];
+  env: Record<string, string | number | boolean>;
 }
 
 export const Docker: PackOperation<DockerConfig> = {

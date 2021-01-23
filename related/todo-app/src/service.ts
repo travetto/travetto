@@ -1,4 +1,4 @@
-import { MongoModelService } from '@travetto/model-mongo';
+import { ElasticsearchModelService } from '@travetto/model-elasticsearch';
 import { Injectable, Inject } from '@travetto/di';
 import { Todo, TodoSearch } from './model';
 
@@ -6,7 +6,7 @@ import { Todo, TodoSearch } from './model';
 export class TodoService {
 
   @Inject()
-  private modelService: MongoModelService;
+  private modelService: ElasticsearchModelService;
 
   async add(todo: Todo) {
     todo.created = new Date();

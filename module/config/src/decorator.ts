@@ -9,7 +9,7 @@ import { ConfigManager } from './manager';
  */
 export function Config(ns: string, depTarget?: Class, name: string = '') {
 
-  return (target: Class) => {
+  return <T extends Class>(target: T) => {
     const og = target.prototype.postConstruct;
 
     target.prototype.postConstruct = function () {

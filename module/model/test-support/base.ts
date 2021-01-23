@@ -1,3 +1,4 @@
+import { FsUtil } from '@travetto/boot/src';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
@@ -6,7 +7,6 @@ import { Class, ResourceManager } from '@travetto/base';
 import { ModelRegistry } from '../src/registry/model';
 import { isBulkSupported, isCrudSupported, isStorageSupported } from '../src/internal/service/common';
 import { ModelType } from '../src/types/model';
-import { FsUtil } from '@travetto/boot/src';
 
 let first = true;
 
@@ -61,9 +61,9 @@ export abstract class BaseModelSuite<T> {
     const service = await this.service;
     if (isStorageSupported(service)) {
       await service.createStorage();
-      if (service.onModelVisibilityChange) {
+      if (service.createModel) {
         await Promise.all(ModelRegistry.getClasses().map(m =>
-          service.onModelVisibilityChange!({ type: 'added', curr: m })));
+          service.createModel!(m)));
       }
     }
   }
@@ -72,9 +72,9 @@ export abstract class BaseModelSuite<T> {
   async deleteStorage() {
     const service = await this.service;
     if (isStorageSupported(service)) {
-      if (service.onModelVisibilityChange) {
+      if (service.deleteModel) {
         for (const m of ModelRegistry.getClasses()) {
-          await service.onModelVisibilityChange!({ type: 'removing', prev: m });
+          await service.deleteModel(m);
         }
       }
       await service.deleteStorage();

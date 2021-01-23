@@ -1,12 +1,12 @@
+let valid = false;
 try {
   require('pg');
+  valid = true;
 } catch {
-  return module.exports = undefined;
 }
-
 const version = '12.2';
 
-module.exports = {
+export const service = valid ? {
   name: 'postgresql',
   version,
   port: 5432,
@@ -16,4 +16,4 @@ module.exports = {
     POSTGRES_PASSWORD: 'password',
     POSTGRES_DB: 'app'
   }
-};
+} : undefined;

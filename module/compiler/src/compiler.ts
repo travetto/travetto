@@ -25,7 +25,7 @@ class $Compiler {
      */
     protected cache: FileCache = AppCache,
   ) {
-    this.rootFiles = new Set(SourceIndex.findByFolders(AppManifest.sourceFolders, 'required').map(x => x.file));
+    this.rootFiles = new Set(SourceIndex.findByFolders(AppManifest.source, 'required').map(x => x.file));
     this.transpiler = new Transpiler(this.cache, this.rootFiles);
   }
 

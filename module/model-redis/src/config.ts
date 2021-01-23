@@ -5,8 +5,8 @@ import { Config } from '@travetto/config';
 export class RedisModelConfig {
 
   client: redis.ClientOpts = {};
-
   namespace: string;
+  autoCreate?: boolean;
 
   postConstruct() {
   }

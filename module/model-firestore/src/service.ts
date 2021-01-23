@@ -1,8 +1,7 @@
 import * as firebase from 'firebase-admin';
 
-import { ResourceManager, ShutdownManager, Util, Class, AppError } from '@travetto/base';
+import { ResourceManager, ShutdownManager, Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { ChangeEvent } from '@travetto/registry';
 import {
   ModelCrudSupport, ModelRegistry, ModelStorageSupport,
   ModelIndexedSupport, ModelType, NotFoundError
@@ -42,7 +41,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   cl: firebase.firestore.Firestore;
 
-  constructor(private config: FirestoreModelConfig) { }
+  constructor(public readonly config: FirestoreModelConfig) { }
 
   private resolveTable(cls: Class) {
     let table = ModelRegistry.getStore(cls);
@@ -67,34 +66,13 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   // Storage
+  async createStorage() { }
+  async deleteStorage() { }
 
-  /**
-   * An event listener for whenever a model is added, changed or removed
-   */
-  async onModelVisibilityChange?<T extends ModelType>(e: ChangeEvent<Class<T>>) {
-    const cls = (e.curr || e.prev)!;
-    // Don't create tables for non-concrete types
-    if (ModelRegistry.getBaseModel(cls) !== cls) {
-      return;
+  async deleteModel(cls: Class) {
+    for await (const el of this.list(cls)) {
+      await this.delete(cls, el.id!);
     }
-
-    switch (e.type) {
-      case 'added': break;
-      case 'changed': break;
-      case 'removing': {
-        for await (const el of this.list(cls)) {
-          await this.delete(cls, el.id!);
-        }
-      }
-    }
-  }
-
-  async createStorage() {
-    // Do nothing
-  }
-
-  async deleteStorage() {
-
   }
 
   // Crud

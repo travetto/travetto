@@ -1,6 +1,6 @@
 const version = '1.13.5';
 
-module.exports = {
+export const service = {
   name: 'dynamodb',
   version,
   port: 8000,

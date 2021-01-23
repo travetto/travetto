@@ -19,6 +19,8 @@ export class S3ModelConfig {
 
   chunkSize = 5 * 2 ** 20; // Chunk size in bytes
 
+  autoCreate?: boolean;
+
   /**
    * Provide host to bucket
    */

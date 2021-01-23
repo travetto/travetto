@@ -2,7 +2,7 @@
 /// @ts-check
 /// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
 
-'module/*/support/service*.js'
+'module/*/support/service*.ts'
   .$dir()
   .$map(f => f.replace(/^.*module\/([^/]+).*$/, (a, m) => `@travetto/${m}`))
   .$collect()

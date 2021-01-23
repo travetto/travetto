@@ -51,7 +51,7 @@ class $ConsoleManager {
     global[this.key] = this.invoke.bind(this);
     this.exclude = new Set();
 
-    if (AppManifest.debug.status === false) {
+    if (AppManifest.env.debug.status === false) {
       this.exclude.add('debug');
     }
 

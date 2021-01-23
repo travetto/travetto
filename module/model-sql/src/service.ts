@@ -6,7 +6,7 @@ import { Util, Class } from '@travetto/base';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { ChangeEvent } from '@travetto/registry';
-import { SchemaChangeEvent } from '@travetto/schema';
+import { SchemaChange, SchemaChangeEvent } from '@travetto/schema';
 import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport, PageableModelQuery, ValidStringFields, WhereClause } from '@travetto/model-query';
@@ -113,7 +113,7 @@ export class SQLModelService implements
       if (this.dialect.conn.init) {
         await this.dialect.conn.init();
       }
-      this.manager = new TableManager(this.context, this.config, this.dialect);
+      this.manager = new TableManager(this.context, this.dialect);
       ModelStorageUtil.registerModelChangeListener(this);
     }
   }
@@ -126,12 +126,16 @@ export class SQLModelService implements
     return this.dialect.generateId();
   }
 
-  async onSchemaChange(ev: SchemaChangeEvent) {
-    await this.manager.onSchemaChange(ev);
+  async changeSchema(cls: Class, change: SchemaChange) {
+    await this.manager.changeSchema(cls, change);
   }
 
-  async onModelVisibilityChange<T extends ModelType>(e: ChangeEvent<Class<T>>) {
-    await this.manager.onModelChange(e);
+  async createModel(cls: Class) {
+    await this.manager.createTables(cls);
+  }
+
+  async deleteModel(cls: Class) {
+    await this.manager.dropTables(cls);
   }
 
   async createStorage() { }

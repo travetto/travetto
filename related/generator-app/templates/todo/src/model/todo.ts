@@ -1,7 +1,7 @@
-import { Model, ModelCore } from '@travetto/model';
+import { Model, ModelType } from '@travetto/model';
 
 @Model()
-export class Todo implements ModelCore {
+export class Todo implements ModelType {
   id?: string;
   text: string;
   completed?: boolean;

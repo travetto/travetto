@@ -15,7 +15,7 @@ export const init = {
     const { AppManifest } = await import('@travetto/base');
     const { Compiler } = await import('../src/compiler');
 
-    for (const x of SourceIndex.findByFolders(AppManifest.sourceFolders)) {
+    for (const x of SourceIndex.findByFolders(AppManifest.source)) {
       if (!AppCache.hasEntry(x.file)) {
         Compiler.transpile(x.file); // Compile all the desired files
       }

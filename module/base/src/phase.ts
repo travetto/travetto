@@ -52,11 +52,15 @@ export class PhaseManager {
 
   initializers: Initializer[] = [];
 
+  filter: RegExp;
+
   /**
    * Create a new manager
    * @param scope The scope to run against
    */
-  constructor(public scope: string) { }
+  constructor(public scope: string) {
+    this.filter = new RegExp(`phase[.]${this.scope}(.*?)[.]ts`);
+  }
 
   /**
    * Fetch the associated files in the various support/ folders.
@@ -64,7 +68,7 @@ export class PhaseManager {
    * @param after Starting point, exclusive
    */
   load(upto?: string, after?: string) {
-    const found = SourceIndex.find({ folder: 'support', filter: new RegExp(`phase[.]${this.scope}(.*?)[.]ts`) });
+    const found = SourceIndex.find({ folder: 'support', filter: this.filter });
 
     // Ensure we transpile all files
     for (const el of found) {

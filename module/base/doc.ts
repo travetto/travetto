@@ -26,11 +26,13 @@ The framework provides basic environment information, e.g. in prod/test/dev.  Th
 as well. The information that is available is:
 
 ${List(
-  d`${fld`prod`}- Determines if app is in prod mode.  A ${inp`boolean`} flag that should indicate a production run.`,
-  d`${fld`env`} - The environment name.  Will usually be one of ${inp`dev`}, ${inp`test`}, or ${inp`prod`}.  Can be anything that is passed in.`,
-  d`${fld`profiles: Set<string>`} - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.`,
-  d`${fld`debug`} - Simple logging flag.  This ${inp`boolean`} flag will enable or disable logging at various levels. By default ${inp`debug`} is on in non-${inp`prod`}.`,
-  d`${fld`appRoots: string[]`} - The file root paths for the application, the default set is the current project. Order matters with respect to resource resolution. All paths should be relative to the project base`,
+  d`${fld`env.prod`}- Determines if app is in prod mode.  A ${inp`boolean`} flag that should indicate a production run.`,
+  d`${fld`env.name`} - The environment name.  Will usually be one of ${inp`dev`}, ${inp`test`}, or ${inp`prod`}.  Can be anything that is passed in.`,
+  d`${fld`env.profiles: Set<string>`} - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.`,
+  d`${fld`env.debug`} - Simple logging flag.  This ${inp`boolean`} flag will enable or disable logging at various levels. By default ${inp`debug`} is on in non-${inp`prod`}.`,
+  d`${fld`env.resources: string[]`} - Redource folders.  Search paths for resolving resouce requests via ${ResourceManagerLink}`,
+  d`${fld`source.local: string[]`} - Local source folders for transpiling.  Does not extend to installed modules.`,
+  d`${fld`source.common: string[]`} - Common source folders for transpiling. Includes installed modules.`,
   d`${meth`hasProfile(p: string): boolean;`} - Test whether or not a profile is active.`,
 )}
 
