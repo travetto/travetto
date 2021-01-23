@@ -1,8 +1,7 @@
 import { Class } from '@travetto/base';
-import { ChangeEvent } from '@travetto/registry';
-import { SchemaChangeEvent } from '@travetto/schema';
+import { SchemaChange } from '@travetto/schema';
+
 import { ModelType } from '../types/model';
-import { ModelBasicSupport } from './basic';
 
 /**
  * This interface defines the behavior for dealing with the
@@ -13,7 +12,15 @@ import { ModelBasicSupport } from './basic';
  *
  * @concrete ../internal/service/common:ModelStorageSupportTarget
  */
-export interface ModelStorageSupport extends ModelBasicSupport {
+export interface ModelStorageSupport {
+
+  /**
+   * Should auto-creation be allowed
+   */
+  readonly config?: {
+    autoCreate?: boolean;
+  };
+
   /**
    * Initialize storage
    */
@@ -23,11 +30,23 @@ export interface ModelStorageSupport extends ModelBasicSupport {
    */
   deleteStorage(): Promise<void>;
   /**
-   * An event listener for whenever a model is added, changed or removed
+   * Installs model
    */
-  onModelVisibilityChange?<T extends ModelType>(e: ChangeEvent<Class<T>>): Promise<void>;
+  createModel?<T extends ModelType>(e: Class<T>): Promise<void>;
+  /**
+   * Installs model
+   */
+  exportModel?<T extends ModelType>(e: Class<T>): Promise<string>;
+  /**
+   * Installs model
+   */
+  deleteModel?<T extends ModelType>(e: Class<T>): Promise<void>;
+  /**
+   * Installs model
+   */
+  changeModel?<T extends ModelType>(e: Class<T>): Promise<void>;
   /**
    * An event listener for whenever a model schema is changed
    */
-  onModelSchemaChange?(e: SchemaChangeEvent): Promise<void>;
+  changeSchema?(cls: Class, changes: SchemaChange): Promise<void>;
 }

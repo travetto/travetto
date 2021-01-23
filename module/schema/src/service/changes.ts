@@ -20,7 +20,7 @@ interface SubSchemaChange {
   fields: ChangeEvent<FieldConfig>[];
 }
 
-interface SchemaChange {
+export interface SchemaChange {
   config: ClassConfig;
   subs: SubSchemaChange[];
 }

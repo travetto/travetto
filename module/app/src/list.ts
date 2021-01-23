@@ -24,7 +24,7 @@ export class AppListUtil {
    */
   static async buildList() {
 
-    SourceIndex.findByFolders(AppManifest.sourceFolders)
+    SourceIndex.findByFolders(AppManifest.source)
       .filter(x => fs.readFileSync(x.file, 'utf-8').includes('@Application'))
       .forEach(x => require(x.file)); // Only load files that are candidates
 

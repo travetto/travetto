@@ -7,8 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/boot": "^2.0.0-alpha.0",
-    "@travetto/yaml": "^2.0.0-alpha.0",
+    "@travetto/base": "^2.0.0-alpha.0",
     "picomatch": "^2.2.2"
   },
   "title": "Pack",
@@ -22,7 +21,8 @@
   ],
   "license": "MIT",
   "files": [
-    "bin"
+    "bin",
+    "support"
   ],
   "name": "@travetto/pack",
   "repository": {

@@ -15,7 +15,6 @@ import {
 } from '@travetto/model';
 import { ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport, PageableModelQuery, Query, ValidStringFields, WhereClause } from '@travetto/model-query';
 
-import { ChangeEvent } from '@travetto/registry';
 import { ShutdownManager, Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { ALL_VIEW, FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
@@ -86,7 +85,7 @@ export class MongoModelService implements
   private db: mongo.Db;
   private bucket: mongo.GridFSBucket;
 
-  constructor(private config: MongoModelConfig) {
+  constructor(public readonly config: MongoModelConfig) {
   }
 
   async postConstruct() {
@@ -113,43 +112,50 @@ export class MongoModelService implements
     await this.db.dropDatabase();
   }
 
-  async establishGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls) {
+  getGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls): mongo.IndexOptions[] {
     const fields = SchemaRegistry.has(cls) ?
       Object.values(SchemaRegistry.get(cls).views[ALL_VIEW].schema) :
       [];
+    const out = [];
     for (const field of fields) {
       if (SchemaRegistry.has(field.type)) {
         // Recurse
-        await this.establishGeoIndices(field.type, [...path, field], root);
+        out.push(...this.getGeoIndices(field.type, [...path, field], root));
       } else if (field.type === PointImpl) {
-        const col = await this.getStore(root);
         const name = [...path, field].map(x => x.name).join('.');
-        console.debug('Creating geo-index', { cls: root.ᚕid, name });
-        await col.createIndex({ [name]: '2d' });
+        console.debug('Preparing geo-index', { cls: root.ᚕid, name });
+        out.push({ [name]: '2d' });
       }
     }
+    return out;
+  }
+
+  getIndicies<T extends ModelType>(cls: Class<T>) {
+    const indices = ModelRegistry.get(cls).indices ?? [];
+    return [
+      ...indices.map(idx => {
+        const combined = Object.assign({}, ...idx.fields);
+        return { ...combined, unique: idx.unique };
+      }),
+      ...this.getGeoIndices(cls)
+    ];
   }
 
   async establishIndices<T extends ModelType>(cls: Class<T>) {
-    const indices = ModelRegistry.get(cls).indices ?? [];
-    await Promise.all(indices.map(idx => {
-      const combined = Object.assign({}, ...idx.fields);
-      console.debug('Creating index', { index: combined, unique: idx.unique });
-      return this.getStore(cls)
-        .then(col => col.createIndex(combined, { unique: idx.unique }));
-    }));
-
-    await this.establishGeoIndices(cls);
+    const col = await this.getStore(cls);
+    const creating = this.getIndicies(cls);
+    if (creating.length) {
+      console.debug('Creating indexes', creating);
+      await col.createIndexes(creating);
+    }
   }
 
-  async onModelVisibilityChange(ev: ChangeEvent<Class>) {
-    switch (ev.type) {
-      case 'added':
-      case 'changed': {
-        await this.establishIndices(ev.curr!);
-        break;
-      }
-    }
+  async createModel(cls: Class) {
+    await this.establishIndices(cls);
+  }
+
+  async changeModel(cls: Class) {
+    await this.establishIndices(cls);
   }
 
   /**

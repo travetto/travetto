@@ -13,7 +13,7 @@ export interface AssembleConfig extends CommonConfig {
   add: Record<string, string>[];
   exclude: string[];
   excludeCompile: string[];
-  env: Record<string, string | undefined>;
+  env: Record<string, string | number | boolean | undefined>;
 }
 
 /**
@@ -44,8 +44,8 @@ export const Assemble: PackOperation<AssembleConfig> = {
    * Assemble the project into a workspace directory, optimized for space and runtime
    */
   async* exec({ workspace, cacheDir, add, exclude, excludeCompile, env, keepSource, readonly }: AssembleConfig) {
-    const fullCacheDir = FsUtil.resolveUnix(workspace, cacheDir);
-    const ws = FsUtil.resolveUnix(workspace);
+    const fullCacheDir = FsUtil.resolveUnix(workspace!, cacheDir);
+    const ws = FsUtil.resolveUnix(workspace!);
 
     yield 'Cleaning Workspace'; await FsUtil.unlinkRecursive(ws, true).then(() => { });
     yield 'Copying Dependencies'; await AssembleUtil.copyDependencies(ws);

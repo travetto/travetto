@@ -13,7 +13,7 @@
     "@travetto/log": "^2.0.0-alpha.0",
     "@travetto/cli": "^2.0.0-alpha.0",
     "@travetto/app": "^2.0.0-alpha.0",
-    "@travetto/model-mongo": "^2.0.0-alpha.0",
+    "@travetto/model-elasticsearch": "^2.0.0-alpha.0",
     "@travetto/rest-express": "^2.0.0-alpha.0",
     "@travetto/openapi": "^2.0.0-alpha.0"
   },

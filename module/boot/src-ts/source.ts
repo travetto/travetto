@@ -1,13 +1,29 @@
 import { FsUtil } from './fs';
-import { ScanEntry } from './scan';
-import { FrameworkUtil, ScanTest } from './framework';
+import { ScanEntry, ScanFs } from './scan';
+import { EnvUtil } from './env';
 
 type SimpleEntry = Pick<ScanEntry, 'module' | 'file'>;
-
+type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean, paths?: string[] };
+type FrameworkScan = { testFile: (x: string) => boolean, testDir: (x: string) => boolean, base: string, map: (e: ScanEntry) => ScanEntry };
 
-const isStandardFile = (x: string) => x.endsWith('.ts') && !x.endsWith('.d.ts');
-const moduleMatcher = /^.*node_modules\/(@travetto\/[^/]+)(\/.*)?$/;
+/**
+ * Configuration for searching for source files
+ */
+export interface SourceConfig {
+  /**
+   * Common folders, including all modules to search for source files in
+   */
+  common: string[];
+  /**
+   * Local folders (non-node_modules) to search for source files in
+   */
+  local: string[];
+  /**
+   * Which modules to exclude from searching
+   */
+  excludeModules: Set<string>;
+}
 
 /**
  * Source index
@@ -23,11 +39,9 @@ export class SourceIndex {
   private static compute(entry: ScanEntry) {
     const file = entry.module;
     if (file.includes('node_modules')) {
-      if (moduleMatcher.test(file)) { // External module
-        const mod = file.replace(moduleMatcher, (a, b) => b);
-        if (mod.includes('node_modules')) {
-          return;
-        } else if (entry.stats.isDirectory() || entry.stats.isSymbolicLink()) {
+      const mod = file.match(/^.*node_modules\/(@travetto\/[^/]+)(\/.*)?$/)?.[1];
+      if (mod) { // External module
+        if (entry.stats.isDirectory() || entry.stats.isSymbolicLink()) {
           return { mod, sub: '' };
         } else {
           const [sub] = file.split(`${mod}/`)[1].split('/');
@@ -42,6 +56,41 @@ export class SourceIndex {
   }
 
   /**
+   * Scan the framework for folder/files only the framework should care about
+   * @param testFile The test to determine if a file is desired
+   */
+  private static scanFramework(test: ScanTest) {
+    const cleaned = 'test' in test ? test.test.bind(test) : test;
+
+    // Folders to check
+    const folders = [
+      {
+        testFile: cleaned, testDir: x =>
+          /^node_modules[/]?$/.test(x) ||  // Top level node_modules
+          (/^node_modules\/@travetto/.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
+          !x.includes('node_modules'), // non module file
+        base: FsUtil.cwd, map: e => e
+      } as FrameworkScan,
+      ...Object.entries(EnvUtil.getDynamicModules()).map(([dep, pth]) => (
+        {
+          testFile: cleaned, testDir: x => !x.includes('node_modules'),
+          base: pth, map: e => {
+            e.module = e.module.includes('node_modules') ? e.module : e.file.replace(pth, `node_modules/${dep}`);
+            return e;
+          }
+        } as FrameworkScan
+      ))
+    ];
+    const out: ScanEntry[][] = [];
+    for (const { testFile, testDir, base, map } of folders) {
+      out.push(ScanFs.scanDirSync({ testFile, testDir }, base).map(map).filter(x => x.stats.isFile()));
+    }
+
+    return out.flat();
+  }
+
+
+  /**
    * Get index of all source files
    */
   private static get index() {
@@ -49,7 +98,7 @@ export class SourceIndex {
       const idx = new Map() as (typeof SourceIndex)['_SOURCE_INDEX'];
       idx.set('.', { base: FsUtil.cwd, files: new Map() });
 
-      for (const el of FrameworkUtil.scan(isStandardFile)) {
+      for (const el of this.scanFramework(x => x.endsWith('.ts') && !x.endsWith('.d.ts'))) {
         const res = this.compute(el);
 
         if (!res) {
@@ -138,7 +187,7 @@ export class SourceIndex {
    * Find all source files registered
    * @param mode Should all sources files be returned, including optional.
    */
-  static findByFolders(config: { common: string[], local: string[], excludeModules?: Set<string> }, mode: 'all' | 'required' = 'all') {
+  static findByFolders(config: SourceConfig, mode: 'all' | 'required' = 'all') {
     const all: SimpleEntry[][] = [];
     const getAll = (src: string[], cmd: (c: FindConfig) => SimpleEntry[]) => {
       for (const folder of src.filter(x => mode === 'all' || !x.startsWith('^'))) {

@@ -1,4 +1,4 @@
-import { FrameworkUtil } from '@travetto/boot/src/framework';
+import { SourceIndex } from '@travetto/boot/src/source';
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
 
@@ -129,9 +129,9 @@ export class ServiceUtil {
    * Find all services
    */
   static findAll() {
-    return FrameworkUtil
-      .scan(x => /support\/service[.].*?[.]js$/.test(x))
-      .map(x => require(x.file) as Service)
+    return SourceIndex
+      .find({ folder: 'support', filter: x => /\/service[.]/.test(x) })
+      .map(x => require(x.file).service as Service)
       .filter(x => !!x)
       .map(x => {
         x.version = `${x.version}`;

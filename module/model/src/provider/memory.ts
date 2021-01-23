@@ -1,4 +1,3 @@
-import { ChangeEvent } from '@travetto/registry';
 import { StreamUtil } from '@travetto/boot';
 import { Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
@@ -20,6 +19,7 @@ import { ModelStorageUtil } from '../internal/service/storage';
 
 @Config('model.memory')
 export class MemoryModelConfig {
+  autoCreate: boolean;
   namespace: string;
 }
 
@@ -33,7 +33,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   private expiry = new Map<string, Map<string, { expiresAt: number, issuedAt: number }>>();
   private indexes = new Map<string, Map<string, string>>();
 
-  constructor(private config: MemoryModelConfig) { }
+  constructor(public readonly config: MemoryModelConfig) { }
 
   private getStore<T extends ModelType>(cls: Class<T> | string): Map<string, Buffer>;
   private getStore<T extends ModelType>(cls: Class<T> | string, prop: 'store'): Map<string, Buffer>;
@@ -218,14 +218,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     this.indexes.clear();
   }
 
-  async onModelVisibilityChange(ev: ChangeEvent<Class>) {
-    switch (ev.type) {
-      case 'added': {
-        for (const idx of ModelRegistry.get(ev.curr!).indices ?? []) {
-          this.indexes.set(`${ev.curr!.ᚕid}:${idx.name}`, new Map());
-        }
-        break;
-      }
+  async createModel(cls: Class<ModelType>) {
+    for (const idx of ModelRegistry.get(cls).indices ?? []) {
+      this.indexes.set(`${cls.ᚕid}:${idx.name}`, new Map());
     }
   }
 

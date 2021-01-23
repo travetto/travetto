@@ -1,6 +1,6 @@
-const { version } = require('@elastic/elasticsearch/package.json');
+import { version } from '@elastic/elasticsearch/package.json';
 
-module.exports = {
+export const service = {
   name: 'elasticsearch',
   version,
   port: 9200,

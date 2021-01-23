@@ -45,9 +45,9 @@ class $Logger {
    * Initialize
    */
   init() {
-    if (AppManifest.debug.status !== false) {
+    if (AppManifest.env.debug.status !== false) {
       delete this.exclude.debug;
-      const filter = LogUtil.buildFilter(AppManifest.debug.value ?? '@app');
+      const filter = LogUtil.buildFilter(AppManifest.env.debug.value ?? '@app');
       if (filter) {
         this.filters.debug = filter;
       }

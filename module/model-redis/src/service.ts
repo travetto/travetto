@@ -43,7 +43,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   cl: redis.RedisClient;
 
-  constructor(private config: RedisModelConfig) { }
+  constructor(public readonly config: RedisModelConfig) { }
 
   private wrap = <T>(fn: T): T => (fn as unknown as Function).bind(this.cl) as T;
 

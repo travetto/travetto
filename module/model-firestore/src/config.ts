@@ -7,6 +7,7 @@ export class FirestoreModelConfig {
   emulator?: string;
   projectId: string;
   namespace: string;
+  autoCreate?: boolean;
 
   postConstruct() {
     if (this.emulator) {

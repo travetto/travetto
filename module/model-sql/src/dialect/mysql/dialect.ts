@@ -2,13 +2,12 @@
 import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
-// import { WhereClause } from '@travetto/model';
+import { WhereClause } from '@travetto/model-query';
 
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../base';
 import { VisitStack } from '../../internal/util';
 import { MySQLConnection } from './connection';
-import { WhereClause } from '@travetto/model-query';
 
 /**
  * MYSQL Dialect for the SQL Model Source

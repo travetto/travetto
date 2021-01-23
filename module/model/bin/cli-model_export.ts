@@ -7,7 +7,14 @@ import { CliModelExportUtil } from './lib/export';
 export class ModelExportPlugin extends BaseModelPlugin {
   name = 'model:export';
 
-  async run(provider: string, models: string[]) {
-    CliModelExportUtil.export(provider, models);
+  async action(provider: string, models: string[]) {
+    try {
+      await this.validate(provider, models);
+      await this.prepareEnv();
+      const resolved = await this.resolve(provider, models);
+      await CliModelExportUtil.run(resolved.provider, resolved.models);
+    } catch (e) {
+      console.error(e.message);
+    }
   }
 }

@@ -10,12 +10,12 @@ import { AppManifest } from '@travetto/base';
  */
 @Config('api.info')
 export class ApiInfoConfig {
-  contact: ContactObject = AppManifest.author ?? {};
-  description: string = AppManifest.description;
-  license: LicenseObject = { name: AppManifest.license! };
+  contact: ContactObject = AppManifest.info.author ?? {};
+  description?: string = AppManifest.info.description;
+  license: LicenseObject = { name: AppManifest.info.license! };
   termsOfService?: string;
-  title: string = AppManifest.name;
-  version: string = AppManifest.version;
+  title: string = AppManifest.info.name;
+  version?: string = AppManifest.info.version;
 }
 
 /**

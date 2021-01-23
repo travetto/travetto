@@ -32,7 +32,7 @@ class $ApplicationRegistry {
       filename: config.filename.replace(/^.*node_modules\//, '').replace(FsUtil.cwd, '.')
     });
     console.log('Configured', {
-      app: AppManifest.toJSON(),
+      ...AppManifest.toJSON(),
       config: AppManifest.prod ? ConfigManager.getSecure() : ConfigManager.get()
     });
   }

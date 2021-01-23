@@ -3,8 +3,8 @@ import { Reindex } from '@elastic/elasticsearch/api/requestParams';
 
 import { Class } from '@travetto/base';
 import { ModelRegistry, ModelType } from '@travetto/model';
-import { ChangeEvent } from '@travetto/registry';
-import { SchemaChangeEvent } from '@travetto/schema';
+import { ModelStorageSupport } from '@travetto/model/src/service/storage';
+import { SchemaChange } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config';
 import { ElasticsearchSchemaUtil } from './internal/schema';
@@ -13,14 +13,14 @@ import { EsIdentity } from './internal/types';
 /**
  * Manager for elasticsearch indices and schemas
  */
-export class IndexManager {
+export class IndexManager implements ModelStorageSupport {
 
   private indexToAlias = new Map<string, string>();
   private aliasToIndex = new Map<string, string>();
 
   private identities = new Map<Class, EsIdentity>();
 
-  constructor(private config: ElasticsearchModelConfig, private client: es.Client) { }
+  constructor(public readonly config: ElasticsearchModelConfig, private client: es.Client) { }
 
   getStore(cls: Class) {
     return ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
@@ -105,51 +105,37 @@ export class IndexManager {
     const ident = this.getIdentity(cls);
     try {
       await this.client.search(ident);
+      console.log('Index already exists, not creating', ident);
     } catch (err) {
       await this.createIndex(cls);
     }
   }
 
-  /**
-   * When the model changes
-   */
-  async onModelChange(e: ChangeEvent<Class>) {
-    console.debug('Model Changed', { type: e.type, target: (e.curr ?? e.prev)?.ᚕid });
+  async createModel(cls: Class<ModelType>) {
+    await this.createIndexIfMissing(cls);
+    await this.computeAliasMappings(true);
+  }
 
-    if (!this.config.autoCreate) {
-      return;
-    }
+  async exportModel(cls: Class<ModelType>) {
+    return '';
+  }
 
-    const cls = e.curr ?? e.prev!;
-    if (ModelRegistry.getBaseModel(cls) !== cls) {
-      return; // Skip it
-    }
-
-    switch (e.type) {
-      case 'removing': {
-        const alias = this.getNamespacedIndex(this.getStore(e.prev!));
-        if (this.aliasToIndex.get(alias)) {
-          await this.client.indices.delete({
-            index: this.aliasToIndex.get(alias)!
-          });
-          await this.computeAliasMappings(true);
-        }
-        break;
-      }
-      case 'added': {
-        await this.createIndexIfMissing(e.curr!);
-        await this.computeAliasMappings(true);
-        break;
-      }
+  async deleteModel(cls: Class<ModelType>) {
+    const alias = this.getNamespacedIndex(this.getStore(cls));
+    if (this.aliasToIndex.get(alias)) {
+      await this.client.indices.delete({
+        index: this.aliasToIndex.get(alias)!
+      });
+      await this.computeAliasMappings(true);
     }
   }
 
   /**
    * When the schema changes
    */
-  async onSchemaChange(e: SchemaChangeEvent) {
+  async changeSchema(cls: Class, change: SchemaChange) {
     // Find which fields are gone
-    const removes = e.change.subs.reduce((acc, v) => {
+    const removes = change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'removing')
         .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
@@ -157,18 +143,18 @@ export class IndexManager {
     }, [] as string[]);
 
     // Find which types have changed
-    const typeChanges = e.change.subs.reduce((acc, v) => {
+    const typeChanges = change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'changed')
         .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
       return acc;
     }, [] as string[]);
 
-    const { index, type } = this.getIdentity(e.cls);
+    const { index, type } = this.getIdentity(cls);
 
     // If removing fields or changing types, run as script to update data
     if (removes.length || typeChanges.length) { // Removing and adding
-      const next = await this.createIndex(e.cls, false);
+      const next = await this.createIndex(cls, false);
 
       const aliases = await this.client.indices.getAlias({ index });
       const curr = Object.keys(aliases)[0];
@@ -193,7 +179,7 @@ export class IndexManager {
 
       await this.client.indices.putAlias({ index: next, name: index });
     } else { // Only update the schema
-      const schema = ElasticsearchSchemaUtil.generateSourceSchema(e.cls, this.config.schemaConfig);
+      const schema = ElasticsearchSchemaUtil.generateSourceSchema(cls, this.config.schemaConfig);
 
       await this.client.indices.putMapping({
         index,

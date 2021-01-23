@@ -8,7 +8,7 @@ export const init = {
     const { SourceIndex } = await import('@travetto/boot');
     const { AppManifest } = await import('@travetto/base');
 
-    for (const { file } of SourceIndex.findByFolders(AppManifest.sourceFolders, 'required')) {
+    for (const { file } of SourceIndex.findByFolders(AppManifest.source, 'required')) {
       require(file); // Scan all files as compiler source root
     }
   }

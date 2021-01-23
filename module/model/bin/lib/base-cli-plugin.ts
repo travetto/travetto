@@ -3,13 +3,16 @@ import * as commander from 'commander';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { CliModelCandidateUtil } from './candidate';
+import { CliUtil } from '@travetto/cli/src/util';
 
 /**
  * CLI Entry point for exporting model schemas
  */
 export abstract class BaseModelPlugin extends BasePlugin {
 
-  name = 'model:install';
+  restoreEnv?: (err: Error) => unknown;
+
+  resolve = CliModelCandidateUtil.resolve.bind(CliModelCandidateUtil);
 
   init(cmd: commander.Command) {
     return cmd
@@ -27,21 +30,27 @@ ${models.map(p => color`  * ${{ param: p }}`).join('\n')}
 `);
   }
 
-  async action(provider: string, models: string[]) {
+  async validate(provider: string, models: string[]) {
     const candidates = await CliModelCandidateUtil.getCandidates();
     if (!provider) {
       return await this.usage(candidates);
     } else {
       if (!candidates.providers.includes(provider)) {
-        return this.usage(candidates, color`${{ param: provider }} is not a valid provider`);
+        await this.usage(candidates, color`${{ param: provider }} is not a valid provider`);
       }
       const badModel = models.find(x => x !== '*' && !candidates.models.includes(x));
       if (badModel) {
-        return this.usage(candidates, color`${{ param: badModel }} is not a valid model`);
+        await this.usage(candidates, color`${{ param: badModel }} is not a valid model`);
       }
     }
-    this.run(provider, models);
   }
 
-  abstract run(provider: string, models: string[]): Promise<unknown>;
+  async prepareEnv() {
+    CliUtil.initEnv({ watch: false });
+    const { PhaseManager, ConsoleManager } = await import('@travetto/base');
+    ConsoleManager['exclude'].add('debug');
+
+    // Init
+    await PhaseManager.init();
+  }
 }

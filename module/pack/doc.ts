@@ -32,7 +32,7 @@ ${Ordered(
   'Emptying .ts Files - If keep source is false, all .ts files are emptied, as compilation will not occur at runtime',
 )}
 
-${Snippet('Assemble Default Config', 'bin/pack.config.yml', /assemble:/, /[.]d[.]ts/)}
+${Snippet('Assemble Default Config', 'support/pack.config.ts', /assemble:/, /[.]d[.]ts/)}
 
 ${Execute('Assemble Usage', 'trv', ['pack:assemble', '--help'])}
 
@@ -40,27 +40,24 @@ ${SubSection('CLI - pack:zip')}
 
 Zip is an optional step, that can run post assembly.  The only configuration it currently provides is the ability to specify the output location for the zip file.
 
-${Snippet('Zip Default Config', 'bin/pack.config.yml', /zip:/, /output/)}
+${Snippet('Zip Default Config', 'support/pack.config.ts', /zip:/, /output/)}
 
 ${Execute('Zip Usage', 'trv', ['pack:zip', '--help'])}
 
 ${SubSection('Modes')}
-Various modules may provide customizations to the default ${pth`pack.config.yml`} to allow for easy integration with the packing process.  A simple example of this is via the ${mod.Rest} module, for how to publish lambda packages.
+Various modules may provide customizations to the default ${pth`pack.config.ts`} to allow for easy integration with the packing process.  A simple example of this is via the ${mod.Rest} module, for how to publish lambda packages.
 
-${Code('Rest, pack.lambda.yml', '@travetto/rest/support/pack.lambda.yml')}
+${Code('Rest, pack.lambda.ts', '@travetto/rest/support/pack.lambda.ts')}
 
-${Terminal('Invoking Pack with Mode', 'npx travetto pack <mode>')}
+${Terminal('Invoking Pack with Mode', 'npx trv pack <mode>')}
 
 ${SubSection('Configuration')}
-By default the following paths are searched for configuration (in the following order):
 
-${Ordered(
-  '@travetto/pack/bin/pack.config.yml',
-  d`${inp`<mode>`} related pack.*.yml`,
-  'pack.config.ya?ml'
-)}
+By default, the configuration consists of two components.
+* The default config in ${pth`support/pack.config.ts`} and
+* The config selected to execute from the cli
 
-Given the ordering, its clear to see that a project can define it's own configuration at the root of the project with ${pth`pack.config.yml`}. Any defaults can be overidden.
+These two configurations will be loaded and layered, with the selected config taking precedence.
 
-${Code('Example pack.config.yml', 'doc/pack.config.yml')}
+${Code('Example pack.config.ts', 'doc/support/pack.config.ts')}
 `;

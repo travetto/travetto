@@ -1,3 +1,4 @@
+import { color } from '@travetto/cli/src/color';
 import { BaseModelPlugin } from './lib/base-cli-plugin';
 import { CliModelInstallUtil } from './lib/install';
 
@@ -7,7 +8,15 @@ import { CliModelInstallUtil } from './lib/install';
 export class ModelInstallPlugin extends BaseModelPlugin {
   name = 'model:install';
 
-  async run(provider: string, models: string[]) {
-    CliModelInstallUtil.install(provider, models);
+  async action(provider: string, models: string[]) {
+    try {
+      await this.validate(provider, models);
+      await this.prepareEnv();
+      const resolved = await this.resolve(provider, models);
+      await CliModelInstallUtil.run(resolved.provider, resolved.models);
+      console.log(color`${{ success: 'Successfully' }} installed ${{ param: models.length.toString() }} model(s)`);
+    } catch (e) {
+      console.error(e.message);
+    }
   }
 }

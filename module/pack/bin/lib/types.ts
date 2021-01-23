@@ -1,4 +1,6 @@
 export type CommonConfig = {
+  name?: string;
+  file?: string;
   workspace: string;
   active?: boolean;
 };

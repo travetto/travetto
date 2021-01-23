@@ -148,4 +148,4 @@ class $ResourceManager {
   }
 }
 
-export const ResourceManager = new $ResourceManager(AppManifest.resourceFolders);
+export const ResourceManager = new $ResourceManager(AppManifest.env.resources);

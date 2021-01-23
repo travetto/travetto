@@ -1,12 +1,12 @@
-const fs = require('fs');
-const os = require('os');
+import * as fs from 'fs';
+import * as os from 'os';
 
 const temp = `${os.tmpdir()}/local-stack`;
 try {
   fs.mkdirSync(temp);
 } catch { }
 
-module.exports = {
+export const service = {
   name: 's3',
   version: 'latest',
   privileged: true,

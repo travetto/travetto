@@ -24,7 +24,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   private client: s3.S3;
 
-  constructor(private config: S3ModelConfig) {
+  constructor(public readonly config: S3ModelConfig) {
   }
 
   private resolveKey(cls: Class | string, id?: string) {

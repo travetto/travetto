@@ -177,14 +177,14 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Register additional listeners
    */
-  on<T>(callback: (e: ChangeEvent<Class>) => unknown): void {
+  on<T>(callback: (e: ChangeEvent<Class<T>>) => unknown): void {
     this.events.on('change', callback);
   }
 
   /**
    * Remove listeners
    */
-  off<T>(callback: (e: ChangeEvent<Class>) => unknown) {
+  off<T>(callback: (e: ChangeEvent<Class<T>>) => unknown) {
     this.events.off('change', callback);
   }
 

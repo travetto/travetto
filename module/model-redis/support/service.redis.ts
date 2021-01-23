@@ -1,6 +1,6 @@
 const version = 5;
 
-module.exports = {
+export const service = {
   name: 'redis',
   version,
   port: 6379,

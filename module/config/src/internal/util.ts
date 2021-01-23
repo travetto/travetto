@@ -15,7 +15,7 @@ export class ConfigUtil {
    * - env.yml
    */
   static async fetchOrderedConfigs() {
-    const profileIndex = AppManifest.profiles.reduce((acc, k, v) => {
+    const profileIndex = AppManifest.env.profiles.reduce((acc, k, v) => {
       acc[k] = v;
       return acc;
     }, {} as Record<string, number>);

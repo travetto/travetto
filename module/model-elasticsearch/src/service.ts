@@ -5,11 +5,13 @@ import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError,
 } from '@travetto/model';
-import { ChangeEvent } from '@travetto/registry';
 import { Class, Util, ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { SchemaChangeEvent, SchemaConfig, SchemaRegistry } from '@travetto/schema';
-import { ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport, PageableModelQuery, Query, ValidStringFields } from '@travetto/model-query';
+import { SchemaChange, SchemaConfig, SchemaRegistry } from '@travetto/schema';
+import {
+  ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
+  ModelQuerySupport, PageableModelQuery, Query, ValidStringFields
+} from '@travetto/model-query';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
@@ -51,7 +53,7 @@ export class ElasticsearchModelService implements
   client: es.Client;
   manager: IndexManager;
 
-  constructor(private config: ElasticsearchModelConfig) { }
+  constructor(public readonly config: ElasticsearchModelConfig) { }
 
   /**
    * Directly run the search
@@ -64,35 +66,25 @@ export class ElasticsearchModelService implements
     return res as SearchResponse<T>;
   }
 
-  async postConstruct() {
+  async postConstruct(this: ElasticsearchModelService) {
     this.client = new es.Client({
       nodes: this.config.hosts,
       ...(this.config.options || {})
     });
     await this.client.cluster.health({});
-    ModelStorageUtil.registerModelChangeListener(this);
     this.manager = new IndexManager(this.config, this.client);
+    ModelStorageUtil.registerModelChangeListener(this.manager, this.constructor as Class);
     ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.close());
   }
 
+  createStorage() { return this.manager.createStorage(); }
+  deleteStorage() { return this.manager.deleteStorage(); }
+  createModel(cls: Class) { return this.manager.createModel(cls); }
+  deleteModel(cls: Class) { return this.manager.deleteModel(cls); }
+  changeSchema(cls: Class, change: SchemaChange) { return this.manager.changeSchema(cls, change); }
+
   uuid() {
     return Util.uuid();
-  }
-
-  async onModelSchemaChange(e: SchemaChangeEvent) {
-    await this.manager.onSchemaChange(e);
-  }
-
-  async onModelVisibilityChange<T extends ModelType>(e: ChangeEvent<Class<T>>) {
-    await this.manager.onModelChange(e);
-  }
-
-  async createStorage() {
-    await this.manager.createStorage();
-  }
-
-  async deleteStorage() {
-    await this.manager.deleteStorage();
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {

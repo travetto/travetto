@@ -38,7 +38,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   cl: dynamodb.DynamoDB;
 
-  constructor(private config: DynamoDBModelConfig) { }
+  constructor(public readonly config: DynamoDBModelConfig) { }
 
   private resolveTable(cls: Class) {
     let table = ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
@@ -117,61 +117,72 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   // Storage
 
   /**
-   * An event listener for whenever a model is added, changed or removed
+   * Add a new model
+   * @param cls
    */
-  async onModelVisibilityChange?<T extends ModelType>(e: ChangeEvent<Class<T>>) {
-    const cls = (e.curr || e.prev)!;
+  async installModel(cls: Class<ModelType>) {
+    if (ModelRegistry.getBaseModel(cls) !== cls) {
+      return;
+    }
+    const table = this.resolveTable(cls);
+    const idx = this.computeIndexConfig(cls);
+
+    await this.cl.createTable({
+      TableName: table,
+      KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
+      BillingMode: 'PAY_PER_REQUEST',
+      AttributeDefinitions: [
+        { AttributeName: 'id', AttributeType: 'S' },
+        ...idx.attributes
+      ],
+      GlobalSecondaryIndexes: idx.indices?.length ? idx.indices : undefined
+    });
+
+    await this.cl.updateTimeToLive({
+      TableName: table,
+      TimeToLiveSpecification: { AttributeName: 'internal_expires_at', Enabled: true }
+    });
+  }
+
+  /**
+   * Remove a model
+   * @param cls
+   */
+  async deleteModel(cls: Class<ModelType>) {
     // Don't create tables for non-concrete types
     if (ModelRegistry.getBaseModel(cls) !== cls) {
       return;
     }
 
-    switch (e.type) {
-      case 'added': {
-        const table = this.resolveTable(cls);
-        const idx = this.computeIndexConfig(cls);
-
-        await this.cl.createTable({
-          TableName: table,
-          KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
-          BillingMode: 'PAY_PER_REQUEST',
-          AttributeDefinitions: [
-            { AttributeName: 'id', AttributeType: 'S' },
-            ...idx.attributes
-          ],
-          GlobalSecondaryIndexes: idx.indices?.length ? idx.indices : undefined
-        });
-
-        await this.cl.updateTimeToLive({
-          TableName: table,
-          TimeToLiveSpecification: { AttributeName: 'internal_expires_at', Enabled: true }
-        });
-        break;
-      }
-      case 'changed': {
-        const table = this.resolveTable(cls);
-        const idx = this.computeIndexConfig(cls);
-        // const existing = await this.cl.describeTable({ TableName: table });
-
-        await this.cl.updateTable({
-          TableName: table,
-          AttributeDefinitions: [
-            { AttributeName: 'id', AttributeType: 'S' },
-            ...idx.attributes
-          ],
-          // TODO: Fill out index computation
-        });
-        break;
-      }
-      case 'removing': {
-        const table = this.resolveTable(cls);
-        const { Table: verify } = (await this.cl.describeTable({ TableName: table }).catch(err => ({ Table: undefined })));
-        if (verify) {
-          await this.cl.deleteTable({ TableName: table });
-        }
-        break;
-      }
+    const table = this.resolveTable(cls);
+    const { Table: verify } = (await this.cl.describeTable({ TableName: table }).catch(err => ({ Table: undefined })));
+    if (verify) {
+      await this.cl.deleteTable({ TableName: table });
     }
+  }
+
+  /**
+   * When the model changes
+   * @param cls
+   */
+  async changeModel(cls: Class<ModelType>) {
+    // Don't create tables for non-concrete types
+    if (ModelRegistry.getBaseModel(cls) !== cls) {
+      return;
+    }
+
+    const table = this.resolveTable(cls);
+    const idx = this.computeIndexConfig(cls);
+    // const existing = await this.cl.describeTable({ TableName: table });
+
+    await this.cl.updateTable({
+      TableName: table,
+      AttributeDefinitions: [
+        { AttributeName: 'id', AttributeType: 'S' },
+        ...idx.attributes
+      ],
+      // TODO: Fill out index computation
+    });
   }
 
   async createStorage() {

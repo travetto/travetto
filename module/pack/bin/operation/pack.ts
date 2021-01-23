@@ -1,9 +1,10 @@
 import { color } from '@travetto/cli/src/color';
+import type { DeepPartial } from '@travetto/base';
 import { CommonConfig, PackOperation } from '../lib/types';
 import { PackUtil } from '../lib/util';
-import { Assemble } from './assemble';
-import { Docker } from './docker';
-import { Zip } from './zip';
+import { Assemble, AssembleConfig } from './assemble';
+import { Docker, DockerConfig } from './docker';
+import { Zip, ZipConfig } from './zip';
 
 const ops = {
   [Assemble.key]: Assemble,
@@ -12,9 +13,11 @@ const ops = {
 } as const;
 
 export type AllConfig = CommonConfig &
-{ assemble: Parameters<typeof Assemble['exec']>[0] } &
-{ zip: Parameters<typeof Zip['exec']>[0] } &
-{ docker: Parameters<typeof Docker['exec']>[0] };
+{ assemble: AssembleConfig } &
+{ zip: ZipConfig } &
+{ docker: DockerConfig };
+
+export type AllConfigPartial = DeepPartial<AllConfig>;
 
 export const Pack: PackOperation<AllConfig> = {
   key: '',
