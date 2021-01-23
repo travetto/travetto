@@ -15,6 +15,6 @@ import { Application } from '@travetto/app';
 })
 class Complex {
   async run(domain: string, port: number) {
-    console.debug('Launching', { domain, port });
+    console.log('Launching', { domain, port });
   }
 }

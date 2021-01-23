@@ -1,4 +1,3 @@
-import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 
 /**
@@ -33,7 +32,7 @@ export class SQLModelConfig {
   /**
    * Auto schema creation
    */
-  autoCreate = !EnvUtil.isReadonly();
+  autoCreate: boolean;
   /**
    * Db version
    */

@@ -43,6 +43,11 @@ export class MongoModelConfig {
   } as mongo.MongoClientOptions;
 
   /**
+   * Should we autocreate the db
+   */
+  autoCreate?: boolean;
+
+  /**
    * Load a resource
    */
   async fetch(val: string) {

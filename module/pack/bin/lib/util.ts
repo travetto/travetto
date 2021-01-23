@@ -1,37 +1,32 @@
-import { promises as fs, readFileSync } from 'fs';
+import { promises as fs } from 'fs';
 import * as util from 'util';
 import * as path from 'path';
 
 const glob = require('picomatch');
 
-import { FrameworkUtil } from '@travetto/boot/src/framework';
-import { FsUtil, ScanFs } from '@travetto/boot';
+import { FsUtil, ScanFs, SourceIndex } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
-import { YamlUtil } from '@travetto/yaml';
 
 import { CommonConfig, PackOperation } from './types';
-
-export const BASE_CONFIG = [FsUtil.resolveUnix(__dirname, '..', 'pack.config.yml')];
-export const USER_CONFIG = ['pack.config.yml', 'pack.config.yaml'].map(x => FsUtil.resolveUnix(x));
 
 /**
  * Shared packing utils
  */
 export class PackUtil {
 
-  private static _defaultConfigs: Record<string, Partial<CommonConfig>>[];
-  private static _modes: { key: string, file: string }[];
+  private static _defaultConfigs: Partial<CommonConfig>[];
+  private static _modes: Partial<CommonConfig>[];
 
   /**
    * Find pack modes with associated metadata
    */
   static async modeList() {
     if (!this._modes) {
-      this._modes = FrameworkUtil.scan(f => /support\/pack[.].*[.]ya?ml/.test(f))
+      this._modes = SourceIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
         .map(x => {
-          const [, mod, name] = x.module.match(/.*@travetto\/([^/]+)\/.*pack[.]([^.]+).ya?ml/) ?? [];
-          const key = x.module.includes('compiler/bin') ? `<default>` : `${mod}/${name}`;
-          return { key, file: x.file };
+          const req = require(x.file).config as Partial<CommonConfig>;
+          req.file = x.file;
+          return req;
         });
     }
     return this._modes;
@@ -40,16 +35,11 @@ export class PackUtil {
   /**
    * Get Config
    */
-  static async getConfigs(): Promise<Record<string, Partial<CommonConfig>>[]> {
+  static async getConfigs(): Promise<Partial<CommonConfig>[]> {
     if (!this._defaultConfigs) {
       const allModes = await this.modeList();
-      const mode = allModes.find(x => process.argv.find(a => a === x.key));
-      this._defaultConfigs = [...BASE_CONFIG, mode?.file, ...USER_CONFIG].map(f => {
-        if (!f || !FsUtil.existsSync(f)) {
-          return; // Skip missing
-        }
-        return YamlUtil.parse(readFileSync(f, 'utf8'));
-      }).filter(x => !!x) as Record<string, Partial<CommonConfig>>[];
+      const mode = allModes.find(x => process.argv.find(a => a === x.name))!;
+      this._defaultConfigs = [allModes.find(x => x.name === 'default')!, mode!];
     }
     return this._defaultConfigs;
   }

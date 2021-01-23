@@ -24,20 +24,16 @@ export class RunUtil {
 
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 
-    // Pause outputting
-    const events: [string, { line: number, file: string }, unknown[]][] = [];
-    ConsoleManager.set({ onLog: (a, b, c) => events.push([a, b, c]) });
+    ConsoleManager['exclude'].add('debug');
 
     // Init
     await PhaseManager.init();
 
+    ConsoleManager['exclude'].delete('debug');
+
     // And run
     const { ApplicationRegistry } = await import('../../src/registry');
     await ApplicationRegistry.resolveParameters(app, sub);
-
-    // Output on success
-    ConsoleManager.clear();
-    events.forEach(([a, b, c]) => ConsoleManager.invoke(a as 'debug', b, ...c));
 
     return await ApplicationRegistry.run(app.name, sub);
   }

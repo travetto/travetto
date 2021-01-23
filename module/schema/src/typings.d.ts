@@ -1,9 +1,4 @@
-import type { Class } from '@travetto/base';
-
-type DeepPartial<T> = {
-  [P in keyof T]?: (T[P] extends (number | string | Date | boolean | undefined) ? (T[P] | undefined) :
-    (T[P] extends any[] ? (DeepPartial<T[P][number]> | null | undefined)[] : DeepPartial<T[P]>));
-};
+import type { Class, DeepPartial } from '@travetto/base';
 
 declare global {
   interface Function {

@@ -1,6 +1,6 @@
 const version = 'latest';
 
-module.exports = {
+export const service = {
   name: 'firestore',
   version,
   ports: { 7000: 8080 },

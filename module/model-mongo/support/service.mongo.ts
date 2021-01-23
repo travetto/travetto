@@ -1,6 +1,6 @@
 const version = '3.6';
 
-module.exports = {
+export const service = {
   name: 'mongodb',
   version,
   port: 27017,
