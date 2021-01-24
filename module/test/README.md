@@ -19,7 +19,7 @@ This module provides unit testing functionality that integrates with the framewo
 
 ## Definition
 
-A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L12) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L9) decorator.  All tests intrinsically support `async`/`await`.
+A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L12) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L11) decorator.  All tests intrinsically support `async`/`await`.
 
 A simple example would be:
 
@@ -32,7 +32,10 @@ import { Suite, Test } from '@travetto/test';
 @Suite()
 class SimpleTest {
 
-  private complexService: any;
+  private complexService: {
+    doLongOp(): Promise<number>;
+    getText(): string;
+  };
 
   @Test()
   async test1() {
@@ -206,7 +209,7 @@ class SimpleTest {
 
     await assert.rejects(() => {
       throw new Error('Big Error');
-    }, (err: any) =>
+    }, (err: Error) =>
       err.message.startsWith('Big') && err.message.length > 4 ? undefined : err
     );
   }

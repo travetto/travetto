@@ -1,4 +1,7 @@
+import { FsUtil } from '@travetto/boot/src';
 import { doc as d, pth, inp, Execute, Section, lib, Code } from '@travetto/doc';
+
+process.env.TRV_CLI_FILES = FsUtil.resolveUnix('doc/bin/cli-echo.ts');
 
 exports.text = d`
 

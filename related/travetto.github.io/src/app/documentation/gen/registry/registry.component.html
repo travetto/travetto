@@ -32,7 +32,8 @@ This flow ensures all files are loaded and processed before application starts. 
       <figcaption class="code">Sample Registry
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/registry/doc/registry.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Class<span class="token punctuation">,</span> MetadataRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Class <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MetadataRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">interface</span> <span class="token class-name">Group</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">class</span><span class="token operator">:</span> Class<span class="token punctuation">;</span>
@@ -55,7 +56,7 @@ This flow ensures all files are loaded and processed before application starts. 
   <span class="token comment">/**
    * Create scaffolding on first encounter of a class
    */</span>
-  <span class="token function">createPending</span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> Partial<span class="token operator">&lt;</span>Group<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">createPending</span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token punctuation">)</span><span class="token operator">:</span> Partial<span class="token operator">&lt;</span>Group<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">class</span><span class="token operator">:</span> cls<span class="token punctuation">,</span>
       name<span class="token operator">:</span> cls<span class="token punctuation">.</span>name

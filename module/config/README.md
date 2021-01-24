@@ -75,7 +75,7 @@ Config {
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under `config.redacted`.
 
 ## Consuming
-The  service provides direct access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/master/module/config/src/decorator.ts#L9) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The  service provides direct access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/master/module/config/src/decorator.ts#L10) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 

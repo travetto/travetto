@@ -18,3 +18,5 @@ npm-debug.log
 email-dev-context.json
 
 **/test-support/resources/logo
+
+related/generator-app/.eslintrc.js

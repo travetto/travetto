@@ -25,7 +25,12 @@ Usage:  pack <span class="token punctuation">[</span>options<span class="token p
 
 Options:
   -w --workspace <span class="token punctuation">[</span>workspace<span class="token punctuation">]</span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
-  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Available Pack Modes:
+  * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span>
+  * rest/lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.lambda.ts<span class="token punctuation">]</span></code></pre>     
       </figure>
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. The pack operation is actually a wrapper around multiple sub-operations that are run in series to produce the desired final structure for deployment.  The currently support operations are:
@@ -52,31 +57,32 @@ Assemble is the operation that stages the project's code for deployment.  The as
 
       <figure class="code">
       <figcaption class="code">Assemble Default Config
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/pack/bin/pack.config.yml#L1">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/pack/support/pack.config.ts#L5">Source</a></cite>
       </figcaption>
-      <pre><code class="language-yaml"><span class="token key atrule">assemble</span><span class="token punctuation">:</span>
-  <span class="token key atrule">active</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-  <span class="token key atrule">cacheDir</span><span class="token punctuation">:</span> cache
-  <span class="token key atrule">keepSource</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-  <span class="token key atrule">readonly</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-  <span class="token key atrule">add</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">node_modules/@travetto/cli/bin/travetto.js</span><span class="token punctuation">:</span> node_modules/.bin/trv
-    <span class="token punctuation">-</span> <span class="token key atrule">node_modules/@travetto/cli/bin/travetto.js</span><span class="token punctuation">:</span> node_modules/.bin/travetto
-    <span class="token punctuation">-</span> <span class="token key atrule">node_modules/lodash/lodash.min.js</span><span class="token punctuation">:</span> node_modules/lodash/lodash.js
-  <span class="token key atrule">excludeCompile</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> node_modules/@travetto/<span class="token important">*/alt/</span>
-    <span class="token punctuation">-</span> node_modules/@travetto/<span class="token important">*/test/</span>
-  <span class="token key atrule">exclude</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> bower.json
-    <span class="token punctuation">-</span> LICENSE
-    <span class="token punctuation">-</span> LICENCE
-    <span class="token punctuation">-</span> <span class="token string">'*.map'</span>
-    <span class="token punctuation">-</span> <span class="token string">'*.md'</span>
-    <span class="token punctuation">-</span> <span class="token string">'*.lock'</span>
-    <span class="token punctuation">-</span> <span class="token string">'*.html'</span>
-    <span class="token punctuation">-</span> <span class="token string">'*.mjs'</span>
-    <span class="token punctuation">-</span> <span class="token string">'*.ts'</span>
-    <span class="token punctuation">-</span> <span class="token string">'*.d.ts'</span></code></pre>     
+      <pre><code class="language-typescript">assemble<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+  active<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  cacheDir<span class="token operator">:</span> <span class="token string">'cache'</span><span class="token punctuation">,</span>
+  keepSource<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token keyword">readonly</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  add<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{{'{'}}</span> <span class="token string">'node_modules/@travetto/cli/bin/trv.js'</span><span class="token operator">:</span> <span class="token string">'node_modules/.bin/trv'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{{'{'}}</span> <span class="token string">'node_modules/lodash/lodash.min.js'</span><span class="token operator">:</span> <span class="token string">'node_modules/lodash/lodash.js'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  excludeCompile<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token string">'node_modules/@travetto/*/alt/'</span><span class="token punctuation">,</span>
+    <span class="token string">'node_modules/@travetto/*/test/'</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  exclude<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token string">'bower.json'</span><span class="token punctuation">,</span>
+    <span class="token string">'LICENSE'</span><span class="token punctuation">,</span>
+    <span class="token string">'LICENCE'</span><span class="token punctuation">,</span>
+    <span class="token string">'*.map'</span><span class="token punctuation">,</span>
+    <span class="token string">'*.md'</span><span class="token punctuation">,</span>
+    <span class="token string">'*.lock'</span><span class="token punctuation">,</span>
+    <span class="token string">'*.html'</span><span class="token punctuation">,</span>
+    <span class="token string">'*.mjs'</span><span class="token punctuation">,</span>
+    <span class="token string">'*.ts'</span><span class="token punctuation">,</span>
+    <span class="token string">'*.d.ts'</span><span class="token punctuation">,</span></code></pre>     
       </figure>
 
       <figure class="terminal">
@@ -91,7 +97,12 @@ Options:
   -w --workspace <span class="token punctuation">[</span>workspace<span class="token punctuation">]</span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
   -k --keep-source <span class="token punctuation">[</span>boolean<span class="token punctuation">]</span>  Should <span class="token builtin class-name">source</span> be preserved <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -r --readonly <span class="token punctuation">[</span>boolean<span class="token punctuation">]</span>     Build a <span class="token builtin class-name">readonly</span> deployable <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
-  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Available Pack Modes:
+  * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span>
+  * rest/lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.lambda.ts<span class="token punctuation">]</span></code></pre>     
       </figure>
 
 <h3 id="cli-pack-zip">CLI - pack:zip</h3>
@@ -100,11 +111,12 @@ Zip is an optional step, that can run post assembly.  The only configuration it 
 
       <figure class="code">
       <figcaption class="code">Zip Default Config
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/pack/bin/pack.config.yml#L43">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/pack/support/pack.config.ts#L51">Source</a></cite>
       </figcaption>
-      <pre><code class="language-yaml"><span class="token key atrule">zip</span><span class="token punctuation">:</span>
-  <span class="token key atrule">active</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-  <span class="token key atrule">output</span><span class="token punctuation">:</span> output.zip</code></pre>     
+      <pre><code class="language-typescript">zip<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+  active<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  output<span class="token operator">:</span> <span class="token string">'output.zip'</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span></code></pre>     
       </figure>
 
       <figure class="terminal">
@@ -118,57 +130,80 @@ Usage:  pack:zip <span class="token punctuation">[</span>options<span class="tok
 Options:
   -w --workspace <span class="token punctuation">[</span>workspace<span class="token punctuation">]</span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
   -o --output <span class="token punctuation">[</span>output<span class="token punctuation">]</span>        Output File <span class="token punctuation">(</span>default: <span class="token string">"output.zip"</span><span class="token punctuation">)</span>
-  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Available Pack Modes:
+  * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span>
+  * rest/lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.lambda.ts<span class="token punctuation">]</span></code></pre>     
       </figure>
 
 <h3 id="modes">Modes</h3>
-Various modules may provide customizations to the default <code class="item path">pack.config.yml</code> to allow for easy integration with the packing process.  A simple example of this is via the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module, for how to publish lambda packages.
+Various modules may provide customizations to the default <code class="item path">pack.config.ts</code> to allow for easy integration with the packing process.  A simple example of this is via the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module, for how to publish lambda packages.
 
       <figure class="code">
-      <figcaption class="code">Rest, pack.lambda.yml
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest/support/pack.lambda.yml">Source</a></cite>
+      <figcaption class="code">Rest, pack.lambda.ts
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest/support/pack.lambda.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-yaml"><span class="token key atrule">assemble</span><span class="token punctuation">:</span>
-  <span class="token key atrule">active</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-  <span class="token key atrule">keepSource</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-  <span class="token key atrule">add</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">node_modules/@travetto/rest/support/aws-lambda.js</span><span class="token punctuation">:</span> index.js
-  <span class="token key atrule">env</span><span class="token punctuation">:</span>
-    <span class="token key atrule">NO_COLOR</span><span class="token punctuation">:</span> <span class="token number">1</span>
-<span class="token key atrule">zip</span><span class="token punctuation">:</span>
-  <span class="token key atrule">active</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-  <span class="token key atrule">output</span><span class="token punctuation">:</span> dist/lambda.zip</code></pre>     
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> AllConfigPartial <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/pack/bin/operation/pack'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> config<span class="token operator">:</span> AllConfigPartial <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+  name<span class="token operator">:</span> <span class="token string">'rest/lambda'</span><span class="token punctuation">,</span>
+  assemble<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    active<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    keepSource<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    add<span class="token operator">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">{{'{'}}</span> <span class="token string">'node_modules/@travetto/rest/support/aws-lambda.js'</span><span class="token operator">:</span> <span class="token string">'index.js'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    exclude<span class="token operator">:</span> <span class="token punctuation">[</span>
+      <span class="token string">'node_modules/node-forge'</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    env<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token constant">NO_COLOR</span><span class="token operator">:</span> <span class="token number">1</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+  zip<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    active<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    output<span class="token operator">:</span> <span class="token string">'dist/lambda.zip'</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>     
       </figure>
 
       <figure class="terminal">
       <figcaption class="terminal">Invoking Pack with Mode
       
       </figcaption>
-      <pre><code class="language-bash">npx travetto pack <span class="token operator">&lt;</span>mode<span class="token operator">></span></code></pre>     
+      <pre><code class="language-bash">npx trv pack <span class="token operator">&lt;</span>mode<span class="token operator">></span></code></pre>     
       </figure>
 
 <h3 id="configuration">Configuration</h3>
-By default the following paths are searched for configuration (in the following order):
 
-<ol> <li>@travetto/pack/bin/pack.config.yml</li>
- <li><code class="item input">&lt;mode&gt;</code> related pack.*.yml</li>
- <li>pack.config.ya?ml</li></ol>
+By default, the configuration consists of two components.
+* The default config in <code class="item path">support/pack.config.ts</code> and
+* The config selected to execute from the cli
 
-Given the ordering, its clear to see that a project can define it's own configuration at the root of the project with <code class="item path">pack.config.yml</code>. Any defaults can be overidden.
+These two configurations will be loaded and layered, with the selected config taking precedence.
 
       <figure class="code">
-      <figcaption class="code">Example pack.config.yml
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/pack/doc/pack.config.yml">Source</a></cite>
+      <figcaption class="code">Example pack.config.ts
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/pack/doc/support/pack.config.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-yaml"><span class="token key atrule">workspace</span><span class="token punctuation">:</span> dist/alt
-<span class="token key atrule">assemble</span><span class="token punctuation">:</span>
-  <span class="token key atrule">active</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-  <span class="token key atrule">add</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">assets</span><span class="token punctuation">:</span> assets
-    <span class="token punctuation">-</span> <span class="token key atrule">/secret/location/key.pem</span><span class="token punctuation">:</span> resources/key.pem
-<span class="token key atrule">zip</span><span class="token punctuation">:</span>
-  <span class="token key atrule">active</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-  <span class="token key atrule">output</span><span class="token punctuation">:</span> dist/build.zip</code></pre>     
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> AllConfigPartial <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/pack/bin/operation/pack'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> config<span class="token operator">:</span> AllConfigPartial <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+  workspace<span class="token operator">:</span> <span class="token string">'dist/alt'</span><span class="token punctuation">,</span>
+  assemble<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    active<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    add<span class="token operator">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">{{'{'}}</span> assets<span class="token operator">:</span> <span class="token string">'assets'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">{{'{'}}</span> <span class="token string">'/secret/location/key.pem'</span><span class="token operator">:</span> <span class="token string">'resources/key.pem'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+  zip<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    active<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    output<span class="token operator">:</span> <span class="token string">'dist/build.zip'</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>     
       </figure>
 
 </div>

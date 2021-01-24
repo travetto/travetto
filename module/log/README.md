@@ -27,10 +27,10 @@ The `debug` messages can be filtered using the patterns from the [debug](https:/
 **Terminal: Sample environment flags**
 ```bash
 # Debug
-$ DEBUG=@app:*,-@trv:model npx travetto run app
-$ DEBUG=-@trv:registry npx travetto run app
-$ DEBUG=@trv:rest npx travetto run app
-$ DEBUG=@trv:*,-@trv:model npx travetto run app
+$ DEBUG=@app:*,-@trv:model npx trv run app
+$ DEBUG=-@trv:registry npx trv run app
+$ DEBUG=@trv:rest npx trv run app
+$ DEBUG=@trv:*,-@trv:model npx trv run app
 ```
 
 **Note**: In production mode, all `console.debug` invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.

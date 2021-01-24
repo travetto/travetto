@@ -25,7 +25,7 @@ export class PackUtil {
       this._modes = SourceIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
         .map(x => {
           const req = require(x.file).config as Partial<CommonConfig>;
-          req.file = x.file;
+          req.file = x.module.replace(/^node_modules\//, '');
           return req;
         });
     }

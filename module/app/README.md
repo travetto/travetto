@@ -69,7 +69,7 @@ $ trv run --help
 Usage:  run [options] [application] [args...]
 
 Options:
-  -e, --env [env]             Application environment (dev|prod|<any>)
+  -e, --env [env]             Application environment (dev|prod|<other>)
   -p, --profile [profile]     Specify additional application profiles (default: [])
   -r, --resource [resources]  Specify additional resource locations (default: [])
   -h, --help                  display help for command
@@ -97,7 +97,7 @@ Available Applications:
      file:  doc/entry.ts
 ```
 
-Running without specifying an application ``, will display all the available apps, and would look like:
+Running without specifying an application `trv run`, will display all the available apps, and would look like:
 
 **Terminal: Sample CLI Output**
 ```bash
@@ -106,7 +106,7 @@ $ trv run
 Usage: trv run [options] [application] [args...]
 
 Options:
-  -e, --env [env]             Application environment (dev|prod|<any>)
+  -e, --env [env]             Application environment (dev|prod|<other>)
   -p, --profile [profile]     Specify additional application profiles (default: [])
   -r, --resource [resources]  Specify additional resource locations (default: [])
   -h, --help                  display help for command
@@ -141,9 +141,30 @@ To invoke the `simple` application, you need to pass `domain` where port is opti
 ```bash
 $ trv run simple-domain mydomain.biz 4000
 
-2021-03-14T05:00:00.618Z info  [@trv:app/registry:31] Running application { name: 'simple-domain', filename: './doc/domain.ts' }
-2021-03-14T05:00:00.837Z info  [@trv:app/registry:35] Configured {
-  app: {
+2021-03-14T05:00:00.618Z info  [@trv:app/registry:30] Running application { name: 'simple-domain', filename: './doc/domain.ts' }
+2021-03-14T05:00:00.837Z info  [@trv:app/registry:34] Configured {
+  info: {
+    name: '@travetto/app',
+    description: 'Application registration/management and run support.',
+    version: '2.0.0',
+    license: 'MIT',
+    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
+    frameworkVersion: '2.0.0'
+  },
+  env: {
+    name: 'dev',
+    profiles: [ 'application', 'dev' ],
+    prod: false,
+    debug: { status: false, value: undefined },
+    resources: [ 'resources', 'doc/resources' ],
+    shutdownWait: 2000,
+    watch: false,
+    readonly: false
+  },
+  source: {
+    common: [ 'src' ],
+    local: [ 'doc' ],
+    excludeModules: Set(3) { '@travetto/cli', '@travetto/doc', '@travetto/boot' },
     dynamicModules: {
       '@travetto/base': '/home/tim/Code/travetto/module/base',
       '@travetto/boot': '/home/tim/Code/travetto/module/boot',
@@ -159,23 +180,7 @@ $ trv run simple-domain mydomain.biz 4000
       '@travetto/watch': '/home/tim/Code/travetto/module/watch',
       '@travetto/worker': '/home/tim/Code/travetto/module/worker',
       '@travetto/yaml': '/home/tim/Code/travetto/module/yaml'
-    },
-    watch: true,
-    readonly: false,
-    travetto: '2.0.0',
-    name: '@travetto/app',
-    version: '2.0.0',
-    license: 'MIT',
-    description: 'Application registration/management and run support.',
-    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
-    env: 'dev',
-    prod: false,
-    profiles: [ 'application', 'dev' ],
-    localSourceFolders: [ 'doc' ],
-    commonSourceFolders: [ 'src' ],
-    resourceFolders: [ 'resources', 'doc/resources' ],
-    debug: { status: false, value: undefined },
-    shutdownWait: 2000
+    }
   },
   config: {}
 }
@@ -193,10 +198,10 @@ $ trv run simple-domain mydomain.biz orange
 Failed application run {
   error: Error: Invalid parameter port: Received orange, but exepcted number
       at Function.enforceParamType (./src/util.ts:19:13)
-      at ./src/registry.ts:46:79
+      at ./src/registry.ts:45:79
       at Array.map (<anonymous>)
-      at $ApplicationRegistry.resolveParameters (./src/registry.ts:46:24)
-      at Function.run (./bin/lib/run.ts:54:31)
+      at $ApplicationRegistry.resolveParameters (./src/registry.ts:45:24)
+      at Function.run (./bin/lib/run.ts:36:31)
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
       at AppRunPlugin.action (./bin/cli-run.ts:55:11)
 }
@@ -233,7 +238,7 @@ import { Application } from '@travetto/app';
 })
 class Complex {
   async run(domain: string, port: number) {
-    console.debug('Launching', { domain, port });
+    console.log('Launching', { domain, port });
   }
 }
 ```

@@ -21,7 +21,7 @@ The module utilizes AST transformations to collect schema information, and facil
    *  `description` - detailed description of the schema
    *  `examples` - A set of examples as [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML)
 
-The `title` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/common.ts#L9) decorator.
+The `title` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/common.ts#L11) decorator.
 
 **Code: Sample User Schema**
 ```typescript
@@ -60,24 +60,24 @@ User:
 This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
 
    
-   *  [@Field](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L40) defines a field that will be serialized.
-   *  [@Required](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L61) defines a that field should be required
-   *  [@Enum](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L68) defines the allowable values that a field can have
-   *  [@Trimmed](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L78) augments binding to remove leading and trailing whitespace from string values
-   *  [@Match](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L96) defines a regular expression that the field value should match
-   *  [@MinLength](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L104) enforces min length of a string
-   *  [@MaxLength](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L112) enforces max length of a string
-   *  [@Min](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L104) enforces min value for a date or a number
-   *  [@Max](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L112) enforces max value for a date or a number
-   *  [@Email](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L135) ensures string field matches basic email regex
-   *  [@Telephone](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L142) ensures string field matches basic telephone regex
-   *  [@Url](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L149) ensures string field matches basic url regex
-   *  [@Ignore](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L188) exclude from auto schema registration
-   *  [@Integer](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L163) ensures number passed in is only a whole number
-   *  [@Float](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L169) ensures number passed in allows fractional values
-   *  [@Currency](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L181) provides support for standard currency
-   *  [@Text](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L83) indicates that a field is expecting natural language input, not just discrete values
-   *  [@LongText](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L88) same as text, but expects longer form content
+   *  [@Field](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L34) defines a field that will be serialized.
+   *  [@Required](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L55) defines a that field should be required
+   *  [@Enum](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L62) defines the allowable values that a field can have
+   *  [@Trimmed](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L71) augments binding to remove leading and trailing whitespace from string values
+   *  [@Match](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L89) defines a regular expression that the field value should match
+   *  [@MinLength](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L97) enforces min length of a string
+   *  [@MaxLength](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L105) enforces max length of a string
+   *  [@Min](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L97) enforces min value for a date or a number
+   *  [@Max](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L105) enforces max value for a date or a number
+   *  [@Email](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L128) ensures string field matches basic email regex
+   *  [@Telephone](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L135) ensures string field matches basic telephone regex
+   *  [@Url](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L142) ensures string field matches basic url regex
+   *  [@Ignore](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L181) exclude from auto schema registration
+   *  [@Integer](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L156) ensures number passed in is only a whole number
+   *  [@Float](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L162) ensures number passed in allows fractional values
+   *  [@Currency](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L174) provides support for standard currency
+   *  [@Text](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L76) indicates that a field is expecting natural language input, not just discrete values
+   *  [@LongText](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L81) same as text, but expects longer form content
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated.
 
@@ -87,7 +87,7 @@ Just like the class, all fields can be defined with
    *  `description` - detailed description of the schema
    *  `examples` - A set of examples as [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML)
 
-And similarly, the `description` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/common.ts#L9) decorator.
+And similarly, the `description` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/common.ts#L11) decorator.
 
 ## Binding/Validation
 At runtime, once a schema is registered, a programmer can utilize this structure to perform specific operations. Specifically binding and validation.
@@ -267,7 +267,7 @@ export interface ValidationError {
   /**
    * The value provided
    */
-  value?: any;
+  value?: unknown;
   /**
    * Regular expression to match
    */
@@ -301,7 +301,7 @@ In addition to the general types, the code relies upon name matching to provide 
 
 **Code: Supported Mappings**
 ```typescript
-static NAMES_TO_TYPE: Record<string, [RegExp, () => any][]> = {
+static NAMES_TO_TYPE = {
     string: [
       [/^(image|img).*url$/, faker.image.imageUrl],
       [/^url$/, faker.internet.url],
@@ -326,12 +326,12 @@ static NAMES_TO_TYPE: Record<string, [RegExp, () => any][]> = {
       [/(image|img)/, faker.image.image],
       [/^company(name)?$/, faker.company.companyName],
       [/(desc|description)$/, () => faker.lorem.sentences(10)]
-    ],
+    ] as [RegExp, () => string][],
     date: [
       [/dob|birth/, () => faker.date.past(60)],
       [/creat(e|ion)/, () => between(-200, -100)],
       [/(update|modif(y|ied))/, () => between(-100, -50)]
-    ]
+    ] as [RegExp, () => Date][],
   };
 ```
 
@@ -386,12 +386,12 @@ export type Point = [number, number];
 const INVALID = Symbol.for('invalid-point');
 
 export class PointImpl {
-  static validateSchema(input: any) {
+  static validateSchema(input: unknown) {
     const ret = this.bindSchema(input);
     return ret !== INVALID && ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
   }
 
-  static bindSchema(input: any): [number, number] | typeof INVALID | undefined {
+  static bindSchema(input: unknown): [number, number] | typeof INVALID | undefined {
     if (Array.isArray(input) && input.length === 2) {
       return input.map(x => Util.coerceType(x, Number, false)) as [number, number];
     } else {
