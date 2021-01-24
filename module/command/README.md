@@ -109,10 +109,10 @@ Service          Version    Status
 The services are defined as plain javascript files within the framework and can easily be extended:
 
 **Code: Sample Service Definition**
-```javascript
-const { version } = require('@elastic/elasticsearch/package.json');
+```typescript
+import { version } from '@elastic/elasticsearch/package.json';
 
-module.exports = {
+export const service = {
   name: 'elasticsearch',
   version,
   port: 9200,

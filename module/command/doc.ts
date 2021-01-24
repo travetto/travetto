@@ -35,5 +35,5 @@ ${SubSection('Defining new Services')}
 
 The services are defined as plain javascript files within the framework and can easily be extended:
 
-${Code('Sample Service Definition', '@travetto/model-elasticsearch/support/service.elasticsearch.js')}
+${Code('Sample Service Definition', '@travetto/model-elasticsearch/support/service.elasticsearch.ts')}
 `;

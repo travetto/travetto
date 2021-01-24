@@ -1,6 +1,6 @@
 import { doc as d, inp, Ref, Section, Code, Note, SubSection, lib } from '@travetto/doc';
-import { Injectable, InjectableFactory, Inject } from './src/decorator';
 import { Config } from '@travetto/config';
+import { Injectable, InjectableFactory, Inject } from './src/decorator';
 import { DependencyRegistry } from './src/registry';
 
 exports.text = d`

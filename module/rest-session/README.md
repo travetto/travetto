@@ -12,7 +12,7 @@ This is a module that adds session support to the [RESTful API](https://github.c
 
 **Code: Session Structure**
 ```typescript
-export class Session<T = any>  {
+export class Session<T = unknown>  {
   /**
    * The expiry time when the session was loaded
    */
@@ -84,7 +84,7 @@ export class Session<T = any>  {
 }
 ```
 
-A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L44) parameter as [Session](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L15) and [SessionData](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L7) respectively.  Iit can also be accessed via the [Request](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.d.ts#L9) as a session property.
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) parameter as [Session](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L15) and [SessionData](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L7) respectively.  Iit can also be accessed via the [Request](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.d.ts#L9) as a session property.
 
 **Code: Sample Session Usage**
 ```typescript
@@ -151,7 +151,7 @@ export class RequetSessionEncoder implements SessionEncoder {
   @Inject()
   config: SessionConfig;
 
-  async encode(req: Request, res: Response, session: Session<any> | null): Promise<void> {
+  async encode(req: Request, res: Response, session: Session | null): Promise<void> {
     if (session && session.data) {
       if (this.config.transport === 'cookie') {
         res.cookies.set(this.config.keyName, session.key, {

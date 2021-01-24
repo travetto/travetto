@@ -26,7 +26,8 @@ This flow ensures all files are loaded and processed before application starts. 
 
 **Code: Sample Registry**
 ```typescript
-import { Class, MetadataRegistry } from '@travetto/registry';
+import { Class } from '@travetto/base';
+import { MetadataRegistry } from '@travetto/registry';
 
 interface Group {
   class: Class;
@@ -49,7 +50,7 @@ export class SampleRegistry extends MetadataRegistry<Group, Child> {
   /**
    * Create scaffolding on first encounter of a class
    */
-  createPending(cls: Class<any>): Partial<Group> {
+  createPending(cls: Class): Partial<Group> {
     return {
       class: cls,
       name: cls.name

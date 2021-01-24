@@ -5,7 +5,7 @@ import { EnvUtil } from './env';
 type SimpleEntry = Pick<ScanEntry, 'module' | 'file'>;
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean, paths?: string[] };
-type FrameworkScan = { testFile: (x: string) => boolean, testDir: (x: string) => boolean, base: string, map: (e: ScanEntry) => ScanEntry };
+type FrameworkScan = { testDir: (x: string) => boolean, base: string, map: (e: ScanEntry) => ScanEntry };
 
 /**
  * Configuration for searching for source files
@@ -25,12 +25,14 @@ export interface SourceConfig {
   excludeModules: Set<string>;
 }
 
+type IndexRecord = { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> };
+
 /**
  * Source index
  */
 export class SourceIndex {
 
-  private static _SOURCE_INDEX = new Map<string, { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> }>();
+  private static _SOURCE_INDEX = new Map<string, IndexRecord>();
 
   /**
    * Compute index for a scan entry
@@ -60,32 +62,34 @@ export class SourceIndex {
    * @param testFile The test to determine if a file is desired
    */
   private static scanFramework(test: ScanTest) {
-    const cleaned = 'test' in test ? test.test.bind(test) : test;
+    const testFile = 'test' in test ? test.test.bind(test) : test;
 
     // Folders to check
     const folders = [
       {
-        testFile: cleaned, testDir: x =>
+        testDir: x =>
           /^node_modules[/]?$/.test(x) ||  // Top level node_modules
           (/^node_modules\/@travetto/.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
           !x.includes('node_modules'), // non module file
-        base: FsUtil.cwd, map: e => e
+        base: FsUtil.cwd,
+        map: e => e
       } as FrameworkScan,
       ...Object.entries(EnvUtil.getDynamicModules()).map(([dep, pth]) => (
         {
-          testFile: cleaned, testDir: x => !x.includes('node_modules'),
-          base: pth, map: e => {
+          testDir: x => !x.includes('node_modules'),
+          base: pth,
+          map: e => {
             e.module = e.module.includes('node_modules') ? e.module : e.file.replace(pth, `node_modules/${dep}`);
             return e;
           }
         } as FrameworkScan
       ))
     ];
+
     const out: ScanEntry[][] = [];
-    for (const { testFile, testDir, base, map } of folders) {
+    for (const { testDir, base, map } of folders) {
       out.push(ScanFs.scanDirSync({ testFile, testDir }, base).map(map).filter(x => x.stats.isFile()));
     }
-
     return out.flat();
   }
 
@@ -95,7 +99,7 @@ export class SourceIndex {
    */
   private static get index() {
     if (this._SOURCE_INDEX.size === 0) {
-      const idx = new Map() as (typeof SourceIndex)['_SOURCE_INDEX'];
+      const idx = new Map<string, IndexRecord>();
       idx.set('.', { base: FsUtil.cwd, files: new Map() });
 
       for (const el of this.scanFramework(x => x.endsWith('.ts') && !x.endsWith('.d.ts'))) {

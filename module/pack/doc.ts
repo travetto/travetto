@@ -40,7 +40,7 @@ ${SubSection('CLI - pack:zip')}
 
 Zip is an optional step, that can run post assembly.  The only configuration it currently provides is the ability to specify the output location for the zip file.
 
-${Snippet('Zip Default Config', 'support/pack.config.ts', /zip:/, /output/)}
+${Snippet('Zip Default Config', 'support/pack.config.ts', /zip:/, /\}/)}
 
 ${Execute('Zip Usage', 'trv', ['pack:zip', '--help'])}
 

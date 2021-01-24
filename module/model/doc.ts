@@ -1,9 +1,5 @@
 import { doc as d, mod, Section, Code, inp, lib, List, SubSection, fld } from '@travetto/doc';
 import { Model } from './src/registry/decorator';
-import { ModelService } from './src/service/model';
-import { ModelSource } from './src/service/source';
-import { ModelController } from './src/extension/rest';
-
 
 exports.text = d`
 This module provides a clean interface to data model persistence, modification and retrieval.  This module builds heavily upon the ${mod.Schema}, which is used for data model validation.

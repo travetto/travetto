@@ -8,8 +8,7 @@ export const config: AllConfigPartial = {
     keepSource: true,
     readonly: true,
     add: [
-      { 'node_modules/@travetto/cli/bin/travetto.js': 'node_modules/.bin/trv' },
-      { 'node_modules/@travetto/cli/bin/travetto.js': 'node_modules/.bin/travetto' },
+      { 'node_modules/@travetto/cli/bin/trv.js': 'node_modules/.bin/trv' },
       { 'node_modules/lodash/lodash.min.js': 'node_modules/lodash/lodash.js' },
     ],
     excludeCompile: [

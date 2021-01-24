@@ -33,10 +33,10 @@ The <code class="item input">debug</code> messages can be filtered using the pat
       
       </figcaption>
       <pre><code class="language-bash"><span class="token comment"># Debug</span>
-$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@app:*,-@trv:model npx travetto run app
-$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>-@trv:registry npx travetto run app
-$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@trv:rest npx travetto run app
-$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@trv:*,-@trv:model npx travetto run app</code></pre>     
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@app:*,-@trv:model npx trv run app
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>-@trv:registry npx trv run app
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@trv:rest npx trv run app
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@trv:*,-@trv:model npx trv run app</code></pre>     
       </figure>
 
 <p class="note"><strong>Note</strong> In production mode, all <code class="item method">console.debug</code> invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.</p>

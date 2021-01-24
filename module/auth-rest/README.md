@@ -107,10 +107,10 @@ export class AppConfig {
 }
 ```
 
-The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L72) method.
+The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L71) method.
 
 ## Route Declaration
-Like the [AuthService](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/service.ts#L15), there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
+Like the [AuthService](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/service.ts#L14), there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
 
 [Authenticate](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L10) provides middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
@@ -145,7 +145,7 @@ export class SampleAuth {
 }
 ```
 
-[@Authenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L21) and [@Unauthenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L37) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, [AuthContext](https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11) is accessible via [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L44) directly, without wiring in a request object, but is also accessible on the request object as [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12).auth.
+[@Authenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L21) and [@Unauthenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L37) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, [AuthContext](https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11) is accessible via [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) directly, without wiring in a request object, but is also accessible on the request object as [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12).auth.
 
 ## Passport - Extension
 
@@ -199,7 +199,7 @@ export class AppConfig {
 }
 ```
 
-As you can see, [PassportIdentitySource](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/extension/passport/identity.ts#L15) will take care of the majority of the work, and all that is required is:
+As you can see, [PassportIdentitySource](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/extension/passport/identity.ts#L17) will take care of the majority of the work, and all that is required is:
    
    *  Provide the name of the strategy (should be unique)
    *  Provide the strategy instance. **Note**: you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework
@@ -250,7 +250,7 @@ export class SampleAuth {
    * Simple Echo
    */
   @Post('/')
-  async echo(req: Request): Promise<Record<string, any>> {
+  async echo(req: Request): Promise<object> {
     return req.body;
   }
 }

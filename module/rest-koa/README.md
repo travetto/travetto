@@ -16,8 +16,9 @@ The module is an [koa](https://koajs.com/) provider for the [RESTful API](https:
 ```typescript
 import { Injectable } from '@travetto/di';
 import { KoaRestServer } from '@travetto/rest-koa';
+import { Middleware } from 'koa';
 
-declare let rateLimit: any;
+declare let rateLimit: (config: { windowMs: number, max: number }) => Middleware;
 
 @Injectable({ primary: true })
 class CustomRestServer extends KoaRestServer {
