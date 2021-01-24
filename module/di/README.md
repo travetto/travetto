@@ -11,7 +11,7 @@ npm install @travetto/di
 [Dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) is a framework primitive.  When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of [Typescript](https://typescriptlang.org) and type erasure of interfaces, dependency injection only supports `class`es as type signafiers. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.
 
 ## Declaration
-The [@Injectable](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L29) and [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L72) decorators provide the registration of dependencies.   Dependency declaration revolves around exposing `class`es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various implementations (e.g. [MongoModelService](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L77) provides itself as an injectable candidate for [ModelCrudSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts).
+The [@Injectable](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L29) and [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L71) decorators provide the registration of dependencies.   Dependency declaration revolves around exposing `class`es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various implementations (e.g. [MongoModelService](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L78) provides itself as an injectable candidate for [ModelCrudSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts).
 
 **Code: Example Injectable**
 ```typescript
@@ -72,7 +72,7 @@ class SpecificService extends BaseService {
 }
 ```
 
-In this scenario, `SpecificService` is a valid candidate for `BaseService` due to the abstract inheritance. Sometimes, you may want to provide a slight variation to  a dependency without extending a class.  To this end, the [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L72) decorator denotes a `static` class method that produces an [@Injectable](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L29).
+In this scenario, `SpecificService` is a valid candidate for `BaseService` due to the abstract inheritance. Sometimes, you may want to provide a slight variation to  a dependency without extending a class.  To this end, the [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L71) decorator denotes a `static` class method that produces an [@Injectable](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L29).
 
 **Code: Example InjectableFactory**
 ```typescript
@@ -93,7 +93,7 @@ class Config {
 
 Given the `static` method `initService`, the function will be provided as a valid candidate for `CoolService`.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
 
-**Note**: Other modules are able to provide aliases to [@Injectable](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L29) that also provide additional functionality.  For example, the [@Config](https://github.com/travetto/travetto/tree/master/module/config/src/decorator.ts#L9) or the [@Controller](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/controller.ts#L10) decorator registers the associated class as an injectable element.
+**Note**: Other modules are able to provide aliases to [@Injectable](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L29) that also provide additional functionality.  For example, the [@Config](https://github.com/travetto/travetto/tree/master/module/config/src/decorator.ts#L10) or the [@Controller](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/controller.ts#L9) decorator registers the associated class as an injectable element.
 
 ## Injection
 
@@ -134,7 +134,7 @@ class CustomService {
 }
 ```
 
-Via [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L72) params, which are comparable to constructor params
+Via [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L71) params, which are comparable to constructor params
 
 **Code: Example InjectableFactory with parameters as dependencies**
 ```typescript

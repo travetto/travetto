@@ -23,10 +23,10 @@ The ${inp`debug`} messages can be filtered using the patterns from the ${lib.Deb
 
 ${Terminal('Sample environment flags', `
 # Debug
-$ DEBUG=@app:*,-@trv:model npx travetto run app
-$ DEBUG=-@trv:registry npx travetto run app
-$ DEBUG=@trv:rest npx travetto run app
-$ DEBUG=@trv:*,-@trv:model npx travetto run app
+$ DEBUG=@app:*,-@trv:model npx trv run app
+$ DEBUG=-@trv:registry npx trv run app
+$ DEBUG=@trv:rest npx trv run app
+$ DEBUG=@trv:*,-@trv:model npx trv run app
 `)}
 
 ${Note(d`In production mode, all ${meth`console.debug`} invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.`)}

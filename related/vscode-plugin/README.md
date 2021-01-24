@@ -14,7 +14,7 @@ The currently supported features are:
 
 ## Testing
 
-The test related functionality relies upon the [Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework") module being installed, and used to define tests ([@Suite](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L12) and [@Test](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L9)).
+The test related functionality relies upon the [Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework") module being installed, and used to define tests ([@Suite](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L12) and [@Test](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L11)).
 
 ### Real-time Test Evaluation
 

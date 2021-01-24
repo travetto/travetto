@@ -111,7 +111,7 @@ Everything is based on absolute paths being passed in, and translated into cache
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 ## File System Interaction
-[FsUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/fs.ts#L10) provides some high level functionality (like recursive directory delete).
+[FsUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/fs.ts#L11) provides some high level functionality (like recursive directory delete).
 
 ## File System Scanning
 [ScanFs](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L57) provides a breadth-first search through the file system with the ability to track and collect files via patterns.

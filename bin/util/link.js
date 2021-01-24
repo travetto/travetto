@@ -16,7 +16,7 @@ async function mkdirp(d) {
 
 [
   ['module/boot/register.js', 'node_modules/@travetto/boot/register.js'],
-  ['module/boot/travetto.js', '.bin/trv'],
+  ['module/cli/bin/trv.js', '.bin/trv'],
   ['bin/util/npmr.js', '.bin/npmr']
 ]
   .$map(a => a.map(v => path.resolve(v)))

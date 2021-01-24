@@ -23,6 +23,9 @@ const RestInterceptor = SnippetLink('RestInterceptor', 'src/interceptor/types.ts
 
 import { ModelController } from './src/extension/model';
 import { SchemaBody, SchemaQuery } from './src/extension/schema';
+// To ensure module loading
+import '@travetto/schema';
+import '@travetto/model';
 
 exports.text = d`
 
@@ -147,7 +150,7 @@ To customize a REST server, you may need to construct an entry point using the $
 
 ${Code('Application entry point for Rest Applications', 'doc/custom-app.ts')}
 
-And using the pattern established in the ${mod.App} module, you would run your program using ${Command('npx travetto run custom')}.
+And using the pattern established in the ${mod.App} module, you would run your program using ${Command('npx trv run custom')}.
 
 ${Section('Custom Interceptors')}
 Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the ${mod.Di} by extending the ${RestInterceptor} class.  The interceptors are tied to the defined ${Request} and ${Response} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:

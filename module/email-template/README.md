@@ -143,7 +143,7 @@ The final template will render as:
 ```bash
 $ node -r @travetto/boot/register ./doc/render.ts
 
-2021-03-14T05:00:00.618Z info  [@trv:email-template/doc/render:11] <!DOCTYPE html><html>
+<!DOCTYPE html><html>
 
 <body>
 

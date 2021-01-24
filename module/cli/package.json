@@ -7,7 +7,7 @@
     "access": "public"
   },
   "bin": {
-    "trv": "bin/travetto.js"
+    "trv": "bin/trv.js"
   },
   "title": "Command Line Interface",
   "dependencies": {
@@ -21,7 +21,7 @@
     "travetto"
   ],
   "license": "MIT",
-  "main": "bin/travetto.js",
+  "main": "bin/trv.js",
   "name": "@travetto/cli",
   "files": [
     "src",

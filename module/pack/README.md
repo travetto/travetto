@@ -19,6 +19,11 @@ Usage:  pack [options] [mode]
 Options:
   -w --workspace [workspace]  Workspace directory (default: "/tmp/pack_travetto_pack")
   -h, --help                  display help for command
+
+Available Pack Modes:
+  * default [support/pack.config.ts]
+  * rest/docker [@travetto/rest/support/pack.docker.ts]
+  * rest/lambda [@travetto/rest/support/pack.lambda.ts]
 ```
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. The pack operation is actually a wrapper around multiple sub-operations that are run in series to produce the desired final structure for deployment.  The currently support operations are:
@@ -46,30 +51,31 @@ Assemble is the operation that stages the project's code for deployment.  The as
    1. Emptying .ts Files - If keep source is false, all .ts files are emptied, as compilation will not occur at runtime
 
 **Code: Assemble Default Config**
-```yaml
-assemble:
-  active: true
-  cacheDir: cache
-  keepSource: true
-  readonly: true
-  add:
-    - node_modules/@travetto/cli/bin/travetto.js: node_modules/.bin/trv
-    - node_modules/@travetto/cli/bin/travetto.js: node_modules/.bin/travetto
-    - node_modules/lodash/lodash.min.js: node_modules/lodash/lodash.js
-  excludeCompile:
-    - node_modules/@travetto/*/alt/
-    - node_modules/@travetto/*/test/
-  exclude:
-    - bower.json
-    - LICENSE
-    - LICENCE
-    - '*.map'
-    - '*.md'
-    - '*.lock'
-    - '*.html'
-    - '*.mjs'
-    - '*.ts'
-    - '*.d.ts'
+```typescript
+assemble: {
+    active: true,
+    cacheDir: 'cache',
+    keepSource: true,
+    readonly: true,
+    add: [
+      { 'node_modules/@travetto/cli/bin/trv.js': 'node_modules/.bin/trv' },
+      { 'node_modules/lodash/lodash.min.js': 'node_modules/lodash/lodash.js' },
+    ],
+    excludeCompile: [
+      'node_modules/@travetto/*/alt/',
+      'node_modules/@travetto/*/test/',
+    ],
+    exclude: [
+      'bower.json',
+      'LICENSE',
+      'LICENCE',
+      '*.map',
+      '*.md',
+      '*.lock',
+      '*.html',
+      '*.mjs',
+      '*.ts',
+      '*.d.ts',
 ```
 
 **Terminal: Assemble Usage**
@@ -83,6 +89,11 @@ Options:
   -k --keep-source [boolean]  Should source be preserved (default: true)
   -r --readonly [boolean]     Build a readonly deployable (default: true)
   -h, --help                  display help for command
+
+Available Pack Modes:
+  * default [support/pack.config.ts]
+  * rest/docker [@travetto/rest/support/pack.docker.ts]
+  * rest/lambda [@travetto/rest/support/pack.lambda.ts]
 ```
 
 ### CLI - pack:zip
@@ -90,10 +101,11 @@ Options:
 Zip is an optional step, that can run post assembly.  The only configuration it currently provides is the ability to specify the output location for the zip file.
 
 **Code: Zip Default Config**
-```yaml
-zip:
-  active: false
-  output: output.zip
+```typescript
+zip: {
+    active: false,
+    output: 'output.zip'
+  },
 ```
 
 **Terminal: Zip Usage**
@@ -106,50 +118,72 @@ Options:
   -w --workspace [workspace]  Workspace directory (default: "/tmp/pack_travetto_pack")
   -o --output [output]        Output File (default: "output.zip")
   -h, --help                  display help for command
+
+Available Pack Modes:
+  * default [support/pack.config.ts]
+  * rest/docker [@travetto/rest/support/pack.docker.ts]
+  * rest/lambda [@travetto/rest/support/pack.lambda.ts]
 ```
 
 ### Modes
-Various modules may provide customizations to the default `pack.config.yml` to allow for easy integration with the packing process.  A simple example of this is via the [RESTful API](https://github.com/travetto/travetto/tree/master/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module, for how to publish lambda packages.
+Various modules may provide customizations to the default `pack.config.ts` to allow for easy integration with the packing process.  A simple example of this is via the [RESTful API](https://github.com/travetto/travetto/tree/master/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module, for how to publish lambda packages.
 
-**Code: Rest, pack.lambda.yml**
-```yaml
-assemble:
-  active: true
-  keepSource: false
-  add:
-    - node_modules/@travetto/rest/support/aws-lambda.js: index.js
-  env:
-    NO_COLOR: 1
-zip:
-  active: true
-  output: dist/lambda.zip
+**Code: Rest, pack.lambda.ts**
+```typescript
+import type { AllConfigPartial } from '@travetto/pack/bin/operation/pack';
+
+export const config: AllConfigPartial = {
+  name: 'rest/lambda',
+  assemble: {
+    active: true,
+    keepSource: false,
+    add: [
+      { 'node_modules/@travetto/rest/support/aws-lambda.js': 'index.js' }
+    ],
+    exclude: [
+      'node_modules/node-forge'
+    ],
+    env: {
+      NO_COLOR: 1
+    }
+  },
+  zip: {
+    active: true,
+    output: 'dist/lambda.zip'
+  }
+};
 ```
 
 **Terminal: Invoking Pack with Mode**
 ```bash
-npx travetto pack <mode>
+npx trv pack <mode>
 ```
 
 ### Configuration
-By default the following paths are searched for configuration (in the following order):
 
-   
-   1. @travetto/pack/bin/pack.config.yml
-   1. `<mode>` related pack.*.yml
-   1. pack.config.ya?ml
+By default, the configuration consists of two components.
+* The default config in `support/pack.config.ts` and
+* The config selected to execute from the cli
 
-Given the ordering, its clear to see that a project can define it's own configuration at the root of the project with `pack.config.yml`. Any defaults can be overidden.
+These two configurations will be loaded and layered, with the selected config taking precedence.
 
-**Code: Example pack.config.yml**
-```yaml
-workspace: dist/alt
-assemble:
-  active: true
-  add:
-    - assets: assets
-    - /secret/location/key.pem: resources/key.pem
-zip:
-  active: true
-  output: dist/build.zip
+**Code: Example pack.config.ts**
+```typescript
+import type { AllConfigPartial } from '@travetto/pack/bin/operation/pack';
+
+export const config: AllConfigPartial = {
+  workspace: 'dist/alt',
+  assemble: {
+    active: true,
+    add: [
+      { assets: 'assets' },
+      { '/secret/location/key.pem': 'resources/key.pem' }
+    ]
+  },
+  zip: {
+    active: true,
+    output: 'dist/build.zip'
+  }
+};
 ```
 

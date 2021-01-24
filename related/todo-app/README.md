@@ -86,7 +86,7 @@ Now we need to create `src/service.ts`
 
 **Code: Service Definition**
 ```typescript
-import { MongoModelService } from '@travetto/model-mongo';
+import { ElasticsearchModelService } from '@travetto/model-elasticsearch';
 import { Injectable, Inject } from '@travetto/di';
 import { Todo, TodoSearch } from './model';
 
@@ -94,7 +94,7 @@ import { Todo, TodoSearch } from './model';
 export class TodoService {
 
   @Inject()
-  private modelService: MongoModelService;
+  private modelService: ElasticsearchModelService;
 
   async add(todo: Todo) {
     todo.created = new Date();
@@ -217,7 +217,7 @@ Finally, we establish the controller at `src/route.ts`
 
 **Code: Controller contents**
 ```typescript
-import { Controller, Get, Post, Put, Delete, Path, Query, SchemaBody, SchemaQuery, Patch } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete, Path, Query, SchemaBody, SchemaQuery } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 
 import { TodoService } from './service';
@@ -287,12 +287,33 @@ First we must start the application:
 ```bash
 $ ./doc/startup.sh 
 
-2021-03-14T05:00:00.618Z info  [@trv:app/registry:31] Running application {
+2021-03-14T05:00:00.618Z info  [@trv:app/registry:30] Running application {
   name: 'rest',
-  filename: '/home/tim/Code/travetto/module/rest/support/application.rest.ts'
+  filename: '/home/tim/Code/travetto/module/rest/src/internal/application.rest.ts'
 }
-2021-03-14T05:00:00.837Z info  [@trv:app/registry:35] Configured {
-  app: {
+2021-03-14T05:00:00.837Z info  [@trv:app/registry:34] Configured {
+  info: {
+    name: '@travetto/todo-app',
+    description: '',
+    version: undefined,
+    license: 'ISC',
+    author: '',
+    frameworkVersion: '2.0.0'
+  },
+  env: {
+    name: 'dev',
+    profiles: [ 'application', 'dev' ],
+    prod: false,
+    debug: { status: false, value: undefined },
+    resources: [ 'resources', 'doc/resources' ],
+    shutdownWait: 2000,
+    watch: true,
+    readonly: false
+  },
+  source: {
+    common: [ 'src' ],
+    local: [ '^doc' ],
+    excludeModules: Set(3) { '@travetto/cli', '@travetto/doc', '@travetto/boot' },
     dynamicModules: {
       '@travetto/app': '/home/tim/Code/travetto/module/app',
       '@travetto/base': '/home/tim/Code/travetto/module/base',
@@ -304,7 +325,7 @@ $ ./doc/startup.sh
       '@travetto/doc': '/home/tim/Code/travetto/module/doc',
       '@travetto/log': '/home/tim/Code/travetto/module/log',
       '@travetto/model': '/home/tim/Code/travetto/module/model',
-      '@travetto/model-mongo': '/home/tim/Code/travetto/module/model-mongo',
+      '@travetto/model-elasticsearch': '/home/tim/Code/travetto/module/model-elasticsearch',
       '@travetto/model-query': '/home/tim/Code/travetto/module/model-query',
       '@travetto/openapi': '/home/tim/Code/travetto/module/openapi',
       '@travetto/pack': '/home/tim/Code/travetto/module/pack',
@@ -317,23 +338,7 @@ $ ./doc/startup.sh
       '@travetto/watch': '/home/tim/Code/travetto/module/watch',
       '@travetto/worker': '/home/tim/Code/travetto/module/worker',
       '@travetto/yaml': '/home/tim/Code/travetto/module/yaml'
-    },
-    watch: true,
-    readonly: false,
-    travetto: '2.0.0',
-    name: '@travetto/todo-app',
-    version: undefined,
-    license: 'ISC',
-    description: '',
-    author: '',
-    env: 'dev',
-    prod: false,
-    profiles: [ 'application', 'dev' ],
-    localSourceFolders: [ '^doc' ],
-    commonSourceFolders: [ 'src' ],
-    resourceFolders: [ 'resources', 'doc/resources' ],
-    debug: { status: false, value: undefined },
-    shutdownWait: 2000
+    }
   },
   config: {
     rest: { cors: { active: true } },
@@ -374,9 +379,24 @@ $ ./doc/list.sh
 
 [
   {
-    "id": "422e793aed76ee063d13feec2e5e95b4",
+    "id": "eba6734e307bc66d442ae78291e71040",
     "text": "New Todo",
     "created": "2021-03-14T05:00:02.819Z"
+  },
+  {
+    "id": "77ba279b4e30fdacfc55b9e3be224403",
+    "text": "New Todo",
+    "created": "2021-03-14T05:00:03.144Z"
+  },
+  {
+    "id": "5fe95813c97b18ef067eb8025287189f",
+    "text": "New Todo",
+    "created": "2021-03-14T05:00:03.248Z"
+  },
+  {
+    "id": "422e793aed76ee063d13feec2e5e95b4",
+    "text": "New Todo",
+    "created": "2021-03-14T05:00:03.441Z"
   }
 ]
 ```

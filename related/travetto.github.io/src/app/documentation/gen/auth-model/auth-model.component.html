@@ -58,7 +58,7 @@ A registered identity extends the base concept of an identity, by adding in addi
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token keyword">extends</span> <span class="token class-name">BaseModel</span> <span class="token keyword">implements</span> <span class="token class-name">RegisteredIdentity</span> <span class="token punctuation">{{'{'}}</span>
   id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   source<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  details<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
+  details<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">unknown</span><span class="token operator">></span><span class="token punctuation">;</span>
   password<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   hash<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>

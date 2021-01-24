@@ -23,11 +23,13 @@ The framework provides basic environment information, e.g. in prod/test/dev.  Th
 as well. The information that is available is:
 
    
-   *  `prod`- Determines if app is in prod mode.  A `boolean` flag that should indicate a production run.
-   *  `env` - The environment name.  Will usually be one of `dev`, `test`, or `prod`.  Can be anything that is passed in.
-   *  `profiles: Set<string>` - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.
-   *  `debug` - Simple logging flag.  This `boolean` flag will enable or disable logging at various levels. By default `debug` is on in non-`prod`.
-   *  `appRoots: string[]` - The file root paths for the application, the default set is the current project. Order matters with respect to resource resolution. All paths should be relative to the project base
+   *  `env.prod`- Determines if app is in prod mode.  A `boolean` flag that should indicate a production run.
+   *  `env.name` - The environment name.  Will usually be one of `dev`, `test`, or `prod`.  Can be anything that is passed in.
+   *  `env.profiles: Set<string>` - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.
+   *  `env.debug` - Simple logging flag.  This `boolean` flag will enable or disable logging at various levels. By default `debug` is on in non-`prod`.
+   *  `env.resources: string[]` - Redource folders.  Search paths for resolving resouce requests via [ResourceManager](https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts)
+   *  `source.local: string[]` - Local source folders for transpiling.  Does not extend to installed modules.
+   *  `source.common: string[]` - Common source folders for transpiling. Includes installed modules.
    *  `hasProfile(p: string): boolean;` - Test whether or not a profile is active.
 
 With respect to `process.env`, we specifically test for all uppercase, lowercase, and given case. This allows us to test various patterns and catch flags that might be off due to casing. That would mean that a key of `Enable_Feature` would be tested as:
@@ -48,10 +50,10 @@ A simple example of finding specific `.config` files in your codebase:
 **Code: Looking for all .config files with the prefix defined by svc**
 ```typescript
 import * as fs from 'fs';
-import { ScanApp } from '@travetto/base';
+import { SourceIndex } from '@travetto/boot';
 
 export async function processServiceConfigs(svc: string) {
-  const svcConfigs = await ScanApp.findCommonFiles({ filter: new RegExp(`${svc}.*[.]config$/`) });
+  const svcConfigs = await SourceIndex.find({ filter: new RegExp(`${svc}.*[.]config$/`) });
   for (const conf of svcConfigs) {
     // Do work
 
@@ -110,7 +112,7 @@ export const init = {
   after: ['@trv:base/init'],
   action: async () => {
     const { ConfigManager } = await import('../src/manager');
-    ConfigManager.init();
+    await ConfigManager.init();
   }
 };
 ```
@@ -173,9 +175,9 @@ async function test() {
   await inner1();
 }
 
-process.on('unhandledRejection', (err: any) => {
+process.on('unhandledRejection', (err: unknown) => {
   StacktraceUtil.init();
-  console!.log(StacktraceUtil.simplifyStack(err));
+  console!.log(StacktraceUtil.simplifyStack(err as Error));
 });
 
 test();
@@ -201,7 +203,7 @@ Error: Uh oh
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
 
 ## Util
-Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [Util](https://github.com/travetto/travetto/tree/master/module/base/src/util.ts#L8) includes:
+Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [Util](https://github.com/travetto/travetto/tree/master/module/base/src/util.ts#L9) includes:
 
    
    *  `isPrimitive(el: any)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
@@ -217,7 +219,7 @@ Simple functions for providing a minimal facsimile to [lodash](https://lodash.co
 
 ## SystemUtil
 
-Unlike [Util](https://github.com/travetto/travetto/tree/master/module/base/src/util.ts#L8), the [SystemUtil](https://github.com/travetto/travetto/tree/master/module/base/src/internal/system.ts#L7) is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful.  [SystemUtil](https://github.com/travetto/travetto/tree/master/module/base/src/internal/system.ts#L7) has functionality for:
+Unlike [Util](https://github.com/travetto/travetto/tree/master/module/base/src/util.ts#L9), the [SystemUtil](https://github.com/travetto/travetto/tree/master/module/base/src/internal/system.ts#L13) is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful.  [SystemUtil](https://github.com/travetto/travetto/tree/master/module/base/src/internal/system.ts#L13) has functionality for:
 
    
    *  `naiveHash(text: string): number` computes a very naive hash. Should not be relied upon for scenarios where collisions cannot be tolerated.
