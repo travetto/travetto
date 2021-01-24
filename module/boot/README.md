@@ -13,8 +13,8 @@ Boot is basic environment  awareness coupled with typescript bootstrapping for [
    *  Environmental Information
    *  Cache Support
    *  File Operations
-   *  Typescript bootstrapping
-   *  Process execution
+   *  Typescript Bootstrapping
+   *  Process Execution
    *  Stream Support
 
 ## Environmental Information
@@ -28,7 +28,7 @@ The functionality we support for testing and retrieving environment information:
    *  `getList(key: string): string[];` - Retrieve an environmental value as a list
    *  `getTime(key: string, def: number):number` - Reads an environment variable as milliseconds, with support for `s`, `m`, and `h` suffixes to provide succinct time units.
 
-## File Cache
+## Cache Support
 The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/app-cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L11).  [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L11) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
@@ -107,14 +107,19 @@ export declare class FileCache {
 
 Everything is based on absolute paths being passed in, and translated into cache specific files.
 
-## Registration
-This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
-
-## File System Interaction
+## File Operations
 [FsUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/fs.ts#L11) provides some high level functionality (like recursive directory delete).
 
-## File System Scanning
+### File System Scanning
 [ScanFs](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L57) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
+
+## Typescript Bootstrapping
+
+### Source Indexing
+The bootstrap process will also requires an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatica discovery that is used within the framework (and transpiling).
+
+### Registration
+This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 ## Process Execution
 Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L79) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.

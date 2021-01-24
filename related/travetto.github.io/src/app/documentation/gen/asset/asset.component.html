@@ -13,13 +13,45 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/asset</code></pre>     
       </figure>
 
-The asset module requires an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25">ModuleStreamSupport</a> to provide functionality for reading and writing streams. You can use any existing providers to serve as your <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25">ModuleStreamSupport</a>, or you can roll your own.
+The asset module requires an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25">ModelStreamSupport</a> to provide functionality for reading and writing streams. You can use any existing providers to serve as your <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25">ModelStreamSupport</a>, or you can roll your own.
 
       <figure class="install">
       <figcaption class="install">provider
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/asset-<span class="token punctuation">{{'{'}}</span>provider<span class="token punctuation">{{'}'}}</span></code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-<span class="token punctuation">{{'{'}}</span>provider<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+Currently, the following are packages that provide <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25">ModelStreamSupport</a>:
+<ul> <li>@travetto/model - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L38">FileModelService</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L30">MemoryModelService</a></li>
+ <li>@travetto/model-mongo - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L78">MongoModelService</a></li>
+ <li>@travetto/model-s3 - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-s3/src/service.ts#L23">S3ModelService</a></li></ul>
+
+If you are using more than one <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25">ModelStreamSupport</a>-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
+
+      <figure class="code">
+      <figcaption class="code">Configuration Methods
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/asset/doc/asset-config.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> S3ModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-s3'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AssetModelSym<span class="token punctuation">,</span> AssetService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/service'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">SymoblBasedConfiguration</span> <span class="token punctuation">{{'{'}}</span>
+  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span>AssetModelSym<span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">getAssetModelService</span><span class="token punctuation">(</span><span class="token parameter">service<span class="token operator">:</span> S3ModelService</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> service<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token comment">/* OR */</span>
+
+<span class="token keyword">class</span> <span class="token class-name">FullConfiguration</span> <span class="token punctuation">{{'{'}}</span>
+  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">getAssetService</span><span class="token punctuation">(</span><span class="token parameter">service<span class="token operator">:</span> S3ModelService</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">AssetService</span><span class="token punctuation">(</span>service<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 Reading of and writing assets uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/asset/src/service.ts#L15">AssetService</a>.  Below you can see an example dealing with a user's profile image.
@@ -103,18 +135,17 @@ To get the asset information, you would call:
 
       <figure class="code">
       <figcaption class="code">Fetching Asset Info
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/asset/doc/user-profile-tags.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/asset/doc/user-profile-meta.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> UserProfileService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user-profile'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">UserProfileTagService</span> <span class="token keyword">extends</span> <span class="token class-name">UserProfileService</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">async</span> <span class="token function">checkImageGroup</span><span class="token punctuation">(</span><span class="token parameter">userId<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">getImageContentType</span><span class="token punctuation">(</span><span class="token parameter">userId<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>model<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userId<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">const</span> info <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>asset<span class="token punctuation">.</span><span class="token function">getMetadata</span><span class="token punctuation">(</span>user<span class="token punctuation">.</span>profileImage<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token comment">// Check asset's tags for a specific group</span>
-    <span class="token keyword">return</span> info<span class="token punctuation">;</span> <span class="token comment">// TODO: Change</span>
+    <span class="token keyword">return</span> info<span class="token punctuation">.</span>contentType<span class="token punctuation">;</span>  <span class="token comment">// Return image content type</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>

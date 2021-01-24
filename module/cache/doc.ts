@@ -1,12 +1,29 @@
-import { doc as d, Code, Section, List, inp, meth, mod, SubSection, lib } from '@travetto/doc';
+import { doc as d, Code, Section, List, inp, meth, mod, SubSection, lib, Install, SnippetLink } from '@travetto/doc';
+import { FileModelService, MemoryModelService } from '@travetto/model';
+import { DynamoDBModelService } from '@travetto/model-dynamodb';
+import { RedisModelService } from '@travetto/model-redis';
+
 import { Cache, EvictCache } from './src/decorator';
-import { CacheService } from './src/service';
+import { CacheModelSym, CacheService } from './src/service';
+
+const ModelExpirySupport = SnippetLink('ModelExpirySupport', '@travetto/model/src/service/expiry.ts', /interface ModelExpirySupport/);
 
 exports.text = d`
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without ${mod.Di}.  The code aims to handle use cases surrounding common/basic usage.
 
+The cache module requires an ${ModelExpirySupport} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${ModelExpirySupport}, or you can roll your own.
+
+${Install('provider', `@travetto/model-{provider}`)}
+
+Currently, the following are packages that provide ${ModelExpirySupport}:
+${List(
+  d`@travetto/model - ${FileModelService}, ${MemoryModelService}`,
+  d`@travetto/model-dynamodb - ${DynamoDBModelService}`,
+  d`@travetto/model-redis - ${RedisModelService}`,
+)}
+
 ${Section('Decorators')}
-The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into JSON.  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.
+The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into ${lib.JSON}.  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.
 
 Additionally, to use the decorators you will need to have a ${CacheService} object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.
 
@@ -39,8 +56,7 @@ ${Code('Using decorators to cache/evict user access', 'doc/evict.ts')}
 
 ${Section('Extending the Cache Service')}
 
-By design, the ${CacheService} relies solely on the ${mod.Model} module.  Specifically on the ModelExpirySupport.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any ModelService that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the ModelService to be registered using the CacheModelSym:
+By design, the ${CacheService} relies solely on the ${mod.Model} module.  Specifically on the ${ModelExpirySupport}.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the model service to be registered using the ${CacheModelSym.description!}:
 
 ${Code('Registering a Custom Model Source', 'doc/custom.ts')}
-
 `;

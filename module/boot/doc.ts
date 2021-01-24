@@ -1,4 +1,4 @@
-import { doc as d, Code, Section, List, inp, meth, Ref, lib, Execute } from '@travetto/doc';
+import { doc as d, Code, Section, SubSection, List, inp, meth, Ref, lib, Execute } from '@travetto/doc';
 import { FileCache, ExecUtil, StreamUtil } from './src';
 
 const AppCacheLink = Ref('AppCache', 'src-ts/app-cache.ts');
@@ -14,8 +14,8 @@ ${List(
   'Environmental Information',
   'Cache Support',
   'File Operations',
-  'Typescript bootstrapping',
-  'Process execution',
+  'Typescript Bootstrapping',
+  'Process Execution',
   'Stream Support'
 )}
 
@@ -31,7 +31,7 @@ ${List(
   d`${meth`getTime(key: string, def: number):number`} - Reads an environment variable as milliseconds, with support for ${inp`s`}, ${inp`m`}, and ${inp`h`} suffixes to provide succinct time units.`
 )}
 
-${Section('File Cache')}
+${Section('Cache Support')}
 The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  ${AppCacheLink} is the cache that is used specific to the framework, and is an instance of ${FileCacheLink}.  ${FileCacheLink} is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
@@ -40,15 +40,19 @@ ${Code('File Cache Structure', 'src/cache.d.ts')}
 
 Everything is based on absolute paths being passed in, and translated into cache specific files.
 
-${Section('Registration')}
-This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
-
-${Section('File System Interaction')}
+${Section('File Operations')}
 ${FsUtilLink} provides some high level functionality (like recursive directory delete).
 
-
-${Section('File System Scanning')}
+${SubSection('File System Scanning')}
 ${ScanFsLink} provides a breadth-first search through the file system with the ability to track and collect files via patterns.
+
+${Section('Typescript Bootstrapping')}
+
+${SubSection('Source Indexing')}
+The bootstrap process will also requires an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatica discovery that is used within the framework (and transpiling).
+
+${SubSection('Registration')}
+This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 ${Section('Process Execution')}
 Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${meth`spawn`} and ${meth`fork`}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${inp`Promise`} structure, that throws an error on an non-zero return status.

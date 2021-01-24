@@ -1,17 +1,31 @@
-import { doc as d, Install, Code, Section, Snippet, SnippetLink } from '@travetto/doc';
+import { doc as d, Install, Code, Section, Snippet, SnippetLink, List } from '@travetto/doc';
 import { Injectable } from '@travetto/di';
 
 import { AssetService } from '.';
+import { FileModelService, MemoryModelService } from '@travetto/model';
+import { MongoModelService } from '@travetto/model-mongo';
+import { S3ModelService } from '@travetto/model-s3';
 
 const Asset = SnippetLink('Asset', 'src/types.ts', /interface Asset/);
-const ModelStreamSupport = SnippetLink('ModuleStreamSupport', '@travetto/model/src/service/stream.ts', /interface ModelStreamSupport/);
+const ModelStreamSupport = SnippetLink('ModelStreamSupport', '@travetto/model/src/service/stream.ts', /interface ModelStreamSupport/);
 const AssetNamingStrategySnippet = Snippet('AssetNamingStrategy', 'src/naming.ts', /interface AssetNamingStrategy/, /^[}]/);
 
 exports.text = d`
 
 The asset module requires an ${ModelStreamSupport} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${ModelStreamSupport}, or you can roll your own.
 
-${Install('provider', `@travetto/asset-{provider}`)}
+${Install('provider', `@travetto/model-{provider}`)}
+
+Currently, the following are packages that provide ${ModelStreamSupport}:
+${List(
+  d`@travetto/model - ${FileModelService}, ${MemoryModelService}`,
+  d`@travetto/model-mongo - ${MongoModelService}`,
+  d`@travetto/model-s3 - ${S3ModelService}`,
+)}
+
+If you are using more than one ${ModelStreamSupport}-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
+
+${Code('Configuration Methods', 'doc/asset-config.ts')}
 
 Reading of and writing assets uses the ${AssetService}.  Below you can see an example dealing with a user's profile image.
 
@@ -35,5 +49,5 @@ ${Code('Asset Structure', 'src/types.ts')}
 
 To get the asset information, you would call:
 
-${Code('Fetching Asset Info', 'doc/user-profile-tags.ts')}
+${Code('Fetching Asset Info', 'doc/user-profile-meta.ts')}
 `;

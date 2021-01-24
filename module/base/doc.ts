@@ -13,15 +13,16 @@ exports.text = d`
 Base is the foundation of all ${lib.Travetto} applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
 ${List(
-  'Environmental Information',
+  'Application Manifest',
   'File Operations',
   'Resource Management',
-  'Life-cycle Support',
-  'Stacktrace Management ',
+  'Lifecycle Support',
+  'Shutdown Management',
+  'Standard Error Support',
   'General Utilities'
 )}
 
-${Section('Environmental Information')}
+${Section('Application Manifest')}
 The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers 
 as well. The information that is available is:
 
@@ -36,17 +37,6 @@ ${List(
   d`${meth`hasProfile(p: string): boolean;`} - Test whether or not a profile is active.`,
 )}
 
-With respect to ${fld`process.env`}, we specifically test for all uppercase, lowercase, and given case. This allows us to test various patterns and catch flags that might be off due to casing. That would mean that a key of ${inp`Enable_Feature`} would be tested as:
-
-${List(
-  inp`Enable_Feature`,
-  inp`ENABLE_FEATURE`,
-  inp`enable_feature`,
-)}
-
-${SubSection('App Information')}
-This basically exposes your ${pth`package.json`} data as a typed data structure, useful for integrating package information into your application.
-
 ${Section('File Operations')}
 The framework does a fair amount of file system scanning to auto - load files. It also needs to have knowledge of what files are available. The framework provides a simple and performant functionality for recursively finding files. This functionality leverages regular expressions in lieu of glob pattern matching(this is to minimize overall code complexity).
 
@@ -54,7 +44,7 @@ A simple example of finding specific ${pth`.config`} files in your codebase:
 
 ${Code('Looking for all .config files with the prefix defined by svc', 'doc/find.ts')}
 
-${Section('Application Resources')}
+${Section('Resource Management')}
 
 Resource management, loading of files, and other assets at runtime is a common pattern that the ${ResourceManagerLink} encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
 
@@ -77,7 +67,14 @@ An example would be something like ${pth`phase.init.ts`} in the ${mod.Config} mo
 
 ${Code('Config phase init', '@travetto/config/support/phase.init.ts')}
 
-${Section('Common Application Error Class')}
+${Section('Shutdown Management')}
+
+Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides ${meth`process.exit`} to properly handle ${inp`SIGKILL`} and ${inp`SIGINT`}, with a default threshold of 3 seconds. In the advent of a ${inp`SIGTERM`} signal, the code exits immediately without any cleanup.
+
+As a registered shutdown handler, you can do.
+${Code('Registering a shutdown handler', 'doc/shutdown.ts')}
+
+${Section('Standard Error Support')}
 
 While the framework is 100 % compatible with standard ${inp`Error`} instances, there are cases in which additional functionality is desired. Within the framework we use ${AppErrorLink} (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the ${mod.Rest} module and HTTP status codes).  
 
@@ -93,14 +90,8 @@ ${List(
   d`${inp`unavailable`} - Resource was unresponsive`,
 )}
 
-${Section('Shutdown')}
 
-Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides ${meth`process.exit`} to properly handle ${inp`SIGKILL`} and ${inp`SIGINT`}, with a default threshold of 3 seconds. In the advent of a ${inp`SIGTERM`} signal, the code exits immediately without any cleanup.
-
-As a registered shutdown handler, you can do.
-${Code('Registering a shutdown handler', 'doc/shutdown.ts')}
-
-${Section('Stacktrace')}
+${SubSection('Stacktrace')}
 The built in stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  
 
 From a test scenario:
@@ -113,16 +104,16 @@ ${Execute('tack trace from async errors', 'doc/stack-test.ts')}
 
 The needed functionality cannot be loaded until ${meth`init.action`} executes, and so must be required only at that time.
 
-${Section('Util')}
+${Section('General Utilities')}
 Simple functions for providing a minimal facsimile to ${lib.Lodash}, but without all the weight. Currently ${UtilLink} includes:
 
 ${List(
-  d`${meth`isPrimitive(el: any)`} determines if ${inp`el`} is a ${inp`string`}, ${inp`boolean`}, ${inp`number`} or ${inp`RegExp`}`,
-  d`${meth`isPlainObject(obj: any)`} determines if the obj is a simple object`,
-  d`${meth`isFunction(o: any)`} determines if ${inp`o`} is a simple ${inp`Function`}`,
-  d`${meth`isClass(o: any)`} determines if ${inp`o`} is a class constructor`,
-  d`${meth`isSimple(a: any)`} determines if ${inp`a`} is a simple value`,
-  d`${meth`deepAssign(a: any, b: any, mode ?)`} which allows for deep assignment of ${inp`b`} onto ${inp`a`}, the ${inp`mode`} determines how aggressive the assignment is, and how flexible it is.  ${inp`mode`} can have any of the following values: ${List(
+  d`${meth`isPrimitive(el)`} determines if ${inp`el`} is a ${inp`string`}, ${inp`boolean`}, ${inp`number`} or ${inp`RegExp`}`,
+  d`${meth`isPlainObject(obj)`} determines if the obj is a simple object`,
+  d`${meth`isFunction(o)`} determines if ${inp`o`} is a simple ${inp`Function`}`,
+  d`${meth`isClass(o)`} determines if ${inp`o`} is a class constructor`,
+  d`${meth`isSimple(a)`} determines if ${inp`a`} is a simple value`,
+  d`${meth`deepAssign(a, b, mode ?)`} which allows for deep assignment of ${inp`b`} onto ${inp`a`}, the ${inp`mode`} determines how aggressive the assignment is, and how flexible it is.  ${inp`mode`} can have any of the following values: ${List(
     d`${inp`loose`}, which is the default is the most lenient. It will not error out, and overwrites will always happen`,
     d`${inp`coerce`}, will attempt to force values from ${inp`b`} to fit the types of ${inp`a`}, and if it can't it will error out`,
     d`${inp`strict`}, will error out if the types do not match`,
