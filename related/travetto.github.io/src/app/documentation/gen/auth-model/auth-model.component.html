@@ -13,7 +13,25 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/auth-model</code></pre>     
       </figure>
 
-This module provides the integration between the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth" title="Authentication scaffolding for the travetto framework">Authentication</a> module and the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Core</a>.
+This module provides the integration between the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth" title="Authentication scaffolding for the travetto framework">Authentication</a> module and the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Core</a>. 
+
+The asset module requires an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10">ModelCrudSupport</a> to provide functionality for reading and storing user information. You can use any existing providers to serve as your <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10">ModelCrudSupport</a>, or you can roll your own.
+
+      <figure class="install">
+      <figcaption class="install">provider
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-<span class="token punctuation">{{'{'}}</span>provider<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+Currently, the following are packages that provide <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10">ModelCrudSupport</a>:
+<ul> <li><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-dynamodb" title="DynamoDB backing for the travetto model module.">DynamoDB Model Support</a> - @travetto/model-dynamodb</li>
+ <li><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-elasticsearch" title="Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.">Elasticsearch Model Source</a> @travetto/model-elasticsearch</li>
+ <li><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-firestore" title="Firestore backing for the travetto model module.">Firestore Model Support</a> @travetto/model-firestore</li>
+ <li><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a> @travetto/model-mongo</li>
+ <li><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-redis" title="Redis backing for the travetto model module.">Redis Model Support</a> @travetto/model-redis</li>
+ <li><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-s3" title="S3 backing for the travetto model module.">S3 Model Support</a> @travetto/model-s3</li>
+ <li><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Source</a> @travetto/model-sql</li></ul>
 
 The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-model/src/identity.ts#L6">RegisteredIdentity</a>
 

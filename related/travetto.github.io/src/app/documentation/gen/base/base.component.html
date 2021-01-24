@@ -15,14 +15,15 @@
 
 Base is the foundation of all <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
-<ul> <li>Environmental Information</li>
+<ul> <li>Application Manifest</li>
  <li>File Operations</li>
  <li>Resource Management</li>
- <li>Life-cycle Support</li>
- <li>Stacktrace Management </li>
+ <li>Lifecycle Support</li>
+ <li>Shutdown Management</li>
+ <li>Standard Error Support</li>
  <li>General Utilities</li></ul>
 
-<h2 id="environmental-information">Environmental Information</h2>
+<h2 id="application-manifest">Application Manifest</h2>
 The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers 
 as well. The information that is available is:
 
@@ -34,15 +35,6 @@ as well. The information that is available is:
  <li><code class="item field">source.local: string[]</code> - Local source folders for transpiling.  Does not extend to installed modules.</li>
  <li><code class="item field">source.common: string[]</code> - Common source folders for transpiling. Includes installed modules.</li>
  <li><code class="item method">hasProfile(p: string): boolean;</code> - Test whether or not a profile is active.</li></ul>
-
-With respect to <code class="item field">process.env</code>, we specifically test for all uppercase, lowercase, and given case. This allows us to test various patterns and catch flags that might be off due to casing. That would mean that a key of <code class="item input">Enable_Feature</code> would be tested as:
-
-<ul> <li><code class="item input">Enable_Feature</code></li>
- <li><code class="item input">ENABLE_FEATURE</code></li>
- <li><code class="item input">enable_feature</code></li></ul>
-
-<h3 id="app-information">App Information</h3>
-This basically exposes your <code class="item path">package.json</code> data as a typed data structure, useful for integrating package information into your application.
 
 <h2 id="file-operations">File Operations</h2>
 The framework does a fair amount of file system scanning to auto - load files. It also needs to have knowledge of what files are available. The framework provides a simple and performant functionality for recursively finding files. This functionality leverages regular expressions in lieu of glob pattern matching(this is to minimize overall code complexity).
@@ -68,7 +60,7 @@ A simple example of finding specific <code class="item path">.config</code> file
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h2 id="application-resources">Application Resources</h2>
+<h2 id="resource-management">Resource Management</h2>
 
 Resource management, loading of files, and other assets at runtime is a common pattern that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts">ResourceManager</a> encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
 
@@ -123,21 +115,7 @@ An example would be something like <code class="item path">phase.init.ts</code> 
 <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>     
       </figure>
 
-<h2 id="common-application-error-class">Common Application Error Class</h2>
-
-While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
-
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9">AppError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
-<ul> <li><code class="item input">general</code> - General purpose errors</li>
- <li><code class="item input">system</code> - Synonym for <code class="item input">general</code></li>
- <li><code class="item input">data</code> - Data format, content, etc are incorrect. Generally correlated to bad input.</li>
- <li><code class="item input">permission</code> - Operation failed due to lack of permissions</li>
- <li><code class="item input">auth</code> - Operation failed due to lack of authentication</li>
- <li><code class="item input">missing</code> - Resource was not found when requested</li>
- <li><code class="item input">timeout</code> - Operation did not finish in a timely manner</li>
- <li><code class="item input">unavailable</code> - Resource was unresponsive</li></ul>
-
-<h2 id="shutdown">Shutdown</h2>
+<h2 id="shutdown-management">Shutdown Management</h2>
 
 Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides <code class="item method">process.exit</code> to properly handle <code class="item input">SIGKILL</code> and <code class="item input">SIGINT</code>, with a default threshold of 3 seconds. In the advent of a <code class="item input">SIGTERM</code> signal, the code exits immediately without any cleanup.
 
@@ -157,7 +135,21 @@ As a registered shutdown handler, you can do.
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h2 id="stacktrace">Stacktrace</h2>
+<h2 id="standard-error-support">Standard Error Support</h2>
+
+While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
+
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9">AppError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+<ul> <li><code class="item input">general</code> - General purpose errors</li>
+ <li><code class="item input">system</code> - Synonym for <code class="item input">general</code></li>
+ <li><code class="item input">data</code> - Data format, content, etc are incorrect. Generally correlated to bad input.</li>
+ <li><code class="item input">permission</code> - Operation failed due to lack of permissions</li>
+ <li><code class="item input">auth</code> - Operation failed due to lack of authentication</li>
+ <li><code class="item input">missing</code> - Resource was not found when requested</li>
+ <li><code class="item input">timeout</code> - Operation did not finish in a timely manner</li>
+ <li><code class="item input">unavailable</code> - Resource was unresponsive</li></ul>
+
+<h3 id="stacktrace">Stacktrace</h3>
 The built in stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  
 
 From a test scenario:
@@ -213,15 +205,15 @@ Error: Uh oh
 
 The needed functionality cannot be loaded until <code class="item method">init.action</code> executes, and so must be required only at that time.
 
-<h2 id="util">Util</h2>
+<h2 id="general-utilities">General Utilities</h2>
 Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/util.ts#L9">Util</a> includes:
 
-<ul> <li><code class="item method">isPrimitive(el: any)</code> determines if <code class="item input">el</code> is a <code class="item input">string</code>, <code class="item input">boolean</code>, <code class="item input">number</code> or <code class="item input">RegExp</code></li>
- <li><code class="item method">isPlainObject(obj: any)</code> determines if the obj is a simple object</li>
- <li><code class="item method">isFunction(o: any)</code> determines if <code class="item input">o</code> is a simple <code class="item input">Function</code></li>
- <li><code class="item method">isClass(o: any)</code> determines if <code class="item input">o</code> is a class constructor</li>
- <li><code class="item method">isSimple(a: any)</code> determines if <code class="item input">a</code> is a simple value</li>
- <li><code class="item method">deepAssign(a: any, b: any, mode ?)</code> which allows for deep assignment of <code class="item input">b</code> onto <code class="item input">a</code>, the <code class="item input">mode</code> determines how aggressive the assignment is, and how flexible it is.  <code class="item input">mode</code> can have any of the following values: <ul> <li><code class="item input">loose</code>, which is the default is the most lenient. It will not error out, and overwrites will always happen</li>
+<ul> <li><code class="item method">isPrimitive(el)</code> determines if <code class="item input">el</code> is a <code class="item input">string</code>, <code class="item input">boolean</code>, <code class="item input">number</code> or <code class="item input">RegExp</code></li>
+ <li><code class="item method">isPlainObject(obj)</code> determines if the obj is a simple object</li>
+ <li><code class="item method">isFunction(o)</code> determines if <code class="item input">o</code> is a simple <code class="item input">Function</code></li>
+ <li><code class="item method">isClass(o)</code> determines if <code class="item input">o</code> is a class constructor</li>
+ <li><code class="item method">isSimple(a)</code> determines if <code class="item input">a</code> is a simple value</li>
+ <li><code class="item method">deepAssign(a, b, mode ?)</code> which allows for deep assignment of <code class="item input">b</code> onto <code class="item input">a</code>, the <code class="item input">mode</code> determines how aggressive the assignment is, and how flexible it is.  <code class="item input">mode</code> can have any of the following values: <ul> <li><code class="item input">loose</code>, which is the default is the most lenient. It will not error out, and overwrites will always happen</li>
  <li><code class="item input">coerce</code>, will attempt to force values from <code class="item input">b</code> to fit the types of <code class="item input">a</code>, and if it can't it will error out</li>
  <li><code class="item input">strict</code>, will error out if the types do not match</li></ul></li>
  <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li></ul>

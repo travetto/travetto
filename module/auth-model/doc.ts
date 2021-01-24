@@ -1,8 +1,25 @@
-import { doc as d, mod, Code, SnippetLink, Section, Snippet } from '@travetto/doc';
+import { doc as d, mod, Code, SnippetLink, Section, Snippet, Install, List } from '@travetto/doc';
+
+const ModelCrudSupport = SnippetLink('ModelCrudSupport', '@travetto/model/src/service/crud.ts', /interface ModelCrudSupport/);
 
 exports.text = d`
 
-This module provides the integration between the ${mod.Auth} module and the ${mod.Model}.
+This module provides the integration between the ${mod.Auth} module and the ${mod.Model}. 
+
+The asset module requires an ${ModelCrudSupport} to provide functionality for reading and storing user information. You can use any existing providers to serve as your ${ModelCrudSupport}, or you can roll your own.
+
+${Install('provider', `@travetto/model-{provider}`)}
+
+Currently, the following are packages that provide ${ModelCrudSupport}:
+${List(
+  d`${mod.ModelDynamodb} - @travetto/model-dynamodb`,
+  d`${mod.ModelElasticsearch} @travetto/model-elasticsearch`,
+  d`${mod.ModelFirestore} @travetto/model-firestore`,
+  d`${mod.ModelMongo} @travetto/model-mongo`,
+  d`${mod.ModelRedis} @travetto/model-redis`,
+  d`${mod.ModelS3} @travetto/model-s3`,
+  d`${mod.ModelSql} @travetto/model-sql`,
+)}
 
 The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a ${SnippetLink('RegisteredIdentity', './src/identity.ts', /interface RegisteredIdentity/)}
 

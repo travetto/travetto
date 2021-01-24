@@ -17,8 +17,8 @@ Boot is basic environment  awareness coupled with typescript bootstrapping for <
 <ul> <li>Environmental Information</li>
  <li>Cache Support</li>
  <li>File Operations</li>
- <li>Typescript bootstrapping</li>
- <li>Process execution</li>
+ <li>Typescript Bootstrapping</li>
+ <li>Process Execution</li>
  <li>Stream Support</li></ul>
 
 <h2 id="environmental-information">Environmental Information</h2>
@@ -31,7 +31,7 @@ The functionality we support for testing and retrieving environment information:
  <li><code class="item method">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li>
  <li><code class="item method">getTime(key: string, def: number):number</code> - Reads an environment variable as milliseconds, with support for <code class="item input">s</code>, <code class="item input">m</code>, and <code class="item input">h</code> suffixes to provide succinct time units.</li></ul>
 
-<h2 id="file-cache">File Cache</h2>
+<h2 id="cache-support">Cache Support</h2>
 The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/app-cache.ts">AppCache</a> is the cache that is used specific to the framework, and is an instance of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L11">FileCache</a>.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L11">FileCache</a> is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
@@ -112,14 +112,19 @@ The class organization looks like:
 
 Everything is based on absolute paths being passed in, and translated into cache specific files.
 
-<h2 id="registration">Registration</h2>
-This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
-
-<h2 id="file-system-interaction">File System Interaction</h2>
+<h2 id="file-operations">File Operations</h2>
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/fs.ts#L11">FsUtil</a> provides some high level functionality (like recursive directory delete).
 
-<h2 id="file-system-scanning">File System Scanning</h2>
+<h3 id="file-system-scanning">File System Scanning</h3>
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L57">ScanFs</a> provides a breadth-first search through the file system with the ability to track and collect files via patterns.
+
+<h2 id="typescript-bootstrapping">Typescript Bootstrapping</h2>
+
+<h3 id="source-indexing">Source Indexing</h3>
+The bootstrap process will also requires an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatica discovery that is used within the framework (and transpiling).
+
+<h3 id="registration">Registration</h3>
+This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 <h2 id="process-execution">Process Execution</h2>
 Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L79">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.

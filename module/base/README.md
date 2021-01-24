@@ -11,14 +11,15 @@ npm install @travetto/base
 Base is the foundation of all [Travetto](https://travetto.dev) applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
    
-   *  Environmental Information
+   *  Application Manifest
    *  File Operations
    *  Resource Management
-   *  Life-cycle Support
-   *  Stacktrace Management 
+   *  Lifecycle Support
+   *  Shutdown Management
+   *  Standard Error Support
    *  General Utilities
 
-## Environmental Information
+## Application Manifest
 The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers 
 as well. The information that is available is:
 
@@ -31,16 +32,6 @@ as well. The information that is available is:
    *  `source.local: string[]` - Local source folders for transpiling.  Does not extend to installed modules.
    *  `source.common: string[]` - Common source folders for transpiling. Includes installed modules.
    *  `hasProfile(p: string): boolean;` - Test whether or not a profile is active.
-
-With respect to `process.env`, we specifically test for all uppercase, lowercase, and given case. This allows us to test various patterns and catch flags that might be off due to casing. That would mean that a key of `Enable_Feature` would be tested as:
-
-   
-   *  `Enable_Feature`
-   *  `ENABLE_FEATURE`
-   *  `enable_feature`
-
-### App Information
-This basically exposes your `package.json` data as a typed data structure, useful for integrating package information into your application.
 
 ## File Operations
 The framework does a fair amount of file system scanning to auto - load files. It also needs to have knowledge of what files are available. The framework provides a simple and performant functionality for recursively finding files. This functionality leverages regular expressions in lieu of glob pattern matching(this is to minimize overall code complexity).
@@ -64,7 +55,7 @@ export async function processServiceConfigs(svc: string) {
 }
 ```
 
-## Application Resources
+## Resource Management
 
 Resource management, loading of files, and other assets at runtime is a common pattern that the [ResourceManager](https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts) encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
 
@@ -117,22 +108,7 @@ export const init = {
 };
 ```
 
-## Common Application Error Class
-
-While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/master/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes).  
-
-The [AppError](https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
-   
-   *  `general` - General purpose errors
-   *  `system` - Synonym for `general`
-   *  `data` - Data format, content, etc are incorrect. Generally correlated to bad input.
-   *  `permission` - Operation failed due to lack of permissions
-   *  `auth` - Operation failed due to lack of authentication
-   *  `missing` - Resource was not found when requested
-   *  `timeout` - Operation did not finish in a timely manner
-   *  `unavailable` - Resource was unresponsive
-
-## Shutdown
+## Shutdown Management
 
 Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides `process.exit` to properly handle `SIGKILL` and `SIGINT`, with a default threshold of 3 seconds. In the advent of a `SIGTERM` signal, the code exits immediately without any cleanup.
 
@@ -150,7 +126,22 @@ export function registerShutdownHandler() {
 }
 ```
 
-## Stacktrace
+## Standard Error Support
+
+While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/master/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes).  
+
+The [AppError](https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+   
+   *  `general` - General purpose errors
+   *  `system` - Synonym for `general`
+   *  `data` - Data format, content, etc are incorrect. Generally correlated to bad input.
+   *  `permission` - Operation failed due to lack of permissions
+   *  `auth` - Operation failed due to lack of authentication
+   *  `missing` - Resource was not found when requested
+   *  `timeout` - Operation did not finish in a timely manner
+   *  `unavailable` - Resource was unresponsive
+
+### Stacktrace
 The built in stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  
 
 From a test scenario:
@@ -202,16 +193,16 @@ Error: Uh oh
 
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
 
-## Util
+## General Utilities
 Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [Util](https://github.com/travetto/travetto/tree/master/module/base/src/util.ts#L9) includes:
 
    
-   *  `isPrimitive(el: any)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
-   *  `isPlainObject(obj: any)` determines if the obj is a simple object
-   *  `isFunction(o: any)` determines if `o` is a simple `Function`
-   *  `isClass(o: any)` determines if `o` is a class constructor
-   *  `isSimple(a: any)` determines if `a` is a simple value
-   *  `deepAssign(a: any, b: any, mode ?)` which allows for deep assignment of `b` onto `a`, the `mode` determines how aggressive the assignment is, and how flexible it is.  `mode` can have any of the following values:    
+   *  `isPrimitive(el)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
+   *  `isPlainObject(obj)` determines if the obj is a simple object
+   *  `isFunction(o)` determines if `o` is a simple `Function`
+   *  `isClass(o)` determines if `o` is a class constructor
+   *  `isSimple(a)` determines if `a` is a simple value
+   *  `deepAssign(a, b, mode ?)` which allows for deep assignment of `b` onto `a`, the `mode` determines how aggressive the assignment is, and how flexible it is.  `mode` can have any of the following values:    
       *  `loose`, which is the default is the most lenient. It will not error out, and overwrites will always happen
       *  `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out
       *  `strict`, will error out if the types do not match

@@ -8,11 +8,42 @@
 npm install @travetto/asset
 ```
 
-The asset module requires an [ModuleStreamSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [ModuleStreamSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25), or you can roll your own.
+The asset module requires an [ModelStreamSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [ModelStreamSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25), or you can roll your own.
 
 **Install: provider**
 ```bash
-npm install @travetto/asset-{provider}
+npm install @travetto/model-{provider}
+```
+
+Currently, the following are packages that provide [ModelStreamSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25):
+   
+   *  @travetto/model - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L38), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L30)
+   *  @travetto/model-mongo - [MongoModelService](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L78)
+   *  @travetto/model-s3 - [S3ModelService](https://github.com/travetto/travetto/tree/master/module/model-s3/src/service.ts#L23)
+
+If you are using more than one [ModelStreamSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25)-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
+
+**Code: Configuration Methods**
+```typescript
+import { InjectableFactory } from '@travetto/di';
+import { S3ModelService } from '@travetto/model-s3';
+import { AssetModelSym, AssetService } from '../src/service';
+
+class SymoblBasedConfiguration {
+  @InjectableFactory(AssetModelSym)
+  static getAssetModelService(service: S3ModelService) {
+    return service;
+  }
+}
+
+/* OR */
+
+class FullConfiguration {
+  @InjectableFactory()
+  static getAssetService(service: S3ModelService) {
+    return new AssetService(service);
+  }
+}
 ```
 
 Reading of and writing assets uses the [AssetService](https://github.com/travetto/travetto/tree/master/module/asset/src/service.ts#L15).  Below you can see an example dealing with a user's profile image.
@@ -94,12 +125,11 @@ import { UserProfileService } from './user-profile';
 import { User } from './user';
 
 export class UserProfileTagService extends UserProfileService {
-  async checkImageGroup(userId: string) {
+  async getImageContentType(userId: string) {
     const user = await this.model.get(User, userId);
     const info = await this.asset.getMetadata(user.profileImage);
 
-    // Check asset's tags for a specific group
-    return info; // TODO: Change
+    return info.contentType;  // Return image content type
   }
 }
 ```
