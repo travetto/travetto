@@ -22,7 +22,7 @@ function hasPreDestroy(o: unknown): o is { preDestroy: () => unknown } {
 /**
  * Dependency registry
  */
-@Watchable('@trv:di/injection')
+@Watchable('@travetto/di/support/watch.injection')
 class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   protected pendingFinalize: Class[] = [];
 

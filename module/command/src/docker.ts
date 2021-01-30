@@ -67,7 +67,7 @@ export class DockerContainer {
   /**
    * Watch execution for any failed state and evict as needed
    */
-  private watchForEviction(state: ExecutionState, all = false) {
+  private watchForEviction(state: ExecutionState, all = false): ExecutionState {
     state.result = state.result.catch(e => {
       if (all || e.killed) {
         this.evict = true;
@@ -314,7 +314,7 @@ export class DockerContainer {
     if (this.pendingExecutions) {
       const pendingResults = [...this.pendingExecutions.values()].map(e => e.result);
       this.pendingExecutions.clear();
-      prom = Promise.all([toStop, ...pendingResults]).then(([first]) => first);
+      prom = Promise.all([toStop, ...pendingResults]).then(([first]) => first) as (typeof prom);
     }
     return prom;
   }
@@ -327,7 +327,7 @@ export class DockerContainer {
     const execState = this.runCmd('exec', ...flags, this.container, ...(args ?? []));
     this.pendingExecutions.add(execState);
 
-    execState.result = execState.result.finally(() => this.pendingExecutions.delete(execState));
+    execState.result.finally(() => this.pendingExecutions.delete(execState));
 
     return execState;
   }

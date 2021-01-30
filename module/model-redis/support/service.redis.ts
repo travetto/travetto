@@ -1,6 +1,8 @@
-const version = 5;
+import type { Service } from '@travetto/command/bin/lib/service';
 
-export const service = {
+const version = '5';
+
+export const service: Service = {
   name: 'redis',
   version,
   port: 6379,

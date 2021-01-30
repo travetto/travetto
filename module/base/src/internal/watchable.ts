@@ -13,9 +13,7 @@ export function Watchable(key: string) {
       } catch {
         return;
       }
-      const [, mod, sub] = key.match(/@trv:([^/]+)\/(.*)/) ?? [];
-      const full = `@travetto/${mod}/support/watch.${sub}`;
-      return require(full).watch(target);
+      return require(key).watch(target);
     }
   };
 }

@@ -41,7 +41,7 @@ export class SourceIndex {
   private static compute(entry: ScanEntry) {
     const file = entry.module;
     if (file.includes('node_modules')) {
-      const mod = file.match(/^.*node_modules\/(@travetto\/[^/]+)(\/.*)?$/)?.[1];
+      const mod = file.match(/^.*node_modules\/((?:@[^/]+\/)?[^/]+)/)?.[1];
       if (mod) { // External module
         if (entry.stats.isDirectory() || entry.stats.isSymbolicLink()) {
           return { mod, sub: '' };

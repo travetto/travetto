@@ -10,6 +10,7 @@ export type Service = {
   privileged?: boolean;
   image: string;
   args?: string[];
+  ready?: { url: string, test?(body: string): boolean };
   volumes?: Record<string, string>;
   env?: Record<string, string>;
   require?: string;
@@ -23,10 +24,26 @@ export class ServiceUtil {
   /**
    * Determine if service is running
    */
-  static async isRunning(svc: Service, timeout = 100) {
+  static async * isRunning(svc: Service, mode: 'running' | 'startup', timeout = 100,) {
     const port = svc.ports ? +Object.keys(svc.ports)[0] : (svc.port ?? 0);
     if (port > 0) {
-      return CommandUtil.waitForPort(port, timeout).then(x => true, x => false);
+      const checkPort = CommandUtil.waitForPort(port, timeout).then(x => true, x => false);
+      if (mode === 'startup') {
+        yield { input: `Waiting for port ${port}...` };
+        let res = await checkPort;
+        if (res && svc.ready) {
+          try {
+            yield { input: `Waiting for url ${svc.ready.url}...` };
+            const body = await CommandUtil.waitForHttp(svc.ready.url, timeout);
+            res = svc.ready.test ? svc.ready.test(body) : res;
+          } catch {
+            res = false;
+          }
+        }
+        return res;
+      } else {
+        return await checkPort;
+      }
     } else {
       return true;
     }
@@ -43,7 +60,8 @@ export class ServiceUtil {
    * Stop a service
    */
   static async * stop(svc: Service) {
-    if (await this.isRunning(svc)) {
+    const running = yield* this.isRunning(svc, 'running');
+    if (running) {
       const pid = await this.getContainerId(svc);
       if (pid) {
         yield { subtitle: 'Stopping' };
@@ -61,7 +79,8 @@ export class ServiceUtil {
    * Start a service
    */
   static async * start(svc: Service) {
-    if (!(await this.isRunning(svc))) {
+    const preRun = yield* this.isRunning(svc, 'running');
+    if (!preRun) {
       yield { subtitle: 'Starting' };
       try {
         const conatiner = new DockerContainer(svc.image)
@@ -89,7 +108,8 @@ export class ServiceUtil {
         const promise = await conatiner.setUnref(false).run(svc.args ?? []);
 
         const out = (await promise).stdout;
-        if (!await this.isRunning(svc, 15000)) {
+        const running = yield* this.isRunning(svc, 'startup', 15000);
+        if (!running) {
           yield { failure: 'Failed to start service correctly' };
         } else {
           yield { success: `Started ${out.substring(0, 12)}` };
@@ -107,7 +127,7 @@ export class ServiceUtil {
    * @param svc
    */
   static async * restart(svc: Service) {
-    if (await this.isRunning(svc)) {
+    if (await this.isRunning(svc, 'running')) {
       yield* this.stop(svc);
     }
     yield* this.start(svc);
@@ -117,7 +137,7 @@ export class ServiceUtil {
    * Get status of a service
    */
   static async * status(svc: Service) {
-    if (!await this.isRunning(svc)) {
+    if (!await this.isRunning(svc, 'running')) {
       yield { subsubtitle: 'Not running' };
     } else {
       const pid = await this.getContainerId(svc);

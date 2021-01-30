@@ -379,24 +379,9 @@ $ ./doc/list.sh
 
 [
   {
-    "id": "eba6734e307bc66d442ae78291e71040",
-    "text": "New Todo",
-    "created": "2021-03-14T05:00:02.819Z"
-  },
-  {
-    "id": "77ba279b4e30fdacfc55b9e3be224403",
-    "text": "New Todo",
-    "created": "2021-03-14T05:00:03.144Z"
-  },
-  {
-    "id": "5fe95813c97b18ef067eb8025287189f",
-    "text": "New Todo",
-    "created": "2021-03-14T05:00:03.248Z"
-  },
-  {
     "id": "422e793aed76ee063d13feec2e5e95b4",
     "text": "New Todo",
-    "created": "2021-03-14T05:00:03.441Z"
+    "created": "2021-03-14T05:00:02.819Z"
   }
 ]
 ```

@@ -1,12 +1,14 @@
 import * as fs from 'fs';
 import * as os from 'os';
 
+import type { Service } from '@travetto/command/bin/lib/service';
+
 const temp = `${os.tmpdir()}/local-stack`;
 try {
   fs.mkdirSync(temp);
 } catch { }
 
-export const service = {
+export const service: Service = {
   name: 's3',
   version: 'latest',
   privileged: true,

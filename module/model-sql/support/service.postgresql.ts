@@ -1,3 +1,5 @@
+import type { Service } from '@travetto/command/bin/lib/service';
+
 let valid = false;
 try {
   require('pg');
@@ -6,7 +8,7 @@ try {
 }
 const version = '12.2';
 
-export const service = valid ? {
+export const service: Service | undefined = valid ? {
   name: 'postgresql',
   version,
   port: 5432,

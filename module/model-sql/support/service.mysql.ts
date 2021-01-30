@@ -1,3 +1,5 @@
+import type { Service } from '@travetto/command/bin/lib/service';
+
 let valid = false;
 try {
   require('mysql');
@@ -7,7 +9,7 @@ try {
 
 const version = '5.6';
 
-export const service = valid ? {
+export const service: Service | undefined = valid ? {
   name: 'mysql',
   version,
   image: `mysql:${version}`,

@@ -16,6 +16,13 @@ if (target && target.startsWith(root)) {
 
 // Update commander
 [
+  !target ?
+    'Restarting Services'
+      .$tap(console.log)
+      .$map(() => {
+        require('child_process').spawnSync('npm', ['run', 'service', 'restart'], { stdio: 'inherit', encoding: 'utf8' });
+      }) : undefined,
+
   commander
     .$read()
     .$replace(/(process[.]stdout[.]columns \|\|).*;/g, (_, k) => `${k} 140;`)
@@ -70,14 +77,6 @@ if (target && target.startsWith(root)) {
     .$parallel(
       ({ mod, html, title, dir, mods }) =>
         title
-          .$flatMap(x => mod !== 'todo-app' ? [x] :
-            'Restarting Mongodb'
-              .$tap(console.log)
-              .$map(() => {
-                require('child_process').spawnSync('npm', ['run', 'service', 'restart', 'mongodb'], { stdio: 'inherit', encoding: 'utf8' });
-                return x;
-              })
-          )
           .$tap(console.log)
           .$exec('trv', {
             args: ['doc', '-o', page(html), '-o', './README.md'],
