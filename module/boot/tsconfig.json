@@ -10,6 +10,7 @@
     "lib": [
       "es2020"
     ],
+    "resolveJsonModule": true,
     "removeComments": true,
     "noEmitOnError": false,
     "noErrorTruncation": true,

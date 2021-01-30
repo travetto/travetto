@@ -17,30 +17,31 @@ export class CommandUtil {
   static async waitForHttp(url: string, ms = 5000) {
     const start = Date.now();
     const port = /:\d+/.test(url) ? parseInt(url.replace(/.*:(\d+).*/, (all, p) => p), 10) : (url.startsWith('https') ? 443 : 80);
-    console.debug('Waiting for port', { port });
     await this.waitForPort(port, ms);
-    console.debug('Acquired port', { port });
 
     while ((Date.now() - start) < ms) {
-      const status = await new Promise<number>((resolve) => {
+      const [status, body] = await new Promise<[number, string]>((resolve) => {
+        const data: Buffer[] = [];
+        const res = (s: number) => resolve([s, Buffer.concat(data).toString('utf8')]);
         try {
           const client = url.startsWith('https') ? https : http;
           const req = client.get(url, (msg) =>
             msg
-              .on('data', () => { }) // Consume data
-              .on('error', (err) => resolve(500))
-              .on('end', () => resolve((msg.statusCode || 200)))
-              .on('close', () => resolve((msg.statusCode || 200))));
-          req.on('error', (err) => resolve(500));
+              .on('data', (d) => { data.push(Buffer.from(d)); }) // Consume data
+              .on('error', (err) => res(500))
+              .on('end', () => res((msg.statusCode || 200)))
+              .on('close', () => res((msg.statusCode || 200))));
+          req.on('error', (err) => res(500));
         } catch (e) {
-          resolve(400);
+          res(400);
         }
       });
       if (status >= 200 && status <= 299) {
-        return; // We good
+        return body; // We good
       }
       await new Promise(res => setTimeout(res, 100));
     }
+    throw new Error('Could not make http connection to url');
   }
 
   /**

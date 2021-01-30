@@ -1,6 +1,8 @@
+import type { Service } from '@travetto/command/bin/lib/service';
+
 const version = 'latest';
 
-export const service = {
+export const service: Service = {
   name: 'firestore',
   version,
   ports: { 7000: 8080 },

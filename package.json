@@ -15,7 +15,7 @@
     "test": "cd module/test; trv test:lerna",
     "upgrade": "./bin/util/upgrade",
     "lint": "npx eslint --ext .js --ext .ts .",
-    "docs": "./bin/util/docs.js",
+    "doc": "./bin/util/doc.js",
     "boot": "cd module/boot; npm run build",
     "lerna": "npx lerna bootstrap --hoist",
     "init": "npm run lerna; npm run boot; npm run clean; npm run link"

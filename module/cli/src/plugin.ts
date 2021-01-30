@@ -1,4 +1,4 @@
-import { EnvUtil, SourceIndex } from '@travetto/boot';
+import { SourceIndex } from '@travetto/boot';
 
 import { color } from './color';
 import { BasePlugin } from './plugin-base';
@@ -25,9 +25,6 @@ export class PluginManager {
   static getPluginMapping() {
     const all = new Map<string, string>();
     for (const { file } of SourceIndex.find({ folder: 'bin', filter: /bin\/cli-/ })) {
-      all.set(file.replace(/^.*\/bin\/.+?-(.*?)[.][^.]*$/, (_, f) => f), file);
-    }
-    for (const file of EnvUtil.getList('TRV_CLI_FILES')) {
       all.set(file.replace(/^.*\/bin\/.+?-(.*?)[.][^.]*$/, (_, f) => f), file);
     }
     return all;

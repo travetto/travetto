@@ -39,12 +39,14 @@ export interface ExecutionResult {
   killed?: boolean;
 }
 
+type CatchableResult = Promise<ExecutionResult> & { catchAsResult(): Promise<ExecutionResult> };
+
 /**
  * Execution State
  */
-export interface ExecutionState {
+export interface ExecutionState<T extends Promise<ExecutionResult> = Promise<ExecutionResult>> {
   process: ChildProcess;
-  result: Promise<ExecutionResult> & { catchAsResult(): Promise<ExecutionResult> };
+  result: T;
 }
 
 /**
@@ -63,14 +65,6 @@ export interface ExecutionOptions extends SpawnOptions {
    * The stdin source for the execution
    */
   stdin?: string | Buffer | NodeJS.ReadableStream;
-  /**
-   * Exit on completion, with the appropriate exit code
-   */
-  exitOnComplete?: boolean;
-  /**
-   * When timeout occurs, kill using this method in lieu of a direct kill invocation
-   */
-  killOnTimeout?: (proc: ChildProcess) => Promise<void>;
 }
 
 /**
@@ -103,7 +97,7 @@ export class ExecUtil {
    * @param options The options to use to ehance the process
    * @param cmd The command being run
    */
-  static enhanceProcess(p: ChildProcess, options: ExecutionOptions, cmd: string): ExecutionState['result'] {
+  static enhanceProcess(p: ChildProcess, options: ExecutionOptions, cmd: string): CatchableResult {
     const timeout = options.timeout;
 
     const prom = new Promise<ExecutionResult>((resolve, reject) => {
@@ -126,9 +120,7 @@ export class ExecUtil {
           ...result
         };
 
-        if (options.exitOnComplete) {
-          process.exit(final.code);
-        } else if (!final.valid) {
+        if (!final.valid) {
           const err = new Error(`Error executing ${cmd}: ${final.message || final.stderr || final.stdout || 'failed'}`);
           (err as unknown as { meta: ExecutionResult }).meta = final;
           reject(err);
@@ -154,17 +146,13 @@ export class ExecUtil {
 
       if (timeout) {
         timer = setTimeout(async x => {
-          if (options.killOnTimeout) {
-            await options.killOnTimeout(p);
-          } else {
-            p.kill('SIGKILL');
-          }
+          p.kill('SIGKILL');
           finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
         }, timeout);
       }
     });
 
-    const res = prom as ExecutionState['result'];
+    const res = prom as CatchableResult;
     res.catchAsResult = () => res.catch(e => (e as { meta: ExecutionResult }).meta);
     return res;
   }
@@ -175,7 +163,7 @@ export class ExecUtil {
    * @param args The command line argumetns to pass
    * @param options The enhancement options
    */
-  static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
+  static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
     const p = spawn(cmd, args, this.getOpts(options));
     const result = this.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
     return { process: p, result };
@@ -188,7 +176,7 @@ export class ExecUtil {
    * @param args The command line arguments to pass
    * @param options The enhancement options
    */
-  static fork(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
+  static fork(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
     const p = spawn(process.argv0, [cmd, ...args], this.getOpts(options));
     const result = this.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
     return { process: p, result };
