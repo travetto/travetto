@@ -110,15 +110,19 @@ The services are defined as plain javascript files within the framework and can 
 
 **Code: Sample Service Definition**
 ```typescript
+import type { Service } from '@travetto/command/bin/lib/service';
 import { version } from '@elastic/elasticsearch/package.json';
 
-export const service = {
+const port = 9200;
+
+export const service: Service = {
   name: 'elasticsearch',
   version,
-  port: 9200,
+  port,
   env: {
     'discovery.type': 'single-node'
   },
+  ready: { url: `http://localhost:${port}/_cluster/health`, test: b => b.includes('"status":"green"') },
   image: `docker.elastic.co/elasticsearch/elasticsearch:${version}`
 };
 ```

@@ -478,9 +478,9 @@ class UserController {
 }
 ```
 
-## Extension - Rest
+## Extension - Model
 
-To facilitate common RESTful patterns, the module exposes  [Data Modeling Core](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") support in the form of [@ModelController](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model.ts#L23).
+To facilitate common RESTful patterns, the module exposes  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") support in the form of [@ModelController](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model.ts#L23).
 
 **Code: ModelController example**
 ```typescript

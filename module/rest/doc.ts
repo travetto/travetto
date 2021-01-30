@@ -211,7 +211,7 @@ Addtionally, ${SchemaQuery} and ${SchemaBody} can also be used with ${inp`interf
 ${Code(d`Using ${SchemaQuery.name} with a type literal`, 'doc/schema-query-type.ts')}
 
 
-${Section('Extension - Rest')}
+${Section('Extension - Model')}
 
 To facilitate common RESTful patterns, the module exposes  ${mod.Model} support in the form of ${ModelController}.
 

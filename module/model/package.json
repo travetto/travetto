@@ -11,7 +11,7 @@
     "@travetto/registry": "^2.0.0-alpha.0",
     "@travetto/schema": "^2.0.0-alpha.0"
   },
-  "title": "Data Modeling Core",
+  "title": "Data Modeling Support",
   "description": "Datastore abstraction for core operations.",
   "homepage": "https://travetto.io",
   "keywords": [
@@ -27,7 +27,6 @@
     "index.ts",
     "bin",
     "src",
-    "support",
     "test-support"
   ],
   "name": "@travetto/model",

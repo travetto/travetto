@@ -16,7 +16,7 @@
     "mysql": "^2.18.1",
     "pg": "^8.5.1"
   },
-  "title": "SQL Model Source",
+  "title": "SQL Model Service",
   "description": "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "devDependencies": {
     "@travetto/app": "^2.0.0-alpha.0"

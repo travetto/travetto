@@ -223,6 +223,11 @@ export class DocUtil {
     file = res.file;
     const content = res.content.split(/\n/g);
     const startIdx = content.findIndex(l => startPattern.test(l));
+
+    if (startIdx < 0) {
+      throw new Error(`Pattern ${startPattern.source} not found in ${file}`);
+    }
+
     const endIdx = endPattern ? content.findIndex((l, i) => i > startIdx && endPattern.test(l)) : startIdx;
     let text = content.slice(startIdx, endIdx + 1).join('\n');
 

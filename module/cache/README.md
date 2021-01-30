@@ -10,17 +10,17 @@ npm install @travetto/cache
 
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.").  The code aims to handle use cases surrounding common/basic usage.
 
-The cache module requires an [ModelExpirySupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L32) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [ModelExpirySupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L32), or you can roll your own.
+The cache module requires an [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L8) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L8), or you can roll your own.
 
 **Install: provider**
 ```bash
 npm install @travetto/model-{provider}
 ```
 
-Currently, the following are packages that provide [ModelExpirySupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L32):
+Currently, the following are packages that provide [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L8):
    
    *  @travetto/model - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L38), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L30)
-   *  @travetto/model-dynamodb - [DynamoDBModelService](https://github.com/travetto/travetto/tree/master/module/model-dynamodb/src/service.ts#L37)
+   *  @travetto/model-dynamodb - [DynamoDBModelService](https://github.com/travetto/travetto/tree/master/module/model-dynamodb/src/service.ts#L36)
    *  @travetto/model-redis - [RedisModelService](https://github.com/travetto/travetto/tree/master/module/model-redis/src/service.ts#L42)
 
 ## Decorators
@@ -109,7 +109,7 @@ export class UserService {
 
 ## Extending the Cache Service
 
-By design, the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L24) relies solely on the [Data Modeling Core](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [ModelExpirySupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L32).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L24).  The [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L24) is expecting the model service to be registered using the @trv:cache/model:
+By design, the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L24) relies solely on the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L8).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L24).  The [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L24) is expecting the model service to be registered using the @trv:cache/model:
 
 **Code: Registering a Custom Model Source**
 ```typescript

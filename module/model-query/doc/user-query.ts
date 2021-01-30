@@ -1,11 +1,11 @@
-import { ModelService } from '../../../src/service/model';
+import { ModelQuerySupport } from '../src/service/query';
 import { User } from './user';
 
 export class UserSearch {
-  service: ModelService;
+  service: ModelQuerySupport;
 
   find() {
-    return this.service.getAllByQuery(User, {
+    return this.service.query(User, {
       where: {
         $and: [
           {

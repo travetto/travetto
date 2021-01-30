@@ -8,20 +8,20 @@
 npm install @travetto/asset
 ```
 
-The asset module requires an [ModelStreamSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [ModelStreamSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25), or you can roll your own.
+The asset module requires an [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1), or you can roll your own.
 
 **Install: provider**
 ```bash
 npm install @travetto/model-{provider}
 ```
 
-Currently, the following are packages that provide [ModelStreamSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25):
+Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1):
    
    *  @travetto/model - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L38), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L30)
    *  @travetto/model-mongo - [MongoModelService](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L78)
    *  @travetto/model-s3 - [S3ModelService](https://github.com/travetto/travetto/tree/master/module/model-s3/src/service.ts#L23)
 
-If you are using more than one [ModelStreamSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L25)-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
+If you are using more than one [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1)-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
 
 **Code: Configuration Methods**
 ```typescript

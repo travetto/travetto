@@ -1,16 +1,16 @@
 import { doc as d, mod, Code, SnippetLink, Section, Snippet, Install, List } from '@travetto/doc';
 
-const ModelCrudSupport = SnippetLink('ModelCrudSupport', '@travetto/model/src/service/crud.ts', /interface ModelCrudSupport/);
+import { Links } from '@travetto/model/support/doc-support';
 
 exports.text = d`
 
 This module provides the integration between the ${mod.Auth} module and the ${mod.Model}. 
 
-The asset module requires an ${ModelCrudSupport} to provide functionality for reading and storing user information. You can use any existing providers to serve as your ${ModelCrudSupport}, or you can roll your own.
+The asset module requires an ${Links.Crud} to provide functionality for reading and storing user information. You can use any existing providers to serve as your ${Links.Crud}, or you can roll your own.
 
 ${Install('provider', `@travetto/model-{provider}`)}
 
-Currently, the following are packages that provide ${ModelCrudSupport}:
+Currently, the following are packages that provide ${Links.Crud}:
 ${List(
   d`${mod.ModelDynamodb} - @travetto/model-dynamodb`,
   d`${mod.ModelElasticsearch} @travetto/model-elasticsearch`,

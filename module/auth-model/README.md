@@ -8,16 +8,16 @@
 npm install @travetto/auth-model
 ```
 
-This module provides the integration between the [Authentication](https://github.com/travetto/travetto/tree/master/module/auth#readme "Authentication scaffolding for the travetto framework") module and the [Data Modeling Core](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations."). 
+This module provides the integration between the [Authentication](https://github.com/travetto/travetto/tree/master/module/auth#readme "Authentication scaffolding for the travetto framework") module and the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations."). 
 
-The asset module requires an [ModelCrudSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10) to provide functionality for reading and storing user information. You can use any existing providers to serve as your [ModelCrudSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10), or you can roll your own.
+The asset module requires an [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10) to provide functionality for reading and storing user information. You can use any existing providers to serve as your [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10), or you can roll your own.
 
 **Install: provider**
 ```bash
 npm install @travetto/model-{provider}
 ```
 
-Currently, the following are packages that provide [ModelCrudSupport](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10):
+Currently, the following are packages that provide [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10):
    
    *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - @travetto/model-dynamodb
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/master/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.") @travetto/model-elasticsearch
@@ -25,7 +25,7 @@ Currently, the following are packages that provide [ModelCrudSupport](https://gi
    *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-mongo#readme "Mongo backing for the travetto model module.") @travetto/model-mongo
    *  [Redis Model Support](https://github.com/travetto/travetto/tree/master/module/model-redis#readme "Redis backing for the travetto model module.") @travetto/model-redis
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.") @travetto/model-s3
-   *  [SQL Model Source](https://github.com/travetto/travetto/tree/master/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") @travetto/model-sql
+   *  [SQL Model Service](https://github.com/travetto/travetto/tree/master/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") @travetto/model-sql
 
 The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a [RegisteredIdentity](https://github.com/travetto/travetto/tree/master/module/auth-model/src/identity.ts#L6)
 
