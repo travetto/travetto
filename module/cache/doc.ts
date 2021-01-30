@@ -3,19 +3,19 @@ import { FileModelService, MemoryModelService } from '@travetto/model';
 import { DynamoDBModelService } from '@travetto/model-dynamodb';
 import { RedisModelService } from '@travetto/model-redis';
 
+import { Links } from '@travetto/model/support/doc-support';
+
 import { Cache, EvictCache } from './src/decorator';
 import { CacheModelSym, CacheService } from './src/service';
-
-const ModelExpirySupport = SnippetLink('ModelExpirySupport', '@travetto/model/src/service/expiry.ts', /interface ModelExpirySupport/);
 
 exports.text = d`
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without ${mod.Di}.  The code aims to handle use cases surrounding common/basic usage.
 
-The cache module requires an ${ModelExpirySupport} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${ModelExpirySupport}, or you can roll your own.
+The cache module requires an ${Links.Expiry} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${Links.Expiry}, or you can roll your own.
 
 ${Install('provider', `@travetto/model-{provider}`)}
 
-Currently, the following are packages that provide ${ModelExpirySupport}:
+Currently, the following are packages that provide ${Links.Expiry}:
 ${List(
   d`@travetto/model - ${FileModelService}, ${MemoryModelService}`,
   d`@travetto/model-dynamodb - ${DynamoDBModelService}`,
@@ -56,7 +56,7 @@ ${Code('Using decorators to cache/evict user access', 'doc/evict.ts')}
 
 ${Section('Extending the Cache Service')}
 
-By design, the ${CacheService} relies solely on the ${mod.Model} module.  Specifically on the ${ModelExpirySupport}.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the model service to be registered using the ${CacheModelSym.description!}:
+By design, the ${CacheService} relies solely on the ${mod.Model} module.  Specifically on the ${Links.Expiry}.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the model service to be registered using the ${CacheModelSym.description!}:
 
 ${Code('Registering a Custom Model Source', 'doc/custom.ts')}
 `;

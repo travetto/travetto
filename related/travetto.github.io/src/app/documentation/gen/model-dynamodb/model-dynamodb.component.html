@@ -13,12 +13,19 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-dynamodb</code></pre>     
       </figure>
 
-This module provides an <a target="_blank" class="external-link" href="https://aws.amazon.com/dynamodb/">DynamoDB</a>-based implementation for the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Core</a>.  This source allows the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Core</a> module to read, write and query against <a target="_blank" class="external-link" href="https://aws.amazon.com/dynamodb/">DynamoDB</a>. The entire document is stored as a single value, so nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively computed for new values.
+This module provides an <a target="_blank" class="external-link" href="https://aws.amazon.com/dynamodb/">DynamoDB</a>-based implementation for the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>.  This source allows the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and query against <a target="_blank" class="external-link" href="https://aws.amazon.com/dynamodb/">DynamoDB</a>. The entire document is stored as a single value, so nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively computed for new values.
 
-Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the service or config, you can override and register it with the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module.
+Supported featrues:
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10">CRUD</a></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L8">Expiry</a></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10">Indexed</a></li></ul>
 
+    Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source 
+    or config, you can override and register it with the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module.
+
+    
       <figure class="code">
-      <figcaption class="code">Wiring up a custom service
+      <figcaption class="code">Wiring up a custom Model Source
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model-dynamodb/doc/custom-service.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
@@ -33,8 +40,9 @@ Out of the box, by installing the module, everything should be wired up by defau
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-dynamodb/src/config.ts#L5">DynamoDBModelConfig</a> is defined by:
+  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-dynamodb/src/config.ts#L5">DynamoDBModelConfig</a> is defined by:
 
+  
       <figure class="code">
       <figcaption class="code">Structure of DynamoDBModelConfig
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model-dynamodb/src/config.ts">Source</a></cite>
@@ -51,5 +59,9 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   <span class="token keyword">namespace</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
+
+  Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/config/src/decorator.ts#L10">@Config</a> annotation, and so these values can be overridden using the 
+  standard <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/config" title="Environment-aware config management using yaml files">Configuration</a>resolution paths. 
+  
 
 </div>

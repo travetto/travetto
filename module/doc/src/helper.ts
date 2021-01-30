@@ -1,8 +1,8 @@
 import * as n from './nodes';
-import { AllChildren } from './render';
+import { AllType } from './node-types';
 
-export function doc(values: TemplateStringsArray, ...keys: (AllChildren | { ᚕfile: string, name: string } | string)[]) {
-  const out: AllChildren[] = [];
+export function doc(values: TemplateStringsArray, ...keys: (AllType | { ᚕfile: string, name: string } | string)[]) {
+  const out: AllType[] = [];
 
   keys.forEach((el, i) =>
     out.push(

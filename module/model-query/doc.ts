@@ -1,28 +1,36 @@
-import { doc as d, mod, Section, Code, inp, lib, List, SubSection, fld } from '@travetto/doc';
-import { Model } from './src/registry/decorator';
-import { ModelService } from './src/service/model';
-import { ModelSource } from './src/service/source';
+import { doc as d, mod, Section, Code, inp, lib, List, SubSection, fld, Snippet, Table } from '@travetto/doc';
+
+import { Links } from './support/doc-support';
 
 exports.text = d`
-This module provides a clean interface to data model persistence, modification and retrieval.  This module builds heavily upon the ${mod.Schema}, which is used for data model validation.
+This module provides an enhanced query contract for ${mod.Model} implementations.  This contract has been externalized due to it being more complex than many implemenations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
 
-The module can be segmented into three main areas: declaration, access/storage, and querying
+${Section('Contracts')}
 
-${Section('Declaration')}
-Models are declared via the ${Model} decorator, which allows the system to know that this is a class that is compatible with the module.
+${SubSection(Links.Query)}
+This contract provides the ability to apply the query support to return one or many items, as well as providing counts against a specific query.
 
-${Code('Extending BaseModel', 'doc/alt/docs/src/user.ts')}
+${Snippet(Links.Query.title, './src/service/query.ts', /export interface/, /}/)}
 
-The ${inp`User`} model is now ready to be used with the model services.
+${SubSection(Links.QueryCrud)}
+Reinforcing the complexity provided in these contracts, the ${Links.QueryCrud} contract allows for bulk update/deletion by query.  This requires the underlying implentation to support these operations.
 
-${Section('Access/Storage')}
-The ${ModelService} is the foundation for all access to the storage layer, and provides a comprehensive set of functionality.  The service includes support for modifying individual records, bulk update/insert/delete, partial updates, finding records, and more.  This should be the expected set of functionality for storage and retrieval.
+${Snippet(Links.QueryCrud.title, './src/service/crud.ts', /export interface/, /}/)}
 
-${Code(d`Using ${ModelService.name} with the User model`, 'doc/alt/docs/src/user-manager.ts')}
 
-The ${ModelService} itself relies upon a ${ModelSource} which is the driver for the storage layer.
+${SubSection(Links.QueryFacet)}
+With the complex nature of the query support, the ability to find counts by groups is a common and desirable pattern. This contract allows for faceting on a given field, with query filtering.  Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
 
-During development, ${ModelSource} supports the ability to respond to model changes in real-time, and to modify the underlying storage mechanism.  An example of this would be ${lib.Elasticsearch} schemas being updated as fields are added or removed from the ${Model} class.
+${Snippet(Links.QueryFacet.title, './src/service/facet.ts', /export interface/, /}/)}
+
+${Section('Implementations')}
+
+${Table(
+  ['Service', 'Query', 'QueryCrud', 'QueryFacet'],
+  [mod.ModelElasticsearch, 'X', 'X', 'X'],
+  [mod.ModelMongo, 'X', 'X', 'X',],
+  [mod.ModelSql, 'X', 'X', 'X',],
+)}
 
 ${Section('Querying')}
 
@@ -74,7 +82,7 @@ ${List(
 
 A sample query for ${inp`User`}'s might be:
 
-${Code('Using the query structure for specific queries', 'doc/alt/docs/src/user-query.ts')}
+${Code('Using the query structure for specific queries', 'doc/user-query.ts')}
 
 This would find all users who are over ${inp`35`} and that have the ${inp`contact`} field specified.
 
@@ -96,7 +104,7 @@ ${List(
 
 All sub fields are dot separated for access, e.g. ${fld`user.address.city`}. A query language version of the previous query could look like:
 
-${Code('Query language with boolean checks and exists check', 'not (age < 35) and contact != null', false, 'doc/sql')}
+${Code('Query language with boolean checks and exists check', 'not (age < 35) and contact != null', false, 'sql')}
 
 A more complex query would look like:
 
@@ -106,4 +114,12 @@ ${Code('Query language with more complex needs',
 ${SubSection('Regular Expression')}
 
 When querying with regular expressions,patterns can be specified as ${inp`'strings'`} or as ${inp`/patterns/`}.  The latter allows for the case insensitive modifier: ${inp`/pattern/i`}.  Supporting the insensitive flag is up to the underlying model implementation.
+
+${Section('Custom Model Query Service')}
+In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
+repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the ${mod.ModelQuery} implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
+
+To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.
+
+${Code('MongoDB Service Test Configuration', '@travetto/model-mongo/test/service.query.ts')}
 `;

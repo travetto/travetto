@@ -1,19 +1,18 @@
 import { FsUtil } from '@travetto/boot';
 
 import * as n from './nodes';
+import { AllType, AllTypeMap } from './node-types';
 import { highlight } from './code-highlight';
 
 const ROOT = FsUtil.resolveUnix(FsUtil.cwd, '..', '..');
 
-type N = typeof n;
-export type AllChildren = { [K in keyof N]: ReturnType<N[K]> }[keyof N];
-
-type Anchor = ReturnType<N['Anchor']>;
+type AllChildren = AllType;
+type AnchorType = AllTypeMap['Anchor'];
 
 export type Renderer = {
   render(child: AllChildren): string;
   wrap(content: string, module: string): string;
-  toc(content: string, title: string, anchors: Anchor[]): string;
+  toc(content: string, title: string, anchors: AnchorType[]): string;
 };
 
 function titleCase(a: string) {
@@ -31,7 +30,7 @@ function getId(a: string) {
 }
 
 export const Markdown: Renderer = {
-  toc(content: string, title: string, anchors: Anchor[]) {
+  toc(content: string, title: string, anchors: AnchorType[]) {
     const lines = content.split(/\n/g);
     const empty = lines.findIndex(x => x.startsWith('##'));
     lines.splice(empty - 1, 0, this.render(n.Group([n.SubSection(title), n.Ordered(...anchors)])), '');
@@ -79,6 +78,15 @@ ${clean(recurse(c.content))}
         }
         return out.join('\n');
       }
+      case 'table': {
+        const header = ['', ...c.headers.map(h => recurse(h)), ''].join('|');
+        const out: string[] = [
+          header,
+          header.replace(/[^|]/g, '-'),
+          ...c.rows.map(row => ['', ...row.map(r => recurse(r)), ''].join('|'))
+        ];
+        return out.join('\n');
+      }
       case 'header':
         return `# ${recurse(c.title)}\n${c.description ? `## ${recurse(c.description)}\n` : ''}${'install' in c ? recurse(n.Install(c.package, c.package)) : ''}\n`;
       case 'text':
@@ -91,7 +99,7 @@ ${clean(recurse(c.content))}
 };
 
 export const Html: Renderer = {
-  toc(content: string, title: string, anchors: Anchor[]) {
+  toc(content: string, title: string, anchors: AnchorType[]) {
     return `<div class="toc"><div class="inner">
   ${this.render(n.SubSection(n.Text(title)))}
   ${this.render(n.List(...anchors))}
@@ -147,6 +155,16 @@ export const Html: Renderer = {
         }
         const tag = ordered ? 'ol' : 'ul';
         return `<${tag}>${out.join('\n')}</${tag}>`;
+      }
+      case 'table': {
+        const out: string[] = [
+          '<table>', '<thead>',
+          `<tr>${c.headers.map(h => recurse(h)).map(h => `<th>${h}</th>`).join('')}</tr>`,
+          '</thead>', '<tbody>',
+          ...c.rows.map(row => `<tr>${row.map(r => `<td>${recurse(r)}</td>`).join('')}</tr>`),
+          '</tbody>', '</table>'
+        ];
+        return out.join('\n');
       }
       case 'header':
         return `<h1>${recurse(c.title)}

@@ -2,7 +2,6 @@ import * as dynamodb from '@aws-sdk/client-dynamodb';
 
 import { Class, ShutdownManager, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { ChangeEvent } from '@travetto/registry';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
   ModelIndexedSupport, ModelType, NotFoundError, ExistsError

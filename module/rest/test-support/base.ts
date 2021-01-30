@@ -119,7 +119,7 @@ export abstract class BaseRestSuite {
 
   async makeRequst(method: 'get' | 'post' | 'patch' | 'put' | 'delete' | 'options', path: string, { throwOnError = true, query, headers, body }: {
     query?: Record<string, string>;
-    body?: Record<string, unknown> | FormData;
+    body?: Record<string, unknown> | FormData | Buffer;
     headers?: Record<string, string>;
     throwOnError?: boolean;
   } = {}) {

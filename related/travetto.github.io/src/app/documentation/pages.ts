@@ -29,18 +29,20 @@ import { CacheComponent } from './gen/cache/cache.component';
 import { CommandComponent } from './gen/command/command.component';
 import { WorkerComponent } from './gen/worker/worker.component';
 import { WatchComponent } from './gen/watch/watch.component';
-import { AssetMongoComponent } from './gen/asset-mongo/asset-mongo.component';
-import { AssetS3Component } from './gen/asset-s3/asset-s3.component';
 import { AssetRestComponent } from './gen/asset-rest/asset-rest.component';
 import { AuthModelComponent } from './gen/auth-model/auth-model.component';
 import { AuthRestComponent } from './gen/auth-rest/auth-rest.component';
-import { AuthPassportComponent } from './gen/auth-passport/auth-passport.component';
 import { JwtComponent } from './gen/jwt/jwt.component';
 import { EmailTemplateComponent } from './gen/email-template/email-template.component';
 import { YamlComponent } from './gen/yaml/yaml.component';
 import { TransformerComponent } from './gen/transformer/transformer.component';
 import { ImageComponent } from './gen/image/image.component';
 import { PackComponent } from './gen/pack/pack.component';
+import { ModelQueryComponent } from './gen/model-query/model-query.component';
+import { ModelDynamodbComponent } from './gen/model-dynamodb/model-dynamodb.component';
+import { ModelFirestoreComponent } from './gen/model-firestore/model-firestore.component';
+import { ModelRedisComponent } from './gen/model-redis/model-redis.component';
+import { ModelS3Component } from './gen/model-s3/model-s3.component';
 
 export const PAGES = [
   { path: 'di', title: 'Dependency Injection  ', component: DiComponent },
@@ -48,8 +50,13 @@ export const PAGES = [
   { path: 'schema', title: 'Schema', component: SchemaComponent },
   {
     path: 'model', title: 'Model', component: ModelComponent, subs: [
+      { path: 'model-query', title: 'Query', component: ModelQueryComponent },
+      { path: 'model-dynamodb', title: 'DynamoDB', component: ModelDynamodbComponent },
       { path: 'model-elasticsearch', title: 'Elasticsearch', component: ModelElasticsearchComponent },
+      { path: 'model-firestore', title: 'Firestore', component: ModelFirestoreComponent },
       { path: 'model-mongo', title: 'Mongo', component: ModelMongoComponent },
+      { path: 'model-redis', title: 'Redis', component: ModelRedisComponent },
+      { path: 'model-s3', title: 'S3', component: ModelS3Component },
       { path: 'model-sql', title: 'SQL', component: ModelSqlComponent }
     ]
   },
@@ -69,8 +76,6 @@ export const PAGES = [
   },
   {
     path: 'asset', title: 'Asset', component: AssetComponent, subs: [
-      { path: 'asset-mongo', title: 'Mongo', component: AssetMongoComponent },
-      { path: 'asset-s3', title: 'S3', component: AssetS3Component },
       { path: 'asset-rest', title: 'Rest', component: AssetRestComponent }
     ]
   },
@@ -78,7 +83,6 @@ export const PAGES = [
     path: 'auth', title: 'Auth', component: AuthComponent, subs: [
       { path: 'auth-model', title: 'Model', component: AuthModelComponent },
       { path: 'auth-rest', title: 'Rest', component: AuthRestComponent },
-      { path: 'auth-passport', title: 'Passport', component: AuthPassportComponent },
       { path: 'jwt', title: 'JWT', component: JwtComponent }
     ]
   },

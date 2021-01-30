@@ -6,24 +6,25 @@ import { FileModelService, MemoryModelService } from '@travetto/model';
 import { MongoModelService } from '@travetto/model-mongo';
 import { S3ModelService } from '@travetto/model-s3';
 
+import { Links } from '@travetto/model/support/doc-support';
+
 const Asset = SnippetLink('Asset', 'src/types.ts', /interface Asset/);
-const ModelStreamSupport = SnippetLink('ModelStreamSupport', '@travetto/model/src/service/stream.ts', /interface ModelStreamSupport/);
 const AssetNamingStrategySnippet = Snippet('AssetNamingStrategy', 'src/naming.ts', /interface AssetNamingStrategy/, /^[}]/);
 
 exports.text = d`
 
-The asset module requires an ${ModelStreamSupport} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${ModelStreamSupport}, or you can roll your own.
+The asset module requires an ${Links.Stream} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${Links.Stream}, or you can roll your own.
 
 ${Install('provider', `@travetto/model-{provider}`)}
 
-Currently, the following are packages that provide ${ModelStreamSupport}:
+Currently, the following are packages that provide ${Links.Stream}:
 ${List(
   d`@travetto/model - ${FileModelService}, ${MemoryModelService}`,
   d`@travetto/model-mongo - ${MongoModelService}`,
   d`@travetto/model-s3 - ${S3ModelService}`,
 )}
 
-If you are using more than one ${ModelStreamSupport}-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
+If you are using more than one ${Links.Stream}-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
 
 ${Code('Configuration Methods', 'doc/asset-config.ts')}
 

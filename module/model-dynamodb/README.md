@@ -8,11 +8,19 @@
 npm install @travetto/model-dynamodb
 ```
 
-This module provides an [DynamoDB](https://aws.amazon.com/dynamodb/)-based implementation for the [Data Modeling Core](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Core](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [DynamoDB](https://aws.amazon.com/dynamodb/). The entire document is stored as a single value, so nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively computed for new values.
+This module provides an [DynamoDB](https://aws.amazon.com/dynamodb/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [DynamoDB](https://aws.amazon.com/dynamodb/). The entire document is stored as a single value, so nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively computed for new values.
 
-Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the service or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") module.
+Supported featrues:
+   
+   *  [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10)
+   *  [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L8)
+   *  [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10)
 
-**Code: Wiring up a custom service**
+    Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source 
+    or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") module.
+
+    
+**Code: Wiring up a custom Model Source**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 
@@ -26,8 +34,9 @@ export class Init {
 }
 ```
 
-where the [DynamoDBModelConfig](https://github.com/travetto/travetto/tree/master/module/model-dynamodb/src/config.ts#L5) is defined by:
+  where the [DynamoDBModelConfig](https://github.com/travetto/travetto/tree/master/module/model-dynamodb/src/config.ts#L5) is defined by:
 
+  
 **Code: Structure of DynamoDBModelConfig**
 ```typescript
 import * as dynamodb from '@aws-sdk/client-dynamodb';
@@ -43,3 +52,6 @@ export class DynamoDBModelConfig {
 }
 ```
 
+  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/master/module/config/src/decorator.ts#L10) annotation, and so these values can be overridden using the 
+  standard [Configuration](https://github.com/travetto/travetto/tree/master/module/config#readme "Environment-aware config management using yaml files")resolution paths. 
+  

@@ -2,7 +2,8 @@ import * as path from 'path';
 import { FsUtil, ExecUtil, EnvUtil } from '@travetto/boot';
 import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 
-import type { Renderer, AllChildren } from '../../src/render';
+import type { Renderer } from '../../src/render';
+import { AllType } from '@travetto/doc/src/node-types';
 
 const PRIMARY_BRANCH = EnvUtil.get('TRV_DOC_BRANCH') ||
   ExecUtil.execSync('git', ['status', '-b', '-s', '.']).split(/\n/)[0].split('...')[0].split(' ')[1].trim();
@@ -49,7 +50,7 @@ export class DocCliUtil {
     const { Header } = await import('../..');
     file = FsUtil.resolveUnix(file);
 
-    const doc: { header?: boolean, toc?: string, text: AllChildren } = await import(file);
+    const doc: { header?: boolean, toc?: string, text: AllType } = await import(file);
     let content = '';
     if (doc.header !== false) {
       content = `${renderer.render(Header(FsUtil.cwd)).trim()}\n`;
@@ -61,7 +62,7 @@ export class DocCliUtil {
         doc.text.nodes
           .filter(x => x._type === 'section')
           .map(x => {
-            const title = (x as AllChildren & { _type: 'section' }).title;
+            const title = (x as AllType & { _type: 'section' }).title;
             return ({ _type: 'anchor', title, fragment: title });
           })
       );

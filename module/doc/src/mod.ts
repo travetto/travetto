@@ -1,4 +1,5 @@
 import { FsUtil } from '@travetto/boot/src';
+import { AllTypeMap } from './node-types';
 import { Mod } from './nodes';
 
 const MAPPING = {
@@ -53,4 +54,4 @@ export const mod = new Proxy({}, {
   get(tgt, p: keyof typeof MAPPING) {
     return Mod(FsUtil.resolveUnix('../..', MAPPING[p]));
   }
-}) as Record<keyof typeof MAPPING, ReturnType<typeof Mod>>;
+}) as Record<keyof typeof MAPPING, AllTypeMap['Mod']>;

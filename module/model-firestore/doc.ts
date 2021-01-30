@@ -1,20 +1,16 @@
-import { doc as d, lib, mod, Code, inp, SnippetLink } from '@travetto/doc';
-import { ModelSource } from '@travetto/model/src/service/source';
-import { MongoModelConfig } from './src/config';
+import { doc as d, lib, mod, Code, List } from '@travetto/doc';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-support';
 
-const ResourceManager = SnippetLink('ResourceManager', '@travetto/base/src/resource.ts', /class [$]Resource/);
+import { FirestoreModelConfig } from './src/config';
+import { FirestoreModelService } from './src/service';
 
 exports.text = d`
-This module provides an ${lib.MongoDB}-based implementation of ${ModelSource} for the ${mod.Model}.  This source allows the ${mod.Model} module to read, write and query against ${lib.MongoDB}.. Given the dynamic nature of ${lib.MongoDB}, during development when models are modified, nothing needs to be done to adapt to the latest schema.
+This module provides an ${lib.Firestore}-based implementation of the ${mod.Model}.  This source allows the ${mod.Model} module to read, write and query against ${lib.Firestore}.
 
-Out of the box, by installing the module, everything should be wired up by default.  If you need to customize any aspect of the source or config, you can override and register it with the ${mod.Di} module.
+Supported featrues:
+${List(
+  ...ModelTypes(FirestoreModelService)
+)}
 
-${Code('Wiring up a custom Model Source', 'doc/source.ts')}
-
-where the ${MongoModelConfig} is defined by:
-
-${Code('Structure of MongoModelConfig', MongoModelConfig.ᚕfile)}
-
-and can be overridden via environment variables or config files, as defined in ${mod.Config}.  The SSL file options in ${inp`clientOptions`} will automatically be resolved to files when given a path.  This path can be a ${ResourceManager} path or just a standard file path.
-
+${ModelCustomConfig(FirestoreModelConfig)}
 `;

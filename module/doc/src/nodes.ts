@@ -110,10 +110,18 @@ function BuildList(items: Content[], ordered = false) {
 export const List = (...items: Content[]) => BuildList(items);
 export const Ordered = (...items: Content[]) => BuildList(items, true);
 
+export const Table = (headers: Content[], ...rows: Content[][]) =>
+  $n('table', {
+    headers: headers.map(x => typeof x === 'string' ? $c(x) : x),
+    rows: rows.map(row =>
+      row.map(x => typeof x === 'string' ? $c(x) : x)
+    )
+  });
+
+
 export function Image(title: Content, file: string) {
   if (!/^https?:/.test(file) && !FsUtil.existsSync(file)) {
     throw new Error(`${file} is not a valid location`);
   }
-
   return $n('image', { title: $c(title), link: $c(file) });
 }

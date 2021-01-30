@@ -52,6 +52,7 @@ import { ModelDynamodbComponent } from './gen/model-dynamodb/model-dynamodb.comp
 import { ModelRedisComponent } from './gen/model-redis/model-redis.component';
 import { ModelS3Component } from './gen/model-s3/model-s3.component';
 import { ModelFirestoreComponent } from './gen/model-firestore/model-firestore.component';
+import { ModelQueryComponent } from './gen/model-query/model-query.component';
 
 @NgModule({
   imports: [
@@ -116,7 +117,8 @@ import { ModelFirestoreComponent } from './gen/model-firestore/model-firestore.c
     ModelDynamodbComponent,
     ModelRedisComponent,
     ModelS3Component,
-    ModelFirestoreComponent
+    ModelFirestoreComponent,
+    ModelQueryComponent
   ]
 })
 export class DocumentationModule { }
