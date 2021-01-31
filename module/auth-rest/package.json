@@ -10,7 +10,7 @@
     "@travetto/auth": "^2.0.0-alpha.2",
     "@travetto/config": "^2.0.0-alpha.2",
     "@travetto/context": "^2.0.0-alpha.2",
-    "@travetto/rest": "^2.0.0-alpha.2"
+    "@travetto/rest": "^2.0.0-alpha.3"
   },
   "optionalPeerDependencies": {
     "@types/passport": "^1.0.5",
@@ -37,5 +37,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/auth-rest"
   },
-  "version": "2.0.0-alpha.2"
+  "version": "2.0.0-alpha.3"
 }
