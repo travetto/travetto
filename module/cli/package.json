@@ -11,7 +11,7 @@
   },
   "title": "Command Line Interface",
   "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.1",
+    "@travetto/base": "^2.0.0-alpha.2",
     "commander": "^6.2.1"
   },
   "description": "CLI infrastructure for travetto framework",
@@ -31,5 +31,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/cli"
   },
-  "version": "2.0.0-alpha.1"
+  "version": "2.0.0-alpha.2"
 }

@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^2.0.0-alpha.1",
-    "@travetto/di": "^2.0.0-alpha.1",
+    "@travetto/config": "^2.0.0-alpha.2",
+    "@travetto/di": "^2.0.0-alpha.2",
     "@types/cookies": "^0.7.6",
     "@types/express-serve-static-core": "^4.17.18",
     "cookies": "^0.8.0"
@@ -46,5 +46,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/rest"
   },
-  "version": "2.0.0-alpha.1"
+  "version": "2.0.0-alpha.2"
 }

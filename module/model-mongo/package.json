@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^2.0.0-alpha.1",
-    "@travetto/model": "^2.0.0-alpha.1",
-    "@travetto/model-query": "^2.0.0-alpha.1",
+    "@travetto/config": "^2.0.0-alpha.2",
+    "@travetto/model": "^2.0.0-alpha.2",
+    "@travetto/model-query": "^2.0.0-alpha.2",
     "@types/mongodb": "^3.6.3",
     "mongodb": "^3.6.3"
   },
@@ -34,5 +34,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/model-mongo"
   },
-  "version": "2.0.0-alpha.1"
+  "version": "2.0.0-alpha.2"
 }

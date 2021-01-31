@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/compiler": "^2.0.0-alpha.1",
-    "@travetto/di": "^2.0.0-alpha.1",
-    "@travetto/model": "^2.0.0-alpha.1"
+    "@travetto/compiler": "^2.0.0-alpha.2",
+    "@travetto/di": "^2.0.0-alpha.2",
+    "@travetto/model": "^2.0.0-alpha.2"
   },
   "title": "Caching",
   "description": "Caching functionality with decorators for declarative use.",
@@ -33,5 +33,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/cache"
   },
-  "version": "2.0.0-alpha.1"
+  "version": "2.0.0-alpha.2"
 }
