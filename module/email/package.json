@@ -9,7 +9,7 @@
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.0",
     "@travetto/di": "^2.0.0-alpha.0",
-    "@types/mustache": "^4.1.0",
+    "@types/mustache": "^4.1.1",
     "mustache": "^4.1.0"
   },
   "title": "Email",

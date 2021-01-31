@@ -10,7 +10,7 @@
   "dependencies": {
     "@travetto/boot": "^2.0.0-alpha.0",
     "@travetto/registry": "^2.0.0-alpha.0",
-    "prismjs": "1.20.0"
+    "prismjs": "^1.23.0"
   },
   "title": "Documentation",
   "description": "Documentation support for the travetto framework",
