@@ -339,7 +339,7 @@ export class LoggingInterceptor implements RestInterceptor {
 Currently [Asset Rest Support](https://github.com/travetto/travetto/tree/master/module/asset-rest#readme "Provides integration between the travetto asset and rest module.") is implemented in this fashion, as well as [Rest Auth](https://github.com/travetto/travetto/tree/master/module/auth-rest#readme "Rest authentication integration support for the travetto framework").
 
 ## Cookie Support
-Express/Koa/Fastify all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12)/[Response](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12)/[Response](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 **Code: Sample Cookie Usage**
 ```typescript
@@ -367,6 +367,7 @@ Additionally the framework supports SSL out of the box, by allowing you to speci
    
    *  SSL support is configured
    *  [node-forge](https://www.npmjs.com/package/node-forge) is installed
+   *  Not running in prod
    *  No keys provided
 
 This is useful for local development where you implicitly trust the cert.

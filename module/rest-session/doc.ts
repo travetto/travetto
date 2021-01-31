@@ -1,4 +1,4 @@
-import { doc as d, mod, Snippet, SnippetLink, Code, Section, SubSection, meth } from '@travetto/doc';
+import { doc as d, mod, Snippet, SnippetLink, Code, Section, SubSection, meth, lib } from '@travetto/doc';
 import { Context } from '@travetto/rest/src/decorator/param';
 import { Cache, CacheService } from '@travetto/cache';
 
@@ -19,7 +19,7 @@ A session allows for defining the expiration time, what state the session should
 
 ${Code('Sample Session Usage', 'doc/usage.ts')}
 
-This usage should be comparable to express, koa and mostly every other framework.
+This usage should be comparable to ${lib.Express}, ${lib.Koa} and mostly every other framework.
 
 ${Section('Configuration')}
 

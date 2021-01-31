@@ -112,7 +112,7 @@ export class SessionRoutes {
 }
 ```
 
-This usage should be comparable to express, koa and mostly every other framework.
+This usage should be comparable to [express](https://expressjs.com), [koa](https://koajs.com/) and mostly every other framework.
 
 ## Configuration
 
