@@ -10,7 +10,7 @@
     "@travetto/config": "^2.0.0-alpha.0",
     "@travetto/di": "^2.0.0-alpha.0",
     "@types/cookies": "^0.7.6",
-    "@types/express-serve-static-core": "^4.17.17",
+    "@types/express-serve-static-core": "^4.17.18",
     "cookies": "^0.8.0"
   },
   "devDependencies": {
@@ -21,7 +21,7 @@
     "@travetto/schema": "^2.0.0-alpha.0",
     "@travetto/model": "^2.0.0-alpha.0",
     "node-forge": "^0.10.0",
-    "@types/node-forge": "^0.9.6"
+    "@types/node-forge": "^0.9.7"
   },
   "title": "RESTful API",
   "description": "Declarative api for RESTful APIs with support for the dependency injection module.",

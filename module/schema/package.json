@@ -9,8 +9,8 @@
   "title": "Schema",
   "description": "Data type registry for runtime validation, reflection and binding. ",
   "optionalPeerDependencies": {
-    "@types/faker": "^5.1.5",
-    "faker": "^5.1.0"
+    "@types/faker": "^5.1.6",
+    "faker": "^5.2.0"
   },
   "homepage": "https://travetto.io",
   "keywords": [
