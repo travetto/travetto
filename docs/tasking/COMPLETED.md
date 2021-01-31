@@ -1,6 +1,12 @@
 Completed Tasks
 ==============
 
+Model (Cache, Asset, Auth)
+----------------------
+[x] Move all data oriented operations into the model module
+  - [x] update down stream activities to rely on the new contracts
+  - [x] beef up testing considerably for various implementations
+
 Worker
 ----------------------
 [x] Use worker threads in lieu of IPC (should be more robust)
