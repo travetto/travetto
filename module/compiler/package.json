@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.0",
-    "@travetto/transformer": "^2.0.0-alpha.0",
-    "@travetto/watch": "^2.0.0-alpha.0"
+    "@travetto/base": "^2.0.0-alpha.1",
+    "@travetto/transformer": "^2.0.0-alpha.1",
+    "@travetto/watch": "^2.0.0-alpha.1"
   },
   "title": "Compiler",
   "description": "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.",
@@ -36,5 +36,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/compiler"
   },
-  "version": "2.0.0-alpha.0"
+  "version": "2.0.0-alpha.1"
 }
