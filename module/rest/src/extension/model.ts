@@ -28,7 +28,7 @@ export function ModelController<T extends ModelType>(path: string, cls: Class<T>
   return (target: Class<Svc>) => {
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
-        target, function getById(this: Svc, id: string) {
+        target, function get(this: Svc, id: string) {
           return this.source.get<ModelType>(getCls(), id);
         }),
       {
