@@ -164,7 +164,7 @@ ${Code('Defining a fully controlled Interceptor', 'doc/interceptor-controlled.ts
 Currently ${mod.AssetRest} is implemented in this fashion, as well as ${mod.AuthRest}.
 
 ${Section('Cookie Support')}
-Express/Koa/Fastify all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using ${lib.Cookies}.  This functionality is exposed onto the ${Request}/${Response} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+${lib.Express}/${lib.Koa}/${lib.Fastify} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using ${lib.Cookies}.  This functionality is exposed onto the ${Request}/${Response} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 ${Code('Sample Cookie Usage', 'doc/cookie-routes.ts')}
 
@@ -174,6 +174,7 @@ Additionally the framework supports SSL out of the box, by allowing you to speci
 ${List(
   'SSL support is configured',
   d`${lib.NodeForge} is installed`,
+  'Not running in prod',
   'No keys provided'
 )}
 

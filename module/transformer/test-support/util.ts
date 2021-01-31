@@ -21,7 +21,7 @@ export class TranformerTestUtil {
 
     const prog = ts.createProgram({
       options: ts.convertCompilerOptionsFromJson(require(tsconfig), tsconfig).options,
-      rootNames: ScanFs.scanDirSync({ testFile: f => f.startsWith('src/') && f.endsWith('.ts') }, folder)
+      rootNames: (await ScanFs.scanDir({ testFile: f => f.startsWith('src/') && f.endsWith('.ts') }, folder))
         .filter(x => x.stats.isFile())
         .filter(x => !file || x.file.endsWith(file))
         .map(x => x.file),
@@ -32,7 +32,7 @@ export class TranformerTestUtil {
 
     const visitor = new VisitorFactory(
       (ctx, src) => new TransformerState(src, ctx.factory, prog.getTypeChecker()),
-      ScanFs.scanDirSync({ testFile: f => f.startsWith('support/transformer') }, folder)
+      (await ScanFs.scanDir({ testFile: f => f.startsWith('support/transformer') }, folder))
         .filter(x => x.stats.isFile())
         .map(x => getAllTransformers(require(x.file)))
         .flat(),
