@@ -198,9 +198,9 @@ Error: Uh oh
     at inner1 <span class="token punctuation">(</span>./doc/stack-test.ts:12:16<span class="token punctuation">)</span>
     at <span class="token builtin class-name">test</span> <span class="token punctuation">(</span>./doc/stack-test.ts:16:9<span class="token punctuation">)</span>
     at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>./doc/stack-test.ts:24:1<span class="token punctuation">)</span>
-    at Function.compileJavascript <span class="token punctuation">(</span>/home/tim/Code/travetto/module/boot/src-ts/compile.ts:106:16<span class="token punctuation">)</span>
-    at Function.compile <span class="token punctuation">(</span>/home/tim/Code/travetto/module/boot/src-ts/compile.ts:97:17<span class="token punctuation">)</span>
-    at Object.require.extensions.<span class="token operator">&lt;</span>computed<span class="token operator">></span> <span class="token punctuation">[</span>as .ts<span class="token punctuation">]</span> <span class="token punctuation">(</span>/home/tim/Code/travetto/module/boot/src-ts/compile.ts:137:62<span class="token punctuation">)</span></code></pre>     
+    at Function.compileJavascript <span class="token punctuation">(</span>/home/tim/Code/travetto/module/boot/src/compile.js:68:10<span class="token punctuation">)</span>
+    at Function.compile <span class="token punctuation">(</span>/home/tim/Code/travetto/module/boot/src/compile.js:63:13<span class="token punctuation">)</span>
+    at Object.require.extensions.<span class="token operator">&lt;</span>computed<span class="token operator">></span> <span class="token punctuation">[</span>as .ts<span class="token punctuation">]</span> <span class="token punctuation">(</span>/home/tim/Code/travetto/module/boot/src/compile.js:86:70<span class="token punctuation">)</span></code></pre>     
       </figure>
 
 The needed functionality cannot be loaded until <code class="item method">init.action</code> executes, and so must be required only at that time.

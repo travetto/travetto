@@ -6,8 +6,8 @@ declare let rateLimit: (config: { windowMs: number, max: number }) => Middleware
 
 @Injectable({ primary: true })
 class CustomRestServer extends KoaRestServer {
-  createRaw() {
-    const app = super.createRaw();
+  init() {
+    const app = super.init();
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: 100 // limit each IP to 100 requests per windowMs

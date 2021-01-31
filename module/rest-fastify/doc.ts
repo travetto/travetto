@@ -1,5 +1,5 @@
 import { doc as d, lib, mod, Section, Snippet, Code } from '@travetto/doc';
-import { RestApplication } from '@travetto/rest/src/server/application';
+import { RestApplication } from '@travetto/rest/src/application/rest';
 
 exports.text = d`
 The module is an ${lib.Fastify} provider for the ${mod.Rest} module.  This module provides an implementation of ${RestApplication} for automatic injection in the default Rest server.

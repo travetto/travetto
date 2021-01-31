@@ -301,10 +301,7 @@ First we must start the application:
       </figcaption>
       <pre><code class="language-bash">$ ./doc/startup.sh
 
-<span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:30<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span>
-  name: <span class="token string">'rest'</span>,
-  filename: <span class="token string">'/home/tim/Code/travetto/module/rest/src/internal/application.rest.ts'</span>
-<span class="token punctuation">{{'}'}}</span>
+<span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:30<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'/home/tim/Code/travetto/module/rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
 <span class="token number">2021</span>-03-14T05:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:34<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'@travetto/todo-app'</span>,
@@ -360,7 +357,7 @@ First we must start the application:
     sql: <span class="token punctuation">{{'{'}}</span> model: <span class="token punctuation">{{'{'}}</span> namespace: <span class="token string">'todo'</span>, user: <span class="token string">'root'</span>, password: <span class="token string">'password'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2021</span>-03-14T05:00:01.510Z info  <span class="token punctuation">[</span>@trv:rest/server/base:206<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
+<span class="token number">2021</span>-03-14T05:00:01.510Z info  <span class="token punctuation">[</span>@trv:rest/application/rest:192<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure> 
 
 next, let's execute <a target="_blank" class="external-link" href="https://curl.haxx.se/">curl</a> requests to interact with the new api:

@@ -6,8 +6,8 @@ declare let rateLimit: (config: { windowMs: number, max: number }) => FastifyPlu
 
 @Injectable({ primary: true })
 class CustomRestServer extends FastifyRestServer {
-  async createRaw() {
-    const app = await super.createRaw();
+  async init() {
+    const app = await super.init();
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: 100 // limit each IP to 100 requests per windowMs

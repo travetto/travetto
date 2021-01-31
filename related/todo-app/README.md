@@ -287,10 +287,7 @@ First we must start the application:
 ```bash
 $ ./doc/startup.sh 
 
-2021-03-14T05:00:00.618Z info  [@trv:app/registry:30] Running application {
-  name: 'rest',
-  filename: '/home/tim/Code/travetto/module/rest/src/internal/application.rest.ts'
-}
+2021-03-14T05:00:00.618Z info  [@trv:app/registry:30] Running application { name: 'rest', filename: '/home/tim/Code/travetto/module/rest/src/application/rest.ts' }
 2021-03-14T05:00:00.837Z info  [@trv:app/registry:34] Configured {
   info: {
     name: '@travetto/todo-app',
@@ -346,7 +343,7 @@ $ ./doc/startup.sh
     sql: { model: { namespace: 'todo', user: 'root', password: 'password' } }
   }
 }
-2021-03-14T05:00:01.510Z info  [@trv:rest/server/base:206] Listening { port: 3000 }
+2021-03-14T05:00:01.510Z info  [@trv:rest/application/rest:192] Listening { port: 3000 }
 ```
  
 

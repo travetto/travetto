@@ -22,11 +22,13 @@ const RestInterceptor = SnippetLink('RestInterceptor', 'src/interceptor/types.ts
 
 import { ModelRoutes } from './src/extension/model';
 import { SchemaBody, SchemaQuery } from './src/extension/schema';
+import { ModelQueryRoutes } from './src/extension/model-query';
+import { RestApplication } from './src/application/rest';
+
 // To ensure module loading
 import '@travetto/schema';
 import '@travetto/model';
-import { ModelQueryRoutes } from './src/extension/model-query';
-import { RestApplication } from './src/application/rest';
+import '@travetto/model-query';
 
 exports.text = d`
 
