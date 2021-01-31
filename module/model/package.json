@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^2.0.0-alpha.2",
-    "@travetto/registry": "^2.0.0-alpha.2",
-    "@travetto/schema": "^2.0.0-alpha.2"
+    "@travetto/di": "^2.0.0-alpha.3",
+    "@travetto/registry": "^2.0.0-alpha.3",
+    "@travetto/schema": "^2.0.0-alpha.3"
   },
   "title": "Data Modeling Support",
   "description": "Datastore abstraction for core operations.",
@@ -34,5 +34,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/model"
   },
-  "version": "2.0.0-alpha.2"
+  "version": "2.0.0-alpha.3"
 }

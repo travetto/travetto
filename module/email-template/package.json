@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
-    "@travetto/di": "^2.0.0-alpha.2",
-    "@travetto/email": "^2.0.0-alpha.2",
+    "@travetto/di": "^2.0.0-alpha.3",
+    "@travetto/email": "^2.0.0-alpha.3",
     "@travetto/image": "^2.0.0-alpha.2",
     "@types/html-entities": "^1.2.16",
     "@types/inline-css": "^0.0.33",
@@ -49,5 +49,5 @@
     "!resources/email/demo/",
     "bin"
   ],
-  "version": "2.0.0-alpha.2"
+  "version": "2.0.0-alpha.3"
 }
