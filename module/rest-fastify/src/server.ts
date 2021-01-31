@@ -1,8 +1,8 @@
 import * as https from 'https';
 import { FastifyInstance, fastify, FastifyServerOptions, FastifyHttpsOptions } from 'fastify';
 
-import { RouteConfig, RestServer } from '@travetto/rest';
-import { Injectable } from '@travetto/di';
+import { RestConfig, RouteConfig, RestServer } from '@travetto/rest';
+import { Inject, Injectable } from '@travetto/di';
 
 import { FastifyServerUtil } from './internal/util';
 
@@ -10,12 +10,19 @@ import { FastifyServerUtil } from './internal/util';
  * Fastify-based rest server
  */
 @Injectable()
-export class FastifyRestServer extends RestServer<FastifyInstance> {
+export class FastifyRestServer implements RestServer<FastifyInstance> {
+
+  listening = false;
+
+  raw: FastifyInstance;
+
+  @Inject()
+  config: RestConfig;
 
   /**
    * Build the fastify server
    */
-  async createRaw() {
+  async init() {
     const fastConf: FastifyServerOptions = {};
     if (this.config.ssl.active) {
       (fastConf as FastifyHttpsOptions<https.Server>).https = (await this.config.getKeys())!;
@@ -32,6 +39,7 @@ export class FastifyRestServer extends RestServer<FastifyInstance> {
     // @ts-expect-error
     app.addContentTypeParser(['*'], (_r, _p, done) => done());
 
+    this.raw = app;
     return app;
   }
 
@@ -61,6 +69,7 @@ export class FastifyRestServer extends RestServer<FastifyInstance> {
 
   async listen() {
     await this.raw.listen(this.config.port, this.config.bindAddress);
+    this.listening = true;
     return {
       on: this.raw.server.on.bind(this.raw),
       close: this.raw.close.bind(this.raw)

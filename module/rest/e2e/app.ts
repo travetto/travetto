@@ -1,26 +1,30 @@
 import { Injectable } from '@travetto/di';
 import { Application } from '@travetto/app';
-import { RouteConfig, RestServer, RestInterceptor } from '..';
-import { ServerHandle } from '../src/types';
+
+import { RestApplication, ServerHandle, RouteConfig, RestServer, RestInterceptor } from '..';
 
 type Inner = {
   use(factory: unknown): void;
 };
 
 @Injectable()
-class DummyServer extends RestServer<Inner> {
+class DummyServer implements RestServer<Inner> {
+
+  listening = false;
+
   raw: Inner;
 
-  async createRaw() {
+  async init() {
     return {
       use(val: unknown) {
-        console.log('Using', { val });
+        console.log('Using', { val: val as string });
       }
     };
   }
 
   listen() {
     console.log('Listening');
+    this.listening = true;
     return {} as ServerHandle;
   }
 
@@ -38,11 +42,5 @@ class DummyServer extends RestServer<Inner> {
 }
 
 @Application('sample')
-export class SampleApp {
-
-  constructor(private app: RestServer) { }
-
-  async run() {
-    return this.app.run();
-  }
+export class SampleApp extends RestApplication {
 }

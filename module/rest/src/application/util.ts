@@ -3,7 +3,7 @@ import { Response, Request } from '../types';
 /**
  * Base response object
  */
-abstract class BaseResponse implements Partial<Response> {
+class ResponseCore implements Partial<Response> {
   /**
    * Produce JSON as the output
    */
@@ -43,9 +43,9 @@ abstract class BaseResponse implements Partial<Response> {
    * @param code The HTTP code to send
    * @param path The new location for the request
    */
-  redirect(this: Response & BaseResponse, code: number, path: string): void;
-  redirect(this: Response & BaseResponse, path: string): void;
-  redirect(this: Response & BaseResponse, pathOrCode: number | string, path?: string) {
+  redirect(this: Response & ResponseCore, code: number, path: string): void;
+  redirect(this: Response & ResponseCore, path: string): void;
+  redirect(this: Response & ResponseCore, pathOrCode: number | string, path?: string) {
     let code = 302;
     if (path) {
       code = pathOrCode as number;
@@ -62,7 +62,7 @@ abstract class BaseResponse implements Partial<Response> {
 /**
  * Base Request object
  */
-abstract class BaseRequest implements Partial<Request> {
+class RequestCore implements Partial<Request> {
   /**
    * Get the outbound response header
    * @param key The header to get
@@ -82,7 +82,7 @@ export class RestServerUtil {
    */
   static decorateRequest<T extends Request>(req: Partial<T> & Record<string, unknown>): T {
     delete req.redirect;
-    Object.setPrototypeOf(req, BaseRequest.prototype);
+    Object.setPrototypeOf(req, RequestCore.prototype);
     req.url = req.path;
     // @ts-ignore
     req.connection = {};
@@ -94,7 +94,7 @@ export class RestServerUtil {
    * @param req Outbound response
    */
   static decorateResponse<T extends Response>(res: Partial<T> & Record<string, unknown>): T {
-    Object.setPrototypeOf(res, BaseResponse.prototype);
+    Object.setPrototypeOf(res, ResponseCore.prototype);
     return res as T;
   }
 

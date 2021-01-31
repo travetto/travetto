@@ -3,9 +3,8 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 
-import { EnvUtil } from '@travetto/boot';
-import { Injectable } from '@travetto/di';
-import { RouteUtil, RestServer, ParamConfig, RouteConfig, RouteHandler, NodeRequestSym } from '@travetto/rest';
+import { Inject, Injectable } from '@travetto/di';
+import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, ParamConfig, RouteConfig, NodeRequestSym } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
 
 import { RouteStack } from './internal/types';
@@ -14,9 +13,18 @@ import { RouteStack } from './internal/types';
  * An express rest server
  */
 @Injectable()
-export class ExpressRestServer extends RestServer<express.Application> {
+export class ExpressRestServer implements RestServer<express.Application> {
 
-  createRaw(): express.Application {
+  private raw: express.Application;
+
+  listening: boolean;
+
+  reregisterGlobalOnChange = true;
+
+  @Inject()
+  config: RestConfig;
+
+  init(): express.Application {
     const app = express();
     app.set('query parser', 'simple');
     app.use(compression());
@@ -36,6 +44,8 @@ export class ExpressRestServer extends RestServer<express.Application> {
       app.enable('trust proxy');
     }
 
+    this.raw = app;
+
     return app;
   }
 
@@ -47,7 +57,7 @@ export class ExpressRestServer extends RestServer<express.Application> {
     }
   }
 
-  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
+  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[], interceptors: RestInterceptor[]) {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {
@@ -56,14 +66,14 @@ export class ExpressRestServer extends RestServer<express.Application> {
         route.handlerFinalized!);
     }
 
-    // Register options handler for each controller
+    // Register options handler for each controller, working with a bug in express
     if (key !== GlobalRoute) {
       const optionHandler = RouteUtil.createRouteHandler(
-        this.interceptors,
+        interceptors,
         {
           method: 'options',
           path: '*',
-          handler: this.globalHandler as RouteHandler,
+          handler: (req: Request) => '',
           params: [{ extract: (__, r: unknown) => r } as ParamConfig]
         }
       );
@@ -74,13 +84,6 @@ export class ExpressRestServer extends RestServer<express.Application> {
 
     router.key = key;
     this.raw.use(path, router);
-
-    if (this.listening && key !== GlobalRoute) {
-      if (!EnvUtil.isReadonly()) {
-        await this.unregisterGlobal();
-      }
-      await this.registerGlobal();
-    }
   }
 
   async listen() {
@@ -89,6 +92,7 @@ export class ExpressRestServer extends RestServer<express.Application> {
       const keys = await this.config.getKeys();
       raw = (await import('https')).createServer(keys!, this.raw);
     }
+    this.listening = true;
     return raw.listen(this.config.port, this.config.bindAddress!);
   }
 }

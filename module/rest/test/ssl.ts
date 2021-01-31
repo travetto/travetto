@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { RestServerUtil } from '../src/server/util';
+import { RestServerUtil } from '../src/application/util';
 
 @Suite()
 export class SSLTest {

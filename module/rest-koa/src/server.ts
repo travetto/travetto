@@ -5,8 +5,7 @@ import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
-import { GlobalRoute } from '@travetto/rest/src/internal/types';
+import { RestConfig, RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
 
 import { KoaServerUtil } from './internal/util';
 import Router = require('koa-router');
@@ -15,12 +14,21 @@ import Router = require('koa-router');
  * Koa-based Rest server
  */
 @Injectable()
-export class KoaRestServer extends RestServer<koa> {
+export class KoaRestServer implements RestServer<koa> {
+
+  raw: koa;
+
+  listening = false;
+
+  reregisterGlobalOnChange = true;
 
   @Inject()
   cookies: RestCookieConfig;
 
-  createRaw(): koa {
+  @Inject()
+  config: RestConfig;
+
+  init(): koa {
     const app = new koa();
     app.use(kCompress());
     app.use(kBodyParser());
@@ -31,6 +39,8 @@ export class KoaRestServer extends RestServer<koa> {
     if (this.config.trustProxy) {
       app.proxy = true;
     }
+
+    this.raw = app;
 
     return app;
   }
@@ -62,12 +72,6 @@ export class KoaRestServer extends RestServer<koa> {
     const middleware: ReturnType<Router['routes']> & { key?: string | symbol } = router.routes();
     middleware.key = key;
     this.raw.use(middleware);
-
-    // If already running and not global routes, re-register
-    if (this.listening && key !== GlobalRoute) {
-      await this.unregisterGlobal();
-      await this.registerGlobal();
-    }
   }
 
   async listen() {
@@ -77,6 +81,7 @@ export class KoaRestServer extends RestServer<koa> {
         .createServer((await this.config.getKeys())!, this.raw.callback())
         .listen(this.config.port, this.config.bindAddress);
     }
+    this.listening = true;
     return raw.listen(this.config.port, this.config.bindAddress);
   }
 }

@@ -7,7 +7,7 @@ import { RootRegistry } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 
-import type { RestServer } from '../src/server/base';
+import type { RestApplication } from '../src/application/rest';
 import { ServerHandle } from '../src/types';
 import { RestLambdaSym } from '../src/internal/lambda';
 
@@ -63,7 +63,7 @@ async function getOutput(t: string | Promise<string>) {
 export abstract class BaseRestSuite {
 
   private handle: ServerHandle | undefined;
-  private server: RestServer<unknown>;
+  private app: RestApplication;
   private port: number = -1;
   private awsLambda: boolean = false;
 
@@ -94,12 +94,12 @@ export abstract class BaseRestSuite {
     );
 
     if (!this.awsLambda) {
-      this.server = await DependencyRegistry.getInstance(rest.RestServer);
+      const config = await DependencyRegistry.getInstance(rest.RestConfig);
+      config.port = this.port;
+      config.ssl.active = false; // Update config object
 
-      this.server.config.port = this.port;
-      this.server.config.ssl.active = false;
-
-      this.handle = await this.server.run();
+      this.app = await DependencyRegistry.getInstance(rest.RestApplication);
+      this.handle = await this.app.run();
 
       const start = Date.now();
 
@@ -112,8 +112,8 @@ export abstract class BaseRestSuite {
         }
       }
     } else {
-      this.server = await DependencyRegistry.getInstance(rest.RestServer, RestLambdaSym);
-      this.handle = await this.server.run();
+      this.app = await DependencyRegistry.getInstance(rest.RestApplication, RestLambdaSym);
+      this.handle = await this.app.run();
     }
   }
 
@@ -151,7 +151,7 @@ export abstract class BaseRestSuite {
       });
       resp = { status: res.status, body: await getOutput(res.text()), headers: [...res.headers] };
     } else {
-      const res = await (this.server as unknown as LambdaHandler).handle({
+      const res = await (this.app as unknown as LambdaHandler).handle({
         ...baseLambdaEvent,
         path,
         httpMethod,

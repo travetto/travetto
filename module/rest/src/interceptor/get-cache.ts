@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@travetto/di';
 
 import { RouteConfig, Request, Response } from '../types';
-import { RestConfig } from '../server/config';
+import { RestConfig } from '../application/config';
 import { RestInterceptor } from './types';
 import { CorsInterceptor } from './cors';
 

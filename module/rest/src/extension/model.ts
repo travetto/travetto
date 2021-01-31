@@ -11,16 +11,14 @@ import { paramConfig } from '../decorator/param';
 type Svc = { source: ModelCrudSupport };
 
 /**
- * Provides a basic CRUD controller for a given model:
+ * Provides a basic CRUD routes for a given model:
  *
  * - Create
  * - Read
  * - Update
  * - Delete
- *
- * @augments `@trv:di/Injectable`
  */
-export function ModelController<T extends ModelType>(path: string, cls: Class<T>) {
+export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
   function getCls() {
     return ModelRegistry.get(cls).class as Class<T>;
   }
@@ -80,10 +78,5 @@ export function ModelController<T extends ModelType>(path: string, cls: Class<T>
         description: `Delete ${cls.name} by id`,
         priority: 105, method: 'delete', path: '/:id'
       });
-
-    ControllerRegistry.register(target, {
-      basePath: path,
-      class: target,
-    });
   };
 }

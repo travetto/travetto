@@ -12,8 +12,7 @@ import { GetCacheInterceptor } from './src/interceptor/get-cache';
 import { LoggingInterceptor } from './src/interceptor/logging';
 import { SerializeInterceptor } from './src/interceptor/serialize';
 import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies';
-import { DefaultRestApplication } from './src/internal/application.rest';
-import { RestConfig } from './src/server/config';
+import { RestConfig } from './src/application/config';
 
 const Request = SnippetLink('Request', 'src/types.d.ts', /interface Request/);
 const Response = SnippetLink('Response', 'src/types.d.ts', /interface Response/);
@@ -21,11 +20,13 @@ const ResourceManager = Ref('ResourceManager', '@travetto/base/src/resource.ts')
 
 const RestInterceptor = SnippetLink('RestInterceptor', 'src/interceptor/types.ts', /interface RestInterceptor/);
 
-import { ModelController } from './src/extension/model';
+import { ModelRoutes } from './src/extension/model';
 import { SchemaBody, SchemaQuery } from './src/extension/schema';
 // To ensure module loading
 import '@travetto/schema';
 import '@travetto/model';
+import { ModelQueryRoutes } from './src/extension/model-query';
+import { RestApplication } from './src/application/rest';
 
 exports.text = d`
 
@@ -142,7 +143,7 @@ ${Ordered(
 
 ${Section('Creating and Running an App')}
 
-By default, the framework provices a default ${Application} at ${DefaultRestApplication} that will follow default behaviors, and spin up the REST server.  You will need to install the ${mod.App} module to execute.  
+By default, the framework provices a default ${Application} at ${RestApplication} that will follow default behaviors, and spin up the REST server.  You will need to install the ${mod.App} module to execute.  
 
 ${Install('Installing app support', '@travett/app')}
 
@@ -214,12 +215,16 @@ ${Code(d`Using ${SchemaQuery.name} with a type literal`, 'doc/schema-query-type.
 
 ${Section('Extension - Model')}
 
-To facilitate common RESTful patterns, the module exposes  ${mod.Model} support in the form of ${ModelController}.
+To facilitate common RESTful patterns, the module exposes  ${mod.Model} support in the form of ${ModelRoutes}.
 
-${Code('ModelController example', 'doc/controller-with-model.ts')}
+${Code('ModelRoutes example', 'doc/controller-with-model.ts')}
 
 is a shorthand that is equal to:
 
 ${Code('Comparable UserController, built manually', 'doc/controller-without-model.ts')}
 
+
+${Section('Extension - Model Query')}
+
+Additionally, ${mod.ModelQuery} support can also be added support in the form of ${ModelQueryRoutes}. This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
 `;

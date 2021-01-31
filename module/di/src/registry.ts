@@ -138,7 +138,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // Compute fields to be auto-wired
     const fieldKeys = Object.keys(managed.dependencies.fields!)
-      .filter(x => !managed.factory || !(x in inst)); // Only apply fields that were not set on the factory instance
+      .filter(x => inst[x as keyof typeof inst] === undefined); // Only apply fields that have not been set
 
     // And auto-wire fields
     await this.resolveFieldDependencies(fieldKeys, managed, inst);

@@ -3,6 +3,7 @@ import { SystemUtil } from '@travetto/base/src/internal/system';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
 import { EnvUtil } from '@travetto/boot';
+import { Application } from '@travetto/app';
 
 import { RouteConfig, Request, RouteHandler, ParamConfig, ServerHandle } from '../types';
 import { RestConfig } from './config';
@@ -10,27 +11,27 @@ import { RouteUtil } from '../util/route';
 import { RestInterceptor } from '../interceptor/types';
 import { ControllerRegistry } from '../registry/controller';
 import { GlobalRoute, RestInterceptorTarget } from '../internal/types';
+import { RestServer } from './server';
 
 /**
- * The rest server
+ * The rest application
  */
-export abstract class RestServer<T = unknown> {
+@Application('rest', {
+  description: 'Default rest application entrypoint',
+  watch: true
+})
+export class RestApplication {
 
   @Inject()
   config: RestConfig;
 
-  /**
-   * The underlying raw application
-   */
-  raw: T;
+  @Inject()
+  server: RestServer<unknown>;
+
   /**
    * List of provided interceptors
    */
   interceptors: RestInterceptor[] = [];
-  /**
-   * Is the application listening
-   */
-  listening = false;
 
   /**
    * Provide the base information for the app
@@ -60,33 +61,12 @@ export abstract class RestServer<T = unknown> {
   }
 
   /**
-   * Create the raw application
-   */
-  abstract createRaw(): Promise<T> | T;
-  /**
-   * Register new routes
-   * @param key The identifier for the set of routes
-   * @param path The path to add the routes to
-   * @param endpoints The list of endpoints to add
-   */
-  abstract registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[]): Promise<void>;
-  /**
-   * The routes to unregister
-   * @param key The key to unregister by
-   */
-  abstract unregisterRoutes(key: string | symbol): Promise<void>;
-  /**
-   * Start the listening process
-   */
-  abstract listen(): ServerHandle | Promise<ServerHandle>;
-
-  /**
    * Initialize the application
    */
   async init() {
     await ControllerRegistry.init();
 
-    this.raw = await this.createRaw();
+    await this.server.init();
 
     this.interceptors = await this.getInterceptors();
 
@@ -137,7 +117,7 @@ export abstract class RestServer<T = unknown> {
    * @param c The class to register
    */
   async registerController(c: Class) {
-    if (this.listening && EnvUtil.isReadonly()) {
+    if (this.server.listening && EnvUtil.isReadonly()) {
       console.warn('Reloading not supported in readonly mode');
       return;
     }
@@ -150,7 +130,13 @@ export abstract class RestServer<T = unknown> {
       ep.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, ep, config);
     }
 
-    await this.registerRoutes(config.class.ᚕid, config.basePath, config.endpoints);
+    await this.server.registerRoutes(config.class.ᚕid, config.basePath, config.endpoints, this.interceptors);
+
+    if (this.server.reregisterGlobalOnChange) {
+      await this.unregisterGlobal();
+      await this.registerGlobal();
+    }
+
     console.debug('Registering Controller Instance', { id: config.class.ᚕid, path: config.basePath, endpointCount: config.endpoints.length });
   }
 
@@ -159,19 +145,19 @@ export abstract class RestServer<T = unknown> {
    * @param c The class to unregister
    */
   async unregisterController(c: Class) {
-    if (this.listening && EnvUtil.isReadonly()) {
+    if (this.server.listening && EnvUtil.isReadonly()) {
       console.warn('Unloading not supported in readonly mode');
       return;
     }
 
-    await this.unregisterRoutes(c.ᚕid);
+    await this.server.unregisterRoutes(c.ᚕid);
   }
 
   /**
    * Register the global listener as a hardcoded path
    */
   async registerGlobal() {
-    if (this.listening && EnvUtil.isReadonly()) {
+    if (this.server.listening && EnvUtil.isReadonly()) {
       console.warn('Reloading not supported in readonly mode');
       return;
     }
@@ -183,19 +169,19 @@ export abstract class RestServer<T = unknown> {
       method: 'all', path: '*'
     };
     route.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, route);
-    await this.registerRoutes(GlobalRoute, '/', [route]);
+    await this.server.registerRoutes(GlobalRoute, '/', [route]);
   }
 
   /**
    * Remove the global listener
    */
   async unregisterGlobal() {
-    if (this.listening && EnvUtil.isReadonly()) {
+    if (this.server.listening && EnvUtil.isReadonly()) {
       console.warn('Unloading not supported in readonly mode');
       return;
     }
 
-    await this.unregisterRoutes(GlobalRoute);
+    await this.server.unregisterRoutes(GlobalRoute);
   }
 
   /**
@@ -204,8 +190,6 @@ export abstract class RestServer<T = unknown> {
   async run(): Promise<ServerHandle> {
     await this.init();
     console.info('Listening', { port: this.config.port });
-    const listener = await this.listen();
-    this.listening = true;
-    return listener;
+    return await this.server.listen();
   }
 }

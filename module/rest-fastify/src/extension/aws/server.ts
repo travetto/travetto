@@ -3,9 +3,9 @@ import type * as lambda from 'aws-lambda';
 import { FastifyInstance } from 'fastify';
 
 import { Injectable } from '@travetto/di';
-import { RestServer } from '@travetto/rest/src/server/base';
-import { RestLambdaSym } from '@travetto/rest/src/internal/lambda';
 import { ConfigManager } from '@travetto/config';
+import { RestServerTarget } from '@travetto/rest/src/internal/server';
+import { RestLambdaSym } from '@travetto/rest/src/internal/lambda';
 
 import { FastifyRestServer } from '../../server';
 
@@ -19,23 +19,24 @@ const awsLambdaFastify = require('aws-lambda-fastify') as (
  */
 @Injectable({
   qualifier: RestLambdaSym,
-  target: RestServer
+  target: RestServerTarget
 })
-export class AwsLambdaRestServer extends FastifyRestServer {
+export class AwsLambdaFastifyRestServer extends FastifyRestServer {
 
   /**
    * Handler method for the proxy, will get initialized on first request
    */
   public handle: (event: lambda.APIGatewayProxyEvent, context: lambda.Context) => void;
 
-  async createRaw() {
-    const ret = await super.createRaw();
+  async init() {
+    const ret = await super.init();
     const config = ConfigManager.get('rest.aws');
-    this.handle = awsLambdaFastify(ret, config.binaryMimeTypes ?? []);
+    this.handle = awsLambdaFastify(ret, config.binaryMimeTypes as string[] ?? []);
     return ret;
   }
 
   async listen() {
+    this.listening = true;
     return {
       close: this.raw.close.bind(this.raw),
       on: this.raw.server.on.bind(this.raw.server)

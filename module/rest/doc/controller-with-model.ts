@@ -1,11 +1,12 @@
 // @file-if @travetto/model
 import { Inject } from '@travetto/di';
 import { ModelCrudSupport } from '@travetto/model';
-import { ModelController } from '@travetto/rest';
+import { Controller, ModelRoutes } from '@travetto/rest';
 
 import { User } from './user';
 
-@ModelController('/user', User)
+@Controller('/user')
+@ModelRoutes(User)
 class UserController {
   @Inject()
   source: ModelCrudSupport;

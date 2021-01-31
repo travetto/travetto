@@ -34,10 +34,8 @@ const convert = <T>(k?: string) => k && typeof k === 'string' && /^[\{\[]/.test(
  *
  * - query for all
  * - suggest a field
- *
- * @augments `@trv:di/Injectable`
  */
-export function ModelQueryController<T extends ModelType>(path: string, cls: Class<T>) {
+export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
   function getCls() {
     return ModelRegistry.get(cls).class as Class<T>;
   }
@@ -83,10 +81,5 @@ export function ModelQueryController<T extends ModelType>(path: string, cls: Cla
         responseType: { type: cls, description: cls.name }
       }
     );
-
-    ControllerRegistry.register(target, {
-      basePath: path,
-      class: target,
-    });
   };
 }

@@ -5,9 +5,9 @@ import type * as lambda from 'aws-lambda';
 import * as awsServerlessExpress from 'aws-serverless-express';
 
 import { Injectable } from '@travetto/di';
-import { RestServer } from '@travetto/rest/src/server/base';
-import { RestLambdaSym } from '@travetto/rest/src/internal/lambda';
 import { ConfigManager } from '@travetto/config';
+import { RestServerTarget } from '@travetto/rest/src/internal/server';
+import { RestLambdaSym } from '@travetto/rest/src/internal/lambda';
 
 import { KoaRestServer } from '../../server';
 
@@ -16,9 +16,9 @@ import { KoaRestServer } from '../../server';
  */
 @Injectable({
   qualifier: RestLambdaSym,
-  target: RestServer
+  target: RestServerTarget
 })
-export class AwsLambdaRestServer extends KoaRestServer {
+export class AwsLambdaKoaRestServer extends KoaRestServer {
 
   private server: http.Server;
 
@@ -29,14 +29,15 @@ export class AwsLambdaRestServer extends KoaRestServer {
     return awsServerlessExpress.proxy(this.server, event, context, 'PROMISE').promise;
   }
 
-  createRaw() {
-    const ret = super.createRaw();
+  init() {
+    const ret = super.init();
     const config = ConfigManager.get('rest.aws');
-    this.server = awsServerlessExpress.createServer(ret.callback(), undefined, config.binaryMimeTypes ?? []);
+    this.server = awsServerlessExpress.createServer(ret.callback(), undefined, config.binaryMimeTypes as string[] ?? []);
     return ret;
   }
 
   async listen() {
+    this.listening = true;
     return this.server;
   }
 }
