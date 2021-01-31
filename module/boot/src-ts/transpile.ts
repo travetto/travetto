@@ -33,7 +33,7 @@ export class TranspileUtil {
     const root = process.env.TRV_DEV_ROOT || process.env.TRV_DEV;
     return {
       paths: {
-        '@travetto/*': [`${process.env.TRV_DEV}/*`]
+        [`@travetto/${'*'}`]: [`${process.env.TRV_DEV}/${'*'}`]
       },
       rootDir: root,
       outDir: root,
