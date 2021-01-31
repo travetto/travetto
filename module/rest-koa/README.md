@@ -8,7 +8,7 @@
 npm install @travetto/rest-koa
 ```
 
-The module is an [koa](https://koajs.com/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/master/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestServer](https://github.com/travetto/travetto/tree/master/module/rest/src/server/base.ts#L17) for automatic injection in the default Rest server.
+The module is an [koa](https://koajs.com/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/master/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) for automatic injection in the default Rest server.
 
 ## Customizing Rest App
 
@@ -22,8 +22,8 @@ declare let rateLimit: (config: { windowMs: number, max: number }) => Middleware
 
 @Injectable({ primary: true })
 class CustomRestServer extends KoaRestServer {
-  createRaw() {
-    const app = super.createRaw();
+  init() {
+    const app = super.init();
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: 100 // limit each IP to 100 requests per windowMs
@@ -48,4 +48,4 @@ const app = new koa();
 ```
 
 ## Extension - AWS Lambda
-The [koa](https://koajs.com/) module supports integration with [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md) when installed.  This produces an instance of [RestServer](https://github.com/travetto/travetto/tree/master/module/rest/src/server/base.ts#L17) that is able to integrate with AWS appropriately.
+The [koa](https://koajs.com/) module supports integration with [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md) when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) that is able to integrate with AWS appropriately.

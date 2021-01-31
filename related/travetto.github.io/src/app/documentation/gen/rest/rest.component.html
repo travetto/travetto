@@ -271,7 +271,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 <h2 id="creating-and-running-an-app">Creating and Running an App</h2>
 
-By default, the framework provices a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24">@Application</a> at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/internal/application.rest.ts#L11">DefaultRestApplication</a> that will follow default behaviors, and spin up the REST server.  You will need to install the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/app" title="Application registration/management and run support.">Application</a> module to execute.  
+By default, the framework provices a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24">@Application</a> at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23">RestApplication</a> that will follow default behaviors, and spin up the REST server.  You will need to install the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/app" title="Application registration/management and run support.">Application</a> module to execute.  
 
       <figure class="install">
       <figcaption class="install">Installing app support
@@ -287,17 +287,14 @@ To customize a REST server, you may need to construct an entry point using the <
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest/doc/custom-app.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestServer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestApplication <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 
 @<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'custom'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
-
-  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token keyword">private</span> server<span class="token operator">:</span> RestServer</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token keyword">extends</span> <span class="token class-name">RestApplication</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token comment">// Configure server before running</span>
-
-    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>server<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
@@ -392,7 +389,7 @@ This is useful for local development where you implicitly trust the cert.
 SSL support can be enabled by setting <code class="item input">rest.ssl.active: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts">ResourceManager</a>.
 
 <h2 id="full-config">Full Config</h2>
-The entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/server/config.ts#L13">RestConfig</a> which will show the full set of valid configuration parameters for the rest module.
+The entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/application/config.ts#L13">RestConfig</a> which will show the full set of valid configuration parameters for the rest module.
 
 <h2 id="serverless">Serverless</h2>
 <h3 id="aws-lambda">AWS Lambda</h3>
@@ -506,19 +503,20 @@ Addtionally, <a target="_blank" class="source-link" href="https://github.com/tra
 
 <h2 id="extension-model">Extension - Model</h2>
 
-To facilitate common RESTful patterns, the module exposes  <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model.ts#L23">@ModelController</a>.
+To facilitate common RESTful patterns, the module exposes  <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model.ts#L21">ModelRoutes</a>.
 
       <figure class="code">
-      <figcaption class="code">ModelController example
+      <figcaption class="code">ModelRoutes example
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest/doc/controller-with-model.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelCrudSupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelController <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> ModelRoutes <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">ModelController</span><span class="token punctuation">(</span><span class="token string">'/user'</span><span class="token punctuation">,</span> User<span class="token punctuation">)</span>
+@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/user'</span><span class="token punctuation">)</span>
+@<span class="token meta">ModelRoutes</span><span class="token punctuation">(</span>User<span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">UserController</span> <span class="token punctuation">{{'{'}}</span>
   @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   source<span class="token operator">:</span> ModelCrudSupport<span class="token punctuation">;</span>
@@ -570,5 +568,8 @@ is a shorthand that is equal to:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
+<h2 id="extension-model-query">Extension - Model Query</h2>
+
+Additionally, <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a> support can also be added support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L38">ModelQueryRoutes</a>. This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
 
 </div>

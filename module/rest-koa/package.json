@@ -17,6 +17,10 @@
     "koa-compress": "^5.0.1",
     "koa-router": "^9.4.0"
   },
+  "optionalPeerDependencies": {
+    "@types/aws-serverless-express": "^3.3.3",
+    "aws-serverless-express": "^3.4.0"
+  },
   "title": "Koa REST Source",
   "description": "Koa provider for the travetto rest module.",
   "homepage": "https://travetto.io",

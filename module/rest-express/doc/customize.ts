@@ -5,8 +5,8 @@ declare let rateLimit: (config: { windowMs: number, max: number }) => ((req: Exp
 
 @Injectable({ primary: true })
 class CustomRestServer extends ExpressRestServer {
-  createRaw() {
-    const app = super.createRaw();
+  init() {
+    const app = super.init();
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: 100 // limit each IP to 100 requests per windowMs

@@ -1,8 +1,8 @@
 import { doc as d, mod, Section, Snippet, Code, lib } from '@travetto/doc';
-import { RestServer } from '@travetto/rest';
+import { RestApplication } from '@travetto/rest';
 
 exports.text = d`
-The module is an ${lib.Koa} provider for the ${mod.Rest} module.  This module provides an implementation of ${RestServer} for automatic injection in the default Rest server.
+The module is an ${lib.Koa} provider for the ${mod.Rest} module.  This module provides an implementation of ${RestApplication} for automatic injection in the default Rest server.
 
 ${Section('Customizing Rest App')}
 
@@ -14,5 +14,5 @@ When working with an ${lib.Koa} applications, the module provides what is assume
 ${Snippet('Configured Middleware', 'src/server.ts', /const app\s*=/, /bodyParser/i)}
 
 ${Section('Extension - AWS Lambda')}
-The ${lib.Koa} module supports integration with ${lib.AwsServerlessExpress} when installed.  This produces an instance of ${RestServer} that is able to integrate with AWS appropriately.
+The ${lib.Koa} module supports integration with ${lib.AwsServerlessExpress} when installed.  This produces an instance of ${RestApplication} that is able to integrate with AWS appropriately.
 `;

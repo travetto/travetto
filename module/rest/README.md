@@ -263,7 +263,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 ## Creating and Running an App
 
-By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) at [DefaultRestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/internal/application.rest.ts#L11) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to execute.  
+By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) at [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to execute.  
 
 **Install: Installing app support**
 ```bash
@@ -275,17 +275,14 @@ To customize a REST server, you may need to construct an entry point using the [
 **Code: Application entry point for Rest Applications**
 ```typescript
 import { Application } from '@travetto/app';
-import { RestServer } from '@travetto/rest';
+import { RestApplication } from '@travetto/rest';
 
 @Application('custom')
-export class SampleApp {
-
-  constructor(private server: RestServer) { }
+export class SampleApp extends RestApplication {
 
   run() {
     // Configure server before running
-
-    return this.server.run();
+    return super.run();
   }
 }
 ```
@@ -375,7 +372,7 @@ This is useful for local development where you implicitly trust the cert.
 SSL support can be enabled by setting `rest.ssl.active: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the [ResourceManager](https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts).
 
 ## Full Config
-The entire [RestConfig](https://github.com/travetto/travetto/tree/master/module/rest/src/server/config.ts#L13) which will show the full set of valid configuration parameters for the rest module.
+The entire [RestConfig](https://github.com/travetto/travetto/tree/master/module/rest/src/application/config.ts#L13) which will show the full set of valid configuration parameters for the rest module.
 
 ## Serverless
 ### AWS Lambda
@@ -481,17 +478,18 @@ class UserController {
 
 ## Extension - Model
 
-To facilitate common RESTful patterns, the module exposes  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") support in the form of [@ModelController](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model.ts#L23).
+To facilitate common RESTful patterns, the module exposes  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") support in the form of [ModelRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model.ts#L21).
 
-**Code: ModelController example**
+**Code: ModelRoutes example**
 ```typescript
 import { Inject } from '@travetto/di';
 import { ModelCrudSupport } from '@travetto/model';
-import { ModelController } from '@travetto/rest';
+import { Controller, ModelRoutes } from '@travetto/rest';
 
 import { User } from './user';
 
-@ModelController('/user', User)
+@Controller('/user')
+@ModelRoutes(User)
 class UserController {
   @Inject()
   source: ModelCrudSupport;
@@ -541,3 +539,6 @@ class UserController {
 }
 ```
 
+## Extension - Model Query
+
+Additionally, [Data Model Querying](https://github.com/travetto/travetto/tree/master/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L38). This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
