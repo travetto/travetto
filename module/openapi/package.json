@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
-    "@travetto/rest": "^2.0.0-alpha.3",
-    "@travetto/schema": "^2.0.0-alpha.2",
+    "@travetto/rest": "^2.0.0-alpha.4",
+    "@travetto/schema": "^2.0.0-alpha.3",
     "@travetto/yaml": "^2.0.0-alpha.2",
     "openapi3-ts": "^1.4.0"
   },
@@ -34,5 +34,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/openapi"
   },
-  "version": "2.0.0-alpha.3"
+  "version": "2.0.0-alpha.4"
 }

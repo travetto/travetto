@@ -9,7 +9,7 @@
   "private": true,
   "dependencies": {
     "@travetto/boot": "^2.0.0-alpha.2",
-    "@travetto/registry": "^2.0.0-alpha.2",
+    "@travetto/registry": "^2.0.0-alpha.3",
     "prismjs": "^1.23.0"
   },
   "title": "Documentation",
@@ -32,5 +32,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/doc"
   },
-  "version": "2.0.0-alpha.2"
+  "version": "2.0.0-alpha.3"
 }
