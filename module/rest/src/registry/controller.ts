@@ -96,13 +96,17 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param fn The filter to call
    */
   createFilterDecorator(fn: Filter) {
-    return (<T>(target: Class<T> | T, prop: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) => {
+    return ((target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>) => {
       if (prop) {
-        this.registerEndpointFilter((target as unknown as ClassInstance<T>).constructor, descriptor!.value!, fn);
+        this.registerEndpointFilter((target as unknown as ClassInstance).constructor, descriptor!.value!, fn);
       } else {
-        this.registerControllerFilter(target as Class<T>, fn);
+        this.registerControllerFilter(target as Class, fn);
       }
-    });
+    }) as
+      (
+        (<T extends Class>(target: T) => void) &
+        (<U>(target: U, prop: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) => void)
+      );
   }
 
   /**

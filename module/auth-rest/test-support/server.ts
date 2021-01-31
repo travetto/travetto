@@ -76,6 +76,16 @@ class TestAuthController {
   }
 }
 
+@Controller('/test/auth-all')
+@Authenticated()
+class TestAuthAllController {
+
+  @Get('/self')
+  async getSelf(req: Request) {
+    return req.auth?.principal;
+  }
+}
+
 @Suite()
 export abstract class AuthRestServerSuite extends BaseRestSuite {
 
@@ -129,6 +139,32 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
     assert(status === 201);
 
     const { status: lastStatus } = await this.makeRequst('get', '/test/auth/self', {
+      throwOnError: false,
+      headers: {
+        Authorization: headers.authorization
+      }
+    });
+    assert(lastStatus === 200);
+  }
+
+  @Test()
+  async testAllAuthenticated() {
+    const { status } = await this.makeRequst('get', '/test/auth-all/self', {
+      throwOnError: false
+    });
+    assert(status === 401);
+
+
+    const { headers, status: authStatus } = await this.makeRequst('post', '/test/auth/login', {
+      throwOnError: false,
+      body: {
+        username: 'super-user',
+        password: 'password'
+      }
+    });
+    assert(authStatus === 201);
+
+    const { status: lastStatus } = await this.makeRequst('get', '/test/auth-all/self', {
       throwOnError: false,
       headers: {
         Authorization: headers.authorization
