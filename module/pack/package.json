@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.0",
+    "@travetto/base": "^2.0.0-alpha.1",
     "picomatch": "^2.2.2"
   },
   "title": "Pack",
@@ -29,5 +29,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/pack"
   },
-  "version": "2.0.0-alpha.0"
+  "version": "2.0.0-alpha.1"
 }

@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/compiler": "^2.0.0-alpha.0"
+    "@travetto/compiler": "^2.0.0-alpha.1"
   },
   "title": "Registry",
   "description": "Patterns and utilities for handling registration of metadata and functionality for run-time use",
@@ -32,5 +32,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/registry"
   },
-  "version": "2.0.0-alpha.0"
+  "version": "2.0.0-alpha.1"
 }

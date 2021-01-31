@@ -7,8 +7,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^2.0.0-alpha.0",
-    "@travetto/model": "^2.0.0-alpha.0",
+    "@travetto/di": "^2.0.0-alpha.1",
+    "@travetto/model": "^2.0.0-alpha.1",
     "@types/mime": "^2.0.3",
     "file-type": "^14.7.1",
     "mime": "^2.5.0"
@@ -34,5 +34,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/asset"
   },
-  "version": "2.0.0-alpha.0"
+  "version": "2.0.0-alpha.1"
 }

@@ -7,9 +7,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/di": "^2.0.0-alpha.0",
-    "@travetto/schema": "^2.0.0-alpha.0",
-    "@travetto/model": "^2.0.0-alpha.0"
+    "@travetto/di": "^2.0.0-alpha.1",
+    "@travetto/model": "^2.0.0-alpha.1",
+    "@travetto/schema": "^2.0.0-alpha.1"
   },
   "title": "Data Model Querying",
   "description": "Datastore abstraction for advanced query support.",
@@ -34,5 +34,5 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/model-query"
   },
-  "version": "2.0.0-alpha.0"
+  "version": "2.0.0-alpha.1"
 }

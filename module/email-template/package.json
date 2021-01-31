@@ -7,10 +7,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/config": "^2.0.0-alpha.0",
-    "@travetto/di": "^2.0.0-alpha.0",
-    "@travetto/email": "^2.0.0-alpha.0",
-    "@travetto/image": "^2.0.0-alpha.0",
+    "@travetto/config": "^2.0.0-alpha.1",
+    "@travetto/di": "^2.0.0-alpha.1",
+    "@travetto/email": "^2.0.0-alpha.1",
+    "@travetto/image": "^2.0.0-alpha.1",
     "@types/html-entities": "^1.2.16",
     "@types/inline-css": "^0.0.33",
     "@types/node-sass": "^4.11.1",
@@ -49,5 +49,5 @@
     "!resources/email/demo/",
     "bin"
   ],
-  "version": "2.0.0-alpha.0"
+  "version": "2.0.0-alpha.1"
 }

@@ -38,7 +38,7 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/boot"
   },
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0-alpha.1",
   "scripts": {
     "build": "tsc -p src-ts",
     "build:watch": "tsc -w -p src-ts",
