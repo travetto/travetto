@@ -1,15 +1,12 @@
-Active Development (1.0.0 - RC Ready)
+Active Development (2.0.0 - RC Ready)
 =====================================
 
-Cache/Rest-Session
---------------------------
-- [ ] Update docs with clearer example of cache usage
+Model
+--------------
+- [ ] Polymorphism tests
+- [ ] Multiple providers and conflicts on realtime data updating
+- [ ] Realworld example
 
-Rest
-----------------------
-- [ ] Documentation on auth, w.r.t sessions and cookies
-   - [ ] Making sessions optional?
-  
 Tests
 --------------
 - [?] Better unit tests

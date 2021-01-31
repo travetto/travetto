@@ -1,6 +1,10 @@
 Completed Tasks
 ==============
 
+Development
+----------------------
+- [x] allow for better alignment with `tsc` and remove unneeded symlink logic
+
 Model (Cache, Asset, Auth)
 ----------------------
 [x] Move all data oriented operations into the model module
