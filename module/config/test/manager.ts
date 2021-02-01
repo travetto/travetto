@@ -4,6 +4,7 @@ import { YamlUtil } from '@travetto/yaml';
 import { Test, Suite, BeforeEach, AfterEach } from '@travetto/test';
 
 import { ConfigManager } from '../src/manager';
+import { SimpleObject, Util } from '@travetto/base';
 
 class DbConfig {
   name: string;
@@ -96,7 +97,7 @@ export class ManagerTest {
 
   @Test()
   async verifyTopLevelKeys() {
-    ConfigManager.putAll(YamlUtil.parse(SAMPLE_YAML));
+    ConfigManager.putAll(YamlUtil.parse(SAMPLE_YAML) as SimpleObject);
     console.log('Configuration', ConfigManager.get() as Record<string, string>);
     const conf = new Test2Config();
     ConfigManager.bindTo(conf, 'test.beta');
@@ -129,10 +130,10 @@ config:
   s3:
     secretAccessKey: bob
 panda.user: bob
-`));
+`) as SimpleObject);
 
     const all = ConfigManager.getSecure();
-    assert(all.panda?.user === '***');
-    assert(all.config?.s3.secretAccessKey === '***');
+    assert(Util.isPlainObject(all.panda) && all.panda.user === '***');
+    assert(Util.isPlainObject(all.config) && Util.isPlainObject(all.config.s3) && all.config.s3.secretAccessKey === '***');
   }
 }

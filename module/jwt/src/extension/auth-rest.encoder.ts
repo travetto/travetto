@@ -36,7 +36,7 @@ export class JWTAuthContextEncoder implements AuthContextEncoder {
   /**
    * Write context
    */
-  async write(ctx: AuthContext, req: Request, res: Response) {
+  async encode(req: Request, res: Response, ctx: AuthContext) {
     if (ctx) {
       const expires = ctx.principal.expires || new Date(Date.now() + (1000 * 60 * 60 * 24 * 365));
       const body: Pick<AuthContext, 'identity' | 'principal'> & { exp: number } = {
@@ -51,7 +51,7 @@ export class JWTAuthContextEncoder implements AuthContextEncoder {
   /**
    * Read JWT from location
    */
-  async read(req: Request) {
+  async decode(req: Request) {
     const input = this.accessor.readValue(req);
     if (input) {
       const ac = await verify<AuthContext>(input!, { key: this.signingKey });

@@ -24,9 +24,11 @@ export class AppListUtil {
    */
   static async buildList() {
 
-    SourceIndex.findByFolders(AppManifest.source)
-      .filter(x => fs.readFileSync(x.file, 'utf-8').includes('@Application'))
-      .forEach(x => require(x.file)); // Only load files that are candidates
+    await Promise.all(
+      SourceIndex.findByFolders(AppManifest.source)
+        .filter(x => fs.readFileSync(x.file, 'utf-8').includes('@Application'))
+        .map(x => import(x.file)) // Only load files that are candidates
+    );
 
     // Get applications
     const res = await ApplicationRegistry.getAll();

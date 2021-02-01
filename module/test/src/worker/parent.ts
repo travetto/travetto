@@ -1,4 +1,5 @@
 import { ErrorUtil } from '@travetto/base/src/internal/error';
+import { FsUtil } from '@travetto/boot/src';
 import { ParentCommChannel, WorkUtil } from '@travetto/worker';
 import { Events, RunEvent } from './types';
 import { TestConsumer } from '../consumer/types';

@@ -11,8 +11,7 @@
     "@travetto/config": "^2.0.0-alpha.2",
     "@travetto/rest": "^2.0.0-alpha.4",
     "@types/busboy": "^0.2.3",
-    "busboy": "^0.3.1",
-    "mime-match": "^1.0.2"
+    "busboy": "^0.3.1"
   },
   "title": "Asset Rest Support",
   "description": "Provides integration between the travetto asset and rest module.",

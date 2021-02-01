@@ -1,4 +1,7 @@
 import * as https from 'https';
+import compress from 'fastify-compress';
+import formBody from 'fastify-formbody';
+
 import { FastifyInstance, fastify, FastifyServerOptions, FastifyHttpsOptions } from 'fastify';
 
 import { RestConfig, RouteConfig, RestServer } from '@travetto/rest';
@@ -32,8 +35,8 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
     }
 
     const app = fastify(fastConf);
-    app.register(require('fastify-compress'));
-    app.register(require('fastify-formbody'));
+    app.register(compress);
+    app.register(formBody);
 
     // Allow everything else to be treated as a stream
     // @ts-expect-error

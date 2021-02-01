@@ -15,7 +15,7 @@ class $TestConsumerRegistry {
   async manualInit() {
     for (const entry of await ScanFs.scanDir({ testDir: f => true, testFile: f => f.includes('types/') }, __dirname)) {
       if (entry.stats.isFile()) {
-        require(entry.file);
+        await import(entry.file);
       }
     }
   }

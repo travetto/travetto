@@ -1,12 +1,11 @@
 import { Application } from '@travetto/app';
 import { InjectableFactory } from '@travetto/di';
 import { MailService, NodemailerTransport, MailTransport } from '..';
-const sendmail = require('nodemailer-sendmail-transport');
 
 class EmailConfig {
   @InjectableFactory()
   static getTransport(): MailTransport {
-    return new NodemailerTransport(sendmail);
+    return new NodemailerTransport({ sendmail: true });
   }
 }
 

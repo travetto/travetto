@@ -1,6 +1,7 @@
 
 import * as assert from 'assert';
 
+import { SimpleObject, Util } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 
 import { YamlUtil } from '../src/util';
@@ -206,8 +207,8 @@ parent:
 config:
   redacted:
     - panda.user
-panda.user: bob`);
-    assert(output.config.redacted === ['panda.user']);
+panda.user: bob`) as SimpleObject;
+    assert(Util.isPlainObject(output.config) && output.config.redacted === ['panda.user']);
   }
 
   @Test()
@@ -216,8 +217,8 @@ panda.user: bob`);
 add:
   - package.json
   - .trv_cache: cache
-  - src`);
-    assert(output.add[1]['.trv_cache'] === 'cache');
-    assert(output.add[2] === 'src');
+  - src`) as SimpleObject;
+    assert(Array.isArray(output.add) && Util.isPlainObject(output.add[1]) && output.add[1]['.trv_cache'] === 'cache');
+    assert(Array.isArray(output.add) && output.add[2] === 'src');
   }
 }

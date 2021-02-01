@@ -1,14 +1,9 @@
+// @file-if pg
 import type { Service } from '@travetto/command/bin/lib/service';
 
-let valid = false;
-try {
-  require('pg');
-  valid = true;
-} catch {
-}
 const version = '12.2';
 
-export const service: Service | undefined = valid ? {
+export const service: Service = {
   name: 'postgresql',
   version,
   port: 5432,
@@ -18,4 +13,4 @@ export const service: Service | undefined = valid ? {
     POSTGRES_PASSWORD: 'password',
     POSTGRES_DB: 'app'
   }
-} : undefined;
+};

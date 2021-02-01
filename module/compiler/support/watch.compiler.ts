@@ -1,3 +1,5 @@
+import * as sourceMapSupport from 'source-map-support';
+
 import { AppManifest, Class, ShutdownManager } from '@travetto/base';
 import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
 import { CompileUtil, FsUtil } from '@travetto/boot';
@@ -40,8 +42,8 @@ export function watch($Compiler: Class<typeof Compiler>) {
       });
 
       // Update source map support
-      require('source-map-support').install({
-        retrieveFile: (p: string) => this.transpiler.getContents(p)
+      sourceMapSupport.install({
+        retrieveFile: (p: string) => this.transpiler.getContents(p)!
       });
 
       this.presence = new FilePresenceManager(

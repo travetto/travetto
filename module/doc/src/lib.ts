@@ -14,7 +14,7 @@ export const VSCodeDownload = Library(`VSCode`, 'https://code.visualstudio.com/d
 // Data formats
 export const YAML = Library('YAML', 'https://en.wikipedia.org/wiki/YAML');
 export const JSON = Library('JSON', 'https://www.json.org');
-export const Base64 = Library('Base64', 'https://en.wikipedia.org/wiki/Base64'),
+export const Base64 = Library('Base64', 'https://en.wikipedia.org/wiki/Base64');
 export const TAP = Library('TAP 13', 'https://testanything.org/tap-version-13-specification.html');
 export const XUnit = Library('xUnit', 'https://en.wikipedia.org/wiki/XUnit');
 

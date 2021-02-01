@@ -9,7 +9,7 @@ export class GenerateUtil {
    */
   static async generate() {
     const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.init();
+    await PhaseManager.run('init');
 
     const { DependencyRegistry } = await import('@travetto/di');
     const { OpenApiService } = await import('../../src/service');

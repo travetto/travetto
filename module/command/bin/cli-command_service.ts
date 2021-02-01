@@ -18,7 +18,7 @@ export class CliServicePlugin extends BasePlugin {
   }
 
   async action(mode: 'start' | 'stop' | 'status' | 'restart', services: string[]) {
-    const all = ServiceUtil.findAll()
+    const all = (await ServiceUtil.findAll())
       .filter(x => services && services.length && !services.includes('all') ? services.includes(x.name) : true)
       .sort((a, b) => a.name.localeCompare(b.name));
 

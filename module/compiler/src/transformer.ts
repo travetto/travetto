@@ -18,7 +18,7 @@ export class TransformerManager {
   /**
    * Read all transformers from disk under the pattern support/transformer.*
    */
-  init() {
+  async init() {
     if (this.cached) {
       return;
     }
@@ -27,7 +27,7 @@ export class TransformerManager {
     const found = SourceIndex.find({ folder: 'support', filter: /\/transformer.*[.]ts/ });
 
     for (const entry of found) { // Exclude based on blacklist
-      this.transformers.push(...getAllTransformers(require(entry.file)));
+      this.transformers.push(...getAllTransformers(await import(entry.file)));
     }
 
     console.debug('Transformers', {

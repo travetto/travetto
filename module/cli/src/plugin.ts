@@ -47,7 +47,7 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
       }
       throw new Error(`Unknown command: ${cmd}`);
     }
-    for (const v of Object.values(require(f)) as { new(...args: unknown[]): unknown }[]) {
+    for (const v of Object.values(await import(f)) as { new(...args: unknown[]): unknown }[]) {
       try {
         const inst = new v();
         if (inst instanceof BasePlugin) {

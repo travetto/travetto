@@ -62,7 +62,9 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
       console.log('Sent email', { to });
 
       const senderConfig = await ConfigUtil.getSenderConfig();
-      return senderConfig.host?.includes('ethereal') ? { url: require('nodemailer').getTestMessageUrl(info) } : {};
+      return senderConfig.host?.includes('ethereal') ? {
+        url: (await import('nodemailer')).getTestMessageUrl(info as any)
+      } : {};
     } catch (e) {
       console.warn('Failed to send email', { to, error: e as Error });
       throw e;

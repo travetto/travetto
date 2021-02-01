@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { SimpleType, ResourceManager, Util, AppManifest, ClassInstance, AppError } from '@travetto/base';
+import { SimpleType, ResourceManager, Util, AppManifest, ClassInstance, AppError, SimpleObject } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 /**
@@ -28,28 +28,28 @@ export class ConfigUtil {
   /**
    * Parse config file from YAML into JSON
    */
-  static async getConfigFileAsData(file: string, ns: string = ''): Promise<Record<string, SimpleType>> {
+  static async getConfigFileAsData(file: string, ns: string = ''): Promise<SimpleObject> {
     const data = await ResourceManager.read(file, 'utf8');
     const doc = YamlUtil.parse(data);
-    return ns ? { [ns]: doc } : doc as Record<string, SimpleType>;
+    return ns ? { [ns]: doc } : doc as SimpleObject;
   }
 
   /**
    * Break down dotted keys into proper objects with nesting
    */
-  static breakDownKeys(data: SimpleType): Record<string, SimpleType> {
+  static breakDownKeys(data: SimpleObject): SimpleObject {
     if (!Util.isPlainObject(data)) {
       throw new AppError('Only objects are supported for breaking keys down');
     }
     for (const key of Object.keys(data)) {
       if (Util.isPlainObject(data[key])) {
-        this.breakDownKeys(data[key]);
+        this.breakDownKeys(data[key] as SimpleObject);
       }
       if (key.includes('.')) {
         const parts = key.split('.');
         const top = parts[0];
         const subTop = {};
-        let sub: Record<string, SimpleType> = subTop;
+        let sub: SimpleObject = subTop;
 
         while (parts.length > 1) {
           sub = (sub[parts.shift()!] = {});
@@ -66,8 +66,8 @@ export class ConfigUtil {
   /**
   * Break down dotted keys into proper objects with nesting
   */
-  static toFullKeys(data: Record<string, SimpleType> | SimpleType[], prefix: string = '') {
-    const out: Record<string, SimpleType> = {};
+  static toFullKeys(data: SimpleObject | SimpleType[], prefix: string = '') {
+    const out: SimpleObject = {};
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;
       if (Util.isPlainObject(value)) {
@@ -161,7 +161,7 @@ export class ConfigUtil {
     }
 
     key = this.getKeyName(key, data) || (/^[A-Z_0-9]+$/.test(key) ? key.toLowerCase() : key);
-    (data as Record<string, SimpleType>)[key] = this.coerce(value, data[key as keyof typeof data])!;
+    (data as SimpleObject)[key] = this.coerce(value, data[key as keyof typeof data])!;
 
     return true;
   }
@@ -169,13 +169,13 @@ export class ConfigUtil {
   /**
    * Bind `src` to `target`
    */
-  static bindTo<T extends object>(src: Record<string, SimpleType>, target: T, key?: string): T {
+  static bindTo<T extends object>(src: SimpleObject, target: T, key?: string): T {
     const keys = (key ? key.split('.') : []);
-    let sub: Record<string, SimpleType> = src;
+    let sub: SimpleObject = src;
 
     while (keys.length && sub) {
       const next = keys.shift()!;
-      sub = sub[next] as Record<string, SimpleType>;
+      sub = sub[next] as SimpleObject;
     }
 
     if (sub) {
@@ -198,7 +198,7 @@ export class ConfigUtil {
   /**
    * Sanitize payload
    */
-  static sanitizeValuesByKey<T extends Record<string, SimpleType>>(obj: T, patterns: string[]): T {
+  static sanitizeValuesByKey<T extends SimpleObject>(obj: T, patterns: string[]): T {
     const regex = this.buildRedactRegex(patterns);
 
     const full = this.toFullKeys(obj);

@@ -5,6 +5,8 @@ import { CompletionConfig } from './types';
 import { PluginManager } from './plugin';
 import { HelpUtil } from './help';
 
+import { version } from '../package.json';
+
 /**
  * Execution manager
  */
@@ -53,7 +55,7 @@ export class ExecutionManager {
    * @param args argv
    */
   static async run(args: string[]) {
-    commander.version(require('../package.json').version);
+    commander.version(version);
     const cmd = args[2];
 
     if (cmd === 'complete') {

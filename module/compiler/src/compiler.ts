@@ -39,7 +39,7 @@ class $Compiler {
   /**
    * Initialize the compiler
    */
-  init() {
+  async init() {
     if (this.active) {
       return;
     }
@@ -50,7 +50,7 @@ class $Compiler {
     require.extensions[TranspileUtil.EXT] = this.compile.bind(this);
 
     if (!EnvUtil.isReadonly()) {
-      this.transpiler.init();
+      await this.transpiler.init();
     } else { // Force reading from cache
       this.transpile = (tsf: string) => this.cache.readEntry(tsf);
     }
@@ -119,6 +119,7 @@ class $Compiler {
     if (filename in require.cache) { // if already loaded
       this.unload(filename);
     }
+    // Load Synchronously
     require(filename);
     this.notify('added', filename);
   }
@@ -137,6 +138,7 @@ class $Compiler {
   changed(filename: string) {
     if (this.transpiler.hashChanged(filename, fs.readFileSync(filename, 'utf8'))) {
       this.unload(filename);
+      // Load Synchronously
       require(filename);
       this.notify('changed', filename);
     }

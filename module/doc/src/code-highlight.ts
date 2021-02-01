@@ -1,15 +1,22 @@
-const Prism = require('prismjs');
+type Lang = {};
 
-require('prismjs/plugins/normalize-whitespace/prism-normalize-whitespace');
-require('prismjs/components/prism-typescript');
-require('prismjs/components/prism-javascript');
-require('prismjs/components/prism-css');
-require('prismjs/components/prism-scss');
-require('prismjs/components/prism-yaml');
-require('prismjs/components/prism-json');
-require('prismjs/components/prism-sql');
-require('prismjs/components/prism-properties');
-require('prismjs/components/prism-bash');
+// TODO: Get proper typings
+const Prism = require('prismjs') as {
+  plugins: Record<string, any>;
+  languages: Record<string, Lang>;
+  highlight(text: string, grammar: Lang, language: string): string;
+};
+
+import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-scss';
+import 'prismjs/components/prism-yaml';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-properties';
+import 'prismjs/components/prism-bash';
 
 Prism.plugins.NormalizeWhitespace.setDefaults({
   'remove-trailing': true,
@@ -37,7 +44,7 @@ export function highlight(text: string, lang: string) {
     .replace(/&([a-z][^;]*);/g, (a, k) => tokenMapping[k] || a);
 
   try {
-    return (Prism.highlight(text, Prism.languages[lang], lang) as string)
+    return Prism.highlight(text, Prism.languages[lang], lang)
       .replace(/(@\s*<span[^>]*)function("\s*>)/g, (a, pre, post) => `${pre}meta${post}`)
       .replace(/[{}]/g, a => `{{'${a}'}}`);
   } catch (e) {

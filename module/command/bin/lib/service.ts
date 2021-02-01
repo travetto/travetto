@@ -148,10 +148,12 @@ export class ServiceUtil {
   /**
    * Find all services
    */
-  static findAll() {
-    return SourceIndex
-      .find({ folder: 'support', filter: x => /\/service[.]/.test(x) })
-      .map(x => require(x.file).service as Service)
+  static async findAll() {
+    return (await Promise.all(
+      SourceIndex
+        .find({ folder: 'support', filter: x => /\/service[.]/.test(x) })
+        .map(async x => (await import(x.file)).service as Service)
+    ))
       .filter(x => !!x)
       .map(x => {
         x.version = `${x.version}`;

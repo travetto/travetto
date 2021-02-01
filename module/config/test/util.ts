@@ -2,6 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 import { YamlUtil } from '@travetto/yaml';
+import { SimpleObject } from '@travetto/base';
 
 import { ConfigUtil } from '../src/internal/util';
 
@@ -19,7 +20,7 @@ a.b:
    d: name
 a:
   e:
-    g: test`);
+    g: test`) as SimpleObject;
 
     const broken = ConfigUtil.breakDownKeys(data) as { a: { b: { c: number[], d: string }, e: { g: string } } };
     assert((broken as Record<string, unknown>)['a.b.c'] === undefined);

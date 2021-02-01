@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import * as util from 'util';
 import * as path from 'path';
 
+// TODO: Get proper typings
 const glob = require('picomatch');
 
 import { FsUtil, ScanFs, SourceIndex } from '@travetto/boot';
@@ -22,12 +23,14 @@ export class PackUtil {
    */
   static async modeList() {
     if (!this._modes) {
-      this._modes = SourceIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
-        .map(x => {
-          const req = require(x.file).config as Partial<CommonConfig>;
-          req.file = x.module.replace(/^node_modules\//, '');
-          return req;
-        });
+      this._modes = await Promise.all(
+        SourceIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
+          .map(async (x) => {
+            const req = (await import(x.file)).config as Partial<CommonConfig>;
+            req.file = x.module.replace(/^node_modules\//, '');
+            return req;
+          })
+      );
     }
     return this._modes;
   }

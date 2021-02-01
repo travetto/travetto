@@ -1,5 +1,5 @@
 import { color } from './color';
-import commander = require('commander');
+import * as commander from 'commander';
 
 /**
  * Utilities for formatting help

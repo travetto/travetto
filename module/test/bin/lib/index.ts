@@ -26,7 +26,7 @@ async function load() {
 
   await CompileCliUtil.compile();
   const { PhaseManager } = await import('@travetto/base');
-  await PhaseManager.init('@trv:compiler/load');
+  await PhaseManager.run('init', '@trv:compiler/load');
 }
 
 /**
@@ -72,7 +72,7 @@ export async function watchTests(format: string = 'tap') {
 
   // Compile everything inline, don't delegate
   const { PhaseManager } = await import('@travetto/base');
-  await PhaseManager.init('@trv:compiler/load');
+  await PhaseManager.run('init', '@trv:compiler/load');
 
   // Trigger startup of transpiler
   (await import('@travetto/compiler')).Compiler['transpiler']['getProgram']();

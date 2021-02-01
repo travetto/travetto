@@ -70,7 +70,7 @@ export class Parser {
   /**
    * Parse via `State`
    */
-  static parse(input: string | State): SimpleType {
+  static parse(input: string | State) {
     const state = typeof input === 'string' ? new State(input) : input;
 
     let pos = 0;
@@ -129,6 +129,6 @@ export class Parser {
       pos = nextLineStart;
     }
 
-    return state.popToTop()!.value;
+    return state.popToTop()!.value!;
   }
 }

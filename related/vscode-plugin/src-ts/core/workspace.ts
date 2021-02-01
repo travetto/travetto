@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, Package } from '@travetto/boot';
 
 /**
  * Standard set of workspace utilities
@@ -58,7 +58,7 @@ export class Workspace {
    */
   static getModule() {
     if (this._module === undefined) {
-      this._module = FsUtil.existsSync(this.resolve('package.json')) ? require(Workspace.resolve('package.json')).name : '';
+      this._module = Package.name ?? '';
     }
     return this._module;
   }
@@ -139,7 +139,7 @@ export class Workspace {
     const breakpoint = new vscode.SourceBreakpoint(loc, true);
     vscode.debug.addBreakpoints([breakpoint]);
 
-    const remove = vscode.debug.onDidTerminateDebugSession(e => {
+    const remove = vscode.debug.onDidTerminateDebugSession(() => {
       vscode.debug.removeBreakpoints([breakpoint]);
       remove.dispose();
     });

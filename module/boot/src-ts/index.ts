@@ -9,3 +9,4 @@ export * from './source';
 export * from './scan';
 export * from './compile';
 export * from './transpile';
+export * from './package';

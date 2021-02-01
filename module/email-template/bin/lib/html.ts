@@ -1,5 +1,6 @@
 import { TreeAdapter, Node, serialize, DefaultTreeElement } from 'parse5';
 
+// TODO: Get proper typings
 export const Parse5Adapter: TreeAdapter = require('parse5/lib/tree-adapters/default');
 
 /**

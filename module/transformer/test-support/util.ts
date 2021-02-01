@@ -19,8 +19,10 @@ export class TranformerTestUtil {
       tsconfig = FsUtil.resolveUnix(__dirname, '..', '..', 'node_modules', '@travetto', 'boot', 'tsconfig.json');
     }
 
+    const tsconfigObj = JSON.parse(await fs.promises.readFile(tsconfig, 'utf8'));
+
     const prog = ts.createProgram({
-      options: ts.convertCompilerOptionsFromJson(require(tsconfig), tsconfig).options,
+      options: ts.convertCompilerOptionsFromJson(tsconfigObj, tsconfig).options,
       rootNames: (await ScanFs.scanDir({ testFile: f => f.startsWith('src/') && f.endsWith('.ts') }, folder))
         .filter(x => x.stats.isFile())
         .filter(x => !file || x.file.endsWith(file))
@@ -30,12 +32,14 @@ export class TranformerTestUtil {
 
     await FsUtil.unlinkRecursive(log, true);
 
-    const visitor = new VisitorFactory(
-      (ctx, src) => new TransformerState(src, ctx.factory, prog.getTypeChecker()),
+    const transformers =
       (await ScanFs.scanDir({ testFile: f => f.startsWith('support/transformer') }, folder))
         .filter(x => x.stats.isFile())
-        .map(x => getAllTransformers(require(x.file)))
-        .flat(),
+        .map(x => import(x.file).then(getAllTransformers));
+
+    const visitor = new VisitorFactory(
+      (ctx, src) => new TransformerState(src, ctx.factory, prog.getTypeChecker()),
+      (await Promise.all(transformers)).flat(),
       log
     );
 

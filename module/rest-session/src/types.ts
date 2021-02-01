@@ -12,7 +12,7 @@ export interface SessionData {
  * Full session object, with metadata
  */
 @ContextProvider((c, req) => req.session)
-export class Session<T = unknown>  {
+export class Session<T extends SessionData = SessionData>  {
   /**
    * The expiry time when the session was loaded
    */
@@ -71,6 +71,21 @@ export class Session<T = unknown>  {
 
     // Hash the session as it stands
     this.hash = SystemUtil.naiveHash(JSON.stringify(this));
+  }
+
+  /**
+   * Get session value
+   */
+  getValue<V>(key: string): V | undefined {
+    return this.data && key in this.data ? this.data[key] as V : undefined;
+  }
+
+  /**
+   * Set session value
+   */
+  setValue<V>(key: string, value: V): void {
+    this.data = this.data || {} as T;
+    (this.data as Record<string, unknown>)[key] = value;
   }
 
   /**

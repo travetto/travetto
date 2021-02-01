@@ -144,7 +144,7 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
     assert(/Validation errors have occurred/.test(res.body.message));
     assert(res.body.errors[0].path === 'id');
 
-    res = await this.makeRequst('get', '/test/schema/user', { query: { id: 0, name: 'bob', age: 'a' }, throwOnError: false });
+    res = await this.makeRequst('get', '/test/schema/user', { query: { id: '0', name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res.status === 400);
     assert(/Validation errors have occurred/.test(res.body.message));
@@ -165,7 +165,7 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
     assert(/Validation errors have occurred/.test(res.body.message));
     assert(res.body.errors[0].path === 'id');
 
-    res = await this.makeRequst('get', '/test/schema/interface', { query: { id: 0, name: 'bob', age: 'a' }, throwOnError: false });
+    res = await this.makeRequst('get', '/test/schema/interface', { query: { id: '0', name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res.status === 400);
     assert(/Validation errors have occurred/.test(res.body.message));

@@ -1,5 +1,5 @@
 import { CliUtil } from '@travetto/cli/src/util';
-import { ExecUtil } from '@travetto/boot/src';
+import { ExecUtil, FsUtil } from '@travetto/boot/src';
 
 import type { Class } from '@travetto/base';
 import type { InjectableConfig } from '@travetto/di';
@@ -54,7 +54,7 @@ export class CliModelCandidateUtil {
   private static async init() {
     CliUtil.initEnv({ watch: false });
     const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.init();
+    await PhaseManager.run('init');
   }
 
   /**
@@ -72,7 +72,7 @@ export class CliModelCandidateUtil {
    */
   static async getCandidates() {
     return CliUtil.waiting('Compiling', () =>
-      ExecUtil.worker<{ providers: string[], models: string[] }>(require.resolve('../plugin-candidates'), ['build'], {
+      ExecUtil.worker<{ providers: string[], models: string[] }>(require.resolve('../plugin-candidates.js'), ['build'], {
         env: { TRV_WATCH: '0' }
       }).message
     );

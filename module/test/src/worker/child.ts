@@ -78,7 +78,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     console.debug('Resetting', { fileCount: Object.keys(require.cache).length });
 
     // Reload registries, test and root
-    await PhaseManager.create('reset').run();
+    await PhaseManager.run('reset');
     await ShutdownManager.executeAsync(-1);
 
     for (const { file } of SourceIndex.find({
@@ -106,9 +106,9 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     }
 
     // Run all remaining initializations as needed for tests
-    await PhaseManager.init('@trv:compiler/load'); // Require all
+    await PhaseManager.run('init', '@trv:compiler/load'); // Require all
 
-    await PhaseManager.initAfter('@trv:registry/init');
+    await PhaseManager.run('init', '*', '@trv:registry/init');
 
     const { Runner } = await import(`../execute/runner`);
 

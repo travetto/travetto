@@ -1,5 +1,5 @@
 import { Application } from '@travetto/app';
-import { RestConfig, RestServer } from '@travetto/rest';
+import { RestConfig, RestApplication } from '@travetto/rest';
 
 @Application('sample', {
   description: 'Sample rest application'
@@ -7,7 +7,7 @@ import { RestConfig, RestServer } from '@travetto/rest';
 export class SampleApp {
 
   constructor(
-    private server: RestServer,
+    private server: RestApplication,
     private config: RestConfig
   ) { }
 

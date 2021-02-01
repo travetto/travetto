@@ -1,4 +1,4 @@
-import { ExecUtil, ExecutionOptions, } from '@travetto/boot';
+import { ExecUtil, ExecutionOptions, FsUtil } from '@travetto/boot';
 import { ParentCommChannel } from './comm/parent';
 import { Worker } from './pool';
 
@@ -22,9 +22,7 @@ export class WorkUtil {
     }
   ): Worker<X> {
     const channel = new ParentCommChannel<V>(
-      ExecUtil.fork(command, args, {
-        ...(opts ?? {})
-      })
+      ExecUtil.fork(command, args, { ...(opts ?? {}) })
     );
     return {
       get id() { return channel.id; },

@@ -1,4 +1,4 @@
-import commander = require('commander');
+import * as commander from 'commander';
 import { CompletionConfig } from './types';
 import { HelpUtil } from './help';
 

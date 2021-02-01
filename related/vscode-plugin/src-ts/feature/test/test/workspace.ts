@@ -57,7 +57,7 @@ export class WorkspaceResultsManager {
    * @param target
    */
   getLocation(target: vscode.TextDocument | RemoveEvent | TestEvent) {
-    let file: string;
+    let file: string | undefined;
     if ('fileName' in target) {
       file = target.fileName;
     } else if ('file' in target) {

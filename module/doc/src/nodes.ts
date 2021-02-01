@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, Package } from '@travetto/boot';
 import { DocUtil } from './util';
 
 export interface DocNode { _type: string }
@@ -72,9 +72,8 @@ export function Config(title: Content, content: Content, language = 'yaml') {
   return $n('config', { title: $c(title), content: $c(res.content), language: res.language, file: $c(res.file) });
 }
 
-export function Header(folder: string, install = true) {
-  const pkg = require(`${folder}/package.json`) as Record<string, string>;
-  return $n('header', { title: $c(pkg.title), description: $c(pkg.description), package: pkg.name, install });
+export function Header(install = true, pkg = Package) {
+  return $n('header', { title: $c(pkg.title ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });
 }
 
 export function Snippet(title: Content, file: string, startPattern: RegExp, endPattern?: RegExp, outline?: boolean) {

@@ -143,9 +143,9 @@ export class Transpiler {
   /**
    * Initialize
    */
-  init() {
+  async init() {
     this.host = this.getHost();
-    this.transformerManager.init();
+    await this.transformerManager.init();
   }
 
   /**

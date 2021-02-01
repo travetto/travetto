@@ -16,7 +16,7 @@ export class StandardWorker {
       RunnerUtil.registerCleanup('runner');
 
       // Init the app
-      await PhaseManager.initAfter('@trv:registry/init');
+      await PhaseManager.run('init', '*', '@trv:registry/init');
 
       // Run the tests
       const res = await new Runner(opts).run();

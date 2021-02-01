@@ -9,6 +9,7 @@ import { RestLambdaSym } from '@travetto/rest/src/internal/lambda';
 
 import { FastifyRestServer } from '../../server';
 
+// TODO: Get proper typings
 const awsLambdaFastify = require('aws-lambda-fastify') as (
   (app: FastifyInstance, binaryMimeTypes?: string[])
     => (event: lambda.APIGatewayProxyEvent, context: lambda.Context) => void // eslint-disable-line

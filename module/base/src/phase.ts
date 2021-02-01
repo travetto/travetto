@@ -7,6 +7,8 @@ interface Initializer {
   key: string;
 }
 
+type Scope = 'init' | 'reset' | 'test';
+
 /**
  * Allows for running application phases.  The manager will
  * scan all the loaded modules for any phase support files
@@ -28,26 +30,8 @@ export class PhaseManager {
    * @param upto An optional upper bound on the stages to run, inclusive
    * @param after An optional lower bound on the stages to run, exclusive
    */
-  static create(scope: string, upto?: string, after?: string) {
-    const mgr = new PhaseManager(scope);
-    mgr.load(upto, after);
-    return mgr;
-  }
-
-  /**
-   * Shorthand for running the init phase
-   * @param upto Optional stopping point
-   */
-  static init(upto?: string) {
-    return this.create('init', upto).run();
-  }
-
-  /**
-   * Shorthand for running the init phase
-   * @param after Optional starting point
-   */
-  static initAfter(after: string) {
-    return this.create('init', '*', after).run();
+  static run(scope: Scope, upto: string = '*', after?: string) {
+    return new PhaseManager(scope).load(upto, after).then(m => m.run());
   }
 
   initializers: Initializer[] = [];
@@ -58,7 +42,7 @@ export class PhaseManager {
    * Create a new manager
    * @param scope The scope to run against
    */
-  constructor(public scope: string) {
+  constructor(public scope: Scope) {
     this.filter = new RegExp(`phase[.]${this.scope}(.*?)[.]ts`);
   }
 
@@ -67,7 +51,7 @@ export class PhaseManager {
    * @param upto Stopping point, inclusive
    * @param after Starting point, exclusive
    */
-  load(upto?: string, after?: string) {
+  async load(upto?: string, after?: string) {
     const found = SourceIndex.find({ folder: 'support', filter: this.filter });
 
     // Ensure we transpile all files
@@ -76,7 +60,7 @@ export class PhaseManager {
     }
 
     // Load all support files
-    const initFiles = found.map(x => require(x.file));
+    const initFiles = await Promise.all(found.map(x => import(x.file)));
     this.initializers = SystemUtil.computeOrdering(initFiles.map(x => x.init));
 
     if (upto) {

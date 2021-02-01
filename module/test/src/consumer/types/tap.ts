@@ -33,7 +33,7 @@ export class TapEmitter implements TestConsumer {
    * Preamble
    */
   onStart() {
-    this.log(this.enhancer.suiteName('TAP version 13'));
+    this.log(this.enhancer.suiteName('TAP version 13')!);
   }
 
   /**

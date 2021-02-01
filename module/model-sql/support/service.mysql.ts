@@ -1,15 +1,9 @@
+// @file-if mysql
 import type { Service } from '@travetto/command/bin/lib/service';
-
-let valid = false;
-try {
-  require('mysql');
-  valid = true;
-} catch {
-}
 
 const version = '5.6';
 
-export const service: Service | undefined = valid ? {
+export const service: Service = {
   name: 'mysql',
   version,
   image: `mysql:${version}`,
@@ -18,4 +12,4 @@ export const service: Service | undefined = valid ? {
     MYSQL_ROOT_PASSWORD: 'password',
     MYSQL_DATABASE: 'app'
   },
-} : undefined;
+};

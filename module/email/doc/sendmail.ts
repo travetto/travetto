@@ -4,6 +4,6 @@ import { NodemailerTransport } from '@travetto/email';
 class Config {
   @InjectableFactory()
   static getTransport() {
-    return new NodemailerTransport(require('nodemailer-sendmail-transport'));
+    return new NodemailerTransport({ sendmail: true });
   }
 }

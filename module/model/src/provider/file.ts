@@ -24,6 +24,8 @@ type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 export class FileModelConfig {
   folder: string;
   namespace: string = '.';
+  autoCreate?: boolean;
+
   async postConstruct() {
     if (!this.folder) {
       this.folder = FsUtil.resolveUnix(os.tmpdir(), Util.uuid().substring(0, 10));
@@ -52,7 +54,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
    *
    * @param folder
    */
-  constructor(private config: FileModelConfig) { }
+  constructor(public config: FileModelConfig) { }
 
   private async resolveName<T extends ModelType>(cls: Class<T> | string, suffix: Suffix, id?: string) {
     const name = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);

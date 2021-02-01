@@ -15,6 +15,6 @@ export const init = {
     }
 
     const { Compiler } = await import('../src/compiler');
-    Compiler.init();
+    await Compiler.init();
   }
 };

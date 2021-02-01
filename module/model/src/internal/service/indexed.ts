@@ -20,7 +20,8 @@ export class ModelIndexedUtil {
    */
   static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, emptyValue = null) {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
-    return cfg.fields.reduce((res: Record<string, unknown>, f: Record<string, unknown>) => {
+    const res = {} as Record<string, unknown>;
+    for (let f of cfg.fields as Record<string, unknown>[]) {
       let o: Record<string, unknown> | undefined = item;
       let sub: Record<string, unknown> = res;
 
@@ -35,8 +36,8 @@ export class ModelIndexedUtil {
           f = f[k] as Record<string, unknown>;
         }
       }
-      return res;
-    }, {} as Record<string, unknown>);
+    }
+    return res;
   }
 
   /**

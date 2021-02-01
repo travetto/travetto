@@ -1,13 +1,13 @@
 import * as path from 'path';
-import { FsUtil, ExecUtil, EnvUtil } from '@travetto/boot';
+import { Package, FsUtil, ExecUtil, EnvUtil } from '@travetto/boot';
 import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 
+import { AllType } from '../../src/node-types';
 import type { Renderer } from '../../src/render';
-import { AllType } from '@travetto/doc/src/node-types';
 
 const PRIMARY_BRANCH = EnvUtil.get('TRV_DOC_BRANCH') ||
   ExecUtil.execSync('git', ['status', '-b', '-s', '.']).split(/\n/)[0].split('...')[0].split(' ')[1].trim();
-const REPO = (require(`${FsUtil.cwd}/package.json`).repository?.url || '').split(/[.]git$/)[0];
+const REPO = (Package.repository?.url ?? '').split(/[.]git$/)[0];
 const GIT_SRC_ROOT = `${REPO}/tree/${PRIMARY_BRANCH}`;
 
 export class DocCliUtil {
@@ -24,7 +24,7 @@ export class DocCliUtil {
     process.env.TRV_LOG_PLAIN = '1';
 
     const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.init();
+    await PhaseManager.run('init');
   }
 
   /**
@@ -53,7 +53,7 @@ export class DocCliUtil {
     const doc: { header?: boolean, toc?: string, text: AllType } = await import(file);
     let content = '';
     if (doc.header !== false) {
-      content = `${renderer.render(Header(FsUtil.cwd)).trim()}\n`;
+      content = `${renderer.render(Header()).trim()}\n`;
     }
     content = `${content}${renderer.render(doc.text)}`.replace(/\n{3,100}/msg, '\n\n');
     content = renderer.wrap(content, this.getPackageName());
@@ -98,7 +98,7 @@ ${content}`;
 
     new Watcher(__dirname, { interval: 250, exclude: { testDir: () => false, testFile: f => f === file } })
       .on('all', e => {
-        Compiler.unload(require.resolve(FsUtil.resolveUnix(file)));
+        Compiler.unload(FsUtil.resolveUnix(file));
         cb(e);
       });
     await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24));

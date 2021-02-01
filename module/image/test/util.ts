@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import * as fs from 'fs';
 
 import { Test, Suite } from '@travetto/test';
 
@@ -61,6 +62,6 @@ class ImageUtilTest {
     });
 
     await StreamUtil.writeToFile(out, 'temp.jpg');
-    require('fs').unlinkSync('temp.jpg');
+    await fs.promises.unlink('temp.jpg');
   }
 }

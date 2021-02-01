@@ -1,5 +1,7 @@
 import * as fs from 'fs';
+import * as sourceMapSupport from 'source-map-support';
 import type * as tsi from 'typescript';
+
 import { EnvUtil } from './env';
 import { FsUtil } from './fs';
 import { AppCache } from './app-cache';
@@ -13,6 +15,12 @@ type Diag = {
     getLineAndCharacterOfPosition(start: number): { line: number, character: number };
   };
 };
+
+function getTs() {
+  // Load Synchronously
+  const ts: typeof tsi = require('typescript');
+  return ts;
+}
 
 const CompilerOptionsSym = Symbol.for('@trv:compiler/options');
 
@@ -116,7 +124,7 @@ export class TranspileUtil {
    */
   static get compilerOptions(): unknown {
     if (!this[CompilerOptionsSym]) {
-      const ts: typeof tsi = require('typescript');
+      const ts = getTs();
       const projTsconfig = FsUtil.resolveUnix('tsconfig.json');
       const baseTsconfig = FsUtil.resolveUnix(__dirname, '..', 'tsconfig.json');
       // Fallback to base tsconfig if not found in local folder
@@ -141,8 +149,7 @@ export class TranspileUtil {
   static checkTranspileErrors(filename: string, diagnostics: readonly Diag[]) {
     if (diagnostics && diagnostics.length) {
       const errors: string[] = diagnostics.slice(0, 5).map(diag => {
-        const ts: typeof tsi = require('typescript');
-        const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+        const message = getTs().flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
           const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
           return ` @ ${diag.file.fileName.replace(FsUtil.cwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
@@ -215,8 +222,7 @@ export class TranspileUtil {
     return AppCache.getOrSet(tsf, () => {
       try {
         const diags: Diag[] = [];
-        const ts: typeof tsi = require('typescript');
-        const ret = ts.transpile(this.preProcess(tsf), this.compilerOptions as tsi.CompilerOptions, tsf, diags as tsi.Diagnostic[]);
+        const ret = getTs().transpile(this.preProcess(tsf), this.compilerOptions as tsi.CompilerOptions, tsf, diags as tsi.Diagnostic[]);
         this.checkTranspileErrors(tsf, diags);
         return ret;
       } catch (e) {
@@ -232,9 +238,9 @@ export class TranspileUtil {
     AppCache.init();
 
     // Register source maps for cached files
-    require('source-map-support').install({
+    sourceMapSupport.install({
       emptyCacheBetweenOperations: EnvUtil.isWatch(),
-      retrieveFile: (p: string) => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined
+      retrieveFile: (p: string) => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined!
     });
 
     // Disable compilation

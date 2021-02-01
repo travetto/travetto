@@ -1,10 +1,10 @@
 import { Application } from '@travetto/app';
-import { RestServer } from '@travetto/rest';
+import { RestApplication } from '@travetto/rest';
 
 @Application('sample')
 export class SampleApp {
 
-  constructor(private app: RestServer) { }
+  constructor(private app: RestApplication) { }
 
   run() {
     return this.app.run();

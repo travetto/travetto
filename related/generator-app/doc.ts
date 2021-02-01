@@ -4,7 +4,7 @@ const Todo = Ref('Todo', './templates/todo/src/model/todo.ts');
 
 exports.header = false;
 exports.text = d`
-${Header(__dirname, false)}
+${Header(false)}
 
 A simple ${lib.Yeoman} generator for scaffolding a reference project.  To get started, you need to make sure:
 

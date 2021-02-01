@@ -51,6 +51,6 @@ ${models.map(p => color`  * ${{ param: p }}`).join('\n')}
     ConsoleManager['exclude'].add('debug');
 
     // Init
-    await PhaseManager.init();
+    await PhaseManager.run('init');
   }
 }

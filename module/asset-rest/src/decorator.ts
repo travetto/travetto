@@ -37,9 +37,10 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
         const assetConfig = await DependencyRegistry.getInstance(RestAssetConfig);
 
         if (!req.files) { // Prevent duplication if given multiple decorators
-          req.files = await AssetRestUtil.upload(req, { ...assetConfig, ...finalConf },
-            `${(target.constructor as unknown as ControllerConfig).basePath}/`
-          );
+          req.files = await AssetRestUtil.upload(req, {
+            ...assetConfig,
+            ...finalConf
+          });
         }
       },
       extract: extractUpload

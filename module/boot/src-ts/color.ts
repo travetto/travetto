@@ -1,5 +1,7 @@
 import { EnvUtil } from './env';
 
+type Prim = string | number | boolean | Date;
+
 /**
  * Utilities for dealing with coloring console text
  */
@@ -54,9 +56,9 @@ export class ColorUtil {
    * @param styles Text styles to apply
    * @param value The value to color
    */
-  static color(textColor: keyof typeof ColorUtil.COLORS, styles: (keyof typeof ColorUtil.STYLES)[], value: unknown): string | null | undefined {
-    if (value === undefined || value === null || value === '') {
-      return value;
+  static color(textColor: keyof typeof ColorUtil.COLORS, styles: (keyof typeof ColorUtil.STYLES)[], value: Prim): string {
+    if (value === undefined || value === null) {
+      return '';
     }
     if (this.colorize) {
       for (const style of [this.COLORS[textColor], ...styles.map(s => this.STYLES[s])]) {
@@ -81,14 +83,14 @@ export class ColorUtil {
    *
    * @param palette The list of supported keys for the string template
    */
-  static makeTemplate<T extends Record<string, (text: string) => ReturnType<(typeof ColorUtil)['color']>>>(palette: T) {
+  static makeTemplate<T extends Record<string, (text: Prim) => ReturnType<(typeof ColorUtil)['color']>>>(palette: T) {
     /**
      * @example
      * ```
      * color`${{title: 'Main Title'}} is ${{subtitle: 'Sub Title}}`
      * ```
      */
-    return (values: TemplateStringsArray, ...keys: (Partial<Record<keyof T, string>> | string)[]) => {
+    return (values: TemplateStringsArray, ...keys: (Partial<Record<keyof T, Prim>> | string)[]) => {
       if (keys.length === 0) {
         return values[0];
       } else {

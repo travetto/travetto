@@ -1,4 +1,4 @@
-import ts = require('typescript');
+import type * as ts from 'typescript';
 
 /**
  * Base type for a simplistic type structure

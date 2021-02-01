@@ -66,7 +66,7 @@ export abstract class RestServerSuite extends BaseRestSuite {
   async putQuery() {
     const { body: ret } = await this.makeRequst('put', '/test/query', {
       query: {
-        age: 20
+        age: '20'
       }
     });
     assert(ret === { query: 20 });

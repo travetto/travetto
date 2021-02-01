@@ -18,7 +18,7 @@ class Preferences {
 
 @Model()
 class User {
-  id: number;
+  id: string;
   email: string;
   prefs: Preferences;
 }
@@ -57,7 +57,7 @@ export class VerifyTest {
   async verifyNested() {
     const query: ModelQuery<User> = {
       where: {
-        id: 5,
+        id: '5',
         prefs: {
           language: {
             $eq: 'a'

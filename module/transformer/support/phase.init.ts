@@ -13,6 +13,7 @@ export const init = {
     // Inject into global space as 'ts'
     global.ts = new Proxy({}, { // Only in inject as needed
       get(t, p, r) {
+        // Load Synchronously
         return (global.ts = require('typescript'))[p]; // Overwrite
       }
     });

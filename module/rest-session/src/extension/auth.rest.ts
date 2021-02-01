@@ -20,7 +20,7 @@ export class SessionAuthContextEncoder implements AuthContextEncoder {
   async encode(req: Request, res: Response, ctx: AuthContext) {
     if (req.session) {
       if (ctx && ctx.principal) {
-        req.session.data[this.key] = ctx;
+        req.session.setValue(this.key, ctx);
       } else {
         req.session.destroy(); // Kill session
       }
@@ -32,7 +32,7 @@ export class SessionAuthContextEncoder implements AuthContextEncoder {
    */
   async decode(req: Request) {
     if (req.session) {
-      let val = req.session.data[this.key];
+      let val = req.session.getValue<AuthContext>(this.key);
       if (val && val.constructor !== AuthContext) {
         val = new AuthContext(val.identity, val.principal);
       }

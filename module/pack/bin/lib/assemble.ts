@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { promises as fs } from 'fs';
 
-import { EnvUtil, ExecUtil, FsUtil, ScanFs } from '@travetto/boot';
+import { EnvUtil, ExecUtil, FsUtil, Package, ScanFs } from '@travetto/boot';
 
 import { DependenciesUtil, DepType } from './depdencies';
 import { PackUtil } from './util';
@@ -78,7 +78,7 @@ export class AssembleUtil {
     if (process.env.TRV_DEV) { // If in dev, inject Dynamic Modules into dependencies
       const mods = { ...EnvUtil.getDynamicModules() };
       ['@travetto/doc', '@travetto/test', '@travetto/pack'].forEach(x => delete mods[x]);
-      Object.assign(require(`${FsUtil.cwd}/package.json`)['dependencies'], mods);
+      Object.assign(Package.dependencies, mods);
     }
 
     for (const el of await DependenciesUtil.resolveDependencies({ types })) {

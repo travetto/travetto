@@ -1,10 +1,10 @@
 import { Application } from '@travetto/app';
-import { RestConfig, RestServer } from '@travetto/rest';
+import { RestConfig, RestApplication } from '@travetto/rest';
 
 @Application('sample')
 export class SampleApp {
 
-  constructor(private server: RestServer, private config: RestConfig) { }
+  constructor(private server: RestApplication, private config: RestConfig) { }
 
   run() {
     this.config.port = 3000;

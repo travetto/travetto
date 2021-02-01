@@ -16,12 +16,12 @@ export class EmailCompilePlugin extends BasePlugin {
   }
   async action() {
     const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.init();
+    await PhaseManager.run('init');
 
     const { TemplateUtil } = await import('./lib/util');
 
     const all = await TemplateUtil.compileAllToDisk();
-    console!.log(color`Successfully compiled ${{ param: all.length }} templates`);
+    console!.log(color`Successfully compiled ${{ param: `${all.length}` }} templates`);
 
     if (CliUtil.isTrue(this._cmd.watch)) {
       await TemplateUtil.watchCompile();

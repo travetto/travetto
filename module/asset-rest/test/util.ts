@@ -6,6 +6,37 @@ import { AssetRestUtil } from '../src/util';
 
 @Suite()
 export class UtilTest {
+
+  @Test()
+  validateMimesAllowDeny() {
+    const validator = AssetRestUtil.mimeValidator(['image/*'], ['image/tiff']);
+
+    assert.doesNotThrow(() => validator({ contentType: 'image/png' }));
+    assert.throws(() => validator({ contentType: 'image/tiff' }));
+    assert.throws(() => validator({ contentType: 'image' }));
+    assert.throws(() => validator({ contentType: 'img' }));
+  }
+
+  @Test()
+  validateDeny() {
+    const validator = AssetRestUtil.mimeValidator([], ['image/tiff']);
+
+    assert.doesNotThrow(() => validator({ contentType: 'image/png' }));
+    assert.throws(() => validator({ contentType: 'image/tiff' }));
+    assert.doesNotThrow(() => validator({ contentType: 'image' }));
+    assert.doesNotThrow(() => validator({ contentType: 'img' }));
+  }
+
+  @Test()
+  validateAllow() {
+    const validator = AssetRestUtil.mimeValidator(['image/*']);
+
+    assert.doesNotThrow(() => validator({ contentType: 'image/png' }));
+    assert.doesNotThrow(() => validator({ contentType: 'image/tiff' }));
+    assert.throws(() => validator({ contentType: 'image' }));
+    assert.throws(() => validator({ contentType: 'img' }));
+  }
+
   @Test()
   extractFilename() {
     const req = {

@@ -48,7 +48,7 @@ export class DependenciesUtil {
   /**
    * Get list of all production dependencies and their folders, for a given package
    */
-  static resolveDependencies({
+  static async resolveDependencies({
     root = FsUtil.cwd,
     types = ['prod'],
     maxDepth = Number.MAX_SAFE_INTEGER
@@ -61,7 +61,7 @@ export class DependenciesUtil {
       if (depth > maxDepth) { // Ignore if greater than valid max depth
         continue;
       }
-      const p = require(`${top}/package.json`) as Record<string, Record<string, string>> & { name: string };
+      const p = await import(`${top}/package.json`) as Record<string, Record<string, string>> & { name: string };
       const deps = [] as (readonly [name: string, type: DepType, version: string])[];
       for (const type of types) {
         if (

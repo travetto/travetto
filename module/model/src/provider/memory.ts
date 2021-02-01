@@ -19,7 +19,7 @@ import { ModelStorageUtil } from '../internal/service/storage';
 
 @Config('model.memory')
 export class MemoryModelConfig {
-  autoCreate: boolean;
+  autoCreate?: boolean;
   namespace: string;
 }
 

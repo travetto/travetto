@@ -32,7 +32,7 @@ export class Runner {
 
     console.debug('Running', { files });
 
-    await PhaseManager.create('test').run();
+    await PhaseManager.run('test');
 
     const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
       idleTimeoutMillis: 10000,
@@ -56,7 +56,7 @@ export class Runner {
     const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
     consumer.onStart();
 
-    await PhaseManager.create('test').run();
+    await PhaseManager.run('test');
     await TestExecutor.execute(consumer, this.state.args[0], ...this.state.args.slice(1));
 
     return consumer.summarizeAsBoolean();
@@ -72,7 +72,7 @@ export class Runner {
 
     console.debug('Running', { files });
 
-    await PhaseManager.create('test').run();
+    await PhaseManager.run('test');
 
     for (const f of files) {
       const modules = (await fs.promises.readFile(f, 'utf8'))

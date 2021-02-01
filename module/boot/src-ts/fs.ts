@@ -195,7 +195,7 @@ export class FsUtil {
   /**
    * Symlink, with some platform specific support, synchronously
    */
-  static async symlinkSync(actual: string, linkPath: string) {
+  static symlinkSync(actual: string, linkPath: string) {
     try {
       fss.lstatSync(linkPath);
     } catch (e) {

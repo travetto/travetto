@@ -1,13 +1,14 @@
 import * as path from 'path';
 
 import { EnvUtil, ExecUtil } from '@travetto/boot';
+import { version } from '@travetto/boot/package.json';
 
 export class Context {
   cwd: string;
   app: { name: string };
 
   template = '';
-  frameworkVersion = require('@travetto/boot/package.json').version.replace(/[.]\d+$/, '.0');
+  frameworkVersion = version.replace(/[.]\d+$/, '.0');
   frameworkDependencies: string[] = [];
   peerDependencies: string[] = [];
   modules: Record<string, boolean> = {};

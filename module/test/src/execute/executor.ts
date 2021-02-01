@@ -38,7 +38,7 @@ export class TestExecutor {
       .add(async () => {
         try {
           PromiseCapture.start(); // Listen for all promises to detect any unfinished, only start once method is invoked
-          await suite.instance[test.methodName](); // Run
+          await (suite.instance as Record<string, Function>)[test.methodName](); // Run
         } finally {
           PromiseCapture.stop().then(() => setTimeout(promCleanup.resolve, 1), promCleanup.reject);
         }
@@ -224,7 +224,7 @@ export class TestExecutor {
     }
 
     try {
-      require(FsUtil.toUnix(file)); // Path to module
+      await import(FsUtil.toUnix(file)); // Path to module
     } catch (err) {
       this.failFile(consumer, file, err);
       return;

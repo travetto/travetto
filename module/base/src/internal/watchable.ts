@@ -1,4 +1,4 @@
-import { EnvUtil } from '@travetto/boot';
+import { EnvUtil, FsUtil } from '@travetto/boot';
 import { Class } from '../types';
 
 /**
@@ -9,10 +9,11 @@ export function Watchable(key: string) {
   return (target: Class<unknown>) => {
     if (EnvUtil.isWatch()) {
       try {
-        require('@travetto/watch'); // Ensure watch is installed
+        require.resolve('@travetto/watch'); // Ensure watch is installed
       } catch {
         return;
       }
+      // Load Synchronously
       return require(key).watch(target);
     }
   };

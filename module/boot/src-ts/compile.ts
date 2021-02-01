@@ -4,6 +4,7 @@ import * as Mod from 'module';
 import { TranspileUtil } from './transpile';
 import { FsUtil } from './fs';
 import { EnvUtil } from './env';
+import { Package } from './package';
 
 type Module = {
   loaded?: boolean;
@@ -21,8 +22,6 @@ declare const global: {
   };
   ᚕsrc: (f: string) => string;
 };
-
-let PKG: { name: string, main: string };
 
 /**
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
@@ -77,11 +76,8 @@ export class CompileUtil {
       if (match) {
         p = `${match}${sub! ?? ''}`;
       } else {
-        if (!PKG) {
-          PKG = require(FsUtil.resolveUnix('package.json'));
-        }
-        if (key === PKG.name) {
-          p = FsUtil.resolveUnix(sub ? `./${sub}` : PKG.main);
+        if (key === Package.name) {
+          p = FsUtil.resolveUnix(sub ? `./${sub}` : Package.main);
         }
       }
     }

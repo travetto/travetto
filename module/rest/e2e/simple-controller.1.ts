@@ -1,7 +1,7 @@
 // @file-if @travetto/context
 import { WithAsyncContext, AsyncContext } from '@travetto/context';
 
-import { Controller, Get } from '../..';
+import { Controller, Get } from '..';
 import { MockService } from './mock';
 
 @Controller('/simple2')

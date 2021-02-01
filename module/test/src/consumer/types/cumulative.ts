@@ -23,6 +23,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    */
   summarizeSuite(test: TestResult): SuiteResult {
     try {
+      // TODO: Load asyncronously
       require(test.file);
       this.state[test.classId] = this.state[test.classId] ?? {};
       this.state[test.classId][test.methodName] = test.status;

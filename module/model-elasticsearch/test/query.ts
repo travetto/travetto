@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 
+import { Util } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { Schema } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
@@ -43,6 +44,15 @@ class WhereType {
   age: number;
 }
 
+function isBool(o: unknown): o is { bool: { must: any, ['must_not']: any, ['should_not']: any } } {
+  return Util.isPlainObject(o) && 'bool' in o;
+}
+
+function isRegexp(o: unknown): o is { regexp: { name: string } } {
+  return Util.isPlainObject(o) && 'regexp' in o;
+}
+
+
 @Suite()
 export class QueryTest {
 
@@ -70,21 +80,25 @@ export class QueryTest {
 
     out = ElasticsearchQueryUtil.extractWhereQuery(WhereType, qry);
 
-    assert.ok(out.bool);
+    assert(isBool(out));
 
-    assert.ok(out.bool.must[0]);
+    if (isBool(out)) {
+      assert.ok(out.bool);
 
-    assert.ok(out.bool.must[0].nested);
+      assert.ok(out.bool.must[0]);
 
-    assert(out.bool.must[0].nested.path === 'a');
+      assert.ok(out.bool.must[0].nested);
 
-    assert(out.bool.must[0].nested.query);
+      assert(out.bool.must[0].nested.path === 'a');
 
-    assert.ok(out.bool.must[0].nested.query.term);
+      assert(out.bool.must[0].nested.query);
 
-    assert.ok(out.bool.must[0].nested.query.term['a.b.c']);
+      assert.ok(out.bool.must[0].nested.query.term);
 
-    assert(out.bool.must[0].nested.query.term['a.b.c'] === 5);
+      assert.ok(out.bool.must[0].nested.query.term['a.b.c']);
+
+      assert(out.bool.must[0].nested.query.term['a.b.c'] === 5);
+    }
   }
 
   @Test()
@@ -95,7 +109,11 @@ export class QueryTest {
       ]
     });
 
-    assert(!!out.bool.must[0].terms._id);
+    assert(isBool(out));
+
+    if (isBool(out)) {
+      assert(!!out.bool.must[0].terms._id);
+    }
   }
 
   @Test()
@@ -107,7 +125,11 @@ export class QueryTest {
       }
     });
 
-    assert(typeof out.regexp.name === 'string');
-    assert(out.regexp.name === 'google.$');
+    assert(isRegexp(out));
+
+    if (isRegexp(out)) {
+      assert(typeof out.regexp.name === 'string');
+      assert(out.regexp.name === 'google.$');
+    }
   }
 }

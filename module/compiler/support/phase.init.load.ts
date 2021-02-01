@@ -9,7 +9,7 @@ export const init = {
     const { AppManifest } = await import('@travetto/base');
 
     for (const { file } of SourceIndex.findByFolders(AppManifest.source, 'required')) {
-      require(file); // Scan all files as compiler source root
+      await import(file); // Scan all files as compiler source root
     }
   }
 };

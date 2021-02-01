@@ -5,7 +5,7 @@ import { ElasticsearchModelService } from '../../src/service';
  */
 export async function getSchemas() {
   const { PhaseManager } = await import('@travetto/base');
-  await PhaseManager.init();
+  await PhaseManager.run('init');
 
   const { DependencyRegistry } = await import('@travetto/di');
   const { ModelRegistry, } = await import('@travetto/model');

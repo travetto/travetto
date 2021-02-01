@@ -30,8 +30,8 @@ export class ConfigUtil {
    */
   static async get(): Promise<ConfigType> {
     return fs.promises.readFile(this.CONFIG_FILE, 'utf8')
-      .then(YamlUtil.parse)
-      .catch(err => ({}));
+      .then(f => YamlUtil.parse(f) as ConfigType)
+      .catch(err => ({} as ConfigType));
   }
 
   static async getContext() {

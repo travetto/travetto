@@ -1,3 +1,5 @@
+import { version as VERSION } from '@elastic/elasticsearch/package.json';
+
 import { Class, Util } from '@travetto/base';
 import { ModelRegistry } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
@@ -5,9 +7,20 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types';
 
-const VERSION = require('@elastic/elasticsearch/package.json').version;
 
-type SchemaType = { properties: Record<string, unknown>, dynamic: boolean };
+type FieldType = {
+  type?: string;
+  format?: string;
+  scaling_factor?: number;
+  fields?: Record<string, FieldType>;
+  dynamic?: boolean;
+  properties?: Record<string, FieldType>;
+};
+
+type SchemaType = {
+  properties: Record<string, FieldType>;
+  dynamic: boolean;
+};
 
 /**
  * Utils for ES Schema management
@@ -75,7 +88,7 @@ export class ElasticsearchSchemaUtil {
   static generateSingleSourceSchema<T>(cls: Class<T>, config?: EsSchemaConfig): SchemaType {
     const schema = SchemaRegistry.getViewSchema(cls);
 
-    const props: Record<string, unknown> = {};
+    const props: SchemaType['properties'] = {};
 
     for (const field of schema.fields) {
       const conf = schema.schema[field];

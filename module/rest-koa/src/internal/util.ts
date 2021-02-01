@@ -12,7 +12,7 @@ export class KoaServerUtil {
   /**
    * Build a Travetto Request from a koa context
    */
-  static getRequest(ctx: koa.ParameterizedContext & { [RequestSym]?: Travetto.Request }) {
+  static getRequest(ctx: koa.ParameterizedContext<unknown> & { [RequestSym]?: Travetto.Request }) {
     if (!ctx[RequestSym]) {
       ctx[RequestSym] = RestServerUtil.decorateRequest({
         [ProviderRequestSym]: ctx,
@@ -38,7 +38,7 @@ export class KoaServerUtil {
   /**
    * Build a Travetto Response from a koa context
    */
-  static getResponse(ctx: koa.ParameterizedContext & { [ResponseSym]?: Travetto.Response }) {
+  static getResponse(ctx: koa.ParameterizedContext<unknown> & { [ResponseSym]?: Travetto.Response }) {
     if (!ctx[ResponseSym]) {
       ctx[ResponseSym] = RestServerUtil.decorateResponse({
         [ProviderResponseSym]: ctx,

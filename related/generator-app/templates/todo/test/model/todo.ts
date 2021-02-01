@@ -9,7 +9,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { Todo } from '../../src/model/todo';
 
 // Import with side effects as test will not automatically scan all files due to performance
-require('../config');
+import '../config';
 
 @Suite('Simple CRUD')
 class TestCRUD {

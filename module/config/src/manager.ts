@@ -1,4 +1,4 @@
-import { Util, SimpleType } from '@travetto/base';
+import { Util, SimpleObject } from '@travetto/base';
 
 import { ConfigUtil } from './internal/util';
 
@@ -53,8 +53,8 @@ class $ConfigManager {
   /**
    * Get a sub tree of the config, or everything if key is not passed
    */
-  get(key?: string) {
-    return this.bindTo({} as Record<string, SimpleType>, key);
+  get(key?: string): SimpleObject {
+    return this.bindTo({}, key);
   }
 
   /**
@@ -84,7 +84,7 @@ class $ConfigManager {
   /**
    * Update config with a full subtree
    */
-  putAll(data: SimpleType) {
+  putAll(data: SimpleObject) {
     Util.deepAssign(this.storage, ConfigUtil.breakDownKeys(data), 'coerce');
   }
 

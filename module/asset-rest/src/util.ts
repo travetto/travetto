@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as os from 'os';
 import * as busboy from 'busboy';
-import match = require('mime-match');
 
 import { Request, Response, NodeRequestSym, NodeResponseSym } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
@@ -18,24 +17,39 @@ type AssetMap = Record<string, Asset>;
 export class AssetRestUtil {
 
   /**
+   * Create a mime type validator
+   */
+  static mimeValidator(allowedTypes: string[] = [], excludedTypes: string[] = []) {
+
+    const cached = Object.fromEntries(
+      [...allowedTypes, ...excludedTypes].map(mime =>
+        [mime, (mime.endsWith('/*') || !mime.includes('/')) ? new RegExp(`^${mime.replace(/[\/][*]$/, '')}\/.*`) : new RegExp(`^${mime}$`)]
+      )
+    );
+
+    return <T extends { contentType: string }>(asset: T) => {
+      const matchPositive = !!allowedTypes.find(t => cached[t].test(asset.contentType));
+      const matchNegative = !!excludedTypes.find(t => cached[t].test(asset.contentType));
+
+      if (
+        (excludedTypes.length && matchNegative) ||
+        (allowedTypes.length && !matchPositive)) {
+        throw new AppError(`Content type not allowed: ${asset.contentType}`, 'data');
+      }
+      return asset;
+    };
+  }
+
+  /**
    * Stream file to disk, and verify types in the process.  Produce an asset as the output
    */
-  static async toLocalAsset(data: NodeJS.ReadableStream | Buffer, filename: string, allowedTypes: string[], excludedTypes: string[]) {
+  static async toLocalAsset(data: NodeJS.ReadableStream | Buffer, filename: string) {
     const uniqueDir = FsUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
     await FsUtil.mkdirp(uniqueDir); // TODO: Unique dir for each file? Use random file, and override metadata
     const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(filename));
 
     await StreamUtil.writeToFile(data, uniqueLocal);
-
     const asset = await AssetUtil.fileToAsset(uniqueLocal);
-
-    const notMatchPositive = allowedTypes.length && !allowedTypes.find(match(asset.contentType));
-    const matchNegative = excludedTypes.length && !!excludedTypes.find(match(asset.contentType));
-
-    if (notMatchPositive || matchNegative) {
-      throw new AppError(`Content type not allowed: ${asset.contentType}`, 'data');
-    }
-
     return asset;
   }
 
@@ -56,13 +70,13 @@ export class AssetRestUtil {
   /**
    * Actually process upload
    */
-  static upload(req: Request, config: Partial<RestAssetConfig>, relativeRoot?: string) {
-    const allowedTypes = config.allowedTypesList!;
-    const excludedTypes = config.excludedTypesList!;
+  static upload(req: Request, config: Partial<RestAssetConfig>) {
+    const validator = this.mimeValidator(config.allowedTypesList, config.excludedTypesList);
 
     if (!/multipart|urlencoded/i.test(req.header('content-type') as string)) {
       const filename = this.getFileName(req);
-      return this.toLocalAsset(req.body ?? req[NodeRequestSym], filename, allowedTypes, excludedTypes)
+      return this.toLocalAsset(req.body ?? req[NodeRequestSym], filename)
+        .then(validator)
         .then(file => ({ file }));
     } else {
       return new Promise<AssetMap>((resolve, reject) => {
@@ -78,7 +92,8 @@ export class AssetRestUtil {
         uploader.on('file', async (fieldName, stream, filename, encoding, mimeType) => {
           console.debug('Uploading file', { fieldName, filename, encoding, mimeType });
           uploads.push(
-            this.toLocalAsset(stream, filename, allowedTypes, excludedTypes)
+            this.toLocalAsset(stream, filename)
+              .then(validator)
               .then(res => mapping[fieldName] = res)
           );
         });

@@ -1,6 +1,6 @@
 import { Node } from 'parse5';
 
-import type { Class } from '@travetto/base';
+import type { Class, ClassInstance } from '@travetto/base';
 
 import { Parse5Adapter } from './html';
 
@@ -26,7 +26,7 @@ class $TagRegistry {
     return (typeof tag === 'string' ? tag : Parse5Adapter.getTagName(tag)).replace(new RegExp(`^${ns}`), '');
   }
 
-  register(cls: Class, name: string, fn: (node: Node) => string) {
+  register(cls: ClassInstance, name: string, fn: (node: Node) => string) {
     cls = this.id(cls);
     if (!this.data.has(cls)) {
       this.data.set(cls, {});
@@ -34,12 +34,12 @@ class $TagRegistry {
     this.data.get(cls)![name] = fn;
   }
 
-  resolve(cls: Class, tag: string) {
+  resolve(cls: ClassInstance, tag: string) {
     cls = this.id(cls);
     return this.data.get(cls)?.[tag];
   }
 
-  has(cls: Class, tag: string) {
+  has(cls: ClassInstance, tag: string) {
     cls = this.id(cls);
     return !!this.data.get(cls)?.[tag];
   }
@@ -51,8 +51,8 @@ export const TagRegistry = new $TagRegistry();
  * Tag Decorator
  */
 export function Tag(name?: string) {
-  return (
-    target: Class, prop: string | symbol, desc: TypedPropertyDescriptor<(node: Node) => string>
+  return <T extends ClassInstance, U extends string = string>(
+    target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(node: Node) => U>
   ) => {
     TagRegistry.register(target, name || desc.value!.name, desc.value!);
   };

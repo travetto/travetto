@@ -3,12 +3,12 @@ import * as commander from 'commander';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, Package } from '@travetto/boot';
 
 import { PackUtil } from './lib/util';
 import { CommonConfig, PackOperation } from './lib/types';
 
-const packName = `pack_${require(FsUtil.resolveUnix('package.json')).name}`
+const packName = `pack_${Package.name}`
   .toLowerCase()
   .replace(/[^a-z]+/g, '_')
   .replace(/_+/g, '_');

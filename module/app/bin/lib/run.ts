@@ -27,7 +27,7 @@ export class RunUtil {
     ConsoleManager['exclude'].add('debug');
 
     // Init
-    await PhaseManager.init();
+    await PhaseManager.run('init');
 
     ConsoleManager['exclude'].delete('debug');
 

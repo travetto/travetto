@@ -1,4 +1,5 @@
-import { FsUtil, EnvUtil, SourceConfig } from '@travetto/boot';
+import { EnvUtil, Package, SourceConfig } from '@travetto/boot';
+import { version as frameworkVersion } from '../package.json';
 
 /**
  * Application info
@@ -87,16 +88,16 @@ class $AppManifest {
   /** Paths */
   readonly source: SourceConfig;
 
-  constructor(pkgLoc: string) {
+  constructor(pkg: Record<string, unknown> = {}) {
     this.info = {
       name: 'untitled',
       description: 'A Travetto application',
     };
     try {
-      const { version, name, license, author, description } = require(pkgLoc);
+      const { version, name, license, author, description } = pkg;
       Object.assign(this.info, { version, name, license, author, description });
     } catch { }
-    this.info.frameworkVersion = require('../package.json').version; // Travetto version
+    this.info.frameworkVersion = frameworkVersion; // Travetto version
 
     const env = EnvUtil.get('TRV_ENV', EnvUtil.get('NODE_ENV', 'dev'))
       .replace(/^production$/i, 'prod')
@@ -163,4 +164,4 @@ class $AppManifest {
   }
 }
 
-export const AppManifest = new $AppManifest(FsUtil.resolveUnix('package.json'));
+export const AppManifest = new $AppManifest(Package);

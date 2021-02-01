@@ -8,7 +8,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
 
 import { KoaServerUtil } from './internal/util';
-import Router = require('koa-router');
+
+type Routes = ReturnType<InstanceType<typeof kRouter>['routes']>;
 
 /**
  * Koa-based Rest server
@@ -54,7 +55,7 @@ export class KoaRestServer implements RestServer<koa> {
   }
 
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
-    const router = new kRouter(path !== '/' ? { prefix: path } : {});
+    const router = new kRouter<unknown, unknown>(path !== '/' ? { prefix: path } : {});
 
     // Register all routes to extract the proper request/response for the framework
     for (const route of routes) {
@@ -69,7 +70,7 @@ export class KoaRestServer implements RestServer<koa> {
     }
 
     // Register routes
-    const middleware: ReturnType<Router['routes']> & { key?: string | symbol } = router.routes();
+    const middleware: Routes & { key?: string | symbol } = router.routes();
     middleware.key = key;
     this.raw.use(middleware);
   }
