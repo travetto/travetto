@@ -6,7 +6,7 @@ import { RootRegistry } from '@travetto/registry';
 import { SchemaValidator, ValidationResultError, SchemaRegistry, ValidationError } from '../';
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaz,
-  CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address
+  CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque
 } from './models/validation';
 
 function findError(errors: ValidationError[], path: string, message: string) {
@@ -309,5 +309,32 @@ class Validation {
         a: false
       }]
     });
+  }
+
+  @Test()
+  async opqaueChild() {
+    const child = Opaque.from({
+      name: 'bob',
+      details: {
+        age: 20
+      }
+    });
+
+    await SchemaValidator.validate(Opaque, child);
+  }
+
+  @Test({
+    shouldThrow: ValidationResultError
+  })
+  async badOpqaueChild() {
+    const child = Opaque.from({
+      // @ts-expect-error
+      name: 5,
+      details: {
+        age: 20
+      }
+    });
+
+    await SchemaValidator.validate(Opaque, child);
   }
 }

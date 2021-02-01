@@ -32,10 +32,6 @@ import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier
 
 type WithId<T> = T & { _id?: mongo.Binary };
 
-function uuid(val: string) {
-  return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
-}
-
 function idToString(id: string | mongo.ObjectID | mongo.Binary) {
   if (typeof id === 'string') {
     return id;
@@ -45,6 +41,8 @@ function idToString(id: string | mongo.ObjectID | mongo.Binary) {
     return id.buffer.toString('hex');
   }
 }
+
+const uuid = MongoUtil.uuid;
 
 async function postLoadId<T extends ModelType>(item: T) {
   if (item && '_id' in item) {

@@ -50,9 +50,11 @@ export class SchemaValidator {
       }
 
       const { type, array } = fieldSchema;
-      const complex = SchemaRegistry.has(type) || type === Object;
+      const complex = SchemaRegistry.has(type);
 
-      if (array) {
+      if (type === Object) {
+        continue; // Free form, no validation
+      } else if (array) {
         if (!Array.isArray(val)) {
           errors = errors.concat(this.prepareErrors(path, [{ kind: 'type', type: Array, value: val }]));
           continue;
@@ -186,9 +188,9 @@ export class SchemaValidator {
         path
       };
 
-      const msg = res.message ||
-        (res.re && Messages.get(res.re)) ||
-        Messages.get(res.kind) ||
+      const msg = res.message ??
+        Messages.get(res.re?.source ?? '') ??
+        Messages.get(res.kind) ??
         Messages.get('default')!;
 
       if (res.re) {
@@ -196,7 +198,7 @@ export class SchemaValidator {
       }
 
       err.message = msg
-        .replace(/\{([^}]+)\}/g, (a: string, k: string) => err[k as (keyof ValidationError)]!);
+        .replace(/\{([^}]+)\}/g, (a: string, k: string) => `${err[k as (keyof ValidationError)]}`);
 
       out.push(err as ValidationError);
     }

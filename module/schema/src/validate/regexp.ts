@@ -14,5 +14,5 @@ export const CommonRegExp = {
 // Rebind regexes
 for (const k of Object.keys(CommonRegExp) as (keyof typeof CommonRegExp)[]) {
   Object.defineProperty(CommonRegExp[k], 'source', { value: `[[:${k}:]]` });
-  Messages.set(CommonRegExp[k], Messages.get(k)!);
+  Messages.set(CommonRegExp[k].source, Messages.get(k)!);
 }

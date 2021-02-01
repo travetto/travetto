@@ -119,3 +119,10 @@ export class Grade {
   @Min(0)
   score: number;
 }
+
+
+@Schema()
+export class Opaque {
+  name: string;
+  details: any;
+}

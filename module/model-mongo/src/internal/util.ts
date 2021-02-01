@@ -21,6 +21,11 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
  */
 export class MongoUtil {
 
+
+  static uuid(val: string) {
+    return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
+  }
+
   static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
   static has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);
   static has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$not' in (o as object);
@@ -54,28 +59,6 @@ export class MongoUtil {
   }
 
   /**
-   * Convert ids from '_id' to 'id'
-   */
-  static replaceId(v: Record<string, string>): Record<string, mongo.ObjectId>;
-  static replaceId(v: string[]): mongo.ObjectId[];
-  static replaceId(v: string): mongo.ObjectId;
-  static replaceId(v: string | string[] | Record<string, string>) {
-    if (typeof v === 'string') {
-      return new mongo.ObjectId(v);
-    } else if (Array.isArray(v)) {
-      return v.map(x => this.replaceId(x));
-    } else if (Util.isPlainObject(v)) {
-      const out: Record<string, unknown> = {};
-      for (const k of Object.keys(v)) {
-        out[k] = this.replaceId(v[k]);
-      }
-      return out;
-    } else {
-      return v;
-    }
-  }
-
-  /**
    * Convert `'a.b.c'` to `{ a: { b: { c: ... }}}`
    */
   static extractSimple<T>(o: T, path: string = ''): Record<string, unknown> {
@@ -87,7 +70,7 @@ export class MongoUtil {
       const v = sub[key] as Record<string, unknown>;
 
       if (subpath === 'id') { // Handle ids directly
-        out._id = this.replaceId(v as Record<string, string>);
+        out._id = this.uuid(v as unknown as string);
       } else {
         const isPlain = v && Util.isPlainObject(v);
         const firstKey = isPlain ? Object.keys(v)[0] : '';

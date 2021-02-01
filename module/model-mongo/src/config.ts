@@ -35,6 +35,10 @@ export class MongoModelConfig {
    */
   connectionOptions = {};
   /**
+   * Is using the SRV DNS record configuration
+   */
+  srvRecord = false;
+  /**
    * Mongo client options
    */
   clientOptions = {
@@ -84,9 +88,13 @@ export class MongoModelConfig {
    */
   get url() {
     const hosts = this.hosts
-      .map(h => h.includes(':') ? h : `${h}:${this.port}`)
+      .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port}`)
       .join(',');
     const opts = Object.entries(this.connectionOptions).map(([k, v]) => `${k}=${v}`).join('&');
-    return `mongodb://${hosts}/${this.namespace}?${opts}`;
+    let creds;
+    if (this.username) {
+      creds = `${[this.username, this.password].filter(x => !!x).join(':')}@`;
+    }
+    return `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${opts}`;
   }
 }
