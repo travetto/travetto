@@ -40,3 +40,26 @@ export function Index<T>(...indices: IndexConfig<T>[]) {
     ModelRegistry.getOrCreatePending(target).indices!.push(...indices);
   };
 }
+
+/**
+ * Model field decorator for denoting expiry date/time
+ * @augments `@trv:schema/Field`
+ */
+export function ExpiresAt() {
+  return <K extends string, T extends Partial<Record<K, Date>>>(tgt: T, prop: K) => {
+    const cfg = ModelRegistry.getOrCreatePending(tgt.constructor as Class<T>);
+    const expiry = (cfg.expiry ??= {} as ModelOptions['expiry']);
+    Object.assign(expiry, { expiresAt: prop });
+  };
+}
+
+/**
+ * Model field decorator for denoting issued at date/time
+ */
+export function IssuedAt() {
+  return <K extends string, T extends Partial<Record<K, Date>>>(tgt: T, prop: K) => {
+    const cfg = ModelRegistry.getOrCreatePending(tgt.constructor as Class<T>);
+    const expiry = (cfg.expiry ??= {} as ModelOptions['expiry']);
+    Object.assign(expiry, { issuedAt: prop });
+  };
+}

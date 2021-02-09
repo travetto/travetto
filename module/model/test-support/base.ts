@@ -62,8 +62,9 @@ export abstract class BaseModelSuite<T> {
     if (isStorageSupported(service)) {
       await service.createStorage();
       if (service.createModel) {
-        await Promise.all(ModelRegistry.getClasses().map(m =>
-          service.createModel!(m)));
+        await Promise.all(ModelRegistry.getClasses()
+          .filter(x => x === ModelRegistry.getBaseModel(x))
+          .map(m => service.createModel!(m)));
       }
     }
   }
@@ -74,7 +75,9 @@ export abstract class BaseModelSuite<T> {
     if (isStorageSupported(service)) {
       if (service.deleteModel) {
         for (const m of ModelRegistry.getClasses()) {
-          await service.deleteModel(m);
+          if (m === ModelRegistry.getBaseModel(m)) {
+            await service.deleteModel(m);
+          }
         }
       }
       await service.deleteStorage();

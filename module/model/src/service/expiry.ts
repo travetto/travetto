@@ -3,25 +3,25 @@ import { ModelType } from '../types/model';
 import { ModelBasicSupport } from './basic';
 
 /**
- * Basic state for expiry requests
+ * Expiry state
  */
 export interface ExpiryState {
   /**
    * Expire timestamp in ms
    */
-  expiresAt: number;
+  expiresAt: Date;
   /**
    * Issue timestamp in ms
    */
-  issuedAt: number;
+  issuedAt?: Date;
   /**
-   * Is this expired
+   * Max age in ms
+   */
+  maxAge?: number;
+  /**
+   * Expired?
    */
   expired: boolean;
-  /**
-   * The specified max age
-   */
-  maxAge: number;
 }
 
 /**

@@ -15,8 +15,6 @@ class User extends BaseModel {
 @Suite()
 export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
 
-  baseLatency = 10;
-
   @Test()
   async bulkInsert() {
     const service = await this.service;

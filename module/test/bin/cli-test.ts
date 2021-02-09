@@ -51,6 +51,9 @@ export class TestPlugin extends BasePlugin {
           state.mode = 'single';
         } else if ((await FsUtil.exists(args[0]))?.isFile() && /^\d+/.test(args[1])) { // If is a single file and specifying a line
           state.mode = 'single';
+        } else if (args[0].startsWith('test-extension')) {
+          state.concurrency = 1;
+          state.mode = 'extension';
         }
       }
     }

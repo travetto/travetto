@@ -22,7 +22,7 @@ type SortClause<T> = SortClauseRaw<RetainFields<T>>;
 /**
  * Model options
  */
-export class ModelOptions<T extends ModelType> {
+export class ModelOptions<T extends ModelType = ModelType> {
   /**
    * Class for model
    */
@@ -51,6 +51,13 @@ export class ModelOptions<T extends ModelType> {
    * Which provider is this for
    */
   for?: symbol;
+  /**
+   * Does the model support expiry
+   */
+  expiry?: {
+    expiresAt: string;
+    issuedAt?: string;
+  };
 }
 
 /**

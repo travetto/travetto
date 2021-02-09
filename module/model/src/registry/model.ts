@@ -157,6 +157,18 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     }
     return cfg;
   }
+
+  /**
+   * Get expiry config
+   * @param cls
+   */
+  getExpiry(cls: Class) {
+    const expiry = this.get(cls).expiry;
+    if (!expiry || !expiry.expiresAt) {
+      throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`, 'general');
+    }
+    return expiry!;
+  }
 }
 
 export const ModelRegistry = new $ModelRegistry();

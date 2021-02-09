@@ -1,10 +1,9 @@
 import * as assert from 'assert';
 
-import { Suite, Test, BeforeAll } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
 import { ModelExpirySupport } from '@travetto/model';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
 
 import { Cache, EvictCache } from '../src/decorator';
 import { CacheService } from '../src/service';
@@ -12,14 +11,7 @@ import { CacheUtil } from '../src/util';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
-class User {
-  static from(obj: unknown) {
-    return new User(obj);
-  }
-  constructor(values: unknown) {
-    Object.assign(this, values);
-  }
-}
+class User { }
 
 @Injectable()
 class SampleService {
@@ -62,7 +54,7 @@ class SampleService {
     return { length: Object.keys(config).length, size };
   }
 
-  @Cache('source', { keySpace: 'user.id', reinstate: x => User.from(x) })
+  @Cache('source', { keySpace: 'user.id', reinstate: x => User.from(x as User) })
   async getUser(userId: string) {
     await wait(100);
 
@@ -83,13 +75,6 @@ class SampleService {
 export abstract class CacheServiceSuite extends BaseModelSuite<ModelExpirySupport> {
 
   baseLatency = 10;
-
-  @BeforeAll()
-  async initAll() {
-    await RootRegistry.init();
-    const cache = await DependencyRegistry.getInstance(CacheService);
-    cache.cullRate = this.baseLatency + 50;
-  }
 
   get testService() {
     return DependencyRegistry.getInstance(SampleService);
@@ -186,27 +171,6 @@ export abstract class CacheServiceSuite extends BaseModelSuite<ModelExpirySuppor
     const val6 = await service.customKey({ a: 5, b: 100 }, 50);
     assert.deepStrictEqual(val4, val6);
   }
-
-  // @Test()
-  // async culling() {
-  //   const service = await this.testService;
-
-  //   if (this.service instanceof CullableCacheSource) {
-  //     await Promise.all(
-  //       ' '.repeat(100)
-  //         .split('')
-  //         .map((x, i) =>
-  //           service.cullable(i)));
-
-  //     const local = service.source as CullableCacheSource;
-  //     assert([...(await local.keys())].length > 90);
-
-  //     await wait(1000);
-
-  //     await local.cull(true);
-  //     assert([...(await local.keys())].length === 0);
-  //   }
-  // }
 
   @Test()
   async reinstating() {

@@ -3,8 +3,8 @@ import * as util from 'util';
 
 import { Class, ShutdownManager, Util } from '@travetto/base';
 import {
-  ModelCrudSupport, ModelExpirySupport, ModelRegistry, ExpiryState, ModelType, ModelStorageSupport,
-  Model, NotFoundError, ExistsError, ModelIndexedSupport
+  ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
+  NotFoundError, ExistsError, ModelIndexedSupport
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 
@@ -14,26 +14,6 @@ import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { RedisModelConfig } from './config';
-
-@Model()
-class ExpiryMeta implements ModelType, ExpiryState {
-
-  id?: string;
-  issuedAt: number;
-  expiresAt: number;
-
-  get maxAge() {
-    return this.expiresAt - this.issuedAt;
-  }
-
-  get expired() {
-    return this.expiresAt < Date.now();
-  }
-
-  toJSON() {
-    return { issuedAt: this.issuedAt, expiresAt: this.expiresAt };
-  }
-}
 
 /**
  * A model service backed by redis
@@ -172,18 +152,15 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
+  // Expiry
   async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
-    const expires = ModelExpiryUtil.getExpiresAt(ttl);
-    const updated = await this.wrap(util.promisify(this.cl.pexpireat))(
-      this.resolveKey(cls, id), expires.getTime()
-    );
+    const item = ModelExpiryUtil.getPartialUpdate(cls, {}, ttl);
+    const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
+    await this.updatePartial(cls, id, item);
 
-    // Store expiry and mark for deletion
-    const expireKey = `expiry-${this.resolveKey(cls, id)}`;
-    await this.wrap(util.promisify(this.cl.set))(expireKey,
-      JSON.stringify(({ expiresAt: expires.getTime(), issuedAt: Date.now() }))
+    const updated = await this.wrap(util.promisify(this.cl.pexpireat))(
+      this.resolveKey(cls, id), expiry.expiresAt.getTime()
     );
-    // await this.wrap(util.promisify(this.cl.pexpireat))(expireKey, expires.getTime());
 
     if (!updated) {
       throw new NotFoundError(cls, id);
@@ -191,21 +168,21 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
-    const { id } = await this.upsert(cls, item);
-    await this.updateExpiry(cls, id!, ttl);
-    return item;
+    item = ModelExpiryUtil.getPartialUpdate(cls, item, ttl);
+    const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
+    const result = await this.upsert(cls, item);
+    await this.wrap(util.promisify(this.cl.pexpireat))(
+      this.resolveKey(cls, result.id!), expiry.expiresAt.getTime()
+    );
+    return result;
   }
 
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const expireKey = `expiry-${this.resolveKey(cls, id)}`;
-    const content = await this.wrap(util.promisify(this.cl.get))(expireKey);
-    if (content) {
-      return (await ModelCrudUtil.load(ExpiryMeta, content))!;
-    } else {
-      throw new NotFoundError(cls, id);
-    }
+    const item = await this.get(cls, id);
+    return ModelExpiryUtil.getExpiryForItem(cls, item);
   }
 
+  // Storage
   async createStorage() {
     // Do nothing
   }

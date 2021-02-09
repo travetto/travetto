@@ -21,6 +21,7 @@ import { ModelStorageUtil } from '../internal/service/storage';
 export class MemoryModelConfig {
   autoCreate?: boolean;
   namespace: string;
+  cullRate?: number;
 }
 
 /**
@@ -30,20 +31,16 @@ export class MemoryModelConfig {
 export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
   private store = new Map<string, Map<string, Buffer>>();
-  private expiry = new Map<string, Map<string, { expiresAt: number, issuedAt: number }>>();
   private indexes = new Map<string, Map<string, string>>();
 
   constructor(public readonly config: MemoryModelConfig) { }
 
-  private getStore<T extends ModelType>(cls: Class<T> | string): Map<string, Buffer>;
-  private getStore<T extends ModelType>(cls: Class<T> | string, prop: 'store'): Map<string, Buffer>;
-  private getStore<T extends ModelType>(cls: Class<T> | string, prop: 'expiry'): Map<string, { expiresAt: number, issuedAt: number }>;
-  private getStore<T extends ModelType>(cls: Class<T> | string, prop: 'expiry' | 'store' = 'store') {
+  private getStore<T extends ModelType>(cls: Class<T> | string): Map<string, Buffer> {
     const key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
-    if (!this[prop].has(key)) {
-      this[prop].set(key, new Map());
+    if (!this.store.has(key)) {
+      this.store.set(key, new Map());
     }
-    return this[prop].get(key)!;
+    return this.store.get(key)!;
   }
 
   private find<T extends ModelType>(cls: Class<T> | string, id?: string, errorState?: 'data' | 'notfound') {
@@ -85,6 +82,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   postConstruct() {
     ModelStorageUtil.registerModelChangeListener(this);
+    ModelExpiryUtil.registerCull(this);
   }
 
   // CRUD Support
@@ -174,38 +172,29 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   // Expiry Support
   async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
-    const store = this.getStore(cls, 'expiry');
-    store.set(id, { expiresAt: ModelExpiryUtil.getExpiresAt(ttl).getTime(), issuedAt: Date.now() });
+    const item = ModelExpiryUtil.getPartialUpdate(cls, {}, ttl);
+    await this.updatePartial(cls, id, item);
   }
 
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const store = this.getStore(cls, 'expiry');
-    if (!store.has(id)) {
-      throw new NotFoundError('Expiry information', id);
-    }
-    const { expiresAt, issuedAt } = store.get(id)!;
-    const maxAge = expiresAt - issuedAt;
-    const expired = expiresAt < Date.now();
-    return { expiresAt, issuedAt, maxAge, expired };
+    const item = await this.get(cls, id);
+    return ModelExpiryUtil.getExpiryForItem(cls, item);
   }
 
   async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
-    item = await this.upsert(cls, item);
-    await this.updateExpiry(cls, item.id!, ttl);
-    return item;
+    item = ModelExpiryUtil.getPartialUpdate(cls, item, ttl);
+    return await this.upsert(cls, item);
   }
 
   async deleteExpired<T extends ModelType>(cls: Class<T>) {
-    let number = 0;
-    const store = this.getStore(cls, 'expiry');
-    for await (const [id, { expiresAt }] of [...store.entries()]) {
-      if (expiresAt < Date.now()) {
-        await this.delete(cls, id);
-        store.delete(id);
-        number += 1;
+    const deleting = [];
+    const store = this.getStore(cls);
+    for await (const id of [...store.keys()]) {
+      if ((await this.getExpiry(cls, id)).expired) {
+        deleting.push(this.delete(cls, id));
       }
     }
-    return number;
+    return (await Promise.all(deleting)).length;
   }
 
   // Storage Support
@@ -213,7 +202,6 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async deleteStorage() {
-    this.expiry.clear();
     this.store.clear();
     this.indexes.clear();
   }

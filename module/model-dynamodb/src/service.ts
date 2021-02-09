@@ -14,6 +14,10 @@ import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { DynamoDBModelConfig } from './config';
 
+interface Expirable {
+  _expiresAt: number;
+}
+
 function toValue(val: string | number | boolean | Date | undefined | null, forceString?: boolean): dynamodb.AttributeValue;
 function toValue(val: unknown, forceString?: boolean): dynamodb.AttributeValue | undefined {
   if (val === undefined || val === null || val === '') {
@@ -119,10 +123,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * Add a new model
    * @param cls
    */
-  async installModel(cls: Class<ModelType>) {
-    if (ModelRegistry.getBaseModel(cls) !== cls) {
-      return;
-    }
+  async createModel(cls: Class<ModelType>) {
     const table = this.resolveTable(cls);
     const idx = this.computeIndexConfig(cls);
 
@@ -137,10 +138,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       GlobalSecondaryIndexes: idx.indices?.length ? idx.indices : undefined
     });
 
-    await this.cl.updateTimeToLive({
-      TableName: table,
-      TimeToLiveSpecification: { AttributeName: 'internal_expires_at', Enabled: true }
-    });
+    if (ModelRegistry.get(cls).expiry) {
+      await this.cl.updateTimeToLive({
+        TableName: table,
+        TimeToLiveSpecification: { AttributeName: '_expiresAt', Enabled: true }
+      });
+    }
   }
 
   /**
@@ -148,11 +151,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * @param cls
    */
   async deleteModel(cls: Class<ModelType>) {
-    // Don't create tables for non-concrete types
-    if (ModelRegistry.getBaseModel(cls) !== cls) {
-      return;
-    }
-
     const table = this.resolveTable(cls);
     const { Table: verify } = (await this.cl.describeTable({ TableName: table }).catch(err => ({ Table: undefined })));
     if (verify) {
@@ -165,11 +163,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * @param cls
    */
   async changeModel(cls: Class<ModelType>) {
-    // Don't create tables for non-concrete types
-    if (ModelRegistry.getBaseModel(cls) !== cls) {
-      return;
-    }
-
     const table = this.resolveTable(cls);
     const idx = this.computeIndexConfig(cls);
     // const existing = await this.cl.describeTable({ TableName: table });
@@ -279,55 +272,22 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   // Expiry
   async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
-    const expiresAt = ModelExpiryUtil.getExpiresAt(ttl);
-
-    /* eslint-disable @typescript-eslint/naming-convention */
-    const entries = Object.entries({
-      internal_expires_at: toValue(Math.trunc(expiresAt.getTime() / 1000)),
-      internal_issued_at: toValue(Math.trunc(new Date().getTime() / 1000))
-    });
-    /* eslint-enable @typescript-eslint/naming-convention */
-
-    const res = await this.cl.updateItem({
-      TableName: this.resolveTable(cls),
-      Key: { id: toValue(id) },
-      ReturnValues: 'ALL_OLD',
-      UpdateExpression: `SET ${entries.map(([k, v]) => `${k}__ = :${k}`).join(', ')}`,
-      ExpressionAttributeValues: Object.fromEntries(entries.map(([k, v]) => [`:${k}`, v]))
-    });
-
-    if (!res.Attributes) {
-      throw new NotFoundError(cls, id);
-    }
-  }
-
-  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
-    item = await this.upsert(cls, item);
-    await this.updateExpiry(cls, item.id!, ttl);
-    return item;
+    const item = ModelExpiryUtil.getPartialUpdate(cls, {}, ttl);
+    const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
+    (item as unknown as Expirable)._expiresAt = expiry.expiresAt.getTime() / 1000; // Convert to seconds
+    await this.updatePartial(cls, id, item);
   }
 
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const res = await this.cl.getItem({
-      TableName: this.resolveTable(cls),
-      Key: { id: toValue(id) },
-    });
-    if (!res.Item) {
-      throw new NotFoundError(cls, id);
-    }
-    const item = res.Item!;
-    if (!(item.internal_issued_at__ && item.internal_issued_at__)) {
-      throw new NotFoundError(cls, id);
-    }
-    const expiresAt = parseInt(`${item.internal_expires_at__.N}`, 10) * 1000;
-    const issuedAt = parseInt(`${item.internal_issued_at__.N}`, 10) * 1000;
+    const item = await this.get(cls, id);
+    return ModelExpiryUtil.getExpiryForItem(cls, item);
+  }
 
-    return {
-      issuedAt,
-      expiresAt,
-      expired: expiresAt < Date.now(),
-      maxAge: expiresAt - issuedAt
-    };
+  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
+    item = ModelExpiryUtil.getPartialUpdate(cls, item, ttl);
+    const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
+    (item as unknown as Expirable)._expiresAt = expiry.expiresAt.getTime() / 1000; // Convert to seconds
+    return await this.upsert(cls, item);
   }
 
   // Indexed

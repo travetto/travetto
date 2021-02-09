@@ -8,6 +8,7 @@ import { ModelCrudSuite } from '@travetto/model/test-support/crud';
 import { ModelStreamSuite } from '@travetto/model/test-support/stream';
 import { ModelBulkSuite } from '@travetto/model/test-support/bulk';
 import { ModelIndexedSuite } from '@travetto/model/test-support/indexed';
+import { ModelExpirySuite } from '@travetto/model/test-support/expiry';
 
 import { MongoModelConfig, MongoModelService } from '..';
 
@@ -20,6 +21,13 @@ export class MongoBasicSuite extends ModelBasicSuite {
 
 @Suite()
 export class MongoCrudSuite extends ModelCrudSuite {
+  constructor() {
+    super(MongoModelService, MongoModelConfig);
+  }
+}
+
+@Suite()
+export class MongoExpirySuite extends ModelExpirySuite {
   constructor() {
     super(MongoModelService, MongoModelConfig);
   }

@@ -2,12 +2,13 @@ import * as es from '@elastic/elasticsearch';
 import { Index, Update, Search, DeleteByQuery } from '@elastic/elasticsearch/api/requestParams';
 
 import {
-  ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport,
+  ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError,
+  Model, ExpiryState
 } from '@travetto/model';
 import { Class, Util, ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { SchemaChange, SchemaConfig, SchemaRegistry } from '@travetto/schema';
+import { Long, SchemaChange, SchemaConfig, SchemaRegistry } from '@travetto/schema';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySupport, PageableModelQuery, Query, ValidStringFields
@@ -16,6 +17,10 @@ import {
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
+import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
+import { ModelRegistry } from '@travetto/model/src/registry/model';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 
 import { ElasticsearchModelConfig } from './config';
 import { EsIdentity, EsBulkError } from './internal/types';
@@ -23,9 +28,7 @@ import { ElasticsearchQueryUtil } from './internal/query';
 import { ElasticsearchSchemaUtil } from './internal/schema';
 import { IndexManager } from './index-manager';
 import { SearchResponse } from './types';
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
-import { ModelRegistry } from '@travetto/model/src/registry/model';
+import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 
 type WithId<T> = T & { _id?: string };
 
@@ -47,6 +50,7 @@ function postLoad<T extends ModelType>(o: T) {
 export class ElasticsearchModelService implements
   ModelCrudSupport, ModelIndexedSupport,
   ModelStorageSupport, ModelBulkSupport,
+  ModelExpirySupport,
   ModelQuerySupport, ModelQueryCrudSupport,
   ModelQueryFacetSupport {
 
@@ -73,8 +77,10 @@ export class ElasticsearchModelService implements
     });
     await this.client.cluster.health({});
     this.manager = new IndexManager(this.config, this.client);
+
     ModelStorageUtil.registerModelChangeListener(this.manager, this.constructor as Class);
     ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.close());
+    ModelExpiryUtil.registerCull(this);
   }
 
   createStorage() { return this.manager.createStorage(); }
@@ -102,7 +108,7 @@ export class ElasticsearchModelService implements
       id,
       refresh: 'true'
     });
-    if (!res.found) {
+    if (res.result !== 'deleted') {
       throw new NotFoundError(cls, id);
     }
   }
@@ -282,6 +288,26 @@ export class ElasticsearchModelService implements
     }
 
     return out;
+  }
+
+  // Expiry
+  async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
+    const item = ModelExpiryUtil.getPartialUpdate(cls, {}, ttl);
+    await this.updatePartial(cls, id, item);
+  }
+
+  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
+    const item = await this.get(cls, id);
+    return ModelExpiryUtil.getExpiryForItem(cls, item);
+  }
+
+  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
+    item = ModelExpiryUtil.getPartialUpdate(cls, item, ttl);
+    return await this.upsert(cls, item);
+  }
+
+  deleteExpired<T extends ModelType>(cls: Class<T>) {
+    return ModelQueryExpiryUtil.deleteExpired(this, cls);
   }
 
   // Indexed

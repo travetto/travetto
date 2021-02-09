@@ -1,4 +1,4 @@
-import { Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
+import { ExpiresAt, IssuedAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 
@@ -15,6 +15,10 @@ export class CacheType {
   id?: string;
   @Text()
   entry: string;
+  @ExpiresAt()
+  expiresAt: Date;
+  @IssuedAt()
+  issuedAt: Date;
 }
 
 /**
@@ -23,22 +27,9 @@ export class CacheType {
 @Injectable()
 export class CacheService {
 
-  /**
-   * Time of last culling
-   */
-  lastCullCheck = Date.now();
-  /**
-   * Cull rate
-   */
-  cullRate = 10 * 60000; // 10 minutes
-
   constructor(@Inject(CacheModelSym) private modelService: ModelExpirySupport) { }
 
   async get(id: string, extendOnAccess = true) {
-    if (this.modelService.deleteExpired) {
-      await this.cull();
-    }
-
     const { expiresAt, expired, maxAge } = await this.modelService.getExpiry(CacheType, id);
 
     if (expired) {
@@ -48,10 +39,10 @@ export class CacheService {
 
     // If half way to eviction, not perfect, but will reduce the amount of unnecessary updates
     if (extendOnAccess) {
-      const delta = expiresAt - Date.now();
-      const threshold = maxAge / 2;
+      const delta = expiresAt.getTime() - Date.now();
+      const threshold = maxAge! / 2;
       if (delta < threshold) {
-        await this.modelService.updateExpiry(CacheType, id, maxAge); // Do not wait
+        await this.modelService.updateExpiry(CacheType, id, maxAge!); // Do not wait
       }
     }
 
@@ -85,18 +76,6 @@ export class CacheService {
       }
     }
     return res;
-  }
-
-  /**
-   * Cull expired data
-   */
-  async cull(force = false) {
-    if (!this.modelService.deleteExpired || (!force && (Date.now() - this.lastCullCheck) < this.cullRate)) {
-      return;
-    }
-
-    this.lastCullCheck = Date.now();
-    await this.modelService.deleteExpired(CacheType);
   }
 
   /**

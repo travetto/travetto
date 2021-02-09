@@ -13,7 +13,10 @@ import {
   ExistsError,
   ModelIndexedSupport
 } from '@travetto/model';
-import { ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport, PageableModelQuery, Query, ValidStringFields, WhereClause } from '@travetto/model-query';
+import {
+  ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
+  PageableModelQuery, Query, ValidStringFields, WhereClause
+} from '@travetto/model-query';
 
 import { ShutdownManager, Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
@@ -25,10 +28,12 @@ import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
+import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
+import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 
 import { MongoUtil } from './internal/util';
 import { MongoModelConfig } from './config';
-import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
 
 type WithId<T> = T & { _id?: mongo.Binary };
 
@@ -95,6 +100,7 @@ export class MongoModelService implements
     });
     ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.close());
+    ModelExpiryUtil.registerCull(this);
   }
 
   /**
@@ -110,11 +116,11 @@ export class MongoModelService implements
     await this.db.dropDatabase();
   }
 
-  getGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls): mongo.IndexOptions[] {
+  getGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls): Record<string, '2d'>[] {
     const fields = SchemaRegistry.has(cls) ?
       Object.values(SchemaRegistry.get(cls).views[ALL_VIEW].schema) :
       [];
-    const out = [];
+    const out: Record<string, '2d'>[] = [];
     for (const field of fields) {
       if (SchemaRegistry.has(field.type)) {
         // Recurse
@@ -132,10 +138,10 @@ export class MongoModelService implements
     const indices = ModelRegistry.get(cls).indices ?? [];
     return [
       ...indices.map(idx => {
-        const combined = Object.assign({}, ...idx.fields);
-        return { ...combined, unique: idx.unique };
+        const combined = Object.assign({}, ...idx.fields) as Record<string, number>;
+        return [combined, { unique: idx.unique } as mongo.IndexOptions] as const;
       }),
-      ...this.getGeoIndices(cls)
+      ...this.getGeoIndices(cls).map(x => [x] as const)
     ];
   }
 
@@ -144,7 +150,9 @@ export class MongoModelService implements
     const creating = this.getIndicies(cls);
     if (creating.length) {
       console.debug('Creating indexes', creating);
-      await col.createIndexes(creating);
+      for (const el of creating) {
+        await col.createIndex(el[0], el[1]);
+      }
     }
   }
 
@@ -375,6 +383,26 @@ export class MongoModelService implements
     }
 
     return out;
+  }
+
+  // Expiry
+  async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
+    const item = ModelExpiryUtil.getPartialUpdate(cls, {}, ttl);
+    await this.updatePartial(cls, id, item);
+  }
+
+  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
+    const item = await this.get(cls, id);
+    return ModelExpiryUtil.getExpiryForItem(cls, item);
+  }
+
+  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
+    item = ModelExpiryUtil.getPartialUpdate(cls, item, ttl);
+    return await this.upsert(cls, item);
+  }
+
+  deleteExpired<T extends ModelType>(cls: Class<T>) {
+    return ModelQueryExpiryUtil.deleteExpired(this, cls);
   }
 
   // Indexed

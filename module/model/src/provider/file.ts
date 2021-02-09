@@ -25,6 +25,7 @@ export class FileModelConfig {
   folder: string;
   namespace: string = '.';
   autoCreate?: boolean;
+  cullRate?: number;
 
   async postConstruct() {
     if (!this.folder) {
@@ -79,6 +80,10 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       throw new NotFoundError(cls, id);
     }
     return file;
+  }
+
+  postConstruct() {
+    ModelExpiryUtil.registerCull(this);
   }
 
   uuid() {
@@ -183,41 +188,33 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     }
   }
 
+  // Expiry
   async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
-    const file = await (await this.find(cls, '.json', id)).replace('.json', '.expires');
-    await fs.promises.writeFile(file, '', 'utf8');
-    await fs.promises.utimes(file, ModelExpiryUtil.getExpiresAt(ttl), new Date());
+    const item = ModelExpiryUtil.getPartialUpdate(cls, {}, ttl);
+    await this.updatePartial(cls, id, item);
   }
 
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const file = await this.find(cls, '.expires', id);
-    const stat = await fs.promises.stat(file);
-    const expiresAt = stat.atimeMs;
-    const issuedAt = stat.mtimeMs;
-    const maxAge = expiresAt - issuedAt;
-    const expired = expiresAt < Date.now();
-    return { expiresAt, issuedAt, maxAge, expired };
+    const item = await this.get(cls, id);
+    return ModelExpiryUtil.getExpiryForItem(cls, item);
   }
 
   async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
-    item = await this.upsert(cls, item);
-    await this.updateExpiry(cls, item.id!, ttl);
-    return item;
+    item = ModelExpiryUtil.getPartialUpdate(cls, item, ttl);
+    return await this.upsert(cls, item);
   }
 
   async deleteExpired<T extends ModelType>(cls: Class<T>) {
-    let number = 0;
-    for await (const [id, file] of FileModelService.scanFolder(await this.resolveName(cls, '.expires'), '.expires')) {
-      const stat = await fs.promises.stat(file);
-      if (stat.atimeMs < Date.now()) {
-        await this.delete(cls, id);
-        await fs.promises.unlink(file); // Remove expired file
-        number += 1;
+    const deleted = [];
+    for await (const el of this.list(cls)) {
+      if (ModelExpiryUtil.getExpiryForItem(cls, el).expired) {
+        deleted.push(this.delete(cls, el.id!));
       }
     }
-    return number;
+    return (await Promise.all(deleted)).length;
   }
 
+  // Storage mgmt
   async createStorage() {
     await FsUtil.mkdirp(FsUtil.resolveUnix(this.config.folder, this.config.namespace));
   }

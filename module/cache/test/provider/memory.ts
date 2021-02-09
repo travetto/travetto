@@ -13,7 +13,6 @@ class Config {
 
 @Suite()
 export class MemoryCacheSuite extends CacheServiceSuite {
-  baseLatency = 100;
   constructor() {
     super(MemoryModelService, MemoryModelConfig);
   }

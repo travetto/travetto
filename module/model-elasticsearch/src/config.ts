@@ -42,6 +42,11 @@ export class ElasticsearchModelConfig {
   };
 
   /**
+   * Frequency of culling for expirable content
+   */
+  cullRate?: number;
+
+  /**
    * Build final hosts
    */
   postConstruct() {

@@ -34,9 +34,9 @@ export class ModelStorageUtil {
     if (storage.createModel || storage.deleteModel || storage.changeModel) {
       ModelRegistry.on<ModelType>(ev => {
         switch (ev.type) {
-          case 'added': checkType(ev.curr!) && storage.createModel?.(ev.curr!); break;
-          case 'changed': checkType(ev.curr!, false) && storage.changeModel?.(ev.curr!); break;
-          case 'removing': checkType(ev.prev!) && storage.deleteModel?.(ev.prev!); break;
+          case 'added': checkType(ev.curr!) ? storage.createModel?.(ev.curr!) : undefined; break;
+          case 'changed': checkType(ev.curr!, false) ? storage.changeModel?.(ev.curr!) : undefined; break;
+          case 'removing': checkType(ev.prev!) ? storage.deleteModel?.(ev.prev!) : undefined; break;
         }
       });
     }

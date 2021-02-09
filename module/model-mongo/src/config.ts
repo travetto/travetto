@@ -52,6 +52,11 @@ export class MongoModelConfig {
   autoCreate?: boolean;
 
   /**
+   * Frequency of culling for expirable content
+   */
+  cullRate?: number;
+
+  /**
    * Load a resource
    */
   async fetch(val: string) {
@@ -91,10 +96,11 @@ export class MongoModelConfig {
       .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port}`)
       .join(',');
     const opts = Object.entries(this.connectionOptions).map(([k, v]) => `${k}=${v}`).join('&');
-    let creds;
+    let creds = '';
     if (this.username) {
       creds = `${[this.username, this.password].filter(x => !!x).join(':')}@`;
     }
-    return `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${opts}`;
+    const url = `mongodb${this.srvRecord ? '+srv' : ''}://${creds}${hosts}/${this.namespace}?${opts}`;
+    return url;
   }
 }

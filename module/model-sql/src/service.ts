@@ -1,20 +1,25 @@
 import {
   ModelType,
-  BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport, NotFoundError, ModelRegistry,
+  BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
+  NotFoundError, ModelRegistry
 } from '@travetto/model';
 import { Util, Class } from '@travetto/base';
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { ChangeEvent } from '@travetto/registry';
-import { SchemaChange, SchemaChangeEvent } from '@travetto/schema';
+import { SchemaChange } from '@travetto/schema';
 import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
-import { ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport, PageableModelQuery, ValidStringFields, WhereClause } from '@travetto/model-query';
+import {
+  ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
+  PageableModelQuery, ValidStringFields, WhereClause
+} from '@travetto/model-query';
 
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
+import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { SQLModelConfig } from './config';
 import { Connected, ConnectedIterator, Transactional } from './connection/decorator';
@@ -115,6 +120,7 @@ export class SQLModelService implements
       }
       this.manager = new TableManager(this.context, this.dialect);
       ModelStorageUtil.registerModelChangeListener(this);
+      ModelExpiryUtil.registerCull(this);
     }
   }
 
@@ -216,6 +222,30 @@ export class SQLModelService implements
     const ret = await this.dialect.bulkProcess(deletes, inserts, upserts, updates);
     ret.insertedIds = insertedIds;
     return ret;
+  }
+
+  // Expiry
+  @Transactional()
+  async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
+    const item = ModelExpiryUtil.getPartialUpdate(cls, {}, ttl);
+    await this.updatePartial(cls, id, item);
+  }
+
+  @Connected()
+  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
+    const item = await this.get(cls, id);
+    return ModelExpiryUtil.getExpiryForItem(cls, item);
+  }
+
+  @Transactional()
+  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
+    item = ModelExpiryUtil.getPartialUpdate(cls, item, ttl);
+    return await this.upsert(cls, item);
+  }
+
+  @Transactional()
+  deleteExpired<T extends ModelType>(cls: Class<T>) {
+    return ModelQueryExpiryUtil.deleteExpired(this, cls);
   }
 
   @Connected()
