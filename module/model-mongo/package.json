@@ -10,8 +10,8 @@
     "@travetto/config": "^2.0.0-alpha.2",
     "@travetto/model": "^2.0.0-alpha.3",
     "@travetto/model-query": "^2.0.0-alpha.3",
-    "@types/mongodb": "^3.6.3",
-    "mongodb": "^3.6.3"
+    "@types/mongodb": "^3.6.7",
+    "mongodb": "^3.6.4"
   },
   "title": "MongoDB Model Support",
   "description": "Mongo backing for the travetto model module.",

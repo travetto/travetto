@@ -14,7 +14,7 @@
   },
   "optionalPeerDependencies": {
     "@types/mysql": "^2.15.17",
-    "@types/pg": "^7.14.9",
+    "@types/pg": "^7.14.10",
     "mysql": "^2.18.1",
     "pg": "^8.5.1"
   },

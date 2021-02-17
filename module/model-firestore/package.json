@@ -9,7 +9,7 @@
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
     "@travetto/model": "^2.0.0-alpha.3",
-    "firebase-admin": "^9.4.2"
+    "firebase-admin": "^9.5.0"
   },
   "title": "Firestore Model Support",
   "description": "Firestore backing for the travetto model module.",

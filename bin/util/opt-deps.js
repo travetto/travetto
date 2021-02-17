@@ -19,7 +19,7 @@
     'package.json'
       .$read()
       .$json()
-      .$tap(a => a.peerDependencies = all)
+      .$tap(a => a.devDependencies = all)
       .$map(a => JSON.stringify(a, null, 2))
       .$writeFinal('package.json');
   });

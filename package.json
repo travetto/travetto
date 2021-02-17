@@ -9,26 +9,26 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
-    "clean": "./bin/util/clean.js",
-    "link": "./bin/util/link.js",
-    "service": "./bin/util/service.js",
+    "util:clean": "./bin/util/clean.js",
+    "util:link": "./bin/util/link.js",
+    "util:service": "./bin/util/service.js",
+    "util:opt-deps": "./bin/util/opt-deps.js",
+    "util:upgrade": "./bin/util/upgrade.js",
+    "util:doc": "./bin/util/doc.js",
     "test": "cd module/test; trv test:lerna",
-    "upgrade": "./bin/util/upgrade.js",
     "lint": "npx eslint --ext .js --ext .ts .",
-    "doc": "./bin/util/doc.js",
     "boot": "cd module/boot; npm run build",
     "lerna": "npx lerna bootstrap --hoist",
-    "opt-deps": "./bin/util/opt-deps.js",
-    "init": "npm run opt-deps; npm run lerna; npm run boot; npm run clean; npm run link"
+    "init": "npm run util:opt-deps; npm run lerna; npm run boot; npm run util:clean; npm run util:link"
   },
-  "devDependencies": {
+  "dependencies": {
     "@arcsine/nodesh": "^1.8.3",
-    "eslint": "^7.18.0",
-    "@typescript-eslint/eslint-plugin": "^4.14.1",
-    "@typescript-eslint/parser": "^4.14.1",
+    "eslint": "^7.20.0",
+    "@typescript-eslint/eslint-plugin": "^4.15.1",
+    "@typescript-eslint/parser": "^4.15.1",
     "lerna": "~3.22.1"
   },
-  "peerDependencies": {
+  "devDependencies": {
     "@travetto/app": "^2.0.0-alpha.0",
     "@travetto/auth-rest": "^2.0.0-alpha.0",
     "@travetto/model": "^2.0.0-alpha.0",
@@ -38,13 +38,13 @@
     "@types/mysql": "^2.15.17",
     "@types/node-forge": "^0.9.7",
     "@types/nodemailer": "^6.4.0",
-    "@types/passport": "^1.0.5",
-    "@types/pg": "^7.14.9",
+    "@types/passport": "^1.0.6",
+    "@types/pg": "^7.14.10",
     "aws-lambda-fastify": "1.4.4",
     "aws-serverless-express": "^3.4.0",
     "mysql": "^2.18.1",
     "node-forge": "^0.10.0",
-    "nodemailer": "^6.4.17",
+    "nodemailer": "^6.4.18",
     "passport": "^0.4.1",
     "pg": "^8.5.1"
   }
