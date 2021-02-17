@@ -2,6 +2,7 @@ import { AppError, Util, Class } from '@travetto/base';
 import { Inject } from '@travetto/di';
 import { ModelCrudSupport, ModelType, NotFoundError } from '@travetto/model';
 import { AuthContext, AuthUtil, Principal, PrincipalSource } from '@travetto/auth';
+import { TimeUtil } from '@travetto/base/src/internal/time';
 
 import { RegisteredIdentity } from './identity';
 
@@ -130,7 +131,7 @@ export class ModelPrincipalSource<T extends ModelType> implements PrincipalSourc
     const salt = await Util.uuid();
 
     ident.resetToken = await AuthUtil.generateHash(`${new Date().getTime()}`, salt, 25000, 32);
-    ident.resetExpires = new Date(Date.now() + (60 * 60 * 1000 /* 1 hour */));
+    ident.resetExpires = TimeUtil.withAge(1, 'h');
 
     Object.assign(user, this.fromIdentity(ident));
 

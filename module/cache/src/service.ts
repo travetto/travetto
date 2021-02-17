@@ -8,7 +8,7 @@ import { CacheUtil } from './util';
 
 export const CacheModelSym = Symbol.for('@trv:cache/model');
 
-const INFINITE_MAX_AGE = new Date('10000-01-01').getTime();
+const INFINITE_MAX_AGE = '10000-01-01';
 
 @Model({ for: CacheModelSym })
 export class CacheType {
@@ -42,7 +42,10 @@ export class CacheService {
       const delta = expiresAt.getTime() - Date.now();
       const threshold = maxAge! / 2;
       if (delta < threshold) {
-        await this.modelService.updateExpiry(CacheType, id, maxAge!); // Do not wait
+        await this.modelService.updatePartial(CacheType, id, {
+          expiresAt: new Date(Date.now() + maxAge!),
+          issuedAt: new Date()
+        }); // Do not wait
       }
     }
 
@@ -50,12 +53,21 @@ export class CacheService {
     return CacheUtil.fromSafeJSON(res.entry);
   }
 
-  async set(id: string, entry: unknown, maxAge = INFINITE_MAX_AGE) {
+  /**
+   * Set an item into the cache
+   * @param maxAge Max age in ms
+   * @returns
+   */
+  async set(id: string, entry: unknown, maxAge?: number) {
     const entryText = CacheUtil.toSafeJSON(entry);
 
-    const store = await this.modelService.upsertWithExpiry(CacheType,
-      CacheType.from({ id, entry: entryText! }),
-      maxAge ?? INFINITE_MAX_AGE
+    const store = await this.modelService.upsert(CacheType,
+      CacheType.from({
+        id,
+        entry: entryText!,
+        expiresAt: new Date(maxAge ? maxAge + Date.now() : INFINITE_MAX_AGE),
+        issuedAt: new Date()
+      }),
     );
 
     return CacheUtil.fromSafeJSON(store.entry);

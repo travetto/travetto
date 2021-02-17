@@ -71,9 +71,17 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
         multi.hmset(this.resolveKey(cls, idx.name), ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id!);
       }
 
-      return new Promise<void>((resolve, reject) => multi.exec(err => err ? reject(err) : resolve()));
+      await new Promise<void>((resolve, reject) => multi.exec(err => err ? reject(err) : resolve()));
     } else {
-      return await this.wrap(util.promisify(this.cl.set))(key, JSON.stringify(item));
+      await this.wrap(util.promisify(this.cl.set))(key, JSON.stringify(item));
+    }
+
+    // Set expiry
+    if (config.expiry) {
+      const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
+      await this.wrap(util.promisify(this.cl.pexpireat))(
+        this.resolveKey(cls, item.id!), expiry.expiresAt.getTime()
+      );
     }
   }
 
@@ -153,30 +161,6 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   // Expiry
-  async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
-    const item = ModelExpiryUtil.getPartialUpdate(cls, {}, ttl);
-    const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
-    await this.updatePartial(cls, id, item);
-
-    const updated = await this.wrap(util.promisify(this.cl.pexpireat))(
-      this.resolveKey(cls, id), expiry.expiresAt.getTime()
-    );
-
-    if (!updated) {
-      throw new NotFoundError(cls, id);
-    }
-  }
-
-  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
-    item = ModelExpiryUtil.getPartialUpdate(cls, item, ttl);
-    const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
-    const result = await this.upsert(cls, item);
-    await this.wrap(util.promisify(this.cl.pexpireat))(
-      this.resolveKey(cls, result.id!), expiry.expiresAt.getTime()
-    );
-    return result;
-  }
-
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
     const item = await this.get(cls, id);
     return ModelExpiryUtil.getExpiryForItem(cls, item);

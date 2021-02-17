@@ -1,15 +1,9 @@
 import { Class, ClassInstance, AppError } from '@travetto/base';
+import { TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';
 
 import { HeaderMap, Request, RouteHandler } from '../types';
 import { ControllerRegistry } from '../registry/controller';
 import { EndpointConfig, ControllerConfig, DescribableConfig } from '../registry/types';
-
-const MIN = 1000 * 60;
-const HOUR = MIN * 60;
-const DAY = HOUR * 24;
-
-const UNIT_MAPPING = { s: 1000, ms: 1, m: MIN, h: HOUR, d: DAY, w: DAY * 7, y: DAY * 365 };
-type Units = keyof (typeof UNIT_MAPPING);
 
 function register(config: Partial<EndpointConfig | ControllerConfig>) {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) {
@@ -38,11 +32,12 @@ export function SetHeaders(headers: HeaderMap) { return register({ headers }); }
  * @param value The value for the duration
  * @param unit The unit of measurement
  */
-export function CacheControl(value: number, unit: Units = 's') {
-  const delta = UNIT_MAPPING[unit] * value;
+export function CacheControl(value: number, unit: TimeUnit = 's') {
+  const date = TimeUtil.withAge(value, unit);
+  const delta = date.getTime() - Date.now();
   return SetHeaders({
-    Expires: value === 0 ? '-1' : () => `${new Date(Date.now() + delta).toUTCString()}`,
-    'Cache-Control': () => `max-age=${delta}${delta === 0 ? ',no-cache' : ''}`
+    Expires: value === 0 ? '-1' : () => `${date.toUTCString()}`,
+    'Cache-Control': () => `max-age=${delta}${value === 0 ? ',no-cache' : ''}`
   });
 }
 

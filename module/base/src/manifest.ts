@@ -1,5 +1,6 @@
 import { EnvUtil, Package, SourceConfig } from '@travetto/boot';
 import { version as frameworkVersion } from '../package.json';
+import { TimeUtil } from './internal/time';
 
 /**
  * Application info
@@ -116,7 +117,7 @@ class $AppManifest {
         value: (status ? EnvUtil.get('TRV_DEBUG') : '') || undefined
       },
       resources: ['resources', ...EnvUtil.getList('TRV_RESOURCES')],
-      shutdownWait: EnvUtil.getTime('TRV_SHUTDOWN_WAIT', 2, 's')
+      shutdownWait: TimeUtil.getEnv('TRV_SHUTDOWN_WAIT', 2, 's')
     };
 
     this.#profileSet = new Set(this.env.profiles);

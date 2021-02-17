@@ -171,19 +171,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   // Expiry Support
-  async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
-    const item = ModelExpiryUtil.getPartialUpdate(cls, {}, ttl);
-    await this.updatePartial(cls, id, item);
-  }
-
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
     const item = await this.get(cls, id);
     return ModelExpiryUtil.getExpiryForItem(cls, item);
-  }
-
-  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
-    item = ModelExpiryUtil.getPartialUpdate(cls, item, ttl);
-    return await this.upsert(cls, item);
   }
 
   async deleteExpired<T extends ModelType>(cls: Class<T>) {

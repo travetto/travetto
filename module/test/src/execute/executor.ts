@@ -1,9 +1,10 @@
 import * as path from 'path';
 
 import { Util } from '@travetto/base';
-import { FsUtil, EnvUtil } from '@travetto/boot';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { FsUtil } from '@travetto/boot';
 import { Barrier, ExecutionError } from '@travetto/worker';
+import { SystemUtil } from '@travetto/base/src/internal/system';
+import { TimeUtil } from '@travetto/base/src/internal/time';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig, TestResult } from '../model/test';
@@ -16,7 +17,7 @@ import { TestPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { AssertUtil } from '../assert/util';
 
-const TEST_TIMEOUT = EnvUtil.getTime('TRV_TEST_TIMEOUT', 5, 's');
+const TEST_TIMEOUT = TimeUtil.getEnv('TRV_TEST_TIMEOUT', 5, 's');
 
 /**
  * Support execution of the tests

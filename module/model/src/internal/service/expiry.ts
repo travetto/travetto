@@ -10,29 +10,6 @@ import { ModelType } from '../../types/model';
 export class ModelExpiryUtil {
 
   /**
-   * Get partial update for expiry
-   * @param cls
-   * @param item
-   * @param ttl
-   * @returns
-   */
-  static getPartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, ttl: number): T {
-    const { expiresAt, issuedAt } = ModelRegistry.getExpiry(cls);
-    const issued = new Date();
-
-    if (ttl < 1000000) {
-      ttl = Date.now() + ttl;
-    }
-
-    const expires = new Date(ttl);
-    item[expiresAt as keyof T] = expires as any;
-    if (issuedAt) {
-      item[issuedAt as keyof T] = issued as any;
-    }
-    return item as T;
-  }
-
-  /**
    * Get expiry for a given item
    */
   static getExpiryForItem<T extends ModelType>(cls: Class<T>, item: T) {

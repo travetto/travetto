@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
+import { TimeUtil } from '@travetto/base/src/internal/time';
 
 import { ExpiresAt, Model } from '../src/registry/decorator';
 import { ModelExpirySupport } from '../src/service/expiry';
@@ -21,7 +22,9 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   @Test()
   async basic() {
     const service = await this.service;
-    const res = await service.upsertWithExpiry(User, User.from({}), 1000);
+    const res = await service.upsert(User, User.from({
+      expiresAt: TimeUtil.withAge(1, 's')
+    }));
     assert(res instanceof User);
 
     const expiry = await service.getExpiry(User, res.id!);
@@ -31,7 +34,9 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   @Test()
   async aging() {
     const service = await this.service;
-    const res = await service.upsertWithExpiry(User, User.from({}), 10);
+    const res = await service.upsert(User, User.from({
+      expiresAt: TimeUtil.withAge(10)
+    }));
     assert(res instanceof User);
 
     await this.wait(100);
@@ -43,13 +48,17 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   @Test()
   async ageWithExtension() {
     const service = await this.service;
-    const res = await service.upsertWithExpiry(User, User.from({}), 5000);
+    const res = await service.upsert(User, User.from({
+      expiresAt: TimeUtil.withAge(5, 's')
+    }));
     assert(res instanceof User);
 
     await this.wait(100);
 
     assert(!(await service.getExpiry(User, res.id!)).expired);
-    await service.updateExpiry(User, res.id!, 10);
+    await service.updatePartial(User, res.id!, {
+      expiresAt: TimeUtil.withAge(10)
+    });
 
     await this.wait(100);
 
@@ -62,8 +71,11 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     if (service.deleteExpired) {
       // Create
       await Promise.all(
-        ' '.repeat(10).split('')
-          .map((x, i) => service.upsertWithExpiry(User, User.from({}), 1000 + i))
+        ' '
+          .repeat(10).split('')
+          .map((x, i) => service.upsert(User, User.from({
+            expiresAt: TimeUtil.withAge(i, 's')
+          })))
       );
 
       let total;

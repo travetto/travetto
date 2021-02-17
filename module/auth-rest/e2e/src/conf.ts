@@ -1,5 +1,6 @@
 import { PrincipalSource, Identity } from '@travetto/auth';
 import { AuthContext } from '@travetto/auth/src/context';
+import { TimeUtil } from '@travetto/base/src/internal/time';
 import { InjectableFactory } from '@travetto/di';
 
 import { IdentitySource } from '../..';
@@ -28,7 +29,7 @@ export class AppConfig {
       async authenticate(req, res) {
         return {
           id: '5',
-          expires: new Date(Date.now() + 1000 * 60),
+          expires: TimeUtil.withAge(1, 'm'),
           details: { woah: 'fun' },
           source: 'simple',
           permissions: []

@@ -65,30 +65,6 @@ export class EnvUtil {
   }
 
   /**
-   * Get time as milliseconds
-   * @param k The environment key to search for
-   * @param deTime The default time if the key isn't found
-   * @param defUnit The unit for the default time, ms is default if not specified
-   */
-  static getTime(k: string, defTime: number, defUnit?: 'h' | 'm' | 's'): number {
-    let val: string | number = defTime;
-    let unit: string | undefined = defUnit;
-    let mult = 1;
-    const match = this.get(k, '').match(/^(\d+)([hms]?)$/);
-
-    if (match) {
-      [, val, unit] = match;
-    }
-
-    switch (unit) {
-      case 'h': mult = 60 * 60 * 1000; break;
-      case 'm': mult = 60 * 1000; break;
-      case 's': mult = 1000; break;
-    }
-    return parseInt(`${val}`, 10) * mult;
-  }
-
-  /**
    * Determine if value is set explicitly
    * @param k The environment key to search for
    */

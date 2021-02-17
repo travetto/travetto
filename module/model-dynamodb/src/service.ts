@@ -53,6 +53,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   private async putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert') {
     const config = ModelRegistry.get(cls);
+
+    if (config.expiry) {
+      const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
+      (item as unknown as Expirable)._expiresAt = expiry.expiresAt.getTime() / 1000; // Convert to seconds
+    }
+
     try {
       if (mode === 'create') {
         const query = {
@@ -271,23 +277,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Expiry
-  async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
-    const item = ModelExpiryUtil.getPartialUpdate(cls, {}, ttl);
-    const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
-    (item as unknown as Expirable)._expiresAt = expiry.expiresAt.getTime() / 1000; // Convert to seconds
-    await this.updatePartial(cls, id, item);
-  }
-
   async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
     const item = await this.get(cls, id);
     return ModelExpiryUtil.getExpiryForItem(cls, item);
-  }
-
-  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
-    item = ModelExpiryUtil.getPartialUpdate(cls, item, ttl);
-    const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
-    (item as unknown as Expirable)._expiresAt = expiry.expiresAt.getTime() / 1000; // Convert to seconds
-    return await this.upsert(cls, item);
   }
 
   // Indexed
