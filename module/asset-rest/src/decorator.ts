@@ -29,7 +29,7 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
   }
 
   return function (target: ClassInstance, propertyKey: string, index: number) {
-    const handler = target.constructor.prototype[propertyKey];
+    const handler = target[propertyKey];
     ControllerRegistry.registerEndpointParameter(target.constructor as Class, handler, {
       ...param as ParamConfig,
       location: 'files' as 'body',

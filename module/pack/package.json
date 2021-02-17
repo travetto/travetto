@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@travetto/base": "^2.0.0-alpha.2",
+    "@types/picomatch": "^2.2.1",
     "picomatch": "^2.2.2"
   },
   "title": "Pack",

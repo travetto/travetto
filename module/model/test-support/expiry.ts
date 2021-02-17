@@ -74,7 +74,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
         ' '
           .repeat(10).split('')
           .map((x, i) => service.upsert(User, User.from({
-            expiresAt: TimeUtil.withAge(i, 's')
+            expiresAt: TimeUtil.withAge(1000 + i)
           })))
       );
 
