@@ -89,7 +89,9 @@ export class LineFormatter implements Formatter {
       out.push(`[${loc}]`);
     }
 
-    out.push(ev.message);
+    if (ev.message) {
+      out.push(ev.message);
+    }
 
     if (ev.context) {
       out.push(this.pretty(ev, ev.context));

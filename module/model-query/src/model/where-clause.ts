@@ -1,3 +1,5 @@
+import { Primitive as Prim } from '@travetto/base/src/internal/global-types';
+
 /**
  * Point as [number,number] with validation and binding support
  *
@@ -5,7 +7,7 @@
  */
 export type Point = [number, number];
 
-export type Primitive = number | boolean | string | Date | Point;
+export type Primitive = Prim | Point;
 export type PrimitiveArray = Primitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
 

@@ -1,6 +1,5 @@
 import * as assert from 'assert';
 
-import { MessageContext } from '@travetto/base/src/internal/global-types';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 
 import { Logger } from '../src/service';
@@ -22,7 +21,7 @@ class LoggerTest {
     Logger.listen('test', e => events.push(e));
     (function (ᚕlg) {
       console.log('Hello', { args: [1, 2, 3] });
-    })((level: string, ctx: LogEvent, message: string, payload: MessageContext) => Logger.onLog(level as 'debug', ctx, [message, payload]));
+    })((level: string, ctx: LogEvent, message: string, context: Record<string, unknown>) => Logger.onLog(level as 'debug', ctx, [message, context]));
     assert(events.length === 1);
     assert(events[0].message === 'Hello');
     assert.deepStrictEqual(events[0].context, { args: [1, 2, 3] });

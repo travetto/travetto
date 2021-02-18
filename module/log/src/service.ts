@@ -1,7 +1,6 @@
 import { EnvUtil } from '@travetto/boot';
-import { ConsoleManager, LogLevel, AppManifest } from '@travetto/base';
+import { ConsoleManager, LogLevel, AppManifest, Util } from '@travetto/base';
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { MessageContext } from '@travetto/base/src/internal/global-types';
 
 import { Appender, Formatter, LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
@@ -111,8 +110,18 @@ class $Logger {
   /**
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
-  onLog(level: LogLevel, { file, line, scope }: LineContext, [message, context, ...args]: [string, MessageContext, ...unknown[]]): void {
+  onLog(level: LogLevel, { file, line, scope }: LineContext, [message, context, ...args]: [string, Record<string, unknown>, ...unknown[]]): void {
     level = (level in LogLevels) ? level : 'info';
+
+    if (!Util.isPlainObject(context)) {
+      args.unshift(context);
+      context = {};
+    }
+
+    if (typeof message !== 'string') {
+      args.unshift(message);
+      message = '';
+    }
 
     const category = SystemUtil.computeModule(file);
 
@@ -122,14 +131,14 @@ class $Logger {
 
     // Allow for controlled order of event properties
     const finalEvent: LogEvent = {
-      level,
-      message,
-      category,
       timestamp: new Date().toISOString(),
+      level,
       file,
       line,
-      context,
+      category,
       scope,
+      message: message !== '' ? message : undefined,
+      context,
       args: args.length ? args : undefined
     };
 

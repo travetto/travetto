@@ -1,9 +1,10 @@
 import * as mongo from 'mongodb';
 
 import { Class, Util } from '@travetto/base';
-import { DistanceUnit, WhereClause } from '@travetto/model-query';
-import { ModelRegistry } from '@travetto/model/src/registry/model';
+import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
+import { ModelType, ModelRegistry } from '@travetto/model';
 import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
+import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
 
 /**
  * Converting units to various radians
@@ -16,6 +17,8 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
   rad: 1
 };
 
+export type WithId<T> = T & { _id?: mongo.Binary };
+
 /**
  * Basic mongo utils for conforming to the model module
  */
@@ -24,6 +27,42 @@ export class MongoUtil {
 
   static uuid(val: string) {
     return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
+  }
+
+
+  static idToString(id: string | mongo.ObjectID | mongo.Binary) {
+    if (typeof id === 'string') {
+      return id;
+    } else if (id instanceof mongo.ObjectID) {
+      return id.toHexString();
+    } else {
+      return id.buffer.toString('hex');
+    }
+  }
+
+  static async postLoadId<T extends ModelType>(item: T) {
+    if (item && '_id' in item) {
+      item.id = this.idToString((item as WithId<T>)._id!);
+      delete (item as WithId<T>)._id;
+    }
+    return item;
+  }
+
+  static preInsertId<T extends ModelType>(item: T) {
+    if (item && item.id) {
+      (item as WithId<T>)._id = this.uuid(item.id!);
+      delete item.id;
+    }
+    return item;
+  }
+
+  static prepareQuery<T, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U) {
+    query.where = MongoUtil.getWhereClause(cls, query.where);
+    QueryVerifier.verify(cls, query);
+    return {
+      query: query as U & { where: WhereClause<T> },
+      filter: MongoUtil.extractWhereClause(query.where)
+    } as const;
   }
 
   static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);

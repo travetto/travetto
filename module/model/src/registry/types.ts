@@ -1,7 +1,6 @@
 import { Class } from '@travetto/base';
+import { Primitive } from '@travetto/base/src/internal/global-types';
 import { ModelType } from '../types/model';
-
-type Primitive = number | boolean | string | Date;
 
 type ValidFieldNames<T> = {
   [K in keyof T]:

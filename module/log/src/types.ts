@@ -1,5 +1,4 @@
 import { LogLevel } from '@travetto/base';
-import { MessageContext } from '@travetto/base/src/internal/global-types';
 
 /**
  * Log levels, numerically
@@ -16,37 +15,37 @@ export const LogLevels = {
  */
 export interface LogEvent {
   /**
+   * Time of event, ISO 8601 timestamp
+   */
+  timestamp: string;
+  /**
    * Log level
    */
   level: LogLevel;
-  /**
-   * Line number
-   */
-  line: number;
   /**
    * File
    */
   file: string;
   /**
+   * Line number
+   */
+  line: number;
+  /**
    * Categorization of file into a readible name
    */
   category: string;
-  /**
-   * Log message
-   */
-  message: string;
-  /**
-   * Time of event, ISO 8601 timestamp
-   */
-  timestamp: string;
   /**
    * The scope of identifiers to the location of the log statement
    */
   scope?: string;
   /**
+   * Log message
+   */
+  message?: string;
+  /**
    * Log Message context
    */
-  context?: MessageContext;
+  context?: Record<string, unknown>;
   /**
    * Log arguments
    */

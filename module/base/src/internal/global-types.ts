@@ -1,7 +1,6 @@
 import { StacktraceUtil } from '../stacktrace';
 
-type Primitive = number | boolean | string | Date | undefined | null | string[] | number[] | Error;
-export declare type MessageContext = Record<string, Primitive | Record<string, Primitive>>;
+export type Primitive = number | boolean | string | Date | Error;
 
 // Enable maps to be serialized as json
 Map.prototype.toJSON = function (this: Map<unknown, unknown>) {
