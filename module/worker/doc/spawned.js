@@ -1,5 +1,5 @@
 require('@travetto/boot/register');
-require('@travetto/base').PhaseManager.init().then(async () => {
+require('@travetto/base').PhaseManager.run('init').then(async () => {
   const { ChildCommChannel } = require('..');
 
   const exec = new ChildCommChannel();

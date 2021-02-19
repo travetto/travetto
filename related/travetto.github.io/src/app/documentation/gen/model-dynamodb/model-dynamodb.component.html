@@ -34,7 +34,7 @@ Supported featrues:
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Init</span> <span class="token punctuation">{{'{'}}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> primary<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getModelService</span><span class="token punctuation">(</span><span class="token parameter">conf<span class="token operator">:</span> DynamoDBModelConfig</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">static</span> <span class="token function">getModelService</span><span class="token punctuation">(</span>conf<span class="token operator">:</span> DynamoDBModelConfig<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">DynamoDBModelService</span><span class="token punctuation">(</span>conf<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
@@ -55,7 +55,7 @@ Supported featrues:
   config<span class="token operator">:</span> dynamodb<span class="token punctuation">.</span>DynamoDBClientConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
     endpoint<span class="token operator">:</span> <span class="token keyword">undefined</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-  autoCreate<span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token keyword">namespace</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>

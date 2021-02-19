@@ -47,7 +47,7 @@ import { NodemailerTransport } from '@travetto/email';
 class Config {
   @InjectableFactory()
   static getTransport() {
-    return new NodemailerTransport(require('nodemailer-sendmail-transport'));
+    return new NodemailerTransport({ sendmail: true });
   }
 }
 ```
@@ -60,20 +60,26 @@ import { NodemailerTransport } from '@travetto/email';
 class Config {
   @InjectableFactory()
   static getTransport() {
-    return new NodemailerTransport(require('nodemailer-smtp-transport'));
+    return new NodemailerTransport({
+      service: 'smtp'
+    });
   }
 }
 ```
 
 **Code: `ses` to send all messages via the ses operation**
 ```typescript
+import { SESClient } from '@aws-sdk/client-ses';
+
 import { InjectableFactory } from '@travetto/di';
 import { NodemailerTransport } from '@travetto/email';
 
 class Config {
   @InjectableFactory()
   static getTransport() {
-    return new NodemailerTransport(require('nodemailer-ses-transport'));
+    return new NodemailerTransport({
+      SES: SESClient
+    });
   }
 }
 ```

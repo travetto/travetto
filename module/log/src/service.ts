@@ -139,7 +139,7 @@ class $Logger {
       scope,
       message: message !== '' ? message : undefined,
       context,
-      args: args.length ? args : undefined
+      args: args.filter(x => x !== undefined)
     };
 
     for (const l of this.listeners) {

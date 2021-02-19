@@ -45,6 +45,11 @@ And when in ${inp`prod`} mode transforms into:
 
 ${Code('Sample After Transpilation, in Prod', AppCache.readEntry('doc/transpile-prod.ts'), false, 'javascript')}
 
+${Section('Logging to External Systems')}
+By default the logging functionality logs messages directly to the console, relying on the ${meth`util.inspect`} method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as ${lib.JSON}, which is easily consumable by services like ${lib.Elasticsearch} or ${lib.AwsCloudwatch} if running as a lambda or in a docker container.  
+
+The main caveat that comes with this, is that not all objects can be converted to JSON (specifically circular dependencies, and unsupported types).  That end, the framework recommends logging with the following format, ${inp`message: string`} ${inp`context: Record<string, Primitive>`}.  Here context can be recursive, but the general idea is to only pass in known data structures that will not break the ${lib.JSON} production.
+
 ${Section('Sample Output')}
 
 The logging output, as indicated provides context for location of invocation. Given the file ${pth`test/simple.ts`}:

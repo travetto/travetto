@@ -76,24 +76,7 @@ Certain implementations will also provide support for automatic expiry of data a
 
 **Code: Expiry Contract**
 ```typescript
-export interface ModelExpirySupport extends ModelBasicSupport {
-
-  /**
-   * Set expiry time for a record of a given id
-   *
-   * @param id The identifier of the document
-   * @param ttl Time to live in seconds
-   */
-  updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number): Promise<void>;
-
-  /**
-   * Upsert a document with expiry
-   *
-   * @param item The item to upsert
-   * @param ttl The ttl for expiry
-   */
-  upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number): Promise<T>;
-
+export interface ModelExpirySupport extends ModelCrudSupport {
   /**
    * Determines if the associated document is expired
    *
@@ -197,8 +180,8 @@ All fields are optional, but the `id` and `type` are important as those field ty
 |[Redis Model Support](https://github.com/travetto/travetto/tree/master/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
 |[S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| | |X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/master/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X| | |X|
-|[MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L30)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L38)|X|X| |X|X|X|
+|[MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)|X|X|X|X|X|X|
+|[FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L41)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
@@ -225,8 +208,9 @@ import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
 @Config('model.memory')
 export class MemoryModelConfig {
-  autoCreate: boolean;
+  autoCreate?: boolean;
   namespace: string;
+  cullRate?: number;
 }
 /**
  * Standard in-memory support
@@ -234,7 +218,6 @@ export class MemoryModelConfig {
 @Injectable()
 export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
   private store = new Map<string, Map<string, Buffer>>();
-  private expiry = new Map<string, Map<string, { expiresAt: number, issuedAt: number }>>();
   private indexes = new Map<string, Map<string, string>>();
   constructor(public readonly config: MemoryModelConfig) { }
   private find<T extends ModelType>(cls: Class<T> | string, id?: string, errorState?: 'data' | 'notfound') {
@@ -258,26 +241,16 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async getStreamMetadata(location: string) ;
   async deleteStream(location: string) ;
   // Expiry Support
-  async updateExpiry<T extends ModelType>(cls: Class<T>, id: string, ttl: number) {
-    const store = this.getStore(cls, 'expiry');
-    store.set(id, { expiresAt: ModelExpiryUtil.getExpiresAt(ttl).getTime(), issuedAt: Date.now() });
-    const { expiresAt, issuedAt } = store.get(id)!;
-    const maxAge = expiresAt - issuedAt;
-    const expired = expiresAt < Date.now();
-    return { expiresAt, issuedAt, maxAge, expired };
-  }
-  async upsertWithExpiry<T extends ModelType>(cls: Class<T>, item: T, ttl: number) {
-    item = await this.upsert(cls, item);
-    await this.updateExpiry(cls, item.id!, ttl);
-    return item;
+  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
+    const item = await this.get(cls, id);
+    return ModelExpiryUtil.getExpiryForItem(cls, item);
   }
   async deleteExpired<T extends ModelType>(cls: Class<T>) {
-    let number = 0;
-    const store = this.getStore(cls, 'expiry');
-    for await (const [id, { expiresAt }] of [...store.entries()]) {
-      if (expiresAt < Date.now()) {
-        await this.delete(cls, id);
-        store.delete(id);
+    const deleting = [];
+    const store = this.getStore(cls);
+    for await (const id of [...store.keys()]) {
+      if ((await this.getExpiry(cls, id)).expired) {
+        deleting.push(this.delete(cls, id));
 ```
 
 To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.

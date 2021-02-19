@@ -1,6 +1,6 @@
 require('@travetto/boot/register');
 require('@travetto/base')
-  .PhaseManager.init('@trv:schema/init')
+  .PhaseManager.run('init', '@trv:schema/init')
   .then(() => {
     require('./watch');
     require('.').SchemaRegistry.onFieldChange((e) => {

@@ -93,12 +93,12 @@ export class LineFormatter implements Formatter {
       out.push(ev.message);
     }
 
-    if (ev.context) {
+    if (ev.context && Object.keys(ev.context).length) {
       out.push(this.pretty(ev, ev.context));
     }
 
-    if (ev.args) {
-      out.push(...ev.args.map(a => this.pretty(ev, a)).join(' '));
+    if (ev.args && ev.args.length) {
+      out.push(...ev.args.map(a => this.pretty(ev, a)));
     }
 
     return out.join(' ');

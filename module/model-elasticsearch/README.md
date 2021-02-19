@@ -8,12 +8,13 @@
 npm install @travetto/model-elasticsearch
 ```
 
-This module provides an [elasticsearch](https://elastic.co)-based implementation of the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [elasticsearch](https://elastic.co). In development mode, [ElasticsearchModelService](https://github.com/travetto/travetto/tree/master/module/model-elasticsearch/src/service.ts#L47) will also modify the [elasticsearch](https://elastic.co) schema in real time to minimize impact to development.
+This module provides an [elasticsearch](https://elastic.co)-based implementation of the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [elasticsearch](https://elastic.co). In development mode, [ElasticsearchModelService](https://github.com/travetto/travetto/tree/master/module/model-elasticsearch/src/service.ts#L50) will also modify the [elasticsearch](https://elastic.co) schema in real time to minimize impact to development.
 
 Supported featrues:
    
    *  [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10)
    *  [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19)
+   *  [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L8)
    *  [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10)
    *  [Query Crud](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/facet.ts#L12)
@@ -85,6 +86,11 @@ export class ElasticsearchModelConfig {
     ['number_of_replicas']: 0,
     ['number_of_shards']: 1
   };
+
+  /**
+   * Frequency of culling for expirable content
+   */
+  cullRate?: number;
 
   /**
    * Build final hosts

@@ -45,11 +45,11 @@ This flow ensures all files are loaded and processed before application starts. 
   method<span class="token operator">:</span> <span class="token builtin">Function</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleRegistry</span> <span class="token keyword">extends</span> <span class="token class-name">MetadataRegistry</span><span class="token operator">&lt;</span>Group<span class="token punctuation">,</span> Child<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleRegistry</span> <span class="token keyword">extends</span> <span class="token class-name">MetadataRegistry<span class="token operator">&lt;</span>Group<span class="token punctuation">,</span> Child<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Finalize class after all metadata is collected
    */</span>
-  onInstallFinalize<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> Group <span class="token punctuation">{{'{'}}</span>
+  <span class="token generic-function"><span class="token function">onInstallFinalize</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> Group <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getOrCreatePending</span><span class="token punctuation">(</span>cls<span class="token punctuation">)</span> <span class="token keyword">as</span> Group<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 

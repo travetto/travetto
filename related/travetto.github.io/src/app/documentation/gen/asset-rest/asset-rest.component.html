@@ -44,7 +44,7 @@ A simple example:
    * @param file A file to upload
    */</span>
   @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/files'</span><span class="token punctuation">)</span>
-  <span class="token function">loadFiles</span><span class="token punctuation">(</span><span class="token parameter">@<span class="token meta">Upload</span><span class="token punctuation">(</span><span class="token punctuation">)</span> file<span class="token operator">:</span> Asset</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">loadFiles</span><span class="token punctuation">(</span>@<span class="token meta">Upload</span><span class="token punctuation">(</span><span class="token punctuation">)</span> file<span class="token operator">:</span> Asset<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> AssetRestUtil<span class="token punctuation">.</span><span class="token function">downloadable</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     

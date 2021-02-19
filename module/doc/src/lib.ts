@@ -33,6 +33,9 @@ export const Https = Library(`https`, 'https://nodejs.org/api/https.html');
 export const Console = Library('console', 'https://nodejs.org/api/console.html');
 export const Assert = Library('assert', 'https://nodejs.org/api/assert.html');
 
+// Cloud
+export const AwsCloudwatch = Library('AWS Cloudwatch', 'https://aws.amazon.com/cloudwatch/');
+
 // Utils
 export const Lodash = Library('lodash', 'https://lodash.com');
 export const NodeForge = Library('node-forge', 'https://www.npmjs.com/package/node-forge');

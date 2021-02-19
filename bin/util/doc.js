@@ -20,7 +20,7 @@ if (target && target.startsWith(root)) {
     'Restarting Services'
       .$tap(console.log)
       .$map(() => {
-        require('child_process').spawnSync('npm', ['run', 'service', 'restart'], { stdio: 'inherit', encoding: 'utf8' });
+        require('child_process').spawnSync('npm', ['run', 'util:service', 'restart'], { stdio: 'inherit', encoding: 'utf8' });
       }) : undefined,
 
   commander
@@ -35,7 +35,7 @@ if (target && target.startsWith(root)) {
         // Overview
         `<div class="documentation">`
           .$concat(
-            $exec('npx', ['markdown-to-html', '--flavor', 'gfm', 'README.md'])
+            $exec('npx', ['github-markdown', 'README.md'])
               .$filter(x => !/<p.*<img/.test(x) && !/<sub/.test(x)),
           )
           .$concat(['</div>\n<app-module-chart></app-module-chart>'])

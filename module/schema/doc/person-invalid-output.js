@@ -3,7 +3,7 @@ process.env.TRV_SRC_LOCAL = 'doc';
 
 (async function () {
   const { PhaseManager } = await require('@travetto/base');
-  await PhaseManager.init();
+  await PhaseManager.run('init');
   const { validate } = await require('./person-binding-invalid.ts');
   try {
     await validate();

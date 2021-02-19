@@ -43,8 +43,8 @@ When working with an [fastify](https://www.fastify.io/) applications, the module
 **Code: Configured Middleware**
 ```typescript
 const app = fastify(fastConf);
-    app.register(require('fastify-compress'));
-    app.register(require('fastify-formbody'));
+    app.register(compress);
+    app.register(formBody);
 
     // Allow everything else to be treated as a stream
     // @ts-expect-error

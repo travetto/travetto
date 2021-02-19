@@ -23,8 +23,8 @@ The asset module requires an <a target="_blank" class="source-link" href="https:
       </figure>
 
 Currently, the following are packages that provide <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1">Streaming</a>:
-<ul> <li>@travetto/model - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L38">FileModelService</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L30">MemoryModelService</a></li>
- <li>@travetto/model-mongo - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L78">MongoModelService</a></li>
+<ul> <li>@travetto/model - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L41">FileModelService</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31">MemoryModelService</a></li>
+ <li>@travetto/model-mongo - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L41">MongoModelService</a></li>
  <li>@travetto/model-s3 - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-s3/src/service.ts#L23">S3ModelService</a></li></ul>
 
 If you are using more than one <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1">Streaming</a>-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
@@ -39,7 +39,7 @@ If you are using more than one <a target="_blank" class="source-link" href="http
 
 <span class="token keyword">class</span> <span class="token class-name">SymoblBasedConfiguration</span> <span class="token punctuation">{{'{'}}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span>AssetModelSym<span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getAssetModelService</span><span class="token punctuation">(</span><span class="token parameter">service<span class="token operator">:</span> S3ModelService</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">static</span> <span class="token function">getAssetModelService</span><span class="token punctuation">(</span>service<span class="token operator">:</span> S3ModelService<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> service<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
@@ -48,7 +48,7 @@ If you are using more than one <a target="_blank" class="source-link" href="http
 
 <span class="token keyword">class</span> <span class="token class-name">FullConfiguration</span> <span class="token punctuation">{{'{'}}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">getAssetService</span><span class="token punctuation">(</span><span class="token parameter">service<span class="token operator">:</span> S3ModelService</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">static</span> <span class="token function">getAssetService</span><span class="token punctuation">(</span>service<span class="token operator">:</span> S3ModelService<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">AssetService</span><span class="token punctuation">(</span>service<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
@@ -70,18 +70,18 @@ Reading of and writing assets uses the <a target="_blank" class="source-link" hr
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">UserProfileService</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token keyword">constructor</span><span class="token punctuation">(</span>
-    <span class="token parameter"><span class="token keyword">public</span> asset<span class="token operator">:</span> AssetService<span class="token punctuation">,</span>
-    <span class="token keyword">public</span> model<span class="token operator">:</span> ModelCrudSupport</span>
+    <span class="token keyword">public</span> asset<span class="token operator">:</span> AssetService<span class="token punctuation">,</span>
+    <span class="token keyword">public</span> model<span class="token operator">:</span> ModelCrudSupport
   <span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
 
-  <span class="token keyword">async</span> <span class="token function">saveProfileImage</span><span class="token punctuation">(</span><span class="token parameter">userId<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> image<span class="token operator">:</span> Asset</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">saveProfileImage</span><span class="token punctuation">(</span>userId<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> image<span class="token operator">:</span> Asset<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> path <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>asset<span class="token punctuation">.</span><span class="token function">upsert</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> <span class="token operator">...</span>image<span class="token punctuation">,</span> stream<span class="token operator">:</span> fs<span class="token punctuation">.</span><span class="token function">createReadStream</span><span class="token punctuation">(</span>image<span class="token punctuation">.</span>filename<span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>model<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userId<span class="token punctuation">)</span><span class="token punctuation">;</span>
     user<span class="token punctuation">.</span>profileImage <span class="token operator">=</span> path<span class="token punctuation">;</span>
     <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>model<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> user<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
-  <span class="token keyword">async</span> <span class="token function">getProfileImage</span><span class="token punctuation">(</span><span class="token parameter">userId<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">getProfileImage</span><span class="token punctuation">(</span>userId<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>model<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userId<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>asset<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>user<span class="token punctuation">.</span>profileImage<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -141,7 +141,7 @@ To get the asset information, you would call:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">UserProfileTagService</span> <span class="token keyword">extends</span> <span class="token class-name">UserProfileService</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">async</span> <span class="token function">getImageContentType</span><span class="token punctuation">(</span><span class="token parameter">userId<span class="token operator">:</span> <span class="token builtin">string</span></span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">getImageContentType</span><span class="token punctuation">(</span>userId<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>model<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> userId<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">const</span> info <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>asset<span class="token punctuation">.</span><span class="token function">getMetadata</span><span class="token punctuation">(</span>user<span class="token punctuation">.</span>profileImage<span class="token punctuation">)</span><span class="token punctuation">;</span>
 

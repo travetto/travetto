@@ -3,7 +3,7 @@ process.env.TRV_SRC_LOCAL = 'doc';
 
 (async function () {
   const { PhaseManager } = require('@travetto/base');
-  await PhaseManager.init();
+  await PhaseManager.run('init');
   const { LocationAware } = require('./custom-type-usage.ts');
   const { SchemaValidator } = require('../src/validate/validator.ts');
 

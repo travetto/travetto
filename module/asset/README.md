@@ -17,8 +17,8 @@ npm install @travetto/model-{provider}
 
 Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1):
    
-   *  @travetto/model - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L38), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L30)
-   *  @travetto/model-mongo - [MongoModelService](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L78)
+   *  @travetto/model - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L41), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)
+   *  @travetto/model-mongo - [MongoModelService](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L41)
    *  @travetto/model-s3 - [S3ModelService](https://github.com/travetto/travetto/tree/master/module/model-s3/src/service.ts#L23)
 
 If you are using more than one [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1)-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:

@@ -80,7 +80,7 @@ A sample auth provider would look like:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> IdentitySource <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SimpleIdentitySource</span> <span class="token keyword">implements</span> <span class="token class-name">IdentitySource</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">async</span> <span class="token function">authenticate</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> Request<span class="token punctuation">,</span> res<span class="token operator">:</span> Response</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">authenticate</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">,</span> res<span class="token operator">:</span> Response<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> username<span class="token punctuation">,</span> password <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> req<span class="token punctuation">.</span>body<span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>username <span class="token operator">===</span> <span class="token string">'test'</span> <span class="token operator">&amp;&amp;</span> password <span class="token operator">===</span> <span class="token string">'test'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
@@ -145,13 +145,13 @@ Like the <a target="_blank" class="source-link" href="https://github.com/travett
 
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/self'</span><span class="token punctuation">)</span>
   @<span class="token meta">Authenticated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getSelf</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">getSelf</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> req<span class="token punctuation">.</span>auth<span class="token operator">?.</span>principal<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/logout'</span><span class="token punctuation">)</span>
   @<span class="token meta">Authenticated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">logout</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">logout</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">await</span> req<span class="token punctuation">.</span><span class="token function">logout</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Redirect</span><span class="token punctuation">(</span><span class="token string">'/auth/self'</span><span class="token punctuation">,</span> <span class="token number">301</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -192,10 +192,10 @@ Within the node ecosystem, the most prevalent auth framework is <a target="_blan
           callbackURL<span class="token operator">:</span> <span class="token string">'http://localhost:3000/auth/facebook/callback'</span><span class="token punctuation">,</span>
           profileFields<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'id'</span><span class="token punctuation">,</span> <span class="token string">'username'</span><span class="token punctuation">,</span> <span class="token string">'displayName'</span><span class="token punctuation">,</span> <span class="token string">'photos'</span><span class="token punctuation">,</span> <span class="token string">'email'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
         <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
-        <span class="token punctuation">(</span><span class="token parameter">accessToken<span class="token punctuation">,</span> refreshToken<span class="token punctuation">,</span> profile<span class="token punctuation">,</span> cb</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+        <span class="token punctuation">(</span>accessToken<span class="token punctuation">,</span> refreshToken<span class="token punctuation">,</span> profile<span class="token punctuation">,</span> cb<span class="token punctuation">)</span> <span class="token operator">=></span>
           <span class="token function">cb</span><span class="token punctuation">(</span><span class="token keyword">undefined</span><span class="token punctuation">,</span> profile<span class="token punctuation">)</span>
       <span class="token punctuation">)</span><span class="token punctuation">,</span>
-      <span class="token punctuation">(</span><span class="token parameter">user<span class="token operator">:</span> FbUser</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+      <span class="token punctuation">(</span>user<span class="token operator">:</span> FbUser<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
         id<span class="token operator">:</span> user<span class="token punctuation">.</span>username<span class="token punctuation">,</span>
         permissions<span class="token operator">:</span> user<span class="token punctuation">.</span>roles<span class="token punctuation">,</span>
         details<span class="token operator">:</span> user
@@ -205,8 +205,8 @@ Within the node ecosystem, the most prevalent auth framework is <a target="_blan
 
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">principalSource</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> PrincipalSource <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">class</span> <span class="token keyword">implements</span> <span class="token class-name">PrincipalSource</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">async</span> <span class="token function">authorize</span><span class="token punctuation">(</span><span class="token parameter">ident<span class="token operator">:</span> Identity</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token keyword">class</span></span> <span class="token keyword">implements</span> <span class="token class-name">PrincipalSource</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">async</span> <span class="token function">authorize</span><span class="token punctuation">(</span>ident<span class="token operator">:</span> Identity<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
         <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">AuthContext</span><span class="token punctuation">(</span>ident<span class="token punctuation">,</span> ident<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -246,7 +246,7 @@ After that, the provider is no different than any other, and can be used accordi
 
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/self'</span><span class="token punctuation">)</span>
   @<span class="token meta">Authenticated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getSelf</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">getSelf</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> req<span class="token punctuation">.</span>auth<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
@@ -258,7 +258,7 @@ After that, the provider is no different than any other, and can be used accordi
 
   @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/logout'</span><span class="token punctuation">)</span>
   @<span class="token meta">Unauthenticated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">logout</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token operator">:</span> Request</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">logout</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">await</span> req<span class="token punctuation">.</span><span class="token function">logout</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 

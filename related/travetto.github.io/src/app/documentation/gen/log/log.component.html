@@ -105,6 +105,11 @@ exports<span class="token punctuation">.</span>work <span class="token operator"
 Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> <span class="token string">'ᚕtrv'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> configurable<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> value<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>     
       </figure>
 
+<h2 id="logging-to-external-systems">Logging to External Systems</h2>
+By default the logging functionality logs messages directly to the console, relying on the <code class="item method">util.inspect</code> method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as <a target="_blank" class="external-link" href="https://www.json.org">JSON</a>, which is easily consumable by services like <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> or <a target="_blank" class="external-link" href="https://aws.amazon.com/cloudwatch/">AWS Cloudwatch</a> if running as a lambda or in a docker container.  
+
+The main caveat that comes with this, is that not all objects can be converted to JSON (specifically circular dependencies, and unsupported types).  That end, the framework recommends logging with the following format, <code class="item input">message: string</code> <code class="item input">context: Record&lt;string, Primitive&gt;</code>.  Here context can be recursive, but the general idea is to only pass in known data structures that will not break the <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> production.
+
 <h2 id="sample-output">Sample Output</h2>
 
 The logging output, as indicated provides context for location of invocation. Given the file <code class="item path">test/simple.ts</code>:

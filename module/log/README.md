@@ -93,6 +93,11 @@ exports.work = work;
 Object.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });
 ```
 
+## Logging to External Systems
+By default the logging functionality logs messages directly to the console, relying on the `util.inspect` method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as [JSON](https://www.json.org), which is easily consumable by services like [elasticsearch](https://elastic.co) or [AWS Cloudwatch](https://aws.amazon.com/cloudwatch/) if running as a lambda or in a docker container.  
+
+The main caveat that comes with this, is that not all objects can be converted to JSON (specifically circular dependencies, and unsupported types).  That end, the framework recommends logging with the following format, `message: string` `context: Record<string, Primitive>`.  Here context can be recursive, but the general idea is to only pass in known data structures that will not break the [JSON](https://www.json.org) production.
+
 ## Sample Output
 
 The logging output, as indicated provides context for location of invocation. Given the file `test/simple.ts`:

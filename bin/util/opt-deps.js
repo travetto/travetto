@@ -11,6 +11,7 @@
       .$flatMap(x => Object.entries(x.optionalPeerDependencies ?? []))
   )
   .$sort(([a], [b]) => a.localeCompare(b))
+  .$filter(([a]) => !a.startsWith('@travetto'))
   .$reduce((acc, [a, b]) => {
     acc[a] = b;
     return acc;

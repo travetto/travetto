@@ -47,7 +47,7 @@ export class DynamoDBModelConfig {
   config: dynamodb.DynamoDBClientConfig = {
     endpoint: undefined
   };
-  autoCreate: boolean;
+  autoCreate?: boolean;
   namespace: string;
 }
 ```
