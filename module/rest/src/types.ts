@@ -1,11 +1,5 @@
 import { Class, Closeable } from '@travetto/base';
 
-export const NodeRequestSym = Symbol.for('@trv:rest/node-request');
-export const NodeResponseSym = Symbol.for('@trv:rest/node-response');
-export const ProviderRequestSym = Symbol.for('@trv:rest/provider-request');
-export const ProviderResponseSym = Symbol.for('@trv:rest/provider-response');
-export const HeadersAddedSym: unique symbol = Symbol.for('@trv:rest/headers');
-
 export type HeaderMap = Record<string, (string | (() => string))>;
 
 export type PathType = string | RegExp;

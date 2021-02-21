@@ -4,6 +4,7 @@ import { ExecUtil, FsUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
 import { CommonConfig, PackOperation } from '../lib/types';
+import { PackUtil } from '../lib/util';
 
 export interface ZipConfig extends CommonConfig {
   output: string;
@@ -18,8 +19,7 @@ export const Zip: PackOperation<ZipConfig> = {
   ],
   extend(a: ZipConfig, b: Partial<ZipConfig>) {
     return {
-      active: b.active ?? a.active,
-      workspace: b.workspace ?? a.workspace,
+      ...PackUtil.commonExtend(a, b),
       output: b.output ?? a.output
     };
   },

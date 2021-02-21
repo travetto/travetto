@@ -4,8 +4,9 @@ import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, ParamConfig, RouteConfig, NodeRequestSym } from '@travetto/rest';
+import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, ParamConfig, RouteConfig } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
+import { NodeEntitySym } from '@travetto/rest/src/internal/symbol';
 
 import { RouteStack } from './internal/types';
 
@@ -31,14 +32,17 @@ export class ExpressRestServer implements RestServer<express.Application> {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.raw({ type: 'image/*' }));
-    app.use((
-      req: express.Request & { [NodeRequestSym]?: express.Request },
-      res: express.Response & { [NodeRequestSym]?: express.Response },
-      next) => {
-      req[NodeRequestSym] = req; // Express objects match the framework structure
-      res[NodeRequestSym] = res;
-      next();
-    });
+    app.use(
+      (
+        req: express.Request & { [NodeEntitySym]?: express.Request },
+        res: express.Response & { [NodeEntitySym]?: express.Response },
+        next
+      ) => {
+        req[NodeEntitySym] = req; // Express objects match the framework structure
+        res[NodeEntitySym] = res;
+        next();
+      }
+    );
 
     if (this.config.trustProxy) {
       app.enable('trust proxy');

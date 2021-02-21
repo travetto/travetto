@@ -20,13 +20,13 @@ import { RestServer } from './server';
   description: 'Default rest application entrypoint',
   watch: true
 })
-export class RestApplication {
+export class RestApplication<T extends unknown = unknown>  {
 
   @Inject()
   config: RestConfig;
 
   @Inject()
-  server: RestServer<unknown>;
+  server: RestServer<T>;
 
   /**
    * List of provided interceptors

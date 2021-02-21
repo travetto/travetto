@@ -3,6 +3,7 @@ import { ExecUtil, FsUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
 import { CommonConfig, PackOperation } from '../lib/types';
+import { PackUtil } from '../lib/util';
 
 export interface DockerConfig extends CommonConfig {
   image: string;
@@ -22,8 +23,7 @@ export const Docker: PackOperation<DockerConfig> = {
   ],
   extend(a: DockerConfig, b: Partial<DockerConfig>) {
     return {
-      active: b.active ?? a.active,
-      workspace: b.workspace ?? a.workspace,
+      ...PackUtil.commonExtend(a, b),
       image: b.image ?? a.image,
       tag: b.tag ?? a.tag ?? ['app'],
       port: b.port ?? a.port,

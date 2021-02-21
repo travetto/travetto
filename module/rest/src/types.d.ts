@@ -1,7 +1,8 @@
 import 'express-serve-static-core';
 import { SetOption, GetOption } from 'cookies';
-import { IncomingMessage, ServerResponse } from 'http';
-import { NodeRequestSym, NodeResponseSym, ProviderRequestSym, ProviderResponseSym, HeadersAddedSym, HeaderMap } from './types';
+import { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'http';
+import { HeaderMap } from './types';
+import { HeadersAddedSym, NodeEntitySym, ProviderEntitySym } from './internal/symbol';
 
 declare global {
   namespace Travetto {
@@ -9,15 +10,15 @@ declare global {
      * Travetto request
      * @concrete ./internal/types:RequestCls
      */
-    interface Request {
+    interface Request<T = unknown> {
       /**
        * The original request of the underlying framework
        */
-      [ProviderRequestSym]?: any;
+      [ProviderEntitySym]?: T;
       /**
        * The raw http Incoming Message object
        */
-      [NodeRequestSym]: IncomingMessage;
+      [NodeEntitySym]: IncomingMessage;
       /**
        * The http method
        */
@@ -49,7 +50,7 @@ declare global {
       /**
        * The request headers
        */
-      headers: Record<string, string | string[]>;
+      headers: IncomingHttpHeaders;
       /**
        * The cookie support
        */
@@ -85,15 +86,15 @@ declare global {
      * Travetto response
      * @concrete ./internal/types:ResponseCls
      */
-    interface Response {
+    interface Response<T = unknown> {
       /**
        * The underlying request object
        */
-      [ProviderResponseSym]?: any;
+      [ProviderEntitySym]?: T;
       /**
        * The raw http server response object
        */
-      [NodeResponseSym]: ServerResponse;
+      [NodeEntitySym]: ServerResponse;
       /**
        * The additional headers for this request, provided by controllers/route config
        */

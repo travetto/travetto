@@ -29,15 +29,14 @@ export const Assemble: PackOperation<AssembleConfig> = {
   ],
   extend(a: AssembleConfig, b: Partial<AssembleConfig>) {
     return {
-      active: b.active ?? a.active,
-      workspace: b.workspace ?? a.workspace,
+      ...PackUtil.commonExtend(a, b),
       keepSource: b.keepSource ?? a.keepSource,
       readonly: b.readonly ?? a.readonly,
       cacheDir: b.cacheDir ?? a.cacheDir,
       add: [...(b.add ?? []), ...(a.add ?? [])],
       exclude: [...(b.exclude ?? []), ...(a.exclude ?? [])],
       excludeCompile: [...(b.excludeCompile ?? []), ...(a.excludeCompile ?? [])],
-      env: { ...(b.env ?? {}), ...(a.env ?? {}) }
+      env: { ...(b.env ?? {}), ...(a.env ?? {}) },
     };
   },
   /**

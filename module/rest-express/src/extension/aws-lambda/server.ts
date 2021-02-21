@@ -1,32 +1,27 @@
 // @file-if aws-serverless-express
 import * as http from 'http';
-import type * as lambda from 'aws-lambda';
-
 import * as awsServerlessExpress from 'aws-serverless-express';
+import type * as lambda from 'aws-lambda';
 
 import { Injectable } from '@travetto/di';
 import { ConfigManager } from '@travetto/config';
 
-import { RestServerTarget } from '@travetto/rest/src/internal/server';
-import { RestLambdaSym } from '@travetto/rest/src/internal/lambda';
+import { AwsLambdaRestServer, AwsLambdaRestServerTarget } from '@travetto/rest/src/extension/lambda';
 
 import { ExpressRestServer } from '../../server';
 
 /**
  * Aws Lambda Rest Server
  */
-@Injectable({
-  qualifier: RestLambdaSym,
-  target: RestServerTarget
-})
-export class AwsLambdaExpressRestServer extends ExpressRestServer {
+@Injectable({ target: AwsLambdaRestServerTarget })
+export class AwsLambdaExpressRestServer extends ExpressRestServer implements AwsLambdaRestServer {
 
   private server: http.Server;
 
   /**
    * Handler method for the proxy
    */
-  public handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
+  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
     return awsServerlessExpress.proxy(this.server, event, context, 'PROMISE').promise;
   }
 

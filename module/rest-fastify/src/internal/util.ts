@@ -1,18 +1,15 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { RestServerUtil } from '@travetto/rest';
-import { NodeResponseSym, NodeRequestSym, ProviderRequestSym, ProviderResponseSym, Request } from '@travetto/rest/src/types';
-
-const RequestSym = Symbol.for('@trv:rest-fastify/req');
-const ResponseSym = Symbol.for('@trv:rest-fastify/res');
+import { RestServerUtil, Request } from '@travetto/rest';
+import { TravettoEntitySym, NodeEntitySym, ProviderEntitySym } from '@travetto/rest/src/internal/symbol';
 
 type FRequest = FastifyRequest & {
-  [RequestSym]?: Travetto.Request;
+  [TravettoEntitySym]?: Travetto.Request;
   session?: Travetto.Request['session'];
 };
 
 type FResponse = FastifyReply & {
-  [ResponseSym]?: Travetto.Response;
+  [TravettoEntitySym]?: Travetto.Response;
 };
 
 /**
@@ -23,14 +20,14 @@ export class FastifyServerUtil {
    * Build a Travetto Request from a Fastify Request
    */
   static getRequest(reqs: FRequest) {
-    if (!reqs[RequestSym]) {
+    if (!reqs[TravettoEntitySym]) {
       let [path] = (reqs.raw!.url ?? '').split(/[#?]/g);
       if (!path.startsWith('/')) {
         path = `/${path}`;
       }
-      reqs[RequestSym] = RestServerUtil.decorateRequest({
-        [ProviderRequestSym]: reqs,
-        [NodeRequestSym]: reqs.raw,
+      reqs[TravettoEntitySym] = RestServerUtil.decorateRequest({
+        [ProviderEntitySym]: reqs,
+        [NodeEntitySym]: reqs.raw,
         protocol: (reqs.raw.socket && 'encrypted' in reqs.raw.socket) ? 'https' : 'http',
         method: reqs.raw.method as Request['method'],
         path,
@@ -38,24 +35,24 @@ export class FastifyServerUtil {
         params: reqs.params as Record<string, string>,
         body: reqs.body,
         session: reqs.session,
-        headers: reqs.headers as Record<string, string | string[]>,
+        headers: reqs.headers,
         files: undefined,
         auth: undefined,
         pipe: reqs.raw.pipe.bind(reqs.raw),
         on: reqs.raw.on.bind(reqs.raw)
       });
     }
-    return reqs[RequestSym]!;
+    return reqs[TravettoEntitySym]!;
   }
 
   /**
    * Build a Travetto Response from a Fastify Reply
    */
   static getResponse(reply: FResponse) {
-    if (!reply[ResponseSym]) {
-      reply[ResponseSym] = RestServerUtil.decorateResponse({
-        [ProviderResponseSym]: reply,
-        [NodeResponseSym]: reply.raw,
+    if (!reply[TravettoEntitySym]) {
+      reply[TravettoEntitySym] = RestServerUtil.decorateResponse({
+        [ProviderEntitySym]: reply,
+        [NodeEntitySym]: reply.raw,
         get headersSent() {
           return reply.sent;
         },
@@ -87,6 +84,6 @@ export class FastifyServerUtil {
       });
     }
 
-    return reply[ResponseSym]!;
+    return reply[TravettoEntitySym]!;
   }
 }

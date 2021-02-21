@@ -1,9 +1,6 @@
 import * as koa from 'koa';
 import { RestServerUtil } from '@travetto/rest';
-import { NodeResponseSym, NodeRequestSym, ProviderRequestSym, ProviderResponseSym } from '@travetto/rest/src/types';
-
-const ResponseSym = Symbol.for('@trv:rest-koa/response');
-const RequestSym = Symbol.for('@trv:rest-koa/request');
+import { NodeEntitySym, ProviderEntitySym, TravettoEntitySym } from '@travetto/rest/src/internal/symbol';
 
 /**
  * Provides translation between koa request/response objects and the framework
@@ -12,11 +9,11 @@ export class KoaServerUtil {
   /**
    * Build a Travetto Request from a koa context
    */
-  static getRequest(ctx: koa.ParameterizedContext<unknown> & { [RequestSym]?: Travetto.Request }) {
-    if (!ctx[RequestSym]) {
-      ctx[RequestSym] = RestServerUtil.decorateRequest({
-        [ProviderRequestSym]: ctx,
-        [NodeRequestSym]: ctx.req,
+  static getRequest(ctx: koa.ParameterizedContext<unknown> & { [TravettoEntitySym]?: Travetto.Request }) {
+    if (!ctx[TravettoEntitySym]) {
+      ctx[TravettoEntitySym] = RestServerUtil.decorateRequest({
+        [ProviderEntitySym]: ctx,
+        [NodeEntitySym]: ctx.req,
         protocol: ctx.protocol as 'http',
         method: ctx.request.method as 'GET',
         path: ctx.request.path,
@@ -32,17 +29,17 @@ export class KoaServerUtil {
         on: ctx.req.on.bind(ctx.req)
       });
     }
-    return ctx[RequestSym]!;
+    return ctx[TravettoEntitySym]!;
   }
 
   /**
    * Build a Travetto Response from a koa context
    */
-  static getResponse(ctx: koa.ParameterizedContext<unknown> & { [ResponseSym]?: Travetto.Response }) {
-    if (!ctx[ResponseSym]) {
-      ctx[ResponseSym] = RestServerUtil.decorateResponse({
-        [ProviderResponseSym]: ctx,
-        [NodeResponseSym]: ctx.res,
+  static getResponse(ctx: koa.ParameterizedContext<unknown> & { [TravettoEntitySym]?: Travetto.Response }) {
+    if (!ctx[TravettoEntitySym]) {
+      ctx[TravettoEntitySym] = RestServerUtil.decorateResponse({
+        [ProviderEntitySym]: ctx,
+        [NodeEntitySym]: ctx.res,
         get headersSent() {
           return ctx.headerSent;
         },
@@ -73,6 +70,6 @@ export class KoaServerUtil {
         cookies: ctx.cookies,
       });
     }
-    return ctx[ResponseSym]!;
+    return ctx[TravettoEntitySym]!;
   }
 }

@@ -18,6 +18,15 @@ export class PackUtil {
   private static _defaultConfigs: Partial<CommonConfig>[];
   private static _modes: Partial<CommonConfig>[];
 
+  static commonExtend<T extends CommonConfig>(a: T, b: Partial<T>): T {
+    return {
+      active: b.active ?? a.active,
+      workspace: b.workspace ?? a.workspace,
+      preProcess: [...(b.preProcess ?? []), ...(a.preProcess ?? [])],
+      postProcess: [...(b.postProcess ?? []), ...(a.postProcess ?? [])],
+    } as T;
+  }
+
   /**
    * Find pack modes with associated metadata
    */
@@ -113,24 +122,50 @@ export class PackUtil {
     const title = color`${{ title: op.title }} ${ctx}`;
     const width = title.replace(/\x1b\[\d+m/g, '').length; // eslint-disable-line
 
-    console.log();
-    console.log(`${spacer}${title}`);
-    console.log(`${spacer}${'-'.repeat(width)}`);
-
     let i = 0;
-    for await (const msg of op.exec(cfg)) {
+    function stdout(msg?: string) {
       if (i++ > 0) {
         process.stdout.write(color`${spacer}${{ param: 'done' }}\n`);
       }
-      if (msg.includes('Success')) {
-        console.log(`${spacer}${'-'.repeat(width)}`);
-        console.log(`${spacer}${msg}`);
-      } else if (msg) {
+      if (msg) {
         process.stdout.write(color`${spacer}${{ output: '᳁' }} ${{ path: msg.padEnd(width - 15) }} ... `);
-      } else {
-        process.stdout.write('\n');
       }
     }
-    console.log();
+
+    process.stdout.write(`${spacer}${title}\n`);
+    process.stdout.write(`${spacer}${'-'.repeat(width)}\n`);
+
+    if (cfg.preProcess && cfg.preProcess.length) {
+      await stdout('Pre-processing');
+      for (const el of cfg.preProcess) {
+        await el(cfg);
+      }
+    }
+
+    let message: string | undefined;
+
+    for await (const msg of op.exec(cfg)) {
+      if (msg.includes('Success')) { // We are done
+        message = msg;
+        break;
+      } else {
+        stdout(msg);
+      }
+    }
+
+    if (cfg.postProcess && cfg.postProcess.length) {
+      await stdout('Post-processing');
+      for (const el of cfg.postProcess) {
+        await el(cfg);
+      }
+    }
+
+    // Wrap up
+    stdout();
+
+    if (message !== undefined) {
+      process.stdout.write(`${spacer}${'-'.repeat(width)}\n`);
+      process.stdout.write(`${spacer}${message}\n`);
+    }
   }
 }

@@ -46,8 +46,10 @@ export const Pack: PackOperation<AllConfig> = {
       throw new Error(`Pack operation has zero active steps`);
     }
     for (const [step, op] of steps) {
+      process.stdout.write('\n');
       await PackUtil.runOperation(op as typeof Assemble, cfg[step as 'assemble'], 2);
     }
+    process.stdout.write('\n');
     yield color`${{ success: 'Successfully' }} packed project`;
   }
 };
