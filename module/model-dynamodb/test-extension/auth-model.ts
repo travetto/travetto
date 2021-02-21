@@ -2,13 +2,12 @@
 
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelSym } from '@travetto/auth-model';
-import { AuthModelServiceSuite } from '@travetto/auth-model/test-support/service';
+import { AuthModelServiceSuite, TestModelSvcSym } from '@travetto/auth-model/test-support/service';
 
 import { DynamoDBModelConfig, DynamoDBModelService } from '..';
 
 class Init {
-  @InjectableFactory(AuthModelSym)
+  @InjectableFactory(TestModelSvcSym)
   static modelProvider(config: DynamoDBModelConfig) {
     return new DynamoDBModelService(config);
   }

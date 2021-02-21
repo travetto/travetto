@@ -189,15 +189,10 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   // Expiry
-  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const item = await this.get(cls, id);
-    return ModelExpiryUtil.getExpiryForItem(cls, item);
-  }
-
   async deleteExpired<T extends ModelType>(cls: Class<T>) {
     const deleted = [];
     for await (const el of this.list(cls)) {
-      if (ModelExpiryUtil.getExpiryForItem(cls, el).expired) {
+      if (ModelExpiryUtil.getExpiryState(cls, el).expired) {
         deleted.push(this.delete(cls, el.id!));
       }
     }

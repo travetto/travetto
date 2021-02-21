@@ -1,6 +1,8 @@
-import { ExpiresAt, IssuedAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
+import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
+import { EnvUtil } from '@travetto/boot/src';
+import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 import { CacheConfig } from './types';
 import { CacheError } from './error';
@@ -10,14 +12,13 @@ export const CacheModelSym = Symbol.for('@trv:cache/model');
 
 const INFINITE_MAX_AGE = '10000-01-01';
 
-@Model({ for: CacheModelSym })
-export class CacheType {
+@Model({ autoCreate: false })
+export class CacheRecord {
   id?: string;
   @Text()
   entry: string;
   @ExpiresAt()
   expiresAt: Date;
-  @IssuedAt()
   issuedAt: Date;
 }
 
@@ -29,27 +30,37 @@ export class CacheService {
 
   constructor(@Inject(CacheModelSym) private modelService: ModelExpirySupport) { }
 
-  async get(id: string, extendOnAccess = true) {
-    const { expiresAt, expired, maxAge } = await this.modelService.getExpiry(CacheType, id);
+  async postConstruct() {
+    if (isStorageSupported(this.modelService)) {
+      if (!EnvUtil.isReadonly()) {
+        await this.modelService.createModel?.(CacheRecord);
+      }
+    }
+  }
 
-    if (expired) {
-      await this.modelService.delete(CacheType, id);
+  async get(id: string, extendOnAccess = true) {
+    const { expiresAt, issuedAt } = await this.modelService.get(CacheRecord, id);
+
+    const delta = expiresAt.getTime() - Date.now();
+    const maxAge = expiresAt.getTime() - issuedAt.getTime();
+
+    if (delta < 0) { // Expired
+      await this.modelService.delete(CacheRecord, id);
       throw new CacheError('Key expired', 'data');
     }
 
     // If half way to eviction, not perfect, but will reduce the amount of unnecessary updates
     if (extendOnAccess) {
-      const delta = expiresAt.getTime() - Date.now();
-      const threshold = maxAge! / 2;
+      const threshold = maxAge / 2;
       if (delta < threshold) {
-        await this.modelService.updatePartial(CacheType, id, {
-          expiresAt: new Date(Date.now() + maxAge!),
+        await this.modelService.updatePartial(CacheRecord, id, {
+          expiresAt: new Date(Date.now() + maxAge),
           issuedAt: new Date()
         }); // Do not wait
       }
     }
 
-    const res = await this.modelService.get(CacheType, id);
+    const res = await this.modelService.get(CacheRecord, id);
     return CacheUtil.fromSafeJSON(res.entry);
   }
 
@@ -61,8 +72,8 @@ export class CacheService {
   async set(id: string, entry: unknown, maxAge?: number) {
     const entryText = CacheUtil.toSafeJSON(entry);
 
-    const store = await this.modelService.upsert(CacheType,
-      CacheType.from({
+    const store = await this.modelService.upsert(CacheRecord,
+      CacheRecord.from({
         id,
         entry: entryText!,
         expiresAt: new Date(maxAge ? maxAge + Date.now() : INFINITE_MAX_AGE),
@@ -74,7 +85,7 @@ export class CacheService {
   }
 
   async delete(id: string) {
-    await this.modelService.delete(CacheType, id);
+    await this.modelService.delete(CacheRecord, id);
   }
 
   async getOptional(id: string, extendOnAccess = true) {

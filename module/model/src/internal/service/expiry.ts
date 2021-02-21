@@ -1,7 +1,7 @@
 import { Class, ShutdownManager } from '@travetto/base';
 
 import { ModelRegistry } from '../../registry/model';
-import { ExpiryState, ModelExpirySupport } from '../../service/expiry';
+import { ModelExpirySupport } from '../../service/expiry';
 import { ModelType } from '../../types/model';
 
 /**
@@ -10,20 +10,16 @@ import { ModelType } from '../../types/model';
 export class ModelExpiryUtil {
 
   /**
-   * Get expiry for a given item
+   * Get expiry info for a given item
    */
-  static getExpiryForItem<T extends ModelType>(cls: Class<T>, item: T) {
-    const now = new Date(Date.now() - 1);
-    const { expiresAt, issuedAt } = ModelRegistry.getExpiry(cls);
-    const exp = item[expiresAt as keyof T] ? item[expiresAt as keyof T] as unknown as Date : now;
-    const iss = item[issuedAt as keyof T] ? item[issuedAt as keyof T] as unknown as Date : now;
+  static getExpiryState<T extends ModelType>(cls: Class<T>, item: T) {
+    const expKey = ModelRegistry.getExpiry(cls);
+    const expiresAt = item[expKey as keyof T] ? item[expKey as keyof T] as unknown as Date : undefined;
 
     return {
-      issuedAt: iss,
-      expiresAt: exp,
-      maxAge: issuedAt ? exp.getTime() - iss.getTime() : undefined,
-      expired: exp.getTime() < Date.now()
-    } as ExpiryState;
+      expiresAt,
+      expired: expiresAt ? expiresAt.getTime() < Date.now() : undefined
+    } as const;
   }
 
   /**
@@ -31,7 +27,7 @@ export class ModelExpiryUtil {
    * @param svc
    */
   static registerCull(svc: ModelExpirySupport & { readonly config?: { cullRate?: number } }) {
-    const expirable = ModelRegistry.getClasses().filter(cls => !!ModelRegistry.get(cls).expiry);
+    const expirable = ModelRegistry.getClasses().filter(cls => !!ModelRegistry.get(cls).expiresAt);
     if (svc.deleteExpired && expirable.length) {
       let running = false;
       const culler = async () => {

@@ -49,7 +49,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
-    return { class: cls, indices: [] };
+    return { class: cls, indices: [], autoCreate: true };
   }
 
   onInstallFinalize<T>(cls: Class<T>) {
@@ -159,15 +159,15 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   /**
-   * Get expiry config
+   * Get expiry field
    * @param cls
    */
   getExpiry(cls: Class) {
-    const expiry = this.get(cls).expiry;
-    if (!expiry || !expiry.expiresAt) {
+    const expiry = this.get(cls).expiresAt;
+    if (!expiry) {
       throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`, 'general');
     }
-    return expiry!;
+    return expiry;
   }
 }
 

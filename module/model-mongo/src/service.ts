@@ -346,11 +346,6 @@ export class MongoModelService implements
   }
 
   // Expiry
-  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const item = await this.get(cls, id);
-    return ModelExpiryUtil.getExpiryForItem(cls, item);
-  }
-
   deleteExpired<T extends ModelType>(cls: Class<T>) {
     return ModelQueryExpiryUtil.deleteExpired(this, cls);
   }

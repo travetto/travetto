@@ -126,7 +126,7 @@ This usage should be comparable to [express](https://expressjs.com), [koa](https
 
 Session mechanics are defined by two main components, encoders and a cache source.  The encoders are provided within the module, but the stores are provided via the [@Cache](https://github.com/travetto/travetto/tree/master/module/cache/src/decorator.ts#L12) module.
 
-By default, the module supplies the [RequetSessionEncoder](https://github.com/travetto/travetto/tree/master/module/rest-session/src/encoder/request.ts#L14) and the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L28) as default usage.
+By default, the module supplies the [RequetSessionEncoder](https://github.com/travetto/travetto/tree/master/module/rest-session/src/encoder/request.ts#L14) and the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L27) as default usage.
 
 ### Building an Encoder
 

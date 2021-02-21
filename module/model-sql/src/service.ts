@@ -225,12 +225,6 @@ export class SQLModelService implements
   }
 
   // Expiry
-  @Connected()
-  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const item = await this.get(cls, id);
-    return ModelExpiryUtil.getExpiryForItem(cls, item);
-  }
-
   @Transactional()
   deleteExpired<T extends ModelType>(cls: Class<T>) {
     return ModelQueryExpiryUtil.deleteExpired(this, cls);

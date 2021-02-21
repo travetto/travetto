@@ -1,20 +1,16 @@
 import { AppError, Util, Class } from '@travetto/base';
-import { Inject } from '@travetto/di';
 import { ModelCrudSupport, ModelType, NotFoundError } from '@travetto/model';
 import { AuthContext, AuthUtil, Principal, PrincipalSource } from '@travetto/auth';
+import { EnvUtil } from '@travetto/boot';
+import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 import { TimeUtil } from '@travetto/base/src/internal/time';
 
 import { RegisteredIdentity } from './identity';
-
-export const AuthModelSym = Symbol.for('@trv:auth-model/model');
 
 /**
  * A model-based principal source
  */
 export class ModelPrincipalSource<T extends ModelType> implements PrincipalSource {
-
-  @Inject(AuthModelSym)
-  private modelService: ModelCrudSupport;
 
   /**
    * Build a Model Principal Source
@@ -24,10 +20,17 @@ export class ModelPrincipalSource<T extends ModelType> implements PrincipalSourc
    * @param fromIdentity Convert an identity to the model
    */
   constructor(
+    private modelService: ModelCrudSupport,
     private cls: Class<T>,
     public toIdentity: (t: T) => RegisteredIdentity,
     public fromIdentity: (t: Partial<RegisteredIdentity>) => Partial<T>,
   ) { }
+
+  async postConstruct() {
+    if (isStorageSupported(this.modelService) && !EnvUtil.isReadonly()) {
+      await this.modelService.createModel?.(this.cls);
+    }
+  }
 
   /**
    * Retrieve user by id

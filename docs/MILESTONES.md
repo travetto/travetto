@@ -244,7 +244,7 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 
 #### Logging overhaul (Base no longer duplicates functionality of log)
 * All filtering and formatting now belong to the log module
-* All log statements are expected to following the pattern of `message`, `{ payload }`
+* All log statements are encouraged to following the pattern of `message`, `{ payload }`
 * Startup logs may still need some support if the goal is suppression
 
 #### Module reorg
@@ -265,7 +265,6 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 #### Separated out configuration of which folders to scan during execution (and allowing for soft optional)
 * This has the affect of removing a bunch of custom logic around tests
 * Alt folders have been removed, and can be emulated by specifying `TRV_SRC_LOCAL` values as needed.
-
 
 ### New Features
 * Updated boot to allow for user provided registration hoooks via `TRV_REQUIRES`

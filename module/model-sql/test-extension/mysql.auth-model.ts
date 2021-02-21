@@ -2,8 +2,7 @@
 
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelSym } from '@travetto/auth-model';
-import { AuthModelServiceSuite } from '@travetto/auth-model/test-support/service';
+import { AuthModelServiceSuite, TestModelSvcSym } from '@travetto/auth-model/test-support/service';
 import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 import { AsyncContext } from '@travetto/context';
 
@@ -18,7 +17,7 @@ class Config {
 }
 
 class Init {
-  @InjectableFactory(AuthModelSym)
+  @InjectableFactory(TestModelSvcSym)
   static modelProvider(svc: SQLModelService) {
     return svc;
   }

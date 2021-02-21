@@ -1,5 +1,4 @@
 import { EnvUtil } from '@travetto/boot';
-import { DependencyRegistry } from '@travetto/di';
 import { AppManifest, Class } from '@travetto/base';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -26,8 +25,8 @@ export class ModelStorageUtil {
       if (enforceBase && ModelRegistry.getBaseModel(cls) !== cls) {
         return false;
       }
-      const sym = ModelRegistry.get(cls)?.for;
-      return !sym || DependencyRegistry.getCandidateTypes(target!).find(x => x.qualifier === sym);
+      const { autoCreate } = ModelRegistry.get(cls) ?? {};
+      return autoCreate;
     };
 
     // If listening for model add/removes/updates

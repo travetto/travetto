@@ -2,16 +2,15 @@ import * as assert from 'assert';
 
 import { AppError } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { BaseModelSuite } from '@travetto/model/test-support/base';
+import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { ModelCrudSupport, BaseModel, Model } from '@travetto/model';
+import { BaseModelSuite } from '@travetto/model/test-support/base';
 
 import { ModelPrincipalSource, RegisteredIdentity } from '..';
-import { AuthModelSym } from '../src/principal';
 
-@Model({
-  for: AuthModelSym
-})
+export const TestModelSvcSym = Symbol.for('@trv:auth-model/test-model-svc');
+
+@Model({ autoCreate: false })
 class User extends BaseModel {
   password?: string;
   salt?: string;
@@ -23,8 +22,9 @@ class User extends BaseModel {
 
 class TestConfig {
   @InjectableFactory()
-  static getAuthService(): ModelPrincipalSource<User> {
-    return new ModelPrincipalSource<User>(
+  static getPrincipalSource(@Inject(TestModelSvcSym) svc: ModelCrudSupport): ModelPrincipalSource<User> {
+    const src = new ModelPrincipalSource<User>(
+      svc,
       User,
       (u) => ({
         ...(u as unknown as RegisteredIdentity),
@@ -36,6 +36,7 @@ class TestConfig {
         ...(registered as User)
       })
     );
+    return src;
   }
 }
 

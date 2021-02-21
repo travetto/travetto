@@ -54,9 +54,11 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   private async putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert') {
     const config = ModelRegistry.get(cls);
 
-    if (config.expiry) {
-      const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
-      (item as unknown as Expirable)._expiresAt = expiry.expiresAt.getTime() / 1000; // Convert to seconds
+    if (config.expiresAt) {
+      const expiry = ModelExpiryUtil.getExpiryState(cls, item);
+      if (expiry.expiresAt) {
+        (item as unknown as Expirable)._expiresAt = expiry.expiresAt.getTime() / 1000; // Convert to seconds
+      }
     }
 
     try {
@@ -133,6 +135,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const table = this.resolveTable(cls);
     const idx = this.computeIndexConfig(cls);
 
+    const existing = await this.cl.describeTable({ TableName: table }).then(() => true, () => false);
+
+    if (existing) {
+      return;
+    }
+
     await this.cl.createTable({
       TableName: table,
       KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
@@ -144,7 +152,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       GlobalSecondaryIndexes: idx.indices?.length ? idx.indices : undefined
     });
 
-    if (ModelRegistry.get(cls).expiry) {
+    if (ModelRegistry.get(cls).expiresAt) {
       await this.cl.updateTimeToLive({
         TableName: table,
         TimeToLiveSpecification: { AttributeName: '_expiresAt', Enabled: true }
@@ -277,9 +285,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Expiry
-  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const item = await this.get(cls, id);
-    return ModelExpiryUtil.getExpiryForItem(cls, item);
+  async deleteExpired<T extends ModelType>(cls: Class<T>) {
+    return -1;
   }
 
   // Indexed

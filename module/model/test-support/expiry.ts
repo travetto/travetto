@@ -7,6 +7,7 @@ import { ExpiresAt, Model } from '../src/registry/decorator';
 import { ModelExpirySupport } from '../src/service/expiry';
 import { BaseModel } from '../src/types/base';
 import { BaseModelSuite } from './base';
+import { ModelExpiryUtil } from '../src/internal/service/expiry';
 
 @Model('expiry-user')
 class User extends BaseModel {
@@ -27,7 +28,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     }));
     assert(res instanceof User);
 
-    const expiry = await service.getExpiry(User, res.id!);
+    const expiry = ModelExpiryUtil.getExpiryState(User, await service.get(User, res.id!));
     assert(!expiry.expired);
   }
 
@@ -41,7 +42,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
     await this.wait(100);
 
-    const expiry = await service.getExpiry(User, res.id!);
+    const expiry = ModelExpiryUtil.getExpiryState(User, await service.get(User, res.id!));
     assert(expiry.expired);
   }
 
@@ -55,14 +56,14 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
     await this.wait(100);
 
-    assert(!(await service.getExpiry(User, res.id!)).expired);
+    assert(!ModelExpiryUtil.getExpiryState(User, (await service.get(User, res.id!))).expired);
     await service.updatePartial(User, res.id!, {
       expiresAt: TimeUtil.withAge(10)
     });
 
     await this.wait(100);
 
-    assert((await service.getExpiry(User, res.id!)).expired);
+    assert(ModelExpiryUtil.getExpiryState(User, await service.get(User, res.id!)).expired);
   }
 
   @Test()

@@ -12,7 +12,7 @@ This module provides a set of contracts/interfaces to data model persistence, mo
 
 ## Contracts
 
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10), [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10), [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L8), [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1) and [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10), [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10), [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10), [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1) and [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19).
 
 ### [Basic](https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9)
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -70,20 +70,13 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
 }
 ```
 
-### [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L8)
+### [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10)
 
 Certain implementations will also provide support for automatic expiry of data at runtime.  This is extremely useful for temporary data as, and is used in the [Caching](https://github.com/travetto/travetto/tree/master/module/cache#readme "Caching functionality with decorators for declarative use.") module for expiring data accordingly.
 
 **Code: Expiry Contract**
 ```typescript
 export interface ModelExpirySupport extends ModelCrudSupport {
-  /**
-   * Determines if the associated document is expired
-   *
-   * @param id The identifier of the document
-   */
-  getExpiry<T extends ModelType>(cls: Class<T>, id: string): Promise<ExpiryState>;
-
   /**
    * Delete all expired by class
    *
@@ -241,15 +234,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async getStreamMetadata(location: string) ;
   async deleteStream(location: string) ;
   // Expiry Support
-  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const item = await this.get(cls, id);
-    return ModelExpiryUtil.getExpiryForItem(cls, item);
-  }
   async deleteExpired<T extends ModelType>(cls: Class<T>) {
     const deleting = [];
     const store = this.getStore(cls);
     for await (const id of [...store.keys()]) {
-      if ((await this.getExpiry(cls, id)).expired) {
+      if ((ModelExpiryUtil.getExpiryState(cls, await this.get(cls, id))).expired) {
         deleting.push(this.delete(cls, id));
 ```
 

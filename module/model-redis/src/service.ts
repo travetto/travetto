@@ -77,11 +77,17 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
 
     // Set expiry
-    if (config.expiry) {
-      const expiry = ModelExpiryUtil.getExpiryForItem(cls, item);
-      await this.wrap(util.promisify(this.cl.pexpireat))(
-        this.resolveKey(cls, item.id!), expiry.expiresAt.getTime()
-      );
+    if (config.expiresAt) {
+      const expiry = ModelExpiryUtil.getExpiryState(cls, item);
+      if (expiry.expiresAt !== undefined) {
+        if (expiry.expiresAt !== null) {
+          await this.wrap(util.promisify(this.cl.pexpireat))(
+            this.resolveKey(cls, item.id!), expiry.expiresAt.getTime()
+          );
+        } else {
+          await this.wrap(util.promisify(this.cl.persist))(this.resolveKey(cls, item.id!));
+        }
+      }
     }
   }
 
@@ -161,9 +167,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   // Expiry
-  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const item = await this.get(cls, id);
-    return ModelExpiryUtil.getExpiryForItem(cls, item);
+  async deleteExpired<T extends ModelType>(cls: Class<T>) {
+    // Automatic
+    return -1;
   }
 
   // Storage

@@ -39,6 +39,8 @@ const toSimpleObj = <T>(inp: T, missingValue: unknown = null) =>
 @Injectable()
 export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupport, ModelIndexedSupport {
 
+  static app: firebase.app.App;
+
   cl: firebase.firestore.Firestore;
 
   constructor(public readonly config: FirestoreModelConfig) { }
@@ -56,12 +58,14 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async postConstruct() {
-    firebase.initializeApp({
-      ...(this.config.credential ? { credential: firebase.credential.cert(await ResourceManager.findAbsolute(this.config.credential)) } : undefined),
-      projectId: this.config.projectId,
-      databaseURL: this.config.databaseURL
-    });
-    this.cl = firebase.firestore();
+    if (!FirestoreModelService.app) {
+      FirestoreModelService.app = firebase.initializeApp({
+        ...(this.config.credential ? { credential: firebase.credential.cert(await ResourceManager.findAbsolute(this.config.credential)) } : undefined),
+        projectId: this.config.projectId,
+        databaseURL: this.config.databaseURL
+      });
+    }
+    this.cl = FirestoreModelService.app.firestore();
     ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.cl.terminate());
   }
 

@@ -42,7 +42,7 @@ export interface ModelStorageSupport {
    */
   deleteModel?<T extends ModelType>(e: Class<T>): Promise<void>;
   /**
-   * Installs model
+   * Deals with model internals changing
    */
   changeModel?<T extends ModelType>(e: Class<T>): Promise<void>;
   /**

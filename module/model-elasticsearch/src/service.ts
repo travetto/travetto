@@ -3,12 +3,11 @@ import { Index, Update, Search, DeleteByQuery } from '@elastic/elasticsearch/api
 
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
-  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError,
-  Model, ExpiryState
+  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry
 } from '@travetto/model';
 import { Class, Util, ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { Long, SchemaChange, SchemaConfig, SchemaRegistry } from '@travetto/schema';
+import { SchemaChange, SchemaConfig, SchemaRegistry } from '@travetto/schema';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySupport, PageableModelQuery, Query, ValidStringFields
@@ -19,8 +18,8 @@ import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
-import { ModelRegistry } from '@travetto/model/src/registry/model';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 
 import { ElasticsearchModelConfig } from './config';
 import { EsIdentity, EsBulkError } from './internal/types';
@@ -28,7 +27,6 @@ import { ElasticsearchQueryUtil } from './internal/query';
 import { ElasticsearchSchemaUtil } from './internal/schema';
 import { IndexManager } from './index-manager';
 import { SearchResponse } from './types';
-import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 
 type WithId<T> = T & { _id?: string };
 
@@ -291,11 +289,6 @@ export class ElasticsearchModelService implements
   }
 
   // Expiry
-  async getExpiry<T extends ModelType>(cls: Class<T>, id: string) {
-    const item = await this.get(cls, id);
-    return ModelExpiryUtil.getExpiryForItem(cls, item);
-  }
-
   deleteExpired<T extends ModelType>(cls: Class<T>) {
     return ModelQueryExpiryUtil.deleteExpired(this, cls);
   }

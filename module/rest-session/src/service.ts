@@ -38,8 +38,8 @@ export class RestSessionService {
    */
   async postConstruct() {
     if (this.cacheSource === undefined) {
-      this.cacheSource = new CacheService(new MemoryModelService(new MemoryModelConfig()));
       if (!AppManifest.prod) {
+        this.cacheSource = new CacheService(new MemoryModelService(new MemoryModelConfig()));
         console.warn('No session cache defined, falling back to in-memory cache. This is not intended for production session use');
       } else {
         throw new AppError('In-memory cache is not intended for production session use', 'general');

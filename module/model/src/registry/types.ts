@@ -47,33 +47,27 @@ export class ModelOptions<T extends ModelType = ModelType> {
    */
   extra?: object;
   /**
-   * Which provider is this for
-   */
-  for?: symbol;
-  /**
    * Does the model support expiry
    */
-  expiry?: {
-    expiresAt: string;
-    issuedAt?: string;
-  };
+  expiresAt: string;
+  /**
+   * Auto create in development mode
+   */
+  autoCreate: boolean;
 }
 
 /**
  * Index options
  */
 export interface IndexConfig<T extends ModelType> {
-
   /**
    * Index name
    */
   name: string;
-
   /**
    * Fields and sort order
    */
   fields: SortClause<T>[];
-
   /**
    * Is the index unique?
    */

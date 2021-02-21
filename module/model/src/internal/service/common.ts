@@ -34,7 +34,7 @@ export function isCrudSupported(o: unknown): o is ModelCrudSupport {
  * @param o
  */
 export function isExpirySupported(o: unknown): o is ModelExpirySupport {
-  return !!o && 'getExpiry' in (o as object);
+  return !!o && 'deleteExpired' in (o as object);
 }
 
 /**
