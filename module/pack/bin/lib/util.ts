@@ -132,17 +132,20 @@ export class PackUtil {
       }
     }
 
-    process.stdout.write(`${spacer}${title}\n`);
-    process.stdout.write(`${spacer}${'-'.repeat(width)}\n`);
-
-    if (cfg.preProcess && cfg.preProcess.length) {
-      await stdout('Pre-processing');
-      for (const el of cfg.preProcess) {
-        await el(cfg);
+    async function runPhase(phase: 'preProcess' | 'postProcess') {
+      for (const el of cfg[phase] ?? []) {
+        const [name, fn] = Object.entries(el)[0];
+        await stdout(name);
+        await fn(cfg);
       }
     }
 
     let message: string | undefined;
+
+    process.stdout.write(`${spacer}${title}\n`);
+    process.stdout.write(`${spacer}${'-'.repeat(width)}\n`);
+
+    runPhase('preProcess');
 
     for await (const msg of op.exec(cfg)) {
       if (msg.includes('Success')) { // We are done
@@ -153,12 +156,7 @@ export class PackUtil {
       }
     }
 
-    if (cfg.postProcess && cfg.postProcess.length) {
-      await stdout('Post-processing');
-      for (const el of cfg.postProcess) {
-        await el(cfg);
-      }
-    }
+    runPhase('postProcess');
 
     // Wrap up
     stdout();

@@ -3,8 +3,8 @@ export type CommonConfig = {
   file?: string;
   workspace: string;
   active?: boolean;
-  postProcess?: (<T extends CommonConfig>(cfg: T) => Promise<void>)[];
-  preProcess?: (<T extends CommonConfig>(cfg: T) => Promise<void>)[];
+  postProcess?: { [key: string]: (<T extends CommonConfig>(cfg: T) => Promise<void>) }[];
+  preProcess?: { [key: string]: (<T extends CommonConfig>(cfg: T) => Promise<void>) }[];
 };
 
 export type PackOperation<T extends CommonConfig> = {

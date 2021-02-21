@@ -3,9 +3,6 @@ import { AppCache, FsUtil } from '@travetto/boot';
 
 import type { AllConfigPartial } from '@travetto/pack/bin/operation/pack';
 
-const Entrypoint = AppCache.toEntryName(require.resolve('@travetto/rest/support/aws-lambda.ts'))
-  .replace(AppCache.cacheDir, '.');
-
 export const config: AllConfigPartial = {
   name: 'rest/aws-lambda',
   assemble: {
@@ -17,11 +14,13 @@ export const config: AllConfigPartial = {
     env: {
       NO_COLOR: 1
     },
-    postProcess: [
-      async (cfg: { cacheDir: string, workspace: string }) => {
-        await fs.promises.copyFile(FsUtil.resolveUnix(cfg.workspace, cfg.cacheDir, Entrypoint), FsUtil.resolveUnix(cfg.workspace, 'index.js'));
+    postProcess: [{
+      ['Install Entrypoint']: async (cfg: { cacheDir: string, workspace: string }) => {
+        const Entrypoint = AppCache.toEntryName(require.resolve('@travetto/rest/support/aws-lambda.ts'))
+          .replace(AppCache.cacheDir, FsUtil.resolveUnix(cfg.workspace, cfg.cacheDir));
+        await fs.promises.copyFile(Entrypoint, FsUtil.resolveUnix(cfg.workspace, 'index.js'));
       }
-    ],
+    }],
   },
   zip: {
     active: true,
