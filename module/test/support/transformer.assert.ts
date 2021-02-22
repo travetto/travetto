@@ -32,6 +32,8 @@ export const OPTOKEN_ASSERT = {
   LessThanEqualsToken: 'lessThanEqual',
   LessThanToken: 'lessThan',
   InstanceOfKeyword: 'instanceof',
+  AmpersandAmpersandToken: '', // Default to assert
+  BarBarToken: '' // Default to assert
 };
 
 const ASSERT_CMD = 'assert';

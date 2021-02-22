@@ -133,7 +133,9 @@ panda.user: bob
 `) as SimpleObject);
 
     const all = ConfigManager.getSecure();
-    assert(Util.isPlainObject(all.panda) && all.panda.user === '***');
-    assert(Util.isPlainObject(all.config) && Util.isPlainObject(all.config.s3) && all.config.s3.secretAccessKey === '***');
+    assert(Util.isPlainObject(all.panda));
+    assert(all.panda === { user: '***' });
+    assert(Util.isPlainObject(all.config));
+    assert(all.config.s3 === { secretAccessKey: '***' });
   }
 }
