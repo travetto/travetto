@@ -6,14 +6,14 @@ import type * as lambda from 'aws-lambda';
 import { Injectable } from '@travetto/di';
 import { ConfigManager } from '@travetto/config';
 
-import { AwsLambdaRestServer, AwsLambdaRestServerTarget } from '@travetto/rest/src/extension/aws-lambda';
+import { AwsLambdaRestServer, AwsLambdaSym } from '@travetto/rest/src/extension/aws-lambda';
 
 import { ExpressRestServer } from '../../server';
 
 /**
  * Aws Lambda Rest Server
  */
-@Injectable({ target: AwsLambdaRestServerTarget })
+@Injectable(AwsLambdaSym)
 export class AwsLambdaExpressRestServer extends ExpressRestServer implements AwsLambdaRestServer {
 
   private server: http.Server;

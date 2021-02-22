@@ -16,7 +16,7 @@ export const config: AllConfigPartial = {
     },
     postProcess: [{
       ['Install Entrypoint']: async (cfg: { cacheDir: string, workspace: string }) => {
-        const Entrypoint = AppCache.toEntryName(require.resolve('@travetto/rest/support/aws-lambda.ts'))
+        const Entrypoint = AppCache.toEntryName(require.resolve('@travetto/rest/support/entry.aws-lambda.ts'))
           .replace(AppCache.cacheDir, FsUtil.resolveUnix(cfg.workspace, cfg.cacheDir));
         await fs.promises.copyFile(Entrypoint, FsUtil.resolveUnix(cfg.workspace, 'index.js'));
       }

@@ -36,8 +36,8 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
       { active: true, secure: false, signed: false }
     );
 
-    const { AwsLambdaRestApplication: App } = await import('../../src/extension/aws-lambda');
-    this.lambda = await DependencyRegistry.getInstance(App);
+    const { AwsLambdaRestApplication: App, AwsLambdaSym } = await import('../../src/extension/aws-lambda');
+    this.lambda = await DependencyRegistry.getInstance(App, AwsLambdaSym);
     return await this.lambda.run();
   }
 
