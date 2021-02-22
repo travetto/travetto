@@ -208,7 +208,8 @@ config:
   redacted:
     - panda.user
 panda.user: bob`) as SimpleObject;
-    assert(Util.isPlainObject(output.config) && output.config.redacted === ['panda.user']);
+    assert(Util.isPlainObject(output.config));
+    assert(output.config.redacted === ['panda.user']);
   }
 
   @Test()
@@ -218,7 +219,7 @@ add:
   - package.json
   - .trv_cache: cache
   - src`) as SimpleObject;
-    assert(Array.isArray(output.add) && Util.isPlainObject(output.add[1]) && output.add[1]['.trv_cache'] === 'cache');
-    assert(Array.isArray(output.add) && output.add[2] === 'src');
+    assert(Array.isArray(output.add));
+    assert(output.add === ['package.json', { '.trv_cache': 'cache' }, 'src']);
   }
 }

@@ -4,8 +4,9 @@ import { Injectable } from '@travetto/di';
 import { RestInterceptor } from './types';
 import { LoggingInterceptor } from './logging';
 
-import { Response, Request, HeadersAddedSym } from '../types';
+import { Response, Request } from '../types';
 import { Renderable } from '../response/renderable';
+import { HeadersAddedSym } from '../internal/symbol';
 
 const isRenderable = (o: unknown): o is Renderable => !!o && 'render' in (o as object);
 

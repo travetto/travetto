@@ -24,6 +24,15 @@ function getTs() {
 
 const CompilerOptionsSym = Symbol.for('@trv:compiler/options');
 
+const NODE_VERSION = EnvUtil.get('TRV_NODE_MAJOR', process.version.split(/[v.]/)[1]) as '12';
+const TS_TARGET = ({
+  12: 'ES2019',
+  13: 'ES2019',
+  14: 'ES2020',
+  15: 'ES2020',
+  16: 'ES2020'
+} as const)[NODE_VERSION] ?? 'ES2019'; // Default if not found
+
 /**
  * Standard transpilation utilities, with support for basic text filters
  */
@@ -132,6 +141,7 @@ export class TranspileUtil {
       const json = ts.readJsonConfigFile(config, ts.sys.readFile);
       this[CompilerOptionsSym] = {
         ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options,
+        target: ts.ScriptTarget[TS_TARGET],
         rootDir: FsUtil.cwd,
         outDir: FsUtil.cwd,
         sourceRoot: FsUtil.cwd,

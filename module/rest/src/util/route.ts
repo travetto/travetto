@@ -1,8 +1,9 @@
-import { Request, Response, Filter, RouteConfig, HeadersAddedSym } from '../types';
+import { Request, Response, Filter, RouteConfig } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { RestInterceptor } from '../interceptor/types';
 
 import { ParamUtil } from './param';
+import { HeadersAddedSym } from '../internal/symbol';
 
 /**
  * Route specific utilities

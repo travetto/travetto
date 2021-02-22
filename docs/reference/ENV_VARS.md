@@ -32,5 +32,6 @@ The common environment variables throughout the code base:
 * `TRV_SRC_COMMON` = ['src']      - The common folders to search across all modules in, for source files.  Auto loaded at runtime.
 * `TRV_SRC_LOCAL` = []            - The folder local only to the application that is searched for source files.  Useful for loading in optional sub-applications.
 * `TRV_DOC_BRANCH` = `master`     - The branch to target the documentation against.
+* `TRV_NODE_MAJOR` = DEFAULT      - The node major version to compile for, translates into a specific typescript target for compability. Will default to the version of node the compilation is happening on.
 
 Anything not prefixed with `TRV_`, is a standard env var that we are leveraging
