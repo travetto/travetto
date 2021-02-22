@@ -31,6 +31,7 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
       database: this.config.database,
       host: this.config.host,
       port: this.config.port,
+      parseInputDatesAsUTC: true,
       ...(this.config.options || {})
     });
 

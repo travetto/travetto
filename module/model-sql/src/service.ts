@@ -226,7 +226,7 @@ export class SQLModelService implements
 
   // Expiry
   @Transactional()
-  deleteExpired<T extends ModelType>(cls: Class<T>) {
+  async deleteExpired<T extends ModelType>(cls: Class<T>) {
     return ModelQueryExpiryUtil.deleteExpired(this, cls);
   }
 

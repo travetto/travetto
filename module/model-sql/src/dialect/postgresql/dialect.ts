@@ -29,7 +29,8 @@ export class PostgreSQLDialect extends SQLDialect {
 
     // Special types
     Object.assign(this.COLUMN_TYPES, {
-      JSON: 'json'
+      JSON: 'json',
+      TIMESTAMP: 'TIMESTAMPTZ'
     });
 
     // Word boundary

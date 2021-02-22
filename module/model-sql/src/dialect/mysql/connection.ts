@@ -27,6 +27,7 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
       database: this.config.database,
       host: this.config.host,
       port: this.config.port,
+      timezone: 'utc',
       typeCast: this.typeCast.bind(this),
       ...(this.config.options || {})
     });
