@@ -98,6 +98,32 @@ export class MongoUtil {
   }
 
   /**
+   * Convert ids from '_id' to 'id'
+   */
+  static replaceId(v: Record<string, unknown>): Record<string, mongo.Binary>;
+  static replaceId(v: string[]): mongo.Binary[];
+  static replaceId(v: string): mongo.Binary;
+  static replaceId(v: unknown): undefined;
+  static replaceId(v: string | string[] | Record<string, unknown> | unknown) {
+    if (typeof v === 'string') {
+      return this.uuid(v);
+    } else if (Array.isArray(v)) {
+      return v.map(x => this.replaceId(x));
+    } else if (Util.isPlainObject(v)) {
+      const out: Record<string, mongo.Binary> = {};
+      for (const [k, el] of Object.entries(v)) {
+        const found = this.replaceId(el);
+        if (found) {
+          out[k] = found;
+        }
+      }
+      return out;
+    } else {
+      return v;
+    }
+  }
+
+  /**
    * Convert `'a.b.c'` to `{ a: { b: { c: ... }}}`
    */
   static extractSimple<T>(o: T, path: string = ''): Record<string, unknown> {
@@ -109,7 +135,7 @@ export class MongoUtil {
       const v = sub[key] as Record<string, unknown>;
 
       if (subpath === 'id') { // Handle ids directly
-        out._id = this.uuid(v as unknown as string);
+        out._id = this.replaceId(v);
       } else {
         const isPlain = v && Util.isPlainObject(v);
         const firstKey = isPlain ? Object.keys(v)[0] : '';

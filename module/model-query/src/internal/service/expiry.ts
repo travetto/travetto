@@ -15,7 +15,7 @@ export class ModelQueryExpiryUtil {
     const expiry = await ModelRegistry.getExpiry(cls);
     const res = await svc.deleteByQuery<ModelType>(cls, {
       where: {
-        [expiry.expiresAt]: {
+        [expiry]: {
           $lt: new Date()
         }
       }

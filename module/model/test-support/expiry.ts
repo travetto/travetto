@@ -69,31 +69,29 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   @Test()
   async culling() {
     const service = await this.service;
-    if (service.deleteExpired) {
-      // Create
-      await Promise.all(
-        ' '
-          .repeat(10).split('')
-          .map((x, i) => service.upsert(User, User.from({
-            expiresAt: TimeUtil.withAge(1000 + i)
-          })))
-      );
+    // Create
+    await Promise.all(
+      ' '
+        .repeat(10).split('')
+        .map((x, i) => service.upsert(User, User.from({
+          expiresAt: TimeUtil.withAge(1000 + i)
+        })))
+    );
 
-      let total;
-      // Let expire
-      await this.wait(1);
+    let total;
+    // Let expire
+    await this.wait(1);
 
-      total = await service.deleteExpired(User);
-      assert(total === 0);
+    total = await service.deleteExpired(User);
+    assert(total === 0);
 
-      // Let expire
-      await this.wait(1100);
+    // Let expire
+    await this.wait(1100);
 
-      total = await service.deleteExpired(User);
-      assert(total === 10);
+    total = await service.deleteExpired(User);
+    assert(total === 10);
 
-      total = await service.deleteExpired(User);
-      assert(total === 0);
-    }
+    total = await service.deleteExpired(User);
+    assert(total === 0);
   }
 }
