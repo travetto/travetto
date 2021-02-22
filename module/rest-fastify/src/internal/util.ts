@@ -4,12 +4,12 @@ import { RestServerUtil, Request } from '@travetto/rest';
 import { TravettoEntitySym, NodeEntitySym, ProviderEntitySym } from '@travetto/rest/src/internal/symbol';
 
 type FRequest = FastifyRequest & {
-  [TravettoEntitySym]?: Travetto.Request;
-  session?: Travetto.Request['session'];
+  [TravettoEntitySym]?: TravettoRequest;
+  session?: TravettoRequest['session'];
 };
 
 type FResponse = FastifyReply & {
-  [TravettoEntitySym]?: Travetto.Response;
+  [TravettoEntitySym]?: TravettoResponse;
 };
 
 /**

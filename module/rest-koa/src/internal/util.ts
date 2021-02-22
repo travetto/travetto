@@ -9,7 +9,7 @@ export class KoaServerUtil {
   /**
    * Build a Travetto Request from a koa context
    */
-  static getRequest(ctx: koa.ParameterizedContext<unknown> & { [TravettoEntitySym]?: Travetto.Request }) {
+  static getRequest(ctx: koa.ParameterizedContext<unknown> & { [TravettoEntitySym]?: TravettoRequest }) {
     if (!ctx[TravettoEntitySym]) {
       ctx[TravettoEntitySym] = RestServerUtil.decorateRequest({
         [ProviderEntitySym]: ctx,

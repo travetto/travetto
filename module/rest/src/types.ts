@@ -4,8 +4,8 @@ export type HeaderMap = Record<string, (string | (() => string))>;
 
 export type PathType = string | RegExp;
 
-export type Request = Travetto.Request;
-export type Response = Travetto.Response;
+export type Request = TravettoRequest;
+export type Response = TravettoResponse;
 
 export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'trace' | 'all';
 

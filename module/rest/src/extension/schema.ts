@@ -9,12 +9,8 @@ import { ExtractFn } from '../util/param';
 const QuerySchemaSym: unique symbol = Symbol.for('@trv:rest/schema-query');
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Travetto {
-    // eslint-disable-next-line no-shadow
-    interface Request {
-      [QuerySchemaSym]: Record<string, unknown>;
-    }
+  interface TravettoRequest {
+    [QuerySchemaSym]: Record<string, unknown>;
   }
 }
 
