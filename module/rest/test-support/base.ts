@@ -1,12 +1,12 @@
 import { RootRegistry } from '@travetto/registry';
 import { AppError } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
+import { AfterAll, BeforeAll, Suite } from '@travetto/test';
 
 import { MethodOrAll, Request, ServerHandle } from '../src/types';
-import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './base/base';
-import { AfterAll, BeforeAll, Suite } from '@travetto/test';
-import { AwsLambdaRestServerSupport } from './base/aws-lambda';
-import { CoreRestServerSupport } from './base/core';
+import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
+import { AwsLambdaRestServerSupport } from './server-support/aws-lambda';
+import { CoreRestServerSupport } from './server-support/core';
 
 /**
  * Base Rest Suite

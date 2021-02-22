@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Controller, Get, Body, Post, Put, Query, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/test-support/base';
-import { AfterAll, BeforeAll, Suite, Test } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 
 import { SessionData, SessionConfig } from '..';
@@ -34,12 +34,6 @@ class TestController {
 
 @Suite()
 export abstract class RestSessionServerSuite extends BaseRestSuite {
-
-  @BeforeAll()
-  async before() { return this.initServer(); }
-
-  @AfterAll()
-  async after() { return this.destroySever(); }
 
   get config() {
     return DependencyRegistry.getInstance(SessionConfig);
