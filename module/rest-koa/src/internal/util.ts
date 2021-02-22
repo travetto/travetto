@@ -1,6 +1,6 @@
 import * as koa from 'koa';
 import { RestServerUtil } from '@travetto/rest';
-import { NodeEntitySym, ProviderEntitySym, TravettoEntitySym } from '@travetto/rest/src/internal/symbol';
+import { NodeEntitySym, ProviderEntitySym } from '@travetto/rest/src/internal/symbol';
 
 /**
  * Provides translation between koa request/response objects and the framework
@@ -9,9 +9,8 @@ export class KoaServerUtil {
   /**
    * Build a Travetto Request from a koa context
    */
-  static getRequest(ctx: koa.ParameterizedContext<unknown> & { [TravettoEntitySym]?: { req?: TravettoRequest } }) {
-    ctx[TravettoEntitySym] ??= {};
-    return ctx[TravettoEntitySym]!.req ??= RestServerUtil.decorateRequest({
+  static getRequest(ctx: koa.ParameterizedContext<unknown>) {
+    return RestServerUtil.decorateRequest({
       [ProviderEntitySym]: ctx,
       [NodeEntitySym]: ctx.req,
       protocol: ctx.protocol as 'http',
@@ -33,9 +32,8 @@ export class KoaServerUtil {
   /**
    * Build a Travetto Response from a koa context
    */
-  static getResponse(ctx: koa.ParameterizedContext<unknown> & { [TravettoEntitySym]?: { res?: TravettoResponse } }) {
-    ctx[TravettoEntitySym] ??= {};
-    return ctx[TravettoEntitySym]!.res ??= RestServerUtil.decorateResponse({
+  static getResponse(ctx: koa.ParameterizedContext<unknown>) {
+    return RestServerUtil.decorateResponse({
       [ProviderEntitySym]: ctx,
       [NodeEntitySym]: ctx.res,
       get headersSent() {

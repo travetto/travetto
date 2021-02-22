@@ -10,6 +10,19 @@ import { NodeEntitySym } from '@travetto/rest/src/internal/symbol';
 
 import { RouteStack } from './internal/types';
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    // eslint-disable-next-line no-shadow
+    interface Request {
+      [NodeEntitySym]?: express.Request;
+    }
+    interface Response {
+      [NodeEntitySym]?: express.Response;
+    }
+  }
+}
+
 /**
  * An express rest server
  */
@@ -32,16 +45,11 @@ export class ExpressRestServer implements RestServer<express.Application> {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.raw({ type: 'image/*' }));
-    app.use(
-      (
-        req: express.Request & { [NodeEntitySym]?: express.Request },
-        res: express.Response & { [NodeEntitySym]?: express.Response },
-        next
-      ) => {
-        req[NodeEntitySym] = req; // Express objects match the framework structure
-        res[NodeEntitySym] = res;
-        next();
-      }
+    app.use((req, res, next) => {
+      req[NodeEntitySym] ??= req; // Express objects match the framework structure
+      res[NodeEntitySym] ??= res;
+      next();
+    }
     );
 
     if (this.config.trustProxy) {
@@ -77,7 +85,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
         {
           method: 'options',
           path: '*',
-          handler: (req: Request) => '',
+          handler: (__req: Request) => '',
           params: [{ extract: (__, r: unknown) => r } as ParamConfig]
         }
       );

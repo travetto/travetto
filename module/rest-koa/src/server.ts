@@ -8,8 +8,12 @@ import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
 
 import { KoaServerUtil } from './internal/util';
+import { TravettoEntitySym } from '@travetto/rest/src/internal/symbol';
+import { Request, Response } from '@travetto/rest/src/types';
 
-type Routes = ReturnType<InstanceType<typeof kRouter>['routes']>;
+type TrvCtx = { [TravettoEntitySym]: [Request, Response] };
+type Router = kRouter<{}, TrvCtx>;
+type Routes = ReturnType<Router['routes']>;
 
 /**
  * Koa-based Rest server
@@ -55,7 +59,7 @@ export class KoaRestServer implements RestServer<koa> {
   }
 
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
-    const router = new kRouter<unknown, unknown>(path !== '/' ? { prefix: path } : {});
+    const router = new kRouter<unknown, TrvCtx>(path !== '/' ? { prefix: path } : {});
 
     // Register all routes to extract the proper request/response for the framework
     for (const route of routes) {
@@ -63,8 +67,10 @@ export class KoaRestServer implements RestServer<koa> {
         route.path = /.*/;
       }
       router[route.method as 'get'](route.path!, async (ctx) => {
-        const req = KoaServerUtil.getRequest(ctx);
-        const res = KoaServerUtil.getResponse(ctx);
+        const [req, res] = ctx[TravettoEntitySym] ??= [
+          KoaServerUtil.getRequest(ctx),
+          KoaServerUtil.getResponse(ctx)
+        ];
         return await route.handlerFinalized!(req, res);
       });
     }

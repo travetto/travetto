@@ -1,16 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { RestServerUtil, Request } from '@travetto/rest';
-import { TravettoEntitySym, NodeEntitySym, ProviderEntitySym } from '@travetto/rest/src/internal/symbol';
-
-type FRequest = FastifyRequest & {
-  [TravettoEntitySym]?: TravettoRequest;
-  session?: TravettoRequest['session'];
-};
-
-type FResponse = FastifyReply & {
-  [TravettoEntitySym]?: TravettoResponse;
-};
+import { NodeEntitySym, ProviderEntitySym } from '@travetto/rest/src/internal/symbol';
 
 /**
  * Provide a mapping between fastify request/response and the framework analogs
@@ -19,12 +10,12 @@ export class FastifyServerUtil {
   /**
    * Build a Travetto Request from a Fastify Request
    */
-  static getRequest(reqs: FRequest) {
+  static getRequest(reqs: FastifyRequest & { session?: TravettoRequest['session'] }) {
     let [path] = (reqs.raw!.url ?? '').split(/[#?]/g);
     if (!path.startsWith('/')) {
       path = `/${path}`;
     }
-    return reqs[TravettoEntitySym] ??= RestServerUtil.decorateRequest({
+    return RestServerUtil.decorateRequest({
       [ProviderEntitySym]: reqs,
       [NodeEntitySym]: reqs.raw,
       protocol: (reqs.raw.socket && 'encrypted' in reqs.raw.socket) ? 'https' : 'http',
@@ -45,8 +36,8 @@ export class FastifyServerUtil {
   /**
    * Build a Travetto Response from a Fastify Reply
    */
-  static getResponse(reply: FResponse) {
-    return reply[TravettoEntitySym] ??= RestServerUtil.decorateResponse({
+  static getResponse(reply: FastifyReply) {
+    return RestServerUtil.decorateResponse({
       [ProviderEntitySym]: reply,
       [NodeEntitySym]: reply.raw,
       get headersSent() {

@@ -4,10 +4,21 @@ import formBody from 'fastify-formbody';
 
 import { FastifyInstance, fastify, FastifyServerOptions, FastifyHttpsOptions } from 'fastify';
 
-import { RestConfig, RouteConfig, RestServer } from '@travetto/rest';
+import { Request, Response, RestConfig, RouteConfig, RestServer } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
+import { TravettoEntitySym } from '@travetto/rest/src/internal/symbol';
 
 import { FastifyServerUtil } from './internal/util';
+
+// Support typings
+declare module 'fastify' {
+  interface FastifyRequest {
+    [TravettoEntitySym]?: Request;
+  }
+  interface FastifyReply {
+    [TravettoEntitySym]?: Response;
+  }
+}
 
 /**
  * Fastify-based rest server
@@ -63,9 +74,10 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
       }
       sub = sub.replace(/\/+/g, '/').replace(/\/+$/, '');
       this.raw[route.method as 'get'](sub, async (reqs, reply) => {
-        const req = FastifyServerUtil.getRequest(reqs);
-        const res = FastifyServerUtil.getResponse(reply);
-        await route.handlerFinalized!(req, res);
+        await route.handlerFinalized!(
+          reqs[TravettoEntitySym] ??= FastifyServerUtil.getRequest(reqs),
+          reply[TravettoEntitySym] ??= FastifyServerUtil.getResponse(reply)
+        );
       });
     }
   }
