@@ -112,3 +112,19 @@ class TestConfig {
     return new InterfaceType();
   }
 }
+
+
+@Injectable()
+export class UsableMainClass { }
+
+@Injectable()
+export class UsableSubClass extends UsableMainClass { }
+
+@Injectable()
+export abstract class UsableSubSubClass extends UsableSubClass { }
+
+@Injectable()
+export class UsableSubSubAClass extends UsableSubSubClass { }
+
+@Injectable()
+export class UsableSubSubBClass extends UsableSubSubClass { }

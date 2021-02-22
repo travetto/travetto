@@ -55,14 +55,22 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     } else {
       const resolved = [...qualifiers.keys()];
       if (!qualifier) {
+        // If primary found
         if (qualifiers.has(PrimaryCandidateSym)) {
           qualifier = PrimaryCandidateSym;
         } else {
+          // If there is only one default symbol
           const filtered = resolved.filter(x => !!x).filter(x => this.defaultSymbols.has(x));
           if (filtered.length === 1) {
             qualifier = filtered[0];
           } else if (filtered.length > 1) {
-            throw new InjectionError('Dependency has multiple candidates', target, filtered);
+            // If dealing with sub types, prioritize exact matches
+            const exact = this.getCandidateTypes(target as Class).filter(x => x.class === target);
+            if (exact.length === 1) {
+              qualifier = exact[0].qualifier;
+            } else {
+              throw new InjectionError('Dependency has multiple candidates', target, filtered);
+            }
           }
         }
       }

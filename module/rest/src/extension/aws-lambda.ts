@@ -25,7 +25,7 @@ export class AwsLambdaRestServerTarget { }
  */
 export interface AwsLambdaRestServer extends RestServer, AwsLambdaHandler { }
 
-@Injectable(AwsLambdaSym)
+@Injectable()
 export class AwsLambdaRestApplication extends RestApplication implements AwsLambdaHandler {
   constructor(@Inject(AwsLambdaSym) private lambdaServer: AwsLambdaRestServer) {
     super();

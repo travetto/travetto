@@ -7,10 +7,12 @@ import { DependencyRegistry } from '../src/registry';
 import {
   ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT,
   CUSTOM_DATABASE, Database, CUSTOM_EMPTY, BasePattern,
-  SpecificPattern, InterfaceType, BaseTypeTarget, CUSTOM_INTERFACE
+  SpecificPattern, InterfaceType, BaseTypeTarget, CUSTOM_INTERFACE, UsableMainClass, UsableSubClass,
+  UsableSubSubClass
 } from './deps';
 
 import { DbConfig } from './config';
+import { DependencyInjection } from '@travetto/doc/src/lib';
 
 const FOUR = 4;
 
@@ -171,5 +173,23 @@ class DiTest2 {
 
     const customInst = await DependencyRegistry.getInstance(BaseTypeTarget, CUSTOM_INTERFACE);
     assert(customInst instanceof InterfaceType);
+  }
+
+  @Test('overriden via subclass')
+  async subclassVerification() {
+    const types = DependencyRegistry.getCandidateTypes(UsableMainClass);
+    assert(types.length === 2);
+
+    const spec = DependencyRegistry.getCandidateTypes(UsableSubClass);
+    assert(spec.length === 1);
+
+    const specInst = await DependencyRegistry.getInstance(UsableSubClass);
+    assert(specInst.constructor === UsableSubClass);
+
+
+    const specSpec = DependencyRegistry.getCandidateTypes(UsableSubSubClass);
+    assert(specSpec.length === 2);
+
+    await assert.rejects(() => DependencyRegistry.getInstance(UsableSubSubClass), /Multiple candidate/i);
   }
 }
