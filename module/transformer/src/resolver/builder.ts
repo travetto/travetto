@@ -55,6 +55,10 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
     let resolvedType = type;
     if ('target' in resolvedType && resolvedType['target']) {
       resolvedType = resolvedType['target'] as ts.Type;
+      // If resolved target has a concrete type
+      if (DocUtil.readDocTag(resolvedType, 'concrete').length) {
+        return { category: 'concrete', type: resolvedType };
+      }
     }
 
     if (!resolvedType.isClass()) { // Real type

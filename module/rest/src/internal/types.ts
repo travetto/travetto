@@ -2,10 +2,10 @@ import type { Request, Response } from '../types';
 import { ContextProvider } from '../decorator/param';
 
 @ContextProvider((__: unknown, rq: Request) => rq)
-export class RequestCls { }
+export class RequestTarget { }
 
 @ContextProvider((__: unknown, rq: Request, rs: Response) => rs)
-export class ResponseCls { }
+export class ResponseTarget { }
 
 export class RestInterceptorTarget { }
 

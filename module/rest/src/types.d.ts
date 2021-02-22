@@ -6,7 +6,7 @@ import { HeadersAddedSym, NodeEntitySym, ProviderEntitySym } from './internal/sy
 declare global {
   /**
    * Travetto request
-   * @concrete ./internal/types:RequestCls
+   * @concrete ./internal/types:RequestTarget
    */
   interface TravettoRequest<T = unknown> {
     /**
@@ -82,7 +82,7 @@ declare global {
 
   /**
    * Travetto response
-   * @concrete ./internal/types:ResponseCls
+   * @concrete ./internal/types:ResponseTarget
    */
   interface TravettoResponse<T = unknown> {
     /**
