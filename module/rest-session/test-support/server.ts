@@ -56,19 +56,19 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
       maxAge: 10000
     });
 
-    let res = await this.makeRequst('get', '/test/session');
+    let res = await this.request('get', '/test/session');
     let cookie = res.headers['set-cookie'];
     assert(res.body === { age: 1 });
-    res = await this.makeRequst('get', '/test/session', { headers: { Cookie: cookie } });
+    res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     cookie = res.headers['set-cookie'] ?? cookie;
     assert(res.body === { age: 2 });
-    res = await this.makeRequst('get', '/test/session', { headers: { Cookie: cookie } });
+    res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     cookie = res.headers['set-cookie'] ?? cookie;
     assert(res.body === { age: 3 });
-    res = await this.makeRequst('get', '/test/session');
+    res = await this.request('get', '/test/session');
     assert(res.body === { age: 1 });
     cookie = res.headers['set-cookie'] ?? cookie;
-    res = await this.makeRequst('get', '/test/session', { headers: { Cookie: cookie } });
+    res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert(res.body === { age: 2 });
   }
 
@@ -80,9 +80,9 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.makeRequst('post', '/test/session/complex', { body: payload });
+    let res = await this.request('post', '/test/session/complex', { body: payload });
     const cookie = res.headers['set-cookie'];
-    res = await this.makeRequst('get', '/test/session', { headers: { Cookie: cookie } });
+    res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
   }
@@ -95,18 +95,18 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
       maxAge: 3000
     });
 
-    let res = await this.makeRequst('get', '/test/session');
+    let res = await this.request('get', '/test/session');
     let header = res.headers[key];
     assert(res.body === { age: 1 });
-    res = await this.makeRequst('get', '/test/session', { headers: { [key]: header } });
+    res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body === { age: 2 });
-    res = await this.makeRequst('get', '/test/session', { headers: { [key]: header } });
+    res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body === { age: 3 });
 
-    res = await this.makeRequst('get', '/test/session');
+    res = await this.request('get', '/test/session');
     assert(res.body === { age: 1 });
     header = res.headers[key];
-    res = await this.makeRequst('get', '/test/session', { headers: { [key]: header } });
+    res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body === { age: 2 });
   }
 
@@ -118,9 +118,9 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.makeRequst('post', '/test/session/complex', { body: payload });
+    let res = await this.request('post', '/test/session/complex', { body: payload });
     const header = res.headers[key];
-    res = await this.makeRequst('get', '/test/session', { headers: { [key]: header } });
+    res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
   }
@@ -133,15 +133,15 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.makeRequst('post', '/test/session/complex', { body: payload });
+    let res = await this.request('post', '/test/session/complex', { body: payload });
     const header = res.headers[key];
-    res = await this.makeRequst('get', '/test/session', { headers: { [key]: header } });
+    res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
 
     await this.wait(100);
 
-    res = await this.makeRequst('get', '/test/session', { headers: { [key]: header } });
+    res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body.payload === undefined);
     assert(res.body.age === 1);
   }
@@ -154,16 +154,16 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.makeRequst('post', '/test/session/complex', { body: payload });
+    let res = await this.request('post', '/test/session/complex', { body: payload });
     const cookie = res.headers['set-cookie'];
 
-    res = await this.makeRequst('get', '/test/session', { headers: { Cookie: cookie } });
+    res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
 
     await this.wait(100);
 
-    res = await this.makeRequst('get', '/test/session', { headers: { Cookie: cookie } });
+    res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert(res.body.payload === undefined);
     assert(res.body.age === 1);
   }
@@ -176,19 +176,19 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.makeRequst('post', '/test/session/complex', { body: payload });
+    let res = await this.request('post', '/test/session/complex', { body: payload });
     const header = res.headers[key];
 
     await this.wait(50);
-    res = await this.makeRequst('get', '/test/session', { headers: { [key]: header } });
+    res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body.payload === payload);
     await this.wait(50);
 
-    res = await this.makeRequst('get', '/test/session', { headers: { [key]: header } });
+    res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body.payload === payload);
     await this.wait(50);
 
-    res = await this.makeRequst('get', '/test/session', { headers: { [key]: header } });
+    res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body.payload === payload);
 
     assert(res.body.age === 3);

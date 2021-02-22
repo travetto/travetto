@@ -14,7 +14,6 @@ import { TestResultsEnhancer, COLOR_ENHANCER, DUMMY_ENHANCER } from '../enhancer
 @Consumable('tap')
 export class TapEmitter implements TestConsumer {
   private count = 0;
-  private namespace: string;
 
   constructor(
     private stream: NodeJS.WriteStream = process.stdout,
@@ -23,10 +22,6 @@ export class TapEmitter implements TestConsumer {
 
   protected log(message: string) {
     this.stream.write(`${message}\n`);
-  }
-
-  setNamespace(namespace: string) {
-    this.namespace = namespace;
   }
 
   /**
@@ -51,7 +46,7 @@ export class TapEmitter implements TestConsumer {
   onEvent(e: TestEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
-      const suiteId = this.enhancer.suiteName(this.namespace ? `${this.namespace}#${test.classId}` : test.classId);
+      const suiteId = this.enhancer.suiteName(test.classId);
       let header = `${suiteId} - ${this.enhancer.testName(test.methodName)}`;
       if (test.description) {
         header += `: ${this.enhancer.testDescription(test.description)}`;

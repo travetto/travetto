@@ -1,6 +1,6 @@
 import 'express-serve-static-core';
 import { SetOption, GetOption } from 'cookies';
-import { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'http';
+import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'http';
 import { HeaderMap } from './types';
 import { HeadersAddedSym, NodeEntitySym, ProviderEntitySym } from './internal/symbol';
 

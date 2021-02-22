@@ -1,7 +1,7 @@
 import type * as lambda from 'aws-lambda';
-import type { RestLambdaApplication } from '../src/extension/aws-lambda';
+import type { AwsLambdaRestApplication } from '../src/extension/aws-lambda';
 
-let inst: RestLambdaApplication;
+let inst: AwsLambdaRestApplication;
 export async function handler(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
   if (!inst) {
     require('@travetto/boot/register');
@@ -12,7 +12,7 @@ export async function handler(event: lambda.APIGatewayProxyEvent, context: lambd
     const { DependencyRegistry } = await import('@travetto/di');
     await DependencyRegistry.init();
 
-    const { RestLambdaApplication: App } = await import('@travetto/rest/src/extension/aws-lambda');
+    const { AwsLambdaRestApplication: App } = await import('@travetto/rest/src/extension/aws-lambda');
 
     inst = await DependencyRegistry.getInstance(App);
     await inst.run();

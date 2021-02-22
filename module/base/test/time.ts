@@ -4,8 +4,6 @@ import { Test, Suite } from '@travetto/test';
 
 import { TimeUtil } from '../src/internal/time';
 
-class Test2 { }
-
 @Suite()
 class TimeUtilSuite {
   @Test()

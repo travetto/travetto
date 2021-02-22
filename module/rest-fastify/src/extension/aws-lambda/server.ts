@@ -3,7 +3,7 @@ import { FastifyInstance } from 'fastify';
 
 import { Injectable } from '@travetto/di';
 import { ConfigManager } from '@travetto/config';
-import { AwsLambdaRestServer, AwsLambdaRestServerTarget } from '@travetto/rest/src/extension/lambda';
+import { AwsLambdaRestServer, AwsLambdaRestServerTarget } from '@travetto/rest/src/extension/aws-lambda';
 
 import { FastifyRestServer } from '../../server';
 

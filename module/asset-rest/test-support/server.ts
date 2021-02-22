@@ -7,7 +7,7 @@ import { AssetUtil, Asset } from '@travetto/asset';
 import { ResourceManager } from '@travetto/base';
 import { Controller, Post } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/test-support/base';
-import { AfterAll, BeforeAll, Suite, Test } from '@travetto/test';
+import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { Upload } from '../src/decorator';
 
@@ -48,12 +48,6 @@ async function getForm(files: Record<string, string>, content: string) {
 export abstract class AssetRestServerSuite extends BaseRestSuite {
 
   @BeforeAll()
-  async before() { return this.initServer(); }
-
-  @AfterAll()
-  async after() { return this.destroySever(); }
-
-  @BeforeAll()
   async setup() {
     const src = await import('@travetto/asset/test-support/service');
     ResourceManager.addPath(FsUtil.resolveUnix(src.AssetServiceSuite.ᚕfile, '..', 'resources'));
@@ -62,7 +56,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   @Test()
   async testUploadDirect() {
     const sent = await getAsset('logo.png', 'image/png');
-    const res = await this.makeRequst('post', '/test/upload', {
+    const res = await this.request('post', '/test/upload', {
       headers: {
         'Content-Type': sent.type,
         'Content-Length': `${sent.size}`
@@ -77,7 +71,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   @Test()
   async testUpload() {
     const body = await getForm({ file: 'logo.png' }, 'image/png');
-    const res = await this.makeRequst('post', '/test/upload', { headers: body.headers, body });
+    const res = await this.request('post', '/test/upload', { headers: body.headers, body });
     const asset = await AssetUtil.fileToAsset(await ResourceManager.findAbsolute('/logo.png'));
     assert(res.body.hash === asset.hash);
   }
@@ -85,7 +79,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   @Test()
   async testMultiUpload() {
     const body = await getForm({ file1: 'logo.png', file2: 'logo.png' }, 'image/png');
-    const res = await this.makeRequst('post', '/test/upload/all', { headers: body.headers, body });
+    const res = await this.request('post', '/test/upload/all', { headers: body.headers, body });
     const asset = await AssetUtil.fileToAsset(await ResourceManager.findAbsolute('/logo.png'));
     assert(res.body.hash1 === asset.hash);
     assert(res.body.hash2 === asset.hash);

@@ -6,7 +6,7 @@ import type * as lambda from 'aws-lambda';
 import { Injectable } from '@travetto/di';
 import { ConfigManager } from '@travetto/config';
 
-import { AwsLambdaRestServer, AwsLambdaRestServerTarget } from '@travetto/rest/src/extension/lambda';
+import { AwsLambdaRestServer, AwsLambdaRestServerTarget } from '@travetto/rest/src/extension/aws-lambda';
 
 import { ExpressRestServer } from '../../server';
 

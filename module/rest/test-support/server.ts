@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { Test, BeforeAll, AfterAll, Suite } from '@travetto/test';
+import { Test, Suite } from '@travetto/test';
 
 import { Controller } from '../src/decorator/controller';
 import { Get, Post, Put, Delete, Patch } from '../src/decorator/endpoint';
@@ -44,34 +44,28 @@ class TestController {
 @Suite()
 export abstract class RestServerSuite extends BaseRestSuite {
 
-  @BeforeAll()
-  async before() { return this.initServer(); }
-
-  @AfterAll()
-  async after() { return this.destroySever(); }
-
   @Test()
   async getJSON() {
-    const { body: ret } = await this.makeRequst('get', '/test/json');
+    const { body: ret } = await this.request('get', '/test/json');
     assert(ret === { json: true });
   }
 
   @Test()
   async getParam() {
-    const { body: ret } = await this.makeRequst('post', '/test/param/bob');
+    const { body: ret } = await this.request('post', '/test/param/bob');
     assert(ret === { param: 'bob' });
   }
 
   @Test()
   async putQuery() {
-    const { body: ret } = await this.makeRequst('put', '/test/query', {
+    const { body: ret } = await this.request('put', '/test/query', {
       query: {
         age: '20'
       }
     });
     assert(ret === { query: 20 });
 
-    await assert.rejects(() => this.makeRequst('put', '/test/query', {
+    await assert.rejects(() => this.request('put', '/test/query', {
       query: {
         age: 'blue'
       }
@@ -80,7 +74,7 @@ export abstract class RestServerSuite extends BaseRestSuite {
 
   @Test()
   async postBody() {
-    const { body: ret } = await this.makeRequst('put', '/test/body', {
+    const { body: ret } = await this.request('put', '/test/body', {
       body: {
         age: 20
       }
@@ -90,19 +84,19 @@ export abstract class RestServerSuite extends BaseRestSuite {
 
   @Test()
   async testCookie() {
-    const { body: ret, headers } = await this.makeRequst('delete', '/test/cookie', {
+    const { body: ret, headers } = await this.request('delete', '/test/cookie', {
       headers: {
         Cookie: `orange=yummy`
       }
     });
     console.log('Headers', { headers });
-    assert(/flavor.*oreo/.test(headers['set-cookie']));
+    assert(/flavor.*oreo/.test(headers['set-cookie'] ?? ''));
     assert(ret === { cookie: 'yummy' });
   }
 
   @Test()
   async testRegex() {
-    const { body: ret } = await this.makeRequst('patch', '/test/regexp/super-poodle-party');
+    const { body: ret } = await this.request('patch', '/test/regexp/super-poodle-party');
     assert(ret === { path: 'poodle' });
   }
 }

@@ -38,11 +38,8 @@ export class TestLernaPlugin extends BasePlugin {
 
     readline.createInterface({ input: child.process.stdout!, output: process.stdout, terminal: false })
       .on('line', line => {
-        const [, name, body] = line.match(/^(\S+):\s+(.*)\s*$/)!;
+        const [, , body] = line.match(/^(\S+):\s+(.*)\s*$/)!;
         try {
-          if (hasNamespace(emitter)) {
-            emitter.setNamespace(name);
-          }
           consumer.onEvent(JSON.parse(body));
         } catch {
           console!.error('Failed on', body);

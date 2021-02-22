@@ -1,24 +1,18 @@
-// @file-if aws-lambda
 import type * as lambda from 'aws-lambda';
+
 import { Inject, Injectable } from '@travetto/di';
+
 import { RestApplication } from '../application/rest';
 import { RestServer } from '../application/server';
 
-export interface LambdaResponse {
-  statusCode: number;
-  body: string;
-  headers: {};
-}
-
 /**
  * Main contract for lambda based applications
- * @concrete .:AwsLambdaHandlerTarget
  */
 export interface AwsLambdaHandler {
   /**
    * Handles lambda proxy event
    */
-  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<LambdaResponse | void> | LambdaResponse | void;
+  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult>;
 }
 
 export class AwsLambdaRestServerTarget { }
@@ -30,13 +24,13 @@ export class AwsLambdaRestServerTarget { }
 export interface AwsLambdaRestServer extends RestServer, AwsLambdaHandler { }
 
 @Injectable()
-export class RestLambdaApplication extends RestApplication implements AwsLambdaHandler {
-  constructor(@Inject() server: AwsLambdaRestServer) {
+export class AwsLambdaRestApplication extends RestApplication implements AwsLambdaHandler {
+  constructor(@Inject() private lambdaServer: AwsLambdaRestServer) {
     super();
-    this.server = server;
+    this.server = lambdaServer;
   }
 
   handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
-    return (this.server as AwsLambdaRestServer).handle(event, context);
+    return this.lambdaServer.handle(event, context);
   }
 }

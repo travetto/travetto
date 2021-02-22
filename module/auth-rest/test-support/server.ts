@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Controller, Get, Post, Redirect, Request, Response } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/test-support/base';
-import { AfterAll, BeforeAll, Suite, Test } from '@travetto/test';
+import { Suite, Test } from '@travetto/test';
 import { Injectable, InjectableFactory } from '@travetto/di';
 import { AppError } from '@travetto/base';
 import { AuthContext } from '@travetto/auth/src/context';
@@ -89,15 +89,9 @@ class TestAuthAllController {
 @Suite()
 export abstract class AuthRestServerSuite extends BaseRestSuite {
 
-  @BeforeAll()
-  async before() { return this.initServer(); }
-
-  @AfterAll()
-  async after() { return this.destroySever(); }
-
   @Test()
   async testBadAuth() {
-    const { status } = await this.makeRequst('post', '/test/auth/login', {
+    const { status } = await this.request('post', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'todd',
@@ -109,7 +103,7 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
 
   @Test()
   async testGoodAuth() {
-    const { status } = await this.makeRequst('post', '/test/auth/login', {
+    const { status } = await this.request('post', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'super-user',
@@ -121,7 +115,7 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
 
   @Test()
   async testBlockedAuthenticated() {
-    const { status } = await this.makeRequst('get', '/test/auth/self', {
+    const { status } = await this.request('get', '/test/auth/self', {
       throwOnError: false
     });
     assert(status === 401);
@@ -129,7 +123,7 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
 
   @Test()
   async testGoodAuthenticated() {
-    const { headers, status } = await this.makeRequst('post', '/test/auth/login', {
+    const { headers, status } = await this.request('post', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'super-user',
@@ -138,7 +132,7 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
     });
     assert(status === 201);
 
-    const { status: lastStatus } = await this.makeRequst('get', '/test/auth/self', {
+    const { status: lastStatus } = await this.request('get', '/test/auth/self', {
       throwOnError: false,
       headers: {
         Authorization: headers.authorization
@@ -149,13 +143,13 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
 
   @Test()
   async testAllAuthenticated() {
-    const { status } = await this.makeRequst('get', '/test/auth-all/self', {
+    const { status } = await this.request('get', '/test/auth-all/self', {
       throwOnError: false
     });
     assert(status === 401);
 
 
-    const { headers, status: authStatus } = await this.makeRequst('post', '/test/auth/login', {
+    const { headers, status: authStatus } = await this.request('post', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'super-user',
@@ -164,7 +158,7 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
     });
     assert(authStatus === 201);
 
-    const { status: lastStatus } = await this.makeRequst('get', '/test/auth-all/self', {
+    const { status: lastStatus } = await this.request('get', '/test/auth-all/self', {
       throwOnError: false,
       headers: {
         Authorization: headers.authorization

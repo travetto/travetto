@@ -40,7 +40,7 @@ export class TimeUtil {
 
     if (match) {
       val = match[1];
-      if (match.length > 2) {
+      if (match.length > 2 && match[2]) {
         unit = match[2] as TimeUnit;
       }
     }
