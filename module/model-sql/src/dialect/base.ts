@@ -183,7 +183,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Number) {
       return `${value}`;
     } else if (conf.type === Date) {
-      const [day, time] = (value as Date).toISOString().split(/[T.]/);
+      const [day, time] = (value as Date).toISOString().split(/[TZ]/);
       return this.quote(`${day} ${time}`);
     } else if (conf.type === PointImpl && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;

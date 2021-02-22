@@ -80,7 +80,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     if (config.expiresAt) {
       const expiry = ModelExpiryUtil.getExpiryState(cls, item);
       if (expiry.expiresAt !== undefined) {
-        if (expiry.expiresAt !== null) {
+        if (expiry.expiresAt) {
           await this.wrap(util.promisify(this.cl.pexpireat))(
             this.resolveKey(cls, item.id!), expiry.expiresAt.getTime()
           );

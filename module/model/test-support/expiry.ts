@@ -6,8 +6,9 @@ import { TimeUtil } from '@travetto/base/src/internal/time';
 import { ExpiresAt, Model } from '../src/registry/decorator';
 import { ModelExpirySupport } from '../src/service/expiry';
 import { BaseModel } from '../src/types/base';
-import { BaseModelSuite } from './base';
 import { ModelExpiryUtil } from '../src/internal/service/expiry';
+import { NotFoundError } from '../src/error/not-found';
+import { BaseModelSuite } from './base';
 
 @Model('expiry-user')
 class User extends BaseModel {
@@ -19,6 +20,19 @@ class User extends BaseModel {
 export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport> {
 
   baseLatency = 10;
+
+  async getSize() {
+    let i = 0;
+    for await (const __el of (await this.service).list(User)) {
+      i += 1;
+    }
+    return i;
+  }
+
+  async wait(ms: number) {
+    await super.wait(ms);
+    await (await this.service).deleteExpired(User);
+  }
 
   @Test()
   async basic() {
@@ -38,12 +52,12 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     const res = await service.upsert(User, User.from({
       expiresAt: TimeUtil.withAge(10)
     }));
+
     assert(res instanceof User);
 
     await this.wait(100);
 
-    const expiry = ModelExpiryUtil.getExpiryState(User, await service.get(User, res.id!));
-    assert(expiry.expired);
+    await assert.rejects(() => service.get(User, res.id!), NotFoundError);
   }
 
   @Test()
@@ -63,35 +77,38 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
     await this.wait(100);
 
-    assert(ModelExpiryUtil.getExpiryState(User, await service.get(User, res.id!)).expired);
+    await assert.rejects(() => service.get(User, res.id!), NotFoundError);
   }
 
   @Test()
   async culling() {
     const service = await this.service;
-    // Create
-    await Promise.all(
-      ' '
-        .repeat(10).split('')
-        .map((x, i) => service.upsert(User, User.from({
-          expiresAt: TimeUtil.withAge(1000 + i)
-        })))
-    );
 
     let total;
+
+    total = await this.getSize();
+    assert(total === 0);
+
+    // Create
+    await Promise.all(
+      Array(10).fill(0).map((x, i) => service.upsert(User, User.from({
+        expiresAt: TimeUtil.withAge(1000 + i)
+      })))
+    );
+
     // Let expire
     await this.wait(1);
 
-    total = await service.deleteExpired(User);
-    assert(total === 0);
+    total = await this.getSize();
+    assert(total === 10);
 
     // Let expire
     await this.wait(1100);
 
-    total = await service.deleteExpired(User);
-    assert(total === 10);
+    total = await this.getSize();
+    assert(total === 0);
 
-    total = await service.deleteExpired(User);
+    total = await this.getSize();
     assert(total === 0);
   }
 }

@@ -30,7 +30,7 @@ export class PostgreSQLDialect extends SQLDialect {
     // Special types
     Object.assign(this.COLUMN_TYPES, {
       JSON: 'json',
-      TIMESTAMP: 'TIMESTAMPTZ'
+      TIMESTAMP: 'TIMESTAMP(6) WITH TIME ZONE'
     });
 
     // Word boundary

@@ -31,7 +31,7 @@ export class MySQLDialect extends SQLDialect {
 
     // Custom types
     Object.assign(this.COLUMN_TYPES, {
-      TIMESTAMP: 'DATETIME',
+      TIMESTAMP: 'DATETIME(3)',
       JSON: 'TEXT'
     });
 
