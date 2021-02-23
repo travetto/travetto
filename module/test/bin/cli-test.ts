@@ -49,7 +49,7 @@ export class TestPlugin extends BasePlugin {
           state.args = ['test/.*'];
         } else if (state.concurrency === 1) {
           state.mode = 'single';
-        } else if ((await FsUtil.exists(args[0]))?.isFile() && /^\d+/.test(args[1])) { // If is a single file and specifying a line
+        } else if ((await FsUtil.exists(args[0]))?.isFile()) { // If is a single file
           state.mode = 'single';
         } else if (args[0].startsWith('test-extension')) {
           state.concurrency = 1;

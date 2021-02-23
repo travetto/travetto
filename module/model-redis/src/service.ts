@@ -41,7 +41,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   private async * iterate(prefix: Class | string): AsyncIterable<string[]> {
     let prevCursor: string | undefined;
     let done = false;
-    const query = `${this.resolveKey(prefix)}:*`;
+    const query = `${this.resolveKey(prefix)}*`;
 
     while (!done) {
       const [cursor, results] = await this.wrap(util.promisify(
@@ -50,8 +50,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       ))(prevCursor ?? '0', 'MATCH', query, 'COUNT', '100');
       prevCursor = cursor;
       if (results.length) {
-        const values = await this.wrap(util.promisify(this.cl.mget as (keys: string[], cb: redis.Callback<(string | null)[]>) => void))(results);
-        yield values.filter(x => !!x) as string[];
+        yield results;
       }
       if (cursor === '0') {
         done = true;
@@ -153,7 +152,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    for await (const bodies of this.iterate(cls)) {
+    for await (const ids of this.iterate(cls)) {
+
+      const bodies = (await this.wrap(util.promisify(this.cl.mget as (keys: string[], cb: redis.Callback<(string | null)[]>) => void))(ids))
+        .filter(x => !!x) as string[];
+
       for (const body of bodies) {
         try {
           yield await ModelCrudUtil.load(cls, body);

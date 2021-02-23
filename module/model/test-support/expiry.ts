@@ -38,7 +38,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   async basic() {
     const service = await this.service;
     const res = await service.upsert(User, User.from({
-      expiresAt: TimeUtil.withAge(1, 's')
+      expiresAt: TimeUtil.withAge(10, 's')
     }));
     assert(res instanceof User);
 
