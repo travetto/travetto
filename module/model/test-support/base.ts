@@ -3,6 +3,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
 import { Class, ResourceManager } from '@travetto/base';
+import { TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';
 
 import { ModelRegistry } from '../src/registry/model';
 import { isBulkSupported, isCrudSupported, isStorageSupported } from '../src/internal/service/common';
@@ -32,8 +33,8 @@ export abstract class BaseModelSuite<T> {
     }
   }
 
-  wait(n: number) {
-    return new Promise(res => setTimeout(res, n));
+  wait(n: number, unit: TimeUnit = 'ms') {
+    return new Promise(res => setTimeout(res, TimeUtil.toMillis(n, unit)));
   }
 
   get service() {

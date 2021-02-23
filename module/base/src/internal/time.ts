@@ -20,12 +20,31 @@ export type TimeUnit = keyof typeof TIME_UNITS;
 export class TimeUtil {
 
   /**
+   * Returns time units convert to ms
+   * @param amount Number of units to extend
+   * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
+   */
+  static toMillis(amount: number | string, unit: TimeUnit = 'ms') {
+    if (typeof amount === 'string') {
+      if (/[smhdwy]$/i.test(amount)) { // If unit provided
+        [, amount, unit] = amount.match(/^([\-.0-9]+)(.*)$/i) as [undefined, string, 'm'] ?? [undefined, amount, unit];
+        unit = unit.toLowerCase() as 'm';
+        if (!TIME_UNITS[unit]) {
+          return NaN;
+        }
+      }
+      amount = parseFloat(amount as string);
+    }
+    return amount * TIME_UNITS[unit];
+  }
+
+  /**
    * Returns a new date with `age` units into the future
    * @param age Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static withAge(age: number, unit: TimeUnit = 'ms') {
-    return new Date(Date.now() + age * TIME_UNITS[unit]);
+  static withAge(age: number | string, unit: TimeUnit = 'ms') {
+    return new Date(Date.now() + this.toMillis(age, unit));
   }
 
   /**
@@ -35,16 +54,6 @@ export class TimeUtil {
    * @param unit The unit for the default time, ms is default if not specified
    */
   static getEnv(k: string, defTime: number, unit: TimeUnit = 'ms'): number {
-    let val: string | number = defTime;
-    const match = EnvUtil.get(k, '').match(/^(\d+)([hms]?)$/);
-
-    if (match) {
-      val = match[1];
-      if (match.length > 2 && match[2]) {
-        unit = match[2] as TimeUnit;
-      }
-    }
-
-    return parseInt(`${val}`, 10) * TIME_UNITS[unit];
+    return this.toMillis(EnvUtil.get(k, '') || defTime, unit);
   }
 }

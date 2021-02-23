@@ -50,7 +50,7 @@ export class VerifyTest {
     };
 
     assert.doesNotThrow(() => test(ModelUser));
-    assert.throws(() => test(User), ValidationResultError);
+    assert.doesNotThrow(() => test(User));
   }
 
   @Test()
@@ -79,7 +79,7 @@ export class VerifyTest {
     };
 
     assert.doesNotThrow(() => test(ModelUser));
-    assert.throws(() => test(User), ValidationResultError);
+    assert.doesNotThrow(() => test(User));
 
     const test2 = <T>(cls: Class<T>) => {
       const t: Query<ModelType> = {
