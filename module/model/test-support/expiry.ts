@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { TimeUtil } from '@travetto/base/src/internal/time';
+import { TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';
 
 import { ExpiresAt, Model } from '../src/registry/decorator';
 import { ModelExpirySupport } from '../src/service/expiry';
@@ -19,7 +19,7 @@ class User extends BaseModel {
 @Suite()
 export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport> {
 
-  baseLatency = 10;
+  delayFactor: number = 1;
 
   async getSize() {
     let i = 0;
@@ -29,16 +29,20 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     return i;
   }
 
-  async wait(ms: number) {
-    await super.wait(ms);
+  async wait(n: number, unit: TimeUnit = 'ms') {
+    await super.wait(TimeUtil.toMillis(n, unit) * this.delayFactor);
     await (await this.service).deleteExpired(User);
+  }
+
+  getAge(v: number, unit: TimeUnit = 'ms') {
+    return new Date(Date.now() + TimeUtil.toMillis(v, unit) * this.delayFactor);
   }
 
   @Test()
   async basic() {
     const service = await this.service;
     const res = await service.upsert(User, User.from({
-      expiresAt: TimeUtil.withAge(10, 's')
+      expiresAt: this.getAge(2, 's')
     }));
     assert(res instanceof User);
 
@@ -50,12 +54,12 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   async aging() {
     const service = await this.service;
     const res = await service.upsert(User, User.from({
-      expiresAt: TimeUtil.withAge(10)
+      expiresAt: this.getAge(100, 'ms')
     }));
 
     assert(res instanceof User);
 
-    await this.wait(100);
+    await this.wait(200);
 
     await assert.rejects(() => service.get(User, res.id!), NotFoundError);
   }
@@ -64,18 +68,19 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   async ageWithExtension() {
     const service = await this.service;
     const res = await service.upsert(User, User.from({
-      expiresAt: TimeUtil.withAge(5, 's')
+      expiresAt: this.getAge(2, 's')
     }));
     assert(res instanceof User);
 
-    await this.wait(100);
+    await this.wait(50);
 
     assert(!ModelExpiryUtil.getExpiryState(User, (await service.get(User, res.id!))).expired);
+
     await service.updatePartial(User, res.id!, {
-      expiresAt: TimeUtil.withAge(10)
+      expiresAt: this.getAge(100)
     });
 
-    await this.wait(100);
+    await this.wait(200);
 
     await assert.rejects(() => service.get(User, res.id!), NotFoundError);
   }
@@ -92,7 +97,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     // Create
     await Promise.all(
       Array(10).fill(0).map((x, i) => service.upsert(User, User.from({
-        expiresAt: TimeUtil.withAge(1000 + i)
+        expiresAt: this.getAge(1000 + i * this.delayFactor)
       })))
     );
 

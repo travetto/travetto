@@ -35,7 +35,7 @@ if (target && target.startsWith(root)) {
         // Overview
         `<div class="documentation">`
           .$concat(
-            $exec('npx', ['github-markdown', 'README.md'])
+            $exec('npx', ['marked', '--gfm', 'README.md'])
               .$filter(x => !/<p.*<img/.test(x) && !/<sub/.test(x)),
           )
           .$concat(['</div>\n<app-module-chart></app-module-chart>'])

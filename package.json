@@ -23,15 +23,15 @@
   },
   "dependencies": {
     "@arcsine/nodesh": "^1.8.3",
+    "@typescript-eslint/eslint-plugin": "^4.15.2",
+    "@typescript-eslint/parser": "^4.15.2",
     "eslint": "^7.20.0",
-    "@typescript-eslint/eslint-plugin": "^4.15.1",
-    "@typescript-eslint/parser": "^4.15.1",
     "lerna": "~3.22.1",
-    "markdown-to-html": "^0.0.13"
+    "marked": "^2.0.0"
   },
   "devDependencies": {
     "@types/aws-serverless-express": "^3.3.3",
-    "@types/faker": "^5.1.6",
+    "@types/faker": "^5.1.7",
     "@types/mysql": "^2.15.17",
     "@types/node-forge": "^0.9.7",
     "@types/nodemailer": "^6.4.0",

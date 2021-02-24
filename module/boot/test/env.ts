@@ -103,6 +103,7 @@ export class EnvUtilTest {
 
   @Test()
   verifyValueOrFalse() {
+    delete process.env.color;
     assert(EnvUtil.isValueOrFalse('color', ['red', 'green', 'blue'] as const, 'red') === 'red');
     assert(EnvUtil.isValueOrFalse('color', ['red', 'green', 'blue'] as const) === false);
     process.env.color = '0';

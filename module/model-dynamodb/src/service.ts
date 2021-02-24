@@ -14,9 +14,7 @@ import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { DynamoDBModelConfig } from './config';
 
-interface Expirable {
-  _expiresAt: number;
-}
+const EXP_ATTR = 'expires_at__';
 
 function toValue(val: string | number | boolean | Date | undefined | null, forceString?: boolean): dynamodb.AttributeValue;
 function toValue(val: unknown, forceString?: boolean): dynamodb.AttributeValue | undefined {
@@ -31,6 +29,19 @@ function toValue(val: unknown, forceString?: boolean): dynamodb.AttributeValue |
   } else if (val instanceof Date) {
     return { N: `${val.getTime()}` };
   }
+}
+
+async function loadAndCheckExpiry<T extends ModelType>(cls: Class<T>, doc: string): Promise<T> {
+  const item = await ModelCrudUtil.load(cls, doc);
+  if (ModelRegistry.get(cls).expiresAt) {
+    const expiry = ModelExpiryUtil.getExpiryState(cls, item);
+    if (!expiry.expired) {
+      return item;
+    }
+  } else {
+    return item;
+  }
+  throw new NotFoundError(cls, item.id!);
 }
 
 /**
@@ -53,11 +64,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   private async putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert') {
     const config = ModelRegistry.get(cls);
+    let expiry: number | undefined;
 
     if (config.expiresAt) {
-      const expiry = ModelExpiryUtil.getExpiryState(cls, item);
-      if (expiry.expiresAt) {
-        (item as unknown as Expirable)._expiresAt = expiry.expiresAt.getTime() / 1000; // Convert to seconds
+      const { expiresAt } = ModelExpiryUtil.getExpiryState(cls, item);
+      if (expiresAt) {
+        expiry = Math.trunc(Math.ceil(expiresAt.getTime() / 1000)); // Convert to seconds
       }
     }
 
@@ -69,6 +81,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           Item: {
             id: toValue(item.id),
             body: toValue(JSON.stringify(item)),
+            [EXP_ATTR]: toValue(expiry),
             ...Object.fromEntries(config.indices?.map(idx => [`${idx.name}__`, toValue(ModelIndexedUtil.computeIndexKey(cls, idx, item))]) ?? [])
           },
           ReturnValues: 'NONE'
@@ -80,9 +93,14 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           TableName: this.resolveTable(cls),
           ConditionExpression: mode === 'update' ? 'attribute_exists(body)' : undefined,
           Key: { id: { S: id } },
-          UpdateExpression: `SET ${['body=:body', ...(config.indices?.map(idx => `${idx.name}__ = :${idx.name}`) ?? [])].join(', ')}`,
+          UpdateExpression: `SET ${[
+            'body=:body',
+            `${EXP_ATTR}=:expr`,
+            ...(config.indices?.map(idx => `${idx.name}__ = :${idx.name}`) ?? [])
+          ].join(', ')}`,
           ExpressionAttributeValues: {
             ':body': toValue(JSON.stringify(item)),
+            ':expr': toValue(expiry),
             ...Object.fromEntries(config.indices?.map(idx => [`:${idx.name}`, toValue(ModelIndexedUtil.computeIndexKey(cls, idx, item))]) ?? [])
           },
           ReturnValues: 'ALL_NEW'
@@ -155,7 +173,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     if (ModelRegistry.get(cls).expiresAt) {
       await this.cl.updateTimeToLive({
         TableName: table,
-        TimeToLiveSpecification: { AttributeName: '_expiresAt', Enabled: true }
+        TimeToLiveSpecification: { AttributeName: EXP_ATTR, Enabled: true }
       });
     }
   }
@@ -215,7 +233,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     });
 
     if (res && res.Item && res.Item.body) {
-      return await ModelCrudUtil.load(cls, res.Item.body.S!);
+      return loadAndCheckExpiry(cls, res.Item.body.S!);
     }
     throw new NotFoundError(cls, id);
   }
@@ -267,7 +285,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       if (batch.Count && batch.Items) {
         for (const el of batch.Items) {
           try {
-            yield await ModelCrudUtil.load(cls, el.body.S!);
+            yield loadAndCheckExpiry(cls, el.body.S!);
           } catch (e) {
             if (!(e instanceof NotFoundError)) {
               throw e;
