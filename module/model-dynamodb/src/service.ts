@@ -41,7 +41,7 @@ async function loadAndCheckExpiry<T extends ModelType>(cls: Class<T>, doc: strin
   } else {
     return item;
   }
-  throw new NotFoundError(cls, item.id!);
+  throw new NotFoundError(cls, item.id);
 }
 
 /**
@@ -240,25 +240,25 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.putItem(cls, item.id!, item, 'create');
+    await this.putItem(cls, item.id, item, 'create');
     return item;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.putItem(cls, item.id!, item, 'update');
+    await this.putItem(cls, item.id, item, 'update');
     return item;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.putItem(cls, item.id!, item, 'upsert');
+    await this.putItem(cls, item.id, item, 'upsert');
     return item;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
-    await this.putItem(cls, item.id!, item, 'update');
+    await this.putItem(cls, id, item as T, 'update');
     return item as T;
   }
 

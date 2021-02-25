@@ -7,7 +7,7 @@ export interface ModelType {
    *
    * If not provided, will be computed on create
    */
-  id?: string;
+  id: string;
   /**
    * Type of model to save
    */

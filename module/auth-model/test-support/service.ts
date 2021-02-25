@@ -70,7 +70,7 @@ export abstract class AuthModelServiceSuite extends BaseModelSuite<ModelCrudSupp
     });
 
     try {
-      await svc.authenticate(pre.id!, pre.password!);
+      await svc.authenticate(pre.id, pre.password!);
     } catch (err) {
       if (err instanceof AppError && err.category === 'notfound') {
         const user = await svc.register(pre);
@@ -81,6 +81,6 @@ export abstract class AuthModelServiceSuite extends BaseModelSuite<ModelCrudSupp
       }
     }
 
-    await assert.doesNotReject(() => svc.authenticate(pre.id!, pre.password!));
+    await assert.doesNotReject(() => svc.authenticate(pre.id, pre.password!));
   }
 }

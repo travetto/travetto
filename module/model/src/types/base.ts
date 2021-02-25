@@ -9,7 +9,7 @@ import { ModelType } from './model';
 @Schema()
 export abstract class BaseModel implements ModelType {
 
-  id?: string;
+  id: string;
   version?: string;
   type?: string;
   createdDate?: Date;

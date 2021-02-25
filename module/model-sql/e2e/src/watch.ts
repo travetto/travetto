@@ -16,7 +16,7 @@ class Address {
 
 @Model()
 class Person implements ModelType {
-  id?: string;
+  id: string;
   name: string;
   age: number;
   gender: 'm' | 'f';
@@ -25,7 +25,7 @@ class Person implements ModelType {
 
 @Model()
 class Employee implements ModelType {
-  id?: string;
+  id: string;
   name: string;
 }
 

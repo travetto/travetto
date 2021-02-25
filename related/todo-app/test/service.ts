@@ -44,10 +44,10 @@ export class TodoTest extends BaseModelSuite<ModelCrudSupport> {
     const saved = await svc.add(test);
     assert.ok(saved.id);
 
-    let updated = await svc.complete(saved.id!);
+    let updated = await svc.complete(saved.id);
     assert(updated.completed === true);
 
-    updated = await svc.complete(saved.id!, false);
+    updated = await svc.complete(saved.id, false);
     assert(updated.completed === false);
   }
 
@@ -63,10 +63,10 @@ export class TodoTest extends BaseModelSuite<ModelCrudSupport> {
     assert.ok(saved.id);
     assert(test.text === 'Sample Task');
 
-    await svc.remove(saved.id!);
+    await svc.remove(saved.id);
 
     try {
-      await svc.get(saved.id!);
+      await svc.get(saved.id);
     } catch (e) {
       assert(e.message);
     }

@@ -68,14 +68,14 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   private async writeIndices<T extends ModelType>(cls: Class<T>, item: T) {
     for (const idx of ModelRegistry.get(cls).indices ?? []) {
-      this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.set(ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id!);
+      this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.set(ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id);
     }
   }
 
   private async write<T extends ModelType>(cls: Class<T>, item: T) {
     const store = this.getStore(cls);
-    await this.removeIndices(cls, item.id!);
-    store.set(item.id!, Buffer.from(JSON.stringify(item)));
+    await this.removeIndices(cls, item.id);
+    store.set(item.id, Buffer.from(JSON.stringify(item)));
     await this.writeIndices(cls, item);
     return item;
   }
@@ -120,8 +120,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
-    item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
-    return await this.write(cls, item) as T;
+    const clean = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
+    return await this.write(cls, clean);
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {

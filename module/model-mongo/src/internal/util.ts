@@ -17,7 +17,7 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
   rad: 1
 };
 
-export type WithId<T> = T & { _id?: mongo.Binary };
+export type WithId<T> = T & { _id: mongo.Binary };
 
 /**
  * Basic mongo utils for conforming to the model module
@@ -42,16 +42,16 @@ export class MongoUtil {
 
   static async postLoadId<T extends ModelType>(item: T) {
     if (item && '_id' in item) {
-      item.id = this.idToString((item as WithId<T>)._id!);
-      delete (item as WithId<T>)._id;
+      item.id = this.idToString((item as WithId<T>)._id);
+      delete (item as { _id?: unknown })._id;
     }
     return item;
   }
 
   static preInsertId<T extends ModelType>(item: T) {
     if (item && item.id) {
-      (item as WithId<T>)._id = this.uuid(item.id!);
-      delete item.id;
+      (item as WithId<T>)._id = this.uuid(item.id);
+      delete (item as { id?: unknown }).id;
     }
     return item;
   }

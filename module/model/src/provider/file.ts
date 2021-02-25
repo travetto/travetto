@@ -111,21 +111,21 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const file = await this.resolveName(cls, '.json', item.id);
 
     if (await FsUtil.exists(file)) {
-      throw new ExistsError(cls, item.id!);
+      throw new ExistsError(cls, item.id);
     }
 
     return await this.upsert(cls, item);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
-    await this.find(cls, '.json', item.id!);
+    await this.find(cls, '.json', item.id);
     return await this.upsert(cls, item);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
 
-    const file = await this.resolveName(cls, '.json', item.id!);
+    const file = await this.resolveName(cls, '.json', item.id);
     await fs.promises.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
 
     return item;
@@ -133,7 +133,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
-    const file = await this.resolveName(cls, '.json', item.id!);
+    const file = await this.resolveName(cls, '.json', item.id);
     await fs.promises.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
 
     return item as T;
@@ -193,7 +193,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const deleted = [];
     for await (const el of this.list(cls)) {
       if (ModelExpiryUtil.getExpiryState(cls, el).expired) {
-        deleted.push(this.delete(cls, el.id!));
+        deleted.push(this.delete(cls, el.id));
       }
     }
     return (await Promise.all(deleted)).length;

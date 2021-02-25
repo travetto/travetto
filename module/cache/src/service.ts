@@ -14,7 +14,7 @@ const INFINITE_MAX_AGE = '10000-01-01';
 
 @Model({ autoCreate: false })
 export class CacheRecord {
-  id?: string;
+  id: string;
   @Text()
   entry: string;
   @ExpiresAt()

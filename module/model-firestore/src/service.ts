@@ -75,7 +75,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async deleteModel(cls: Class) {
     for await (const el of this.list(cls)) {
-      await this.delete(cls, el.id!);
+      await this.delete(cls, el.id);
     }
   }
 
@@ -95,25 +95,25 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.getCollection(cls).doc(item.id!).create(toSimpleObj(item));
+    await this.getCollection(cls).doc(item.id).create(toSimpleObj(item));
     return item;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.getCollection(cls).doc(item.id!).update(toSimpleObj(item));
+    await this.getCollection(cls).doc(item.id).update(toSimpleObj(item));
     return item;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.getCollection(cls).doc(item.id!).set(toSimpleObj(item));
+    await this.getCollection(cls).doc(item.id).set(toSimpleObj(item));
     return item;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
-    await this.getCollection(cls).doc(id!).set(toSimpleObj(item, firebase.firestore.FieldValue.delete()), { merge: true });
+    await this.getCollection(cls).doc(id).set(toSimpleObj(item, firebase.firestore.FieldValue.delete()), { merge: true });
     return this.get(cls, id);
   }
 
@@ -143,7 +143,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     const item = await query.get();
 
     if (item && !item.empty) {
-      return this.get(cls, item.docs[0].id!);
+      return this.get(cls, item.docs[0].id);
     }
 
     throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
@@ -157,7 +157,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     const item = await query.get();
 
     if (item && !item.empty) {
-      return this.delete(cls, item.docs[0].id!);
+      return this.delete(cls, item.docs[0].id);
     }
 
     throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));

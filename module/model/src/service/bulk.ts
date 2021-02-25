@@ -7,7 +7,7 @@ import { ModelType } from '../types/model';
 /**
  * Bulk operation. Each operation has a single action and payload
  */
-export type BulkOp<T> =
+export type BulkOp<T extends ModelType> =
   { delete?: T } &
   { insert?: T } &
   { update?: T } &

@@ -2,7 +2,7 @@ import { Model, ModelType } from '@travetto/model';
 
 @Model()
 export class Todo implements ModelType {
-  id?: string;
+  id: string;
   text: string;
   completed?: boolean;
   // {{#modules.auth-rest}} // @doc-exclude

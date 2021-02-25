@@ -23,27 +23,33 @@ class Person extends BaseModel {
 
 @Model()
 class Simple {
-  id?: string;
+  id: string;
   name: string;
 }
 
+@Schema()
+class SimpleItem {
+  name: string;
+}
+
+
 @Model()
 class SimpleList {
-  id?: string;
+  id: string;
   names: string[];
-  simples?: Simple[];
+  simples?: SimpleItem[];
 }
 
 @Model()
 class User2 {
-  id?: string;
+  id: string;
   address?: Address;
   name: string;
 }
 
 @Model()
 class Dated {
-  id?: string;
+  id: string;
   time?: Date;
 }
 
@@ -97,7 +103,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       people.map(el => service.upsert(Person, el))
     );
 
-    const single = await service.get(Person, people[2].id!);
+    const single = await service.get(Person, people[2].id);
     assert(single !== undefined);
     assert(single.age === 23);
 
@@ -112,7 +118,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const o = await service.create(Simple, Simple.from({ name: 'bob' }));
     o.name = 'roger';
     const b = await service.update(Simple, o);
-    const id = b.id!;
+    const id = b.id;
 
     const z = await service.get(Simple, id);
 
@@ -142,7 +148,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(o2.age === 20);
     assert(o2.address.street2 === 'roader');
 
-    await service.updatePartial(Person, o2.id!, Person.from({
+    await service.updatePartial(Person, o2.id, Person.from({
       gender: 'f',
       address: {
         street1: 'changed\n',
@@ -150,7 +156,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       }
     }));
 
-    const o3 = await service.get(Person, o.id!);
+    const o3 = await service.get(Person, o.id);
 
     assert(o3.name === 'oscar');
     assert(o3.age === 20);
@@ -177,13 +183,13 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       ]
     }));
 
-    const o2 = await service.updatePartial(SimpleList, o.id!, SimpleList.from({
+    const o2 = await service.updatePartial(SimpleList, o.id, SimpleList.from({
       names: ['a', 'd'],
       simples: [{ name: 'd' }]
     }));
 
     assert(o2.names === ['a', 'd']);
-    assert(o2.simples === [Simple.from({ name: 'd' })]);
+    assert(o2.simples === [SimpleItem.from({ name: 'd' })]);
   }
 
   @Test('Verify partial update with field removal and lists')
@@ -195,13 +201,13 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     assert(o.address === undefined);
 
-    await service.updatePartial(User2, o.id!, User2.from({
+    await service.updatePartial(User2, o.id, User2.from({
       address: {
         street1: 'blue'
       }
     }));
 
-    const o3 = await service.get(User2, o.id!);
+    const o3 = await service.get(User2, o.id);
 
     assert(o3.address !== undefined);
     assert(o3.address!.street1 === 'blue');
@@ -223,40 +229,40 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       Firefighter.from({ name: 'rob', firehouse: 20 }),
       Engineer.from({ name: 'cob', major: 'oranges' })
     ];
-    const o = await Promise.all(people.map(p => service.create(Worker, p)));
+    const [doc, fire, eng] = await Promise.all(people.map(p => service.create(Worker, p)));
 
-    assert(o[0] instanceof Doctor);
+    assert(doc instanceof Doctor);
 
     await assert.rejects(
-      () => service.get(Engineer, o[0].id!),
+      () => service.get(Engineer, doc.id),
       NotFoundError);
 
-    assert(o[0] instanceof Doctor);
-    assert(o[1] instanceof Firefighter);
-    assert(o[2] instanceof Engineer);
+    assert(doc instanceof Doctor);
+    assert(fire instanceof Firefighter);
+    assert(eng instanceof Engineer);
 
-    const o2 = await service.get(Worker, o[0].id!);
-    assert(o2 instanceof Doctor);
-    const o3 = await service.get(Worker, o[1].id!);
-    assert(o3 instanceof Firefighter);
+    const doc2 = await service.get(Worker, doc.id);
+    assert(doc2 instanceof Doctor);
+    const fire2 = await service.get(Worker, fire.id);
+    assert(fire2 instanceof Firefighter);
 
     const all = await collect(service.list(Worker));
     assert(all.length === 3);
 
-    const dIdx = all.findIndex(x => x instanceof Doctor);
-    assert(all[dIdx] instanceof Doctor);
-    assert((all[dIdx] as Doctor).specialty === 'feet');
-    assert(all[dIdx].name === 'bob');
+    const doc3 = all.find(x => x instanceof Doctor);
+    assert(doc3 instanceof Doctor);
+    assert(doc3.specialty === 'feet');
+    assert(doc3.name === 'bob');
 
-    const fIdx = all.findIndex(x => x instanceof Firefighter);
-    assert(all[fIdx] instanceof Firefighter);
-    assert((all[fIdx] as Firefighter).firehouse === 20);
-    assert(all[fIdx].name === 'rob');
+    const fire3 = all.find(x => x instanceof Firefighter);
+    assert(fire3 instanceof Firefighter);
+    assert((fire3 as Firefighter).firehouse === 20);
+    assert(fire3.name === 'rob');
 
-    const eIdx = all.findIndex(x => x instanceof Engineer);
-    assert(all[eIdx] instanceof Engineer);
-    assert((all[eIdx] as Engineer).major === 'oranges');
-    assert(all[eIdx].name === 'cob');
+    const eng3 = all.find(x => x instanceof Engineer);
+    assert(eng3 instanceof Engineer);
+    assert((eng3 as Engineer).major === 'oranges');
+    assert(eng3.name === 'cob');
 
     const engineers = await collect(service.list(Engineer));
     assert(engineers.length === 1);
@@ -273,23 +279,23 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('Polymorphic upsert and delete')
   async polymorphicUpsertAndDelete() {
     const service = await this.service;
-    const people = [
+    const [doc, fire, eng] = [
       Doctor.from({ name: 'bob', specialty: 'feet' }),
       Firefighter.from({ name: 'rob', firehouse: 20 }),
       Engineer.from({ name: 'cob', major: 'oranges' })
     ];
 
-    await this.saveAll(Worker, people);
+    await this.saveAll(Worker, [doc, fire, eng]);
 
-    assert(await service.get(Worker, people[0].id!) instanceof Doctor);
-    assert(await service.get(Worker, people[1].id!) instanceof Firefighter);
+    assert(await service.get(Worker, doc.id) instanceof Doctor);
+    assert(await service.get(Worker, fire.id) instanceof Firefighter);
 
     const update = new Date();
 
     await assert.rejects(
       () =>
         service.upsert(Doctor, Doctor.from({
-          id: people[1].id!, name: 'drob', specialty: 'eyes'
+          id: fire.id, name: 'drob', specialty: 'eyes'
         })),
       TypeMismatchError
     );
@@ -300,7 +306,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       (e: Error) => (e instanceof NotFoundError || e instanceof TypeMismatchError) ? undefined : e);
 
     const res = await service.upsert(Doctor, Doctor.from({
-      id: people[0].id!, name: 'drob', specialty: 'eyes'
+      id: doc.id, name: 'drob', specialty: 'eyes'
     }));
 
     assert(res.updatedDate!.getTime() > update.getTime());
@@ -308,24 +314,24 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     // Delete by wrong class
     await assert.rejects(
-      () => service.delete(Doctor, people[1].id!),
+      () => service.delete(Doctor, fire.id),
       NotFoundError
     );
 
     // Delete by base class
-    await service.delete(Worker, people[1].id!);
+    await service.delete(Worker, fire.id);
 
     await assert.rejects(
-      () => service.delete(Worker, people[1].id!),
+      () => service.delete(Worker, fire.id),
       NotFoundError
     );
 
     // Delete by proper class
-    await service.delete(Doctor, people[0].id!);
+    await service.delete(Doctor, doc.id);
 
     // Delete by any subtype when id is missing
     await assert.rejects(
-      () => service.delete(Firefighter, people[0].id!),
+      () => service.delete(Firefighter, doc.id),
       NotFoundError
     );
   }

@@ -661,14 +661,14 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Get all create indices need for a given class
    */
-  getCreateAllIndicesSQL<T>(cls: Class<T>, indices: IndexConfig<T>[]): string[] {
+  getCreateAllIndicesSQL<T extends ModelType>(cls: Class<T>, indices: IndexConfig<T>[]): string[] {
     return indices.map(idx => this.getCreateIndexSQL(cls, idx));
   }
 
   /**
    * Get CREATE INDEX sql
    */
-  getCreateIndexSQL<T>(cls: Class<T>, idx: IndexConfig<T>): string {
+  getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
     const table = this.namespace(SQLUtil.classToStack(cls));
     const fields: [string, boolean][] = idx.fields.map(x => {
       const key = Object.keys(x)[0] as keyof typeof x;
@@ -687,7 +687,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Drop all tables for a given class
    */
-  getDropAllTablesSQL(cls: Class): string[] {
+  getDropAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     const out: string[] = [];
     SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
@@ -770,7 +770,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
   /**
    * Get ALL Insert queries as needed
    */
-  getAllInsertSQL<T>(cls: Class<T>, instance: T): string[] {
+  getAllInsertSQL<T extends ModelType>(cls: Class<T>, instance: T): string[] {
     const out: string[] = [];
     const add = (text?: string) => text && out.push(text);
     SQLUtil.visitSchemaInstance(cls, instance, {

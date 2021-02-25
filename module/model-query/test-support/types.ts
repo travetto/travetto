@@ -20,13 +20,13 @@ export class Person extends BaseModel {
 
 @Model('query-simple')
 export class Simple {
-  id?: string;
+  id: string;
   name: string;
 }
 
 @Model('query-simple-list')
 export class SimpleList {
-  id?: string;
+  id: string;
   names: string[];
   simples?: Simple[];
 }
@@ -52,12 +52,12 @@ export class Note implements ModelType {
 
 @Model()
 export class Location {
-  id?: string;
+  id: string;
   point: Point;
 }
 
 @Model()
 export class Region {
-  id?: string;
+  id: string;
   points: Point[];
 }

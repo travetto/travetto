@@ -148,23 +148,23 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     if (item.id) {
-      if (await this.head(cls, item.id!)) {
-        throw new ExistsError(cls, item.id!);
+      if (await this.head(cls, item.id)) {
+        throw new ExistsError(cls, item.id);
       }
     }
     return this.upsert(cls, item);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
-    if (!(await this.head(cls, item.id!))) {
-      throw new NotFoundError(cls, item.id!);
+    if (!(await this.head(cls, item.id))) {
+      throw new NotFoundError(cls, item.id);
     }
     return this.upsert(cls, item);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.client.putObject(this.q(cls, item.id!, {
+    await this.client.putObject(this.q(cls, item.id, {
       Body: JSON.stringify(item),
       ContentType: 'application/json'
     }));
@@ -173,7 +173,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
-    await this.client.putObject(this.q(cls, item.id!, {
+    await this.client.putObject(this.q(cls, id, {
       Body: JSON.stringify(item),
       ContentType: 'application/json'
     }));
@@ -181,7 +181,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    if (!(await this.head(cls, id!))) {
+    if (!(await this.head(cls, id))) {
       throw new NotFoundError(cls, id);
     }
     await this.client.deleteObject(this.q(cls, id));

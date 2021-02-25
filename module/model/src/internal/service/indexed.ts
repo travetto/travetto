@@ -75,7 +75,7 @@ export class ModelIndexedUtil {
    * @param idx Index config
    * @param item Item to read values from
    */
-  static flattenIndexItem<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: T, separator = '.') {
+  static flattenIndexItem<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, separator = '.') {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
     return cfg.fields.map((f: SortClauseRaw<unknown>) => {
       let o = item as Record<string, unknown>;
@@ -101,7 +101,7 @@ export class ModelIndexedUtil {
    * @param idx Index config
    * @param item item to process
    */
-  static computeIndexKey<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: T, separator = 'ᚕ') {
+  static computeIndexKey<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, separator = 'ᚕ') {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
     return cfg.fields.map((f: SortClauseRaw<unknown>) => {
       let o = item as Record<string, unknown>;

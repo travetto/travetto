@@ -37,7 +37,7 @@ export class ModelCrudUtil {
     const result = ModelRegistry.getBaseModel(cls).from(input as object) as T;
 
     if (!(result instanceof cls)) {
-      throw new NotFoundError(cls, result.id!);
+      throw new NotFoundError(cls, result.id);
     }
 
     if (result.postLoad) {
@@ -52,7 +52,7 @@ export class ModelCrudUtil {
    * @param cls Type to store for
    * @param item Item to store
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, item: T, idSource: { uuid(): string }) {
+  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<T>, idSource: { uuid(): string }): Promise<T> {
     if (!item.id) {
       item.id = idSource.uuid();
     }
@@ -63,7 +63,7 @@ export class ModelCrudUtil {
       await item.prePersist();
     }
 
-    return item;
+    return item as T;
   }
 
   /**

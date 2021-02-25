@@ -35,7 +35,7 @@ type WithId<T> = T & { _id?: string };
  */
 function postLoad<T extends ModelType>(o: T) {
   if ('_id' in o) {
-    o.id = (o as WithId<T>)._id;
+    (o as { id?: unknown }).id = (o as WithId<T>)._id;
     delete (o as WithId<T>)._id;
   }
   return o;
@@ -60,7 +60,7 @@ export class ElasticsearchModelService implements
   /**
    * Directly run the search
    */
-  async execSearch<T>(cls: Class<T>, search: Search<unknown>): Promise<SearchResponse<T>> {
+  async execSearch<T extends ModelType>(cls: Class<T>, search: Search<unknown>): Promise<SearchResponse<T>> {
     const res = await this.client.search({
       ...this.manager.getIdentity(cls),
       ...search
@@ -111,25 +111,24 @@ export class ElasticsearchModelService implements
     }
   }
 
-  async create<T extends ModelType>(cls: Class<T>, o: T): Promise<T> {
-    o = await ModelCrudUtil.preStore(cls, o, this);
-    const id = o.id!;
+  async create<T extends ModelType>(cls: Class<T>, o: Partial<T>): Promise<T> {
+    const clean = await ModelCrudUtil.preStore(cls, o, this);
+    const id = clean.id;
 
-    const { body: res } = await this.client.index({
+    await this.client.index({
       ...this.manager.getIdentity(cls) as Required<EsIdentity>,
-      ... (id ? { id } : {}),
+      id,
       refresh: 'true',
-      body: o
+      body: clean
     });
 
-    o.id = res._id;
-    return o;
+    return clean;
   }
 
   async update<T extends ModelType>(cls: Class<T>, o: T): Promise<T> {
     o = await ModelCrudUtil.preStore(cls, o, this);
 
-    const id = o.id!;
+    const id = o.id;
 
     await this.client.index({
       ...this.manager.getIdentity(cls),
@@ -143,23 +142,20 @@ export class ElasticsearchModelService implements
     return o;
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, o: T) {
-    o = await ModelCrudUtil.preStore(cls, o, this);
-
-    const id = o.id!;
+  async upsert<T extends ModelType>(cls: Class<T>, o: Partial<T>) {
+    const item = await ModelCrudUtil.preStore(cls, o, this);
 
     await this.client.update({
       ...this.manager.getIdentity(cls),
-      id,
+      id: item.id,
       refresh: 'true',
       body: {
-        doc: o,
+        doc: item,
         doc_as_upsert: true
       }
     });
 
-    o.id = id;
-    return o;
+    return item;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, data: Partial<T>) {
@@ -229,13 +225,13 @@ export class ElasticsearchModelService implements
         acc.push({ delete: { ...ident, _id: op.delete.id } });
       } else if (op.insert) {
         acc.push({ create: { ...ident, _id: op.insert.id } }, op.insert);
-        delete op.insert.id;
+        delete (op.insert as { id?: unknown }).id;
       } else if (op.upsert) {
         acc.push({ index: { ...ident, _id: op.upsert.id } }, op.upsert);
-        delete op.upsert.id;
+        delete (op.upsert as { id?: unknown }).id;
       } else if (op.update) {
         acc.push({ update: { ...ident, _id: op.update.id } }, { doc: op.update });
-        delete op.update.id;
+        delete (op.update as { id?: unknown }).id;
       }
       return acc;
     }, [] as (T | Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>> | { doc: T })[]);

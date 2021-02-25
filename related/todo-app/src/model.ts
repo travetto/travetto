@@ -3,7 +3,7 @@ import { Schema } from '@travetto/schema';
 
 @Model()
 export class Todo {
-  id?: string;
+  id: string;
   text: string;
   created?: Date;
   completed?: boolean;

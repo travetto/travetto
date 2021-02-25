@@ -145,23 +145,23 @@ export class MongoModelService implements
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     const cleaned = await ModelCrudUtil.preStore(cls, item, this);
-    (item as WithId<T>)._id = MongoUtil.uuid(item.id!);
+    (item as WithId<T>)._id = MongoUtil.uuid(item.id);
 
     const store = await this.getStore(cls);
     const result = await store.insertOne(cleaned);
     if (result.insertedCount === 0) {
-      throw new ExistsError(cls, item.id!);
+      throw new ExistsError(cls, item.id);
     }
-    delete (item as WithId<T>)._id;
+    delete (item as { _id?: unknown })._id;
     return item;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
-    const res = await store.replaceOne({ _id: MongoUtil.uuid(item.id!) }, item);
+    const res = await store.replaceOne({ _id: MongoUtil.uuid(item.id) }, item);
     if (res.matchedCount === 0) {
-      throw new NotFoundError(cls, item.id!);
+      throw new NotFoundError(cls, item.id);
     }
     return item;
   }
@@ -170,7 +170,7 @@ export class MongoModelService implements
     item = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
     await store.updateOne(
-      { _id: MongoUtil.uuid(item.id!) },
+      { _id: MongoUtil.uuid(item.id) },
       { $set: item },
       { upsert: true }
     );
@@ -291,24 +291,24 @@ export class MongoModelService implements
       const op = operations[i];
       if (op.insert) {
         op.insert = await ModelCrudUtil.preStore(cls, op.insert, this);
-        out.insertedIds.set(i, op.insert.id!);
+        out.insertedIds.set(i, op.insert.id);
         bulk.insert(MongoUtil.preInsertId(op.insert));
       } else if (op.upsert) {
         const newId = !op.upsert.id;
         op.upsert = await ModelCrudUtil.preStore(cls, op.upsert, this);
-        const id = MongoUtil.uuid(op.upsert.id!);
+        const id = MongoUtil.uuid(op.upsert.id);
         bulk.find({ _id: id })
           .upsert()
           .updateOne({ $set: op.upsert });
 
         if (newId) {
-          out.insertedIds.set(i, op.upsert.id!);
+          out.insertedIds.set(i, op.upsert.id);
         }
       } else if (op.update) {
         op.update = await ModelCrudUtil.preStore(cls, op.update, this);
-        bulk.find({ _id: MongoUtil.uuid(op.update.id!) }).update({ $set: op.update });
+        bulk.find({ _id: MongoUtil.uuid(op.update.id) }).update({ $set: op.update });
       } else if (op.delete) {
-        bulk.find({ _id: MongoUtil.uuid(op.delete.id!) }).removeOne();
+        bulk.find({ _id: MongoUtil.uuid(op.delete.id) }).removeOne();
       }
     }
 

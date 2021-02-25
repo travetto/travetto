@@ -67,7 +67,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       multi.set(key, JSON.stringify(item));
 
       for (const idx of config.indices) {
-        multi.hmset(this.resolveKey(cls, idx.name), ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id!);
+        multi.hmset(this.resolveKey(cls, idx.name), ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id);
       }
 
       await new Promise<void>((resolve, reject) => multi.exec(err => err ? reject(err) : resolve()));
@@ -81,10 +81,10 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       if (expiry.expiresAt !== undefined) {
         if (expiry.expiresAt) {
           await this.wrap(util.promisify(this.cl.pexpireat))(
-            this.resolveKey(cls, item.id!), expiry.expiresAt.getTime()
+            this.resolveKey(cls, item.id), expiry.expiresAt.getTime()
           );
         } else {
-          await this.wrap(util.promisify(this.cl.persist))(this.resolveKey(cls, item.id!));
+          await this.wrap(util.promisify(this.cl.persist))(this.resolveKey(cls, item.id));
         }
       }
     }
@@ -122,13 +122,13 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     if (item.id) {
-      await this.has(cls, item.id!, 'data');
+      await this.has(cls, item.id, 'data');
     }
     return this.upsert(cls, item);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
-    await this.has(cls, item.id!, 'notfound');
+    await this.has(cls, item.id, 'notfound');
     return this.upsert(cls, item);
   }
 
@@ -140,7 +140,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
-    await this.store(cls, item);
+    await this.store(cls, item as T);
     return item as T;
   }
 

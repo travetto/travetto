@@ -28,7 +28,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
 
     await service.create(Person, person);
 
-    const single = await service.get(Person, person.id!);
+    const single = await service.get(Person, person.id);
     assert(single !== undefined);
     assert(single.age === 25);
 
@@ -36,10 +36,10 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
       await service.get(Person, service.uuid());
     }, NotFoundError);
 
-    await service.delete(Person, person.id!);
+    await service.delete(Person, person.id);
 
     await assert.rejects(async () => {
-      await service.get(Person, person.id!);
+      await service.get(Person, person.id);
     }, NotFoundError);
   }
 }

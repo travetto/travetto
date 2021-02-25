@@ -46,7 +46,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     }));
     assert(res instanceof User);
 
-    const expiry = ModelExpiryUtil.getExpiryState(User, await service.get(User, res.id!));
+    const expiry = ModelExpiryUtil.getExpiryState(User, await service.get(User, res.id));
     assert(!expiry.expired);
   }
 
@@ -61,7 +61,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
     await this.wait(200);
 
-    await assert.rejects(() => service.get(User, res.id!), NotFoundError);
+    await assert.rejects(() => service.get(User, res.id), NotFoundError);
   }
 
   @Test()
@@ -74,15 +74,15 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
     await this.wait(50);
 
-    assert(!ModelExpiryUtil.getExpiryState(User, (await service.get(User, res.id!))).expired);
+    assert(!ModelExpiryUtil.getExpiryState(User, (await service.get(User, res.id))).expired);
 
-    await service.updatePartial(User, res.id!, {
+    await service.updatePartial(User, res.id, {
       expiresAt: this.getAge(100)
     });
 
     await this.wait(200);
 
-    await assert.rejects(() => service.get(User, res.id!), NotFoundError);
+    await assert.rejects(() => service.get(User, res.id), NotFoundError);
   }
 
   @Test()

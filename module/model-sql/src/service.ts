@@ -81,11 +81,11 @@ export class SQLModelService implements
       if (target) {
         if (!target.id) {
           target.id = this.uuid();
-          addedIds.set(i, target.id!);
+          addedIds.set(i, target.id);
         } else if (op.upsert) {
           toCheck.set(target.id, i);
         } else if (op.insert) {
-          addedIds.set(i, target.id!);
+          addedIds.set(i, target.id);
         }
       }
     }
@@ -99,7 +99,7 @@ export class SQLModelService implements
       )).records : [];
 
     for (const el of all) {
-      toCheck.delete(el.id!);
+      toCheck.delete(el.id);
     }
 
     for (const [el, idx] of toCheck.entries()) {
@@ -158,14 +158,14 @@ export class SQLModelService implements
 
   @Transactional()
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    await this.delete(cls, item.id!);
+    await this.delete(cls, item.id);
     return await this.create(cls, item);
   }
 
   @Transactional()
   async upsert<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     try {
-      await this.delete(cls, item.id!);
+      await this.delete(cls, item.id);
     } catch (err) {
       if (!(err instanceof NotFoundError)) {
         throw err;
@@ -214,7 +214,7 @@ export class SQLModelService implements
 
     const insertedIds = await this.computeInsertedIds(cls, operations);
 
-    const deletes = [{ stack: SQLUtil.classToStack(cls), ids: deleteOps.map(x => x.id!) }].filter(x => !!x.ids.length);
+    const deletes = [{ stack: SQLUtil.classToStack(cls), ids: deleteOps.map(x => x.id) }].filter(x => !!x.ids.length);
     const inserts = (await SQLUtil.getInserts(cls, insertOps)).filter(x => !!x.records.length);
     const upserts = (await SQLUtil.getInserts(cls, upsertOps)).filter(x => !!x.records.length);
     const updates = (await SQLUtil.getInserts(cls, updateOps)).filter(x => !!x.records.length);
