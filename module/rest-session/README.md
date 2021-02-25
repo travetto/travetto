@@ -92,7 +92,7 @@ export class Session<T extends SessionData = SessionData>  {
 }
 ```
 
-A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) parameter as [Session](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L15) and [SessionData](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L7) respectively.  Iit can also be accessed via the [Request](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.d.ts#L9) as a session property.
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) parameter as [Session](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L15) and [SessionData](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L7) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.d.ts#L8) as a session property.
 
 **Code: Sample Session Usage**
 ```typescript
@@ -126,7 +126,7 @@ This usage should be comparable to [express](https://expressjs.com), [koa](https
 
 Session mechanics are defined by two main components, encoders and a cache source.  The encoders are provided within the module, but the stores are provided via the [@Cache](https://github.com/travetto/travetto/tree/master/module/cache/src/decorator.ts#L12) module.
 
-By default, the module supplies the [RequetSessionEncoder](https://github.com/travetto/travetto/tree/master/module/rest-session/src/encoder/request.ts#L14) and the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L27) as default usage.
+By default, the module supplies the [RequetSessionEncoder](https://github.com/travetto/travetto/tree/master/module/rest-session/src/encoder/request.ts#L14) and the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L29) as default usage.
 
 ### Building an Encoder
 

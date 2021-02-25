@@ -29,8 +29,8 @@ Options:
 
 Available Pack Modes:
   * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
-  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span>
-  * rest/lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.lambda.ts<span class="token punctuation">]</span></code></pre>     
+  * rest/aws-lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.aws-lambda.ts<span class="token punctuation">]</span>
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span></code></pre>     
       </figure>
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. The pack operation is actually a wrapper around multiple sub-operations that are run in series to produce the desired final structure for deployment.  The currently support operations are:
@@ -101,8 +101,8 @@ Options:
 
 Available Pack Modes:
   * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
-  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span>
-  * rest/lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.lambda.ts<span class="token punctuation">]</span></code></pre>     
+  * rest/aws-lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.aws-lambda.ts<span class="token punctuation">]</span>
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span></code></pre>     
       </figure>
 
 <h3 id="cli-pack-zip">CLI - pack:zip</h3>
@@ -134,8 +134,8 @@ Options:
 
 Available Pack Modes:
   * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
-  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span>
-  * rest/lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.lambda.ts<span class="token punctuation">]</span></code></pre>     
+  * rest/aws-lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.aws-lambda.ts<span class="token punctuation">]</span>
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span></code></pre>     
       </figure>
 
 <h3 id="modes">Modes</h3>
@@ -143,24 +143,31 @@ Various modules may provide customizations to the default <code class="item path
 
       <figure class="code">
       <figcaption class="code">Rest, pack.lambda.ts
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest/support/pack.lambda.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest/support/pack.aws-lambda.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> AllConfigPartial <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/pack/bin/operation/pack'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppCache<span class="token punctuation">,</span> FsUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> AllConfigPartial <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/pack/bin/operation/pack'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> config<span class="token operator">:</span> AllConfigPartial <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
-  name<span class="token operator">:</span> <span class="token string">'rest/lambda'</span><span class="token punctuation">,</span>
+  name<span class="token operator">:</span> <span class="token string">'rest/aws-lambda'</span><span class="token punctuation">,</span>
   assemble<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     active<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
     keepSource<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
-    add<span class="token operator">:</span> <span class="token punctuation">[</span>
-      <span class="token punctuation">{{'{'}}</span> <span class="token string">'node_modules/@travetto/rest/support/aws-lambda.js'</span><span class="token operator">:</span> <span class="token string">'index.js'</span> <span class="token punctuation">{{'}'}}</span>
-    <span class="token punctuation">]</span><span class="token punctuation">,</span>
     exclude<span class="token operator">:</span> <span class="token punctuation">[</span>
       <span class="token string">'node_modules/node-forge'</span>
     <span class="token punctuation">]</span><span class="token punctuation">,</span>
     env<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token constant">NO_COLOR</span><span class="token operator">:</span> <span class="token number">1</span>
-    <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+    postProcess<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{{'{'}}</span>
+      <span class="token punctuation">[</span><span class="token string">'Install Entrypoint'</span><span class="token punctuation">]</span><span class="token operator">:</span> <span class="token keyword">async</span> <span class="token punctuation">(</span>cfg<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> cacheDir<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> workspace<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">const</span> Entrypoint <span class="token operator">=</span> AppCache<span class="token punctuation">.</span><span class="token function">toEntryName</span><span class="token punctuation">(</span><span class="token keyword">require</span><span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token string">'@travetto/rest/support/entry.aws-lambda.ts'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+          <span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span>AppCache<span class="token punctuation">.</span>cacheDir<span class="token punctuation">,</span> FsUtil<span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>cfg<span class="token punctuation">.</span>workspace<span class="token punctuation">,</span> cfg<span class="token punctuation">.</span>cacheDir<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">await</span> fs<span class="token punctuation">.</span>promises<span class="token punctuation">.</span><span class="token function">copyFile</span><span class="token punctuation">(</span>Entrypoint<span class="token punctuation">,</span> FsUtil<span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>cfg<span class="token punctuation">.</span>workspace<span class="token punctuation">,</span> <span class="token string">'index.js'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
   zip<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     active<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>

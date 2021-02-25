@@ -18,30 +18,30 @@ The integration with the [RESTful API](https://github.com/travetto/travetto/tree
    *  Route declaration
 
 ## Security information management
-When working with framework's authentication, the user information is exposed via the [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) 
+When working with framework's authentication, the user information is exposed via the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11) 
 object.  The auth functionality is exposed on the request as the property `auth`.
 
 **Code: Structure of auth property on the request**
 ```typescript
-export interface Request {
-      /**
-       * The auth context
-       */
-      auth?: AuthContext;
-      /**
-       * The login context
-       */
-      loginContext?: Record<string, any>;
-      /**
-       * Log the user out
-       */
-      logout(): Promise<void>;
-      /**
-       * Perform a login
-       * @param providers  List of providers to authenticate against
-       */
-      login(providers: symbol[]): Promise<AuthContext | undefined>; // Undefined is for multi step logins
-    }
+export interface TravettoRequest {
+    /**
+     * The auth context
+     */
+    auth?: AuthContext;
+    /**
+     * The login context
+     */
+    loginContext?: Record<string, any>;
+    /**
+     * Log the user out
+     */
+    logout(): Promise<void>;
+    /**
+     * Perform a login
+     * @param providers  List of providers to authenticate against
+     */
+    login(providers: symbol[]): Promise<AuthContext | undefined>; // Undefined is for multi step logins
+  }
 ```
 
 This allows for any filters/middleware to access this information without deeper knowledge of the framework itself.  Also, for performance benefits, the auth context can be stored in the user session as a means to minimize future lookups. If storing the entire principal in the session, it is best to keep the principal as small as possible.
@@ -56,7 +56,7 @@ Every external framework integration relies upon the [IdentitySource](https://gi
 [IdentitySource](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/identity.ts#L9)
 ```
 
-The only required method to be defined is the `authenticate` method.  This takes in a [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [Response](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), and is responsible for:
+The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L87), and is responsible for:
 
    
    *  Returning an [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L29) if authentication was successful
@@ -145,7 +145,7 @@ export class SampleAuth {
 }
 ```
 
-[@Authenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L21) and [@Unauthenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L37) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, [AuthContext](https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11) is accessible via [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) directly, without wiring in a request object, but is also accessible on the request object as [Request](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12).auth.
+[@Authenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L21) and [@Unauthenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L37) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, [AuthContext](https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11) is accessible via [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) directly, without wiring in a request object, but is also accessible on the request object as [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11).auth.
 
 ## Passport - Extension
 

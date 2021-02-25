@@ -1,5 +1,5 @@
 // @ts-check
-import { pth, doc as d, mod, Code, inp, Terminal, Section, List, Execute, SubSection, Ordered, Snippet } from '@travetto/doc';
+import { pth, doc as d, mod, Code, Terminal, Section, List, Execute, SubSection, Ordered, Snippet } from '@travetto/doc';
 
 exports.text = d`
 ${Section('CLI - pack')} 
@@ -47,7 +47,7 @@ ${Execute('Zip Usage', 'trv', ['pack:zip', '--help'])}
 ${SubSection('Modes')}
 Various modules may provide customizations to the default ${pth`pack.config.ts`} to allow for easy integration with the packing process.  A simple example of this is via the ${mod.Rest} module, for how to publish lambda packages.
 
-${Code('Rest, pack.lambda.ts', '@travetto/rest/support/pack.lambda.ts')}
+${Code('Rest, pack.lambda.ts', '@travetto/rest/support/pack.aws-lambda.ts')}
 
 ${Terminal('Invoking Pack with Mode', 'npx trv pack <mode>')}
 

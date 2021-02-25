@@ -202,7 +202,7 @@ Failed application run {
       at Array.map (<anonymous>)
       at $ApplicationRegistry.resolveParameters (./src/registry.ts:45:24)
       at Function.run (./bin/lib/run.ts:36:31)
-      at processTicksAndRejections (internal/process/task_queues.js:93:5)
+      at processTicksAndRejections (node:internal/process/task_queues:94:5)
       at AppRunPlugin.action (./bin/cli-run.ts:55:11)
 }
 ```

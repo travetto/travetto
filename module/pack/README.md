@@ -22,8 +22,8 @@ Options:
 
 Available Pack Modes:
   * default [support/pack.config.ts]
+  * rest/aws-lambda [@travetto/rest/support/pack.aws-lambda.ts]
   * rest/docker [@travetto/rest/support/pack.docker.ts]
-  * rest/lambda [@travetto/rest/support/pack.lambda.ts]
 ```
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. The pack operation is actually a wrapper around multiple sub-operations that are run in series to produce the desired final structure for deployment.  The currently support operations are:
@@ -92,8 +92,8 @@ Options:
 
 Available Pack Modes:
   * default [support/pack.config.ts]
+  * rest/aws-lambda [@travetto/rest/support/pack.aws-lambda.ts]
   * rest/docker [@travetto/rest/support/pack.docker.ts]
-  * rest/lambda [@travetto/rest/support/pack.lambda.ts]
 ```
 
 ### CLI - pack:zip
@@ -121,8 +121,8 @@ Options:
 
 Available Pack Modes:
   * default [support/pack.config.ts]
+  * rest/aws-lambda [@travetto/rest/support/pack.aws-lambda.ts]
   * rest/docker [@travetto/rest/support/pack.docker.ts]
-  * rest/lambda [@travetto/rest/support/pack.lambda.ts]
 ```
 
 ### Modes
@@ -130,22 +130,29 @@ Various modules may provide customizations to the default `pack.config.ts` to al
 
 **Code: Rest, pack.lambda.ts**
 ```typescript
+import * as fs from 'fs';
+import { AppCache, FsUtil } from '@travetto/boot';
+
 import type { AllConfigPartial } from '@travetto/pack/bin/operation/pack';
 
 export const config: AllConfigPartial = {
-  name: 'rest/lambda',
+  name: 'rest/aws-lambda',
   assemble: {
     active: true,
     keepSource: false,
-    add: [
-      { 'node_modules/@travetto/rest/support/aws-lambda.js': 'index.js' }
-    ],
     exclude: [
       'node_modules/node-forge'
     ],
     env: {
       NO_COLOR: 1
-    }
+    },
+    postProcess: [{
+      ['Install Entrypoint']: async (cfg: { cacheDir: string, workspace: string }) => {
+        const Entrypoint = AppCache.toEntryName(require.resolve('@travetto/rest/support/entry.aws-lambda.ts'))
+          .replace(AppCache.cacheDir, FsUtil.resolveUnix(cfg.workspace, cfg.cacheDir));
+        await fs.promises.copyFile(Entrypoint, FsUtil.resolveUnix(cfg.workspace, 'index.js'));
+      }
+    }],
   },
   zip: {
     active: true,

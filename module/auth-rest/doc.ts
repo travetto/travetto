@@ -7,8 +7,8 @@ import { AuthService } from './src/service';
 import { Authenticate, Unauthenticated, Authenticated } from './src/decorator';
 import { PassportIdentitySource } from './src/extension/passport/identity';
 
-const Request = SnippetLink('Request', '@travetto/rest/src/types.d.ts', /interface Request/);
-const Response = SnippetLink('Response', '@travetto/rest/src/types.d.ts', /interface Response/);
+const Request = SnippetLink('TravettoRequest', '@travetto/rest/src/types.d.ts', /interface TravettoRequest/);
+const Response = SnippetLink('TravettoResponse', '@travetto/rest/src/types.d.ts', /interface TravettoResponse/);
 const Identity = SnippetLink('Identity', '@travetto/auth/src/types.ts', /interface Identity/);
 const IdentitySource = SnippetLink('IdentitySource', './src/identity.ts', /interface IdentitySource/);
 
@@ -28,7 +28,7 @@ ${Section('Security information management')}
 When working with framework's authentication, the user information is exposed via the ${Request} 
 object.  The auth functionality is exposed on the request as the property ${inp`auth`}.
 
-${Snippet('Structure of auth property on the request', './src/typings.d.ts', /interface Request/, /^\s+[}]/)}
+${Snippet('Structure of auth property on the request', './src/typings.d.ts', /interface TravettoRequest/, /^\s+[}]/)}
 
 This allows for any filters/middleware to access this information without deeper knowledge of the framework itself.  Also, for performance benefits, the auth context can be stored in the user session as a means to minimize future lookups. If storing the entire principal in the session, it is best to keep the principal as small as possible.
 

@@ -8,6 +8,7 @@ try {
 
 export const Package = pkg as {
   name: string;
+  title?: string;
   version: string;
   description?: string;
   license?: string;

@@ -82,7 +82,7 @@ export interface ModelExpirySupport extends ModelCrudSupport {
    *
    * @returns Returns the number of documents expired
    */
-  deleteExpired?<T extends ModelType>(cls: Class<T>): Promise<number>;
+  deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number>;
 }
 ```
 

@@ -14,8 +14,8 @@ import { SerializeInterceptor } from './src/interceptor/serialize';
 import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies';
 import { RestConfig } from './src/application/config';
 
-const Request = SnippetLink('Request', 'src/types.d.ts', /interface Request/);
-const Response = SnippetLink('Response', 'src/types.d.ts', /interface Response/);
+const Request = SnippetLink('TravettoRequest', 'src/types.d.ts', /interface TravettoRequest/);
+const Response = SnippetLink('TravettoResponse', 'src/types.d.ts', /interface TravettoResponse/);
 const ResourceManager = Ref('ResourceManager', '@travetto/base/src/resource.ts');
 
 const RestInterceptor = SnippetLink('RestInterceptor', 'src/interceptor/types.ts', /interface RestInterceptor/);
