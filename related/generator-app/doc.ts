@@ -1,6 +1,7 @@
 import { doc as d, lib, Header, Install, Section, Terminal, mod, inp, List, pth, SubSection, Code, Ref } from '@travetto/doc';
 
-const Todo = Ref('Todo', './templates/todo/src/model/todo.ts');
+import { Todo } from './templates/todo/src/model/todo';
+import { TodoController } from './templates/todo/src/rest/todo';
 
 exports.header = false;
 exports.text = d`
@@ -52,19 +53,21 @@ ${List(
   lib.Elasticsearch,
   lib.MongoDB,
   lib.SQL,
+  lib.DynamoDB,
+  lib.Firestore,
 )}
 
 
 A default model is constructed, a ${Todo} class:
 
-${Code('Todo Model', Todo.link.content)}
+${Code('Todo Model', Todo.ᚕfile)}
 
 Basic tests are also included for the ${inp`model`} to verify that database interaction and functionality is working properly.
 
 ${Section('Rest + Model')}
 In the case both ${inp`rest`} and ${inp`model`} features are enabled, the code will produce a controller that exposes the ${Todo} model via restful patterns.
 
-${Code('Todo controller', './templates/todo/src/rest/todo.ts')}
+${Code('Todo controller', TodoController.ᚕfile)}
 
 ${Section('Running')}
 

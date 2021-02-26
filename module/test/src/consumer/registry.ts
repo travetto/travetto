@@ -1,4 +1,4 @@
-import { ScanFs } from '@travetto/boot/src';
+import { ScanFs } from '@travetto/boot';
 import { Class, ConcreteClass } from '@travetto/base';
 import { TestConsumer } from './types';
 

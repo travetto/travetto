@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { AppError } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
-import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
+import { Inject, InjectableFactory } from '@travetto/di';
 import { ModelCrudSupport, BaseModel, Model } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
 
@@ -43,37 +43,32 @@ class TestConfig {
 @Suite()
 export abstract class AuthModelServiceSuite extends BaseModelSuite<ModelCrudSupport> {
 
-  get principalSource() {
-    return DependencyRegistry.getInstance<ModelPrincipalSource<User>>(ModelPrincipalSource);
-  }
+  @Inject()
+  principalSource: ModelPrincipalSource<User>;
 
   @Test()
   async register() {
-    const svc = await this.principalSource;
-
     const pre = User.from({
       password: 'bob'
     });
 
-    const user = await svc.register(pre);
+    const user = await this.principalSource.register(pre);
     assert.ok(user.hash);
     assert.ok(user.id);
   }
 
   @Test()
   async authenticate() {
-    const svc = await this.principalSource;
-
     const pre = User.from({
       id: '5',
       password: 'bob'
     });
 
     try {
-      await svc.authenticate(pre.id, pre.password!);
+      await this.principalSource.authenticate(pre.id, pre.password!);
     } catch (err) {
       if (err instanceof AppError && err.category === 'notfound') {
-        const user = await svc.register(pre);
+        const user = await this.principalSource.register(pre);
         assert.ok(user.hash);
         assert.ok(user.id);
       } else {
@@ -81,6 +76,6 @@ export abstract class AuthModelServiceSuite extends BaseModelSuite<ModelCrudSupp
       }
     }
 
-    await assert.doesNotReject(() => svc.authenticate(pre.id, pre.password!));
+    await assert.doesNotReject(() => this.principalSource.authenticate(pre.id, pre.password!));
   }
 }

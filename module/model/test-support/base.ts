@@ -1,9 +1,10 @@
-import { FsUtil } from '@travetto/boot/src';
+import { FsUtil } from '@travetto/boot';
 import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
 import { AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
 import { Class, ResourceManager } from '@travetto/base';
+import { RootRegistry } from '@travetto/registry';
 import { TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';
+import { BaseInjectableTest } from '@travetto/di/test-support/base';
 
 import { ModelRegistry } from '../src/registry/model';
 import { isBulkSupported, isCrudSupported, isStorageSupported } from '../src/internal/service/common';
@@ -11,9 +12,10 @@ import { ModelType } from '../src/types/model';
 
 let first = true;
 
-export abstract class BaseModelSuite<T> {
+export abstract class BaseModelSuite<T> extends BaseInjectableTest {
 
   constructor(public serviceClass: Class<T>, public configClass: Class) {
+    super();
   }
 
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]) {

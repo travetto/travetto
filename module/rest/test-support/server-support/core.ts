@@ -1,16 +1,19 @@
 import * as qs from 'querystring';
 import * as fetch from 'node-fetch';
 
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistry, Injectable } from '@travetto/di';
 
 import type { RestApplication } from '../../src/application/rest';
 import type { Request } from '../../src/types';
 import type { RestServerSupport, MakeRequestConfig } from './base';
+import { RestCookieConfig } from '@travetto/rest/src/interceptor/cookies';
 
 /**
  * Support for invoking http requests against the server
  */
 export class CoreRestServerSupport implements RestServerSupport {
+
+  private cookieConfig: RestCookieConfig;
 
   private app: RestApplication;
 

@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 // import * as cookies from 'cookies';
 
-import { RootRegistry } from '@travetto/registry';
-import { Suite, Test, BeforeEach } from '@travetto/test';
-import { DependencyRegistry } from '@travetto/di';
+import { Suite, Test } from '@travetto/test';
+import { Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
+import { BaseInjectableTest } from '@travetto/di/test-support/base';
 
 import { RequetSessionEncoder } from '../src/encoder/request';
 import { Session } from '../src/types';
@@ -12,22 +12,21 @@ import { SessionConfig } from '../src/config';
 // import { CookieEncoder } from '../src/encoder/cookie';
 
 @Suite()
-export class EncoderTest {
+export class EncoderTest extends BaseInjectableTest {
 
-  @BeforeEach()
-  async init() {
-    await RootRegistry.init();
-  }
+  @Inject()
+  instance: RequetSessionEncoder;
+
+  @Inject()
+  config: SessionConfig;
 
   @Test()
   async testSessionHeader() {
-    const instance = await DependencyRegistry.getInstance(RequetSessionEncoder);
-    const config = await DependencyRegistry.getInstance(SessionConfig);
-    config.transport = 'header';
+    this.config.transport = 'header';
 
     const headers: Record<string, string> = {};
 
-    await instance.encode({} as Request, {
+    await this.instance.encode({} as Request, {
       setHeader(key: string, value: string) {
         headers[key] = value;
       }
@@ -38,23 +37,21 @@ export class EncoderTest {
       }
     }));
 
-    assert(headers[config.keyName] !== undefined);
+    assert(headers[this.config.keyName] !== undefined);
   }
 
   @Test()
   async testSessionHeaderMissing() {
-    const instance = await DependencyRegistry.getInstance(RequetSessionEncoder);
-    const config = await DependencyRegistry.getInstance(SessionConfig);
-    config.transport = 'header';
+    this.config.transport = 'header';
 
     const headers: Record<string, string> = {};
 
-    await instance.encode({} as Request, {
+    await this.instance.encode({} as Request, {
       setHeader(key: string, value: string) {
         headers[key] = value;
       }
     } as Response, null);
 
-    assert(headers[config.keyName] === undefined);
+    assert(headers[this.config.keyName] === undefined);
   }
 }

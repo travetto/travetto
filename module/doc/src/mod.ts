@@ -1,4 +1,4 @@
-import { FsUtil } from '@travetto/boot/src';
+import { FsUtil } from '@travetto/boot';
 import { AllTypeMap } from './node-types';
 import { Mod } from './nodes';
 

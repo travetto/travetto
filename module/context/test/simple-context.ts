@@ -1,22 +1,17 @@
 import * as assert from 'assert';
 import * as asyncHooks from 'async_hooks';
 
-import { DependencyRegistry } from '@travetto/di';
-import { Suite, Test, BeforeAll } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
+import { Inject } from '@travetto/di';
+import { Suite, Test } from '@travetto/test';
+import { BaseInjectableTest } from '@travetto/di/test-support/base';
 
 import { AsyncContext, WithAsyncContext } from '../';
 
 @Suite()
-class VerifyContext {
+class VerifyContext extends BaseInjectableTest {
 
+  @Inject()
   context: AsyncContext;
-
-  @BeforeAll()
-  async init() {
-    await RootRegistry.init();
-    this.context = await DependencyRegistry.getInstance(AsyncContext);
-  }
 
   @Test()
   @WithAsyncContext({})

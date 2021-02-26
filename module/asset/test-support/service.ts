@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 
-import { FsUtil } from '@travetto/boot/src';
+import { FsUtil } from '@travetto/boot';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
+import { Inject } from '@travetto/di';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
-import { DependencyRegistry } from '@travetto/di';
 import { ModelStreamSupport } from '@travetto/model';
 
 import { HashNamingStrategy, AssetService, AssetUtil } from '..';
@@ -12,9 +12,8 @@ import { HashNamingStrategy, AssetService, AssetUtil } from '..';
 @Suite()
 export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSupport> {
 
-  get assetService() {
-    return DependencyRegistry.getInstance(AssetService);
-  }
+  @Inject()
+  assetService: AssetService;
 
   @BeforeAll()
   async setup() {
@@ -23,7 +22,7 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
 
   @Test()
   async writeBasic() {
-    const service = await this.assetService;
+    const service = this.assetService;
     const pth = await ResourceManager.findAbsolute('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
 
@@ -34,7 +33,7 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
 
   @Test()
   async writeHashed() {
-    const service = await this.assetService;
+    const service = this.assetService;
     const pth = await ResourceManager.findAbsolute('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const outHashed = await service.upsert(file, false, new HashNamingStrategy());
@@ -44,7 +43,7 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
 
   @Test()
   async writeAndGet() {
-    const service = await this.assetService;
+    const service = this.assetService;
     const pth = await ResourceManager.findAbsolute('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     await service.upsert(file);
@@ -59,7 +58,7 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
 
   @Test()
   async writeAndDelete() {
-    const service = await this.assetService;
+    const service = this.assetService;
     const pth = await ResourceManager.findAbsolute('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const id = await service.upsert(file);

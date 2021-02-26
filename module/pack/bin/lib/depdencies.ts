@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { FsUtil } from '@travetto/boot/src';
+import { FsUtil } from '@travetto/boot';
 
 export type ResolvedDep = { file: string, type: DepType, dep: string, version: string };
 export type DepType = 'prod' | 'dev' | 'opt' | 'peer' | 'optPeer';

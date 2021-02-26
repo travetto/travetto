@@ -28,7 +28,8 @@
   "files": [
     "index.ts",
     "src",
-    "support"
+    "support",
+    "test-support"
   ],
   "name": "@travetto/di",
   "repository": {

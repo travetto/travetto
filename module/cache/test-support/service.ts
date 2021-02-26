@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
 import { ModelExpirySupport } from '@travetto/model';
-import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 
 import { Cache, EvictCache } from '../src/decorator';
 import { CacheService } from '../src/service';
@@ -76,9 +76,8 @@ export abstract class CacheServiceSuite extends BaseModelSuite<ModelExpirySuppor
 
   baseLatency = 10;
 
-  get testService() {
-    return DependencyRegistry.getInstance(SampleService);
-  }
+  @Inject()
+  testService: SampleService;
 
   @Test()
   async basic() {

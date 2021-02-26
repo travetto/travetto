@@ -1,12 +1,12 @@
 import * as assert from 'assert';
 
-import { RootRegistry } from '@travetto/registry';
 import { Schema, FieldConfig } from '@travetto/schema';
-import { Test, BeforeAll, Suite } from '@travetto/test';
-import { DependencyRegistry } from '@travetto/di';
+import { Test, Suite } from '@travetto/test';
+import { Inject } from '@travetto/di';
 
 import { VisitStack } from '../src/internal/util';
 import { SQLModelService } from '../src/service';
+import { BaseInjectableTest } from '@travetto/di/test-support/base';
 
 @Schema()
 class User {
@@ -45,19 +45,13 @@ class WhereType {
 }
 
 @Suite()
-export abstract class BaseQueryTest {
+export abstract class BaseQueryTest extends BaseInjectableTest {
 
-  get service() {
-    return DependencyRegistry.getInstance(SQLModelService);
-  }
-
-  @BeforeAll()
-  async beforeAll() {
-    await RootRegistry.init();
-  }
+  @Inject()
+  service: SQLModelService;
 
   get dialect() {
-    return this.service.then(s => s.dialect);
+    return this.service.dialect;
   }
 
   @Test()
@@ -74,7 +68,7 @@ export abstract class BaseQueryTest {
       ]
     };
 
-    const dct = await this.dialect;
+    const dct = this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
       const field = stack[stack.length - 1] as FieldConfig;
       const parent = stack[stack.length - 2] as FieldConfig;
@@ -87,7 +81,7 @@ export abstract class BaseQueryTest {
 
   @Test()
   async testRegEx() {
-    const dct = await this.dialect;
+    const dct = this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
       const field = stack[stack.length - 1] as FieldConfig;
       return `${field.owner.name}.${field.name}`;
@@ -101,7 +95,7 @@ export abstract class BaseQueryTest {
 
     assert(out === `User.name ${dct.SQL_OPS.$regex} 'google.$'`);
 
-    const dia = await this.dialect;
+    const dia = this.dialect;
     const outBoundary = dct.getWhereGroupingSQL(User, {
       name: {
         $regex: /\bgoogle\b/

@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 
-import { RootRegistry } from '@travetto/registry';
-import { Test, Suite, BeforeAll } from '@travetto/test';
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
+import { Test, Suite } from '@travetto/test';
+import { Inject, InjectableFactory } from '@travetto/di';
+import { BaseInjectableTest } from '@travetto/di/test-support/base';
 
 import { MailService, MailTransport, NullTransport } from '../';
 
@@ -14,18 +14,14 @@ class Config {
 }
 
 @Suite('Emails')
-class EmailSuite {
+class EmailSuite extends BaseInjectableTest {
 
-  @BeforeAll()
-  async init() {
-    await RootRegistry.init();
-  }
+  @Inject()
+  instance: MailService;
 
   @Test('Send email')
   async sendEmail() {
-    const instance = await DependencyRegistry.getInstance(MailService);
-
-    const opts = await instance.send({
+    const opts = await this.instance.send({
       html: 'Message'
     });
     assert(opts);

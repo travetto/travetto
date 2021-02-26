@@ -3,7 +3,6 @@
   "README.md": {},
   "gitignore.txt": {},
   ".eslintrc.js": {},
-  "tsconfig.json": {},
   "resources/application.yml": {},
   "src/model/todo.ts": {
     "requires": [
