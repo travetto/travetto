@@ -646,6 +646,13 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   }
 
   /**
+   * Generate truncate SQL
+   */
+  getTruncateTableSQL(stack: VisitStack[]) {
+    return `TRUNCATE ${this.table(stack)}; `;
+  }
+
+  /**
    * Get all table creat queries for a class
    */
   getCreateAllTablesSQL(cls: Class): string[] {
@@ -696,6 +703,20 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     });
     return out;
   }
+
+  /**
+   * Truncate all tables for a given class
+   */
+  getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
+    const out: string[] = [];
+    SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+      onRoot: ({ path, descend }) => { descend(); out.push(this.getTruncateTableSQL(path)); },
+      onSub: ({ path, descend }) => { descend(); out.push(this.getTruncateTableSQL(path)); },
+      onSimple: ({ path }) => out.push(this.getTruncateTableSQL(path))
+    });
+    return out;
+  }
+
 
   /**
    * Get INSERT sql for a given instance and a specific stack location

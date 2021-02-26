@@ -59,6 +59,19 @@ export class TableManager {
   }
 
   /**
+   * Drop all tables for a given class
+   */
+  @WithAsyncContext({})
+  @Connected()
+  @Transactional()
+  async truncateTables(cls: Class): Promise<void> {
+    for (const op of this.dialect.getTruncateAllTablesSQL(cls)) {
+      await this.exec(op);
+    }
+  }
+
+
+  /**
    * Get a valid connection
    */
   get conn() {

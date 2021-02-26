@@ -144,6 +144,10 @@ export class SQLModelService implements
     await this.manager.dropTables(cls);
   }
 
+  async truncateModel(cls: Class) {
+    await this.manager.truncateTables(cls);
+  }
+
   async createStorage() { }
   async deleteStorage() { }
 

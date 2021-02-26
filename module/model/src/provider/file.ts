@@ -205,6 +205,6 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   async deleteStorage() {
-    await FsUtil.unlinkRecursiveSync(FsUtil.resolveUnix(this.config.folder, this.config.namespace), false);
+    await FsUtil.unlinkRecursiveSync(FsUtil.resolveUnix(this.config.folder, this.config.namespace), true);
   }
 }

@@ -42,6 +42,10 @@ export interface ModelStorageSupport {
    */
   deleteModel?<T extends ModelType>(e: Class<T>): Promise<void>;
   /**
+   * Removes all data from a model, but leaving the structure in place
+   */
+  truncateModel?<T extends ModelType>(e: Class<T>): Promise<void>;
+  /**
    * Deals with model internals changing
    */
   changeModel?<T extends ModelType>(e: Class<T>): Promise<void>;

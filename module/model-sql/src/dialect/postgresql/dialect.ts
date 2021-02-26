@@ -2,12 +2,14 @@
 import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
+import { ModelType } from '@travetto/model';
+import { Class } from '@travetto/base';
+
 
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../base';
-import { VisitStack } from '../../internal/util';
+import { SQLUtil, VisitStack } from '../../internal/util';
 import { PostgreSQLConnection } from './connection';
-
 /**
  * Postgresql Dialect for the SQL Model Source
  */
@@ -56,5 +58,19 @@ export class PostgreSQLDialect extends SQLDialect {
     const type = this.getColumnType(field as FieldConfig);
     const ident = this.ident(field.name);
     return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${ident}  TYPE ${type} USING (${ident}::${type});`;
+  }
+
+  /**
+   * Generate truncate SQL
+   */
+  getTruncateTableSQL(stack: VisitStack[]) {
+    return `TRUNCATE ${this.table(stack)} CASCADE; `;
+  }
+
+  /**
+   * Suppress foreign key checks
+   */
+  getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
+    return [this.getTruncateTableSQL(SQLUtil.classToStack(cls))];
   }
 }

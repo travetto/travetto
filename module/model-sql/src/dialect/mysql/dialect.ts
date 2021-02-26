@@ -3,6 +3,8 @@ import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
+import { Class } from '@travetto/base';
+import { ModelType } from '@travetto/model';
 
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../base';
@@ -83,5 +85,16 @@ export class MySQLDialect extends SQLDialect {
   getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>) {
     const sql = super.getDeleteSQL(stack, where);
     return sql.replace(/\bDELETE\b/g, `DELETE ${this.rootAlias}`);
+  }
+
+  /**
+   * Suppress foreign key checks
+   */
+  getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
+    return [
+      'SET FOREIGN_KEY_CHECKS = 0;',
+      ...super.getTruncateAllTablesSQL(cls),
+      'SET FOREIGN_KEY_CHECKS = 1;'
+    ];
   }
 }

@@ -312,7 +312,7 @@ export class SQLUtil {
   /**
    * Get insert statements for a given class, and its child tables
    */
-  static async getInserts<T>(cls: Class<T>, els: T[]): Promise<InsertWrapper[]> {
+  static async getInserts<T extends ModelType>(cls: Class<T>, els: T[]): Promise<InsertWrapper[]> {
     const ins = {} as Record<string, InsertWrapper>;
 
     const track = (stack: VisitStack[], value: any) => {

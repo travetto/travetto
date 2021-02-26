@@ -10,7 +10,8 @@ export class EnvUtilTest {
 
   @BeforeEach()
   copy() {
-    this.env = { ...process.env };
+    this.env = process.env;
+    process.env = {};
   }
 
   @AfterEach()

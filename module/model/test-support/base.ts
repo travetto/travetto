@@ -1,6 +1,6 @@
 import { FsUtil } from '@travetto/boot';
 import { DependencyRegistry } from '@travetto/di';
-import { AfterEach, BeforeAll, BeforeEach, Suite } from '@travetto/test';
+import { AfterAll, AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
 import { Class, ResourceManager } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';
@@ -74,6 +74,26 @@ export abstract class BaseModelSuite<T> extends BaseInjectableTest {
 
   @AfterEach()
   async deleteStorage() {
+    const service = await this.service;
+    if (isStorageSupported(service)) {
+      if (service.truncateModel || service.deleteModel) {
+        for (const m of ModelRegistry.getClasses()) {
+          if (m === ModelRegistry.getBaseModel(m)) {
+            if (service.truncateModel) {
+              await service.truncateModel(m);
+            } else if (service.deleteModel) {
+              await service.deleteModel(m);
+            }
+          }
+        }
+      } else {
+        await service.deleteStorage(); // Purge it all
+      }
+    }
+  }
+
+  @AfterAll()
+  async deleteAllStorage() {
     const service = await this.service;
     if (isStorageSupported(service)) {
       if (service.deleteModel) {

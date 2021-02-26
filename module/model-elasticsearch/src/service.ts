@@ -85,6 +85,7 @@ export class ElasticsearchModelService implements
   deleteStorage() { return this.manager.deleteStorage(); }
   createModel(cls: Class) { return this.manager.createModel(cls); }
   deleteModel(cls: Class) { return this.manager.deleteModel(cls); }
+  truncateModel(cls: Class) { return this.deleteByQuery(cls, {}).then(() => { }); }
   changeSchema(cls: Class, change: SchemaChange) { return this.manager.changeSchema(cls, change); }
 
   uuid() {
