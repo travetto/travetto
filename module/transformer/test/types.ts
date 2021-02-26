@@ -6,7 +6,7 @@ import { TranformerTestUtil } from '../test-support/util';
 @Suite()
 export class TypesTransformSuite {
 
-  @Test()
+  @Test({ timeout: 10000 })
   async transformQuestion() {
     const output = await TranformerTestUtil.compile(
       FsUtil.resolveUnix(__dirname, '../doc'),

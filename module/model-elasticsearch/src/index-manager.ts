@@ -105,7 +105,7 @@ export class IndexManager implements ModelStorageSupport {
     const ident = this.getIdentity(cls);
     try {
       await this.client.search(ident);
-      console.log('Index already exists, not creating', ident);
+      console.debug('Index already exists, not creating', ident);
     } catch (err) {
       await this.createIndex(cls);
     }

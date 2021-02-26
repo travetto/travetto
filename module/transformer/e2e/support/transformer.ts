@@ -9,7 +9,7 @@ export class MakeUpper {
 
   @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration) {
-    if (!state.source.fileName.includes('alt/')) {
+    if (!state.source.fileName.includes('e2e/')) {
       return node;
     }
     const resolved = state.resolveReturnType(node);

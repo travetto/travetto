@@ -45,7 +45,9 @@ export class TranformerTestUtil {
     });
 
     await new Promise((res) => setTimeout(res, 1000)); // Wait for file buffer to sync
-    console.info(fs.readFileSync(log, 'utf8'));
+    try {
+      console.info(fs.readFileSync(log, 'utf8'));
+    } catch { }
 
     await FsUtil.unlinkRecursive(log, true);
 

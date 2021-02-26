@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { DependencyRegistry } from '@travetto/di';
+import { Inject } from '@travetto/di';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
 import { ModelCrudSupport } from '@travetto/model';
-import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
+import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
 
 import { TodoService } from '../src/service';
 import { Todo } from '../src/model';
@@ -12,61 +12,54 @@ import { Todo } from '../src/model';
 @Suite()
 export class TodoTest extends BaseModelSuite<ModelCrudSupport> {
 
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  @Inject()
+  svc: TodoService;
 
-  get svc() {
-    return DependencyRegistry.getInstance(TodoService);
+  constructor() {
+    super(ElasticsearchModelService, ElasticsearchModelConfig);
   }
 
   @Test('Create todo')
   async create() {
-    const svc = await this.svc;
-
     const test = Todo.from({
       text: 'Sample Task'
     });
 
-    const saved = await svc.add(test);
+    const saved = await this.svc.add(test);
 
     assert.ok(saved.id);
   }
 
   @Test('Complete todo')
   async complete() {
-    const svc = await this.svc;
-
     const test = Todo.from({
       text: 'Sample Task'
     });
 
-    const saved = await svc.add(test);
+    const saved = await this.svc.add(test);
     assert.ok(saved.id);
 
-    let updated = await svc.complete(saved.id);
+    let updated = await this.svc.complete(saved.id);
     assert(updated.completed === true);
 
-    updated = await svc.complete(saved.id, false);
+    updated = await this.svc.complete(saved.id, false);
     assert(updated.completed === false);
   }
 
   @Test('Delete todo')
   async remove() {
-    const svc = await this.svc;
-
     const test = Todo.from({
       text: 'Sample Task'
     });
 
-    const saved = await svc.add(test);
+    const saved = await this.svc.add(test);
     assert.ok(saved.id);
     assert(test.text === 'Sample Task');
 
-    await svc.remove(saved.id);
+    await this.svc.remove(saved.id);
 
     try {
-      await svc.get(saved.id);
+      await this.svc.get(saved.id);
     } catch (e) {
       assert(e.message);
     }
