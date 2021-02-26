@@ -5,15 +5,9 @@ import { RestSessionServerSuite } from '@travetto/rest-session/test-support/serv
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class FastifyRestSessionTest extends RestSessionServerSuite {
-  constructor() {
-    super(3003);
-  }
-}
+export class FastifyRestSessionTest extends RestSessionServerSuite { }
 
 @Suite()
 export class FastifyLambdaRestSessionTest extends RestSessionServerSuite {
-  constructor() {
-    super(true);
-  }
+  type = 'lambda';
 }

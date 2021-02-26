@@ -13,16 +13,11 @@ export class TranformerTestUtil {
    * Compile a single file from a folder
    */
   static async compile(folder: string, file?: string) {
-    let tsconfig = FsUtil.resolveUnix(folder, 'tsconfig.json');
 
-    if (!FsUtil.existsSync(tsconfig)) {
-      tsconfig = FsUtil.resolveUnix(__dirname, '..', '..', 'node_modules', '@travetto', 'boot', 'tsconfig.json');
-    }
-
-    const tsconfigObj = JSON.parse(await fs.promises.readFile(tsconfig, 'utf8'));
+    const tsconfigObj = await import('@travetto/boot/tsconfig.json');
 
     const prog = ts.createProgram({
-      options: ts.convertCompilerOptionsFromJson(tsconfigObj, tsconfig).options,
+      options: ts.convertCompilerOptionsFromJson(tsconfigObj, '').options,
       rootNames: (await ScanFs.scanDir({ testFile: f => f.startsWith('src/') && f.endsWith('.ts') }, folder))
         .filter(x => x.stats.isFile())
         .filter(x => !file || x.file.endsWith(file))

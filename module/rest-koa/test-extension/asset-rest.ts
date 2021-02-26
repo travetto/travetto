@@ -5,15 +5,9 @@ import { AssetRestServerSuite } from '@travetto/asset-rest/test-support/server';
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class KoaAssetRestTest extends AssetRestServerSuite {
-  constructor() {
-    super(3004);
-  }
-}
+export class KoaAssetRestTest extends AssetRestServerSuite { }
 
 @Suite()
 export class KoaAssetRestLambdaTest extends AssetRestServerSuite {
-  constructor() {
-    super(true);
-  }
+  type = 'lambda';
 }

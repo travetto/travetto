@@ -5,15 +5,9 @@ import { AuthRestServerSuite } from '@travetto/auth-rest/test-support/server';
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class FastifyAuthRestTest extends AuthRestServerSuite {
-  constructor() {
-    super(3003);
-  }
-}
+export class FastifyAuthRestTest extends AuthRestServerSuite { }
 
 @Suite()
 export class FastifyLambdaAuthRestTest extends AuthRestServerSuite {
-  constructor() {
-    super(true);
-  }
+  type = 'lambda';
 }

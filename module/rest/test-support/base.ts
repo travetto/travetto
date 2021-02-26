@@ -2,29 +2,36 @@ import { RootRegistry } from '@travetto/registry';
 import { AppError } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 import { AfterAll, BeforeAll, Suite } from '@travetto/test';
+import { BaseInjectableTest } from '@travetto/di/test-support/base';
 
 import { MethodOrAll, Request, ServerHandle } from '../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
 import { AwsLambdaRestServerSupport } from './server-support/aws-lambda';
 import { CoreRestServerSupport } from './server-support/core';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 /**
  * Base Rest Suite
  */
 @Suite()
-export abstract class BaseRestSuite {
+export abstract class BaseRestSuite extends BaseInjectableTest {
 
-  private handle: ServerHandle | undefined;
+  private handle?: ServerHandle;
   private support: RestServerSupport;
 
-  constructor(support: number | true | RestServerSupport) {
-    if (typeof support === 'number') {
-      this.support = new CoreRestServerSupport(support);
-    } else if (typeof support === 'boolean') {
+  type: string | RestServerSupport = 'core';
+
+  @BeforeAll()
+  async initServer() {
+    if (this.type === 'core') {
+      this.support = new CoreRestServerSupport((SystemUtil.naiveHash(this.constructor.ᚕid) % 60000) + 1000);
+    } else if (this.type === 'lambda') {
       this.support = new AwsLambdaRestServerSupport();
-    } else {
-      this.support = support;
+    } else if (typeof this.type !== 'string') {
+      this.support = this.type;
     }
+    await RootRegistry.init();
+    this.handle = await this.support.init();
   }
 
   async wait(n: number) {
@@ -38,12 +45,6 @@ export abstract class BaseRestSuite {
     } catch (e) {
       return content;
     }
-  }
-
-  @BeforeAll()
-  async initServer() {
-    await RootRegistry.init();
-    this.handle = await this.support.init();
   }
 
   @AfterAll()

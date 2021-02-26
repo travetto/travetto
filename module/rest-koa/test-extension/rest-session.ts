@@ -5,15 +5,9 @@ import { RestSessionServerSuite } from '@travetto/rest-session/test-support/serv
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class KoaRestSessionTest extends RestSessionServerSuite {
-  constructor() {
-    super(3004);
-  }
-}
+export class KoaRestSessionTest extends RestSessionServerSuite { }
 
 @Suite()
 export class KoaLambdaRestSessionTest extends RestSessionServerSuite {
-  constructor() {
-    super(true);
-  }
+  type = 'lambda';
 }

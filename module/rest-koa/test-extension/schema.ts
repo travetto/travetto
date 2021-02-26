@@ -5,15 +5,9 @@ import { SchemaRestServerSuite } from '@travetto/rest/test-support/schema';
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class KoaSchemaTest extends SchemaRestServerSuite {
-  constructor() {
-    super(3004);
-  }
-}
+export class KoaSchemaTest extends SchemaRestServerSuite { }
 
 @Suite()
 export class KoaLambdaSchemaTest extends SchemaRestServerSuite {
-  constructor() {
-    super(true);
-  }
+  type = 'lambda';
 }

@@ -3,7 +3,5 @@ import { Suite } from '@travetto/test';
 
 @Suite()
 export class KoaRestCoreLambdaTest extends RestServerSuite {
-  constructor() {
-    super(true);
-  }
+  type = 'lambda';
 }

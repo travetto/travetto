@@ -9,7 +9,7 @@ export class TypesTransformSuite {
   @Test()
   async transformQuestion() {
     const output = await TranformerTestUtil.compile(
-      FsUtil.resolveUnix(__dirname, '../alt/upper'),
+      FsUtil.resolveUnix(__dirname, '../doc'),
       'upper.ts'
     );
     assert(output.includes('this.AGE'));

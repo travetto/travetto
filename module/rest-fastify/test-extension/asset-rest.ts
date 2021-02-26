@@ -5,15 +5,9 @@ import { AssetRestServerSuite } from '@travetto/asset-rest/test-support/server';
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class FastifyAssetRestTest extends AssetRestServerSuite {
-  constructor() {
-    super(3002);
-  }
-}
+export class FastifyAssetRestTest extends AssetRestServerSuite { }
 
 @Suite()
 export class FastifyAssetRestLambdaTest extends AssetRestServerSuite {
-  constructor() {
-    super(true);
-  }
+  type = 'lambda';
 }

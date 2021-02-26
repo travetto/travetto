@@ -5,15 +5,9 @@ import { AuthRestServerSuite } from '@travetto/auth-rest/test-support/server';
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class ExpressAuthRestTest extends AuthRestServerSuite {
-  constructor() {
-    super(3002);
-  }
-}
+export class ExpressAuthRestTest extends AuthRestServerSuite { }
 
 @Suite()
 export class ExpressLambdaAuthRestTest extends AuthRestServerSuite {
-  constructor() {
-    super(true);
-  }
+  type = 'lambda';
 }

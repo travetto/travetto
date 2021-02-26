@@ -9,7 +9,7 @@ export class RecursiveTransformSuite {
   @Test()
   async transformTree() {
     const output = await TranformerTestUtil.compile(
-      FsUtil.resolveUnix(__dirname, '../alt/recursive'),
+      FsUtil.resolveUnix(__dirname, '../e2e'),
       'tree.ts'
     );
     assert(output.includes('name: \'TreeNode\''));
@@ -19,7 +19,7 @@ export class RecursiveTransformSuite {
   @Test()
   async transformTree2() {
     const output = await TranformerTestUtil.compile(
-      FsUtil.resolveUnix(__dirname, '../alt/recursive'),
+      FsUtil.resolveUnix(__dirname, '../e2e'),
       'tree2.ts'
     );
     assert(output.includes('name: \'TreeNode2\''));
@@ -29,7 +29,7 @@ export class RecursiveTransformSuite {
   @Test()
   async transformTree3() {
     const output = await TranformerTestUtil.compile(
-      FsUtil.resolveUnix(__dirname, '../alt/recursive'),
+      FsUtil.resolveUnix(__dirname, '../e2e'),
       'tree3.ts'
     );
     assert(output.includes('left:'));

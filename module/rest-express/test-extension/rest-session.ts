@@ -5,15 +5,9 @@ import { RestSessionServerSuite } from '@travetto/rest-session/test-support/serv
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class ExpressRestSessionTest extends RestSessionServerSuite {
-  constructor() {
-    super(3002);
-  }
-}
+export class ExpressRestSessionTest extends RestSessionServerSuite { }
 
 @Suite()
 export class ExpressLambdaRestSessionTest extends RestSessionServerSuite {
-  constructor() {
-    super(true);
-  }
+  type = 'lambda';
 }

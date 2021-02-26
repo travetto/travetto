@@ -1,6 +1,6 @@
 import { FsUtil } from '@travetto/boot';
 import { DependencyRegistry } from '@travetto/di';
-import { AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
+import { AfterEach, BeforeAll, BeforeEach, Suite } from '@travetto/test';
 import { Class, ResourceManager } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';

@@ -1,12 +1,12 @@
 import * as assert from 'assert';
 
 import { Schema, FieldConfig } from '@travetto/schema';
-import { Test, Suite } from '@travetto/test';
+import { Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
+import { BaseInjectableTest } from '@travetto/di/test-support/base';
 
 import { VisitStack } from '../src/internal/util';
 import { SQLModelService } from '../src/service';
-import { BaseInjectableTest } from '@travetto/di/test-support/base';
 
 @Schema()
 class User {
@@ -44,7 +44,6 @@ class WhereType {
   age: number;
 }
 
-@Suite()
 export abstract class BaseQueryTest extends BaseInjectableTest {
 
   @Inject()
