@@ -10,9 +10,9 @@ import { AsyncContext } from '../src/service';
  */
 export function WithSuiteContext(data: Record<string, unknown> = {}) {
   return (target: Class) => {
-    SuiteRegistry.register(target, {
+    SuiteRegistry.registerPendingListener(target,
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      beforeEach: [async function (this: { __initialized?: boolean } & Record<string, Function>) {
+      async function (this: { __initialized?: boolean } & Record<string, Function>) {
         if (!this.__initialized) {
           this.__initialized = true;
           const ctx = await DependencyRegistry.getInstance(AsyncContext);
@@ -26,7 +26,8 @@ export function WithSuiteContext(data: Record<string, unknown> = {}) {
             this[t.methodName] = fn;
           }
         }
-      }],
-    });
+      },
+      'beforeEach'
+    );
   };
 }

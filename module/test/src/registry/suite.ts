@@ -40,7 +40,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   /**
    * Add a new phase listeners
    */
-  registerPendingListener<T>(cls: Class<T>, listener: Function, phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach',) {
+  registerPendingListener<T>(cls: Class<T>, listener: Function, phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach') {
     const suiteConfig = this.getOrCreatePending(cls)! as SuiteConfig;
     suiteConfig[phase].push(listener);
   }

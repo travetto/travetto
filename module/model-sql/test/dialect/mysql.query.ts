@@ -9,7 +9,6 @@ import { ModelQueryFacetSuite } from '@travetto/model-query/test-support/facet';
 
 import { SQLModelConfig, SQLModelService } from '../..';
 import { MySQLDialect } from '../../src/dialect/mysql/dialect';
-import { BaseQueryTest } from '../query';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -42,6 +41,3 @@ export class MysqlQueryFacetSuite extends ModelQueryFacetSuite {
     super(SQLModelService, SQLModelConfig);
   }
 }
-
-@Suite()
-export class MySQLQueryTest extends BaseQueryTest { }

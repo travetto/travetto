@@ -6,11 +6,11 @@ import { SuiteCore } from './common';
 /**
  * Suite configuration
  */
-export interface SuiteConfig extends SuiteCore {
+export interface SuiteConfig<T = unknown> extends SuiteCore {
   /**
    * Class suite is in
    */
-  class: Class;
+  class: Class<T>;
   /**
    * Should this be skipped
    */
@@ -18,7 +18,7 @@ export interface SuiteConfig extends SuiteCore {
   /**
    * Actual class instance
    */
-  instance: unknown;
+  instance: T;
   /**
    * List of tests to run
    */

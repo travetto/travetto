@@ -4,7 +4,7 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
-import { BaseInjectableTest } from '@travetto/di/test-support/base';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 import { RequetSessionEncoder } from '../src/encoder/request';
 import { Session } from '../src/types';
@@ -12,7 +12,8 @@ import { SessionConfig } from '../src/config';
 // import { CookieEncoder } from '../src/encoder/cookie';
 
 @Suite()
-export class EncoderTest extends BaseInjectableTest {
+@InjectableSuite()
+export class EncoderTest {
 
   @Inject()
   instance: RequetSessionEncoder;

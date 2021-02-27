@@ -120,7 +120,11 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Resolve all field dependencies
    */
-  protected async resolveFieldDependencies<T>(keys: string[], config: InjectableConfig<T>, instance: T) {
+  protected async resolveFieldDependencies<T>(config: InjectableConfig<T>, instance: T) {
+
+    const keys = Object.keys(config.dependencies.fields ?? {})
+      .filter(k => instance[k as keyof T] !== undefined); // Filter out already set ones
+
     // And auto-wire
     if (keys.length) {
       const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]));
@@ -144,20 +148,15 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       managed.factory(...consValues) :
       new (managed.class as ConcreteClass<T>)(...consValues);
 
-    // Compute fields to be auto-wired
-    const fieldKeys = Object.keys(managed.dependencies.fields!)
-      .filter(x => inst[x as keyof typeof inst] === undefined); // Only apply fields that have not been set
-
     // And auto-wire fields
-    await this.resolveFieldDependencies(fieldKeys, managed, inst);
+    await this.resolveFieldDependencies(managed, inst);
 
     // If factory with field properties on the sub class
     if (managed.factory) {
       const resolved = this.get((inst as ClassInstance<T>).constructor);
 
       if (resolved) {
-        const subKeys = Object.keys(resolved.dependencies.fields).filter(x => !managed.dependencies.fields[x]);
-        await this.resolveFieldDependencies(subKeys, resolved, inst);
+        await this.resolveFieldDependencies(resolved, inst);
       }
     }
 
@@ -497,6 +496,14 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.targetToClass.clear();
     this.classToTarget.clear();
     this.factories.clear();
+  }
+
+  /**
+   * Inject fields into instance
+   */
+  async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor as Class<T>) {
+    // Compute fields to be auto-wired
+    return await this.resolveFieldDependencies(this.get(cls), o);
   }
 }
 

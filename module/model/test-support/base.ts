@@ -3,8 +3,9 @@ import { DependencyRegistry } from '@travetto/di';
 import { AfterAll, AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
 import { Class, ResourceManager } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
+
 import { TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';
-import { BaseInjectableTest } from '@travetto/di/test-support/base';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 import { ModelRegistry } from '../src/registry/model';
 import { isBulkSupported, isCrudSupported, isStorageSupported } from '../src/internal/service/common';
@@ -12,11 +13,10 @@ import { ModelType } from '../src/types/model';
 
 let first = true;
 
-export abstract class BaseModelSuite<T> extends BaseInjectableTest {
+@InjectableSuite()
+export abstract class BaseModelSuite<T> {
 
-  constructor(public serviceClass: Class<T>, public configClass: Class) {
-    super();
-  }
+  constructor(public serviceClass: Class<T>, public configClass: Class) { }
 
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]) {
     const svc = await this.service;

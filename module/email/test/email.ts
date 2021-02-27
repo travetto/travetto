@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { BaseInjectableTest } from '@travetto/di/test-support/base';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 import { MailService, MailTransport, NullTransport } from '../';
 
@@ -14,7 +14,8 @@ class Config {
 }
 
 @Suite('Emails')
-class EmailSuite extends BaseInjectableTest {
+@InjectableSuite()
+class EmailSuite {
 
   @Inject()
   instance: MailService;

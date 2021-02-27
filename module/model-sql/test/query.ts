@@ -1,9 +1,8 @@
 import * as assert from 'assert';
 
 import { Schema, FieldConfig } from '@travetto/schema';
-import { Test } from '@travetto/test';
-import { Inject } from '@travetto/di';
-import { BaseInjectableTest } from '@travetto/di/test-support/base';
+import { Suite, Test } from '@travetto/test';
+import { BaseModelSuite } from '@travetto/model/test-support/base';
 
 import { VisitStack } from '../src/internal/util';
 import { SQLModelService } from '../src/service';
@@ -44,13 +43,11 @@ class WhereType {
   age: number;
 }
 
-export abstract class BaseQueryTest extends BaseInjectableTest {
-
-  @Inject()
-  service: SQLModelService;
+@Suite()
+export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
 
   get dialect() {
-    return this.service.dialect;
+    return this.service.then(s => s.dialect);
   }
 
   @Test()
@@ -67,7 +64,7 @@ export abstract class BaseQueryTest extends BaseInjectableTest {
       ]
     };
 
-    const dct = this.dialect;
+    const dct = await this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
       const field = stack[stack.length - 1] as FieldConfig;
       const parent = stack[stack.length - 2] as FieldConfig;
@@ -80,7 +77,7 @@ export abstract class BaseQueryTest extends BaseInjectableTest {
 
   @Test()
   async testRegEx() {
-    const dct = this.dialect;
+    const dct = await this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
       const field = stack[stack.length - 1] as FieldConfig;
       return `${field.owner.name}.${field.name}`;
@@ -94,13 +91,12 @@ export abstract class BaseQueryTest extends BaseInjectableTest {
 
     assert(out === `User.name ${dct.SQL_OPS.$regex} 'google.$'`);
 
-    const dia = this.dialect;
     const outBoundary = dct.getWhereGroupingSQL(User, {
       name: {
         $regex: /\bgoogle\b/
       }
     });
 
-    assert(outBoundary === `User.name ${dct.SQL_OPS.$regex} '${dia.regexWordBoundary}google${dia.regexWordBoundary}'`);
+    assert(outBoundary === `User.name ${dct.SQL_OPS.$regex} '${dct.regexWordBoundary}google${dct.regexWordBoundary}'`);
   }
 }

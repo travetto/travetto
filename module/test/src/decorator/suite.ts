@@ -8,7 +8,6 @@ export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
  * Register a class to be defined as a test suite, and a candidate for testing
  * @param description The Suite description
  * @augments `@trv:test/Suite`
- * @augments `@trv:di/Injectable`
  */
 export function Suite(): ClassDecorator;
 export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;

@@ -3,12 +3,13 @@ import * as asyncHooks from 'async_hooks';
 
 import { Inject } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
-import { BaseInjectableTest } from '@travetto/di/test-support/base';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 import { AsyncContext, WithAsyncContext } from '../';
 
 @Suite()
-class VerifyContext extends BaseInjectableTest {
+@InjectableSuite()
+class VerifyContext {
 
   @Inject()
   context: AsyncContext;

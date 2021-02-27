@@ -9,7 +9,6 @@ import { ModelQueryFacetSuite } from '@travetto/model-query/test-support/facet';
 
 import { SQLModelConfig, SQLModelService } from '../..';
 import { PostgreSQLDialect } from '../../src/dialect/postgresql/dialect';
-import { BaseQueryTest } from '../query';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -41,9 +40,4 @@ export class PostgreSQLQueryFacetSuite extends ModelQueryFacetSuite {
   constructor() {
     super(SQLModelService, SQLModelConfig);
   }
-}
-
-@Suite()
-export class PostgreSQLQueryTest extends BaseQueryTest {
-
 }

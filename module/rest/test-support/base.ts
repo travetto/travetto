@@ -2,7 +2,7 @@ import { RootRegistry } from '@travetto/registry';
 import { AppError } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 import { AfterAll, BeforeAll, Suite } from '@travetto/test';
-import { BaseInjectableTest } from '@travetto/di/test-support/base';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 import { MethodOrAll, Request, ServerHandle } from '../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
@@ -13,8 +13,8 @@ import { SystemUtil } from '@travetto/base/src/internal/system';
 /**
  * Base Rest Suite
  */
-@Suite()
-export abstract class BaseRestSuite extends BaseInjectableTest {
+@InjectableSuite()
+export abstract class BaseRestSuite {
 
   private handle?: ServerHandle;
   private support: RestServerSupport;
