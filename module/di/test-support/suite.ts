@@ -9,12 +9,11 @@ import { DependencyRegistry } from '../src/registry';
  */
 export function InjectableSuite() {
   return (target: Class) => {
-    DependencyRegistry.getOrCreatePending(target); // Register
     SuiteRegistry.registerPendingListener(
       target,
       async function (this: Record<string, Function>) {
         await RootRegistry.init();
-        await DependencyRegistry.injectFields(this as ClassInstance, target);
+        await DependencyRegistry.injectFields(this as ClassInstance);
       },
       'beforeAll'
     );

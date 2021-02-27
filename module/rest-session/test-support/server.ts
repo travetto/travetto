@@ -1,9 +1,10 @@
 import * as assert from 'assert';
 
 import { Controller, Get, Body, Post, Put, Query, Request } from '@travetto/rest';
-import { BaseRestSuite } from '@travetto/rest/test-support/base';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
+import { BaseRestSuite } from '@travetto/rest/test-support/base';
 
 import { SessionData, SessionConfig } from '..';
 
@@ -33,6 +34,7 @@ class TestController {
 }
 
 @Suite()
+@InjectableSuite()
 export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Inject()

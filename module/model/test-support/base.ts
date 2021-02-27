@@ -5,7 +5,6 @@ import { Class, ResourceManager } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 
 import { TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';
-import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 import { ModelRegistry } from '../src/registry/model';
 import { isBulkSupported, isCrudSupported, isStorageSupported } from '../src/internal/service/common';
@@ -13,7 +12,6 @@ import { ModelType } from '../src/types/model';
 
 let first = true;
 
-@InjectableSuite()
 export abstract class BaseModelSuite<T> {
 
   constructor(public serviceClass: Class<T>, public configClass: Class) { }

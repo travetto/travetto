@@ -1,6 +1,4 @@
-import * as fs from 'fs';
 import * as assert from 'assert';
-import FormData from 'formdata-node';
 
 import { FsUtil, StreamUtil } from '@travetto/boot';
 import { AssetUtil, Asset } from '@travetto/asset';
@@ -10,6 +8,8 @@ import { BaseRestSuite } from '@travetto/rest/test-support/base';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { Upload } from '../src/decorator';
+
+type FileUpload = { name: string, resource: string, type: string };
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -26,26 +26,19 @@ class TestUploadController {
   }
 }
 
-async function getAsset(file: string, type: string) {
-  return {
-    filename: file,
-    stream: await ResourceManager.readStream(file),
-    size: (await fs.promises.stat(await ResourceManager.findAbsolute(file))).size,
-    type
-  };
-}
-
-async function getForm(files: Record<string, string>, content: string) {
-  const form = new FormData();
-  for (const [k, v] of Object.entries(files)) {
-    const { stream, ...asset } = await getAsset(v, content);
-    form.append(k, stream, asset);
-  }
-  return form;
-}
-
 @Suite()
 export abstract class AssetRestServerSuite extends BaseRestSuite {
+
+  async getUploads(...files: FileUpload[]) {
+    return Promise.all(files.map(async ({ name, type, resource: filename }) => {
+      const buffer = await StreamUtil.streamToBuffer(await ResourceManager.readStream(filename));
+      return { name, type, filename, buffer, size: buffer.length };
+    }));
+  }
+
+  async getAsset(path: string) {
+    return AssetUtil.fileToAsset(await ResourceManager.findAbsolute(path));
+  }
 
   @BeforeAll()
   async setup() {
@@ -55,32 +48,35 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
 
   @Test()
   async testUploadDirect() {
-    const sent = await getAsset('logo.png', 'image/png');
+    const [sent] = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request('post', '/test/upload', {
       headers: {
         'Content-Type': sent.type,
         'Content-Length': `${sent.size}`
       },
-      body: await StreamUtil.streamToBuffer(sent.stream)
+      body: sent.buffer
     });
 
-    const asset = await AssetUtil.fileToAsset(await ResourceManager.findAbsolute('/logo.png'));
+    const asset = await this.getAsset('/logo.png');
     assert(res.body.hash === asset.hash);
   }
 
   @Test()
   async testUpload() {
-    const body = await getForm({ file: 'logo.png' }, 'image/png');
-    const res = await this.request('post', '/test/upload', { headers: body.headers, body });
-    const asset = await AssetUtil.fileToAsset(await ResourceManager.findAbsolute('/logo.png'));
+    const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
+    const res = await this.request('post', '/test/upload', this.getMultipartRequest(uploads));
+    const asset = await this.getAsset('/logo.png');
     assert(res.body.hash === asset.hash);
   }
 
   @Test()
   async testMultiUpload() {
-    const body = await getForm({ file1: 'logo.png', file2: 'logo.png' }, 'image/png');
-    const res = await this.request('post', '/test/upload/all', { headers: body.headers, body });
-    const asset = await AssetUtil.fileToAsset(await ResourceManager.findAbsolute('/logo.png'));
+    const uploads = await this.getUploads(
+      { name: 'file1', resource: 'logo.png', type: 'image/png' },
+      { name: 'file2', resource: 'logo.png', type: 'image/png' }
+    );
+    const res = await this.request('post', '/test/upload/all', this.getMultipartRequest(uploads));
+    const asset = await this.getAsset('/logo.png');
     assert(res.body.hash1 === asset.hash);
     assert(res.body.hash2 === asset.hash);
   }

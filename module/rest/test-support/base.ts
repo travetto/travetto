@@ -1,19 +1,19 @@
 import { RootRegistry } from '@travetto/registry';
-import { AppError } from '@travetto/base';
+import { AppError, ResourceManager, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
-import { AfterAll, BeforeAll, Suite } from '@travetto/test';
-import { InjectableSuite } from '@travetto/di/test-support/suite';
+import { AfterAll, BeforeAll } from '@travetto/test';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { MethodOrAll, Request, ServerHandle } from '../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
 import { AwsLambdaRestServerSupport } from './server-support/aws-lambda';
 import { CoreRestServerSupport } from './server-support/core';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+
+type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
 /**
  * Base Rest Suite
  */
-@InjectableSuite()
 export abstract class BaseRestSuite {
 
   private handle?: ServerHandle;
@@ -53,6 +53,36 @@ export abstract class BaseRestSuite {
       await this.handle.close?.();
       delete this.handle;
     }
+  }
+
+  getMultipartRequest(chunks: Multipart[]) {
+    const boundary = `-------------------------multipart-${Util.uuid()}`;
+
+    const nl = `\r\n`;
+
+    const header = (flag: boolean, key: string, ...values: (string | number | undefined)[]) =>
+      flag ? `${key}: ${values.map(v => `${v}`).join(';')}${nl}` : Buffer.alloc(0);
+
+    const lines = [
+      ...chunks.flatMap(chunk => [
+        '--', boundary, nl,
+        header(true, 'Content-Disposition', 'form-data', `name="${chunk.name}"`, `filename="${chunk.filename ?? chunk.name}"`),
+        header(!!chunk.size, 'Content-Length', chunk.size),
+        header(!!chunk.type, 'Content-Type', chunk.type),
+        nl,
+        chunk.buffer, nl
+      ]),
+      '--', boundary, '--', nl
+    ];
+
+    const body = Buffer.concat(lines.map(l => Buffer.from(l)));
+
+    const headers = {
+      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+      'Content-Length': `${body.length}`
+    };
+
+    return { body, headers };
   }
 
   async request(

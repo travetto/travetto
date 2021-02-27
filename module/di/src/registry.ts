@@ -121,9 +121,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Resolve all field dependencies
    */
   protected async resolveFieldDependencies<T>(config: InjectableConfig<T>, instance: T) {
-
     const keys = Object.keys(config.dependencies.fields ?? {})
-      .filter(k => instance[k as keyof T] !== undefined); // Filter out already set ones
+      .filter(k => instance[k as keyof T] === undefined); // Filter out already set ones
 
     // And auto-wire
     if (keys.length) {
