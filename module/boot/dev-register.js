@@ -1,21 +1,30 @@
-const defaultMods = ['@travetto/test', '@travetto/cli', '@travetto/doc', '@travetto/app', '@travetto/log'];
-const existing = (process.env.TRV_MODULES || '');
-const cleaned = existing.replace(/(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g, (a, m) => {
-  if (!defaultMods.includes(m)) {
-    defaultMods.push(m);
+const TRV_MOD = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
+
+/**
+ * Naive hashing
+ * @param {string} text
+ */
+function naiveHash(text) {
+  let hash = 5381;
+
+  for (let i = 0; i < text.length; i++) {
+    // eslint-disable-next-line no-bitwise
+    hash = (hash * 33) ^ text.charCodeAt(i);
   }
-  return '';
-});
+
+  return Math.abs(hash);
+}
 
 /**
  * Gather all dependencies of a given module
  * @param {string} root
+ * @param {Iterable<string>} givenMods
  */
-function readDeps() {
+function readDeps(root, givenMods) {
   const path = require('path');
-  const { name, dependencies, devDependencies } = require(path.resolve('package.json'));
+  const { name, dependencies, devDependencies } = require(path.resolve(root, 'package.json'));
   const keys = [
-    ...defaultMods, // Givens
+    ...givenMods, // Givens
     ...Object.keys(dependencies || {}),
     ...Object.keys(devDependencies || {})
   ]
@@ -26,7 +35,7 @@ function readDeps() {
   while (keys.length) {
     const top = keys.shift();
     final.set(top, null);
-    const deps = require(`${top.replace(/@travetto/, process.env.TRV_DEV)}/package.json`).dependencies ?? {};
+    const deps = require(`${top.replace('@travetto', process.env.TRV_DEV)}/package.json`).dependencies ?? {};
 
     for (const sub of Object.keys(deps)) {
       if (sub.startsWith('@travetto') && !final.has(sub)) {
@@ -43,16 +52,24 @@ function readDeps() {
         .filter(([k]) => k.startsWith('TRV_'))
         .sort((a, b) => a[0].localeCompare(b[0]))),
     },
-    entries: Object.fromEntries([...final.entries()].filter(([k, v]) => k !== name))
+    entries: [...final.entries()].filter(([k, v]) => k !== name).map(x => x.join('='))
   };
 }
 
 const { FileCache } = require('./src/cache');
 const cache = new FileCache(process.env.TRV_CACHE ?? '.trv_cache');
 cache.init();
-const content = cache.getOrSet(`dev-modules.${existing.length}.json`, () => JSON.stringify(readDeps(), null, 2));
-const resolved = Object.entries(JSON.parse(content).entries);
-process.env.TRV_MODULES = `${cleaned},${resolved.map(x => x.join('=')).join(',')}`;
+
+const envMods = process.env.TRV_MODULES ?? '';
+const content = cache.getOrSet(`isolated-modules.${naiveHash(envMods)}.json`,
+  () => {
+    const defaultMods = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc', '@travetto/app', '@travetto/log']);
+    envMods.replace(TRV_MOD, (_, m) => defaultMods.add(m));
+    return JSON.stringify(readDeps(process.cwd(), defaultMods), null, 2);
+  }
+);
+const { entries } = JSON.parse(content);
+process.env.TRV_MODULES = `${envMods.replace(TRV_MOD, '')},${entries.join(',')}`;
 
 // Force install
 require(`./src/compile`).CompileUtil.init();

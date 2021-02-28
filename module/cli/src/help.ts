@@ -100,7 +100,7 @@ export class HelpUtil {
    * @param message
    * @param extra
    */
-  static showHelp(command: commander.Command, message?: string, extra?: string) {
+  static showHelp(command: commander.Command, message?: string, extra?: string): never {
     if (message) {
       console!.error(color`${{ failure: message }}\n`);
     }

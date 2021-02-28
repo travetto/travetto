@@ -34,6 +34,8 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
 
+const STREAMS_BUCKET = 'streams';
+
 /**
  * Mongo-based model source
  */
@@ -53,9 +55,9 @@ export class MongoModelService implements
 
   async postConstruct() {
     this.client = await mongo.MongoClient.connect(this.config.url, this.config.clientOptions);
-    this.db = this.client.db();
+    this.db = this.client.db(this.config.namespace);
     this.bucket = new mongo.GridFSBucket(this.db, {
-      bucketName: 'streams',
+      bucketName: STREAMS_BUCKET,
       writeConcern: { w: 1 }
     });
     ModelStorageUtil.registerModelChangeListener(this);
@@ -250,7 +252,7 @@ export class MongoModelService implements
 
     const res = await this.bucket.openDownloadStreamByName(location);
     if (!res) {
-      throw new NotFoundError('stream', location);
+      throw new NotFoundError(STREAMS_BUCKET, location);
     }
     return res;
   }
@@ -258,18 +260,23 @@ export class MongoModelService implements
   async getStreamMetadata(location: string) {
     const files = await this.bucket.find({ filename: location }, { limit: 1 }).toArray();
 
-    if (!files || !files.length) {
-      throw new NotFoundError('stream', location);
+    if (!files?.length) {
+      throw new NotFoundError(STREAMS_BUCKET, location);
     }
 
-    const [f] = files;
-    return f.metadata;
+    const [{ metadata }] = files;
+    return metadata;
   }
 
   async deleteStream(location: string) {
-    const files = await this.bucket.find({ filename: location }).toArray();
-    const [{ _id: bucketId }] = files;
-    await this.bucket.delete(bucketId);
+    const files = await this.bucket.find({ filename: location }, { limit: 1 }).toArray();
+
+    if (!files?.length) {
+      throw new NotFoundError(STREAMS_BUCKET, location);
+    }
+
+    const [{ _id: fileId }] = files;
+    await new Promise((res, rej) => this.bucket.delete(fileId, (err, value) => err ? rej(err) : res(value)));
   }
 
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {

@@ -15,7 +15,7 @@ export interface RunState {
   /**
    * Test mode
    */
-  mode?: 'single' | 'watch' | 'extension' | 'standard';
+  mode?: 'single' | 'watch' | 'isolated' | 'standard';
   /**
    * Number of test suites to run concurrently, when mode is not single
    */

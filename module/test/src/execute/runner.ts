@@ -1,8 +1,6 @@
-import * as fs from 'fs';
-import { ExecUtil, FsUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
-import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TestExecutor } from './executor';
 import { buildWorkManager } from '../worker/parent';
@@ -63,47 +61,11 @@ export class Runner {
   }
 
   /**
-   * Run all files
-   */
-  async runExtensions() {
-    const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
-
-    const files = await RunnerUtil.getTestFiles(this.patterns, 'test-extension');
-
-    console.debug('Running', { files });
-
-    await PhaseManager.run('test');
-
-    for (const f of files) {
-      const modules = (await fs.promises.readFile(f, 'utf8'))
-        .split(/\n/g)
-        .filter(l => l.includes('@file-if'))
-        .map(x => x.split('@file-if')[1].trim())
-        .filter(x => x.startsWith('@travetto'))
-        .join(',');
-
-      const cache = `.trv_cache_${SystemUtil.naiveHash(modules)}`;
-
-      const proc = ExecUtil.fork(require.resolve('../../bin/plugin-test'), [f], {
-        env: {
-          TRV_TEST_FORMAT: 'exec',
-          TRV_CACHE: cache,
-          TRV_MODULES: modules
-        }
-      });
-      proc.process.on('message', e => consumer.onEvent(e));
-      await proc.result;
-    }
-
-    return consumer.summarizeAsBoolean();
-  }
-
-  /**
    * Run the runner, based on the inputs passed to the constructor
    */
   async run() {
     switch (this.state.mode) {
-      case 'extension': return await this.runExtensions();
+      case 'isolated': // Modules are prepared appropriately
       case 'single': return await this.runSingle();
       case 'standard': return await this.runFiles();
     }

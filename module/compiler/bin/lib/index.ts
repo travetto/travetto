@@ -1,7 +1,6 @@
 import { ExecUtil } from '@travetto/boot/src/exec';
 import { EnvUtil } from '@travetto/boot/src/env';
 import { CliUtil } from '@travetto/cli/src/util';
-import { FsUtil } from '@travetto/boot/src/fs';
 
 /**
  * Utilities for running compilation

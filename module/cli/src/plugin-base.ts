@@ -28,7 +28,7 @@ export abstract class BasePlugin {
   /**
    * Render help with additional message or extra text
    */
-  async showHelp(err?: string | Error, extra?: string) {
+  async showHelp(err?: string | Error, extra?: string): Promise<never> {
     if (err && typeof err !== 'string') {
       err = err.message;
     }

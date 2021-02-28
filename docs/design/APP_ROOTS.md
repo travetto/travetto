@@ -12,8 +12,7 @@ Module Structure
 ## Test
 * test/
   * resources/
-* test-extension/ (For testing extension based code)
-  * resources/
+* test-<isolate>/ (For testing isolated code)
 
 ## Library (node_modules/@travetto/{x})
 * bin/  - CLI Support
@@ -48,4 +47,3 @@ Test Running
 ## Config
 * (root)/resources/*.yml
 * (root)/test/resources/*.yml
-* (root)/test-extension/resources/*.yml

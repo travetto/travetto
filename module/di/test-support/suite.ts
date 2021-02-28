@@ -13,9 +13,9 @@ export function InjectableSuite() {
       target,
       async function (this: Record<string, Function>) {
         await RootRegistry.init();
-        await DependencyRegistry.injectFields(this as ClassInstance);
+        await DependencyRegistry.injectFields(this as ClassInstance, target);
       },
-      'beforeAll'
+      'beforeEach'
     );
   };
 }

@@ -21,8 +21,8 @@ async function customLogs() {
 }
 
 async function load() {
-  process.env.TRV_SRC_LOCAL = '^test';
-  process.env.TRV_SRC_COMMON = '^test-support';
+  process.env.TRV_SRC_LOCAL = `^test,${process.env.TRV_SRC_LOCAL ?? ''}`;
+  process.env.TRV_SRC_COMMON = `^test-support,${process.env.TRV_SRC_COMMON ?? ''}`;
 
   await CompileCliUtil.compile();
   const { PhaseManager } = await import('@travetto/base');

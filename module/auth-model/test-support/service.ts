@@ -5,6 +5,7 @@ import { Suite, Test } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { ModelCrudSupport, BaseModel, Model } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 import { ModelPrincipalSource, RegisteredIdentity } from '..';
 
@@ -41,6 +42,7 @@ class TestConfig {
 }
 
 @Suite()
+@InjectableSuite()
 export abstract class AuthModelServiceSuite extends BaseModelSuite<ModelCrudSupport> {
 
   @Inject()

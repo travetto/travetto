@@ -4,12 +4,14 @@ import { FsUtil } from '@travetto/boot';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 import { Inject } from '@travetto/di';
+import { ModelStreamSupport, NotFoundError } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
-import { ModelStreamSupport } from '@travetto/model';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 import { HashNamingStrategy, AssetService, AssetUtil } from '..';
 
 @Suite()
+@InjectableSuite()
 export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSupport> {
 
   @Inject()
@@ -61,16 +63,16 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
     const service = this.assetService;
     const pth = await ResourceManager.findAbsolute('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
-    const id = await service.upsert(file);
+    const loc = await service.upsert(file);
 
-    const out = await service.getMetadata(id);
+    const out = await service.getMetadata(loc);
 
-    assert(out.filename === id);
+    assert(out.filename === loc);
 
-    await service.delete(id);
+    await service.delete(loc);
 
     await assert.rejects(async () => {
-      await service.getMetadata(id);
-    });
+      await service.getMetadata(loc);
+    }, NotFoundError);
   }
 }
