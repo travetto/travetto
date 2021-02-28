@@ -135,7 +135,7 @@ class $QueryVerifier {
         MULTIPLE_KEYS_ALLOWED.has(keys[0]) ||
         MULTIPLE_KEYS_ALLOWED.has(keys[1])
       )) {
-        state.log(`One and only one operation may be specified in an operator clause`);
+        state.log('One and only one operation may be specified in an operator clause');
         return;
       }
     }
@@ -244,7 +244,7 @@ class $QueryVerifier {
           if (value === 1 || value === 0 || actual === 'boolean') {
             return;
           }
-          state.log(`Only true, false 0, and 1 are allowed for including/excluding fields`);
+          state.log('Only true, false 0, and 1 are allowed for including/excluding fields');
         } else {
         /* if (actual === 'string') {
           if (!/[A-Za-z_$0-9]/.test(value)) {
@@ -254,14 +254,14 @@ class $QueryVerifier {
           return;
         } else if (isPlainObject(value)) {
           if (!('alias' in value)) {
-            state.log(`Alias is a required field for selecting`);
+            state.log('Alias is a required field for selecting');
             return;
           } else {
             // or { alias: string, calc?: string }
             // console.log('Yay');
           }
         */}
-        state.log(`Only true, false, 0, and 1 are allowed for selecting fields`);
+        state.log('Only true, false, 0, and 1 are allowed for selecting fields');
       }
     });
   }

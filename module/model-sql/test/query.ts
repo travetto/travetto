@@ -72,7 +72,7 @@ export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
     };
 
     const qryStr = dct.getWhereGroupingSQL(WhereType, qry);
-    assert(qryStr === `(WhereTypeAB.c = 5 AND WhereTypeD.e = TRUE AND (WhereType.name = 5 OR WhereType.age = 10) AND z.z IN ('a','b','c') AND WhereTypeA.d > 20)`);
+    assert(qryStr === "(WhereTypeAB.c = 5 AND WhereTypeD.e = TRUE AND (WhereType.name = 5 OR WhereType.age = 10) AND z.z IN ('a','b','c') AND WhereTypeA.d > 20)");
   }
 
   @Test()

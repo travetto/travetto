@@ -115,7 +115,7 @@ export class ServiceUtil {
           yield { success: `Started ${out.substring(0, 12)}` };
         }
       } catch (err) {
-        yield { failure: `Failed to run docker` };
+        yield { failure: 'Failed to run docker' };
       }
     } else {
       yield { subsubtitle: 'Skipping, already running' };

@@ -36,9 +36,9 @@ export const Zip: PackOperation<ZipConfig> = {
 
     yield 'Compressing';
     if (/win/i.test(process.platform)) {
-      await ExecUtil.spawn(`powershell`, ['Compress-Archive', '-Path', '.', '-DestinationPath', zipFile], { cwd: ws }).result;
+      await ExecUtil.spawn('powershell', ['Compress-Archive', '-Path', '.', '-DestinationPath', zipFile], { cwd: ws }).result;
     } else {
-      await ExecUtil.spawn(`zip`, ['-r', zipFile, '.'], { cwd: ws }).result;
+      await ExecUtil.spawn('zip', ['-r', zipFile, '.'], { cwd: ws }).result;
     }
 
     yield color`${{ success: 'Successfully' }} archived project to ${{ path: zipFile.replace(FsUtil.cwd, '.') }}`;

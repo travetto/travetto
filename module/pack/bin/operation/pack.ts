@@ -43,7 +43,7 @@ export const Pack: PackOperation<AllConfig> = {
   async * exec(cfg: AllConfig) {
     const steps = Object.entries(ops).filter(x => cfg[x[0] as 'assemble'].active);
     if (!steps.length) {
-      throw new Error(`Pack operation has zero active steps`);
+      throw new Error('Pack operation has zero active steps');
     }
     for (const [step, op] of steps) {
       process.stdout.write('\n');

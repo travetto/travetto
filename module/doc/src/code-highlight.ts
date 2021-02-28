@@ -31,7 +31,7 @@ const tokenMapping: { [key: string]: string } = {
   gt: '>',
   lt: '<',
   quot: '"',
-  apos: `'`
+  apos: "'"
 };
 
 export function highlight(text: string, lang: string) {

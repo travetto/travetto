@@ -138,7 +138,7 @@ export class SystemUtil {
       }
       mod = rest.join('/');
     } else if (!mod.startsWith('.')) {
-      ns = `@npm`;
+      ns = '@npm';
     } else {
       const [ns1, ...rest] = mod.split(/\/+/);
       ns = ns1;

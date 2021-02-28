@@ -45,12 +45,12 @@ c:
     const out2 = Serializer.serialize({
       name: ''
     });
-    assert(out2.includes(`name: ''`));
+    assert(out2.includes("name: ''"));
 
     const out3 = Serializer.serialize({
       name: undefined
     });
-    assert(!out3.includes(`name`));
+    assert(!out3.includes('name'));
   }
 
   @Test()

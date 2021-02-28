@@ -33,7 +33,7 @@ if (target && target.startsWith(root)) {
       .$tap(console.log)
       .$map(() =>
         // Overview
-        `<div class="documentation">`
+        '<div class="documentation">'
           .$concat(
             $exec('npx', ['marked', '--gfm', 'README.md'])
               .$filter(x => !/<p.*<img/.test(x) && !/<sub/.test(x)),

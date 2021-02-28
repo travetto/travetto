@@ -162,7 +162,7 @@ export abstract class SQLDialect implements DialectState {
   abstract ident(name: string | FieldConfig): string;
 
   quote(text: string): string {
-    return `'${text.replace(/[']/g, `''`)}'`;
+    return `'${text.replace(/[']/g, "''")}'`;
   }
 
   /**
@@ -188,7 +188,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === PointImpl && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;
     } else if (conf.type === Object) {
-      return this.quote(JSON.stringify(value).replace(/[']/g, `''`));
+      return this.quote(JSON.stringify(value).replace(/[']/g, "''"));
     }
     throw new AppError(`Unknown value type for field ${conf.name}, ${value}`, 'data');
   }

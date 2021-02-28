@@ -69,7 +69,7 @@ export class MailService {
 
     if (msg.text) {
       (msg.alternatives = msg.alternatives || []).push({
-        content: msg.text, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `text/plain; charset=utf-8`
+        content: msg.text, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: 'text/plain; charset=utf-8'
       });
       delete msg.text;
     }
@@ -80,7 +80,7 @@ export class MailService {
       (msg.attachments = msg.attachments || []).push(...attachments);
       (msg.alternatives = msg.alternatives || []).push({
         // NOTE: The leading space on the content type is to force node mailer to not do anything fancy with
-        content: html, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: ` text/html; charset=utf-8`
+        content: html, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: ' text/html; charset=utf-8'
       });
       // @ts-ignore
       delete msg.html; // This is a hack to fix nodemailer

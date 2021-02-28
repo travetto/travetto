@@ -86,7 +86,7 @@ export abstract class RestServerSuite extends BaseRestSuite {
   async testCookie() {
     const { body: ret, headers } = await this.request('delete', '/test/cookie', {
       headers: {
-        Cookie: `orange=yummy`
+        Cookie: 'orange=yummy'
       }
     });
     console.log('Headers', { headers });

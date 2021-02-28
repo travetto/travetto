@@ -110,7 +110,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
     await PhaseManager.run('init', '*', '@trv:registry/init');
 
-    const { Runner } = await import(`../execute/runner`);
+    const { Runner } = await import('../execute/runner');
 
     console.debug('Running', { file: event.file });
 

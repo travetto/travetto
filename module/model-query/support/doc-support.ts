@@ -22,4 +22,4 @@ export const ModelQueryTypes = (file: string | { ᚕfile: string }) => {
     }
   }
   return found;
-}
+};

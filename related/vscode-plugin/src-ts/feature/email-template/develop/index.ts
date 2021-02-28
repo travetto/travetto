@@ -129,7 +129,7 @@ export class EmailTemplateFeature extends BaseFeature {
         {
           location: vscode.ProgressLocation.Notification,
           cancellable: false,
-          title: `Sending email`
+          title: 'Sending email'
         },
         () => this.server.emitMessageAndWaitFor('send', { file: this._activeFile }, 'sent', 'sent-failed').then(console.log)
           .catch(err => {

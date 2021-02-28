@@ -23,7 +23,7 @@ export class CliServicePlugin extends BasePlugin {
       .sort((a, b) => a.name.localeCompare(b.name));
 
     if (!all.length) {
-      this.showHelp('', `\nNo services found\n`);
+      this.showHelp('', '\nNo services found\n');
     }
 
     if (!mode) {

@@ -84,7 +84,7 @@ export class RestTransformUtil {
         const resolved = state['resolver']['tsChecker'].getTypeFromTypeNode(typeNode);
         return state.resolveType(resolved);
       } else {
-        throw new Error(`All Renderable outputs must declare a @returns type on the render method`);
+        throw new Error('All Renderable outputs must declare a @returns type on the render method');
       }
     }
   }

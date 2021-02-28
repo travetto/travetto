@@ -15,7 +15,7 @@ class InkyTest {
     assert(!factory.render('<inky-center></inky-center>').includes('<inky-center>'));
   }
 
-  @Test(`doesn't choke on inline elements`)
+  @Test('does not choke on inline elements')
   testInline() {
     const input = '<container>This is a link to <a href="#">ZURB.com</a>.</container>';
     const expected = `
@@ -31,7 +31,7 @@ class InkyTest {
     assert(cleanseTemplate(input) === cleanseOutput(expected));
   }
 
-  @Test(`doesn't choke on special characters`)
+  @Test('does not choke on special characters')
   testSpecial() {
     const input = '<container>This is a link tö <a href="#">ZURB.com</a>.</container>';
     const expected = `
@@ -47,9 +47,9 @@ class InkyTest {
     assert(cleanseTemplate(input) === cleanseOutput(expected));
   }
 
-  @Test(`doesn't convert these characters into entities`)
+  @Test('does not convert these characters into entities')
   testEntities() {
-    const input = `<container>There's &nbsp; some amazing things here!</container>`;
+    const input = "<container>There's &nbsp; some amazing things here!</container>";
     const expected = `
       <table align="center" class="container">
         <tbody>
@@ -63,7 +63,7 @@ class InkyTest {
     assert(cleanseTemplate(input) === cleanseOutput(expected));
   }
 
-  @Test(`doesn't decode entities if non default cheerio config is given`)
+  @Test('does not decode entities if non default cheerio config is given')
   testDecode() {
     const input = '<container>"should not replace quotes"</container>';
     const expected = `
@@ -79,7 +79,7 @@ class InkyTest {
     assert(cleanseTemplate(input) === cleanseOutput(expected));
   }
 
-  @Test(`doesn't muck with stuff inside raw`)
+  @Test('does not muck with stuff inside raw')
   doTest() {
     const input = '<raw><%= test %></raw>';
     const expected = '<%= test %>';
@@ -87,7 +87,7 @@ class InkyTest {
     assert(cleanseTemplate(input) === cleanseOutput(expected));
   }
 
-  @Test(`can handle multiple raw tags`)
+  @Test('can handle multiple raw tags')
   testMultipleRaw() {
     const input = '<h1><raw><%= test %></raw></h1><h2>< raw >!!!</ raw ></h2>';
     const expected = '<h1><%= test %></h1><h2>!!!</h2>';

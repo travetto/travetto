@@ -76,7 +76,8 @@ export class Workspace {
    * @param config
    */
   static generateLaunchConfig(config: { name: string, program: string } & Partial<vscode.DebugConfiguration>) {
-    config.program = config.program.replace(this.path, `\${workspaceFolder}`);
+    // eslint-disable-next-line no-template-curly-in-string
+    config.program = config.program.replace(this.path, '${workspaceFolder}');
     return {
       type: 'node',
       request: 'launch',

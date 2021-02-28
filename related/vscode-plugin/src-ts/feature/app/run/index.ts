@@ -151,7 +151,7 @@ export class AppRunFeature extends BaseFeature {
         isResolved: true,
         command: {
           command: this.commandName('new'),
-          title: `Debug Application`,
+          title: 'Debug Application',
           arguments: [app.name, app.codeStart]
         }
       }));

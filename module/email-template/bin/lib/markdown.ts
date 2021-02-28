@@ -144,13 +144,13 @@ export class MarkdownUtil {
           break;
         case 'b':
         case 'strong':
-          output.push(`**`);
+          output.push('**');
           descend();
           output.push('**');
           break;
         case 'i':
         case 'em':
-          output.push(`__`);
+          output.push('__');
           descend();
           output.push('__');
           break;

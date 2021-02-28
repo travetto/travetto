@@ -47,12 +47,12 @@ export const Docker: PackOperation<DockerConfig> = {
     `, { encoding: 'utf8' });
 
     yield 'Pulling Base Image';
-    await ExecUtil.spawn(`docker`, ['pull', image]).result;
+    await ExecUtil.spawn('docker', ['pull', image]).result;
 
     yield 'Building Docker Container';
     const args = ['build', ...tag.flatMap(x => ['-t', x]), '.'];
 
-    const { result } = ExecUtil.spawn(`docker`, args, { cwd: ws, stdio: [0, 'pipe', 2] });
+    const { result } = ExecUtil.spawn('docker', args, { cwd: ws, stdio: [0, 'pipe', 2] });
     await result;
 
     yield color`${{ success: 'Successfully' }} containerized project`;

@@ -68,16 +68,16 @@ export class TranspileUtil {
     const f = ([k, v]: string[]) => `${k}: (t,k) => ${v}`;
     const e = '{ throw new Error(msg); }';
     const map: { [P in keyof ProxyHandler<object>]?: string } = {
-      getOwnPropertyDescriptor: base ? `({})` : e,
+      getOwnPropertyDescriptor: base ? '({})' : e,
       get: base ? `{ const v = values[keys.indexOf(k)]; if (!v) ${e} else return v; }` : e,
-      has: base ? `keys.includes(k)` : e
+      has: base ? 'keys.includes(k)' : e
     };
     return [
       (typeof isModule === 'string') ? `console.debug(\`${isModule}\`);` : '',
-      base ? `let keys = ['${Object.keys(base).join(`','`)}']` : '',
-      base ? `let values = ['${Object.values(base).join(`','`)}']` : '',
+      base ? `let keys = ['${Object.keys(base).join("','")}']` : '',
+      base ? `let values = ['${Object.values(base).join("','")}']` : '',
       `let msg = \`${message}\`;`,
-      `Object.defineProperty(exports, 'ᚕtrvError', { value: true })`,
+      "Object.defineProperty(exports, 'ᚕtrvError', { value: true })",
       `module.exports = new Proxy({}, { ${Object.entries(map).map(([k, v]) => f([k, v!])).join(',')}});`
     ].join('\n');
   }

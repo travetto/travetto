@@ -16,7 +16,7 @@ const pool = new WorkPool(() =>
 
         if (!(inp + inp === data)) {
           // Ensure the answer is double the input
-          throw new Error(`Didn't get the double`);
+          throw new Error('Did not get the double');
         }
       }
     }

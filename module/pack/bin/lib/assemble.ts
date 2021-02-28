@@ -107,7 +107,7 @@ export class AssembleUtil {
    * Compile workspace
    */
   static async compileWorkspace(root: string, cacheDir: string) {
-    await ExecUtil.spawn(`node`, ['./node_modules/@travetto/cli/bin/trv.js', 'compile'],
+    await ExecUtil.spawn('node', ['./node_modules/@travetto/cli/bin/trv.js', 'compile'],
       { cwd: root, env: { TRV_CACHE: cacheDir, TRV_MODULES: '', TRV_DEV: '', TRV_REQUIRES: '' }, stdio: ['pipe', 'pipe', 2] }).result;
   }
 

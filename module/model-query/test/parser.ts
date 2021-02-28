@@ -27,6 +27,7 @@ export class QueryStringTest {
       { type: 'operator', value: '==' },
       { type: 'identifier', value: 'D' },
     ]);
+    // eslint-disable-next-line @typescript-eslint/quotes
     assert(QueryLanguageTokenizer.tokenize(`"A.b.c"   =='  D'`) === [
       { type: 'literal', value: 'A.b.c' },
       { type: 'operator', value: '==' },
@@ -41,7 +42,7 @@ export class QueryStringTest {
       QueryLanguageTokenizer.tokenize('"hello"');
     });
 
-    assert(QueryLanguageTokenizer.tokenize(`A ~ /b.c.d/`) === [
+    assert(QueryLanguageTokenizer.tokenize('A ~ /b.c.d/') === [
       { type: 'identifier', value: 'A' },
       { type: 'operator', value: '~' },
       { type: 'literal', value: /b.c.d/ }
@@ -154,7 +155,7 @@ export class QueryStringTest {
   @Test('Parse complex')
   async parseComplex() {
     const res = QueryLanguageParser.parseToQuery<UserType>(
-      `user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')`);
+      "user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')");
     assert(res === {
       $and: [
         { user: { role: { $in: ['admin', 'root'] } } },
@@ -171,13 +172,13 @@ export class QueryStringTest {
   @Test('Parse Regex')
   async parseRegex() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res: any = QueryLanguageParser.parseToQuery<UserType>(`user.role ~ /^admin/`);
+    const res: any = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /^admin/');
     assert(res === { user: { role: { $regex: /^admin/ } } });
     assert(res.user.role.$regex instanceof RegExp);
     assert(res.user.role.$regex.toString() === '/^admin/');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res2: any = QueryLanguageParser.parseToQuery<UserType>(`user.role ~ 'admin'`);
+    const res2: any = QueryLanguageParser.parseToQuery<UserType>("user.role ~ 'admin'");
     assert(res2 === { user: { role: { $regex: /^admin/ } } });
     assert(res2.user.role.$regex instanceof RegExp);
     assert(res2.user.role.$regex.toString() === '/^admin/');
@@ -186,20 +187,20 @@ export class QueryStringTest {
   @Test('Parse Regex with flags')
   async parseRegexWithFlags() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res: any = QueryLanguageParser.parseToQuery<UserType>(`user.role ~ /^admin/i`);
+    const res: any = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /^admin/i');
     assert(res === { user: { role: { $regex: /^admin/i } } });
     assert(res.user.role.$regex instanceof RegExp);
     assert(res.user.role.$regex.toString() === '/^admin/i');
 
     assert.throws(() => {
-      QueryLanguageParser.parseToQuery(`user.role ~ /^admin/gig`);
+      QueryLanguageParser.parseToQuery('user.role ~ /^admin/gig');
     }, /Invalid.*flags/);
   }
 
   @Test('Parse Regex with word boundaries')
   async parseRegexWithWordBoundaries() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res: any = QueryLanguageParser.parseToQuery<UserType>(`user.role ~ /\badmin\b/i`);
+    const res: any = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /\badmin\b/i');
     assert(res.user.role.$regex instanceof RegExp);
     assert(res.user.role.$regex.toString() === '/\badmin\b/i');
   }

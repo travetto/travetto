@@ -18,7 +18,7 @@ import { MySQLConnection } from './connection';
 export class MySQLDialect extends SQLDialect {
 
   conn: MySQLConnection;
-  tablePostfix = `COLLATE='utf8mb4_unicode_ci' ENGINE=InnoDB`;
+  tablePostfix = "COLLATE='utf8mb4_unicode_ci' ENGINE=InnoDB";
   ns: string;
 
   constructor(context: AsyncContext, public config: SQLModelConfig) {

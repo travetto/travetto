@@ -22,7 +22,7 @@ const join = (items: string[]) => [...new Set(items)].join(',');
  */
 export class CliUtil {
 
-  static WAIT_STATE = `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏`.split('');
+  static WAIT_STATE = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
   static isBoolean(x: string) {
     return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);

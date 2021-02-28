@@ -32,14 +32,14 @@ export class TokenizerTest {
 
   @Test()
   testSpacing() {
-    const complex = Tokenizer.tokenize(`"hello my"name is 'bob-o-rama\\'s'`);
-    assert(complex === ['"hello my"', 'name', ' ', 'is', ' ', `'bob-o-rama\\'s'`]);
+    const complex = Tokenizer.tokenize("\"hello my\"name is 'bob-o-rama\\'s'");
+    assert(complex === ['"hello my"', 'name', ' ', 'is', ' ', "'bob-o-rama\\'s'"]);
   }
 
   @Test()
   testJSON() {
     assert(true);
-    const json = Tokenizer.tokenize(`hello [1,2,3,4,5] #Woah`);
+    const json = Tokenizer.tokenize('hello [1,2,3,4,5] #Woah');
     assert(Tokenizer.cleanTokens(json) === ['hello', ' ', '[1,2,3,4,5]']);
   }
 
@@ -51,20 +51,20 @@ export class TokenizerTest {
 
   @Test()
   testJSONParse() {
-    const [, json] = Tokenizer.readJSON(`[1,2,3,4,5]`);
+    const [, json] = Tokenizer.readJSON('[1,2,3,4,5]');
     assert(json === '[1,2,3,4,5]');
 
-    const [, json2] = Tokenizer.readJSON(`{1,2,3,4,5}`);
+    const [, json2] = Tokenizer.readJSON('{1,2,3,4,5}');
     assert(json2 === '{1,2,3,4,5}');
 
-    const [, json3] = Tokenizer.readJSON(`{1,2,[3,{"4"}],5}`);
+    const [, json3] = Tokenizer.readJSON('{1,2,[3,{"4"}],5}');
     assert(json3 === '{1,2,[3,{"4"}],5}');
 
-    const [, json4] = Tokenizer.readJSON(`{1,2,[3,{"4\\"5"}],5}`);
+    const [, json4] = Tokenizer.readJSON('{1,2,[3,{"4\\"5"}],5}');
     assert(json4 === '{1,2,[3,{"4\\"5"}],5}');
 
     assert.throws(() => {
-      Tokenizer.readJSON(`{1,2,[3,{"4}],5}`);
+      Tokenizer.readJSON('{1,2,[3,{"4}],5}');
     }, Error);
   }
 

@@ -72,4 +72,4 @@ const { entries } = JSON.parse(content);
 process.env.TRV_MODULES = `${envMods.replace(TRV_MOD, '')},${entries.join(',')}`;
 
 // Force install
-require(`./src/compile`).CompileUtil.init();
+require('./src/compile').CompileUtil.init();

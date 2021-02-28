@@ -22,18 +22,25 @@ export class TestPlugin extends BasePlugin {
       .option('-m, --mode <mode>', 'Test run mode', /^(single|isolated|standard)$/, 'standard');
   }
 
-  async isFile(file: string) {
+  async isFile(file: string, errorIfNot?: string) {
     try {
       const stat = await FsUtil.exists(file);
-      return stat?.isFile();
-    } catch {
-      return false;
+      const res = stat?.isFile();
+      if (res) {
+        return true;
+      }
+    } catch { }
+
+    if (errorIfNot) {
+      await this.showHelp(errorIfNot);
     }
   }
 
   async onIsolated(state: Partial<RunState>, file: string) {
-    await this.onSingle(state, file);
+    await this.isFile(file, 'You must specify a proper test file to run in isolated mode');
+    state.mode = 'isolated';
 
+    // Read modules for extensions
     const modules = (await fs.promises.readFile(file, 'utf8'))
       .split(/\n/g)
       .filter(l => l.includes('@file-if'))
@@ -41,30 +48,18 @@ export class TestPlugin extends BasePlugin {
       .filter(x => x.startsWith('@travetto'))
       .join(',');
 
-    // Reset
-    // TODO: Cleanup
-    process.env.TRV_MODULES = modules;
-    process.env.TRV_CACHE = `.trv_cache_${SystemUtil.naiveHash(modules)}`;
-    delete require.cache[require.resolve('../../boot/dev-register')];
-    require('../../boot/dev-register');
-    process.env.TRV_SRC_LOCAL = `^${file.split('/')[0]}`;
-    delete EnvUtil['DYNAMIC_MODULES'];
-    SourceIndex.reset();
-    AppCache.init();
+    process.env.TRV_MODULES = `${modules},${process.env.TRV_MODULES}`;
   }
 
   async onSingle(state: Partial<RunState>, file: string) {
-    if (!(await this.isFile(file)) || !/test(-[^/]+)?\//.test(file)) {
-      await this.showHelp(`You must specify a proper test file to run in single mode`);
-    }
+    await this.isFile(file, 'You must specify a proper test file to run in single mode');
     state.mode = 'single';
   }
 
-  async onStandard(state: Partial<RunState>, args: string[]) {
-    const [first] = args;
+  async onStandard(state: Partial<RunState>, first: string) {
     const isFile = await this.isFile(first);
 
-    if (args.length === 0) {
+    if (!first) {
       state.args = ['test/.*'];
     } else if (isFile) { // If is a single file
       if (first.startsWith('test/')) {
@@ -92,7 +87,7 @@ export class TestPlugin extends BasePlugin {
     switch (state.mode) {
       case 'single': await this.onSingle(state, first); break;
       case 'isolated': await this.onIsolated(state, first); break;
-      case 'standard': await this.onStandard(state, args); break;
+      case 'standard': await this.onStandard(state, first); break;
     }
 
     const res = await runTests(state as RunState);

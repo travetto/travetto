@@ -25,7 +25,7 @@ $exec('npx', ['lerna', 'ls', '-p', '-a'])
           .$filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
           .$filter(x => !x.dep.startsWith('@travetto'))
           .$parallel(({ dep, type, version }) =>
-            $exec(`npm`, {
+            $exec('npm', {
               args: ['show', `${dep}@${version}`, 'version', '--json'],
               spawn: { cwd: m }
             })

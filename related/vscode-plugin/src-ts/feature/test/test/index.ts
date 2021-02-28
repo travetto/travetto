@@ -93,7 +93,7 @@ class TestRunnerFeature extends BaseFeature {
         isResolved: true,
         command: {
           command: this.commandName('line'),
-          title: `Debug Test`,
+          title: 'Debug Test',
           arguments: [doc.fileName, test.code, true]
         }
       }) as vscode.CodeLens);

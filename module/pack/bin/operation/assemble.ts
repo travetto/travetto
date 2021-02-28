@@ -50,7 +50,7 @@ export const Assemble: PackOperation<AssembleConfig> = {
     yield 'Copying Dependencies'; await AssembleUtil.copyDependencies(ws);
     yield 'Copying App Content'; await AssembleUtil.copyModule(FsUtil.cwd, ws);
     yield 'Excluding Pre-Compile Files'; await AssembleUtil.excludeFiles(ws, excludeCompile);
-    yield `Compiling`; await AssembleUtil.compileWorkspace(ws, cacheDir);
+    yield 'Compiling'; await AssembleUtil.compileWorkspace(ws, cacheDir);
     yield 'Excluding Post-Compile Files'; await AssembleUtil.excludeFiles(ws, exclude);
     yield 'Copying Added Content'; await AssembleUtil.copyAddedContent(ws, add);
     yield 'Removing Empty Folders'; await PackUtil.removeEmptyFolders(ws);

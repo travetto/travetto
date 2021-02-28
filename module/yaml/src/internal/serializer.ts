@@ -15,7 +15,7 @@ export class Serializer {
         `'${key.replace(/[']/g, '\\\'')}'` :
         `"${key.replace(/["]/g, '\\"')}"`;
     } else if (!key) {
-      return `''`;
+      return "''";
     } else {
       return key;
     }
@@ -83,7 +83,7 @@ export class Serializer {
           out = `\n${out}`;
         }
       } else {
-        out = ` []`;
+        out = ' []';
       }
     } else if (typeof o === 'number' || typeof o === 'boolean' || o === null) {
       out = ` ${o}`;

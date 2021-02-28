@@ -94,7 +94,7 @@ module.exports = {
       'single',
       {
         avoidEscape: true,
-        allowTemplateLiterals: true
+        allowTemplateLiterals: false
       }
     ],
     '@typescript-eslint/semi': [

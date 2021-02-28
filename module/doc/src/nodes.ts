@@ -44,7 +44,7 @@ export function Execute(title: Content, cmd: string, args: string[] = [], cfg: P
     cmd = DocUtil.resolveFile(cmd).resolved.replace(FsUtil.cwd, '.');
     if (/.*\/doc\/.*[.][tj]s$/.test(cmd)) {
       args.unshift('-r', '@travetto/boot/register', cmd);
-      cmd = `node`;
+      cmd = 'node';
     }
   }
   const script = DocUtil.run(cmd, args, cfg);

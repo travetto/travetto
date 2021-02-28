@@ -1,6 +1,7 @@
-import { FsUtil } from '@travetto/boot';
+import { ExecUtil, FsUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
+import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TestExecutor } from './executor';
 import { buildWorkManager } from '../worker/parent';
@@ -48,14 +49,40 @@ export class Runner {
   }
 
   /**
+   * Run isolated suite
+   */
+  async runIsolated() {
+    const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
+
+    const [file, ...args] = this.state.args;
+
+    await PhaseManager.run('test');
+
+    const cache = `.trv_cache_${SystemUtil.naiveHash(file)}`;
+
+    const proc = ExecUtil.fork(require.resolve('../../bin/plugin-test'), [file, ...args], {
+      env: {
+        TRV_TEST_FORMAT: 'exec',
+        TRV_CACHE: cache,
+      }
+    });
+    proc.process.on('message', e => consumer.onEvent(e));
+    await proc.result;
+
+    return consumer.summarizeAsBoolean();
+  }
+
+  /**
    * Run a single file
    */
   async runSingle() {
     const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
     consumer.onStart();
 
+    const [file, ...args] = this.state.args;
+
     await PhaseManager.run('test');
-    await TestExecutor.execute(consumer, this.state.args[0], ...this.state.args.slice(1));
+    await TestExecutor.execute(consumer, file, ...args);
 
     return consumer.summarizeAsBoolean();
   }
@@ -65,7 +92,7 @@ export class Runner {
    */
   async run() {
     switch (this.state.mode) {
-      case 'isolated': // Modules are prepared appropriately
+      case 'isolated': return await this.runIsolated();
       case 'single': return await this.runSingle();
       case 'standard': return await this.runFiles();
     }

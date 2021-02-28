@@ -19,7 +19,7 @@ function titleCase(a: string) {
   return `${a.charAt(0).toUpperCase()}${a.substr(1)}`;
 }
 
-const TOKENS: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': `{{'{'}}`, '}': `{{'}'}}` };
+const TOKENS: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
 
 function clean(a?: string) {
   return a ? a.replace(/^[\n ]+|[\n ]+$/gs, '') : '';
@@ -41,7 +41,7 @@ export const Markdown: Renderer = {
     const link = (s: n.DocNode, ctx: { _type: string, line?: number }) =>
       `${recurse(s)
         .replace(ROOT, '%GIT%')
-        .replace('@travetto/', `%GIT%/module/`)}${ctx.line ? `#L${ctx.line}` : ''}`;
+        .replace('@travetto/', '%GIT%/module/')}${ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
       case 'group': return c.nodes.map(cc => recurse(cc,)).join('');
       case 'code':

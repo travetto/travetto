@@ -22,5 +22,5 @@ export const service: Service = {
     [temp]: '/tmp/localstack'
   },
   ports: { 4566: 4566, 4571: 4571, 8080: 8080, 8081: 8081 },
-  image: `localstack/localstack`
+  image: 'localstack/localstack'
 };

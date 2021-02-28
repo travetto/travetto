@@ -5,10 +5,6 @@ import * as readline from 'readline';
 import { FsUtil, ExecUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
-function hasNamespace(o: unknown): o is { setNamespace(ns: string): void } {
-  return !!o && 'setNamespace' in (o as object);
-}
-
 /**
  * Launch test framework for monorepo and execute tests
  */

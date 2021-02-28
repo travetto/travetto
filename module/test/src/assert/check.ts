@@ -103,7 +103,7 @@ export class AssertCheck {
       // On error, produce the appropriate error message
       if (e instanceof AssertionError) {
         if (!assertion.message) {
-          assertion.message = (OP_MAPPING[fn] ?? `{state} be {expected}`);
+          assertion.message = (OP_MAPPING[fn] ?? '{state} be {expected}');
         }
         assertion.message = assertion.message
           .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || assertion[k as keyof typeof assertion] as string)
@@ -177,7 +177,7 @@ export class AssertCheck {
       }
     } catch (e) {
       if (positive) {
-        missed = new AppError(`Error thrown, but expected no errors`);
+        missed = new AppError('Error thrown, but expected no errors');
         missed.stack = e.stack;
       }
 
@@ -216,7 +216,7 @@ export class AssertCheck {
       }
     } catch (e) {
       if (positive) {
-        missed = new AppError(`Error thrown, but expected no errors`);
+        missed = new AppError('Error thrown, but expected no errors');
       }
 
       e = (missed && e) || this.checkError(shouldThrow, e);

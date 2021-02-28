@@ -11,7 +11,7 @@ const ESCAPE: Record<string, string> = {
   '\\r': '\r',
   '\\t': '\t',
   '\\"': '"',
-  [`\\'`]: `'`
+  "\\'": "'"
 };
 
 /**

@@ -179,7 +179,7 @@ export class InkyComponentFactory implements ComponentFactory {
       inner = this.render(`<${this.ns}center>
         ${inner}
       </${this.ns}center>`);
-      expander = `\n<td class="expander"></td>`;
+      expander = '\n<td class="expander"></td>';
     }
 
     // The .button class is always there, along with any others on the <button> element

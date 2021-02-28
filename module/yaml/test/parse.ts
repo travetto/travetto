@@ -17,7 +17,7 @@ export class ParserTest {
   c
 
   d`);
-    assert(output === [`a\nb\nc\n\nd`]);
+    assert(output === ['a\nb\nc\n\nd']);
   }
 
   @Test()
@@ -31,7 +31,7 @@ export class ParserTest {
  *bold*
  `);
 
-    assert(output === [`# Hello World\n## Sub\n### Sub Sub\n\n*bold*`]);
+    assert(output === ['# Hello World\n## Sub\n### Sub Sub\n\n*bold*']);
   }
 
   @Test()
@@ -45,7 +45,7 @@ export class ParserTest {
 
   d`);
 
-    assert(output === [`a b c\n\nd`]);
+    assert(output === ['a b c\n\nd']);
   }
 
   @Test()
@@ -171,7 +171,7 @@ age: 20
 
   @Test()
   blankFile() {
-    const output = YamlUtil.parse(``);
+    const output = YamlUtil.parse('');
     assert(output === {});
   }
 

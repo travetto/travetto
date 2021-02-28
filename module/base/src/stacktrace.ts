@@ -1,6 +1,8 @@
 import { FsUtil } from '@travetto/boot';
 import { AppManifest } from './manifest';
 
+const escapeRe = (x: string) => x.replace(/[().\[\]|?]/g, z => `\\${z}`);
+
 /**
  * General tools for manipulating stack traces.
  */
@@ -39,7 +41,7 @@ export class StacktraceUtil {
   static addStackFilters(...names: string[]) {
     if (this.FILTERS) {
       this.FILTERS.push(...names);
-      this.FILTER_REGEX = new RegExp(`(${this.FILTERS.map(x => x.replace(/[().\[\]|?]/g, z => `\\${z}`)).join('|')})`);
+      this.FILTER_REGEX = new RegExp(`(${this.FILTERS.map(escapeRe).join('|')})`);
     }
   }
 

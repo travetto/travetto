@@ -56,7 +56,7 @@ class $ApplicationRegistry {
   async run(name: string, args: string[]) {
     const config = this.applications.get(name);
     if (!config) {
-      throw new InjectionError(`Application not found`, { ᚕid: name } as Class);
+      throw new InjectionError('Application not found', { ᚕid: name } as Class);
     }
 
     const typed = this.resolveParameters(config, args);

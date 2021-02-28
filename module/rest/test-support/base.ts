@@ -58,7 +58,7 @@ export abstract class BaseRestSuite {
   getMultipartRequest(chunks: Multipart[]) {
     const boundary = `-------------------------multipart-${Util.uuid()}`;
 
-    const nl = `\r\n`;
+    const nl = '\r\n';
 
     const header = (flag: boolean, key: string, ...values: (string | number | undefined)[]) =>
       flag ? `${key}: ${values.map(v => `${v}`).join(';')}${nl}` : Buffer.alloc(0);
