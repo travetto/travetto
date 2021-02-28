@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 import { ExecUtil, FsUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
@@ -53,19 +55,23 @@ export class Runner {
    */
   async runIsolated() {
     const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
+    consumer.onStart();
 
     const [file, ...args] = this.state.args;
 
+    // Read modules for extensions
+    const modules = [...(await fs.promises.readFile(file, 'utf8'))
+      .matchAll(/\/\/\s*@file-if\s+(@travetto\/[A-Za-z0-9\-]+)/g)]
+      .map(x => x[1]);
+
+    const env = {
+      TRV_MODULES: modules.join(','),
+      TRV_TEST_FORMAT: 'exec',
+      TRV_CACHE: `.trv_cache_${SystemUtil.naiveHash(file)}`
+    };
+
     await PhaseManager.run('test');
-
-    const cache = `.trv_cache_${SystemUtil.naiveHash(file)}`;
-
-    const proc = ExecUtil.fork(require.resolve('../../bin/plugin-test'), [file, ...args], {
-      env: {
-        TRV_TEST_FORMAT: 'exec',
-        TRV_CACHE: cache,
-      }
-    });
+    const proc = ExecUtil.fork(require.resolve('../../bin/plugin-test'), [file, ...args], { env });
     proc.process.on('message', e => consumer.onEvent(e));
     await proc.result;
 

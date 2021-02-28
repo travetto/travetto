@@ -1,5 +1,5 @@
 import { RootRegistry } from '@travetto/registry';
-import { AppError, ResourceManager, Util } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { SystemUtil } from '@travetto/base/src/internal/system';

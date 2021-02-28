@@ -2,11 +2,10 @@ import * as commander from 'commander';
 import * as os from 'os';
 import * as fs from 'fs';
 
-import { AppCache, EnvUtil, FsUtil, SourceIndex } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 import type { RunState } from '../src/execute/types';
-import { SystemUtil } from '@travetto/base/src/internal/system';
 
 /**
  * Launch test framework and execute tests
@@ -39,16 +38,6 @@ export class TestPlugin extends BasePlugin {
   async onIsolated(state: Partial<RunState>, file: string) {
     await this.isFile(file, 'You must specify a proper test file to run in isolated mode');
     state.mode = 'isolated';
-
-    // Read modules for extensions
-    const modules = (await fs.promises.readFile(file, 'utf8'))
-      .split(/\n/g)
-      .filter(l => l.includes('@file-if'))
-      .map(x => x.split('@file-if')[1].trim())
-      .filter(x => x.startsWith('@travetto'))
-      .join(',');
-
-    process.env.TRV_MODULES = `${modules},${process.env.TRV_MODULES}`;
   }
 
   async onSingle(state: Partial<RunState>, file: string) {

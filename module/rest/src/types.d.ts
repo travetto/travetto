@@ -73,7 +73,7 @@ declare global {
      * Get a header as a string or array of strings depending on what was passed
      * @param key 
      */
-    header(key: string): string | string[] | undefined;
+    header<K extends keyof IncomingHttpHeaders>(key: K): IncomingHttpHeaders[K] | undefined;
     /**
      * Listen for request events
      */

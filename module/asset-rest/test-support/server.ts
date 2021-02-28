@@ -3,16 +3,25 @@ import * as assert from 'assert';
 import { FsUtil, StreamUtil } from '@travetto/boot';
 import { AssetUtil, Asset } from '@travetto/asset';
 import { ResourceManager } from '@travetto/base';
-import { Controller, Post } from '@travetto/rest';
+import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/test-support/base';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
-import { Upload } from '../src/decorator';
+import { Upload, UploadAll } from '../src/decorator';
 
 type FileUpload = { name: string, resource: string, type: string };
 
 @Controller('/test/upload')
 class TestUploadController {
+
+  @Post('/all')
+  @UploadAll()
+  async uploadAll({ files }: Request) {
+    for (const [, file] of Object.entries(files)) {
+      delete file.stream;
+      return file;
+    }
+  }
 
   @Post('/')
   async upload(@Upload() file: Asset) {
@@ -45,6 +54,22 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
     const src = await import('@travetto/asset/test-support/service');
     ResourceManager.addPath(FsUtil.resolveUnix(src.AssetServiceSuite.ᚕfile, '..', 'resources'));
   }
+
+  @Test()
+  async testUploadAll() {
+    const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
+    const res = await this.request('post', '/test/upload/all', {
+      headers: {
+        'Content-Type': sent.type,
+        'Content-Length': `${sent.size}`
+      },
+      body: sent.buffer
+    });
+
+    const asset = await this.getAsset('/logo.png');
+    assert(res.body.hash === asset.hash);
+  }
+
 
   @Test()
   async testUploadDirect() {

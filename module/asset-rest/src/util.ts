@@ -59,11 +59,11 @@ export class AssetRestUtil {
    */
   static getFileName(req: Request) {
     const filenameExtract = /filename[*]?=["]?([^";]*)["]?/;
-    const matches = (req.header('content-disposition') as string ?? '').match(filenameExtract);
+    const matches = (req.header('content-disposition') ?? '').match(filenameExtract);
     if (matches && matches.length) {
       return matches[1];
     } else {
-      const [, type] = (req.header('content-type') as string)?.split('/') ?? [];
+      const [, type] = req.header('content-type')?.split('/') ?? [];
       return `file-upload.${type}`;
     }
   }
@@ -74,7 +74,7 @@ export class AssetRestUtil {
   static upload(req: Request, config: Partial<RestAssetConfig>) {
     const validator = this.mimeValidator(config.allowedTypesList, config.excludedTypesList);
 
-    if (!/multipart|urlencoded/i.test(req.header('content-type') as string)) {
+    if (!/multipart|urlencoded/i.test(req.header('content-type') ?? '')) {
       const filename = this.getFileName(req);
       return this.toLocalAsset(req.body ?? req[NodeEntitySym], filename)
         .then(validator)
@@ -127,7 +127,7 @@ export class AssetRestUtil {
       async render(res: Response) {
         const stream = asset.stream!;
         res.status(200);
-        res.setHeader('Content-Type', asset.contentType);
+        res.setHeader('Content-Type', [asset.contentType]);
         res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
         await new Promise((resolve, reject) => {
           stream.pipe(res[NodeEntitySym]);
