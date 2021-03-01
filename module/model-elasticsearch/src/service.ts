@@ -3,7 +3,8 @@ import { Index, Update, Search, DeleteByQuery } from '@elastic/elasticsearch/api
 
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
-  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry
+  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
+  SubTypeNotSupportedError
 } from '@travetto/model';
 import { Class, Util, ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
@@ -27,19 +28,9 @@ import { ElasticsearchQueryUtil } from './internal/query';
 import { ElasticsearchSchemaUtil } from './internal/schema';
 import { IndexManager } from './index-manager';
 import { SearchResponse } from './types';
+import { resolveContent } from 'nodemailer/lib/shared';
 
 type WithId<T> = T & { _id?: string };
-
-/**
- * Convert _id to id
- */
-function postLoad<T extends ModelType>(o: T) {
-  if ('_id' in o) {
-    (o as { id?: unknown }).id = (o as WithId<T>)._id;
-    delete (o as WithId<T>)._id;
-  }
-  return o;
-}
 
 /**
  * Elasticsearch model source.
@@ -66,6 +57,30 @@ export class ElasticsearchModelService implements
       ...search
     });
     return res as SearchResponse<T>;
+  }
+
+  /**
+   * Convert _id to id
+   */
+  async postLoad<T extends ModelType>(cls: Class<T>, o: T) {
+    if ('_id' in o) {
+      (o as { id?: unknown }).id = (o as WithId<T>)._id;
+      delete (o as WithId<T>)._id;
+    }
+
+    o = await ModelCrudUtil.load(cls, o);
+
+    const { expiresAt } = ModelRegistry.get(cls);
+
+    if (expiresAt) {
+      const expiry = ModelExpiryUtil.getExpiryState(cls, o);
+      if (!expiry.expired) {
+        return o;
+      }
+      throw new NotFoundError(cls, o.id);
+    } else {
+      return o;
+    }
   }
 
   async postConstruct(this: ElasticsearchModelService) {
@@ -95,20 +110,31 @@ export class ElasticsearchModelService implements
   async get<T extends ModelType>(cls: Class<T>, id: string) {
     try {
       const res = await this.client.get({ ...this.manager.getIdentity(cls), id });
-      return postLoad(await ModelCrudUtil.load(cls, res.body._source));
+      return this.postLoad(cls, res.body._source);
     } catch (err) {
       throw new NotFoundError(cls, id);
     }
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    const { body: res } = await this.client.delete({
-      ...this.manager.getIdentity(cls) as Required<EsIdentity>,
-      id,
-      refresh: 'true'
-    });
-    if (res.result !== 'deleted') {
-      throw new NotFoundError(cls, id);
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
+
+    try {
+      const { body: res } = await this.client.delete({
+        ...this.manager.getIdentity(cls) as Required<EsIdentity>,
+        id,
+        refresh: 'true'
+      });
+      if (res.result === 'not_found') {
+        throw new NotFoundError(cls, id);
+      }
+    } catch (err) {
+      if (err.body && err.body.result === 'not_found') {
+        throw new NotFoundError(cls, id);
+      }
+      throw err;
     }
   }
 
@@ -127,9 +153,17 @@ export class ElasticsearchModelService implements
   }
 
   async update<T extends ModelType>(cls: Class<T>, o: T): Promise<T> {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
+
     o = await ModelCrudUtil.preStore(cls, o, this);
 
     const id = o.id;
+
+    if (ModelRegistry.get(cls).expiresAt) {
+      await this.get(cls, id);
+    }
 
     await this.client.index({
       ...this.manager.getIdentity(cls),
@@ -144,6 +178,10 @@ export class ElasticsearchModelService implements
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, o: Partial<T>) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
+
     const item = await ModelCrudUtil.preStore(cls, o, this);
 
     await this.client.update({
@@ -159,8 +197,13 @@ export class ElasticsearchModelService implements
     return item;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, id: string, data: Partial<T>) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, data: Partial<T> & { id: string }) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
+
     const script = ElasticsearchSchemaUtil.generateUpdateScript(data);
+    const id = data.id;
 
     console.debug('Partial Script', { script });
 
@@ -180,15 +223,13 @@ export class ElasticsearchModelService implements
     let search: SearchResponse<T> = await this.execSearch(cls, {
       scroll: '2m',
       size: 100,
-      body: {
-        query: { match_all: {} }
-      }
+      body: ElasticsearchQueryUtil.getSearchBody(cls, {})
     });
 
     while (search.body.hits.hits.length > 0) {
       for (const el of search.body.hits.hits) {
         try {
-          yield postLoad(await ModelCrudUtil.load(cls, el._source));
+          yield this.postLoad(cls, el._source);
         } catch (err) {
           if (!(err instanceof NotFoundError)) {
             throw err;
@@ -291,24 +332,28 @@ export class ElasticsearchModelService implements
   }
 
   // Indexed
+  getIndexQuery<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    return ElasticsearchQueryUtil.getSearchBody(
+      cls, ElasticsearchQueryUtil.extractWhereTermQuery(
+        cls, ModelIndexedUtil.projectIndex(
+          cls, idx, body, null
+        )
+      )
+    );
+  }
+
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
-    const res: SearchResponse<T> = await this.execSearch(cls, {
-      body: {
-        query: ElasticsearchQueryUtil.extractWhereTermQuery(ModelIndexedUtil.projectIndex(cls, idx, body, null), cls)
-      }
-    });
+    const res: SearchResponse<T> = await this.execSearch(cls, { body: this.getIndexQuery(cls, idx, body) });
     if (!res.body.hits.hits.length) {
       throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
     }
-    return postLoad(await ModelCrudUtil.load(cls, res.body.hits.hits[0]._source));
+    return this.postLoad(cls, res.body.hits.hits[0]._source);
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     const res = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
-      body: {
-        query: ElasticsearchQueryUtil.extractWhereTermQuery(ModelIndexedUtil.projectIndex(cls, idx, body, null), cls)
-      }
+      body: this.getIndexQuery(cls, idx, body)
     });
     if (res.body.deleted) {
       return;
@@ -318,10 +363,10 @@ export class ElasticsearchModelService implements
 
   // Query
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
-    const req = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, true);
+    const req = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
     const results = await this.execSearch(cls, req);
     const items = ElasticsearchQueryUtil.cleanIdRemoval(req, results);
-    return Promise.all(items.map(m => ModelCrudUtil.load(cls, m).then(postLoad)));
+    return Promise.all(items.map(m => this.postLoad(cls, m)));
   }
 
   async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T> {
@@ -329,7 +374,7 @@ export class ElasticsearchModelService implements
   }
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
-    const req = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig, true);
+    const req = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig);
     const res = (await this.execSearch(cls, req)).body.hits.total as (number | { value: number } | undefined);
     return res ? typeof res === 'number' ? res : res.value : 0;
   }
@@ -401,7 +446,7 @@ export class ElasticsearchModelService implements
     const res = await this.execSearch(cls, search);
     const safe = ElasticsearchQueryUtil.cleanIdRemoval<T>(search, res);
     const combined = ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, safe, (x, v) => v, query && query.limit);
-    return Promise.all(combined.map(m => ModelCrudUtil.load(cls, m).then(postLoad)));
+    return Promise.all(combined.map(m => this.postLoad(cls, m)));
   }
 
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {

@@ -4,7 +4,7 @@ import { ResourceManager, ShutdownManager, Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelRegistry, ModelStorageSupport,
-  ModelIndexedSupport, ModelType, NotFoundError
+  ModelIndexedSupport, ModelType, NotFoundError, SubTypeNotSupportedError
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -100,24 +100,37 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     item = await ModelCrudUtil.preStore(cls, item, this);
     await this.getCollection(cls).doc(item.id).update(toSimpleObj(item));
     return item;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     item = await ModelCrudUtil.preStore(cls, item, this);
     await this.getCollection(cls).doc(item.id).set(toSimpleObj(item));
     return item;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
+    const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
     await this.getCollection(cls).doc(id).set(toSimpleObj(item, firebase.firestore.FieldValue.delete()), { merge: true });
     return this.get(cls, id);
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     await this.getCollection(cls).doc(id).delete();
   }
 
@@ -136,6 +149,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     const res = ModelIndexedUtil.flattenIndexItem(cls, idx, body);
     const query = res.reduce((q, [k, v]) =>
       q.where(k, '==', v), this.getCollection(cls) as firebase.firestore.Query);
@@ -150,6 +166,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     const res = ModelIndexedUtil.flattenIndexItem(cls, idx, body);
     const query = res.reduce((q, [k, v]) =>
       q.where(k, '==', v), this.getCollection(cls) as firebase.firestore.Query);

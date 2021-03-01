@@ -119,7 +119,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     return await this.write(cls, item);
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
+    const id = item.id;
     const clean = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
     return await this.write(cls, clean);
   }
@@ -154,7 +155,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     return StreamUtil.bufferToStream(streams.get(location)!);
   }
 
-  async getStreamMetadata(location: string) {
+  async describeStream(location: string) {
     const metas = this.find('_streams_meta', location, 'notfound');
     return JSON.parse(metas.get(location)!.toString('utf8')) as StreamMeta;
   }

@@ -4,7 +4,7 @@ import * as util from 'util';
 import { Class, ShutdownManager, Util } from '@travetto/base';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
-  NotFoundError, ExistsError, ModelIndexedSupport
+  NotFoundError, ExistsError, ModelIndexedSupport, SubTypeNotSupportedError
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 
@@ -128,23 +128,36 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     await this.has(cls, item.id, 'notfound');
     return this.upsert(cls, item);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     item = await ModelCrudUtil.preStore(cls, item, this);
     await this.store(cls, item);
     return item;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
+    const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
     await this.store(cls, item as T);
     return item as T;
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     const count = await this.wrap(util.promisify(this.cl.del as (key: string, cb: redis.Callback<number>) => void))(this.resolveKey(cls, id));
     if (count === 0) {
       throw new NotFoundError(cls, id);
@@ -194,6 +207,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     const key = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const id = await this.wrap(util.promisify(this.cl.hget))(this.resolveKey(cls, idx), key);
     if (id) {
@@ -203,6 +219,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     const key = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const id = await this.wrap(util.promisify(this.cl.hget))(this.resolveKey(cls, idx), key);
     if (id) {

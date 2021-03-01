@@ -36,7 +36,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
    * @param view The schema view to validate against
    * @throws {NotFoundError} When an item is not found
    */
-  updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string): Promise<T>;
+  updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T>;
 
   /**
    * List all items

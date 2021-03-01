@@ -4,11 +4,14 @@ import type { MetadataBearer } from '@aws-sdk/types';
 import { StreamUtil } from '@travetto/boot';
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
-  ModelType, ModelRegistry, ExistsError, NotFoundError
+  ModelType, ModelRegistry, ExistsError, NotFoundError, SubTypeNotSupportedError
 } from '@travetto/model';
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, Util } from '@travetto/base';
+
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 
 import { S3ModelConfig } from './config';
 
@@ -20,7 +23,7 @@ function isMetadataBearer(o: unknown): o is MetadataBearer {
  * Asset source backed by S3
  */
 @Injectable()
-export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, ModelStorageSupport {
+export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, ModelExpirySupport {
 
   private client: s3.S3;
 
@@ -41,6 +44,16 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   private q<U extends object>(cls: string | Class, id: string, extra: U = {} as U) {
     const key = this.resolveKey(cls, id);
     return { Key: key, Bucket: this.config.bucket, ...extra } as (U & { Key: string, Bucket: string });
+  }
+
+  private getExpiryConfig<T extends ModelType>(cls: Class<T>, item: T) {
+    if (ModelRegistry.get(cls).expiresAt) {
+      const { expiresAt } = ModelExpiryUtil.getExpiryState(cls, item as T);
+      if (expiresAt) {
+        return { Expires: expiresAt };
+      }
+    }
+    return {};
   }
 
   private async * iterateBucket(cls?: string | Class) {
@@ -113,7 +126,11 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async head<T extends ModelType>(cls: Class<T>, id: string) {
     try {
-      await this.client.headObject(this.q(cls, id));
+      const res = await this.client.headObject(this.q(cls, id));
+      const { expiresAt } = ModelRegistry.get(cls);
+      if (expiresAt && res.Expires && res.Expires.getTime() < Date.now()) {
+        return false;
+      }
       return true;
     } catch (e) {
       if (isMetadataBearer(e)) {
@@ -132,7 +149,15 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         const body = (await StreamUtil.streamToBuffer(result.Body)).toString('utf8');
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
-          return output;
+          const { expiresAt } = ModelRegistry.get(cls);
+          if (expiresAt) {
+            const expiry = ModelExpiryUtil.getExpiryState(cls, output);
+            if (!expiry.expired) {
+              return output;
+            }
+          } else {
+            return output;
+          }
         }
       }
       throw new NotFoundError(cls, id);
@@ -156,6 +181,9 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     if (!(await this.head(cls, item.id))) {
       throw new NotFoundError(cls, item.id);
     }
@@ -163,24 +191,36 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     item = await ModelCrudUtil.preStore(cls, item, this);
     await this.client.putObject(this.q(cls, item.id, {
       Body: JSON.stringify(item),
-      ContentType: 'application/json'
+      ContentType: 'application/json',
+      ...this.getExpiryConfig(cls, item)
     }));
     return item;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
+    const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
     await this.client.putObject(this.q(cls, id, {
       Body: JSON.stringify(item),
-      ContentType: 'application/json'
+      ContentType: 'application/json',
+      ...this.getExpiryConfig(cls, item as T)
     }));
     return item as T;
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     if (!(await this.head(cls, id))) {
       throw new NotFoundError(cls, id);
     }
@@ -199,6 +239,11 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         }
       }
     }
+  }
+
+  // Expiry
+  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
+    return -1;
   }
 
   async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
@@ -244,7 +289,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async getStreamMetadata(location: string) {
+  async describeStream(location: string) {
     const obj = await this.headStream(location);
 
     if (obj) {

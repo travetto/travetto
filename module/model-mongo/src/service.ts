@@ -15,7 +15,7 @@ import {
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields
+  PageableModelQuery, ValidStringFields, WhereClause
 } from '@travetto/model-query';
 
 import { ShutdownManager, Util, Class } from '@travetto/base';
@@ -63,6 +63,10 @@ export class MongoModelService implements
     ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.close());
     ModelExpiryUtil.registerCull(this);
+  }
+
+  getWhere<T extends ModelType>(cls: Class<T>, where: WhereClause<T>) {
+    return MongoUtil.prepareQuery(cls, { where }).filter;
   }
 
   /**
@@ -135,7 +139,7 @@ export class MongoModelService implements
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
     const store = await this.getStore(cls);
-    const result = await store.findOne({ _id: MongoUtil.uuid(id), }, {});
+    const result = await store.findOne(this.getWhere<ModelType>(cls, { id }), {});
     if (result) {
       const res = await ModelCrudUtil.load(cls, result);
       if (res) {
@@ -161,7 +165,7 @@ export class MongoModelService implements
   async update<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
-    const res = await store.replaceOne({ _id: MongoUtil.uuid(item.id) }, item);
+    const res = await store.replaceOne(this.getWhere<ModelType>(cls, { id: item.id }), item);
     if (res.matchedCount === 0) {
       throw new NotFoundError(cls, item.id);
     }
@@ -179,7 +183,7 @@ export class MongoModelService implements
     return item;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
     const store = await this.getStore(cls);
 
     if (view) {
@@ -204,7 +208,8 @@ export class MongoModelService implements
       return acc;
     }, {} as Record<string, unknown>);
 
-    const res = await store.findOneAndUpdate({ _id: MongoUtil.uuid(id) }, final, { returnOriginal: false });
+    const id = item.id;
+    const res = await store.findOneAndUpdate(this.getWhere<ModelType>(cls, { id }), final, { returnOriginal: false });
 
     if (!res.value) {
       new NotFoundError(cls, id);
@@ -215,7 +220,7 @@ export class MongoModelService implements
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
     const store = await this.getStore(cls);
-    const result = await store.deleteOne({ _id: MongoUtil.uuid(id) });
+    const result = await store.deleteOne(this.getWhere<ModelType>(cls, { id }));
     if (result.deletedCount === 0) {
       throw new NotFoundError(cls, id);
     }
@@ -223,7 +228,7 @@ export class MongoModelService implements
 
   async * list<T extends ModelType>(cls: Class<T>) {
     const store = await this.getStore(cls);
-    for await (const el of store.find()) {
+    for await (const el of store.find(this.getWhere(cls, {}))) {
       try {
         yield MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el));
       } catch (e) {
@@ -234,6 +239,7 @@ export class MongoModelService implements
     }
   }
 
+  // Stream
   async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
     const writeStream = this.bucket.openUploadStream(location, {
       contentType: meta.contentType,
@@ -248,7 +254,7 @@ export class MongoModelService implements
   }
 
   async getStream(location: string) {
-    await this.getStreamMetadata(location);
+    await this.describeStream(location);
 
     const res = await this.bucket.openDownloadStreamByName(location);
     if (!res) {
@@ -257,7 +263,7 @@ export class MongoModelService implements
     return res;
   }
 
-  async getStreamMetadata(location: string) {
+  async describeStream(location: string) {
     const files = await this.bucket.find({ filename: location }, { limit: 1 }).toArray();
 
     if (!files?.length) {
@@ -360,7 +366,12 @@ export class MongoModelService implements
   // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     const store = await this.getStore(cls);
-    const result = await store.findOne(ModelIndexedUtil.projectIndex(cls, idx, body, null));
+    const result = await store.findOne(
+      this.getWhere(
+        cls,
+        ModelIndexedUtil.projectIndex(cls, idx, body, null) as WhereClause<T>
+      )
+    );
     if (!result) {
       throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
     }
@@ -369,7 +380,12 @@ export class MongoModelService implements
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     const store = await this.getStore(cls);
-    const result = await store.deleteOne(ModelIndexedUtil.projectIndex(cls, idx, body, null));
+    const result = await store.deleteOne(
+      this.getWhere(
+        cls,
+        ModelIndexedUtil.projectIndex(cls, idx, body, null) as WhereClause<T>
+      )
+    );
     if (result.deletedCount) {
       return;
     }

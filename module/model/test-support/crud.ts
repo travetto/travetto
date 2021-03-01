@@ -5,6 +5,7 @@ import { Schema, Text, Precision, TypeMismatchError } from '@travetto/schema';
 
 import { BaseModelSuite } from './base';
 import { ModelCrudSupport, Model, BaseModel, NotFoundError } from '..';
+import { SubTypeNotSupportedError } from '../src/error/invalid-sub-type';
 
 @Schema()
 class Address {
@@ -140,7 +141,8 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(o.id);
     assert(o.name === 'bob');
 
-    const o2 = await service.updatePartial(Person, o.id, Person.from({
+    const o2 = await service.updatePartial(Person, Person.from({
+      id: o.id,
       name: 'oscar'
     }));
 
@@ -148,7 +150,8 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(o2.age === 20);
     assert(o2.address.street2 === 'roader');
 
-    await service.updatePartial(Person, o2.id, Person.from({
+    await service.updatePartial(Person, Person.from({
+      id: o2.id,
       gender: 'f',
       address: {
         street1: 'changed\n',
@@ -183,7 +186,8 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       ]
     }));
 
-    const o2 = await service.updatePartial(SimpleList, o.id, SimpleList.from({
+    const o2 = await service.updatePartial(SimpleList, SimpleList.from({
+      id: o.id,
       names: ['a', 'd'],
       simples: [{ name: 'd' }]
     }));
@@ -201,7 +205,8 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     assert(o.address === undefined);
 
-    await service.updatePartial(User2, o.id, User2.from({
+    await service.updatePartial(User2, User2.from({
+      id: o.id,
       address: {
         street1: 'blue'
       }
@@ -297,25 +302,34 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
         service.upsert(Doctor, Doctor.from({
           id: fire.id, name: 'drob', specialty: 'eyes'
         })),
-      TypeMismatchError
+      SubTypeNotSupportedError
     );
 
     await assert.rejects(
       // @ts-expect-error
-      () => service.update(Engineer, Doctor.from({ ...people[0] })),
-      (e: Error) => (e instanceof NotFoundError || e instanceof TypeMismatchError) ? undefined : e);
+      () => service.update(Engineer, Doctor.from({ ...doc })),
+      (e: Error) => (e instanceof NotFoundError || e instanceof SubTypeNotSupportedError) ? undefined : e);
 
-    const res = await service.upsert(Doctor, Doctor.from({
+    try {
+      const res = await service.upsert(Doctor, Doctor.from({
+        id: doc.id, name: 'drob', specialty: 'eyes'
+      }));
+
+      assert(res.updatedDate!.getTime() > update.getTime());
+    } catch (err) {
+      assert(err instanceof SubTypeNotSupportedError);
+    }
+
+    const resAlt = await service.upsert(Worker, Doctor.from({
       id: doc.id, name: 'drob', specialty: 'eyes'
     }));
 
-    assert(res.updatedDate!.getTime() > update.getTime());
-
+    assert(resAlt.updatedDate!.getTime() > update.getTime());
 
     // Delete by wrong class
     await assert.rejects(
       () => service.delete(Doctor, fire.id),
-      NotFoundError
+      SubTypeNotSupportedError
     );
 
     // Delete by base class
@@ -326,13 +340,10 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       NotFoundError
     );
 
-    // Delete by proper class
-    await service.delete(Doctor, doc.id);
-
     // Delete by any subtype when id is missing
     await assert.rejects(
       () => service.delete(Firefighter, doc.id),
-      NotFoundError
+      SubTypeNotSupportedError
     );
   }
 }

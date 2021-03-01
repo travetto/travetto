@@ -31,7 +31,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
   async wait(n: number, unit: TimeUnit = 'ms') {
     await super.wait(TimeUtil.toMillis(n, unit) * this.delayFactor);
-    await (await this.service).deleteExpired(User);
+    // await (await this.service).deleteExpired(User);
   }
 
   getAge(v: number, unit: TimeUnit = 'ms') {
@@ -65,6 +65,20 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   }
 
   @Test()
+  async updateExpired() {
+    const service = await this.service;
+    const res = await service.upsert(User, User.from({
+      expiresAt: this.getAge(100, 'ms')
+    }));
+
+    assert(res instanceof User);
+
+    await this.wait(200);
+
+    await assert.rejects(() => service.update(User, User.from({ id: res.id })), NotFoundError);
+  }
+
+  @Test()
   async ageWithExtension() {
     const service = await this.service;
     const res = await service.upsert(User, User.from({
@@ -76,7 +90,8 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
     assert(!ModelExpiryUtil.getExpiryState(User, (await service.get(User, res.id))).expired);
 
-    await service.updatePartial(User, res.id, {
+    await service.updatePartial(User, {
+      id: res.id,
       expiresAt: this.getAge(100)
     });
 

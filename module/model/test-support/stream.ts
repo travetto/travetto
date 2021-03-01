@@ -46,7 +46,7 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
 
     await service.upsertStream(meta.hash, stream, meta);
 
-    const retrieved = await service.getStreamMetadata(meta.hash);
+    const retrieved = await service.describeStream(meta.hash);
     assert(meta === retrieved);
   }
 

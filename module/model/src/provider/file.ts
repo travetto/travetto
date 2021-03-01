@@ -131,7 +131,8 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     return item;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, id: string, item: Partial<T>, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
+    const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
     const file = await this.resolveName(cls, '.json', item.id);
     await fs.promises.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
@@ -169,7 +170,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     return fs.createReadStream(file);
   }
 
-  async getStreamMetadata(location: string) {
+  async describeStream(location: string) {
     const file = await this.find('_streams', '.meta', location);
     const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
     const text = JSON.parse(content.toString('utf8'));

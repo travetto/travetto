@@ -42,7 +42,7 @@ export interface ModelStreamSupport {
    * Get metadata for stream
    * @param location The location of the stream
    */
-  getStreamMetadata(location: string): Promise<StreamMeta>;
+  describeStream(location: string): Promise<StreamMeta>;
 
   /**
    * Delete stream by location

@@ -76,7 +76,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Extract specific term for a class, and a given field
    */
-  static extractWhereTermQuery<T>(o: Record<string, unknown>, cls: Class<T>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
+  static extractWhereTermQuery<T>(cls: Class<T>, o: Record<string, unknown>, config?: EsSchemaConfig, path: string = ''): Record<string, unknown> {
     const items = [];
     const schema = SchemaRegistry.getViewSchema(cls).schema;
 
@@ -91,7 +91,7 @@ export class ElasticsearchQueryUtil {
       if (Util.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
-          const inner = this.extractWhereTermQuery(top, declaredType, config, `${sPath}.`);
+          const inner = this.extractWhereTermQuery(declaredType, top, config, `${sPath}.`);
           items.push(declaredSchema.array ?
             { nested: { path: sPath, query: inner } } :
             inner
@@ -218,29 +218,51 @@ export class ElasticsearchQueryUtil {
     } else if (has$Not(o)) {
       return { bool: { ['must_not']: this.extractWhereQuery<T>(cls, o.$not, config) } };
     } else {
-      return this.extractWhereTermQuery(o, cls, config);
+      return this.extractWhereTermQuery(cls, o, config);
     }
+  }
+
+  /**
+   * Generate final search query
+   * @param cls
+   * @param search
+   */
+  static getSearchBody<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>) {
+    const clauses = [];
+    if (search && Object.keys(search).length) {
+      clauses.push(search);
+    }
+    const { expiresAt, subType } = ModelRegistry.get(cls);
+    if (expiresAt) {
+      clauses.push({
+        bool: {
+          should: [
+            { exists: { field: expiresAt } },
+            { range: { [expiresAt]: { gte: new Date().toISOString() } } },
+          ],
+          minimum_should_match: 1
+        },
+      });
+    }
+    if (subType) {
+      clauses.push({
+        term: { type: { value: subType } }
+      });
+    }
+    return clauses.length === 0 ? {} :
+      clauses.length === 1 ? { query: clauses[0] } :
+        { query: { bool: { must: clauses } } };
   }
 
   /**
    * Build a base search object from a class and a query
    */
-  static getSearchObject<T extends ModelType>(cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, subTypeAware?: boolean): Search {
+  static getSearchObject<T extends ModelType>(cls: Class<T>, query: Query<T>, config?: EsSchemaConfig): Search {
     query.where = query.where ? (typeof query.where === 'string' ? QueryLanguageParser.parseToQuery(query.where) : query.where) : {};
-
-    if (subTypeAware) {
-      const conf = ModelRegistry.get(cls);
-      if (conf.subType) {
-        const filterClause = { type: conf.subType };
-        query.where = (Object.keys(query.where!).length > 0 ? { $and: [query.where, filterClause] } : filterClause) as WhereClause<T>;
-      }
-    }
-
     QueryVerifier.verify(cls, query); // Verify
 
-    const q = this.extractWhereQuery(cls, query.where as WhereClause<T>, config);
     const search: Search = {
-      body: q ? { query: q } : {}
+      body: this.getSearchBody(cls, this.extractWhereQuery(cls, query.where as WhereClause<T>, config))
     };
 
     const sort = query.sort;

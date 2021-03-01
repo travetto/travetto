@@ -35,8 +35,8 @@ export class AssetService {
    * Get the asset info
    * @param location The location to get metadata for
    */
-  getMetadata(location: string) {
-    return this.store.getStreamMetadata(location);
+  describeStream(location: string) {
+    return this.store.describeStream(location);
   }
 
   /**
@@ -54,7 +54,7 @@ export class AssetService {
     if (!overwriteIfFound) {
       let missing = false;
       try {
-        await this.getMetadata(location);
+        await this.describeStream(location);
       } catch (err) {
         if (err instanceof NotFoundError) {
           missing = true;
@@ -80,7 +80,7 @@ export class AssetService {
    */
   async get(location: string): Promise<Asset> {
     const stream = await this.store.getStream(location);
-    const info = await this.getMetadata(location);
+    const info = await this.describeStream(location);
     return { stream, ...info };
   }
 }

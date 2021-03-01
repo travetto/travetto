@@ -57,11 +57,11 @@ export class MongoUtil {
   }
 
   static prepareQuery<T, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U) {
-    query.where = MongoUtil.getWhereClause(cls, query.where);
+    query.where = this.getWhereClause(cls, query.where);
     QueryVerifier.verify(cls, query);
     return {
       query: query as U & { where: WhereClause<T> },
-      filter: MongoUtil.extractWhereClause(query.where)
+      filter: this.extractWhereClause(query.where)
     } as const;
   }
 
@@ -74,10 +74,22 @@ export class MongoUtil {
    */
   static getWhereClause<T>(cls: Class<T>, o: WhereClause<T> | string | undefined): WhereClause<T> {
     let q = o ? (typeof o === 'string' ? QueryLanguageParser.parseToQuery(o) as WhereClause<T> : o) : {};
+    const clauses = [q];
 
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
-      q = { $and: [q, { type: conf.subType }] };
+      clauses.push({ type: conf.subType });
+    }
+    if (conf.expiresAt) {
+      clauses.push({
+        $or: [
+          { [conf.expiresAt]: { $exists: false } },
+          { [conf.expiresAt]: { $gte: new Date() } },
+        ]
+      });
+    }
+    if (clauses.length > 1) {
+      q = { $and: clauses };
     }
     return q;
   }
