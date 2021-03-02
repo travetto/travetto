@@ -16,6 +16,7 @@ import { ConsoleCapture } from './console';
 import { TestPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { AssertUtil } from '../assert/util';
+import { Skip } from '../model/common';
 
 const TEST_TIMEOUT = TimeUtil.getEnv('TRV_TEST_TIMEOUT', 5, 's');
 
@@ -47,6 +48,17 @@ export class TestExecutor {
 
     // Wait for all barriers to be satisfied
     return barrier.wait();
+  }
+
+  /**
+   * Determining if we should skip
+   */
+  private static async skip(cfg: TestConfig | SuiteConfig, inst: unknown) {
+    if (cfg.skip !== undefined) {
+      if (typeof cfg.skip === 'boolean' ? cfg.skip : await cfg.skip(inst)) {
+        return true;
+      }
+    }
   }
 
   /**
@@ -85,7 +97,7 @@ export class TestExecutor {
   /**
    * Execute the test, capture output, assertions and promises
    */
-  static async executeTest(consumer: TestConsumer, test: TestConfig) {
+  static async executeTest(consumer: TestConsumer, test: TestConfig, suite: SuiteConfig) {
 
     // Mark test start
     consumer.onEvent({ type: 'test', phase: 'before', test });
@@ -101,7 +113,7 @@ export class TestExecutor {
       status: 'skipped'
     };
 
-    if (test.skip) {
+    if (await this.skip(test, suite.instance)) {
       return result as TestResult;
     }
 
@@ -150,11 +162,12 @@ export class TestExecutor {
 
     try {
       await mgr.startPhase('all');
-      if (!test.skip) {
+      const skip = await this.skip(test, suite.instance);
+      if (!skip) {
         await mgr.startPhase('each');
       }
-      await this.executeTest(consumer, test);
-      if (!test.skip) {
+      await this.executeTest(consumer, test, suite);
+      if (!skip) {
         await mgr.endPhase('each');
       }
       await mgr.endPhase('all');
@@ -180,18 +193,18 @@ export class TestExecutor {
       // Handle the BeforeAll calls
       await mgr.startPhase('all');
 
-      for (const testConfig of suite.tests) {
+      for (const test of suite.tests) {
         const testStart = Date.now();
-        if (!testConfig.skip) {
+        if (!test.skip) {
           // Handle BeforeEach
           await mgr.startPhase('each');
         }
 
         // Run test
-        const ret = await this.executeTest(consumer, testConfig);
+        const ret = await this.executeTest(consumer, test, suite);
         result[ret.status]++;
 
-        if (!testConfig.skip) {
+        if (!test.skip) {
           result.tests.push(ret);
         }
 
@@ -240,7 +253,7 @@ export class TestExecutor {
     // If running specific suites
     if ('suites' in params) {
       for (const suite of params.suites) {
-        if (!suite.skip && suite.tests.length) {
+        if (!(await this.skip(suite, suite.instance)) && suite.tests.length) {
           await this.executeSuite(consumer, suite);
         }
       }

@@ -7,6 +7,7 @@ import { ModelBulkSuite } from '@travetto/model/test-support/bulk';
 import { ModelBasicSuite } from '@travetto/model/test-support/basic';
 import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 import { ModelExpirySuite } from '@travetto/model/test-support/expiry';
+import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
 
 import { SQLModelConfig, SQLModelService } from '../..';
 import { PostgreSQLDialect } from '../../src/dialect/postgresql/dialect';
@@ -45,6 +46,14 @@ export class PostgreSQLBulkSuite extends ModelBulkSuite {
 @WithSuiteContext()
 @Suite()
 export class PostgreSQLExpirySuite extends ModelExpirySuite {
+  constructor() {
+    super(SQLModelService, SQLModelConfig);
+  }
+}
+
+@WithSuiteContext()
+@Suite()
+export class PostgreSQLQueryPolymorphismSuite extends ModelPolymorphismSuite {
   constructor() {
     super(SQLModelService, SQLModelConfig);
   }

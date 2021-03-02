@@ -1,6 +1,5 @@
 import * as commander from 'commander';
 import * as os from 'os';
-import * as fs from 'fs';
 
 import { FsUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';

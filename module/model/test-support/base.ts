@@ -1,7 +1,7 @@
 import { FsUtil } from '@travetto/boot';
 import { DependencyRegistry } from '@travetto/di';
 import { AfterAll, AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
-import { Class, ResourceManager } from '@travetto/base';
+import { AppError, Class, ResourceManager } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 
 import { TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';
@@ -14,7 +14,24 @@ let first = true;
 
 export abstract class BaseModelSuite<T> {
 
+  static ifNot(pred: (svc: unknown) => boolean) {
+    return async (x: unknown) => !pred(await (x as BaseModelSuite<unknown>).service);
+  }
+
   constructor(public serviceClass: Class<T>, public configClass: Class) { }
+
+  async getSize<U extends ModelType>(cls: Class<U>) {
+    const svc = (await this.service);
+    if (isCrudSupported(svc)) {
+      let i = 0;
+      for await (const __el of svc.list(cls)) {
+        i += 1;
+      }
+      return i;
+    } else {
+      throw new AppError(`Size is not supported for this service: ${this.serviceClass.name}`);
+    }
+  }
 
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]) {
     const svc = await this.service;

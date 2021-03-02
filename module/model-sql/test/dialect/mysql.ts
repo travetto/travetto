@@ -10,6 +10,7 @@ import { ModelExpirySuite } from '@travetto/model/test-support/expiry';
 
 import { SQLModelConfig, SQLModelService } from '../..';
 import { MySQLDialect } from '../../src/dialect/mysql/dialect';
+import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -45,6 +46,14 @@ export class MySQLBulkSuite extends ModelBulkSuite {
 @WithSuiteContext()
 @Suite()
 export class MySQLExpirySuite extends ModelExpirySuite {
+  constructor() {
+    super(SQLModelService, SQLModelConfig);
+  }
+}
+
+@WithSuiteContext()
+@Suite()
+export class MySQLPolymorphismSuite extends ModelPolymorphismSuite {
   constructor() {
     super(SQLModelService, SQLModelConfig);
   }

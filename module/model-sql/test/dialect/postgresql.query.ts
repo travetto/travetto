@@ -6,6 +6,8 @@ import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 import { ModelQuerySuite } from '@travetto/model-query/test-support/query';
 import { ModelQueryCrudSuite } from '@travetto/model-query/test-support/crud';
 import { ModelQueryFacetSuite } from '@travetto/model-query/test-support/facet';
+import { ModelQueryPolymorphismSuite } from '@travetto/model-query/test-support/polymorphism';
+import { ModelQuerySuggestSuite } from '@travetto/model-query/test-support/suggest';
 
 import { SQLModelConfig, SQLModelService } from '../..';
 import { PostgreSQLDialect } from '../../src/dialect/postgresql/dialect';
@@ -37,6 +39,22 @@ export class PostgreSQLQueryCrudSuite extends ModelQueryCrudSuite {
 @WithSuiteContext()
 @Suite()
 export class PostgreSQLQueryFacetSuite extends ModelQueryFacetSuite {
+  constructor() {
+    super(SQLModelService, SQLModelConfig);
+  }
+}
+
+@WithSuiteContext()
+@Suite()
+export class PostgreSQLQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
+  constructor() {
+    super(SQLModelService, SQLModelConfig);
+  }
+}
+
+@WithSuiteContext()
+@Suite()
+export class PostgreSQLQuerySuggestSuite extends ModelQuerySuggestSuite {
   constructor() {
     super(SQLModelService, SQLModelConfig);
   }

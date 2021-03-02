@@ -1,7 +1,7 @@
 import type { Class } from '@travetto/base';
 
 import { TestConfig, TestResult } from './test';
-import { SuiteCore } from './common';
+import { Skip, SuiteCore } from './common';
 
 /**
  * Suite configuration
@@ -14,7 +14,7 @@ export interface SuiteConfig<T = unknown> extends SuiteCore {
   /**
    * Should this be skipped
    */
-  skip: boolean;
+  skip: Skip;
   /**
    * Actual class instance
    */

@@ -1,3 +1,6 @@
+/** Configuration of a skip */
+export type Skip = boolean | ((instance: unknown) => boolean | Promise<boolean>) | (() => boolean | Promise<boolean>);
+
 /**
  * Core Suite definition
  */

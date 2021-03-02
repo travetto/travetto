@@ -7,6 +7,7 @@ import { ModelBasicSuite } from '@travetto/model/test-support/basic';
 import { ModelCrudSuite } from '@travetto/model/test-support/crud';
 import { ModelStreamSuite } from '@travetto/model/test-support/stream';
 import { ModelExpirySuite } from '@travetto/model/test-support/expiry';
+import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
 
 import { S3ModelConfig } from '../src/config';
 import { S3ModelService } from '../src/service';
@@ -31,6 +32,14 @@ export class S3ExpirySuite extends ModelExpirySuite {
     super(S3ModelService, S3ModelConfig);
   }
 }
+
+@Suite()
+export class S3PolymorphismSuite extends ModelPolymorphismSuite {
+  constructor() {
+    super(S3ModelService, S3ModelConfig);
+  }
+}
+
 
 @Suite()
 export class S3StreamSuite extends ModelStreamSuite {

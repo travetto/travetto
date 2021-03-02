@@ -1,5 +1,5 @@
 import type { Class } from '@travetto/base';
-import { TestCore } from './common';
+import { Skip, TestCore } from './common';
 
 export type ThrowableError = string | RegExp | Function;
 
@@ -22,7 +22,7 @@ export interface TestConfig extends TestCore {
   /**
    * Should it be skipped
    */
-  skip: boolean;
+  skip: Skip;
   /**
    * Override the timeout duration
    */

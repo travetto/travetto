@@ -21,14 +21,6 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
   delayFactor: number = 1;
 
-  async getSize() {
-    let i = 0;
-    for await (const __el of (await this.service).list(User)) {
-      i += 1;
-    }
-    return i;
-  }
-
   async wait(n: number, unit: TimeUnit = 'ms') {
     await super.wait(TimeUtil.toMillis(n, unit) * this.delayFactor);
     // await (await this.service).deleteExpired(User);
@@ -106,7 +98,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
     let total;
 
-    total = await this.getSize();
+    total = await this.getSize(User);
     assert(total === 0);
 
     // Create
@@ -119,16 +111,16 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     // Let expire
     await this.wait(1);
 
-    total = await this.getSize();
+    total = await this.getSize(User);
     assert(total === 10);
 
     // Let expire
     await this.wait(1100);
 
-    total = await this.getSize();
+    total = await this.getSize(User);
     assert(total === 0);
 
-    total = await this.getSize();
+    total = await this.getSize(User);
     assert(total === 0);
   }
 }

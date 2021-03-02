@@ -478,11 +478,13 @@ export class MongoModelService implements
       }
     }];
 
-    if (query && query.where) {
-      pipeline.unshift({
-        $match: MongoUtil.prepareQuery(cls, query).filter
-      });
+    let q: Record<string, unknown> = { [field]: { $exists: true } };
+
+    if (query?.where) {
+      q = { $and: [q, MongoUtil.prepareQuery(cls, query).filter] };
     }
+
+    pipeline.unshift({ $match: q });
 
     const result = await col.aggregate(pipeline).toArray();
 

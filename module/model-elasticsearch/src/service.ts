@@ -28,7 +28,6 @@ import { ElasticsearchQueryUtil } from './internal/query';
 import { ElasticsearchSchemaUtil } from './internal/schema';
 import { IndexManager } from './index-manager';
 import { SearchResponse } from './types';
-import { resolveContent } from 'nodemailer/lib/shared';
 
 type WithId<T> = T & { _id?: string };
 
@@ -421,7 +420,6 @@ export class ElasticsearchModelService implements
     }
 
     const searchObj = ElasticsearchQueryUtil.getSearchObject(cls, filter ?? {});
-    const conf = ModelRegistry.get(cls);
 
     return {
       ...searchObj,
@@ -432,8 +430,7 @@ export class ElasticsearchModelService implements
             must: [
               searchObj.body.query ?? { ['match_all']: {} },
               ...(q ? [{ ['match_phrase_prefix']: { [text ? `${field}.text` : field]: { query: q } } }] : [])
-            ],
-            ...(conf.subType ? { filter: { term: { type: conf.subType } } } : {})
+            ]
           }
         }
       },
