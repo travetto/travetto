@@ -52,8 +52,12 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     return { class: cls, indices: [], autoCreate: true };
   }
 
-  onInstallFinalize<T>(cls: Class<T>) {
-    return this.pending.get(cls.ᚕid)! as ModelOptions<T>;
+  onInstallFinalize(cls: Class) {
+    const config = this.pending.get(cls.ᚕid)! as ModelOptions<ModelType>;
+    for (const el of config.indices ?? []) {
+      el.simpleName = el.name.replace(/[^A-Za-z0-9]/g, '');
+    }
+    return config;
   }
 
   onUninstallFinalize(cls: Class) {

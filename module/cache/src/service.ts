@@ -53,7 +53,8 @@ export class CacheService {
     if (extendOnAccess) {
       const threshold = maxAge / 2;
       if (delta < threshold) {
-        await this.modelService.updatePartial(CacheRecord, id, {
+        await this.modelService.updatePartial(CacheRecord, {
+          id,
           expiresAt: new Date(Date.now() + maxAge),
           issuedAt: new Date()
         }); // Do not wait

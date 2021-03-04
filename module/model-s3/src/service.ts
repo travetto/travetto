@@ -171,13 +171,25 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
+  async store<T extends ModelType>(cls: Class<T>, item: T, preStore = true) {
+    if (preStore) {
+      item = await ModelCrudUtil.preStore(cls, item, this);
+    }
+    await this.client.putObject(this.q(cls, item.id, {
+      Body: JSON.stringify(item),
+      ContentType: 'application/json',
+      ...this.getExpiryConfig(cls, item)
+    }));
+    return item;
+  }
+
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     if (item.id) {
       if (await this.head(cls, item.id)) {
         throw new ExistsError(cls, item.id);
       }
     }
-    return this.upsert(cls, item);
+    return this.store(cls, item);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
@@ -187,20 +199,14 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     if (!(await this.head(cls, item.id))) {
       throw new NotFoundError(cls, item.id);
     }
-    return this.upsert(cls, item);
+    return this.store(cls, item);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
-    item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.client.putObject(this.q(cls, item.id, {
-      Body: JSON.stringify(item),
-      ContentType: 'application/json',
-      ...this.getExpiryConfig(cls, item)
-    }));
-    return item;
+    return this.store(cls, item);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
@@ -209,12 +215,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
-    await this.client.putObject(this.q(cls, id, {
-      Body: JSON.stringify(item),
-      ContentType: 'application/json',
-      ...this.getExpiryConfig(cls, item as T)
-    }));
-    return item as T;
+    return this.store<T>(cls, item as T, false);
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {

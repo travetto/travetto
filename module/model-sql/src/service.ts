@@ -9,12 +9,10 @@ import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClause
+  PageableModelQuery, ValidStringFields, WhereClauseRaw
 } from '@travetto/model-query';
 
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
-import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
@@ -26,26 +24,7 @@ import { Connected, ConnectedIterator, Transactional } from './connection/decora
 import { SQLUtil } from './internal/util';
 import { SQLDialect } from './dialect/base';
 import { TableManager } from './table-manager';
-
-function prepareQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): ModelQuery<T> & { where: WhereClause<T> } {
-
-  if (query.where && typeof query.where === 'string') {
-    query.where = QueryLanguageParser.parseToQuery(query.where);
-  }
-
-  const conf = ModelRegistry.get(cls);
-
-  // Polymorphism
-  if (conf.subType) {
-    query.where = (query.where ?
-      { $and: [query.where ?? {}, { type: conf.subType }] } :
-      { type: conf.subType }) as WhereClause<T>;
-  }
-
-  QueryVerifier.verify(cls, query);
-
-  return query as ModelQuery<T> & { where: WhereClause<T> };
-}
+import { ExistsError } from '@travetto/model/src/error/exists';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,
@@ -154,8 +133,16 @@ export class SQLModelService implements
   @Transactional()
   async create<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     await ModelCrudUtil.preStore(cls, item, this);
-    for (const ins of this.dialect.getAllInsertSQL(cls, item)) {
-      await this.exec(ins);
+    try {
+      for (const ins of this.dialect.getAllInsertSQL(cls, item)) {
+        await this.exec(ins);
+      }
+    } catch (err) {
+      if (err instanceof ExistsError) {
+        throw new ExistsError(cls, item.id);
+      } else {
+        throw err;
+      }
     }
     return item;
   }
@@ -187,8 +174,7 @@ export class SQLModelService implements
 
   @Connected()
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
-    // @ts-ignore
-    const res = await this.query(cls, { where: { id } } as ModelQuery<T>);
+    const res = await this.query(cls, { where: { id } as WhereClauseRaw<T> });
     if (res.length === 1) {
       return await ModelCrudUtil.load(cls, res[0]);
     }
@@ -204,7 +190,9 @@ export class SQLModelService implements
 
   @Transactional()
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    const count = await this.dialect.deleteAndGetCount<ModelType>(cls, { where: { id } });
+    const count = await this.dialect.deleteAndGetCount<ModelType>(cls, {
+      where: ModelQueryUtil.getWhereClause(cls, { id } as WhereClauseRaw<T>)
+    });
     if (count === 0) {
       throw new NotFoundError(cls, id);
     }
@@ -237,7 +225,7 @@ export class SQLModelService implements
 
   @Connected()
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
-    const { records: res } = await this.exec<T>(this.dialect.getQuerySQL(cls, await prepareQuery(cls, query)));
+    const { records: res } = await this.exec<T>(this.dialect.getQuerySQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query)));
     if (ModelRegistry.has(cls)) {
       await this.dialect.fetchDependents(cls, res, query && query.select);
     }
@@ -253,22 +241,22 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async queryCount<T extends ModelType>(cls: Class<T>, builder: ModelQuery<T>): Promise<number> {
-    const { records } = await this.exec<{ total: string | number }>(this.dialect.getQueryCountSQL(cls, await prepareQuery(cls, builder)));
+  async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
+    const { records } = await this.exec<{ total: string | number }>(this.dialect.getQueryCountSQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query)));
     return +records[0].total;
   }
 
   @Connected()
   @Transactional()
   async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
-    const { count } = await this.exec(this.dialect.getUpdateSQL(SQLUtil.classToStack(cls), data, (await prepareQuery(cls, query)).where));
+    const { count } = await this.exec(this.dialect.getUpdateSQL(SQLUtil.classToStack(cls), data, ModelQueryUtil.getQueryAndVerify(cls, query).where));
     return count;
   }
 
   @Connected()
   @Transactional()
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
-    const { count } = await this.exec(this.dialect.getDeleteSQL(SQLUtil.classToStack(cls), (await prepareQuery(cls, query)).where));
+    const { count } = await this.exec(this.dialect.getDeleteSQL(SQLUtil.classToStack(cls), ModelQueryUtil.getQueryAndVerify(cls, query, false).where));
     return count;
   }
 
@@ -276,14 +264,14 @@ export class SQLModelService implements
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     const q = ModelQuerySuggestUtil.getSuggestQuery(cls, field, prefix, query);
     const results = await this.query(cls, q);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query && query.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query?.limit);
   }
 
   @Connected()
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
     const results = await this.query(cls, q);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, x => x, query && query.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field as 'type', prefix, results, x => x, query?.limit);
   }
 
   @Connected()
@@ -295,11 +283,9 @@ export class SQLModelService implements
       `SELECT ${col} as ${key}, COUNT(${col}) as ${ttl}`,
       this.dialect.getFromSQL(cls),
     ];
-    if (query && query.where) {
-      q.push(
-        this.dialect.getWhereSQL(cls, prepareQuery(cls, query).where)
-      );
-    }
+    q.push(
+      this.dialect.getWhereSQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query ?? {}).where)
+    );
     q.push(
       `GROUP BY ${col}`,
       `ORDER BY ${ttl} DESC`

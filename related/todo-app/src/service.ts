@@ -23,7 +23,7 @@ export class TodoService {
   }
 
   async complete(id: string, completed = true) {
-    return this.modelService.updatePartial(Todo, id, Todo.from({ completed }));
+    return this.modelService.updatePartial(Todo, Todo.from({ id, completed }));
   }
 
   async remove(id: string) {

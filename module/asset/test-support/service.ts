@@ -29,7 +29,7 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
     const file = await AssetUtil.fileToAsset(pth);
 
     const out = await service.upsert(file);
-    const metadata = await service.getMetadata(out);
+    const metadata = await service.describeStream(out);
     assert(file.filename === metadata.filename);
   }
 
@@ -65,14 +65,14 @@ export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSuppor
     const file = await AssetUtil.fileToAsset(pth);
     const loc = await service.upsert(file);
 
-    const out = await service.getMetadata(loc);
+    const out = await service.describeStream(loc);
 
     assert(out.filename === loc);
 
     await service.delete(loc);
 
     await assert.rejects(async () => {
-      await service.getMetadata(loc);
+      await service.describeStream(loc);
     }, NotFoundError);
   }
 }

@@ -15,7 +15,7 @@ let first = true;
 export abstract class BaseModelSuite<T> {
 
   static ifNot(pred: (svc: unknown) => boolean) {
-    return async (x: unknown) => !pred(await (x as BaseModelSuite<unknown>).service);
+    return async (x: any) => !pred(new (x as any).serviceClass());
   }
 
   constructor(public serviceClass: Class<T>, public configClass: Class) { }

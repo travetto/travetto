@@ -36,7 +36,7 @@ export class TableManager {
     if (indices) {
       for (const op of this.dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {
-          this.exec(op);
+          await this.exec(op);
         } catch (e) {
           if (!/\bexists|duplicate\b/i.test(e.message)) {
             throw e;

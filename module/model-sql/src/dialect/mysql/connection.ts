@@ -5,6 +5,8 @@ import { ShutdownManager } from '@travetto/base';
 import { AsyncContext } from '@travetto/context';
 import { Connection } from '../../connection/base';
 import { SQLModelConfig } from '../../config';
+import { NotFoundError } from '@travetto/model/src/error/not-found';
+import { ExistsError } from '@travetto/model/src/error/exists';
 
 /**
  * Connection support for mysql
@@ -56,8 +58,12 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
       console.debug('Executing Query', { query });
       conn.query(query, (err, results, fields) => {
         if (err) {
-          console.debug('Failed query', { error: err });
-          rej(err);
+          console.debug('Failed query', { error: err, query });
+          if (err.message.startsWith('ER_DUP_ENTRY')) {
+            rej(new ExistsError('query', query));
+          } else {
+            rej(err);
+          }
         } else {
           const records = Array.isArray(results) ? [...results].map(v => ({ ...v })) : [{ ...results }] as T[];
           res({ records, count: results.affectedRows });

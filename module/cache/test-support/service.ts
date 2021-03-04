@@ -8,6 +8,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { Cache, EvictCache } from '../src/decorator';
 import { CacheService } from '../src/service';
 import { CacheUtil } from '../src/util';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
@@ -72,6 +73,7 @@ class SampleService {
 }
 
 @Suite()
+@InjectableSuite()
 export abstract class CacheServiceSuite extends BaseModelSuite<ModelExpirySupport> {
 
   baseLatency = 10;

@@ -1,6 +1,7 @@
-import { ModelType } from '@travetto/model';
+import { ModelRegistry, ModelType } from '@travetto/model';
 import { Class } from '@travetto/base';
-import { PageableModelQuery, Query, SelectClause } from '../../model/query';
+
+import { PageableModelQuery, Query } from '../../model/query';
 import { ValidStringFields, WhereClauseRaw } from '../../model/where-clause';
 
 /**
@@ -18,25 +19,34 @@ export class ModelQuerySuggestUtil {
   /**
    * Build suggest query on top of query language
    */
-  static getSuggestQuery<T>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>) {
-    const re = this.getSuggestRegex(prefix);
+  static getSuggestQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: Query<T>) {
+    const config = ModelRegistry.get(cls);
     const limit = query?.limit ?? 10;
-    const where: WhereClauseRaw<unknown> = { [field]: { $regex: re } };
+    const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
 
-    const q = {
-      where: query && query.where ? { $and: [where, query.where!] } : where,
-      limit
-    } as Query<T>;
-    if (query && query.select) {
-      q.select = query.select;
+    if (config.subType) {
+      clauses.push({ type: config.subType });
     }
-    return q;
+
+    if (config.expiresAt) {
+      clauses.push({ [config.expiresAt]: { $gt: new Date() } });
+    }
+
+    if (query?.where) {
+      clauses.push(query.where! as WhereClauseRaw<ModelType>);
+    }
+
+    return {
+      where: clauses.length ? (clauses.length > 1 ? { $and: clauses } : clauses[0]) : {},
+      limit,
+      select: query?.select
+    } as Query<T>;
   }
 
   /**
    * Join suggestion results
    */
-  static combineSuggestResults<T, U>(
+  static combineSuggestResults<T extends ModelType, U>(
     cls: Class<T>, field: ValidStringFields<T>,
     prefix: string = '', results: T[],
     transform: (value: string, entity: T) => U,
@@ -64,9 +74,10 @@ export class ModelQuerySuggestUtil {
    * Build suggestion query
    */
   static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>) {
-    return this.getSuggestQuery(cls, field, prefix, {
+    const config = ModelRegistry.get(cls);
+    return this.getSuggestQuery<ModelType>(cls, field as any, prefix, {
       ...(query ?? {}),
-      select: { [field]: true } as SelectClause<T>
+      select: { [field]: true, ...(config.subType ? { type: true } : {}) }
     });
   }
 }

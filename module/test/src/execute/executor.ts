@@ -195,7 +195,8 @@ export class TestExecutor {
 
       for (const test of suite.tests) {
         const testStart = Date.now();
-        if (!test.skip) {
+        const skip = await this.skip(test, suite.instance);
+        if (!skip) {
           // Handle BeforeEach
           await mgr.startPhase('each');
         }
@@ -204,7 +205,7 @@ export class TestExecutor {
         const ret = await this.executeTest(consumer, test, suite);
         result[ret.status]++;
 
-        if (!test.skip) {
+        if (!skip) {
           result.tests.push(ret);
         }
 

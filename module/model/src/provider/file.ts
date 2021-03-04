@@ -17,6 +17,7 @@ import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
+import { SubTypeNotSupportedError } from '../error/invalid-sub-type';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -86,6 +87,14 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     ModelExpiryUtil.registerCull(this);
   }
 
+  checkExpiry<T extends ModelType>(cls: Class<T>, item: T) {
+    const { expiresAt } = ModelRegistry.get(cls);
+    if (expiresAt && ModelExpiryUtil.getExpiryState(cls, item).expired) {
+      throw new NotFoundError(cls, item.id);
+    }
+    return item;
+  }
+
   uuid() {
     return Util.uuid(32);
   }
@@ -97,7 +106,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
     if (await FsUtil.exists(file)) {
       const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
-      return await ModelCrudUtil.load(cls, content);
+      return this.checkExpiry(cls, await ModelCrudUtil.load(cls, content));
     }
 
     throw new NotFoundError(cls, id);
@@ -118,11 +127,14 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
-    await this.find(cls, '.json', item.id);
+    await this.get(cls, item.id);
     return await this.upsert(cls, item);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     item = await ModelCrudUtil.preStore(cls, item, this);
 
     const file = await this.resolveName(cls, '.json', item.id);
@@ -132,6 +144,9 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
     const file = await this.resolveName(cls, '.json', item.id);
@@ -157,6 +172,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     }
   }
 
+  // Stream
   async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
     const file = await this.resolveName('_streams', '.bin', location);
     await Promise.all([

@@ -95,7 +95,13 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     if (store.has(id)) {
       const res = await ModelCrudUtil.load(cls, store.get(id)!);
       if (res) {
-        return res;
+        if (ModelRegistry.get(cls).expiresAt) {
+          if (!ModelExpiryUtil.getExpiryState(cls, res).expired) {
+            return res;
+          }
+        } else {
+          return res;
+        }
       }
     }
     throw new NotFoundError(cls, id);
@@ -110,7 +116,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
-    this.find(cls, item.id, 'notfound');
+    await this.get(cls, item.id);
     return await this.upsert(cls, item);
   }
 

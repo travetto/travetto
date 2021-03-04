@@ -76,6 +76,7 @@ export class MongoModelService implements
     return Util.uuid();
   }
 
+  // Storage
   async createStorage() { }
 
   async deleteStorage() {
@@ -137,6 +138,7 @@ export class MongoModelService implements
     return this.db.collection(ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
   }
 
+  // Crud
   async get<T extends ModelType>(cls: Class<T>, id: string) {
     const store = await this.getStore(cls);
     const result = await store.findOne(this.getWhere<ModelType>(cls, { id }), {});
@@ -175,8 +177,12 @@ export class MongoModelService implements
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
+    const conf = ModelRegistry.get(cls);
     await store.updateOne(
-      { _id: MongoUtil.uuid(item.id) },
+      {
+        _id: MongoUtil.uuid(item.id),
+        ...(conf.subType ? { type: conf.subType } : {})
+      },
       { $set: item },
       { upsert: true }
     );
@@ -392,6 +398,7 @@ export class MongoModelService implements
     throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
   }
 
+  // Query
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     const col = await this.getStore(cls);
     const { filter } = MongoUtil.prepareQuery(cls, query);
@@ -434,6 +441,7 @@ export class MongoModelService implements
     return ModelQueryUtil.verifyGetSingleCounts(cls, results, failOnMany);
   }
 
+  // Query Crud
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     const col = await this.getStore(cls);
     const { filter } = MongoUtil.prepareQuery(cls, query);
@@ -461,12 +469,7 @@ export class MongoModelService implements
     return res.matchedCount;
   }
 
-  async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
-    const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
-    const results = await this.query(cls, q);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a) => a, query && query.limit);
-  }
-
+  // Facet
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
     const col = await this.getStore(cls);
     const pipeline: object[] = [{
@@ -494,9 +497,16 @@ export class MongoModelService implements
     })).sort((a, b) => b.count - a.count);
   }
 
+  // Suggest
+  async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
+    const results = await this.query(cls, q);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field as 'type', prefix, results, (a) => a, query && query.limit);
+  }
+
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
     const q = ModelQuerySuggestUtil.getSuggestQuery(cls, field, prefix, query);
     const results = await this.query(cls, q);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query && query.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (_, b) => b, query && query.limit);
   }
 }

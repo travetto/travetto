@@ -124,7 +124,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     if (item.id) {
       await this.has(cls, item.id, 'data');
     }
-    return this.upsert(cls, item);
+    item = await ModelCrudUtil.preStore(cls, item, this);
+    await this.store(cls, item);
+    return item;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {

@@ -352,7 +352,8 @@ export class ElasticsearchModelService implements
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     const res = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
-      body: this.getIndexQuery(cls, idx, body)
+      body: this.getIndexQuery(cls, idx, body),
+      refresh: true
     });
     if (res.body.deleted) {
       return;
@@ -405,41 +406,9 @@ export class ElasticsearchModelService implements
   }
 
   // Query Facet
-  /**
-   * Build query to support searching multiple fields
-   */
-  buildSuggestQuery<T extends ModelType>(
-    cls: Class<T>, field: ValidStringFields<T>, q?: string,
-    filter?: Query<T>
-  ) {
-    const spec = SchemaRegistry.getViewSchema(cls).schema[field as keyof SchemaConfig].specifier;
-    const text = spec && spec.startsWith('text');
-
-    if (!text) {
-      console.warn(`${cls.ᚕid}.${field} is not registered as @Text, reverting to keyword search`);
-    }
-
-    const searchObj = ElasticsearchQueryUtil.getSearchObject(cls, filter ?? {});
-
-    return {
-      ...searchObj,
-      ...this.manager.getIdentity(cls),
-      body: {
-        query: {
-          bool: {
-            must: [
-              searchObj.body.query ?? { ['match_all']: {} },
-              ...(q ? [{ ['match_phrase_prefix']: { [text ? `${field}.text` : field]: { query: q } } }] : [])
-            ]
-          }
-        }
-      },
-      size: filter?.limit ?? 10
-    };
-  }
-
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
-    const search = this.buildSuggestQuery(cls, field, prefix, query);
+    const q = ModelQuerySuggestUtil.getSuggestQuery(cls, field, prefix, query);
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, q);
     const res = await this.execSearch(cls, search);
     const safe = ElasticsearchQueryUtil.cleanIdRemoval<T>(search, res);
     const combined = ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, safe, (x, v) => v, query && query.limit);
@@ -447,21 +416,22 @@ export class ElasticsearchModelService implements
   }
 
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
-    const search = this.buildSuggestQuery(cls, field, prefix, {
+    const q = ModelQuerySuggestUtil.getSuggestQuery(cls, field, prefix, {
       // @ts-ignore
       select: { [field]: 1 },
       ...query
     });
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, q);
     const res = await this.execSearch(cls, search);
     const safe = ElasticsearchQueryUtil.cleanIdRemoval(search, res);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, safe, x => x, query && query.limit);
   }
 
+  // Facet
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
     const q = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
 
     const search = {
-      ...this.manager.getIdentity(cls),
       body: {
         query: q.body.query ?? { ['match_all']: {} },
         aggs: { [field]: { terms: { field, size: 100 } } }

@@ -16,6 +16,10 @@ import { DynamoDBModelConfig } from './config';
 
 const EXP_ATTR = 'expires_at__';
 
+function simpleName(idx: string) {
+  return idx.replace(/[^A-Za-z0-9]/g, '');
+}
+
 function toValue(val: string | number | boolean | Date | undefined | null, forceString?: boolean): dynamodb.AttributeValue;
 function toValue(val: unknown, forceString?: boolean): dynamodb.AttributeValue | undefined {
   if (val === undefined || val === null || val === '') {
@@ -81,8 +85,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           Item: {
             id: toValue(item.id),
             body: toValue(JSON.stringify(item)),
-            [EXP_ATTR]: toValue(expiry),
-            ...Object.fromEntries(config.indices?.map(idx => [`${idx.name}__`, toValue(ModelIndexedUtil.computeIndexKey(cls, idx, item))]) ?? [])
+            ...(expiry !== undefined ? { [EXP_ATTR]: toValue(expiry) } : {}),
+            ...Object.fromEntries(config.indices?.map(idx => [`${simpleName(idx.name)}__`, toValue(ModelIndexedUtil.computeIndexKey(cls, idx, item))]) ?? [])
           },
           ReturnValues: 'NONE'
         };
@@ -95,13 +99,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           Key: { id: { S: id } },
           UpdateExpression: `SET ${[
             'body=:body',
-            `${EXP_ATTR}=:expr`,
-            ...(config.indices?.map(idx => `${idx.name}__ = :${idx.name}`) ?? [])
-          ].join(', ')}`,
+            expiry !== undefined ? `${EXP_ATTR}=:expr` : undefined,
+            ...(config.indices?.map(idx => `${simpleName(idx.name)}__ = :${simpleName(idx.name)}`) ?? [])
+          ].filter(x => !!x).join(', ')}`,
           ExpressionAttributeValues: {
             ':body': toValue(JSON.stringify(item)),
-            ':expr': toValue(expiry),
-            ...Object.fromEntries(config.indices?.map(idx => [`:${idx.name}`, toValue(ModelIndexedUtil.computeIndexKey(cls, idx, item))]) ?? [])
+            ...(expiry !== undefined ? { ':expr': toValue(expiry) } : {}),
+            ...Object.fromEntries(config.indices?.map(idx => [`:${simpleName(idx.name)}`, toValue(ModelIndexedUtil.computeIndexKey(cls, idx, item))]) ?? [])
           },
           ReturnValues: 'ALL_NEW'
         });
@@ -120,16 +124,16 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   private computeIndexConfig<T extends ModelType>(cls: Class<T>) {
     const config = ModelRegistry.get(cls);
-    const attributes = config.indices?.flatMap(idx => ({ AttributeName: `${idx.name}__`, AttributeType: 'S' })) ?? [];
+    const attributes = config.indices?.flatMap(idx => ({ AttributeName: `${simpleName(idx.name)}__`, AttributeType: 'S' })) ?? [];
 
     const indices: dynamodb.GlobalSecondaryIndex[] | undefined = config.indices?.map(idx => ({
-      IndexName: idx.name,
+      IndexName: simpleName(idx.name),
       Projection: {
         ProjectionType: 'INCLUDE',
         NonKeyAttributes: ['id']
       },
       KeySchema: [{
-        AttributeName: `${idx.name}__`,
+        AttributeName: `${simpleName(idx.name)}__`,
         KeyType: 'HASH'
       }]
     }));
@@ -331,11 +335,11 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
     const query = {
       TableName: this.resolveTable(cls),
-      IndexName: idx,
+      IndexName: simpleName(idx),
       ProjectionExpression: 'id',
-      KeyConditionExpression: `${idx}__ = :${idx}`,
+      KeyConditionExpression: `${simpleName(idx)}__ = :${simpleName(idx)}`,
       ExpressionAttributeValues: {
-        [`:${idx}`]: toValue(ModelIndexedUtil.computeIndexKey(cls, idx, body))
+        [`:${simpleName(idx)}`]: toValue(ModelIndexedUtil.computeIndexKey(cls, idx, body))
       }
     };
 
@@ -354,11 +358,11 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
     const query = {
       TableName: this.resolveTable(cls),
-      IndexName: idx,
+      IndexName: simpleName(idx),
       ProjectionExpression: 'id',
-      KeyConditionExpression: `${idx}__ = :${idx}`,
+      KeyConditionExpression: `${simpleName(idx)}__ = :${simpleName(idx)}`,
       ExpressionAttributeValues: {
-        [`:${idx}`]: toValue(ModelIndexedUtil.computeIndexKey(cls, idx, body))
+        [`:${simpleName(idx)}`]: toValue(ModelIndexedUtil.computeIndexKey(cls, idx, body))
       }
     };
 

@@ -2,9 +2,8 @@ import * as mongo from 'mongodb';
 
 import { Class, Util } from '@travetto/base';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
-import { ModelType, ModelRegistry } from '@travetto/model';
-import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
-import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
+import { ModelType } from '@travetto/model';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 
 /**
  * Converting units to various radians
@@ -28,7 +27,6 @@ export class MongoUtil {
   static uuid(val: string) {
     return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
   }
-
 
   static idToString(id: string | mongo.ObjectID | mongo.Binary) {
     if (typeof id === 'string') {
@@ -56,43 +54,17 @@ export class MongoUtil {
     return item;
   }
 
-  static prepareQuery<T, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U) {
-    query.where = this.getWhereClause(cls, query.where);
-    QueryVerifier.verify(cls, query);
+  static prepareQuery<T extends ModelType, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U) {
+    const q = ModelQueryUtil.getQueryAndVerify(cls, query);
     return {
-      query: query as U & { where: WhereClause<T> },
-      filter: this.extractWhereClause(query.where)
+      query: q,
+      filter: q.where ? this.extractWhereClause(q.where) : {}
     } as const;
   }
 
   static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
   static has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);
   static has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$not' in (o as object);
-
-  /**
-   * Get a where clause with type
-   */
-  static getWhereClause<T>(cls: Class<T>, o: WhereClause<T> | string | undefined): WhereClause<T> {
-    let q = o ? (typeof o === 'string' ? QueryLanguageParser.parseToQuery(o) as WhereClause<T> : o) : {};
-    const clauses = [q];
-
-    const conf = ModelRegistry.get(cls);
-    if (conf.subType) {
-      clauses.push({ type: conf.subType });
-    }
-    if (conf.expiresAt) {
-      clauses.push({
-        $or: [
-          { [conf.expiresAt]: { $exists: false } },
-          { [conf.expiresAt]: { $gte: new Date() } },
-        ]
-      });
-    }
-    if (clauses.length > 1) {
-      q = { $and: clauses };
-    }
-    return q;
-  }
 
   /**
    * Build mongo where clause

@@ -1,13 +1,14 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
+import { Text, TypeMismatchError } from '@travetto/schema';
 
 import { BaseModelSuite } from './base';
-import { ModelCrudSupport, Model, BaseModel, NotFoundError, SubTypeNotSupportedError } from '..';
+import {
+  ModelIndexedSupport, Index, ModelCrudSupport, Model,
+  BaseModel, NotFoundError, SubTypeNotSupportedError
+} from '..';
 import { isIndexedSupported } from '../src/internal/service/common';
-import { Index } from '../src/registry/decorator';
-import { ModelIndexedSupport } from '../src/service/indexed';
-import { Text } from '@travetto/schema';
 
 @Model({ baseType: true })
 @Index({
@@ -15,7 +16,6 @@ import { Text } from '@travetto/schema';
   fields: [{ name: 1 }, { age: 1 }]
 })
 export class Worker extends BaseModel {
-  @Text()
   name: string;
   age?: number;
 }
@@ -122,13 +122,13 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
         service.upsert(Doctor, Doctor.from({
           id: fire.id, name: 'drob', specialty: 'eyes'
         })),
-      SubTypeNotSupportedError
+      e => (e instanceof SubTypeNotSupportedError || e instanceof NotFoundError) ? undefined : e
     );
 
     await assert.rejects(
       // @ts-expect-error
       () => service.update(Engineer, Doctor.from({ ...doc })),
-      (e: Error) => (e instanceof NotFoundError || e instanceof SubTypeNotSupportedError) ? undefined : e);
+      (e: Error) => (e instanceof NotFoundError || e instanceof SubTypeNotSupportedError || e instanceof TypeMismatchError) ? undefined : e);
 
     try {
       const res = await service.upsert(Doctor, Doctor.from({
@@ -149,7 +149,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     // Delete by wrong class
     await assert.rejects(
       () => service.delete(Doctor, fire.id),
-      SubTypeNotSupportedError
+      e => (e instanceof SubTypeNotSupportedError || e instanceof NotFoundError) ? undefined : e
     );
 
     // Delete by base class
@@ -163,7 +163,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     // Delete by any subtype when id is missing
     await assert.rejects(
       () => service.delete(Firefighter, doc.id),
-      SubTypeNotSupportedError
+      e => (e instanceof SubTypeNotSupportedError || e instanceof NotFoundError) ? undefined : e
     );
   }
 
@@ -193,7 +193,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
       });
       assert(res2 instanceof Firefighter); // If service allows for get by subtype
     } catch (e) {
-      assert(e instanceof SubTypeNotSupportedError); // If it does not
+      assert(e instanceof SubTypeNotSupportedError || e instanceof NotFoundError); // If it does not
     }
   }
 
