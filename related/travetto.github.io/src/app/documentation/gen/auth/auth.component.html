@@ -39,8 +39,6 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
   <span class="token constant">U</span> <span class="token operator">=</span> <span class="token builtin">any</span><span class="token punctuation">,</span>
   <span class="token constant">I</span> <span class="token keyword">extends</span> Identity <span class="token operator">=</span> Identity<span class="token punctuation">,</span>
   <span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">private</span> permsSet<span class="token operator">:</span> Set<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token keyword">private</span> permsArr<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Identity of the context
    */</span>
@@ -135,15 +133,12 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
  * Standard auth utilities
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthUtil</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token constant">CHECK_EXC_CACHE</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Map<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> PermissionChecker<span class="token operator">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token constant">CHECK_INC_CACHE</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Map<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> PermissionChecker<span class="token operator">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Build a permission checker against the provided permissions
    *
    * @param perms Set of permissions to check
    * @param defaultIfEmpty If no perms passed, default to empty
    */</span>
-  <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token function">buildChecker</span><span class="token punctuation">(</span>perms<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> defaultIfEmpty<span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> PermissionChecker <span class="token punctuation">;</span>
   <span class="token comment">/**
    * Generate a hash for a given value
    *

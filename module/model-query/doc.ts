@@ -19,9 +19,14 @@ ${Snippet(Links.QueryCrud.title, './src/service/crud.ts', /export interface/, /}
 
 
 ${SubSection(Links.QueryFacet)}
-With the complex nature of the query support, the ability to find counts by groups is a common and desirable pattern. This contract allows for faceting on a given field, with query filtering.  Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
+With the complex nature of the query support, the ability to find counts by groups is a common and desirable pattern. This contract allows for faceting on a given field, with query filtering.
 
 ${Snippet(Links.QueryFacet.title, './src/service/facet.ts', /export interface/, /}/)}
+
+${SubSection(Links.QuerySuggest)}
+Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
+
+${Snippet(Links.QuerySuggest.title, './src/service/suggest.ts', /export interface/, /}/)}
 
 ${Section('Implementations')}
 

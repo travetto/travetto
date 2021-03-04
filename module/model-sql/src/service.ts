@@ -1,7 +1,7 @@
 import {
   ModelType,
   BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
-  NotFoundError, ModelRegistry
+  NotFoundError, ModelRegistry, ExistsError
 } from '@travetto/model';
 import { Util, Class } from '@travetto/base';
 import { SchemaChange } from '@travetto/schema';
@@ -18,13 +18,13 @@ import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
 
 import { SQLModelConfig } from './config';
 import { Connected, ConnectedIterator, Transactional } from './connection/decorator';
 import { SQLUtil } from './internal/util';
 import { SQLDialect } from './dialect/base';
 import { TableManager } from './table-manager';
-import { ExistsError } from '@travetto/model/src/error/exists';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,
@@ -35,7 +35,8 @@ import { ExistsError } from '@travetto/model/src/error/exists';
 export class SQLModelService implements
   ModelCrudSupport, ModelStorageSupport,
   ModelBulkSupport, ModelQuerySupport,
-  ModelQueryCrudSupport, ModelQueryFacetSupport {
+  ModelQueryCrudSupport, ModelQueryFacetSupport,
+  ModelQuerySuggestSupport {
 
   private manager: TableManager;
 

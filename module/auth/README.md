@@ -34,8 +34,6 @@ export class AuthContext<
   U = any,
   I extends Identity = Identity,
   P extends Principal = Principal> {
-  private permsSet: Set<string>;
-  private permsArr: string[];
   /**
    * Identity of the context
    */
@@ -127,15 +125,12 @@ type PermissionChecker = {
  * Standard auth utilities
  */
 export class AuthUtil {
-  private static CHECK_EXC_CACHE = new Map<string, PermissionChecker>();
-  private static CHECK_INC_CACHE = new Map<string, PermissionChecker>();
   /**
    * Build a permission checker against the provided permissions
    *
    * @param perms Set of permissions to check
    * @param defaultIfEmpty If no perms passed, default to empty
    */
-  private static buildChecker(perms: Iterable<string>, defaultIfEmpty: boolean): PermissionChecker ;
   /**
    * Generate a hash for a given value
    *

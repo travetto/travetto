@@ -63,11 +63,26 @@ export interface ModelQueryCrudSupport extends ModelCrudSupport, ModelQuerySuppo
 ```
 
 ### [Facet](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/facet.ts#L12)
-With the complex nature of the query support, the ability to find counts by groups is a common and desirable pattern. This contract allows for faceting on a given field, with query filtering.  Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
+With the complex nature of the query support, the ability to find counts by groups is a common and desirable pattern. This contract allows for faceting on a given field, with query filtering.
 
 **Code: Facet**
 ```typescript
 export interface ModelQueryFacetSupport extends ModelQuerySupport {
+  /**
+   * Facet a given class on a specific field, limited by an optional query
+   * @param cls The model class to facet on
+   * @param field The field to facet on
+   * @param query Additional query filtering
+   */
+  facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]>;
+```
+
+### [Suggest](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/suggest.ts#L12)
+Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
+
+**Code: Suggest**
+```typescript
+export interface ModelQuerySuggestSupport extends ModelQuerySupport {
   /**
    * Suggest instances for a given cls and a given field (allows for duplicates with as long as they have different ids)
    *
@@ -86,13 +101,7 @@ export interface ModelQueryFacetSupport extends ModelQuerySupport {
    * @param query A query to filter the search on, in addition to the prefix
    */
   suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]>;
-  /**
-   * Facet a given class on a specific field, limited by an optional query
-   * @param cls The model class to facet on
-   * @param field The field to facet on
-   * @param query Additional query filtering
-   */
-  facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]>;
+}
 ```
 
 ## Implementations
@@ -225,6 +234,8 @@ import { Suite } from '@travetto/test';
 import { ModelQuerySuite } from '@travetto/model-query/test-support/query';
 import { ModelQueryCrudSuite } from '@travetto/model-query/test-support/crud';
 import { ModelQueryFacetSuite } from '@travetto/model-query/test-support/facet';
+import { ModelQueryPolymorphismSuite } from '@travetto/model-query/test-support/polymorphism';
+import { ModelQuerySuggestSuite } from '@travetto/model-query/test-support/suggest';
 
 import { MongoModelConfig, MongoModelService } from '..';
 
@@ -244,6 +255,20 @@ export class MongoQueryCrudSuite extends ModelQueryCrudSuite {
 
 @Suite()
 export class MongoQueryFacetSuite extends ModelQueryFacetSuite {
+  constructor() {
+    super(MongoModelService, MongoModelConfig);
+  }
+}
+
+@Suite()
+export class MongoQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
+  constructor() {
+    super(MongoModelService, MongoModelConfig);
+  }
+}
+
+@Suite()
+export class MongoQuerySuggestSuite extends ModelQuerySuggestSuite {
   constructor() {
     super(MongoModelService, MongoModelConfig);
   }

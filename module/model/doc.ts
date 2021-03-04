@@ -60,12 +60,12 @@ ${Section('Implementations')}
 ${Table(
   ['Service', 'Basic', 'CRUD', 'Indexed', 'Expiry', 'Stream', 'Bulk'],
   [mod.ModelDynamodb, 'X', 'X', 'X', 'X', ' ', ' '],
-  [mod.ModelElasticsearch, 'X', 'X', 'X', ' ', ' ', 'X'],
+  [mod.ModelElasticsearch, 'X', 'X', 'X', 'X', ' ', 'X'],
   [mod.ModelFirestore, 'X', 'X', 'X', ' ', ' ', ' '],
-  [mod.ModelMongo, 'X', 'X', 'X', ' ', 'X', 'X'],
+  [mod.ModelMongo, 'X', 'X', 'X', 'X', 'X', 'X'],
   [mod.ModelRedis, 'X', 'X', 'X', 'X', ' ', ''],
-  [mod.ModelS3, 'X', 'X', ' ', ' ', 'X', ' '],
-  [mod.ModelSql, 'X', 'X', 'X', ' ', ' ', 'X'],
+  [mod.ModelS3, 'X', 'X', ' ', 'X', 'X', ' '],
+  [mod.ModelSql, 'X', 'X', 'X', 'X', ' ', 'X'],
   [d`${MemoryModelService}`, 'X', 'X', 'X', 'X', 'X', 'X'],
   [d`${FileModelService}`, 'X', 'X', ' ', 'X', 'X', 'X']
 )}

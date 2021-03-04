@@ -136,7 +136,7 @@ export class DocUtil {
       let methodPrefix = '';
       code = code.split(/\n/).map((x) => {
         if (!methodPrefix) {
-          const info = x.match(/^(\s+)(?:(private|public)\s+)?(?:static\s+)?(?:(?:get|set|async)\s+)?(\S+)[(](.*)/);
+          const info = x.match(/^(\s+)(?:(private|public)\s+)?(?:static\s+)?(?:async\s+)?(?:[*]\s*)?(?:(?:get|set)\s+)?(\S+)[<(](.*)/);
           if (info) {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             const [, space, __name, rest] = info;
@@ -153,6 +153,7 @@ export class DocUtil {
           return '';
         }
       })
+        .filter(x => !/^\s+private /.test(x))
         .filter(x => !!x)
         .join('\n');
     }

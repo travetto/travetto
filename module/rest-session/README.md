@@ -16,11 +16,9 @@ export class Session<T extends SessionData = SessionData>  {
   /**
    * The expiry time when the session was loaded
    */
-  private expiresAtLoaded: number | undefined;
   /**
    * The hash of the session at load
    */
-  private hash: number;
   /**
    * The session key name
    */

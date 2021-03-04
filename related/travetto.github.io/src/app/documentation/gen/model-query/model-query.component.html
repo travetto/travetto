@@ -72,13 +72,30 @@ Reinforcing the complexity provided in these contracts, the <a target="_blank" c
       </figure>
 
 <h3 id="-a-target-blank-class-source-link-href-git-module-model-query-src-service-facet-ts-l-facet-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/facet.ts#L12">Facet</a></h3>
-With the complex nature of the query support, the ability to find counts by groups is a common and desirable pattern. This contract allows for faceting on a given field, with query filtering.  Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
+With the complex nature of the query support, the ability to find counts by groups is a common and desirable pattern. This contract allows for faceting on a given field, with query filtering.
 
       <figure class="code">
       <figcaption class="code">Facet
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/facet.ts#L12">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelQueryFacetSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQuerySupport</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Facet a given class on a specific field, limited by an optional query
+   * @param cls The model class to facet on
+   * @param field The field to facet on
+   * @param query Additional query filtering
+   */</span>
+  <span class="token generic-function"><span class="token function">facet</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> field<span class="token operator">:</span> ValidStringFields<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> query<span class="token operator">?</span><span class="token operator">:</span> ModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token punctuation">{{'{'}}</span> key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> count<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">;</span></code></pre>     
+      </figure>
+
+<h3 id="-a-target-blank-class-source-link-href-git-module-model-query-src-service-suggest-ts-l-suggest-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/suggest.ts#L12">Suggest</a></h3>
+Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
+
+      <figure class="code">
+      <figcaption class="code">Suggest
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/suggest.ts#L12">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelQuerySuggestSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQuerySupport</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Suggest instances for a given cls and a given field (allows for duplicates with as long as they have different ids)
    *
@@ -97,13 +114,7 @@ With the complex nature of the query support, the ability to find counts by grou
    * @param query A query to filter the search on, in addition to the prefix
    */</span>
   <span class="token generic-function"><span class="token function">suggestValues</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> field<span class="token operator">:</span> ValidStringFields<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> prefix<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> query<span class="token operator">?</span><span class="token operator">:</span> PageableModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Facet a given class on a specific field, limited by an optional query
-   * @param cls The model class to facet on
-   * @param field The field to facet on
-   * @param query Additional query filtering
-   */</span>
-  <span class="token generic-function"><span class="token function">facet</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> field<span class="token operator">:</span> ValidStringFields<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> query<span class="token operator">?</span><span class="token operator">:</span> ModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token punctuation">{{'{'}}</span> key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> count<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">;</span></code></pre>     
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <h2 id="implementations">Implementations</h2>
@@ -241,6 +252,8 @@ To enforce that these contracts are honored, the module provides shared test sui
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQuerySuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query/test-support/query'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQueryCrudSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query/test-support/crud'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQueryFacetSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query/test-support/facet'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQueryPolymorphismSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query/test-support/polymorphism'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQuerySuggestSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query/test-support/suggest'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MongoModelConfig<span class="token punctuation">,</span> MongoModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'..'</span><span class="token punctuation">;</span>
 
@@ -260,6 +273,20 @@ To enforce that these contracts are honored, the module provides shared test sui
 
 @<span class="token meta">Suite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MongoQueryFacetSuite</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQueryFacetSuite</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">super</span><span class="token punctuation">(</span>MongoModelService<span class="token punctuation">,</span> MongoModelConfig<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+
+@<span class="token meta">Suite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MongoQueryPolymorphismSuite</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQueryPolymorphismSuite</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">super</span><span class="token punctuation">(</span>MongoModelService<span class="token punctuation">,</span> MongoModelConfig<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+
+@<span class="token meta">Suite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MongoQuerySuggestSuite</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQuerySuggestSuite</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">super</span><span class="token punctuation">(</span>MongoModelService<span class="token punctuation">,</span> MongoModelConfig<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>

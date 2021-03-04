@@ -1,4 +1,4 @@
-import { SchemaRegistry } from '@travetto/schema';
+import { SchemaRegistry, ALL_VIEW } from '@travetto/schema';
 import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, Class } from '@travetto/base';
@@ -54,9 +54,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
 
   onInstallFinalize(cls: Class) {
     const config = this.pending.get(cls.ᚕid)! as ModelOptions<ModelType>;
-    for (const el of config.indices ?? []) {
-      el.simpleName = el.name.replace(/[^A-Za-z0-9]/g, '');
-    }
+    delete SchemaRegistry.get(cls).views[ALL_VIEW].schema.id.required; // Allow ids to be optional
     return config;
   }
 

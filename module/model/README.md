@@ -112,7 +112,7 @@ export interface ModelStreamSupport {
    * Get metadata for stream
    * @param location The location of the stream
    */
-  getStreamMetadata(location: string): Promise<StreamMeta>;
+  describeStream(location: string): Promise<StreamMeta>;
 
   /**
    * Delete stream by location
@@ -144,7 +144,7 @@ export interface ModelType {
    *
    * If not provided, will be computed on create
    */
-  id?: string;
+  id: string;
   /**
    * Type of model to save
    */
@@ -167,14 +167,14 @@ All fields are optional, but the `id` and `type` are important as those field ty
 |Service|Basic|CRUD|Indexed|Expiry|Stream|Bulk|
 |-------|-----|----|-------|------|------|----|
 |[DynamoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.")|X|X|X|X| | |
-|[Elasticsearch Model Source](https://github.com/travetto/travetto/tree/master/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")|X|X|X| | |X|
+|[Elasticsearch Model Source](https://github.com/travetto/travetto/tree/master/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")|X|X|X|X| |X|
 |[Firestore Model Support](https://github.com/travetto/travetto/tree/master/module/model-firestore#readme "Firestore backing for the travetto model module.")|X|X|X| | | |
-|[MongoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-mongo#readme "Mongo backing for the travetto model module.")|X|X|X| |X|X|
+|[MongoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-mongo#readme "Mongo backing for the travetto model module.")|X|X|X|X|X|X|
 |[Redis Model Support](https://github.com/travetto/travetto/tree/master/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
-|[S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| | |X| |
-|[SQL Model Service](https://github.com/travetto/travetto/tree/master/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X| | |X|
+|[S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
+|[SQL Model Service](https://github.com/travetto/travetto/tree/master/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
 |[MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L41)|X|X| |X|X|X|
+|[FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L42)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
@@ -210,36 +210,32 @@ export class MemoryModelConfig {
  */
 @Injectable()
 export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
-  private store = new Map<string, Map<string, Buffer>>();
-  private indexes = new Map<string, Map<string, string>>();
   constructor(public readonly config: MemoryModelConfig) { }
-  private find<T extends ModelType>(cls: Class<T> | string, id?: string, errorState?: 'data' | 'notfound') {
-    const store = this.getStore(cls);
-    if (id && errorState && (errorState === 'notfound' ? !store.has(id) : store.has(id))) {
-      throw errorState === 'notfound' ? new NotFoundError(cls, id) : new ExistsError(cls, id);
-    }
-    return store;
-  }
-  private async removeIndices<T extends ModelType>(cls: Class<T>, id: string) {
-    try {
-      const item = await this.get(cls, id);
-      for (const idx of ModelRegistry.get(cls).indices ?? []) {
-        this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.delete(ModelIndexedUtil.computeIndexKey(cls, idx, item));
-      }
-    }
-  }
+  postConstruct() ;
+  // CRUD Support
+  uuid() ;
+  async get<T extends ModelType>(cls: Class<T>, id: string) ;
+  async create<T extends ModelType>(cls: Class<T>, item: T) ;
+  async update<T extends ModelType>(cls: Class<T>, item: T) ;
+  async upsert<T extends ModelType>(cls: Class<T>, item: T) ;
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) ;
+  async delete<T extends ModelType>(cls: Class<T>, id: string) ;
+  async * list<T extends ModelType>(cls: Class<T>) ;
   // Stream Support
   async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) ;
   async getStream(location: string) ;
-  async getStreamMetadata(location: string) ;
+  async describeStream(location: string) ;
   async deleteStream(location: string) ;
   // Expiry Support
-  async deleteExpired<T extends ModelType>(cls: Class<T>) {
-    const deleting = [];
-    const store = this.getStore(cls);
-    for await (const id of [...store.keys()]) {
-      if ((ModelExpiryUtil.getExpiryState(cls, await this.get(cls, id))).expired) {
-        deleting.push(this.delete(cls, id));
+  async deleteExpired<T extends ModelType>(cls: Class<T>) ;
+  // Storage Support
+  async createStorage() ;
+  async deleteStorage() ;
+  async createModel(cls: Class<ModelType>) ;
+  // Indexed
+  getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> ;
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) ;
+}
 ```
 
 To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.

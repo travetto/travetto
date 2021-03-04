@@ -16,9 +16,9 @@ A simple example:
 
 **Code: Rest controller with upload support**
 ```typescript
-import { Controller, Post, Get } from '@travetto/rest';
+import { Controller, Post, Get, Request } from '@travetto/rest';
 import { Asset } from '@travetto/asset';
-import { AssetRestUtil, Upload } from '@travetto/asset-rest';
+import { AssetRestUtil, Upload, UploadAll } from '@travetto/asset-rest';
 
 @Controller('/simple')
 export class Simple {
@@ -36,9 +36,20 @@ export class Simple {
   /**
    * @param file A file to upload
    */
-  @Post('/files')
-  loadFiles(@Upload() file: Asset) {
+  @Post('/file')
+  loadFile(@Upload() file: Asset) {
     return AssetRestUtil.downloadable(file);
+  }
+
+  /**
+ * @param file A file to upload
+ */
+  @Post('/files')
+  @UploadAll()
+  loadFiles({ files }: Request) {
+    for (const [, file] of Object.entries(files)) {
+      return AssetRestUtil.downloadable(file); // return the first
+    }
   }
 }
 ```
