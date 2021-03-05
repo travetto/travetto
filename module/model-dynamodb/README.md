@@ -53,5 +53,4 @@ export class DynamoDBModelConfig {
 ```
 
   Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/master/module/config/src/decorator.ts#L10) annotation, and so these values can be overridden using the 
-  standard [Configuration](https://github.com/travetto/travetto/tree/master/module/config#readme "Environment-aware config management using yaml files")resolution paths. 
-  
+  standard [Configuration](https://github.com/travetto/travetto/tree/master/module/config#readme "Environment-aware config management using yaml files")resolution paths.

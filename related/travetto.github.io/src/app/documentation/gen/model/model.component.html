@@ -19,7 +19,7 @@ This module provides a set of contracts/interfaces to data model persistence, mo
 
 The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1">Streaming</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19">Bulk</a>.
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-model-src-service-basic-ts-l-basic-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9">Basic</a></h3>
+<h3 id="basic"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9">Basic</a></h3>
 All <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
 
       <figure class="code">
@@ -33,7 +33,7 @@ All <a class="module-link" href="https://github.com/travetto/travetto/tree/maste
    * @throws {{'{'}}NotFoundError{{'}'}} When an item is not found</span></code></pre>     
       </figure>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-model-src-service-crud-ts-l-crud-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10">CRUD</a></h3>
+<h3 id="crud"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10">CRUD</a></h3>
 The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth-model" title="Model-based authentication and registration support for the travetto framework">Model Auth Source</a>, is an example of a module that only needs create, read and delete, and so any implementation of <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> that honors this contract, can be used with the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth-model" title="Model-based authentication and registration support for the travetto framework">Model Auth Source</a>.
 
       <figure class="code">
@@ -54,7 +54,7 @@ The crud contract, builds upon the basic contract, and is built around the idea 
    * @throws {{'{'}}NotFoundError{{'}'}} When an item is not found</span></code></pre>     
       </figure>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-model-src-service-indexed-ts-l-indexed-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10">Indexed</a></h3>
+<h3 id="indexed"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10">Indexed</a></h3>
 Additionally, an implementation may support the ability for basic indexed queries. This is not the full featured query support of <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a>, but
 allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.  
 
@@ -81,7 +81,7 @@ allowing for indexed lookups.  This does not support listing by index, but may b
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-model-src-service-expiry-ts-l-expiry-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10">Expiry</a></h3>
+<h3 id="expiry"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10">Expiry</a></h3>
 
 Certain implementations will also provide support for automatic expiry of data at runtime.  This is extremely useful for temporary data as, and is used in the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/cache" title="Caching functionality with decorators for declarative use.">Caching</a> module for expiring data accordingly.
 
@@ -99,7 +99,7 @@ Certain implementations will also provide support for automatic expiry of data a
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-model-src-service-stream-ts-l-streaming-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1">Streaming</a></h3>
+<h3 id="streaming"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1">Streaming</a></h3>
 
 Some implementations also allow for the ability to read/write binary data as a stream.  Given that all implementations can store <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.  This pattern is currently used by <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/asset" title="Modular library for storing and retrieving binary assets">Asset</a> for reading and writing asset data.
 
@@ -137,7 +137,7 @@ Some implementations also allow for the ability to read/write binary data as a s
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-model-src-service-bulk-ts-l-bulk-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19">Bulk</a></h3>
+<h3 id="bulk"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19">Bulk</a></h3>
 
 Finally, there is support for bulk operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.  
 
@@ -313,5 +313,4 @@ To enforce that these contracts are honored, the module provides shared test sui
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
-
 </div>

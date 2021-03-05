@@ -110,4 +110,3 @@ export type VerifyOptions = {
 ```typescript
 export async function verify<T>(jwt: string, options: VerifyOptions = {}): Promise<Payload & T> {
 ```
-

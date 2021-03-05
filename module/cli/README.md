@@ -93,4 +93,3 @@ $ trv echo -u bOb rOb DRoP
 
 [ 'BOB', 'ROB', 'DROP' ]
 ```
-

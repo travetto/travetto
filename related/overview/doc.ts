@@ -1,8 +1,6 @@
-import { doc as d, Header, Image, lib, List, OutputContext, Section, Strong } from '@travetto/doc';
+import { doc as d, lib, List, Section, Strong } from '@travetto/doc';
 
 export const text = d`
-${Header()}
-
 The goal of the framework is to provide a holistic application platform with the a focus on interactive development.
 
 ${Section('Philosophy')}
@@ -19,19 +17,20 @@ ${Section('Modules')}
 Every module within the framework follows the overarching philosophy.  For the most part each module is as isolated as possible.  The modules are stacked vertically to generally indicate dependencies.  The only exception is for common libraries, which are unrelated.
 `;
 
-export const finalize = {
-  html: (context: OutputContext) => `
+export const assemble = {
+  html: (content: string) => `
 <div class="documentation">
   <h1>The Travetto Framework</h1>
-  ${context.content}
+  ${content}
 </div>
 <app-module-chart></app-module-chart>`,
-  md: (context: OutputContext) => `
+  md: (content: string) => `
 <h1>   
   <sub><img src="./docs/images/logo.png" height="40"></sub>
   The Travetto Framework
 </h1>
-${context.content}
-![Module Layout](./docs/images/modules.png)
-`
+
+${content}
+
+![Module Layout](./docs/images/modules.png)`
 };

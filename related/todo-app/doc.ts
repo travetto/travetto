@@ -1,6 +1,7 @@
 import {
   doc as d, RawHeader, lib, mod, List, Section,
-  Terminal, fld, pth, Code, SnippetLink, Execute, DocUtil, Hidden, Ref
+  Terminal, fld, pth, Code, SnippetLink, Execute, DocUtil, Hidden, Ref,
+  TableOfContents
 } from '@travetto/doc';
 import { Model } from '@travetto/model';
 
@@ -11,6 +12,8 @@ export const text = d`
 ${RawHeader('Getting Started: A Todo App')}
 
 The following tutorial wil walk you through setting up a ${lib.Travetto} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at ${Ref('Todo App', __dirname)}.  Additionally, you can use the ${mod.GeneratorApp}.
+
+${TableOfContents('Overview')}
 
 ${Section('Prerequisites')}
 

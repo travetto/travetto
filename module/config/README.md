@@ -106,4 +106,3 @@ DBConfig {
   creds: { user: 'admin - user', password: 'test' }
 }
 ```
-

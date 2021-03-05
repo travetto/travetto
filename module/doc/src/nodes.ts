@@ -34,6 +34,7 @@ export const Anchor = (title: Content, fragment: Content) => $n('anchor', { titl
 export const Note = (content: Content) => $n('note', { content: $c(content) });
 export const Item = (node: DocNode, ordered = false) => $n('item', { node, ordered });
 export const RawHeader = (title: Content, description?: string) => $n('header', { title: $c(title), description: $c(description) });
+export const TableOfContents = (title: Content) => $n('toc', { title: $c(title) });
 
 export function SnippetLink(title: Content, file: string, startPattern: RegExp) {
   const res = DocUtil.resolveSnippetLink(file, startPattern);

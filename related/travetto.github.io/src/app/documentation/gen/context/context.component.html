@@ -74,5 +74,4 @@ The decorator also allows for a priming of the contextual information.  This is 
 <h2 id="extension-rest">Extension - Rest</h2>
 
 Within the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module, it can be challening to share context across the various layers that may be touched by a request.  This module provides <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/context/src/extension/rest.interceptor.ts#L12">AsyncContextInterceptor</a> to create a data store that will be private to an individual request. This is used by <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest" title="Rest authentication integration support for the travetto framework">Rest Auth</a> to store authentiated user information for built-in authorization and permission validation.
-
 </div>

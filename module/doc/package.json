@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "restricted"
   },
-  "private": true,
+  "private": false,
   "dependencies": {
     "@travetto/boot": "^2.0.0-alpha.2",
     "@travetto/registry": "^2.0.0-alpha.3",

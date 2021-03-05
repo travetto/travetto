@@ -274,4 +274,3 @@ export class MongoQuerySuggestSuite extends ModelQuerySuggestSuite {
   }
 }
 ```
-

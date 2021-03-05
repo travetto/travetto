@@ -17,7 +17,7 @@ This module provides an enhanced query contract for <a class="module-link" href=
 
 <h2 id="contracts">Contracts</h2>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-model-query-src-service-query-ts-l-query-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/query.ts#L10">Query</a></h3>
+<h3 id="query"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/query.ts#L10">Query</a></h3>
 This contract provides the ability to apply the query support to return one or many items, as well as providing counts against a specific query.
 
       <figure class="code">
@@ -47,7 +47,7 @@ This contract provides the ability to apply the query support to return one or m
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-model-query-src-service-crud-ts-l-query-crud-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/crud.ts#L11">Query Crud</a></h3>
+<h3 id="query-crud"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/crud.ts#L11">Query Crud</a></h3>
 Reinforcing the complexity provided in these contracts, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/crud.ts#L11">Query Crud</a> contract allows for bulk update/deletion by query.  This requires the underlying implentation to support these operations.
 
       <figure class="code">
@@ -71,7 +71,7 @@ Reinforcing the complexity provided in these contracts, the <a target="_blank" c
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-model-query-src-service-facet-ts-l-facet-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/facet.ts#L12">Facet</a></h3>
+<h3 id="facet"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/facet.ts#L12">Facet</a></h3>
 With the complex nature of the query support, the ability to find counts by groups is a common and desirable pattern. This contract allows for faceting on a given field, with query filtering.
 
       <figure class="code">
@@ -88,7 +88,7 @@ With the complex nature of the query support, the ability to find counts by grou
   <span class="token generic-function"><span class="token function">facet</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> field<span class="token operator">:</span> ValidStringFields<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> query<span class="token operator">?</span><span class="token operator">:</span> ModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token punctuation">{{'{'}}</span> key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> count<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">;</span></code></pre>     
       </figure>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-model-query-src-service-suggest-ts-l-suggest-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/suggest.ts#L12">Suggest</a></h3>
+<h3 id="suggest"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-query/src/service/suggest.ts#L12">Suggest</a></h3>
 Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
 
       <figure class="code">
@@ -292,5 +292,4 @@ To enforce that these contracts are honored, the module provides shared test sui
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
-
 </div>

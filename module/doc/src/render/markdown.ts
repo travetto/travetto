@@ -1,7 +1,7 @@
 import { FsUtil } from '@travetto/boot';
 import * as n from '../nodes';
 
-import { AllChildren, AnchorType, Renderer } from './types';
+import { AllChildren, RenderContext, Renderer } from './types';
 import { RenderUtil } from './util';
 
 const { getId, clean, titleCase } = RenderUtil;
@@ -10,16 +10,14 @@ const ROOT = FsUtil.resolveUnix('..', '..');
 
 export const Markdown: Renderer = {
   ext: 'md',
-  toc(title: string, anchors: AnchorType[]) {
-    return this.render(n.Group([n.SubSection(title), n.Ordered(...anchors)]));
-  },
-  render(c: AllChildren) {
-    const recurse = (s: AllChildren | n.DocNode) => this.render(s as AllChildren);
+  render(c: AllChildren, context: RenderContext) {
+    const recurse = (s: AllChildren | n.DocNode) => this.render(s as AllChildren, context);
     const link = (s: n.DocNode, ctx: { _type: string, line?: number }) =>
       `${recurse(s)
-        .replace(ROOT, '%GIT%')
-        .replace('@travetto/', '%GIT%/module/')}${ctx.line ? `#L${ctx.line}` : ''}`;
+        .replace(ROOT, context.gitRoot)
+        .replace('@travetto/', `${context.gitRoot}/module/`)}${ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
+      case 'toc': return recurse(n.Group([n.SubSection(c.title), context.toc]));
       case 'strong': return `**${recurse(c.content)}**`;
       case 'group': return c.nodes.map(cc => recurse(cc,)).join('');
       case 'code':
@@ -72,9 +70,5 @@ ${clean(recurse(c.content))}
       case 'hidden':
         return '';
     }
-  },
-  assemble: ({ preamble, content }) => `${preamble}\n${content}`,
-  finalize: (content, { module, gitRoot }) => content
-    .replace(new RegExp(`[.][.]/${module}`, 'g'), '.')
-    .replace(/%GIT%/g, gitRoot)
+  }
 };

@@ -10,6 +10,6 @@ export class RenderUtil {
   }
 
   static getId(a: string) {
-    return a.toLowerCase().replace(/[^a-z]+/g, '-');
+    return a.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/ /g, '-');
   }
 }

@@ -285,4 +285,3 @@ export class MemoryIndexedSuite extends ModelIndexedSuite {
   }
 }
 ```
-

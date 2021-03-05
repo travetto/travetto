@@ -130,4 +130,3 @@ class CustomAwesomeModelService implements ModelExpirySupport {
   // Implement all the things
 }
 ```
-

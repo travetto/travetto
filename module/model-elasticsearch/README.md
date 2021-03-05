@@ -122,4 +122,3 @@ Usage:  model:es-schema [options]
 Options:
   -h, --help  display help for command
 ```
-

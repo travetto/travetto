@@ -52,4 +52,4 @@ const app = fastify(fastConf);
 ```
 
 ## Extension - AWS Lambda
-The [fastify](https://www.fastify.io/) module supports integration with [aws-lambda-fastify](https://github.com/fastify/aws-lambda-fastify/blob/master/README.md) when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) that is able to integrate with AWS appropriately. 
+The [fastify](https://www.fastify.io/) module supports integration with [aws-lambda-fastify](https://github.com/fastify/aws-lambda-fastify/blob/master/README.md) when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) that is able to integrate with AWS appropriately.

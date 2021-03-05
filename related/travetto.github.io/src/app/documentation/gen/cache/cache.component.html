@@ -63,7 +63,7 @@ Additionally, to use the decorators you will need to have a <a target="_blank" c
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-cache-src-decorator-ts-l-cache-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/cache/src/decorator.ts#L12">@Cache</a></h3>
+<h3 id="cache"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/cache/src/decorator.ts#L12">@Cache</a></h3>
 
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/cache/src/decorator.ts#L12">@Cache</a> decorator supports configurations on:
 
@@ -76,7 +76,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
  <li><code class="item input">serialize</code> the function to execute before storing a cacheable value.  This allows for any custom data modification needed to persist as a string properly.</li>
  <li><code class="item input">reinstate</code> the function to execute on return of a cached value.  This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.).  This method should not be used often, as the return values of the methods should naturally serialize to/from <code class="item input">JSON</code> and the values should be usable either way.</li></ul></li></ul>
 
-<h3 id="-a-target-blank-class-source-link-href-git-module-cache-src-decorator-ts-l-evictcache-a-"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/cache/src/decorator.ts#L26">@EvictCache</a></h3>
+<h3 id="evictcache"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/cache/src/decorator.ts#L26">@EvictCache</a></h3>
 
 Additionally, there is support for planned eviction via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/cache/src/decorator.ts#L26">@EvictCache</a> decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same <code class="item input">keySpace</code> and <code class="item input">key</code> to compute the expected key.
 
@@ -140,5 +140,4 @@ By design, the <a target="_blank" class="source-link" href="https://github.com/t
   <span class="token comment">// Implement all the things</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
-
 </div>

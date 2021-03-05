@@ -191,4 +191,3 @@ $ node -r @travetto/boot/register ./doc/render.ts
 
 </body></html>
 ```
-

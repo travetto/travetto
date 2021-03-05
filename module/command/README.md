@@ -132,4 +132,3 @@ export const service: Service = {
   image: `docker.elastic.co/elasticsearch/elasticsearch:${version}`
 };
 ```
-

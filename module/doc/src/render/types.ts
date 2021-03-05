@@ -1,24 +1,20 @@
 import { AllType, AllTypeMap } from '../node-types';
 
 export type AllChildren = AllType;
-export type AnchorType = AllTypeMap['Anchor'];
 
-export type OutputContext = {
-  preamble: string;
+export type RenderContext = {
   module: string;
-  content: string;
+  toc: AllTypeMap['Ordered'];
   gitRoot: string;
 };
 
 export type DocumentContext = {
-  assemble?: Record<string, (output: OutputContext) => string>;
+  assemble?: Record<string, (output: string) => string>;
   text: AllType;
 };
 
 export type Renderer = {
   ext: string;
-  render(child: AllChildren): string;
-  assemble(output: OutputContext): string;
-  finalize(output: string, context: OutputContext): string;
-  toc(title: string, anchors: AnchorType[]): string;
+  render(child: AllChildren, context: RenderContext): string;
+  assemble?(output: string): string;
 };

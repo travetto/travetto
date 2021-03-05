@@ -1,4 +1,4 @@
-import { doc as d, Install, lib, mod, inp, List, Note } from '@travetto/doc';
+import { doc as d, Install, lib, mod, inp, List, Note, Header } from '@travetto/doc';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc-support';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-support';
 
@@ -6,6 +6,8 @@ import { SQLModelConfig } from './src/config';
 import { SQLModelService } from './src/service';
 
 export const text = d`
+${Header()}
+
 ${Install('Specific SQL Client: mysql', 'mysql')}
 
 or 

@@ -1,7 +1,7 @@
 import { FsUtil } from '@travetto/boot';
 
 import * as n from '../nodes';
-import { AllChildren, AnchorType, Renderer } from './types';
+import { AllChildren, RenderContext, Renderer } from './types';
 import { RenderUtil } from './util';
 import { highlight } from './code-highlight';
 
@@ -11,22 +11,20 @@ const ROOT = FsUtil.resolveUnix('..', '..');
 
 export const Html: Renderer = {
   ext: 'html',
-  toc(title: string, anchors: AnchorType[]) {
-    return `<div class="toc"><div class="inner">
-  ${this.render(n.SubSection(n.Text(title)))}
-  ${this.render(n.List(...anchors))}
-</div></div>`;
-  },
-  render(c: AllChildren) {
-    const recurse = (s: AllChildren | n.DocNode) => this.render(s as AllChildren);
+  render(c: AllChildren, context: RenderContext) {
+    const recurse = (s: AllChildren | n.DocNode) => this.render(s as AllChildren, context);
     const link = (s: n.DocNode, ctx: { _type: string, line?: number }) =>
       `${recurse(s)
         .replace(/@travetto\/([^.]+)$/, (_, x) => `/docs/${x}`)
-        .replace(ROOT, '%GIT%')
-        .replace(/^images\//, '/assets/images/%MOD%/')
+        .replace(ROOT, context.gitRoot)
+        .replace(/^images\//, `/assets/images/${context.module}/`)
         .replace(/^https?:\/\/travetto.dev\//g, '/')
-        .replace(/^.*@travetto\//, '%GIT%/module/')}${ctx && ctx.line ? `#L${ctx.line}` : ''}`;
+        .replace(/^.*@travetto\//, `${context.gitRoot}/module/`)}${ctx && ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
+      case 'toc': {
+        const content = recurse(n.Group([n.SubSection(c.title), context.toc]));
+        return `<div class="toc"><div class="inner">${content}</div></div>`;
+      }
       case 'strong': return `<strong>${recurse(c.content)}</strong>`;
       case 'group': return c.nodes.map(cc => recurse(cc)).join('');
       case 'install':
@@ -49,7 +47,7 @@ export const Html: Renderer = {
       case 'subsection': {
         const tag = c._type === 'section' ? 'h2' : 'h3';
         const title = recurse(c.title);
-        return `<${tag} id="${getId(title)}">${title}</${tag}>`;
+        return `<${tag} id="${getId(title.replace(/<[^>]+>/g, ' '))}">${title}</${tag}>`;
       }
       case 'command':
       case 'method':
@@ -89,6 +87,5 @@ export const Html: Renderer = {
         return '';
     }
   },
-  assemble: ({ content, preamble }) => `${preamble}\n<div class="documentation">\n${content}\n</div>`,
-  finalize: (output, { module, gitRoot }) => output.replace(/%MOD%/g, module).replace(/%GIT%/g, gitRoot)
+  assemble: content => `<div class="documentation">\n${content}\n</div>`
 };
