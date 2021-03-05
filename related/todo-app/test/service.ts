@@ -5,11 +5,13 @@ import { Inject } from '@travetto/di';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
 import { ModelCrudSupport } from '@travetto/model';
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 import { TodoService } from '../src/service';
 import { Todo } from '../src/model';
 
 @Suite()
+@InjectableSuite()
 export class TodoTest extends BaseModelSuite<ModelCrudSupport> {
 
   @Inject()
