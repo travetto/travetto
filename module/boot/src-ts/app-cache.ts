@@ -39,40 +39,6 @@ class $AppCache extends FileCache {
       }
     }
   }
-
-  /**
-   * Convert from cached entry name to local file
-   * @param cached Cached entry location
-   */
-  fromEntryName(cached: string) {
-    return FsUtil.resolveUnix(
-      super.fromEntryName(cached)
-        .replace(/_._/g, 'node_modules/@travetto')
-        .replace('node_modules/@travetto', v => process.env.TRV_DEV || v)
-    ).replace(/[.]js$/, '.ts');
-  }
-
-  /**
-   * Convert from local entry name to cache
-   * @param local Local entry location
-   */
-  toEntryName(local: string) {
-    return super.toEntryName(local.replace(FsUtil.cwd, '')
-      .replace(process.env.TRV_DEV || '@@', 'node_modules/@travetto')
-      .replace(/node_modules\/@travetto/g, '_._')
-    ).replace(/[.]ts$/, '.js');
-  }
-
-  /**
-   * Clear the cache
-   */
-  reset() {
-    for (const k of Object.keys(require.cache)) {
-      if (k.includes('@travetto')) { // If a travetto module
-        delete require.cache[k];
-      }
-    }
-  }
 }
 
 export const AppCache = new $AppCache();

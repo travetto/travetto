@@ -116,7 +116,8 @@ export class FileCache {
     return FsUtil.toUnix(entry)
       .replace(this.cacheDir, '')
       .replace(/~/g, '/')
-      .replace(/\/\/+/g, '/');
+      .replace(/\/\/+/g, '/')
+      .replace(/^./g, 'node_modules/@travetto');
   }
 
   /**
@@ -125,6 +126,9 @@ export class FileCache {
    */
   toEntryName(local: string) {
     return FsUtil.joinUnix(this.cacheDir, local
+      .replace(FsUtil.cwd, '')
+      .replace(process.env.TRV_DEV || '#', '.')
+      .replace(/node_modules\/@travetto/g, '.')
       .replace(/^\//, '')
       .replace(/\/+/g, '~')
     );
