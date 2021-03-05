@@ -31,7 +31,7 @@
     "src",
     "bin",
     "register.js",
-    "tsconfig.json"
+    "tsconfig.trv.json"
   ],
   "name": "@travetto/boot",
   "repository": {

@@ -32,7 +32,7 @@ The functionality we support for testing and retrieving environment information:
  <li><code class="item method">getTime(key: string, def: number):number</code> - Reads an environment variable as milliseconds, with support for <code class="item input">s</code>, <code class="item input">m</code>, and <code class="item input">h</code> suffixes to provide succinct time units.</li></ul>
 
 <h2 id="cache-support">Cache Support</h2>
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/app-cache.ts">AppCache</a> is the cache that is used specific to the framework, and is an instance of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L11">FileCache</a>.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L11">FileCache</a> is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts">AppCache</a> is the cache that is used specific to the framework, and is an instance of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L12">FileCache</a>.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L12">FileCache</a> is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
 
@@ -51,14 +51,21 @@ The class organization looks like:
     <span class="token comment">/**
      * Directory to cache into
      */</span>
-    <span class="token keyword">constructor</span><span class="token punctuation">(</span>cacheDir<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+    <span class="token keyword">constructor</span><span class="token punctuation">(</span>cacheDir<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Purge all expired data
+     */</span>
+    <span class="token keyword">private</span> purgeExpired<span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Initialize the cache behavior
+     */</span>
+    <span class="token function">init</span><span class="token punctuation">(</span>purgeExpired<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
     <span class="token comment">/**
      * Write contents to disk
      * @param local Local location
      * @param contents Contents to write
      */</span>
-    <span class="token function">writeEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> contents<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> Buffer<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+    <span class="token function">writeEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> contents<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
     <span class="token comment">/**
      * Read entry from disk
      * @param local Read the entry given the local name
@@ -107,7 +114,8 @@ The class organization looks like:
      * @param force Should create be executed always
      */</span>
     <span class="token function">getOrSet</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token function-variable function">create</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">string</span><span class="token punctuation">,</span> force<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
+<span class="token punctuation">{{'}'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">declare</span> <span class="token keyword">const</span> AppCache<span class="token operator">:</span> FileCache<span class="token punctuation">;</span></code></pre>     
       </figure>
 
 Everything is based on absolute paths being passed in, and translated into cache specific files.

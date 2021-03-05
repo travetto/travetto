@@ -2,7 +2,7 @@ import * as commander from 'commander';
 import * as os from 'os';
 import * as fs from 'fs';
 
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, ScanFs } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 import type { RunState } from '../src/execute/types';
@@ -15,16 +15,13 @@ export class TestPlugin extends BasePlugin {
   _types: string[];
 
   getTypes() {
-    const base = FsUtil.resolveUnix(__dirname, '..', 'src/consumer/types/');
     if (!this._types) {
-      this._types = fs.readdirSync(base)
-        .flatMap(x =>
-          fs.readFileSync(FsUtil.resolveUnix(base, x), 'utf8')
-            .split(/\n/)
-            .filter(l => l.includes('@Consumable'))
-        )
-        .map(x => x.match(/@Consumable[(]'([^']+)/)?.[1] as string)
-        .filter(x => ['exec']);
+      this._types = ScanFs.scanDirSync({},
+        FsUtil.resolveUnix(__dirname, '..', 'src/consumer/types/')
+      )
+        .filter(x => x.stats.isFile())
+        .map(x => fs.readFileSync(x.file, 'utf8').match(/@Consumable[(]'([^']+)/)?.[1] as string)
+        .filter(x => x && x !== 'exec');
     }
     return this._types;
   }

@@ -1,4 +1,4 @@
-import { TranspileUtil } from '@travetto/boot';
+import { SourceUtil } from '@travetto/boot/src/internal';
 
 import { AppManifest } from './manifest';
 
@@ -56,7 +56,7 @@ class $ConsoleManager {
     }
 
     this.set(console); // Init to console
-    TranspileUtil.addPreProcessor(this.instrument.bind(this)); // Register console manager
+    SourceUtil.addPreProcessor(this.instrument.bind(this)); // Register console manager
   }
 
   /**

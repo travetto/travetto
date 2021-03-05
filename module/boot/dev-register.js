@@ -57,8 +57,8 @@ function readDeps(root, givenMods) {
 }
 
 const { FileCache } = require('./src/cache');
-const cache = new FileCache(process.env.TRV_CACHE ?? '.trv_cache');
-cache.init();
+const cache = new FileCache();
+cache.init(true);
 
 const envMods = process.env.TRV_MODULES ?? '';
 const content = cache.getOrSet(`isolated-modules.${naiveHash(envMods)}.json`,
@@ -72,4 +72,4 @@ const { entries } = JSON.parse(content);
 process.env.TRV_MODULES = `${envMods.replace(TRV_MOD, '')},${entries.join(',')}`;
 
 // Force install
-require('./src/compile').CompileUtil.init();
+require('./src/internal/compile').CompileUtil.init();

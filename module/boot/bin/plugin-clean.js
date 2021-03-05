@@ -1,2 +1,2 @@
 require('../register');
-require('@travetto/boot/src/app-cache').AppCache.clear();
+require('@travetto/boot/src/cache').AppCache.clear();

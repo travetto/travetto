@@ -1,5 +1,5 @@
 {
-  "extends": "./module/boot/tsconfig.json",
+  "extends": "./module/boot/tsconfig.trv.json",
   "compilerOptions": {
     "rootDir": ".",
     "paths": {

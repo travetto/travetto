@@ -1,7 +1,9 @@
 import * as ts from 'typescript';
 import * as path from 'path';
+import * as fs from 'fs';
 
-import { FileCache, TranspileUtil, FsUtil } from '@travetto/boot';
+import { FsUtil, AppCache } from '@travetto/boot';
+import { ModuleUtil, SourceUtil, TranspileUtil } from '@travetto/boot/src/internal';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';
@@ -22,10 +24,6 @@ export class Transpiler {
 
   constructor(
     /**
-     * Cache for transpilation
-     */
-    private cache: FileCache,
-    /**
      * App Root paths to load files for
      */
     private rootNames: Set<string>
@@ -41,8 +39,8 @@ export class Transpiler {
     if (content === undefined) {
       throw new Error(`Unable to read file ${filename}`);
     }
-    if (filename.endsWith('.ts') && !filename.endsWith('.d.ts')) {
-      content = TranspileUtil.preProcess(filename, content);
+    if (filename.endsWith(SourceUtil.EXT) && !filename.endsWith('.d.ts')) {
+      content = SourceUtil.preProcess(filename, content);
     }
     return content;
   }
@@ -54,7 +52,7 @@ export class Transpiler {
     filename = FsUtil.toUnixTs(filename);
     this.contents.set(filename, content);
     this.hashes.set(filename, SystemUtil.naiveHash(content));
-    this.cache.writeEntry(filename, content);
+    AppCache.writeEntry(filename, content);
   }
 
   /**
@@ -118,7 +116,7 @@ export class Transpiler {
    * Perform actual transpilation
    */
   private _transpile(filename: string, force = false) {
-    if (force || !this.cache.hasEntry(filename)) {
+    if (force || !AppCache.hasEntry(filename)) {
       console.debug('Emitting', { filename: filename.replace(FsUtil.cwd, '.') });
 
       const prog = this.getProgram(filename);
@@ -133,7 +131,7 @@ export class Transpiler {
       TranspileUtil.checkTranspileErrors(filename, result.diagnostics as []);
       // Save writing for typescript program (`writeFile`)
     } else {
-      const cached = this.cache.readEntry(filename);
+      const cached = AppCache.readEntry(filename);
       this.contents.set(filename, cached);
     }
 
@@ -151,7 +149,8 @@ export class Transpiler {
   /**
    * See if a file's hash code has changed
    */
-  hashChanged(filename: string, content: string) {
+  hashChanged(filename: string, content?: string) {
+    content ??= fs.readFileSync(filename, 'utf8');
     // Let's see if they are really different
     const hash = SystemUtil.naiveHash(content);
     if (hash === this.hashes.get(filename)) {
@@ -182,7 +181,7 @@ export class Transpiler {
     try {
       return this._transpile(filename, force);
     } catch (err) {
-      const errContent = TranspileUtil.handlePhaseError('transpile', filename, err);
+      const errContent = ModuleUtil.handlePhaseError('transpile', filename, err);
       this.contents.set(filename, errContent);
       return errContent;
     }
@@ -195,7 +194,7 @@ export class Transpiler {
     if (this.contents.has(filename)) {
       console.debug('Unloading', { filename: filename.replace(FsUtil.cwd, '.'), unlink });
 
-      this.cache.removeExpiredEntry(filename, unlink);
+      AppCache.removeExpiredEntry(filename, unlink);
 
       if (unlink && this.hashes.has(filename)) {
         this.hashes.delete(filename);

@@ -6,7 +6,7 @@
 function init() {
   try { require(`${process.cwd()}/.env`); } catch { }
   (process.env.TRV_REQUIRES || '').split(',').filter(x => !!x).forEach(m => require(m));
-  require('@travetto/boot/src/compile').CompileUtil.init();
+  require('@travetto/boot/src/internal/compile').CompileUtil.init();
 }
 
 if (!global.trvInit) { // Register once, and mark

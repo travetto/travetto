@@ -46,7 +46,7 @@ Supported featrues:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-mongo/src/config.ts#L12">MongoModelConfig</a> is defined by:
+  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model-mongo/src/config.ts#L11">MongoModelConfig</a> is defined by:
 
   
       <figure class="code">
@@ -56,7 +56,6 @@ Supported featrues:
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> mongo <span class="token keyword">from</span> <span class="token string">'mongodb'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> promises <span class="token keyword">as</span> fs <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FsUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ResourceManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 
@@ -115,11 +114,9 @@ Supported featrues:
    * Load a resource
    */</span>
   <span class="token keyword">async</span> <span class="token function">fetch</span><span class="token punctuation">(</span>val<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token keyword">await</span> FsUtil<span class="token punctuation">.</span><span class="token function">exists</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">?</span> fs<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span> <span class="token operator">:</span> ResourceManager<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">catch</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">return</span> val<span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">return</span> ResourceManager<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token keyword">catch</span><span class="token punctuation">(</span>e <span class="token operator">=></span> fs<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token keyword">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> val<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**

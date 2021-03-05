@@ -29,7 +29,7 @@ The functionality we support for testing and retrieving environment information:
    *  `getTime(key: string, def: number):number` - Reads an environment variable as milliseconds, with support for `s`, `m`, and `h` suffixes to provide succinct time units.
 
 ## Cache Support
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/app-cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L11).  [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L11) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L12).  [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L12) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
 
@@ -46,14 +46,21 @@ export declare class FileCache {
     /**
      * Directory to cache into
      */
-    constructor(cacheDir: string);
-    init(): void;
+    constructor(cacheDir?: string);
+    /**
+     * Purge all expired data
+     */
+    private purgeExpired;
+    /**
+     * Initialize the cache behavior
+     */
+    init(purgeExpired?: boolean): void;
     /**
      * Write contents to disk
      * @param local Local location
      * @param contents Contents to write
      */
-    writeEntry(local: string, contents: string | Buffer): void;
+    writeEntry(local: string, contents: string): void;
     /**
      * Read entry from disk
      * @param local Read the entry given the local name
@@ -103,6 +110,7 @@ export declare class FileCache {
      */
     getOrSet(local: string, create: () => string, force?: boolean): string;
 }
+export declare const AppCache: FileCache;
 ```
 
 Everything is based on absolute paths being passed in, and translated into cache specific files.
