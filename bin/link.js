@@ -5,16 +5,11 @@
 const fs = require('fs');
 const path = require('path');
 
-async function mkdirp(d) {
-  const parts = d.split(path.sep);
-  for (let i = 1; i < parts.length; i++) {
-    try {
-      await fs.promises.mkdir(parts.slice(0, i + 1).join(path.sep));
-    } catch { }
-  }
-}
-
 '*'
+  .$map(async (v) => {
+    await fs.promises.mkdir(path.resolve('.bin')).catch(() => { });
+    return v;
+  })
   .$dir({ type: 'file', base: '.bin' })
   .$map(x => fs.unlinkSync(x))
   .$collect()
@@ -23,14 +18,24 @@ async function mkdirp(d) {
       ['module/boot/register.js', 'node_modules/@travetto/boot/register.js'],
       ['module/cli/bin/trv.js', '.bin/trv'],
     ]
-      .$concat('*.js'.$dir({ type: 'file', base: 'bin' }).$map(f => [f, `.bin/trv-${f.split(/[\\\/]/).pop().replace(/.js$/, '')}`]))
+      .$concat(
+        '*'.$dir({ type: 'file', base: 'bin' })
+          .$filter(x => !x.includes('publish'))
+          .$filter(x => !/(link|clean|compress-js|opt-deps)[.]js$/.test(x))
+          .$map(f => [f, `.bin/trv-${f.split(/[\\\/]/).pop().replace(/[.](js|sh)$/, '')}`])
+      )
       .$map(a => a.map(v => path.resolve(v)))
       .$map(async ([s, d]) => {
-        await mkdirp(path.dirname(d));
-        try {
-          await fs.promises.stat(d);
-        } catch {
-          await fs.promises.symlink(s, d);
+        if (d.includes('trv-') && s.endsWith('.js')) {
+          await fs.promises.writeFile(d, `
+#!/bin/sh
+cd \$(dirname \`dirname \$0\`)
+./bin/${s.split('/').pop()} \${@}
+`.trim(), { mode: 0o755 });
+        } else {
+          try {
+            await fs.promises.symlink(s, d); // Direct link
+          } catch { }
         }
       })
   );
