@@ -5,7 +5,8 @@ import * as path from 'path';
 // TODO: Get proper typings
 const glob = require('picomatch');
 
-import { FsUtil, ScanFs, SourceIndex } from '@travetto/boot';
+import { FsUtil, ScanFs } from '@travetto/boot';
+import { SourceCodeIndex } from '@travetto/boot/src/internal';
 import { color } from '@travetto/cli/src/color';
 
 import { CommonConfig, PackOperation } from './types';
@@ -33,7 +34,7 @@ export class PackUtil {
   static async modeList() {
     if (!this._modes) {
       this._modes = await Promise.all(
-        SourceIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
+        SourceCodeIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
           .map(async (x) => {
             const req = (await import(x.file)).config as Partial<CommonConfig>;
             req.file = x.module.replace(/^node_modules\//, '');

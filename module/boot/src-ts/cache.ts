@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { EnvUtil } from './env';
 import { FsUtil } from './fs';
 
 function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
@@ -16,12 +17,45 @@ export class FileCache {
   /**
    * Directory to cache into
    */
-  constructor(cacheDir: string) {
-    this.cacheDir = FsUtil.toUnix(cacheDir);
+  constructor(cacheDir?: string) {
+    this.cacheDir = FsUtil.resolveUnix(cacheDir ?? EnvUtil.get('TRV_CACHE', '.trv_cache'));
   }
 
-  init() {
-    FsUtil.mkdirpSync(this.cacheDir);
+  /**
+   * Purge all expired data
+   */
+  private purgeExpired() {
+    for (const f of fs.readdirSync(this.cacheDir)) {
+      const full = this.fromEntryName(f);
+      try {
+        this.removeExpiredEntry(full);
+      } catch (e) {
+        // Only care if it's source, otherwise might be dynamically cached data without backing file
+        if (full.endsWith('.ts') || full.endsWith('.js')) {
+          // Cannot remove file, source is missing
+          console.warn('Cannot read', { error: e });
+        }
+      }
+    }
+  }
+
+  /**
+   * Initialize the cache behavior
+   */
+  init(purgeExpired = false) {
+    if (!EnvUtil.isReadonly()) {
+      FsUtil.mkdirpSync(this.cacheDir);
+
+      try {
+        // Ensure we have access before trying to delete
+        fs.accessSync(this.cacheDir, fs.constants.W_OK);
+      } catch (e) {
+        throw new Error(`Unable to write to cache directory: ${this.cacheDir}`);
+      }
+      if (purgeExpired) {
+        this.purgeExpired();
+      }
+    }
   }
 
   /**
@@ -29,8 +63,8 @@ export class FileCache {
    * @param local Local location
    * @param contents Contents to write
    */
-  writeEntry(local: string, contents: string | Buffer) {
-    fs.writeFileSync(this.toEntryName(local), contents);
+  writeEntry(local: string, contents: string) {
+    fs.writeFileSync(this.toEntryName(local), contents, 'utf8');
     this.statEntry(local);
   }
 
@@ -38,8 +72,8 @@ export class FileCache {
    * Read entry from disk
    * @param local Read the entry given the local name
    */
-  readEntry(local: string) {
-    return fs.readFileSync(this.toEntryName(local), 'utf-8');
+  readEntry(local: string): string {
+    return fs.readFileSync(this.toEntryName(local), 'utf8');
   }
 
   /**
@@ -117,7 +151,7 @@ export class FileCache {
       .replace(this.cacheDir, '')
       .replace(/~/g, '/')
       .replace(/\/\/+/g, '/')
-      .replace(/^./g, 'node_modules/@travetto');
+      .replace(/^[.]/g, 'node_modules/@travetto');
   }
 
   /**
@@ -151,3 +185,5 @@ export class FileCache {
     return content;
   }
 }
+
+export const AppCache = new FileCache();

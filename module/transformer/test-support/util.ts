@@ -14,7 +14,7 @@ export class TranformerTestUtil {
    */
   static async compile(folder: string, file?: string) {
 
-    const tsconfigObj = await import('@travetto/boot/tsconfig.json');
+    const tsconfigObj = await import('@travetto/boot/tsconfig.trv.json');
 
     const prog = ts.createProgram({
       options: ts.convertCompilerOptionsFromJson(tsconfigObj, '').options,

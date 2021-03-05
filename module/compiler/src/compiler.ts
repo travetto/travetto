@@ -1,14 +1,14 @@
 import { EventEmitter } from 'events';
-import * as fs from 'fs';
 
-import { SourceIndex, FsUtil, AppCache, FileCache, CompileUtil, TranspileUtil, EnvUtil } from '@travetto/boot';
+import { FsUtil, EnvUtil } from '@travetto/boot';
+import { SourceCodeIndex, CompileUtil } from '@travetto/boot/src/internal';
 import { AppManifest } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
 import { Transpiler } from './transpiler';
 
 /**
- * Compilation orchestrator
+ * Compilation orchestrator, interfaces with watching, unloading, emitting and delegates appropriately
  */
 @Watchable('@travetto/compiler/support/watch.compiler')
 class $Compiler {
@@ -19,14 +19,9 @@ class $Compiler {
 
   active = false;
 
-  constructor(
-    /**
-     * The cache source
-     */
-    protected cache: FileCache = AppCache,
-  ) {
-    this.rootFiles = new Set(SourceIndex.findByFolders(AppManifest.source, 'required').map(x => x.file));
-    this.transpiler = new Transpiler(this.cache, this.rootFiles);
+  constructor() {
+    this.rootFiles = new Set(SourceCodeIndex.findByFolders(AppManifest.source, 'required').map(x => x.file));
+    this.transpiler = new Transpiler(this.rootFiles);
   }
 
   /**
@@ -47,15 +42,20 @@ class $Compiler {
     const start = Date.now();
     this.active = true;
 
-    require.extensions[TranspileUtil.EXT] = this.compile.bind(this);
-
     if (!EnvUtil.isReadonly()) {
       await this.transpiler.init();
-    } else { // Force reading from cache
-      this.transpile = (tsf: string) => this.cache.readEntry(tsf);
+      // Enhance transpilation, with custom transformations
+      CompileUtil.setTranspiler(this.transpile.bind(this));
     }
 
     console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
+  }
+
+  /**
+   * Transpile a file
+   */
+  transpile(tsf: string) {
+    return this.transpiler.transpile(tsf);
   }
 
   /**
@@ -65,20 +65,16 @@ class $Compiler {
     if (!EnvUtil.isReadonly()) {
       this.transpiler.reset();
     }
-    SourceIndex.reset();
+    SourceCodeIndex.reset();
     this.active = false;
   }
 
   /**
-   * Remove file from require.cache, and possible the file system
+   * Unload transpiled file
    */
   unload(filename: string, unlink = false) {
     this.transpiler.unload(filename, unlink); // Remove source
-    const native = FsUtil.toNative(filename);
-    if (native in require.cache) {
-      delete require.cache[native]; // Remove require cached element
-      return true;
-    }
+    return CompileUtil.unload(filename);
   }
 
   /**
@@ -94,22 +90,6 @@ class $Compiler {
    */
   on<T extends 'added' | 'removed' | 'changed'>(type: T, handler: (filename: string) => void) {
     this.emitter.on(type, handler);
-  }
-
-  /**
-   * Compile a file, follows the same shape as `Module._compile`
-   */
-  compile(m: NodeModule, tsf: string) {
-    const content = this.transpile(tsf);
-    return CompileUtil.compileJavascript(m, content, tsf);
-  }
-
-  /**
-   * Transpile a given file
-   * @param tsf The typescript file to transpile
-   */
-  transpile(tsf: string) {
-    return this.transpiler.transpile(tsf);
   }
 
   /**
@@ -136,7 +116,7 @@ class $Compiler {
    * When a file changes during watch
    */
   changed(filename: string) {
-    if (this.transpiler.hashChanged(filename, fs.readFileSync(filename, 'utf8'))) {
+    if (this.transpiler.hashChanged(filename)) {
       this.unload(filename);
       // Load Synchronously
       require(filename);

@@ -3,7 +3,7 @@ import { parentPort } from 'worker_threads';
 
 import { EnvUtil } from '@travetto/boot';
 import { CliUtil } from '@travetto/cli/src/util';
-import { AppCache } from '@travetto/boot/src/app-cache';
+import { AppCache } from '@travetto/boot/src/cache';
 import { FsUtil } from '@travetto/boot/src/fs';
 import { ExecUtil } from '@travetto/boot/src/exec';
 import { SystemUtil } from '@travetto/base/src/internal/system';

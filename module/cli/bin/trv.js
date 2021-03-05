@@ -18,12 +18,13 @@ if (!process.env.TRV_DEV) {
  * Compile CLI for usage
  */
 function compile() {
-  const { AppCache, EnvUtil, SourceIndex, TranspileUtil } = require('@travetto/boot');
+  const { AppCache, EnvUtil, } = require('@travetto/boot');
+  const { CompileUtil, SourceCodeIndex } = require('@travetto/boot/src/internal');
 
   if (!EnvUtil.isReadonly()) {
-    for (const { file } of SourceIndex.find({ folder: 'bin' })) {
+    for (const { file } of SourceCodeIndex.find({ folder: 'bin' })) {
       if (!AppCache.hasEntry(file)) {
-        TranspileUtil.transpile(file);
+        CompileUtil.transpile(file);
       }
     }
   }

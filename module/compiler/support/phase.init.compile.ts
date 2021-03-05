@@ -5,7 +5,9 @@ export const init = {
   key: '@trv:compiler/compile',
   after: ['@trv:compiler/init'],
   action: async () => {
-    const { AppCache, EnvUtil, SourceIndex } = await import('@travetto/boot');
+    const { AppCache, EnvUtil } = await import('@travetto/boot');
+    const { SourceCodeIndex } = await import('@travetto/boot/src/internal');
+    const { Compiler } = await import('../src/compiler');
 
     if (EnvUtil.isReadonly()) {
       console.debug('Skipping compilation, in readonly mode');
@@ -13,9 +15,8 @@ export const init = {
     }
 
     const { AppManifest } = await import('@travetto/base');
-    const { Compiler } = await import('../src/compiler');
 
-    for (const x of SourceIndex.findByFolders(AppManifest.source)) {
+    for (const x of SourceCodeIndex.findByFolders(AppManifest.source)) {
       if (!AppCache.hasEntry(x.file)) {
         Compiler.transpile(x.file); // Compile all the desired files
       }

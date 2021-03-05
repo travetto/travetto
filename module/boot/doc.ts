@@ -1,7 +1,7 @@
 import { doc as d, Code, Section, SubSection, List, inp, meth, Ref, lib, Header, Execute } from '@travetto/doc';
 import { FileCache, ExecUtil, StreamUtil } from './src';
 
-const AppCacheLink = Ref('AppCache', 'src-ts/app-cache.ts');
+const AppCacheLink = Ref('AppCache', 'src-ts/cache.ts');
 const FileCacheLink = Ref(FileCache.name, 'src-ts/cache.ts');
 const FsUtilLink = Ref('FsUtil', 'src-ts/fs.ts');
 const ScanFsLink = Ref('ScanFs', 'src-ts/scan.ts');

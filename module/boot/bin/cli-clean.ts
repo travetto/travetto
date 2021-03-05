@@ -15,7 +15,7 @@ export class BootCleanPlugin extends BasePlugin {
   }
 
   async action() {
-    const { AppCache } = await import('../src/app-cache');
+    const { AppCache } = await import('../src/cache');
     try {
       AppCache.clear(true);
 

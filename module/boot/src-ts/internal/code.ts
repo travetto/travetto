@@ -1,6 +1,6 @@
-import { FsUtil } from './fs';
-import { ScanEntry, ScanFs } from './scan';
-import { EnvUtil } from './env';
+import { FsUtil } from '../fs';
+import { ScanEntry, ScanFs } from '../scan';
+import { EnvUtil } from '../env';
 
 type SimpleEntry = Pick<ScanEntry, 'module' | 'file'>;
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
@@ -28,11 +28,11 @@ export interface SourceConfig {
 type IndexRecord = { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> };
 
 /**
- * Source index
+ * Source code index
  */
-export class SourceIndex {
+export class SourceCodeIndex {
 
-  private static _SOURCE_INDEX = new Map<string, IndexRecord>();
+  private static _INDEX = new Map<string, IndexRecord>();
 
   /**
    * Compute index for a scan entry
@@ -98,7 +98,7 @@ export class SourceIndex {
    * Get index of all source files
    */
   private static get index() {
-    if (this._SOURCE_INDEX.size === 0) {
+    if (this._INDEX.size === 0) {
       const idx = new Map<string, IndexRecord>();
       idx.set('.', { base: FsUtil.cwd, files: new Map() });
 
@@ -126,16 +126,16 @@ export class SourceIndex {
           idx.get(mod)!.files.get(sub)!.push({ file: el.file, module: el.module });
         }
       }
-      this._SOURCE_INDEX = idx;
+      this._INDEX = idx;
     }
-    return this._SOURCE_INDEX;
+    return this._INDEX;
   }
 
   /**
    * Clears the app scanning cache
    */
   static reset() {
-    this._SOURCE_INDEX.clear();
+    this._INDEX.clear();
   }
 
   /**

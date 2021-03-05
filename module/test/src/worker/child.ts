@@ -1,5 +1,5 @@
 import type { Compiler } from '@travetto/compiler';
-import { SourceIndex } from '@travetto/boot';
+import { SourceCodeIndex } from '@travetto/boot/src/internal';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
@@ -81,8 +81,8 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     await PhaseManager.run('reset');
     await ShutdownManager.executeAsync(-1);
 
-    for (const { file } of SourceIndex.find({
-      paths: SourceIndex.getPaths().filter(x => !FIXED_MODULES.has(x)),
+    for (const { file } of SourceCodeIndex.find({
+      paths: SourceCodeIndex.getPaths().filter(x => !FIXED_MODULES.has(x)),
       includeIndex: true
     })) {
       if (!/support\/(transformer|phase)[.]/.test(file)) {

@@ -2,7 +2,9 @@ import * as sourceMapSupport from 'source-map-support';
 
 import { AppManifest, Class, ShutdownManager } from '@travetto/base';
 import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
-import { CompileUtil, FsUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
+import { ModuleUtil } from '@travetto/boot/src/internal';
+
 
 import { Compiler } from '../src/compiler';
 
@@ -28,7 +30,7 @@ export function watch($Compiler: Class<typeof Compiler>) {
       }, 0);
 
       // Proxy all file loads
-      CompileUtil.addModuleHandler((name, mod) => {
+      ModuleUtil.addHandler((name, mod) => {
         if (name.includes(FsUtil.cwd) && !name.includes('node_modules') && /src\//.test(name)) {
           if (!this.modules.has(name)) {
             this.modules.set(name, new RetargettingProxy(mod));

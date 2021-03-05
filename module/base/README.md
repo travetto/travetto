@@ -41,16 +41,14 @@ A simple example of finding specific `.config` files in your codebase:
 **Code: Looking for all .config files with the prefix defined by svc**
 ```typescript
 import * as fs from 'fs';
-import { SourceIndex } from '@travetto/boot';
+import { FsUtil, ScanFs } from '@travetto/boot';
 
 export async function processServiceConfigs(svc: string) {
-  const svcConfigs = await SourceIndex.find({ filter: new RegExp(`${svc}.*[.]config$/`) });
+  const svcConfigs = await ScanFs.scanDir({ testFile: f => new RegExp(`${svc}.*[.]config$/`).test(f) }, FsUtil.cwd);
   for (const conf of svcConfigs) {
     // Do work
 
-    await new Promise((res, rej) => fs.readFile(conf.module, 'utf8', (err, v) => {
-      err ? rej(err) : res(v);
-    })); // Read file
+    const contents = await fs.promises.readFile(conf.module, 'utf8');
   }
 }
 ```
@@ -185,10 +183,7 @@ Error: Uh oh
     at inner2 (./doc/stack-test.ts:8:16)  
     at inner1 (./doc/stack-test.ts:12:16)  
     at test (./doc/stack-test.ts:16:9)  
-    at Object.<anonymous> (./doc/stack-test.ts:24:1)  
-    at Function.compileJavascript (/home/tim/Code/travetto/module/boot/src-ts/compile.ts:102:16)  
-    at Function.compile (/home/tim/Code/travetto/module/boot/src-ts/compile.ts:93:17)  
-    at Object.require.extensions.<computed> [as .ts] (/home/tim/Code/travetto/module/boot/src-ts/compile.ts:133:62)
+    at Object.<anonymous> (./doc/stack-test.ts:24:1)
 ```
 
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.

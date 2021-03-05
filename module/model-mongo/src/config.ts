@@ -1,7 +1,6 @@
 import * as mongo from 'mongodb';
 import { promises as fs } from 'fs';
 
-import { FsUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
 
@@ -60,11 +59,9 @@ export class MongoModelConfig {
    * Load a resource
    */
   async fetch(val: string) {
-    try {
-      return (await FsUtil.exists(val)) ? fs.readFile(val) : ResourceManager.read(val);
-    } catch {
-      return val;
-    }
+    return ResourceManager.read(val)
+      .catch(e => fs.readFile(val))
+      .catch(() => val);
   }
 
   /**

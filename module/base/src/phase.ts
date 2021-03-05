@@ -1,4 +1,4 @@
-import { SourceIndex, TranspileUtil } from '@travetto/boot';
+import { SourceCodeIndex, CompileUtil } from '@travetto/boot/src/internal';
 
 import { SystemUtil } from './internal/system';
 
@@ -52,11 +52,11 @@ export class PhaseManager {
    * @param after Starting point, exclusive
    */
   async load(upto?: string, after?: string) {
-    const found = SourceIndex.find({ folder: 'support', filter: this.filter });
+    const found = SourceCodeIndex.find({ folder: 'support', filter: this.filter });
 
     // Ensure we transpile all files
     for (const el of found) {
-      TranspileUtil.transpile(el.file);
+      CompileUtil.transpile(el.file);
     }
 
     // Load all support files

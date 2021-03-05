@@ -1,4 +1,4 @@
-import { TranspileUtil } from '@travetto/boot';
+import { SourceUtil } from '@travetto/boot/src/internal';
 
 declare const global: { ts: unknown }; // Used for transformers
 
@@ -19,7 +19,7 @@ export const init = {
     });
 
     // Drop typescript import, and use global. Great speedup;
-    TranspileUtil.addPreProcessor((name, contents) => {
+    SourceUtil.addPreProcessor((_, contents) => {
       contents = contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript'/mg, x => `// ${x}`);
       return contents;
     });

@@ -1,13 +1,11 @@
 import * as fs from 'fs';
-import { SourceIndex } from '@travetto/boot';
+import { FsUtil, ScanFs } from '@travetto/boot';
 
 export async function processServiceConfigs(svc: string) {
-  const svcConfigs = await SourceIndex.find({ filter: new RegExp(`${svc}.*[.]config$/`) });
+  const svcConfigs = await ScanFs.scanDir({ testFile: f => new RegExp(`${svc}.*[.]config$/`).test(f) }, FsUtil.cwd);
   for (const conf of svcConfigs) {
     // Do work
 
-    await new Promise((res, rej) => fs.readFile(conf.module, 'utf8', (err, v) => {
-      err ? rej(err) : res(v);
-    })); // Read file
+    const contents = await fs.promises.readFile(conf.module, 'utf8');
   }
 }
