@@ -16,11 +16,11 @@ if (target && target.startsWith(root)) {
 
 // Update commander
 [
-  !target ?
+  !target || target === 'todo-app' ?
     'Restarting Services'
       .$tap(console.log)
       .$map(() => {
-        require('child_process').spawnSync('npm', ['run', 'util:service', 'restart'], { stdio: 'inherit', encoding: 'utf8' });
+        require('child_process').spawnSync('trv-service', ['restart'], { stdio: 'inherit', encoding: 'utf8' });
       }) : undefined,
 
   commander

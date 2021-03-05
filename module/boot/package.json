@@ -42,6 +42,6 @@
   "scripts": {
     "build": "tsc -p src-ts",
     "build:watch": "tsc -w -p src-ts",
-    "prepack": "../../bin/util/compress-js.js src/**/*.js"
+    "prepack": "../../bin/compress-js.js src/**/*.js"
   }
 }

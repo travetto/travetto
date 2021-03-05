@@ -151,11 +151,13 @@ Now the tests should be defined at <code class="item path">test/service.ts</code
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BaseModelSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model/test-support/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelCrudSupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ElasticsearchModelConfig<span class="token punctuation">,</span> ElasticsearchModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-elasticsearch'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di/test-support/suite'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> TodoService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/service'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Todo <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/model'</span><span class="token punctuation">;</span>
 
 @<span class="token meta">Suite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+@<span class="token meta">InjectableSuite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TodoTest</span> <span class="token keyword">extends</span> <span class="token class-name">BaseModelSuite<span class="token operator">&lt;</span>ModelCrudSupport<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
 
   @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>

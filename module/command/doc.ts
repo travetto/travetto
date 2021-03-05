@@ -29,7 +29,7 @@ ${Execute('Command Service', 'trv', ['command:service', '--help'])}
 
 A sample of all services available to the entire framework:
 
-${Terminal('All Services', DocUtil.run('./bin/util/service.js', ['status'], { cwd: FsUtil.resolveUnix(__dirname, '..', '..') }))}
+${Terminal('All Services', DocUtil.run('./bin/service.js', ['status'], { cwd: FsUtil.resolveUnix(__dirname, '..', '..') }))}
 
 ${SubSection('Defining new Services')}
 
