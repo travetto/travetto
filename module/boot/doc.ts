@@ -8,7 +8,7 @@ const ScanFsLink = Ref('ScanFs', 'src-ts/scan.ts');
 const ExecUtilLink = Ref(ExecUtil.name, 'src-ts/exec.ts');
 const StreamUtilLink = Ref(StreamUtil.name, 'src-ts/stream.ts');
 
-exports.text = d`
+export const text = d`
 Boot is basic environment  awareness coupled with typescript bootstrapping for ${lib.Travetto} apps and libraries.  It has support for the following key areas:
 ${List(
   'Environmental Information',

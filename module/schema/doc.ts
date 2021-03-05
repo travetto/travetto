@@ -6,7 +6,7 @@ import {
 import { Schema } from './src/decorator/schema';
 import { Describe } from './src/decorator/common';
 
-exports.text = d`
+export const text = d`
 This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
 
 ${Section('Registration')}

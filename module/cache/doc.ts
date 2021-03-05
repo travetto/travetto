@@ -8,7 +8,7 @@ import { Links } from '@travetto/model/support/doc-support';
 import { Cache, EvictCache } from './src/decorator';
 import { CacheModelSym, CacheService } from './src/service';
 
-exports.text = d`
+export const text = d`
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without ${mod.Di}.  The code aims to handle use cases surrounding common/basic usage.
 
 The cache module requires an ${Links.Expiry} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${Links.Expiry}, or you can roll your own.

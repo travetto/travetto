@@ -7,7 +7,7 @@ import { Links } from './support/doc-support';
 
 const ModelTypeSnippet = Snippet('ModelType', './src/types/model.ts', /export interface/, /}/)
 
-exports.text = d`
+export const text = d`
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the ${mod.Schema}, which is used for data model validation.
 
 ${Section('Contracts')}

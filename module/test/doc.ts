@@ -4,7 +4,7 @@ import { AppCache } from '@travetto/boot';
 import { Suite } from './src/decorator/suite';
 import { Test } from './src/decorator/test';
 
-exports.text = d`
+export const text = d`
 
 This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the following formats:
 

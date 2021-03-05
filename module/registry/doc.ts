@@ -5,7 +5,7 @@ const SchemaReg = Ref('SchemaRegistry', '../schema/src/service/registry.ts');
 const MetadataReg = Ref('MetadataRegistry', 'src/service/metadata.ts');
 const DependencyReg = Ref('DependencyRegistry', '@travetto/di/src/registry.ts');
 
-exports.text = d`
+export const text = d`
 This module is the backbone for all "discovered" and "registered" behaviors within the framework. This is primarily used for building modules within the framework and not directly useful for application development.
 
 ${Section('Flows')}

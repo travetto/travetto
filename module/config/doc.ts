@@ -2,7 +2,7 @@ import { doc as d, mod, Config, List, inp, Section, meth, Code, Ordered, Execute
 import { ConfigManager } from './src/manager';
 import { Config as ConfigDec } from './src/decorator';
 
-exports.text = d`
+export const text = d`
 
 The config module provides support for loading application config on startup. Configuration values support the common ${lib.YAML} constructs as defined in ${mod.Yaml}.  The configuration information is comprised of:
 

@@ -12,7 +12,7 @@ const Response = SnippetLink('TravettoResponse', '@travetto/rest/src/types.d.ts'
 const Identity = SnippetLink('Identity', '@travetto/auth/src/types.ts', /interface Identity/);
 const IdentitySource = SnippetLink('IdentitySource', './src/identity.ts', /interface IdentitySource/);
 
-exports.text = d`
+export const text = d`
 
 This is a primary integration for the ${mod.Auth} module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  
 

@@ -2,7 +2,7 @@ import { doc as d, mod, Code, Note, inp, lib } from '@travetto/doc';
 import { ModelCustomConfig } from '@travetto/model/support/doc-support';
 import { S3ModelConfig } from './src/config';
 
-exports.text = d`
+export const text = d`
 This module provides an ${lib.S3}-based implementation for the ${mod.Model}.  This source allows the ${mod.Model} module to read, write and stream against ${lib.S3}.
 
 ${ModelCustomConfig(S3ModelConfig)}

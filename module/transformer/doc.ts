@@ -1,6 +1,6 @@
 import { doc as d, pth, Code, Section, inp, lib, Note, mod } from '@travetto/doc';
 
-exports.text = d`
+export const text = d`
 
 This module provides support for enhanced AST transformations, and declarative transformer registration, with common patterns to support all the transformers used throughout the framework. Transformations are located by ${pth`support/transformer.<name>.ts`} as the filename. 
 

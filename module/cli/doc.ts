@@ -1,6 +1,6 @@
 import { doc as d, pth, inp, Execute, Section, lib, Code } from '@travetto/doc';
 
-exports.text = d`
+export const text = d`
 
 The cli is the primary structure for interacting with the external requirements of the framework.  This can range from running tests, to running applications, to generating email templates. The main executable can be installed globally or locally.  If installed globally and locally, it will defer to the local installation for execution.
 

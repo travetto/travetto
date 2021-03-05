@@ -1,7 +1,7 @@
 // @ts-check
 import { pth, doc as d, mod, Code, Terminal, Section, List, Execute, SubSection, Ordered, Snippet } from '@travetto/doc';
 
-exports.text = d`
+export const text = d`
 ${Section('CLI - pack')} 
 
 ${Execute('Pack usage', 'trv', ['pack', '--help'])}

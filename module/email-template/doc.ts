@@ -1,7 +1,7 @@
 import { doc as d, lib, inp, Section, List, Anchor, Ordered, Code, mod, Execute, pth, SubSection } from '@travetto/doc';
 
 
-exports.text = d`
+export const text = d`
 This is primarily a set of command line tools for compiling and developing templates.  The primary input into this process is a ${pth`.email.html`} under the ${pth`resources/email`} folder.  This template drives the generation of the ${inp`html`} and ${inp`text`} outputs, as well as the ${inp`subject`} file.
 
 ${Section('Asset Management')}

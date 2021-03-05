@@ -5,7 +5,7 @@ import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-suppo
 import { SQLModelConfig } from './src/config';
 import { SQLModelService } from './src/service';
 
-exports.text = d`
+export const text = d`
 ${Install('Specific SQL Client: mysql', 'mysql')}
 
 or 

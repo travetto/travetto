@@ -4,7 +4,7 @@ import { AsyncContext } from './src/service';
 
 const AsyncContextInterceptor = Ref('AsyncContextInterceptor', 'src/extension/rest.interceptor.ts');
 
-exports.text = d`
+export const text = d`
 This module provides a wrapper around node's ${lib.AsyncHooks} to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow.
 
 The most common way of utilizing the context, is via the ${WithAsyncContext} decorator.  The decorator requires the class it's being used in, to have a ${AsyncContext} member, as it is the source of the contextual information.

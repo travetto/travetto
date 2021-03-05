@@ -8,7 +8,7 @@ import { WorkUtil } from './src/util';
 
 const InputSource = SnippetLink('InputSource', 'src/input/types.ts', /interface InputSource/);
 
-exports.text = d`
+export const text = d`
 This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc (inter-process communication) functionality out of the box. This module builds upon that by providing enhanced event management, richer process management, as well as constructs for orchestrating a conversation between two processes.
 
 ${Section('Execution Pools')}

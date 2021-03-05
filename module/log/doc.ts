@@ -3,7 +3,7 @@ import { AppCache } from '@travetto/boot';
 
 const ConsoleManager = Ref('ConsoleManager', '@travetto/base/src/console.ts');
 
-exports.text = d`
+export const text = d`
 This module provides logging functionality, building upon ${ConsoleManager} in the ${mod.Base} module.  This is all ultimately built upon ${lib.Console} operations. 
 
 The supported operations are:

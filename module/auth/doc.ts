@@ -6,7 +6,7 @@ const PrincipalSource = SnippetLink('PrincipalSource', './src/types.ts', /interf
 const Principal = SnippetLink('Principal', './src/types.ts', /interface Principal/);
 const Identity = SnippetLink('Identity', './src/types.ts', /interface Identity/);
 
-exports.text = d`
+export const text = d`
 This module provides the high-level backdrop for managing security principals.  The goal of this module is to be a centralized location for various security frameworks to plug into.  The primary contributions are:
 
 ${List(

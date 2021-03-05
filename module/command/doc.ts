@@ -2,7 +2,7 @@ import { doc as d, Section, List, Code, lib, cls, Execute, Terminal, DocUtil, Su
 import { CommandService } from './src/command';
 import { FsUtil } from '@travetto/boot';
 
-exports.text = d`
+export const text = d`
 The command module provides the necessary foundation for calling complex commands at runtime. Additionally special attention is provided to running ${lib.Docker} containers.
 
 ${Section('Docker Support')}

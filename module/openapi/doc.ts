@@ -1,6 +1,6 @@
 import { doc as d, mod, Section, inp, pth, Code, lib, Execute, Note } from '@travetto/doc';
 
-exports.text = d`
+export const text = d`
 In the ${mod.Rest} module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap.
 
 The module is provides an ${lib.OpenAPI} v3.x representation of the API metadata provided via the ${mod.Rest} and ${mod.Schema} modules.

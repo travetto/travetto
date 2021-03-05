@@ -3,7 +3,7 @@ import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-suppo
 import { RedisModelConfig } from './src/config';
 import { RedisModelService } from './src/service';
 
-exports.text = d`
+export const text = d`
 This module provides an ${lib.Redis}-based implementation for the ${mod.Model}.  This source allows the ${mod.Model} module to read, write and query against ${lib.Redis}.
 
 Supported featrues:

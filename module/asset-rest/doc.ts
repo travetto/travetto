@@ -1,6 +1,6 @@
 import { doc as d, Code, SnippetLink, lib, fld, mod } from '@travetto/doc';
 
-exports.text = d`
+export const text = d`
 
 This module provides a clean and direct mechanism for processing uploads, built upon ${lib.Busboy}. The module also provides some best practices with respect to temporary file deletion.
 

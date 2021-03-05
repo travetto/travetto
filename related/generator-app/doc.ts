@@ -3,8 +3,8 @@ import { doc as d, lib, Header, Install, Section, Terminal, mod, inp, List, pth,
 import { Todo } from './templates/todo/src/model/todo';
 import { TodoController } from './templates/todo/src/rest/todo';
 
-exports.header = false;
-exports.text = d`
+export const header = false;
+export const text = d`
 ${Header(false)}
 
 A simple ${lib.Yeoman} generator for scaffolding a reference project.  To get started, you need to make sure:

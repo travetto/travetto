@@ -9,7 +9,7 @@ const Request = SnippetLink('TravettoRequest', 'src/types.d.ts', /interface Trav
 const SessionData = SnippetLink('SessionData', 'src/types.ts', /interface SessionData/);
 const SessionEncoder = SnippetLink('SessionEncoder', 'src/encoder/types.ts', /interface SessionEncoder/);
 
-exports.text = d`
+export const text = d`
 
 This is a module that adds session support to the ${mod.Rest} framework.  Sessions are represented as:
 

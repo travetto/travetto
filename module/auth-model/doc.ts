@@ -2,7 +2,7 @@ import { doc as d, mod, Code, SnippetLink, Section, Snippet, Install, List } fro
 
 import { Links } from '@travetto/model/support/doc-support';
 
-exports.text = d`
+export const text = d`
 
 This module provides the integration between the ${mod.Auth} module and the ${mod.Model}. 
 

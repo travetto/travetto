@@ -1,6 +1,6 @@
 import { doc as d, inp, List, mod, Section, pth, lib, cls, Execute, fld } from '@travetto/doc';
 
-exports.text = d`
+export const text = d`
 
 This module expands upon ${lib.Typescript}, with supplemental functionality:
 ${List(

@@ -8,7 +8,7 @@ const AppErrorLink = Ref(AppError.name, 'src/error.ts');
 const ResourceManagerLink = Ref('ResourceManager', 'src/resource.ts');
 const SystemUtilLink = Ref(SystemUtil.name, 'src/internal/system.ts');
 
-exports.text = d`
+export const text = d`
 
 Base is the foundation of all ${lib.Travetto} applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 

@@ -11,7 +11,7 @@ import { Links } from '@travetto/model/support/doc-support';
 const Asset = SnippetLink('Asset', 'src/types.ts', /interface Asset/);
 const AssetNamingStrategySnippet = Snippet('AssetNamingStrategy', 'src/naming.ts', /interface AssetNamingStrategy/, /^[}]/);
 
-exports.text = d`
+export const text = d`
 
 The asset module requires an ${Links.Stream} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${Links.Stream}, or you can roll your own.
 

@@ -6,9 +6,9 @@ import { Model } from '@travetto/model';
 
 const ModelType = SnippetLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 
-exports.header = false;
-exports.toc = 'Overview';
-exports.text = d`
+export const header = false;
+export const toc = 'Overview';
+export const text = d`
 ${RawHeader('Getting Started: A Todo App')}
 
 The following tutorial wil walk you through setting up a ${lib.Travetto} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at ${Ref('Todo App', __dirname)}.  Additionally, you can use the ${mod.GeneratorApp}.
