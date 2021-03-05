@@ -17,6 +17,7 @@ function $c(val: string | DocNode | undefined): DocNode | undefined {
 }
 const $n = <T extends string, U extends Record<string, unknown>>(t: T, vals: U) => ({ _type: t, ...vals } as { _type: T } & U);
 
+export const Strong = (content: Content) => $n('strong', { content: $c(content) });
 export const Group = (node: DocNode | DocNode[]) => $n('group', { nodes: [node].flat() });
 export const Method = (content: Content) => $n('method', { content: $c(content) });
 export const Command = (script: Content, ...args: Content[]) => $n('command', { content: $c([script, ...args].join(' ')) });

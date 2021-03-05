@@ -8,6 +8,8 @@ const path = require('path');
 '*'
   .$map(async (v) => {
     await fs.promises.mkdir(path.resolve('.bin')).catch(() => { });
+    await fs.promises.mkdir(path.resolve('node_modules/@travetto')).catch(() => { });
+    await fs.promises.mkdir(path.resolve('node_modules/@travetto/boot')).catch(() => { });
     return v;
   })
   .$dir({ type: 'file', base: '.bin' })

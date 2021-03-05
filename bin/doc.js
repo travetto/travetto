@@ -9,7 +9,7 @@ const commander = path.resolve('node_modules/commander/index.js');
 const page = path.resolve.bind(path, 'related/travetto.github.io/src');
 
 let target = $argv[0];
-const root = process.cwd();
+const root = path.resolve(__dirname, '..');
 if (target && target.startsWith(root)) {
   target = target.split(root)[1].split('/').pop();
 }
@@ -32,21 +32,24 @@ if (target && target.startsWith(root)) {
     'Copying Plugin images'
       .$tap(console.log)
       .$map(() => fs.promises.mkdir(page('assets/images/vscode-plugin')).catch(err => { }))
-      .$flatMap(() => 'related/vscode-plugin/images/**/*.{jpg,png}'.$dir())
+      .$flatMap(() => 'related/vscode-plugin/images/**/*.{gif,jpg,png}'.$dir())
       .$map(img => fs.promises.copyFile(img, page(`assets/images/vscode-plugin/${path.basename(img)}`)).then(x => 1))
       .$collect(),
 
   [
     {
-      mod: 'root', title: 'Building out Overview docs', dir: 'related/overview', mods: [], args: ['-o', path.resolve('README.md')],
+      mod: 'overview', title: 'Building out Overview docs', dir: 'related/overview',
+      mods: [], args: ['-o', path.resolve(root, 'README.md')],
       html: 'app/documentation/overview/overview.component.html'
     },
     {
-      mod: 'todo-app', title: 'Building out Guide docs', dir: 'related/todo-app', mods: [], args: [],
+      mod: 'todo-app', title: 'Building out Guide docs', dir: 'related/todo-app',
+      mods: [], args: [],
       html: 'app/guide/guide.component.html'
     },
     {
-      mod: 'vscode-plugin', title: 'Building out Plugin docs', dir: 'related/vscode-plugin', mods: [], args: [],
+      mod: 'vscode-plugin', title: 'Building out Plugin docs', dir: 'related/vscode-plugin',
+      mods: [], args: [],
       html: 'app/documentation/vscode-plugin/vscode-plugin.component.html'
     },
   ]
