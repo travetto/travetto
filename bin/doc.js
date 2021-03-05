@@ -6,10 +6,10 @@ const path = require('path');
 const fs = require('fs');
 
 const commander = path.resolve('node_modules/commander/index.js');
-const page = (p) => path.resolve(`related/travetto.github.io/src/${p}`);
+const page = path.resolve.bind(path, 'related/travetto.github.io/src');
 
 let target = $argv[0];
-const root = path.resolve(__dirname, '..', '..');
+const root = process.cwd();
 if (target && target.startsWith(root)) {
   target = target.split(root)[1].split('/').pop();
 }
@@ -29,20 +29,6 @@ if (target && target.startsWith(root)) {
     .$writeFinal(commander),
 
   target ? undefined :
-    'Building out Overview docs'
-      .$tap(console.log)
-      .$map(() =>
-        // Overview
-        '<div class="documentation">'
-          .$concat(
-            $exec('npx', ['marked', '--gfm', 'README.md'])
-              .$filter(x => !/<p.*<img/.test(x) && !/<sub/.test(x)),
-          )
-          .$concat(['</div>\n<app-module-chart></app-module-chart>'])
-          .$write(page('app/documentation/overview/overview.component.html'))
-      ),
-
-  target ? undefined :
     'Copying Plugin images'
       .$tap(console.log)
       .$map(() => fs.promises.mkdir(page('assets/images/vscode-plugin')).catch(err => { }))
@@ -51,8 +37,18 @@ if (target && target.startsWith(root)) {
       .$collect(),
 
   [
-    { mod: 'todo-app', html: 'app/guide/guide.component.html', title: 'Building out Guide docs', dir: 'related/todo-app', mods: [] },
-    { mod: 'vscode-plugin', html: 'app/documentation/vscode-plugin/vscode-plugin.component.html', title: 'Building out Plugin docs', dir: 'related/vscode-plugin', mods: [] },
+    {
+      mod: 'root', title: 'Building out Overview docs', dir: 'related/overview', mods: [], args: ['-o', path.resolve('README.md')],
+      html: 'app/documentation/overview/overview.component.html'
+    },
+    {
+      mod: 'todo-app', title: 'Building out Guide docs', dir: 'related/todo-app', mods: [], args: [],
+      html: 'app/guide/guide.component.html'
+    },
+    {
+      mod: 'vscode-plugin', title: 'Building out Plugin docs', dir: 'related/vscode-plugin', mods: [], args: [],
+      html: 'app/documentation/vscode-plugin/vscode-plugin.component.html'
+    },
   ]
     .$concat(
       'module/*/doc.ts'.$dir()
@@ -69,17 +65,18 @@ if (target && target.startsWith(root)) {
             mods,
             title: `Building out ${mod} docs`,
             html: 'app/documentation/gen/%MOD/%MOD.component.html',
+            args: [],
             dir: path.dirname(f)
           };
         })
     )
     .$filter(x => target ? x.mod === target : !x.mod.includes('worker'))
     .$parallel(
-      ({ mod, html, title, dir, mods }) =>
+      ({ mod, html, title, dir, mods, args }) =>
         title
           .$tap(console.log)
           .$exec('trv', {
-            args: ['doc', '-o', page(html), '-o', './README.md'],
+            args: ['doc', '-o', page(html), '-o', './README.md', ...args],
             spawn: {
               shell: true,
               detached: true,
@@ -95,4 +92,5 @@ if (target && target.startsWith(root)) {
     )
     .$notEmpty()
     .$tap(console.log)
-].$forEach(() => { });
+]
+  .$forEach(() => { });
