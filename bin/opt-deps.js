@@ -2,14 +2,23 @@
 /// @ts-check
 /// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
 
-'module/*/package.json'
-  .$dir()
-  .$flatMap(f =>
-    f
-      .$read()
-      .$json()
-      .$flatMap(x => Object.entries(x.optionalPeerDependencies ?? []))
-  )
+[
+  'module/*/package.json'.$dir()
+    .$flatMap(f =>
+      f
+        .$read()
+        .$json()
+        .$flatMap(x => Object.entries(x.optionalPeerDependencies ?? []))
+    ),
+  'related/vscode-*/package.json'.$dir()
+    .$flatMap(f =>
+      f
+        .$read()
+        .$json()
+        .$flatMap(x => Object.entries(x.devDependencies ?? []))
+    )
+]
+  .$flatten()
   .$sort(([a], [b]) => a.localeCompare(b))
   .$filter(([a]) => !a.startsWith('@travetto'))
   .$reduce((acc, [a, b]) => {

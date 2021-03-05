@@ -9,17 +9,12 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
-    "util:clean": "./bin/util/clean.js",
-    "util:link": "./bin/util/link.js",
-    "util:service": "./bin/util/service.js",
-    "util:opt-deps": "./bin/util/opt-deps.js",
-    "util:upgrade": "./bin/util/upgrade.js",
-    "util:doc": "./bin/util/doc.js",
+    "link": "./bin/link.js",
     "test": "cd module/test; trv test:lerna",
     "lint": "npx eslint --ext .js --ext .ts .",
     "boot": "cd module/boot; npm run build",
     "lerna": "npx lerna bootstrap --hoist",
-    "init": "npm run util:opt-deps; npm run lerna; npm run boot; npm run util:clean; npm run util:link"
+    "init": "npm run link; trv-opt-deps; npm run lerna; npm run boot; trv-clean;"
   },
   "dependencies": {
     "@arcsine/nodesh": "^1.8.3",
@@ -37,6 +32,7 @@
     "@types/nodemailer": "^6.4.0",
     "@types/passport": "^1.0.6",
     "@types/pg": "^7.14.11",
+    "@types/vscode": "^1.50.0",
     "aws-lambda-fastify": "1.4.4",
     "aws-serverless-express": "^3.4.0",
     "faker": "^5.4.0",
