@@ -12,7 +12,7 @@
     "test": "./bin/test.js",
     "lint": "npx eslint --ext .js --ext .ts .",
     "lerna": "npx lerna bootstrap --hoist",
-    "init": "./bin/link.js; ./bin/opt-deps.js; npm run lerna; ./bin/boot.js; ./bin/clean.js;"
+    "init": "./bin/opt-deps.js; npm run lerna; ./bin/boot.js; ./bin/clean.js; ./bin/link.js; "
   },
   "dependencies": {
     "@arcsine/nodesh": "^1.8.3",

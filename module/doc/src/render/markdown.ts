@@ -73,7 +73,8 @@ ${clean(recurse(c.content))}
         return '';
     }
   },
-  finalize: ({ preamble, toc, header, content, module }) =>
-    `${preamble}\n${header}\n${toc}\n${content}`
-      .replace(new RegExp(`[.][.]/${module}`, 'g'), '.')
+  assemble: ({ preamble, header, content }) => `${preamble}\n${header}\n${content}`,
+  finalize: (content, { module, gitRoot }) => content
+    .replace(new RegExp(`[.][.]/${module}`, 'g'), '.')
+    .replace(/%GIT%/g, gitRoot)
 };

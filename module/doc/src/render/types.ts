@@ -4,23 +4,23 @@ export type AllChildren = AllType;
 export type AnchorType = AllTypeMap['Anchor'];
 
 export type OutputContext = {
-  header?: string;
-  toc?: string;
+  header: string;
+  toc: string;
   preamble: string;
   module: string;
   content: string;
+  gitRoot: string;
 };
 
 export type DocumentContext = {
-  header?: boolean;
-  finalize?: Record<string, (output: OutputContext) => string>;
-  toc?: string;
+  assemble?: Record<string, (output: OutputContext) => string>;
   text: AllType;
 };
 
 export type Renderer = {
   ext: string;
   render(child: AllChildren): string;
-  finalize(output: OutputContext): string;
+  assemble(output: OutputContext): string;
+  finalize(output: string, context: OutputContext): string;
   toc(title: string, anchors: AnchorType[]): string;
 };

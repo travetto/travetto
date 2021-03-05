@@ -1,7 +1,5 @@
 import { doc as d, Image, lib, List, OutputContext, Section, Strong } from '@travetto/doc';
 
-export const header = false;
-export const toc = false;
 export const text = d`
 The goal of the framework is to provide a holistic application platform with the a focus on interactive development.
 
