@@ -9,13 +9,11 @@ import {
   BaseModel, NotFoundError, SubTypeNotSupportedError
 } from '..';
 import { isIndexedSupported } from '../src/internal/service/common';
+import { ExistsError } from '../src/error/exists';
 
 @Model({ baseType: true })
-@Index({
-  name: 'worker-name',
-  fields: [{ name: 1 }, { age: 1 }]
-})
 export class Worker extends BaseModel {
+  @Text()
   name: string;
   age?: number;
 }
@@ -32,6 +30,31 @@ export class Firefighter extends Worker {
 
 @Model()
 export class Engineer extends Worker {
+  major: string;
+}
+
+@Model({ baseType: true })
+@Index({
+  name: 'worker-name',
+  fields: [{ name: 1 }, { age: 1 }]
+})
+export class IndexedWorker extends BaseModel {
+  name: string;
+  age?: number;
+}
+
+@Model()
+export class IndexedDoctor extends IndexedWorker {
+  specialty: string;
+}
+
+@Model()
+export class IndexedFirefighter extends IndexedWorker {
+  firehouse: number;
+}
+
+@Model()
+export class IndexedEngineer extends IndexedWorker {
   major: string;
 }
 
@@ -122,7 +145,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
         service.upsert(Doctor, Doctor.from({
           id: fire.id, name: 'drob', specialty: 'eyes'
         })),
-      e => (e instanceof SubTypeNotSupportedError || e instanceof NotFoundError) ? undefined : e
+      e => (e instanceof SubTypeNotSupportedError || e instanceof ExistsError) ? undefined : e
     );
 
     await assert.rejects(
@@ -172,26 +195,26 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     const service = (await this.service) as unknown as ModelIndexedSupport;
     const now = 30;
     const [doc, fire, eng] = [
-      Doctor.from({ name: 'bob', specialty: 'feet', age: now }),
-      Firefighter.from({ name: 'rob', firehouse: 20, age: now }),
-      Engineer.from({ name: 'cob', major: 'oranges', age: now })
+      IndexedDoctor.from({ name: 'bob', specialty: 'feet', age: now }),
+      IndexedFirefighter.from({ name: 'rob', firehouse: 20, age: now }),
+      IndexedEngineer.from({ name: 'cob', major: 'oranges', age: now })
     ];
 
-    await this.saveAll(Worker, [doc, fire, eng]);
+    await this.saveAll(IndexedWorker, [doc, fire, eng]);
 
-    const res = await service.getByIndex(Worker, 'worker-name', {
+    const res = await service.getByIndex(IndexedWorker, 'worker-name', {
       age: now,
       name: 'rob'
     });
 
-    assert(res instanceof Firefighter);
+    assert(res instanceof IndexedFirefighter);
 
     try {
-      const res2 = await service.getByIndex(Firefighter, 'worker-name', {
+      const res2 = await service.getByIndex(IndexedFirefighter, 'worker-name', {
         age: now,
         name: 'rob'
       });
-      assert(res2 instanceof Firefighter); // If service allows for get by subtype
+      assert(res2 instanceof IndexedFirefighter); // If service allows for get by subtype
     } catch (e) {
       assert(e instanceof SubTypeNotSupportedError || e instanceof NotFoundError); // If it does not
     }
@@ -202,25 +225,25 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     const service = (await this.service) as unknown as ModelIndexedSupport;
     const now = 30;
     const [doc, fire, eng] = [
-      Doctor.from({ name: 'bob', specialty: 'feet', age: now }),
-      Firefighter.from({ name: 'rob', firehouse: 20, age: now }),
-      Engineer.from({ name: 'cob', major: 'oranges', age: now })
+      IndexedDoctor.from({ name: 'bob', specialty: 'feet', age: now }),
+      IndexedFirefighter.from({ name: 'rob', firehouse: 20, age: now }),
+      IndexedEngineer.from({ name: 'cob', major: 'oranges', age: now })
     ];
 
-    await this.saveAll(Worker, [doc, fire, eng]);
+    await this.saveAll(IndexedWorker, [doc, fire, eng]);
 
-    assert(await this.getSize(Worker) === 3);
+    assert(await this.getSize(IndexedWorker) === 3);
 
-    await service.deleteByIndex(Worker, 'worker-name', {
+    await service.deleteByIndex(IndexedWorker, 'worker-name', {
       age: now,
       name: 'bob'
     });
 
-    assert(await this.getSize(Worker) === 2);
-    assert(await this.getSize(Doctor) === 0);
+    assert(await this.getSize(IndexedWorker) === 2);
+    assert(await this.getSize(IndexedDoctor) === 0);
 
     try {
-      await service.deleteByIndex(Firefighter, 'worker-name', {
+      await service.deleteByIndex(IndexedFirefighter, 'worker-name', {
         age: now,
         name: 'rob'
       });
@@ -229,7 +252,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     }
 
     try {
-      await service.deleteByIndex(Engineer, 'worker-name', {
+      await service.deleteByIndex(IndexedEngineer, 'worker-name', {
         age: now,
         name: 'bob'
       });

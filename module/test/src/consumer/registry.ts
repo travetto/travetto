@@ -1,4 +1,3 @@
-import { ScanFs } from '@travetto/boot';
 import { Class, ConcreteClass } from '@travetto/base';
 import { TestConsumer } from './types';
 
@@ -13,11 +12,7 @@ class $TestConsumerRegistry {
    * Manual initialization when running oustide of the bootstrap process
    */
   async manualInit() {
-    for (const entry of await ScanFs.scanDir({ testDir: f => true, testFile: f => f.includes('types/') }, __dirname)) {
-      if (entry.stats.isFile()) {
-        await import(entry.file);
-      }
-    }
+    await import('./types/index');
   }
 
   /**

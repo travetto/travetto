@@ -67,8 +67,8 @@ export class MongoModelService implements
     ModelExpiryUtil.registerCull(this);
   }
 
-  getWhere<T extends ModelType>(cls: Class<T>, where: WhereClause<T>) {
-    return MongoUtil.prepareQuery(cls, { where }).filter;
+  getWhere<T extends ModelType>(cls: Class<T>, where: WhereClause<T>, checkExpiry = true) {
+    return MongoUtil.prepareQuery(cls, { where }, checkExpiry).filter;
   }
 
   /**
@@ -179,15 +179,19 @@ export class MongoModelService implements
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
-    const conf = ModelRegistry.get(cls);
-    await store.updateOne(
-      {
-        _id: MongoUtil.uuid(item.id),
-        ...(conf.subType ? { type: conf.subType } : {})
-      },
-      { $set: item },
-      { upsert: true }
-    );
+    try {
+      await store.updateOne(
+        this.getWhere<ModelType>(cls, { id: item.id }, false),
+        { $set: item },
+        { upsert: true }
+      );
+    } catch (err) {
+      if (err.message.includes('duplicate key error')) {
+        throw new ExistsError(cls, item.id);
+      } else {
+        throw err;
+      }
+    }
     return item;
   }
 

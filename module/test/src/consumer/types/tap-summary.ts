@@ -58,7 +58,7 @@ export class SummaryEmitter implements TestConsumer {
               this.log(`Test ${suite.classId}:${test.methodName}`);
               for (const assert of (test.assertions ?? [])) {
                 if (assert.error) {
-                  this.log(`${assert.error}`);
+                  this.log(`${assert.classId}:${assert.line} => ${assert.text}\n${assert.error.stack}\n`);
                 }
               }
             }

@@ -3,6 +3,8 @@ import * as pg from 'pg';
 
 import { ShutdownManager } from '@travetto/base';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { ExistsError } from '@travetto/model';
+
 import { Connection } from '../../connection/base';
 import { SQLModelConfig } from '../../config';
 
@@ -47,8 +49,16 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
 
   async execute<T = unknown>(conn: pg.PoolClient, query: string): Promise<{ count: number, records: T[] }> {
     console.debug('Executing query', { query });
-    const out = await conn.query(query);
-    return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as T[] };
+    try {
+      const out = await conn.query(query);
+      return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as T[] };
+    } catch (err) {
+      if (err.message.includes('duplicate key value')) {
+        throw new ExistsError('query', query);
+      } else {
+        throw err;
+      }
+    }
   }
 
   acquire() {

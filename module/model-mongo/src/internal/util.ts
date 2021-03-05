@@ -54,8 +54,8 @@ export class MongoUtil {
     return item;
   }
 
-  static prepareQuery<T extends ModelType, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U) {
-    const q = ModelQueryUtil.getQueryAndVerify(cls, query);
+  static prepareQuery<T extends ModelType, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U, checkExpiry = true) {
+    const q = ModelQueryUtil.getQueryAndVerify(cls, query, checkExpiry);
     return {
       query: q,
       filter: q.where ? this.extractWhereClause(q.where) : {}
