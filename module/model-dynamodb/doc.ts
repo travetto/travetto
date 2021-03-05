@@ -1,4 +1,4 @@
-import { doc as d, lib, Code, mod, List } from '@travetto/doc';
+import { doc as d, lib, Code, mod, List, Header } from '@travetto/doc';
 
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-support';
 
@@ -6,6 +6,8 @@ import { DynamoDBModelService } from './src/service';
 import { DynamoDBModelConfig } from './src/config';
 
 export const text = d`
+${Header()}
+
 This module provides an ${lib.DynamoDB}-based implementation for the ${mod.Model}.  This source allows the ${mod.Model} module to read, write and query against ${lib.DynamoDB}. The entire document is stored as a single value, so nothing is needed to handle schema updates in real time. Indices on the other hand are more complicated, and will not be retroactively computed for new values.
 
 Supported featrues:

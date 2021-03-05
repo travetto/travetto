@@ -1,6 +1,7 @@
-import { doc as d, inp, List, mod, Section, pth, lib, cls, Execute, fld } from '@travetto/doc';
+import { doc as d, inp, List, mod, Section, pth, lib, cls, Execute, fld, Header } from '@travetto/doc';
 
 export const text = d`
+${Header()}
 
 This module expands upon ${lib.Typescript}, with supplemental functionality:
 ${List(

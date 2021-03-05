@@ -1,4 +1,4 @@
-import { doc as d, mod, Code, Section, List, inp, meth, SubSection, Ref, Execute, pth, lib, fld } from '@travetto/doc';
+import { doc as d, mod, Code, Section, List, inp, meth, SubSection, Ref, Execute, pth, lib, fld, Header } from '@travetto/doc';
 import { AppError } from './src/error';
 import { Util } from './src/util';
 import { SystemUtil } from './src/internal/system';
@@ -9,6 +9,7 @@ const ResourceManagerLink = Ref('ResourceManager', 'src/resource.ts');
 const SystemUtilLink = Ref(SystemUtil.name, 'src/internal/system.ts');
 
 export const text = d`
+${Header()}
 
 Base is the foundation of all ${lib.Travetto} applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 

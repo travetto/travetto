@@ -89,6 +89,6 @@ export const Html: Renderer = {
         return '';
     }
   },
-  assemble: ({ content, header, preamble }) => `${preamble}\n<div class="documentation">\n${header}\n${content}\n</div>`,
+  assemble: ({ content, preamble }) => `${preamble}\n<div class="documentation">\n${content}\n</div>`,
   finalize: (output, { module, gitRoot }) => output.replace(/%MOD%/g, module).replace(/%GIT%/g, gitRoot)
 };

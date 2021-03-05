@@ -1,4 +1,4 @@
-import { doc as d, Section, SnippetLink, inp, Code, meth, SubSection, Execute } from '@travetto/doc';
+import { doc as d, Section, SnippetLink, inp, Code, meth, SubSection, Execute, Header } from '@travetto/doc';
 import { WorkPool } from './src/pool';
 import { IterableInputSource } from './src/input/iterable';
 import { DynamicAsyncIterator } from './src/input/async-iterator';
@@ -9,6 +9,8 @@ import { WorkUtil } from './src/util';
 const InputSource = SnippetLink('InputSource', 'src/input/types.ts', /interface InputSource/);
 
 export const text = d`
+${Header()}
+
 This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc (inter-process communication) functionality out of the box. This module builds upon that by providing enhanced event management, richer process management, as well as constructs for orchestrating a conversation between two processes.
 
 ${Section('Execution Pools')}

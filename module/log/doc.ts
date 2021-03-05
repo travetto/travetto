@@ -1,9 +1,11 @@
-import { doc as d, lib, inp, Terminal, List, Note, Section, mod, Ref, meth, Code, Execute, pth } from '@travetto/doc';
+import { doc as d, lib, inp, Terminal, List, Note, Section, mod, Ref, meth, Code, Execute, pth, Header } from '@travetto/doc';
 import { AppCache } from '@travetto/boot';
 
 const ConsoleManager = Ref('ConsoleManager', '@travetto/base/src/console.ts');
 
 export const text = d`
+${Header()}
+
 This module provides logging functionality, building upon ${ConsoleManager} in the ${mod.Base} module.  This is all ultimately built upon ${lib.Console} operations. 
 
 The supported operations are:

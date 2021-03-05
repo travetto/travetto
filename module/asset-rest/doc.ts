@@ -1,6 +1,7 @@
-import { doc as d, Code, SnippetLink, lib, fld, mod } from '@travetto/doc';
+import { doc as d, Code, SnippetLink, lib, fld, mod, Header } from '@travetto/doc';
 
 export const text = d`
+${Header()}
 
 This module provides a clean and direct mechanism for processing uploads, built upon ${lib.Busboy}. The module also provides some best practices with respect to temporary file deletion.
 

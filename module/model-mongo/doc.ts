@@ -1,4 +1,4 @@
-import { doc as d, lib, mod, Code, inp, SnippetLink, List } from '@travetto/doc';
+import { doc as d, lib, mod, Code, inp, SnippetLink, List, Header } from '@travetto/doc';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc-support';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-support';
 import { MongoModelConfig } from './src/config';
@@ -7,6 +7,8 @@ import { MongoModelService } from './src/service';
 const ResourceManager = SnippetLink('ResourceManager', '@travetto/base/src/resource.ts', /class [$]Resource/);
 
 export const text = d`
+${Header()}
+
 This module provides an ${lib.MongoDB}-based implementation for the ${mod.Model}.  This source allows the ${mod.Model} module to read, write and query against ${lib.MongoDB}.. Given the dynamic nature of ${lib.MongoDB}, during development when models are modified, nothing needs to be done to adapt to the latest schema.
 
 Supported featrues:

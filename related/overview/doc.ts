@@ -1,6 +1,8 @@
-import { doc as d, Image, lib, List, OutputContext, Section, Strong } from '@travetto/doc';
+import { doc as d, Header, Image, lib, List, OutputContext, Section, Strong } from '@travetto/doc';
 
 export const text = d`
+${Header()}
+
 The goal of the framework is to provide a holistic application platform with the a focus on interactive development.
 
 ${Section('Philosophy')}

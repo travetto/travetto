@@ -1,8 +1,10 @@
-import { doc as d, mod, Section, Code, inp, lib, List, SubSection, fld, Snippet, Table } from '@travetto/doc';
+import { doc as d, mod, Section, Code, inp, lib, List, SubSection, fld, Snippet, Table, Header } from '@travetto/doc';
 
 import { Links } from './support/doc-support';
 
 export const text = d`
+${Header()}
+
 This module provides an enhanced query contract for ${mod.Model} implementations.  This contract has been externalized due to it being more complex than many implemenations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
 
 ${Section('Contracts')}

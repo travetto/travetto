@@ -1,4 +1,4 @@
-import { doc as d, lib, Code, List, Note, mod, Section, Snippet, Method, inp, SnippetLink } from '@travetto/doc';
+import { doc as d, lib, Code, List, Note, mod, Section, Snippet, Method, inp, SnippetLink, Header } from '@travetto/doc';
 import { InjectableFactory } from '@travetto/di';
 import { Context } from '@travetto/rest';
 import { AuthContext } from '@travetto/auth/src/context';
@@ -13,6 +13,7 @@ const Identity = SnippetLink('Identity', '@travetto/auth/src/types.ts', /interfa
 const IdentitySource = SnippetLink('IdentitySource', './src/identity.ts', /interface IdentitySource/);
 
 export const text = d`
+${Header()}
 
 This is a primary integration for the ${mod.Auth} module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  
 

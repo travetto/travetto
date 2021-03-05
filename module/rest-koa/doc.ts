@@ -1,7 +1,9 @@
-import { doc as d, mod, Section, Snippet, Code, lib } from '@travetto/doc';
+import { doc as d, mod, Section, Snippet, Code, lib, Header } from '@travetto/doc';
 import { RestApplication } from '@travetto/rest';
 
 export const text = d`
+${Header()}
+
 The module is an ${lib.Koa} provider for the ${mod.Rest} module.  This module provides an implementation of ${RestApplication} for automatic injection in the default Rest server.
 
 ${Section('Customizing Rest App')}

@@ -31,6 +31,7 @@ import '@travetto/model';
 import '@travetto/model-query';
 
 export const text = d`
+${Header()}
 
 The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles ${lib.Express} in the ${Request} and ${Response} objects). 
 

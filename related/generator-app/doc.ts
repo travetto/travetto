@@ -3,7 +3,6 @@ import { doc as d, lib, Header, Install, Section, Terminal, mod, inp, List, pth,
 import { Todo } from './templates/todo/src/model/todo';
 import { TodoController } from './templates/todo/src/rest/todo';
 
-export const header = false;
 export const text = d`
 ${Header(false)}
 
@@ -75,3 +74,7 @@ Once finished the application will reflect the modules chosen, and will be ready
 
 ${Terminal('Starting the App', 'npm start')}
 `;
+
+export const assemble = {
+
+}

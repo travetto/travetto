@@ -1,6 +1,8 @@
-import { doc as d, lib, Snippet } from '@travetto/doc';
+import { doc as d, Header, lib, Snippet } from '@travetto/doc';
 
 export const text = d`
+${Header()}
+
 This module is a simple component to support ${lib.JWT} signing and verification.  The framework provides a port of ${lib.NodeJWT}. The API has been streamlined, and is intended as a lower level component as a basis for other modules.
 
 The API exposes:

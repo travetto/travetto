@@ -1,10 +1,11 @@
-import { doc as d, lib, mod, List, Note, pth, Section, inp, Code, meth, Execute, SubSection } from '@travetto/doc';
+import { doc as d, lib, mod, List, Note, pth, Section, inp, Code, meth, Execute, SubSection, Header } from '@travetto/doc';
 import { AppCache } from '@travetto/boot';
 
 import { Suite } from './src/decorator/suite';
 import { Test } from './src/decorator/test';
 
 export const text = d`
+${Header()}
 
 This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the following formats:
 

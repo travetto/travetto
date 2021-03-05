@@ -4,8 +4,6 @@ export type AllChildren = AllType;
 export type AnchorType = AllTypeMap['Anchor'];
 
 export type OutputContext = {
-  header: string;
-  toc: string;
   preamble: string;
   module: string;
   content: string;

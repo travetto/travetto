@@ -1,4 +1,4 @@
-import { doc as d, mod, Section, Code, inp, lib, List, SubSection, Table, Snippet, SnippetLink, fld } from '@travetto/doc';
+import { doc as d, mod, Section, Code, inp, lib, List, SubSection, Table, Snippet, SnippetLink, fld, Header } from '@travetto/doc';
 import { FileModelService } from './src/provider/file';
 import { MemoryModelService } from './src/provider/memory';
 import { Model } from './src/registry/decorator';
@@ -8,6 +8,8 @@ import { Links } from './support/doc-support';
 const ModelTypeSnippet = Snippet('ModelType', './src/types/model.ts', /export interface/, /}/)
 
 export const text = d`
+${Header()}
+
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the ${mod.Schema}, which is used for data model validation.
 
 ${Section('Contracts')}

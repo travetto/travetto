@@ -1,4 +1,4 @@
-import { doc as d, mod, Code, inp, SnippetLink, Section, Method, List } from '@travetto/doc';
+import { doc as d, mod, Code, inp, SnippetLink, Section, Method, List, Header } from '@travetto/doc';
 import { AuthContext } from './src/context';
 import { AuthUtil } from './src/util';
 
@@ -7,6 +7,8 @@ const Principal = SnippetLink('Principal', './src/types.ts', /interface Principa
 const Identity = SnippetLink('Identity', './src/types.ts', /interface Identity/);
 
 export const text = d`
+${Header()}
+
 This module provides the high-level backdrop for managing security principals.  The goal of this module is to be a centralized location for various security frameworks to plug into.  The primary contributions are:
 
 ${List(

@@ -1,7 +1,9 @@
-import { doc as d, lib, mod, Section, Snippet, Code } from '@travetto/doc';
+import { doc as d, lib, mod, Section, Snippet, Code, Header } from '@travetto/doc';
 import { RestApplication } from '@travetto/rest/src/application/rest';
 
 export const text = d`
+${Header()}
+
 The module is an ${lib.Fastify} provider for the ${mod.Rest} module.  This module provides an implementation of ${RestApplication} for automatic injection in the default Rest server.
 
 ${Section('Customizing Rest App')}

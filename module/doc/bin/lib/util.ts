@@ -52,8 +52,7 @@ export class DocCliUtil {
 
     const doc: DocumentContext = await import(file);
     // Build content
-    const content = renderer.render(doc.text);
-    const header = renderer.render(Header());
+    const content = renderer.render(doc.text).trimStart();
     const toc = renderer.toc('Overview',
       (doc.text as AllTypeMap['Group']).nodes
         .filter(x => x._type === 'section')
@@ -72,7 +71,7 @@ export class DocCliUtil {
     // General info
     const module = this.getPackageName();
 
-    const outputContext = { content, toc, header, preamble, module, gitRoot };
+    const outputContext = { content, toc, preamble, module, gitRoot };
 
     const output = (doc.assemble && doc.assemble[renderer.ext]) ?
       doc.assemble[renderer.ext](outputContext) :

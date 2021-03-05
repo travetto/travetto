@@ -1,8 +1,9 @@
-import { doc as d, mod, Config, List, inp, Section, meth, Code, Ordered, Execute, pth, lib, fld } from '@travetto/doc';
+import { doc as d, mod, Config, List, inp, Section, meth, Code, Ordered, Execute, pth, lib, fld, Header } from '@travetto/doc';
 import { ConfigManager } from './src/manager';
 import { Config as ConfigDec } from './src/decorator';
 
 export const text = d`
+${Header()}
 
 The config module provides support for loading application config on startup. Configuration values support the common ${lib.YAML} constructs as defined in ${mod.Yaml}.  The configuration information is comprised of:
 

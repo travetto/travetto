@@ -1,8 +1,9 @@
-import { doc as d, mod, Code, SnippetLink, Section, Snippet, Install, List } from '@travetto/doc';
+import { doc as d, mod, Code, SnippetLink, Section, Snippet, Install, List, Header } from '@travetto/doc';
 
 import { Links } from '@travetto/model/support/doc-support';
 
 export const text = d`
+${Header()}
 
 This module provides the integration between the ${mod.Auth} module and the ${mod.Model}. 
 

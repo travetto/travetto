@@ -1,4 +1,4 @@
-import { doc as d, Section, SubSection, Ref, mod, inp, List, Ordered, Code } from '@travetto/doc';
+import { doc as d, Section, SubSection, Ref, mod, inp, List, Ordered, Code, Header } from '@travetto/doc';
 
 const RootReg = Ref('RootRegistry', 'src/service/root.ts');
 const SchemaReg = Ref('SchemaRegistry', '../schema/src/service/registry.ts');
@@ -6,6 +6,8 @@ const MetadataReg = Ref('MetadataRegistry', 'src/service/metadata.ts');
 const DependencyReg = Ref('DependencyRegistry', '@travetto/di/src/registry.ts');
 
 export const text = d`
+${Header()}
+
 This module is the backbone for all "discovered" and "registered" behaviors within the framework. This is primarily used for building modules within the framework and not directly useful for application development.
 
 ${Section('Flows')}

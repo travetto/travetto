@@ -1,4 +1,4 @@
-import { doc as d, mod, Snippet, SnippetLink, Code, Section, SubSection, meth, lib } from '@travetto/doc';
+import { doc as d, mod, Snippet, SnippetLink, Code, Section, SubSection, meth, lib, Header } from '@travetto/doc';
 import { Context } from '@travetto/rest/src/decorator/param';
 import { Cache, CacheService } from '@travetto/cache';
 
@@ -10,6 +10,7 @@ const SessionData = SnippetLink('SessionData', 'src/types.ts', /interface Sessio
 const SessionEncoder = SnippetLink('SessionEncoder', 'src/encoder/types.ts', /interface SessionEncoder/);
 
 export const text = d`
+${Header()}
 
 This is a module that adds session support to the ${mod.Rest} framework.  Sessions are represented as:
 

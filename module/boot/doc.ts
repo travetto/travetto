@@ -1,4 +1,4 @@
-import { doc as d, Code, Section, SubSection, List, inp, meth, Ref, lib, Execute } from '@travetto/doc';
+import { doc as d, Code, Section, SubSection, List, inp, meth, Ref, lib, Header, Execute } from '@travetto/doc';
 import { FileCache, ExecUtil, StreamUtil } from './src';
 
 const AppCacheLink = Ref('AppCache', 'src-ts/app-cache.ts');
@@ -9,6 +9,8 @@ const ExecUtilLink = Ref(ExecUtil.name, 'src-ts/exec.ts');
 const StreamUtilLink = Ref(StreamUtil.name, 'src-ts/stream.ts');
 
 export const text = d`
+${Header()}
+
 Boot is basic environment  awareness coupled with typescript bootstrapping for ${lib.Travetto} apps and libraries.  It has support for the following key areas:
 ${List(
   'Environmental Information',

@@ -1,4 +1,4 @@
-import { doc as d, Section, SubSection, List, inp, lib, mod, Code, Execute, Note, Snippet, meth, Config } from '@travetto/doc';
+import { doc as d, Section, SubSection, List, inp, lib, mod, Code, Execute, Note, Snippet, meth, Config, Header } from '@travetto/doc';
 import {
   Field, Required, Enum, Trimmed, Match, MinLength, MaxLength,
   Min, Max, Email, Telephone, Url, Ignore, Integer, Float, Currency, LongText, Text
@@ -7,6 +7,8 @@ import { Schema } from './src/decorator/schema';
 import { Describe } from './src/decorator/common';
 
 export const text = d`
+${Header()}
+
 This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
 
 ${Section('Registration')}

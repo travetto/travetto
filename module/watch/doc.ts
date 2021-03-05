@@ -1,8 +1,9 @@
-import { doc as d, Code, Section, inp, lib } from '@travetto/doc';
+import { doc as d, Code, Section, inp, lib, Header } from '@travetto/doc';
 import { Watcher } from './src/watcher';
 import { RetargettingProxy } from './src/proxy';
 
 export const text = d`
+${Header()}
 
 This module is intended to be used during development, and is not during production.  This constraint is tied to the performance hit the functionality could have at run-time.  To that end, this is primarily an utilitiy for other modules, but it's functionality could prove useful to others during development.
 

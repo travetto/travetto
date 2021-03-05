@@ -2,7 +2,6 @@ import { RawHeader, doc as d, inp, lib, Image, List, Section, SubSection, mod, p
 import { Test, Suite } from '@travetto/test';
 import { Application } from '@travetto/app';
 
-export const header = false;
 export const text = d`
 ${RawHeader('VS Code Plugin')}
 
