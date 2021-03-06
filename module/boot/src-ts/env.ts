@@ -1,4 +1,4 @@
-import { FsUtil } from './fs';
+import { PathUtil } from './path';
 
 /**
  * Basic utils for reading environment variables
@@ -133,7 +133,7 @@ export class EnvUtil {
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([k, v]) => [k, v ||
             k.replace(/^@travetto/, m => process.env.TRV_DEV || m) ||
-            FsUtil.resolveUnix('node_modules', k)
+            PathUtil.resolveUnix('node_modules', k)
           ])
       );
     }

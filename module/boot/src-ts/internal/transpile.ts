@@ -5,6 +5,7 @@ import { FsUtil } from '../fs';
 import { AppCache } from '../cache';
 import { ModuleUtil } from './module';
 import { SourceUtil } from './source';
+import { PathUtil } from '../path';
 
 type Diag = {
   start: number;
@@ -59,17 +60,17 @@ export class TranspileUtil {
   static get compilerOptions(): unknown {
     if (!this[CompilerOptionsSym]) {
       const ts = getTs();
-      const projTsconfig = FsUtil.resolveUnix('tsconfig.json');
-      const baseTsconfig = FsUtil.resolveUnix(__dirname, '..', '..', 'tsconfig.trv.json');
+      const projTsconfig = PathUtil.resolveUnix('tsconfig.json');
+      const baseTsconfig = PathUtil.resolveUnix(__dirname, '..', '..', 'tsconfig.trv.json');
       // Fallback to base tsconfig if not found in local folder
       const config = FsUtil.existsSync(projTsconfig) ? projTsconfig : baseTsconfig;
       const json = ts.readJsonConfigFile(config, ts.sys.readFile);
       this[CompilerOptionsSym] = {
-        ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, FsUtil.cwd).options,
+        ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, PathUtil.cwd).options,
         target: ts.ScriptTarget[TS_TARGET],
-        rootDir: FsUtil.cwd,
-        outDir: FsUtil.cwd,
-        sourceRoot: FsUtil.cwd,
+        rootDir: PathUtil.cwd,
+        outDir: PathUtil.cwd,
+        sourceRoot: PathUtil.cwd,
         ...(process.env.TRV_DEV ? this.devCompilerOptions : {})
       } as tsi.CompilerOptions;
     }
@@ -87,7 +88,7 @@ export class TranspileUtil {
         const message = getTs().flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
           const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
-          return ` @ ${diag.file.fileName.replace(FsUtil.cwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
+          return ` @ ${diag.file.fileName.replace(PathUtil.cwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
         } else {
           return ` ${message}`;
         }
@@ -96,7 +97,7 @@ export class TranspileUtil {
       if (diagnostics.length > 5) {
         errors.push(`${diagnostics.length - 5} more ...`);
       }
-      throw new Error(`Transpiling ${filename.replace(FsUtil.cwd, '.')} failed: \n${errors.join('\n')}`);
+      throw new Error(`Transpiling ${filename.replace(PathUtil.cwd, '.')} failed: \n${errors.join('\n')}`);
     }
   }
 

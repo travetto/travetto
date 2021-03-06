@@ -33,17 +33,6 @@ export class CliUtil {
   }
 
   /**
-   * Platform aware file opening
-   */
-  static launch(path: string) {
-    const op = process.platform === 'darwin' ? ['open', path] :
-      process.platform === 'win32' ? ['cmd', '/c', 'start', path] :
-        ['xdg-open', path];
-
-    ExecUtil.spawn(op[0], op.slice(1));
-  }
-
-  /**
    * Get code completion values
    */
   static async getCompletion(compl: CompletionConfig, args: string[]) {

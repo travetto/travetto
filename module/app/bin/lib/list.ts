@@ -1,11 +1,11 @@
 import * as fs from 'fs';
 import { parentPort } from 'worker_threads';
 
-import { EnvUtil } from '@travetto/boot';
-import { CliUtil } from '@travetto/cli/src/util';
-import { AppCache } from '@travetto/boot/src/cache';
+import { EnvUtil } from '@travetto/boot/src/env';
 import { FsUtil } from '@travetto/boot/src/fs';
+import { AppCache } from '@travetto/boot/src/cache';
 import { ExecUtil } from '@travetto/boot/src/exec';
+import { CliUtil } from '@travetto/cli/src/util';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import type { ApplicationConfig } from '../../src/types';
@@ -122,6 +122,6 @@ export class CliAppListUtil {
   }
 }
 
-export function entry(...args: string[]) {
+export function main(...args: string[]) {
   CliAppListUtil.run(...args);
 }

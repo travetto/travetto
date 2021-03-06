@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 
@@ -36,7 +36,7 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
 
   @BeforeAll()
   async beforeAll() {
-    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, '..', 'resources'));
+    ResourceManager.addPath(PathUtil.resolveUnix(__dirname, '..', 'resources'));
   }
 
   @Test()

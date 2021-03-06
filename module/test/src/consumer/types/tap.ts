@@ -1,4 +1,4 @@
-import { ColorUtil, FsUtil } from '@travetto/boot';
+import { ColorUtil, PathUtil } from '@travetto/boot';
 import { YamlUtil } from '@travetto/yaml';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 
@@ -62,7 +62,7 @@ export class TapEmitter implements TestConsumer {
             this.enhancer.assertNumber(++subCount),
             '-',
             this.enhancer.assertDescription(text),
-            `${this.enhancer.assertFile(a.file.replace(FsUtil.cwd, '.'))}:${this.enhancer.assertLine(a.line)}`
+            `${this.enhancer.assertFile(a.file.replace(PathUtil.cwd, '.'))}:${this.enhancer.assertLine(a.line)}`
           ].join(' ');
 
           if (a.error) {

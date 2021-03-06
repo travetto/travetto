@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { TransformerState, OnCall, DeclarationUtil, CoreUtil, TransformerId } from '@travetto/transformer';
 
 /**
@@ -278,7 +278,7 @@ export class AssertTransformer {
   static onAssertCall(state: TransformerState & AssertState, node: ts.CallExpression) {
     // If not in test mode, see if file is valid
     if (state[IsTestSym] === undefined) {
-      const name = FsUtil.toUnix(state.source.fileName);
+      const name = PathUtil.toUnix(state.source.fileName);
       // Only apply to test files, allowing for inheriting from module test files as well
       state[IsTestSym] = /\/test|(test-[^/]+)\//.test(name) && !name.includes('/test/src/');
     }

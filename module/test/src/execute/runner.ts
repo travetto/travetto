@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { ExecUtil, FsUtil } from '@travetto/boot';
+import { ExecUtil, PathUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
 import { SystemUtil } from '@travetto/base/src/internal/system';
@@ -20,7 +20,7 @@ export class Runner {
   constructor(private state: RunState) { }
 
   get patterns() {
-    return this.state.args.map(x => new RegExp(FsUtil.toUnix(x)));
+    return this.state.args.map(x => new RegExp(PathUtil.toUnix(x)));
   }
 
   /**

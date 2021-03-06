@@ -1,15 +1,18 @@
 import * as fs from 'fs';
 import { EnvUtil } from './env';
 import { FsUtil } from './fs';
-
-function isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
-  return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
-}
+import { PathUtil } from './path';
 
 /**
  * Standard file cache, with output file name normalization and truncation
  */
 export class FileCache {
+
+  private static isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
+    return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
+  }
+
+
   private cache = new Map<string, fs.Stats>();
 
   readonly cacheDir: string;
@@ -18,7 +21,7 @@ export class FileCache {
    * Directory to cache into
    */
   constructor(cacheDir?: string) {
-    this.cacheDir = FsUtil.resolveUnix(cacheDir ?? EnvUtil.get('TRV_CACHE', '.trv_cache'));
+    this.cacheDir = PathUtil.resolveUnix(cacheDir ?? EnvUtil.get('TRV_CACHE', '.trv_cache'));
   }
 
   /**
@@ -84,7 +87,7 @@ export class FileCache {
   removeExpiredEntry(local: string, force = false) {
     if (this.hasEntry(local)) {
       try {
-        if (force || isOlder(this.statEntry(local), fs.statSync(local))) {
+        if (force || FileCache.isOlder(this.statEntry(local), fs.statSync(local))) {
           fs.unlinkSync(this.toEntryName(local));
         }
       } catch (e) {
@@ -147,11 +150,12 @@ export class FileCache {
    * @param entry The entry path
    */
   fromEntryName(entry: string) {
-    return FsUtil.toUnix(entry)
+    return PathUtil.toUnix(entry)
       .replace(this.cacheDir, '')
       .replace(/~/g, '/')
       .replace(/\/\/+/g, '/')
-      .replace(/^[.]/g, 'node_modules/@travetto');
+      .replace(/^[.]/g, 'node_modules/@travetto')
+      .replace(/node_modules\/@travetto/, a => process.env.TRV_DEV || a);
   }
 
   /**
@@ -159,8 +163,8 @@ export class FileCache {
    * @param local Local path
    */
   toEntryName(local: string) {
-    return FsUtil.joinUnix(this.cacheDir, local
-      .replace(FsUtil.cwd, '')
+    return PathUtil.joinUnix(this.cacheDir, local
+      .replace(PathUtil.cwd, '')
       .replace(process.env.TRV_DEV || '#', '.')
       .replace(/node_modules\/@travetto/g, '.')
       .replace(/^\//, '')
@@ -175,7 +179,7 @@ export class FileCache {
    * @param force Should create be executed always
    */
   getOrSet(local: string, create: () => string, force = false) {
-    const name = FsUtil.toUnix(local);
+    const name = PathUtil.toUnix(local);
     let content: string;
     if (force || !this.hasEntry(name)) {
       this.writeEntry(name, content = create());

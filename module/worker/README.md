@@ -124,10 +124,10 @@ When creating your work, via process spawning, you will need to provide the scri
 **Code: Spawning Pool**
 ```typescript
 import { WorkPool, WorkUtil, IterableInputSource } from '@travetto/worker';
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 
 const pool = new WorkPool(() =>
-  WorkUtil.spawnedWorker<string>(FsUtil.resolveUnix(__dirname, 'spawned.js'), {
+  WorkUtil.spawnedWorker<string>(PathUtil.resolveUnix(__dirname, 'spawned.js'), {
     handlers: {
       async init(channel) {
         return channel.listenOnce('ready'); // Wait for child to indicate it is ready

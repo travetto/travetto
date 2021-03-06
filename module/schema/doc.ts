@@ -81,7 +81,7 @@ ${Code('Binding from JSON to Schema', 'doc/person-binding.ts')}
 
 and the output would be a ${inp`Person`} instance with the following structure
 
-${Execute('Sample data output after binding', 'doc/person-output.js')}
+${Execute('Sample data output after binding', 'doc/person-output.ts')}
 
 ${Note(`Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.`)}
 
@@ -97,7 +97,7 @@ ${Code('Read Person, and validate', 'doc/person-binding-invalid.ts')}
 
 would produce an exception similar to following structure
 
-${Execute('Sample error output', 'doc/person-invalid-output.js')}
+${Execute('Sample error output', 'doc/person-invalid-output.ts')}
 
 ${SubSection('Custom Validators')}
 
@@ -158,5 +158,5 @@ ${Code('Simple Custom Type Usage', 'doc/custom-type-usage.ts')}
 
 All that happens now, is the type is exported, and the class above is able to properly handle point as an ${inp`[x, y]`} tuple.  All standard binding and validation patterns are supported, and type enforcement will work as expected.
 
-${Execute('Custom Type Validation', 'doc/custom-type-output.js')};
+${Execute('Custom Type Validation', 'doc/custom-type-output.ts')};
 `;

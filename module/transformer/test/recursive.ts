@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { TranformerTestUtil } from '../test-support/util';
 
 @Suite()
@@ -9,7 +9,7 @@ export class RecursiveTransformSuite {
   @Test({ timeout: 10000 })
   async transformTree() {
     const output = await TranformerTestUtil.compile(
-      FsUtil.resolveUnix(__dirname, '../e2e'),
+      PathUtil.resolveUnix(__dirname, '../e2e'),
       'tree.ts'
     );
     assert(output.includes('name: \'TreeNode\''));
@@ -19,7 +19,7 @@ export class RecursiveTransformSuite {
   @Test({ timeout: 10000 })
   async transformTree2() {
     const output = await TranformerTestUtil.compile(
-      FsUtil.resolveUnix(__dirname, '../e2e'),
+      PathUtil.resolveUnix(__dirname, '../e2e'),
       'tree2.ts'
     );
     assert(output.includes('name: \'TreeNode2\''));
@@ -29,7 +29,7 @@ export class RecursiveTransformSuite {
   @Test({ timeout: 10000 })
   async transformTree3() {
     const output = await TranformerTestUtil.compile(
-      FsUtil.resolveUnix(__dirname, '../e2e'),
+      PathUtil.resolveUnix(__dirname, '../e2e'),
       'tree3.ts'
     );
     assert(output.includes('left:'));

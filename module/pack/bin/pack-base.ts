@@ -3,7 +3,7 @@ import * as commander from 'commander';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
-import { FsUtil, Package } from '@travetto/boot';
+import { PathUtil, Package } from '@travetto/boot';
 
 import { PackUtil } from './lib/util';
 import { CommonConfig, PackOperation } from './lib/types';
@@ -31,7 +31,7 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
     const out: C = [...(await PackUtil.getConfigs()), extra]
       .map(x => this.operation.key && this.operation.key in (x ?? {}) ? ((x as Record<string, C>)[this.operation.key] as C) : x as C)
       .reduce((acc, l) => this.operation.extend(acc, l ?? {}), {} as C);
-    out.workspace = out.workspace ?? FsUtil.resolveUnix(os.tmpdir(), packName);
+    out.workspace = out.workspace ?? PathUtil.resolveUnix(os.tmpdir(), packName);
     out.active = true;
     return out;
   }

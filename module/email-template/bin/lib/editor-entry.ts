@@ -1,6 +1,3 @@
-import { PhaseManager } from '@travetto/base';
-
-export async function entry() {
-  await PhaseManager.run('init');
+export async function main() {
   (await import('./editor')).EditorUtil.init();
 }

@@ -43,6 +43,6 @@ export class RunUtil {
   }
 }
 
-export function entry(app: string, ...args: string[]) {
+export function main(app: string, ...args: string[]) {
   return RunUtil.run(app, ...args);
 }

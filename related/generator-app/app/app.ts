@@ -1,6 +1,6 @@
 import * as Generator from 'yeoman-generator';
 
-import { FsUtil, EnvUtil } from '@travetto/boot';
+import { PathUtil, EnvUtil } from '@travetto/boot';
 
 import { FEATURES, Feature } from './features';
 import { verifyDestination, meetsRequirement, template } from './util';
@@ -49,7 +49,7 @@ export class TravettoGenerator extends Generator {
       name = res.name;
     }
 
-    this.destinationRoot(FsUtil.resolveUnix(EnvUtil.get('INIT_CWD')!, name));
+    this.destinationRoot(PathUtil.resolveUnix(name));
 
     try {
       if (!EnvUtil.isTrue('TRV_GEN_NO_VERIFY')) {
@@ -64,7 +64,7 @@ export class TravettoGenerator extends Generator {
 
     context.template = (this.options as unknown as { template: string }).template;
 
-    this.sourceRoot(FsUtil.resolveUnix(__dirname, `../templates/${context.template}`));
+    this.sourceRoot(PathUtil.resolveUnix(__dirname, `../templates/${context.template}`));
 
     return context;
   }
@@ -118,7 +118,7 @@ export class TravettoGenerator extends Generator {
   }
 
   async _templateFiles(context: Context) {
-    const files = await import(FsUtil.resolveUnix(this.sourceRoot(), 'listing.json')) as Record<string, { requires?: string[] }>;
+    const files = await import(PathUtil.resolveUnix(this.sourceRoot(), 'listing.json')) as Record<string, { requires?: string[] }>;
     for (const key of Object.keys(files)) {
       const conf = files[key];
       if (conf.requires && !meetsRequirement(context.frameworkDependencies, conf.requires)) {

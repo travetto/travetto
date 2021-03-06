@@ -1,4 +1,4 @@
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { AppManifest } from './manifest';
 
 const escapeRe = (x: string) => x.replace(/[().\[\]|?]/g, z => `\\${z}`);
@@ -62,7 +62,7 @@ export class StacktraceUtil {
     const body = (typeof err === 'string' ? err : err.stack!).replace(/\\/g, '/').split('\n')
       .filter(x => !filter || !this.FILTERS.length || !this.FILTER_REGEX.test(x)) // Exclude framework boilerplate
       .reduce((acc, line) => {
-        const [, location] = line.split(FsUtil.cwd);
+        const [, location] = line.split(PathUtil.cwd);
 
         if (location === lastLocation) {
           // Do nothing
@@ -75,7 +75,7 @@ export class StacktraceUtil {
         return acc;
       }, [] as string[])
       .map(x => x
-        .replace(`${FsUtil.cwd}/`, './')
+        .replace(`${PathUtil.cwd}/`, './')
         .replace(/^[\/]+/, '')
       );
 

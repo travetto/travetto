@@ -23,7 +23,7 @@ import * as path from 'path';
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
 
 import { Config } from '@travetto/config';
-import { FsUtil, EnvUtil } from '@travetto/boot';
+import { PathUtil, EnvUtil, FsUtil } from '@travetto/boot';
 import { AppManifest } from '@travetto/base';
 
 /**
@@ -77,13 +77,13 @@ export class ApiSpecConfig {
   exposeAllSchemas: boolean = false;
 
   async postConstruct() {
-    this.output = FsUtil.toUnix(this.output);
+    this.output = PathUtil.toUnix(this.output);
     if (!this.output || this.output === '-') {
       this.persist = false;
     }
     if (this.persist) {
       if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder
-        this.output = FsUtil.resolveUnix(this.output, 'openapi.yml');
+        this.output = PathUtil.resolveUnix(this.output, 'openapi.yml');
       }
       await FsUtil.mkdirp(path.dirname(this.output));
     }

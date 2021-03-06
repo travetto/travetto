@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { CliUtil } from '@travetto/cli/src/util';
-import { ExecUtil, FsUtil } from '@travetto/boot';
+import { ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
 
 /**
  * CLI for generating the cli client
@@ -21,8 +21,8 @@ export class OpenApiClientPlugin extends BasePlugin {
   }
 
   async action(format: string, props?: string) {
-    this._cmd.input = FsUtil.resolveUnix(this._cmd.input);
-    this._cmd.output = FsUtil.resolveUnix(this._cmd.output);
+    this._cmd.input = PathUtil.resolveUnix(this._cmd.input);
+    this._cmd.output = PathUtil.resolveUnix(this._cmd.output);
 
     // Ensure its there
     await FsUtil.mkdirp(this._cmd.output);

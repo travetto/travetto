@@ -131,7 +131,7 @@ Various modules may provide customizations to the default `pack.config.ts` to al
 **Code: Rest, pack.lambda.ts**
 ```typescript
 import * as fs from 'fs';
-import { AppCache, FsUtil } from '@travetto/boot';
+import { AppCache, PathUtil } from '@travetto/boot';
 
 import type { AllConfigPartial } from '@travetto/pack/bin/operation/pack';
 
@@ -149,8 +149,8 @@ export const config: AllConfigPartial = {
     postProcess: [{
       ['Install Entrypoint']: async (cfg: { cacheDir: string, workspace: string }) => {
         const Entrypoint = AppCache.toEntryName(require.resolve('@travetto/rest/support/entry.aws-lambda.ts'))
-          .replace(AppCache.cacheDir, FsUtil.resolveUnix(cfg.workspace, cfg.cacheDir));
-        await fs.promises.copyFile(Entrypoint, FsUtil.resolveUnix(cfg.workspace, 'index.js'));
+          .replace(AppCache.cacheDir, PathUtil.resolveUnix(cfg.workspace, cfg.cacheDir));
+        await fs.promises.copyFile(Entrypoint, PathUtil.resolveUnix(cfg.workspace, 'index.js'));
       }
     }],
   },

@@ -1,7 +1,7 @@
 import * as fss from 'fs';
 import * as path from 'path';
-
 import { ExecUtil } from './exec';
+import { PathUtil } from './path';
 
 const fs = fss.promises;
 
@@ -9,8 +9,6 @@ const fs = fss.promises;
  * Standard utils for interacting with the file system
  */
 export class FsUtil {
-
-  static readonly cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
 
   /**
    * Command to remove a folder
@@ -21,7 +19,7 @@ export class FsUtil {
       throw new Error('Path has not been defined');
     }
     if (process.platform === 'win32') {
-      return ['rmdir', ['/Q', '/S', this.toNative(pth)]];
+      return ['rmdir', ['/Q', '/S', PathUtil.toNative(pth)]];
     } else {
       return ['rm', ['-r', pth]];
     }
@@ -33,49 +31,10 @@ export class FsUtil {
    */
   private static copyCommand(src: string, dest: string): [string, string[]] {
     if (process.platform === 'win32') {
-      return ['xcopy', ['/y', '/h', '/s', this.toNative(src), this.toNative(dest)]];
+      return ['xcopy', ['/y', '/h', '/s', PathUtil.toNative(src), PathUtil.toNative(dest)]];
     } else {
       return ['cp', ['-r', '-p', src, dest]];
     }
-  }
-
-  /**
-   * Convert file to a unix format
-   * @param pth The path to convert
-   */
-  static toUnix(pth: string) {
-    return pth.replace(/[\\\/]+/g, '/');
-  }
-
-  /**
-   * Convert a given path to a source path
-   */
-  static toUnixTs(file: string) {
-    return file.replace(/[\\\/]+/g, '/').replace(/[.]js$/, '.ts');
-  }
-
-  /**
-   * Convert file to the native format
-   * @param pth The path to convert
-   */
-  static toNative(pth: string) {
-    return pth.replace(/[\\\/]+/g, path.sep);
-  }
-
-  /**
-   * Resolve path to use / for directory seps
-   * @param pths The paths to resolve
-   */
-  static resolveUnix(...pths: string[]) {
-    return this.toUnix(path.resolve(this.cwd, ...pths));
-  }
-
-  /**
-   * Path.join, and coercing to unix
-   * @param pths The paths to join
-   */
-  static joinUnix(...pths: string[]) {
-    return this.toUnix(path.join(...pths));
   }
 
   /**
@@ -131,6 +90,13 @@ export class FsUtil {
   }
 
   /**
+   * Find latest timestamp between creation and modification
+   */
+  static maxTime(stat: fss.Stats) {
+    return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
+  }
+
+  /**
    * Remove directory, determine if errors should be ignored
    * @param pth The folder to delete
    * @param ignore Should errors be ignored
@@ -173,10 +139,14 @@ export class FsUtil {
   }
 
   /**
-   * Find latest timestamp between creation and modification
+   * OS aware file opening
    */
-  static maxTime(stat: fss.Stats) {
-    return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
+  static nativeOpen(pth: string) {
+    const op = process.platform === 'darwin' ? ['open', pth] :
+      process.platform === 'win32' ? ['cmd', '/c', 'start', pth] :
+        ['xdg-open', pth];
+
+    ExecUtil.spawn(op[0], op.slice(1));
   }
 
   /**

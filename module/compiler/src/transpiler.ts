@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
 
-import { FsUtil, AppCache } from '@travetto/boot';
+import { PathUtil, AppCache } from '@travetto/boot';
 import { ModuleUtil, SourceUtil, TranspileUtil } from '@travetto/boot/src/internal';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
@@ -49,7 +49,7 @@ export class Transpiler {
    * Write file to disk, and set value in cache as well
    */
   private writeFile(filename: string, content: string) {
-    filename = FsUtil.toUnixTs(filename);
+    filename = PathUtil.toUnixTs(filename);
     this.contents.set(filename, content);
     this.hashes.set(filename, SystemUtil.naiveHash(content));
     AppCache.writeEntry(filename, content);
@@ -71,7 +71,7 @@ export class Transpiler {
       writeFile: (f, c) => this.writeFile(f, c),
       fileExists: f => this.fileExists(f),
       getDefaultLibFileName: (opts) => ts.getDefaultLibFileName(opts),
-      getCurrentDirectory: () => FsUtil.cwd,
+      getCurrentDirectory: () => PathUtil.cwd,
       getCanonicalFileName: x => x,
       getNewLine: () => ts.sys.newLine,
       useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
@@ -117,7 +117,7 @@ export class Transpiler {
    */
   private _transpile(filename: string, force = false) {
     if (force || !AppCache.hasEntry(filename)) {
-      console.debug('Emitting', { filename: filename.replace(FsUtil.cwd, '.') });
+      console.debug('Emitting', { filename: filename.replace(PathUtil.cwd, '.') });
 
       const prog = this.getProgram(filename);
       const result = prog.emit(
@@ -192,7 +192,7 @@ export class Transpiler {
    */
   unload(filename: string, unlink = true) {
     if (this.contents.has(filename)) {
-      console.debug('Unloading', { filename: filename.replace(FsUtil.cwd, '.'), unlink });
+      console.debug('Unloading', { filename: filename.replace(PathUtil.cwd, '.'), unlink });
 
       AppCache.removeExpiredEntry(filename, unlink);
 

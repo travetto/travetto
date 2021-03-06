@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { Package, FsUtil, ExecUtil, EnvUtil } from '@travetto/boot';
+import { Package, PathUtil, ExecUtil, EnvUtil } from '@travetto/boot';
 import { CompileCliUtil } from '@travetto/compiler/bin/lib';
 
 import * as n from '../../src/nodes';
@@ -13,7 +13,7 @@ export class DocCliUtil {
    * Initialize for doc gen
    */
   static async init() {
-    process.env.TRV_SRC_LOCAL = '^doc';
+    process.env.TRV_SRC_LOCAL = 'doc';
     process.env.TRV_RESOURCES = 'doc/resources';
 
     await CompileCliUtil.compile();
@@ -47,7 +47,7 @@ export class DocCliUtil {
    * @param renderer
    */
   static async generate(file: string, renderer: Renderer) {
-    file = FsUtil.resolveUnix(file);
+    file = PathUtil.resolveUnix(file);
 
     // Get repo information
     const gitRepo = (Package.repository?.url ?? '').split(/[.]git$/)[0];
@@ -76,7 +76,7 @@ export class DocCliUtil {
   }
 
   static getPackageName() {
-    return path.basename(FsUtil.cwd);
+    return path.basename(PathUtil.cwd);
   }
 
   /**
@@ -84,7 +84,7 @@ export class DocCliUtil {
    * @param output
    */
   static async getOutputLoc(output: string) {
-    const root = FsUtil.resolveUnix(output);
+    const root = PathUtil.resolveUnix(output);
     const name = this.getPackageName();
     return root.replace(/%MOD/g, name);
   }
@@ -100,7 +100,7 @@ export class DocCliUtil {
 
     new Watcher(__dirname, { interval: 250, exclude: { testDir: () => false, testFile: f => f === file } })
       .on('all', e => {
-        Compiler.unload(FsUtil.resolveUnix(file));
+        Compiler.unload(PathUtil.resolveUnix(file));
         cb(e);
       });
     await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24));

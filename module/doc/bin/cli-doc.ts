@@ -2,7 +2,7 @@ import * as commander from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 import { DocCliUtil } from './lib/util';
@@ -44,7 +44,7 @@ export class DocPlugin extends BasePlugin {
         try {
           await write();
         } catch (err) {
-          console.log(FsUtil.cwd, err);
+          console.log(PathUtil.cwd, err);
         }
       }
     } else {

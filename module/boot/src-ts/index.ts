@@ -4,6 +4,7 @@ export * from './color';
 export * from './stream';
 export * from './env';
 export * from './fs';
+export * from './path';
 export * from './internal/code';
 export * from './scan';
 export * from './package';

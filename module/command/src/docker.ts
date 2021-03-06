@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { FsUtil, EnvUtil, ExecUtil, ExecutionState } from '@travetto/boot';
+import { PathUtil, EnvUtil, ExecUtil, ExecutionState, FsUtil } from '@travetto/boot';
 import { ShutdownManager } from '@travetto/base';
 
 /**
@@ -419,7 +419,7 @@ export class DockerContainer {
     if (files) {
       await Promise.all(
         files.map(({ name, content }) =>
-          fs.promises.writeFile(FsUtil.joinUnix(dir, name), content, { mode: '755' }))
+          fs.promises.writeFile(PathUtil.joinUnix(dir, name), content, { mode: '755' }))
       );
     }
     return;

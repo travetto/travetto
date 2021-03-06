@@ -14,7 +14,7 @@ export async function runTests(opts: RunState) {
 }
 
 // Direct entry point
-export async function entry(...args: string[]) {
+export async function main(...args: string[]) {
   return runTests({
     args,
     format: process.env.TRV_TEST_FORMAT ?? 'tap',

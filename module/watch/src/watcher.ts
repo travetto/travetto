@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as ts from 'typescript';
 
-import { ScanEntry, ScanFs, FsUtil, ScanHandler } from '@travetto/boot';
+import { ScanEntry, ScanFs, PathUtil, ScanHandler } from '@travetto/boot';
 
 /**
  * Watch Options
@@ -44,7 +44,7 @@ export class Watcher extends EventEmitter {
     super();
 
     this.options = { interval: 100, ...this.options };
-    this.folder = FsUtil.resolveUnix(this.options.cwd || FsUtil.cwd, this.folder);
+    this.folder = PathUtil.resolveUnix(this.options.cwd || PathUtil.cwd, this.folder);
 
     // Set maxListeners
     if (this.options.maxListeners !== undefined) {
@@ -74,7 +74,7 @@ export class Watcher extends EventEmitter {
       }
 
       // Convert to full paths
-      current = current.filter(x => !x.startsWith('.')).map(x => FsUtil.joinUnix(dir.file, x));
+      current = current.filter(x => !x.startsWith('.')).map(x => PathUtil.joinUnix(dir.file, x));
 
       // Get watched files for this dir
       const previous = (dir.children ?? []).slice(0);
@@ -118,8 +118,8 @@ export class Watcher extends EventEmitter {
 
     try {
       console.debug('Watching Directory', { directory: entry.file });
-      // const watcher = fs.watch(FsUtil.resolveUnix(entry.file), { persistent: false }, () => this.processDirectoryChange(entry);
-      const watcher = ts.sys.watchDirectory!(FsUtil.resolveUnix(entry.file), () => this.processDirectoryChange(entry), false);
+      // const watcher = fs.watch(PathUtil.resolveUnix(entry.file), { persistent: false }, () => this.processDirectoryChange(entry);
+      const watcher = ts.sys.watchDirectory!(PathUtil.resolveUnix(entry.file), () => this.processDirectoryChange(entry), false);
 
       // watcher.on('error', this.handleError.bind(this));
       this.directories.set(entry.file, watcher);
@@ -258,7 +258,7 @@ export class Watcher extends EventEmitter {
   emit(type: string, payload?: ScanEntry | Error) {
     if (!this.suppress) {
       if (type !== 'error' && type !== 'end') {
-        console.debug('Watch Event', { type, file: (payload as ScanEntry)?.file.replace(FsUtil.cwd, '.') });
+        console.debug('Watch Event', { type, file: (payload as ScanEntry)?.file.replace(PathUtil.cwd, '.') });
         super.emit('all', { event: type, entry: payload });
       }
       super.emit(type, payload);

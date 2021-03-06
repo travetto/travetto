@@ -1,4 +1,4 @@
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import * as n from '../nodes';
 
 import { AllChildren, RenderContext, Renderer } from './types';
@@ -6,7 +6,7 @@ import { RenderUtil } from './util';
 
 const { getId, clean, titleCase } = RenderUtil;
 
-const ROOT = FsUtil.resolveUnix('..', '..');
+const ROOT = PathUtil.resolveUnix('..', '..');
 
 export const Markdown: Renderer = {
   ext: 'md',

@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { promises as fs } from 'fs';
 
-import { EnvUtil, ExecUtil, FsUtil, Package, ScanFs } from '@travetto/boot';
+import { EnvUtil, ExecUtil, PathUtil, Package, ScanFs, FsUtil } from '@travetto/boot';
 
 import { DependenciesUtil, DepType } from './depdencies';
 import { PackUtil } from './util';
@@ -43,8 +43,8 @@ export class AssembleUtil {
    */
   static async copyModule(root: string, target: string) {
     for (const f of MODULE_DIRS) {
-      const stgt = FsUtil.resolveUnix(root, f);
-      const ftgt = FsUtil.resolveUnix(target, f);
+      const stgt = PathUtil.resolveUnix(root, f);
+      const ftgt = PathUtil.resolveUnix(target, f);
       const found = await FsUtil.exists(stgt);
       if (found) {
         if (found.isFile()) {
@@ -86,7 +86,7 @@ export class AssembleUtil {
         .replace(/.*?node_modules/, 'node_modules')
         .replace(`${process.env.TRV_DEV}`, 'node_modules/@travetto');
 
-      const tgt = FsUtil.resolveUnix(workspace, sub);
+      const tgt = PathUtil.resolveUnix(workspace, sub);
       await FsUtil.mkdirp(path.dirname(tgt));
 
       if (el.dep.startsWith('@travetto')) {
@@ -98,8 +98,8 @@ export class AssembleUtil {
       }
     }
     await fs.copyFile(
-      FsUtil.resolveUnix(require.resolve('@travetto/boot/register.js')),
-      FsUtil.resolveUnix(workspace, 'node_modules/@travetto/boot/register.js')
+      PathUtil.resolveUnix(require.resolve('@travetto/boot/register.js')),
+      PathUtil.resolveUnix(workspace, 'node_modules/@travetto/boot/register.js')
     );
   }
 
@@ -117,7 +117,7 @@ export class AssembleUtil {
   static async copyAddedContent(workspace: string, files: Record<string, string>[]) {
     for (const a of files) {
       let [src, dest] = Object.entries(a)[0];
-      [src, dest] = [FsUtil.resolveUnix(src), FsUtil.resolveUnix(workspace, dest)];
+      [src, dest] = [PathUtil.resolveUnix(src), PathUtil.resolveUnix(workspace, dest)];
       const stat = await FsUtil.exists(src);
       if (stat) {
         if (stat.isFile()) {

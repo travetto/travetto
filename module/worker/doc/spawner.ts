@@ -1,8 +1,8 @@
 import { WorkPool, WorkUtil, IterableInputSource } from '@travetto/worker';
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 
 const pool = new WorkPool(() =>
-  WorkUtil.spawnedWorker<{ data: string }, string>(FsUtil.resolveUnix(__dirname, 'spawned.ts'), {
+  WorkUtil.spawnedWorker<{ data: string }, string>(PathUtil.resolveUnix(__dirname, 'spawned.ts'), {
     handlers: {
       async init(channel) {
         return channel.listenOnce('ready'); // Wait for child to indicate it is ready
@@ -23,6 +23,6 @@ const pool = new WorkPool(() =>
   })
 );
 
-if (process.argv.pop() === 'top') {
-  pool.process(new IterableInputSource([1, 2, 3, 4, 5])).then(x => pool.shutdown());
+export function main() {
+  return pool.process(new IterableInputSource([1, 2, 3, 4, 5])).then(x => pool.shutdown());
 }

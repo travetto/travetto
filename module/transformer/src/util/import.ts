@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { resolve as pathResolve } from 'path';
 
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 
 import { Import } from '../types/shared';
 
@@ -26,7 +26,7 @@ export class ImportUtil {
    */
   static collectImports(src: ts.SourceFile) {
     const pth = require.resolve(src.fileName);
-    const base = FsUtil.toUnix(pth);
+    const base = PathUtil.toUnix(pth);
 
     const imports = new Map<string, Import>();
 

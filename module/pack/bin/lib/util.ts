@@ -5,7 +5,7 @@ import * as path from 'path';
 // TODO: Get proper typings
 const glob = require('picomatch');
 
-import { FsUtil, ScanFs } from '@travetto/boot';
+import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
 import { SourceCodeIndex } from '@travetto/boot/src/internal';
 import { color } from '@travetto/cli/src/color';
 
@@ -72,7 +72,7 @@ export class PackUtil {
 
     return (f: string) => {
       let exclude = undefined;
-      f = FsUtil.resolveUnix(base, f);
+      f = PathUtil.resolveUnix(base, f);
       for (const [p, n] of all) {
         if ((n || exclude === undefined) && p(f)) {
           if (n) { // Fast exit if negating
@@ -96,7 +96,7 @@ export class PackUtil {
     }
     const lines = Object.entries(env).filter(([, v]) => !!v).map(([k, v]) => `process.env['${k}'] = ${v};`);
     const content = `${src}\n${lines.join('\n')}`;
-    await fs.writeFile(FsUtil.resolveUnix(workspace, '.env.js'), content, { encoding: 'utf8' });
+    await fs.writeFile(PathUtil.resolveUnix(workspace, '.env.js'), content, { encoding: 'utf8' });
   }
 
   /**

@@ -39,5 +39,5 @@ ${Code('Spawning Pool', 'doc/spawner.ts')}
 
 ${Code('Spawned Worker', 'doc/spawned.js')}
 
-${Execute('Output', 'doc/spawner.ts', ['top'])}
+${Execute('Output', 'doc/spawner.ts')}
 `;

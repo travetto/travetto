@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 
 export type Orderable<T> = {
   after?: T[];
@@ -95,7 +95,7 @@ export class SystemUtil {
   static convertFileToModule(file: string | undefined, base?: string) {
     file = file?.replace(/[.](t|j)s$/, '')
       .replace(process.env.TRV_DEV || '#', '@travetto')
-      .replace(FsUtil.cwd, '.')
+      .replace(PathUtil.cwd, '.')
       .replace(/^.*node_modules\//, '');
 
     if (
@@ -105,8 +105,8 @@ export class SystemUtil {
         !base.includes('node_modules')
       )
     ) { // Relative path
-      const fileDir = path.dirname(FsUtil.resolveUnix(file));
-      const baseDir = path.dirname(FsUtil.resolveUnix(base));
+      const fileDir = path.dirname(PathUtil.resolveUnix(file));
+      const baseDir = path.dirname(PathUtil.resolveUnix(base));
       file = `${path.relative(baseDir, fileDir) || '.'}/${path.basename(file)}`;
       if (/^[A-Za-z]/.test(file)) {
         file = `./${file}`;
@@ -120,7 +120,7 @@ export class SystemUtil {
    * Compute internal module name from file name
    */
   static computeModule(filename: string) {
-    filename = FsUtil.resolveUnix(filename);
+    filename = PathUtil.resolveUnix(filename);
 
     if (this.MOD_CACHE.has(filename)) {
       return this.MOD_CACHE.get(filename)!;
