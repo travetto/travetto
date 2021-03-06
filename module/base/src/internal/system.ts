@@ -94,7 +94,7 @@ export class SystemUtil {
   static convertFileToModule(file: undefined, base?: string): undefined;
   static convertFileToModule(file: string | undefined, base?: string) {
     file = file?.replace(/[.](t|j)s$/, '')
-      .replace(process.env.TRV_DEV || '@@', '@travetto')
+      .replace(process.env.TRV_DEV || '#', '@travetto')
       .replace(FsUtil.cwd, '.')
       .replace(/^.*node_modules\//, '');
 

@@ -13,7 +13,7 @@ export function buildWorkManager(consumer: TestConsumer) {
   /**
    * Spawn a child
    */
-  return WorkUtil.spawnedWorker(require.resolve('../../bin/plugin-child-worker'), {
+  return WorkUtil.spawnedWorker('@travetto/test/bin/lib/worker', {
     opts: {
       env: {
         TRV_WATCH: '0'

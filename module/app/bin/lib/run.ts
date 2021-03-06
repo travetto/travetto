@@ -18,7 +18,7 @@ export class RunUtil {
    * Execute running of an application, by name.  Setting important environment variables before
    * loading framework and compiling
    */
-  static async run(app: ApplicationConfig, ...sub: string[]) {
+  static async run(app: ApplicationConfig | string, ...sub: string[]) {
 
     await CompileCliUtil.compile();
 
@@ -33,8 +33,16 @@ export class RunUtil {
 
     // And run
     const { ApplicationRegistry } = await import('../../src/registry');
+
+    // Convert to full app
+    app = typeof app === 'string' ? ApplicationRegistry['applications'].get(app)! : app;
+
     await ApplicationRegistry.resolveParameters(app, sub);
 
     return await ApplicationRegistry.run(app.name, sub);
   }
+}
+
+export function entry(app: string, ...args: string[]) {
+  return RunUtil.run(app, ...args);
 }

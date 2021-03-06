@@ -17,7 +17,7 @@ export class CompileCliUtil {
 
     // Compile rest of code
     return CliUtil.waiting(`Compiling... ${output || ''}`,
-      ExecUtil.worker(require.resolve('@travetto/compiler/bin/plugin-compile'), [], {
+      ExecUtil.workerEntry(__filename, [], { // target self
         env: {
           ...(output ? { TRV_CACHE: output } : {}),
           TRV_WATCH: '0', // Ensure no watching
@@ -36,4 +36,8 @@ export class CompileCliUtil {
     // Standard compile
     await PhaseManager.run('init', '@trv:compiler/compile');
   }
+}
+
+export function entry() {
+  return CompileCliUtil.compileAll();
 }

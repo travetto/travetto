@@ -1,8 +1,11 @@
-require('@travetto/boot/register');
-require('@travetto/base').PhaseManager.run('init').then(async () => {
-  const { ChildCommChannel } = require('..');
+import { PhaseManager } from '@travetto/base';
 
-  const exec = new ChildCommChannel();
+export async function entry() {
+  await PhaseManager.run('init');
+
+  const { ChildCommChannel } = await import('..');
+
+  const exec = new ChildCommChannel<{ data: string }>();
 
   exec.listenFor('request', data => {
     exec.send('response', { data: (data.data + data.data) }); // When data is received, return double
@@ -12,4 +15,4 @@ require('@travetto/base').PhaseManager.run('init').then(async () => {
 
   const heartbeat = () => setTimeout(heartbeat, 5000); // Keep-alive
   heartbeat();
-});
+}

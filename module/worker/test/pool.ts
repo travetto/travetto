@@ -19,7 +19,7 @@ export class PoolExecTest {
       }
     });
 
-    const launcher = await ResourceManager.findAbsolute('simple.child-launcher.js');
+    const launcher = await ResourceManager.findAbsolute('simple.child.ts');
 
     const pool = new WorkPool(() =>
       WorkUtil.spawnedWorker<{ data: string }, string>(launcher, {

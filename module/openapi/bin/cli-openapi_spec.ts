@@ -1,6 +1,6 @@
 import * as commander from 'commander';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
-import { ExecUtil, FsUtil } from '@travetto/boot';
+import { ExecUtil } from '@travetto/boot';
 import { CliUtil } from '@travetto/cli/src/util';
 
 /**
@@ -15,7 +15,7 @@ export class OpenApiSpecPlugin extends BasePlugin {
 
   async action() {
     CliUtil.initEnv({ watch: false, debug: '0', envExtra: { API_SPEC_OUTPUT: this._cmd.output } });
-    const result = await ExecUtil.worker(require.resolve('./plugin-openapi_spec.js')).message;
+    const result = await ExecUtil.worker(require.resolve('./util')).message;
 
     if (this._cmd.output === '-' || !this._cmd.output) {
       console.log!(result);

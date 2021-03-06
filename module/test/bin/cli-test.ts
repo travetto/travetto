@@ -75,7 +75,7 @@ export class TestPlugin extends BasePlugin {
   }
 
   async action(args: string[]): Promise<void> {
-    const { runTests } = await import('./lib');
+    const { runTests } = await import('./lib/run');
 
     const [first] = args;
 

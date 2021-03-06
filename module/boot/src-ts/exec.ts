@@ -65,6 +65,10 @@ export interface ExecutionOptions extends SpawnOptions {
    * The stdin source for the execution
    */
   stdin?: string | Buffer | NodeJS.ReadableStream;
+  /**
+   * Entry file, only relevant to `.forkEntry` and `.workerEntry`
+   */
+  entry?: string;
 }
 
 /**
@@ -83,7 +87,8 @@ export class ExecUtil {
       ...opts,
       env: {
         ...process.env,
-        ...(opts.env ?? {})
+        ...(opts.env ?? {}),
+        ...(opts.entry ? { TRV_ENTRY: opts.entry.replace(/[.]js$/, '.ts') } : {})
       }
     } as ExecutionOptions;
   }
@@ -177,8 +182,24 @@ export class ExecUtil {
    * @param options The enhancement options
    */
   static fork(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
+    // Always register for the fork
     const p = spawn(process.argv0, [cmd, ...args], this.getOpts(options));
     const result = this.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
+    return { process: p, result };
+  }
+
+  /**
+   * Run a travetto entry command relative to the current node executable.  Mimics how node's
+   * fork operation is just spawn with the command set to `process.argv0`
+   * @param cmd The file to run
+   * @param args The command line arguments to pass
+   * @param options The enhancement options
+   */
+  static forkEntry(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
+    // Always register for the fork
+    const opts = this.getOpts({ ...options, entry: cmd });
+    const p = spawn(process.argv0, [require.resolve('../register'), ...args], opts);
+    const result = this.enhanceProcess(p, options, `${cmd}:entry ${args.join(' ')}`);
     return { process: p, result };
   }
 
@@ -189,9 +210,6 @@ export class ExecUtil {
    * @param options The worker options
    */
   static worker<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
-    if (!file.endsWith('.js')) {
-      file = require.resolve(file);
-    }
     const worker = new Worker(file, {
       stderr: true,
       stdout: true,
@@ -199,7 +217,7 @@ export class ExecUtil {
       ...options,
       env: {
         ...process.env,
-        ...((options.env !== SHARE_ENV ? options.env : {}) || {})
+        ...((options.env !== SHARE_ENV ? options.env : {}) || {}),
       },
       argv: args
     });
@@ -240,6 +258,18 @@ export class ExecUtil {
     });
 
     return { worker, message, result };
+  }
+
+  /**
+   * Run a file as an enry worker thread
+   * @param file The file to run, if starts with @, will be resolved as a module
+   * @param args The arguments to pass in
+   * @param options The worker options
+   */
+  static workerEntry<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
+    const e = (options.env ??= {}) as Record<string, string>;
+    e.TRV_ENTRY = file.replace(/[.]js$/, '.ts');
+    return this.worker<T>(require.resolve('../register'), args, options);
   }
 
   /**

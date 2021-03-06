@@ -23,7 +23,7 @@ export class CliAppListUtil {
   static async buildList() {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Compiling', () =>
-        ExecUtil.worker<ApplicationConfig[]>(require.resolve('../plugin-list'), ['build'], {
+        ExecUtil.workerEntry<ApplicationConfig[]>(__filename, ['build'], {
           env: { TRV_WATCH: '0' }
         }).message
       );
@@ -120,4 +120,8 @@ export class CliAppListUtil {
       CliUtil.pluginResponse(err);
     }
   }
+}
+
+export function entry(...args: string[]) {
+  CliAppListUtil.run(...args);
 }

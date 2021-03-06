@@ -15,7 +15,7 @@ export class ExecUtilTest {
       cwd: __dirname
     });
     const result = await proc.result;
-    assert(result.stdout.includes(path.basename(__filename.replace('.js', '.ts'))));
+    assert(result.stdout.includes(path.basename(__filename.replace(/[.]js$/, '.ts'))));
     assert(result.code === 0);
     assert(result.valid);
   }
@@ -39,8 +39,15 @@ export class ExecUtilTest {
   }
 
   @Test()
+  async forkEntry() {
+    const proc = ExecUtil.forkEntry(await ResourceManager.findAbsolute('test.ts'));
+    const result = await proc.result;
+    assert(result.stdout === 'Hello World\n');
+  }
+
+  @Test()
   async worker() {
-    const { message } = ExecUtil.worker(await ResourceManager.findAbsolute('worker.js'));
+    const { message } = ExecUtil.workerEntry(await ResourceManager.findAbsolute('worker.ts'));
     const result = await message;
     assert(result === { a: 1, b: 2, c: new Set([1, 2, 3]) });
   }
@@ -53,10 +60,10 @@ export class ExecUtilTest {
 
   @Test()
   async pipe() {
-    const echo = await ResourceManager.findAbsolute('echo.js');
-    const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
-    const returnedStream = await ExecUtil.pipe(proc, fs.createReadStream(__filename.replace('.js', '.ts')));
+    const echo = await ResourceManager.findAbsolute('echo.ts');
+    const proc = ExecUtil.forkEntry(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
+    const returnedStream = await ExecUtil.pipe(proc, fs.createReadStream(__filename.replace(/[.]js$/, '.ts')));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
-    assert(result.includes('ExecUtil.fork(echo)'));
+    assert(result.includes('ExecUtil.forkEntry(echo'));
   }
 }

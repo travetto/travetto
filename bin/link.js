@@ -6,15 +6,14 @@ const fs = require('fs');
 const path = require('path');
 
 '*'
-  .$map(async (v) => {
-    await fs.promises.mkdir(path.resolve('.bin')).catch(() => { });
-    await fs.promises.mkdir(path.resolve('node_modules/@travetto')).catch(() => { });
-    await fs.promises.mkdir(path.resolve('node_modules/@travetto/boot')).catch(() => { });
-    return v;
-  })
   .$dir({ type: 'file', base: '.bin' })
   .$map(x => fs.unlinkSync(x))
   .$collect()
+  .$tap(async () => {
+    await fs.promises.mkdir(path.resolve('.bin')).catch(() => { });
+    await fs.promises.mkdir(path.resolve('node_modules/@travetto')).catch(() => { });
+    await fs.promises.mkdir(path.resolve('node_modules/@travetto/boot')).catch(() => { });
+  })
   .$forEach(async () =>
     [
       ['module/boot/register.js', 'node_modules/@travetto/boot/register.js'],
