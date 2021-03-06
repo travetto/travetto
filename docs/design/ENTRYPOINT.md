@@ -1,10 +1,9 @@
 Entry Points
 ------------------
 
-Within the @travetto framework, there are three main entry points into the system.  
+Within the @travetto framework, there are two main entry points into the system.  
 
 - CLI actions
-- PLUGIN adapters
 - Direct invocation
 
 ## Commonalities
@@ -20,18 +19,14 @@ Within the framework, we expose CLI actions through the various modules.  These 
 
 ## Direct Invocation
 
-This is assumed that the caller knows what they are doing.  Usually these scripts support being forked in a symlinked environment, but there are some exceptions (`@travetto/base/bin/bootstrap`).
-
-## Plugin Adapters
-
-These are scripts exposed for the plugin to execute, and to honor the contract the vscode plugin expects for execution.  These are 100% forked and require the environment variable to be set for proper invocation.
+This is assumed that the caller knows what they are doing. The user is required to target `@travetto/boot/register` and pass the entry point as `TRV_ENTRY`.  The entry target must have an exported method `entry` for this to work.
 
 ## Inventory 
 t = typescript, i = init, r = run, a = await
 
-* boot/bin (Used as a bootstrap, when running script run as app)
+* boot/ (Used as a bootstrap, when running script run as app)
   ------------------------------------------------------
-  [t   ] ./init.js                
+  [t   ] ./register.js                
 
 * cli/bin (Run cli)
   ------------------------------------------------------
@@ -40,13 +35,10 @@ t = typescript, i = init, r = run, a = await
 * compiler/bin (Run app to establish all transformers)
   ------------------------------------------------------
   [    ] ./cli-compile.ts  
-  [tira] ./plugin-compile.js
 
 * di/bin (Run app selected, collect app data)
   ------------------------------------------------------
-  [tira] ./plugin-find-apps.js           [ lib.js - computeApps, bootstrap - compiler ]
   [ ira] ./cli-run.ts    [ lib.js - runApp ] 
-  [tira] ./plugin-run.js [ lib.js - runApp ]
 
 * email-template/bin (Run app for email activity)
   ------------------------------------------------------
@@ -70,6 +62,4 @@ t = typescript, i = init, r = run, a = await
 
 * test/bin (Initialize compiler, not loading transformers)
   ------------------------------------------------------
-  [ ira] ./plugin-child-worker.js          [ lib.js - worker ]
   [ ira] ./cli-test.ts    [ self, lib.js - runTests ]
-  [tira] ./plugin-test.js [ lib.js - runTests ]

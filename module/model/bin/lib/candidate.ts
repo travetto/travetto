@@ -1,5 +1,5 @@
 import { CliUtil } from '@travetto/cli/src/util';
-import { ExecUtil, FsUtil } from '@travetto/boot';
+import { ExecUtil } from '@travetto/boot';
 
 import type { Class } from '@travetto/base';
 import type { InjectableConfig } from '@travetto/di';
@@ -72,7 +72,7 @@ export class CliModelCandidateUtil {
    */
   static async getCandidates() {
     return CliUtil.waiting('Compiling', () =>
-      ExecUtil.worker<{ providers: string[], models: string[] }>(require.resolve('../plugin-candidates.js'), ['build'], {
+      ExecUtil.workerEntry<{ providers: string[], models: string[] }>(__filename, ['build'], {
         env: { TRV_WATCH: '0' }
       }).message
     );
@@ -105,4 +105,8 @@ export class CliModelCandidateUtil {
       CliUtil.pluginResponse(err);
     }
   }
+}
+
+export function entry(...args: string[]) {
+  CliModelCandidateUtil.run();
 }

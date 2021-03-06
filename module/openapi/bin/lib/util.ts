@@ -19,3 +19,7 @@ export class GenerateUtil {
     CliUtil.pluginResponse(spec);
   }
 }
+
+export function entry() {
+  return GenerateUtil.generate();
+}
