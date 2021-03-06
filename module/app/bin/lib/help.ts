@@ -1,5 +1,6 @@
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
+
 import { RunUtil } from './run';
 import { ApplicationConfig } from '../../src/types';
 
@@ -41,7 +42,7 @@ export class HelpUtil {
 
       lines.push(color`${{ identifier: conf.name }} ${{ subtitle: conf.description }}`);
       lines.push(color`${{ subsubtitle: 'usage' }}: ${usage}`);
-      lines.push(color`${{ subsubtitle: 'file' }}:  ${{ path: conf.filename.replace(`${FsUtil.cwd}/`, '') }}`);
+      lines.push(color`${{ subsubtitle: 'file' }}:  ${{ path: conf.filename.replace(`${PathUtil.cwd}/`, '') }}`);
 
       // eslint-disable-next-line no-control-regex
       const len = lines.reduce((acc, v) => Math.max(acc, v.replace(/\x1b\[\d+m/g, '').length), 0);

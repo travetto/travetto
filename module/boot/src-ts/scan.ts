@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { FsUtil } from './fs';
+import { PathUtil } from './path';
 
 const fsp = fs.promises;
 
@@ -94,7 +94,7 @@ export class ScanFs {
           continue inner;
         }
 
-        let full = FsUtil.resolveUnix(dir.file, file);
+        let full = PathUtil.resolveUnix(dir.file, file);
         if (handler.resolvePath) {
           full = handler.resolvePath(full);
         }
@@ -142,7 +142,7 @@ export class ScanFs {
           continue inner;
         }
 
-        let full = FsUtil.resolveUnix(dir.file, file);
+        let full = PathUtil.resolveUnix(dir.file, file);
         if (handler.resolvePath) {
           full = handler.resolvePath(full);
         }

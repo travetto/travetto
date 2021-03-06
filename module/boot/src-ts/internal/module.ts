@@ -3,7 +3,7 @@ import * as Mod from 'module';
 
 import { Package } from '../package';
 import { EnvUtil } from '../env';
-import { FsUtil } from '../fs';
+import { PathUtil } from '../path';
 import { SourceUtil } from './source';
 
 type ModuleHandler<T = unknown> = (name: string, o: T) => T;
@@ -35,7 +35,7 @@ export class ModuleUtil {
         p = `${match}${sub! ?? ''}`;
       } else {
         if (key === Package.name) {
-          p = FsUtil.resolveUnix(sub ? `./${sub}` : Package.main);
+          p = PathUtil.resolveUnix(sub ? `./${sub}` : Package.main);
         }
       }
     }
@@ -49,7 +49,7 @@ export class ModuleUtil {
    * @param err The error produced
    * @param filename The relative filename
    */
-  static handlePhaseError(phase: 'load' | 'compile' | 'transpile', tsf: string, err: Error, filename = tsf.replace(FsUtil.cwd, '.')) {
+  static handlePhaseError(phase: 'load' | 'compile' | 'transpile', tsf: string, err: Error, filename = tsf.replace(PathUtil.cwd, '.')) {
     if (phase === 'compile' &&
       (err.message.startsWith('Cannot find module') || err.message.startsWith('Unable to load'))
     ) {

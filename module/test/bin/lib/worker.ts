@@ -17,7 +17,7 @@ export async function customLogs() {
   });
 }
 
-export async function entry() {
+export async function main() {
   CliUtil.initEnv({ ...DEF_ENV, envExtra: ENV_EXT });
   await customLogs();
   await load();

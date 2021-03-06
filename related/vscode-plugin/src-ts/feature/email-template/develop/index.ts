@@ -34,7 +34,7 @@ export class EmailTemplateFeature extends BaseFeature {
   ) {
     super(module, command);
 
-    this.server = new ProcessServer('node', [this.resolvePlugin('email_compile')], {
+    this.server = new ProcessServer('node', [this.resolvePlugin('editor-entry')], {
       cwd: Workspace.path
     });
 

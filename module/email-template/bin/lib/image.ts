@@ -1,4 +1,4 @@
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import * as path from 'path';
 
 export class ImageUtil {
@@ -13,7 +13,7 @@ export class ImageUtil {
 
     html = html.replace(/(<img[^>]src=")([^"]+)/g, (all, pre, src) => {
       if (!src.startsWith('http')) {
-        const resolved = FsUtil.resolveUnix(root, src).replace(/^.*\/resources\//, '/');
+        const resolved = PathUtil.resolveUnix(root, src).replace(/^.*\/resources\//, '/');
         srcs.push(resolved);
         return `${pre}${resolved}`;
       }

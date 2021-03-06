@@ -1,4 +1,4 @@
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { Class, AppManifest, ShutdownManager } from '@travetto/base';
 import { ConfigManager } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
@@ -29,7 +29,7 @@ class $ApplicationRegistry {
     // Log startup
     console.log('Running application', {
       name: config.name,
-      filename: config.filename.replace(/^.*node_modules\//, '').replace(FsUtil.cwd, '.')
+      filename: config.filename.replace(/^.*node_modules\//, '').replace(PathUtil.cwd, '.')
     });
     console.log('Configured', {
       ...AppManifest.toJSON(),

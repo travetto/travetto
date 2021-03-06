@@ -1,4 +1,4 @@
-import { FsUtil } from '../fs';
+import { PathUtil } from '../path';
 import { ScanEntry, ScanFs } from '../scan';
 import { EnvUtil } from '../env';
 
@@ -71,7 +71,7 @@ export class SourceCodeIndex {
           /^node_modules[/]?$/.test(x) ||  // Top level node_modules
           (/^node_modules\/@travetto/.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
           !x.includes('node_modules'), // non module file
-        base: FsUtil.cwd,
+        base: PathUtil.cwd,
         map: e => e
       } as FrameworkScan,
       ...Object.entries(EnvUtil.getDynamicModules()).map(([dep, pth]) => (
@@ -100,7 +100,7 @@ export class SourceCodeIndex {
   private static get index() {
     if (this._INDEX.size === 0) {
       const idx = new Map<string, IndexRecord>();
-      idx.set('.', { base: FsUtil.cwd, files: new Map() });
+      idx.set('.', { base: PathUtil.cwd, files: new Map() });
 
       for (const el of this.scanFramework(x => x.endsWith('.ts') && !x.endsWith('.d.ts'))) {
         const res = this.compute(el);

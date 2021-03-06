@@ -1,5 +1,5 @@
-import { AppCache } from '../../src/cache';
+import { AppCache } from '../..';
 
-export function entry() {
+export async function main() {
   AppCache.clear();
 }

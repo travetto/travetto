@@ -1,5 +1,5 @@
 import { promises as fs } from 'fs';
-import { ExecUtil, FsUtil } from '@travetto/boot';
+import { ExecUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
 import { CommonConfig, PackOperation } from '../lib/types';
@@ -34,10 +34,10 @@ export const Docker: PackOperation<DockerConfig> = {
   * Zip workspace with flags
   */
   async* exec({ workspace, image, port, tag, env }: DockerConfig) {
-    const ws = FsUtil.resolveUnix(workspace);
+    const ws = PathUtil.resolveUnix(workspace);
 
     yield 'Building Dockerfile';
-    await fs.writeFile(FsUtil.resolveUnix(ws, 'Dockerfile'), `
+    await fs.writeFile(PathUtil.resolveUnix(ws, 'Dockerfile'), `
   FROM ${image}
   WORKDIR /app
   COPY . .

@@ -38,6 +38,6 @@ export class CompileCliUtil {
   }
 }
 
-export function entry() {
+export function main() {
   return CompileCliUtil.compileAll();
 }

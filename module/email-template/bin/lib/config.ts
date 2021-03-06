@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, PathUtil } from '@travetto/boot';
 import { YamlUtil } from '@travetto/yaml';
 
 interface ConfigType {
@@ -22,8 +22,8 @@ interface ConfigType {
  */
 export class ConfigUtil {
 
-  static CONFIG_FILE = FsUtil.resolveUnix('resources/email/dev.yml');
-  static DEFAULT_CONFIG = fs.readFileSync(FsUtil.resolveUnix(__dirname, 'default-dev.yml'));
+  static CONFIG_FILE = PathUtil.resolveUnix('resources/email/dev.yml');
+  static DEFAULT_CONFIG = fs.readFileSync(PathUtil.resolveUnix(__dirname, 'default-dev.yml'));
 
   /**
    *

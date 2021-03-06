@@ -1,4 +1,4 @@
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 
 import * as n from '../nodes';
 import { AllChildren, RenderContext, Renderer } from './types';
@@ -7,7 +7,7 @@ import { highlight } from './code-highlight';
 
 const { getId, clean, TOKENS } = RenderUtil;
 
-const ROOT = FsUtil.resolveUnix('..', '..');
+const ROOT = PathUtil.resolveUnix('..', '..');
 
 export const Html: Renderer = {
   ext: 'html',

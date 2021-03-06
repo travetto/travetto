@@ -4,6 +4,7 @@ import * as commander from 'commander';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { CliUtil } from '@travetto/cli/src/util';
+import { PathUtil } from '@travetto/boot';
 
 import { CliAppListUtil } from './lib/list';
 import { RunUtil } from './lib/run';
@@ -72,7 +73,7 @@ export class AppRunPlugin extends BasePlugin {
     const apps = await CliAppListUtil.getList() || [];
     const env = ['prod', 'dev'];
 
-    const profiles = fs.readdirSync(process.cwd())
+    const profiles = fs.readdirSync(PathUtil.cwd)
       .filter(x => x.endsWith('.yml'))
       .map(x => x.replace('.yml', ''));
 

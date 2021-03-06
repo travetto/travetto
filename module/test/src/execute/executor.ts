@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { Util } from '@travetto/base';
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { Barrier, ExecutionError } from '@travetto/worker';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { TimeUtil } from '@travetto/base/src/internal/time';
@@ -68,7 +68,7 @@ export class TestExecutor {
     const name = path.basename(file);
     const classId = SystemUtil.computeModuleClass(file, name);
     const suite = { class: { name }, classId, duration: 0, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
-    err.message = err.message.replace(FsUtil.cwd, '.');
+    err.message = err.message.replace(PathUtil.cwd, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
     consumer.onEvent({ type: 'test', phase: 'before', test: res.testConfig });
@@ -234,12 +234,12 @@ export class TestExecutor {
    */
   static async execute(consumer: TestConsumer, file: string, ...args: string[]) {
 
-    if (!file.startsWith(FsUtil.cwd)) {
-      file = FsUtil.joinUnix(FsUtil.cwd, file);
+    if (!file.startsWith(PathUtil.cwd)) {
+      file = PathUtil.joinUnix(PathUtil.cwd, file);
     }
 
     try {
-      await import(FsUtil.toUnix(file)); // Path to module
+      await import(PathUtil.toUnix(file)); // Path to module
     } catch (err) {
       this.failFile(consumer, file, err);
       return;

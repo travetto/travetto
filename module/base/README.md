@@ -41,10 +41,10 @@ A simple example of finding specific `.config` files in your codebase:
 **Code: Looking for all .config files with the prefix defined by svc**
 ```typescript
 import * as fs from 'fs';
-import { FsUtil, ScanFs } from '@travetto/boot';
+import { PathUtil, ScanFs } from '@travetto/boot';
 
 export async function processServiceConfigs(svc: string) {
-  const svcConfigs = await ScanFs.scanDir({ testFile: f => new RegExp(`${svc}.*[.]config$/`).test(f) }, FsUtil.cwd);
+  const svcConfigs = await ScanFs.scanDir({ testFile: f => new RegExp(`${svc}.*[.]config$/`).test(f) }, PathUtil.cwd);
   for (const conf of svcConfigs) {
     // Do work
 

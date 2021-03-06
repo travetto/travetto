@@ -2,7 +2,7 @@
 
 import * as assert from 'assert';
 
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { Util, AppError, ClassInstance, Class } from '@travetto/base';
 
 import { ThrowableError, TestConfig } from '../model/test';
@@ -239,7 +239,7 @@ export class AssertCheck {
     }
 
     AssertCapture.add({
-      file: test.file.replace(`${FsUtil.cwd}/`, ''),
+      file: test.file.replace(`${PathUtil.cwd}/`, ''),
       line,
       operator: 'throws',
       error: err,

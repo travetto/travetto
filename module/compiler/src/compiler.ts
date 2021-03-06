@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { FsUtil, EnvUtil } from '@travetto/boot';
+import { PathUtil, EnvUtil } from '@travetto/boot';
 import { SourceCodeIndex, CompileUtil } from '@travetto/boot/src/internal';
 import { AppManifest } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
@@ -81,7 +81,7 @@ class $Compiler {
    * Notify of an add/remove/change event
    */
   notify(type: 'added' | 'removed' | 'changed', filename: string) {
-    console.debug('File Event', { type, filename: filename.replace(FsUtil.cwd, '.') });
+    console.debug('File Event', { type, filename: filename.replace(PathUtil.cwd, '.') });
     this.emitter.emit(type, filename);
   }
 

@@ -2,7 +2,7 @@ import * as commander from 'commander';
 import * as os from 'os';
 import * as fs from 'fs';
 
-import { FsUtil, ScanFs } from '@travetto/boot';
+import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 import type { RunState } from '../src/execute/types';
@@ -17,7 +17,7 @@ export class TestPlugin extends BasePlugin {
   getTypes() {
     if (!this._types) {
       this._types = ScanFs.scanDirSync({},
-        FsUtil.resolveUnix(__dirname, '..', 'src/consumer/types/')
+        PathUtil.resolveUnix(__dirname, '..', 'src/consumer/types/')
       )
         .filter(x => x.stats.isFile())
         .map(x => fs.readFileSync(x.file, 'utf8').match(/@Consumable[(]'([^']+)/)?.[1] as string)

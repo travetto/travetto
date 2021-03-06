@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { FsUtil, Package } from '@travetto/boot';
+import { PathUtil, Package, FsUtil } from '@travetto/boot';
 import { DocUtil } from './util';
 
 export interface DocNode { _type: string }
@@ -43,10 +43,10 @@ export function SnippetLink(title: Content, file: string, startPattern: RegExp) 
 
 export function Execute(title: Content, cmd: string, args: string[] = [], cfg: Parameters<(typeof DocUtil)['run']>[2] = {}) {
   if (cmd !== 'trv') {
-    cmd = DocUtil.resolveFile(cmd).resolved.replace(FsUtil.cwd, '.');
-    if (/.*\/doc\/.*[.][tj]s$/.test(cmd)) {
-      args.unshift('-r', '@travetto/boot/register', cmd);
-      cmd = 'node';
+    cmd = DocUtil.resolveFile(cmd).resolved.replace(PathUtil.cwd, '.');
+    if (/.*\/doc\/.*[.]ts$/.test(cmd)) {
+      const main = DocUtil.run('node', [require.resolve('@travetto/boot/register'), cmd, ...args], cfg);
+      return Terminal(title, `$ node @travetto/boot/register ${cmd} ${args.join(' ')}\n\n${main}`);
     }
   }
   const script = DocUtil.run(cmd, args, cfg);

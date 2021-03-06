@@ -1,4 +1,4 @@
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { DependencyRegistry } from '@travetto/di';
 import { AfterAll, AfterEach, BeforeAll, BeforeEach } from '@travetto/test';
 import { AppError, Class, ResourceManager } from '@travetto/base';
@@ -61,7 +61,7 @@ export abstract class BaseModelSuite<T> {
   @BeforeAll()
   async init() {
     // Track self
-    ResourceManager.addPath(FsUtil.resolveUnix(__dirname, 'resources'));
+    ResourceManager.addPath(PathUtil.resolveUnix(__dirname, 'resources'));
 
     await RootRegistry.init();
 

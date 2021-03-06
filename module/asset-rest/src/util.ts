@@ -5,7 +5,7 @@ import * as busboy from 'busboy';
 import { Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 import { AppError } from '@travetto/base';
-import { FsUtil, StreamUtil } from '@travetto/boot';
+import { FsUtil, PathUtil, StreamUtil } from '@travetto/boot';
 import { NodeEntitySym } from '@travetto/rest/src/internal/symbol';
 
 import { RestAssetConfig } from './config';
@@ -45,9 +45,9 @@ export class AssetRestUtil {
    * Stream file to disk, and verify types in the process.  Produce an asset as the output
    */
   static async toLocalAsset(data: NodeJS.ReadableStream | Buffer, filename: string) {
-    const uniqueDir = FsUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
+    const uniqueDir = PathUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
     await FsUtil.mkdirp(uniqueDir); // TODO: Unique dir for each file? Use random file, and override metadata
-    const uniqueLocal = FsUtil.resolveUnix(uniqueDir, path.basename(filename));
+    const uniqueLocal = PathUtil.resolveUnix(uniqueDir, path.basename(filename));
 
     await StreamUtil.writeToFile(data, uniqueLocal);
     const asset = await AssetUtil.fileToAsset(uniqueLocal);

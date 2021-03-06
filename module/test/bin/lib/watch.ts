@@ -1,7 +1,7 @@
 import { CliUtil } from '@travetto/cli/src/util';
 import { DEF_ENV, ENV_EXT } from './env';
 
-export async function entry(format: string = 'tap') {
+export async function main(format: string = 'tap') {
   CliUtil.initEnv({
     ...DEF_ENV, watch: true, envExtra: {
       ...ENV_EXT,

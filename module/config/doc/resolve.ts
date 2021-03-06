@@ -1,6 +1,6 @@
 import { ResourceManager } from '@travetto/base';
 
-(async function run() {
+export async function main() {
   (await ResourceManager.read('env.properties', 'utf8'))
     .split(/\n/g)
     .map(x => x.split(/\s*=\s*/))
@@ -12,4 +12,4 @@ import { ResourceManager } from '@travetto/base';
   const { ConfigManager } = await import('@travetto/config');
   await ConfigManager.init();
   console.log('Config', ConfigManager.get() as Record<string, string>);
-}());
+}

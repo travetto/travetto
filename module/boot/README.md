@@ -29,7 +29,7 @@ The functionality we support for testing and retrieving environment information:
    *  `getTime(key: string, def: number):number` - Reads an environment variable as milliseconds, with support for `s`, `m`, and `h` suffixes to provide succinct time units.
 
 ## Cache Support
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L12).  [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L12) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L9).  [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L9) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
 
@@ -41,6 +41,7 @@ import * as fs from 'fs';
  * Standard file cache, with output file name normalization and truncation
  */
 export declare class FileCache {
+    private static isOlder;
     private cache;
     readonly cacheDir: string;
     /**
@@ -130,7 +131,7 @@ The bootstrap process will also requires an index of all source files, which all
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L77) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L78) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

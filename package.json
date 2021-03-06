@@ -19,7 +19,10 @@
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
     "eslint": "^7.21.0",
-    "lerna": "~3.22.1"
+    "lerna": "~3.22.1",
+    "passport-facebook": "^3.0.0",
+    "@types/passport-facebook": "^2.1.8",
+    "@aws-sdk/client-ses": "^3.8.0"
   },
   "devDependencies": {
     "@types/aws-serverless-express": "^3.3.3",

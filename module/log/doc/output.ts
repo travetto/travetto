@@ -1,11 +1,15 @@
 process.env.TRV_DEBUG = '*'; // @doc-exclude
 process.env.TRV_LOG_PLAIN = '0';  // @doc-exclude
-import '@travetto/base';  // @doc-exclude
+import { PhaseManager } from '@travetto/base';
 
-console.log('Hello World');
+export async function main() {
+  await PhaseManager.run('init');
 
-console.log('Woah!', { a: { b: { c: { d: 10 } } } });
+  console.log('Hello World');
 
-console.info('Woah!');
+  console.log('Woah!', { a: { b: { c: { d: 10 } } } });
 
-console.debug('Test');
+  console.info('Woah!');
+
+  console.debug('Test');
+}

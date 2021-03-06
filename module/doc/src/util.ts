@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { spawnSync } from 'child_process';
 
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, PathUtil } from '@travetto/boot';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 
@@ -42,17 +42,18 @@ export class DocUtil {
 
   static run(cmd: string, args: string[], config: { env?: Record<string, string>, cwd?: string } = {}) {
     try {
+      const env = {
+        ...Object.fromEntries(Object.entries(process.env).filter(([a, b]) => a.startsWith('TRV') || a === 'PATH')),
+        TRV_DEBUG: '0',
+        ...(config.env ?? {})
+      };
       const res = spawnSync(cmd, args, {
         encoding: 'utf8',
         cwd: config.cwd,
         shell: '/bin/bash',
         maxBuffer: 1024 * 1024 * 20,
         stdio: 'pipe',
-        env: {
-          ...process.env,
-          TRV_DEBUG: '0',
-          ...(config.env ?? {})
-        }
+        env
       });
 
       if (res.error) {
@@ -63,7 +64,7 @@ export class DocUtil {
       return output.trim()
         // eslint-disable-next-line no-control-regex
         .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
-        .replace(new RegExp(FsUtil.cwd, 'g'), '.')
+        .replace(new RegExp(PathUtil.cwd, 'g'), '.')
         .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.DOC_STATE.getDate.bind(this.DOC_STATE))
         .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.DOC_STATE.getId.bind(this.DOC_STATE))
         .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);
@@ -76,7 +77,7 @@ export class DocUtil {
     if (file.startsWith('@')) {
       file = require.resolve(file);
     }
-    const resolved = FsUtil.resolveUnix(file);
+    const resolved = PathUtil.resolveUnix(file);
     return { resolved, cleaned: resolved.replace(/^.*node_modules\//, '') };
   }
 

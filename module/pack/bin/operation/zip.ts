@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { ExecUtil, FsUtil } from '@travetto/boot';
+import { ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
 import { CommonConfig, PackOperation } from '../lib/types';
@@ -27,8 +27,8 @@ export const Zip: PackOperation<ZipConfig> = {
   * Zip workspace with flags
   */
   async* exec({ workspace, output }: ZipConfig) {
-    const ws = FsUtil.resolveUnix(workspace);
-    const zipFile = FsUtil.resolveUnix(output);
+    const ws = PathUtil.resolveUnix(workspace);
+    const zipFile = PathUtil.resolveUnix(output);
 
     yield 'Preparing Target';
     await FsUtil.mkdirp(path.dirname(zipFile));
@@ -41,6 +41,6 @@ export const Zip: PackOperation<ZipConfig> = {
       await ExecUtil.spawn('zip', ['-r', zipFile, '.'], { cwd: ws }).result;
     }
 
-    yield color`${{ success: 'Successfully' }} archived project to ${{ path: zipFile.replace(FsUtil.cwd, '.') }}`;
+    yield color`${{ success: 'Successfully' }} archived project to ${{ path: zipFile.replace(PathUtil.cwd, '.') }}`;
   }
 };

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { FsUtil, ScanFs, ScanEntry } from '@travetto/boot';
+import { PathUtil, ScanFs, ScanEntry, FsUtil } from '@travetto/boot';
 
 import { AppError } from './error';
 import { AppManifest } from './manifest';
@@ -24,7 +24,7 @@ class $ResourceManager {
     this.paths.push(...this.rootPaths);
 
     this.paths = this.paths
-      .map(x => FsUtil.resolveUnix(x))
+      .map(x => PathUtil.resolveUnix(x))
       .filter(x => FsUtil.existsSync(x));
   }
 
@@ -54,7 +54,7 @@ class $ResourceManager {
    * @param full Is the path fully qualified or should it be relative to the cwd
    */
   addPath(searchPath: string) {
-    this.paths.push(FsUtil.resolveUnix(searchPath));
+    this.paths.push(PathUtil.resolveUnix(searchPath));
   }
 
   /**
@@ -68,7 +68,7 @@ class $ResourceManager {
    * List all paths as relative to the cwd
    */
   getRelativePaths() {
-    return this.paths.slice(0).map(x => x.replace(`${FsUtil.cwd}/`, ''));
+    return this.paths.slice(0).map(x => x.replace(`${PathUtil.cwd}/`, ''));
   }
 
   /**
@@ -91,7 +91,7 @@ class $ResourceManager {
       return this.cache.get(pth)!;
     }
 
-    for (const f of this.paths.map(x => FsUtil.joinUnix(x, pth))) {
+    for (const f of this.paths.map(x => PathUtil.joinUnix(x, pth))) {
       if (await FsUtil.exists(f)) {
         this.cache.set(pth, f);
         return f;
@@ -138,7 +138,7 @@ class $ResourceManager {
 
     for (const root of this.paths) {
       const results = await ScanFs.scanDir({ testFile: x => pattern.test(x) },
-        FsUtil.resolveUnix(root, base));
+        PathUtil.resolveUnix(root, base));
 
       for (const r of results) {
         this.scanEntry(base, found, out, r);

@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { Class, ClassInstance, Util } from '@travetto/base';
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
@@ -42,13 +42,13 @@ export class AssertUtil {
       .replace(/[\\]/g, '/')
       .split('\n')
       // Exclude node_modules, target self
-      .filter(x => x.includes(FsUtil.cwd) &&
+      .filter(x => x.includes(PathUtil.cwd) &&
         (!x.includes('node_modules') || /node_modules\/@travetto\/[^/]+\/test\//.test(x)));
 
     let best = lines.filter(x => x.includes(filename))[0];
 
     if (!best) {
-      [best] = lines.filter(x => x.includes(`${FsUtil.cwd}/test`));
+      [best] = lines.filter(x => x.includes(`${PathUtil.cwd}/test`));
     }
 
     if (!best) {
@@ -70,7 +70,7 @@ export class AssertUtil {
       line = -1;
     }
 
-    const outFileParts = file.split(FsUtil.cwd.replace(/^[A-Za-z]:/, ''));
+    const outFileParts = file.split(PathUtil.cwd.replace(/^[A-Za-z]:/, ''));
 
     const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
 

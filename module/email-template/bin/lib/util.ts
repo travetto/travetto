@@ -1,12 +1,13 @@
 import { dirname } from 'path';
 import { promises as fs } from 'fs';
 
+import { FsUtil } from '@travetto/boot';
+import type { MailTemplateEngine } from '@travetto/email';
+
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
 import { StyleUtil } from './style';
 import { ImageUtil } from './image';
-import { FsUtil } from '@travetto/boot';
-import type { MailTemplateEngine } from '@travetto/email';
 
 type Parts = 'html' | 'text' | 'subject';
 const PARTS = (['html', 'subject', 'text'] as const);

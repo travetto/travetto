@@ -20,6 +20,6 @@ export class GenerateUtil {
   }
 }
 
-export function entry() {
+export function main() {
   return GenerateUtil.generate();
 }

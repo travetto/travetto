@@ -1,5 +1,6 @@
 import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
+import { PathUtil } from './path';
 import { StreamUtil } from './stream';
 
 declare module 'worker_threads' {
@@ -82,13 +83,12 @@ export class ExecUtil {
   static getOpts(opts: ExecutionOptions) {
     return {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-      cwd: process.cwd(),
+      cwd: PathUtil.cwd,
       shell: false,
       ...opts,
       env: {
         ...process.env,
-        ...(opts.env ?? {}),
-        ...(opts.entry ? { TRV_ENTRY: opts.entry.replace(/[.]js$/, '.ts') } : {})
+        ...(opts.env ?? {})
       }
     } as ExecutionOptions;
   }
@@ -181,10 +181,10 @@ export class ExecUtil {
    * @param args The command line arguments to pass
    * @param options The enhancement options
    */
-  static fork(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
+  static fork(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
     // Always register for the fork
-    const p = spawn(process.argv0, [cmd, ...args], this.getOpts(options));
-    const result = this.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
+    const p = spawn(process.argv0, [file, ...args], this.getOpts(options));
+    const result = this.enhanceProcess(p, options, `${file} ${args.join(' ')}`);
     return { process: p, result };
   }
 
@@ -195,11 +195,12 @@ export class ExecUtil {
    * @param args The command line arguments to pass
    * @param options The enhancement options
    */
-  static forkEntry(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
+  static forkEntry(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
     // Always register for the fork
-    const opts = this.getOpts({ ...options, entry: cmd });
-    const p = spawn(process.argv0, [require.resolve('../register'), ...args], opts);
-    const result = this.enhanceProcess(p, options, `${cmd}:entry ${args.join(' ')}`);
+    const opts = this.getOpts(options);
+    file = file.replace(/[.]js$/, '.ts');
+    const p = spawn(process.argv0, [require.resolve('../register'), file, ...args], opts);
+    const result = this.enhanceProcess(p, options, `@travetto/boot/register ${file} ${args.join(' ')}`);
     return { process: p, result };
   }
 
@@ -267,9 +268,8 @@ export class ExecUtil {
    * @param options The worker options
    */
   static workerEntry<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
-    const e = (options.env ??= {}) as Record<string, string>;
-    e.TRV_ENTRY = file.replace(/[.]js$/, '.ts');
-    return this.worker<T>(require.resolve('../register'), args, options);
+    file = file.replace(/[.]js$/, '.ts');
+    return this.worker<T>(require.resolve('../register'), [file, ...args], options);
   }
 
   /**

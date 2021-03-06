@@ -107,6 +107,6 @@ export class CliModelCandidateUtil {
   }
 }
 
-export function entry(...args: string[]) {
+export function main(...args: string[]) {
   CliModelCandidateUtil.run();
 }

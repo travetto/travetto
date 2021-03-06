@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 import { CommandService } from '@travetto/command';
-import { ExecUtil, FsUtil, StreamUtil, AppCache } from '@travetto/boot';
+import { ExecUtil, StreamUtil, AppCache, FsUtil } from '@travetto/boot';
 
 /**
  * Image output options

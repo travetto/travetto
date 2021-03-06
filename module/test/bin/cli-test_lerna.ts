@@ -2,7 +2,7 @@ import * as commander from 'commander';
 import * as os from 'os';
 import * as readline from 'readline';
 
-import { FsUtil, ExecUtil } from '@travetto/boot';
+import { PathUtil, ExecUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 /**
@@ -22,7 +22,7 @@ export class TestLernaPlugin extends BasePlugin {
       'lerna', '--no-sort',
       'exec', '--no-bail', '--stream', '--',
       'trv', 'test', '-f', 'event', '-m', this._cmd.mode, '-c', '2'
-    ], { shell: true, rawOutput: true, cwd: FsUtil.resolveUnix(__dirname, '..', '..') });
+    ], { shell: true, rawOutput: true, cwd: PathUtil.resolveUnix(__dirname, '..', '..') });
 
     const { TestConsumerRegistry } = await import('../src/consumer/registry');
     await TestConsumerRegistry.manualInit();

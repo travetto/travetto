@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { basename } from 'path';
 
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { AnyType, ExternalType } from './resolver/types';
@@ -96,7 +96,7 @@ export class ImportManager {
         ...file.statements.filter((x: ts.Statement & { remove?: boolean }) => !x.remove) // Exclude culled imports
       ]);
     } catch (err) { // Missing import
-      const out = new Error(`${err.message} in ${file.fileName.replace(FsUtil.cwd, '.')}`);
+      const out = new Error(`${err.message} in ${file.fileName.replace(PathUtil.cwd, '.')}`);
       out.stack = err.stack;
       throw out;
     }

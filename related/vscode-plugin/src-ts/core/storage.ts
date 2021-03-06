@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as util from 'util';
-import { FsUtil } from '@travetto/boot';
+import { PathUtil, FsUtil } from '@travetto/boot';
 
 const writeProm = util.promisify(fs.writeFile);
 const readProm = util.promisify(fs.readFile);
@@ -25,7 +25,7 @@ export class ActionStorage<T> {
    * Load configuration
    */
   get resolved() {
-    return FsUtil.resolveUnix(this.root, `.trv.${this.scope}.json`);
+    return PathUtil.resolveUnix(this.root, `.trv.${this.scope}.json`);
   }
 
   /**

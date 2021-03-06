@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { FsUtil, Package } from '@travetto/boot';
+import { FsUtil, PathUtil, Package } from '@travetto/boot';
 
 /**
  * Standard set of workspace utilities
@@ -35,7 +35,7 @@ export class Workspace {
   static init(context: vscode.ExtensionContext) {
     this.context = context;
     [this.folder] = vscode.workspace.workspaceFolders!;
-    Object.defineProperty(FsUtil, 'cwd', { value: Workspace.path });
+    Object.defineProperty(PathUtil, 'cwd', { value: Workspace.path });
   }
 
   /**
@@ -50,7 +50,7 @@ export class Workspace {
    * Resolve worskapce path
    */
   static resolve(...p: string[]) {
-    return FsUtil.resolveUnix(this.path, ...p);
+    return PathUtil.resolveUnix(this.path, ...p);
   }
 
   /**

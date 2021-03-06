@@ -1,9 +1,9 @@
 import * as fs from 'fs';
-import { FsUtil } from './fs';
+import { PathUtil } from './path';
 
 let pkg = {};
 try {
-  pkg = JSON.parse(fs.readFileSync(FsUtil.resolveUnix('package.json'), 'utf8'));
+  pkg = JSON.parse(fs.readFileSync(PathUtil.resolveUnix('package.json'), 'utf8'));
 } catch { }
 
 export const Package = pkg as {

@@ -2,7 +2,7 @@
 import * as ts from 'typescript';
 import { dirname } from 'path';
 
-import { FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { Util } from '@travetto/base';
 
 import { Type, AnyType, UnionType, Checker } from './types';
@@ -213,10 +213,10 @@ export const TypeBuilder: {
         if (source === '.') {
           source = sourceFile;
         } else if (source.startsWith('.')) {
-          source = FsUtil.resolveUnix(dirname(sourceFile), source);
+          source = PathUtil.resolveUnix(dirname(sourceFile), source);
         }
 
-        return { key: 'external', name, source: FsUtil.resolveUnix(sourceFile, source) };
+        return { key: 'external', name, source: PathUtil.resolveUnix(sourceFile, source) };
       }
     }
   }

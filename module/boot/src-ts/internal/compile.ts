@@ -6,10 +6,10 @@ import { TranspileUtil } from './transpile';
 import { ModuleUtil, ModType } from './module';
 import { SourceUtil } from './source';
 
-import { FsUtil } from '../fs';
 import { EnvUtil } from '../env';
 import { SourceCodeIndex } from './code';
 import { AppCache } from '../cache';
+import { PathUtil } from '../path';
 
 export const Module = Mod as unknown as ModType;
 
@@ -98,7 +98,7 @@ export class CompileUtil {
     }
 
     // Registering unix conversion to use for filenames
-    global.ᚕsrc = FsUtil.toUnixTs;
+    global.ᚕsrc = PathUtil.toUnixTs;
     ModuleUtil.init();
     AppCache.init(true);
 
@@ -119,7 +119,7 @@ export class CompileUtil {
    * Remove file from require.cache, and possible the file system
    */
   static unload(filename: string) {
-    const native = FsUtil.toNative(filename);
+    const native = PathUtil.toNative(filename);
     if (native in require.cache) {
       delete require.cache[native]; // Remove require cached element
       return true;
