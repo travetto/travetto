@@ -23,7 +23,8 @@ export class StacktraceUtil {
       'internal',
       'tslib',
       '@travetto/context', // @line-if -$TRV_DEV
-      '@travetto/watch', // @line-if -$TRV_DEV
+      '@travetto/watch', // @line-if -$TRV_DEV,
+      '/boot/bin/',
       'typescript',
       'source-map-support.js'
     );

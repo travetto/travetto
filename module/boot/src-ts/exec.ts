@@ -66,10 +66,6 @@ export interface ExecutionOptions extends SpawnOptions {
    * The stdin source for the execution
    */
   stdin?: string | Buffer | NodeJS.ReadableStream;
-  /**
-   * Entry file, only relevant to `.forkEntry` and `.workerEntry`
-   */
-  entry?: string;
 }
 
 /**
@@ -189,13 +185,13 @@ export class ExecUtil {
   }
 
   /**
-   * Run a travetto entry command relative to the current node executable.  Mimics how node's
+   * Run a file with a main entry point relative to the current node executable.  Mimics how node's
    * fork operation is just spawn with the command set to `process.argv0`
    * @param cmd The file to run
    * @param args The command line arguments to pass
    * @param options The enhancement options
    */
-  static forkEntry(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
+  static forkMain(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
     // Always register for the fork
     const opts = this.getOpts(options);
     file = file.replace(/[.]js$/, '.ts');
@@ -262,12 +258,12 @@ export class ExecUtil {
   }
 
   /**
-   * Run a file as an enry worker thread
+   * Run a file with a main entry point as a worker thread
    * @param file The file to run, if starts with @, will be resolved as a module
    * @param args The arguments to pass in
    * @param options The worker options
    */
-  static workerEntry<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
+  static workerMain<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
     file = file.replace(/[.]js$/, '.ts');
     return this.worker<T>(require.resolve('@travetto/boot/bin/main'), [file, ...args], options);
   }

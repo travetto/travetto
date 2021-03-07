@@ -27,7 +27,7 @@ export class CliModelCandidateUtil {
   /**
    * Get model names
    */
-  private static async getModelNames() {
+  static async getModelNames() {
     const { ModelRegistry } = await import('@travetto/model');
     return (await this.getModels()).map(x => ModelRegistry.getStore(x)).sort();
   }
@@ -35,14 +35,17 @@ export class CliModelCandidateUtil {
   /**
    * Get all providers that are viable candidates
    */
-  private static async getProviders(): Promise<InjectableConfig[]> {
+  static async getProviders(): Promise<InjectableConfig[]> {
     const { DependencyRegistry } = await import('@travetto/di');
     const { ModelStorageSupportTarget } = await import('@travetto/model/src/internal/service/common');
     const types = DependencyRegistry.getCandidateTypes<ModelStorageSupport>(ModelStorageSupportTarget as unknown as Class<ModelStorageSupport>);
     return types;
   }
 
-  private static async getProviderNames() {
+  /**
+   * Get list of names of all viable providers
+   */
+  static async getProviderNames() {
     return (await this.getProviders())
       .map(x => x.class.name.replace(/ModelService/, ''))
       .sort();
@@ -51,7 +54,7 @@ export class CliModelCandidateUtil {
   /**
    * Initialize
    */
-  private static async init() {
+  static async init() {
     CliUtil.initEnv({ watch: false });
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
@@ -72,7 +75,7 @@ export class CliModelCandidateUtil {
    */
   static async getCandidates() {
     return CliUtil.waiting('Compiling', () =>
-      ExecUtil.workerEntry<{ providers: string[], models: string[] }>(__filename, ['build'], {
+      ExecUtil.workerMain<{ providers: string[], models: string[] }>(__filename, ['build'], {
         env: { TRV_WATCH: '0' }
       }).message
     );
@@ -90,23 +93,19 @@ export class CliModelCandidateUtil {
       models: await this.getModels(models)
     };
   }
-
-  /**
-   * Handles plugin response
-   */
-  static async run() {
-    try {
-      await this.init();
-      CliUtil.pluginResponse({
-        models: await this.getModelNames(),
-        providers: await this.getProviderNames()
-      });
-    } catch (err) {
-      CliUtil.pluginResponse(err);
-    }
-  }
 }
 
-export function main(...args: string[]) {
-  CliModelCandidateUtil.run();
+/**
+ * Handles direct invocation
+ */
+export async function main() {
+  try {
+    await CliModelCandidateUtil.init();
+    CliUtil.pluginResponse({
+      models: await CliModelCandidateUtil.getModelNames(),
+      providers: await CliModelCandidateUtil.getProviderNames()
+    });
+  } catch (err) {
+    CliUtil.pluginResponse(err);
+  }
 }

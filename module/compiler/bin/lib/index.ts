@@ -17,7 +17,7 @@ export class CompileCliUtil {
 
     // Compile rest of code
     return CliUtil.waiting(`Compiling... ${output || ''}`,
-      ExecUtil.workerEntry(__filename, [], { // target self
+      ExecUtil.workerMain(__filename, [], { // target self
         env: {
           ...(output ? { TRV_CACHE: output } : {}),
           TRV_WATCH: '0', // Ensure no watching

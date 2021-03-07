@@ -38,7 +38,7 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   async compile() {
-    const { result } = ExecUtil.fork(Workspace.resolve('node_modules/@travetto/compiler/bin/plugin-compile.js'), [], {
+    const { result } = ExecUtil.forkMain(Workspace.resolve('node_modules/@travetto/compiler/bin/lib/index.ts'), [], {
       cwd: Workspace.path,
     });
 
@@ -55,7 +55,7 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   async runPlugin(name: string) {
-    const { result } = ExecUtil.forkEntry(this.resolvePlugin(name), [], {
+    const { result } = ExecUtil.forkMain(this.resolvePlugin(name), [], {
       cwd: Workspace.path
     });
     const output = await result;
