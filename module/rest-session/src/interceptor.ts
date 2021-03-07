@@ -21,10 +21,10 @@ export class SessionInterceptor implements RestInterceptor {
   async intercept(req: Request, res: Response, next: () => Promise<unknown>) {
     try {
       this.service.configure(req);
-      await this.service.loadFromExternal(req);
+      await this.service.read(req, res);
       return await next();
     } finally {
-      await this.service.storeToExternal(req, res);
+      await this.service.persist(req, res);
     }
   }
 }

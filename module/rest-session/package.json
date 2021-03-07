@@ -7,7 +7,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/cache": "^2.0.0-alpha.3",
+    "@travetto/model": "^2.0.0-alpha.3",
     "@travetto/config": "^2.0.0-alpha.2",
     "@travetto/rest": "^2.0.0-alpha.4"
   },

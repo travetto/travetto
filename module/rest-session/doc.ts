@@ -3,7 +3,7 @@ import { Context } from '@travetto/rest/src/decorator/param';
 import { Cache, CacheService } from '@travetto/cache';
 
 import { Session } from '.';
-import { RequetSessionEncoder } from './src/encoder/request';
+import { RequetSessionEncoder } from './src/provider/opaque';
 
 const Request = SnippetLink('TravettoRequest', 'src/types.d.ts', /interface TravettoRequest/);
 const SessionData = SnippetLink('SessionData', 'src/types.ts', /interface SessionData/);

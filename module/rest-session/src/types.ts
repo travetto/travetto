@@ -16,15 +16,15 @@ export class Session<T extends SessionData = SessionData>  {
   /**
    * The expiry time when the session was loaded
    */
-  private expiresAtLoaded: number | undefined;
+  private expiresAtLoaded: Date | undefined;
   /**
    * The hash of the session at load
    */
   private hash: number;
   /**
-   * The session key name
+   * The session identifer
    */
-  readonly key: string;
+  readonly id: string;
   /**
    * Session max age in ms
    */
@@ -36,12 +36,12 @@ export class Session<T extends SessionData = SessionData>  {
   /**
    * Session initial issue timestamp
    */
-  readonly issuedAt: number;
+  readonly issuedAt: Date;
 
   /**
    * Expires at time
    */
-  expiresAt: number | undefined;
+  expiresAt: Date | undefined;
   /**
    * What action should be taken against the session
    */
@@ -56,17 +56,17 @@ export class Session<T extends SessionData = SessionData>  {
    */
   constructor(data: Partial<Session>) {
     // Mark the issued at as now
-    this.issuedAt = Date.now();
+    this.issuedAt = new Date();
 
     // Overwrite with data
     Object.assign(this, data);
 
     // Mark the expiry load time
-    this.expiresAtLoaded = this.expiresAt ?? Date.now();
+    this.expiresAtLoaded = this.expiresAt ?? new Date();
 
     // Mark expiry time
     if (this.maxAge && !this.expiresAt) {
-      this.expiresAt = this.maxAge + Date.now();
+      this.refresh();
     }
 
     // Hash the session as it stands
@@ -106,14 +106,14 @@ export class Session<T extends SessionData = SessionData>  {
    * See if the session is nearly expired
    */
   isAlmostExpired() {
-    return (!!this.maxAge && (this.expiresAt! - Date.now()) < this.maxAge / 2);
+    return (!!this.maxAge && (this.expiresAt!.getTime() - Date.now()) < this.maxAge / 2);
   }
 
   /**
    * See if the session is truly expired
    */
   isExpired() {
-    return this.expiresAt && this.expiresAt < Date.now();
+    return this.expiresAt && this.expiresAt.getTime() < Date.now();
   }
 
   /**
@@ -121,7 +121,7 @@ export class Session<T extends SessionData = SessionData>  {
    */
   refresh() {
     if (this.maxAge) {
-      this.expiresAt = this.maxAge + Date.now();
+      this.expiresAt = new Date(this.maxAge + Date.now());
     }
   }
 
@@ -138,7 +138,7 @@ export class Session<T extends SessionData = SessionData>  {
    */
   toJSON() {
     return {
-      key: this.key,
+      id: this.id,
       signature: this.signature,
       expiresAt: this.expiresAt,
       maxAge: this.maxAge,

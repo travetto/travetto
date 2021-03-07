@@ -6,17 +6,16 @@ import { Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
 
-import { RequetSessionEncoder } from '../src/encoder/request';
+import { OpaqueSessionProvider } from '../src/provider/opaque';
 import { Session } from '../src/types';
 import { SessionConfig } from '../src/config';
-// import { CookieEncoder } from '../src/encoder/cookie';
 
 @Suite()
 @InjectableSuite()
 export class EncoderTest {
 
   @Inject()
-  instance: RequetSessionEncoder;
+  instance: OpaqueSessionProvider;
 
   @Inject()
   config: SessionConfig;
@@ -32,7 +31,7 @@ export class EncoderTest {
         headers[key] = value;
       }
     } as Response, new Session({
-      key: 'true',
+      id: 'true',
       data: {
         data: 'hello'
       }
