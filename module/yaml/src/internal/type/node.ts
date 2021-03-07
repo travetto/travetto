@@ -1,4 +1,5 @@
 import { SimpleType, Util } from '@travetto/base';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 export interface Node<T extends SimpleType = SimpleType> {
   value: T;
@@ -37,6 +38,6 @@ export class JSONNode implements Node {
   value: SimpleType;
 
   constructor(token: string) {
-    this.value = JSON.parse(token);
+    this.value = JSONUtil.parse(token);
   }
 }

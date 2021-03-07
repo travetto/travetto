@@ -2,7 +2,6 @@ import * as readline from 'readline';
 import { parentPort } from 'worker_threads';
 // Imported individually to prevent barrel import loading too much
 import { EnvUtil } from '@travetto/boot/src/env';
-import { ExecUtil } from '@travetto/boot/src/exec';
 
 import { CompletionConfig } from './types';
 

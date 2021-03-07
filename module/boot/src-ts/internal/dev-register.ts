@@ -1,6 +1,12 @@
 import { FileCache } from '../cache';
 import { Package } from '../package';
 import { CompileUtil } from './compile';
+import { JSONUtil } from './json';
+
+type DevConfig = {
+  entries: string[];
+  env: Record<string, string | number>;
+};
 
 class DevRegister {
 
@@ -29,7 +35,7 @@ class DevRegister {
   }
 
   /** Gather all dependencies of the module */
-  readDeps(givenMods: Iterable<string>) {
+  readDeps(givenMods: Iterable<string>): DevConfig {
     const keys = [
       ...givenMods, // Givens
       ...Object.keys(Package.dependencies || {}),
@@ -76,7 +82,7 @@ class DevRegister {
   }
 
   run() {
-    const { entries } = JSON.parse(this.getContent());
+    const { entries } = JSONUtil.parse<DevConfig>(this.getContent());
     process.env.TRV_MODULES = `${this.envMods.replace(DevRegister.TRV_MOD, '')},${entries.join(',')}`;
     // Force install
     CompileUtil.init();

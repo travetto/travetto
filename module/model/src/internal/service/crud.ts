@@ -1,6 +1,8 @@
 import * as crypto from 'crypto';
 import { Class } from '@travetto/base';
 import { SchemaValidator } from '@travetto/schema';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
+
 import { ModelRegistry } from '../../registry/model';
 import { ModelType } from '../../types/model';
 import { NotFoundError } from '../../error/not-found';
@@ -28,10 +30,8 @@ export class ModelCrudUtil {
    * @param input Input as string or plain object
    */
   static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object): Promise<T> {
-    if (typeof input === 'string') {
-      input = JSON.parse(input);
-    } else if (input instanceof Buffer) {
-      input = JSON.parse(input.toString('utf8'));
+    if (typeof input === 'string' || input instanceof Buffer) {
+      input = JSONUtil.parse(input);
     }
 
     const result = ModelRegistry.getBaseModel(cls).from(input as object) as T;

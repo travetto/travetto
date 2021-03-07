@@ -4,6 +4,7 @@ import * as readline from 'readline';
 
 import { PathUtil, ExecUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 /**
  * Launch test framework for monorepo and execute tests
@@ -36,7 +37,7 @@ export class TestLernaPlugin extends BasePlugin {
       .on('line', line => {
         const [, , body] = line.match(/^(\S+):\s+(.*)\s*$/)!;
         try {
-          consumer.onEvent(JSON.parse(body));
+          consumer.onEvent(JSONUtil.parse(body));
         } catch {
           console!.error('Failed on', body);
         }

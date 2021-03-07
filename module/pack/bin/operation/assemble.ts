@@ -1,7 +1,6 @@
-import { PathUtil } from '@travetto/boot';
+import { FsUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 import { CliUtil } from '@travetto/cli/src/util';
-import { NativeUtil } from '@travetto/boot/src/internal';
 
 import { PackUtil } from '../lib/util';
 import { CommonConfig, PackOperation } from '../lib/types';
@@ -47,7 +46,7 @@ export const Assemble: PackOperation<AssembleConfig> = {
     const fullCacheDir = PathUtil.resolveUnix(workspace!, cacheDir);
     const ws = PathUtil.resolveUnix(workspace!);
 
-    yield 'Cleaning Workspace'; await NativeUtil.unlinkRecursive(ws, true).then(() => { });
+    yield 'Cleaning Workspace'; await FsUtil.unlinkRecursive(ws, true).then(() => { });
     yield 'Copying Dependencies'; await AssembleUtil.copyDependencies(ws);
     yield 'Copying App Content'; await AssembleUtil.copyModule(PathUtil.cwd, ws);
     yield 'Excluding Pre-Compile Files'; await AssembleUtil.excludeFiles(ws, excludeCompile);

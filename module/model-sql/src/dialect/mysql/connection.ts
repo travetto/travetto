@@ -3,10 +3,11 @@ import * as mysql from 'mysql';
 
 import { ShutdownManager } from '@travetto/base';
 import { AsyncContext } from '@travetto/context';
+import { ExistsError } from '@travetto/model/src/error/exists';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
+
 import { Connection } from '../../connection/base';
 import { SQLModelConfig } from '../../config';
-import { NotFoundError } from '@travetto/model/src/error/not-found';
-import { ExistsError } from '@travetto/model/src/error/exists';
 
 /**
  * Connection support for mysql
@@ -46,7 +47,7 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
     if (typeof res === 'string' && (field.type === 'JSON' || field.type === 'BLOB')) {
       if (res.charAt(0) === '{' && res.charAt(res.length - 1) === '}') {
         try {
-          return (JSON.parse(res));
+          return JSONUtil.parse(res);
         } catch { }
       }
     }

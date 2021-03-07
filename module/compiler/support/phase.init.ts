@@ -6,7 +6,8 @@ export const init = {
   after: ['@trv:config/init', '@trv:base/init'],
   action: async () => {
     const { AppCache } = await import('@travetto/boot');
-    const { CompileUtil, SourceCodeIndex } = await import('@travetto/boot/src/internal');
+    const { SourceCodeIndex } = await import('@travetto/boot/src/internal/code');
+    const { CompileUtil } = await import('@travetto/boot/src/internal/compile');
 
     // Ensure all support files are pre-compiled
     for (const x of SourceCodeIndex.find({ folder: 'support' })) {

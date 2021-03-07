@@ -4,6 +4,7 @@ import * as passport from 'passport';
 import { Identity } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
 import { Util } from '@travetto/base';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { IdentitySource } from '../../identity';
 
@@ -24,8 +25,7 @@ export class PassportIdentitySource<U> implements IdentitySource {
     if (req.query.state) {
       if (typeof req.query.state === 'string' && req.query.state) {
         try {
-          const json = Buffer.from(req.query.state, 'base64').toString('utf8');
-          return JSON.parse(json);
+          return JSONUtil.parse<Record<string, any>>(Buffer.from(req.query.state, 'base64').toString('utf8'));
         } catch {
           console.error('Unable to process previous login state');
         }

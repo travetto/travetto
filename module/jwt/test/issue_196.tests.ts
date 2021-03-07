@@ -1,5 +1,7 @@
 import * as assert from 'assert';
+
 import { Suite, Test } from '@travetto/test';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import * as jwt from '..';
 
@@ -16,7 +18,7 @@ class Issue196 {
   @Test('should use issuer provided in payload.iss')
   async test() {
     const token = await jwt.sign({ iss: 'foo' }, { key: 'shhhhh' });
-    const issuer = JSON.parse(base64toUtf8(token.split('.')[1])).iss;
+    const issuer = JSONUtil.parse<{ iss: string }>(base64toUtf8(token.split('.')[1])).iss;
     assert(issuer === 'foo');
   }
 }

@@ -2,6 +2,7 @@ import * as fs from 'fs';
 
 import { PathUtil, Package, FsUtil } from '@travetto/boot';
 import { DocUtil } from './util';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 export interface DocNode { _type: string }
 type Content = DocNode | string;
@@ -59,7 +60,7 @@ export function Execute(title: Content, cmd: string, args: string[] = [], cfg: E
 }
 
 export function Mod(folder: string) {
-  const pkg = JSON.parse(fs.readFileSync(`${folder}/package.json`, 'utf8'));
+  const pkg = JSONUtil.parse<{ description: string, title: string }>(fs.readFileSync(`${folder}/package.json`, 'utf8'));
   const { description, title } = pkg;
   return $n('mod', { title: $c(title), link: $c(folder), description: $c(description) });
 }

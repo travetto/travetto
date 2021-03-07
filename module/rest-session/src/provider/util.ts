@@ -31,11 +31,11 @@ export class EncodeUtil {
    * Store value back into request
    */
   static putValue(res: Response, config: SessionConfig, session: null): void;
-  static putValue(res: Response, config: SessionConfig, session: Session, extract: (op: Session) => string): void;
-  static putValue(res: Response, config: SessionConfig, session: Session | null, extract?: (op: Session) => string) {
+  static putValue(res: Response, config: SessionConfig, session: Session, value: string): void;
+  static putValue(res: Response, config: SessionConfig, session: Session | null, value?: string) {
     if (session) {
       if (config.transport === 'cookie') {
-        res.cookies.set(config.keyName, extract!(session), {
+        res.cookies.set(config.keyName, value, {
           maxAge: !session.expiresAt ? -1 : undefined, // Session cookie by default
           expires: session.expiresAt
         });

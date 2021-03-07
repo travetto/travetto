@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import { JSONUtil } from '@travetto/boot/src/internal/json';
+
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
 import { ActionStorage } from '../../../core/storage';
@@ -30,7 +32,7 @@ export class AppRunFeature extends BaseFeature {
    */
   async getAppList() {
     await this.compile();
-    const choices = JSON.parse(await this.runPlugin('list')) as AppChoice[];
+    const choices = JSONUtil.parse<AppChoice[]>(await this.runPlugin('list'));
     return choices.map(x => {
       x.inputs = x.inputs || [];
       return x;

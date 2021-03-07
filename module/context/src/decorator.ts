@@ -1,3 +1,4 @@
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 import { AsyncContext } from './service';
 
 /**
@@ -8,7 +9,7 @@ export function WithAsyncContext<T extends { context: AsyncContext }>(data?: Rec
     const og = descriptor.value!;
     descriptor.value = function (this: T, ...args: unknown[]) {
       return (this.context.run((og as Function).bind(this, ...args),
-        data ? JSON.parse(JSON.stringify(data)) : {})) as Promise<V>;
+        data ? JSONUtil.clone(data) : {})) as Promise<V>;
     };
 
     Object.defineProperty(descriptor.value, 'name', { value: og.name });

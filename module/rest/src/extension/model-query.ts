@@ -4,13 +4,17 @@
 import { Class } from '@travetto/base';
 import { ModelType, ModelRegistry } from '@travetto/model';
 import { Schema } from '@travetto/schema';
-import { ModelQueryFacetSupport, ModelQuerySupport, SortClause, ValidStringFields } from '@travetto/model-query';
+import {
+  ModelQueryFacetSupport, ModelQuerySupport, ModelQuerySuggestSupport,
+  SortClause, ValidStringFields
+} from '@travetto/model-query';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { schemaParamConfig } from './schema';
 import { ControllerRegistry } from '../registry/controller';
 import { paramConfig } from '../decorator/param';
 
-type Svc = { source: ModelQuerySupport & ModelQueryFacetSupport };
+type Svc = { source: ModelQuerySupport & ModelQueryFacetSupport & ModelQuerySuggestSupport };
 
 @Schema()
 class Query {
@@ -27,7 +31,7 @@ class SuggestQuery {
   offset?: number;
 }
 
-const convert = <T>(k?: string) => k && typeof k === 'string' && /^[\{\[]/.test(k) ? JSON.parse(k) as T : k;
+const convert = <T>(k?: string) => k && typeof k === 'string' && /^[\{\[]/.test(k) ? JSONUtil.parse<T>(k) : k;
 
 /**
  * Provides a basic query controller for a given model:

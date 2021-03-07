@@ -1,4 +1,5 @@
 import { Writable } from 'stream';
+
 import { TestEvent } from '../../model/event';
 import { TestConsumer } from '../types';
 import { ConsumerUtil } from '../util';

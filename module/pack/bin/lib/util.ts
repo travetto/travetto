@@ -6,7 +6,7 @@ import * as path from 'path';
 const glob = require('picomatch');
 
 import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
-import { SourceCodeIndex } from '@travetto/boot/src/internal';
+import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
 import { color } from '@travetto/cli/src/color';
 
 import { CommonConfig, PackOperation } from './types';

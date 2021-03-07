@@ -4,6 +4,9 @@
     "importHelpers": false,
     "outDir": "out",
     "paths": {
+      "@travetto/boot": [
+        "../../module/boot"
+      ],
       "@travetto/doc": [
         "../../module/doc"
       ],

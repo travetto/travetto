@@ -4,6 +4,7 @@ import * as asyncHooks from 'async_hooks';
 import { Inject } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { AsyncContext, WithAsyncContext } from '../';
 
@@ -62,7 +63,7 @@ class VerifyContext {
         }
         await new Promise(r => setTimeout(r, 20));
         await this.context.run(async () => {
-          contexts.push(JSON.parse(JSON.stringify(this.context.get())));
+          contexts.push(JSONUtil.clone(this.context.get()));
         }, { color: 'green' });
       }, { age: 20, name: 'bob' });
     }));

@@ -7,9 +7,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@travetto/model": "^2.0.0-alpha.3",
     "@travetto/config": "^2.0.0-alpha.2",
     "@travetto/rest": "^2.0.0-alpha.4"
+  },
+  "optionalPeerDependencies": {
+    "@travetto/model": "^2.0.0-alpha.3"
   },
   "title": "REST Session",
   "description": "Session provider for the travetto rest module.",

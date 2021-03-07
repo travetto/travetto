@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-
-import { NativeUtil } from '@travetto/boot/src/internal';
+import { FsUtil } from '@travetto/boot';
 
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
@@ -47,9 +46,9 @@ class TestRunnerFeature extends BaseFeature {
   /** Clean up */
   clean(recopy = false) {
     this.consumer.dispose();
-    NativeUtil.unlinkRecursiveSync(this.cacheDir, t);
+    FsUtil.unlinkRecursiveSync(this.cacheDir, true);
     if (recopy) {
-      NativeUtil.copyRecursiveSync(`${Workspace.path}/.trv_cache`, this.cacheDir, t);
+      FsUtil.copyRecursiveSync(`${Workspace.path}/.trv_cache`, this.cacheDir, true);
     }
   }
 

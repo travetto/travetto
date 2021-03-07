@@ -1,17 +1,19 @@
+// @file-if @travetto/model
 import { Request, Response } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
-import { ExpiresAt, MemoryModelConfig, MemoryModelService, Model, ModelCrudSupport } from '@travetto/model';
+import { ExpiresAt, Model, ModelCrudSupport } from '@travetto/model';
 import { Text } from '@travetto/schema';
-import { AppError, AppManifest } from '@travetto/base';
+import { AppError } from '@travetto/base';
 import { isExpirySupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 import { EnvUtil } from '@travetto/boot';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
-import { SessionProvider } from './types';
+import { SessionProvider } from '../provider/types';
 import { Session } from '../types';
 import { SessionConfig } from '../config';
-import { EncodeUtil } from './util';
+import { EncodeUtil } from '../provider/util';
 
-export const SessionOpaqueSym = Symbol.for('@trv:session/opaque');
+export const SessionModelSym = Symbol.for('@trv:rest-session/model');
 
 @Model({ autoCreate: false })
 export class SessionEntry {
@@ -26,11 +28,9 @@ export class SessionEntry {
 
 /**
  * Uses request for maintaining the session coherency with the user.
- * Primarily encode the user identifier, but relies on cookie behavior for
- * encoding the expiry time, when transport is set to cookie.
  */
-@Injectable({ primary: true })
-export class OpaqueSessionProvider implements SessionProvider {
+@Injectable()
+export class ModelSessionProvider implements SessionProvider {
 
   @Inject()
   config: SessionConfig;
@@ -38,21 +38,14 @@ export class OpaqueSessionProvider implements SessionProvider {
   /**
    * Cache for storing the session
    */
-  @Inject({ qualifier: SessionOpaqueSym, optional: true })
+  @Inject(SessionModelSym)
   modelService: ModelCrudSupport;
 
   /**
    * Initialize service if none defined
    */
   async postConstruct() {
-    if (this.modelService === undefined) {
-      if (!AppManifest.prod) {
-        this.modelService = new MemoryModelService(new MemoryModelConfig());
-        console.warn('No session cache defined, falling back to in-memory cache. This is not intended for production session use');
-      } else {
-        throw new AppError('In-memory cache is not intended for production session use', 'general');
-      }
-    } else if (!isExpirySupported(this.modelService)) {
+    if (!isExpirySupported(this.modelService)) {
       throw new AppError(`Model service must provide expiry support, ${this.modelService.constructor.name} does  not`);
     }
     if (isStorageSupported(this.modelService)) {
@@ -71,12 +64,12 @@ export class OpaqueSessionProvider implements SessionProvider {
       // Store update of session
       await this.modelService.upsert(SessionEntry, SessionEntry.from({
         ...session,
-        data: JSON.stringify(session.data),
+        data: Buffer.from(JSON.stringify(session.data)).toString('base64')
       }));
 
       // Send updated info only if expiry changed
       if (session.isTimeChanged()) {
-        EncodeUtil.putValue(res, this.config, session, x => x.id);
+        EncodeUtil.putValue(res, this.config, session, session.id);
       }
     } else if (EncodeUtil.canDelete(req, this.config)) {
       EncodeUtil.putValue(res, this.config, null);
@@ -91,7 +84,7 @@ export class OpaqueSessionProvider implements SessionProvider {
     if (record) {
       return new Session({
         ...record,
-        data: JSON.parse(record.data)
+        data: JSONUtil.parse(Buffer.from(record.data, 'base64').toString('utf8'))
       });
     }
   }

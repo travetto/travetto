@@ -5,7 +5,7 @@ export const init = {
   key: '@trv:compiler/load',
   after: ['@trv:compiler/compile'],
   action: async () => {
-    const { SourceCodeIndex } = await import('@travetto/boot/src/internal');
+    const { SourceCodeIndex } = await import('@travetto/boot/src/internal/code');
     const { AppManifest } = await import('@travetto/base');
 
     for (const { file } of SourceCodeIndex.findByFolders(AppManifest.source, 'required')) {

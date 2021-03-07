@@ -7,12 +7,13 @@ import { InjectableSuite } from '@travetto/di/test-support/suite';
 import { BaseRestSuite } from '@travetto/rest/test-support/base';
 
 import { SessionData, SessionConfig } from '..';
-import { OpaqueSessionProvider } from '../src/provider/opaque';
+import { ModelSessionProvider } from '../src/extension/model';
+import { SessionProvider } from '../src/provider/types';
 
 class Config {
-  @InjectableFactory()
-  static provider() {
-    return new OpaqueSessionProvider();
+  @InjectableFactory({ primary: true })
+  static provider(): SessionProvider {
+    return new ModelSessionProvider();
   }
 }
 

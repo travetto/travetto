@@ -225,7 +225,12 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 * `cache/src/extension/{redis,dynamdb}` are gone and are also now model provided
 * `model` is gone and has been replaced by `model-core` and `model-query`.
 * `model-core` is a series of interfaces/contracts, and some minor utility functions. All ownership has been pushed to the various providers.
-* Method names have been standardized as `verbNoun` e.g. `getStream` or `upsertExpiry`
+* Method names have been standardized as `verbNoun` e.g. `getStream` or `deleteExpired`
+
+#### Rest Internals Overhaul
+* Testing support greatly increased, and provides clearer behavior for testing as a server, and as a lambda.
+* Streamlined internals, and separated lambda from general usage
+* 
 
 #### Support for Dynamic Module references, specifically, third party
 * No longer symlinking for local dev
@@ -238,9 +243,11 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 #### Local Dev Overhual
 * Now relies on environment variables (`direnv` makes it easier) for augmenting what would have been embedded in the framework.
 * Using tsconfig paths in lieu of symlinks, general development performance, and refactoring are substantially improved.
+* Removed dependency on symlinks
 
 #### Extension Overhaul (and testing thereof overhaul)
 * Extensions are now tested in isolation allowing for various combinations of extensions to be tested
+* Relies on use of Dynamic Modules to allow for creating a custom cache related to the modules being loaded
 
 #### Logging overhaul (Base no longer duplicates functionality of log)
 * All filtering and formatting now belong to the log module
@@ -253,11 +260,16 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 * `cache`'s built in extensions are not model modules
 * Extensions have been moved to the module which owns the complexity (e.,g. schema rest support dealt more with the internals of rest than schema, and has been moved).
 
-#### Typescript Alignment
+#### Typescript Upgrade
 * Shifted codebase away from use of `any` to `unknown` where applicable (over 750 instances migrated)
+* Moving to typescripti 4.2
+* Converted all available files to `.ts`, only build scripts remain in `.js`
+
+#### Dependency Injection Enhancements
 * Using more interfaces where possible (and less reliance on abstract clasess)
    * This allows for better control at the cost of potentially duplicated functionality
-* Movingn to typescripti 4.2
+* Support for injecting/registering by interfaces
+* Better default behavior on multiple providers, with local code breaking ties.
 
 #### Removed `sync` versions of `ResourceManager` methods
 * All resource lookups are considered to be `async`, as runtime support for `sync` was an anti-pattern
@@ -266,16 +278,24 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 * This has the affect of removing a bunch of custom logic around tests
 * Alt folders have been removed, and can be emulated by specifying `TRV_SRC_LOCAL` values as needed.
 
-### New Features
+#### Compiler Ownership
+* Reworked @travetto/boot compiler to create clear responsiblity for managing the compiler/transpiler relationsip with node runtime.
+* Modified @travetto/compiler to no longer register extension directly, but 
+
+#### Entrypoint Standardization
 * Updated boot to allow for user provided registration hoooks via `TRV_REQUIRES`
+* Allow for use of `main` functions to allow for direct invocation of any file, primaryily used for plugins and cli activities
+* Removed all `plugin-*.js` files as in lieu of exposing a `main` function in the target files.
+* Removed almost all `*.js` files in the test folders, in lieu of exposing `main` functions. Tests no longer auto execute on import.
 
 ### Non-Breaking Changes
 
 #### Standard dependency upgrades
 
-#### Lessened dependency on bash scripts, and moved build processes over to nodesh
-* Local developmentshould now support windows, but there may still be a few edge cases
+#### Lessened dependency on bash scripts, and moved build processes over to @arcsine/nodesh
+* Local development should now support windows, but there may still be a few edge cases
 
 #### Docs have been converted back to typescript, and the doc folders have been simplified
 * Proper typechecking on all docs
 * Renamed file from DOCS.js to doc.ts
+* Moved main README.md to `related/overview/doc.ts`

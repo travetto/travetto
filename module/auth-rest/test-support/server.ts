@@ -6,6 +6,7 @@ import { Suite, Test } from '@travetto/test';
 import { Injectable, InjectableFactory } from '@travetto/di';
 import { AppError } from '@travetto/base';
 import { AuthContext } from '@travetto/auth/src/context';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { Authenticate, Authenticated } from '../src/decorator';
 import { IdentitySource } from '../src/identity';
@@ -18,15 +19,13 @@ const TestAuthSym = Symbol.for('TEST_AUTH');
 })
 class AuthorizationEncoder implements AuthContextEncoder {
   async encode(req: Request, res: Response, ctx: AuthContext) {
-    const value = Buffer
-      .from(JSON.stringify({ principal: ctx.principal, identity: ctx.identity }))
-      .toString('base64');
-    res.setHeader('Authorization', value);
+    const value = JSON.stringify({ principal: ctx.principal, identity: ctx.identity });
+    res.setHeader('Authorization', Buffer.from(value).toString('base64'));
   }
   async decode(req: Request) {
     try {
       if (req.headers.authorization) {
-        const config = JSON.parse(Buffer.from(req.headers.authorization as string, 'base64').toString('utf8'));
+        const config = JSONUtil.parse<AuthContext>(Buffer.from(req.headers.authorization as string, 'base64').toString('utf8'));
         if (config.identity && config.principal) {
           return new AuthContext(config.identity, config.principal);
         }

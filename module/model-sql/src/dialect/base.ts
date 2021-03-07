@@ -3,11 +3,11 @@ import { Class, Util, AppError } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
+import { ModelType } from '@travetto/model/src/types/model';
 
 import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
 import { Connection } from '../connection/base';
-import { ModelType } from '@travetto/model/src/types/model';
 
 const has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
 const has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);

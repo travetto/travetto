@@ -6,6 +6,7 @@ import { FsUtil, PathUtil, StreamUtil } from '@travetto/boot';
 import { Class, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
@@ -189,7 +190,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   async describeStream(location: string) {
     const file = await this.find('_streams', '.meta', location);
     const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
-    const text = JSON.parse(content.toString('utf8'));
+    const text = JSONUtil.parse(content);
     return text as StreamMeta;
   }
 

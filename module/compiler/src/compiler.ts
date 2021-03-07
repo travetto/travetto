@@ -2,7 +2,8 @@ import * as sourceMapSupport from 'source-map-support';
 import { EventEmitter } from 'events';
 
 import { PathUtil, EnvUtil } from '@travetto/boot';
-import { SourceCodeIndex, CompileUtil } from '@travetto/boot/src/internal';
+import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
+import { CompileUtil } from '@travetto/boot/src/internal/compile';
 import { AppManifest } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 

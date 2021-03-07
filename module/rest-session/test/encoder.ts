@@ -1,12 +1,11 @@
 import * as assert from 'assert';
-// import * as cookies from 'cookies';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
 
-import { OpaqueSessionProvider } from '../src/provider/opaque';
+import { StatelessSessionProvider } from '../src/provider/stateless';
 import { Session } from '../src/types';
 import { SessionConfig } from '../src/config';
 
@@ -15,7 +14,7 @@ import { SessionConfig } from '../src/config';
 export class EncoderTest {
 
   @Inject()
-  instance: OpaqueSessionProvider;
+  instance: StatelessSessionProvider;
 
   @Inject()
   config: SessionConfig;

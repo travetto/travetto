@@ -2,6 +2,7 @@ import { StreamUtil } from '@travetto/boot';
 import { Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
@@ -163,7 +164,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async describeStream(location: string) {
     const metas = this.find('_streams_meta', location, 'notfound');
-    return JSON.parse(metas.get(location)!.toString('utf8')) as StreamMeta;
+    return JSONUtil.parse<StreamMeta>(metas.get(location)!);
   }
 
   async deleteStream(location: string) {

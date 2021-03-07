@@ -1,4 +1,6 @@
 import * as crypto from 'crypto';
+
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 import { Util } from '@travetto/base';
 import { CoreCacheConfig } from './types';
 
@@ -13,15 +15,11 @@ export class CacheUtil {
    * @param all Should functions and regex be included
    */
   static toSafeJSON(value: unknown, all = false) {
-    if (value === null || value === undefined) {
-      return value;
-    }
-
     const replacer = all ?
       ((key: string, val: unknown) => (Util.isFunction(val) || val instanceof RegExp) ? (val as RegExp)?.source : val) :
       undefined;
 
-    return Buffer.from(JSON.stringify(value, replacer), 'utf8').toString('base64');
+    return Buffer.from(JSON.stringify(value, replacer)).toString('base64');
   }
 
   /**
@@ -29,7 +27,7 @@ export class CacheUtil {
    * @param value The value to read as safe JSON
    */
   static fromSafeJSON(value: string) {
-    return value ? JSON.parse(Buffer.from(value, 'base64').toString('utf8')) : value;
+    return JSONUtil.parse(Buffer.from(value, 'base64').toString('utf8'));
   }
 
   /**

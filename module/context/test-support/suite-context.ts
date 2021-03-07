@@ -1,6 +1,7 @@
 import { DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/base';
 import { SuiteRegistry } from '@travetto/test';
+import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { AsyncContext } from '../src/service';
 
@@ -20,7 +21,7 @@ export function WithSuiteContext(data: Record<string, unknown> = {}) {
             const og = this[t.methodName] as Function;
             // eslint-disable-next-line no-shadow
             const fn = function (this: unknown) {
-              return ctx.run(og.bind(this), JSON.parse(JSON.stringify(data)));
+              return ctx.run(og.bind(this), JSONUtil.clone(data));
             };
             Object.defineProperty(fn, 'name', { value: t.methodName });
             this[t.methodName] = fn;
