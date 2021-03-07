@@ -97,9 +97,9 @@ export class AssembleUtil {
         }
       }
     }
-    await fs.copyFile(
-      PathUtil.resolveUnix(require.resolve('@travetto/boot/register.js')),
-      PathUtil.resolveUnix(workspace, 'node_modules/@travetto/boot/register.js')
+    await FsUtil.copyRecursiveSync(
+      PathUtil.resolveUnix(require.resolve('@travetto/boot/bin')),
+      PathUtil.resolveUnix(workspace, 'node_modules/@travetto/boot/bin')
     );
   }
 

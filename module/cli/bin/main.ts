@@ -38,6 +38,6 @@ async function compile() {
 export async function main() {
   await verifyLocal();
   await compile();
-  (await import('@travetto/cli/src/execute'))
-    .ExecutionManager.run(process.argv); // Run cli
+  const { ExecutionManager } = await import('@travetto/cli/src/execute');
+  return ExecutionManager.run(process.argv); // Run cli
 }

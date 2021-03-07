@@ -14,9 +14,6 @@ import { PathUtil } from '../path';
 export const Module = Mod as unknown as ModType;
 
 declare const global: {
-  trvInit?: {
-    reset: () => void;
-  };
   ᚕsrc: (f: string) => string;
 };
 
@@ -26,6 +23,7 @@ declare const global: {
 export class CompileUtil {
   private static moduleLoad = Module._load!.bind(Module);
   private static resolveFilename = Module._resolveFilename!.bind(Module);
+  private static initialized = false;
 
   static readonly transpile: (filename: string) => string;
 
@@ -79,7 +77,7 @@ export class CompileUtil {
    * Enable compile support
    */
   static init() {
-    if (global.trvInit) {
+    if (this.initialized) {
       return;
     }
 
@@ -112,7 +110,7 @@ export class CompileUtil {
     Module._load = (req, p) => this.onModuleLoad(req, p);
     require.extensions[SourceUtil.EXT] = this.compile.bind(this);
 
-    global.trvInit = this;
+    this.initialized = true;
   }
 
   /**
@@ -130,12 +128,12 @@ export class CompileUtil {
    * Turn off compile support
    */
   static reset() {
-    if (!global.trvInit) {
+    if (!this.initialized) {
       return;
     }
 
     delete require.extensions[SourceUtil.EXT];
-    delete global.trvInit;
+    this.initialized = false;
     Module._load = this.moduleLoad;
     Module._resolveFilename = this.resolveFilename;
     ModuleUtil.reset();

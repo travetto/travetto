@@ -1,9 +1,6 @@
-import { PhaseManager } from '@travetto/base';
+import { ChildCommChannel } from '../../src/comm/child';
 
 export async function main() {
-  await PhaseManager.run('init');
-
-  const { ChildCommChannel } = await import('../../src/comm/child');
   const exec = new ChildCommChannel<{ data: string }>();
 
   exec.listenFor('request', data => {

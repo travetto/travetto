@@ -60,5 +60,10 @@ ${Code('Various log levels', 'doc/output.ts')}
 
 The corresponding output would be
 
-${Execute('Logging output', 'doc/output.ts')}
+${Execute('Logging output', 'doc/output.ts', [], {
+  env: {
+    TRV_DEBUG: '*',
+    TRV_LOG_PLAIN = '0'
+  }
+})}
 `;

@@ -1,9 +1,5 @@
-import { PhaseManager } from '@travetto/base';
+import { Test } from './person-binding';
 
 export async function main() {
-  await PhaseManager.run('init');
-
-  const { Test } = await import('./person-binding');
-
   console.log!(Test());
 }

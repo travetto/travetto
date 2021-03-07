@@ -1,5 +1,3 @@
-import { StacktraceUtil } from '@travetto/base';
-
 function inner3() {
   throw new Error('Uh oh');
 }
@@ -18,8 +16,7 @@ async function test() {
 
 export function main() {
   process.on('unhandledRejection', (err: unknown) => {
-    StacktraceUtil.init();
-    console!.log(StacktraceUtil.simplifyStack(err as Error));
+    console.log(err);
   });
 
   test();
