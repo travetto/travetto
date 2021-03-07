@@ -71,7 +71,7 @@ At runtime the resolved config would be:
       <figcaption class="terminal">Runtime Resolution
       
       </figcaption>
-      <pre><code class="language-bash">$ node -r @travetto/boot/register ./doc/resolve.ts
+      <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/resolve.ts
 
 Config <span class="token punctuation">{{'{'}}</span>
   database: <span class="token punctuation">{{'{'}}</span>
@@ -113,12 +113,12 @@ Using the above config files, the resultant object would be:
       <figcaption class="terminal">Resolved database config
       
       </figcaption>
-      <pre><code class="language-bash">$ node -r @travetto/boot/register ./doc/dbconfig-run.ts
+      <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/dbconfig-run.ts
 
 DBConfig <span class="token punctuation">{{'{'}}</span>
-  host: <span class="token string">'prod - host - db'</span>,
+  host: <span class="token string">'localhost'</span>,
   port: undefined,
-  creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'admin - user'</span>, password: <span class="token string">'test'</span> <span class="token punctuation">{{'}'}}</span>
+  creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'test'</span>, password: <span class="token string">'test'</span> <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 </div>

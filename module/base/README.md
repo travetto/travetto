@@ -164,26 +164,27 @@ async function test() {
   await inner1();
 }
 
-process.on('unhandledRejection', (err: unknown) => {
-  StacktraceUtil.init();
-  console!.log(StacktraceUtil.simplifyStack(err as Error));
-});
+export function main() {
+  process.on('unhandledRejection', (err: unknown) => {
+    console.log(StacktraceUtil.simplifyStack(err as Error));
+  });
 
-test();
+  test();
+}
 ```
 
 Will produce the following stack trace:
 
-**Terminal: tack trace from async errors**
+**Terminal: Stack trace from async errors**
 ```bash
-$ node -r @travetto/boot/register ./doc/stack-test.ts
+$ node @travetto/base/bin/main ./doc/stack-test.ts 
 
 Error: Uh oh  
     at inner3 (./doc/stack-test.ts:4:9)  
     at inner2 (./doc/stack-test.ts:8:16)  
     at inner1 (./doc/stack-test.ts:12:16)  
     at test (./doc/stack-test.ts:16:9)  
-    at Object.<anonymous> (./doc/stack-test.ts:24:1)
+    at Object.main (./doc/stack-test.ts:24:3)
 ```
 
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.

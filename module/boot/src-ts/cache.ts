@@ -80,6 +80,14 @@ export class FileCache {
   }
 
   /**
+   * Read optional entry from disk, undefined if missing
+   * @param local Read the entry given the local name
+   */
+  readOptionalEntry(local: string): string | undefined {
+    return this.hasEntry(local) ? this.readEntry(local) : undefined;
+  }
+
+  /**
    * Delete expired entries
    * @param full The local location
    * @param force Should deletion be force

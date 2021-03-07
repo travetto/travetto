@@ -34,10 +34,11 @@ export class LineFormatter implements Formatter {
   private opts: LineFormatterOpts;
 
   constructor(opts: LineFormatterOpts = {}) {
+    const notPlain = EnvUtil.isFalse('TRV_LOG_PLAIN');
     this.opts = {
-      colorize: ColorUtil.colorize,
-      timestamp: EnvUtil.isValueOrFalse('TRV_LOG_TIME', ['s', 'ms'] as const, 'ms'),
-      align: true, level: true, location: true,
+      colorize: notPlain && ColorUtil.colorize,
+      timestamp: notPlain ? EnvUtil.isValueOrFalse('TRV_LOG_TIME', ['s', 'ms'] as const, 'ms') : undefined,
+      align: true, level: notPlain, location: notPlain,
       ...opts
     };
   }

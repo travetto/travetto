@@ -4,7 +4,7 @@ Entry Points
 Within the @travetto framework, there are two main entry points into the system.  
 
 - CLI actions
-- Direct invocation
+- Main invocation
 
 ## Commonalities
 
@@ -17,20 +17,21 @@ Additionally, because of the symlink behavior, and that the issue only applies t
 
 Within the framework, we expose CLI actions through the various modules.  These actions allow for simple and organized access to common tasks. Given that these are directly invoked, there is not special requirements.  
 
-## Direct Invocation
+## Main Invocation
 
-This is assumed that the caller knows what they are doing. The user is required to target `@travetto/boot/register` and pass the entry point as `TRV_ENTRY`.  The entry target must have an exported method `entry` for this to work.
+This is assumed that the caller knows what they are doing. The user is required to invoke `node @travetto/boot/bin/main {file}`.  The entry target must have an exported method `main` for this to work.  One can also use `node @travetto/base/bin/main {file}` to have the bootstrapping phase automatically completed before the script executes.
 
 ## Inventory 
 t = typescript, i = init, r = run, a = await
 
 * boot/ (Used as a bootstrap, when running script run as app)
   ------------------------------------------------------
-  [t   ] ./register.js                
+  [t   ] ./bin/register.js                
+  [t   ] ./bin/main.js                
 
 * cli/bin (Run cli)
   ------------------------------------------------------
-  [t   ] ./travetto.js
+  [t   ] ./trv.js
 
 * compiler/bin (Run app to establish all transformers)
   ------------------------------------------------------
@@ -48,17 +49,17 @@ t = typescript, i = init, r = run, a = await
   ------------------------------------------------------
   [t   ] ./index.js                        
 
-* model-elasticsearch/bin (Run app to collect data)
+* model/bin (Run app to collect data)
   ------------------------------------------------------
-  [ ira] ./cli-es_schema.ts [ lib.js - getSchemas ] 
+  [ ira] ./cli-model_schema.ts [ lib.js - getSchemas ] 
 
 * rest-aws-lambda/bin (Run app to collect data)
   ------------------------------------------------------
   [ ira] ./cli-rest-aws-lambda_build-sam.ts  
 
-* swagger/bin  (Run app to collect data)
+* openapi/bin  (Run app to collect data)
   ------------------------------------------------------
-  [ ira] ./cli-swagger-client.ts [ lib.js ] 
+  [ ira] ./cli-openapi-client.ts [ lib.js ] 
 
 * test/bin (Initialize compiler, not loading transformers)
   ------------------------------------------------------

@@ -1,3 +1,4 @@
+import * as sourceMapSupport from 'source-map-support';
 import { EventEmitter } from 'events';
 
 import { PathUtil, EnvUtil } from '@travetto/boot';
@@ -47,6 +48,11 @@ class $Compiler {
       // Enhance transpilation, with custom transformations
       CompileUtil.setTranspiler(this.transpile.bind(this));
     }
+
+    // Update source map support to read from tranpsiler cache
+    sourceMapSupport.install({
+      retrieveFile: p => this.transpiler.getContents(PathUtil.toUnixTs(p))!
+    });
 
     console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
   }

@@ -18,14 +18,16 @@ This module  is the base file system watching support for [Travetto](https://tra
 ```typescript
 import { Watcher } from '@travetto/watch';
 
-const watcher = new Watcher('base/path/to/...')
-  .on('all', ({ event, entry }) => {
-    if (entry.file.endsWith('.config') || entry.file.endsWith('.config.json')) {
-      console.log('File Event', { event, file: entry.file });
-    }
-  });
+export function main() {
+  const watcher = new Watcher('base/path/to/...')
+    .on('all', ({ event, entry }) => {
+      if (entry.file.endsWith('.config') || entry.file.endsWith('.config.json')) {
+        console.log('File Event', { event, file: entry.file });
+      }
+    });
 
-setTimeout(() => watcher.close(), 1000);
+  setTimeout(() => watcher.close(), 1000);
+}
 ```
 
 ## Retargetting Proxy

@@ -60,7 +60,7 @@ At runtime the resolved config would be:
 
 **Terminal: Runtime Resolution**
 ```bash
-$ node -r @travetto/boot/register ./doc/resolve.ts
+$ node @travetto/boot/bin/main ./doc/resolve.ts 
 
 Config {
   database: {
@@ -98,11 +98,11 @@ Using the above config files, the resultant object would be:
 
 **Terminal: Resolved database config**
 ```bash
-$ node -r @travetto/boot/register ./doc/dbconfig-run.ts
+$ node @travetto/boot/bin/main ./doc/dbconfig-run.ts 
 
 DBConfig {
-  host: 'prod - host - db',
+  host: 'localhost',
   port: undefined,
-  creds: { user: 'admin - user', password: 'test' }
+  creds: { user: 'test', password: 'test' }
 }
 ```

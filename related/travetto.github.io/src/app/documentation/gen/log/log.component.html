@@ -118,13 +118,15 @@ The logging output, as indicated provides context for location of invocation. Gi
       <figcaption class="code">Various log levels
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/log/doc/output.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Hello World'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Hello World'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Woah!'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> a<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> b<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> c<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> d<span class="token operator">:</span> <span class="token number">10</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Woah!'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> a<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> b<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> c<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> d<span class="token operator">:</span> <span class="token number">10</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">'Woah!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">'Woah!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">'Test'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>     
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">'Test'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 The corresponding output would be
@@ -133,11 +135,11 @@ The corresponding output would be
       <figcaption class="terminal">Logging output
       
       </figcaption>
-      <pre><code class="language-bash">$ node -r @travetto/boot/register ./doc/output.ts
+      <pre><code class="language-bash">$ node @travetto/base/bin/main ./doc/output.ts
 
-Hello World
-Woah<span class="token operator">!</span> <span class="token punctuation">{{'{'}}</span> a: <span class="token punctuation">{{'{'}}</span> b: <span class="token punctuation">{{'{'}}</span> c: <span class="token punctuation">[</span>Object<span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
-Woah<span class="token operator">!</span>
-Test</code></pre>     
+<span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:log/doc/output:2<span class="token punctuation">]</span> Hello World
+<span class="token number">2021</span>-03-14T05:00:00.837Z info  <span class="token punctuation">[</span>@trv:log/doc/output:4<span class="token punctuation">]</span> Woah<span class="token operator">!</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token number">2021</span>-03-14T05:00:01.510Z info  <span class="token punctuation">[</span>@trv:log/doc/output:6<span class="token punctuation">]</span> Woah<span class="token operator">!</span>
+<span class="token number">2021</span>-03-14T05:00:02.450Z debug <span class="token punctuation">[</span>@trv:log/doc/output:8<span class="token punctuation">]</span> Test</code></pre>     
       </figure>
 </div>

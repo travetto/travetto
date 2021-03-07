@@ -141,8 +141,8 @@ To invoke the `simple` application, you need to pass `domain` where port is opti
 ```bash
 $ trv run simple-domain mydomain.biz 4000
 
-2021-03-14T05:00:00.618Z info  [@trv:app/registry:30] Running application { name: 'simple-domain', filename: './doc/domain.ts' }
-2021-03-14T05:00:00.837Z info  [@trv:app/registry:34] Configured {
+Running application { name: 'simple-domain', filename: './doc/domain.ts' }
+Configured {
   info: {
     name: '@travetto/app',
     description: 'Application registration/management and run support.',
@@ -184,7 +184,7 @@ $ trv run simple-domain mydomain.biz 4000
   },
   config: {}
 }
-2021-03-14T05:00:01.510Z info  [@trv:app/doc/domain:6] Launching { domain: 'mydomain.biz', port: 4000 }
+Launching { domain: 'mydomain.biz', port: 4000 }
 ```
 
 ## Type Checking
@@ -195,16 +195,13 @@ The parameters to `run` will be type checked, to ensure proper evaluation.
 ```bash
 $ trv run simple-domain mydomain.biz orange
 
-Failed application run {
-  error: Error: Invalid parameter port: Received orange, but exepcted number
-      at Function.enforceParamType (./src/util.ts:19:13)
-      at ./src/registry.ts:45:79
-      at Array.map (<anonymous>)
-      at $ApplicationRegistry.resolveParameters (./src/registry.ts:45:24)
-      at Function.run (./bin/lib/run.ts:36:31)
-      at processTicksAndRejections (node:internal/process/task_queues:94:5)
-      at AppRunPlugin.action (./bin/cli-run.ts:55:11)
-}
+Failed application run
+ Error: Invalid parameter port: Received orange, but exepcted number  
+    at Function.enforceParamType (./src/util.ts:19:13)  
+    at ./src/registry.ts:45:79  
+    at $ApplicationRegistry.resolveParameters (./src/registry.ts:45:24)  
+    at Function.run (./bin/lib/run.ts:40:31)  
+    at AppRunPlugin.action (./bin/cli-run.ts:56:11)
 ```
 
 The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) 

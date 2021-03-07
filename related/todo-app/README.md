@@ -303,7 +303,7 @@ $ ./doc/startup.sh
   },
   source: {
     common: [ 'src' ],
-    local: [ '^doc' ],
+    local: [ 'doc' ],
     excludeModules: Set(3) { '@travetto/cli', '@travetto/doc', '@travetto/boot' },
     dynamicModules: {
       '@travetto/app': '/home/tim/Code/travetto/module/app',

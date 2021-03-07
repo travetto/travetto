@@ -141,9 +141,9 @@ The final template will render as:
 
 **Terminal: Final Output, with styling removed**
 ```bash
-$ node -r @travetto/boot/register ./doc/render.ts
+$ node @travetto/base/bin/main ./doc/render.ts 
 
-2021-03-14T05:00:00.618Z info  [@trv:email-template/doc/render:11] <!DOCTYPE html><html>
+<!DOCTYPE html><html>
 
 <body>
 

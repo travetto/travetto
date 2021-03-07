@@ -147,7 +147,7 @@ and the output would be a <code class="item input">Person</code> instance with t
       <figcaption class="terminal">Sample data output after binding
       
       </figcaption>
-      <pre><code class="language-bash">$ node -r @travetto/boot/register ./doc/person-output.js
+      <pre><code class="language-bash">$ node @travetto/base/bin/main ./doc/person-output.ts
 
 Person <span class="token punctuation">{{'{'}}</span>
   name: <span class="token string">'Test'</span>,
@@ -213,7 +213,7 @@ would produce an exception similar to following structure
       <figcaption class="terminal">Sample error output
       
       </figcaption>
-      <pre><code class="language-bash">$ node -r @travetto/boot/register ./doc/person-invalid-output.js
+      <pre><code class="language-bash">$ node @travetto/base/bin/main ./doc/person-invalid-output.ts
 
 Validation Failed <span class="token punctuation">{{'{'}}</span>
   <span class="token string">"errors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
@@ -452,7 +452,7 @@ All that happens now, is the type is exported, and the class above is able to pr
       <figcaption class="terminal">Custom Type Validation
       
       </figcaption>
-      <pre><code class="language-bash">$ node -r @travetto/boot/register ./doc/custom-type-output.js
+      <pre><code class="language-bash">$ node @travetto/base/bin/main ./doc/custom-type-output.ts
 
 Validation Failed <span class="token punctuation">{{'{'}}</span>
   <span class="token string">"errors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
