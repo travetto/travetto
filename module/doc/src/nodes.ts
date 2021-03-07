@@ -8,6 +8,7 @@ type Content = DocNode | string;
 
 export const Text = (text: string) => ({ _type: 'text' as const, content: text });
 type TextType = ReturnType<typeof Text>;
+type ExecConfig = Parameters<(typeof DocUtil)['run']>[2] & { module?: 'base' | 'boot' };
 
 function $c(val: string): TextType;
 function $c(val: DocNode | string): DocNode;
@@ -41,12 +42,13 @@ export function SnippetLink(title: Content, file: string, startPattern: RegExp) 
   return $n('file', { title: $c(title), link: $c(res.file), line: res.line });
 }
 
-export function Execute(title: Content, cmd: string, args: string[] = [], cfg: Parameters<(typeof DocUtil)['run']>[2] = {}) {
+export function Execute(title: Content, cmd: string, args: string[] = [], cfg: ExecConfig = {}) {
   if (cmd !== 'trv') {
     cmd = DocUtil.resolveFile(cmd).resolved.replace(PathUtil.cwd, '.');
     if (/.*\/doc\/.*[.]ts$/.test(cmd)) {
-      const main = DocUtil.run('node', [require.resolve('@travetto/boot/register'), cmd, ...args], cfg);
-      return Terminal(title, `$ node @travetto/boot/register ${cmd} ${args.join(' ')}\n\n${main}`);
+      const mod = cfg.module ?? 'base';
+      const main = DocUtil.run('node', [require.resolve(`@travetto/${mod}/bin/main`), cmd, ...args], cfg);
+      return Terminal(title, `$ node @travetto/${mod}/bin/main ${cmd} ${args.join(' ')}\n\n${main}`);
     }
   }
   const script = DocUtil.run(cmd, args, cfg);

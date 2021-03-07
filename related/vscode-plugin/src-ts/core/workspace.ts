@@ -97,8 +97,8 @@ export class Workspace {
         '<node_internals>/**',
         '**/@travetto/context/**/*',
         '**/@travetto/watch/**/*',
-        '**/tslib/**/*',
-        '**/@travetto/boot/**/*'
+        '**/@travetto/**/internal/*',
+        '**/tslib/**/*'
       ],
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',

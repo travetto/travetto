@@ -10,13 +10,14 @@ const path = require('path');
   .$map(x => fs.unlinkSync(x))
   .$collect()
   .$tap(async () => {
-    await fs.promises.mkdir(path.resolve('.bin')).catch(() => { });
-    await fs.promises.mkdir(path.resolve('node_modules/@travetto')).catch(() => { });
-    await fs.promises.mkdir(path.resolve('node_modules/@travetto/boot')).catch(() => { });
+    for (const d of ['.bin', 'node_modules/@travetto', 'node_modules/@travetto/boot', 'node_modules/@travetto/boot/bin']) {
+      await fs.promises.mkdir(path.resolve(d)).catch(() => { });
+    }
   })
   .$forEach(async () =>
     [
-      ['module/boot/register.js', 'node_modules/@travetto/boot/register.js'],
+      ['module/boot/bin/register.js', 'node_modules/@travetto/boot/bin/register.js'],
+      ['module/boot/bin/main.js', 'node_modules/@travetto/boot/bin/main.js'],
       ['module/cli/bin/trv.js', '.bin/trv'],
     ]
       .$concat(

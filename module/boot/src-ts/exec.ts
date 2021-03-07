@@ -199,8 +199,8 @@ export class ExecUtil {
     // Always register for the fork
     const opts = this.getOpts(options);
     file = file.replace(/[.]js$/, '.ts');
-    const p = spawn(process.argv0, [require.resolve('../register'), file, ...args], opts);
-    const result = this.enhanceProcess(p, options, `@travetto/boot/register ${file} ${args.join(' ')}`);
+    const p = spawn(process.argv0, [require.resolve('@travetto/boot/bin/main'), file, ...args], opts);
+    const result = this.enhanceProcess(p, options, `@travetto/boot/bin/main ${file} ${args.join(' ')}`);
     return { process: p, result };
   }
 
@@ -269,7 +269,7 @@ export class ExecUtil {
    */
   static workerEntry<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
     file = file.replace(/[.]js$/, '.ts');
-    return this.worker<T>(require.resolve('../register'), [file, ...args], options);
+    return this.worker<T>(require.resolve('@travetto/boot/bin/main'), [file, ...args], options);
   }
 
   /**

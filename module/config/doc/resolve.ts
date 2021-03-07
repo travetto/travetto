@@ -10,6 +10,6 @@ export async function main() {
     }, process.env);
 
   const { ConfigManager } = await import('@travetto/config');
-  await ConfigManager.init();
+  await ConfigManager.load();
   console.log('Config', ConfigManager.get() as Record<string, string>);
 }

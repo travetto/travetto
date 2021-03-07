@@ -4,7 +4,7 @@ import type { AwsLambdaRestApplication } from '../src/extension/aws-lambda';
 let inst: AwsLambdaRestApplication;
 export async function handler(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
   if (!inst) {
-    require('@travetto/boot/register');
+    require('@travetto/boot/bin/register');
 
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');

@@ -1,10 +1,6 @@
-import { PhaseManager } from '@travetto/base';
+import { validate } from './person-binding-invalid';
 
 export async function main() {
-  await PhaseManager.run('init');
-
-  const { validate } = await import('./person-binding-invalid');
-
   try {
     await validate();
   } catch (err) {
