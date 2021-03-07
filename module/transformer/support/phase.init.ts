@@ -1,4 +1,4 @@
-import { SourceUtil } from '@travetto/boot/src/internal';
+import { SourceUtil } from '@travetto/boot/src/internal/source';
 
 declare const global: { ts: unknown }; // Used for transformers
 

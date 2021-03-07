@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as readline from 'readline';
 
 import { ShutdownManager } from '@travetto/base';
-import { SourceCodeIndex } from '@travetto/boot/src/internal';
+import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
 
 /**
  * Simple Test Utilities

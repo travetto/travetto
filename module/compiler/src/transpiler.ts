@@ -3,7 +3,9 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { PathUtil, AppCache } from '@travetto/boot';
-import { ModuleUtil, SourceUtil, TranspileUtil } from '@travetto/boot/src/internal';
+import { ModuleUtil } from '@travetto/boot/src/internal/module';
+import { SourceUtil } from '@travetto/boot/src/internal/source';
+import { TranspileUtil } from '@travetto/boot/src/internal/transpile';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';

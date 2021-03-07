@@ -541,4 +541,4 @@ class UserController {
 
 ## Extension - Model Query
 
-Additionally, [Data Model Querying](https://github.com/travetto/travetto/tree/master/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L38). This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
+Additionally, [Data Model Querying](https://github.com/travetto/travetto/tree/master/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L42). This provides listing by query as well as an endpoint to facillitate suggestion behaviors.

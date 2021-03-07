@@ -1,5 +1,5 @@
 import type { Compiler } from '@travetto/compiler';
-import { SourceCodeIndex } from '@travetto/boot/src/internal';
+import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';

@@ -1,4 +1,4 @@
-import { SourceCodeIndex } from '@travetto/boot/src/internal';
+import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
 
 import { color } from './color';
 import { BasePlugin } from './plugin-base';

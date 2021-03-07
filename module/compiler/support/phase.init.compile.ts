@@ -6,7 +6,7 @@ export const init = {
   after: ['@trv:compiler/init'],
   action: async () => {
     const { AppCache, EnvUtil } = await import('@travetto/boot');
-    const { SourceCodeIndex } = await import('@travetto/boot/src/internal');
+    const { SourceCodeIndex } = await import('@travetto/boot/src/internal/code');
     const { Compiler } = await import('../src/compiler');
 
     if (EnvUtil.isReadonly()) {

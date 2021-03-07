@@ -1,8 +1,7 @@
 import * as ts from 'typescript';
 import * as fs from 'fs';
 
-import { ScanFs } from '@travetto/boot';
-import { NativeUtil } from '@travetto/boot/src/internal';
+import { FsUtil, ScanFs } from '@travetto/boot';
 
 import { VisitorFactory, TransformerState, getAllTransformers } from '..';
 
@@ -26,7 +25,7 @@ export class TranformerTestUtil {
     });
     const log = `${folder}/.trv_compiler.log`;
 
-    await NativeUtil.unlinkRecursive(log, true);
+    await FsUtil.unlinkRecursive(log, true);
 
     const transformers =
       (await ScanFs.scanDir({ testFile: f => f.startsWith('support/transformer') }, folder))
@@ -50,7 +49,7 @@ export class TranformerTestUtil {
       console.info(fs.readFileSync(log, 'utf8'));
     } catch { }
 
-    await NativeUtil.unlinkRecursive(log, true);
+    await FsUtil.unlinkRecursive(log, true);
 
     return out;
   }

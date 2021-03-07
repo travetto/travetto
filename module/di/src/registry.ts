@@ -429,6 +429,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
       this.targetToClass.get(el.ᚕid)!.set(config.qualifier, classId);
       this.classToTarget.get(classId)!.set(Symbol.for(el.ᚕid), el.ᚕid);
+
+      if (config.primary && (classId === targetId || config.factory)) {
+        this.targetToClass.get(el.ᚕid)!.set(PrimaryCandidateSym, classId);
+      }
     }
 
     // If targeting self (default @Injectable behavior)

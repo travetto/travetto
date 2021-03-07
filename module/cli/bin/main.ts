@@ -21,7 +21,8 @@ async function verifyLocal() {
  */
 async function compile() {
   const { AppCache, EnvUtil, } = await import('@travetto/boot');
-  const { CompileUtil, SourceCodeIndex } = await import('@travetto/boot/src/internal');
+  const { CompileUtil } = await import('@travetto/boot/src/internal/compile');
+  const { SourceCodeIndex } = await import('@travetto/boot/src/internal/code');
 
   if (!EnvUtil.isReadonly()) {
     for (const { file } of SourceCodeIndex.find({ folder: 'bin' })) {

@@ -1,13 +1,13 @@
 import { doc as d, mod, Snippet, SnippetLink, Code, Section, SubSection, meth, lib, Header } from '@travetto/doc';
 import { Context } from '@travetto/rest/src/decorator/param';
-import { Cache, CacheService } from '@travetto/cache';
 
 import { Session } from '.';
-import { RequetSessionEncoder } from './src/provider/opaque';
+import { StatelessSessionProvider } from './src/provider/stateless';
+import { ModelSessionProvider } from './src/extension/model';
 
 const Request = SnippetLink('TravettoRequest', 'src/types.d.ts', /interface TravettoRequest/);
 const SessionData = SnippetLink('SessionData', 'src/types.ts', /interface SessionData/);
-const SessionEncoder = SnippetLink('SessionEncoder', 'src/encoder/types.ts', /interface SessionEncoder/);
+const SessionProvider = SnippetLink('SessionProvider', 'src/provider/types.ts', /interface SessionProvider/);
 
 export const text = d`
 ${Header()}
@@ -24,18 +24,18 @@ This usage should be comparable to ${lib.Express}, ${lib.Koa} and mostly every o
 
 ${Section('Configuration')}
 
-Session mechanics are defined by two main components, encoders and a cache source.  The encoders are provided within the module, but the stores are provided via the ${Cache} module.
+Session mechanics are defined by the underlying provider.
 
-By default, the module supplies the ${RequetSessionEncoder} and the ${CacheService} as default usage.
+${SubSection('Building a Provider')}
 
-${SubSection('Building an Encoder')}
+Provider are pieces that enable you manage the session state, including interaction with the request/response. This allows for sessions to be read/written to cookies, headers, url parameters, etc. Additionally, this allows for persisting session data as needed. The structure for the provider is fairly straightforward:
 
-Encoders are pieces that enable you read/write the session state from the request/response.  This allows for sessions to be read/written to cookies, headers, url parameters, etc. The structure for the encoder is fairly straightforward:
+${Code('Provider structure', SessionProvider.link)}
 
-${Code('Encoder structure', SessionEncoder.link)}
+The provider will ${meth`encode`} the session into the response.  The ${meth`decode`} operation will then read the session from the request and reconstruct a fully defined ${Session} object.  This allows for storing the session data externally or internal to the app.
 
-The encoder will ${meth`encode`} the session into the response, as a string.  The ${meth`decode`} operation will then read that string and either produce a session identifier (a string) or a fully defined ${Session} object.  This allows for storing the session data externally or internal to the app, and referencing it by a session identifier.
+${Code('Stateless Session Provider', StatelessSessionProvider.ᚕfile)}
 
-${Code('Standard Request Encoder', RequetSessionEncoder.ᚕfile)}
+${Code('Model Session Provider', ModelSessionProvider.ᚕfile)}
 
 `;

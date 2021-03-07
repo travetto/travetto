@@ -1,4 +1,5 @@
-import { SourceCodeIndex, CompileUtil } from '@travetto/boot/src/internal';
+import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
+import { CompileUtil } from '@travetto/boot/src/internal/compile';
 
 import { SystemUtil } from './internal/system';
 

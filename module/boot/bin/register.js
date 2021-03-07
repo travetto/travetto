@@ -10,5 +10,5 @@ if (!global[sym]) {
     req && require(req);
   }
 
-  require('@travetto/boot/src/internal').CompileUtil.init();
+  require('@travetto/boot/src/internal/compile').CompileUtil.init();
 }

@@ -1,7 +1,7 @@
 import { AppManifest, Class, ShutdownManager } from '@travetto/base';
 import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
 import { FsUtil, PathUtil } from '@travetto/boot';
-import { ModuleUtil } from '@travetto/boot/src/internal';
+import { ModuleUtil } from '@travetto/boot/src/internal/module';
 
 
 import { Compiler } from '../src/compiler';

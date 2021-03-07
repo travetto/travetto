@@ -16,6 +16,7 @@ Supported featrues:
    *  [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1)
    *  [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19)
    *  [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10)
+   *  [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10)
    *  [Query Crud](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/facet.ts#L12)
    *  [Query](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/query.ts#L10)
