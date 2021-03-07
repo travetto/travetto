@@ -39,17 +39,15 @@ if (target && target.startsWith(root)) {
   [
     {
       mod: 'overview', title: 'Building out Overview docs', dir: 'related/overview',
-      mods: [], args: ['-o', path.resolve(root, 'README.md')],
+      markdown: path.resolve(root, 'README.md'),
       html: 'app/documentation/overview/overview.component.html'
     },
     {
       mod: 'todo-app', title: 'Building out Guide docs', dir: 'related/todo-app',
-      mods: [], args: [],
       html: 'app/guide/guide.component.html'
     },
     {
       mod: 'vscode-plugin', title: 'Building out Plugin docs', dir: 'related/vscode-plugin',
-      mods: [], args: [],
       html: 'app/documentation/vscode-plugin/vscode-plugin.component.html'
     },
   ]
@@ -68,25 +66,24 @@ if (target && target.startsWith(root)) {
             mods,
             title: `Building out ${mod} docs`,
             html: 'app/documentation/gen/%MOD/%MOD.component.html',
-            args: [],
             dir: path.dirname(f)
           };
         })
     )
     .$filter(x => target ? x.mod === target : !x.mod.includes('worker'))
     .$parallel(
-      ({ mod, html, title, dir, mods, args }) =>
+      ({ html, markdown, title, dir, mods, args }) =>
         title
           .$tap(console.log)
           .$exec('trv', {
-            args: ['doc', '-o', page(html), '-o', './README.md', ...args],
+            args: ['doc', '-o', page(html), '-o', markdown ?? './README.md', ...(args ?? [])],
             spawn: {
               shell: true,
               detached: true,
               cwd: dir,
               env: {
                 ...process.env,
-                TRV_MODULES: mods.join(',')
+                TRV_MODULES: (mods ?? []).join(',')
               }
             }
 
