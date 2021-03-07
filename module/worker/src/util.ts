@@ -22,7 +22,7 @@ export class WorkUtil {
     }
   ): Worker<X> {
     const channel = new ParentCommChannel<V>(
-      ExecUtil.forkEntry(command, args, { ...opts })
+      ExecUtil.forkMain(command, args, { ...opts })
     );
     return {
       get id() { return channel.id; },

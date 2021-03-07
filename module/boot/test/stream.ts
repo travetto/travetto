@@ -63,7 +63,7 @@ export class StreamUtilTest {
 
   @Test()
   async waitForCompletion() {
-    const state = ExecUtil.forkEntry(await ResourceManager.findAbsolute('long.ts'), ['100000'], { stdio: 'pipe' });
+    const state = ExecUtil.forkMain(await ResourceManager.findAbsolute('long.ts'), ['100000'], { stdio: 'pipe' });
     const stream = await StreamUtil.waitForCompletion(state.process.stdout!, () => state.result);
     const output = (await StreamUtil.toBuffer(stream)).toString('utf8').split(/\n/g);
     assert(output.length >= 100000);

@@ -23,7 +23,7 @@ export class CliAppListUtil {
   static async buildList() {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Compiling', () =>
-        ExecUtil.workerEntry<ApplicationConfig[]>(__filename, ['build'], {
+        ExecUtil.workerMain<ApplicationConfig[]>(__filename, ['build'], {
           env: { TRV_WATCH: '0' }
         }).message
       );
@@ -107,21 +107,17 @@ export class CliAppListUtil {
     }
     return items;
   }
-
-  /**
-   * Handles plugin response
-   */
-  static async run(mode?: string) {
-    try {
-      CliUtil.initEnv({});
-      const list = mode === 'build' ? this.buildList() : this.getList();
-      CliUtil.pluginResponse((await list) ?? []);
-    } catch (err) {
-      CliUtil.pluginResponse(err);
-    }
-  }
 }
 
-export function main(...args: string[]) {
-  CliAppListUtil.run(...args);
+/**
+ * Entry point when run directly
+ */
+export async function main(mode?: 'build') {
+  try {
+    CliUtil.initEnv({});
+    const list = mode === 'build' ? CliAppListUtil.buildList() : CliAppListUtil.getList();
+    CliUtil.pluginResponse((await list) ?? []);
+  } catch (err) {
+    CliUtil.pluginResponse(err);
+  }
 }
