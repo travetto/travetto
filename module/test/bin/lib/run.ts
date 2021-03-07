@@ -15,10 +15,11 @@ export async function runTests(opts: RunState) {
 
 // Direct entry point
 export async function main(...args: string[]) {
-  return runTests({
+  const res = await runTests({
     args,
     format: process.env.TRV_TEST_FORMAT ?? 'tap',
     mode: 'single',
     concurrency: 1
   });
+  process.exit(res);
 }

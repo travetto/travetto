@@ -71,7 +71,7 @@ export class Runner {
     };
 
     await PhaseManager.run('test');
-    const proc = ExecUtil.fork(require.resolve('../../bin/plugin-test'), [file, ...args], { env });
+    const proc = ExecUtil.forkMain(require.resolve('../../bin/lib/run'), [file, ...args], { env });
     proc.process.on('message', e => consumer.onEvent(e));
     await proc.result;
 

@@ -10,7 +10,7 @@ import { CacheUtil } from './util';
 
 export const CacheModelSym = Symbol.for('@trv:cache/model');
 
-const INFINITE_MAX_AGE = '10000-01-01';
+const INFINITE_MAX_AGE = '5000-01-01';
 
 @Model({ autoCreate: false })
 export class CacheRecord {

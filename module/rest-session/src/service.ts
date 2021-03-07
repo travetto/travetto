@@ -1,15 +1,26 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
-import { CacheService } from '@travetto/cache';
 import { Util, AppError, AppManifest } from '@travetto/base';
-import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
+import { ExpiresAt, MemoryModelConfig, MemoryModelService, Model, ModelCrudSupport } from '@travetto/model';
 
 import { SessionSym } from './internal/types';
 import { Session } from './types';
 import { SessionConfig } from './config';
 import { SessionEncoder } from './encoder/types';
+import { Text } from '@travetto/schema';
+import { isExpirySupported } from '@travetto/model/src/internal/service/common';
 
 export const SessionCacheSym = Symbol.for('@trv:session/cache');
+
+@Model({ autoCreate: false })
+export class SessionEntry {
+  id: string;
+  @Text()
+  entry: string;
+  @ExpiresAt()
+  expiresAt: Date;
+  issuedAt: Date;
+}
 
 /**
  * Rest service for supporting the session and managing the session state
@@ -31,7 +42,7 @@ export class RestSessionService {
    * Cache for storing the session
    */
   @Inject({ qualifier: SessionCacheSym, optional: true })
-  cacheSource: CacheService;
+  cacheSource: ModelCrudSupport;
 
   /**
    * Initialize store if none defined
@@ -39,11 +50,13 @@ export class RestSessionService {
   async postConstruct() {
     if (this.cacheSource === undefined) {
       if (!AppManifest.prod) {
-        this.cacheSource = new CacheService(new MemoryModelService(new MemoryModelConfig()));
+        this.cacheSource = new MemoryModelService(new MemoryModelConfig());
         console.warn('No session cache defined, falling back to in-memory cache. This is not intended for production session use');
       } else {
         throw new AppError('In-memory cache is not intended for production session use', 'general');
       }
+    } else if (!isExpirySupported(this.cacheSource)) {
+      throw new AppError(`Cache source must provide expiry support, ${this.cacheSource.constructor.name} does  not`);
     }
   }
 
@@ -54,7 +67,7 @@ export class RestSessionService {
     if (session.isExpired()) { // Time has passed
       return false;
     }
-    return !!(await this.cacheSource.getOptional(session.key));
+    return !!(await this.cacheSource.get(SessionEntry, session.key).catch(() => { }));
   }
 
   /**
@@ -74,7 +87,7 @@ export class RestSessionService {
     // Read session as an id or as a full payload
     if (sessionKey) {
       if (typeof sessionKey === 'string') {
-        session = await this.cacheSource.get(sessionKey);
+        session = JSON.parse((await this.cacheSource.get(SessionEntry, sessionKey)).entry);
       } else if ('id' in sessionKey) { // Is a session object
         session = sessionKey;
       }
@@ -87,7 +100,7 @@ export class RestSessionService {
       if (await this.validate(session)) {
         req[SessionSym] = session;
       } else {
-        await this.cacheSource.delete(session.key); // Invalid session, nuke it
+        await this.cacheSource.delete(SessionEntry, session.key); // Invalid session, nuke it
         req[SessionSym] = new Session({ action: 'destroy' });
       }
     }
@@ -120,7 +133,7 @@ export class RestSessionService {
 
       // If changed, update
       if (session.isChanged()) {
-        await this.cacheSource.set(session.key, session);
+        await this.cacheSource.update(SessionEntry, SessionEntry.from({ entry: JSON.stringify(session), id: session.key }));
       }
       // If expiration time has changed, send new session information
       if (session.isTimeChanged()) {
@@ -128,7 +141,7 @@ export class RestSessionService {
       }
       // If destroying
     } else if (session.key) { // If destroy and id
-      await this.cacheSource.delete(session.key);
+      await this.cacheSource.delete(SessionEntry, session.key);
       await this.encoder.encode(req, res, null);
     }
   }

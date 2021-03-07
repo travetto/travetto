@@ -4,11 +4,11 @@ import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
 import { ModelExpirySupport } from '@travetto/model';
 import { Inject, Injectable } from '@travetto/di';
+import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 import { Cache, EvictCache } from '../src/decorator';
 import { CacheService } from '../src/service';
 import { CacheUtil } from '../src/util';
-import { InjectableSuite } from '@travetto/di/test-support/suite';
 
 const wait = (n: number) => new Promise(res => setTimeout(res, n));
 

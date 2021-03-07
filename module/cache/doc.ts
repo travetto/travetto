@@ -1,12 +1,16 @@
-import { doc as d, Code, Section, List, inp, meth, mod, SubSection, lib, Install, SnippetLink, Header } from '@travetto/doc';
+import { doc as d, Code, Section, List, inp, meth, mod, SubSection, lib, Install, Header } from '@travetto/doc';
 import { FileModelService, MemoryModelService } from '@travetto/model';
 import { DynamoDBModelService } from '@travetto/model-dynamodb';
+import { MongoModelService } from '@travetto/model-mongo';
+import { ElasticsearchModelService } from '@travetto/model-elasticsearch';
 import { RedisModelService } from '@travetto/model-redis';
 
 import { Links } from '@travetto/model/support/doc-support';
 
 import { Cache, EvictCache } from './src/decorator';
 import { CacheModelSym, CacheService } from './src/service';
+import { SQLModelService } from '@travetto/model-sql';
+import { S3ModelService } from '@travetto/model-s3';
 
 export const text = d`
 ${Header()}
@@ -19,9 +23,13 @@ ${Install('provider', `@travetto/model-{provider}`)}
 
 Currently, the following are packages that provide ${Links.Expiry}:
 ${List(
-  d`@travetto/model - ${FileModelService}, ${MemoryModelService}`,
-  d`@travetto/model-dynamodb - ${DynamoDBModelService}`,
-  d`@travetto/model-redis - ${RedisModelService}`,
+  d`${mod.Model} - ${FileModelService}, ${MemoryModelService}`,
+  d`${mod.ModelDynamodb} - ${DynamoDBModelService}`,
+  d`${mod.ModelElasticsearch} - ${ElasticsearchModelService}`,
+  d`${mod.ModelMongo} - ${MongoModelService}`,
+  d`${mod.ModelRedis} - ${RedisModelService}`,
+  d`${mod.ModelS3} - ${S3ModelService}`,
+  d`${mod.ModelSql} - ${SQLModelService}`,
 )}
 
 ${Section('Decorators')}

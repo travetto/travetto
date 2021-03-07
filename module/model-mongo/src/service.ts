@@ -31,6 +31,7 @@ import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
+import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
@@ -46,7 +47,7 @@ export class MongoModelService implements
   ModelBulkSupport, ModelStreamSupport,
   ModelIndexedSupport, ModelQuerySupport,
   ModelQueryCrudSupport, ModelQueryFacetSupport,
-  ModelQuerySuggestSupport {
+  ModelQuerySuggestSupport, ModelExpirySupport {
 
   private client: mongo.MongoClient;
   private db: mongo.Db;
