@@ -103,7 +103,7 @@ export class CompileUtil {
     // Register source maps for cached files
     sourceMapSupport.install({
       emptyCacheBetweenOperations: EnvUtil.isWatch(),
-      retrieveFile: (p: string) => AppCache.hasEntry(p) ? AppCache.readEntry(p) : undefined!
+      retrieveFile: p => AppCache.readOptionalEntry(PathUtil.toUnixTs(p))!
     });
 
     // Supports bootstrapping with framework resolution

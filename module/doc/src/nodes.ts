@@ -8,7 +8,7 @@ type Content = DocNode | string;
 
 export const Text = (text: string) => ({ _type: 'text' as const, content: text });
 type TextType = ReturnType<typeof Text>;
-type ExecConfig = Parameters<(typeof DocUtil)['run']>[2] & { module?: 'base' | 'boot' };
+type ExecConfig = Parameters<(typeof DocUtil)['run']>[2] & { module?: 'base' | 'boot', filter?: (c: string) => boolean };
 
 function $c(val: string): TextType;
 function $c(val: DocNode | string): DocNode;
@@ -47,7 +47,10 @@ export function Execute(title: Content, cmd: string, args: string[] = [], cfg: E
     cmd = DocUtil.resolveFile(cmd).resolved.replace(PathUtil.cwd, '.');
     if (/.*\/doc\/.*[.]ts$/.test(cmd)) {
       const mod = cfg.module ?? 'base';
-      const main = DocUtil.run('node', [require.resolve(`@travetto/${mod}/bin/main`), cmd, ...args], cfg);
+      let main = DocUtil.run('node', [require.resolve(`@travetto/${mod}/bin/main`), cmd, ...args], cfg);
+      if (cfg.filter) {
+        main = main.split(/\n/g).filter(cfg.filter).join('\n');
+      }
       return Terminal(title, `$ node @travetto/${mod}/bin/main ${cmd} ${args.join(' ')}\n\n${main}`);
     }
   }

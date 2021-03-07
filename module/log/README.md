@@ -104,23 +104,25 @@ The logging output, as indicated provides context for location of invocation. Gi
 
 **Code: Various log levels**
 ```typescript
-console.log('Hello World');
+export async function main() {
+  console.log('Hello World');
 
-console.log('Woah!', { a: { b: { c: { d: 10 } } } });
+  console.log('Woah!', { a: { b: { c: { d: 10 } } } });
 
-console.info('Woah!');
+  console.info('Woah!');
 
-console.debug('Test');
+  console.debug('Test');
+}
 ```
 
 The corresponding output would be
 
 **Terminal: Logging output**
 ```bash
-$ node -r @travetto/boot/register ./doc/output.ts
+$ node @travetto/base/bin/main ./doc/output.ts 
 
-Hello World
-Woah! { a: { b: { c: [Object] } } }
-Woah!
-Test
+2021-03-14T05:00:00.618Z info  [@trv:log/doc/output:2] Hello World
+2021-03-14T05:00:00.837Z info  [@trv:log/doc/output:4] Woah! {
+2021-03-14T05:00:01.510Z info  [@trv:log/doc/output:6] Woah!
+2021-03-14T05:00:02.450Z debug [@trv:log/doc/output:8] Test
 ```

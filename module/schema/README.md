@@ -135,7 +135,7 @@ and the output would be a `Person` instance with the following structure
 
 **Terminal: Sample data output after binding**
 ```bash
-$ node -r @travetto/boot/register ./doc/person-output.js
+$ node @travetto/base/bin/main ./doc/person-output.ts 
 
 Person {
   name: 'Test',
@@ -195,7 +195,7 @@ would produce an exception similar to following structure
 
 **Terminal: Sample error output**
 ```bash
-$ node -r @travetto/boot/register ./doc/person-invalid-output.js
+$ node @travetto/base/bin/main ./doc/person-invalid-output.ts 
 
 Validation Failed {
   "errors": [
@@ -423,7 +423,7 @@ All that happens now, is the type is exported, and the class above is able to pr
 
 **Terminal: Custom Type Validation**
 ```bash
-$ node -r @travetto/boot/register ./doc/custom-type-output.js
+$ node @travetto/base/bin/main ./doc/custom-type-output.ts 
 
 Validation Failed {
   "errors": [

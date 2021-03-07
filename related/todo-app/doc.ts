@@ -7,6 +7,8 @@ import { Model } from '@travetto/model';
 
 const ModelType = SnippetLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 
+process.env.TRV_LOG_PLAIN = '0';
+
 export const toc = 'Overview';
 export const text = d`
 ${RawHeader('Getting Started: A Todo App')}

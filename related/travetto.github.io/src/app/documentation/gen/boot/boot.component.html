@@ -73,6 +73,11 @@ The class organization looks like:
      */</span>
     <span class="token function">readEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
     <span class="token comment">/**
+     * Read optional entry from disk, undefined if missing
+     * @param local Read the entry given the local name
+     */</span>
+    <span class="token function">readOptionalEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
      * Delete expired entries
      * @param full The local location
      * @param force Should deletion be force

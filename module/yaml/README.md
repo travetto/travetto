@@ -16,24 +16,26 @@ In the desire to provide a minimal footprint, the framework provides a minimal [
 ```typescript
 import { YamlUtil } from '@travetto/yaml';
 
-const obj = YamlUtil.parse(`
-name: Source
-age: 20
-fields:
-  sub: 
-    - a
-    - b 
-    - c
-  sub2: [1,2,3]
-  sub3: {"k":5, "v":20}
-`);
+export function main() {
+  const obj = YamlUtil.parse(`
+  name: Source
+  age: 20
+  fields:
+    sub: 
+      - a
+      - b 
+      - c
+    sub2: [1,2,3]
+    sub3: {"k":5, "v":20}
+  `);
 
-console.log(JSON.stringify(obj, null, 2));
+  console.log(JSON.stringify(obj, null, 2));
+}
 ```
 
 **Terminal: Simple YAML Parsing**
 ```bash
-$ node -r @travetto/boot/register ./doc/parse.ts
+$ node @travetto/boot/bin/main ./doc/parse.ts 
 
 {
   "name": "Source",
@@ -61,26 +63,28 @@ $ node -r @travetto/boot/register ./doc/parse.ts
 ```typescript
 import { YamlUtil } from '@travetto/yaml';
 
-const text = YamlUtil.serialize({
-  name: 'Source',
-  age: 20,
-  fields: {
-    sub: [
-      'a',
-      'b',
-      'c'
-    ],
-    sub2: [1, 2, 3],
-    sub3: { k: 5, v: 20 }
-  }
-});
+export function main() {
+  const text = YamlUtil.serialize({
+    name: 'Source',
+    age: 20,
+    fields: {
+      sub: [
+        'a',
+        'b',
+        'c'
+      ],
+      sub2: [1, 2, 3],
+      sub3: { k: 5, v: 20 }
+    }
+  });
 
-console.log(text);
+  console.log(text);
+}
 ```
 
 **Terminal: Simple YAML Serialization**
 ```bash
-$ node -r @travetto/boot/register ./doc/serialize.ts
+$ node @travetto/boot/bin/main ./doc/serialize.ts 
 
 name: Source
 age: 20

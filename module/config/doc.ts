@@ -36,7 +36,7 @@ ${Config('Environment variables', 'doc/resources/env.properties', 'properties')}
 
 At runtime the resolved config would be:
 
-${Execute('Runtime Resolution', 'doc/resolve.ts')}
+${Execute('Runtime Resolution', 'doc/resolve.ts', [], { module: 'boot' })}
 
 ${Section('Secrets')}
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under ${inp`config.redacted`}.
@@ -50,6 +50,6 @@ ${Code('Database config object', 'doc/dbconfig.ts')}
 
 Using the above config files, the resultant object would be:
 
-${Execute('Resolved database config', 'doc/dbconfig-run.ts')}
+${Execute('Resolved database config', 'doc/dbconfig-run.ts', [], { module: 'boot' })}
 
 `;

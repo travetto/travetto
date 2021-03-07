@@ -1,8 +1,6 @@
 import { PathUtil } from '@travetto/boot';
 import { AppManifest } from './manifest';
 
-const escapeRe = (x: string) => x.replace(/[().\[\]|?]/g, z => `\\${z}`);
-
 /**
  * General tools for manipulating stack traces.
  */
@@ -17,16 +15,16 @@ export class StacktraceUtil {
    */
   static init() {
     this.addStackFilters(
-      __filename.replace(/\.js$/, ''),
-      'async_hooks',
-      '(native)',
+      '@travetto/(?:watch|context)', // @line-if -$TRV_DEV
+      'src/stracktrace',
+      '(?:boot|base|[.])/bin/(?:main|register)[.]js',
       'internal',
-      'tslib',
-      '@travetto/context', // @line-if -$TRV_DEV
-      '@travetto/watch', // @line-if -$TRV_DEV,
-      '/boot/bin/',
+      '(?:Array.*?<anonymous>)',
+      'async_hooks',
+      '[(]native[)]',
       'typescript',
-      'source-map-support.js'
+      'tslib',
+      'source-map-support[.]js'
     );
 
     if (!AppManifest.prod) {
@@ -41,7 +39,7 @@ export class StacktraceUtil {
   static addStackFilters(...names: string[]) {
     if (this.FILTERS) {
       this.FILTERS.push(...names);
-      this.FILTER_REGEX = new RegExp(`(${this.FILTERS.map(escapeRe).join('|')})`);
+      this.FILTER_REGEX = new RegExp(`(${this.FILTERS.join('|')})`);
     }
   }
 

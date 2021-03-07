@@ -23,26 +23,28 @@ In the desire to provide a minimal footprint, the framework provides a minimal <
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> YamlUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/yaml'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">const</span> obj <span class="token operator">=</span> YamlUtil<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
-name: Source
-age: 20
-fields:
-  sub:
-    - a
-    - b
-    - c
-  sub2: [1,2,3]
-  sub3: {{'{'}}"k":5, "v":20{{'}'}}
-</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> obj <span class="token operator">=</span> YamlUtil<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">
+  name: Source
+  age: 20
+  fields:
+    sub:
+      - a
+      - b
+      - c
+    sub2: [1,2,3]
+    sub3: {{'{'}}"k":5, "v":20{{'}'}}
+  </span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>obj<span class="token punctuation">,</span> <span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>     
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>obj<span class="token punctuation">,</span> <span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
       <figure class="terminal">
       <figcaption class="terminal">Simple YAML Parsing
       
       </figcaption>
-      <pre><code class="language-bash">$ node -r @travetto/boot/register ./doc/parse.ts
+      <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/parse.ts
 
 <span class="token punctuation">{{'{'}}</span>
   <span class="token string">"name"</span><span class="token builtin class-name">:</span> <span class="token string">"Source"</span>,
@@ -72,28 +74,30 @@ fields:
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> YamlUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/yaml'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">const</span> text <span class="token operator">=</span> YamlUtil<span class="token punctuation">.</span><span class="token function">serialize</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
-  name<span class="token operator">:</span> <span class="token string">'Source'</span><span class="token punctuation">,</span>
-  age<span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
-  fields<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
-    sub<span class="token operator">:</span> <span class="token punctuation">[</span>
-      <span class="token string">'a'</span><span class="token punctuation">,</span>
-      <span class="token string">'b'</span><span class="token punctuation">,</span>
-      <span class="token string">'c'</span>
-    <span class="token punctuation">]</span><span class="token punctuation">,</span>
-    sub2<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-    sub3<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> k<span class="token operator">:</span> <span class="token number">5</span><span class="token punctuation">,</span> v<span class="token operator">:</span> <span class="token number">20</span> <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> text <span class="token operator">=</span> YamlUtil<span class="token punctuation">.</span><span class="token function">serialize</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+    name<span class="token operator">:</span> <span class="token string">'Source'</span><span class="token punctuation">,</span>
+    age<span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+    fields<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+      sub<span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token string">'a'</span><span class="token punctuation">,</span>
+        <span class="token string">'b'</span><span class="token punctuation">,</span>
+        <span class="token string">'c'</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+      sub2<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      sub3<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> k<span class="token operator">:</span> <span class="token number">5</span><span class="token punctuation">,</span> v<span class="token operator">:</span> <span class="token number">20</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>     
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
       <figure class="terminal">
       <figcaption class="terminal">Simple YAML Serialization
       
       </figcaption>
-      <pre><code class="language-bash">$ node -r @travetto/boot/register ./doc/serialize.ts
+      <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/serialize.ts
 
 name: Source
 age: <span class="token number">20</span>
