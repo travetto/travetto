@@ -5,7 +5,6 @@ import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
 
 @Suite()
 export class ElasticsearchBasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }

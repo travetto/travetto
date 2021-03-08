@@ -137,24 +137,23 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { BaseModelSuite } from '@travetto/model/test-support/base';
-import { ModelCrudSupport } from '@travetto/model';
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
+import { ModelSuite } from '@travetto/model/test-support/suite';
 
 import { TodoService } from '../src/service';
 import { Todo } from '../src/model';
 
 @Suite()
+@ModelSuite()
 @InjectableSuite()
-export class TodoTest extends BaseModelSuite<ModelCrudSupport> {
+export class TodoTest {
+
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 
   @Inject()
   svc: TodoService;
-
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
 
   @Test('Create todo')
   async create() {

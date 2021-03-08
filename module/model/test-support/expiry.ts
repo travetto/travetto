@@ -22,7 +22,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   delayFactor: number = 1;
 
   async wait(n: number, unit: TimeUnit = 'ms') {
-    await super.wait(TimeUtil.toMillis(n, unit) * this.delayFactor);
+    await TimeUtil.wait(TimeUtil.toMillis(n, unit) * this.delayFactor);
     // await (await this.service).deleteExpired(User);
   }
 

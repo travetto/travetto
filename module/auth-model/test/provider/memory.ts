@@ -12,7 +12,6 @@ class Init {
 
 @Suite()
 export class MemoryAuthModelServiceSuite extends AuthModelServiceSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }

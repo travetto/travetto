@@ -15,7 +15,7 @@
 
 This module provides a wrapper around node's <a target="_blank" class="external-link" href="https://nodejs.org/api/async_hooks.html">async_hooks</a> to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow.
 
-The most common way of utilizing the context, is via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/context/src/decorator.ts#L7">WithAsyncContext</a> decorator.  The decorator requires the class it's being used in, to have a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/context/src/service.ts#L14">AsyncContext</a> member, as it is the source of the contextual information.
+The most common way of utilizing the context, is via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/context/src/decorator.ts#L6">WithAsyncContext</a> decorator.  The decorator requires the class it's being used in, to have a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/context/src/service.ts#L14">AsyncContext</a> member, as it is the source of the contextual information.
 
 The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain.
 

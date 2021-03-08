@@ -5,7 +5,6 @@ import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
 
 @Suite()
 export class ElasticsearchQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }

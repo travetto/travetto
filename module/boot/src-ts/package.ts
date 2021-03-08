@@ -1,10 +1,9 @@
 import * as fs from 'fs';
-import { JSONUtil } from './internal/json';
 import { PathUtil } from './path';
 
 let pkg = {};
 try {
-  pkg = JSONUtil.parse(fs.readFileSync(PathUtil.resolveUnix('package.json'), 'utf8'));
+  pkg = JSON.parse(fs.readFileSync(PathUtil.resolveUnix('package.json'), 'utf8'));
 } catch { }
 
 export const Package = pkg as {

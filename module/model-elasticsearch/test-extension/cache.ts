@@ -16,7 +16,6 @@ class Config {
 
 @Suite()
 export class ElasticsearchCacheSuite extends CacheServiceSuite {
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }

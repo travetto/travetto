@@ -22,40 +22,35 @@ class Config {
 @WithSuiteContext()
 @Suite()
 export class MysqlQuerySuite extends ModelQuerySuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-    this.supportsGeo = false;
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
+  supportsGeo = false;
 }
 
 @WithSuiteContext()
 @Suite()
 export class MysqlQueryCrudSuite extends ModelQueryCrudSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class MysqlQueryFacetSuite extends ModelQueryFacetSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class MySQLQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class MySQLQuerySuggestSuite extends ModelQuerySuggestSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }

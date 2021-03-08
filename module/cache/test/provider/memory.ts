@@ -13,7 +13,6 @@ class Config {
 
 @Suite()
 export class MemoryCacheSuite extends CacheServiceSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }

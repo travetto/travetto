@@ -15,7 +15,6 @@ class Init {
 
 @Suite()
 export class MongoAuthModelServiceSuite extends AuthModelServiceSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }

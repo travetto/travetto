@@ -15,7 +15,6 @@ class Init {
 
 @Suite()
 export class ElasticsearchAuthModelServiceSuite extends AuthModelServiceSuite {
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }

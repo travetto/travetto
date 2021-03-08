@@ -1,6 +1,5 @@
 import * as crypto from 'crypto';
 
-import { JSONUtil } from '@travetto/boot/src/internal/json';
 import { Util } from '@travetto/base';
 import { CoreCacheConfig } from './types';
 
@@ -26,8 +25,8 @@ export class CacheUtil {
    * Read safe JSON back into an object
    * @param value The value to read as safe JSON
    */
-  static fromSafeJSON(value: string) {
-    return JSONUtil.parse(Buffer.from(value, 'base64').toString('utf8'));
+  static fromSafeJSON(value: string | undefined) {
+    return value ? JSON.parse(Buffer.from(value, 'base64').toString('utf8')) : undefined;
   }
 
   /**

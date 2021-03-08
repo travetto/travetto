@@ -8,7 +8,6 @@ import {
   ModelQueryFacetSupport, ModelQuerySupport, ModelQuerySuggestSupport,
   SortClause, ValidStringFields
 } from '@travetto/model-query';
-import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { schemaParamConfig } from './schema';
 import { ControllerRegistry } from '../registry/controller';
@@ -31,7 +30,7 @@ class SuggestQuery {
   offset?: number;
 }
 
-const convert = <T>(k?: string) => k && typeof k === 'string' && /^[\{\[]/.test(k) ? JSONUtil.parse<T>(k) : k;
+const convert = <T>(k?: string) => k && typeof k === 'string' && /^[\{\[]/.test(k) ? JSON.parse(k) as T : k;
 
 /**
  * Provides a basic query controller for a given model:

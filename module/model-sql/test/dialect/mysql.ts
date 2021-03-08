@@ -7,10 +7,10 @@ import { ModelCrudSuite } from '@travetto/model/test-support/crud';
 import { ModelBulkSuite } from '@travetto/model/test-support/bulk';
 import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 import { ModelExpirySuite } from '@travetto/model/test-support/expiry';
+import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
 
 import { SQLModelConfig, SQLModelService } from '../..';
 import { MySQLDialect } from '../../src/dialect/mysql/dialect';
-import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -22,39 +22,34 @@ class Config {
 @WithSuiteContext()
 @Suite()
 export class MySQLBasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class MySQLCrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class MySQLBulkSuite extends ModelBulkSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class MySQLExpirySuite extends ModelExpirySuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class MySQLPolymorphismSuite extends ModelPolymorphismSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }

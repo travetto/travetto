@@ -13,7 +13,6 @@ class Init {
 
 @Suite()
 export class FileAssetServiceSuite extends AssetServiceSuite {
-  constructor() {
-    super(FileModelService, FileModelConfig);
-  }
+  configClass = FileModelConfig;
+  serviceClass = FileModelService;
 }

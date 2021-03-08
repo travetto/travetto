@@ -2,8 +2,9 @@ import * as commander from 'commander';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
-import { CliModelCandidateUtil } from './candidate';
 import { CliUtil } from '@travetto/cli/src/util';
+
+import { CliModelCandidateUtil } from './candidate';
 
 /**
  * CLI Entry point for exporting model schemas

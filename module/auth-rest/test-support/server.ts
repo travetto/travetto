@@ -6,7 +6,6 @@ import { Suite, Test } from '@travetto/test';
 import { Injectable, InjectableFactory } from '@travetto/di';
 import { AppError } from '@travetto/base';
 import { AuthContext } from '@travetto/auth/src/context';
-import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { Authenticate, Authenticated } from '../src/decorator';
 import { IdentitySource } from '../src/identity';
@@ -25,7 +24,7 @@ class AuthorizationEncoder implements AuthContextEncoder {
   async decode(req: Request) {
     try {
       if (req.headers.authorization) {
-        const config = JSONUtil.parse<AuthContext>(Buffer.from(req.headers.authorization as string, 'base64').toString('utf8'));
+        const config = JSON.parse(Buffer.from(req.headers.authorization as string, 'base64').toString('utf8'));
         if (config.identity && config.principal) {
           return new AuthContext(config.identity, config.principal);
         }

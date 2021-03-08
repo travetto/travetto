@@ -18,7 +18,6 @@ class Config {
 
 @Suite()
 export class MysqlCacheSuite extends CacheServiceSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }

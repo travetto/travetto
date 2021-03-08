@@ -6,10 +6,10 @@ import * as kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
-
-import { KoaServerUtil } from './internal/util';
 import { TravettoEntitySym } from '@travetto/rest/src/internal/symbol';
 import { Request, Response } from '@travetto/rest/src/types';
+
+import { KoaServerUtil } from './internal/util';
 
 type TrvCtx = { [TravettoEntitySym]: [Request, Response] };
 type Router = kRouter<{}, TrvCtx>;

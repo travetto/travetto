@@ -9,29 +9,25 @@ import { FirestoreModelConfig, FirestoreModelService } from '..';
 
 @Suite()
 export class FirestoreBasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(FirestoreModelService, FirestoreModelConfig);
-  }
+  serviceClass = FirestoreModelService;
+  configClass = FirestoreModelConfig;
 }
 
 
 @Suite()
 export class FirestoreCrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(FirestoreModelService, FirestoreModelConfig);
-  }
+  serviceClass = FirestoreModelService;
+  configClass = FirestoreModelConfig;
 }
 
 @Suite()
 export class FirestoreIndexedSuite extends ModelIndexedSuite {
-  constructor() {
-    super(FirestoreModelService, FirestoreModelConfig);
-  }
+  serviceClass = FirestoreModelService;
+  configClass = FirestoreModelConfig;
 }
 
 @Suite()
 export class FirestorePolymorphismSuite extends ModelPolymorphismSuite {
-  constructor() {
-    super(FirestoreModelService, FirestoreModelConfig);
-  }
+  serviceClass = FirestoreModelService;
+  configClass = FirestoreModelConfig;
 }

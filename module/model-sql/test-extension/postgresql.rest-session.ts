@@ -6,6 +6,7 @@ import { Suite } from '@travetto/test';
 import { RestSessionServerSuite } from '@travetto/rest-session/test-support/server';
 import { SessionModelSym, ModelSessionProvider } from '@travetto/rest-session';
 import { AsyncContext } from '@travetto/context';
+import { ModelSuite } from '@travetto/model/test-support/suite';
 
 import { SQLModelConfig } from '../src/config';
 import { PostgreSQLDialect } from '../src/dialect/postgresql/dialect';
@@ -23,4 +24,8 @@ class Config {
 }
 
 @Suite()
-export class PostgreSQLRestSesisonServerSuite extends RestSessionServerSuite { }
+@ModelSuite()
+export class PostgreSQLRestSesisonServerSuite extends RestSessionServerSuite {
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
+}

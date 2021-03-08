@@ -1,8 +1,10 @@
 import * as ts from 'typescript';
 import { AnyType, DeclarationUtil, DeclDocumentation, ParamDocumentation, TransformerState } from '@travetto/transformer';
-import { ParamConfig } from '../src/types';
 import { LiteralType, ShapeType } from '@travetto/transformer/src/resolver/types';
 import { SchemaTransformUtil } from '@travetto/schema/support/lib'; // @line-if @travetto/schema
+
+import { ParamConfig } from '../src/types';
+
 /* // @line-if !@travetto/schema
 const SchemaTransformUtil = undefined;
 */ // @line-if !@travetto/schema

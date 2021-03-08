@@ -2,20 +2,24 @@ import * as assert from 'assert';
 
 import { PathUtil } from '@travetto/boot';
 import { Test, Suite, BeforeAll } from '@travetto/test';
-import { ResourceManager } from '@travetto/base';
+import { Class, ResourceManager } from '@travetto/base';
 import { Inject } from '@travetto/di';
-import { ModelStreamSupport, NotFoundError } from '@travetto/model';
-import { BaseModelSuite } from '@travetto/model/test-support/base';
+import { NotFoundError } from '@travetto/model';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
+import { ModelSuite } from '@travetto/model/test-support/suite';
 
 import { HashNamingStrategy, AssetService, AssetUtil } from '..';
 
 @Suite()
+@ModelSuite()
 @InjectableSuite()
-export abstract class AssetServiceSuite extends BaseModelSuite<ModelStreamSupport> {
+export abstract class AssetServiceSuite {
 
   @Inject()
   assetService: AssetService;
+
+  serviceClass: Class;
+  configClass: Class;
 
   @BeforeAll()
   async setup() {

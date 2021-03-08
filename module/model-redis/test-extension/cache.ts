@@ -16,7 +16,6 @@ class Config {
 
 @Suite()
 export class RedisCacheSuite extends CacheServiceSuite {
-  constructor() {
-    super(RedisModelService, RedisModelConfig);
-  }
+  serviceClass = RedisModelService;
+  configClass = RedisModelConfig;
 }

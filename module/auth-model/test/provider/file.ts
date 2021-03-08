@@ -12,7 +12,6 @@ class Init {
 
 @Suite()
 export class FileAuthModelServiceSuite extends AuthModelServiceSuite {
-  constructor() {
-    super(FileModelService, FileModelConfig);
-  }
+  serviceClass = FileModelService;
+  configClass = FileModelConfig;
 }

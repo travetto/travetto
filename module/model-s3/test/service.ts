@@ -14,38 +14,32 @@ import { S3ModelService } from '../src/service';
 
 @Suite()
 export class S3BasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(S3ModelService, S3ModelConfig);
-  }
+  serviceClass = S3ModelService;
+  configClass = S3ModelConfig;
 }
 
 @Suite()
 export class S3CrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(S3ModelService, S3ModelConfig);
-  }
+  serviceClass = S3ModelService;
+  configClass = S3ModelConfig;
 }
 
 @Suite()
 export class S3ExpirySuite extends ModelExpirySuite {
-  constructor() {
-    super(S3ModelService, S3ModelConfig);
-  }
+  serviceClass = S3ModelService;
+  configClass = S3ModelConfig;
 }
 
 @Suite()
 export class S3PolymorphismSuite extends ModelPolymorphismSuite {
-  constructor() {
-    super(S3ModelService, S3ModelConfig);
-  }
+  serviceClass = S3ModelService;
+  configClass = S3ModelConfig;
 }
-
 
 @Suite()
 export class S3StreamSuite extends ModelStreamSuite {
-  constructor() {
-    super(S3ModelService, S3ModelConfig);
-  }
+  serviceClass = S3ModelService;
+  configClass = S3ModelConfig;
 
   @Test({
     timeout: 15000

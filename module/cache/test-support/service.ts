@@ -1,16 +1,16 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { BaseModelSuite } from '@travetto/model/test-support/base';
 import { ModelExpirySupport } from '@travetto/model';
 import { Inject, Injectable } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
+import { ModelSuite } from '@travetto/model/test-support/suite';
+import { Class } from '@travetto/base';
+import { TimeUtil } from '@travetto/base/src/internal/time';
 
 import { Cache, EvictCache } from '../src/decorator';
 import { CacheService } from '../src/service';
 import { CacheUtil } from '../src/util';
-
-const wait = (n: number) => new Promise(res => setTimeout(res, n));
 
 class User { }
 
@@ -27,37 +27,37 @@ class SampleService {
 
   @Cache('source')
   async basic(num: number) {
-    await wait(100);
+    await TimeUtil.wait(100);
     return num * 2;
   }
 
   @Cache('source', { maxAge: 500 })
   async agesQuickly(num: number) {
-    await wait(100);
+    await TimeUtil.wait(100);
     return num * 3;
   }
 
   @Cache('source', { maxAge: 200, extendOnAccess: true })
   async ageExtension(num: number) {
-    await wait(100);
+    await TimeUtil.wait(100);
     return num * 3;
   }
 
   @Cache('source')
   async complexInput(config: object, size: number) {
-    await wait(100);
+    await TimeUtil.wait(100);
     return { length: Object.keys(config).length, size };
   }
 
   @Cache('source', { key: config => config.a })
   async customKey(config: object, size: number) {
-    await wait(100);
+    await TimeUtil.wait(100);
     return { length: Object.keys(config).length, size };
   }
 
   @Cache('source', { keySpace: 'user.id', reinstate: x => User.from(x as User) })
   async getUser(userId: string) {
-    await wait(100);
+    await TimeUtil.wait(100);
 
     return {
       id: userId,
@@ -67,14 +67,18 @@ class SampleService {
 
   @EvictCache('source', { keySpace: 'user.id' })
   async deleteUser(userId: string) {
-    await wait(100);
+    await TimeUtil.wait(100);
     return true;
   }
 }
 
 @Suite()
+@ModelSuite()
 @InjectableSuite()
-export abstract class CacheServiceSuite extends BaseModelSuite<ModelExpirySupport> {
+export abstract class CacheServiceSuite {
+
+  serviceClass: Class<ModelExpirySupport>;
+  configClass: Class;
 
   baseLatency = 10;
 
@@ -107,7 +111,7 @@ export abstract class CacheServiceSuite extends BaseModelSuite<ModelExpirySuppor
     assert(diff > 75);
     assert(res === 30);
 
-    await this.wait(510);
+    await TimeUtil.wait(510);
 
     start = Date.now();
     res = await service.agesQuickly(10);
@@ -127,7 +131,7 @@ export abstract class CacheServiceSuite extends BaseModelSuite<ModelExpirySuppor
     assert(res === 30);
 
     for (let i = 0; i < 2; i += 1) {
-      await this.wait(55);
+      await TimeUtil.wait(55);
 
       start = Date.now();
       res = await service.ageExtension(10);
@@ -136,7 +140,7 @@ export abstract class CacheServiceSuite extends BaseModelSuite<ModelExpirySuppor
       assert(res === 30);
     }
 
-    await this.wait(210);
+    await TimeUtil.wait(210);
     start = Date.now();
     res = await service.ageExtension(10);
     diff = Date.now() - start;

@@ -15,7 +15,6 @@ class Init {
 
 @Suite()
 export class DynamoDBAuthModelServiceSuite extends AuthModelServiceSuite {
-  constructor() {
-    super(DynamoDBModelService, DynamoDBModelConfig);
-  }
+  serviceClass = DynamoDBModelService;
+  configClass = DynamoDBModelConfig;
 }

@@ -4,7 +4,6 @@ import * as readline from 'readline';
 
 import { PathUtil, ExecUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
-import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 /**
  * Launch test framework for monorepo and execute tests
@@ -15,7 +14,7 @@ export class TestLernaPlugin extends BasePlugin {
   init(cmd: commander.Command) {
     return cmd
       .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, `${Math.min(4, os.cpus().length - 1)}`)
-      .option('-m, --mode <mode>', 'Test mode', /^standard|extension$/, 'standard');
+      .option('-m, --mode <mode>', 'Test mode', /^standard|isolated$/, 'standard');
   }
 
   async action() {
@@ -37,7 +36,7 @@ export class TestLernaPlugin extends BasePlugin {
       .on('line', line => {
         const [, , body] = line.match(/^(\S+):\s+(.*)\s*$/)!;
         try {
-          consumer.onEvent(JSONUtil.parse(body));
+          consumer.onEvent(JSON.parse(body));
         } catch {
           console!.error('Failed on', body);
         }

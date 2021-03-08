@@ -13,7 +13,6 @@ class Config {
 
 @Suite()
 export class FileCacheSuite extends CacheServiceSuite {
-  constructor() {
-    super(FileModelService, FileModelConfig);
-  }
+  serviceClass = FileModelService;
+  configClass = FileModelConfig;
 }

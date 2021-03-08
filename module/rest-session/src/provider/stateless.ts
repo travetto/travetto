@@ -1,7 +1,6 @@
 import { Request, Response } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
 import { AppManifest } from '@travetto/base';
-import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { SessionProvider } from './types';
 import { Session } from '../types';
@@ -31,7 +30,7 @@ export class StatelessSessionProvider implements SessionProvider {
   }
 
   async textToSession(text: string): Promise<Session> {
-    const parsed = JSONUtil.parse<Record<string, any>>(Buffer.from(text, 'base64').toString('utf8'));
+    const parsed = JSON.parse(Buffer.from(text, 'base64').toString('utf8'));
 
     if (parsed.expiresAt) {
       parsed.expiresAt = new Date(parsed.expiresAt);

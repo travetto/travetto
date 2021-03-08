@@ -10,5 +10,8 @@ if (!global[sym]) {
     req && require(req);
   }
 
+  // Remove to prevent __proto__ pollution in JSON
+  delete Object.prototype.__proto__;
+
   require('@travetto/boot/src/internal/compile').CompileUtil.init();
 }
