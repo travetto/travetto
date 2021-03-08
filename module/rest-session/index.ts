@@ -10,4 +10,4 @@ export * from './src/service';
 // Named export needed for proxying
 export { SessionAuthContextEncoder } from './src/extension/auth.rest';
 // Named export needed for proxying
-export { ModelSessionProvider } from './src/extension/model';
+export { ModelSessionProvider, SessionModelSym } from './src/extension/model';

@@ -2,19 +2,12 @@ import * as assert from 'assert';
 
 import { Controller, Get, Body, Post, Put, Query, Request } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
-import { Inject, InjectableFactory } from '@travetto/di';
+import { Inject } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
 import { BaseRestSuite } from '@travetto/rest/test-support/base';
 
 import { SessionData, SessionConfig } from '..';
-import { StatelessSessionProvider } from '../src/provider/stateless';
 
-class Config {
-  @InjectableFactory({ primary: true })
-  static provider() {
-    return new StatelessSessionProvider();
-  }
-}
 
 @Controller('/test/session')
 class TestController {
