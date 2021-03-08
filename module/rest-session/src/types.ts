@@ -140,9 +140,9 @@ export class Session<T extends SessionData = SessionData>  {
     return {
       id: this.id,
       signature: this.signature,
-      expiresAt: this.expiresAt,
+      expiresAt: this.expiresAt?.getTime(),
       maxAge: this.maxAge,
-      issuedAt: this.issuedAt,
+      issuedAt: this.issuedAt?.getTime(),
       data: this.data
     };
   }

@@ -27,11 +27,20 @@ export class StatelessSessionProvider implements SessionProvider {
   }
 
   async sessionToText(session: Session): Promise<string> {
-    return JSON.stringify(session.toJSON());
+    return Buffer.from(JSON.stringify(session.toJSON())).toString('base64');
   }
 
   async textToSession(text: string): Promise<Session> {
-    return new Session(JSONUtil.parse(text));
+    const parsed = JSONUtil.parse<Record<string, any>>(Buffer.from(text, 'base64').toString('utf8'));
+
+    if (parsed.expiresAt) {
+      parsed.expiresAt = new Date(parsed.expiresAt);
+    }
+    if (parsed.issuedAt) {
+      parsed.issuedAt = new Date(parsed.issuedAt);
+    }
+
+    return new Session(parsed);
   }
 
   async encode(req: Request, res: Response, session: Session | null): Promise<void> {

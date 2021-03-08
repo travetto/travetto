@@ -102,14 +102,22 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     let header = res.headers[key];
     assert(res.body === { age: 1 });
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
+    header = res.headers[key] ?? header;
+
     assert(res.body === { age: 2 });
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
+    header = res.headers[key] ?? header;
+
     assert(res.body === { age: 3 });
 
     res = await this.request('get', '/test/session');
+    header = res.headers[key] ?? header;
+
     assert(res.body === { age: 1 });
     header = res.headers[key];
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
+    header = res.headers[key] ?? header;
+
     assert(res.body === { age: 2 });
   }
 
@@ -137,14 +145,19 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request('post', '/test/session/complex', { body: payload });
-    const header = res.headers[key];
+    let header = res.headers[key];
+
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
+    header = res.headers[key] ?? header;
+
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
 
     await this.wait(100);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
+    header = res.headers[key] ?? header;
+
     assert(res.body.payload === undefined);
     assert(res.body.age === 1);
   }
@@ -175,25 +188,30 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
   async testExpiryWithExtend() {
     const { keyName: key } = this.initConifg({
       transport: 'header',
-      maxAge: 100
+      maxAge: 300
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request('post', '/test/session/complex', { body: payload });
-    const header = res.headers[key];
+    let header = res.headers[key];
 
     await this.wait(50);
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
+    header = res.headers[key] ?? header;
+
     assert(res.body.payload === payload);
     await this.wait(50);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
+    header = res.headers[key] ?? header;
+
     assert(res.body.payload === payload);
     await this.wait(50);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
-    assert(res.body.payload === payload);
+    header = res.headers[key] ?? header;
 
+    assert(res.body.payload === payload);
     assert(res.body.age === 3);
   }
 }

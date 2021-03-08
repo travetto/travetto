@@ -40,7 +40,7 @@ export class EncodeUtil {
           expires: session.expiresAt
         });
       } else {
-        res.setHeader(config.keyName, session.id);
+        res.setHeader(config.keyName, value!);
       }
     } else {
       res.cookies.set(config.keyName, null, { maxAge: 0, });
