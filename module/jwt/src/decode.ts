@@ -1,7 +1,5 @@
 import * as jws from 'jws';
 
-import { JSONUtil } from '@travetto/boot/src/internal/json';
-
 import { TypedSig, Payload } from './types';
 import { JWTError } from './error';
 
@@ -27,7 +25,7 @@ export function decodeComplete<T extends Payload = Payload>(jwt: string): TypedS
 
   if (typeof decoded.payload === 'string' && /^[{\[]/.test(decoded.payload)) {
     try {
-      decoded.payload = JSONUtil.parse<T>(decoded.payload as 'string');
+      decoded.payload = JSON.parse(decoded.payload as 'string');
     } catch (e) { }
   }
 

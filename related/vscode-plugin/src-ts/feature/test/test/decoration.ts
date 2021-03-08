@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
 import * as util from 'util';
 
-import { JSONUtil } from '@travetto/boot/src/internal/json';
-
 import { TestResult, ErrorHoverAssertion, StatusUnknown } from './types';
 import { Workspace } from '../../../core/workspace';
 
@@ -87,7 +85,7 @@ export class Decorations {
 
       const getVal = (str: string) => {
         try {
-          return util.inspect(JSONUtil.parse(str), false, 10).replace(/\n/g, '  \n\t');
+          return util.inspect(JSON.parse(str), false, 10).replace(/\n/g, '  \n\t');
         } catch (e) {
           return str;
         }

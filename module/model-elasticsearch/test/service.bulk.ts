@@ -7,7 +7,6 @@ import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
 
 @Suite()
 export class ElasticsearchBulkSuite extends ModelBulkSuite {
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }

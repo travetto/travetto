@@ -7,7 +7,6 @@ import { AppCache } from '@travetto/boot/src/cache';
 import { ExecUtil } from '@travetto/boot/src/exec';
 import { CliUtil } from '@travetto/cli/src/util';
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import type { ApplicationConfig } from '../../src/types';
 
@@ -79,7 +78,7 @@ export class CliAppListUtil {
    */
   static async readList(): Promise<ApplicationConfig[] | undefined> {
     if (AppCache.hasEntry(this.CACHE_CONFIG)) {
-      return JSONUtil.parse<ApplicationConfig[]>(AppCache.readEntry(this.CACHE_CONFIG));
+      return JSON.parse(AppCache.readEntry(this.CACHE_CONFIG)) as ApplicationConfig[];
     }
   }
 

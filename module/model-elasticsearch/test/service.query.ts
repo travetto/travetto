@@ -10,28 +10,24 @@ import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
 
 @Suite()
 export class ElasticsearchQuerySuite extends ModelQuerySuite {
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }
 
 @Suite()
 export class ElasticsearchQueryCrudSuite extends ModelQueryCrudSuite {
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }
 
 @Suite()
 export class ElasticsearchQueryFacetSuite extends ModelQueryFacetSuite {
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }
 
 @Suite()
 export class ElasticsearchQuerySuggestSuite extends ModelQuerySuggestSuite {
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }

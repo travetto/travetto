@@ -11,7 +11,7 @@ export class StreamUtilTest {
 
   @Test()
   async bufferToStream() {
-    const buffer = Buffer.from('hello world', 'utf8');
+    const buffer = Buffer.from('hello world');
     assert(buffer instanceof Buffer);
     const stream = await StreamUtil.bufferToStream(buffer);
     assert('pipe' in stream);

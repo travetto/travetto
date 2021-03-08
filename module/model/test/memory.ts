@@ -8,35 +8,30 @@ import { ModelBasicSuite } from '../test-support/basic';
 
 @Suite()
 export class MemoryBasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }
 
 @Suite()
 export class MemoryCrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }
 
 @Suite()
 export class MemoryStreamSuite extends ModelStreamSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }
 
 @Suite()
 export class MemoryExpirySuite extends ModelExpirySuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }
 
 @Suite()
 export class MemoryIndexedSuite extends ModelIndexedSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }

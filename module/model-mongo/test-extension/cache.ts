@@ -16,7 +16,6 @@ class Config {
 
 @Suite()
 export class MongoCacheSuite extends CacheServiceSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }

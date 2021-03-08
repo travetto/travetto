@@ -173,8 +173,8 @@ All fields are optional, but the `id` and `type` are important as those field ty
 |[Redis Model Support](https://github.com/travetto/travetto/tree/master/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
 |[S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/master/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
-|[MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L32)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L43)|X|X| |X|X|X|
+|[MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)|X|X|X|X|X|X|
+|[FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L42)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
@@ -186,7 +186,6 @@ import { StreamUtil } from '@travetto/boot';
 import { Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { JSONUtil } from '@travetto/boot/src/internal/json';
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
 import { ModelType } from '../types/model';
@@ -253,36 +252,31 @@ import { ModelBasicSuite } from '../test-support/basic';
 
 @Suite()
 export class MemoryBasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }
 
 @Suite()
 export class MemoryCrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }
 
 @Suite()
 export class MemoryStreamSuite extends ModelStreamSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }
 
 @Suite()
 export class MemoryExpirySuite extends ModelExpirySuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }
 
 @Suite()
 export class MemoryIndexedSuite extends ModelIndexedSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }
 ```

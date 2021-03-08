@@ -1,11 +1,11 @@
 import * as assert from 'assert';
 
-import { AppError } from '@travetto/base';
+import { AppError, Class } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { ModelCrudSupport, BaseModel, Model } from '@travetto/model';
-import { BaseModelSuite } from '@travetto/model/test-support/base';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
+import { ModelSuite } from '@travetto/model/test-support/suite';
 
 import { ModelPrincipalSource, RegisteredIdentity } from '..';
 
@@ -42,8 +42,12 @@ class TestConfig {
 }
 
 @Suite()
+@ModelSuite()
 @InjectableSuite()
-export abstract class AuthModelServiceSuite extends BaseModelSuite<ModelCrudSupport> {
+export abstract class AuthModelServiceSuite {
+
+  serviceClass: Class;
+  configClass: Class;
 
   @Inject()
   principalSource: ModelPrincipalSource<User>;

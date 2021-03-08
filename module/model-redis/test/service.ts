@@ -9,35 +9,30 @@ import { RedisModelConfig, RedisModelService } from '..';
 
 @Suite()
 export class RedisBasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(RedisModelService, RedisModelConfig);
-  }
+  serviceClass = RedisModelService;
+  configClass = RedisModelConfig;
 }
 
 @Suite()
 export class RedisCrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(RedisModelService, RedisModelConfig);
-  }
+  serviceClass = RedisModelService;
+  configClass = RedisModelConfig;
 }
 
 @Suite()
 export class RedisExpirySuite extends ModelExpirySuite {
-  constructor() {
-    super(RedisModelService, RedisModelConfig);
-  }
+  serviceClass = RedisModelService;
+  configClass = RedisModelConfig;
 }
 
 @Suite()
 export class RedisIndexedSuite extends ModelIndexedSuite {
-  constructor() {
-    super(RedisModelService, RedisModelConfig);
-  }
+  serviceClass = RedisModelService;
+  configClass = RedisModelConfig;
 }
 
 @Suite()
 export class RedisPolymorphismSuite extends ModelPolymorphismSuite {
-  constructor() {
-    super(RedisModelService, RedisModelConfig);
-  }
+  serviceClass = RedisModelService;
+  configClass = RedisModelConfig;
 }

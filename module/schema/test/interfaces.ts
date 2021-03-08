@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Schema } from '../src/decorator/schema';
 import { RootRegistry } from '@travetto/registry';
 
+import { Schema } from '../src/decorator/schema';
 import { SchemaRegistry } from '../src/service/registry';
 import { ALL_VIEW } from '../src/service/types';
 import { SchemaValidator } from '../src/validate/validator';

@@ -6,7 +6,6 @@ import { Text } from '@travetto/schema';
 import { AppError } from '@travetto/base';
 import { isExpirySupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 import { EnvUtil } from '@travetto/boot';
-import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { SessionProvider } from '../provider/types';
 import { Session } from '../types';
@@ -84,7 +83,7 @@ export class ModelSessionProvider implements SessionProvider {
     if (record) {
       return new Session({
         ...record,
-        data: JSONUtil.parse(Buffer.from(record.data, 'base64').toString('utf8'))
+        data: JSON.parse(Buffer.from(record.data, 'base64').toString('utf8'))
       });
     }
   }

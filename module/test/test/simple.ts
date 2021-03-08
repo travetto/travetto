@@ -1,5 +1,6 @@
-import { Suite, Test, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../';
 import * as assert from 'assert';
+
+import { Suite, Test, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../';
 
 let a: unknown = 0; a = 1;
 

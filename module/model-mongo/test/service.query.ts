@@ -10,35 +10,30 @@ import { MongoModelConfig, MongoModelService } from '..';
 
 @Suite()
 export class MongoQuerySuite extends ModelQuerySuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }
 
 @Suite()
 export class MongoQueryCrudSuite extends ModelQueryCrudSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }
 
 @Suite()
 export class MongoQueryFacetSuite extends ModelQueryFacetSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }
 
 @Suite()
 export class MongoQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }
 
 @Suite()
 export class MongoQuerySuggestSuite extends ModelQuerySuggestSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }

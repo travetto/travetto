@@ -2,9 +2,9 @@ import * as assert from 'assert';
 
 import { YamlUtil } from '@travetto/yaml';
 import { Test, Suite, BeforeEach, AfterEach } from '@travetto/test';
+import { SimpleObject, Util } from '@travetto/base';
 
 import { ConfigManager } from '../src/manager';
-import { SimpleObject, Util } from '@travetto/base';
 
 class DbConfig {
   name: string;

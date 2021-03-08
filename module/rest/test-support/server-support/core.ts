@@ -57,7 +57,7 @@ export class CoreRestServerSupport implements RestServerSupport {
       body
     });
 
-    return { status: res.status, body: Buffer.from(await res.text(), 'utf8'), headers: Object.fromEntries([...res.headers]) };
+    return { status: res.status, body: Buffer.from(await res.text()), headers: Object.fromEntries([...res.headers]) };
   }
 
   get url() {

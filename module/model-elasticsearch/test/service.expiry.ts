@@ -6,7 +6,6 @@ import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
 
 @Suite()
 export class ElasticsearchExpirySuite extends ModelExpirySuite {
-  constructor() {
-    super(ElasticsearchModelService, ElasticsearchModelConfig);
-  }
+  serviceClass = ElasticsearchModelService;
+  configClass = ElasticsearchModelConfig;
 }

@@ -22,39 +22,34 @@ class Config {
 @WithSuiteContext()
 @Suite()
 export class PostgeSQLBasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class PostgreSQLCrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class PostgreSQLBulkSuite extends ModelBulkSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class PostgreSQLExpirySuite extends ModelExpirySuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
 export class PostgreSQLQueryPolymorphismSuite extends ModelPolymorphismSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }

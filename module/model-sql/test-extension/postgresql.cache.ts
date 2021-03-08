@@ -18,7 +18,6 @@ class Config {
 
 @Suite()
 export class PostgresqlCacheSuite extends CacheServiceSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }

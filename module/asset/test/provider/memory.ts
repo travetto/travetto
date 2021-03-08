@@ -13,7 +13,6 @@ class Init {
 
 @Suite()
 export class MemoryAssetServiceSuite extends AssetServiceSuite {
-  constructor() {
-    super(MemoryModelService, MemoryModelConfig);
-  }
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
 }

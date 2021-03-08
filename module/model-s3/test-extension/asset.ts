@@ -16,7 +16,6 @@ class Init {
 
 @Suite()
 export class S3AssetServiceSuite extends AssetServiceSuite {
-  constructor() {
-    super(S3ModelService, S3ModelConfig);
-  }
+  serviceClass = S3ModelService;
+  configClass = S3ModelConfig;
 }

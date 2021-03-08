@@ -17,7 +17,7 @@ npm install @travetto/model-{provider}
 
 Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1):
    
-   *  @travetto/model - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L43), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L32)
+   *  @travetto/model - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L42), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)
    *  @travetto/model-mongo - [MongoModelService](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L45)
    *  @travetto/model-s3 - [S3ModelService](https://github.com/travetto/travetto/tree/master/module/model-s3/src/service.ts#L26)
 

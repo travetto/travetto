@@ -12,7 +12,6 @@ import {
 } from './deps';
 
 import { DbConfig } from './config';
-import { DependencyInjection } from '@travetto/doc/src/lib';
 
 const FOUR = 4;
 

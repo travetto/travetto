@@ -3,7 +3,6 @@ import { AppError, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { JSONUtil } from '@travetto/boot/src/internal/json';
 
 import { MethodOrAll, Request, ServerHandle } from '../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
@@ -41,7 +40,7 @@ export abstract class BaseRestSuite {
 
   async getOutput<T>(t: Buffer) {
     try {
-      return JSONUtil.parse<T>(t);
+      return JSON.parse(t.toString('utf8')) as T;
     } catch (e) {
       return t.toString('utf8');
     }

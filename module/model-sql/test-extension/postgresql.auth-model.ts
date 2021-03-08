@@ -26,7 +26,6 @@ class Init {
 @WithSuiteContext()
 @Suite()
 export class PostgreSQLAuthModelServiceSuite extends AuthModelServiceSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }

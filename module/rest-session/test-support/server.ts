@@ -5,6 +5,7 @@ import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
 import { BaseRestSuite } from '@travetto/rest/test-support/base';
+import { TimeUtil } from '@travetto/base/src/internal/time';
 
 import { SessionData, SessionConfig } from '..';
 
@@ -146,7 +147,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
 
-    await this.wait(100);
+    await TimeUtil.wait(100);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
@@ -170,7 +171,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
 
-    await this.wait(100);
+    await TimeUtil.wait(100);
 
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert(res.body.payload === undefined);
@@ -188,18 +189,18 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     let res = await this.request('post', '/test/session/complex', { body: payload });
     let header = res.headers[key];
 
-    await this.wait(50);
+    await TimeUtil.wait(50);
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
 
     assert(res.body.payload === payload);
-    await this.wait(50);
+    await TimeUtil.wait(50);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
 
     assert(res.body.payload === payload);
-    await this.wait(50);
+    await TimeUtil.wait(50);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;

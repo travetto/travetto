@@ -1,6 +1,6 @@
-import { color } from './color';
 import * as commander from 'commander';
 
+import { color } from './color';
 /**
  * Utilities for formatting help
  */

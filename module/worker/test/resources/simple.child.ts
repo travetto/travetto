@@ -1,3 +1,4 @@
+import '@travetto/base'; // Force registration of log
 import { ChildCommChannel } from '../../src/comm/child';
 
 export async function main() {

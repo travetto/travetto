@@ -56,4 +56,11 @@ export class TimeUtil {
   static getEnv(k: string, defTime: number, unit: TimeUnit = 'ms'): number {
     return this.toMillis(EnvUtil.get(k, '') || defTime, unit);
   }
+
+  /**
+   * Wait for n units of time
+   */
+  static wait(n: number, unit: TimeUnit = 'ms') {
+    return new Promise(res => setTimeout(res, this.toMillis(n, unit)));
+  }
 }

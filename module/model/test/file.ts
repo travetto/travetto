@@ -7,28 +7,24 @@ import { ModelBasicSuite } from '../test-support/basic';
 
 @Suite()
 export class FileBasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(FileModelService, FileModelConfig);
-  }
+  serviceClass = FileModelService;
+  configClass = FileModelConfig;
 }
 
 @Suite()
 export class FileCrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(FileModelService, FileModelConfig);
-  }
+  serviceClass = FileModelService;
+  configClass = FileModelConfig;
 }
 
 @Suite()
 export class FileStreamSuite extends ModelStreamSuite {
-  constructor() {
-    super(FileModelService, FileModelConfig);
-  }
+  serviceClass = FileModelService;
+  configClass = FileModelConfig;
 }
 
 @Suite()
 export class FileExpirySuite extends ModelExpirySuite {
-  constructor() {
-    super(FileModelService, FileModelConfig);
-  }
+  serviceClass = FileModelService;
+  configClass = FileModelConfig;
 }

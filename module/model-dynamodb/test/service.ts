@@ -10,35 +10,30 @@ import { DynamoDBModelConfig, DynamoDBModelService } from '..';
 
 @Suite()
 export class DynamoDBBasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(DynamoDBModelService, DynamoDBModelConfig);
-  }
+  serviceClass = DynamoDBModelService;
+  configClass = DynamoDBModelConfig;
 }
 
 @Suite()
 export class DynamoDBCrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(DynamoDBModelService, DynamoDBModelConfig);
-  }
+  serviceClass = DynamoDBModelService;
+  configClass = DynamoDBModelConfig;
 }
 
 @Suite()
 export class DynamoDBExpirySuite extends ModelExpirySuite {
-  constructor() {
-    super(DynamoDBModelService, DynamoDBModelConfig);
-  }
+  serviceClass = DynamoDBModelService;
+  configClass = DynamoDBModelConfig;
 }
 
 @Suite()
 export class DynamoDBIndexedSuite extends ModelIndexedSuite {
-  constructor() {
-    super(DynamoDBModelService, DynamoDBModelConfig);
-  }
+  serviceClass = DynamoDBModelService;
+  configClass = DynamoDBModelConfig;
 }
 
 @Suite()
 export class DynamoDBPolymorphismSuite extends ModelPolymorphismSuite {
-  constructor() {
-    super(DynamoDBModelService, DynamoDBModelConfig);
-  }
+  serviceClass = DynamoDBModelService;
+  configClass = DynamoDBModelConfig;
 }

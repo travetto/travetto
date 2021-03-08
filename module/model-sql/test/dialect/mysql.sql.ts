@@ -16,7 +16,6 @@ class Config {
 
 @Suite()
 export class MySQLQueryTest extends BaseSQLTest {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }

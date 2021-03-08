@@ -16,7 +16,6 @@ class Init {
 
 @Suite()
 export class MongoAssetServiceSuite extends AssetServiceSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }

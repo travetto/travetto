@@ -15,37 +15,32 @@ import { MongoModelConfig, MongoModelService } from '..';
 
 @Suite()
 export class MongoBasicSuite extends ModelBasicSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }
 
 @Suite()
 export class MongoCrudSuite extends ModelCrudSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }
 
 @Suite()
 export class MongoExpirySuite extends ModelExpirySuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }
 
 @Suite()
 export class MongoStreamSuite extends ModelStreamSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }
 
 @Suite()
 export class MongoBulkSuite extends ModelBulkSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }
 
 @Model()
@@ -61,9 +56,8 @@ class UniqueUser {
 
 @Suite()
 export class MongoIndexedSuite extends ModelIndexedSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 
   @Test()
   async testUnique() {
@@ -75,7 +69,6 @@ export class MongoIndexedSuite extends ModelIndexedSuite {
 
 @Suite()
 export class MongoPolymorphismSuite extends ModelPolymorphismSuite {
-  constructor() {
-    super(MongoModelService, MongoModelConfig);
-  }
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 }

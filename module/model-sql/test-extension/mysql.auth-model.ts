@@ -26,7 +26,6 @@ class Init {
 @WithSuiteContext()
 @Suite()
 export class MySQLAuthModelServiceSuite extends AuthModelServiceSuite {
-  constructor() {
-    super(SQLModelService, SQLModelConfig);
-  }
+  serviceClass = SQLModelService;
+  configClass = SQLModelConfig;
 }
