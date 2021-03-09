@@ -1,11 +1,11 @@
-import { CompileBinUtil } from '@travetto/compiler/bin/lib';
+import { PrecompileUtil } from '@travetto/compiler/bin/lib';
 
 import { ApplicationConfig, ApplicationParameter } from '../../src/types';
 
 /**
  * Supporting app execution
  */
-export class RunUtil {
+export class AppRunUtil {
 
   /**
    * Get the choices or type for a parameter
@@ -20,7 +20,7 @@ export class RunUtil {
    */
   static async run(app: ApplicationConfig | string, ...sub: string[]) {
 
-    await CompileBinUtil.compile();
+    await PrecompileUtil.compile();
 
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 
@@ -41,8 +41,4 @@ export class RunUtil {
 
     return await ApplicationRegistry.run(app.name, sub);
   }
-}
-
-export function main(app: string, ...args: string[]) {
-  return RunUtil.run(app, ...args);
 }

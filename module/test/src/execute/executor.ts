@@ -274,7 +274,7 @@ export class TestExecutor {
       .matchAll(/\/\/\s*@file-if\s+(@travetto\/[A-Za-z0-9\-]+)/g)]
       .map(x => x[1]);
 
-    const proc = ExecUtil.forkMain(require.resolve('../../bin/lib/run'), [file, ...args], {
+    const proc = ExecUtil.forkMain(require.resolve('../../bin/test-direct'), [file, ...args], {
       env: {
         TRV_MODULES: modules.join(','),
         TRV_TEST_FORMAT: 'exec',

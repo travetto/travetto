@@ -19,6 +19,6 @@ export async function main(format: string = 'tap') {
   // Trigger startup of transpiler
   (await import('@travetto/compiler')).Compiler['transpiler']['getProgram']();
 
-  const { TestWatcher } = await import('../../src/execute/watcher');
+  const { TestWatcher } = await import('../src/execute/watcher');
   await TestWatcher.watch(format);
 }

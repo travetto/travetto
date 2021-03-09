@@ -13,43 +13,24 @@ import type { ApplicationConfig } from '../../src/types';
 /**
  * Utilities to fetch list of applications
  */
-export class AppListBinUtil {
+export class AppListUtil {
 
   private static CACHE_CONFIG = `app-cache-${SystemUtil.naiveHash(EnvUtil.get('TRV_SRC_LOCAL', ''))}.json`;
 
   /**
-   * Compile code, and look for `@Application` annotations
+   * Read list
    */
-  static async buildList() {
-    if (!parentPort) { // If top level, recurse
-      return CliUtil.waiting('Compiling', () =>
-        ExecUtil.workerMain<ApplicationConfig[]>(__filename, ['build'], {
-          env: { TRV_WATCH: '0' }
-        }).message
-      );
-    } else {
-      const { PhaseManager } = await import('@travetto/base');
-      await PhaseManager.run('init', '@trv:compiler/compile'); // Compilation is pre done
-
-      const { AppListUtil } = await import('../../src/list');
-      const list = await AppListUtil.buildList();
-      return list.map(({ target, ...rest }) => rest);
+  private static async readList(): Promise<ApplicationConfig[] | undefined> {
+    if (AppCache.hasEntry(this.CACHE_CONFIG)) {
+      return JSON.parse(AppCache.readEntry(this.CACHE_CONFIG)) as ApplicationConfig[];
     }
-  }
-
-  /**
-   * Find application by given name
-   * @param name
-   */
-  static async findByName(name: string) {
-    return (await this.getList())?.find(x => x.name === name);
   }
 
   /**
    * Store list of cached items
    * @param items
    */
-  static storeList(items: ApplicationConfig[]) {
+  private static storeList(items: ApplicationConfig[]) {
     const toStore = items.map(x => ({ ...x, target: undefined }));
     AppCache.writeEntry(this.CACHE_CONFIG, JSON.stringify(toStore));
   }
@@ -57,7 +38,7 @@ export class AppListBinUtil {
   /**
    * Request list of applications
    */
-  static async verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
+  private static async verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
     try {
       for (const el of items) {
         const elStat = (await fs.promises.lstat(el.filename).catch(e => { delete el.generatedTime; }));
@@ -74,12 +55,31 @@ export class AppListBinUtil {
   }
 
   /**
-   * Read list
+   * Compile code, and look for `@Application` annotations
    */
-  static async readList(): Promise<ApplicationConfig[] | undefined> {
-    if (AppCache.hasEntry(this.CACHE_CONFIG)) {
-      return JSON.parse(AppCache.readEntry(this.CACHE_CONFIG)) as ApplicationConfig[];
+  static async buildList() {
+    if (!parentPort) { // If top level, recurse
+      return CliUtil.waiting('Compiling', () =>
+        ExecUtil.workerMain<ApplicationConfig[]>(require.resolve('../list-build'), [], {
+          env: { TRV_WATCH: '0' }
+        }).message
+      );
+    } else {
+      const { PhaseManager } = await import('@travetto/base');
+      await PhaseManager.run('init', '@trv:compiler/compile');
+
+      const { AppScanUtil } = await import('../../src/scan');
+      const list = await AppScanUtil.scanList();
+      return list.map(({ target, ...rest }) => rest);
     }
+  }
+
+  /**
+   * Find application by given name
+   * @param name
+   */
+  static async findByName(name: string) {
+    return (await this.getList())?.find(x => x.name === name);
   }
 
   /**

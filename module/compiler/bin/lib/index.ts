@@ -5,7 +5,7 @@ import { CliUtil } from '@travetto/cli/src/util';
 /**
  * Utilities for running compilation
  */
-export class CompileBinUtil {
+export class PrecompileUtil {
 
   /**
    * Trigger a compile
@@ -17,7 +17,7 @@ export class CompileBinUtil {
 
     // Compile rest of code
     return CliUtil.waiting(`Compiling... ${output || ''}`,
-      ExecUtil.workerMain(__filename, [], { // target self
+      ExecUtil.workerMain(require.resolve('../compile'), [], { // target self
         env: {
           ...(output ? { TRV_CACHE: output } : {}),
           TRV_WATCH: '0', // Ensure no watching
@@ -27,17 +27,4 @@ export class CompileBinUtil {
       }).result
     );
   }
-
-  /**
-   * Compile All
-   */
-  static async compileAll() {
-    const { PhaseManager } = await import('@travetto/base');
-    // Standard compile
-    await PhaseManager.run('init', '@trv:compiler/compile');
-  }
-}
-
-export function main() {
-  return CompileBinUtil.compileAll();
 }

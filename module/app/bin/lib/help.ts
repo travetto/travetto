@@ -1,7 +1,7 @@
 import { PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
-import { RunUtil } from './run';
+import { AppRunUtil } from './run';
 import { ApplicationConfig } from '../../src/types';
 
 export class HelpUtil {
@@ -14,7 +14,7 @@ export class HelpUtil {
 
     if (app.params) {
       usage = color`${{ identifier: usage }} ${app.params.map(p => {
-        const type = RunUtil.getParamType(p);
+        const type = AppRunUtil.getParamType(p);
 
         return p.optional ?
           (p.def !== undefined ?

@@ -1,11 +1,11 @@
 import * as commander from 'commander';
-import * as fs from 'fs';
-import * as path from 'path';
 
-import { PathUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
-import { DocCliUtil } from './lib/util';
+import { PrecompileUtil } from '@travetto/compiler/bin/lib';
+import { EnvInit } from '@travetto/base/bin/init';
+
+import { DocBinUtil } from './lib/util';
 
 /**
  * Command line support for generating module docs.
@@ -21,34 +21,19 @@ export class DocPlugin extends BasePlugin {
   }
 
   async action() {
-    await DocCliUtil.init();
 
-    if (this._cmd.output) {
-
-      const writers = await Promise.all((this._cmd.output as string[]).map(async (out) => {
-        const renderer = await DocCliUtil.getRenderer(path.extname(out) ?? this._cmd.format);
-        const finalName = await DocCliUtil.getOutputLoc(out);
-        return { renderer, finalName };
-      }));
-
-      const write = async () => {
-        for (const { renderer, finalName } of writers) {
-          const content = await DocCliUtil.generate('doc.ts', renderer);
-          fs.writeFileSync(finalName, content, 'utf8');
-        }
-      };
-
-      if (this._cmd.watch) {
-        await DocCliUtil.watchFile('doc.ts', write);
-      } else {
-        try {
-          await write();
-        } catch (err) {
-          console.log(PathUtil.cwd, err);
-        }
+    EnvInit.init({
+      debug: '0',
+      append: {
+        TRV_SRC_LOCAL: 'doc',
+        TRV_RESOURCES: 'doc/resources'
+      },
+      set: {
+        TRV_LOG_PLAIN: '1'
       }
-    } else {
-      console.log(await DocCliUtil.getRenderer(this._cmd.format));
-    }
+    });
+
+    await PrecompileUtil.compile();
+    await DocBinUtil.generate({ output: this._cmd.output, watch: this._cmd.watch, format: this._cmd.format });
   }
 }
