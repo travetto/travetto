@@ -13,11 +13,11 @@ export async function getSchemas() {
 
   const src = (await DependencyRegistry.getInstance<ElasticsearchModelService>(ModelStorageSupportTarget));
 
-  const { ElasticsearchUtil } = await import('../../src/internal/query');
+  const { ElasticsearchSchemaUtil } = await import('../../src/internal/schema');
 
-  const out: Record<string, Record<string, string>> = {};
+  const out: Record<string, Record<string, any>> = {};
   for (const cls of ModelRegistry.getClasses()) {
-    out[src.getStore(cls)] = ElasticsearchUtil.generateSourceSchema(cls);
+    out[src.manager.getStore(cls)] = ElasticsearchSchemaUtil.generateSourceSchema(cls);
   }
 
   return out;

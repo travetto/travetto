@@ -5,7 +5,7 @@ import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, IterableInputSource, DynamicAsyncIterator } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
-import { buildWorkManager } from '../worker/parent';
+import { buildStandardTestManager } from '../worker/standard';
 import { RunEvent } from '../worker/types';
 import { TestConsumerRegistry } from '../consumer/registry';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
@@ -30,7 +30,7 @@ export class TestWatcher {
     SuiteRegistry.listen(RootRegistry);
 
     const consumer = new CumulativeSummaryConsumer(TestConsumerRegistry.getInstance(format));
-    const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
+    const pool = new WorkPool(buildStandardTestManager(consumer), {
       idleTimeoutMillis: 120000,
       min: 2,
       max: os.cpus.length - 1

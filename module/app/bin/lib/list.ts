@@ -7,6 +7,7 @@ import { AppCache } from '@travetto/boot/src/cache';
 import { ExecUtil } from '@travetto/boot/src/exec';
 import { CliUtil } from '@travetto/cli/src/util';
 import { SystemUtil } from '@travetto/base/src/internal/system';
+import { EnvInit } from '@travetto/base/bin/init';
 
 import type { ApplicationConfig } from '../../src/types';
 
@@ -114,7 +115,7 @@ export class CliAppListUtil {
  */
 export async function main(mode?: 'build') {
   try {
-    CliUtil.initEnv({});
+    EnvInit.init({});
     const list = mode === 'build' ? CliAppListUtil.buildList() : CliAppListUtil.getList();
     CliUtil.pluginResponse((await list) ?? []);
   } catch (err) {

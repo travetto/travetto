@@ -1,7 +1,8 @@
 import * as path from 'path';
+import * as fs from 'fs';
 
 import { Util } from '@travetto/base';
-import { PathUtil } from '@travetto/boot';
+import { ExecUtil, PathUtil } from '@travetto/boot';
 import { Barrier, ExecutionError } from '@travetto/worker';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 import { TimeUtil } from '@travetto/base/src/internal/time';
@@ -16,7 +17,6 @@ import { ConsoleCapture } from './console';
 import { TestPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { AssertUtil } from '../assert/util';
-import { Skip } from '../model/common';
 
 const TEST_TIMEOUT = TimeUtil.getEnv('TRV_TEST_TIMEOUT', 5, 's');
 
@@ -263,5 +263,25 @@ export class TestExecutor {
     } else { // Running the suite
       await this.executeSuite(consumer, params.suite);
     }
+  }
+
+  /**
+   * Execute isolated
+   */
+  static async executeIsolated(consumer: TestConsumer, file: string, ...args: string[]) {
+    // Read modules for extensions
+    const modules = [...(await fs.promises.readFile(file, 'utf8'))
+      .matchAll(/\/\/\s*@file-if\s+(@travetto\/[A-Za-z0-9\-]+)/g)]
+      .map(x => x[1]);
+
+    const proc = ExecUtil.forkMain(require.resolve('../../bin/lib/run'), [file, ...args], {
+      env: {
+        TRV_MODULES: modules.join(','),
+        TRV_TEST_FORMAT: 'exec',
+        TRV_CACHE: `.trv_cache_${SystemUtil.naiveHash(file)}`
+      }
+    });
+    proc.process.on('message', e => consumer.onEvent(e));
+    await proc.result;
   }
 }

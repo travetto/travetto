@@ -1,7 +1,8 @@
 import * as commander from 'commander';
+
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { ExecUtil } from '@travetto/boot';
-import { CliUtil } from '@travetto/cli/src/util';
+import { EnvInit } from '@travetto/base/bin/init';
 
 /**
  * CLI for outputting the open api spec to a local file
@@ -14,8 +15,12 @@ export class OpenApiSpecPlugin extends BasePlugin {
   }
 
   async action() {
-    CliUtil.initEnv({ watch: false, debug: '0', envExtra: { API_SPEC_OUTPUT: this._cmd.output } });
-    const result = await ExecUtil.worker(require.resolve('./util')).message;
+    EnvInit.init({
+      watch: false, debug: '0',
+      set: { API_SPEC_OUTPUT: this._cmd.output }
+    });
+
+    const result = await ExecUtil.workerMain(require.resolve('./generate')).message;
 
     if (this._cmd.output === '-' || !this._cmd.output) {
       console.log!(result);

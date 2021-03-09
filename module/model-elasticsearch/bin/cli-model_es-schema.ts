@@ -1,6 +1,6 @@
 import * as commander from 'commander';
 
-import { CliUtil } from '@travetto/cli/src/util';
+import { EnvInit } from '@travetto/base/bin/init';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 /**
@@ -14,8 +14,8 @@ export class EsSchemaPlugin extends BasePlugin {
   }
 
   async action() {
-    CliUtil.initEnv({ env: 'prod' });
-    const { getSchemas } = await import('./lib');
+    EnvInit.init({ env: 'prod' });
+    const { getSchemas } = await import('./lib/schema');
     console!.log(JSON.stringify(await getSchemas(), null, 2));
   }
 }

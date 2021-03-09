@@ -1,29 +1,52 @@
-import { PhaseManager } from '@travetto/base';
-import { RunState } from '../execute/types';
+import { ErrorUtil } from '@travetto/base/src/internal/error';
+import { ParentCommChannel, WorkUtil } from '@travetto/worker';
+
+import { Events, RunEvent } from './types';
+import { TestConsumer } from '../consumer/types';
+import { TestEvent } from '../model/event';
+import { TestResult } from '../model/test';
 
 /**
- * Standard worker, used for direct runs from the command line
+ *  Produce a handler for the child worker
  */
-export class StandardWorker {
+export function buildStandardTestManager(consumer: TestConsumer) {
   /**
-   * Runs tests
+   * Spawn a child
    */
-  static async run(opts: RunState) {
-    try {
-      const { Runner } = await import('../execute/runner');
-      const { RunnerUtil } = await import('../execute/util');
+  return () => WorkUtil.spawnedWorker('@travetto/test/bin/lib/worker', {
+    opts: {
+      env: {
+        TRV_WATCH: '0'
+      }
+    },
+    handlers: {
+      /**
+       * Child initialization
+       */
+      async init(channel: ParentCommChannel<TestEvent>) {
+        await channel.listenOnce(Events.READY); // Wait for the child to be ready
+        await channel.send(Events.INIT); // Initialize
+        await channel.listenOnce(Events.INIT_COMPLETE); // Wait for complete
+        channel.listen(consumer.onEvent.bind(consumer)); // Connect the consumer with the event stream from the child
+      },
+      /**
+       * Send child command to run tests
+       */
+      async execute(channel: ParentCommChannel<TestEvent>, event: string | RunEvent) {
+        // Listen for child to complete
+        const complete = channel.listenOnce(Events.RUN_COMPLETE);
+        // Start test
+        event = typeof event === 'string' ? { file: event } : event;
+        channel.send(Events.RUN, event);
 
-      RunnerUtil.registerCleanup('runner');
+        // Wait for complete
+        const { error } = await (complete as unknown as TestResult);
 
-      // Init the app
-      await PhaseManager.run('init', '*', '@trv:registry/init');
-
-      // Run the tests
-      const res = await new Runner(opts).run();
-      return res ? 0 : 1;
-    } catch (e) {
-      console.error('Test Worker Failed', { error: e });
-      return 1;
+        // If we received an error, throw it
+        if (error) {
+          throw ErrorUtil.deserializeError(error);
+        }
+      }
     }
-  }
+  });
 }
