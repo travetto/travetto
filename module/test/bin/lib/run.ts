@@ -1,5 +1,5 @@
 import { EnvInit } from '@travetto/base/bin/init';
-import { CompileCliUtil } from '@travetto/compiler/bin/lib';
+import { CompileBinUtil } from '@travetto/compiler/bin/lib';
 
 import type { RunState } from '../../src/execute/types';
 
@@ -19,7 +19,7 @@ export async function runTests(opts: RunState) {
     }
   });
 
-  await CompileCliUtil.compile();
+  await CompileBinUtil.compile();
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init', '@trv:registry/init');
 

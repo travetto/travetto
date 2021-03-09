@@ -4,7 +4,7 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
 
-import { CliModelCandidateUtil } from './candidate';
+import { ModelCandidateBinUtil } from './candidate';
 
 /**
  * CLI Entry point for exporting model schemas
@@ -13,7 +13,7 @@ export abstract class BaseModelPlugin extends BasePlugin {
 
   restoreEnv?: (err: Error) => unknown;
 
-  resolve = CliModelCandidateUtil.resolve.bind(CliModelCandidateUtil);
+  resolve = ModelCandidateBinUtil.resolve.bind(ModelCandidateBinUtil);
 
   init(cmd: commander.Command) {
     return cmd
@@ -32,7 +32,7 @@ ${models.map(p => color`  * ${{ param: p }}`).join('\n')}
   }
 
   async validate(provider: string, models: string[]) {
-    const candidates = await CliModelCandidateUtil.getCandidates();
+    const candidates = await ModelCandidateBinUtil.getCandidates();
     if (!provider) {
       return await this.usage(candidates);
     } else {

@@ -5,7 +5,7 @@ import { CliUtil } from '@travetto/cli/src/util';
 /**
  * Utilities for running compilation
  */
-export class CompileCliUtil {
+export class CompileBinUtil {
 
   /**
    * Trigger a compile
@@ -39,5 +39,5 @@ export class CompileCliUtil {
 }
 
 export function main() {
-  return CompileCliUtil.compileAll();
+  return CompileBinUtil.compileAll();
 }

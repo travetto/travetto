@@ -11,7 +11,7 @@ import type { ModelType } from '../../src/types/model';
 /**
  * Utilities for finding candidates for model operations
  */
-export class CliModelCandidateUtil {
+export class ModelCandidateBinUtil {
 
   /**
    * Get all models
@@ -101,10 +101,10 @@ export class CliModelCandidateUtil {
  */
 export async function main() {
   try {
-    await CliModelCandidateUtil.init();
+    await ModelCandidateBinUtil.init();
     CliUtil.pluginResponse({
-      models: await CliModelCandidateUtil.getModelNames(),
-      providers: await CliModelCandidateUtil.getProviderNames()
+      models: await ModelCandidateBinUtil.getModelNames(),
+      providers: await ModelCandidateBinUtil.getProviderNames()
     });
   } catch (err) {
     CliUtil.pluginResponse(err);

@@ -6,7 +6,7 @@ import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
 import { PathUtil } from '@travetto/boot';
 
-import { CliAppListUtil } from './lib/list';
+import { AppListBinUtil } from './lib/list';
 import { RunUtil } from './lib/run';
 import { HelpUtil } from './lib/help';
 
@@ -24,7 +24,7 @@ export class AppRunPlugin extends BasePlugin {
       '',
       color`${{ title: 'Available Applications:' }}`,
       '',
-      HelpUtil.generateAppHelpList(await CliAppListUtil.getList()),
+      HelpUtil.generateAppHelpList(await AppListBinUtil.getList()),
       ''
     ].join('\n');
   }
@@ -44,7 +44,7 @@ export class AppRunPlugin extends BasePlugin {
   async action(app: string, args: string[]) {
     try {
       // Find app
-      const selected = await CliAppListUtil.findByName(app);
+      const selected = await AppListBinUtil.findByName(app);
 
       // If app not found
       if (!selected) {
@@ -69,7 +69,7 @@ export class AppRunPlugin extends BasePlugin {
         }
       }
     } catch (err) {
-      await this.showHelp(err, `\nUsage: ${HelpUtil.getAppUsage((await CliAppListUtil.findByName(app))!)}`);
+      await this.showHelp(err, `\nUsage: ${HelpUtil.getAppUsage((await AppListBinUtil.findByName(app))!)}`);
     }
   }
 
@@ -78,7 +78,7 @@ export class AppRunPlugin extends BasePlugin {
    */
 
   async complete() {
-    const apps = await CliAppListUtil.getList() || [];
+    const apps = await AppListBinUtil.getList() || [];
     const env = ['prod', 'dev'];
 
     const profiles = fs.readdirSync(PathUtil.cwd)

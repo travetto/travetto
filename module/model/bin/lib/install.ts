@@ -2,7 +2,7 @@ import type { Class } from '@travetto/base';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 import type { ModelType } from '@travetto/model/src/types/model';
 
-export class CliModelInstallUtil {
+export class ModelInstallBinUtil {
   static async run(provider: ModelStorageSupport, models: Class<ModelType>[]) {
     if (!provider.createModel) {
       throw new Error(`${provider} does not support model installation`);
