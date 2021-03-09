@@ -25,7 +25,7 @@ class TestRunnerFeature extends BaseFeature {
     command?: string
   ) {
     super(module, command);
-    this.server = new ProcessServer('node', [this.resolvePlugin('watch-test'), 'exec'], {
+    this.server = new ProcessServer('node', [this.resolveBin('test-watch'), 'exec'], {
       env: { TRV_CACHE: this.cacheDir, },
       cwd: Workspace.path
     });
@@ -72,7 +72,7 @@ class TestRunnerFeature extends BaseFeature {
 
     return await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
       name: 'Debug Travetto',
-      program: this.resolvePlugin('test'),
+      program: this.resolveBin('test-direct'),
       args: [
         file.replace(`${Workspace.path}${path.sep}`, ''),
         `${line}`

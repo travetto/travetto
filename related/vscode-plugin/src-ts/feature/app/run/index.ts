@@ -30,7 +30,7 @@ export class AppRunFeature extends BaseFeature {
    */
   async getAppList() {
     await this.compile();
-    const choices = JSON.parse(await this.runPlugin('list')) as AppChoice[];
+    const choices = await this.runBinJSON<AppChoice[]>('list-get');
     return choices.map(x => {
       x.inputs = x.inputs || [];
       return x;
@@ -75,7 +75,7 @@ export class AppRunFeature extends BaseFeature {
 
     return Workspace.generateLaunchConfig({
       name: `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
-      program: this.resolvePlugin('run'),
+      program: this.resolveBin('run'),
       args: [choice.name, ...choice.inputs].map(x => `${x}`),
       env,
       cwd: Workspace.path

@@ -33,12 +33,12 @@ export abstract class BaseFeature implements ActivationTarget {
     }
   }
 
-  resolvePlugin(name: string) {
-    return this.resolve('bin', 'lib', name);
+  resolveBin(name: string) {
+    return this.resolve('bin', name);
   }
 
   async compile() {
-    const { result } = ExecUtil.forkMain(Workspace.resolve('node_modules/@travetto/compiler/bin/lib/index.ts'), [], {
+    const { result } = ExecUtil.forkMain(Workspace.resolve('node_modules/@travetto/compiler/bin/compile'), [], {
       cwd: Workspace.path,
     });
 
@@ -54,12 +54,16 @@ export abstract class BaseFeature implements ActivationTarget {
     }
   }
 
-  async runPlugin(name: string) {
-    const { result } = ExecUtil.forkMain(this.resolvePlugin(name), [], {
+  async runBin(name: string) {
+    const { result } = ExecUtil.forkMain(this.resolveBin(name), [], {
       cwd: Workspace.path
     });
     const output = await result;
     return output.stdout;
+  }
+
+  runBinJSON<T = unknown>(name: string) {
+    return this.runBin(name).then(x => JSON.parse(x) as T);
   }
 
   commandName(task: string) {

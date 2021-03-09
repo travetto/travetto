@@ -10,7 +10,7 @@ import { BaseFeature } from '../../base';
 export class CleanFeature extends BaseFeature {
 
   async clean() {
-    await this.runPlugin('clean');
+    await this.runBin('clean');
     vscode.window.showInformationMessage('Successfully deleted');
   }
 

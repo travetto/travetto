@@ -9,7 +9,7 @@ import { ApplicationRegistry } from './registry';
 /**
  * Utilities to fetch list of applications
  */
-export class AppListUtil {
+export class AppScanUtil {
 
   /**
    * Sort list of cached items
@@ -22,7 +22,7 @@ export class AppListUtil {
   /**
    * Scan source code for apps
    */
-  static async buildList() {
+  static async scanList() {
 
     await Promise.all(
       SourceCodeIndex.findByFolders(AppManifest.source)

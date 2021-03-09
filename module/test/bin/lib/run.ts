@@ -1,5 +1,5 @@
 import { EnvInit } from '@travetto/base/bin/init';
-import { CompileBinUtil } from '@travetto/compiler/bin/lib';
+import { PrecompileUtil } from '@travetto/compiler/bin/lib';
 
 import type { RunState } from '../../src/execute/types';
 
@@ -19,7 +19,7 @@ export async function runTests(opts: RunState) {
     }
   });
 
-  await CompileBinUtil.compile();
+  await PrecompileUtil.compile();
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init', '@trv:registry/init');
 
@@ -35,14 +35,4 @@ export async function runTests(opts: RunState) {
     console.error('Test Worker Failed', { error: err });
     process.exit(1);
   }
-}
-
-// Direct entry point
-export function main(...args: string[]) {
-  return runTests({
-    args,
-    format: process.env.TRV_TEST_FORMAT ?? 'tap',
-    mode: 'single',
-    concurrency: 1
-  });
 }

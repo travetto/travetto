@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 import { AppCache } from '@travetto/boot';
-import { CompileBinUtil } from '@travetto/compiler/bin/lib';
+import { PrecompileUtil } from '@travetto/compiler/bin/lib';
 import { EnvInit } from '@travetto/base/bin/init';
 
 export async function customLogs() {
@@ -31,10 +31,10 @@ export async function main() {
 
   await customLogs();
 
-  await CompileBinUtil.compile();
+  await PrecompileUtil.compile();
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init', '@trv:compiler/load');
 
-  const { TestChildWorker } = await import('../../src/worker/child');
+  const { TestChildWorker } = await import('../src/worker/child');
   return new TestChildWorker().activate();
 }

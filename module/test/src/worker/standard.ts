@@ -13,7 +13,7 @@ export function buildStandardTestManager(consumer: TestConsumer) {
   /**
    * Spawn a child
    */
-  return () => WorkUtil.spawnedWorker('@travetto/test/bin/lib/worker', {
+  return () => WorkUtil.spawnedWorker('@travetto/test/bin/test-child', {
     opts: {
       env: {
         TRV_WATCH: '0'

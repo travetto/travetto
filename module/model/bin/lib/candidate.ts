@@ -11,7 +11,7 @@ import type { ModelType } from '../../src/types/model';
 /**
  * Utilities for finding candidates for model operations
  */
-export class ModelCandidateBinUtil {
+export class ModelCandidateUtil {
 
   /**
    * Get all models
@@ -76,7 +76,7 @@ export class ModelCandidateBinUtil {
    */
   static async getCandidates() {
     return CliUtil.waiting('Compiling', () =>
-      ExecUtil.workerMain<{ providers: string[], models: string[] }>(__filename, ['build'], {
+      ExecUtil.workerMain<{ providers: string[], models: string[] }>(require.resolve('../candidate'), [], {
         env: { TRV_WATCH: '0' }
       }).message
     );
@@ -93,20 +93,5 @@ export class ModelCandidateBinUtil {
       provider: await this.getProvider(provider),
       models: await this.getModels(models)
     };
-  }
-}
-
-/**
- * Handles direct invocation
- */
-export async function main() {
-  try {
-    await ModelCandidateBinUtil.init();
-    CliUtil.pluginResponse({
-      models: await ModelCandidateBinUtil.getModelNames(),
-      providers: await ModelCandidateBinUtil.getProviderNames()
-    });
-  } catch (err) {
-    CliUtil.pluginResponse(err);
   }
 }

@@ -1,6 +1,4 @@
 import * as readline from 'readline';
-import { parentPort } from 'worker_threads';
-
 import { CompletionConfig } from './types';
 
 /**
@@ -123,13 +121,5 @@ export class CliUtil {
     } else {
       return value!;
     }
-  }
-
-  /**
-   * Return plugin data depending on how it has been called
-   */
-  static pluginResponse(obj: unknown) {
-    parentPort ? parentPort.postMessage(obj) : console.log(JSON.stringify(obj));
-    return obj;
   }
 }
