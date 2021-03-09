@@ -1,20 +1,7 @@
 import * as readline from 'readline';
 import { parentPort } from 'worker_threads';
-// Imported individually to prevent barrel import loading too much
-import { EnvUtil } from '@travetto/boot/src/env';
 
 import { CompletionConfig } from './types';
-
-export interface AppEnv {
-  env?: string;
-  watch?: boolean;
-  debug?: string;
-  resources?: string[];
-  profiles?: string[];
-  envExtra?: Record<string, unknown>;
-}
-
-const join = (items: string[]) => [...new Set(items)].join(',');
 
 /**
  * Common CLI Utilities
@@ -67,22 +54,6 @@ export class CliUtil {
     }
 
     return last ? opts.filter(x => x.startsWith(last)) : opts.filter(x => !x.startsWith('-'));
-  }
-
-  /**
-   * Initialize the app environment
-   */
-  static initEnv({ env, watch, resources, profiles, debug, envExtra }: AppEnv) {
-    process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
-    const prod = /^prod(uction)$/i.test(process.env.TRV_ENV);
-
-    Object.assign(process.env, envExtra ?? {}, {
-      NODE_ENV: prod ? 'production' : 'development',
-      TRV_WATCH: `${watch ?? EnvUtil.getBoolean('TRV_WATCH')}`,
-      TRV_RESOURCES: join(EnvUtil.getList('TRV_RESOURCES', resources)),
-      TRV_PROFILES: join(EnvUtil.getList('TRV_PROFILES', profiles)),
-      TRV_DEBUG: EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', debug ?? (prod ? '0' : '')))
-    });
   }
 
   /**

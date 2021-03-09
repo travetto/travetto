@@ -1,12 +1,14 @@
-import { CliUtil } from '@travetto/cli/src/util';
-import { DEF_ENV, ENV_EXT } from './env';
+import { EnvInit } from '@travetto/base/bin/init';
 
 export async function main(format: string = 'tap') {
-  CliUtil.initEnv({
-    ...DEF_ENV, watch: true, envExtra: {
-      ...ENV_EXT,
-      TRV_SRC_COMMON: 'test-support',
-      TRV_SRC_LOCAL: 'test'
+  EnvInit.init({
+    debug: '0',
+    set: { TRV_LOG_TIME: '0' },
+    append: {
+      TRV_RESOURCES: 'test/resources',
+      TRV_PROFILES: 'test',
+      TRV_SRC_LOCAL: 'test',
+      TRV_SRC_COMMON: 'test-support'
     }
   });
 

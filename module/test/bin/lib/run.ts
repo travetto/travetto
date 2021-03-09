@@ -1,25 +1,48 @@
-import { CliUtil } from '@travetto/cli/src/util';
+import { EnvInit } from '@travetto/base/bin/init';
+import { CompileCliUtil } from '@travetto/compiler/bin/lib';
+
 import type { RunState } from '../../src/execute/types';
-import { DEF_ENV, ENV_EXT, load } from './env';
 
 /**
  * Run tests given the input state
  * @param opts
  */
 export async function runTests(opts: RunState) {
-  CliUtil.initEnv({ ...DEF_ENV, envExtra: ENV_EXT, watch: false });
-  await load();
-  const { StandardWorker } = await import('../../src/worker/standard');
-  return StandardWorker.run(opts);
+  EnvInit.init({
+    debug: '0',
+    set: { TRV_LOG_TIME: '0' },
+    append: {
+      TRV_RESOURCES: 'test/resources',
+      TRV_PROFILES: 'test',
+      TRV_SRC_LOCAL: '^test',
+      TRV_SRC_COMMON: '^test-support'
+    }
+  });
+
+  await CompileCliUtil.compile();
+  const { PhaseManager } = await import('@travetto/base');
+  await PhaseManager.run('init', '@trv:registry/init');
+
+  const { RunnerUtil } = await import('../../src/execute/util');
+  const { Runner } = await import('../../src/execute/runner');
+
+  RunnerUtil.registerCleanup('runner');
+
+  try {
+    const res = await new Runner(opts).run();
+    process.exit(res ? 0 : 1);
+  } catch (err) {
+    console.error('Test Worker Failed', { error: err });
+    process.exit(1);
+  }
 }
 
 // Direct entry point
-export async function main(...args: string[]) {
-  const res = await runTests({
+export function main(...args: string[]) {
+  return runTests({
     args,
     format: process.env.TRV_TEST_FORMAT ?? 'tap',
     mode: 'single',
     concurrency: 1
   });
-  process.exit(res);
 }

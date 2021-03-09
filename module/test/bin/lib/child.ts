@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 
 import { AppCache } from '@travetto/boot';
-import { CliUtil } from '@travetto/cli/src/util';
-import { DEF_ENV, ENV_EXT, load } from './env';
+import { CompileCliUtil } from '@travetto/compiler/bin/lib';
+import { EnvInit } from '@travetto/base/bin/init';
 
 export async function customLogs() {
   const { ConsoleManager } = await import('@travetto/base');
@@ -18,9 +18,22 @@ export async function customLogs() {
 }
 
 export async function main() {
-  CliUtil.initEnv({ ...DEF_ENV, envExtra: ENV_EXT });
+  EnvInit.init({
+    debug: '0',
+    set: { TRV_LOG_TIME: '0' },
+    append: {
+      TRV_RESOURCES: 'test/resources',
+      TRV_PROFILES: 'test',
+      TRV_SRC_LOCAL: '^test',
+      TRV_SRC_COMMON: '^test-support'
+    }
+  });
+
   await customLogs();
-  await load();
+
+  await CompileCliUtil.compile();
+  const { PhaseManager } = await import('@travetto/base');
+  await PhaseManager.run('init', '@trv:compiler/load');
 
   const { TestChildWorker } = await import('../../src/worker/child');
   return new TestChildWorker().activate();

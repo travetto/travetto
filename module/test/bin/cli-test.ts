@@ -4,6 +4,7 @@ import * as fs from 'fs';
 
 import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { CliUtil } from '@travetto/cli/src/util';
 
 import type { RunState } from '../src/execute/types';
 
@@ -31,7 +32,8 @@ export class TestPlugin extends BasePlugin {
       .arguments('[regexes...]')
       .option('-f, --format <format>', 'Output format for test results', new RegExp(`^(${this.getTypes().join('|')})$`), 'tap')
       .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, `${Math.min(4, os.cpus().length - 1)}`)
-      .option('-m, --mode <mode>', 'Test run mode', /^(single|isolated|standard)$/, 'standard');
+      .option('-i, --isolated <isolated>', 'Isolated mode', CliUtil.isBoolean, false)
+      .option('-m, --mode <mode>', 'Test run mode', /^(single|standard)$/, 'standard');
   }
 
   async isFile(file: string, errorIfNot?: string) {
@@ -48,11 +50,6 @@ export class TestPlugin extends BasePlugin {
     }
   }
 
-  async onIsolated(state: Partial<RunState>, file: string) {
-    await this.isFile(file, 'You must specify a proper test file to run in isolated mode');
-    state.mode = 'isolated';
-  }
-
   async onSingle(state: Partial<RunState>, file: string) {
     await this.isFile(file, 'You must specify a proper test file to run in single mode');
     state.mode = 'single';
@@ -61,13 +58,15 @@ export class TestPlugin extends BasePlugin {
   async onStandard(state: Partial<RunState>, first: string) {
     const isFile = await this.isFile(first);
 
+    if (first.startsWith('test-')) {
+      state.isolated = true;
+    }
+
     if (!first) {
       state.args = ['test/.*'];
     } else if (isFile) { // If is a single file
-      if (first.startsWith('test/')) {
+      if (/test(\-[^-]+)\//.test(first)) {
         await this.onSingle(state, first);
-      } else if (first.startsWith('test-')) {
-        await this.onIsolated(state, first);
       } else {
         await this.showHelp('Only files in the test/ and test-*/ folders are permitted to be run');
       }
@@ -88,17 +87,15 @@ export class TestPlugin extends BasePlugin {
 
     switch (state.mode) {
       case 'single': await this.onSingle(state, first); break;
-      case 'isolated': await this.onIsolated(state, first); break;
       case 'standard': await this.onStandard(state, first); break;
     }
 
-    const res = await runTests(state as RunState);
-    process.exit(res);
+    await runTests(state as RunState);
   }
 
   complete() {
     const formats = this.getTypes();
-    const modes = ['single', 'isolated', 'standard'];
+    const modes = ['single', 'standard'];
     return {
       '': ['--format', '--mode'],
       '--format': formats,

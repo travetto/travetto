@@ -1,12 +1,10 @@
-import * as fs from 'fs';
-
-import { ExecUtil, PathUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
 import { WorkPool, IterableInputSource } from '@travetto/worker';
-import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TestExecutor } from './executor';
-import { buildWorkManager } from '../worker/parent';
+import { buildStandardTestManager } from '../worker/standard';
+import { buildIsolatedTestManager } from '../worker/isolated';
 
 import { RunnerUtil } from './util';
 import { RunState } from './types';
@@ -35,7 +33,11 @@ export class Runner {
 
     await PhaseManager.run('test');
 
-    const pool = new WorkPool(buildWorkManager.bind(null, consumer), {
+    const manager = this.state.isolated ?
+      buildIsolatedTestManager :
+      buildStandardTestManager;
+
+    const pool = new WorkPool(manager(consumer), {
       idleTimeoutMillis: 10000,
       min: 1,
       max: this.state.concurrency
@@ -51,34 +53,6 @@ export class Runner {
   }
 
   /**
-   * Run isolated suite
-   */
-  async runIsolated() {
-    const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
-    consumer.onStart();
-
-    const [file, ...args] = this.state.args;
-
-    // Read modules for extensions
-    const modules = [...(await fs.promises.readFile(file, 'utf8'))
-      .matchAll(/\/\/\s*@file-if\s+(@travetto\/[A-Za-z0-9\-]+)/g)]
-      .map(x => x[1]);
-
-    const env = {
-      TRV_MODULES: modules.join(','),
-      TRV_TEST_FORMAT: 'exec',
-      TRV_CACHE: `.trv_cache_${SystemUtil.naiveHash(file)}`
-    };
-
-    await PhaseManager.run('test');
-    const proc = ExecUtil.forkMain(require.resolve('../../bin/lib/run'), [file, ...args], { env });
-    proc.process.on('message', e => consumer.onEvent(e));
-    await proc.result;
-
-    return consumer.summarizeAsBoolean();
-  }
-
-  /**
    * Run a single file
    */
   async runSingle() {
@@ -88,7 +62,11 @@ export class Runner {
     const [file, ...args] = this.state.args;
 
     await PhaseManager.run('test');
-    await TestExecutor.execute(consumer, file, ...args);
+    if (this.state.isolated) {
+      await TestExecutor.executeIsolated(consumer, file, ...args);
+    } else {
+      await TestExecutor.execute(consumer, file, ...args);
+    }
 
     return consumer.summarizeAsBoolean();
   }
@@ -98,7 +76,6 @@ export class Runner {
    */
   async run() {
     switch (this.state.mode) {
-      case 'isolated': return await this.runIsolated();
       case 'single': return await this.runSingle();
       case 'standard': return await this.runFiles();
     }

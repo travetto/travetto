@@ -15,11 +15,15 @@ export interface RunState {
   /**
    * Test mode
    */
-  mode?: 'single' | 'watch' | 'isolated' | 'standard';
+  mode?: 'single' | 'watch' | 'standard';
   /**
    * Number of test suites to run concurrently, when mode is not single
    */
   concurrency: number;
+  /**
+   * Run in isolated mode?
+   */
+  isolated?: boolean;
   /**
    * Input arguments
    */

@@ -3,7 +3,7 @@ import * as commander from 'commander';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
-import { CliUtil } from '@travetto/cli/src/util';
+import { EnvInit } from '@travetto/base/bin/init';
 import { PathUtil } from '@travetto/boot';
 
 import { CliAppListUtil } from './lib/list';
@@ -50,7 +50,14 @@ export class AppRunPlugin extends BasePlugin {
       if (!selected) {
         return await this.showHelp(app ? `${app} is an unknown application` : '');
       } else {
-        await CliUtil.initEnv({ env: this._cmd.env, profiles: this._cmd.profile, resources: this._cmd.resource, watch: selected.watch });
+        EnvInit.init({
+          env: this._cmd.env, watch: selected.watch,
+          append: {
+            TRV_PROFILES: this._cmd.profile,
+            TRV_RESOURCES: this._cmd.resource
+          }
+        });
+
         // Run otherwise
         try {
           await RunUtil.run(selected, ...args);

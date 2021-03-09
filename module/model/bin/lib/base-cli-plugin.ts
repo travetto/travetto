@@ -2,7 +2,7 @@ import * as commander from 'commander';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
-import { CliUtil } from '@travetto/cli/src/util';
+import { EnvInit } from '@travetto/base/bin/init';
 
 import { CliModelCandidateUtil } from './candidate';
 
@@ -47,7 +47,7 @@ ${models.map(p => color`  * ${{ param: p }}`).join('\n')}
   }
 
   async prepareEnv() {
-    CliUtil.initEnv({ watch: false });
+    EnvInit.init({ watch: false });
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
     ConsoleManager['exclude'].add('debug');
 

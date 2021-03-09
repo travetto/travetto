@@ -1,5 +1,6 @@
 import { CliUtil } from '@travetto/cli/src/util';
 import { ExecUtil } from '@travetto/boot';
+import { EnvInit } from '@travetto/base/bin/init';
 
 import type { Class } from '@travetto/base';
 import type { InjectableConfig } from '@travetto/di';
@@ -55,7 +56,7 @@ export class CliModelCandidateUtil {
    * Initialize
    */
   static async init() {
-    CliUtil.initEnv({ watch: false });
+    EnvInit.init({ watch: false });
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
   }
