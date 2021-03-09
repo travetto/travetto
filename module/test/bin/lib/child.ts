@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 import { AppCache } from '@travetto/boot';
-import { CompileCliUtil } from '@travetto/compiler/bin/lib';
+import { CompileBinUtil } from '@travetto/compiler/bin/lib';
 import { EnvInit } from '@travetto/base/bin/init';
 
 export async function customLogs() {
@@ -31,7 +31,7 @@ export async function main() {
 
   await customLogs();
 
-  await CompileCliUtil.compile();
+  await CompileBinUtil.compile();
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init', '@trv:compiler/load');
 

@@ -7,14 +7,13 @@ import { AppCache } from '@travetto/boot/src/cache';
 import { ExecUtil } from '@travetto/boot/src/exec';
 import { CliUtil } from '@travetto/cli/src/util';
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { EnvInit } from '@travetto/base/bin/init';
 
 import type { ApplicationConfig } from '../../src/types';
 
 /**
  * Utilities to fetch list of applications
  */
-export class CliAppListUtil {
+export class AppListBinUtil {
 
   private static CACHE_CONFIG = `app-cache-${SystemUtil.naiveHash(EnvUtil.get('TRV_SRC_LOCAL', ''))}.json`;
 
@@ -107,18 +106,5 @@ export class CliAppListUtil {
       }
     }
     return items;
-  }
-}
-
-/**
- * Entry point when run directly
- */
-export async function main(mode?: 'build') {
-  try {
-    EnvInit.init({});
-    const list = mode === 'build' ? CliAppListUtil.buildList() : CliAppListUtil.getList();
-    CliUtil.pluginResponse((await list) ?? []);
-  } catch (err) {
-    CliUtil.pluginResponse(err);
   }
 }

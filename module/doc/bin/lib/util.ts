@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { Package, PathUtil, ExecUtil, EnvUtil } from '@travetto/boot';
-import { CompileCliUtil } from '@travetto/compiler/bin/lib';
+import { CompileBinUtil } from '@travetto/compiler/bin/lib';
 
 import * as n from '../../src/nodes';
 import { AllTypeMap } from '../../src/node-types';
@@ -8,7 +8,7 @@ import type { DocumentContext, Renderer } from '../../src/render/types';
 
 const GIT_BRANCH = ExecUtil.execSync('git', ['status', '-b', '-s', '.']).split(/\n/)[0].split('...')[0].split(' ')[1].trim();
 
-export class DocCliUtil {
+export class DocBinUtil {
   /**
    * Initialize for doc gen
    */
@@ -16,7 +16,7 @@ export class DocCliUtil {
     process.env.TRV_SRC_LOCAL = 'doc';
     process.env.TRV_RESOURCES = 'doc/resources';
 
-    await CompileCliUtil.compile();
+    await CompileBinUtil.compile();
 
     process.env.TRV_DEBUG = '0';
     process.env.TRV_LOG_PLAIN = '1';

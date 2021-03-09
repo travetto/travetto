@@ -1,4 +1,4 @@
-import { CompileCliUtil } from '@travetto/compiler/bin/lib';
+import { CompileBinUtil } from '@travetto/compiler/bin/lib';
 
 import { ApplicationConfig, ApplicationParameter } from '../../src/types';
 
@@ -20,7 +20,7 @@ export class RunUtil {
    */
   static async run(app: ApplicationConfig | string, ...sub: string[]) {
 
-    await CompileCliUtil.compile();
+    await CompileBinUtil.compile();
 
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 

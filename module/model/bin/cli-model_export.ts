@@ -1,5 +1,5 @@
 import { BaseModelPlugin } from './lib/base-cli-plugin';
-import { CliModelExportUtil } from './lib/export';
+import { ModelExportBinUtil } from './lib/export';
 
 /**
  * CLI Entry point for exporting model schemas
@@ -12,7 +12,7 @@ export class ModelExportPlugin extends BaseModelPlugin {
       await this.validate(provider, models);
       await this.prepareEnv();
       const resolved = await this.resolve(provider, models);
-      await CliModelExportUtil.run(resolved.provider, resolved.models);
+      await ModelExportBinUtil.run(resolved.provider, resolved.models);
     } catch (e) {
       console.error(e.message);
     }
