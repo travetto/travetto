@@ -65,8 +65,7 @@ export class AppListUtil {
         }).message
       );
     } else {
-      const { PhaseManager } = await import('@travetto/base');
-      await PhaseManager.run('init', '@trv:compiler/compile');
+      await (await import('@travetto/base/bin/build')).main();
 
       const { AppScanUtil } = await import('../../src/scan');
       const list = await AppScanUtil.scanList();

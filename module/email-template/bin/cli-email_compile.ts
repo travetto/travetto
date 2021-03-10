@@ -12,8 +12,8 @@ export class EmailCompilePlugin extends BasePlugin {
 
   init(cmd: commander.Command) {
     return cmd.option('-w, --watch [watch]', 'Compile in watch mode, requires @travetto/watch (default: false)', CliUtil.isBoolean);
-
   }
+
   async action() {
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');

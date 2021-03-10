@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { CliUtil } from '@travetto/cli/src/util';
+import { EnvInit } from '@travetto/base/bin/init';
 
 import type { RunState } from '../src/execute/types';
 
@@ -25,6 +26,19 @@ export class TestPlugin extends BasePlugin {
         .filter(x => x && x !== 'exec');
     }
     return this._types;
+  }
+
+  envInit() {
+    EnvInit.init({
+      debug: '0',
+      set: { TRV_LOG_TIME: '0' },
+      append: {
+        TRV_RESOURCES: 'test/resources',
+        TRV_PROFILES: 'test',
+        TRV_SRC_LOCAL: '^test',
+        TRV_SRC_COMMON: '^test-support'
+      }
+    });
   }
 
   init(cmd: commander.Command) {
@@ -58,13 +72,12 @@ export class TestPlugin extends BasePlugin {
   async onStandard(state: Partial<RunState>, first: string) {
     const isFile = await this.isFile(first);
 
-    if (first.startsWith('test-')) {
-      state.isolated = true;
-    }
-
     if (!first) {
       state.args = ['test/.*'];
     } else if (isFile) { // If is a single file
+      if (first.startsWith('test-')) {
+        state.isolated = true;
+      }
       if (/test(\-[^-]+)\//.test(first)) {
         await this.onSingle(state, first);
       } else {

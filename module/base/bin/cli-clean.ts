@@ -1,4 +1,5 @@
 import * as commander from 'commander';
+
 import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
@@ -9,13 +10,14 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
  */
 export class BootCleanPlugin extends BasePlugin {
   name = 'clean';
+  build = undefined;
 
   init(cmd: commander.Command) {
     return cmd.option('-q, --quiet', 'Quiet operation');
   }
 
   async action() {
-    const { AppCache } = await import('../src/cache');
+    const { AppCache } = await import('@travetto/boot/src/cache');
     try {
       AppCache.clear(true);
 

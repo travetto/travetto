@@ -3,7 +3,7 @@
  */
 export const init = {
   key: '@trv:registry/init',
-  after: ['@trv:compiler/load'],
+  after: ['@trv:base/load'],
   action: async () => {
     const { RootRegistry } = await import('../src/service/root');
     return RootRegistry.init();

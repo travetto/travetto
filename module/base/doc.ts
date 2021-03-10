@@ -130,4 +130,16 @@ ${List(
   d`${meth`naiveHash(text: string): number`} computes a very naive hash. Should not be relied upon for scenarios where collisions cannot be tolerated.`,
   d`${meth`computeModule(file: string): string`} computes the internal module name from a given file.`
 )}
+
+${Section('CLI - build')} 
+
+${Execute('Build usage', 'trv', ['build', '--help'])}
+
+This command line operation pre-compiles all of the application source code.  You can target the output location as well, which is useful in conjunction with ${fld`process.env.TRV_CACHE`} for relocating the compiled files.
+
+${Section('CLI - clean')}
+
+The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
+
+${Execute('Clean operation', 'trv', ['clean', '--help'])}
 `;

@@ -2,7 +2,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { PathUtil } from '@travetto/boot';
-import { PrecompileUtil } from '@travetto/compiler/bin/lib';
 
 export class DocBinUtil {
 
@@ -56,7 +55,7 @@ export class DocBinUtil {
         }
       }
     } else {
-      console.log(await GenerateUtil.getRenderer(config.format));
+      console.log(await GenerateUtil.getRenderer(config.format!));
     }
 
   }

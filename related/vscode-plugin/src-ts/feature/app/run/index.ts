@@ -29,7 +29,7 @@ export class AppRunFeature extends BaseFeature {
    * Get list of applications
    */
   async getAppList() {
-    await this.compile();
+    await this.build();
     const choices = await this.runBinJSON<AppChoice[]>('list-get');
     return choices.map(x => {
       x.inputs = x.inputs || [];

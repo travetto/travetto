@@ -14,7 +14,7 @@ export async function main(format: string = 'tap') {
 
   // Compile everything inline, don't delegate
   const { PhaseManager } = await import('@travetto/base');
-  await PhaseManager.run('init', '@trv:compiler/load');
+  await PhaseManager.run('init', '@trv:base/load');
 
   // Trigger startup of transpiler
   (await import('@travetto/compiler')).Compiler['transpiler']['getProgram']();

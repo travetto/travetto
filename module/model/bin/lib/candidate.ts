@@ -1,6 +1,5 @@
 import { CliUtil } from '@travetto/cli/src/util';
 import { ExecUtil } from '@travetto/boot';
-import { EnvInit } from '@travetto/base/bin/init';
 
 import type { Class } from '@travetto/base';
 import type { InjectableConfig } from '@travetto/di';
@@ -53,15 +52,6 @@ export class ModelCandidateUtil {
   }
 
   /**
-   * Initialize
-   */
-  static async init() {
-    EnvInit.init({ watch: false });
-    const { PhaseManager } = await import('@travetto/base');
-    await PhaseManager.run('init');
-  }
-
-  /**
    * Get a single provider
    */
   static async getProvider(provider: string) {
@@ -75,7 +65,7 @@ export class ModelCandidateUtil {
    * @returns
    */
   static async getCandidates() {
-    return CliUtil.waiting('Compiling', () =>
+    return CliUtil.waiting('Resolving', () =>
       ExecUtil.workerMain<{ providers: string[], models: string[] }>(require.resolve('../candidate'), [], {
         env: { TRV_WATCH: '0' }
       }).message

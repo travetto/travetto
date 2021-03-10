@@ -10,7 +10,6 @@ export class ModelExportPlugin extends BaseModelPlugin {
   async action(provider: string, models: string[]) {
     try {
       await this.validate(provider, models);
-      await this.prepareEnv();
       const resolved = await this.resolve(provider, models);
       await ModelExportUtil.run(resolved.provider, resolved.models);
     } catch (e) {

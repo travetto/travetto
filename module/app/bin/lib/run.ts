@@ -1,5 +1,3 @@
-import { PrecompileUtil } from '@travetto/compiler/bin/lib';
-
 import { ApplicationConfig, ApplicationParameter } from '../../src/types';
 
 /**
@@ -19,8 +17,6 @@ export class AppRunUtil {
    * loading framework and compiling
    */
   static async run(app: ApplicationConfig | string, ...sub: string[]) {
-
-    await PrecompileUtil.compile();
 
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 

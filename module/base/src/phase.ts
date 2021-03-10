@@ -1,3 +1,4 @@
+import { AppCache } from '@travetto/boot/src';
 import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
 import { CompileUtil } from '@travetto/boot/src/internal/compile';
 
@@ -31,8 +32,8 @@ export class PhaseManager {
    * @param upto An optional upper bound on the stages to run, inclusive
    * @param after An optional lower bound on the stages to run, exclusive
    */
-  static run(scope: Scope, upto: string = '*', after?: string) {
-    return new PhaseManager(scope).load(upto, after).then(m => m.run());
+  static run(scope: Scope, upto: string = '*', skip: string[] = []) {
+    return new PhaseManager(scope).load(upto).then(m => m.run(skip));
   }
 
   initializers: Initializer[] = [];
@@ -53,15 +54,19 @@ export class PhaseManager {
    * @param after Starting point, exclusive
    */
   async load(upto?: string, after?: string) {
-    const found = SourceCodeIndex.find({ folder: 'support', filter: this.filter });
+    const found = SourceCodeIndex.find({ folder: 'support' });
 
-    // Ensure we transpile all files
+    // Ensure we transpile all support files
     for (const el of found) {
-      CompileUtil.transpile(el.file);
+      if (!AppCache.hasEntry(el.file)) {
+        CompileUtil.transpile(el.file);
+      }
     }
 
     // Load all support files
-    const initFiles = await Promise.all(found.map(x => import(x.file)));
+    const initFiles = await Promise.all(found
+      .filter(x => this.filter.test(x.module))
+      .map(x => import(x.file)));
     this.initializers = SystemUtil.computeOrdering(initFiles.map(x => x.init));
 
     if (upto) {
@@ -89,8 +94,11 @@ export class PhaseManager {
   /**
    * Run the phase
    */
-  async run() {
+  async run(skip: string[] = []) {
     for (const i of this.initializers) {
+      if (skip.includes(i.key)) {
+        continue;
+      }
       const start = Date.now();
       await i.action();
       console.debug('Phase', { scope: this.scope, key: i.key, duration: Date.now() - start });

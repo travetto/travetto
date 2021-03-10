@@ -8,6 +8,5 @@ export async function main() {
   const { OpenApiService } = await import('../src/service');
 
   const instance = await DependencyRegistry.getInstance(OpenApiService);
-  const spec = await instance.spec;
-  ExecUtil.mainResponse(spec);
+  ExecUtil.mainResponse(await instance.spec);
 }

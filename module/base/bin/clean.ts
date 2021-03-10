@@ -1,4 +1,4 @@
-import { AppCache } from '../src/cache';
+import { AppCache } from '@travetto/boot/src/cache';
 
 /**
  * Clean cache

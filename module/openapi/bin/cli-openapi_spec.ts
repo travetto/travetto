@@ -14,12 +14,14 @@ export class OpenApiSpecPlugin extends BasePlugin {
     return cmd.option('-o, --output [output]', 'Output files', './openapi.yml');
   }
 
-  async action() {
+  envInit() {
     EnvInit.init({
       watch: false, debug: '0',
       set: { API_SPEC_OUTPUT: this._cmd.output }
     });
+  }
 
+  async action() {
     const result = await ExecUtil.workerMain(require.resolve('./generate')).message;
 
     if (this._cmd.output === '-' || !this._cmd.output) {
