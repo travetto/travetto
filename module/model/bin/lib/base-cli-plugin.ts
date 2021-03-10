@@ -5,6 +5,7 @@ import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
 
 import { ModelCandidateUtil } from './candidate';
+import { BuildUtil } from '@travetto/base/bin/lib';
 
 /**
  * CLI Entry point for exporting model schemas
@@ -14,6 +15,18 @@ export abstract class BaseModelPlugin extends BasePlugin {
   restoreEnv?: (err: Error) => unknown;
 
   resolve = ModelCandidateUtil.resolve.bind(ModelCandidateUtil);
+
+  async envInit() {
+    EnvInit.init({ watch: false });
+  }
+
+  async build() {
+    await BuildUtil.build();
+    const { ConsoleManager, PhaseManager } = await import('@travetto/base');
+    ConsoleManager['exclude'].add('debug');
+    // Init
+    await PhaseManager.run('init');
+  }
 
   init(cmd: commander.Command) {
     return cmd
@@ -44,14 +57,5 @@ ${models.map(p => color`  * ${{ param: p }}`).join('\n')}
         await this.usage(candidates, color`${{ param: badModel }} is not a valid model`);
       }
     }
-  }
-
-  async prepareEnv() {
-    EnvInit.init({ watch: false });
-    const { PhaseManager, ConsoleManager } = await import('@travetto/base');
-    ConsoleManager['exclude'].add('debug');
-
-    // Init
-    await PhaseManager.run('init');
   }
 }

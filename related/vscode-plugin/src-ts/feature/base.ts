@@ -37,8 +37,8 @@ export abstract class BaseFeature implements ActivationTarget {
     return this.resolve('bin', name);
   }
 
-  async compile() {
-    const { result } = ExecUtil.forkMain(Workspace.resolve('node_modules/@travetto/compiler/bin/compile'), [], {
+  async build() {
+    const { result } = ExecUtil.forkMain(Workspace.resolve('node_modules/@travetto/base/bin/build'), [], {
       cwd: Workspace.path,
     });
 
@@ -47,7 +47,7 @@ export abstract class BaseFeature implements ActivationTarget {
     } catch (err) { // Handle timeout
       await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
-        title: 'Compiling...',
+        title: 'Building...',
         cancellable: false
       }, () => result);
       return (await result).stdout;

@@ -1,7 +1,7 @@
 import { PhaseManager } from '@travetto/base';
 
 export async function main() {
-  await PhaseManager.run('init', '@trv:schema/init');
+  await PhaseManager.run('init');
 
   await import('./watch');
   const { SchemaRegistry } = await import('..');

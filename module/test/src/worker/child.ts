@@ -106,9 +106,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     }
 
     // Run all remaining initializations as needed for tests
-    await PhaseManager.run('init', '@trv:compiler/load'); // Require all
-
-    await PhaseManager.run('init', '*', '@trv:registry/init');
+    await PhaseManager.run('init', '*', ['@trv:registry/init']);
 
     const { Runner } = await import('../execute/runner');
 

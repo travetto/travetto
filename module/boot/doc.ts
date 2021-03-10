@@ -81,10 +81,4 @@ ${List(
   d`${meth`writeToFile(src: Readable, out: string):Promise<void>`} will stream a readable into a file path, and wait for completion.`,
   d`${meth`waitForCompletion(src: Readable, finish:()=>Promise<any>)`} will ensure the stream remains open until the promise finish produces is satisfied.`,
 )}
-
-${Section('CLI - clean')}
-
-The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
-
-${Execute('Clean operation', 'trv', ['clean', '--help'])}
 `;

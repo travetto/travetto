@@ -2,8 +2,8 @@
  * Responsible for loading all available modules
  */
 export const init = {
-  key: '@trv:compiler/load',
-  after: ['@trv:compiler/compile'],
+  key: '@trv:base/load',
+  after: ['@trv:base/transpile'],
   action: async () => {
     const { SourceCodeIndex } = await import('@travetto/boot/src/internal/code');
     const { AppManifest } = await import('@travetto/base');

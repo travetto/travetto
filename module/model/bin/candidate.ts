@@ -1,4 +1,6 @@
+import { EnvInit } from '@travetto/base/bin/init';
 import { ExecUtil } from '@travetto/boot/src';
+
 import { ModelCandidateUtil } from './lib/candidate';
 
 /**
@@ -6,7 +8,10 @@ import { ModelCandidateUtil } from './lib/candidate';
  */
 export async function main() {
   try {
-    await ModelCandidateUtil.init();
+    EnvInit.init({ watch: false });
+    const { PhaseManager } = await import('@travetto/base');
+    await PhaseManager.run('init');
+
     ExecUtil.mainResponse({
       models: await ModelCandidateUtil.getModelNames(),
       providers: await ModelCandidateUtil.getProviderNames()

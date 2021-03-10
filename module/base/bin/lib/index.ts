@@ -5,19 +5,21 @@ import { CliUtil } from '@travetto/cli/src/util';
 /**
  * Utilities for running compilation
  */
-export class PrecompileUtil {
+export class BuildUtil {
 
   /**
    * Trigger a compile
    */
-  static compile(output?: string, env?: Record<string, string>) {
+  static build(env?: Record<string, string>) {
     if (EnvUtil.isReadonly()) {
       return; // Do not run the compiler
     }
 
+    const output = env?.TRV_CACHE ?? '';
+
     // Compile rest of code
-    return CliUtil.waiting(`Compiling... ${output || ''}`,
-      ExecUtil.workerMain(require.resolve('../compile'), [], { // target self
+    return CliUtil.waiting(`Building... ${output}`,
+      ExecUtil.workerMain(require.resolve('../build'), [], { // target self
         env: {
           ...(output ? { TRV_CACHE: output } : {}),
           TRV_WATCH: '0', // Ensure no watching

@@ -14,6 +14,19 @@ export abstract class BasePlugin {
   _cmd: commander.Command;
 
   /**
+   * Setup environment before plugin runs
+   */
+  envInit?(): Promise<void> | void;
+
+  /**
+   * Pre-compile on every cli execution
+   */
+  async build?() {
+    await (await import('@travetto/base/bin/lib/'))
+      .BuildUtil.build();
+  }
+
+  /**
    * CLI command name
    */
   abstract get name(): string;
@@ -41,8 +54,21 @@ export abstract class BasePlugin {
   async setup(cmd: commander.Command) {
     cmd = cmd.command(this.name);
     cmd = await this.init(cmd);
-    cmd = cmd.action(this.action.bind(this));
+    cmd = cmd.action(this.runAction.bind(this));
     return this._cmd = cmd;
+  }
+
+  /**
+   * Runs the action at execution time
+   */
+  async runAction(...args: unknown[]) {
+    if (this.envInit) {
+      await this.envInit();
+    }
+    if (this.build) {
+      await this.build();
+    }
+    return await this.action(...args);
   }
 
   /**

@@ -11,7 +11,6 @@ export class ModelInstallPlugin extends BaseModelPlugin {
   async action(provider: string, models: string[]) {
     try {
       await this.validate(provider, models);
-      await this.prepareEnv();
       const resolved = await this.resolve(provider, models);
       await ModelInstallUtil.run(resolved.provider, resolved.models);
       console.log(color`${{ success: 'Successfully' }} installed ${{ param: models.length.toString() }} model(s)`);

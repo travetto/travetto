@@ -28,7 +28,6 @@
   "files": [
     "index.ts",
     "src",
-    "bin",
     "support"
   ],
   "name": "@travetto/compiler",

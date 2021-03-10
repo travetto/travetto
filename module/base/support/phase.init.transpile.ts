@@ -1,13 +1,13 @@
 /**
- * Responsible for compiling all new code
+ * Responsible for transpiling all new code
  */
 export const init = {
-  key: '@trv:compiler/compile',
-  after: ['@trv:compiler/init'],
+  key: '@trv:base/transpile',
+  after: '@trv:base/init',
   action: async () => {
     const { AppCache, EnvUtil } = await import('@travetto/boot');
     const { SourceCodeIndex } = await import('@travetto/boot/src/internal/code');
-    const { Compiler } = await import('../src/compiler');
+    const { CompileUtil } = await import('@travetto/boot/src/internal/compile');
 
     if (EnvUtil.isReadonly()) {
       console.debug('Skipping compilation, in readonly mode');
@@ -18,7 +18,7 @@ export const init = {
 
     for (const x of SourceCodeIndex.findByFolders(AppManifest.source)) {
       if (!AppCache.hasEntry(x.file)) {
-        Compiler.transpile(x.file); // Compile all the desired files
+        CompileUtil.transpile(x.file); // Compile all the desired files
       }
     }
   }

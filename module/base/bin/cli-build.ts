@@ -2,15 +2,16 @@ import * as commander from 'commander';
 
 import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
-import { CompileCliUtil } from './lib';
+import { BuildUtil } from './lib';
 
 /**
- * Command line support for pre-compiling the code with the ability to
+ * Command line support for building the code with the ability to
  * control the output target.
  */
-export class CompilerCompilePlugin extends BasePlugin {
+export class BaseBuildPlugin extends BasePlugin {
 
-  name = 'compile';
+  name = 'build';
+  build = undefined;
 
   init(cmd: commander.Command) {
     return cmd
@@ -33,7 +34,7 @@ export class CompilerCompilePlugin extends BasePlugin {
     }
 
     try {
-      await CompileCliUtil.compile(path, process.env as Record<string, string>);
+      await BuildUtil.build(process.env as Record<string, string>);
 
       if (!this._cmd.quiet) {
         console!.log(color`${{ success: 'Successfully' }} wrote to ${{ path }}`);
