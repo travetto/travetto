@@ -3,9 +3,10 @@ import * as commander from 'commander';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
+import { BuildUtil } from '@travetto/base/bin/lib';
+import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 
 import { ModelCandidateUtil } from './candidate';
-import { BuildUtil } from '@travetto/base/bin/lib';
 
 /**
  * CLI Entry point for exporting model schemas
@@ -14,9 +15,11 @@ export abstract class BaseModelPlugin extends BasePlugin {
 
   restoreEnv?: (err: Error) => unknown;
 
+  op: keyof ModelStorageSupport;
+
   resolve = ModelCandidateUtil.resolve.bind(ModelCandidateUtil);
 
-  async envInit() {
+  envInit() {
     EnvInit.init({ watch: false });
   }
 
@@ -45,7 +48,7 @@ ${models.map(p => color`  * ${{ param: p }}`).join('\n')}
   }
 
   async validate(provider: string, models: string[]) {
-    const candidates = await ModelCandidateUtil.getCandidates();
+    const candidates = await ModelCandidateUtil.getCandidates(this.op);
     if (!provider) {
       return await this.usage(candidates);
     } else {

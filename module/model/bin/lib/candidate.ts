@@ -35,18 +35,18 @@ export class ModelCandidateUtil {
   /**
    * Get all providers that are viable candidates
    */
-  static async getProviders(): Promise<InjectableConfig[]> {
+  static async getProviders(op?: keyof ModelStorageSupport): Promise<InjectableConfig[]> {
     const { DependencyRegistry } = await import('@travetto/di');
     const { ModelStorageSupportTarget } = await import('@travetto/model/src/internal/service/common');
     const types = DependencyRegistry.getCandidateTypes<ModelStorageSupport>(ModelStorageSupportTarget as unknown as Class<ModelStorageSupport>);
-    return types;
+    return types.filter(x => !op || x.class.prototype[op]);
   }
 
   /**
    * Get list of names of all viable providers
    */
-  static async getProviderNames() {
-    return (await this.getProviders())
+  static async getProviderNames(op?: keyof ModelStorageSupport) {
+    return (await this.getProviders(op))
       .map(x => x.class.name.replace(/ModelService/, ''))
       .sort();
   }
@@ -64,9 +64,9 @@ export class ModelCandidateUtil {
    * Get candidates asynchronously
    * @returns
    */
-  static async getCandidates() {
+  static async getCandidates(op: keyof ModelStorageSupport) {
     return CliUtil.waiting('Resolving', () =>
-      ExecUtil.workerMain<{ providers: string[], models: string[] }>(require.resolve('../candidate'), [], {
+      ExecUtil.workerMain<{ providers: string[], models: string[] }>(require.resolve('../candidate'), [op], {
         env: { TRV_WATCH: '0' }
       }).message
     );

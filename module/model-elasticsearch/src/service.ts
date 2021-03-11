@@ -8,7 +8,7 @@ import {
 } from '@travetto/model';
 import { Class, Util, ShutdownManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { SchemaChange, SchemaConfig, SchemaRegistry } from '@travetto/schema';
+import { SchemaChange } from '@travetto/schema';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySupport, PageableModelQuery, Query, ValidStringFields
@@ -99,6 +99,7 @@ export class ElasticsearchModelService implements
   createStorage() { return this.manager.createStorage(); }
   deleteStorage() { return this.manager.deleteStorage(); }
   createModel(cls: Class) { return this.manager.createModel(cls); }
+  exportModel(cls: Class) { return this.manager.exportModel(cls); }
   deleteModel(cls: Class) { return this.manager.deleteModel(cls); }
   truncateModel(cls: Class) { return this.deleteByQuery(cls, {}).then(() => { }); }
   changeSchema(cls: Class, change: SchemaChange) { return this.manager.changeSchema(cls, change); }

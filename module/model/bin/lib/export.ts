@@ -4,6 +4,8 @@ import type { ModelType } from '@travetto/model/src/types/model';
 
 export class ModelExportUtil {
   static async run(provider: ModelStorageSupport, models: Class<ModelType>[]) {
-    (await import('@travetto/base')).ShutdownManager.execute(-1); // Release database
+    for (const model of models) {
+      console.log(await provider.exportModel!(model));
+    }
   }
 }

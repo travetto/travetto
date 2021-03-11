@@ -6,7 +6,7 @@ import { EnvUtil, ExecUtil, PathUtil, Package, ScanFs, FsUtil } from '@travetto/
 import { DependenciesUtil, DepType } from './depdencies';
 import { PackUtil } from './util';
 
-const MODULE_DIRS = ['src', 'bin', 'support', 'resources', 'index.ts', 'package.json', 'tsconfig.json'];
+const MODULE_DIRS = ['src', 'bin', 'support', 'resources', 'index.ts', 'package.json', 'tsconfig.trv.json'];
 
 /**
  * Utils for assmbling
@@ -98,16 +98,20 @@ export class AssembleUtil {
       }
     }
     await FsUtil.copyRecursiveSync(
-      PathUtil.resolveUnix(require.resolve('@travetto/boot/bin')),
+      PathUtil.resolveUnix(path.dirname(require.resolve('@travetto/boot/bin/main.js'))),
       PathUtil.resolveUnix(workspace, 'node_modules/@travetto/boot/bin')
+    );
+    await FsUtil.copyRecursiveSync(
+      PathUtil.resolveUnix(path.dirname(require.resolve('@travetto/base/bin/main.js'))),
+      PathUtil.resolveUnix(workspace, 'node_modules/@travetto/base/bin')
     );
   }
 
   /**
    * Compile workspace
    */
-  static async compileWorkspace(root: string, cacheDir: string) {
-    await ExecUtil.spawn('node', ['./node_modules/@travetto/cli/bin/trv.js', 'compile'],
+  static async buildWorkspace(root: string, cacheDir: string) {
+    await ExecUtil.spawn('node', ['./node_modules/@travetto/cli/bin/trv.js', 'build'],
       { cwd: root, env: { TRV_CACHE: cacheDir, TRV_MODULES: '', TRV_DEV: '', TRV_REQUIRES: '' }, stdio: ['pipe', 'pipe', 2] }).result;
   }
 

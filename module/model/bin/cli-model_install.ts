@@ -7,6 +7,7 @@ import { ModelInstallUtil } from './lib/install';
  */
 export class ModelInstallPlugin extends BaseModelPlugin {
   name = 'model:install';
+  op = 'createModel' as const;
 
   async action(provider: string, models: string[]) {
     try {
