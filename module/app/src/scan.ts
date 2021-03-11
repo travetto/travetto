@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
+import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { AppManifest } from '@travetto/base/src/manifest';
 
 import { ApplicationConfig } from './types';
@@ -25,7 +25,7 @@ export class AppScanUtil {
   static async scanList() {
 
     await Promise.all(
-      SourceCodeIndex.findByFolders(AppManifest.source)
+      SourceIndex.findByFolders(AppManifest.source)
         .filter(x => fs.readFileSync(x.file, 'utf-8').includes('@Application'))
         .map(x => import(x.file)) // Only load files that are candidates
     );

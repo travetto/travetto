@@ -6,7 +6,7 @@ import * as path from 'path';
 const glob = require('picomatch');
 
 import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
-import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
+import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { color } from '@travetto/cli/src/color';
 
 import { CommonConfig, PackOperation } from './types';
@@ -34,7 +34,7 @@ export class PackUtil {
   static async modeList() {
     if (!this._modes) {
       this._modes = await Promise.all(
-        SourceCodeIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
+        SourceIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
           .map(async (x) => {
             const req = (await import(x.file)).config as Partial<CommonConfig>;
             req.file = x.module.replace(/^node_modules\//, '');

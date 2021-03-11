@@ -1,6 +1,6 @@
 import { FileCache } from '../cache';
 import { Package } from '../package';
-import { CompileUtil } from './compile';
+import { ModuleManager } from './module';
 
 type DevConfig = {
   entries: string[];
@@ -84,7 +84,7 @@ class DevRegister {
     const { entries } = JSON.parse(this.getContent()) as DevConfig;
     process.env.TRV_MODULES = `${this.envMods.replace(DevRegister.TRV_MOD, '')},${entries.join(',')}`;
     // Force install
-    CompileUtil.init();
+    ModuleManager.init();
   }
 }
 

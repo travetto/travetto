@@ -3,8 +3,7 @@ import type * as tsi from 'typescript';
 import { EnvUtil } from '../env';
 import { FsUtil } from '../fs';
 import { AppCache } from '../cache';
-import { ModuleUtil } from './module';
-import { SourceUtil } from './source';
+import { SourceUtil } from './source-util';
 import { PathUtil } from '../path';
 
 type Diag = {
@@ -34,9 +33,9 @@ const TS_TARGET = ({
 } as const)[NODE_VERSION] ?? 'ES2019'; // Default if not found
 
 /**
- * Standard transpilation utilities, with support for basic text filters
+ * Standard transpilation support
  */
-export class TranspileUtil {
+export class SimpleTranspiler {
   private static [CompilerOptionsSym]: unknown; // Untyped so that the typescript typings do not make it into the API
 
   /**
@@ -106,16 +105,28 @@ export class TranspileUtil {
    * @param tsf The typescript file to transpile
    * @param force Force transpilation, even if cached
    */
-  static transpileSimple(tsf: string, force = false) {
+  static transpile(tsf: string, force = false) {
     return AppCache.getOrSet(tsf, () => {
       try {
         const diags: Diag[] = [];
         const ret = getTs().transpile(SourceUtil.preProcess(tsf), this.compilerOptions as tsi.CompilerOptions, tsf, diags as tsi.Diagnostic[]);
         this.checkTranspileErrors(tsf, diags);
         return ret;
-      } catch (e) {
-        return ModuleUtil.handlePhaseError('transpile', tsf, e);
+      } catch (err) {
+        return this.transpileError(tsf, err);
       }
     }, force);
+  }
+
+  /**
+   * Handle transpilation errors
+   */
+  static transpileError(tsf: string, err: Error) {
+    if (EnvUtil.isWatch() && !tsf.startsWith('test')) {
+      console.trace(`Unable to transpile ${tsf}: stubbing out with error proxy.`, err.message);
+      return SourceUtil.getErrorModule(err.message);
+    } else {
+      throw err;
+    }
   }
 }

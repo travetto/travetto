@@ -1,4 +1,4 @@
-import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
+import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
 
@@ -150,7 +150,7 @@ export class ServiceUtil {
    */
   static async findAll() {
     return (await Promise.all(
-      SourceCodeIndex
+      SourceIndex
         .find({ folder: 'support', filter: x => /\/service[.]/.test(x) })
         .map(async x => (await import(x.file)).service as Service)
     ))

@@ -20,17 +20,9 @@ async function verifyLocal() {
  * Compile CLI for usage
  */
 async function compile() {
-  const { AppCache, EnvUtil, } = await import('@travetto/boot');
-  const { CompileUtil } = await import('@travetto/boot/src/internal/compile');
-  const { SourceCodeIndex } = await import('@travetto/boot/src/internal/code');
-
-  if (!EnvUtil.isReadonly()) {
-    for (const { file } of SourceCodeIndex.find({ folder: 'bin' })) {
-      if (!AppCache.hasEntry(file)) {
-        CompileUtil.transpile(file);
-      }
-    }
-  }
+  const { ModuleManager } = await import('@travetto/boot/src/internal/module');
+  const { SourceIndex } = await import('@travetto/boot/src/internal/source');
+  ModuleManager.transpileAll(SourceIndex.find({ folder: 'bin ' }));
 }
 
 /**

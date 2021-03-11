@@ -1,6 +1,5 @@
-import { AppCache } from '@travetto/boot/src';
-import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
-import { CompileUtil } from '@travetto/boot/src/internal/compile';
+import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleManager } from '@travetto/boot/src/internal/module';
 
 import { SystemUtil } from './internal/system';
 
@@ -54,14 +53,8 @@ export class PhaseManager {
    * @param after Starting point, exclusive
    */
   async load(upto?: string, after?: string) {
-    const found = SourceCodeIndex.find({ folder: 'support' });
 
-    // Ensure we transpile all support files
-    for (const el of found) {
-      if (!AppCache.hasEntry(el.file)) {
-        CompileUtil.transpile(el.file);
-      }
-    }
+    const found = ModuleManager.transpileAll(SourceIndex.find({ folder: 'support' }));
 
     // Load all support files
     const initFiles = await Promise.all(found

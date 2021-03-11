@@ -1,4 +1,4 @@
-import { SourceUtil } from '@travetto/boot/src/internal/source';
+import { SourceUtil } from '@travetto/boot/src/internal/source-util';
 
 import { AppManifest } from './manifest';
 
