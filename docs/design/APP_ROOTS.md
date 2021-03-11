@@ -12,7 +12,7 @@ Module Structure
 ## Test
 * test/
   * resources/
-* test-<isolate>/ (For testing isolated code)
+* test-isolated/ (For testing isolated code)
 
 ## Library (node_modules/@travetto/{x})
 * bin/  - CLI Support
@@ -28,11 +28,11 @@ App Running
 * (libraries)/support - Loading all transformers
 * (root)/index - Main app logic
 * (root)/src - Main app logic
-* alt/(sub-app)/src - Sub app logic
+* <alt>/(sub-app)/src - Sub app logic
 
 ## Config
 * (root)/resources/*.yml
-* alt/(sub-app)/resources/*.yml
+* <alt>/(sub-app)/resources/*.yml
 
 Test Running
 -----------------------------

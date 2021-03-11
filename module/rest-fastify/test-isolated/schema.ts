@@ -9,5 +9,5 @@ export class FastifySchemaTest extends SchemaRestServerSuite { }
 
 @Suite()
 export class FastifyLambdaSchemaTest extends SchemaRestServerSuite {
-  type = 'lamdba';
+  type = 'lambda';
 }

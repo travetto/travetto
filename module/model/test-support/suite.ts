@@ -9,7 +9,7 @@ import { ModelRegistry } from '../src/registry/model';
 
 const Loaded = Symbol();
 
-export function ModelSuite<T extends { configClass: Class, serviceClass: Class }>() {
+export function ModelSuite<T extends { configClass: Class, serviceClass: Class }>(qualifier?: symbol) {
   return (target: Class<T>) => {
     SuiteRegistry.registerPendingListener(
       target,
@@ -32,7 +32,7 @@ export function ModelSuite<T extends { configClass: Class, serviceClass: Class }
     SuiteRegistry.registerPendingListener(
       target,
       async function (this: T) {
-        const service = await DependencyRegistry.getInstance(this.serviceClass);
+        const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
         if (isStorageSupported(service)) {
           await service.createStorage();
           if (service.createModel) {
@@ -47,7 +47,7 @@ export function ModelSuite<T extends { configClass: Class, serviceClass: Class }
     SuiteRegistry.registerPendingListener(
       target,
       async function (this: T) {
-        const service = await DependencyRegistry.getInstance(this.serviceClass);
+        const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
         if (isStorageSupported(service)) {
           if (service.truncateModel || service.deleteModel) {
             for (const m of ModelRegistry.getClasses()) {
@@ -69,7 +69,7 @@ export function ModelSuite<T extends { configClass: Class, serviceClass: Class }
     SuiteRegistry.registerPendingListener(
       target,
       async function (this: T) {
-        const service = await DependencyRegistry.getInstance(this.serviceClass);
+        const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
         if (isStorageSupported(service)) {
           if (service.deleteModel) {
             for (const m of ModelRegistry.getClasses()) {

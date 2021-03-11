@@ -27,7 +27,7 @@ export class Runner {
   async runFiles() {
     const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
 
-    const files = (await RunnerUtil.getTestFiles(this.patterns));
+    const files = (await RunnerUtil.getTestFiles(this.patterns, this.state.isolated ? 'test-isolated' : 'test'));
 
     console.debug('Running', { files });
 

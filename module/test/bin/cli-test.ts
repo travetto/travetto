@@ -4,7 +4,6 @@ import * as fs from 'fs';
 
 import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
-import { CliUtil } from '@travetto/cli/src/util';
 import { EnvInit } from '@travetto/base/bin/init';
 
 import type { RunState } from '../src/execute/types';
@@ -46,7 +45,7 @@ export class TestPlugin extends BasePlugin {
       .arguments('[regexes...]')
       .option('-f, --format <format>', 'Output format for test results', new RegExp(`^(${this.getTypes().join('|')})$`), 'tap')
       .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, `${Math.min(4, os.cpus().length - 1)}`)
-      .option('-i, --isolated <isolated>', 'Isolated mode', CliUtil.isBoolean, false)
+      .option('-i, --isolated', 'Isolated mode')
       .option('-m, --mode <mode>', 'Test run mode', /^(single|standard)$/, 'standard');
   }
 
@@ -73,7 +72,8 @@ export class TestPlugin extends BasePlugin {
     const isFile = await this.isFile(first);
 
     if (!first) {
-      state.args = ['test/.*'];
+      state.args = state.isolated ? ['test-isolated/.*'] : ['test/.*'];
+      state.concurrency = (state.isolated ? 1 : undefined) ?? state.concurrency;
     } else if (isFile) { // If is a single file
       if (first.startsWith('test-')) {
         state.isolated = true;
@@ -95,6 +95,7 @@ export class TestPlugin extends BasePlugin {
       args,
       mode: this._cmd.mode,
       concurrency: +this._cmd.concurrency,
+      isolated: this._cmd.isolated,
       format: this._cmd.format
     };
 

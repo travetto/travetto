@@ -29,7 +29,7 @@ class TestUploadController {
     return file;
   }
 
-  @Post('/all')
+  @Post('/all-named')
   async uploads(@Upload('file1') file1: Asset, @Upload('file2') file2: Asset) {
     return { hash1: file1.hash, hash2: file2.hash };
   }
@@ -100,7 +100,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
       { name: 'file1', resource: 'logo.png', type: 'image/png' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const res = await this.request('post', '/test/upload/all', this.getMultipartRequest(uploads));
+    const res = await this.request('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
     const asset = await this.getAsset('/logo.png');
     assert(res.body.hash1 === asset.hash);
     assert(res.body.hash2 === asset.hash);

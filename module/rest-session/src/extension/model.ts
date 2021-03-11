@@ -45,7 +45,7 @@ export class ModelSessionProvider implements SessionProvider {
    */
   async postConstruct() {
     if (!isExpirySupported(this.modelService)) {
-      throw new AppError(`Model service must provide expiry support, ${this.modelService.constructor.name} does  not`);
+      throw new AppError(`Model service must provide expiry support, ${this.modelService.constructor.name} does not.`);
     }
     if (isStorageSupported(this.modelService)) {
       if (!EnvUtil.isReadonly()) {
