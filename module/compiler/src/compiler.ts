@@ -2,8 +2,8 @@ import * as sourceMapSupport from 'source-map-support';
 import { EventEmitter } from 'events';
 
 import { PathUtil, EnvUtil } from '@travetto/boot';
-import { SourceCodeIndex } from '@travetto/boot/src/internal/code';
-import { CompileUtil } from '@travetto/boot/src/internal/compile';
+import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleManager } from '@travetto/boot/src/internal/module';
 import { AppManifest } from '@travetto/base';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 
@@ -22,7 +22,7 @@ class $Compiler {
   active = false;
 
   constructor() {
-    this.rootFiles = new Set(SourceCodeIndex.findByFolders(AppManifest.source, 'required').map(x => x.file));
+    this.rootFiles = new Set(SourceIndex.findByFolders(AppManifest.source, 'required').map(x => x.file));
     this.transpiler = new Transpiler(this.rootFiles);
   }
 
@@ -47,7 +47,7 @@ class $Compiler {
     if (!EnvUtil.isReadonly()) {
       await this.transpiler.init();
       // Enhance transpilation, with custom transformations
-      CompileUtil.setTranspiler(this.transpile.bind(this));
+      ModuleManager.setTranspiler(this.transpile.bind(this));
     }
 
     // Update source map support to read from tranpsiler cache
@@ -72,7 +72,7 @@ class $Compiler {
     if (!EnvUtil.isReadonly()) {
       this.transpiler.reset();
     }
-    SourceCodeIndex.reset();
+    SourceIndex.reset();
     this.active = false;
   }
 
@@ -81,7 +81,7 @@ class $Compiler {
    */
   unload(filename: string, unlink = false) {
     this.transpiler.unload(filename, unlink); // Remove source
-    return CompileUtil.unload(filename);
+    return ModuleManager.unload(filename);
   }
 
   /**

@@ -13,5 +13,5 @@ if (!global[sym]) {
   // Remove to prevent __proto__ pollution in JSON
   delete Object.prototype.__proto__;
 
-  require('@travetto/boot/src/internal/compile').CompileUtil.init();
+  require('@travetto/boot/src/internal/module').ModuleManager.init();
 }

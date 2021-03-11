@@ -3,9 +3,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { PathUtil, AppCache } from '@travetto/boot';
-import { ModuleUtil } from '@travetto/boot/src/internal/module';
-import { SourceUtil } from '@travetto/boot/src/internal/source';
-import { TranspileUtil } from '@travetto/boot/src/internal/transpile';
+import { SourceUtil } from '@travetto/boot/src/internal/source-util';
+import { SimpleTranspiler } from '@travetto/boot/src/internal/transpiler';
 import { SystemUtil } from '@travetto/base/src/internal/system';
 
 import { TransformerManager } from './transformer';
@@ -85,7 +84,7 @@ export class Transpiler {
         return this.sources.get(filename);
       },
       getDefaultLibLocation: () => path.dirname(ts.getDefaultLibFilePath(
-        TranspileUtil.compilerOptions as ts.CompilerOptions
+        SimpleTranspiler.compilerOptions as ts.CompilerOptions
       )),
     };
     return host;
@@ -104,7 +103,7 @@ export class Transpiler {
       }
       this.program = ts.createProgram({
         rootNames: [...this.rootNames],
-        options: TranspileUtil.compilerOptions as ts.CompilerOptions,
+        options: SimpleTranspiler.compilerOptions as ts.CompilerOptions,
         host: this.host,
         oldProgram: this.program
       });
@@ -130,7 +129,7 @@ export class Transpiler {
         this.transformerManager.getTransformers()
       );
 
-      TranspileUtil.checkTranspileErrors(filename, result.diagnostics as []);
+      SimpleTranspiler.checkTranspileErrors(filename, result.diagnostics as []);
       // Save writing for typescript program (`writeFile`)
     } else {
       const cached = AppCache.readEntry(filename);
@@ -183,7 +182,7 @@ export class Transpiler {
     try {
       return this._transpile(filename, force);
     } catch (err) {
-      const errContent = ModuleUtil.handlePhaseError('transpile', filename, err);
+      const errContent = SimpleTranspiler.transpileError(filename, err);
       this.contents.set(filename, errContent);
       return errContent;
     }

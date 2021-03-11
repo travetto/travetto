@@ -1,123 +1,160 @@
-// @ts-expect-error
+// @ts-ignore
 import * as Mod from 'module';
+import * as sourceMapSupport from 'source-map-support';
 
-import { Package } from '../package';
+import { SimpleTranspiler } from './transpiler';
+import { ModuleUtil, ModType } from './module-util';
+import { SourceUtil } from './source-util';
+
 import { EnvUtil } from '../env';
+import { SimpleEntry, SourceIndex } from './source';
+import { AppCache } from '../cache';
 import { PathUtil } from '../path';
-import { SourceUtil } from './source';
 
-type ModuleHandler<T = unknown> = (name: string, o: T) => T;
+export const Module = Mod as unknown as ModType;
 
-export type ModType = {
-  loaded?: boolean;
-  _load?(req: string, parent: ModType): unknown;
-  _resolveFilename?(req: string, parent: ModType): string;
-  _compile?(contents: string, file: string): unknown;
-} & NodeJS.Module;
-
-const Module = Mod as unknown as ModType;
+declare const global: {
+  ᚕsrc: (f: string) => string;
+};
 
 /**
- * Module utils
+ * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
-export class ModuleUtil {
+export class ModuleManager {
+  private static moduleLoad = Module._load!.bind(Module);
+  private static resolveFilename = Module._resolveFilename!.bind(Module);
+  private static initialized = false;
 
-  private static handlers: ModuleHandler[] = [];
-
-  /**
-   * Resolve filename for dev mode
-   */
-  static devResolveFilename(p: string) {
-    if (p.includes('@travetto')) {
-      const [, key, sub] = p.match(/^.*(@travetto\/[^/]+)(\/?.*)?$/) ?? [];
-      const match = EnvUtil.getDynamicModules()[key!];
-      if (match) {
-        p = `${match}${sub! ?? ''}`;
-      } else {
-        if (key === Package.name) {
-          p = PathUtil.resolveUnix(sub ? `./${sub}` : Package.main);
-        }
-      }
-    }
-    return p;
-  }
+  static readonly transpile: (filename: string) => string;
 
   /**
-   * Process error response
-   * @param phase The load/compile phase to care about
-   * @param tsf The typescript filename
-   * @param err The error produced
-   * @param filename The relative filename
+   * When a module load is requested
+   * @param request path to file
+   * @param parent parent Module
    */
-  static handlePhaseError(phase: 'load' | 'compile' | 'transpile', tsf: string, err: Error, filename = tsf.replace(PathUtil.cwd, '.')) {
-    if (phase === 'compile' &&
-      (err.message.startsWith('Cannot find module') || err.message.startsWith('Unable to load'))
-    ) {
-      err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${filename}]` : `from ${filename}`}`);
-    }
-
-    if (EnvUtil.isWatch() && !filename.startsWith('test/')) {
-      console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
-      return SourceUtil.getErrorModule(err.message);
-    }
-
-    throw err;
-  }
-
-  /**
-   * Add module post processor (post-load)
-   *
-   * @param handler The code to run on post module load
-   */
-  static addHandler(handler: ModuleHandler) {
-    this.handlers.push(handler);
-  }
-
-  /**
-   * Check for module cycles
-   */
-  static checkForCycles(mod: unknown, request: string, parent: ModType) {
-    if (parent && !parent.loaded) { // Standard ts compiler output
-      const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
-      if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
-        try {
-          const p = Module._resolveFilename!(request, parent);
-          if (p && p.endsWith(SourceUtil.EXT)) {
-            throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
-          }
-        } catch (err) {
-          // Ignore if we can't resolve
-        }
-      }
-    }
-  }
-
-  /**
-   * Handle module post processing
-   */
-  static handleModule(mod: unknown, request: string, parent: ModType) {
-    if (this.handlers) {
+  private static onModuleLoad(request: string, parent: ModType): unknown {
+    let mod: unknown;
+    try {
+      mod = this.moduleLoad.apply(null, [request, parent]);
+      ModuleUtil.checkForCycles(mod, request, parent);
+    } catch (e) {
       const name = Module._resolveFilename!(request, parent);
-      for (const handler of this.handlers) {
-        mod = handler(name, mod);
-      }
+      mod = Module._compile!(ModuleUtil.handlePhaseError('load', name, e), name);
     }
-    return mod;
+    return ModuleUtil.handleModule(mod, request, parent);
   }
 
   /**
-   * Initialize module support
+   * Set transpiler triggered on require
+   */
+  static setTranspiler(fn: (file: string) => string) {
+    if (EnvUtil.isReadonly()) {
+      this.setTranspiler((tsf: string) => AppCache.readEntry(tsf));
+      console.debug('In readonly mode, refusing to set transpiler');
+    } else {
+      // @ts-expect-error
+      this.transpile = fn;
+    }
+  }
+
+  /**
+   * Compile and Transpile .ts file to javascript
+   * @param m node module
+   * @param tsf filename
+   */
+  static compile(m: ModType, tsf: string) {
+    let content = this.transpile(tsf);
+    const jsf = tsf.replace(/[.]ts$/, '.js');
+    try {
+      return m._compile!(content, jsf);
+    } catch (e) {
+      content = ModuleUtil.handlePhaseError('compile', tsf, e);
+      return m._compile!(content, jsf);
+    }
+  }
+
+  /**
+   * Enable compile support
    */
   static init() {
-    // Tag output to indicate it was succefully processed by the framework
-    SourceUtil.addPreProcessor((__, contents) =>
-      `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`);
+    if (this.initialized) {
+      return;
+    }
+
+    // Only do for dev
+    if (process.env.TRV_DEV) {
+      // Override filename resolution
+      Module._resolveFilename = (req, p) => this.resolveFilename(ModuleUtil.devResolveFilename(req), p);
+    }
+
+    this.setTranspiler(f => SimpleTranspiler.transpile(f));
+
+    // Registering unix conversion to use for filenames
+    global.ᚕsrc = PathUtil.toUnixTs;
+    ModuleUtil.init();
+    AppCache.init(true);
+
+    // Register source maps for cached files
+    sourceMapSupport.install({
+      emptyCacheBetweenOperations: EnvUtil.isWatch(),
+      retrieveFile: p => AppCache.readOptionalEntry(PathUtil.toUnixTs(p))!
+    });
+
+    // Supports bootstrapping with framework resolution
+    Module._load = (req, p) => this.onModuleLoad(req, p);
+    require.extensions[SourceUtil.EXT] = this.compile.bind(this);
+
+    this.initialized = true;
   }
 
   /**
-   * Clear out on cleanup
+   * Transpile all found
+   * @param found
+   */
+  static transpileAll(found: SimpleEntry[]) {
+    if (EnvUtil.isReadonly()) {
+      console.debug('Skipping transpilation as we are in read-only mode');
+    } else {
+      // Ensure we transpile all support files
+      for (const el of found) {
+        if (!AppCache.hasEntry(el.file)) {
+          this.transpile(el.file);
+        }
+      }
+    }
+
+    return found;
+  }
+
+  /**
+   * Remove file from require.cache, and possible the file system
+   */
+  static unload(filename: string) {
+    const native = PathUtil.toNative(filename);
+    if (native in require.cache) {
+      delete require.cache[native]; // Remove require cached element
+      return true;
+    }
+  }
+
+  /**
+   * Turn off compile support
    */
   static reset() {
-    this.handlers = [];
+    if (!this.initialized) {
+      return;
+    }
+
+    delete require.extensions[SourceUtil.EXT];
+    this.initialized = false;
+    Module._load = this.moduleLoad;
+    Module._resolveFilename = this.resolveFilename;
+    ModuleUtil.reset();
+    SourceUtil.reset();
+
+    // Unload all
+    for (const { file } of SourceIndex.find({ includeIndex: true })) {
+      this.unload(file);
+    }
   }
 }

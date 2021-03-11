@@ -1,125 +1,210 @@
-import * as fs from 'fs';
+import { PathUtil } from '../path';
+import { ScanEntry, ScanFs } from '../scan';
 import { EnvUtil } from '../env';
 
-type SourceHandler = (name: string, contents: string) => string;
+export type SimpleEntry = Pick<ScanEntry, 'module' | 'file'>;
+type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
+export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean, paths?: string[] };
+type FrameworkScan = { testDir: (x: string) => boolean, base: string, map: (e: ScanEntry) => ScanEntry };
 
 /**
- * Source Utilities
+ * Configuration for searching for source files
  */
-export class SourceUtil {
+export interface SourceConfig {
+  /**
+   * Common folders, including all modules to search for source files in
+   */
+  common: string[];
+  /**
+   * Local folders (non-node_modules) to search for source files in
+   */
+  local: string[];
+  /**
+   * Which modules to exclude from searching
+   */
+  excludeModules: Set<string>;
+}
 
-  private static handlers: SourceHandler[] = [];
+type IndexRecord = { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> };
 
-  static readonly EXT = '.ts';
+/**
+ * Source code index
+ */
+export class SourceIndex {
+
+  private static _INDEX = new Map<string, IndexRecord>();
 
   /**
-   * Build error module source
-   * @param message Error message to show
-   * @param isModule Is the error a module that should have been loaded
-   * @param base The base set of properties to support
+   * Compute index for a scan entry
+   * @param entry
    */
-  static getErrorModule(message: string, isModule?: string | boolean, base?: Record<string, string | boolean>) {
-    const f = ([k, v]: string[]) => `${k}: (t,k) => ${v}`;
-    const e = '{ throw new Error(msg); }';
-    const map: { [P in keyof ProxyHandler<object>]?: string } = {
-      getOwnPropertyDescriptor: base ? '({})' : e,
-      get: base ? `{ const v = values[keys.indexOf(k)]; if (!v) ${e} else return v; }` : e,
-      has: base ? 'keys.includes(k)' : e
-    };
-    return [
-      (typeof isModule === 'string') ? `console.debug(\`${isModule}\`);` : '',
-      base ? `let keys = ['${Object.keys(base).join("','")}']` : '',
-      base ? `let values = ['${Object.values(base).join("','")}']` : '',
-      `let msg = \`${message}\`;`,
-      "Object.defineProperty(exports, 'ᚕtrvError', { value: true })",
-      `module.exports = new Proxy({}, { ${Object.entries(map).map(([k, v]) => f([k, v!])).join(',')}});`
-    ].join('\n');
-  }
-
-  /**
-   * Process token
-   * @param token The token to process
-   */
-  static resolveToken(token: string): { minus: boolean, key: string, valid: boolean, err?: Error } {
-    const [, sign, env, key] = token.match(/(-|\+)?([$])?(.*)/)!;
-    const minus = sign === '-';
-    if (env) {
-      return { minus, key, valid: minus ? EnvUtil.isFalse(key) : (EnvUtil.isSet(key) && !EnvUtil.isFalse(key)) };
-    } else {
-      try {
-        require.resolve(key);
-        return { minus, key, valid: !minus };
-      } catch (err) {
-        return { minus, key, valid: minus, err };
-      }
-    }
-  }
-
-  /**
-   * Resolve macros for keeping/removing text
-   * @param name The name of the file to resolve macros for
-   * @param contents The file contents
-   */
-  static resolveMacros(contents: string) {
-    const errors: string[] = [];
-
-    // Handle line queries
-    contents = contents.replace(/^.*[/][/]\s*@(line|file)-if\s+(.*?)\s*$/mg, (all, mode, token: string) => {
-      if (errors.length) {
-        return ''; // Short circuit
-      }
-      const { valid, key, minus } = this.resolveToken(token);
-      if (valid) {
-        return all;
-      } else {
-        if (mode === 'file') {
-          errors.push(`Dependency ${key} should${minus ? ' not' : ''} be installed`);
+  private static compute(entry: ScanEntry) {
+    const file = entry.module;
+    if (file.includes('node_modules')) {
+      const mod = file.match(/^.*node_modules\/((?:@[^/]+\/)?[^/]+)/)?.[1];
+      if (mod) { // External module
+        if (entry.stats.isDirectory() || entry.stats.isSymbolicLink()) {
+          return { mod, sub: '' };
+        } else {
+          const [sub] = file.split(`${mod}/`)[1].split('/');
+          return { mod, sub };
         }
-        return `// @removed ${token} was not satisfied`;
       }
-    });
-
-    return { errors, contents };
-  }
-
-
-  /**
-   * Pre-processes a typescript source file
-   * @param filename The file to preprocess
-   * @param contents The file contents to process
-   */
-  static preProcess(filename: string, contents?: string) {
-    let fileContents = contents ?? fs.readFileSync(filename, 'utf-8');
-
-    // Resolve macro
-    const { contents: text, errors } = this.resolveMacros(fileContents);
-
-    if (errors.length) {
-      const [err] = errors;
-      fileContents = this.getErrorModule(err, `Skipping: ${err}`, { ᚕtrv: true, filename });
-    } else {
-      fileContents = text;
+    } else { // Core app
+      const mod = '.';
+      const [sub] = file.split('/');
+      return { mod, sub };
     }
-
-    for (const handler of this.handlers) {
-      fileContents = handler(filename, fileContents);
-    }
-
-    return fileContents;
   }
 
   /**
-   * Add support for source preprocessor
-   * @param fn The preprocessor to add
+   * Scan the framework for folder/files only the framework should care about
+   * @param testFile The test to determine if a file is desired
    */
-  static addPreProcessor(fn: SourceHandler) {
-    this.handlers.unshift(fn);
+  private static scanFramework(test: ScanTest) {
+    const testFile = 'test' in test ? test.test.bind(test) : test;
+
+    // Folders to check
+    const folders = [
+      {
+        testDir: x =>
+          /^node_modules[/]?$/.test(x) ||  // Top level node_modules
+          (/^node_modules\/@travetto/.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
+          !x.includes('node_modules'), // non module file
+        base: PathUtil.cwd,
+        map: e => e
+      } as FrameworkScan,
+      ...Object.entries(EnvUtil.getDynamicModules()).map(([dep, pth]) => (
+        {
+          testDir: x => !x.includes('node_modules'),
+          base: pth,
+          map: e => {
+            e.module = e.module.includes('node_modules') ? e.module : e.file.replace(pth, `node_modules/${dep}`);
+            return e;
+          }
+        } as FrameworkScan
+      ))
+    ];
+
+    const out: ScanEntry[][] = [];
+    for (const { testDir, base, map } of folders) {
+      out.push(ScanFs.scanDirSync({ testFile, testDir }, base).map(map).filter(x => x.stats.isFile()));
+    }
+    return out.flat();
+  }
+
+
+  /**
+   * Get index of all source files
+   */
+  private static get index() {
+    if (this._INDEX.size === 0) {
+      const idx = new Map<string, IndexRecord>();
+      idx.set('.', { base: PathUtil.cwd, files: new Map() });
+
+      for (const el of this.scanFramework(x => x.endsWith('.ts') && !x.endsWith('.d.ts'))) {
+        const res = this.compute(el);
+
+        if (!res) {
+          continue;
+        }
+
+        const { mod, sub } = res;
+
+        if (!idx.has(mod)) {
+          idx.set(mod, { base: el.file, files: new Map() });
+        }
+
+        if (el.stats.isDirectory() || el.stats.isSymbolicLink()) {
+          // Do nothing
+        } else if (sub === 'index.ts') {
+          idx.get(mod)!.index = el;
+        } else {
+          if (!idx.get(mod)!.files.has(sub)) {
+            idx.get(mod)!.files.set(sub, []);
+          }
+          idx.get(mod)!.files.get(sub)!.push({ file: el.file, module: el.module });
+        }
+      }
+      this._INDEX = idx;
+    }
+    return this._INDEX;
   }
 
   /**
-   * Clear out on cleanup
+   * Clears the app scanning cache
    */
   static reset() {
-    this.handlers = [];
+    this._INDEX.clear();
+  }
+
+  /**
+   * Get paths from index
+   */
+  static getPaths() {
+    return [...this.index.keys()];
+  }
+
+  /**
+   * Find files from the index
+   * @param paths The paths to check
+   * @param folder The sub-folder to check into
+   * @param filter The filter to determine if this is a valid support file
+   */
+  static find(config: FindConfig) {
+    const { filter: f, folder, paths = this.getPaths() } = config;
+    const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
+
+    if (folder === 'src') {
+      config.includeIndex = config.includeIndex ?? true;
+    }
+    const all: SimpleEntry[][] = [];
+    const idx = this.index;
+    for (const key of paths) {
+      if (idx.has(key)) {
+        const tgt = idx.get(key)!;
+        if (folder) {
+          const sub = tgt.files.get(folder) || [];
+          if (filter) {
+            all.push(sub.filter(el => filter(el.module)));
+          } else {
+            all.push(sub);
+          }
+        } else {
+          for (const sub of tgt.files.values()) {
+            if (filter) {
+              all.push(sub.filter(el => filter(el.module)));
+            } else {
+              all.push(sub);
+            }
+          }
+        }
+        if (config.includeIndex && tgt.index && (!filter || filter(tgt.index.module))) {
+          all.push([tgt.index]);
+        }
+      }
+    }
+    return all.flat();
+  }
+
+  /**
+   * Find all source files registered
+   * @param mode Should all sources files be returned, including optional.
+   */
+  static findByFolders(config: SourceConfig, mode: 'all' | 'required' = 'all') {
+    const all: SimpleEntry[][] = [];
+    const getAll = (src: string[], cmd: (c: FindConfig) => SimpleEntry[]) => {
+      for (const folder of src.filter(x => mode === 'all' || !x.startsWith('^'))) {
+        all.push(cmd({ folder: folder.replace('^', '') })
+          .filter(x => mode === 'all' || !x.module.includes('.opt'))
+        );
+      }
+    };
+    getAll(config.common, c => this.find({
+      ...c, paths: this.getPaths()
+        .filter(x => !config.excludeModules || !config.excludeModules.has(x))
+    }));
+    getAll(config.local, c => this.find({ ...c, paths: ['.'] }));
+    return all.flat();
   }
 }

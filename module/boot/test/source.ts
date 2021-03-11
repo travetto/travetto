@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { SourceUtil } from '../src/internal/source';
+import { SourceUtil } from '../src/internal/source-util';
 
 const FILE_IF = '@file-if';
 
