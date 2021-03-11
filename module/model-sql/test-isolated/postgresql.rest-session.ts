@@ -9,7 +9,7 @@ import { AsyncContext } from '@travetto/context';
 import { ModelSuite } from '@travetto/model/test-support/suite';
 
 import { SQLModelConfig } from '../src/config';
-import { MySQLDialect } from '../src/dialect/mysql/dialect';
+import { PostgreSQLDialect } from '../src/dialect/postgresql/dialect';
 import { SQLModelService } from '../src/service';
 
 class Config {
@@ -17,15 +17,19 @@ class Config {
   static provider() {
     return new ModelSessionProvider();
   }
-  @InjectableFactory(SessionModelSym)
+  @InjectableFactory({ primary: true })
   static getSqlService(ctx: AsyncContext, config: SQLModelConfig) {
-    return new SQLModelService(ctx, config, new MySQLDialect(ctx, config));
+    return new PostgreSQLDialect(ctx, config);
+  }
+  @InjectableFactory(SessionModelSym)
+  static modelProvider(svc: SQLModelService) {
+    return svc;
   }
 }
 
 @Suite()
 @ModelSuite()
-export class MysqlRestSesisonServerSuite extends RestSessionServerSuite {
+export class PostgreSQLRestSesisonServerSuite extends RestSessionServerSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

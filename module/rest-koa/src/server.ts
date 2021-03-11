@@ -1,8 +1,8 @@
 import type * as https from 'https';
 import * as koa from 'koa';
 import * as kCompress from 'koa-compress';
-import * as kBodyParser from 'koa-bodyparser';
 import * as kRouter from 'koa-router';
+import * as coBody from 'co-body';
 
 import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
@@ -36,7 +36,21 @@ export class KoaRestServer implements RestServer<koa> {
   init(): koa {
     const app = new koa();
     app.use(kCompress());
-    app.use(kBodyParser());
+    app.use(async (ctx, next) => {
+      const contentType = ctx.headers['content-type'];
+      if (contentType) {
+        if (/json$/.test(contentType)) {
+          ctx.body = (await coBody.json(ctx));
+        } else if (/urlencoded$/.test(contentType)) {
+          ctx.body = (await coBody.form(ctx));
+        } else if (/^text\//.test(contentType)) {
+          ctx.body = (await coBody.text(ctx));
+        } else {
+          ctx.body = ctx.req;
+        }
+      }
+      await next();
+    });
 
     app.keys = this.cookies.keys;
 

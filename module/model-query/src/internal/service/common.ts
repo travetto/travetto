@@ -13,7 +13,7 @@ export class ModelQuerySuggestSupportTarget { }
  * @param o
  */
 export function isQuerySupported(o: unknown): o is ModelQuerySupport {
-  return !!o && 'query' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['query'];
 }
 
 /**
@@ -21,7 +21,7 @@ export function isQuerySupported(o: unknown): o is ModelQuerySupport {
  * @param o
  */
 export function isQueryCrudSupported(o: unknown): o is ModelQueryCrudSupport {
-  return !!o && 'deleteByQuery' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['deleteByQuery'];
 }
 
 /**
@@ -29,7 +29,7 @@ export function isQueryCrudSupported(o: unknown): o is ModelQueryCrudSupport {
  * @param o
  */
 export function isQueryFacetSupported(o: unknown): o is ModelQueryFacetSupport {
-  return !!o && 'facet' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['facet'];
 }
 
 /**
@@ -37,5 +37,5 @@ export function isQueryFacetSupported(o: unknown): o is ModelQueryFacetSupport {
  * @param o
  */
 export function isQuerySuggestSupported(o: unknown): o is ModelQuerySuggestSupport {
-  return !!o && 'suggest' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['suggest'];
 }

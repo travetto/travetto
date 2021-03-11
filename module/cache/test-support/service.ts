@@ -9,7 +9,7 @@ import { Class } from '@travetto/base';
 import { TimeUtil } from '@travetto/base/src/internal/time';
 
 import { Cache, EvictCache } from '../src/decorator';
-import { CacheService } from '../src/service';
+import { CacheModelSym, CacheService } from '../src/service';
 import { CacheUtil } from '../src/util';
 
 class User { }
@@ -73,7 +73,7 @@ class SampleService {
 }
 
 @Suite()
-@ModelSuite()
+@ModelSuite(CacheModelSym)
 @InjectableSuite()
 export abstract class CacheServiceSuite {
 

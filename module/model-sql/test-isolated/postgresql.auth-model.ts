@@ -14,9 +14,6 @@ class Config {
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
     return new PostgreSQLDialect(ctx, config);
   }
-}
-
-class Init {
   @InjectableFactory(TestModelSvcSym)
   static modelProvider(svc: SQLModelService) {
     return svc;

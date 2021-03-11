@@ -192,7 +192,7 @@ export class SQLModelService implements
   @Transactional()
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
     const count = await this.dialect.deleteAndGetCount<ModelType>(cls, {
-      where: ModelQueryUtil.getWhereClause(cls, { id } as WhereClauseRaw<T>)
+      where: ModelQueryUtil.getWhereClause(cls, { id } as WhereClauseRaw<T>, false)
     });
     if (count === 0) {
       throw new NotFoundError(cls, id);

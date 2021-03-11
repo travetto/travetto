@@ -18,7 +18,7 @@ export class ModelIndexedSupportTarget { }
  * @param o
  */
 export function isBasicSupported(o: unknown): o is ModelBulkSupport {
-  return !!o && 'create' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['create'];
 }
 
 /**
@@ -26,7 +26,7 @@ export function isBasicSupported(o: unknown): o is ModelBulkSupport {
  * @param o
  */
 export function isCrudSupported(o: unknown): o is ModelCrudSupport {
-  return !!o && 'upsert' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['upsert'];
 }
 
 /**
@@ -34,7 +34,7 @@ export function isCrudSupported(o: unknown): o is ModelCrudSupport {
  * @param o
  */
 export function isExpirySupported(o: unknown): o is ModelExpirySupport {
-  return !!o && 'deleteExpired' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['deleteExpired'];
 }
 
 /**
@@ -42,7 +42,7 @@ export function isExpirySupported(o: unknown): o is ModelExpirySupport {
  * @param o
  */
 export function isStorageSupported(o: unknown): o is ModelStorageSupport {
-  return !!o && 'createStorage' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['createStorage'];
 }
 
 /**
@@ -50,7 +50,7 @@ export function isStorageSupported(o: unknown): o is ModelStorageSupport {
  * @param o
  */
 export function isStreamSupported(o: unknown): o is ModelStreamSupport {
-  return !!o && 'getStream' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['getStream'];
 }
 
 /**
@@ -58,7 +58,7 @@ export function isStreamSupported(o: unknown): o is ModelStreamSupport {
  * @param o
  */
 export function isBulkSupported(o: unknown): o is ModelBulkSupport {
-  return !!o && 'processBulk' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['processBulk'];
 }
 
 /**
@@ -66,6 +66,6 @@ export function isBulkSupported(o: unknown): o is ModelBulkSupport {
  * @param o
  */
 export function isIndexedSupported(o: unknown): o is ModelIndexedSupport {
-  return !!o && 'getByIndex' in (o as object);
+  return !!o && !!(o as Record<string, unknown>)['getByIndex'];
 }
 

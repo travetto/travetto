@@ -277,6 +277,10 @@ export class TestExecutor {
     const proc = ExecUtil.forkMain(require.resolve('../../bin/test-direct'), [file, ...args], {
       env: {
         TRV_MODULES: modules.join(','),
+        TRV_RESOURCES: process.env.TRV_RESOURCES,
+        TRV_PROFILES: process.env.TRV_PROFILES,
+        TRV_SRC_LOCAL: '^test-isolated',
+        TRV_SRC_COMMON: process.env.TRV_SRC_COMMON,
         TRV_TEST_FORMAT: 'exec',
         TRV_CACHE: `.trv_cache_${SystemUtil.naiveHash(file)}`
       }

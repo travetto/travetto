@@ -14,14 +14,17 @@ export class TestLernaPlugin extends BasePlugin {
   init(cmd: commander.Command) {
     return cmd
       .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, `${Math.min(4, os.cpus().length - 1)}`)
-      .option('-m, --mode <mode>', 'Test mode', /^standard|isolated$/, 'standard');
+      .option('-i, --isolated', 'Should the test run in isolated mode');
   }
 
   async action() {
     const child = ExecUtil.spawn('npx', [
       'lerna', '--no-sort',
-      'exec', '--no-bail', '--stream', '--',
-      'trv', 'test', '-f', 'event', '-m', this._cmd.mode, '-c', '2'
+      'exec',
+      ...(this._cmd.isolated ? ['--concurrency', '2'] : []),
+      '--no-bail', '--stream', '--',
+      'trv', 'test', '-f', 'event',
+      ...(this._cmd.isolated ? ['-i'] : ['-c', '1']),
     ], { shell: true, rawOutput: true, cwd: PathUtil.resolveUnix(__dirname, '..', '..') });
 
     const { TestConsumerRegistry } = await import('../src/consumer/registry');
