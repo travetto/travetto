@@ -117,7 +117,12 @@ export class IndexManager implements ModelStorageSupport {
   }
 
   async exportModel(cls: Class<ModelType>) {
-    return '';
+    const schema = ElasticsearchSchemaUtil.generateSourceSchema(cls, this.config.schemaConfig);
+    const ident = this.getIdentity(cls); // Already namespaced
+    return `curl -XPOST $ES_HOST/${ident.index} -d '${JSON.stringify({
+      mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
+      settings: this.config.indexCreate
+    })}'`;
   }
 
   async deleteModel(cls: Class<ModelType>) {

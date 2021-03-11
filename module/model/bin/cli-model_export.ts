@@ -6,6 +6,7 @@ import { ModelExportUtil } from './lib/export';
  */
 export class ModelExportPlugin extends BaseModelPlugin {
   name = 'model:export';
+  op = 'exportModel' as const;
 
   async action(provider: string, models: string[]) {
     try {
