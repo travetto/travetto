@@ -1,4 +1,5 @@
 import { color } from '@travetto/cli/src/color';
+
 import { BaseModelPlugin } from './lib/base-cli-plugin';
 import { ModelInstallUtil } from './lib/install';
 

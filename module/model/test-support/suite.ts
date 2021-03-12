@@ -1,4 +1,4 @@
-import { Class, ClassInstance, ResourceManager } from '@travetto/base';
+import { Class, ResourceManager } from '@travetto/base';
 import { PathUtil } from '@travetto/boot/src';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';

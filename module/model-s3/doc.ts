@@ -1,5 +1,6 @@
-import { doc as d, mod, Code, Note, inp, lib, Header } from '@travetto/doc';
+import { doc as d, mod, Note, inp, lib, Header } from '@travetto/doc';
 import { ModelCustomConfig } from '@travetto/model/support/doc-support';
+
 import { S3ModelConfig } from './src/config';
 
 export const text = d`

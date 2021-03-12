@@ -2,8 +2,8 @@ import { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 import { SQLModelConfig } from '@travetto/model-sql/src/config';
 import { Suite } from '@travetto/test';
-
 import { PostgreSQLDialect } from '@travetto/model-sql/src/dialect/postgresql/dialect';
+
 import { SQLModelService } from '../..';
 import { BaseSQLTest } from '../query';
 

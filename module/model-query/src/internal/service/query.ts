@@ -1,6 +1,7 @@
 import { Class, AppError } from '@travetto/base';
 import { ModelRegistry, NotFoundError } from '@travetto/model';
 import { ModelType } from '@travetto/model/src/types/model';
+
 import { ModelQuery, Query } from '../../model/query';
 import { WhereClause, WhereClauseRaw } from '../../model/where-clause';
 import { QueryLanguageParser } from '../query/parser';

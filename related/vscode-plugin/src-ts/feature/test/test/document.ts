@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
-import { SuiteConfig } from '../../../../../../module/test/src/model/suite';
+
+import { SuiteConfig } from '@travetto/test';
 
 import { Decorations } from './decoration';
 import {

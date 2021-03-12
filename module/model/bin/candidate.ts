@@ -1,7 +1,7 @@
 import { EnvInit } from '@travetto/base/bin/init';
 import { ExecUtil } from '@travetto/boot/src';
-import type { ModelStorageSupport } from '../src/service/storage';
 
+import type { ModelStorageSupport } from '../src/service/storage';
 import { ModelCandidateUtil } from './lib/candidate';
 
 /**

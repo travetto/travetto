@@ -1,9 +1,9 @@
 // @file-if @travetto/schema
 import * as assert from 'assert';
+
 import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry } from '@travetto/schema';
-
-import { Controller, Redirect, Post, Get, SchemaBody, SchemaQuery, MethodOrAll, ControllerRegistry } from '..';
+import { Controller, Redirect, Post, Get, SchemaBody, SchemaQuery, MethodOrAll, ControllerRegistry } from '@travetto/rest';
 
 import { BaseRestSuite } from './base';
 

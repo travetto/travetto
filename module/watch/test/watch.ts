@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { ScanFs, ScanHandler } from '@travetto/boot';
+import { ScanFs } from '@travetto/boot';
 
 import { Watcher } from '../src/watcher';
 

@@ -1,4 +1,4 @@
-import { ChildCommChannel } from '../src/comm/child';
+import { ChildCommChannel } from '@travetto/worker';
 
 export async function main() {
   const exec = new ChildCommChannel<{ data: string }>();

@@ -1,5 +1,3 @@
-import { SimpleType } from '@travetto/base';
-
 import { State } from './state';
 import { ListBlock, MapBlock, TextBlock } from './type/block';
 import { Tokenizer } from './tokenizer';

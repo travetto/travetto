@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { RootRegistry } from '@travetto/registry';
 import { Class } from '@travetto/base';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { ValidationResultError, Schema } from '@travetto/schema';
+import { Schema } from '@travetto/schema';
 import { Model, ModelType, BaseModel } from '@travetto/model';
 
 import { ModelQuery, Query } from '..';

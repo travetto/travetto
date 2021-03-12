@@ -1,4 +1,5 @@
 import type { MailService } from '@travetto/email/src/service';
+
 import { TemplateUtil } from './util';
 import { ConfigUtil } from './config';
 

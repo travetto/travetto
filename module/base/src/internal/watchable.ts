@@ -1,4 +1,4 @@
-import { EnvUtil, PathUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/boot';
 import { Class } from '../types';
 
 /**

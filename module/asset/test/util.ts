@@ -4,6 +4,7 @@ import * as assert from 'assert';
 import { PathUtil } from '@travetto/boot';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
+
 import { AssetUtil } from '../src/util';
 
 @Suite()

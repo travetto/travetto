@@ -1,12 +1,11 @@
 import { doc as d, Install, Code, Section, Snippet, SnippetLink, List, Header } from '@travetto/doc';
 import { Injectable } from '@travetto/di';
-
-import { AssetService } from '.';
 import { FileModelService, MemoryModelService } from '@travetto/model';
 import { MongoModelService } from '@travetto/model-mongo';
 import { S3ModelService } from '@travetto/model-s3';
-
 import { Links } from '@travetto/model/support/doc-support';
+
+import { AssetService } from '.';
 
 const Asset = SnippetLink('Asset', 'src/types.ts', /interface Asset/);
 const AssetNamingStrategySnippet = Snippet('AssetNamingStrategy', 'src/naming.ts', /interface AssetNamingStrategy/, /^[}]/);

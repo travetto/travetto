@@ -1,4 +1,5 @@
-import { doc as d, mod, Section, Code, inp, lib, List, SubSection, Table, Snippet, SnippetLink, fld, Header } from '@travetto/doc';
+import { doc as d, mod, Section, Code, lib, SubSection, Table, Snippet, fld, Header } from '@travetto/doc';
+
 import { FileModelService } from './src/provider/file';
 import { MemoryModelService } from './src/provider/memory';
 import { Model } from './src/registry/decorator';

@@ -1,4 +1,5 @@
 import * as koa from 'koa';
+
 import { RestServerUtil } from '@travetto/rest';
 import { NodeEntitySym, ProviderEntitySym } from '@travetto/rest/src/internal/symbol';
 

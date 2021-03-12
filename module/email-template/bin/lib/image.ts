@@ -1,5 +1,5 @@
-import { PathUtil } from '@travetto/boot';
 import * as path from 'path';
+import { PathUtil } from '@travetto/boot';
 
 export class ImageUtil {
 

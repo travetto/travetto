@@ -1,14 +1,14 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientJsonpModule, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppComponent } from './app.component';
 import { LandingComponent } from './landing/landing.component';
 import { GuideComponent } from './guide/guide.component';
 import { DocumentationModule } from './documentation/documentation.module';
 import { BlogComponent } from './blog/blog.component';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from './shared/shared.module';
 
 const routes: Routes = [

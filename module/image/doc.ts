@@ -1,7 +1,7 @@
 import { doc as d, mod, lib, Code, Header } from '@travetto/doc';
 import { CommandService } from '@travetto/command';
-import { ImageUtil } from './src/util';
 
+import { ImageUtil } from './src/util';
 
 export const text = d`
 ${Header()}

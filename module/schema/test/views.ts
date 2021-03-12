@@ -1,6 +1,8 @@
 import * as assert from 'assert';
+
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
+
 import { Schema, View } from '../src/decorator/schema';
 
 @Schema()

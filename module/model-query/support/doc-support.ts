@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+
 import { SnippetLink } from '@travetto/doc';
 import { AllTypeMap } from '@travetto/doc/src/node-types';
 

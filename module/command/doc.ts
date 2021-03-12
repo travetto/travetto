@@ -1,6 +1,7 @@
 import { doc as d, Section, List, Code, lib, cls, Execute, Terminal, DocUtil, SubSection, Header } from '@travetto/doc';
-import { CommandService } from './src/command';
 import { PathUtil } from '@travetto/boot';
+
+import { CommandService } from './src/command';
 
 export const text = d`
 ${Header()}

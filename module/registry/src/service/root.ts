@@ -1,4 +1,5 @@
 import { Class } from '@travetto/base';
+
 import { Registry } from '../registry';
 import { ClassSource } from '../source/class-source';
 import { ChangeEvent } from '../types';

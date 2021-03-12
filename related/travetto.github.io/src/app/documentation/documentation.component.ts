@@ -1,7 +1,7 @@
 import { Component, ViewEncapsulation } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 
 import { PAGES } from './pages';
-import { Router, NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-documentation',

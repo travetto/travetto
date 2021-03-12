@@ -1,6 +1,6 @@
 import * as jws from 'jws';
-
 import * as assert from 'assert';
+
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 

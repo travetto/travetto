@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
+
 import { IterableInputSource } from '../src/input/iterable';
 import { DynamicAsyncIterator } from '../src/input/async-iterator';
 

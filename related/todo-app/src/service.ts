@@ -1,5 +1,6 @@
 import { ElasticsearchModelService } from '@travetto/model-elasticsearch';
 import { Injectable, Inject } from '@travetto/di';
+
 import { Todo, TodoSearch } from './model';
 
 @Injectable()

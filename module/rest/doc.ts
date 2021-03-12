@@ -4,6 +4,15 @@ import {
 } from '@travetto/doc';
 import { Application } from '@travetto/app';
 
+// To ensure module loading
+import '@travetto/schema';
+import '@travetto/model';
+import '@travetto/model-query';
+
+import { ModelRoutes } from './src/extension/model';
+import { SchemaBody, SchemaQuery } from './src/extension/schema';
+import { ModelQueryRoutes } from './src/extension/model-query';
+import { RestApplication } from './src/application/rest';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
 import { Path, Query, Body, Context, Param, Header } from './src/decorator/param';
@@ -19,16 +28,6 @@ const Response = SnippetLink('TravettoResponse', 'src/types.d.ts', /interface Tr
 const ResourceManager = Ref('ResourceManager', '@travetto/base/src/resource.ts');
 
 const RestInterceptor = SnippetLink('RestInterceptor', 'src/interceptor/types.ts', /interface RestInterceptor/);
-
-import { ModelRoutes } from './src/extension/model';
-import { SchemaBody, SchemaQuery } from './src/extension/schema';
-import { ModelQueryRoutes } from './src/extension/model-query';
-import { RestApplication } from './src/application/rest';
-
-// To ensure module loading
-import '@travetto/schema';
-import '@travetto/model';
-import '@travetto/model-query';
 
 export const text = d`
 ${DocHeader()}

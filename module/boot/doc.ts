@@ -1,4 +1,4 @@
-import { doc as d, Code, Section, SubSection, List, inp, meth, Ref, lib, Header, Execute } from '@travetto/doc';
+import { doc as d, Code, Section, SubSection, List, inp, meth, Ref, lib, Header } from '@travetto/doc';
 import { FileCache, ExecUtil, StreamUtil } from './src';
 
 const AppCacheLink = Ref('AppCache', 'src-ts/cache.ts');

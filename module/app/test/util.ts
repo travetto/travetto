@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
+
 import { AppUtil } from '../src/util';
 import { ApplicationParameter } from '../src/types';
 

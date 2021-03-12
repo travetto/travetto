@@ -1,5 +1,5 @@
 import * as commander from 'commander';
-import { BasePlugin } from '../../src/plugin-base';
+import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 /**
  * `npx trv echo`

@@ -1,5 +1,4 @@
 // @file-if @travetto/auth-model
-
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { AuthModelServiceSuite, TestModelSvcSym } from '@travetto/auth-model/test-support/service';

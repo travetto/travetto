@@ -2,6 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 import { Request } from '@travetto/rest';
+
 import { AssetRestUtil } from '../src/util';
 
 @Suite()

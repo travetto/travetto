@@ -1,5 +1,6 @@
-import { doc as d, lib, mod, Code, List, Header } from '@travetto/doc';
+import { doc as d, lib, mod, List, Header } from '@travetto/doc';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-support';
+
 import { RedisModelConfig } from './src/config';
 import { RedisModelService } from './src/service';
 

@@ -2,6 +2,7 @@ import * as commander from 'commander';
 
 import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
+
 import { BuildUtil } from './lib';
 
 /**

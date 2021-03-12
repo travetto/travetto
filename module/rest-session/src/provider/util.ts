@@ -1,4 +1,5 @@
 import { Request, Response } from '@travetto/rest';
+
 import { SessionConfig } from '../config';
 import { Session } from '../types';
 

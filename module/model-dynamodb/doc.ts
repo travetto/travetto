@@ -1,4 +1,4 @@
-import { doc as d, lib, Code, mod, List, Header } from '@travetto/doc';
+import { doc as d, lib, mod, List, Header } from '@travetto/doc';
 
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-support';
 

@@ -1,4 +1,4 @@
-import { doc as d, lib, Header, Install, Section, Terminal, mod, inp, List, pth, SubSection, Code, Ref } from '@travetto/doc';
+import { doc as d, lib, Header, Install, Section, Terminal, mod, inp, List, pth, SubSection, Code } from '@travetto/doc';
 
 import { Todo } from './templates/todo/src/model/todo';
 import { TodoController } from './templates/todo/src/rest/todo';

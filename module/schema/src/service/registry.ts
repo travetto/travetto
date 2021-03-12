@@ -1,5 +1,6 @@
 import { Class, AppError } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
+
 import { ClassList, FieldConfig, ClassConfig, ALL_VIEW, SchemaConfig, ViewFieldsConfig } from './types';
 import {
   SchemaChangeListener,

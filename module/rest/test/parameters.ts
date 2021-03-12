@@ -2,6 +2,7 @@ import * as assert from 'assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+
 import { Query, Header, Path, Context } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';

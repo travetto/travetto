@@ -1,4 +1,5 @@
 import * as ts from 'typescript';
+
 import { DeclDocumentation } from '../types/shared';
 import { CoreUtil } from './core';
 import { DeclarationUtil } from './declaration';

@@ -1,9 +1,9 @@
 import * as assert from 'assert';
+
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
 import { DependencyRegistry } from '../src/registry';
-
 import { Injectable, InjectableFactory } from '../src/decorator';
 
 abstract class Common { }

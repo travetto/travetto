@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as mustache from 'mustache';
+
 import { FsUtil } from '@travetto/boot/src/fs';
 
 export const verifyDestination = (target: string) => {

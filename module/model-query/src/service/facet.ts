@@ -1,7 +1,7 @@
 import { Class } from '@travetto/base';
 import { ModelType } from '@travetto/model';
 
-import { ModelQuery, PageableModelQuery } from '../model/query';
+import { ModelQuery } from '../model/query';
 import { ModelQuerySupport } from './query';
 import { ValidStringFields } from '../model/where-clause';
 

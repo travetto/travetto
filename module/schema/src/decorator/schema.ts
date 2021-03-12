@@ -1,4 +1,5 @@
 import { Class } from '@travetto/base';
+
 import { SchemaRegistry } from '../service/registry';
 import { ViewFieldsConfig } from '../service/types';
 import { ValidatorFn } from '../validate/types';

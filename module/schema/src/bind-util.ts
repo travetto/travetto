@@ -1,4 +1,5 @@
 import { Class, ClassInstance, ConcreteClass, Util } from '@travetto/base';
+
 import { SchemaRegistry } from './service/registry';
 import { FieldConfig, ALL_VIEW } from './service/types';
 

@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
 import { S3ModelService } from '@travetto/model-s3';
-import { AssetModelSym, AssetService } from '../src/service';
+import { AssetModelSym, AssetService } from '@travetto/asset';
 
 class SymoblBasedConfiguration {
   @InjectableFactory(AssetModelSym)

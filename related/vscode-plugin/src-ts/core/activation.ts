@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import { ActivationTarget } from './types';
 import { Workspace } from './workspace';
 

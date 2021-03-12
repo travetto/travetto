@@ -1,6 +1,7 @@
+import { Middleware } from 'koa';
+
 import { Injectable } from '@travetto/di';
 import { KoaRestServer } from '@travetto/rest-koa';
-import { Middleware } from 'koa';
 
 declare let rateLimit: (config: { windowMs: number, max: number }) => Middleware;
 

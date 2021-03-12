@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
+
 import { WhereClause } from '../src/model/where-clause';
 import { QueryLanguageParser } from '../src/internal/query/parser';
 import { QueryLanguageTokenizer } from '../src/internal/query/tokenizer';

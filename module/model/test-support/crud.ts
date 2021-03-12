@@ -1,11 +1,10 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Schema, Text, Precision, TypeMismatchError } from '@travetto/schema';
+import { Schema, Text, Precision, } from '@travetto/schema';
 
 import { BaseModelSuite } from './base';
 import { ModelCrudSupport, Model, BaseModel, NotFoundError } from '..';
-import { SubTypeNotSupportedError } from '../src/error/invalid-sub-type';
 
 @Schema()
 class Address {

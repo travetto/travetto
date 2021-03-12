@@ -1,6 +1,5 @@
 import { ChildProcess } from 'child_process';
 import { ExecutionState, ExecUtil } from '@travetto/boot';
-
 import { ProcessCommChannel } from './channel';
 
 /**

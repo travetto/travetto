@@ -1,6 +1,6 @@
 // @file-if @travetto/schema
 import { Schema } from '@travetto/schema';
-import { Controller, Post, SchemaBody } from '..';
+import { Controller, Post, SchemaBody } from '@travetto/rest';
 
 @Schema()
 class User {

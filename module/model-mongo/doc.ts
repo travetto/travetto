@@ -1,6 +1,7 @@
-import { doc as d, lib, mod, Code, inp, SnippetLink, List, Header } from '@travetto/doc';
+import { doc as d, lib, mod, inp, SnippetLink, List, Header } from '@travetto/doc';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc-support';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-support';
+
 import { MongoModelConfig } from './src/config';
 import { MongoModelService } from './src/service';
 

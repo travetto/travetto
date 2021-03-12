@@ -4,13 +4,13 @@ import { DynamoDBModelService } from '@travetto/model-dynamodb';
 import { MongoModelService } from '@travetto/model-mongo';
 import { ElasticsearchModelService } from '@travetto/model-elasticsearch';
 import { RedisModelService } from '@travetto/model-redis';
+import { SQLModelService } from '@travetto/model-sql';
+import { S3ModelService } from '@travetto/model-s3';
 
 import { Links } from '@travetto/model/support/doc-support';
 
 import { Cache, EvictCache } from './src/decorator';
 import { CacheModelSym, CacheService } from './src/service';
-import { SQLModelService } from '@travetto/model-sql';
-import { S3ModelService } from '@travetto/model-s3';
 
 export const text = d`
 ${Header()}

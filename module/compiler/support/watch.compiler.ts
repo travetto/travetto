@@ -3,7 +3,6 @@ import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
 import { FsUtil, PathUtil } from '@travetto/boot';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
-
 import { Compiler } from '../src/compiler';
 
 /**

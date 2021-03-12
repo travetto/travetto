@@ -1,4 +1,4 @@
-import { ModelQuerySupport } from '../src/service/query';
+import { ModelQuerySupport } from '@travetto/model-query';
 import { User } from './user';
 
 export class UserSearch {

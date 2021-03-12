@@ -1,9 +1,9 @@
 // @file-if @travetto/model
 import { Inject } from '@travetto/di';
 import { ModelCrudSupport } from '@travetto/model';
+import { Path, Controller, SchemaBody, Get, Request, Delete, Post, Put } from '@travetto/rest';
 
 import { User } from './user';
-import { Path, Controller, SchemaBody, Get, Request, Delete, Post, Put } from '..';
 
 @Controller('/user')
 class UserController {

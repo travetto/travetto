@@ -1,4 +1,5 @@
 import { Class, ClassInstance } from '@travetto/base';
+
 import { SuiteRegistry } from '../registry/suite';
 import { SuiteConfig } from '../model/suite';
 

@@ -2,6 +2,7 @@ import * as util from 'util';
 
 import { PathUtil } from '@travetto/boot';
 import { Class, ClassInstance, Util } from '@travetto/base';
+
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
 

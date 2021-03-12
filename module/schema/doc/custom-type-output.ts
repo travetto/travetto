@@ -1,5 +1,5 @@
+import { SchemaValidator } from '@travetto/schema';
 import { LocationAware } from './custom-type-usage';
-import { SchemaValidator } from '../src/validate/validator';
 
 export async function main() {
   const la = LocationAware.from({

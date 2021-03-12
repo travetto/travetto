@@ -1,4 +1,4 @@
-import { Config } from '..';
+import { Config } from '@travetto/config';
 
 @Config('database')
 export class DBConfig {

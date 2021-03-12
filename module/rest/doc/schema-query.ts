@@ -1,6 +1,6 @@
 // @file-if @travetto/schema
 import { Schema } from '@travetto/schema';
-import { Controller, Get, SchemaQuery } from '..';
+import { Controller, Get, SchemaQuery } from '@travetto/rest';
 
 @Schema()
 class SearchParams {

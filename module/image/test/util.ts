@@ -2,9 +2,9 @@ import * as assert from 'assert';
 import * as fs from 'fs';
 
 import { Test, Suite } from '@travetto/test';
-
 import { StreamUtil } from '@travetto/boot';
 import { ResourceManager } from '@travetto/base';
+
 import { ImageUtil } from '../src/util';
 
 @Suite('ImageUtils')

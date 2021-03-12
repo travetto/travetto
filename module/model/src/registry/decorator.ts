@@ -1,7 +1,7 @@
 import { Class } from '@travetto/base';
 import { SchemaRegistry } from '@travetto/schema';
-import { ModelType } from '../types/model';
 
+import { ModelType } from '../types/model';
 import { ModelRegistry } from './model';
 import { IndexConfig, ModelOptions } from './types';
 

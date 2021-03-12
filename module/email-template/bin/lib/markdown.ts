@@ -1,5 +1,6 @@
 import * as parse5 from 'parse5';
 import * as htmlEntities from 'html-entities';
+
 import { HtmlUtil, Parse5Adapter } from './html';
 
 const allEntities = new htmlEntities.AllHtmlEntities();

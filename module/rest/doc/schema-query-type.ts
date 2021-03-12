@@ -1,5 +1,5 @@
 // @file-if @travetto/schema
-import { Controller, Get, SchemaQuery } from '..';
+import { Controller, Get, SchemaQuery } from '@travetto/rest';
 
 type Paging = {
   page?: number;

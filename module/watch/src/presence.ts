@@ -1,5 +1,5 @@
-import { ScanEntry } from '@travetto/boot';
 import { EventEmitter } from 'events';
+import { ScanEntry } from '@travetto/boot';
 import { Watcher, WatcherOptions } from './watcher';
 
 export interface FilePresenceManager {

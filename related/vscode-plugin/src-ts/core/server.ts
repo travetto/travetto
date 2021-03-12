@@ -1,4 +1,3 @@
-
 import { EventEmitter } from 'events';
 import { ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/boot';
 

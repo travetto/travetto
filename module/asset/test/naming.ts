@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
+
 import { SimpleNamingStrategy, HashNamingStrategy } from '../src/naming';
 import { Asset } from '../src/types';
 

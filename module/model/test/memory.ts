@@ -1,4 +1,5 @@
 import { Suite } from '@travetto/test';
+
 import { MemoryModelConfig, MemoryModelService } from '../src/provider/memory';
 import { ModelCrudSuite } from '../test-support/crud';
 import { ModelExpirySuite } from '../test-support/expiry';

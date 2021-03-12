@@ -1,10 +1,9 @@
-
 import * as commander from 'commander';
+
 import { CliUtil } from './util';
 import { CompletionConfig } from './types';
 import { PluginManager } from './plugin';
 import { HelpUtil } from './help';
-
 import { version } from '../package.json';
 
 /**

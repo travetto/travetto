@@ -1,5 +1,6 @@
 import { FieldConfig } from '@travetto/schema';
 import { Class } from '@travetto/base';
+
 import { PointImpl } from '../model/point';
 
 const st = (t: string, arr: boolean = false) => new Set([arr ? `${t}[]` : t]);

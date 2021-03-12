@@ -1,5 +1,6 @@
 import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 import { SHARE_ENV, Worker, WorkerOptions, parentPort } from 'worker_threads';
+
 import { PathUtil } from './path';
 import { StreamUtil } from './stream';
 

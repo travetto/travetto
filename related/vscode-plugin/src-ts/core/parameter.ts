@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import { Workspace } from './workspace';
 import { ParamConfig } from './types';
 

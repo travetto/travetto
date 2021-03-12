@@ -1,4 +1,4 @@
-import { doc as d, inp, List, mod, Section, pth, lib, cls, Execute, fld, Header } from '@travetto/doc';
+import { doc as d, inp, List, mod, Section, pth, lib, cls, Header } from '@travetto/doc';
 
 export const text = d`
 ${Header()}
