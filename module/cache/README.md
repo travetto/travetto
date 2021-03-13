@@ -10,14 +10,14 @@ npm install @travetto/cache
 
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.").  The code aims to handle use cases surrounding common/basic usage.
 
-The cache module requires an [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10), or you can roll your own.
+The cache module requires an [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11), or you can roll your own.
 
 **Install: provider**
 ```bash
 npm install @travetto/model-{provider}
 ```
 
-Currently, the following are packages that provide [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10):
+Currently, the following are packages that provide [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11):
    
    *  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L42), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)
    *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - [DynamoDBModelService](https://github.com/travetto/travetto/tree/master/module/model-dynamodb/src/service.ts#L55)
@@ -113,7 +113,7 @@ export class UserService {
 
 ## Extending the Cache Service
 
-By design, the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L29) relies solely on the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L29).  The [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L29) is expecting the model service to be registered using the @trv:cache/model:
+By design, the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L29) relies solely on the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L29).  The [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L29) is expecting the model service to be registered using the @trv:cache/model:
 
 **Code: Registering a Custom Model Source**
 ```typescript

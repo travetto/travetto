@@ -211,3 +211,35 @@ Unlike [Util](https://github.com/travetto/travetto/tree/master/module/base/src/u
    
    *  `naiveHash(text: string): number` computes a very naive hash. Should not be relied upon for scenarios where collisions cannot be tolerated.
    *  `computeModule(file: string): string` computes the internal module name from a given file.
+
+## CLI - build 
+
+**Terminal: Build usage**
+```bash
+$ trv build --help
+
+Usage:  build [options]
+
+Options:
+  -c, --clean            Indicates if the cache dir should be cleaned
+  -o, --output <output>  Output directory
+  -q, --quiet            Quiet operation
+  -h, --help             display help for command
+```
+
+This command line operation pre-compiles all of the application source code.  You can target the output location as well, which is useful in conjunction with `process.env.TRV_CACHE` for relocating the compiled files.
+
+## CLI - clean
+
+The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
+
+**Terminal: Clean operation**
+```bash
+$ trv clean --help
+
+Usage:  clean [options]
+
+Options:
+  -q, --quiet  Quiet operation
+  -h, --help   display help for command
+```

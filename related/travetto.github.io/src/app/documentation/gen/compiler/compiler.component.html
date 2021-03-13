@@ -26,23 +26,4 @@ Additionally, there is support for common AST transformations via <a class="modu
 <h2 id="debugging">Debugging</h2>
 
 When dealing with transformers, logging is somewhat tricky as the compiler executes before the code is loaded.  To that end, the file <code class="item path">compiler.log</code> is created in the cache directory during the compilation process. This is a location that transformers should be free to log to, for debugging, and any additional feedback.
-
-<h2 id="cli-compile">CLI - compile</h2> 
-
-      <figure class="terminal">
-      <figcaption class="terminal">Compiler usage
-      
-      </figcaption>
-      <pre><code class="language-bash">$ trv compile --help
-
-Usage:  compile <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
-
-Options:
-  -c, --clean            Indicates <span class="token keyword">if</span> the cache <span class="token function">dir</span> should be cleaned
-  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>  Output directory
-  -q, --quiet            Quiet operation
-  -h, --help             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
-      </figure>
-
-This command line operation pre-compiles all of the application source code.  You can target the output location as well, which is useful in conjunction with <code class="item field">process.env.TRV_CACHE</code> for relocating the compiled files.
 </div>

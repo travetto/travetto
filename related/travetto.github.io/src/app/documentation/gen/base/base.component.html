@@ -220,4 +220,40 @@ Unlike <a target="_blank" class="source-link" href="https://github.com/travetto/
 
 <ul> <li><code class="item method">naiveHash(text: string): number</code> computes a very naive hash. Should not be relied upon for scenarios where collisions cannot be tolerated.</li>
  <li><code class="item method">computeModule(file: string): string</code> computes the internal module name from a given file.</li></ul>
+
+<h2 id="cli-build">CLI - build</h2> 
+
+      <figure class="terminal">
+      <figcaption class="terminal">Build usage
+      
+      </figcaption>
+      <pre><code class="language-bash">$ trv build --help
+
+Usage:  build <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -c, --clean            Indicates <span class="token keyword">if</span> the cache <span class="token function">dir</span> should be cleaned
+  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>  Output directory
+  -q, --quiet            Quiet operation
+  -h, --help             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
+
+This command line operation pre-compiles all of the application source code.  You can target the output location as well, which is useful in conjunction with <code class="item field">process.env.TRV_CACHE</code> for relocating the compiled files.
+
+<h2 id="cli-clean">CLI - clean</h2>
+
+The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
+
+      <figure class="terminal">
+      <figcaption class="terminal">Clean operation
+      
+      </figcaption>
+      <pre><code class="language-bash">$ trv clean --help
+
+Usage:  clean <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -q, --quiet  Quiet operation
+  -h, --help   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
 </div>

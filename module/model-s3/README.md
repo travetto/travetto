@@ -29,13 +29,14 @@ export class Init {
 }
 ```
 
-  where the [S3ModelConfig](https://github.com/travetto/travetto/tree/master/module/model-s3/src/config.ts#L10) is defined by:
+  where the [S3ModelConfig](https://github.com/travetto/travetto/tree/master/module/model-s3/src/config.ts#L11) is defined by:
 
   
 **Code: Structure of S3ModelConfig**
 ```typescript
 import { fromIni } from '@aws-sdk/credential-provider-ini';
 import * as S3 from '@aws-sdk/client-s3';
+
 import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 

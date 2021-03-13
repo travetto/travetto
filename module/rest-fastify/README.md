@@ -14,9 +14,10 @@ The module is an [fastify](https://www.fastify.io/) provider for the [RESTful AP
 
 **Code: Customizing the Fastify App**
 ```typescript
+import { FastifyPluginAsync } from 'fastify';
+
 import { Injectable } from '@travetto/di';
 import { FastifyRestServer } from '@travetto/rest-fastify';
-import { FastifyPluginAsync } from 'fastify';
 
 declare let rateLimit: (config: { windowMs: number, max: number }) => FastifyPluginAsync;
 

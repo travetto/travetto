@@ -36,7 +36,7 @@ The current SQL client support stands at:
 
 Supported featrues:
    
-   *  [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10)
+   *  [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11)
    *  [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19)
    *  [Query Crud](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/facet.ts#L12)

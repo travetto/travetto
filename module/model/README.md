@@ -12,7 +12,7 @@ This module provides a set of contracts/interfaces to data model persistence, mo
 
 ## Contracts
 
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10), [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10), [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10), [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1) and [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11), [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1) and [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19).
 
 ### [Basic](https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9)
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -26,7 +26,7 @@ export interface ModelBasicSupport {
    * @throws {NotFoundError} When an item is not found
 ```
 
-### [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10)
+### [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11)
 The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  [Model Auth Source](https://github.com/travetto/travetto/tree/master/module/auth-model#readme "Model-based authentication and registration support for the travetto framework"), is an example of a module that only needs create, read and delete, and so any implementation of [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") that honors this contract, can be used with the [Model Auth Source](https://github.com/travetto/travetto/tree/master/module/auth-model#readme "Model-based authentication and registration support for the travetto framework").
 
 **Code: Crud Contract**
@@ -45,7 +45,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
    * @throws {NotFoundError} When an item is not found
 ```
 
-### [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10)
+### [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11)
 Additionally, an implementation may support the ability for basic indexed queries. This is not the full featured query support of [Data Model Querying](https://github.com/travetto/travetto/tree/master/module/model-query#readme "Datastore abstraction for advanced query support."), but
 allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.  
 
@@ -70,7 +70,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
 }
 ```
 
-### [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10)
+### [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11)
 
 Certain implementations will also provide support for automatic expiry of data at runtime.  This is extremely useful for temporary data as, and is used in the [Caching](https://github.com/travetto/travetto/tree/master/module/cache#readme "Caching functionality with decorators for declarative use.") module for expiring data accordingly.
 
@@ -243,6 +243,7 @@ To enforce that these contracts are honored, the module provides shared test sui
 **Code: Memory Service Test Configuration**
 ```typescript
 import { Suite } from '@travetto/test';
+
 import { MemoryModelConfig, MemoryModelService } from '../src/provider/memory';
 import { ModelCrudSuite } from '../test-support/crud';
 import { ModelExpirySuite } from '../test-support/expiry';

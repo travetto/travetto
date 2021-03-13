@@ -81,7 +81,7 @@ The decorator takes in a namespace, of what part of the resolved configuration y
 
 **Code: Database config object**
 ```typescript
-import { Config } from '..';
+import { Config } from '@travetto/config';
 
 @Config('database')
 export class DBConfig {

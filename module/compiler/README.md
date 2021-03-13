@@ -23,20 +23,3 @@ Additionally, there is support for common AST transformations via [Transformatio
 ## Debugging
 
 When dealing with transformers, logging is somewhat tricky as the compiler executes before the code is loaded.  To that end, the file `compiler.log` is created in the cache directory during the compilation process. This is a location that transformers should be free to log to, for debugging, and any additional feedback.
-
-## CLI - compile 
-
-**Terminal: Compiler usage**
-```bash
-$ trv compile --help
-
-Usage:  compile [options]
-
-Options:
-  -c, --clean            Indicates if the cache dir should be cleaned
-  -o, --output <output>  Output directory
-  -q, --quiet            Quiet operation
-  -h, --help             display help for command
-```
-
-This command line operation pre-compiles all of the application source code.  You can target the output location as well, which is useful in conjunction with `process.env.TRV_CACHE` for relocating the compiled files.

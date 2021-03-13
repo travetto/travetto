@@ -29,7 +29,7 @@ The functionality we support for testing and retrieving environment information:
    *  `getTime(key: string, def: number):number` - Reads an environment variable as milliseconds, with support for `s`, `m`, and `h` suffixes to provide succinct time units.
 
 ## Cache Support
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L9).  [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L9) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L10).  [FileCache](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/cache.ts#L10) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
 
@@ -122,7 +122,7 @@ export declare const AppCache: FileCache;
 Everything is based on absolute paths being passed in, and translated into cache specific files.
 
 ## File Operations
-[FsUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/fs.ts#L11) provides some high level functionality (like recursive directory delete).
+[FsUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/fs.ts#L12) provides some high level functionality (like recursive directory delete).
 
 ### File System Scanning
 [ScanFs](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L57) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
@@ -136,7 +136,7 @@ The bootstrap process will also requires an index of all source files, which all
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L74) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L75) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 
@@ -167,18 +167,3 @@ The [StreamUtil](https://github.com/travetto/travetto/tree/master/module/boot/sr
    *  `toReadable(src: Readable | Buffer | string):Promise<Readable>` for converting a stream/buffer/filepath to a Readable
    *  `writeToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
    *  `waitForCompletion(src: Readable, finish:()=>Promise<any>)` will ensure the stream remains open until the promise finish produces is satisfied.
-
-## CLI - clean
-
-The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
-
-**Terminal: Clean operation**
-```bash
-$ trv clean --help
-
-Usage:  clean [options]
-
-Options:
-  -q, --quiet  Quiet operation
-  -h, --help   display help for command
-```

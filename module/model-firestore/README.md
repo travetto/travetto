@@ -12,8 +12,8 @@ This module provides an [Firestore](https://firebase.google.com/docs/firestore)-
 
 Supported featrues:
    
-   *  [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10)
-   *  [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10)
+   *  [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11)
+   *  [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11)
 
     Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source 
     or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") module.

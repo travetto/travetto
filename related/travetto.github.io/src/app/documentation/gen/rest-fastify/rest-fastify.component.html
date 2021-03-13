@@ -21,9 +21,10 @@ The module is an <a target="_blank" class="external-link" href="https://www.fast
       <figcaption class="code">Customizing the Fastify App
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest-fastify/doc/customize.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FastifyPluginAsync <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'fastify'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FastifyRestServer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest-fastify'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FastifyPluginAsync <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'fastify'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">declare</span> <span class="token keyword">let</span> <span class="token function-variable function">rateLimit</span><span class="token operator">:</span> <span class="token punctuation">(</span>config<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> windowMs<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> max<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span> <span class="token operator">=></span> FastifyPluginAsync<span class="token punctuation">;</span>
 

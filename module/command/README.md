@@ -110,8 +110,8 @@ The services are defined as plain javascript files within the framework and can 
 
 **Code: Sample Service Definition**
 ```typescript
-import type { Service } from '@travetto/command/bin/lib/service';
 import { version } from '@elastic/elasticsearch/package.json';
+import type { Service } from '@travetto/command/bin/lib/service';
 
 const port = 9200;
 

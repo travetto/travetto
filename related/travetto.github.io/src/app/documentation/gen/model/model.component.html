@@ -17,7 +17,7 @@ This module provides a set of contracts/interfaces to data model persistence, mo
 
 <h2 id="contracts">Contracts</h2>
 
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1">Streaming</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19">Bulk</a>.
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1">Streaming</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19">Bulk</a>.
 
 <h3 id="basic"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9">Basic</a></h3>
 All <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -33,12 +33,12 @@ All <a class="module-link" href="https://github.com/travetto/travetto/tree/maste
    * @throws {{'{'}}NotFoundError{{'}'}} When an item is not found</span></code></pre>     
       </figure>
 
-<h3 id="crud"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10">CRUD</a></h3>
+<h3 id="crud"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11">CRUD</a></h3>
 The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth-model" title="Model-based authentication and registration support for the travetto framework">Model Auth Source</a>, is an example of a module that only needs create, read and delete, and so any implementation of <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> that honors this contract, can be used with the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth-model" title="Model-based authentication and registration support for the travetto framework">Model Auth Source</a>.
 
       <figure class="code">
       <figcaption class="code">Crud Contract
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelCrudSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelBasicSupport</span> <span class="token punctuation">{{'{'}}</span>
 
@@ -54,13 +54,13 @@ The crud contract, builds upon the basic contract, and is built around the idea 
    * @throws {{'{'}}NotFoundError{{'}'}} When an item is not found</span></code></pre>     
       </figure>
 
-<h3 id="indexed"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10">Indexed</a></h3>
+<h3 id="indexed"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11">Indexed</a></h3>
 Additionally, an implementation may support the ability for basic indexed queries. This is not the full featured query support of <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a>, but
 allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.  
 
       <figure class="code">
       <figcaption class="code">Indexed Contract
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelIndexedSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelBasicSupport</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
@@ -81,13 +81,13 @@ allowing for indexed lookups.  This does not support listing by index, but may b
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h3 id="expiry"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10">Expiry</a></h3>
+<h3 id="expiry"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11">Expiry</a></h3>
 
 Certain implementations will also provide support for automatic expiry of data at runtime.  This is extremely useful for temporary data as, and is used in the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/cache" title="Caching functionality with decorators for declarative use.">Caching</a> module for expiring data accordingly.
 
       <figure class="code">
       <figcaption class="code">Expiry Contract
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelExpirySupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelCrudSupport</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
@@ -271,6 +271,7 @@ To enforce that these contracts are honored, the module provides shared test sui
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/model/test/memory.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Suite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/test'</span><span class="token punctuation">;</span>
+
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MemoryModelConfig<span class="token punctuation">,</span> MemoryModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/provider/memory'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelCrudSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../test-support/crud'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelExpirySuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../test-support/expiry'</span><span class="token punctuation">;</span>

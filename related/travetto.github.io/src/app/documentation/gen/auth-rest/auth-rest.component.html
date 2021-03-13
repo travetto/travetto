@@ -22,7 +22,7 @@ The integration with the <a class="module-link" href="https://github.com/travett
  <li>Route declaration</li></ul>
 
 <h2 id="security-information-management">Security information management</h2>
-When working with framework's authentication, the user information is exposed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11">TravettoRequest</a> 
+When working with framework's authentication, the user information is exposed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a> 
 object.  The auth functionality is exposed on the request as the property <code class="item input">auth</code>.
 
       <figure class="code">
@@ -64,7 +64,7 @@ Every external framework integration relies upon the <a target="_blank" class="s
       <pre><code class="language-typescript"><span class="token operator">&lt;</span>a target<span class="token operator">=</span><span class="token string">"_blank"</span> <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"source-link"</span> href<span class="token operator">=</span><span class="token string">"https://github.com/travetto/travetto/tree/master/module/auth-rest/src/identity.ts#L9"</span><span class="token operator">></span>IdentitySource<span class="token operator">&lt;</span><span class="token operator">/</span>a<span class="token operator">></span></code></pre>     
       </figure>
 
-The only required method to be defined is the <code class="item method">authenticate</code> method.  This takes in a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L87">TravettoResponse</a>, and is responsible for:
+The only required method to be defined is the <code class="item method">authenticate</code> method.  This takes in a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88">TravettoResponse</a>, and is responsible for:
 
 <ul> <li>Returning an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L29">Identity</a> if authentication was successful</li>
  <li>Throwing an error if it failed</li>
@@ -158,7 +158,7 @@ Like the <a target="_blank" class="source-link" href="https://github.com/travett
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L21">@Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L37">@Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11">AuthContext</a> is accessible via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46">@Context</a> directly, without wiring in a request object, but is also accessible on the request object as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11">TravettoRequest</a>.auth.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L21">@Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L37">@Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11">AuthContext</a> is accessible via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46">@Context</a> directly, without wiring in a request object, but is also accessible on the request object as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a>.auth.
 
 <h2 id="passport-extension">Passport - Extension</h2>
 

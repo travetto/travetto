@@ -13,7 +13,7 @@ The currently supported features are:
 
 ## Testing
 
-The test related functionality relies upon the [Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework") module being installed, and used to define tests ([@Suite](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L12) and [@Test](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L11)).
+The test related functionality relies upon the [Testing](https://github.com/travetto/travetto/tree/master/module/test#readme "Declarative test framework") module being installed, and used to define tests ([@Suite](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L13) and [@Test](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L11)).
 
 ### Real-time Test Evaluation
 
@@ -39,7 +39,7 @@ In addition to manual invocation at a line, each test has a [CodeLens](https://c
 
 ## Application Launching
 
-While using the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support."), a common pattern is to use [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated.
+While using the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support."), a common pattern is to use [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated.
 
 The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.
 
