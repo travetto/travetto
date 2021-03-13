@@ -1,6 +1,10 @@
+import * as fs from 'fs';
+
 import { ExecUtil } from '@travetto/boot/src/exec';
 import { EnvUtil } from '@travetto/boot/src/env';
 import { CliUtil } from '@travetto/cli/src/util';
+import { AppCache, FileCache } from '@travetto/boot/src';
+import { SourceIndex } from '@travetto/boot/src/internal';
 
 /**
  * Utilities for running compilation
@@ -16,6 +20,26 @@ export class BuildUtil {
     }
 
     const output = env?.TRV_CACHE ?? '';
+    AppCache.init();
+
+    const { AppManifest } = require('@travetto/base/src/manifest');
+
+    let missing = false;
+    for (const entry of SourceIndex.findByFolders(AppManifest.source)) {
+      try {
+        if (FileCache.isOlder(AppCache.statEntry(entry.file), fs.statSync(entry.file))) {
+          missing = true;
+          break;
+        }
+      } catch {
+        missing = true;
+        break;
+      }
+    }
+
+    if (!missing) {
+      return;
+    }
 
     // Compile rest of code
     return CliUtil.waiting(`Building... ${output}`,

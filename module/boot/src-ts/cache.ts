@@ -9,10 +9,9 @@ import { PathUtil } from './path';
  */
 export class FileCache {
 
-  private static isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
+  static isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
     return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
   }
-
 
   private cache = new Map<string, fs.Stats>();
 
