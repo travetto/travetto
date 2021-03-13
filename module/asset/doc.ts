@@ -15,7 +15,7 @@ ${Header()}
 
 The asset module requires an ${Links.Stream} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${Links.Stream}, or you can roll your own.
 
-${Install('provider', `@travetto/model-{provider}`)}
+${Install('provider', '@travetto/model-{provider}')}
 
 Currently, the following are packages that provide ${Links.Stream}:
 ${List(

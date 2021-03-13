@@ -19,7 +19,7 @@ Provides a foundational structure for integrating caching at the method level.  
 
 The cache module requires an ${Links.Expiry} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${Links.Expiry}, or you can roll your own.
 
-${Install('provider', `@travetto/model-{provider}`)}
+${Install('provider', '@travetto/model-{provider}')}
 
 Currently, the following are packages that provide ${Links.Expiry}:
 ${List(

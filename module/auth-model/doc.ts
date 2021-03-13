@@ -9,7 +9,7 @@ This module provides the integration between the ${mod.Auth} module and the ${mo
 
 The asset module requires an ${Links.Crud} to provide functionality for reading and storing user information. You can use any existing providers to serve as your ${Links.Crud}, or you can roll your own.
 
-${Install('provider', `@travetto/model-{provider}`)}
+${Install('provider', '@travetto/model-{provider}')}
 
 Currently, the following are packages that provide ${Links.Crud}:
 ${List(

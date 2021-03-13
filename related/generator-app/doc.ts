@@ -16,7 +16,7 @@ $ git config --global.username <Username> #Set your git username
 
 Once installed you can invoke the scaffolding by running
 
-${Terminal('Running Generator', `$ yo @travetto/app`)}
+${Terminal('Running Generator', '$ yo @travetto/app')}
 
 The generator will ask about enabling the following features:
 
@@ -75,6 +75,4 @@ Once finished the application will reflect the modules chosen, and will be ready
 ${Terminal('Starting the App', 'npm start')}
 `;
 
-export const assemble = {
-
-}
+export const assemble = {};

@@ -25,7 +25,7 @@ export class EnvInit {
   static init({ env, watch, debug, set, append }: InitConfig) {
     process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
     const prod = /^prod(uction)$/i.test(process.env.TRV_ENV);
-    watch ??= EnvUtil.getBoolean('TRV_WATCH')
+    watch ??= EnvUtil.getBoolean('TRV_WATCH');
 
     Object.assign(process.env, {
       NODE_ENV: prod ? 'production' : 'development',

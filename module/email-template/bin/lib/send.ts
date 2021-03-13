@@ -59,12 +59,12 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
       }
 
       const key = file.replace(TemplateUtil.TPL_EXT, '').replace(/^.*?\/resources\//, '/');
-      const info = await svc.sendCompiled(key, { to, context });
+      const info = await svc.sendCompiled(key, { to, context }) as { envelope: { from: string, to: string[] }, messageId: string };
       console.log('Sent email', { to });
 
       const senderConfig = await ConfigUtil.getSenderConfig();
       return senderConfig.host?.includes('ethereal') ? {
-        url: (await import('nodemailer')).getTestMessageUrl(info as any)
+        url: (await import('nodemailer')).getTestMessageUrl(info)
       } : {};
     } catch (e) {
       console.warn('Failed to send email', { to, error: e as Error });

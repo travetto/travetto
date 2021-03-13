@@ -75,7 +75,7 @@ export class ModelQuerySuggestUtil {
    */
   static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>) {
     const config = ModelRegistry.get(cls);
-    return this.getSuggestQuery<ModelType>(cls, field as any, prefix, {
+    return this.getSuggestQuery<ModelType>(cls, field as ValidStringFields<ModelType>, prefix, {
       ...(query ?? {}),
       select: { [field]: true, ...(config.subType ? { type: true } : {}) }
     });

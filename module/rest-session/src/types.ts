@@ -5,6 +5,7 @@ import { ContextProvider } from '@travetto/rest';
  * @concrete ./internal/types:SessionDataTarget
  */
 export interface SessionData {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 

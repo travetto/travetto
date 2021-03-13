@@ -6,7 +6,7 @@ import { Model } from './src/registry/decorator';
 
 import { Links } from './support/doc-support';
 
-const ModelTypeSnippet = Snippet('ModelType', './src/types/model.ts', /export interface/, /}/)
+const ModelTypeSnippet = Snippet('ModelType', './src/types/model.ts', /export interface/, /}/);
 
 export const text = d`
 ${Header()}

@@ -38,7 +38,7 @@ export abstract class BaseRestSuite {
     return new Promise(r => setTimeout(r, n));
   }
 
-  async getOutput<T>(t: Buffer) {
+  async getOutput<T>(t: Buffer): Promise<T | string> {
     try {
       return JSON.parse(t.toString('utf8')) as T;
     } catch (e) {
@@ -84,11 +84,11 @@ export abstract class BaseRestSuite {
     return { body, headers };
   }
 
-  async request(
+  async request<T>(
     method: Request['method'] | Exclude<MethodOrAll, 'all'>,
     path: string,
     cfg: MakeRequestConfig<Buffer | string | { stream: NodeJS.ReadableStream } | Record<string, unknown>> & { throwOnError?: boolean } = {}
-  ): Promise<MakeRequestResponse<any>> {
+  ): Promise<MakeRequestResponse<T>> {
 
     method = method.toUpperCase() as Request['method'];
 
@@ -112,18 +112,18 @@ export abstract class BaseRestSuite {
     cfg.body = body;
 
     const resp = await this.support.execute(method, path, { ...cfg, body: buffer });
-    const out = await this.getOutput<any>(resp.body);
+    const out = await this.getOutput<T>(resp.body);
 
     if (resp.status >= 400) {
       if (cfg.throwOnError ?? true) {
-        const err = new AppError(out.message ?? 'Error');
+        const err = new AppError((out as unknown as Error).message ?? 'Error');
         Object.assign(err, resp.body);
         throw err;
       }
     }
     return {
       status: resp.status,
-      body: out,
+      body: out as T,
       headers: Object.fromEntries(Object.entries(resp.headers).map(([k, v]) =>
         [k.toLowerCase(), Array.isArray(v) ? v[0] : v]))
     };

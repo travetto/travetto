@@ -74,7 +74,7 @@ ${List(
 
 Additionally, the ${meth`throws`}/${meth`rejects`} assertions take in a secondary parameter to allow for specification of the type of error expected.  This can be:
 ${List(
-  `A regular expression or string to match against the error's message`,
+  "A regular expression or string to match against the error's message",
   'A class to ensure the returned error is an instance of the class passed in',
   'A function to allow for whatever custom verification of the error is needed',
 )}

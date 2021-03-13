@@ -44,7 +44,17 @@ class WhereType {
   age: number;
 }
 
-function isBool(o: unknown): o is { bool: { must: any, ['must_not']: any, ['should_not']: any } } {
+type MustType = {
+  nested?: {
+    path: unknown;
+    query: {
+      term: Record<string, number>;
+    };
+  };
+  terms: { _id: string };
+};
+
+function isBool(o: unknown): o is { bool: { must: [MustType], ['must_not']: unknown, ['should_not']: unknown } } {
   return Util.isPlainObject(o) && 'bool' in o;
 }
 

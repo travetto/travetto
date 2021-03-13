@@ -116,7 +116,7 @@ ${Code('Query language with boolean checks and exists check', 'not (age < 35) an
 A more complex query would look like:
 
 ${Code('Query language with more complex needs',
-  `user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')`, false, 'sql')}
+  "user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')", false, 'sql')}
 
 ${SubSection('Regular Expression')}
 

@@ -230,5 +230,14 @@ module.exports = {
     ],
     radix: 'error',
     'spaced-comment': ['error', 'always', { line: { markers: ['/'] } }]
-  }
+  },
+  overrides: [
+    {
+      files: ['doc.ts'],
+      rules: {
+        'max-len': 'off',
+        '@typescript-eslint/indent': 'off'
+      }
+    }
+  ]
 };

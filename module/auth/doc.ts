@@ -33,7 +33,7 @@ Comparatively, ${Identity} is defined as an authenticated user session that can 
 Overall, the structure is simple, but drives home the primary use cases of the framework.  The goals are:
 ${List(
   'Be able to identify a user uniquely',
-  `To have a reference to a user's set of permissions`,
+  'To have a reference to a user\'s set of permissions',
   'To have access to the raw principal',
   'To have access to the raw identity',
 )}

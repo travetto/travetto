@@ -132,7 +132,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       throw new SubTypeNotSupportedError(cls);
     }
     try {
-      await this.getCollection(cls).doc(id).delete({ exists: true } as any);
+      await this.getCollection(cls).doc(id).delete({ exists: true } as unknown as firebase.firestore.Precondition);
     } catch (err) {
       if (`${err.message}`.includes('NOT_FOUND')) {
         throw new NotFoundError(cls, id);

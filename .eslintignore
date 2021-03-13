@@ -4,9 +4,8 @@ api-client/
 out/
 *.d.ts
 *.spec.ts
-doc.ts
 
-module/boot/src/*.js
+module/boot/src/**/*.js
 module/boot/index.js
 related/travetto.github.io
 related/generator-app/templates

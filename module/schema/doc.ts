@@ -84,7 +84,7 @@ and the output would be a ${inp`Person`} instance with the following structure
 
 ${Execute('Sample data output after binding', 'doc/person-output.ts')}
 
-${Note(`Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.`)}
+${Note("Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.")}
 
 ${SubSection('Validation')}
 

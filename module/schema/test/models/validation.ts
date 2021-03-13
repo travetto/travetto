@@ -124,5 +124,5 @@ export class Grade {
 @Schema()
 export class Opaque {
   name: string;
-  details: any;
+  details: object;
 }

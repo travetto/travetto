@@ -5,11 +5,13 @@ import { isBulkSupported, isCrudSupported } from '../src/internal/service/common
 import { ModelType } from '../src/types/model';
 import { ModelSuite } from './suite';
 
+type ServiceClass = { serviceClass: { new(): unknown } };
+
 @ModelSuite()
 export abstract class BaseModelSuite<T> {
 
   static ifNot(pred: (svc: unknown) => boolean) {
-    return async (x: any) => !pred(new (x as any).serviceClass());
+    return async (x: unknown) => !pred(new (x as ServiceClass).serviceClass());
   }
 
   serviceClass: Class<T>;

@@ -6,6 +6,7 @@ export async function processServiceConfigs(svc: string) {
   for (const conf of svcConfigs) {
     // Do work
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const contents = await fs.promises.readFile(conf.module, 'utf8');
   }
 }

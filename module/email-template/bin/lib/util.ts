@@ -9,8 +9,8 @@ import { MarkdownUtil } from './markdown';
 import { StyleUtil } from './style';
 import { ImageUtil } from './image';
 
-type Parts = 'html' | 'text' | 'subject';
-const PARTS = (['html', 'subject', 'text'] as const);
+const PARTS = ['html', 'subject', 'text'] as const;
+type Parts = (typeof PARTS)[number];
 
 /**
  * Utilities for templating

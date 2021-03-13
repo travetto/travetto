@@ -25,7 +25,7 @@ class Person extends BaseModel {
 class SimpleNested {
   id: string;
   addresses: Address[];
-  random: any;
+  random: object;
 }
 
 @Model()

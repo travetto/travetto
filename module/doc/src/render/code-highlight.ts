@@ -2,7 +2,7 @@ type Lang = {};
 
 // TODO: Get proper typings
 const Prism = require('prismjs') as {
-  plugins: Record<string, any>;
+  plugins: { NormalizeWhitespace: Record<string, Function> };
   languages: Record<string, Lang>;
   highlight(text: string, grammar: Lang, language: string): string;
 };
