@@ -32,8 +32,8 @@ Options:
   -h, --help                             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Commands:
+  build <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
   clean <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
-  compile <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
   doc <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
   <span class="token builtin class-name">echo</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
   run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
@@ -53,7 +53,8 @@ Extending the <code class="item input">cli</code> is fairly straightforward.  It
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/cli/doc/bin/cli-echo.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> commander <span class="token keyword">from</span> <span class="token string">'commander'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BasePlugin <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../../src/plugin-base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BasePlugin <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli/src/plugin-base'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * `npx trv echo`

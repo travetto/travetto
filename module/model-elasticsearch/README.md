@@ -12,10 +12,10 @@ This module provides an [elasticsearch](https://elastic.co)-based implementation
 
 Supported featrues:
    
-   *  [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L10)
+   *  [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11)
    *  [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19)
-   *  [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L10)
-   *  [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L10)
+   *  [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11)
+   *  [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11)
    *  [Query Crud](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/facet.ts#L12)
    *  [Query](https://github.com/travetto/travetto/tree/master/module/model-query/src/service/query.ts#L10)
@@ -106,19 +106,4 @@ export class ElasticsearchModelConfig {
 ```
 
   Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/master/module/config/src/decorator.ts#L10) annotation, and so these values can be overridden using the 
-  standard [Configuration](https://github.com/travetto/travetto/tree/master/module/config#readme "Environment-aware config management using yaml files")resolution paths. 
-  
-
-## CLI - model:es-schema
-
-The module provides the ability to generate the full [elasticsearch](https://elastic.co) schema from all the various [@Model](https://github.com/travetto/travetto/tree/master/module/model/src/registry/decorator.ts#L13)s within the application.  This is useful for being able to generate the appropriate [JSON](https://www.json.org) files to define your schemas in production.
-
-**Terminal: Running schema generate**
-```bash
-$ trv model:es-schema --help
-
-Usage:  model:es-schema [options]
-
-Options:
-  -h, --help  display help for command
-```
+  standard [Configuration](https://github.com/travetto/travetto/tree/master/module/config#readme "Environment-aware config management using yaml files")resolution paths.

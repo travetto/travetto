@@ -19,7 +19,7 @@ This module provides unit testing functionality that integrates with the framewo
 
 ## Definition
 
-A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L12) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L11) decorator.  All tests intrinsically support `async`/`await`.
+A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L11) decorator.  All tests intrinsically support `async`/`await`.
 
 A simple example would be:
 
@@ -229,6 +229,7 @@ Usage:  test [options] [regexes...]
 Options:
   -f, --format <format>            Output format for test results (default: "tap")
   -c, --concurrency <concurrency>  Number of tests to run concurrently (default: "4")
+  -i, --isolated                   Isolated mode
   -m, --mode <mode>                Test run mode (default: "standard")
   -h, --help                       display help for command
 ```

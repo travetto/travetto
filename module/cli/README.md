@@ -25,8 +25,8 @@ Options:
   -h, --help                             display help for command
 
 Commands:
+  build [options]
   clean [options]
-  compile [options]
   doc [options]
   echo [options] [args...]
   run [options] [application] [args...]
@@ -44,7 +44,8 @@ Extending the `cli` is fairly straightforward.  It is built upon [commander](htt
 **Code: Echo Plugin**
 ```typescript
 import * as commander from 'commander';
-import { BasePlugin } from '../../src/plugin-base';
+import '@travetto/base';
+import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 /**
  * `npx trv echo`

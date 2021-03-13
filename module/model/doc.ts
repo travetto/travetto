@@ -1,4 +1,4 @@
-import { doc as d, mod, Section, Code, lib, SubSection, Table, Snippet, fld, Header } from '@travetto/doc';
+import { doc as d, mod, Section, Code, lib, SubSection, Table, Snippet, fld, Header, Execute } from '@travetto/doc';
 
 import { FileModelService } from './src/provider/file';
 import { MemoryModelService } from './src/provider/memory';
@@ -82,4 +82,16 @@ ${Code('Memory Service', './src/provider/memory.ts', true)}
 To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.
 
 ${Code('Memory Service Test Configuration', './test/memory.ts')}
+
+${Section('CLI - model:export')}
+
+The module provides the ability to generate an export of the model structure from all the various ${Model}s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
+
+${Execute('Running model export', 'trv', ['model:export', '--help'])}
+
+${Section('CLI - model:install')}
+
+The module provides the ability to install all the various ${Model}s within the application given the current configuration being targetted.  This is useful for being able to prepare the datastore manually.
+
+${Execute('Running model install', 'trv', ['model:install', '--help'])}
 `;

@@ -281,3 +281,33 @@ export class MemoryIndexedSuite extends ModelIndexedSuite {
   configClass = MemoryModelConfig;
 }
 ```
+
+## CLI - model:export
+
+The module provides the ability to generate an export of the model structure from all the various [@Model](https://github.com/travetto/travetto/tree/master/module/model/src/registry/decorator.ts#L13)s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
+
+**Terminal: Running model export**
+```bash
+$ trv model:export --help
+
+Usage:  model:export [options] [provider] [models...]
+
+Options:
+  -e, --env [env]  Application environment (dev|prod|<other>)
+  -h, --help       display help for command
+```
+
+## CLI - model:install
+
+The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/master/module/model/src/registry/decorator.ts#L13)s within the application given the current configuration being targetted.  This is useful for being able to prepare the datastore manually.
+
+**Terminal: Running model install**
+```bash
+$ trv model:install --help
+
+Usage:  model:install [options] [provider] [models...]
+
+Options:
+  -e, --env [env]  Application environment (dev|prod|<other>)
+  -h, --help       display help for command
+```

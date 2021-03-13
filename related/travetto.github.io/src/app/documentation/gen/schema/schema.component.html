@@ -16,7 +16,7 @@
 This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
 
 <h2 id="registration">Registration</h2>
-The registry's schema information is defined by <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> AST and only applies to classes registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/schema.ts#L11">@Schema</a> decoration. 
+The registry's schema information is defined by <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> AST and only applies to classes registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/schema.ts#L12">@Schema</a> decoration. 
 
 <h3 id="classes">Classes</h3>
 The module utilizes AST transformations to collect schema information, and facilitate the registration process without user intervention. The class can also be described using providing a:
@@ -99,7 +99,7 @@ And similarly, the <code class="item input">description</code> will be picked up
 At runtime, once a schema is registered, a programmer can utilize this structure to perform specific operations. Specifically binding and validation.
 
 <h3 id="binding">Binding</h3>
-Binding is a very simple operation, as it takes in a class registered as as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/schema.ts#L11">@Schema</a> and a JS object that will be the source of the binding. Given the schema:
+Binding is a very simple operation, as it takes in a class registered as as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/schema.ts#L12">@Schema</a> and a JS object that will be the source of the binding. Given the schema:
 
       <figure class="code">
       <figcaption class="code">Sub Schemas via Address
@@ -315,7 +315,7 @@ By default all types are mapped as-is:
  <li>url</li>
  <li>telephone</li>
  <li>postalCode</li></ul></li>
- <li>Sub-schemas as registered via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/schema.ts#L11">@Schema</a> decorators.</li></ul>
+ <li>Sub-schemas as registered via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/schema.ts#L12">@Schema</a> decorators.</li></ul>
 
 In addition to the general types, the code relies upon name matching to provide additional refinement:
 

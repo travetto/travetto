@@ -1,6 +1,5 @@
-import { doc as d, lib, mod, Section, Execute, List, Header } from '@travetto/doc';
+import { doc as d, lib, mod, List, Header } from '@travetto/doc';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc-support';
-import { Model } from '@travetto/model/src/registry/decorator';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-support';
 
 import { ElasticsearchModelConfig } from './src/config';
@@ -18,10 +17,4 @@ ${List(
 )}
 
 ${ModelCustomConfig(ElasticsearchModelConfig)}
-
-${Section('CLI - model:es-schema')}
-
-The module provides the ability to generate the full ${lib.Elasticsearch} schema from all the various ${Model}s within the application.  This is useful for being able to generate the appropriate ${lib.JSON} files to define your schemas in production.
-
-${Execute('Running schema generate', 'trv', ['model:es-schema', '--help'])}
 `;

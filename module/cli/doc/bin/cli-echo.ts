@@ -1,4 +1,5 @@
 import * as commander from 'commander';
+import '@travetto/base';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 /**

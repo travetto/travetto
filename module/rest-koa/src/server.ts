@@ -15,6 +15,24 @@ type TrvCtx = { [TravettoEntitySym]: [Request, Response] };
 type Router = kRouter<{}, TrvCtx>;
 type Routes = ReturnType<Router['routes']>;
 
+function kCustomBody() {
+  return async (ctx: koa.Context, next: koa.Next) => {
+    const contentType = ctx.headers['content-type'];
+    if (contentType) {
+      if (/json$/.test(contentType)) {
+        ctx.body = (await coBody.json(ctx));
+      } else if (/urlencoded$/.test(contentType)) {
+        ctx.body = (await coBody.form(ctx));
+      } else if (/^text\//.test(contentType)) {
+        ctx.body = (await coBody.text(ctx));
+      } else {
+        ctx.body = ctx.req;
+      }
+    }
+    await next();
+  };
+}
+
 /**
  * Koa-based Rest server
  */
@@ -36,21 +54,7 @@ export class KoaRestServer implements RestServer<koa> {
   init(): koa {
     const app = new koa();
     app.use(kCompress());
-    app.use(async (ctx, next) => {
-      const contentType = ctx.headers['content-type'];
-      if (contentType) {
-        if (/json$/.test(contentType)) {
-          ctx.body = (await coBody.json(ctx));
-        } else if (/urlencoded$/.test(contentType)) {
-          ctx.body = (await coBody.form(ctx));
-        } else if (/^text\//.test(contentType)) {
-          ctx.body = (await coBody.text(ctx));
-        } else {
-          ctx.body = ctx.req;
-        }
-      }
-      await next();
-    });
+    app.use(kCustomBody());
 
     app.keys = this.cookies.keys;
 

@@ -23,7 +23,7 @@ This module provides unit testing functionality that integrates with the framewo
 
 <h2 id="definition">Definition</h2>
 
-A test suite is a collection of individual tests.  All test suites are classes with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L12">@Suite</a> decorator. Tests are defined as methods on the suite class, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L11">@Test</a> decorator.  All tests intrinsically support <code class="item input">async</code>/<code class="item input">await</code>.
+A test suite is a collection of individual tests.  All test suites are classes with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L13">@Suite</a> decorator. Tests are defined as methods on the suite class, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L11">@Test</a> decorator.  All tests intrinsically support <code class="item input">async</code>/<code class="item input">await</code>.
 
 A simple example would be:
 
@@ -224,6 +224,7 @@ Usage:  <span class="token builtin class-name">test</span> <span class="token pu
 Options:
   -f, --format <span class="token operator">&lt;</span>format<span class="token operator">></span>            Output <span class="token function">format</span> <span class="token keyword">for</span> <span class="token builtin class-name">test</span> results <span class="token punctuation">(</span>default: <span class="token string">"tap"</span><span class="token punctuation">)</span>
   -c, --concurrency <span class="token operator">&lt;</span>concurrency<span class="token operator">></span>  Number of tests to run concurrently <span class="token punctuation">(</span>default: <span class="token string">"4"</span><span class="token punctuation">)</span>
+  -i, --isolated                   Isolated mode
   -m, --mode <span class="token operator">&lt;</span>mode<span class="token operator">></span>                Test run mode <span class="token punctuation">(</span>default: <span class="token string">"standard"</span><span class="token punctuation">)</span>
   -h, --help                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>

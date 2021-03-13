@@ -14,9 +14,10 @@ The module is an [koa](https://koajs.com/) provider for the [RESTful API](https:
 
 **Code: Customizing the Koa App**
 ```typescript
+import { Middleware } from 'koa';
+
 import { Injectable } from '@travetto/di';
 import { KoaRestServer } from '@travetto/rest-koa';
-import { Middleware } from 'koa';
 
 declare let rateLimit: (config: { windowMs: number, max: number }) => Middleware;
 
@@ -44,7 +45,7 @@ When working with an [koa](https://koajs.com/) applications, the module provides
 ```typescript
 const app = new koa();
     app.use(kCompress());
-    app.use(kBodyParser());
+    app.use(kCustomBody());
 ```
 
 ## Extension - AWS Lambda

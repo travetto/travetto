@@ -309,4 +309,38 @@ To enforce that these contracts are honored, the module provides shared test sui
   configClass <span class="token operator">=</span> MemoryModelConfig<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
+
+<h2 id="cli-model-export">CLI - model:export</h2>
+
+The module provides the ability to generate an export of the model structure from all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/registry/decorator.ts#L13">@Model</a>s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
+
+      <figure class="terminal">
+      <figcaption class="terminal">Running model export
+      
+      </figcaption>
+      <pre><code class="language-bash">$ trv model:export --help
+
+Usage:  model:export <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>provider<span class="token punctuation">]</span> <span class="token punctuation">[</span>models<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+Options:
+  -e, --env <span class="token punctuation">[</span>env<span class="token punctuation">]</span>  Application environment <span class="token punctuation">(</span>dev<span class="token operator">|</span>prod<span class="token operator">|</span><span class="token operator">&lt;</span>other<span class="token operator">></span><span class="token punctuation">)</span>
+  -h, --help       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
+
+<h2 id="cli-model-install">CLI - model:install</h2>
+
+The module provides the ability to install all the various <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/registry/decorator.ts#L13">@Model</a>s within the application given the current configuration being targetted.  This is useful for being able to prepare the datastore manually.
+
+      <figure class="terminal">
+      <figcaption class="terminal">Running model install
+      
+      </figcaption>
+      <pre><code class="language-bash">$ trv model:install --help
+
+Usage:  model:install <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>provider<span class="token punctuation">]</span> <span class="token punctuation">[</span>models<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+Options:
+  -e, --env <span class="token punctuation">[</span>env<span class="token punctuation">]</span>  Application environment <span class="token punctuation">(</span>dev<span class="token operator">|</span>prod<span class="token operator">|</span><span class="token operator">&lt;</span>other<span class="token operator">></span><span class="token punctuation">)</span>
+  -h, --help       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+      </figure>
 </div>
