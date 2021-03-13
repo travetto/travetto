@@ -17,12 +17,15 @@
   "dependencies": {
     "@arcsine/nodesh": "^1.8.3",
     "@typescript-eslint/eslint-plugin": "^4.17.0",
+    "eslint-plugin-unused-imports": "^1.1.0",
     "@typescript-eslint/parser": "^4.17.0",
     "eslint": "^7.22.0",
     "lerna": "~3.22.1",
     "passport-facebook": "^3.0.0",
     "@types/passport-facebook": "^2.1.10",
-    "@aws-sdk/client-ses": "^3.8.1"
+    "@aws-sdk/client-ses": "^3.8.1",
+    "eslint-config-travetto": "file:./bin/eslint",
+    "eslint-plugin-travetto": "file:./bin/eslint"
   },
   "devDependencies": {
     "@types/aws-serverless-express": "^3.3.3",

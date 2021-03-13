@@ -1,8 +1,8 @@
 import { Class, ClassInstance } from '@travetto/base';
+import { MethodDescriptor } from '@travetto/base/src/internal/types';
 
 import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry } from './registry';
-import { MethodDescriptor } from '@travetto/base/src/internal/types';
 
 function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Partial<InjectConfig> | undefined)[]) {
   let out = {} as T;

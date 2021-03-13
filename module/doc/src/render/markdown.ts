@@ -1,6 +1,6 @@
 import { PathUtil } from '@travetto/boot';
-import * as n from '../nodes';
 
+import * as n from '../nodes';
 import { AllChildren, RenderContext, Renderer } from './types';
 import { RenderUtil } from './util';
 

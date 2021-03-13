@@ -7,14 +7,15 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:travetto/all'
   ],
   plugins: [
     '@typescript-eslint',
-    // 'unused-imports'
+    'unused-imports',
   ],
   globals: { $argv: 'readonly', $exec: 'readonly' },
   rules: {
-    // 'unused-imports/no-unused-imports-ts': 'error',
+    'unused-imports/no-unused-imports': 'error',
     '@typescript-eslint/array-type': 'error',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',

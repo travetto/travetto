@@ -1,6 +1,6 @@
 import { Precision, Schema, Text } from '@travetto/schema';
-
 import { Model, BaseModel, ModelType } from '@travetto/model';
+
 import { Point } from '../src/model/where-clause';
 
 @Schema()

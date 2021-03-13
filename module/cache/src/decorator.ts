@@ -1,4 +1,5 @@
 import { MethodDescriptor } from '@travetto/base/src/internal/types';
+
 import { CacheService } from './service';
 import { CoreCacheConfig, CacheConfig } from './types';
 
