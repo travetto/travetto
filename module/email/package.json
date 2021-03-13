@@ -16,7 +16,7 @@
   "description": "Email transmission module.",
   "optionalPeerDependencies": {
     "nodemailer": "^6.5.0",
-    "@types/nodemailer": "^6.4.0"
+    "@types/nodemailer": "^6.4.1"
   },
   "homepage": "https://travetto.io",
   "keywords": [

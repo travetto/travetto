@@ -16,20 +16,20 @@
   },
   "dependencies": {
     "@arcsine/nodesh": "^1.8.3",
-    "@typescript-eslint/eslint-plugin": "^4.16.1",
-    "@typescript-eslint/parser": "^4.16.1",
-    "eslint": "^7.21.0",
+    "@typescript-eslint/eslint-plugin": "^4.17.0",
+    "@typescript-eslint/parser": "^4.17.0",
+    "eslint": "^7.22.0",
     "lerna": "~3.22.1",
     "passport-facebook": "^3.0.0",
-    "@types/passport-facebook": "^2.1.8",
-    "@aws-sdk/client-ses": "^3.8.0"
+    "@types/passport-facebook": "^2.1.10",
+    "@aws-sdk/client-ses": "^3.8.1"
   },
   "devDependencies": {
     "@types/aws-serverless-express": "^3.3.3",
     "@types/faker": "^5.1.7",
     "@types/mysql": "^2.15.18",
     "@types/node-forge": "^0.9.7",
-    "@types/nodemailer": "^6.4.0",
+    "@types/nodemailer": "^6.4.1",
     "@types/passport": "^1.0.6",
     "@types/pg": "^7.14.11",
     "@types/vscode": "^1.54.0",
