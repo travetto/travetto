@@ -20,9 +20,9 @@ export class Session<T extends SessionData = SessionData>  {
    * The hash of the session at load
    */
   /**
-   * The session key name
+   * The session identifer
    */
-  readonly key: string;
+  readonly id: string;
   /**
    * Session max age in ms
    */
@@ -34,11 +34,11 @@ export class Session<T extends SessionData = SessionData>  {
   /**
    * Session initial issue timestamp
    */
-  readonly issuedAt: number;
+  readonly issuedAt: Date;
   /**
    * Expires at time
    */
-  expiresAt: number | undefined;
+  expiresAt: Date | undefined;
   /**
    * What action should be taken against the session
    */
@@ -90,7 +90,7 @@ export class Session<T extends SessionData = SessionData>  {
 }
 ```
 
-A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) parameter as [Session](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L15) and [SessionData](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L7) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.d.ts#L8) as a session property.
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) parameter as [Session](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L16) and [SessionData](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L7) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.d.ts#L8) as a session property.
 
 **Code: Sample Session Usage**
 ```typescript
@@ -122,64 +122,171 @@ This usage should be comparable to [express](https://expressjs.com), [koa](https
 
 ## Configuration
 
-Session mechanics are defined by two main components, encoders and a cache source.  The encoders are provided within the module, but the stores are provided via the [@Cache](https://github.com/travetto/travetto/tree/master/module/cache/src/decorator.ts#L12) module.
+Session mechanics are defined by the underlying provider.
 
-By default, the module supplies the [RequetSessionEncoder](https://github.com/travetto/travetto/tree/master/module/rest-session/src/encoder/request.ts#L14) and the [CacheService](https://github.com/travetto/travetto/tree/master/module/cache/src/service.ts#L29) as default usage.
+### Building a Provider
 
-### Building an Encoder
+Provider are pieces that enable you manage the session state, including interaction with the request/response. This allows for sessions to be read/written to cookies, headers, url parameters, etc. Additionally, this allows for persisting session data as needed. The structure for the provider is fairly straightforward:
 
-Encoders are pieces that enable you read/write the session state from the request/response.  This allows for sessions to be read/written to cookies, headers, url parameters, etc. The structure for the encoder is fairly straightforward:
-
-**Code: Encoder structure**
+**Code: Provider structure**
 ```typescript
-/home/tim/Code/travetto/module/rest-session/src/encoder/types.ts
+/home/tim/Code/travetto/module/rest-session/src/provider/types.ts
 ```
 
-The encoder will `encode` the session into the response, as a string.  The `decode` operation will then read that string and either produce a session identifier (a string) or a fully defined [Session](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L15) object.  This allows for storing the session data externally or internal to the app, and referencing it by a session identifier.
+The provider will `encode` the session into the response.  The `decode` operation will then read the session from the request and reconstruct a fully defined [Session](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.ts#L16) object.  This allows for storing the session data externally or internal to the app.
 
-**Code: Standard Request Encoder**
+**Code: Stateless Session Provider**
 ```typescript
 import { Request, Response } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
+import { AppManifest } from '@travetto/base';
 
-import { SessionEncoder } from './types';
+import { SessionProvider } from './types';
 import { Session } from '../types';
 import { SessionConfig } from '../config';
+import { EncodeUtil } from './util';
 
 /**
- * Uses request for maintaining the session coherency with the user.
- * Primarily encode the user identifier, but relies on cookie behavior for
- * encoding the expiry time, when transport is set to cookie.
+ * Allows for transparent session behavior, sending the full session in the headers.
+ *
+ * Signed cookies provide tampering protection, where as every other avenue
  */
 @Injectable()
-export class RequetSessionEncoder implements SessionEncoder {
+export class StatelessSessionProvider implements SessionProvider {
 
   @Inject()
   config: SessionConfig;
 
+  postConstruct() {
+    if (this.config.sign === false && AppManifest.prod) {
+      console.error('Stateless support relies on full disclosure of state information.');
+      console.error('By not signing the state, the user has full ability to override the state remotely');
+    }
+  }
+
+  async sessionToText(session: Session): Promise<string> {
+    return Buffer.from(JSON.stringify(session.toJSON())).toString('base64');
+  }
+
+  async textToSession(text: string): Promise<Session> {
+    const parsed = JSON.parse(Buffer.from(text, 'base64').toString('utf8'));
+
+    if (parsed.expiresAt) {
+      parsed.expiresAt = new Date(parsed.expiresAt);
+    }
+    if (parsed.issuedAt) {
+      parsed.issuedAt = new Date(parsed.issuedAt);
+    }
+
+    return new Session(parsed);
+  }
+
   async encode(req: Request, res: Response, session: Session | null): Promise<void> {
-    if (session && session.data) {
-      if (this.config.transport === 'cookie') {
-        res.cookies.set(this.config.keyName, session.key, {
-          maxAge: !session.expiresAt ? -1 : undefined, // Session cookie by default
-          expires: session.expiresAt ? new Date(session.expiresAt) : undefined
-        });
-      } else {
-        res.setHeader(this.config.keyName, session.key);
-      }
-    } else if (this.config.transport === 'cookie' && req.cookies.get(this.config.keyName)) { // If cookie present, clear out
-      res.cookies.set(this.config.keyName, null, {
-        maxAge: 0,
-      });
+    if (session) {
+      EncodeUtil.putValue(res, this.config, session, await this.sessionToText(session));
+    } else if (EncodeUtil.canDelete(req, this.config)) {
+      EncodeUtil.putValue(res, this.config, null);
     }
     return;
   }
 
-  async decode(req: Request): Promise<string | Session | undefined> {
-    if (this.config.transport === 'cookie') {
-      return req.cookies.get(this.config.keyName);
-    } else {
-      return req.header(this.config.keyName) as string;
+  async decode(req: Request): Promise<Session | undefined> {
+    const payload = EncodeUtil.getValue(req, this.config);
+    if (payload) {
+      return await this.textToSession(payload);
+    }
+  }
+}
+```
+
+**Code: Model Session Provider**
+```typescript
+import { Request, Response } from '@travetto/rest';
+import { Inject, Injectable } from '@travetto/di';
+import { ExpiresAt, Model, ModelCrudSupport } from '@travetto/model';
+import { Text } from '@travetto/schema';
+import { AppError } from '@travetto/base';
+import { isExpirySupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
+import { EnvUtil } from '@travetto/boot';
+
+import { SessionProvider } from '../provider/types';
+import { Session } from '../types';
+import { SessionConfig } from '../config';
+import { EncodeUtil } from '../provider/util';
+
+export const SessionModelSym = Symbol.for('@trv:rest-session/model');
+
+@Model({ autoCreate: false })
+export class SessionEntry {
+  id: string;
+  @Text()
+  data: string;
+  @ExpiresAt()
+  expiresAt?: Date;
+  issuedAt: Date;
+  maxAge?: number;
+}
+
+/**
+ * Uses request for maintaining the session coherency with the user.
+ */
+@Injectable()
+export class ModelSessionProvider implements SessionProvider {
+
+  @Inject()
+  config: SessionConfig;
+
+  /**
+   * Cache for storing the session
+   */
+  @Inject(SessionModelSym)
+  modelService: ModelCrudSupport;
+
+  /**
+   * Initialize service if none defined
+   */
+  async postConstruct() {
+    if (!isExpirySupported(this.modelService)) {
+      throw new AppError(`Model service must provide expiry support, ${this.modelService.constructor.name} does not.`);
+    }
+    if (isStorageSupported(this.modelService)) {
+      if (!EnvUtil.isReadonly()) {
+        await this.modelService.createModel?.(SessionEntry);
+      }
+    }
+  }
+
+  async delete(req: Request, res: Response, id: string) {
+    await this.modelService.delete(SessionEntry, id).then(() => true, () => false);
+  }
+
+  async encode(req: Request, res: Response, session: Session | null): Promise<void> {
+    if (session) {
+      // Store update of session
+      await this.modelService.upsert(SessionEntry, SessionEntry.from({
+        ...session,
+        data: Buffer.from(JSON.stringify(session.data)).toString('base64')
+      }));
+
+      // Send updated info only if expiry changed
+      if (session.isTimeChanged()) {
+        EncodeUtil.putValue(res, this.config, session, session.id);
+      }
+    } else if (EncodeUtil.canDelete(req, this.config)) {
+      EncodeUtil.putValue(res, this.config, null);
+    }
+    return;
+  }
+
+  async decode(req: Request): Promise<Session | undefined> {
+    const id = EncodeUtil.getValue(req, this.config);
+    const record = await this.modelService.get(SessionEntry, id).catch(() => { });
+
+    if (record) {
+      return new Session({
+        ...record,
+        data: JSON.parse(Buffer.from(record.data, 'base64').toString('utf8'))
+      });
     }
   }
 }

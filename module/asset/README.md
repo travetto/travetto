@@ -97,7 +97,7 @@ export interface AssetNamingStrategy {
 }
 ```
 
-By extending this, and making it [@Injectable](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L29), the naming strategy will become the default for the system.  
+By extending this, and making it [@Injectable](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L30), the naming strategy will become the default for the system.  
 
 ## Advanced Usage
 

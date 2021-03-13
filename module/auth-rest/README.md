@@ -59,7 +59,7 @@ Every external framework integration relies upon the [IdentitySource](https://gi
 The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), and is responsible for:
 
    
-   *  Returning an [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L29) if authentication was successful
+   *  Returning an [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L30) if authentication was successful
    *  Throwing an error if it failed
    *  Returning undefined if the authentication is multi-staged and has not completed yet
 A sample auth provider would look like:
@@ -107,7 +107,7 @@ export class AppConfig {
 }
 ```
 
-The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L71) method.
+The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L72) method.
 
 ## Route Declaration
 Like the [AuthService](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/service.ts#L14), there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.

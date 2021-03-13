@@ -41,7 +41,7 @@ import * as fs from 'fs';
  * Standard file cache, with output file name normalization and truncation
  */
 export declare class FileCache {
-    private static isOlder;
+    static isOlder(cacheStat: fs.Stats, fullStat: fs.Stats): boolean;
     private cache;
     readonly cacheDir: string;
     /**

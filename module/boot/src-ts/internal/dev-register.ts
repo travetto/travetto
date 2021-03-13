@@ -1,4 +1,4 @@
-import { FileCache } from '../cache';
+import { AppCache } from '../cache';
 import { Package } from '../package';
 import { ModuleManager } from './module';
 
@@ -12,17 +12,8 @@ class DevRegister {
   static TRV_MOD = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
   static DEFAULT_MODS = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc', '@travetto/app', '@travetto/log']);
 
-  envMods: string;
-  cache: FileCache;
-
-  constructor() {
-    this.cache = new FileCache();
-    this.cache.init(true);
-    this.envMods = process.env.TRV_MODULES ?? '';
-  }
-
   /** Naive hashing */
-  naiveHash(text: string) {
+  static naiveHash(text: string) {
     let hash = 5381;
 
     for (let i = 0; i < text.length; i++) {
@@ -34,7 +25,7 @@ class DevRegister {
   }
 
   /** Gather all dependencies of the module */
-  readDeps(givenMods: Iterable<string>): DevConfig {
+  static readDeps(givenMods: Iterable<string>): DevConfig {
     const keys = [
       ...givenMods, // Givens
       ...Object.keys(Package.dependencies || {}),
@@ -68,24 +59,31 @@ class DevRegister {
     };
   }
 
-  getMods() {
+  static getMods(envMods: string) {
     const mods = new Set(DevRegister.DEFAULT_MODS);
-    this.envMods.replace(DevRegister.TRV_MOD, (_, m) => mods.add(m) && '');
+    envMods.replace(DevRegister.TRV_MOD, (_, m) => mods.add(m) && '');
     return mods;
   }
 
-  getContent() {
-    return this.cache.getOrSet(`isolated-modules.${this.naiveHash(this.envMods)}.json`,
-      () => JSON.stringify(this.readDeps(this.getMods()), null, 2)
+  static getContent(envMods: string) {
+    return AppCache.getOrSet(`isolated-modules.${this.naiveHash(envMods)}.json`,
+      () => JSON.stringify(this.readDeps(this.getMods(envMods)), null, 2)
     );
   }
 
-  run() {
-    const { entries } = JSON.parse(this.getContent()) as DevConfig;
-    process.env.TRV_MODULES = `${this.envMods.replace(DevRegister.TRV_MOD, '')},${entries.join(',')}`;
+  static run() {
+    const envMods = process.env.TRV_MODULES ?? '';
+    if (envMods) { // Is specifying modules, build out
+      // @ts-expect-error
+      AppCache.cacheDir = `.trv_cache_${this.naiveHash(process.env.TRV_MODULES)}`;
+    }
+
+    AppCache.init(true);
+    const { entries } = JSON.parse(this.getContent(envMods)) as DevConfig;
+    process.env.TRV_MODULES = `${envMods.replace(DevRegister.TRV_MOD, '')},${entries.join(',')}`;
     // Force install
     ModuleManager.init();
   }
 }
 
-new DevRegister().run();
+DevRegister.run();

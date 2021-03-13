@@ -36,7 +36,6 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
  * additional principal details.
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthContext<span class="token operator">&lt;</span>
-  <span class="token constant">U</span> <span class="token operator">=</span> <span class="token builtin">any</span><span class="token punctuation">,</span>
   <span class="token constant">I</span> <span class="token keyword">extends</span> Identity <span class="token operator">=</span> Identity<span class="token punctuation">,</span>
   <span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
@@ -65,20 +64,6 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
    */</span>
   <span class="token keyword">get</span> <span class="token function">permissionSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> ReadonlySet<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">;</span>
   <span class="token comment">/**
-   * Get principal's details
-   */</span>
-  <span class="token keyword">get</span> <span class="token function">principalDetails</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Set principal's details
-   * @param details Details to set
-   */</span>
-  <span class="token keyword">set</span> <span class="token function">principalDetails</span><span class="token punctuation">(</span>details<span class="token operator">:</span> <span class="token constant">U</span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Update the principal's details
-   * @param details Details to update
-   */</span>
-  <span class="token function">updatePrincipalDetails</span><span class="token punctuation">(</span>details<span class="token operator">:</span> <span class="token constant">U</span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
-  <span class="token comment">/**
    * Check permissions for a given principal
    *
    * @param include The list of permissions that should be included.
@@ -91,7 +76,7 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
 
 As referenced above, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L7">Principal</a> is defined as a user with respect to a security context.  This is generally understood to be the information that the application knows about a user, specifically the configuration the application has about a user.
 
-Comparatively, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L29">Identity</a> is defined as an authenticated user session that can be provided by the application or derived from some other source.  In simpler systems the identity will be equal to the principal, but in systems where you support 3rd party logins (e.g. Google/Facebook/Twitter/etc.) your identity will be external to the system.
+Comparatively, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L30">Identity</a> is defined as an authenticated user session that can be provided by the application or derived from some other source.  In simpler systems the identity will be equal to the principal, but in systems where you support 3rd party logins (e.g. Google/Facebook/Twitter/etc.) your identity will be external to the system.
 
 Overall, the structure is simple, but drives home the primary use cases of the framework.  The goals are:
 <ul> <li>Be able to identify a user uniquely</li>
@@ -100,7 +85,7 @@ Overall, the structure is simple, but drives home the primary use cases of the f
  <li>To have access to the raw identity</li></ul>
 
 <h2 id="customization">Customization</h2>
-By default, the module does not provide an implementation for the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L41">PrincipalSource</a>. By default the structure of the provider can be boiled down to:
+By default, the module does not provide an implementation for the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L42">PrincipalSource</a>. By default the structure of the provider can be boiled down to:
 
       <figure class="code">
       <figcaption class="code">Principal Source

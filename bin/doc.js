@@ -86,7 +86,10 @@ if (target && target.startsWith(root)) {
                 TRV_MODULES: (mods ?? []).join(',')
               }
             }
-
+          })
+          .$onError(() => {
+            console.log(`${title}... failed`);
+            return '';
           }),
       { concurrent: 4 }
     )

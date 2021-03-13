@@ -91,7 +91,7 @@ ${Section('Running the App')}
 
 First we must start the application:
 
-${Execute('Application Startup', 'doc/startup.sh')} ${Hidden(DocUtil.run('doc/run-server.sh', []))}
+${Execute('Application Startup', 'doc/startup.sh', [], { env: { TRV_LOG_PLAIN: '0' } })} ${Hidden(DocUtil.run('doc/run-server.sh', []))}
 
 next, let's execute ${lib.Curl} requests to interact with the new api:
 
@@ -102,6 +102,6 @@ ${Execute('Create Output', 'doc/create.sh')}
 ${Code('Listing Todos by curl', 'doc/list.sh')}
 
 ${Execute('Listing Output', 'doc/list.sh')}
-`;
 
-DocUtil.run('doc/stop-server.sh', []);
+${Hidden(DocUtil.run('doc/stop-server.sh', []))}
+`;

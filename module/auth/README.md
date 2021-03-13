@@ -31,7 +31,6 @@ import { Principal, Identity } from './types';
  * additional principal details.
  */
 export class AuthContext<
-  U = any,
   I extends Identity = Identity,
   P extends Principal = Principal> {
   /**
@@ -60,20 +59,6 @@ export class AuthContext<
    */
   get permissionSet(): ReadonlySet<string> ;
   /**
-   * Get principal's details
-   */
-  get principalDetails() ;
-  /**
-   * Set principal's details
-   * @param details Details to set
-   */
-  set principalDetails(details: U) ;
-  /**
-   * Update the principal's details
-   * @param details Details to update
-   */
-  updatePrincipalDetails(details: U) ;
-  /**
    * Check permissions for a given principal
    *
    * @param include The list of permissions that should be included.
@@ -86,7 +71,7 @@ export class AuthContext<
 
 As referenced above, a [Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L7) is defined as a user with respect to a security context.  This is generally understood to be the information that the application knows about a user, specifically the configuration the application has about a user.
 
-Comparatively, [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L29) is defined as an authenticated user session that can be provided by the application or derived from some other source.  In simpler systems the identity will be equal to the principal, but in systems where you support 3rd party logins (e.g. Google/Facebook/Twitter/etc.) your identity will be external to the system.
+Comparatively, [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L30) is defined as an authenticated user session that can be provided by the application or derived from some other source.  In simpler systems the identity will be equal to the principal, but in systems where you support 3rd party logins (e.g. Google/Facebook/Twitter/etc.) your identity will be external to the system.
 
 Overall, the structure is simple, but drives home the primary use cases of the framework.  The goals are:
    
@@ -96,7 +81,7 @@ Overall, the structure is simple, but drives home the primary use cases of the f
    *  To have access to the raw identity
 
 ## Customization
-By default, the module does not provide an implementation for the [PrincipalSource](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L41). By default the structure of the provider can be boiled down to:
+By default, the module does not provide an implementation for the [PrincipalSource](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L42). By default the structure of the provider can be boiled down to:
 
 **Code: Principal Source**
 ```typescript

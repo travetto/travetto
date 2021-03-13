@@ -44,6 +44,7 @@ Extending the `cli` is fairly straightforward.  It is built upon [commander](htt
 **Code: Echo Plugin**
 ```typescript
 import * as commander from 'commander';
+
 import '@travetto/base';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 

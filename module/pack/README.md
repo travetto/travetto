@@ -131,8 +131,8 @@ Various modules may provide customizations to the default `pack.config.ts` to al
 **Code: Rest, pack.lambda.ts**
 ```typescript
 import * as fs from 'fs';
-import { AppCache, PathUtil } from '@travetto/boot';
 
+import { AppCache, PathUtil } from '@travetto/boot';
 import type { AllConfigPartial } from '@travetto/pack/bin/operation/pack';
 
 export const config: AllConfigPartial = {

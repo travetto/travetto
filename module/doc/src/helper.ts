@@ -9,7 +9,7 @@ export function doc(values: TemplateStringsArray, ...keys: (AllType | { ᚕfile:
       n.Text(values[i] ?? ''),
       typeof el === 'string' ?
         n.Text(el) :
-        'ᚕfile' in el ? n.Ref(el.name, el.ᚕfile) : el
+        'ᚕfile' in el ? n.Ref(el.name.replace(/[$]/, ''), el.ᚕfile) : el
     )
   );
 

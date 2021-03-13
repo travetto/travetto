@@ -1,5 +1,6 @@
 import { doc as d, mod, Snippet, SnippetLink, Code, Section, SubSection, meth, lib, Header } from '@travetto/doc';
 import { Context } from '@travetto/rest/src/decorator/param';
+import '@travetto/model';
 
 import { Session } from '.';
 import { StatelessSessionProvider } from './src/provider/stateless';

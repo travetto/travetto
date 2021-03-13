@@ -8,7 +8,7 @@
 npm install @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L87) objects). 
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) objects). 
 
 ## Routes: Controller
 
@@ -88,7 +88,7 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
    *  [@Query](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L58) - Query params
    *  [@Body](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L70) - Request body (in it's entirety)
    *  [@Header](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L64) - Header values
-   *  [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11), [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L87), Session, AuthContext, etc.)
+   *  [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12), [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), Session, AuthContext, etc.)
 
 Each [@Param](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L33) can be configured to indicate:
    
@@ -263,14 +263,14 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 ## Creating and Running an App
 
-By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) at [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to execute.  
+By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) at [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to execute.  
 
 **Install: Installing app support**
 ```bash
 npm install @travett/app
 ```
 
-To customize a REST server, you may need to construct an entry point using the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L24) decorator. This could look like:
+To customize a REST server, you may need to construct an entry point using the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) decorator. This could look like:
 
 **Code: Application entry point for Rest Applications**
 ```typescript
@@ -290,7 +290,7 @@ export class SampleApp extends RestApplication {
 And using the pattern established in the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module, you would run your program using `npx trv run custom`.
 
 ## Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") by extending the [RestInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/types.ts#L11) class.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L87) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") by extending the [RestInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/types.ts#L11) class.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
@@ -336,7 +336,7 @@ export class LoggingInterceptor implements RestInterceptor {
 Currently [Asset Rest Support](https://github.com/travetto/travetto/tree/master/module/asset-rest#readme "Provides integration between the travetto asset and rest module.") is implemented in this fashion, as well as [Rest Auth](https://github.com/travetto/travetto/tree/master/module/auth-rest#readme "Rest authentication integration support for the travetto framework").
 
 ## Cookie Support
-[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L11)/[TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L87) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12)/[TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 **Code: Sample Cookie Usage**
 ```typescript
@@ -401,7 +401,7 @@ The module provides high level access for [Schema](https://github.com/travetto/t
 **Code: Using SchemaBody for POST requests**
 ```typescript
 import { Schema } from '@travetto/schema';
-import { Controller, Post, SchemaBody } from '..';
+import { Controller, Post, SchemaBody } from '@travetto/rest';
 
 @Schema()
 class User {
@@ -429,7 +429,7 @@ class UserController {
 **Code: Using SchemaQuery for GET requests**
 ```typescript
 import { Schema } from '@travetto/schema';
-import { Controller, Get, SchemaQuery } from '..';
+import { Controller, Get, SchemaQuery } from '@travetto/rest';
 
 @Schema()
 class SearchParams {
@@ -455,7 +455,7 @@ Addtionally, [@SchemaQuery](https://github.com/travetto/travetto/tree/master/mod
 
 **Code: Using SchemaQuery with a type literal**
 ```typescript
-import { Controller, Get, SchemaQuery } from '..';
+import { Controller, Get, SchemaQuery } from '@travetto/rest';
 
 type Paging = {
   page?: number;
@@ -502,9 +502,9 @@ is a shorthand that is equal to:
 ```typescript
 import { Inject } from '@travetto/di';
 import { ModelCrudSupport } from '@travetto/model';
+import { Path, Controller, SchemaBody, Get, Request, Delete, Post, Put } from '@travetto/rest';
 
 import { User } from './user';
-import { Path, Controller, SchemaBody, Get, Request, Delete, Post, Put } from '..';
 
 @Controller('/user')
 class UserController {
@@ -541,4 +541,4 @@ class UserController {
 
 ## Extension - Model Query
 
-Additionally, [Data Model Querying](https://github.com/travetto/travetto/tree/master/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L42). This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
+Additionally, [Data Model Querying](https://github.com/travetto/travetto/tree/master/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L41). This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
