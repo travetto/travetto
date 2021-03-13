@@ -99,7 +99,7 @@ class VerifyExpirationSuite {
       assert(err.message === 'Token is expired');
       assert(!!err.payload);
       assert(!!err.payload.expiredAt);
-      assert(+err.payload.expiredAt === 1437018592000);
+      assert(+(err.payload as { expiredAt: number }).expiredAt === 1437018592000);
     }
   }
 

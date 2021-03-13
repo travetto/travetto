@@ -167,8 +167,8 @@ export class SQLUtil {
   /**
    * Process a schema instance by visiting it synchronously.  This is synchronous to prevent concurrent calls from breaking
    */
-  static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T, handler: VisitHandler<any, VisitInstanceNode<any>>) {
-    const pathObj: any[] = [instance];
+  static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T, handler: VisitHandler<unknown, VisitInstanceNode<unknown>>) {
+    const pathObj: unknown[] = [instance];
     this.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: (config) => {
         const { path } = config;
@@ -178,13 +178,12 @@ export class SQLUtil {
       },
       onSub: (config) => {
         const { config: field } = config;
-        const topObj = pathObj[pathObj.length - 1];
+        const topObj = pathObj[pathObj.length - 1] as Record<string, unknown>;
         const top = config.path[config.path.length - 1];
 
         if (field.name in topObj) {
           const value = topObj[field.name];
-          const isArray = Array.isArray(value);
-          const vals = isArray ? value : [value];
+          const vals = Array.isArray(value) ? value : [value];
 
           let i = 0;
           for (const val of vals) {
@@ -202,7 +201,7 @@ export class SQLUtil {
       },
       onSimple: (config) => {
         const { config: field } = config;
-        const topObj = pathObj[pathObj.length - 1];
+        const topObj = pathObj[pathObj.length - 1] as Record<string, unknown>;
         const value = topObj[field.name];
         return handler.onSimple({ ...config, value });
       }
@@ -240,12 +239,12 @@ export class SQLUtil {
    * Get list of Order By clauses
    */
   static orderBy<T>(cls: Class<T>, sort: SortClause<T>[]): OrderBy[] {
-    return sort.map((cl: any) => {
+    return sort.map((cl: Record<string, unknown>) => {
       let schema: ClassConfig = SchemaRegistry.get(cls);
       const stack = this.classToStack(cls);
       let found: OrderBy | undefined;
       while (!found) {
-        const key = Object.keys(cl)[0] as string;
+        const key = Object.keys(cl)[0];
         const val = cl[key];
         const field = { ...schema.views[ALL_VIEW].schema[key] };
         if (Util.isPrimitive(val)) {
@@ -254,7 +253,7 @@ export class SQLUtil {
         } else {
           stack.push(field);
           schema = SchemaRegistry.get(field.type);
-          cl = val;
+          cl = val as Record<string, unknown>;
         }
       }
       return found;
@@ -264,16 +263,16 @@ export class SQLUtil {
   /**
    * Find all dependent fields via child tables
    */
-  static collectDependents<T>(dct: DialectState, parent: any, v: T[], field?: FieldConfig) {
+  static collectDependents<T>(dct: DialectState, parent: unknown, v: T[], field?: FieldConfig) {
     if (field) {
       const isSimple = SchemaRegistry.has(field.type);
       for (const el of v) {
-        const root = parent[el[dct.parentPathField.name as keyof T]];
+        const root = (parent as { [k: string]: unknown })[el[dct.parentPathField.name as keyof T] as unknown as string] as unknown as Record<string, unknown>;
         if (field.array) {
           if (!root[field.name]) {
             root[field.name] = [isSimple ? el : el[field.name as keyof T]];
           } else {
-            root[field.name].push(isSimple ? el : el[field.name as keyof T]);
+            (root[field.name] as unknown[]).push(isSimple ? el : el[field.name as keyof T]);
           }
         } else {
           root[field.name] = isSimple ? el : el[field.name as keyof T];
@@ -315,7 +314,7 @@ export class SQLUtil {
   static async getInserts<T extends ModelType>(cls: Class<T>, els: T[]): Promise<InsertWrapper[]> {
     const ins = {} as Record<string, InsertWrapper>;
 
-    const track = (stack: VisitStack[], value: any) => {
+    const track = (stack: VisitStack[], value: unknown) => {
       const key = this.buildTable(stack);
       (ins[key] = ins[key] ?? { stack, records: [] }).records.push({ stack, value });
     };

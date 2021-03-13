@@ -21,7 +21,7 @@ export class AppError extends Error {
   constructor(
     public message: string,
     public category: ErrorCategory = 'general',
-    public payload?: Record<string, any>,
+    public payload?: Record<string, unknown>,
     stack?: string
 
   ) {

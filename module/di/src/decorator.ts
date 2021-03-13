@@ -2,6 +2,7 @@ import { Class, ClassInstance } from '@travetto/base';
 
 import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry } from './registry';
+import { MethodDescriptor } from '@travetto/base/src/internal/types';
 
 function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Partial<InjectConfig> | undefined)[]) {
   let out = {} as T;
@@ -69,12 +70,12 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
  * @augments `@trv:di/InjectableFactory`
  */
 export function InjectableFactory(first?: Partial<InjectableFactoryConfig> | symbol, ...args: (Partial<InjectableFactoryConfig> | undefined)[]) {
-  return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
+  return <T extends Class>(target: T, property: string | symbol, descriptor: MethodDescriptor) => {
     const config: InjectableFactoryConfig = collapseConfig(first, ...args);
     DependencyRegistry.registerFactory({
       ...config,
       dependencies: config.dependencies?.map(x => Array.isArray(x) ? collapseConfig(...x) : collapseConfig(x)),
-      fn: descriptor.value,
+      fn: descriptor.value!,
       id: `${target.ᚕid}#${property.toString()}`
     });
   };

@@ -1,3 +1,4 @@
+import { IncomingHttpHeaders } from 'http';
 import { Response, Request } from '../types';
 
 /**
@@ -67,8 +68,8 @@ class RequestCore implements Partial<Request> {
    * Get the outbound response header
    * @param key The header to get
    */
-  header(this: Request, key: string) {
-    return this.headers![key.toLowerCase()] as string;
+  header<K extends keyof IncomingHttpHeaders>(this: Request, key: K) {
+    return this.headers[(key as string).toLowerCase() as K];
   }
 }
 

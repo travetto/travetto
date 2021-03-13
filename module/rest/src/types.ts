@@ -9,7 +9,9 @@ export type Response = TravettoResponse;
 
 export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'trace' | 'all';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type RouteHandler = (...args: any[]) => any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Filter = (req: Request, res: Response) => any;
 
 export type ServerHandle = Closeable & { on(type: 'close', callback: () => void): unknown | void };

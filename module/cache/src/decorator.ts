@@ -1,4 +1,4 @@
-import { PromisedDescriptor } from '@travetto/base/src/internal/types';
+import { MethodDescriptor } from '@travetto/base/src/internal/types';
 import { CacheService } from './service';
 import { CoreCacheConfig, CacheConfig } from './types';
 
@@ -9,7 +9,7 @@ import { CoreCacheConfig, CacheConfig } from './types';
  * @augments `@trv:cache/Cache`
  */
 export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, config: CacheConfig = {}) {
-  return function <R>(target: U, propertyKey: string, descriptor: PromisedDescriptor<R>) { };
+  return function <R extends Promise<unknown>>(target: U, propertyKey: string, descriptor: MethodDescriptor<R>) { };
 }
 
 /**
@@ -20,5 +20,5 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(field
  * @augments `@trv:cache/Evict`
  */
 export function EvictCache<F extends string, U extends Record<F, CacheService>>(field: F, config: CoreCacheConfig = {}) {
-  return function <R>(target: U, propertyKey: string, descriptor: PromisedDescriptor<R>) { };
+  return function <R extends Promise<unknown>>(target: U, propertyKey: string, descriptor: MethodDescriptor<R>) { };
 }

@@ -9,7 +9,6 @@ import { Principal, Identity } from './types';
  * additional principal details.
  */
 export class AuthContext<
-  U = any,
   I extends Identity = Identity,
   P extends Principal = Principal> {
 
@@ -62,29 +61,6 @@ export class AuthContext<
    */
   get permissionSet(): ReadonlySet<string> {
     return this.permsSet;
-  }
-
-  /**
-   * Get principal's details
-   */
-  get principalDetails() {
-    return this.principal.details as U;
-  }
-
-  /**
-   * Set principal's details
-   * @param details Details to set
-   */
-  set principalDetails(details: U) {
-    this.principal.details = details;
-  }
-
-  /**
-   * Update the principal's details
-   * @param details Details to update
-   */
-  updatePrincipalDetails(details: U) {
-    Object.assign(this.principal.details, details);
   }
 
   /**

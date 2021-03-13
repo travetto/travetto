@@ -6,7 +6,7 @@ import { VisitStack } from './util';
  */
 export interface InsertWrapper {
   stack: VisitStack[];
-  records: { stack: VisitStack[], value: any }[];
+  records: { stack: VisitStack[], value: unknown }[];
 }
 
 /**
@@ -50,7 +50,7 @@ export interface OrderBy {
  * Visitation instance
  */
 export interface VisitInstanceNode<R> extends VisitNode<R> {
-  value: any;
+  value: unknown;
 }
 
 /**

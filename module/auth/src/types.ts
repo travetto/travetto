@@ -4,7 +4,7 @@ import { AuthContext } from './context';
  * A user principal, including permissions and details, does not imply
  * authentication
  */
-export interface Principal {
+export interface Principal<D = unknown> {
   /**
    * Primary identifier for a user
    */
@@ -16,7 +16,8 @@ export interface Principal {
   /**
    * Supplemental details
    */
-  details: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  details: D;
   /**
    * Date of expiration
    */
@@ -39,5 +40,5 @@ export interface Identity extends Principal {
  * @concrete ./internal/types:PrincipalSourceTarget
  */
 export interface PrincipalSource {
-  authorize(ident: Identity): Promise<AuthContext<Principal>>;
+  authorize(ident: Identity): Promise<AuthContext>;
 }

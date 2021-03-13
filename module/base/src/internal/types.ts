@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type Promised<R> = (...params: any[]) => Promise<R>;
-export type PromisedDescriptor<R> = TypedPropertyDescriptor<Promised<R>>;
+export type MethodDescriptor<R = any, V = unknown> = TypedPropertyDescriptor<(this: V, ...params: any[]) => R>;
 export type SimpleType = { [key: string]: SimpleType } | SimpleType[] | undefined | null | string | boolean | RegExp | Date | number;
 export type SimpleObject = Record<string, SimpleType>;
 
