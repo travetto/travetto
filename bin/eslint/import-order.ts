@@ -1,23 +1,24 @@
+import type * as eslint from 'eslint';
+
 const groupTypeMap = {
   node: ['node', 'travetto', 'local'],
   travetto: ['travetto', 'local'],
   local: ['local'],
 };
 
-module.exports = {
+export const ImportOrder = {
+  create(context: eslint.Rule.RuleContext) {
 
-  create(context) {
-
-    function validateProgram({ body }) {
+    function Program({ body }: eslint.AST.Program) {
 
       if (context.getFilename().endsWith('.js')) {
         return;
       }
 
-      let groupType = '';
+      let groupType: (keyof typeof groupTypeMap) | undefined;
       let groupSize = 0;
       let contiguous = false;
-      let prev;
+      let prev: eslint.AST.Program['body'][number] | undefined;
 
       for (const node of body) {
 
@@ -31,7 +32,9 @@ module.exports = {
           const initType = decl?.init?.type;
           if (initType === 'CallExpression') {
             call = decl.init;
-          } else if (initType === 'TSAsExpression') {
+            // @ts-expect-error
+          } else if (initType === 'TSAsExpression') { // tslint support
+            // @ts-expect-error
             call = decl.init.expression;
           }
           if (call?.type === 'CallExpression' && call.callee.name === 'require') {
@@ -43,7 +46,7 @@ module.exports = {
           continue;
         }
 
-        const lineType = /^@travetto/.test(from) ? 'travetto' : /^[^.]/.test(from) ? 'node' : 'local';
+        const lineType: typeof groupType = /^@travetto/.test(from) ? 'travetto' : /^[^.]/.test(from) ? 'node' : 'local';
 
         if (/module\/[^/]+\/doc\//.test(context.getFilename()) && lineType === 'local' && from.startsWith('..')) {
           context.report({ message: 'Doc does not support parent imports', node });
@@ -55,7 +58,7 @@ module.exports = {
 
         if (groupType === lineType) {
           groupSize += 1;
-        } else if ((node.loc.end.line - prev?.loc.end.line) > 1) {
+        } else if (((node.loc?.end.line ?? 0) - (prev?.loc?.end.line ?? 0)) > 1) {
           // Newlines
           contiguous = false;
           groupSize = 0;
@@ -75,9 +78,6 @@ module.exports = {
         prev = node;
       }
     }
-
-    return {
-      Program: node => validateProgram(node),
-    };
+    return { Program };
   }
 };

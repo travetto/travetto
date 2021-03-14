@@ -1,3 +1,11 @@
+// Hack Node module system to recognize our plugin.
+const Module = require('module');
+Module._resolveFilename = (original => function (request) {
+  return request === 'eslint-plugin-travetto' ?
+    require.resolve('./bin-dist/eslint') :
+    original.apply(this, arguments);
+})(Module._resolveFilename);
+
 module.exports = {
   env: {
     es6: true,

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "sourceMap": false,
+    "moduleResolution": "node",
+    "inlineSourceMap": true,
+    "lib": [
+      "es2020"
+    ],
+    "resolveJsonModule": true,
+    "removeComments": true,
+    "noEmitOnError": false,
+    "noErrorTruncation": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "outDir": "../bin-dist"
+  }
+}

@@ -1,8 +1,6 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
-/// @ts-check
-/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
-
-const fs = require('fs');
+#!/usr/bin/env node
+import '@arcsine/nodesh';
+import * as fs from 'fs';
 
 $exec('npx', ['lerna', 'ls', '-p', '-a'])
   .$notEmpty()
@@ -19,7 +17,7 @@ $exec('npx', ['lerna', 'ls', '-p', '-a'])
           'optionalPeerDependencies'
         ]
           .$flatMap(type =>
-            Object.entries(pkg[type] || {})
+            Object.entries<string>(pkg[type] || {})
               .$map(([dep, version]) => ({ dep, type, version }))
           )
           .$filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
@@ -39,13 +37,15 @@ $exec('npx', ['lerna', 'ls', '-p', '-a'])
                   return `${dep}@(${curr} -> ${next})`;
                 }
               })
-              .$onError(x => [])
+              .$onError(() => [])
           )
           .$notEmpty()
           .$collect()
           .$map(async (all) => {
             if (all.length > 0) {
-              await JSON.stringify(pkg, undefined, 2).$stream('binary').pipe(fs.createWriteStream(`${m}/package.json`));
+              await JSON.stringify(pkg, undefined, 2)
+                .$stream('binary')
+                .pipe(fs.createWriteStream(`${m}/package.json`));
             }
             return `.${m.split(process.cwd())[1].padEnd(30)} updated ${all.length} dependencies - ${all.join(', ') || 'None'}`;
           })

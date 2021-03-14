@@ -1,8 +1,6 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
-/// @ts-check
-/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
-
-const fs = require('fs');
+#!/usr/bin/env node
+import * as fs from 'fs';
+import '@arcsine/nodesh';
 
 // Clean cache
 [

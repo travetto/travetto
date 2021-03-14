@@ -1,6 +1,5 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
-/// @ts-check
-/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
+#!/usr/bin/env node
+import '@arcsine/nodesh';
 
 [
   'module/*/package.json'.$dir()
@@ -24,7 +23,7 @@
   .$reduce((acc, [a, b]) => {
     acc[a] = b;
     return acc;
-  }, {})
+  }, {} as Record<string, unknown>)
   .$forEach(all => {
     'package.json'
       .$read()

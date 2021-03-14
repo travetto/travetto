@@ -1,6 +1,5 @@
-#!/usr/bin/env -S npx @arcsine/nodesh
-/// @ts-check
-/// <reference types="/tmp/npx-scripts/arcsine.nodesh" lib="npx-scripts" />
+#!/usr/bin/env node
+import '@arcsine/nodesh';
 
 $argv[0]
   .$dir()

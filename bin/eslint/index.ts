@@ -1,4 +1,6 @@
-module.exports = {
+import { ImportOrder } from './import-order';
+
+export = {
   configs: {
     all: {
       plugins: ['travetto'],
@@ -6,6 +8,6 @@ module.exports = {
     }
   },
   rules: {
-    'import-order': require('./import-order')
+    'import-order': ImportOrder
   }
 };

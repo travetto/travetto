@@ -9,10 +9,11 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
-    "test": "./bin/test.js",
+    "bin": "npx tsc -p bin/tsconfig.json 1> /dev/null; chmod +x bin-dist/*.js",
+    "test": "trv-test.js",
     "lint": "npx eslint --ext .js --ext .ts .",
     "lerna": "npx lerna bootstrap --hoist",
-    "init": "./bin/opt-deps.js; npm run lerna; ./bin/boot.js; ./bin/clean.js; ./bin/link.js; "
+    "init": "trv-opt-deps.js; npm run lerna; trv-boot.js; trv-clean.js; trv-link.js; "
   },
   "dependencies": {
     "@arcsine/nodesh": "^1.8.3",
@@ -20,27 +21,22 @@
     "eslint-plugin-unused-imports": "^1.1.0",
     "@typescript-eslint/parser": "^4.17.0",
     "eslint": "^7.22.0",
+    "@types/eslint": "^7.2.7",
     "lerna": "~3.22.1",
     "passport-facebook": "^3.0.0",
     "@types/passport-facebook": "^2.1.10",
-    "@aws-sdk/client-ses": "^3.8.1",
-    "eslint-config-travetto": "file:./bin/eslint",
-    "eslint-plugin-travetto": "file:./bin/eslint"
+    "@aws-sdk/client-ses": "^3.8.1"
   },
   "devDependencies": {
     "@types/aws-serverless-express": "^3.3.3",
-    "@types/faker": "^5.1.7",
     "@types/mysql": "^2.15.18",
-    "@types/node-forge": "^0.9.7",
     "@types/nodemailer": "^6.4.1",
     "@types/passport": "^1.0.6",
     "@types/pg": "^7.14.11",
     "@types/vscode": "^1.54.0",
     "aws-lambda-fastify": "1.4.4",
     "aws-serverless-express": "^3.4.0",
-    "faker": "^5.4.0",
     "mysql": "^2.18.1",
-    "node-forge": "^0.10.0",
     "nodemailer": "^6.5.0",
     "passport": "^0.4.1",
     "pg": "^8.5.1"
