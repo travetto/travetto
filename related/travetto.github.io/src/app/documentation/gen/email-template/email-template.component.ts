@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-email-template',
   templateUrl: './email-template.component.html',
-  styleUrls: ['./email-template.component.scss']
+  styleUrls: []
 })
 export class EmailTemplateComponent implements OnInit {
 

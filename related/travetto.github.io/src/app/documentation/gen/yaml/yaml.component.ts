@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-yaml',
   templateUrl: './yaml.component.html',
-  styleUrls: ['./yaml.component.scss']
+  styleUrls: []
 })
 export class YamlComponent implements OnInit {
 

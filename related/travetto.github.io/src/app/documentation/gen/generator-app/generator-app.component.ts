@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-generator-app',
   templateUrl: './generator-app.component.html',
-  styleUrls: ['./generator-app.component.scss']
+  styleUrls: []
 })
 export class GeneratorAppComponent implements OnInit {
 

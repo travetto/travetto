@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-openapi',
   templateUrl: './openapi.component.html',
-  styleUrls: ['./openapi.component.css']
+  styleUrls: []
 })
 export class OpenapiComponent implements OnInit {
 

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-rest-fastify',
   templateUrl: './rest-fastify.component.html',
-  styleUrls: ['./rest-fastify.component.scss']
+  styleUrls: []
 })
 export class RestFastifyComponent implements OnInit {
 

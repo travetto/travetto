@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-model-dynamodb',
   templateUrl: './model-dynamodb.component.html',
-  styleUrls: ['./model-dynamodb.component.scss']
+  styleUrls: []
 })
 export class ModelDynamodbComponent implements OnInit {
 

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-cli',
   templateUrl: './cli.component.html',
-  styleUrls: ['./cli.component.scss']
+  styleUrls: []
 })
 export class CliComponent implements OnInit {
 

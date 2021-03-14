@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-jwt',
   templateUrl: './jwt.component.html',
-  styleUrls: ['./jwt.component.scss']
+  styleUrls: []
 })
 export class JwtComponent implements OnInit {
 
