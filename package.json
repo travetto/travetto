@@ -29,14 +29,18 @@
   },
   "devDependencies": {
     "@types/aws-serverless-express": "^3.3.3",
+    "@types/faker": "^5.1.7",
     "@types/mysql": "^2.15.18",
+    "@types/node-forge": "^0.9.7",
     "@types/nodemailer": "^6.4.1",
     "@types/passport": "^1.0.6",
     "@types/pg": "^7.14.11",
     "@types/vscode": "^1.54.0",
     "aws-lambda-fastify": "1.4.4",
     "aws-serverless-express": "^3.4.0",
+    "faker": "^5.4.0",
     "mysql": "^2.18.1",
+    "node-forge": "^0.10.0",
     "nodemailer": "^6.5.0",
     "passport": "^0.4.1",
     "pg": "^8.5.1"
