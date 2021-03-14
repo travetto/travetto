@@ -26,6 +26,7 @@ export class DocPlugin extends BasePlugin {
         TRV_RESOURCES: 'doc/resources'
       },
       set: {
+        TRV_COLOR: '0',
         TRV_LOG_PLAIN: '1'
       }
     });

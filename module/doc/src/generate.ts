@@ -52,6 +52,9 @@ export class GenerateUtil {
 <!-- Please modify ${file.replace(/.*travetto\//, `${gitRoot}/`)} and execute "npm run docs" to rebuild -->`;
 
     const doc: DocumentContext = await import(file);
+
+    await new Promise(r => setTimeout(r, 10));
+
     // Build content
     const toc = n.Ordered(
       ...(doc.text as AllTypeMap['Group']).nodes

@@ -16,7 +16,7 @@
 This module provides the high-level backdrop for managing security principals.  The goal of this module is to be a centralized location for various security frameworks to plug into.  The primary contributions are:
 
 <ul> <li>Interfaces for standard security primitive</li>
- <li>Patterns for producing a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L7">Principal</a></li>
+ <li>Patterns for producing a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L8">Principal</a></li>
  <li>Common security-related utilities for <ul> <li>Checking permissions</li>
  <li>Generating passwords</li></ul></li></ul>
 
@@ -74,9 +74,9 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-As referenced above, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L7">Principal</a> is defined as a user with respect to a security context.  This is generally understood to be the information that the application knows about a user, specifically the configuration the application has about a user.
+As referenced above, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L8">Principal</a> is defined as a user with respect to a security context.  This is generally understood to be the information that the application knows about a user, specifically the configuration the application has about a user.
 
-Comparatively, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L30">Identity</a> is defined as an authenticated user session that can be provided by the application or derived from some other source.  In simpler systems the identity will be equal to the principal, but in systems where you support 3rd party logins (e.g. Google/Facebook/Twitter/etc.) your identity will be external to the system.
+Comparatively, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L34">Identity</a> is defined as an authenticated user session that can be provided by the application or derived from some other source.  In simpler systems the identity will be equal to the principal, but in systems where you support 3rd party logins (e.g. Google/Facebook/Twitter/etc.) your identity will be external to the system.
 
 Overall, the structure is simple, but drives home the primary use cases of the framework.  The goals are:
 <ul> <li>Be able to identify a user uniquely</li>
@@ -85,7 +85,7 @@ Overall, the structure is simple, but drives home the primary use cases of the f
  <li>To have access to the raw identity</li></ul>
 
 <h2 id="customization">Customization</h2>
-By default, the module does not provide an implementation for the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L42">PrincipalSource</a>. By default the structure of the provider can be boiled down to:
+By default, the module does not provide an implementation for the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L46">PrincipalSource</a>. By default the structure of the provider can be boiled down to:
 
       <figure class="code">
       <figcaption class="code">Principal Source

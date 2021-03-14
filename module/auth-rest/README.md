@@ -59,7 +59,7 @@ Every external framework integration relies upon the [IdentitySource](https://gi
 The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), and is responsible for:
 
    
-   *  Returning an [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L30) if authentication was successful
+   *  Returning an [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L34) if authentication was successful
    *  Throwing an error if it failed
    *  Returning undefined if the authentication is multi-staged and has not completed yet
 A sample auth provider would look like:

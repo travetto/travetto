@@ -2,7 +2,8 @@ import {
   doc as d, RawHeader, lib, mod, List, Section,
   Terminal, fld, pth, Code, SnippetLink, Execute, Ref,
   TableOfContents,
-  DocRunUtil
+  DocRunUtil,
+  Future
 } from '@travetto/doc';
 import { Model } from '@travetto/model';
 
@@ -10,15 +11,19 @@ const ModelType = SnippetLink('ModelType', '@travetto/model/src/types/model.ts',
 
 process.env.TRV_LOG_PLAIN = '0';
 
-const cmd = DocRunUtil.runBackground('trv', ['run', 'rest']);
+const cmd = DocRunUtil.runBackground('trv', ['run', 'rest'], {
+  env: {
+    REST_LOGROUTES_DENY: '*'
+  }
+});
 const startupBuffer: Buffer[] = [];
-cmd.process.stdout?.on('data', (v) => startupBuffer.push(Buffer.from(v)));
+
+cmd.process.stdout?.on('data', (v) =>
+  startupBuffer.push(Buffer.from(v)));
 
 // Wait 3 seconds
 const start = Date.now();
 while ((Date.now() - start) < 3000) { }
-
-const startupOutput = Buffer.concat(startupBuffer).toString('utf8');
 
 export const toc = 'Overview';
 export const text = d`
@@ -102,7 +107,7 @@ ${Section('Running the App')}
 
 First we must start the application:
 
-${Code('Application Startup', startupOutput)} 
+${Terminal('Application Startup', Future(() => DocRunUtil.cleanRunOutput(Buffer.concat(startupBuffer).toString('utf8'), {})))} 
 
 next, let's execute ${lib.Curl} requests to interact with the new api:
 

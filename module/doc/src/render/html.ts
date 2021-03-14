@@ -21,6 +21,7 @@ export const Html: Renderer = {
         .replace(/^https?:\/\/travetto.dev\//g, '/')
         .replace(/^.*@travetto\//, `${context.gitRoot}/module/`)}${ctx && ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
+      case 'future': return recurse(c.content());
       case 'toc': {
         const content = recurse(n.Group([n.SubSection(c.title), context.toc]));
         return `<div class="toc"><div class="inner">${content}</div></div>`;

@@ -19,12 +19,13 @@ function $c(val: string | DocNode | undefined): DocNode | undefined {
 }
 const $n = <T extends string, U extends Record<string, unknown>>(t: T, vals: U) => ({ _type: t, ...vals } as { _type: T } & U);
 
+export const Future = (cb: () => Content) => $n('future', { content: () => $c(cb()) });
 export const Strong = (content: Content) => $n('strong', { content: $c(content) });
 export const Group = (node: DocNode | DocNode[]) => $n('group', { nodes: [node].flat() });
 export const Method = (content: Content) => $n('method', { content: $c(content) });
 export const Command = (script: Content, ...args: Content[]) => $n('command', { content: $c([script, ...args].join(' ')) });
-export const Terminal = (title: Content, script: string) => $n('terminal', { title: $c(title), content: $c(script), language: 'bash' });
-export const Hidden = (content: any) => $n('hidden', { content: $c('') });
+export const Terminal = (title: Content, script: Content) => $n('terminal', { title: $c(title), content: $c(script), language: 'bash' });
+export const Hidden = (_: unknown) => $n('hidden', { content: $c('') });
 export const Input = (content: Content) => $n('input', { content: $c(content) });
 export const Path = (content: Content) => $n('path', { content: $c(content) });
 export const Class = (content: Content) => $n('class', { content: $c(content) });

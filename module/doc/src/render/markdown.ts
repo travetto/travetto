@@ -17,6 +17,7 @@ export const Markdown: Renderer = {
         .replace(ROOT, context.gitRoot)
         .replace('@travetto/', `${context.gitRoot}/module/`)}${ctx.line ? `#L${ctx.line}` : ''}`;
     switch (c._type) {
+      case 'future': return recurse(c.content());
       case 'toc': return recurse(n.Group([n.SubSection(c.title), context.toc]));
       case 'strong': return `**${recurse(c.content)}**`;
       case 'group': return c.nodes.map(cc => recurse(cc,)).join('');

@@ -143,11 +143,7 @@ The final template will render as:
 ```bash
 $ node @travetto/base/bin/main ./doc/render.ts 
 
-<!DOCTYPE html><html><head>
-
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-  <meta name="viewport" content="width=device-width"/>
-</head>
+<!DOCTYPE html><html>
 
 <body>
 
@@ -194,23 +190,4 @@ $ node @travetto/base/bin/main ./doc/render.ts
   </tbody></table>
 
 </body></html>
-Error on shutdown {
-  error: TypeError: self.emit is not a function
-      at callback (/home/tim/Code/travetto/node_modules/batch/index.js:145:12)
-      at module.exports (/home/tim/Code/travetto/node_modules/style-data/index.js:95:5)
-      at /home/tim/Code/travetto/node_modules/extract-css/index.js:15:9
-      at next (/home/tim/Code/travetto/node_modules/batch/index.js:129:7)
-      at Batch.end (/home/tim/Code/travetto/node_modules/batch/index.js:169:5)
-      at module.exports (/home/tim/Code/travetto/node_modules/extract-css/index.js:25:11)
-      at /home/tim/Code/travetto/node_modules/inline-css/lib/inlineContent.js:12:9
-      at new Promise (<anonymous>)
-      at inlineContent (/home/tim/Code/travetto/node_modules/inline-css/lib/inlineContent.js:5:12)
-      at /home/tim/Code/travetto/node_modules/inline-css/index.js:26:5
-      at new Promise (<anonymous>)
-      at module.exports (/home/tim/Code/travetto/node_modules/inline-css/index.js:3:37)
-      at Function.applyStyling (./bin/lib/style.ts:43:19)
-      at Function.compile (./bin/lib/util.ts:90:12)
-      at Function.compileToDisk (./bin/lib/util.ts:53:22)
-      at Object.main (./doc/render.ts:6:15)
-}
 ```

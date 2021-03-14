@@ -11,7 +11,8 @@ if (!global[sym]) {
   }
 
   // Remove to prevent __proto__ pollution in JSON
-  delete Object.prototype.__proto__;
+  const og = Object.prototype.__proto__;
+  Object.defineProperty(Object.prototype, '__proto__', { configurable: false, enumerable: false, get: () => og });
 
   require('@travetto/boot/src/internal/module').ModuleManager.init();
 }

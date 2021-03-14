@@ -166,20 +166,20 @@ Configured {
     local: [ 'doc' ],
     excludeModules: Set(3) { '@travetto/cli', '@travetto/doc', '@travetto/boot' },
     dynamicModules: {
-      '@travetto/base': '/home/tim/Code/travetto/module/base',
-      '@travetto/boot': '/home/tim/Code/travetto/module/boot',
-      '@travetto/cli': '/home/tim/Code/travetto/module/cli',
-      '@travetto/compiler': '/home/tim/Code/travetto/module/compiler',
-      '@travetto/config': '/home/tim/Code/travetto/module/config',
-      '@travetto/di': '/home/tim/Code/travetto/module/di',
-      '@travetto/doc': '/home/tim/Code/travetto/module/doc',
-      '@travetto/log': '/home/tim/Code/travetto/module/log',
-      '@travetto/registry': '/home/tim/Code/travetto/module/registry',
-      '@travetto/test': '/home/tim/Code/travetto/module/test',
-      '@travetto/transformer': '/home/tim/Code/travetto/module/transformer',
-      '@travetto/watch': '/home/tim/Code/travetto/module/watch',
-      '@travetto/worker': '/home/tim/Code/travetto/module/worker',
-      '@travetto/yaml': '/home/tim/Code/travetto/module/yaml'
+      '@travetto/base': '@trv:base',
+      '@travetto/boot': '@trv:boot',
+      '@travetto/cli': '@trv:cli',
+      '@travetto/compiler': '@trv:compiler',
+      '@travetto/config': '@trv:config',
+      '@travetto/di': '@trv:di',
+      '@travetto/doc': '@trv:doc',
+      '@travetto/log': '@trv:log',
+      '@travetto/registry': '@trv:registry',
+      '@travetto/test': '@trv:test',
+      '@travetto/transformer': '@trv:transformer',
+      '@travetto/watch': '@trv:watch',
+      '@travetto/worker': '@trv:worker',
+      '@travetto/yaml': '@trv:yaml'
     }
   },
   config: {}
@@ -202,7 +202,7 @@ Failed application run
     at $ApplicationRegistry.resolveParameters (./src/registry.ts:45:24)  
     at Function.run (./bin/lib/run.ts:36:31)  
     at AppRunPlugin.action (./bin/cli-run.ts:63:11)  
-    at AppRunPlugin.runAction (/home/tim/Code/travetto/module/cli/src/plugin-base.ts:72:12)
+    at AppRunPlugin.runAction (@trv:cli/src/plugin-base.ts:72:12)
 ```
 
 The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) 

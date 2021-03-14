@@ -140,11 +140,11 @@ The provider will `encode` the session into the response.  The `decode` operatio
 import { Request, Response } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
 import { AppManifest } from '@travetto/base';
+import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 
 import { SessionProvider } from './types';
 import { Session } from '../types';
 import { SessionConfig } from '../config';
-import { EncodeUtil } from './util';
 
 /**
  * Allows for transparent session behavior, sending the full session in the headers.
@@ -157,11 +157,14 @@ export class StatelessSessionProvider implements SessionProvider {
   @Inject()
   config: SessionConfig;
 
+  accessor: ValueAccessor;
+
   postConstruct() {
     if (this.config.sign === false && AppManifest.prod) {
       console.error('Stateless support relies on full disclosure of state information.');
       console.error('By not signing the state, the user has full ability to override the state remotely');
     }
+    this.accessor = new ValueAccessor(this.config.keyName, this.config.transport);
   }
 
   async sessionToText(session: Session): Promise<string> {
@@ -183,15 +186,15 @@ export class StatelessSessionProvider implements SessionProvider {
 
   async encode(req: Request, res: Response, session: Session | null): Promise<void> {
     if (session) {
-      EncodeUtil.putValue(res, this.config, session, await this.sessionToText(session));
-    } else if (EncodeUtil.canDelete(req, this.config)) {
-      EncodeUtil.putValue(res, this.config, null);
+      this.accessor.writeValue(res, await this.sessionToText(session), { expires: session?.expiresAt });
+    } else {
+      this.accessor.writeValue(res, null, { expires: new Date() });
     }
     return;
   }
 
   async decode(req: Request): Promise<Session | undefined> {
-    const payload = EncodeUtil.getValue(req, this.config);
+    const payload = this.accessor.readValue(req);
     if (payload) {
       return await this.textToSession(payload);
     }
@@ -208,11 +211,11 @@ import { Text } from '@travetto/schema';
 import { AppError } from '@travetto/base';
 import { isExpirySupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 import { EnvUtil } from '@travetto/boot';
+import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 
 import { SessionProvider } from '../provider/types';
 import { Session } from '../types';
 import { SessionConfig } from '../config';
-import { EncodeUtil } from '../provider/util';
 
 export const SessionModelSym = Symbol.for('@trv:rest-session/model');
 
@@ -242,6 +245,8 @@ export class ModelSessionProvider implements SessionProvider {
   @Inject(SessionModelSym)
   modelService: ModelCrudSupport;
 
+  accessor: ValueAccessor;
+
   /**
    * Initialize service if none defined
    */
@@ -254,6 +259,7 @@ export class ModelSessionProvider implements SessionProvider {
         await this.modelService.createModel?.(SessionEntry);
       }
     }
+    this.accessor = new ValueAccessor(this.config.keyName, this.config.transport);
   }
 
   async delete(req: Request, res: Response, id: string) {
@@ -270,23 +276,25 @@ export class ModelSessionProvider implements SessionProvider {
 
       // Send updated info only if expiry changed
       if (session.isTimeChanged()) {
-        EncodeUtil.putValue(res, this.config, session, session.id);
+        this.accessor.writeValue(res, session.id, { expires: session.expiresAt });
       }
-    } else if (EncodeUtil.canDelete(req, this.config)) {
-      EncodeUtil.putValue(res, this.config, null);
+    } else {
+      this.accessor.writeValue(res, null, { expires: new Date() });
     }
     return;
   }
 
   async decode(req: Request): Promise<Session | undefined> {
-    const id = EncodeUtil.getValue(req, this.config);
-    const record = await this.modelService.get(SessionEntry, id).catch(() => { });
+    const id = this.accessor.readValue(req);
+    if (id) {
+      const record = await this.modelService.get(SessionEntry, id).catch(() => { });
 
-    if (record) {
-      return new Session({
-        ...record,
-        data: JSON.parse(Buffer.from(record.data, 'base64').toString('utf8'))
-      });
+      if (record) {
+        return new Session({
+          ...record,
+          data: JSON.parse(Buffer.from(record.data, 'base64').toString('utf8'))
+        });
+      }
     }
   }
 }

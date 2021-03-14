@@ -154,11 +154,7 @@ The final template will render as:
       </figcaption>
       <pre><code class="language-bash">$ node @travetto/base/bin/main ./doc/render.ts
 
-<span class="token operator">&lt;</span><span class="token operator">!</span>DOCTYPE html<span class="token operator">></span><span class="token operator">&lt;</span>html<span class="token operator">></span><span class="token operator">&lt;</span>head<span class="token operator">></span>
-
-  <span class="token operator">&lt;</span>meta http-equiv<span class="token operator">=</span><span class="token string">"Content-Type"</span> <span class="token assign-left variable">content</span><span class="token operator">=</span><span class="token string">"text/html; charset=utf-8"</span>/<span class="token operator">></span>
-  <span class="token operator">&lt;</span>meta <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token string">"viewport"</span> <span class="token assign-left variable">content</span><span class="token operator">=</span><span class="token string">"width=device-width"</span>/<span class="token operator">></span>
-<span class="token operator">&lt;</span>/head<span class="token operator">></span>
+<span class="token operator">&lt;</span><span class="token operator">!</span>DOCTYPE html<span class="token operator">></span><span class="token operator">&lt;</span>html<span class="token operator">></span>
 
 <span class="token operator">&lt;</span>body<span class="token operator">></span>
 
@@ -204,25 +200,6 @@ The final template will render as:
     <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
   <span class="token operator">&lt;</span>/tbody<span class="token operator">></span><span class="token operator">&lt;</span>/table<span class="token operator">></span>
 
-<span class="token operator">&lt;</span>/body<span class="token operator">></span><span class="token operator">&lt;</span>/html<span class="token operator">></span>
-Error on <span class="token function">shutdown</span> <span class="token punctuation">{{'{'}}</span>
-  error: TypeError: self.emit is not a <span class="token keyword">function</span>
-      at callback <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/batch/index.js:145:12<span class="token punctuation">)</span>
-      at module.exports <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/style-data/index.js:95:5<span class="token punctuation">)</span>
-      at /home/tim/Code/travetto/node_modules/extract-css/index.js:15:9
-      at next <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/batch/index.js:129:7<span class="token punctuation">)</span>
-      at Batch.end <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/batch/index.js:169:5<span class="token punctuation">)</span>
-      at module.exports <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/extract-css/index.js:25:11<span class="token punctuation">)</span>
-      at /home/tim/Code/travetto/node_modules/inline-css/lib/inlineContent.js:12:9
-      at new Promise <span class="token punctuation">(</span><span class="token operator">&lt;</span>anonymous<span class="token operator">></span><span class="token punctuation">)</span>
-      at inlineContent <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/inline-css/lib/inlineContent.js:5:12<span class="token punctuation">)</span>
-      at /home/tim/Code/travetto/node_modules/inline-css/index.js:26:5
-      at new Promise <span class="token punctuation">(</span><span class="token operator">&lt;</span>anonymous<span class="token operator">></span><span class="token punctuation">)</span>
-      at module.exports <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/inline-css/index.js:3:37<span class="token punctuation">)</span>
-      at Function.applyStyling <span class="token punctuation">(</span>./bin/lib/style.ts:43:19<span class="token punctuation">)</span>
-      at Function.compile <span class="token punctuation">(</span>./bin/lib/util.ts:90:12<span class="token punctuation">)</span>
-      at Function.compileToDisk <span class="token punctuation">(</span>./bin/lib/util.ts:53:22<span class="token punctuation">)</span>
-      at Object.main <span class="token punctuation">(</span>./doc/render.ts:6:15<span class="token punctuation">)</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
+<span class="token operator">&lt;</span>/body<span class="token operator">></span><span class="token operator">&lt;</span>/html<span class="token operator">></span></code></pre>     
       </figure>
 </div>

@@ -1,7 +1,7 @@
 # Bash Autocompletion
 _travetto()
 {
-    local trv="${PWD}/node_modules/.bin/travetto";
+    local trv="${PWD}/node_modules/.bin/trv";
     local cur=${COMP_WORDS[COMP_CWORD]}    
     if [ -f "$trv" ]; then
       local words=`${trv} complete ${COMP_WORDS[@]:1}`

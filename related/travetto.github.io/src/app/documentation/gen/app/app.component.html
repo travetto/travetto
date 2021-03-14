@@ -181,20 +181,20 @@ Configured <span class="token punctuation">{{'{'}}</span>
     local: <span class="token punctuation">[</span> <span class="token string">'doc'</span> <span class="token punctuation">]</span>,
     excludeModules: Set<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token string">'@travetto/cli'</span>, <span class="token string">'@travetto/doc'</span>, <span class="token string">'@travetto/boot'</span> <span class="token punctuation">{{'}'}}</span>,
     dynamicModules: <span class="token punctuation">{{'{'}}</span>
-      <span class="token string">'@travetto/base'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/base'</span>,
-      <span class="token string">'@travetto/boot'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/boot'</span>,
-      <span class="token string">'@travetto/cli'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/cli'</span>,
-      <span class="token string">'@travetto/compiler'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/compiler'</span>,
-      <span class="token string">'@travetto/config'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/config'</span>,
-      <span class="token string">'@travetto/di'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/di'</span>,
-      <span class="token string">'@travetto/doc'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/doc'</span>,
-      <span class="token string">'@travetto/log'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/log'</span>,
-      <span class="token string">'@travetto/registry'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/registry'</span>,
-      <span class="token string">'@travetto/test'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/test'</span>,
-      <span class="token string">'@travetto/transformer'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/transformer'</span>,
-      <span class="token string">'@travetto/watch'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/watch'</span>,
-      <span class="token string">'@travetto/worker'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/worker'</span>,
-      <span class="token string">'@travetto/yaml'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/Code/travetto/module/yaml'</span>
+      <span class="token string">'@travetto/base'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:base'</span>,
+      <span class="token string">'@travetto/boot'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:boot'</span>,
+      <span class="token string">'@travetto/cli'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:cli'</span>,
+      <span class="token string">'@travetto/compiler'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:compiler'</span>,
+      <span class="token string">'@travetto/config'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:config'</span>,
+      <span class="token string">'@travetto/di'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:di'</span>,
+      <span class="token string">'@travetto/doc'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:doc'</span>,
+      <span class="token string">'@travetto/log'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:log'</span>,
+      <span class="token string">'@travetto/registry'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:registry'</span>,
+      <span class="token string">'@travetto/test'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:test'</span>,
+      <span class="token string">'@travetto/transformer'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:transformer'</span>,
+      <span class="token string">'@travetto/watch'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:watch'</span>,
+      <span class="token string">'@travetto/worker'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:worker'</span>,
+      <span class="token string">'@travetto/yaml'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:yaml'</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
@@ -219,7 +219,7 @@ Failed application run
     at <span class="token variable">$ApplicationRegistry</span>.resolveParameters <span class="token punctuation">(</span>./src/registry.ts:45:24<span class="token punctuation">)</span>
     at Function.run <span class="token punctuation">(</span>./bin/lib/run.ts:36:31<span class="token punctuation">)</span>
     at AppRunPlugin.action <span class="token punctuation">(</span>./bin/cli-run.ts:63:11<span class="token punctuation">)</span>
-    at AppRunPlugin.runAction <span class="token punctuation">(</span>/home/tim/Code/travetto/module/cli/src/plugin-base.ts:72:12<span class="token punctuation">)</span></code></pre>     
+    at AppRunPlugin.runAction <span class="token punctuation">(</span>@trv:cli/src/plugin-base.ts:72:12<span class="token punctuation">)</span></code></pre>     
       </figure>
 
 The types are inferred from the <code class="item method">.run()</code> method parameters, but can be overridden in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25">@Application</a> 
