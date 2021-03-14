@@ -1,33 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { spawnSync } from 'child_process';
 
 import { FsUtil, PathUtil } from '@travetto/boot';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
-
-class DocState {
-  baseline = new Date(`${new Date().getFullYear()}-03-14T00:00:00.000`).getTime();
-  _s = 37;
-  ids: Record<string, string> = {};
-
-  rng() {
-    this._s = Math.sin(this._s) * 10000;
-    return this._s - Math.floor(this._s);
-  }
-
-  getDate(d: string) {
-    this.baseline += this.rng() * 1000;
-    return new Date(this.baseline).toISOString();
-  }
-
-  getId(id: string) {
-    if (!this.ids[id]) {
-      this.ids[id] = ' '.repeat(id.length).split('').map(x => Math.trunc(this.rng() * 16).toString(16)).join('');
-    }
-    return this.ids[id];
-  }
-}
 
 export class DocUtil {
   static DEC_CACHE: Record<string, boolean> = {};
@@ -37,41 +13,6 @@ export class DocUtil {
     yml: 'yaml',
     sh: 'bash',
   };
-
-  static DOC_STATE = new DocState();
-
-  static run(cmd: string, args: string[], config: { env?: Record<string, string>, cwd?: string } = {}) {
-    try {
-      const env = {
-        ...Object.fromEntries(Object.entries(process.env).filter(([a, b]) => a.startsWith('TRV') || a === 'PATH')),
-        TRV_DEBUG: '0',
-        ...(config.env ?? {})
-      };
-      const res = spawnSync(cmd, args, {
-        encoding: 'utf8',
-        cwd: config.cwd,
-        shell: '/bin/bash',
-        maxBuffer: 1024 * 1024 * 20,
-        stdio: 'pipe',
-        env
-      });
-
-      if (res.error) {
-        throw res.error;
-      }
-
-      const output = res.stdout.toString() || res.stderr.toString();
-      return output.trim()
-        // eslint-disable-next-line no-control-regex
-        .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
-        .replace(new RegExp(PathUtil.cwd, 'g'), '.')
-        .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.DOC_STATE.getDate.bind(this.DOC_STATE))
-        .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.DOC_STATE.getId.bind(this.DOC_STATE))
-        .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);
-    } catch (err) {
-      return err.message;
-    }
-  }
 
   static resolveFile(file: string) {
     if (file.startsWith('@')) {

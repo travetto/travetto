@@ -6,11 +6,11 @@ import { Text } from '@travetto/schema';
 import { AppError } from '@travetto/base';
 import { isExpirySupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 import { EnvUtil } from '@travetto/boot';
+import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 
 import { SessionProvider } from '../provider/types';
 import { Session } from '../types';
 import { SessionConfig } from '../config';
-import { EncodeUtil } from '../provider/util';
 
 export const SessionModelSym = Symbol.for('@trv:rest-session/model');
 
@@ -40,6 +40,8 @@ export class ModelSessionProvider implements SessionProvider {
   @Inject(SessionModelSym)
   modelService: ModelCrudSupport;
 
+  accessor: ValueAccessor;
+
   /**
    * Initialize service if none defined
    */
@@ -52,6 +54,7 @@ export class ModelSessionProvider implements SessionProvider {
         await this.modelService.createModel?.(SessionEntry);
       }
     }
+    this.accessor = new ValueAccessor(this.config.keyName, this.config.transport);
   }
 
   async delete(req: Request, res: Response, id: string) {
@@ -68,23 +71,25 @@ export class ModelSessionProvider implements SessionProvider {
 
       // Send updated info only if expiry changed
       if (session.isTimeChanged()) {
-        EncodeUtil.putValue(res, this.config, session, session.id);
+        this.accessor.writeValue(res, session.id, { expires: session.expiresAt });
       }
-    } else if (EncodeUtil.canDelete(req, this.config)) {
-      EncodeUtil.putValue(res, this.config, null);
+    } else {
+      this.accessor.writeValue(res, null, { expires: new Date() });
     }
     return;
   }
 
   async decode(req: Request): Promise<Session | undefined> {
-    const id = EncodeUtil.getValue(req, this.config);
-    const record = await this.modelService.get(SessionEntry, id).catch(() => { });
+    const id = this.accessor.readValue(req);
+    if (id) {
+      const record = await this.modelService.get(SessionEntry, id).catch(() => { });
 
-    if (record) {
-      return new Session({
-        ...record,
-        data: JSON.parse(Buffer.from(record.data, 'base64').toString('utf8'))
-      });
+      if (record) {
+        return new Session({
+          ...record,
+          data: JSON.parse(Buffer.from(record.data, 'base64').toString('utf8'))
+        });
+      }
     }
   }
 }

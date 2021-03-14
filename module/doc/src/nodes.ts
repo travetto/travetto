@@ -1,14 +1,15 @@
 import * as fs from 'fs';
 
 import { PathUtil, Package, FsUtil } from '@travetto/boot';
-import { DocUtil } from './util';
+
+import { DocUtil, } from './util';
+import { DocRunUtil, RunConfig } from './run-util';
 
 export interface DocNode { _type: string }
 type Content = DocNode | string;
 
 export const Text = (text: string) => ({ _type: 'text' as const, content: text });
 type TextType = ReturnType<typeof Text>;
-type ExecConfig = Parameters<(typeof DocUtil)['run']>[2] & { module?: 'base' | 'boot', filter?: (c: string) => boolean };
 
 function $c(val: string): TextType;
 function $c(val: DocNode | string): DocNode;
@@ -23,7 +24,7 @@ export const Group = (node: DocNode | DocNode[]) => $n('group', { nodes: [node].
 export const Method = (content: Content) => $n('method', { content: $c(content) });
 export const Command = (script: Content, ...args: Content[]) => $n('command', { content: $c([script, ...args].join(' ')) });
 export const Terminal = (title: Content, script: string) => $n('terminal', { title: $c(title), content: $c(script), language: 'bash' });
-export const Hidden = (content: Content) => $n('hidden', { content: $c(content) });
+export const Hidden = (content: any) => $n('hidden', { content: $c('') });
 export const Input = (content: Content) => $n('input', { content: $c(content) });
 export const Path = (content: Content) => $n('path', { content: $c(content) });
 export const Class = (content: Content) => $n('class', { content: $c(content) });
@@ -42,20 +43,16 @@ export function SnippetLink(title: Content, file: string, startPattern: RegExp) 
   return $n('file', { title: $c(title), link: $c(res.file), line: res.line });
 }
 
-export function Execute(title: Content, cmd: string, args: string[] = [], cfg: ExecConfig = {}) {
+export function Execute(title: Content, cmd: string, args: string[] = [], cfg: RunConfig = {}) {
   if (cmd !== 'trv') {
     cmd = DocUtil.resolveFile(cmd).resolved.replace(PathUtil.cwd, '.');
-    if (/.*\/doc\/.*[.]ts$/.test(cmd)) {
-      const mod = cfg.module ?? 'base';
-      let main = DocUtil.run('node', [require.resolve(`@travetto/${mod}/bin/main`), cmd, ...args], cfg);
-      if (cfg.filter) {
-        main = main.split(/\n/g).filter(cfg.filter).join('\n');
-      }
-      return Terminal(title, `$ node @travetto/${mod}/bin/main ${cmd} ${args.join(' ')}\n\n${main}`);
-    }
   }
-  const script = DocUtil.run(cmd, args, cfg);
-  return Terminal(title, `$ ${cmd} ${args.join(' ')}\n\n${script}`);
+
+  const script = DocRunUtil.run(cmd, args, cfg);
+  const prefix = !/.*\/doc\/.*[.]ts$/.test(cmd) ? '$' :
+    `$ node @travetto/${cfg.module ?? 'base'}/bin/main`;
+
+  return Terminal(title, `${prefix} ${cmd} ${args.join(' ')}\n\n${script}`);
 }
 
 export function Mod(folder: string) {

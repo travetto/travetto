@@ -36,27 +36,27 @@ export class PrincipalTest {
       id: 'b',
       details: {},
       permissions: ['1', '2'],
-      source: 'none'
+      issuer: 'none'
     }));
 
     await assert.doesNotReject(() => source.authorize({
       id: 'a',
       details: {},
       permissions: ['2', '3'],
-      source: 'none'
+      issuer: 'none'
     }));
 
     const ctx = await source.authorize({
       id: 'a',
       details: {},
       permissions: [],
-      source: 'none'
+      issuer: 'none'
     });
 
     assert(!!ctx.identity);
     assert(!!ctx.principal);
     assert(ctx.identity.id === ctx.principal.id);
-    assert(ctx.identity.source === 'none');
+    assert(ctx.identity.issuer === 'none');
     assert(ctx.principal.permissions === ['1', '2', '3']);
   }
 }

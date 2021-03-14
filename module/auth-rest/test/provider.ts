@@ -19,7 +19,7 @@ class SimpleIdentitySource implements IdentitySource {
     if (username === 'test' && password === 'test') {
       return {
         id: 'test',
-        source: 'dummy',
+        issuer: 'dummy',
         permissions: [],
         details: {
           username: 'test'

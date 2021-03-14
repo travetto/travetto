@@ -12,10 +12,13 @@ export class ValueAccessor {
    * @param res
    * @param token
    */
-  writeValue(res: Response, token: string, cookieArgs?: SetOption) {
+  writeValue(res: Response, token: string | null, cookieArgs: SetOption = {}) {
     if (this.location === 'cookie') {
-      res.cookies.set(this.name, token, cookieArgs);
-    } else {
+      res.cookies.set(this.name, token, {
+        ...cookieArgs,
+        maxAge: cookieArgs.expires ? undefined : -1,
+      });
+    } else if (token) {
       res.setHeader(this.name, token);
     }
   }

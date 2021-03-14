@@ -59,7 +59,7 @@ export class PassportIdentitySource<U> implements IdentitySource {
   constructor(
     private strategyName: string,
     private strategy: passport.Strategy,
-    private toIdentity: (user: U) => Pick<Identity, 'id' | 'permissions' | 'details'> & { source?: string },
+    private toIdentity: (user: U) => Pick<Identity, 'id' | 'permissions' | 'details'> & { issuer?: string },
     private passportAuthenticateOptions: passport.AuthenticateOptions = {},
     private extraOptions: PassportAuthOptions = {}
   ) {
@@ -106,8 +106,8 @@ export class PassportIdentitySource<U> implements IdentitySource {
 
       const ident = this.toIdentity(user);
 
-      if (!ident.source) {
-        ident.source = this.strategyName;
+      if (!ident.issuer) {
+        ident.issuer = this.strategyName;
       }
       return ident as Identity;
     }

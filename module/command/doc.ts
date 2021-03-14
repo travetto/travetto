@@ -1,4 +1,4 @@
-import { doc as d, Section, List, Code, lib, cls, Execute, Terminal, DocUtil, SubSection, Header } from '@travetto/doc';
+import { doc as d, Section, List, Code, lib, cls, Execute, Terminal, DocRunUtil, SubSection, Header } from '@travetto/doc';
 import { PathUtil } from '@travetto/boot';
 
 import { CommandService } from './src/command';
@@ -32,7 +32,7 @@ ${Execute('Command Service', 'trv', ['command:service', '--help'])}
 
 A sample of all services available to the entire framework:
 
-${Terminal('All Services', DocUtil.run('./bin/service.js', ['status'], { cwd: PathUtil.resolveUnix(__dirname, '..', '..') }))}
+${Terminal('All Services', DocRunUtil.run('./bin/service.js', ['status'], { cwd: PathUtil.resolveUnix(__dirname, '..', '..') }))}
 
 ${SubSection('Defining new Services')}
 

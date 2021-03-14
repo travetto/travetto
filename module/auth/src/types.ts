@@ -4,7 +4,8 @@ import { AuthContext } from './context';
  * A user principal, including permissions and details, does not imply
  * authentication
  */
-export interface Principal<D = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface Principal<D = any> {
   /**
    * Primary identifier for a user
    */
@@ -16,12 +17,15 @@ export interface Principal<D = unknown> {
   /**
    * Supplemental details
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details: D;
   /**
    * Date of expiration
    */
-  expires?: Date;
+  expiresAt?: Date;
+  /**
+   * Date of issuance
+   */
+  issuedAt?: Date;
 }
 
 /**
@@ -31,7 +35,7 @@ export interface Identity extends Principal {
   /**
    * The source of the identity verification
    */
-  source: string;
+  issuer: string;
 }
 
 /**

@@ -9,6 +9,7 @@ import { TimeUtil } from '@travetto/base/src/internal/time';
 
 import { SessionData, SessionConfig } from '..';
 
+type Aged = { age: number, payload?: Record<string, unknown> };
 
 @Controller('/test/session')
 class TestController {
@@ -53,7 +54,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
       maxAge: 10000
     });
 
-    let res = await this.request('get', '/test/session');
+    let res = await this.request<Aged>('get', '/test/session');
     let cookie = res.headers['set-cookie'];
     assert(res.body === { age: 1 });
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
@@ -77,7 +78,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request('post', '/test/session/complex', { body: payload });
+    let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
     const cookie = res.headers['set-cookie'];
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert(res.body.payload === payload);
@@ -123,7 +124,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request('post', '/test/session/complex', { body: payload });
+    let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
     const header = res.headers[key];
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body.payload === payload);
@@ -138,7 +139,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request('post', '/test/session/complex', { body: payload });
+    let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
     let header = res.headers[key];
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
@@ -164,7 +165,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request('post', '/test/session/complex', { body: payload });
+    let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
     const cookie = res.headers['set-cookie'];
 
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
@@ -186,7 +187,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request('post', '/test/session/complex', { body: payload });
+    let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
     let header = res.headers[key];
 
     await TimeUtil.wait(50);

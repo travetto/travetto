@@ -1,4 +1,5 @@
 export * from './src/util';
+export * from './src/run-util';
 export * from './src/nodes';
 export * from './src/render/types';
 export * from './src/helper';

@@ -1,13 +1,24 @@
 import {
   doc as d, RawHeader, lib, mod, List, Section,
-  Terminal, fld, pth, Code, SnippetLink, Execute, DocUtil, Hidden, Ref,
-  TableOfContents
+  Terminal, fld, pth, Code, SnippetLink, Execute, Ref,
+  TableOfContents,
+  DocRunUtil
 } from '@travetto/doc';
 import { Model } from '@travetto/model';
 
 const ModelType = SnippetLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 
 process.env.TRV_LOG_PLAIN = '0';
+
+const cmd = DocRunUtil.runBackground('trv', ['run', 'rest']);
+const startupBuffer: Buffer[] = [];
+cmd.process.stdout?.on('data', (v) => startupBuffer.push(Buffer.from(v)));
+
+// Wait 3 seconds
+const start = Date.now();
+while ((Date.now() - start) < 3000) { }
+
+const startupOutput = Buffer.concat(startupBuffer).toString('utf8');
 
 export const toc = 'Overview';
 export const text = d`
@@ -91,17 +102,18 @@ ${Section('Running the App')}
 
 First we must start the application:
 
-${Execute('Application Startup', 'doc/startup.sh', [], { env: { TRV_LOG_PLAIN: '0' } })} ${Hidden(DocUtil.run('doc/run-server.sh', []))}
+${Code('Application Startup', startupOutput)} 
 
 next, let's execute ${lib.Curl} requests to interact with the new api:
 
-${Code('Creating Todo by curl', 'doc/create.sh')}
+${Code('Creating Todo by curl', 'doc/create-todo.ts')}
 
-${Execute('Create Output', 'doc/create.sh')}
+${Execute('Create Output', 'doc/create-todo.ts', [], { env: { TRV_LOG_PLAIN: '1' }, module: 'boot' })}
 
-${Code('Listing Todos by curl', 'doc/list.sh')}
+${Code('Listing Todos by curl', 'doc/list-todo.ts')}
 
-${Execute('Listing Output', 'doc/list.sh')}
-
-${Hidden(DocUtil.run('doc/stop-server.sh', []))}
+${Execute('Listing Output', 'doc/list-todo.ts', [], { env: { TRV_LOG_PLAIN: '1' }, module: 'boot' })}
 `;
+
+// Wrap it up
+cmd.process.kill('SIGKILL');

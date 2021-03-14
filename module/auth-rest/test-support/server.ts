@@ -36,19 +36,19 @@ class AuthorizationEncoder implements AuthContextEncoder {
 class Config {
   @InjectableFactory(TestAuthSym)
   static getAuthenticator(): IdentitySource {
-    return new class implements IdentitySource {
+    return {
       async authenticate(req: Request) {
         if (req.body.username === 'super-user' && req.body.password === 'password') {
           return {
             id: '5',
             details: { name: 'Billy' },
             permissions: ['perm1', 'perm2'],
-            source: 'custom',
+            issuer: 'custom',
           };
         }
         throw new AppError('User unknown', 'authentication');
       }
-    }();
+    };
   }
 }
 
