@@ -1,9 +1,21 @@
 {
   "name": "@travetto/generator-app",
+  "displayName": "Yeoman Generator",
   "version": "2.0.0-alpha.2",
-  "title": "Yeoman Generator",
   "description": "Yeoman app generator for the Travetto framework",
-  "main": "app/index.js",
+  "keywords": [
+    "travetto",
+    "yeoman",
+    "generator",
+    "scaffolding",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "app",
     "templates",
@@ -11,6 +23,14 @@
     ".eslintrc.js",
     ".eslintignore"
   ],
+  "main": "app/index.js",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "related/generator-app"
+  },
+  "scripts": {
+    "prepack": "cp ../../bin-dist/eslint/core.js templates/todo/.eslintrc.js"
+  },
   "dependencies": {
     "@travetto/boot": "^2.0.0-alpha.2",
     "mustache": "^4.1.0",
@@ -21,28 +41,7 @@
     "@types/mustache": "^4.1.1",
     "@types/yeoman-generator": "^3.1.4"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepack": "cp ../../.eslintrc.js eslintrc.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "related/generator-app"
-  },
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "travetto",
-    "yeoman",
-    "generator",
-    "scaffolding"
-  ],
-  "author": {
-    "name": "Travetto Framework",
-    "email": "travetto.framework@gmail.com"
-  },
   "publishConfig": {
     "access": "public"
-  },
-  "license": "MIT"
+  }
 }

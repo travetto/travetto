@@ -58,8 +58,8 @@ export function Execute(title: Content, cmd: string, args: string[] = [], cfg: R
 
 export function Mod(folder: string) {
   const pkg = JSON.parse(fs.readFileSync(`${folder}/package.json`, 'utf8'));
-  const { description, title } = pkg;
-  return $n('mod', { title: $c(title), link: $c(folder), description: $c(description) });
+  const { description, displayName } = pkg;
+  return $n('mod', { title: $c(displayName), link: $c(folder), description: $c(description) });
 }
 
 export function Ref(title: Content, file: string) {

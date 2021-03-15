@@ -1,29 +1,29 @@
 {
   "name": "overview",
-  "publishConfig": {
-    "access": "restricted"
-  },
-  "private": true,
+  "displayName": "Overview Docs",
   "version": "2.0.0-alpha.2",
-  "title": "Overview Docs",
   "description": "Documentation overview",
-  "files": [],
-  "dependencies": {
-    "@travetto/boot": "^2.0.0-alpha.2"
+  "keywords": [
+    "travetto",
+    "overview",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
   },
+  "files": [],
   "repository": {
-    "type": "git",
     "url": "https://github.com/travetto/travetto.git",
     "directory": "related/overview"
   },
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "travetto",
-    "overview"
-  ],
-  "author": {
-    "name": "Travetto Framework",
-    "email": "travetto.framework@gmail.com"
+  "dependencies": {
+    "@travetto/boot": "^2.0.0-alpha.2"
   },
-  "license": "MIT"
+  "private": true,
+  "publishConfig": {
+    "access": "restricted"
+  }
 }

@@ -1,18 +1,8 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/config": "^2.0.0-alpha.2",
-    "@travetto/di": "^2.0.0-alpha.3"
-  },
-  "title": "Application",
+  "name": "@travetto/app",
+  "displayName": "Application",
+  "version": "2.0.0-alpha.3",
   "description": "Application registration/management and run support.",
-  "homepage": "https://travetto.io",
   "keywords": [
     "ast-transformations",
     "decorators",
@@ -20,18 +10,28 @@
     "travetto",
     "typescript"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "bin",
     "support"
   ],
-  "name": "@travetto/app",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/app"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@travetto/config": "^2.0.0-alpha.2",
+    "@travetto/di": "^2.0.0-alpha.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

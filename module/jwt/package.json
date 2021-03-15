@@ -1,33 +1,40 @@
 {
   "name": "@travetto/jwt",
+  "displayName": "JWT",
   "version": "2.0.0-alpha.2",
-  "title": "JWT",
   "description": "JSON Web Token implementation",
-  "main": "index.ts",
+  "keywords": [
+    "jwt",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src"
   ],
+  "main": "index.ts",
   "repository": {
-    "type": "git",
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/jwt"
-  },
-  "keywords": [
-    "jwt",
-    "travetto"
-  ],
-  "author": "auth0",
-  "contributors": [
-    "travetto framework"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/travetto/travetto/issues"
   },
   "dependencies": {
     "@travetto/base": "^2.0.0-alpha.2",
     "@types/jws": "^3.2.3",
     "jws": "^4.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "contributors": [
+    "travetto framework"
+  ],
+  "bugs": {
+    "url": "https://github.com/travetto/travetto/issues"
   }
 }

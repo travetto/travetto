@@ -1,27 +1,39 @@
-.vscode/
-.trv*
-node_modules/
-temp/
-build/
-api-client/
-sample/dummy/
-.bin/
-dist/
+# Top Level
 bin-dist/
-out/
+lerna-debug.log
+*.lerna_backup
+
+# Common
+node_modules/
+.trv*
+npm-debug.log
+.DS_STORE
+
+# VSCode
+.vscode/
 *.vsix
+out/
+
+# OpenAPI
+api-client/
 openapi.yml
 openapi.json
 
-.DS_STORE
+# Pack
+dist/
+
+# Email
 *.compiled.*
 dev.yml
-README.html
-lerna-debug.log
-*.lerna_backup
-npm-debug.log
 email-dev-context.json
 
+# Assets
 **/test-support/resources/logo
 
+# General
 related/generator-app/.eslintrc.js
+
+# Folder Specific
+module/*/LICENSE
+related/*/LICENSE
+module/*/*.tgz

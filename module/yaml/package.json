@@ -1,32 +1,33 @@
 {
+  "name": "@travetto/yaml",
+  "displayName": "YAML",
+  "version": "2.0.0-alpha.2",
+  "description": "Simple YAML support, provides only clean subset of yaml",
+  "keywords": [
+    "yaml",
+    "travetto",
+    "simple-yaml",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "title": "YAML",
-  "description": "Simple YAML support, provides only clean subset of yaml",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "yaml",
-    "travetto",
-    "simple-yaml"
-  ],
-  "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.2"
-  },
-  "license": "MIT",
-  "main": "index.ts",
   "files": [
     "index.ts",
     "src"
   ],
-  "name": "@travetto/yaml",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/yaml"
   },
-  "version": "2.0.0-alpha.2"
+  "dependencies": {
+    "@travetto/base": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

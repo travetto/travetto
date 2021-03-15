@@ -1,9 +1,8 @@
 {
   "name": "travetto-plugin",
   "displayName": "Travetto Plugin",
-  "description": "VS Code plugin for interacting with the Travetto framework ",
   "version": "1.1.0",
-  "homepage": "https://travetto.io",
+  "description": "VS Code plugin for interacting with the Travetto framework ",
   "keywords": [
     "vscode",
     "real-time feedback",
@@ -12,39 +11,45 @@
     "travetto",
     "typescript"
   ],
-  "publisher": "arcsine",
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
-  },
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git"
-  },
-  "engines": {
-    "vscode": "^1.50.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "main": "./out/extension",
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "package": "vsce package",
-    "compile": "npx tsc -p ./",
-    "watch": "npx tsc -watch -p ./"
   },
   "files": [
     "src-ts/",
     "README.md",
     "CHANGELOG.md"
   ],
-  "devDependencies": {
-    "@types/vscode": "^1.54.0"
+  "main": "./out/extension",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "related/vscode-plugin"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "package": "vsce package",
+    "compile": "npx tsc -p ./",
+    "watch": "npx tsc -watch -p ./"
   },
   "dependencies": {
     "@travetto/boot": "file://../../module/boot",
     "source-map-support": "^0.5.19"
   },
+  "devDependencies": {
+    "@types/vscode": "^1.54.0"
+  },
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "publisher": "arcsine",
+  "categories": [
+    "Other"
+  ],
   "activationEvents": [
     "workspaceContains:module/boot/src-ts",
     "workspaceContains:node_modules/@travetto",

@@ -1,10 +1,29 @@
 {
+  "name": "@travetto/rest-session",
+  "displayName": "REST Session",
+  "version": "2.0.0-alpha.4",
+  "description": "Session provider for the travetto rest module.",
+  "keywords": [
+    "rest",
+    "session",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src",
+    "test-support"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-session"
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
@@ -13,26 +32,7 @@
   "optionalPeerDependencies": {
     "@travetto/model": "^2.0.0-alpha.3"
   },
-  "title": "REST Session",
-  "description": "Session provider for the travetto rest module.",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "rest",
-    "session",
-    "travetto",
-    "typescript"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src",
-    "test-support"
-  ],
-  "name": "@travetto/rest-session",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/rest-session"
-  },
-  "version": "2.0.0-alpha.4"
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -1,7 +1,20 @@
 {
   "name": "travetto.github.io",
   "version": "0.0.0",
+  "keywords": [
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "related/travetto.github.io"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -11,11 +24,6 @@
     "e2e": "ng e2e",
     "deploy": "./deploy.sh"
   },
-  "author": {
-    "name": "Travetto Framework",
-    "email": "travetto.framework@gmail.com"
-  },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^11.2.4",
     "@angular/cdk": "^11.2.3",
@@ -51,5 +59,9 @@
     "ts-node": "~8.10.1",
     "tslint": "~6.1.0",
     "typescript": "~4.0.5"
+  },
+  "private": true,
+  "publishConfig": {
+    "access": "restricted"
   }
 }

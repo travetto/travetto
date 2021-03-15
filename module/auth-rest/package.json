@@ -1,10 +1,30 @@
 {
+  "name": "@travetto/auth-rest",
+  "displayName": "Rest Auth",
+  "version": "2.0.0-alpha.4",
+  "description": "Rest authentication integration support for the travetto framework",
+  "keywords": [
+    "authentication",
+    "rest",
+    "travetto",
+    "decorators",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src",
+    "test-support"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/auth-rest"
   },
   "dependencies": {
     "@travetto/auth": "^2.0.0-alpha.2",
@@ -16,26 +36,7 @@
     "@types/passport": "^1.0.6",
     "passport": "^0.4.1"
   },
-  "title": "Rest Auth",
-  "description": "Rest authentication integration support for the travetto framework",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "authentication",
-    "rest",
-    "travetto",
-    "decorators"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src",
-    "test-support"
-  ],
-  "name": "@travetto/auth-rest",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/auth-rest"
-  },
-  "version": "2.0.0-alpha.4"
+  "publishConfig": {
+    "access": "public"
+  }
 }

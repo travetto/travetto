@@ -1,10 +1,28 @@
 {
+  "name": "@travetto/model-s3",
+  "displayName": "S3 Model Support",
+  "version": "2.0.0-alpha.3",
+  "description": "S3 backing for the travetto model module.",
+  "keywords": [
+    "s3",
+    "model",
+    "typescript",
+    "travetto"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/model-s3"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^1.0.0-rc.10",
@@ -12,25 +30,7 @@
     "@travetto/config": "^2.0.0-alpha.2",
     "@travetto/model": "^2.0.0-alpha.3"
   },
-  "title": "S3 Model Support",
-  "description": "S3 backing for the travetto model module.",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "s3",
-    "model",
-    "typescript",
-    "travetto"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src"
-  ],
-  "name": "@travetto/model-s3",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/model-s3"
-  },
-  "version": "2.0.0-alpha.3"
+  "publishConfig": {
+    "access": "public"
+  }
 }

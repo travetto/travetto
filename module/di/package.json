@@ -1,20 +1,8 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/registry": "^2.0.0-alpha.3"
-  },
-  "devDependencies": {
-    "@travetto/config": "^2.0.0-alpha.2"
-  },
-  "title": "Dependency Injection",
+  "name": "@travetto/di",
+  "displayName": "Dependency Injection",
+  "version": "2.0.0-alpha.3",
   "description": "Dependency registration/management and injection support.",
-  "homepage": "https://travetto.io",
   "keywords": [
     "ast-transformations",
     "decorators",
@@ -23,18 +11,30 @@
     "travetto",
     "typescript"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "support",
     "test-support"
   ],
-  "name": "@travetto/di",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/di"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@travetto/registry": "^2.0.0-alpha.3"
+  },
+  "devDependencies": {
+    "@travetto/config": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

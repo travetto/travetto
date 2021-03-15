@@ -1,36 +1,36 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "restricted"
-  },
-  "private": false,
-  "dependencies": {
-    "@travetto/boot": "^2.0.0-alpha.2",
-    "@travetto/registry": "^2.0.0-alpha.3",
-    "prismjs": "^1.23.0"
-  },
-  "title": "Documentation",
+  "name": "@travetto/doc",
+  "displayName": "Documentation",
+  "version": "2.0.0-alpha.3",
   "description": "Documentation support for the travetto framework",
-  "homepage": "https://travetto.io",
   "keywords": [
     "docs",
     "travetto",
     "typescript"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "bin",
     "index.ts",
     "src"
   ],
-  "name": "@travetto/doc",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/doc"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@travetto/boot": "^2.0.0-alpha.2",
+    "@travetto/registry": "^2.0.0-alpha.3",
+    "prismjs": "^1.23.0"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
 }

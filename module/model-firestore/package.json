@@ -1,36 +1,36 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/config": "^2.0.0-alpha.2",
-    "@travetto/model": "^2.0.0-alpha.3",
-    "firebase-admin": "^9.5.0"
-  },
-  "title": "Firestore Model Support",
+  "name": "@travetto/model-firestore",
+  "displayName": "Firestore Model Support",
+  "version": "2.0.0-alpha.3",
   "description": "Firestore backing for the travetto model module.",
-  "homepage": "https://travetto.io",
   "keywords": [
     "typescript",
     "travetto",
     "model",
     "firestore"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "support"
   ],
-  "name": "@travetto/model-firestore",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/model-firestore"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@travetto/config": "^2.0.0-alpha.2",
+    "@travetto/model": "^2.0.0-alpha.3",
+    "firebase-admin": "^9.5.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

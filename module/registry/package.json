@@ -1,17 +1,8 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/compiler": "^2.0.0-alpha.2"
-  },
-  "title": "Registry",
+  "name": "@travetto/registry",
+  "displayName": "Registry",
+  "version": "2.0.0-alpha.3",
   "description": "Patterns and utilities for handling registration of metadata and functionality for run-time use",
-  "homepage": "https://travetto.io",
   "keywords": [
     "ast-transformations",
     "registry",
@@ -20,17 +11,26 @@
     "typescript",
     "real-time"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "support"
   ],
-  "name": "@travetto/registry",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/registry"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@travetto/compiler": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

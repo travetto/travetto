@@ -1,10 +1,31 @@
 {
+  "name": "@travetto/rest",
+  "displayName": "RESTful API",
+  "version": "2.0.0-alpha.4",
+  "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
+  "keywords": [
+    "rest",
+    "dependency-injection",
+    "decorators",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src",
+    "support",
+    "test-support"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest"
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
@@ -23,28 +44,7 @@
     "node-forge": "^0.10.0",
     "@types/node-forge": "^0.9.7"
   },
-  "title": "RESTful API",
-  "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "rest",
-    "dependency-injection",
-    "decorators",
-    "travetto",
-    "typescript"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src",
-    "support",
-    "test-support"
-  ],
-  "name": "@travetto/rest",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/rest"
-  },
-  "version": "2.0.0-alpha.4"
+  "publishConfig": {
+    "access": "public"
+  }
 }

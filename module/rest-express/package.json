@@ -1,10 +1,28 @@
 {
+  "name": "@travetto/rest-express",
+  "displayName": "Express REST Source",
+  "version": "2.0.0-alpha.4",
+  "description": "Express provider for the travetto rest module.",
+  "keywords": [
+    "rest",
+    "express",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-express"
   },
   "dependencies": {
     "@travetto/rest": "^2.0.0-alpha.4",
@@ -19,25 +37,7 @@
     "@types/aws-serverless-express": "^3.3.3",
     "aws-serverless-express": "^3.4.0"
   },
-  "title": "Express REST Source",
-  "description": "Express provider for the travetto rest module.",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "rest",
-    "express",
-    "travetto",
-    "typescript"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src"
-  ],
-  "name": "@travetto/rest-express",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/rest-express"
-  },
-  "version": "2.0.0-alpha.4"
+  "publishConfig": {
+    "access": "public"
+  }
 }

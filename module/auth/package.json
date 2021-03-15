@@ -1,31 +1,32 @@
 {
+  "name": "@travetto/auth",
+  "displayName": "Authentication",
+  "version": "2.0.0-alpha.2",
+  "description": "Authentication scaffolding for the travetto framework",
+  "keywords": [
+    "authentication",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/compiler": "^2.0.0-alpha.2"
-  },
-  "title": "Authentication",
-  "description": "Authentication scaffolding for the travetto framework",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "authentication",
-    "travetto"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
   "files": [
     "index.ts",
     "src"
   ],
-  "name": "@travetto/auth",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/auth"
   },
-  "version": "2.0.0-alpha.2"
+  "dependencies": {
+    "@travetto/compiler": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

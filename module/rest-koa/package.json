@@ -1,10 +1,28 @@
 {
+  "name": "@travetto/rest-koa",
+  "displayName": "Koa REST Source",
+  "version": "2.0.0-alpha.4",
+  "description": "Koa provider for the travetto rest module.",
+  "keywords": [
+    "rest",
+    "koa",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-koa"
   },
   "dependencies": {
     "@travetto/rest": "^2.0.0-alpha.4",
@@ -21,25 +39,7 @@
     "@types/aws-serverless-express": "^3.3.3",
     "aws-serverless-express": "^3.4.0"
   },
-  "title": "Koa REST Source",
-  "description": "Koa provider for the travetto rest module.",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "rest",
-    "koa",
-    "travetto",
-    "typescript"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src"
-  ],
-  "name": "@travetto/rest-koa",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/rest-koa"
-  },
-  "version": "2.0.0-alpha.4"
+  "publishConfig": {
+    "access": "public"
+  }
 }

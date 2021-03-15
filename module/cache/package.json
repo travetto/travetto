@@ -1,37 +1,37 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/compiler": "^2.0.0-alpha.2",
-    "@travetto/di": "^2.0.0-alpha.3",
-    "@travetto/model": "^2.0.0-alpha.3"
-  },
-  "title": "Caching",
+  "name": "@travetto/cache",
+  "displayName": "Caching",
+  "version": "2.0.0-alpha.3",
   "description": "Caching functionality with decorators for declarative use.",
-  "homepage": "https://travetto.io",
   "keywords": [
     "typescript",
     "travetto",
     "decorator",
     "cache"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "support",
     "test-support"
   ],
-  "name": "@travetto/cache",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/cache"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@travetto/compiler": "^2.0.0-alpha.2",
+    "@travetto/di": "^2.0.0-alpha.3",
+    "@travetto/model": "^2.0.0-alpha.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

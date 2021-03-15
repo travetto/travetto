@@ -1,18 +1,8 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "dependencies": {
-    "@travetto/compiler": "^2.0.0-alpha.2",
-    "@travetto/registry": "^2.0.0-alpha.3",
-    "@travetto/watch": "^2.0.0-alpha.2",
-    "@travetto/worker": "^2.0.0-alpha.2",
-    "@travetto/yaml": "^2.0.0-alpha.2"
-  },
-  "title": "Testing",
+  "name": "@travetto/test",
+  "displayName": "Testing",
+  "version": "2.0.0-alpha.3",
   "description": "Declarative test framework",
-  "homepage": "https://travetto.io",
   "keywords": [
     "unit-testing",
     "testing",
@@ -21,18 +11,31 @@
     "decorators",
     "ast-transformations"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "bin",
     "support"
   ],
-  "name": "@travetto/test",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/test"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@travetto/compiler": "^2.0.0-alpha.2",
+    "@travetto/registry": "^2.0.0-alpha.3",
+    "@travetto/watch": "^2.0.0-alpha.2",
+    "@travetto/worker": "^2.0.0-alpha.2",
+    "@travetto/yaml": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

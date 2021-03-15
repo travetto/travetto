@@ -1,10 +1,32 @@
 {
+  "name": "@travetto/email-template",
+  "displayName": "Email Templating",
+  "version": "2.0.0-alpha.3",
+  "description": "Email templating module",
+  "keywords": [
+    "email",
+    "inky",
+    "templating",
+    "mustache",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "support",
+    "resources",
+    "!resources/email/demo/",
+    "bin"
+  ],
+  "main": "support/application.email.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/email-template"
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
@@ -21,33 +43,11 @@
     "node-sass": "^4.14.1",
     "parse5": "^6.0.1"
   },
-  "title": "Email Templating",
-  "description": "Email templating module",
   "devDependencies": {
     "@types/js-beautify": "^1.13.1",
     "js-beautify": "^1.13.5"
   },
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "email",
-    "inky",
-    "templating",
-    "mustache",
-    "travetto",
-    "typescript"
-  ],
-  "license": "MIT",
-  "main": "support/application.email.ts",
-  "name": "@travetto/email-template",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/email-template"
-  },
-  "files": [
-    "support",
-    "resources",
-    "!resources/email/demo/",
-    "bin"
-  ],
-  "version": "2.0.0-alpha.3"
+  "publishConfig": {
+    "access": "public"
+  }
 }

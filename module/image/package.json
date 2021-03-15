@@ -1,32 +1,32 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/command": "^2.0.0-alpha.2"
-  },
-  "title": "Image",
+  "name": "@travetto/image",
+  "displayName": "Image",
+  "version": "2.0.0-alpha.2",
   "description": "Image support, resizing, and optimization",
-  "homepage": "https://travetto.io",
   "keywords": [
     "images",
     "travetto",
     "typescript"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src"
   ],
-  "name": "@travetto/image",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/image"
   },
-  "version": "2.0.0-alpha.2"
+  "dependencies": {
+    "@travetto/command": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -1,15 +1,35 @@
 {
+  "name": "@travetto/boot",
+  "displayName": "Boot",
+  "version": "2.0.0-alpha.2",
+  "description": "Bootstrapping and common utilities for travetto applications.",
+  "keywords": [
+    "bootstrapping",
+    "caching",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "engines": {
-    "node": ">=12.17.0"
+  "files": [
+    "src",
+    "bin",
+    "tsconfig.trv.json"
+  ],
+  "main": "src/index.js",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/boot"
   },
-  "publishConfig": {
-    "access": "public"
+  "scripts": {
+    "build": "tsc -p src-ts",
+    "build:watch": "tsc -w -p src-ts",
+    "prepack": "../../bin-dist/trv-compress-js.js -- 'src/**/*.js'; rm  -f src/internal/dev-register.*"
   },
-  "title": "Boot",
   "dependencies": {
     "@types/node": "^12.20.5",
     "@types/source-map-support": "^0.5.3",
@@ -17,30 +37,10 @@
     "tslib": "^2.1.0",
     "typescript": "^4.2.3"
   },
-  "description": "Bootstrapping and common utilities for travetto applications.",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "bootstrapping",
-    "caching",
-    "travetto",
-    "typescript"
-  ],
-  "license": "MIT",
-  "main": "src/index.js",
-  "files": [
-    "src",
-    "bin",
-    "tsconfig.trv.json"
-  ],
-  "name": "@travetto/boot",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/boot"
+  "engines": {
+    "node": ">=12.17.0"
   },
-  "version": "2.0.0-alpha.2",
-  "scripts": {
-    "build": "tsc -p src-ts",
-    "build:watch": "tsc -w -p src-ts",
-    "prepack": "../../bin-dist/trv-compress-js.js -- 'src/**/*.js'; rm  -f src/internal/dev-register.*"
+  "publishConfig": {
+    "access": "public"
   }
 }

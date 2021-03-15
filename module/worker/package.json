@@ -1,19 +1,8 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "title": "Worker",
+  "name": "@travetto/worker",
+  "displayName": "Worker",
+  "version": "2.0.0-alpha.2",
   "description": "Process management utilties, with a focus on inter-process communication",
-  "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.2",
-    "@types/generic-pool": "^3.1.9",
-    "generic-pool": "^3.7.2"
-  },
-  "homepage": "https://travetto.io",
   "keywords": [
     "exec",
     "child-process",
@@ -21,16 +10,27 @@
     "travetto",
     "typescript"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src"
   ],
-  "name": "@travetto/worker",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/worker"
   },
-  "version": "2.0.0-alpha.2"
+  "dependencies": {
+    "@travetto/base": "^2.0.0-alpha.2",
+    "@types/generic-pool": "^3.1.9",
+    "generic-pool": "^3.7.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

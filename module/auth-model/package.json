@@ -1,38 +1,39 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/auth": "^2.0.0-alpha.2",
-    "@travetto/model": "^2.0.0-alpha.3"
-  },
-  "title": "Model Auth Source",
+  "name": "@travetto/auth-model",
+  "displayName": "Model Auth Source",
+  "version": "2.0.0-alpha.3",
   "description": "Model-based authentication and registration support for the travetto framework",
-  "optionalPeerDependencies": {
-    "@travetto/auth-rest": "^2.0.0-alpha.0"
-  },
-  "homepage": "https://travetto.io",
   "keywords": [
     "authentication",
     "model",
     "travetto",
-    "registration"
+    "registration",
+    "typescript"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "test-support"
   ],
-  "name": "@travetto/auth-model",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/auth-model"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@travetto/auth": "^2.0.0-alpha.2",
+    "@travetto/model": "^2.0.0-alpha.3"
+  },
+  "optionalPeerDependencies": {
+    "@travetto/auth-rest": "^2.0.0-alpha.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

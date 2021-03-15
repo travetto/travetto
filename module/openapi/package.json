@@ -1,10 +1,30 @@
 {
+  "name": "@travetto/openapi",
+  "displayName": "OpenAPI Specification",
+  "version": "2.0.0-alpha.4",
+  "description": "OpenAPI integration support for the travetto framework",
+  "keywords": [
+    "rest",
+    "travetto",
+    "decorators",
+    "schema",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src",
+    "bin"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/openapi"
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
@@ -13,26 +33,7 @@
     "@travetto/yaml": "^2.0.0-alpha.2",
     "openapi3-ts": "^1.4.0"
   },
-  "title": "OpenAPI Specification",
-  "description": "OpenAPI integration support for the travetto framework",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "rest",
-    "travetto",
-    "decorators",
-    "schema"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src",
-    "bin"
-  ],
-  "name": "@travetto/openapi",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/openapi"
-  },
-  "version": "2.0.0-alpha.4"
+  "publishConfig": {
+    "access": "public"
+  }
 }

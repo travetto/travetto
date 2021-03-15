@@ -1,17 +1,8 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/boot": "^2.0.0-alpha.2"
-  },
-  "title": "Base",
+  "name": "@travetto/base",
+  "displayName": "Base",
+  "version": "2.0.0-alpha.2",
   "description": "Application phase management, environment config and common utilities for travetto applications.",
-  "homepage": "https://travetto.io",
   "keywords": [
     "shutdown-helper",
     "console-manager",
@@ -19,18 +10,27 @@
     "travetto",
     "typescript"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "bin",
     "src",
     "support"
   ],
-  "name": "@travetto/base",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/base"
   },
-  "version": "2.0.0-alpha.2"
+  "dependencies": {
+    "@travetto/boot": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -1,19 +1,8 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/di": "^2.0.0-alpha.3",
-    "@travetto/model": "^2.0.0-alpha.3",
-    "@travetto/schema": "^2.0.0-alpha.3"
-  },
-  "title": "Data Model Querying",
+  "name": "@travetto/model-query",
+  "displayName": "Data Model Querying",
+  "version": "2.0.0-alpha.3",
   "description": "Datastore abstraction for advanced query support.",
-  "homepage": "https://travetto.io",
   "keywords": [
     "datastore",
     "decorators",
@@ -22,17 +11,28 @@
     "travetto",
     "query-language"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "test-support"
   ],
-  "name": "@travetto/model-query",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/model-query"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@travetto/di": "^2.0.0-alpha.3",
+    "@travetto/model": "^2.0.0-alpha.3",
+    "@travetto/schema": "^2.0.0-alpha.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

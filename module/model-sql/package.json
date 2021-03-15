@@ -1,29 +1,8 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/config": "^2.0.0-alpha.2",
-    "@travetto/context": "^2.0.0-alpha.3",
-    "@travetto/model": "^2.0.0-alpha.3",
-    "@travetto/model-query": "^2.0.0-alpha.3"
-  },
-  "optionalPeerDependencies": {
-    "@types/mysql": "^2.15.18",
-    "@types/pg": "^7.14.11",
-    "mysql": "^2.18.1",
-    "pg": "^8.5.1"
-  },
-  "title": "SQL Model Service",
+  "name": "@travetto/model-sql",
+  "displayName": "SQL Model Service",
+  "version": "2.0.0-alpha.3",
   "description": "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
-  "devDependencies": {
-    "@travetto/app": "^2.0.0-alpha.3"
-  },
-  "homepage": "https://travetto.io",
   "keywords": [
     "sql",
     "data-modeling",
@@ -32,18 +11,39 @@
     "travetto",
     "typescript"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "bin",
     "index.ts",
     "src",
     "support"
   ],
-  "name": "@travetto/model-sql",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/model-sql"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@travetto/config": "^2.0.0-alpha.2",
+    "@travetto/context": "^2.0.0-alpha.3",
+    "@travetto/model": "^2.0.0-alpha.3",
+    "@travetto/model-query": "^2.0.0-alpha.3"
+  },
+  "devDependencies": {
+    "@travetto/app": "^2.0.0-alpha.3"
+  },
+  "optionalPeerDependencies": {
+    "@types/mysql": "^2.15.18",
+    "@types/pg": "^7.14.11",
+    "mysql": "^2.18.1",
+    "pg": "^8.5.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

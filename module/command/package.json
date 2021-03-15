@@ -1,34 +1,34 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "title": "Command",
+  "name": "@travetto/command",
+  "displayName": "Command",
+  "version": "2.0.0-alpha.2",
   "description": "Support for executing complex commands at runtime.",
-  "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.2"
-  },
-  "homepage": "https://travetto.io",
   "keywords": [
     "command",
     "docker",
     "travetto",
     "typescript"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "bin",
     "src"
   ],
-  "name": "@travetto/command",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/command"
   },
-  "version": "2.0.0-alpha.2"
+  "dependencies": {
+    "@travetto/base": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

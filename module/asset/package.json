@@ -1,10 +1,29 @@
 {
+  "name": "@travetto/asset",
+  "displayName": "Asset",
+  "version": "2.0.0-alpha.3",
+  "description": "Modular library for storing and retrieving binary assets",
+  "keywords": [
+    "assets",
+    "storage",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src",
+    "test-support"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/asset"
   },
   "dependencies": {
     "@travetto/di": "^2.0.0-alpha.3",
@@ -13,26 +32,7 @@
     "file-type": "^14.7.1",
     "mime": "^2.5.2"
   },
-  "title": "Asset",
-  "description": "Modular library for storing and retrieving binary assets",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "assets",
-    "storage",
-    "travetto",
-    "typescript"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src",
-    "test-support"
-  ],
-  "name": "@travetto/asset",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/asset"
-  },
-  "version": "2.0.0-alpha.3"
+  "publishConfig": {
+    "access": "public"
+  }
 }

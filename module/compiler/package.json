@@ -1,19 +1,8 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.2",
-    "@travetto/transformer": "^2.0.0-alpha.2",
-    "@travetto/watch": "^2.0.0-alpha.2"
-  },
-  "title": "Compiler",
+  "name": "@travetto/compiler",
+  "displayName": "Compiler",
+  "version": "2.0.0-alpha.2",
   "description": "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.",
-  "homepage": "https://travetto.io",
   "keywords": [
     "tsc",
     "typescript",
@@ -23,17 +12,28 @@
     "real-time",
     "travetto"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "support"
   ],
-  "name": "@travetto/compiler",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/compiler"
   },
-  "version": "2.0.0-alpha.2"
+  "dependencies": {
+    "@travetto/base": "^2.0.0-alpha.2",
+    "@travetto/transformer": "^2.0.0-alpha.2",
+    "@travetto/watch": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

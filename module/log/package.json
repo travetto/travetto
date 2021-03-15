@@ -1,17 +1,8 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/compiler": "^2.0.0-alpha.2"
-  },
-  "title": "Logging",
+  "name": "@travetto/log",
+  "displayName": "Logging",
+  "version": "2.0.0-alpha.2",
   "description": "Logging framework that integrates at the console.log level.",
-  "homepage": "https://travetto.io",
   "keywords": [
     "typescript",
     "travetto",
@@ -19,17 +10,26 @@
     "ast-transformation",
     "console-log"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "support"
   ],
-  "name": "@travetto/log",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/log"
   },
-  "version": "2.0.0-alpha.2"
+  "dependencies": {
+    "@travetto/compiler": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -1,10 +1,29 @@
 {
+  "name": "@travetto/model-redis",
+  "displayName": "Redis Model Support",
+  "version": "2.0.0-alpha.3",
+  "description": "Redis backing for the travetto model module.",
+  "keywords": [
+    "typescript",
+    "travetto",
+    "model",
+    "redis"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src",
+    "support"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/model-redis"
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
@@ -12,26 +31,7 @@
     "@types/redis": "^2.8.28",
     "redis": "^3.0.2"
   },
-  "title": "Redis Model Support",
-  "description": "Redis backing for the travetto model module.",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "typescript",
-    "travetto",
-    "model",
-    "redis"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src",
-    "support"
-  ],
-  "name": "@travetto/model-redis",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/model-redis"
-  },
-  "version": "2.0.0-alpha.3"
+  "publishConfig": {
+    "access": "public"
+  }
 }

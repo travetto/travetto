@@ -1,10 +1,29 @@
 {
+  "name": "@travetto/asset-rest",
+  "displayName": "Asset Rest Support",
+  "version": "2.0.0-alpha.4",
+  "description": "Provides integration between the travetto asset and rest module.",
+  "keywords": [
+    "rest",
+    "travetto",
+    "typescript",
+    "upload"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src",
+    "test-support"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/asset-rest"
   },
   "dependencies": {
     "@travetto/asset": "^2.0.0-alpha.3",
@@ -13,26 +32,7 @@
     "@types/busboy": "^0.2.3",
     "busboy": "^0.3.1"
   },
-  "title": "Asset Rest Support",
-  "description": "Provides integration between the travetto asset and rest module.",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "rest",
-    "travetto",
-    "typescript",
-    "upload"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src",
-    "test-support"
-  ],
-  "name": "@travetto/asset-rest",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/asset-rest"
-  },
-  "version": "2.0.0-alpha.4"
+  "publishConfig": {
+    "access": "public"
+  }
 }

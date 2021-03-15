@@ -1,14 +1,24 @@
 {
   "name": "@travetto/todo-app",
-  "private": true,
+  "description": "",
+  "keywords": [
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "ISC",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "related/todo-app"
+  },
   "scripts": {
     "test": "npx travetto test",
     "start": "npx travetto run"
   },
-  "author": "",
-  "license": "ISC",
-  "keywords": [],
-  "description": "",
   "dependencies": {
     "@travetto/log": "^2.0.0-alpha.0",
     "@travetto/cli": "^2.0.0-alpha.0",
@@ -21,7 +31,8 @@
     "@travetto/pack": "^2.0.0-alpha.0",
     "@travetto/test": "^2.0.0-alpha.0"
   },
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git"
+  "private": true,
+  "publishConfig": {
+    "access": "restricted"
   }
 }

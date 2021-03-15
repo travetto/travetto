@@ -1,10 +1,29 @@
 {
+  "name": "@travetto/model-mongo",
+  "displayName": "MongoDB Model Support",
+  "version": "2.0.0-alpha.3",
+  "description": "Mongo backing for the travetto model module.",
+  "keywords": [
+    "mongo",
+    "travetto",
+    "database",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
   "author": {
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "publishConfig": {
-    "access": "public"
+  "files": [
+    "index.ts",
+    "src",
+    "support"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/model-mongo"
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
@@ -13,26 +32,7 @@
     "@types/mongodb": "^3.6.9",
     "mongodb": "3.6.3"
   },
-  "title": "MongoDB Model Support",
-  "description": "Mongo backing for the travetto model module.",
-  "homepage": "https://travetto.io",
-  "keywords": [
-    "mongo",
-    "travetto",
-    "database",
-    "typescript"
-  ],
-  "license": "MIT",
-  "main": "index.ts",
-  "files": [
-    "index.ts",
-    "src",
-    "support"
-  ],
-  "name": "@travetto/model-mongo",
-  "repository": {
-    "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/model-mongo"
-  },
-  "version": "2.0.0-alpha.3"
+  "publishConfig": {
+    "access": "public"
+  }
 }

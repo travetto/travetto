@@ -1,36 +1,36 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@aws-sdk/client-dynamodb": "^1.0.0-rc.10",
-    "@travetto/config": "^2.0.0-alpha.2",
-    "@travetto/model": "^2.0.0-alpha.3"
-  },
-  "title": "DynamoDB Model Support",
+  "name": "@travetto/model-dynamodb",
+  "displayName": "DynamoDB Model Support",
+  "version": "2.0.0-alpha.3",
   "description": "DynamoDB backing for the travetto model module.",
-  "homepage": "https://travetto.io",
   "keywords": [
     "typescript",
     "travetto",
     "model",
     "dynamodb"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src",
     "support"
   ],
-  "name": "@travetto/model-dynamodb",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/model-dynamodb"
   },
-  "version": "2.0.0-alpha.3"
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^1.0.0-rc.10",
+    "@travetto/config": "^2.0.0-alpha.2",
+    "@travetto/model": "^2.0.0-alpha.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

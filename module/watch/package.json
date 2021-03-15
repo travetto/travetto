@@ -1,32 +1,32 @@
 {
-  "author": {
-    "email": "travetto.framework@gmail.com",
-    "name": "Travetto Framework"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.2"
-  },
-  "title": "Watch",
+  "name": "@travetto/watch",
+  "displayName": "Watch",
+  "version": "2.0.0-alpha.2",
   "description": "Support for making files watchable during runtime",
-  "homepage": "https://travetto.io",
   "keywords": [
     "file-watching",
     "travetto",
     "typescript"
   ],
+  "homepage": "https://travetto.io",
   "license": "MIT",
-  "main": "index.ts",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
   "files": [
     "index.ts",
     "src"
   ],
-  "name": "@travetto/watch",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/watch"
   },
-  "version": "2.0.0-alpha.2"
+  "dependencies": {
+    "@travetto/base": "^2.0.0-alpha.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
