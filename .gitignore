@@ -8,6 +8,10 @@ sample/dummy/
 .bin/
 dist/
 bin-dist/
+out/
+*.vsix
+openapi.yml
+openapi.json
 
 .DS_STORE
 *.compiled.*
