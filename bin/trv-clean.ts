@@ -15,5 +15,7 @@ import '@arcsine/nodesh';
   .$flatten()
   .$filter(x => !x.includes('/.'))
   .$collect()
-  .$map(f => $exec('rm', ['-rf', ...f]))
+  .$map(f => process.platform.startsWith('win') ?
+    $exec('rmdir', ['/Q', '/S', ...f]) :
+    $exec('rm', ['-rf', ...f]))
   .$stdout;
