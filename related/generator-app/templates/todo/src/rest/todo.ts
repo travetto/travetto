@@ -8,6 +8,7 @@ import { Authenticated, AuthContextService } from '@travetto/auth-rest'; // @doc
 // {{/modules.auth-rest}} // @doc-exclude
 
 import { Todo } from '../model/todo';
+import { ModelCrudSupport } from '@travetto/model';
 
 @Schema()
 class Query {
@@ -24,7 +25,11 @@ class Query {
 export class TodoController {
 
   @Inject()
-  source: ModelQueryCrudSupport;
+  source: ModelCrudSupport
+    // {{#modules.model-query}} // @doc-exclude
+    & ModelQueryCrudSupport
+    // {{/modules.model-query}} // @doc-exclude
+    ;
 
   // {{#modules.auth-rest}} // @doc-exclude
   @Inject() // @doc-exclude

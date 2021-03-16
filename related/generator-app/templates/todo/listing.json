@@ -32,12 +32,6 @@
       "@travetto/rest"
     ]
   },
-  "test/config.ts": {
-    "requires": [
-      "@travetto/model",
-      "@travetto/test"
-    ]
-  },
   "test/model/todo.ts": {
     "requires": [
       "@travetto/model",

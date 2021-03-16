@@ -23,6 +23,8 @@ declare const global: {
 export class ModuleManager {
   private static moduleLoad = Module._load!.bind(Module);
   private static resolveFilename = Module._resolveFilename!.bind(Module);
+  // @ts-expect-error
+  private static objectProto = Object.prototype.__proto__; // Remove to prevent __proto__ pollution in JSON
   private static initialized = false;
 
   static readonly transpile: (filename: string) => string;
@@ -103,6 +105,8 @@ export class ModuleManager {
     // Supports bootstrapping with framework resolution
     Module._load = (req, p) => this.onModuleLoad(req, p);
     require.extensions[SourceUtil.EXT] = this.compile.bind(this);
+
+    Object.defineProperty(Object.prototype, '__proto__', { configurable: false, enumerable: false, get: () => this.objectProto });
 
     this.initialized = true;
   }

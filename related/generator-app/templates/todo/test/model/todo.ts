@@ -6,9 +6,6 @@ import { BaseModelSuite } from '@travetto/model/test-support/base';
 
 import { Todo } from '../../src/model/todo';
 
-// Import with side effects as test will not automatically scan all files due to performance
-import '../config';
-
 @Suite('Simple CRUD')
 class TestCRUD extends BaseModelSuite<ModelCrudSupport>  {
 

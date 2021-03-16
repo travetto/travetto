@@ -1,18 +1,7 @@
 #!/usr/bin/env node
-const sym = Symbol.for('@trv:boot/register');
-if (!global[sym]) {
-  global[sym] = true;
-  try {
-    require(`${process.cwd()}/.env`);
-  } catch { }
-
-  for (const req of (process.env.TRV_REQUIRES || '').split(',')) {
-    req && require(req);
-  }
-
-  // Remove to prevent __proto__ pollution in JSON
-  const og = Object.prototype.__proto__;
-  Object.defineProperty(Object.prototype, '__proto__', { configurable: false, enumerable: false, get: () => og });
-
-  require('@travetto/boot/src/internal/module').ModuleManager.init();
-}
+var s = Symbol.for('@trv:boot/register');
+global[s] = global[s] || (() => {
+  try { require(`${process.cwd()}/.env`); } catch { } // read env
+  (process.env.TRV_REQUIRES || '').split(/\s*,\s*/).forEach(x => x && require(x)); //read requires
+  require('@travetto/boot/src/internal/module').ModuleManager.init() // init
+})();
