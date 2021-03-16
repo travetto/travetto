@@ -31,7 +31,7 @@ email-dev-context.json
 **/test-support/resources/logo
 
 # General
-related/generator-app/.eslintrc.js
+related/generator-app/**/.eslintrc.js
 
 # Folder Specific
 module/*/LICENSE
