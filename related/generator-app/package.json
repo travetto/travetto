@@ -29,7 +29,7 @@
     "directory": "related/generator-app"
   },
   "scripts": {
-    "prepack": "cp ../../bin-dist/eslint/core.js templates/todo/.eslintrc.js"
+    "prepack": "cp ../../.trv_cache/bin~eslint~core.ts templates/todo/.eslintrc.js"
   },
   "dependencies": {
     "@travetto/boot": "^2.0.0-alpha.2",

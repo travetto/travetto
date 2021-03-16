@@ -11,6 +11,11 @@ Module._resolveFilename = (original => function (request) {
 const all = require('./bin/eslint/core');
 module.exports = {
   ...all,
+  ignorePatterns: [
+    ...all.ignorePatterns,
+    'module/boot/src/**/*.js',
+    'related/generator-app/templates'
+  ],
   extends: [...all.extends, 'plugin:travetto/all'],
   plugins: [...all.plugins, 'unused-imports'],
   rules: { ...all.rules, 'unused-imports/no-unused-imports': 'error' }

@@ -12,6 +12,13 @@ export = {
     '@typescript-eslint'
   ],
   globals: { $argv: 'readonly', $exec: 'readonly' },
+  ignorePatterns: [
+    'node_modules/',
+    'dist/',
+    'api-client/',
+    'out/',
+    '*.d.ts',
+  ],
   rules: {
     '@typescript-eslint/array-type': 'error',
     '@typescript-eslint/explicit-function-return-type': 'off',

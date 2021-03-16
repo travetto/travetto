@@ -11,13 +11,13 @@ function enhancePackage(file: string, {
   optionalDependencies, optionalPeerDependencies,
   engines, private: priv, repository, author,
   publishConfig, ...rest
-}: Record<string, any>) {
+}: Record<string, unknown>) {
   return {
     name,
     displayName,
     version,
     description,
-    keywords: combine(keywords, 'travetto', 'typescript'),
+    keywords: combine(keywords as string[], 'travetto', 'typescript'),
     homepage: 'https://travetto.io',
     license: 'MIT',
     author: {

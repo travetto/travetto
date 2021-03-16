@@ -9,10 +9,10 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
+    "setup": "./bin/setup.sh",
     "test": "trv-test.js",
     "lint": "npx eslint --ext .js --ext .ts .",
-    "lerna": "npx lerna bootstrap --hoist",
-    "init": "trv-opt-deps.js; npm run lerna; trv-boot.js; trv-clean.js; trv-link.js; "
+    "lerna": "trv-opt-deps; npx lerna bootstrap --hoist; trv-clean;"
   },
   "dependencies": {
     "@arcsine/nodesh": "^1.8.3",

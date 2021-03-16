@@ -31,12 +31,11 @@ email-dev-context.json
 # Assets
 **/test-support/resources/logo
 
-# General
-related/generator-app/**/.eslintrc.js
-
 # Folder Specific
 module/*/LICENSE
 related/*/LICENSE
 module/*/*.tgz
 
+module/boot/src/
+related/generator-app/**/.eslintrc.js
 related/travetto.github.io/src/assets/images/vscode-plugin
