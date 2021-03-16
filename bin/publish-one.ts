@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import '@arcsine/nodesh';
 import * as path from 'path';
 import { execSync } from 'child_process';

@@ -29,7 +29,7 @@
   "scripts": {
     "build": "tsc -p src-ts",
     "build:watch": "tsc -w -p src-ts",
-    "prepack": "../../bin-dist/trv-compress-js.js -- 'src/**/*.js'"
+    "prepack": "trv-compress-js -- 'src/**/*.js'"
   },
   "dependencies": {
     "@types/node": "^12.20.5",

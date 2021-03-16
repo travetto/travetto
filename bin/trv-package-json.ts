@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import '@arcsine/nodesh';
 
 function combine(a: string[], ...b: string[]) {

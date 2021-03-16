@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import '@arcsine/nodesh';
 import * as path from 'path';
 import * as fs from 'fs';

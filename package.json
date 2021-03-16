@@ -9,7 +9,6 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
-    "bin": "npx tsc -p bin/tsconfig.json 1> /dev/null; chmod +x bin-dist/*.js",
     "test": "trv-test.js",
     "lint": "npx eslint --ext .js --ext .ts .",
     "lerna": "npx lerna bootstrap --hoist",

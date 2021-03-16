@@ -1,7 +1,7 @@
 # Top Level
-bin-dist/
 lerna-debug.log
 *.lerna_backup
+.bin/
 
 # Common
 node_modules/
