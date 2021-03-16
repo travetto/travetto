@@ -12,6 +12,7 @@ import { Request, Response } from '@travetto/rest/src/types';
 import { KoaServerUtil } from './internal/util';
 
 type TrvCtx = { [TravettoEntitySym]: [Request, Response] };
+type Keyed = { key?: symbol | string };
 type Router = kRouter<{}, TrvCtx>;
 type Routes = ReturnType<Router['routes']>;
 
@@ -70,7 +71,7 @@ export class KoaRestServer implements RestServer<koa> {
 
   async unregisterRoutes(key: string | symbol) {
     // Delete previous
-    const pos = this.raw.middleware.findIndex(x => (x as { key?: symbol | string }).key === key);
+    const pos = this.raw.middleware.findIndex(x => (x as Keyed).key === key);
     if (pos >= 0) {
       this.raw.middleware.splice(pos, 1);
     }
@@ -94,7 +95,7 @@ export class KoaRestServer implements RestServer<koa> {
     }
 
     // Register routes
-    const middleware: Routes & { key?: string | symbol } = router.routes();
+    const middleware: Routes & Keyed = router.routes();
     middleware.key = key;
     this.raw.use(middleware);
   }

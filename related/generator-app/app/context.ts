@@ -24,6 +24,6 @@ export class Context {
   }
 
   finalize() {
-    this.modules = this.frameworkDependencies.map(x => x.split('/')[1]).reduce((acc, v) => ({ ...acc, [v]: true }), {});
+    this.modules = this.frameworkDependencies.map(x => x.split('/')).reduce((acc, [, v]) => ({ ...acc, [v]: true }), {});
   }
 }

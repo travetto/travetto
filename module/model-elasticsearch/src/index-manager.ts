@@ -86,7 +86,7 @@ export class IndexManager implements ModelStorageSupport {
           ...(alias ? { aliases: { [ident.index]: {} } } : {})
         }
       });
-      console.debug('Index created', { index: ident.index });
+      console.debug('Index created', { index: ident.index, concrete: concreteIndex });
       console.debug('Index Config', {
         mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
         settings: this.config.indexCreate
@@ -161,7 +161,7 @@ export class IndexManager implements ModelStorageSupport {
     if (removes.length || typeChanges.length) { // Removing and adding
       const next = await this.createIndex(cls, false);
 
-      const aliases = await this.client.indices.getAlias({ index });
+      const aliases = (await this.client.indices.getAlias({ index })).body;
       const curr = Object.keys(aliases)[0];
 
       const allChange = removes.concat(typeChanges);
@@ -173,7 +173,7 @@ export class IndexManager implements ModelStorageSupport {
           dest: { index: next },
           script: {
             lang: 'painless',
-            inline: allChange.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
+            source: allChange.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
           }
         },
         waitForCompletion: true

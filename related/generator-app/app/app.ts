@@ -52,7 +52,7 @@ export class TravettoGenerator extends Generator {
     this.destinationRoot(PathUtil.resolveUnix(name));
 
     try {
-      if (!EnvUtil.isTrue('TRV_GEN_NO_VERIFY')) {
+      if (!EnvUtil.isFalse('TRV_GEN_VERIFY')) {
         verifyDestination(this.destinationPath('package.json'));
       }
     } catch (err) {

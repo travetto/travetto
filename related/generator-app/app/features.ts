@@ -34,13 +34,10 @@ export const FEATURES: Feature[] = [
     title: 'Data Modelling',
     npm: '@travetto/model',
     choices: [
-      { title: 'Elasticsearch', npm: '@travetto/model-elasticsearch', addons: [{ npm: '@travetto/model-query' }] },
-      { title: 'MongoDB', npm: '@travetto/model-mongo', addons: [{ npm: '@travetto/model-query' }] },
-      { title: 'DynamoDB', npm: '@travetto/model-dynamodb' },
-      { title: 'Firestore', npm: '@travetto/model-firestore' },
-      { title: 'Redis', npm: '@travetto/model-redis' },
-      { title: 'MySQL', npm: '@travetto/model-sql', addons: [{ npm: 'mysql' }, { npm: '@travetto/model-query' }] },
-      { title: 'PostgreSQL', npm: '@travetto/model-sql', addons: [{ npm: 'pg' }, { npm: '@travetto/model-query' }] }
+      { title: 'Elasticsearch', npm: '@travetto/model-elasticsearch' },
+      { title: 'MongoDB', npm: '@travetto/model-mongo' },
+      { title: 'MySQL', npm: '@travetto/model-sql', addons: [{ npm: 'mysql' }] },
+      { title: 'PostgreSQL', npm: '@travetto/model-sql', addons: [{ npm: 'pg' }] }
     ],
     default: 'MongoDB'
   },

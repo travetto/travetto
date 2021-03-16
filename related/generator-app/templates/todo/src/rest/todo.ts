@@ -1,5 +1,5 @@
-import { AppError } from '@travetto/base';
 import { Controller, Get, Put, Post, Delete, Path, SchemaBody, SchemaQuery } from '@travetto/rest';
+import { ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
@@ -8,7 +8,6 @@ import { Authenticated, AuthContextService } from '@travetto/auth-rest'; // @doc
 // {{/modules.auth-rest}} // @doc-exclude
 
 import { Todo } from '../model/todo';
-import { ModelCrudSupport } from '@travetto/model';
 
 @Schema()
 class Query {
@@ -25,11 +24,7 @@ class Query {
 export class TodoController {
 
   @Inject()
-  source: ModelCrudSupport
-    // {{#modules.model-query}} // @doc-exclude
-    & ModelQueryCrudSupport
-    // {{/modules.model-query}} // @doc-exclude
-    ;
+  source: ModelQueryCrudSupport;
 
   // {{#modules.auth-rest}} // @doc-exclude
   @Inject() // @doc-exclude
@@ -96,7 +91,7 @@ export class TodoController {
     }
     // {{/modules.auth-rest}} // @doc-exclude
     if (await this.source.deleteByQuery(Todo, q) !== 1) {
-      throw new AppError('Not found by id', 'notfound');
+      throw new NotFoundError(Todo, id);
     }
   }
 }

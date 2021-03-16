@@ -4,7 +4,7 @@ import { ExecUtil } from '@travetto/boot/src/exec';
 import { EnvUtil } from '@travetto/boot/src/env';
 import { CliUtil } from '@travetto/cli/src/util';
 import { AppCache, FileCache } from '@travetto/boot/src';
-import { SourceIndex } from '@travetto/boot/src/internal';
+import { SourceIndex } from '@travetto/boot/src/internal/source';
 
 /**
  * Utilities for running compilation

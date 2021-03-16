@@ -8,7 +8,7 @@ import { Response, Request } from '../types';
 import { Renderable } from '../response/renderable';
 import { HeadersAddedSym } from '../internal/symbol';
 
-const isRenderable = (o: unknown): o is Renderable => !!o && 'render' in (o as object);
+const isRenderable = (o: unknown): o is Renderable => !!o && !Util.isPrimitive(o) && 'render' in (o as object);
 
 /**
  * Serialization interceptor

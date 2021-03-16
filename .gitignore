@@ -8,6 +8,7 @@ node_modules/
 .trv*
 npm-debug.log
 .DS_STORE
+Thumbs.db
 
 # VSCode
 .vscode/
@@ -37,3 +38,5 @@ related/generator-app/**/.eslintrc.js
 module/*/LICENSE
 related/*/LICENSE
 module/*/*.tgz
+
+related/travetto.github.io/src/assets/images/vscode-plugin

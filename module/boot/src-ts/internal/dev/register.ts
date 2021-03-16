@@ -1,6 +1,6 @@
-import { AppCache } from '../cache';
-import { Package } from '../package';
-import { ModuleManager } from './module';
+import { AppCache } from '../../cache';
+import { Package } from '../../package';
+import { ModuleManager } from '../module';
 
 type DevConfig = {
   entries: string[];

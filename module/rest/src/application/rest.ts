@@ -132,7 +132,7 @@ export class RestApplication<T extends unknown = unknown>  {
 
     await this.server.registerRoutes(config.class.ᚕid, config.basePath, config.endpoints, this.interceptors);
 
-    if (this.server.reregisterGlobalOnChange) {
+    if (this.server.listening && this.server.reregisterGlobalOnChange) {
       await this.unregisterGlobal();
       await this.registerGlobal();
     }
@@ -157,7 +157,7 @@ export class RestApplication<T extends unknown = unknown>  {
    * Register the global listener as a hardcoded path
    */
   async registerGlobal() {
-    if (this.server.listening && EnvUtil.isReadonly()) {
+    if (EnvUtil.isReadonly()) {
       console.warn('Reloading not supported in readonly mode');
       return;
     }
@@ -176,7 +176,7 @@ export class RestApplication<T extends unknown = unknown>  {
    * Remove the global listener
    */
   async unregisterGlobal() {
-    if (this.server.listening && EnvUtil.isReadonly()) {
+    if (EnvUtil.isReadonly()) {
       console.warn('Unloading not supported in readonly mode');
       return;
     }
