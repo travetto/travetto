@@ -1,16 +1,17 @@
 import * as vscode from 'vscode';
 
 import { Activatible } from '../../../core/activation';
+import { Workspace } from '../../../core/workspace';
 import { BaseFeature } from '../../base';
 
 /**
  * Clean workspace
  */
-@Activatible('@travetto/boot', 'clean')
+@Activatible('base', 'clean')
 export class CleanFeature extends BaseFeature {
 
   async clean() {
-    await this.runBin('clean');
+    await Workspace.runMain(Workspace.binPath(this.module, 'clean'), []).result;
     vscode.window.showInformationMessage('Successfully deleted');
   }
 

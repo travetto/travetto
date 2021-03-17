@@ -13,7 +13,7 @@ import { TestEvent } from './types';
 /**
  * Test Runner Feature
  */
-@Activatible('@travetto/test', 'test')
+@Activatible('test', 'test')
 class TestRunnerFeature extends BaseFeature {
 
   private server: ProcessServer;
@@ -26,9 +26,8 @@ class TestRunnerFeature extends BaseFeature {
     command?: string
   ) {
     super(module, command);
-    this.server = new ProcessServer('node', [this.resolveBin('test-watch'), 'exec'], {
-      env: { TRV_CACHE: this.cacheDir, },
-      cwd: Workspace.path
+    this.server = new ProcessServer(Workspace.binPath(this.module, 'test-watch'), ['exec'], {
+      env: { TRV_CACHE: this.cacheDir, }
     });
 
     this.server.on('stop', () => this.clean());
@@ -71,15 +70,11 @@ class TestRunnerFeature extends BaseFeature {
       Workspace.addBreakpoint(editor, line);
     }
 
-    return await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
-      name: 'Debug Travetto',
-      program: this.resolveBin('test-direct'),
-      args: [
-        file.replace(`${Workspace.path}${path.sep}`, ''),
-        `${line}`
-      ],
-      env: Workspace.getDefaultEnv()
-    }));
+    return await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig(
+      'Debug Travetto',
+      Workspace.binPath(this.module, 'test-direct'),
+      [file.replace(`${Workspace.path}${path.sep}`, ''), `${line}`]
+    ));
   }
 
   /**

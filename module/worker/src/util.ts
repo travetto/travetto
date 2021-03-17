@@ -1,7 +1,12 @@
-import { ExecUtil, ExecutionOptions } from '@travetto/boot';
+import { ExecutionState } from '@travetto/boot';
 
 import { ParentCommChannel } from './comm/parent';
 import { Worker } from './pool';
+
+type Simple<V> = (ch: ParentCommChannel<V>) => Promise<unknown | void>;
+type Param<V, X> = (ch: ParentCommChannel<V>, input: X) => Promise<unknown | void>;
+
+const empty = async () => { };
 
 /**
  * Spawned worker
@@ -11,29 +16,18 @@ export class WorkUtil {
    * Create a process channel worker from a given spawn config
    */
   static spawnedWorker<V, X>(
-    command: string,
-    { args, opts, handlers }: {
-      args?: string[];
-      opts?: ExecutionOptions;
-      handlers: {
-        init?: (ch: ParentCommChannel<V>) => Promise<unknown | void>;
-        execute: (ch: ParentCommChannel<V>, input: X) => Promise<unknown | void>;
-        destroy?: (ch: ParentCommChannel<V>) => Promise<unknown | void>;
-      };
-    }
-  ): Worker<X> {
-    const channel = new ParentCommChannel<V>(
-      ExecUtil.forkMain(command, args, { ...opts })
-    );
+    worker: () => ExecutionState,
+    init: Simple<V>,
+    execute: Param<V, X>,
+    destroy: Simple<V> = empty): Worker<X> {
+    const channel = new ParentCommChannel<V>(worker());
     return {
       get id() { return channel.id; },
       get active() { return channel.active; },
-      init: handlers.init ? handlers.init.bind(handlers, channel) : undefined,
-      execute: handlers.execute.bind(handlers, channel),
+      init: () => init(channel),
+      execute: inp => execute(channel, inp),
       async destroy() {
-        if (handlers.destroy) {
-          await handlers.destroy(channel);
-        }
+        await destroy(channel);
         await channel.destroy();
       },
     };

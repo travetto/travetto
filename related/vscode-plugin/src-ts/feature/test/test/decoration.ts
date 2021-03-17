@@ -62,7 +62,7 @@ export class Decorations {
     let suffix = asrt.message;
 
     if ('errors' in asrt.error) {
-      title = asrt.error.message;
+      title = (asrt.error as { message: string }).message;
       const messages = (asrt.error as unknown as { errors: (Error | string)[] }).errors
         .map(x => typeof x === 'string' ? x : x.message);
 
@@ -83,9 +83,9 @@ export class Decorations {
         suffix = title;
       }
 
-      const getVal = (str: string) => {
+      const getVal = (str: unknown) => {
         try {
-          return util.inspect(JSON.parse(str), false, 10).replace(/\n/g, '  \n\t');
+          return util.inspect(JSON.parse(str as string), false, 10).replace(/\n/g, '  \n\t');
         } catch (e) {
           return str;
         }

@@ -88,7 +88,7 @@ export interface ErrorHoverAssertion {
   expected?: unknown;
   actual?: unknown;
   operator?: string;
-  error: Error & SMap<unknown>;
+  error: Error;
 }
 
 export type RemoveEvent = {

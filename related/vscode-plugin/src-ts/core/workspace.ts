@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
-import { FsUtil, PathUtil, Package } from '@travetto/boot';
+import { FsUtil, PathUtil, ExecUtil, ExecutionOptions } from '@travetto/boot';
+
+type ForkResult = ReturnType<(typeof ExecUtil)['forkMain']>;
 
 /**
  * Standard set of workspace utilities
@@ -50,17 +52,57 @@ export class Workspace {
    * Resolve worskapce path
    */
   static resolve(...p: string[]) {
-    return PathUtil.resolveUnix(this.path, ...p);
+    return PathUtil.resolveUnix(this.path, ...p)
+      .replace(/.*node_modules\/@travetto/, a => process.env.TRV_DEV || a);
   }
 
   /**
-   * Get module
+   * Run a main script
    */
-  static getModule() {
-    if (this._module === undefined) {
-      this._module = Package.name ?? '';
+  static runMain(main: string, args?: string[], opts?: ExecutionOptions & { format: undefined }): ForkResult;
+  static runMain(main: string, args: string[], opts: ExecutionOptions & { format: 'raw' }): ForkResult;
+  static runMain<T>(main: string, args: string[], opts: ExecutionOptions & { format: 'json' }): Promise<T>;
+  static runMain(main: string, args: string[], opts: ExecutionOptions & { format: 'text' }): Promise<string>;
+  static runMain(main: string, args: string[] = [], opts: ExecutionOptions & { format?: string } = {}): Promise<string | object> | ForkResult {
+    const boot = this.resolve(`node_modules/${this.binPath('boot', 'main')}`);
+    const exec = ExecUtil.fork(boot, [main, ...args], {
+      cwd: Workspace.path,
+      ...opts,
+      env: {
+        NODE_PATH: PathUtil.resolveUnix('..', '..', '.bin'),
+        ...(opts.env ?? {}),
+      }
+    });
+    switch (opts.format) {
+      case 'text': return exec.result.then(r => r.stdout);
+      case 'json': return exec.result.then(r => JSON.parse(r.stdout));
+      default: return exec;
     }
-    return this._module;
+  }
+
+  /**
+   * Get a bin path for a module
+   */
+  static binPath(module: string, script: string) {
+    return `@travetto/${module}/bin/${script}`;
+  }
+
+  /**
+   * Build workspace code
+   */
+  static async buildCode() {
+    const { result } = await this.runMain(this.binPath('base', 'build'));
+
+    try {
+      return await Promise.race([result, new Promise((res, rej) => setTimeout(rej, 500))]);
+    } catch (err) { // Handle timeout
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: 'Building...',
+        cancellable: false
+      }, () => result);
+      return (await result).stdout;
+    }
   }
 
   /**
@@ -68,16 +110,14 @@ export class Workspace {
    * @param module
    */
   static async isInstalled(module: string) {
-    return !!(await FsUtil.exists(this.resolve('node_modules', module))) || this.getModule() === module;
+    return !!process.env.TRV_DEV || !!(await FsUtil.exists(this.resolve('node_modules', module)));
   }
 
   /**
    * Generate execution launch config
    * @param config
    */
-  static generateLaunchConfig(config: { name: string, program: string } & Partial<vscode.DebugConfiguration>) {
-    // eslint-disable-next-line no-template-curly-in-string
-    config.program = config.program.replace(this.path, '${workspaceFolder}');
+  static generateLaunchConfig(name: string, main: string, args: string[] = []) {
     return {
       type: 'node',
       request: 'launch',
@@ -102,7 +142,13 @@ export class Workspace {
       ],
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
-      ...config
+      name,
+      program: this.binPath('boot', 'main'),
+      // eslint-disable-next-line no-template-curly-in-string
+      args: [main.replace(this.path, '${workspaceFolder}'), ...args].map(x => `${x}`),
+      env: {
+        FORCE_COLOR: 'true'
+      }
     };
   }
 

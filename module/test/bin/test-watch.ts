@@ -3,12 +3,12 @@ import { EnvInit } from '@travetto/base/bin/init';
 export async function main(format: string = 'tap') {
   EnvInit.init({
     debug: '0',
-    set: { TRV_LOG_TIME: '0' },
+    set: { TRV_LOG_TIME: '0', TRV_WATCH: '1' },
     append: {
       TRV_RESOURCES: 'test/resources',
       TRV_PROFILES: 'test',
       TRV_SRC_LOCAL: 'test',
-      TRV_SRC_COMMON: 'test-support'
+      TRV_SRC_COMMON: '^test-support'
     }
   });
 

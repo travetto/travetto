@@ -1,26 +1,23 @@
 import { WorkPool, WorkUtil, IterableInputSource } from '@travetto/worker';
-import { PathUtil } from '@travetto/boot';
+import { ExecUtil, PathUtil } from '@travetto/boot';
 
 const pool = new WorkPool(() =>
-  WorkUtil.spawnedWorker<{ data: string }, string>(PathUtil.resolveUnix(__dirname, 'spawned.ts'), {
-    handlers: {
-      async init(channel) {
-        return channel.listenOnce('ready'); // Wait for child to indicate it is ready
-      },
-      async execute(channel, inp) {
-        const res = channel.listenOnce('response'); //  Register response listener
-        channel.send('request', { data: inp }); // Send request
+  WorkUtil.spawnedWorker<{ data: string }, string>(
+    () => ExecUtil.forkMain(PathUtil.resolveUnix(__dirname, 'spawned.ts')),
+    ch => ch.listenOnce('ready'), // Wait for child to indicate it is ready    
+    async (channel, inp) => {
+      const res = channel.listenOnce('response'); //  Register response listener
+      channel.send('request', { data: inp }); // Send request
 
-        const { data } = await res; // Get answer
-        console.log('Request complete', { input: inp, output: data });
+      const { data } = await res; // Get answer
+      console.log('Request complete', { input: inp, output: data });
 
-        if (!(inp + inp === data)) {
-          // Ensure the answer is double the input
-          throw new Error('Did not get the double');
-        }
+      if (!(inp + inp === data)) {
+        // Ensure the answer is double the input
+        throw new Error('Did not get the double');
       }
     }
-  })
+  )
 );
 
 export function main() {

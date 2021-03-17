@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
-import { ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/boot';
+import { ExecutionOptions, ExecutionState } from '@travetto/boot';
+import { Workspace } from './workspace';
 
 /**
  * Tracks the logic for running a process as an IPC-based server
@@ -10,7 +11,7 @@ export class ProcessServer {
   private respawn = true;
   private state: ExecutionState;
 
-  constructor(private path: string, private args: string[], private opts: ExecutionOptions) {
+  constructor(private path: string, private args: string[] = [], private opts: ExecutionOptions = {}) {
     process.on('SIGINT', this.stop.bind(this));
     process.on('exit', this.stop.bind(this));
   }
@@ -23,7 +24,7 @@ export class ProcessServer {
     if (!this.running) {
       console.log('Starting', { path: this.path, args: this.args });
       this.emitter.emit('pre-start');
-      this.state = ExecUtil.spawn(this.path, this.args, this.opts);
+      this.state = Workspace.runMain(this.path, this.args, { ...this.opts, format: 'raw' });
 
       this.state.process.stdout?.pipe(process.stdout);
       this.state.process.stderr?.pipe(process.stderr);

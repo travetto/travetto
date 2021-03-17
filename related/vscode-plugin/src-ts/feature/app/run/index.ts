@@ -11,7 +11,7 @@ import { BaseFeature } from '../../base';
 /**
  * App run feature
  */
-@Activatible('@travetto/app', 'run')
+@Activatible('app', 'run')
 export class AppRunFeature extends BaseFeature {
 
   private storage = new ActionStorage<AppChoice>('app.run', Workspace.path);
@@ -29,8 +29,8 @@ export class AppRunFeature extends BaseFeature {
    * Get list of applications
    */
   async getAppList() {
-    await this.build();
-    const choices = await this.runBinJSON<AppChoice[]>('list-get');
+    await Workspace.buildCode();
+    const choices = await Workspace.runMain<AppChoice[]>(Workspace.binPath(this.module, 'list-get'), [], { format: 'json' });
     return choices.map(x => {
       x.inputs = x.inputs || [];
       return x;
@@ -71,15 +71,12 @@ export class AppRunFeature extends BaseFeature {
    */
   getLaunchConfig(choice: AppChoice) {
     const args = choice.inputs.map(x => `${x}`.replace(Workspace.path, '.')).join(', ');
-    const env = Workspace.getDefaultEnv({});
 
-    return Workspace.generateLaunchConfig({
-      name: `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
-      program: this.resolveBin('run'),
-      args: [choice.name, ...choice.inputs].map(x => `${x}`),
-      env,
-      cwd: Workspace.path
-    });
+    return Workspace.generateLaunchConfig(
+      `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
+      Workspace.binPath(this.module, 'run'),
+      [choice.name, ...choice.inputs]
+    );
   }
 
   /**

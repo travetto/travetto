@@ -201,6 +201,7 @@ export class Transpiler {
         this.hashes.delete(filename);
       }
       this.sources.delete(filename);
+      this.contents.delete(filename);
       this.rootNames.delete(filename);
     }
   }

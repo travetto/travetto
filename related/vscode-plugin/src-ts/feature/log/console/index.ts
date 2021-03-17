@@ -14,7 +14,7 @@ interface Link extends vscode.TerminalLink {
 /**
  * Logging workspace
  */
-@Activatible('log')
+@Activatible('log', true)
 export class CleanFeature extends BaseFeature {
 
   base = fs.existsSync(Workspace.resolve('module/boot/package.json')) ? './module' : './node_modules/@travetto';

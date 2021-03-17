@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
  */
 export interface ActivationTarget {
   module: string;
+  command?: string;
   activate?(ctx: vscode.ExtensionContext): void | Promise<void>;
   deactivate?(): void | Promise<void>;
 }

@@ -2,8 +2,8 @@ import { EventEmitter } from 'events';
 import * as vscode from 'vscode';
 
 import { Activatible } from '../../../core/activation';
-import { Workspace } from '../../../core/workspace';
 import { ProcessServer } from '../../../core/server';
+import { Workspace } from '../../../core/workspace';
 
 import { BaseFeature } from '../../base';
 
@@ -12,7 +12,7 @@ type Content = { html: string, text: string, subject: string };
 /**
  * Email Template Feature
  */
-@Activatible('@travetto/email-template', 'develop')
+@Activatible('email-template', 'develop')
 export class EmailTemplateFeature extends BaseFeature {
 
   static isTemplate(f?: string) {
@@ -34,9 +34,7 @@ export class EmailTemplateFeature extends BaseFeature {
   ) {
     super(module, command);
 
-    this.server = new ProcessServer('node', [this.resolveBin('editor')], {
-      cwd: Workspace.path
-    });
+    this.server = new ProcessServer(Workspace.binPath(this.module, 'editor'));
 
     this.server.on('start', () => {
       this.server.onMessage('changed', (type, msg) => this.emitter.emit('render', msg));

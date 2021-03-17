@@ -1,13 +1,11 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 
-import { SuiteConfig } from '@travetto/test';
-
 import { Decorations } from './decoration';
 import {
   AllState, TestState, ResultState,
   TestEvent, SuiteResult, TestResult, Assertion,
-  SuiteState, Level,
+  SuiteConfig, SuiteState, Level,
   ErrorHoverAssertion,
   StatusUnknown,
   RemoveEvent
