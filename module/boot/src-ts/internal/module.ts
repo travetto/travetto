@@ -13,6 +13,8 @@ import { PathUtil } from '../path';
 
 export const Module = Mod as unknown as ModType;
 
+type UnloadHandler = (file: string, unlink?: boolean) => void;
+
 declare const global: {
   ᚕsrc: (f: string) => string;
 };
@@ -26,6 +28,7 @@ export class ModuleManager {
   // @ts-expect-error
   private static objectProto = Object.prototype.__proto__; // Remove to prevent __proto__ pollution in JSON
   private static initialized = false;
+  private static unloadHandlers: UnloadHandler[] = [];
 
   static readonly transpile: (filename: string) => string;
 
@@ -44,6 +47,14 @@ export class ModuleManager {
       mod = Module._compile!(ModuleUtil.handlePhaseError('load', name, e), name);
     }
     return ModuleUtil.handleModule(mod, request, parent);
+  }
+
+  /**
+   * Listen for when files are unloaded
+   * @param handler 
+   */
+  static onUnload(handler: UnloadHandler) {
+    this.unloadHandlers.push(handler);
   }
 
   /**
@@ -133,10 +144,13 @@ export class ModuleManager {
   /**
    * Remove file from require.cache, and possible the file system
    */
-  static unload(filename: string) {
+  static unload(filename: string, unlink = false) {
     const native = PathUtil.toNative(filename);
     if (native in require.cache) {
       delete require.cache[native]; // Remove require cached element
+      for (const el of this.unloadHandlers) {
+        el(filename, unlink);
+      }
       return true;
     }
   }

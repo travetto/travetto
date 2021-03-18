@@ -47,8 +47,10 @@ class $Compiler {
     if (!EnvUtil.isReadonly()) {
       await this.transpiler.init();
       // Enhance transpilation, with custom transformations
-      ModuleManager.setTranspiler(this.transpile.bind(this));
+      ModuleManager.setTranspiler(tsf => this.transpiler.transpile(tsf));
     }
+
+    ModuleManager.onUnload((f, unlink) => this.transpiler.unload(f, unlink)); // Remove source
 
     // Update source map support to read from tranpsiler cache
     sourceMapSupport.install({
@@ -56,13 +58,6 @@ class $Compiler {
     });
 
     console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
-  }
-
-  /**
-   * Transpile a file
-   */
-  transpile(tsf: string) {
-    return this.transpiler.transpile(tsf);
   }
 
   /**
@@ -74,14 +69,6 @@ class $Compiler {
     }
     SourceIndex.reset();
     this.active = false;
-  }
-
-  /**
-   * Unload transpiled file
-   */
-  unload(filename: string, unlink = false) {
-    this.transpiler.unload(filename, unlink); // Remove source
-    return ModuleManager.unload(filename);
   }
 
   /**
@@ -104,7 +91,7 @@ class $Compiler {
    */
   added(filename: string) {
     if (filename in require.cache) { // if already loaded
-      this.unload(filename);
+      ModuleManager.unload(filename);
     }
     // Load Synchronously
     require(filename);
@@ -115,7 +102,7 @@ class $Compiler {
    * Handle when a file is removed during watch
    */
   removed(filename: string) {
-    this.unload(filename, true);
+    ModuleManager.unload(filename, true);
     this.notify('removed', filename);
   }
 
@@ -124,7 +111,7 @@ class $Compiler {
    */
   changed(filename: string) {
     if (this.transpiler.hashChanged(filename)) {
-      this.unload(filename);
+      ModuleManager.unload(filename);
       // Load Synchronously
       require(filename);
       this.notify('changed', filename);

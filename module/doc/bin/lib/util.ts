@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { PathUtil } from '@travetto/boot';
+import { ModuleManager } from '@travetto/boot/src/internal/module';
 
 export class DocBinUtil {
 
@@ -16,7 +17,7 @@ export class DocBinUtil {
 
     new Watcher(__dirname, { interval: 250, exclude: { testDir: () => false, testFile: f => f === file } })
       .on('all', e => {
-        Compiler.unload(PathUtil.resolveUnix(file));
+        ModuleManager.unload(PathUtil.resolveUnix(file));
         cb(e);
       });
     await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24));
