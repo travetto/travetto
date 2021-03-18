@@ -59,7 +59,7 @@ export class AppListUtil {
    */
   static async buildList() {
     if (!parentPort) { // If top level, recurse
-      return CliUtil.waiting('Compiling', () =>
+      return CliUtil.waiting('Collecting', () =>
         ExecUtil.workerMain<ApplicationConfig[]>(require.resolve('../list-build'), [], {
           env: { TRV_WATCH: '0' }
         }).message

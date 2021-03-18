@@ -1,4 +1,4 @@
-import type { Compiler } from '@travetto/compiler';
+import { ModuleManager } from '@travetto/boot/src/internal/module';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager } from '@travetto/base';
@@ -23,7 +23,6 @@ const FIXED_MODULES = new Set([
  */
 export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
-  private compiler: typeof Compiler;
   private runs = 0;
 
   /**
@@ -65,10 +64,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   /**
    * In response to the initialization command
    */
-  async onInitCommand() {
-    // Load the compiler
-    this.compiler = (await import('@travetto/compiler')).Compiler;
-  }
+  async onInitCommand() { }
 
   /**
    * Reset the state to prepare for the next run
@@ -86,7 +82,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       includeIndex: true
     })) {
       if (!/support\/(transformer|phase)[.]/.test(file)) {
-        const worked = this.compiler.unload(file);
+        const worked = ModuleManager.unload(file);
         if (worked) {
           console.debug('Unloading', { pid: process.pid, file });
         }

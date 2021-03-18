@@ -76,9 +76,13 @@ export class ErrorUtil {
         error[k] = e[k];
       }
       error.$ = true;
-      error.message = e instanceof Error ? e.toJSON() : e.message;
-      error.stack = e.stack;
       error.name = e.name;
+      if (e instanceof Error) {
+        Object.assign(error, e.toJSON());
+      } else {
+        error.message = e.message;
+        error.stack = e.stack;
+      }
     }
 
     return error;

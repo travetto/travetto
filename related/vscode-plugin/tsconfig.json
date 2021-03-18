@@ -6,16 +6,11 @@
     "paths": {
       "@travetto/boot": [
         "../../module/boot"
-      ],
-      "@travetto/doc": [
-        "../../module/doc"
-      ],
-      "@travetto/test": [
-        "../../module/test"
       ]
     }
   },
   "exclude": [
+    "doc.ts",
     "node_modules",
     ".vscode-test"
   ],

@@ -67,6 +67,7 @@ class $Compiler {
     if (!EnvUtil.isReadonly()) {
       this.transpiler.reset();
     }
+    ModuleManager['unloadHandlers'] = [];
     SourceIndex.reset();
     this.active = false;
   }

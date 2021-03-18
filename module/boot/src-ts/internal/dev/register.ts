@@ -73,7 +73,7 @@ class DevRegister {
 
   static run() {
     const envMods = process.env.TRV_MODULES ?? '';
-    if (envMods) { // Is specifying modules, build out
+    if (envMods && !process.env.TRV_CACHE) { // Is specifying modules, build out
       // @ts-expect-error
       AppCache.cacheDir = `.trv_cache_${this.naiveHash(process.env.TRV_MODULES)}`;
     }

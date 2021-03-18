@@ -119,12 +119,11 @@ export class Workspace {
    */
   static generateLaunchConfig(name: string, main: string, args: string[] = []) {
     return {
-      type: 'node',
+      type: 'pwa-node',
       request: 'launch',
       protocol: 'inspector',
       // eslint-disable-next-line no-template-curly-in-string
       cwd: '${workspaceFolder}',
-      stopOnEntry: true,
       sourceMaps: true,
       runtimeArgs: [
         '--nolazy'
@@ -135,15 +134,18 @@ export class Workspace {
       breakOnLoadStrategy: 'regex',
       skipFiles: [
         '<node_internals>/**',
+        'node:internals/**',
+        'internal/**',
         '**/@travetto/context/**/*',
         '**/@travetto/watch/**/*',
+        '**/@travetto/rest/src/util/route.ts',
         '**/@travetto/**/internal/*',
         '**/tslib/**/*'
       ],
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
       name,
-      program: this.binPath('boot', 'main'),
+      program: this.resolve(`node_modules/${this.binPath('boot', 'main')}`),
       // eslint-disable-next-line no-template-curly-in-string
       args: [main.replace(this.path, '${workspaceFolder}'), ...args].map(x => `${x}`),
       env: {

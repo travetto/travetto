@@ -43,7 +43,7 @@ export class EmailTemplateFeature extends BaseFeature {
 
   getPanel() {
     if (!this._panel) {
-      this._panel = vscode.window.createWebviewPanel('travetto.email-template.content', 'Email Preview', {
+      this._panel = vscode.window.createWebviewPanel(`${this.commandBase}.content`, 'Email Preview', {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: true
       });

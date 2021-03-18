@@ -51,7 +51,7 @@ export class ModuleManager {
 
   /**
    * Listen for when files are unloaded
-   * @param handler 
+   * @param handler
    */
   static onUnload(handler: UnloadHandler) {
     this.unloadHandlers.push(handler);
@@ -146,11 +146,11 @@ export class ModuleManager {
    */
   static unload(filename: string, unlink = false) {
     const native = PathUtil.toNative(filename);
+    for (const el of this.unloadHandlers) {
+      el(filename, unlink);
+    }
     if (native in require.cache) {
       delete require.cache[native]; // Remove require cached element
-      for (const el of this.unloadHandlers) {
-        el(filename, unlink);
-      }
       return true;
     }
   }
