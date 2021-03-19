@@ -1,8 +1,9 @@
 // @ts-ignore
 import * as Mod from 'module';
+import type * as tsi from 'typescript';
 import * as sourceMapSupport from 'source-map-support';
 
-import { SimpleTranspiler } from './transpiler';
+import { TranspileUtil } from './transpile-util';
 import { ModuleUtil, ModType } from './module-util';
 import { SourceUtil } from './source-util';
 
@@ -87,6 +88,25 @@ export class ModuleManager {
   }
 
   /**
+   * Transpile, and cache
+   * @param tsf The typescript file to transpile
+   * @param force Force transpilation, even if cached
+   */
+  static simpleTranspile(tsf: string, force = false) {
+    return AppCache.getOrSet(tsf, () => {
+      try {
+        const diags: tsi.Diagnostic[] = [];
+        const ts = require('typescript') as typeof tsi;
+        const ret = ts.transpile(SourceUtil.preProcess(tsf), TranspileUtil.compilerOptions as tsi.CompilerOptions, tsf, diags);
+        TranspileUtil.checkTranspileErrors(tsf, diags);
+        return ret;
+      } catch (err) {
+        return TranspileUtil.transpileError(tsf, err);
+      }
+    }, force);
+  }
+
+  /**
    * Enable compile support
    */
   static init() {
@@ -100,7 +120,7 @@ export class ModuleManager {
       Module._resolveFilename = (req, p) => this.resolveFilename(ModuleUtil.devResolveFilename(req), p);
     }
 
-    this.setTranspiler(f => SimpleTranspiler.transpile(f));
+    this.setTranspiler(f => this.simpleTranspile(f));
 
     // Registering unix conversion to use for filenames
     global.ᚕsrc = PathUtil.toUnixTs;

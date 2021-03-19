@@ -11,7 +11,9 @@ export interface CaptureAssert extends Partial<Assertion> {
 /**
  * Assertion capturer
  */
-class $AssertCapture extends EventEmitter {
+class $AssertCapture {
+
+  private emitter = new EventEmitter();
 
   /**
    * Collect all events until the handler is closed
@@ -34,16 +36,16 @@ class $AssertCapture extends EventEmitter {
       }
     };
 
-    this.on('assert', handler);
+    this.emitter.on('assert', handler);
 
     return () => {
-      this.off('assert', handler);
+      this.emitter.off('assert', handler);
       return assertions;
     };
   }
 
   add(a: CaptureAssert) {
-    return super.emit('assert', a);
+    this.emitter.emit('assert', a);
   }
 }
 

@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { Class } from '@travetto/base';
 import { Compiler } from '@travetto/compiler';
 
-import { ChangeSource, ChangeEvent } from '../types';
+import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 import { PendingRegister } from '../decorator';
 
 /**
@@ -14,17 +14,12 @@ import { PendingRegister } from '../decorator';
 export class ClassSource implements ChangeSource<Class> {
 
   private classes = new Map<string, Map<string, Class>>();
-  private events = new EventEmitter();
+  private emitter = new EventEmitter();
 
   constructor() {
-    Compiler.on('added', file => {
-      this.handlePendingFileChanges();
-      this.flush();
-    });
-
-    Compiler.on('changed', file => {
-      this.handlePendingFileChanges();
-    });
+    Compiler
+      .on('added', () => { this.processFiles(); this.flush(); })
+      .on('changed', () => this.processFiles());
   }
 
   /**
@@ -81,7 +76,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Flush all pending classes
    */
-  handlePendingFileChanges() {
+  processFiles() {
     console.debug('Pending changes', { changes: PendingRegister.ordered.map(([, x]) => x.map(y => y.ᚕid)) });
     for (const [file, classes] of PendingRegister.flush()) {
       this.handleFileChanges(file, classes);
@@ -93,7 +88,7 @@ export class ClassSource implements ChangeSource<Class> {
    */
   emit(e: ChangeEvent<Class>) {
     console.debug('Emitting change', { type: e.type, curr: e.curr?.ᚕid, prev: e.prev?.ᚕid });
-    this.events.emit('change', e);
+    this.emitter.emit('change', e);
   }
 
   /**
@@ -113,7 +108,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Add callback for change events
    */
-  on(callback: (e: ChangeEvent<Class>) => void): void {
-    this.events.on('change', callback);
+  on(callback: ChangeHandler<Class>): void {
+    this.emitter.on('change', callback);
   }
 }

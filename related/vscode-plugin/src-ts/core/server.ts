@@ -2,6 +2,8 @@ import { EventEmitter } from 'events';
 import { ExecutionOptions, ExecutionState } from '@travetto/boot';
 import { Workspace } from './workspace';
 
+type EventType = 'start' | 'stop' | 'pre-start' | 'pre-stop' | 'restart';
+
 /**
  * Tracks the logic for running a process as an IPC-based server
  */
@@ -16,14 +18,19 @@ export class ProcessServer {
     process.on('exit', this.stop.bind(this));
   }
 
-  on(type: string, handler: (event: unknown) => void) {
+  private emit(type: EventType, ...args: unknown[]) {
+    this.emitter.emit(type, ...args);
+  }
+
+  on(type: EventType, handler: (event: unknown) => void) {
     this.emitter.on(type, handler);
+    return this;
   }
 
   start() {
     if (!this.running) {
       console.log('Starting', { path: this.path, args: this.args });
-      this.emitter.emit('pre-start');
+      this.emit('pre-start');
       this.state = Workspace.runMain(this.path, this.args, { ...this.opts, format: 'raw' });
 
       this.state.process.stdout?.pipe(process.stdout);
@@ -31,12 +38,12 @@ export class ProcessServer {
 
       this.state.result.finally(() => {
         if (this.respawn) {
-          this.emitter.emit('restart');
+          this.emit('restart');
           this.start();
         }
       });
 
-      this.emitter.emit('start');
+      this.emit('start');
     }
   }
 
@@ -53,9 +60,9 @@ export class ProcessServer {
     if (this.running) {
       console.log('Stopping', { path: this.path, args: this.args });
       this.respawn = false;
-      this.emitter.emit('pre-stop');
+      this.emit('pre-stop');
       this.state.process.kill();
-      this.emitter.emit('stop');
+      this.emit('stop');
     }
   }
 
@@ -63,7 +70,7 @@ export class ProcessServer {
     return this.state && this.state.process && !this.state.process.killed;
   }
 
-  emitMessage(type: string, payload: Record<string, unknown> = {}) {
+  sendMessage(type: string, payload: Record<string, unknown> = {}) {
     if (!this.running) {
       throw new Error('Server is not running');
     }
@@ -96,7 +103,7 @@ export class ProcessServer {
     });
   }
 
-  emitMessageAndWaitFor<U>(type: string, payload: Record<string, unknown>, waitType: string, errType?: string): Promise<U> {
+  sendMessageAndWaitFor<U>(type: string, payload: Record<string, unknown>, waitType: string, errType?: string): Promise<U> {
     const prom = new Promise<U>((resolve, reject) => {
       const remove = this.onMessage([waitType, errType], (resType, msg) => {
         remove();
@@ -107,7 +114,7 @@ export class ProcessServer {
       });
     });
 
-    this.emitMessage(type, payload);
+    this.sendMessage(type, payload);
     return prom;
   }
 }

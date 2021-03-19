@@ -32,15 +32,29 @@ export interface SchemaChangeEvent {
   change: SchemaChange;
 }
 
-export const SCHEMA_CHANGE_EVENT = 'schema:change';
-export const FIELD_CHANGE_EVENT = 'field:change';
-
 /**
  * Schema change listener.  Handles all changes that occur via the SchemaRegistry
  */
-class $SchemaChangeListener extends EventEmitter {
+class $SchemaChangeListener {
 
+  private emitter = new EventEmitter();
   private mapping = new Map<string, Map<string, FieldMapping>>();
+
+  /**
+   * On schema change, emit the change event for the whole schema
+   * @param cb The function to call on schema change
+   */
+  onSchemaChange(handler: (e: SchemaChangeEvent) => void) {
+    this.emitter.on('schema', handler);
+  }
+
+  /**
+   * On schema field change, emit the change event for the whole schema
+   * @param cb The function to call on schema field change
+   */
+  onFieldChange(handler: (e: FieldChangeEvent) => void) {
+    this.emitter.on('field', handler);
+  }
 
   /**
    * Reset the listener
@@ -92,10 +106,7 @@ class $SchemaChangeListener extends EventEmitter {
     }
 
     for (const key of updates.keys()) {
-      this.emit(SCHEMA_CHANGE_EVENT, {
-        cls: updates.get(key)!.config.class,
-        change: updates.get(key)!
-      } as SchemaChangeEvent);
+      this.emitter.emit('schema', { cls: updates.get(key)!.config.class, change: updates.get(key)! });
     }
   }
 
@@ -143,8 +154,7 @@ class $SchemaChangeListener extends EventEmitter {
     }
 
     // Send field changes
-    this.emit(FIELD_CHANGE_EVENT, { cls: curr!.class, changes } as FieldChangeEvent);
-
+    this.emitter.emit('field', { cls: curr!.class, changes });
     this.emitSchemaChanges({ cls: curr!.class, changes });
   }
 }

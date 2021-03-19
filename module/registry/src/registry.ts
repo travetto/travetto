@@ -1,8 +1,6 @@
 import { EventEmitter } from 'events';
-
 import { Class } from '@travetto/base';
-
-import { ChangeSource, ChangeEvent } from './types';
+import { ChangeSource, ChangeEvent, ChangeHandler } from './types';
 
 /**
  * Base registry class, designed to listen to changes over time
@@ -20,7 +18,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Event emitter, to broadcast event changes
    */
-  protected events = new EventEmitter();
+  protected emitter = new EventEmitter();
   /**
    * Dependent registries
    */
@@ -171,28 +169,29 @@ export abstract class Registry implements ChangeSource<Class> {
    * Emit a new event
    */
   emit(e: ChangeEvent<Class>) {
-    this.events.emit('change', e);
+    console.log('Emitting', this.constructor.name, e);
+    this.emitter.emit('change', e);
   }
 
   /**
    * Register additional listeners
    */
-  on<T>(callback: (e: ChangeEvent<Class<T>>) => unknown): void {
-    this.events.on('change', callback);
+  on<T>(callback: ChangeHandler<Class<T>>): void {
+    this.emitter.on('change', callback);
   }
 
   /**
    * Remove listeners
    */
-  off<T>(callback: (e: ChangeEvent<Class<T>>) => unknown) {
-    this.events.off('change', callback);
+  off<T>(callback: ChangeHandler<Class<T>>) {
+    this.emitter.off('change', callback);
   }
 
   /**
    * Connect changes sources
    */
   listen(source: ChangeSource<Class>) {
-    source.on(this.onEvent.bind(this));
+    source.on(e => this.onEvent(e));
   }
 
   /**

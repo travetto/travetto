@@ -2,24 +2,17 @@ import type * as tsi from 'typescript';
 
 import { EnvUtil } from '../env';
 import { FsUtil } from '../fs';
-import { AppCache } from '../cache';
 import { SourceUtil } from './source-util';
 import { PathUtil } from '../path';
 
 type Diag = {
-  start: number;
-  messageText: string;
+  start?: number;
+  messageText: string | { messageText: string, category: 0 | 1 | 2 | 3, code: number };
   file?: {
     fileName: string;
     getLineAndCharacterOfPosition(start: number): { line: number, character: number };
   };
 };
-
-function getTs() {
-  // Load Synchronously
-  const ts: typeof tsi = require('typescript');
-  return ts;
-}
 
 const CompilerOptionsSym = Symbol.for('@trv:compiler/options');
 
@@ -35,7 +28,7 @@ const TS_TARGET = ({
 /**
  * Standard transpilation support
  */
-export class SimpleTranspiler {
+export class TranspileUtil {
   private static [CompilerOptionsSym]: unknown; // Untyped so that the typescript typings do not make it into the API
 
   /**
@@ -58,7 +51,7 @@ export class SimpleTranspiler {
    */
   static get compilerOptions(): unknown {
     if (!this[CompilerOptionsSym]) {
-      const ts = getTs();
+      const ts = require('typescript') as typeof tsi;
       const projTsconfig = PathUtil.resolveUnix('tsconfig.json');
       const baseTsconfig = PathUtil.resolveUnix(__dirname, '..', '..', 'tsconfig.trv.json');
       // Fallback to base tsconfig if not found in local folder
@@ -81,10 +74,11 @@ export class SimpleTranspiler {
    * @param filename The name of the file
    * @param diagnostics The diagnostic errors
    */
-  static checkTranspileErrors(filename: string, diagnostics: readonly Diag[]) {
+  static checkTranspileErrors<T extends Diag>(filename: string, diagnostics: readonly T[]) {
     if (diagnostics && diagnostics.length) {
       const errors: string[] = diagnostics.slice(0, 5).map(diag => {
-        const message = getTs().flattenDiagnosticMessageText(diag.messageText, '\n');
+        const ts = require('typescript') as typeof tsi;
+        const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
           const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
           return ` @ ${diag.file.fileName.replace(PathUtil.cwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
@@ -98,24 +92,6 @@ export class SimpleTranspiler {
       }
       throw new Error(`Transpiling ${filename.replace(PathUtil.cwd, '.')} failed: \n${errors.join('\n')}`);
     }
-  }
-
-  /**
-   * Transpile, and cache
-   * @param tsf The typescript file to transpile
-   * @param force Force transpilation, even if cached
-   */
-  static transpile(tsf: string, force = false) {
-    return AppCache.getOrSet(tsf, () => {
-      try {
-        const diags: Diag[] = [];
-        const ret = getTs().transpile(SourceUtil.preProcess(tsf), this.compilerOptions as tsi.CompilerOptions, tsf, diags as tsi.Diagnostic[]);
-        this.checkTranspileErrors(tsf, diags);
-        return ret;
-      } catch (err) {
-        return this.transpileError(tsf, err);
-      }
-    }, force);
   }
 
   /**

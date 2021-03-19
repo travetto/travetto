@@ -1,16 +1,5 @@
-import { EventEmitter } from 'events';
-import { ScanEntry } from '@travetto/boot';
 import { Watcher, WatcherOptions } from './watcher';
-
-export interface FilePresenceManager {
-  on(type: 'all', handlder: (payload: { event: string, entry: ScanEntry }) => void): this;
-  on(type: 'added', handlder: (entry: ScanEntry) => void): this;
-  on(type: 'addedDir', handlder: (entry: ScanEntry) => void): this;
-  on(type: 'removed', handlder: (entry: ScanEntry) => void): this;
-  on(type: 'removedDir', handlder: (entry: ScanEntry) => void): this;
-  on(type: 'changed', handlder: (entry: ScanEntry) => void): this;
-  on(type: string | symbol, handler: (payload: ScanEntry | { event: string, entry: ScanEntry }) => void): this;
-}
+import { AllEvent, WatchEmitter } from './emitter';
 
 type Opts = WatcherOptions & {
   validFile?: (f: string) => boolean;
@@ -20,7 +9,7 @@ type Opts = WatcherOptions & {
  * Tracks file changes for the application roots,
  * and handles multiple file roots.
  */
-export class FilePresenceManager extends EventEmitter {
+export class FilePresenceManager extends WatchEmitter {
   private watchers = new Map<string, Watcher>();
 
   /**
@@ -30,7 +19,6 @@ export class FilePresenceManager extends EventEmitter {
    */
   constructor(folders: string[], private config: Opts = {}) {
     super();
-
     this.addFolder(...folders);
     setTimeout(() => this.config.ignoreInitial = false, 1000);
   }
@@ -38,7 +26,7 @@ export class FilePresenceManager extends EventEmitter {
   /**
    * Callback handle for the watcher
    */
-  private watcherListener({ event, entry }: { event: string, entry: ScanEntry }) {
+  private watcherListener({ event, entry }: AllEvent) {
     switch (event) {
       case 'added':
       case 'changed':
@@ -48,7 +36,6 @@ export class FilePresenceManager extends EventEmitter {
         }
         break;
     }
-    this.emit('all', { event, entry });
     this.emit(event, entry);
   }
 

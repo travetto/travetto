@@ -1,6 +1,6 @@
 import { EnvUtil } from '@travetto/boot';
 import { AppManifest, Class } from '@travetto/base';
-import { SchemaRegistry } from '@travetto/schema';
+import { SchemaChangeListener } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
 import { ModelStorageSupport } from '../../service/storage';
@@ -32,6 +32,7 @@ export class ModelStorageUtil {
     // If listening for model add/removes/updates
     if (storage.createModel || storage.deleteModel || storage.changeModel) {
       ModelRegistry.on<ModelType>(ev => {
+        console.log('Woohoo', ev);
         switch (ev.type) {
           case 'added': checkType(ev.curr!) ? storage.createModel?.(ev.curr!) : undefined; break;
           case 'changed': checkType(ev.curr!, false) ? storage.changeModel?.(ev.curr!) : undefined; break;
@@ -42,7 +43,7 @@ export class ModelStorageUtil {
 
     // If listening for model add/removes/updates
     if (storage.changeSchema) {
-      SchemaRegistry.onSchemaChange(ev => {
+      SchemaChangeListener.onSchemaChange(ev => {
         if (checkType(ev.cls)) {
           storage.changeSchema!(ev.cls, ev.change);
         }

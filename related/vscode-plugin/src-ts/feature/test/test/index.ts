@@ -30,17 +30,18 @@ class TestRunnerFeature extends BaseFeature {
       env: { TRV_CACHE: this.cacheDir, }
     });
 
-    this.server.on('stop', () => this.clean());
-    this.server.on('pre-start', () => this.clean(true));
-    this.server.on('start', () => {
-      this.server.onMessage('*', (type, ev) => {
-        this.consumer.onEvent(ev as TestEvent);
-        this.codeLensUpdated?.();
-      });
+    this.server
+      .on('stop', () => this.clean())
+      .on('pre-start', () => this.clean(true))
+      .on('start', () => {
+        this.server.onMessage('*', (type, ev) => {
+          this.consumer.onEvent(ev as TestEvent);
+          this.codeLensUpdated?.();
+        });
 
-      this.server.onceMessage('*', () =>  // Listen for first message
-        this.consumer.trackEditor(vscode.window.activeTextEditor));
-    });
+        this.server.onceMessage('*', () =>  // Listen for first message
+          this.consumer.trackEditor(vscode.window.activeTextEditor));
+      });
   }
 
   /** Clean up */

@@ -2,11 +2,7 @@ import { Class, AppError } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, ALL_VIEW, SchemaConfig, ViewFieldsConfig } from './types';
-import {
-  SchemaChangeListener,
-  SchemaChangeEvent, FieldChangeEvent,
-  SCHEMA_CHANGE_EVENT, FIELD_CHANGE_EVENT
-} from './changes';
+import { SchemaChangeListener } from './changes';
 
 function hasType<T>(o: unknown): o is { type: Class<T> | string } {
   return !!o && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
@@ -291,23 +287,6 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       });
     }
   }
-
-  /**
-   * On schema change, emit the change event for the whole schema
-   * @param cb The function to call on schema change
-   */
-  onSchemaChange(cb: (ev: SchemaChangeEvent) => void) {
-    SchemaChangeListener.on(SCHEMA_CHANGE_EVENT, cb);
-  }
-
-  /**
-   * On schema field change, emit the change event for the whole schema
-   * @param cb The function to call on schema field change
-   */
-  onFieldChange(callback: (e: FieldChangeEvent) => unknown): void {
-    SchemaChangeListener.on(FIELD_CHANGE_EVENT, callback);
-  }
-
 }
 
 export const SchemaRegistry = new $SchemaRegistry();

@@ -65,7 +65,7 @@ export class EmailTemplateFeature extends BaseFeature {
       this._activeFile = file;
       this.setActiveContent(undefined);
       if (file) {
-        this.server.emitMessage('redraw', { file });
+        this.server.sendMessage('redraw', { file });
       }
     }
   }
@@ -116,7 +116,7 @@ export class EmailTemplateFeature extends BaseFeature {
   }
 
   async openPreviewContext() {
-    const { file } = await this.server.emitMessageAndWaitFor<{ file: string }>('configure', {}, 'configured');
+    const { file } = await this.server.sendMessageAndWaitFor<{ file: string }>('configure', {}, 'configured');
     const doc = await vscode.workspace.openTextDocument(file);
     await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
   }
@@ -129,7 +129,7 @@ export class EmailTemplateFeature extends BaseFeature {
           cancellable: false,
           title: 'Sending email'
         },
-        () => this.server.emitMessageAndWaitFor('send', { file: this._activeFile }, 'sent', 'sent-failed').then(console.log)
+        () => this.server.sendMessageAndWaitFor('send', { file: this._activeFile }, 'sent', 'sent-failed').then(console.log)
           .catch(err => {
             vscode.window.showErrorMessage(err.message);
           })

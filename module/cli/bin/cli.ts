@@ -19,7 +19,7 @@ async function verifyLocal() {
 /**
  * Compile CLI for usage
  */
-async function compile() {
+async function build() {
   const { ModuleManager } = await import('@travetto/boot/src/internal/module');
   const { SourceIndex } = await import('@travetto/boot/src/internal/source');
   ModuleManager.transpileAll(SourceIndex.find({ folder: 'bin ' }));
@@ -30,7 +30,7 @@ async function compile() {
  */
 export async function main() {
   await verifyLocal();
-  await compile();
+  await build();
   const { ExecutionManager } = await import('@travetto/cli/src/execute');
   return ExecutionManager.run(process.argv); // Run cli
 }

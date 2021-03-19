@@ -1,8 +1,8 @@
-import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as ts from 'typescript';
 
 import { ScanEntry, ScanFs, PathUtil, ScanHandler } from '@travetto/boot';
+import { WatchEmitter } from './emitter';
 
 /**
  * Watch Options
@@ -15,25 +15,14 @@ export interface WatcherOptions {
   exclude?: ScanHandler;
 }
 
-export interface Watcher {
-  on(type: 'all', handlder: (payload: { event: string, entry: ScanEntry }) => void): this;
-  on(type: 'added', handlder: (entry: ScanEntry) => void): this;
-  on(type: 'addedDir', handlder: (entry: ScanEntry) => void): this;
-  on(type: 'removed', handlder: (entry: ScanEntry) => void): this;
-  on(type: 'removedDir', handlder: (entry: ScanEntry) => void): this;
-  on(type: 'changed', handlder: (entry: ScanEntry) => void): this;
-  on(type: string | symbol, handler: (payload: ScanEntry | { event: string, entry: ScanEntry }) => void): this;
-}
-
 /**
  * Standard watcher built on node fs libs
  */
-export class Watcher extends EventEmitter {
+export class Watcher extends WatchEmitter {
 
   private watched = new Map<string, ScanEntry>();
   private directories = new Map<string, { close: () => void }>();
   private files = new Map<string, { close: () => void }>();
-  private suppress = false;
 
   /**
    * Create a new watcher, priming the root direction
@@ -41,15 +30,9 @@ export class Watcher extends EventEmitter {
    * @param opts
    */
   constructor(private folder: string, private options: WatcherOptions = {}) {
-    super();
-
+    super(options.maxListeners);
     this.options = { interval: 100, ...this.options };
     this.folder = PathUtil.resolveUnix(this.options.cwd || PathUtil.cwd, this.folder);
-
-    // Set maxListeners
-    if (this.options.maxListeners !== undefined) {
-      this.setMaxListeners(this.options.maxListeners);
-    }
 
     this.suppress = !!this.options.ignoreInitial;
 
@@ -87,7 +70,7 @@ export class Watcher extends EventEmitter {
           this.unwatch(child.file);
           dir.children!.splice(dir.children!.indexOf(child), 1);
 
-          this.emit(ScanFs.isNotDir(child) ? 'removed' : 'removedDIr', child);
+          this.emit(ScanFs.isNotDir(child) ? 'removed' : 'removedDir', child);
         }
       }
 
@@ -253,29 +236,11 @@ export class Watcher extends EventEmitter {
   }
 
   /**
-   * Emit change to file
-   */
-  emit(type: string, payload?: ScanEntry | Error) {
-    if (!this.suppress) {
-      if (type !== 'error' && type !== 'end') {
-        console.debug('Watch Event', { type, file: (payload as ScanEntry)?.file.replace(PathUtil.cwd, '.') });
-        super.emit('all', { event: type, entry: payload });
-      }
-      super.emit(type, payload);
-    }
-    return true;
-  }
-
-  /**
    * Close the watcher, releasing all the file system pollers
    */
   close() {
     this.unwatch(...this.watched.keys());
-
-    setImmediate(() => {
-      this.emit('end');
-      this.removeAllListeners();
-    });
+    setImmediate(() => this.removeAllListeners());
     return this;
   }
 }

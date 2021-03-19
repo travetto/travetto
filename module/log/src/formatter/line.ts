@@ -34,7 +34,7 @@ export class LineFormatter implements Formatter {
   private opts: LineFormatterOpts;
 
   constructor(opts: LineFormatterOpts = {}) {
-    const notPlain = EnvUtil.isFalse('TRV_LOG_PLAIN');
+    const notPlain = !EnvUtil.isTrue('TRV_LOG_PLAIN');
     this.opts = {
       colorize: notPlain && ColorUtil.colorize,
       timestamp: notPlain ? EnvUtil.isValueOrFalse('TRV_LOG_TIME', ['s', 'ms'] as const, 'ms') : undefined,

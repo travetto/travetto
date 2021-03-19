@@ -13,7 +13,6 @@ export class DocBinUtil {
    */
   static async watchFile(file: string, cb: (ev: unknown) => void) {
     const { Watcher } = await import('@travetto/watch');
-    const { Compiler } = await import('@travetto/compiler');
 
     new Watcher(__dirname, { interval: 250, exclude: { testDir: () => false, testFile: f => f === file } })
       .on('all', e => {
@@ -27,7 +26,6 @@ export class DocBinUtil {
     const { PhaseManager } = await import('@travetto/base');
     // Standard compile
     await PhaseManager.run('init');
-
 
     const { GenerateUtil } = await import('../../src/generate');
 
