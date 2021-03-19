@@ -10,7 +10,7 @@
   "license": "MIT",
   "scripts": {
     "setup": "./bin/setup.sh",
-    "test": "trv-test.js",
+    "test": "trv-test",
     "lint": "npx eslint --ext .js --ext .ts .",
     "lerna": "trv-opt-deps; npx lerna bootstrap --hoist; trv-clean;"
   },

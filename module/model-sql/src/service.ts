@@ -93,6 +93,15 @@ export class SQLModelService implements
     return this.dialect.executeSQL<T>(sql);
   }
 
+  private async deleteRaw<T extends ModelType>(cls: Class<T>, id: string, checkExpiry = true) {
+    const count = await this.dialect.deleteAndGetCount<ModelType>(cls, {
+      where: ModelQueryUtil.getWhereClause(cls, { id } as WhereClauseRaw<T>, checkExpiry)
+    });
+    if (count === 0) {
+      throw new NotFoundError(cls, id);
+    }
+  }
+
   async postConstruct() {
     if (this.dialect) {
       if (this.dialect.conn.init) {
@@ -150,14 +159,14 @@ export class SQLModelService implements
 
   @Transactional()
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    await this.delete(cls, item.id);
+    await this.deleteRaw(cls, item.id, true);
     return await this.create(cls, item);
   }
 
   @Transactional()
   async upsert<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     try {
-      await this.delete(cls, item.id);
+      await this.deleteRaw(cls, item.id, false);
     } catch (err) {
       if (!(err instanceof NotFoundError)) {
         throw err;
@@ -191,12 +200,7 @@ export class SQLModelService implements
 
   @Transactional()
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    const count = await this.dialect.deleteAndGetCount<ModelType>(cls, {
-      where: ModelQueryUtil.getWhereClause(cls, { id } as WhereClauseRaw<T>, false)
-    });
-    if (count === 0) {
-      throw new NotFoundError(cls, id);
-    }
+    await this.deleteRaw(cls, id, false);
   }
 
   @Transactional()
