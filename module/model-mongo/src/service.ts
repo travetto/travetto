@@ -63,7 +63,7 @@ export class MongoModelService implements
       bucketName: STREAMS_BUCKET,
       writeConcern: { w: 1 }
     });
-    ModelStorageUtil.registerModelChangeListener(this);
+    await ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.close());
     ModelExpiryUtil.registerCull(this);
   }

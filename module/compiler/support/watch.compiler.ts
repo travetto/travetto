@@ -2,6 +2,7 @@ import { AppManifest, Class, ShutdownManager } from '@travetto/base';
 import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
 import { FsUtil, PathUtil } from '@travetto/boot';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
+import { ModuleManager } from '@travetto/boot/src/internal/module';
 
 import { Compiler } from '../src/compiler';
 
@@ -39,6 +40,9 @@ export function watch($Compiler: Class<typeof Compiler>) {
           return mod;
         }
       });
+
+      // Clear target on unload
+      ModuleManager.onUnload(f => this.modules.get(f)?.setTarget(null));
 
       this.presence = new FilePresenceManager(
         [...AppManifest.source.local, ...AppManifest.source.common]

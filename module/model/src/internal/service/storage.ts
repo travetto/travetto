@@ -13,7 +13,7 @@ export class ModelStorageUtil {
   /**
    * Register change listener on startup
    */
-  static registerModelChangeListener(storage: ModelStorageSupport, target?: Class) {
+  static async registerModelChangeListener(storage: ModelStorageSupport, target?: Class) {
     if (EnvUtil.isReadonly() || !(storage?.config?.autoCreate ?? !AppManifest.prod)) {
       return;
     }
@@ -38,6 +38,13 @@ export class ModelStorageUtil {
           case 'removing': checkType(ev.prev!) ? storage.deleteModel?.(ev.prev!) : undefined; break;
         }
       });
+      if (storage.createModel) {
+        for (const cls of ModelRegistry.getClasses()) {
+          if (checkType(cls)) {
+            await storage.createModel(cls);
+          }
+        }
+      }
     }
 
     // If listening for model add/removes/updates

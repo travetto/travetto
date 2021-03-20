@@ -80,8 +80,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     return item;
   }
 
-  postConstruct() {
-    ModelStorageUtil.registerModelChangeListener(this);
+  async postConstruct() {
+    await ModelStorageUtil.registerModelChangeListener(this);
     ModelExpiryUtil.registerCull(this);
   }
 

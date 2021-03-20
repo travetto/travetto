@@ -108,7 +108,7 @@ export class SQLModelService implements
         await this.dialect.conn.init();
       }
       this.manager = new TableManager(this.context, this.dialect);
-      ModelStorageUtil.registerModelChangeListener(this);
+      await ModelStorageUtil.registerModelChangeListener(this);
       ModelExpiryUtil.registerCull(this);
     }
   }

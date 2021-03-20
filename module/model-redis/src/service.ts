@@ -92,7 +92,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async postConstruct() {
     this.cl = new redis.RedisClient(this.config.client);
-    ModelStorageUtil.registerModelChangeListener(this);
+    await ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.cl.quit());
   }
 
