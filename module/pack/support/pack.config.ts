@@ -43,7 +43,7 @@ export const config: AllConfigPartial = {
       'node_modules/typescript/',
       'node_modules/@types/',
       '^./node_modules/@travetto/**/*.ts',
-      '^./node_modules/@travetto/*/tsconfig.json',
+      '^./node_modules/@travetto/boot/tsconfig.trv.json',
       '^./resources/',
       '^./src/',
     ]
@@ -54,6 +54,6 @@ export const config: AllConfigPartial = {
   },
   docker: {
     active: false,
-    image: 'node:14.8.0-alpine3.10'
+    image: 'node:15.12.0-alpine3.11'
   }
 };

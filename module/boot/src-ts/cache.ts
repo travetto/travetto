@@ -34,7 +34,7 @@ export class FileCache {
         this.removeExpiredEntry(full);
       } catch (e) {
         // Only care if it's source, otherwise might be dynamically cached data without backing file
-        if (full.endsWith('.ts') || full.endsWith('.js')) {
+        if (full.endsWith('.ts')) {
           // Cannot remove file, source is missing
           console.warn('Cannot read', { error: e });
         }
@@ -163,7 +163,8 @@ export class FileCache {
       .replace(/~/g, '/')
       .replace(/\/\/+/g, '/')
       .replace(/^[.]/g, 'node_modules/@travetto')
-      .replace(/node_modules\/@travetto/, a => process.env.TRV_DEV || a);
+      .replace(/node_modules\/@travetto/, a => process.env.TRV_DEV || a)
+      .replace(/[.]js$/, '.ts');
   }
 
   /**
@@ -177,6 +178,7 @@ export class FileCache {
       .replace(/node_modules\/@travetto/g, '.')
       .replace(/^\//, '')
       .replace(/\/+/g, '~')
+      .replace(/[.]ts$/, '.js')
     );
   }
 

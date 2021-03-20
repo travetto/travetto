@@ -38,11 +38,15 @@ export class ModelStorageUtil {
           case 'removing': checkType(ev.prev!) ? storage.deleteModel?.(ev.prev!) : undefined; break;
         }
       });
-      if (storage.createModel) {
-        for (const cls of ModelRegistry.getClasses()) {
-          if (checkType(cls)) {
-            await storage.createModel(cls);
-          }
+    }
+
+    // Initialize on startup (test manages)
+    await storage.createStorage();
+
+    if (storage.createModel) {
+      for (const cls of ModelRegistry.getClasses()) {
+        if (checkType(cls)) {
+          await storage.createModel(cls);
         }
       }
     }

@@ -9,22 +9,24 @@ import { ModelRegistry } from '../src/registry/model';
 
 const Loaded = Symbol();
 
-export function ModelSuite<T extends { configClass: Class, serviceClass: Class }>(qualifier?: symbol) {
+export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean, namespace?: string }>, serviceClass: Class }>(qualifier?: symbol) {
   return (target: Class<T>) => {
     SuiteRegistry.registerPendingListener(
       target,
-      async function (this: T) {
+      async function (this: T & { [Loaded]?: boolean }) {
         // Track self
         ResourceManager.addPath(PathUtil.resolveUnix(__dirname, 'resources'));
 
         await RootRegistry.init();
 
-        if (!(this as { [Loaded]?: boolean })[Loaded]) {
+        if (!this[Loaded]) {
           const config = await DependencyRegistry.getInstance(this.configClass);
           if ('namespace' in config) {
             config.namespace = `test_${Math.trunc(Math.random() * 10000)}`;
           }
-          (this as { [Loaded]?: boolean })[Loaded] = true;
+          // We manually create
+          config.autoCreate = false;
+          this[Loaded] = true;
         }
       },
       'beforeAll'

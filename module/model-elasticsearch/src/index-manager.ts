@@ -148,9 +148,10 @@ export class IndexManager implements ModelStorageSupport {
     }, [] as string[]);
 
     // Find which types have changed
-    const typeChanges = change.subs.reduce((acc, v) => {
+    const fieldChanges = change.subs.reduce((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'changed')
+        .filter(ev => ev.prev?.type !== ev.curr?.type)
         .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
       return acc;
     }, [] as string[]);
@@ -158,13 +159,13 @@ export class IndexManager implements ModelStorageSupport {
     const { index, type } = this.getIdentity(cls);
 
     // If removing fields or changing types, run as script to update data
-    if (removes.length || typeChanges.length) { // Removing and adding
+    if (removes.length || fieldChanges.length) { // Removing and adding
       const next = await this.createIndex(cls, false);
 
       const aliases = (await this.client.indices.getAlias({ index })).body;
       const curr = Object.keys(aliases)[0];
 
-      const allChange = removes.concat(typeChanges);
+      const allChange = removes.concat(fieldChanges);
 
       // Reindex
       await this.client.reindex({
@@ -196,7 +197,7 @@ export class IndexManager implements ModelStorageSupport {
 
   async createStorage() {
     // PreCreate indexes if missing
-    console.debug('Create Storage', { autoCreate: this.config.autoCreate, idx: this.getNamespacedIndex('*') });
+    console.debug('Create Storage', { idx: this.getNamespacedIndex('*') });
     await this.computeAliasMappings(true);
   }
 
