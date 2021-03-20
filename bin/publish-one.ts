@@ -2,7 +2,7 @@ import '@arcsine/nodesh';
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-const [MOD] = $argv;
+const MOD = process.argv[2];
 const ROOT = path.resolve(__dirname, '..', '..', 'module', MOD);
 
 const VER = require(`${ROOT}/package.json`).version;

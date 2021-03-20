@@ -4,7 +4,7 @@ import { Inject } from '@travetto/di';
 import { TodoService } from './service';
 import { Todo, TodoSearch } from './model';
 
-@Controller('/todo-er')
+@Controller('/todo')
 export class TodoController {
 
   @Inject()

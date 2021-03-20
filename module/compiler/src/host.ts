@@ -12,32 +12,20 @@ import { AppManifest } from '@travetto/base';
 /**
  * Manages the source code and typescript relationship.
  */
-export class SourceCache {
+export class SourceHost implements ts.CompilerHost {
+
   private rootFiles = new Set<string>();
   private hashes = new Map<string, number>();
   private sources = new Map<string, ts.SourceFile>();
-  private _host: ts.CompilerHost;
   readonly contents = new Map<string, string>();
 
-
-  /**
-   * Get compiler host
-   */
-  getCompilerHost(): ts.CompilerHost {
-    return this._host ??= {
-      readFile: f => this.readFile(f),
-      writeFile: (f, c) => this.writeFile(f, c),
-      fileExists: f => this.fileExists(f),
-      getDefaultLibFileName: (opts) => ts.getDefaultLibFileName(opts),
-      getCurrentDirectory: () => PathUtil.cwd,
-      getCanonicalFileName: x => x,
-      getNewLine: () => ts.sys.newLine,
-      useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
-      getSourceFile: (f: string, _tgt, _err, force?: boolean) => this.getSourceFile(f, force),
-      getDefaultLibLocation: () => path.dirname(ts.getDefaultLibFilePath(
-        TranspileUtil.compilerOptions as ts.CompilerOptions
-      )),
-    };
+  getCanonicalFileName = (f: string) => f;
+  getCurrentDirectory = () => PathUtil.cwd;
+  getDefaultLibFileName = (opts: ts.CompilerOptions) => ts.getDefaultLibFileName(opts);
+  getNewLine = () => ts.sys.newLine;
+  useCaseSensitiveFileNames = () => ts.sys.useCaseSensitiveFileNames;
+  getDefaultLibLocation() {
+    return path.dirname(ts.getDefaultLibFilePath(TranspileUtil.compilerOptions as ts.CompilerOptions));
   }
 
   /**
@@ -69,17 +57,21 @@ export class SourceCache {
    * Write file to disk, and set value in cache as well
    */
   writeFile(filename: string, content: string) {
+    this.trackFile(filename, content);
+    AppCache.writeEntry(filename, content);
+  }
+
+  trackFile(filename: string, content: string) {
     filename = PathUtil.toUnixTs(filename);
     this.contents.set(filename, content);
-    this.hashes.set(filename, SystemUtil.naiveHash(content));
-    AppCache.writeEntry(filename, content);
+    this.hashes.set(filename, SystemUtil.naiveHash(fs.readFileSync(filename, 'utf8'))); // Get og content for hashing
   }
 
   /**
    * Get a source file on demand
    * @returns
    */
-  getSourceFile(filename: string, force?: boolean) {
+  getSourceFile(filename: string, _tgt: unknown, _onErr: unknown, force?: boolean) {
     if (!this.sources.has(filename) || force) {
       const content = this.readFile(filename)!;
       this.sources.set(filename, ts.createSourceFile(filename, content ?? '',
@@ -115,13 +107,12 @@ export class SourceCache {
    */
   unload(filename: string, unlink = true) {
     if (this.contents.has(filename)) {
-      console.debug('Unloading', { filename: filename.replace(PathUtil.cwd, '.'), unlink });
-
       AppCache.removeExpiredEntry(filename, unlink);
 
       if (unlink && this.hashes.has(filename)) {
         this.hashes.delete(filename);
       }
+      this.rootFiles.delete(filename);
       this.contents.delete(filename);
       this.sources.delete(filename);
     }

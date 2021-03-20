@@ -8,7 +8,7 @@ import { ModuleManager } from '@travetto/boot/src/internal/module';
 import { Watchable } from '@travetto/base/src/internal/watchable';
 import { TranspileUtil } from '@travetto/boot/src-ts/internal/transpile-util';
 
-import { SourceCache } from './cache';
+import { SourceHost } from './host';
 import { TransformerManager } from './transformer';
 
 type FileListener = (name: string) => void;
@@ -23,12 +23,12 @@ class $Compiler {
   private transformerManager: TransformerManager;
   private program: ts.Program | undefined;
   private emitter = new EventEmitter();
-  private cache: SourceCache;
+  private host: SourceHost;
 
   active = false;
 
   constructor() {
-    this.cache = new SourceCache();
+    this.host = new SourceHost();
     this.transformerManager = new TransformerManager();
   }
 
@@ -39,7 +39,7 @@ class $Compiler {
    */
   private getProgram(forFile?: string): ts.Program {
 
-    const rootFiles = this.cache.getRootFiles();
+    const rootFiles = this.host.getRootFiles();
 
     if (!this.program || (forFile && !rootFiles.has(forFile))) {
       console.debug('Loading program', { size: rootFiles.size, src: forFile });
@@ -49,7 +49,7 @@ class $Compiler {
       this.program = ts.createProgram({
         rootNames: [...rootFiles],
         options: TranspileUtil.compilerOptions as ts.CompilerOptions,
-        host: this.cache.getCompilerHost(),
+        host: this.host,
         oldProgram: this.program
       });
       this.transformerManager.build(this.program.getTypeChecker());
@@ -78,15 +78,15 @@ class $Compiler {
         TranspileUtil.checkTranspileErrors(filename, result.diagnostics as []);
       } catch (err) {
         const errContent = TranspileUtil.transpileError(filename, err);
-        this.cache.contents.set(filename, errContent);
+        this.host.contents.set(filename, errContent);
       }
       // Save writing for typescript program (`writeFile`)
     } else {
       const cached = AppCache.readEntry(filename);
-      this.cache.contents.set(filename, cached);
+      this.host.trackFile(filename, cached);
     }
 
-    return this.cache.contents.get(filename)!;
+    return this.host.contents.get(filename)!;
   }
 
   /**
@@ -106,11 +106,11 @@ class $Compiler {
       ModuleManager.setTranspiler(tsf => this.transpile(tsf));
     }
 
-    ModuleManager.onUnload((f, unlink) => this.cache.unload(f, unlink)); // Remove source
+    ModuleManager.onUnload((f, unlink) => this.host.unload(f, unlink)); // Remove source
 
     // Update source map support to read from tranpsiler cache
     sourceMapSupport.install({
-      retrieveFile: p => this.cache.contents.get(PathUtil.toUnixTs(p))!
+      retrieveFile: p => this.host.contents.get(PathUtil.toUnixTs(p))!
     });
 
     console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
@@ -122,7 +122,7 @@ class $Compiler {
   reset() {
     if (!EnvUtil.isReadonly()) {
       this.transformerManager.reset();
-      this.cache.reset();
+      this.host.reset();
       delete this.program;
     }
     ModuleManager['unloadHandlers'] = [];
@@ -170,7 +170,7 @@ class $Compiler {
    * When a file changes during watch
    */
   changed(filename: string) {
-    if (this.cache.hashChanged(filename)) {
+    if (this.host.hashChanged(filename)) {
       ModuleManager.unload(filename);
       // Load Synchronously
       require(filename);

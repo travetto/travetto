@@ -1,6 +1,6 @@
 import '@arcsine/nodesh';
 
-$argv[0]
+process.argv[2]
   .$dir()
   .$forEach(file => {
     console.log('Writing file', file);

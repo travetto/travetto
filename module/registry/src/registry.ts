@@ -169,7 +169,6 @@ export abstract class Registry implements ChangeSource<Class> {
    * Emit a new event
    */
   emit(e: ChangeEvent<Class>) {
-    console.log('Emitting', this.constructor.name, e);
     this.emitter.emit('change', e);
   }
 

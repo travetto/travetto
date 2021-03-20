@@ -9,7 +9,7 @@ import * as fs from 'fs';
       args: ['publish'],
       spawn: {
         env: {
-          NPM_CONFIG_OTP: $argv[0]
+          NPM_CONFIG_OTP: process.argv[2]
         },
         cwd: path.dirname(file)
       }

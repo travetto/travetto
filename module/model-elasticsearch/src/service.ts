@@ -101,8 +101,8 @@ export class ElasticsearchModelService implements
   createModel(cls: Class) { return this.manager.createModel(cls); }
   exportModel(cls: Class) { return this.manager.exportModel(cls); }
   deleteModel(cls: Class) { return this.manager.deleteModel(cls); }
-  truncateModel(cls: Class) { return this.deleteByQuery(cls, {}).then(() => { }); }
   changeSchema(cls: Class, change: SchemaChange) { return this.manager.changeSchema(cls, change); }
+  truncateModel(cls: Class) { return this.deleteByQuery(cls, {}).then(() => { }); }
 
   uuid() {
     return Util.uuid();

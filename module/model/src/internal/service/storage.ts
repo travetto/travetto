@@ -13,7 +13,7 @@ export class ModelStorageUtil {
   /**
    * Register change listener on startup
    */
-  static async registerModelChangeListener(storage: ModelStorageSupport, target?: Class) {
+  static registerModelChangeListener(storage: ModelStorageSupport, target?: Class) {
     if (EnvUtil.isReadonly() || !(storage?.config?.autoCreate ?? !AppManifest.prod)) {
       return;
     }
@@ -32,7 +32,6 @@ export class ModelStorageUtil {
     // If listening for model add/removes/updates
     if (storage.createModel || storage.deleteModel || storage.changeModel) {
       ModelRegistry.on<ModelType>(ev => {
-        console.log('Woohoo', ev);
         switch (ev.type) {
           case 'added': checkType(ev.curr!) ? storage.createModel?.(ev.curr!) : undefined; break;
           case 'changed': checkType(ev.curr!, false) ? storage.changeModel?.(ev.curr!) : undefined; break;

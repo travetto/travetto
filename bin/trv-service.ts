@@ -6,7 +6,7 @@ import '@arcsine/nodesh';
   .$map(f => f.replace(/^.*module\/([^/]+).*$/, (a, m) => `@travetto/${m}`))
   .$collect()
   .$forEach(modules => {
-    spawnSync('trv', ['command:service', ...$argv], {
+    spawnSync('trv', ['command:service', ...process.argv.slice(2)], {
       env: {
         ...process.env,
         TRV_MODULES: modules.join(',')

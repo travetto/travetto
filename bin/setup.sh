@@ -13,6 +13,6 @@ ln -sf $ROOT/module/cli/bin/trv.js $ROOT/.bin/trv
 cd $ROOT
 for TS in ./bin/*.ts; do 
   SH=.bin/$(basename -s .ts $TS)
-  echo -e "#!/usr/bin/sh\ncd $ROOT\nnode -r @travetto/boot/bin/register $TS -- \${@}" > $SH
+  echo -e "#!/usr/bin/sh\ncd $ROOT\nnode -r @travetto/boot/bin/register $TS \${@}" > $SH
   chmod +x $SH
 done

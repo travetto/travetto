@@ -6,7 +6,7 @@ import '@arcsine/nodesh';
 const commander = path.resolve('node_modules/commander/index.js');
 const page = path.resolve.bind(path, 'related/travetto.github.io/src');
 
-let target = $argv[0];
+let target = process.argv[2];
 const root = path.resolve(__dirname, '..');
 
 if (target && target.startsWith(root)) {
