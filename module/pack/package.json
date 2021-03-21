@@ -28,6 +28,9 @@
     "@types/picomatch": "^2.2.1",
     "picomatch": "^2.2.2"
   },
+  "optionalPeerDependencies": {
+    "@travetto/cli": "^2.0.0-alpha.3"
+  },
   "publishConfig": {
     "access": "public"
   }

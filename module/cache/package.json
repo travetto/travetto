@@ -27,7 +27,7 @@
     "directory": "module/cache"
   },
   "dependencies": {
-    "@travetto/compiler": "^2.0.0-alpha.2",
+    "@travetto/transformer": "^2.0.0-alpha.2",
     "@travetto/di": "^2.0.0-alpha.3",
     "@travetto/model": "^2.0.0-alpha.3"
   },

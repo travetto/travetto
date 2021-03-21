@@ -47,6 +47,9 @@
     "@types/js-beautify": "^1.13.1",
     "js-beautify": "^1.13.5"
   },
+  "optionalPeerDependencies": {
+    "@travetto/cli": "^2.0.0-alpha.2"
+  },
   "publishConfig": {
     "access": "public"
   }

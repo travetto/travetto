@@ -32,6 +32,9 @@
     "@travetto/registry": "^2.0.0-alpha.3",
     "@travetto/schema": "^2.0.0-alpha.3"
   },
+  "optionalPeerDependencies": {
+    "@travetto/cli": "^2.0.0-alpha.2"
+  },
   "publishConfig": {
     "access": "public"
   }

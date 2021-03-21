@@ -24,7 +24,7 @@
     "directory": "module/auth"
   },
   "dependencies": {
-    "@travetto/compiler": "^2.0.0-alpha.2"
+    "@travetto/base": "^2.0.0-alpha.2"
   },
   "publishConfig": {
     "access": "public"

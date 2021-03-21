@@ -29,11 +29,15 @@
     "directory": "module/test"
   },
   "dependencies": {
-    "@travetto/compiler": "^2.0.0-alpha.2",
+    "@travetto/base": "^2.0.0-alpha.3",
+    "@travetto/transformer": "^2.0.0-alpha.3",
     "@travetto/registry": "^2.0.0-alpha.3",
     "@travetto/watch": "^2.0.0-alpha.2",
     "@travetto/worker": "^2.0.0-alpha.2",
     "@travetto/yaml": "^2.0.0-alpha.2"
+  },
+  "optionalPeerDependencies": {
+    "@travetto/cli": "^2.0.0-alpha.3"
   },
   "publishConfig": {
     "access": "public"

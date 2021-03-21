@@ -30,6 +30,8 @@
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
     "@travetto/di": "^2.0.0-alpha.3",
+    "@travetto/registry": "^2.0.0-alpha.3",
+    "@travetto/transformer": "^2.0.0-alpha.3",
     "@types/cookies": "^0.7.6",
     "@types/express-serve-static-core": "^4.17.18",
     "cookies": "^0.8.0"
@@ -41,6 +43,7 @@
     "@travetto/app": "^2.0.0-alpha.0",
     "@travetto/schema": "^2.0.0-alpha.0",
     "@travetto/model": "^2.0.0-alpha.0",
+    "@travetto/cli": "^2.0.0-alpha.3",
     "node-forge": "^0.10.0",
     "@types/node-forge": "^0.9.7"
   },

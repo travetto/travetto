@@ -33,6 +33,9 @@
     "@travetto/yaml": "^2.0.0-alpha.2",
     "openapi3-ts": "^1.4.0"
   },
+  "optionalPeerDependencies": {
+    "@travetto/cli": "^2.0.0-alpha.2"
+  },
   "publishConfig": {
     "access": "public"
   }

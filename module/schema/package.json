@@ -29,7 +29,8 @@
     "directory": "module/schema"
   },
   "dependencies": {
-    "@travetto/registry": "^2.0.0-alpha.3"
+    "@travetto/registry": "^2.0.0-alpha.3",
+    "@travetto/transformer": "^2.0.0-alpha.3"
   },
   "optionalPeerDependencies": {
     "@types/faker": "^5.1.7",
