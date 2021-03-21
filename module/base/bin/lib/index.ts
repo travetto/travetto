@@ -1,9 +1,7 @@
 import * as fs from 'fs';
 
-import { ExecUtil } from '@travetto/boot/src/exec';
-import { EnvUtil } from '@travetto/boot/src/env';
 import { CliUtil } from '@travetto/cli/src/util';
-import { AppCache, FileCache } from '@travetto/boot/src';
+import { AppCache, FsUtil, FileCache, ExecUtil, EnvUtil } from '@travetto/boot/src';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 
 /**
@@ -14,7 +12,7 @@ export class BuildUtil {
   /**
    * Trigger a compile
    */
-  static build(env?: Record<string, string>) {
+  static async build(env?: Record<string, string>) {
     if (EnvUtil.isReadonly()) {
       return; // Do not run the compiler
     }
@@ -22,16 +20,11 @@ export class BuildUtil {
     const output = env?.TRV_CACHE ?? '';
     AppCache.init();
 
-    const { AppManifest } = require('@travetto/base/src/manifest');
+    const { AppManifest } = await import('@travetto/base/src/manifest');
 
     let missing = false;
     for (const entry of SourceIndex.findByFolders(AppManifest.source)) {
-      try {
-        if (FileCache.isOlder(AppCache.statEntry(entry.file), fs.statSync(entry.file))) {
-          missing = true;
-          break;
-        }
-      } catch {
+      if (!FsUtil.existsSync(entry.file) || FileCache.isOlder(AppCache.statEntry(entry.file), fs.statSync(entry.file))) {
         missing = true;
         break;
       }

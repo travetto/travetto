@@ -43,11 +43,19 @@ import { ModelDynamodbComponent } from './gen/model-dynamodb/model-dynamodb.comp
 import { ModelFirestoreComponent } from './gen/model-firestore/model-firestore.component';
 import { ModelRedisComponent } from './gen/model-redis/model-redis.component';
 import { ModelS3Component } from './gen/model-s3/model-s3.component';
+import { DocComponent } from './gen/doc/doc.component';
 
 export const PAGES = [
-  { path: 'di', title: 'Dependency Injection  ', component: DiComponent },
-  { path: 'app', title: 'Application', component: AppComponent },
-  { path: 'schema', title: 'Schema', component: SchemaComponent },
+  {
+    path: 'app', title: 'Application', component: AppComponent, subs: [
+      { path: 'command', title: 'Command', component: CommandComponent },
+      { path: 'cache', title: 'Cache', component: CacheComponent },
+      { path: 'pack', title: 'Pack', component: PackComponent },
+      { path: 'image', title: 'Image', component: ImageComponent },
+      { path: 'log', title: 'Log', component: LogComponent },
+      { path: 'context', title: 'Context', component: ContextComponent }
+    ]
+  },
   {
     path: 'model', title: 'Model', component: ModelComponent, subs: [
       { path: 'model-query', title: 'Query', component: ModelQueryComponent },
@@ -70,11 +78,6 @@ export const PAGES = [
     ]
   },
   {
-    path: 'config', title: 'Config ', component: ConfigComponent, subs: [
-      { path: 'yaml', title: 'Simple YAML Parser', component: YamlComponent }
-    ]
-  },
-  {
     path: 'asset', title: 'Asset', component: AssetComponent, subs: [
       { path: 'asset-rest', title: 'Rest', component: AssetRestComponent }
     ]
@@ -88,36 +91,37 @@ export const PAGES = [
   },
   {
     path: 'email', title: 'Email', component: EmailComponent, subs: [
-      { path: 'email-template', title: 'Template', component: EmailTemplateComponent },
-      { path: 'image', title: 'Image', component: ImageComponent }
+      { path: 'email-template', title: 'Template', component: EmailTemplateComponent }
     ]
   },
-  { path: 'test', title: 'Test', component: TestComponent },
+  {
+    path: 'core', title: 'Core', subs: [
+      { path: 'di', title: 'Dependency Injection  ', component: DiComponent },
+      { path: 'config', title: 'Config ', component: ConfigComponent },
+      { path: 'schema', title: 'Schema', component: SchemaComponent },
+      { path: 'test', title: 'Test', component: TestComponent },
+    ]
+  },
+
+  {
+    path: 'compiler', title: 'Compiler', component: CompilerComponent, subs: [
+      { path: 'transformer', title: 'Transformer', component: TransformerComponent },
+    ]
+  },
+  { path: 'registry', title: 'Registry', component: RegistryComponent },
   {
     path: 'tools', title: 'Tooling', subs: [
-      { path: 'cli', title: 'CLI Support', component: CliComponent },
       { path: 'vscode-plugin', title: 'VS Code Plugin', component: VSCodePluginComponent },
       { path: 'generator-app', title: 'Yeoman App Generator', component: GeneratorAppComponent },
     ]
   },
+  { path: 'cli', title: 'CLI Support', component: CliComponent },
   {
-    path: 'core', title: 'Core Components', subs: [
+    path: 'base', title: 'Base', component: BaseComponent, subs: [
       { path: 'boot', title: 'Boot', component: BootComponent },
-      { path: 'base', title: 'Base', component: BaseComponent },
-      { path: 'compiler', title: 'Compiler', component: CompilerComponent },
-      { path: 'registry', title: 'Registry', component: RegistryComponent },
-      { path: 'transformer', title: 'Transformer', component: TransformerComponent },
-    ]
-  },
-  {
-    path: 'utils', title: 'Common Utilities', subs: [
-      { path: 'log', title: 'Log', component: LogComponent },
-      { path: 'cache', title: 'Cache', component: CacheComponent },
-      { path: 'command', title: 'Command', component: CommandComponent },
-      { path: 'context', title: 'Context', component: ContextComponent },
-      { path: 'pack', title: 'Pack', component: PackComponent },
+      { path: 'yaml', title: 'YAML Parser', component: YamlComponent },
       { path: 'worker', title: 'Worker', component: WorkerComponent },
       { path: 'watch', title: 'Watch', component: WatchComponent }
     ]
-  },
+  }
 ];

@@ -2,6 +2,77 @@
 
 @import "./theme.scss";
 
+@mixin group($r,$g,$b) {
+  background: #333 linear-gradient(315deg, rgba($r, $g, $b, .7) 20px, rgba($r, $g, $b, 1) 30px, rgba($r, $g, $b, 1) 100%);
+}
+
+@mixin materialIcon($size: 20px, $lineHeight: 35px, $padding: .5em) {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: $size;
+  /* Preferred icon size */
+  display: inline-block;
+  line-height: $lineHeight;
+  text-transform: none;
+  letter-spacing: normal;
+  vertical-align: bottom;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  padding-left: $padding;
+  padding-right: $padding;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: 'liga';
+}
+
+@mixin cornered($left: true, $right: true, $radius: 15px, $invert: false) {
+  position: relative;
+  @if $left {
+    &:before {
+      position:absolute; 
+      z-index: 100;
+      top:-1px; 
+      content:'';
+      border-top: $radius solid white;
+      @if $invert {
+        right:-1px; 
+        border-left: $radius solid transparent;
+      } @else {
+        left:-1px; 
+        border-right: $radius solid transparent;
+      }
+    }
+  }
+
+  @if $right {
+    &:after {
+      position:absolute; 
+      z-index: 100;
+      bottom:-1px;
+      content:'';
+      border-bottom: $radius solid white;
+      @if $invert {
+        left:-1px; 
+        border-right: $radius solid transparent;
+      } @else {
+        right:-1px; 
+        border-left: $radius solid transparent;
+      }
+    }
+  }
+}
+
+
 body,
 html {
   padding: 0;
@@ -90,38 +161,58 @@ li {
   a[class$="-link"], code.item {
     display: inline-block;
 
-    font-size: 1.2rem;
-    border: none;
-    background-color: rgba(120,120,120, .8);
-    border-radius: 5px;
-    font-weight: 400;
+    font-size: 1em;
+    // @include group(120,120,120);
     font-family: "Source Sans Pro", sans-serif;      
-    padding: .1em .4em;
-    margin: .1em .2em;
-    line-height: 1.5em;
+    padding: 0 .25em;
   }
 
   a[class$="-link"] {
+    padding-left: .1em;
     text-decoration: none;
-    color: white;
-    opacity: .8;
-    transition: .5s opacity;
+    font-weight: normal;
+    color: #333;
+    opacity: 1;
+    transition: .5s text-decoration;
+    padding-left: 0;
 
     &:hover  {
-      opacity: 1;
+      text-decoration: underline;
     }
 
     &.module-link  {
-      background-color: green;
+      &::after { 
+        content: 'view_module'; 
+        color: rgba(0,128,0,.7);
+      }  
+      color: rgba(0,128,0,1);
+      // background: rgba(0, 128, 0, .2);
     }
 
     &.source-link  {
-      background-color: rgba(255, 0, 0, .8);
+      &::after { 
+        content: 'text_snippet'; 
+        color: rgba(255,0,0,.7);
+      }  
+      color: rgba(255,0,0,1);
+      // background: rgba(255, 0, 0, .2);
     }
 
     &.external-link  {
-      background-color: rgba(0, 0, 255, .8);
+      &::after { 
+        content: 'exit_to_app'; 
+        color: rgba(0,0,255,.7);
+      }  
+      color: rgba(0,0,255,1);
+      // background: rgba(0, 0, 255, .2);
     }
+
+    &::after {
+      @include materialIcon($size: 1.2em, $lineHeight:1em, $padding: 0px);
+      vertical-align: middle;
+      color: white;
+      line-height: 1.25rem;
+    }            
   }
 
   code.item {
@@ -131,11 +222,10 @@ li {
 
 
   figure {
-
+    @include cornered($radius: 20px, $invert: true);
     padding: 0px;
     margin: 0px;
     margin-top: 1rem;
-    border-radius: 5px;
     margin-bottom: 1rem;
     overflow: hidden;
     
@@ -177,32 +267,7 @@ li {
       }
     
       &::before {
-        font-family: 'Material Icons';
-        font-weight: normal;
-        font-style: normal;
-        font-size: 20px;
-        /* Preferred icon size */
-        display: inline-block;
-        line-height: 35px;
-        text-transform: none;
-        letter-spacing: normal;
-        vertical-align: bottom;
-        word-wrap: normal;
-        white-space: nowrap;
-        direction: ltr;
-        padding-left: .5em;
-        margin-right: .5em;
-    
-        /* Support for all WebKit browsers. */
-        -webkit-font-smoothing: antialiased;
-        /* Support for Safari and Chrome. */
-        text-rendering: optimizeLegibility;
-    
-        /* Support for Firefox. */
-        -moz-osx-font-smoothing: grayscale;
-    
-        /* Support for IE. */
-        font-feature-settings: 'liga';
+        @include materialIcon;
       }            
 
       &.install::before { content: 'playlist_add'; }
@@ -225,7 +290,7 @@ li {
     
       &.config {
         background-color: desaturate(darken(rgba(0, 0, 255, 1), 20%), 40%);
-      }  
+      }
     }
 
     pre {

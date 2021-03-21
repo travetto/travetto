@@ -30,6 +30,9 @@
   "dependencies": {
     "@travetto/boot": "^2.0.0-alpha.2"
   },
+  "optionalPeerDependencies": {
+    "@travetto/cli": "^2.0.0-alpha.2"
+  },
   "publishConfig": {
     "access": "public"
   }

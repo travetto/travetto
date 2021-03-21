@@ -1,5 +1,5 @@
 import { EnvUtil, Package } from '@travetto/boot';
-import { SourceConfig } from '@travetto/boot/src/internal/code';
+import { SourceConfig } from '@travetto/boot/src/internal/source';
 
 import { version as frameworkVersion } from '../package.json';
 import { TimeUtil } from './internal/time';

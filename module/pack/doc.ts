@@ -46,6 +46,15 @@ ${Snippet('Zip Default Config', 'support/pack.config.ts', /zip:/, /\}/)}
 
 ${Execute('Zip Usage', 'trv', ['pack:zip', '--help'])}
 
+${SubSection('CLI - pack:docker')}
+
+Docker support is an optional step, that can run post assembly.  This allows for building a docker image, and currently only supports the base images as the only configuration options.
+
+${Snippet('Docker Default Config', 'support/pack.config.ts', /docker:/, /\}/)}
+
+${Execute('Docker Usage', 'trv', ['pack:docker', '--help'])}
+
+
 ${SubSection('Modes')}
 Various modules may provide customizations to the default ${pth`pack.config.ts`} to allow for easy integration with the packing process.  A simple example of this is via the ${mod.Rest} module, for how to publish lambda packages.
 
@@ -56,8 +65,10 @@ ${Terminal('Invoking Pack with Mode', 'npx trv pack <mode>')}
 ${SubSection('Configuration')}
 
 By default, the configuration consists of two components.
-* The default config in ${pth`support/pack.config.ts`} and
-* The config selected to execute from the cli
+${List(
+  d`The default config in ${pth`support/pack.config.ts`} and`,
+  'The config selected to execute from the cli'
+)}
 
 These two configurations will be loaded and layered, with the selected config taking precedence.
 
