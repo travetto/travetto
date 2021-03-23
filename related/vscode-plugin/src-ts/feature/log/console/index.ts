@@ -15,9 +15,7 @@ interface Link extends vscode.TerminalLink {
  * Logging workspace
  */
 @Activatible('log', true)
-export class CleanFeature extends BaseFeature {
-
-  base = fs.existsSync(Workspace.resolve('module/boot/package.json')) ? './module' : './node_modules/@travetto';
+export class LogFeature extends BaseFeature {
 
   /**
    * Handle a terminal link being clicked
@@ -53,7 +51,7 @@ export class CleanFeature extends BaseFeature {
           if (!/^(support|bin|test|test(?:-support|-isolated)?)/.test(path)) {
             path = `src/${path}`;
           }
-          file = Workspace.resolve(`${this.base}/${mod}/${path}`);
+          file = Workspace.resolve(`@travetto/${mod}/${path}`);
         } else {
           file = `${cwd}/${mod}/${path}`;
         }

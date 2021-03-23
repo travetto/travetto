@@ -52,8 +52,7 @@ export class Workspace {
    * Resolve worskapce path
    */
   static resolve(...p: string[]) {
-    return PathUtil.resolveUnix(this.path, ...p)
-      .replace(/.*node_modules\/@travetto/, a => process.env.TRV_DEV || a);
+    return PathUtil.resolveDevPath(PathUtil.resolveUnix(this.path, ...p));
   }
 
   /**
@@ -110,7 +109,7 @@ export class Workspace {
    * @param module
    */
   static async isInstalled(module: string) {
-    return !!process.env.TRV_DEV || !!(await FsUtil.exists(this.resolve('node_modules', module)));
+    return !!(await FsUtil.exists(this.resolve('node_modules', module)));
   }
 
   /**

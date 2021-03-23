@@ -1,5 +1,7 @@
 import * as path from 'path';
 
+const DEV = process.env.TRV_DEV;
+
 /**
  * Standard utils for interacting with the paths
  */
@@ -44,5 +46,25 @@ export class PathUtil {
    */
   static joinUnix(...pths: string[]) {
     return this.toUnix(path.join(...pths));
+  }
+
+  /**
+   * Normalize file path to act as if not in dev mode
+   * @private
+   * @param file 
+   * @returns 
+   */
+  static normalizeDevPath(file: string, prefix = '') {
+    return DEV ? file.replace(DEV, `${prefix}@travetto`) : file;
+  }
+
+  /**
+   * Resolve dev path to actual location
+   * @private
+   * @param file 
+   * @returns 
+   */
+  static resolveDevPath(file: string) {
+    return DEV ? file.replace(/.*@travetto/, m => DEV || m) : file;
   }
 }

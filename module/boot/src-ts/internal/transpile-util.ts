@@ -29,27 +29,12 @@ const TS_TARGET = ({
  * Standard transpilation support
  */
 export class TranspileUtil {
-  private static [CompilerOptionsSym]: unknown; // Untyped so that the typescript typings do not make it into the API
-
-  /**
-   * Gets the dev compiler options
-   */
-  private static get devCompilerOptions() {
-    const root = process.env.TRV_DEV_ROOT || process.env.TRV_DEV;
-    return {
-      paths: {
-        [`@travetto/${'*'}`]: [`${process.env.TRV_DEV}/${'*'}`]
-      },
-      rootDir: root,
-      outDir: root,
-      sourceRoot: root,
-    } as Record<string, unknown>;
-  }
+  private static [CompilerOptionsSym]: Record<string, unknown>; // Untyped so that the typescript typings do not make it into the API
 
   /**
    * Get loaded compiler options
    */
-  static get compilerOptions(): unknown {
+  static getCompilerOptions(): Record<string, unknown> {
     if (!this[CompilerOptionsSym]) {
       const ts = require('typescript') as typeof tsi;
       const projTsconfig = PathUtil.resolveUnix('tsconfig.json');
@@ -62,8 +47,7 @@ export class TranspileUtil {
         target: ts.ScriptTarget[TS_TARGET],
         rootDir: PathUtil.cwd,
         outDir: PathUtil.cwd,
-        sourceRoot: PathUtil.cwd,
-        ...(process.env.TRV_DEV ? this.devCompilerOptions : {})
+        sourceRoot: PathUtil.cwd
       } as tsi.CompilerOptions;
     }
     return this[CompilerOptionsSym];

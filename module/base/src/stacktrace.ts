@@ -15,7 +15,7 @@ export class StacktraceUtil {
    */
   static init() {
     this.addStackFilters(
-      '@travetto/(?:watch|context)', // @line-if -$TRV_DEV
+      '@travetto/(?:watch|context)',
       'src/stracktrace',
       '(?:boot|base|[.])/bin/(?:main|register)[.]js',
       'internal',

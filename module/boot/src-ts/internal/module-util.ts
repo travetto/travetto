@@ -1,7 +1,6 @@
 // @ts-expect-error
 import * as Mod from 'module';
 
-import { Package } from '../package';
 import { EnvUtil } from '../env';
 import { PathUtil } from '../path';
 import { SourceUtil } from './source-util';
@@ -23,24 +22,6 @@ const Module = Mod as unknown as ModType;
 export class ModuleUtil {
 
   private static handlers: ModuleHandler[] = [];
-
-  /**
-   * Resolve filename for dev mode
-   */
-  static devResolveFilename(p: string) {
-    if (p.includes('@travetto')) {
-      const [, key, sub] = p.match(/^.*(@travetto\/[^/]+)(\/?.*)?$/) ?? [];
-      const match = EnvUtil.getDynamicModules()[key!];
-      if (match) {
-        p = `${match}${sub! ?? ''}`;
-      } else {
-        if (key === Package.name) {
-          p = PathUtil.resolveUnix(sub ? `./${sub}` : Package.main);
-        }
-      }
-    }
-    return p;
-  }
 
   /**
    * Process error response

@@ -24,7 +24,9 @@ export class BuildUtil {
 
     let missing = false;
     for (const entry of SourceIndex.findByFolders(AppManifest.source)) {
-      if (!FsUtil.existsSync(entry.file) || FileCache.isOlder(AppCache.statEntry(entry.file), fs.statSync(entry.file))) {
+      if (!FsUtil.existsSync(entry.file)
+        || !FsUtil.existsSync(AppCache.toEntryName(entry.file))
+        || FileCache.isOlder(AppCache.statEntry(entry.file), fs.statSync(entry.file))) {
         missing = true;
         break;
       }

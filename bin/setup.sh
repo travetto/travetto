@@ -1,14 +1,17 @@
 #!/bin/bash
 ROOT=$(realpath $(dirname $(dirname $0)))
+BOOT=$ROOT/module/boot
+CLI=$ROOT/module/cli
+BIN=$ROOT/.bin
 
-rm -rf $ROOT/.bin/@travetto/boot/bin
-mkdir -p $ROOT/.bin/@travetto/boot/bin
+rm -rf $BIN/@travetto/boot/bin
+mkdir -p $BIN/@travetto/boot/bin
 
-[[ ! -e "$ROOT/module/boot/src/fs.js" ]] && tsc -p $ROOT/module/boot/src-ts;
+[[ ! -e "$BOOT/src/fs.js" ]] && tsc -p $BOOT/src-ts;
 
-ln -sf $ROOT/module/boot/bin/register.js $ROOT/.bin/@travetto/boot/bin/register.js
-ln -sf $ROOT/module/boot/bin/main.js $ROOT/.bin/@travetto/boot/bin/main.js
-ln -sf $ROOT/module/cli/bin/trv.js $ROOT/.bin/trv
+ln -sf $BOOT/bin/register.js $BIN/@travetto/boot/bin/register.js
+ln -sf $BOOT/bin/main.js $BIN/@travetto/boot/bin/main.js
+ln -sf $CLI/bin/trv.js $BIN/trv
 
 cd $ROOT
 for TS in ./bin/*.ts; do 

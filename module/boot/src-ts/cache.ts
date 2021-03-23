@@ -158,13 +158,12 @@ export class FileCache {
    * @param entry The entry path
    */
   fromEntryName(entry: string) {
-    return PathUtil.toUnix(entry)
+    return PathUtil.resolveDevPath(PathUtil.toUnix(entry)
       .replace(this.cacheDir, '')
       .replace(/~/g, '/')
       .replace(/\/\/+/g, '/')
-      .replace(/^[.]/g, 'node_modules/@travetto')
-      .replace(/node_modules\/@travetto/, a => process.env.TRV_DEV || a)
-      .replace(/[.]js$/, '.ts');
+      .replace(/^[.]/, 'node_modules/@travetto')
+      .replace(/[.]js$/, '.ts'));
   }
 
   /**
@@ -172,13 +171,12 @@ export class FileCache {
    * @param local Local path
    */
   toEntryName(local: string) {
-    return PathUtil.joinUnix(this.cacheDir, local
-      .replace(PathUtil.cwd, '')
-      .replace(process.env.TRV_DEV || '#', '.')
-      .replace(/node_modules\/@travetto/g, '.')
-      .replace(/^\//, '')
-      .replace(/\/+/g, '~')
-      .replace(/[.]ts$/, '.js')
+    return PathUtil.joinUnix(this.cacheDir,
+      PathUtil.normalizeDevPath(local.replace(PathUtil.cwd, ''))
+        .replace(/.*@travetto/, '.')
+        .replace(/^\//, '')
+        .replace(/\/+/g, '~')
+        .replace(/[.]ts$/, '.js')
     );
   }
 

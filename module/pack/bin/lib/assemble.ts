@@ -82,9 +82,10 @@ export class AssembleUtil {
     }
 
     for (const el of await DependenciesUtil.resolveDependencies({ types })) {
-      const sub = el.file
-        .replace(/.*?node_modules/, 'node_modules')
-        .replace(`${process.env.TRV_DEV}`, 'node_modules/@travetto');
+      const sub = PathUtil.normalizeDevPath(
+        el.file.replace(/.*?node_modules/, 'node_modules'),
+        'node_modules/'
+      );
 
       const tgt = PathUtil.resolveUnix(workspace, sub);
       await FsUtil.mkdirp(path.dirname(tgt));
@@ -112,7 +113,7 @@ export class AssembleUtil {
    */
   static async buildWorkspace(root: string, cacheDir: string) {
     await ExecUtil.spawn('node', ['./node_modules/@travetto/cli/bin/trv.js', 'build'],
-      { cwd: root, env: { TRV_CACHE: cacheDir, TRV_MODULES: '', TRV_DEV: '', TRV_REQUIRES: '' }, stdio: ['pipe', 'pipe', 2] }).result;
+      { cwd: root, isolatedEnv: true, env: { TRV_ENV: 'prod', TRV_CACHE: cacheDir }, stdio: ['pipe', 'pipe', 2] }).result;
   }
 
   /**

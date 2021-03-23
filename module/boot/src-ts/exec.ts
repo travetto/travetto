@@ -56,6 +56,10 @@ export interface ExecutionState<T extends Promise<ExecutionResult> = Promise<Exe
  */
 export interface ExecutionOptions extends SpawnOptions {
   /**
+   * Should the environment be isolated, or inherit from process.env
+   */
+  isolatedEnv?: boolean;
+  /**
    * Built in timeout for any execution
    */
   timeout?: number;
@@ -84,7 +88,7 @@ export class ExecUtil {
       shell: false,
       ...opts,
       env: {
-        ...process.env,
+        ...(opts.isolatedEnv ? {} : process.env),
         ...(opts.env ?? {})
       }
     } as ExecutionOptions;

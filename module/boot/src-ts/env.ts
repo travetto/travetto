@@ -131,10 +131,7 @@ export class EnvUtil {
       this.DYNAMIC_MODULES = Object.fromEntries(
         this.getEntries('TRV_MODULES')
           .sort(([a], [b]) => a.localeCompare(b))
-          .map(([k, v]) => [k, v ||
-            k.replace(/^@travetto/, m => process.env.TRV_DEV || m) ||
-            PathUtil.resolveUnix('node_modules', k)
-          ])
+          .map(([k, v]) => [k, v || PathUtil.resolveUnix('node_modules', k)])
       );
     }
     return this.DYNAMIC_MODULES;

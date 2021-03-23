@@ -25,7 +25,6 @@ declare const global: {
  */
 export class ModuleManager {
   private static moduleLoad = Module._load!.bind(Module);
-  private static resolveFilename = Module._resolveFilename!.bind(Module);
   // @ts-expect-error
   private static objectProto = Object.prototype.__proto__; // Remove to prevent __proto__ pollution in JSON
   private static initialized = false;
@@ -97,7 +96,7 @@ export class ModuleManager {
       try {
         const diags: tsi.Diagnostic[] = [];
         const ts = require('typescript') as typeof tsi;
-        const ret = ts.transpile(SourceUtil.preProcess(tsf), TranspileUtil.compilerOptions as tsi.CompilerOptions, tsf, diags);
+        const ret = ts.transpile(SourceUtil.preProcess(tsf), TranspileUtil.getCompilerOptions() as tsi.CompilerOptions, tsf, diags);
         TranspileUtil.checkTranspileErrors(tsf, diags);
         return ret;
       } catch (err) {
@@ -112,12 +111,6 @@ export class ModuleManager {
   static init() {
     if (this.initialized) {
       return;
-    }
-
-    // Only do for dev
-    if (process.env.TRV_DEV) {
-      // Override filename resolution
-      Module._resolveFilename = (req, p) => this.resolveFilename(ModuleUtil.devResolveFilename(req), p);
     }
 
     this.setTranspiler(f => this.simpleTranspile(f));
@@ -186,7 +179,6 @@ export class ModuleManager {
     delete require.extensions[SourceUtil.EXT];
     this.initialized = false;
     Module._load = this.moduleLoad;
-    Module._resolveFilename = this.resolveFilename;
     ModuleUtil.reset();
     SourceUtil.reset();
 

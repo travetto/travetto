@@ -9,7 +9,9 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
-    "setup": "./bin/setup.sh",
+    "setup": "npm run boot; ./bin/setup.sh",
+    "boot": "tsc -p module/boot/src-ts/tsconfig.json",
+    "boot:watch": "npm run boot -- -w",
     "test": "trv-test",
     "lint": "npx eslint --ext .js --ext .ts .",
     "lerna": "trv-opt-deps; npx lerna bootstrap --hoist; trv-clean;"
