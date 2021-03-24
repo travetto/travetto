@@ -51,8 +51,8 @@ export class PathUtil {
   /**
    * Normalize file path to act as if not in dev mode
    * @private
-   * @param file 
-   * @returns 
+   * @param file
+   * @returns
    */
   static normalizeDevPath(file: string, prefix = '') {
     return DEV ? file.replace(DEV, `${prefix}@travetto`) : file;
@@ -61,8 +61,8 @@ export class PathUtil {
   /**
    * Resolve dev path to actual location
    * @private
-   * @param file 
-   * @returns 
+   * @param file
+   * @returns
    */
   static resolveDevPath(file: string) {
     return DEV ? file.replace(/.*@travetto/, m => DEV || m) : file;

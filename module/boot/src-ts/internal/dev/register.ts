@@ -1,5 +1,6 @@
 // @ts-ignore
 import * as Mod from 'module';
+
 import { AppCache } from '../../cache';
 import { EnvUtil } from '../../env';
 import { Package } from '../../package';

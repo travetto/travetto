@@ -34,7 +34,7 @@ export class WatchEmitter {
   on(type: 'all', handler: Handler<AllEvent>): this;
   on(type: StandardEventType, handler: Handler<ScanEntry>): this;
   on(type: 'error', handler: Handler<Error>): this;
-  on(type: StandardEventType | 'all' | 'error', handler: Handler<any>): this {
+  on<T extends AllEvent | ScanEntry | Error>(type: StandardEventType | 'all' | 'error', handler: Handler<T>): this {
     this.emitter.on(type, handler);
     return this;
   }

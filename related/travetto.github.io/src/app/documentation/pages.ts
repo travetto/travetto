@@ -43,7 +43,6 @@ import { ModelDynamodbComponent } from './gen/model-dynamodb/model-dynamodb.comp
 import { ModelFirestoreComponent } from './gen/model-firestore/model-firestore.component';
 import { ModelRedisComponent } from './gen/model-redis/model-redis.component';
 import { ModelS3Component } from './gen/model-s3/model-s3.component';
-import { DocComponent } from './gen/doc/doc.component';
 
 export const PAGES = [
   {
