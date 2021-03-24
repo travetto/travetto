@@ -31,23 +31,35 @@ const TS_TARGET = ({
 export class TranspileUtil {
   private static [CompilerOptionsSym]: Record<string, unknown>; // Untyped so that the typescript typings do not make it into the API
 
+  private static optionsExtra?: Record<string, unknown>;
+
+  private static readTsConfigOptions(path: string) {
+    const ts = require('typescript') as typeof tsi;
+    return ts.parseJsonSourceFileConfigFileContent(
+      ts.readJsonConfigFile(path, ts.sys.readFile), ts.sys, PathUtil.cwd
+    ).options;
+  }
+
   /**
    * Get loaded compiler options
    */
-  static getCompilerOptions(): Record<string, unknown> {
+  static get compilerOptions(): Record<string, unknown> {
     if (!this[CompilerOptionsSym]) {
+      const opts = this.optionsExtra ?? {};
+      const rootDir = opts.rootDir ?? PathUtil.cwd;
       const ts = require('typescript') as typeof tsi;
       const projTsconfig = PathUtil.resolveUnix('tsconfig.json');
       const baseTsconfig = PathUtil.resolveUnix(__dirname, '..', '..', 'tsconfig.trv.json');
       // Fallback to base tsconfig if not found in local folder
       const config = FsUtil.existsSync(projTsconfig) ? projTsconfig : baseTsconfig;
-      const json = ts.readJsonConfigFile(config, ts.sys.readFile);
+
       this[CompilerOptionsSym] = {
-        ...ts.parseJsonSourceFileConfigFileContent(json, ts.sys, PathUtil.cwd).options,
+        ...this.readTsConfigOptions(config),
         target: ts.ScriptTarget[TS_TARGET],
-        rootDir: PathUtil.cwd,
-        outDir: PathUtil.cwd,
-        sourceRoot: PathUtil.cwd
+        rootDir,
+        outDir: rootDir,
+        sourceRoot: rootDir,
+        ...(this.optionsExtra ?? {})
       } as tsi.CompilerOptions;
     }
     return this[CompilerOptionsSym];

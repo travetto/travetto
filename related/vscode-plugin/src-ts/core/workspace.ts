@@ -52,7 +52,7 @@ export class Workspace {
    * Resolve worskapce path
    */
   static resolve(...p: string[]) {
-    return PathUtil.resolveDevPath(PathUtil.resolveUnix(this.path, ...p));
+    return PathUtil.resolveFrameworkPath(PathUtil.resolveUnix(this.path, ...p));
   }
 
   /**

@@ -48,7 +48,7 @@ class $Compiler {
       }
       this.program = ts.createProgram({
         rootNames: [...rootFiles],
-        options: TranspileUtil.getCompilerOptions() as ts.CompilerOptions,
+        options: TranspileUtil.compilerOptions as ts.CompilerOptions,
         host: this.host,
         oldProgram: this.program
       });

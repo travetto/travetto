@@ -24,11 +24,13 @@ declare const global: {
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
 export class ModuleManager {
+  private static moduleResolveFilename = Module._resolveFilename!.bind(Module);
   private static moduleLoad = Module._load!.bind(Module);
   // @ts-expect-error
   private static objectProto = Object.prototype.__proto__; // Remove to prevent __proto__ pollution in JSON
   private static initialized = false;
   private static unloadHandlers: UnloadHandler[] = [];
+  private static resolveFilename?: (filename: string) => string;
 
   static readonly transpile: (filename: string) => string;
 
@@ -96,7 +98,7 @@ export class ModuleManager {
       try {
         const diags: tsi.Diagnostic[] = [];
         const ts = require('typescript') as typeof tsi;
-        const ret = ts.transpile(SourceUtil.preProcess(tsf), TranspileUtil.getCompilerOptions() as tsi.CompilerOptions, tsf, diags);
+        const ret = ts.transpile(SourceUtil.preProcess(tsf), TranspileUtil.compilerOptions as tsi.CompilerOptions, tsf, diags);
         TranspileUtil.checkTranspileErrors(tsf, diags);
         return ret;
       } catch (err) {
@@ -127,6 +129,9 @@ export class ModuleManager {
     });
 
     // Supports bootstrapping with framework resolution
+    if (this.resolveFilename) {
+      Module._resolveFilename = (req, p) => this.moduleResolveFilename(this.resolveFilename!(req), p);
+    }
     Module._load = (req, p) => this.onModuleLoad(req, p);
     require.extensions[SourceUtil.EXT] = this.compile.bind(this);
 
@@ -179,6 +184,9 @@ export class ModuleManager {
     delete require.extensions[SourceUtil.EXT];
     this.initialized = false;
     Module._load = this.moduleLoad;
+    if (this.resolveFilename) {
+      Module._resolveFilename = this.moduleResolveFilename;
+    }
     ModuleUtil.reset();
     SourceUtil.reset();
 

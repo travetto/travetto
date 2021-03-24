@@ -11,8 +11,6 @@ import { TranspileUtil } from '../transpile-util';
 
 export const Module = Mod as unknown as ModType;
 
-const DEV = process.env.TRV_DEV!;
-
 type DevConfig = {
   entries: string[];
   env: Record<string, string | number>;
@@ -22,22 +20,6 @@ class DevRegister {
 
   static TRV_MOD = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
   static DEFAULT_MODS = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc', '@travetto/app', '@travetto/log']);
-
-  /**
-   * Gets the dev compiler options
-   */
-  static compilerOptions() {
-    const DEV_ROOT = process.env.TRV_DEV_ROOT ?? DEV;
-    return {
-      paths: {
-        // JS compressing is naive, and breaks on unexpected comments
-        [`@travetto/${'*'}`]: [`${DEV}/${'*'}`]
-      },
-      rootDir: DEV_ROOT,
-      outDir: DEV_ROOT,
-      sourceRoot: DEV_ROOT,
-    } as Record<string, unknown>;
-  }
 
   /** Naive hashing */
   static naiveHash(text: string) {
@@ -83,7 +65,7 @@ class DevRegister {
     while (keys.length) {
       const top = keys.shift()!;
       final.set(top, null);
-      const deps = require(`${top.replace('@travetto', DEV)}/package.json`).dependencies ?? {};
+      const deps = require(PathUtil.resolveFrameworkPath(`${top}/package.json`)).dependencies ?? {};
 
       for (const sub of Object.keys(deps)) {
         if (sub.startsWith('@travetto') && !final.has(sub)) {
@@ -127,19 +109,15 @@ class DevRegister {
     const { entries } = JSON.parse(this.getContent(envMods)) as DevConfig;
     process.env.TRV_MODULES = `${envMods.replace(this.TRV_MOD, '')},${entries.join(',')}`;
 
-    // Aligning dynamic modules with DEV
-    const mod = EnvUtil.getDynamicModules();
-    for (const [k, v] of Object.entries(mod)) {
-      mod[k] = v.replace(/.*@travetto/, DEV);
-    }
-
     // Override compiler options
-    const ogOptions = TranspileUtil.getCompilerOptions;
-    TranspileUtil.getCompilerOptions = () => ({ ...ogOptions.call(TranspileUtil), ...this.compilerOptions() });
+    const key = `@travetto/${'*'}`;
+    TranspileUtil['optionsExtra'] = {
+      rootDir: process.env.TRV_DEV_ROOT!,
+      paths: { [key]: [PathUtil.resolveFrameworkPath(key)] }
+    };
 
     // Override filename resolution
-    const resolveFilename = Module._resolveFilename!.bind(Module);
-    Module._resolveFilename = (req, p) => resolveFilename(this.resolveFilename(req), p);
+    ModuleManager['resolveFilename'] = p => this.resolveFilename(p);
 
     ModuleManager.init();
   }

@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { promises as fs } from 'fs';
 
-import { EnvUtil, ExecUtil, PathUtil, Package, ScanFs, FsUtil } from '@travetto/boot';
+import { ExecUtil, PathUtil, ScanFs, FsUtil } from '@travetto/boot';
 
 import { DependenciesUtil, DepType } from './depdencies';
 import { PackUtil } from './util';
@@ -75,14 +75,8 @@ export class AssembleUtil {
    */
   static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'optPeer']) {
 
-    if (process.env.TRV_DEV) { // If in dev, inject Dynamic Modules into dependencies
-      const mods = { ...EnvUtil.getDynamicModules() };
-      ['@travetto/doc', '@travetto/test', '@travetto/pack'].forEach(x => delete mods[x]);
-      Object.assign(Package.dependencies, mods);
-    }
-
     for (const el of await DependenciesUtil.resolveDependencies({ types })) {
-      const sub = PathUtil.normalizeDevPath(
+      const sub = PathUtil.normalizeFrameworkPath(
         el.file.replace(/.*?node_modules/, 'node_modules'),
         'node_modules/'
       );

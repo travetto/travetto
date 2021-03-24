@@ -25,7 +25,7 @@ export class SourceHost implements ts.CompilerHost {
   getNewLine = () => ts.sys.newLine;
   useCaseSensitiveFileNames = () => ts.sys.useCaseSensitiveFileNames;
   getDefaultLibLocation() {
-    return path.dirname(ts.getDefaultLibFilePath(TranspileUtil.getCompilerOptions() as ts.CompilerOptions));
+    return path.dirname(ts.getDefaultLibFilePath(TranspileUtil.compilerOptions as ts.CompilerOptions));
   }
 
   /**
@@ -75,7 +75,7 @@ export class SourceHost implements ts.CompilerHost {
     if (!this.sources.has(filename) || force) {
       const content = this.readFile(filename)!;
       this.sources.set(filename, ts.createSourceFile(filename, content ?? '',
-        (TranspileUtil.getCompilerOptions() as ts.CompilerOptions).target!
+        (TranspileUtil.compilerOptions as ts.CompilerOptions).target!
       ));
     }
     return this.sources.get(filename);

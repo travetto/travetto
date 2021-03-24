@@ -158,7 +158,7 @@ export class FileCache {
    * @param entry The entry path
    */
   fromEntryName(entry: string) {
-    return PathUtil.resolveDevPath(PathUtil.toUnix(entry)
+    return PathUtil.resolveFrameworkPath(PathUtil.toUnix(entry)
       .replace(this.cacheDir, '')
       .replace(/~/g, '/')
       .replace(/\/\/+/g, '/')
@@ -172,7 +172,7 @@ export class FileCache {
    */
   toEntryName(local: string) {
     return PathUtil.joinUnix(this.cacheDir,
-      PathUtil.normalizeDevPath(local.replace(PathUtil.cwd, ''))
+      PathUtil.normalizeFrameworkPath(local.replace(PathUtil.cwd, ''))
         .replace(/.*@travetto/, '.')
         .replace(/^\//, '')
         .replace(/\/+/g, '~')

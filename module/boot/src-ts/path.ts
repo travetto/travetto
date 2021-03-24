@@ -54,7 +54,7 @@ export class PathUtil {
    * @param file
    * @returns
    */
-  static normalizeDevPath(file: string, prefix = '') {
+  static normalizeFrameworkPath(file: string, prefix = '') {
     return DEV ? file.replace(DEV, `${prefix}@travetto`) : file;
   }
 
@@ -64,7 +64,7 @@ export class PathUtil {
    * @param file
    * @returns
    */
-  static resolveDevPath(file: string) {
+  static resolveFrameworkPath(file: string) {
     return DEV ? file.replace(/.*@travetto/, m => DEV || m) : file;
   }
 }
