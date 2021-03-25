@@ -15,13 +15,13 @@ export class FileCache {
 
   private cache = new Map<string, fs.Stats>();
 
-  readonly cacheDir: string;
-
   /**
    * Directory to cache into
    */
-  constructor(cacheDir?: string) {
-    this.cacheDir = PathUtil.resolveUnix(cacheDir ?? EnvUtil.get('TRV_CACHE', '.trv_cache'));
+  readonly cacheDir: string;
+
+  constructor(cacheDir: string) {
+    this.cacheDir = PathUtil.resolveUnix(cacheDir);
   }
 
   /**
@@ -158,12 +158,12 @@ export class FileCache {
    * @param entry The entry path
    */
   fromEntryName(entry: string) {
-    return PathUtil.resolveFrameworkPath(PathUtil.toUnix(entry)
+    return PathUtil.resolveUnix(PathUtil.resolveFrameworkPath(PathUtil.toUnix(entry)
       .replace(this.cacheDir, '')
+      .replace(/^\//, '')
       .replace(/~/g, '/')
-      .replace(/\/\/+/g, '/')
-      .replace(/^[.]/, 'node_modules/@travetto')
-      .replace(/[.]js$/, '.ts'));
+      .replace(/^[.]/, 'node_modules/@travetto/')
+      .replace(/\/\/+/g, '/')));
   }
 
   /**
@@ -171,12 +171,11 @@ export class FileCache {
    * @param local Local path
    */
   toEntryName(local: string) {
-    return PathUtil.joinUnix(this.cacheDir,
-      PathUtil.normalizeFrameworkPath(local.replace(PathUtil.cwd, ''))
-        .replace(/.*@travetto/, '.')
-        .replace(/^\//, '')
-        .replace(/\/+/g, '~')
-        .replace(/[.]ts$/, '.js')
+    local = PathUtil.toUnix(local).replace(PathUtil.cwd, '');
+    return PathUtil.joinUnix(this.cacheDir, PathUtil.normalizeFrameworkPath(local)
+      .replace(/.*@travetto\//, '.')
+      .replace(/^\//, '')
+      .replace(/\/+/g, '~')
     );
   }
 
@@ -198,4 +197,4 @@ export class FileCache {
   }
 }
 
-export const AppCache = new FileCache();
+export const AppCache = new FileCache(EnvUtil.get('TRV_CACHE', '.trv_cache'));

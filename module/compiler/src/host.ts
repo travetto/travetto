@@ -5,7 +5,7 @@ import * as path from 'path';
 import { PathUtil, AppCache } from '@travetto/boot';
 import { SourceUtil } from '@travetto/boot/src/internal/source-util';
 import { SystemUtil } from '@travetto/base/src/internal/system';
-import { TranspileUtil } from '@travetto/boot/src-ts/internal/transpile-util';
+import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { AppManifest } from '@travetto/base';
 
@@ -18,6 +18,11 @@ export class SourceHost implements ts.CompilerHost {
   private hashes = new Map<string, number>();
   private sources = new Map<string, ts.SourceFile>();
   readonly contents = new Map<string, string>();
+
+  private trackFile(filename: string, content: string) {
+    this.contents.set(filename, content);
+    this.hashes.set(filename, SystemUtil.naiveHash(fs.readFileSync(filename, 'utf8'))); // Get og content for hashing
+  }
 
   getCanonicalFileName = (f: string) => f;
   getCurrentDirectory = () => PathUtil.cwd;
@@ -43,6 +48,7 @@ export class SourceHost implements ts.CompilerHost {
    * Read file from disk, using the transpile pre-processor on .ts files
    */
   readFile(filename: string) {
+    filename = PathUtil.toUnixTs(filename);
     let content = ts.sys.readFile(filename);
     if (content === undefined) {
       throw new Error(`Unable to read file ${filename}`);
@@ -57,14 +63,18 @@ export class SourceHost implements ts.CompilerHost {
    * Write file to disk, and set value in cache as well
    */
   writeFile(filename: string, content: string) {
+    filename = PathUtil.toUnixTs(filename);
     this.trackFile(filename, content);
     AppCache.writeEntry(filename, content);
   }
 
-  trackFile(filename: string, content: string) {
+  /**
+   * Fetch file
+   */
+  fetchFile(filename: string) {
     filename = PathUtil.toUnixTs(filename);
-    this.contents.set(filename, content);
-    this.hashes.set(filename, SystemUtil.naiveHash(fs.readFileSync(filename, 'utf8'))); // Get og content for hashing
+    const cached = AppCache.readEntry(filename);
+    this.trackFile(filename, cached);
   }
 
   /**
@@ -85,6 +95,7 @@ export class SourceHost implements ts.CompilerHost {
    * See if a file exists
    */
   fileExists(filename: string) {
+    filename = PathUtil.toUnixTs(filename);
     return this.contents.has(filename) || ts.sys.fileExists(filename);
   }
 

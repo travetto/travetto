@@ -129,7 +129,7 @@ export class TransformerState implements State {
       this.resolver.getType(ident)
     );
 
-    return ({
+    return {
       dec,
       ident,
       file: decl?.getSourceFile().fileName,
@@ -138,7 +138,7 @@ export class TransformerState implements State {
       name: ident ?
         ident.escapedText! as string :
         undefined
-    });
+    };
   }
 
   /**

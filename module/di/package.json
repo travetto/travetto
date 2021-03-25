@@ -29,7 +29,7 @@
     "directory": "module/di"
   },
   "dependencies": {
-    "@travetto/transformer": "^2.0.0-alpha.3",
+    "@travetto/transformer": "^2.0.0-alpha.2",
     "@travetto/registry": "^2.0.0-alpha.3"
   },
   "devDependencies": {

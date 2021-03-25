@@ -24,13 +24,14 @@ declare const global: {
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
 export class ModuleManager {
-  private static moduleResolveFilename = Module._resolveFilename!.bind(Module);
-  private static moduleLoad = Module._load!.bind(Module);
   // @ts-expect-error
   private static objectProto = Object.prototype.__proto__; // Remove to prevent __proto__ pollution in JSON
+
+  private static moduleResolveFilename = Module._resolveFilename!.bind(Module);
+  private static moduleLoad = Module._load!.bind(Module);
+  private static resolveFilename?: (filename: string) => string;
   private static initialized = false;
   private static unloadHandlers: UnloadHandler[] = [];
-  private static resolveFilename?: (filename: string) => string;
 
   static readonly transpile: (filename: string) => string;
 
@@ -64,12 +65,11 @@ export class ModuleManager {
    */
   static setTranspiler(fn: (file: string) => string) {
     if (EnvUtil.isReadonly()) {
-      this.setTranspiler((tsf: string) => AppCache.readEntry(tsf));
+      fn = (tsf: string) => AppCache.readEntry(tsf);
       console.debug('In readonly mode, refusing to set transpiler');
-    } else {
-      // @ts-expect-error
-      this.transpile = fn;
     }
+    // @ts-expect-error
+    this.transpile = fn;
   }
 
   /**

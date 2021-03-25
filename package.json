@@ -9,24 +9,24 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
-    "setup": "npm run boot; ./bin/setup.sh",
+    "start": "npm run boot; ./bin/setup.sh; npm run init",
     "boot": "tsc -p module/boot/src-ts/tsconfig.json",
     "boot:watch": "npm run boot -- -w",
     "test": "trv-test",
     "lint": "npx eslint --ext .js --ext .ts .",
-    "lerna": "trv-opt-deps; npx lerna bootstrap --hoist; trv-clean;"
+    "init": "trv-init"
   },
   "dependencies": {
     "@arcsine/nodesh": "^1.8.3",
     "@typescript-eslint/eslint-plugin": "^4.17.0",
-    "eslint-plugin-unused-imports": "^1.1.0",
     "@typescript-eslint/parser": "^4.17.0",
-    "eslint": "^7.22.0",
     "@types/eslint": "^7.2.7",
+    "eslint-plugin-unused-imports": "^1.1.0",
+    "eslint": "^7.22.0",
     "lerna": "~3.22.1",
+    "@aws-sdk/client-ses": "^3.8.1",
     "passport-facebook": "^3.0.0",
-    "@types/passport-facebook": "^2.1.10",
-    "@aws-sdk/client-ses": "^3.8.1"
+    "@types/passport-facebook": "^2.1.10"
   },
   "devDependencies": {
     "@types/aws-serverless-express": "^3.3.3",

@@ -78,7 +78,7 @@ export class TestPlugin extends BasePlugin {
       if (first.startsWith('test-')) {
         state.isolated = true;
       }
-      if (/test(\-[^-]+)\//.test(first)) {
+      if (/test(\-[^-]+)?\//.test(first)) {
         await this.onSingle(state, first);
       } else {
         await this.showHelp('Only files in the test/ and test-*/ folders are permitted to be run');

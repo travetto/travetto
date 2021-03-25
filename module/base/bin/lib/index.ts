@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 import { CliUtil } from '@travetto/cli/src/util';
-import { AppCache, FsUtil, FileCache, ExecUtil, EnvUtil } from '@travetto/boot/src';
+import { AppCache, FileCache, ExecUtil, EnvUtil } from '@travetto/boot/src';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 
 /**
@@ -22,17 +22,22 @@ export class BuildUtil {
 
     const { AppManifest } = await import('@travetto/base/src/manifest');
 
-    let missing = false;
+    // @ts-ignore
+    let expired;
+    let missing;
     for (const entry of SourceIndex.findByFolders(AppManifest.source)) {
-      if (!FsUtil.existsSync(entry.file)
-        || !FsUtil.existsSync(AppCache.toEntryName(entry.file))
-        || FileCache.isOlder(AppCache.statEntry(entry.file), fs.statSync(entry.file))) {
-        missing = true;
+      try {
+        if (FileCache.isOlder(AppCache.statEntry(entry.file), fs.statSync(entry.file))) {
+          expired = entry;
+          break;
+        }
+      } catch (e) {
+        missing = entry;
         break;
       }
     }
 
-    if (!missing) {
+    if (!missing && !expired) {
       return;
     }
 

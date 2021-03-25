@@ -94,7 +94,7 @@ export class SystemUtil {
   static convertFileToModule(file: undefined, base?: string): undefined;
   static convertFileToModule(file: string | undefined, base?: string) {
     file = file ? PathUtil.normalizeFrameworkPath(file)
-      .replace(/[.](t|j)s$/, '')
+      .replace(/[.][tj]s$/, '')
       .replace(PathUtil.cwd, '.')
       .replace(/^.*node_modules\//, '') : undefined;
 

@@ -1,11 +1,11 @@
 import * as path from 'path';
 
-const DEV = process.env.TRV_DEV;
-
 /**
  * Standard utils for interacting with the paths
  */
 export class PathUtil {
+
+  private static devPath = process.env.TRV_DEV;
 
   static readonly cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
 
@@ -55,7 +55,7 @@ export class PathUtil {
    * @returns
    */
   static normalizeFrameworkPath(file: string, prefix = '') {
-    return DEV ? file.replace(DEV, `${prefix}@travetto`) : file;
+    return this.devPath ? file.replace(this.devPath, `${prefix}@travetto`) : file;
   }
 
   /**
@@ -65,6 +65,6 @@ export class PathUtil {
    * @returns
    */
   static resolveFrameworkPath(file: string) {
-    return DEV ? file.replace(/.*@travetto/, m => DEV || m) : file;
+    return this.devPath ? file.replace(/.*@travetto/, m => this.devPath || m) : file;
   }
 }

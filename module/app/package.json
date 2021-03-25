@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.2",
-    "@travetto/transformer": "^2.0.0-alpha.3",
+    "@travetto/transformer": "^2.0.0-alpha.2",
     "@travetto/registry": "^2.0.0-alpha.3",
     "@travetto/di": "^2.0.0-alpha.3"
   },

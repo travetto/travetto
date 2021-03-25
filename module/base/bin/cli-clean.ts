@@ -1,7 +1,9 @@
 import * as commander from 'commander';
+import * as fs from 'fs';
 
 import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { FileCache, PathUtil } from '@travetto/boot/src';
 
 /**
  * `npx trv clean`
@@ -17,15 +19,17 @@ export class BootCleanPlugin extends BasePlugin {
   }
 
   async action() {
-    const { AppCache } = await import('@travetto/boot/src/cache');
-    try {
-      AppCache.clear(true);
-
-      if (!this._cmd.quiet) {
-        console!.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: AppCache.cacheDir }}`);
+    for (const el of await fs.promises.readdir(PathUtil.cwd)) {
+      if (el.startsWith('.trv') && (await fs.promises.stat(el)).isDirectory()) {
+        const cache = new FileCache(el);
+        try {
+          if (!this._cmd.quiet) {
+            console!.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: cache.cacheDir }}`);
+          }
+        } catch (e) {
+          console!.error(color`${{ failure: 'Failed' }} to delete temp dir ${{ path: cache.cacheDir }}`);
+        }
       }
-    } catch (e) {
-      console!.error(color`${{ failure: 'Failed' }} to delete temp dir ${{ path: AppCache.cacheDir }}`);
     }
   }
 

@@ -6,7 +6,7 @@ import { PathUtil, EnvUtil, AppCache } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 import { Watchable } from '@travetto/base/src/internal/watchable';
-import { TranspileUtil } from '@travetto/boot/src-ts/internal/transpile-util';
+import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 
 import { SourceHost } from './host';
 import { TransformerManager } from './transformer';
@@ -20,17 +20,12 @@ type EventType = 'added' | 'removed' | 'changed';
 @Watchable('@travetto/compiler/support/watch.compiler')
 class $Compiler {
 
-  private transformerManager: TransformerManager;
   private program: ts.Program | undefined;
+  private transformerManager = new TransformerManager();
   private emitter = new EventEmitter();
-  private host: SourceHost;
+  private host = new SourceHost();
 
   active = false;
-
-  constructor() {
-    this.host = new SourceHost();
-    this.transformerManager = new TransformerManager();
-  }
 
   /**
    * Build typescript program
@@ -82,8 +77,7 @@ class $Compiler {
       }
       // Save writing for typescript program (`writeFile`)
     } else {
-      const cached = AppCache.readEntry(filename);
-      this.host.trackFile(filename, cached);
+      this.host.fetchFile(filename);
     }
 
     return this.host.contents.get(filename)!;

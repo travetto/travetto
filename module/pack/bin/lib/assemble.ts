@@ -76,10 +76,8 @@ export class AssembleUtil {
   static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'optPeer']) {
 
     for (const el of await DependenciesUtil.resolveDependencies({ types })) {
-      const sub = PathUtil.normalizeFrameworkPath(
-        el.file.replace(/.*?node_modules/, 'node_modules'),
-        'node_modules/'
-      );
+      const sub = PathUtil.normalizeFrameworkPath(el.file, 'node_modules/')
+        .replace(/.*?node_modules/, 'node_modules');
 
       const tgt = PathUtil.resolveUnix(workspace, sub);
       await FsUtil.mkdirp(path.dirname(tgt));

@@ -12,7 +12,7 @@ import { TranspileUtil } from '../transpile-util';
 export const Module = Mod as unknown as ModType;
 
 type DevConfig = {
-  entries: string[];
+  entries: Record<string, string>;
   env: Record<string, string | number>;
 };
 
@@ -82,7 +82,7 @@ class DevRegister {
           .filter(([k]) => k.startsWith('TRV_'))
           .sort((a, b) => a[0].localeCompare(b[0]))),
       },
-      entries: [...final.entries()].filter(([k, v]) => k !== Package.name).map(x => x.join('='))
+      entries: Object.fromEntries([...final.entries()].filter(([k, v]) => k !== Package.name))
     };
   }
 
@@ -107,7 +107,7 @@ class DevRegister {
 
     AppCache.init(true);
     const { entries } = JSON.parse(this.getContent(envMods)) as DevConfig;
-    process.env.TRV_MODULES = `${envMods.replace(this.TRV_MOD, '')},${entries.join(',')}`;
+    process.env.TRV_MODULES = `${envMods.replace(this.TRV_MOD, '')},${Object.entries(entries).map(([k, v]) => `${k}=${v ?? ''}`).join(',')}`;
 
     // Override compiler options
     const key = `@travetto/${'*'}`;

@@ -31,6 +31,9 @@ export = {
       multiline: { delimiter: 'semi', requireLast: true },
       singleline: { delimiter: 'comma', requireLast: false }
     }],
+    'no-restricted-imports': ['error', {
+      patterns: ['@travetto/boot/src-ts/**/*']
+    }],
     '@typescript-eslint/no-use-before-define': ['error', { classes: false }],
     '@typescript-eslint/member-ordering': ['error', {
       default: [

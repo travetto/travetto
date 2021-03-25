@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
+import { PathUtil } from '@travetto/boot/src';
 
 import { Orderable, SystemUtil } from '../src/internal/system';
 
@@ -50,8 +51,8 @@ class SystemUtilTests {
 
   @Test()
   async buildModuleName() {
-    const og = process.env.TRV_DEV;
-    process.env.TRV_DEV = '@@@@';
+    const og = PathUtil['devPath'];
+    PathUtil['devPath'] = '@@@@';
     const modName = SystemUtil.computeModule(__filename);
     assert(modName === './test/system-util');
 
@@ -63,7 +64,7 @@ class SystemUtilTests {
 
     const modName4 = SystemUtil.computeModule(`${__dirname}/node_modules/lodash/test`);
     assert(modName4 === '@npm/lodash/test');
-    process.env.TRV_DEV = og;
+    PathUtil['devPath'] = og;
   }
 
   @Test()
