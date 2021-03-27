@@ -1,17 +1,14 @@
-import { spawnSync } from 'child_process';
 import '@arcsine/nodesh';
+import { ExecUtil } from '@travetto/boot';
 
 'module/*/support/service*.ts'
   .$dir()
   .$map(f => f.replace(/^.*module\/([^/]+).*$/, (a, m) => `@travetto/${m}`))
   .$collect()
   .$forEach(modules => {
-    spawnSync('trv', ['command:service', ...process.argv.slice(2)], {
-      env: {
-        ...process.env,
-        TRV_MODULES: modules.join(',')
-      },
-      stdio: [0, 1, 2],
+    ExecUtil.spawn('trv', ['command:service', ...process.argv.slice(2)], {
+      env: { TRV_MODULES: modules.join(',') },
+      stdio: 'inherit',
       cwd: 'module/command'
     });
   });

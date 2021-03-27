@@ -14,8 +14,6 @@ export class TransformerManager {
   private cached: { before: ts.TransformerFactory<ts.SourceFile>[] } | undefined;
   transformers: NodeTransformer<TransformerState>[] = [];
 
-  constructor() { }
-
   /**
    * Read all transformers from disk under the pattern support/transformer.*
    */

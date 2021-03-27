@@ -6,7 +6,7 @@ import { BasePlugin } from './plugin-base';
 const PLUGIN_PACKAGE = [
   [/^run$/, 'app', true],
   [/^compile$/, 'compiler', true],
-  [/^test(:lerna)?$/, 'test', false],
+  [/^test$/, 'test', false],
   [/^command:service$/, 'command', true],
   [/^model:(install|export)$/, 'model', true],
   [/^openapi:(spec|client)$/, 'openapi', true],

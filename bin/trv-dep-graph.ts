@@ -1,21 +1,14 @@
 import '@arcsine/nodesh';
+import { PathUtil } from '@travetto/boot/src';
+import { Modules } from './package/modules';
 
-const prep = (v: string) => v.replace('@travetto/', '');
+const prep = (v: string) => v.replace(PathUtil.cwd, '').replace(/\/(module|related)\//, '');
 
-const list = (name: string, obj: Record<string, string>, weight: number) =>
-  Object.keys(obj ?? {}).filter(x => x.includes('@travetto')).map(x => [prep(name), prep(x), weight] as const);
-
-[].$concat(
-  ['digraph g {'],
-  'module/*/package.json'
-    .$dir()
-    .$flatMap(p =>
-      p.$read().$json().$flatMap(pkg => [
-        ...list(pkg.name, pkg.dependencies, 10),
-        // ...list(pkg.name, pkg.optionalPeerDependencies, 1),
-      ])
-    )
-    .$map(([src, dest, weight]) => `"${src}" -> "${dest}" [ weight=${(src + dest).includes('-') ? weight / 2 : weight} ];`),
+['digraph g {'].$concat(
+  ''.$map(() => Modules.graph)
+    .$flatMap(v => Object.entries(v))
+    .$flatMap(([k, v]) => [...v].map(x => [prep(k), prep(x)]))
+    .$map(([src, dest]) => `"${dest}" -> "${src}";`),
   ['}']
 )
   .$stdout;

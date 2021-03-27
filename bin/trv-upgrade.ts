@@ -1,53 +1,16 @@
 import '@arcsine/nodesh';
-import * as fs from 'fs';
+import { PathUtil } from '@travetto/boot/src';
 
-$exec('npx', ['lerna', 'ls', '-p', '-a'])
-  .$notEmpty()
-  .$filter(x => x.includes(process.cwd()))
-  .$concat([process.cwd()])
-  .$parallel(m =>
-    `${m}/package.json`
-      .$read({ singleValue: true })
-      .$json()
-      .$flatMap(pkg =>
-        [
-          'dependencies', 'devDependencies',
-          'peerDependencies', 'optionalDependencies',
-          'optionalPeerDependencies'
-        ]
-          .$flatMap(type =>
-            Object.entries<string>(pkg[type] || {})
-              .$map(([dep, version]) => ({ dep, type, version }))
-          )
-          .$filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
-          .$filter(x => !x.dep.startsWith('@travetto'))
-          .$parallel(({ dep, type, version }) =>
-            $exec('npm', {
-              args: ['show', `${dep}@${version}`, 'version', '--json'],
-              spawn: { cwd: m }
-            })
-              .$json()
-              .$map(v => {
-                const top = Array.isArray(v) ? v.pop() : v;
-                const curr = pkg[type][dep];
-                const next = version.replace(/\d.*$/, top);
-                if (next !== curr) {
-                  pkg[type][dep] = next;
-                  return `${dep}@(${curr} -> ${next})`;
-                }
-              })
-              .$onError(() => [])
-          )
-          .$notEmpty()
-          .$collect()
-          .$map(async (all) => {
-            if (all.length > 0) {
-              await JSON.stringify(pkg, undefined, 2)
-                .$stream('binary')
-                .pipe(fs.createWriteStream(`${m}/package.json`));
-            }
-            return `.${m.split(process.cwd())[1].padEnd(30)} updated ${all.length} dependencies - ${all.join(', ') || 'None'}`;
-          })
-      )
+import { Packages, Pkg } from './package/packages';
+
+const top = PathUtil.resolveUnix('package.json');
+
+Packages.yieldPackagesJson()
+  .$concat([[top, require(top) as Pkg] as const])
+  .$parallel(([pth, pkg]) =>
+    Packages.upgrade(pth, pkg).$map(all =>
+      `.${pth.split(PathUtil.cwd)[1].padEnd(30)} updated ${all.length} dependencies - ${all.join(', ') || 'None'}`
+    )
   )
+  .$tap(() => Packages.writeAll()) // Write all 
   .$console;

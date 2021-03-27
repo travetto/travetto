@@ -1,6 +1,4 @@
 # Top Level
-lerna-debug.log
-*.lerna_backup
 .bin/
 
 # Common

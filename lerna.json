@@ -1,9 +1,0 @@
-{
-  "lerna": "3.2.1",
-  "packages": [
-    "module/*",
-    "related/todo-app",
-    "related/generator-app"
-  ],
-  "version": "independent"
-}
