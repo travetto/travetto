@@ -100,24 +100,18 @@ export class Packages {
     };
   }
 
-  static writeOut(file: string, pkg: Pkg) {
-    return JSON.stringify(pkg, null, 2)
-      .$stream('binary')
-      .pipe(fs.createWriteStream(file.includes('package.json') ? file : `${file}/package.json`));
-  }
-
-  static upgrade(pth: string, pkg: Pkg) {
-    return [...DEP_GROUPS]
+  static upgrade(pth: string, pkg: Pkg, groups: typeof DEP_GROUPS[number][]) {
+    return groups
       .$flatMap(type =>
         Object.entries<string>(pkg[type] || {})
           .$map(([dep, version]) => ({ dep, type, version }))
       )
-      .$filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
       .$filter(x => !x.dep.startsWith('@travetto'))
+      .$filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
       .$parallel(({ dep, type, version }) =>
         $exec('npm', {
           args: ['show', `${dep}@${version}`, 'version', '--json'],
-          spawn: { cwd: pth }
+          spawn: { cwd: pth.replace(/\/package.json/, '') }
         })
           .$json()
           .$map(v => {
@@ -135,6 +129,11 @@ export class Packages {
       .$collect();
   }
 
+  static writeOut(file: string, pkg: Pkg) {
+    return `${JSON.stringify(pkg, null, 2)}\n`
+      .$stream('binary')
+      .pipe(fs.createWriteStream(file.includes('package.json') ? file : `${file}/package.json`));
+  }
 
   static async writeAll() {
     await this.init();

@@ -34,7 +34,7 @@
   },
   "optionalPeerDependencies": {
     "@types/faker": "^5.1.7",
-    "faker": "^5.4.0"
+    "faker": "^5.5.1"
   },
   "publishConfig": {
     "access": "public"
