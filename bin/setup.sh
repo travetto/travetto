@@ -4,6 +4,7 @@ BOOT=$ROOT/module/boot
 CLI=$ROOT/module/cli
 BIN=$ROOT/.bin
 
+rm -rf $BIN
 rm -rf $BIN/@travetto/boot/bin
 mkdir -p $BIN/@travetto/boot/bin
 

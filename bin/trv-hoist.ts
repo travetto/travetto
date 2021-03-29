@@ -4,12 +4,17 @@ import { PathUtil } from '@travetto/boot';
 import { DEP_GROUPS, Packages } from './package/packages';
 
 Packages.yieldPackagesJson()
+  .$filter(([pth]) => !pth.includes('travetto.github.io'))
   .$map(([path, pkg]) => ({ path, pkg, groups: DEP_GROUPS }))
-  .$tap(({ path, groups }) => console.log(`Applying ${groups.join(',')} for ${path.replace(PathUtil.cwd, '')}`))
-  .$flatMap(({ pkg, groups }) => [...groups].$map(k => Object.entries(pkg[k] ?? [])))
+  .$flatMap(({ path, pkg, groups }) => [...groups]
+    .$flatMap(k => Object.entries(pkg[k] ?? []))
+    .$filter(([a]) => !a.startsWith('@travetto'))
+    .$collect()
+    .$filter(all => all.length > 0)
+    .$tap(all => console.log(`Hoisting ${all.length.toString().padStart(2, ' ')} deps for ${path.replace(PathUtil.cwd, '.')}`))
+  )
   .$flatten()
   .$sort(([a], [b]) => a.localeCompare(b))
-  .$filter(([a]) => !a.startsWith('@travetto'))
   .$reduce((acc, [a, b]) => { acc[a] = b; return acc; }, {} as Record<string, unknown>)
   .$forEach(all =>
     'package.json'.$read().$json()
