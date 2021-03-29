@@ -30,7 +30,16 @@ export class Git {
       .$unique();
   }
 
-  static publishCommit(level: SemverLevel) {
-    return $exec('git', ['commit', '-m', `Publish ${level}`])
+  static publishCommit(tag: string) {
+    return $exec('git', { args: ['commit', '.', '-m', `Publish ${tag}`] });
+  }
+
+  static checkWorkspaceDirty(errorMessage: string) {
+    return $exec('git', ['diff', '--quiet', '--exit-code'])
+      .$concat($exec('git', ['diff', '--quiet', '--exit-code', '--cached']))
+      .$onError(() => {
+        console.error(errorMessage);
+        process.exit(1);
+      })
   }
 }

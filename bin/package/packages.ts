@@ -1,5 +1,8 @@
 import * as fs from 'fs';
 
+import '@arcsine/nodesh';
+import { PathUtil } from '@travetto/boot/src';
+
 export const DEP_GROUPS = [
   'dependencies', 'devDependencies',
   'optionalPeerDependencies', 'peerDependencies',
@@ -58,7 +61,7 @@ export class Packages {
     return this.init().then(() => this._cache);
   }
 
-  static standardize(file: string, {
+  static standardize(folder: string, {
     name, displayName, version, description,
     files, main, bin, scripts, keywords,
     dependencies, devDependencies, peerDependencies,
@@ -83,7 +86,7 @@ export class Packages {
       bin,
       repository: {
         url: 'https://github.com/travetto/travetto.git',
-        directory: file.replace(`${process.cwd()}/`, '').replace(/\/package.json/, '')
+        directory: folder.replace(`${PathUtil.cwd}/`, '')
       },
       scripts,
       dependencies,
@@ -100,30 +103,34 @@ export class Packages {
     };
   }
 
-  static upgrade(pth: string, pkg: Pkg, groups: typeof DEP_GROUPS[number][]) {
+  static showVersion(folder: string, dep: string, version: string) {
+    return $exec('npm', {
+      args: ['show', `${dep}@${version}`, 'version', '--json'],
+      spawn: { cwd: folder },
+      singleValue: true
+    })
+      .$map(v => v ? JSON.parse(v) as (string | string[]) : '')
+      .$map(v => Array.isArray(v) ? v.pop()! : v)
+  }
+
+  static upgrade(folder: string, pkg: Pkg, groups: typeof DEP_GROUPS[number][]) {
     return groups
       .$flatMap(type =>
         Object.entries<string>(pkg[type] || {})
-          .$map(([dep, version]) => ({ dep, type, version }))
+          .$map(([name, version]) => ({ name, type, version }))
       )
-      .$filter(x => !x.dep.startsWith('@travetto'))
+      .$filter(x => !x.name.startsWith('@travetto'))
       .$filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
-      .$parallel(({ dep, type, version }) =>
-        $exec('npm', {
-          args: ['show', `${dep}@${version}`, 'version', '--json'],
-          spawn: { cwd: pth.replace(/\/package.json/, '') }
+      .$parallel(d => this.showVersion(folder, d.name, d.version)
+        .$map(top => {
+          const curr = pkg[d.type]![d.name];
+          const next = d.version.replace(/\d.*$/, top);
+          if (next !== curr) {
+            pkg[d.type]![d.name] = next;
+            return `${d.name}@(${curr} -> ${next})`;
+          }
         })
-          .$json()
-          .$map(v => {
-            const top = Array.isArray(v) ? v.pop() : v;
-            const curr = pkg[type]![dep];
-            const next = version.replace(/\d.*$/, top);
-            if (next !== curr) {
-              pkg[type]![dep] = next;
-              return `${dep}@(${curr} -> ${next})`;
-            }
-          })
-          .$onError(() => [])
+        .$onError(() => [])
       )
       .$notEmpty()
       .$collect();
@@ -146,7 +153,7 @@ export class Packages {
   static async * yieldPackagesJson() {
     await this.init();
     for (const [el, pkg] of Object.entries(this._cache)) {
-      yield [`${el}/package.json`, pkg] as const;
+      yield [el, pkg] as const;
     }
   }
 }

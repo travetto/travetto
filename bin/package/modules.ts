@@ -86,4 +86,11 @@ export class Modules {
     pkg.version = final;
     return msg;
   }
+
+  static async * yieldPackagesJson() {
+    await this.init();
+    for (const [el, pkg] of Object.entries(this._byPath)) {
+      yield [el, pkg] as const;
+    }
+  }
 }
