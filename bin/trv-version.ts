@@ -15,9 +15,8 @@ Git.checkWorkspaceDirty('Cannot update versions with uncomitted changes')
   .$flatMap(() => 'Continue?'.$prompt())
   .$map(res => {
     if (res === 'yes') {
-      return Packages.writeAll().then(() => Git.publishCommit(level))
-    } else {
-      process.exit(-1);
+      return Packages.writeAll().then(() => Git.publishCommit(level));
     }
   })
+  .$notEmpty()
   .$console;

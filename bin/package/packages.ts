@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 
 import '@arcsine/nodesh';
+
 import { PathUtil } from '@travetto/boot/src';
 
 export const DEP_GROUPS = [
@@ -37,13 +38,13 @@ export type Pkg = {
 
 
 export class Packages {
-  private static combine(a: string[], ...b: string[]) {
-    return [...new Set([...(a || []), ...(b || [])])];
-  }
-
   private static _cache: Record<string, Pkg> = {};
 
   private static _init = false;
+
+  private static combine(a: string[], ...b: string[]) {
+    return [...new Set([...(a || []), ...(b || [])])];
+  }
 
   private static async init() {
     if (this._init) {
@@ -111,6 +112,7 @@ export class Packages {
     })
       .$map(v => v ? JSON.parse(v) as (string | string[]) : '')
       .$map(v => Array.isArray(v) ? v.pop()! : v)
+      .$notEmpty();
   }
 
   static upgrade(folder: string, pkg: Pkg, groups: typeof DEP_GROUPS[number][]) {
