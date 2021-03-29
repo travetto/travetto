@@ -1,6 +1,5 @@
 import { PathUtil } from '@travetto/boot/src';
 import { Modules } from './modules';
-import { SemverLevel } from './semver';
 
 export class Git {
 
@@ -21,7 +20,7 @@ export class Git {
       .$sort()
       .$unique()
       .$map(f => PathUtil.resolveUnix(f));
-  };
+  }
 
   static findModulesChanged(hash: string) {
     return this.findFilesChanged(hash)
@@ -40,6 +39,6 @@ export class Git {
       .$onError(() => {
         console.error(errorMessage);
         process.exit(1);
-      })
+      });
   }
 }

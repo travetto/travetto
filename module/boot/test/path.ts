@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Test, Suite, AfterEach } from '@travetto/test';
 import { PathUtil } from '../src';
 
-const ogPath = PathUtil['devPath']
+const ogPath = PathUtil['devPath'];
 
 @Suite()
 export class PathTest {

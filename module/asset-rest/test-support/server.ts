@@ -58,7 +58,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   @Test()
   async testUploadAll() {
     const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request('post', '/test/upload/all', {
+    const res = await this.request<Asset>('post', '/test/upload/all', {
       headers: {
         'Content-Type': sent.type,
         'Content-Length': `${sent.size}`
@@ -74,7 +74,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   @Test()
   async testUploadDirect() {
     const [sent] = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request('post', '/test/upload', {
+    const res = await this.request<Asset>('post', '/test/upload', {
       headers: {
         'Content-Type': sent.type,
         'Content-Length': `${sent.size}`
@@ -89,7 +89,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request('post', '/test/upload', this.getMultipartRequest(uploads));
+    const res = await this.request<Asset>('post', '/test/upload', this.getMultipartRequest(uploads));
     const asset = await this.getAsset('/logo.png');
     assert(res.body.hash === asset.hash);
   }
@@ -100,7 +100,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
       { name: 'file1', resource: 'logo.png', type: 'image/png' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const res = await this.request('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
+    const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
     const asset = await this.getAsset('/logo.png');
     assert(res.body.hash1 === asset.hash);
     assert(res.body.hash2 === asset.hash);

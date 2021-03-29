@@ -9,7 +9,9 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
-    "start": "npm ci --legacy-peer-deps; npm run boot; ./bin/setup.sh",
+    "prestart": "npm ci --legacy-peer-deps",
+    "start": "npm run boot",
+    "poststart": "./bin/setup.sh",
     "boot": "npx tsc -p module/boot/src-ts/tsconfig.json",
     "boot:watch": "npm run boot -- -w",
     "test": "trv-test",
