@@ -11,7 +11,8 @@ async function run(isolated = false) {
 
   const consumer = new RunnableTestConsumer(emitter);
 
-  return [...Object.keys(await Modules.byPath)]
+  return Modules.yieldPackagesJson()
+    .$map(([path]) => path)
     .$tap(console.log)
     .$parallel(async cwd => {
       const args = ['test', '-f', 'exec', ...(isolated ? ['-i'] : ['-c', '1'])];
@@ -21,4 +22,4 @@ async function run(isolated = false) {
     }, { concurrent: isolated ? 2 : 6 }).then(x => consumer.summarizeAsBoolean());
 }
 
-run();
+run(/^true|1|yes|on$/.test(process.argv[2]));

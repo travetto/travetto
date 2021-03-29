@@ -1,11 +1,11 @@
 import '@arcsine/nodesh';
 
-import { FsUtil } from '@travetto/boot';
+import { FsUtil, PathUtil } from '@travetto/boot';
 import { Packages } from './package/packages';
 
 // Clean cache
 Packages.yieldPackagesJson()
-  .$flatMap(([path]) => path.replace('package.json', '.trv_cache*'))
+  .$flatMap(([path]) => PathUtil.resolveUnix(path, '.trv_cache*'))
   .$dir({ allowHidden: true, type: 'dir' })
   .$filter(x => !x.includes('/.'))
   .$parallel(f => FsUtil.unlinkRecursive(f, true))
