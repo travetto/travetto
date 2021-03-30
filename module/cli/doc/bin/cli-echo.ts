@@ -8,7 +8,7 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
  *
  * Allows for cleaning of the cache dire
  */
-export class CliEchoPlugin extends BasePlugin {
+export class CliEchoPlugin extends BasePlugin<{ uppercase?: boolean }> {
   name = 'echo';
 
   init(cmd: commander.Command) {
@@ -17,7 +17,7 @@ export class CliEchoPlugin extends BasePlugin {
   }
 
   async action(args: string[]) {
-    if (this._cmd.uppercase) {
+    if (this.opts.uppercase) {
       args = args.map(x => x.toUpperCase());
     }
     console.log(args);

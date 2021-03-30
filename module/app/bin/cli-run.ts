@@ -10,10 +10,16 @@ import { AppListUtil } from './lib/list';
 import { AppRunUtil } from './lib/run';
 import { HelpUtil } from './lib/help';
 
+type Config = {
+  env?: string;
+  profile: string[];
+  resource: string[];
+};
+
 /**
  * The main entry point for the application cli
  */
-export class AppRunPlugin extends BasePlugin {
+export class AppRunPlugin extends BasePlugin<Config> {
   name = 'run';
 
   /**
@@ -51,10 +57,10 @@ export class AppRunPlugin extends BasePlugin {
         return await this.showHelp(app ? `${app} is an unknown application` : '');
       } else {
         EnvInit.init({
-          env: this._cmd.env, watch: selected.watch,
+          env: this.opts.env, watch: selected.watch,
           append: {
-            TRV_PROFILES: this._cmd.profile,
-            TRV_RESOURCES: this._cmd.resource
+            TRV_PROFILES: this.opts.profile,
+            TRV_RESOURCES: this.opts.resource
           }
         });
 

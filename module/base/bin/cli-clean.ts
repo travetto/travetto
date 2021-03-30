@@ -5,12 +5,16 @@ import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { FileCache, PathUtil } from '@travetto/boot/src';
 
+type Config = {
+  quiet?: boolean;
+};
+
 /**
  * `npx trv clean`
  *
  * Allows for cleaning of the cache dire
  */
-export class BootCleanPlugin extends BasePlugin {
+export class BaseCleanPlugin extends BasePlugin<Config> {
   name = 'clean';
   build = undefined;
 
@@ -23,7 +27,7 @@ export class BootCleanPlugin extends BasePlugin {
       if (el.startsWith('.trv') && (await fs.promises.stat(el)).isDirectory()) {
         const cache = new FileCache(el);
         try {
-          if (!this._cmd.quiet) {
+          if (!this.opts.quiet) {
             console!.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: cache.cacheDir }}`);
           }
         } catch (e) {

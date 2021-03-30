@@ -7,7 +7,7 @@ import { color } from '@travetto/cli/src/color';
 /**
  * CLI Entry point for running the email server
  */
-export class EmailCompilePlugin extends BasePlugin {
+export class EmailCompilePlugin extends BasePlugin<{ watch?: boolean }> {
   name = 'email:compile';
 
   init(cmd: commander.Command) {
@@ -23,7 +23,7 @@ export class EmailCompilePlugin extends BasePlugin {
     const all = await TemplateUtil.compileAllToDisk();
     console!.log(color`Successfully compiled ${{ param: `${all.length}` }} templates`);
 
-    if (CliUtil.isTrue(this._cmd.watch)) {
+    if (CliUtil.isTrue(this.opts.watch)) {
       await TemplateUtil.watchCompile();
       await new Promise(r => process.on('exit', r));
     }

@@ -5,10 +5,17 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { CliUtil } from '@travetto/cli/src/util';
 import { ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
 
+type Config = {
+  input: string;
+  dockerImage: string;
+  output: string;
+  watch?: boolean;
+};
+
 /**
  * CLI for generating the cli client
  */
-export class OpenApiClientPlugin extends BasePlugin {
+export class OpenApiClientPlugin extends BasePlugin<Config> {
   name = 'openapi:client';
 
   init(cmd: commander.Command) {
@@ -21,27 +28,27 @@ export class OpenApiClientPlugin extends BasePlugin {
   }
 
   async action(format: string, props?: string) {
-    this._cmd.input = PathUtil.resolveUnix(this._cmd.input);
-    this._cmd.output = PathUtil.resolveUnix(this._cmd.output);
+    this.opts.input = PathUtil.resolveUnix(this.opts.input);
+    this.opts.output = PathUtil.resolveUnix(this.opts.output);
 
     // Ensure its there
-    await FsUtil.mkdirp(this._cmd.output);
+    await FsUtil.mkdirp(this.opts.output);
 
     const args = [
       'run',
       '--user', `${process.geteuid()}:${process.getgid()}`,
-      '-v', `${this._cmd.output}:/workspace`,
-      '-v', `${path.dirname(this._cmd.input)}:/input`,
+      '-v', `${this.opts.output}:/workspace`,
+      '-v', `${path.dirname(this.opts.input)}:/input`,
       '-it',
       '--rm',
-      this._cmd.dockerImage,
+      this.opts.dockerImage,
       'generate',
       '--skip-validate-spec',
       '--remove-operation-id-prefix',
       '-g', format,
       '-o', '/workspace',
-      '-i', `/input/${path.basename(this._cmd.input)}`,
-      ...(this._cmd.watch ? ['-w'] : []),
+      '-i', `/input/${path.basename(this.opts.input)}`,
+      ...(this.opts.watch ? ['-w'] : []),
       ...(props ? ['--additional-properties', props] : [])
     ];
 

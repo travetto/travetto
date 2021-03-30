@@ -5,11 +5,17 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 import { BuildUtil } from './lib';
 
+type Config = {
+  output?: string;
+  clean?: boolean;
+  quiet?: boolean;
+};
+
 /**
  * Command line support for building the code with the ability to
  * control the output target.
  */
-export class BaseBuildPlugin extends BasePlugin {
+export class BaseBuildPlugin extends BasePlugin<Config> {
 
   name = 'build';
   build = undefined;
@@ -22,14 +28,14 @@ export class BaseBuildPlugin extends BasePlugin {
   }
 
   async action() {
-    if (this._cmd.output) {
-      process.env.TRV_CACHE = this._cmd.output;
+    if (this.opts.output) {
+      process.env.TRV_CACHE = this.opts.output;
     }
 
     const { AppCache } = await import('@travetto/boot');
-    const path = this._cmd.output ?? AppCache.cacheDir;
+    const path = this.opts.output ?? AppCache.cacheDir;
 
-    if (this._cmd.clean) {
+    if (this.opts.clean) {
       await AppCache.clear(true);
       console.log(color`${{ success: 'Succesfully' }} deleted ${{ path }} `);
     }
@@ -37,7 +43,7 @@ export class BaseBuildPlugin extends BasePlugin {
     try {
       await BuildUtil.build(process.env as Record<string, string>);
 
-      if (!this._cmd.quiet) {
+      if (!this.opts.quiet) {
         console!.log(color`${{ success: 'Successfully' }} wrote to ${{ path }}`);
       }
     } catch (err) {
