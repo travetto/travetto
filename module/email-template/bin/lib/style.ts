@@ -9,7 +9,7 @@ export class StyleUtil {
    * Compile SCSS content with roots as search paths for additional assets
    */
   static async compileSass(file: string, roots: string[]) {
-    const sass = await import('node-sass');
+    const sass = await import('sass');
     const result = await util.promisify(sass.render)({
       file,
       sourceMap: false,
