@@ -1,7 +1,7 @@
 import { EnvUtil, Package } from '@travetto/boot';
 import { SourceConfig } from '@travetto/boot/src/internal/source';
 
-import { version as frameworkVersion } from '../package.json';
+import { version as baseVersion } from '../package.json';
 import { TimeUtil } from './internal/time';
 
 /**
@@ -31,7 +31,7 @@ interface AppInfo {
   /**
    * Travetto Version
    */
-  frameworkVersion?: string;
+  baseVersion?: string;
 }
 
 /**
@@ -100,7 +100,7 @@ class $AppManifest {
       const { version, name, license, author, description } = pkg;
       Object.assign(this.info, { version, name, license, author, description });
     } catch { }
-    this.info.frameworkVersion = frameworkVersion; // Travetto version
+    this.info.baseVersion = baseVersion; // Travetto version
 
     const env = EnvUtil.get('TRV_ENV', EnvUtil.get('NODE_ENV', 'dev'))
       .replace(/^production$/i, 'prod')

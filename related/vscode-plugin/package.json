@@ -43,6 +43,7 @@
   "engines": {
     "vscode": "^1.50.0"
   },
+  "private": true,
   "publishConfig": {
     "access": "restricted"
   },

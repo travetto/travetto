@@ -1,8 +1,9 @@
 import '@arcsine/nodesh';
 import { ExecUtil } from '@travetto/boot';
+import { Packages } from './package/packages';
 
-'module/*/support/service*.ts'
-  .$dir()
+Packages.yieldPublicPackages()
+  .$flatMap(x => 'support/service*.ts'.$dir({ base: x._.folder }))
   .$map(f => f.replace(/^.*module\/([^/]+).*$/, (a, m) => `@travetto/${m}`))
   .$collect()
   .$forEach(modules => {

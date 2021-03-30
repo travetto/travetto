@@ -1,6 +1,7 @@
 import '@arcsine/nodesh';
 import { ExecUtil } from '@travetto/boot';
-import { Modules } from './package/modules';
+
+import { Git } from './package/git';
 
 async function run(isolated = false) {
   const { TestConsumerRegistry } = await import('@travetto/test/src/consumer/registry');
@@ -11,12 +12,10 @@ async function run(isolated = false) {
 
   const consumer = new RunnableTestConsumer(emitter);
 
-  return Modules.yieldPackagesJson()
-    .$map(([path]) => path)
-    .$tap(console.log)
-    .$parallel(async cwd => {
+  return Git.yieldChangedPackges()
+    .$parallel(async p => {
       const args = ['test', '-f', 'exec', ...(isolated ? ['-i'] : ['-c', '1'])];
-      const { process: proc, result } = ExecUtil.spawn('trv', args, { cwd, stdio: [0, 'pipe', 2, 'ipc'] });
+      const { process: proc, result } = ExecUtil.spawn('trv', args, { cwd: p._.folder, stdio: [0, 'pipe', 2, 'ipc'] });
       proc.on('message', ev => consumer.onEvent(ev));
       await result;
     }, { concurrent: isolated ? 2 : 6 }).then(x => consumer.summarizeAsBoolean());

@@ -3,8 +3,6 @@ import * as htmlEntities from 'html-entities';
 
 import { HtmlUtil, Parse5Adapter } from './html';
 
-const allEntities = new htmlEntities.AllHtmlEntities();
-
 const LI_TOKEN = '⇜⇟⇝';
 
 /**
@@ -58,7 +56,7 @@ export class MarkdownUtil {
     let simple = html.replace(/&#xA0;/g, ' '); // Remove entities
 
     // Decode all encoded pieces
-    simple = allEntities.decode(simple);
+    simple = htmlEntities.decode(simple);
 
     const output: string[] = [];
 

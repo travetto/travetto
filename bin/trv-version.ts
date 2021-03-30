@@ -6,17 +6,15 @@ import { Packages } from './package/packages';
 
 const [level, prefix] = process.argv.slice(2);
 
-Git.checkWorkspaceDirty('Cannot update versions with uncomitted changes')
-  .$concat(Git.findLastRelease())
-  .$flatMap(h => Git.findModulesChanged(h))
-  .$map(p => Modules.updateVersion(p, level as 'major', prefix))
-  .$tap(console.log)
-  .$collect()
-  .$flatMap(() => 'Continue?'.$prompt())
-  .$map(res => {
-    if (res === 'yes') {
-      return Packages.writeAll().then(() => Git.publishCommit(level));
-    }
-  })
-  .$notEmpty()
-  .$console;
+Git.checkWorkspaceDirty('Cannot update versions with uncomitted changes').then(() =>
+  Git.yieldChangedPackges()
+    .$map(p => Modules.updateVersion(p, level as 'major', prefix))
+    .$tap(p => console.log(`Upgrading ${p.name} from ${p._.version} to ${p.version}`))
+    .$collect()
+    .$flatMap((all) =>
+      'Continue?'.$prompt().$flatMap(res => res === 'yes' ? all : [])
+    )
+    .$map(p => Packages.writeOut(p))
+    .$notEmpty()
+    .$console
+);

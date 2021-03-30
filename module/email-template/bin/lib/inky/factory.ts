@@ -43,7 +43,7 @@ export class InkyComponentFactory implements ComponentFactory {
    * Traverse nodes
    */
   private traverse(node: Node & { hasColumns?: boolean }) {
-    const children = Parse5Adapter.getChildNodes(node) ?? [];
+    const children = (Parse5Adapter.getChildNodes(node) ?? []) as Node[];
     const out = [];
 
     for (const child of children) {
@@ -278,7 +278,7 @@ export class InkyComponentFactory implements ComponentFactory {
 
   @Tag()
   center(element: Node) {
-    for (const child of (Parse5Adapter.getChildNodes(element) ?? [])) {
+    for (const child of (Parse5Adapter.getChildNodes(element) ?? []) as Node[]) {
       if (Parse5Adapter.isElementNode(child)) {
         HtmlUtil.setDomAttribute(child, 'align', 'center');
         HtmlUtil.setDomAttribute(child, 'class', 'float-center');
