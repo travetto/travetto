@@ -1,7 +1,9 @@
-import { TreeAdapter, Node, serialize, DefaultTreeElement } from 'parse5';
+import { TreeAdapter, Node, serialize } from 'parse5';
 
 // TODO: Get proper typings
 export const Parse5Adapter: TreeAdapter = require('parse5/lib/tree-adapters/default');
+
+type AttrList = { name: string, value: string }[];
 
 /**
  * Utilities for visiting html trees
@@ -13,7 +15,7 @@ export class HtmlUtil {
    */
   static visit(root: Node, visitor: (node: Node, descend: () => void) => void) {
     function traverse(node: Node) {
-      const children = Parse5Adapter.getChildNodes(node) ?? [];
+      const children = (Parse5Adapter.getChildNodes(node) ?? []) as Node[];
       for (const child of children) {
         if (child) {
           visitor(child, traverse.bind(null, child));
@@ -27,11 +29,11 @@ export class HtmlUtil {
    * Get hashmap of all attributes on the node
    */
   static getAttrMap(el: Node) {
-    const attrs = Parse5Adapter.getAttrList(el);
+    const attrs = Parse5Adapter.getAttrList(el) as AttrList;
     if (!attrs) {
       return {} as Record<string, string>;
     } else {
-      return attrs.reduce((acc, val) => {
+      return attrs.reduce((acc: Record<string, string>, val) => {
         acc[val.name] = val.value;
         return acc;
       }, {} as Record<string, string>);
@@ -65,9 +67,9 @@ export class HtmlUtil {
    * Set DOM Attribute to value
    */
   static setDomAttribute(node: Node, attrName: string, value: string) {
-    let attrList = Parse5Adapter.getAttrList(node);
+    let attrList = Parse5Adapter.getAttrList(node) as AttrList;
     if (!attrList) {
-      attrList = (node as DefaultTreeElement).attrs = [];
+      attrList = (node as { attrs: AttrList }).attrs = [];
     }
     const attr = attrList.find(x => x.name === attrName);
 

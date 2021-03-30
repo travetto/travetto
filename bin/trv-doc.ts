@@ -3,6 +3,8 @@ import * as  fs from 'fs';
 
 import '@arcsine/nodesh';
 
+import { Packages } from './package/packages';
+
 const commander = path.resolve('node_modules/commander/index.js');
 const page = path.resolve.bind(path, 'related/travetto.github.io/src');
 
@@ -53,21 +55,20 @@ if (target && target.startsWith(root)) {
     },
   ]
     .$concat(
-      'module/*/doc.ts'.$dir()
-        .$filter(f => !f.includes('worker'))
-        .$map(async f => {
-          const mod = f.replace(/^(.*module|related)\/([^/]+)(.*)$/, (_, a, b) => `@travetto/${b}`);
-          const mods = await f.$read()
+      Packages.yieldPublicPackages()
+        .$filter(f => !f.name.includes('worker'))
+        .$map(async (pkg) => {
+          const mods = await `${pkg._.folder}/doc.ts`.$read()
             .$tokens(/@travetto\/[^/' `;\n]+/)
-            .$filter(x => /^@[a-z\/0-9-]+$/.test(x) && x !== mod)
+            .$filter(x => /^@[a-z\/0-9-]+$/.test(x) && x !== pkg.name)
             .$sort()
             .$unique();
           return {
-            mod: mod.split('/')[1],
+            mod: pkg.name.split('/')[1],
             mods,
-            title: `Building out ${mod} docs`,
+            title: `Building out ${pkg.name} docs`,
             html: 'app/documentation/gen/%MOD/%MOD.component.html',
-            dir: path.dirname(f)
+            dir: pkg._.folder
           };
         })
     )

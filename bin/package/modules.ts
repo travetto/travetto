@@ -4,9 +4,7 @@ import { Semver, SemverLevel } from './semver';
 export class Modules {
   private static _init = false;
 
-  static _byPath: Record<string, Pkg>;
-  static _byName: Record<string, string>;
-  static _graph: Record<string, Set<string>>;
+  static _graphByFolder: Record<string, Set<string>>;
 
   private static getDeps(pkg: Pkg) {
     return [...DEP_GROUPS].$flatMap(k => Object.keys(pkg[k] ?? {}));
@@ -18,79 +16,64 @@ export class Modules {
     }
 
     this._init = true;
-    this._byPath = await Packages.cache
-      .then(map => Object.entries(map)
-        .$filter(([, pkg]) => pkg.publishConfig?.access !== 'restricted')
-        .$collect()
-      )
-      .then(([all]) => Object.fromEntries(all));
 
-    this._byName = Object.fromEntries(Object.entries(this._byPath).map(([a, b]) => [b.name, a]));
+    const byName = await Packages.yieldPublicPackages()
+      .$map(pkg => [pkg.name, pkg] as const)
+      .then((all) => Object.fromEntries(all));
 
-    this._graph = {};
-    await Object.values(this._byPath)
+    this._graphByFolder = {};
+    await Packages.yieldPublicPackages()
       .$flatMap(pkg => this.getDeps(pkg)
-        .$filter(k => !!this._byName[k])
+        .$filter(k => !!byName[k])
         .$map(dep =>
-          (this._graph[this._byName[dep]] ??= new Set()).add(this._byName[pkg.name])
+          (this._graphByFolder[byName[dep]._.folder] ??= new Set()).add(byName[pkg.name]._.folder)
         )
       );
   }
 
-  static get graph() {
-    return this.init().then(() => this._graph);
+  static get graphByFolder() {
+    return this.init().then(() => this._graphByFolder);
   }
 
-  static get byPath() {
-    return this.init().then(() => this._byPath);
-  }
-
-  static async getDependentModules(root: string) {
+  static async * getDependentModules(root: string) {
     await this.init();
 
-    if (!this._graph[root]) {
-      return new Set<string>();
+    if (!this._graphByFolder[root]) {
+      return;
     }
 
     const process = [root];
     const out = new Set([root]);
+    yield Packages.getByFolder(root);
+
     while (process.length) {
       const first = process.shift()!;
-      for (const el of this._graph[first] ?? []) {
+      for (const el of this._graphByFolder[first] ?? []) {
         if (!out.has(el)) {
           out.add(el);
+          yield Packages.getByFolder(el);
           process.push(el);
         }
       }
     }
-    return out;
   }
 
-  static async getDependentPackages(root: string) {
-    return [...(await this.getDependentModules(root))].map(p => this._byPath[p]);
+  static getDependentPackages(root: string | Pkg) {
+    return this.getDependentModules(typeof root === 'string' ? root : root._.folder);
   }
 
-  static async updateVersion(modPath: string, level: SemverLevel, prefix?: string) {
-    const pkg = (await Modules.byPath)[modPath];
+  static async updateVersion(pkg: Pkg, level: SemverLevel, prefix?: string) {
     const parsed = Semver.parse(pkg.version);
     const final = Semver.format(Semver.increment(parsed, level, prefix));
-    for (const dPkg of await Modules.getDependentPackages(modPath)) {
+    for await (const dPkg of this.getDependentPackages(pkg)) {
       for (const key of DEP_GROUPS) {
-        if (dPkg[key]?.[pkg.name]) {
-          const val = dPkg[key]![pkg.name];
-          dPkg[key]![pkg.name] = val.replace(pkg.version, final); // Only bump if matching
+        const grp = dPkg[key];
+        if (grp?.[pkg.name]) {
+          grp[pkg.name] = grp[pkg.name].replace(pkg.version, final); // Only bump if matching
         }
       }
     }
-    const msg = `Upgrading ${pkg.name} from ${pkg.version} to ${final}`;
     pkg.version = final;
-    return msg;
-  }
-
-  static async * yieldPackagesJson() {
-    await this.init();
-    for (const [el, pkg] of Object.entries(this._byPath)) {
-      yield [el, pkg] as const;
-    }
+    return pkg;
   }
 }

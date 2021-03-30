@@ -104,7 +104,9 @@ export class HelpUtil {
     if (message) {
       console!.error(color`${{ failure: message }}\n`);
     }
-    command.outputHelp(text => HelpUtil.getHelpText(text, extra));
+    console![message ? 'error' : 'log'](
+      HelpUtil.getHelpText(command.helpInformation(), extra)
+    );
     process.exit(message ? 1 : 0);
   }
 }

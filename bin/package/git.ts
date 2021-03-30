@@ -1,5 +1,7 @@
 import { PathUtil } from '@travetto/boot/src';
+
 import { Modules } from './modules';
+import { Packages } from './packages';
 
 export class Git {
 
@@ -11,21 +13,25 @@ export class Git {
       .$map(([hash]) => hash);
   }
 
-  static async * findFilesChanged(hash: string) {
-    const byPath = await Object.keys(await Modules.byPath)
-      .$replace(`${PathUtil.cwd}/`, '');
+  static async * findFoldersChanged(hash: string) {
+    const byFolder = await Packages.yieldPublicPackages()
+      .$map(p => p._.folderRelative);
+    const patt = new RegExp(`(${byFolder.join('|')})\/`);
 
     yield* $exec('git', ['diff', '--name-only', `HEAD..${hash}`])
-      .$tokens(new RegExp(`(${byPath.join('|')})`))
+      .$tokens(patt)
       .$sort()
       .$unique()
       .$map(f => PathUtil.resolveUnix(f));
   }
 
-  static findModulesChanged(hash: string) {
-    return this.findFilesChanged(hash)
+  static async * yieldChangedPackges(hash?: string) {
+    if (!hash) {
+      hash = await this.findLastRelease().$value;
+    }
+    yield* this.findFoldersChanged(hash)
       .$flatMap(f => Modules.getDependentModules(f))
-      .$sort()
+      .$sort((a, b) => a.name.localeCompare(b.name))
       .$unique();
   }
 

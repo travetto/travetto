@@ -33,10 +33,10 @@
     "nodemailer": "^6.5.0",
     "@types/nodemailer": "^6.4.1"
   },
-  "docDependencies": {
-    "@aws-sdk/client-ses": "^3.10.0"
-  },
   "publishConfig": {
     "access": "public"
+  },
+  "docDependencies": {
+    "@aws-sdk/client-ses": "^3.10.0"
   }
 }

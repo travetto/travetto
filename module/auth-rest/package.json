@@ -36,11 +36,11 @@
     "@types/passport": "^1.0.6",
     "passport": "^0.4.1"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "docDependencies": {
     "@types/passport-facebook": "^2.1.10",
     "passport-facebook": "^3.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
