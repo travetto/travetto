@@ -8,10 +8,13 @@ import { EnvInit } from '@travetto/base/bin/init';
 
 import type { RunState } from '../src/execute/types';
 
+const modes = ['single', 'standard'];
+const bound = (l: number, u: number, v: string, d: number) => +v >= l && +v <= u ? +v : d;
+
 /**
  * Launch test framework and execute tests
  */
-export class TestPlugin extends BasePlugin {
+export class TestPlugin extends BasePlugin<RunState> {
   name = 'test';
   _types: string[];
 
@@ -42,10 +45,10 @@ export class TestPlugin extends BasePlugin {
   init(cmd: commander.Command) {
     return cmd
       .arguments('[regexes...]')
-      .option('-f, --format <format>', 'Output format for test results', new RegExp(`^(${this.getTypes().join('|')})$`), 'tap')
-      .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', /^[1-32]$/, `${Math.min(4, os.cpus().length - 1)}`)
+      .option('-f, --format <format>', 'Output format for test results', (t, d) => this.getTypes().includes(t) ? t : d, 'tap')
+      .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', bound.bind(null, 1, 32), Math.min(4, os.cpus().length - 1))
       .option('-i, --isolated', 'Isolated mode')
-      .option('-m, --mode <mode>', 'Test run mode', /^(single|standard)$/, 'standard');
+      .option('-m, --mode <mode>', 'Test run mode', (x, d) => modes.includes(x) ? x : d, 'standard');
   }
 
   async isFile(file: string, errorIfNot?: string) {
@@ -92,10 +95,10 @@ export class TestPlugin extends BasePlugin {
 
     const state: Partial<RunState> = {
       args,
-      mode: this._cmd.mode,
-      concurrency: +this._cmd.concurrency,
-      isolated: this._cmd.isolated,
-      format: this._cmd.format
+      mode: this.opts.mode,
+      concurrency: +this.opts.concurrency,
+      isolated: this.opts.isolated,
+      format: this.opts.format
     };
 
     switch (state.mode) {
@@ -108,7 +111,6 @@ export class TestPlugin extends BasePlugin {
 
   complete() {
     const formats = this.getTypes();
-    const modes = ['single', 'standard'];
     return {
       '': ['--format', '--mode'],
       '--format': formats,

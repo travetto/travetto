@@ -5,10 +5,16 @@ import { EnvInit } from '@travetto/base/bin/init';
 
 import { DocBinUtil } from './lib/util';
 
+type Config = {
+  output: string[];
+  format: string;
+  watch: boolean;
+};
+
 /**
  * Command line support for generating module docs.
  */
-export class DocPlugin extends BasePlugin {
+export class DocPlugin extends BasePlugin<Config> {
   name = 'doc';
 
   init(cmd: commander.Command) {
@@ -33,6 +39,6 @@ export class DocPlugin extends BasePlugin {
   }
 
   async action() {
-    await DocBinUtil.generate({ output: this._cmd.output, watch: this._cmd.watch, format: this._cmd.format });
+    await DocBinUtil.generate({ output: this.opts.output, watch: this.opts.watch, format: this.opts.format });
   }
 }

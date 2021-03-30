@@ -8,7 +8,7 @@ type Completion = Record<string, string[]>;
 /**
  * Base plugin
  */
-export abstract class BasePlugin {
+export abstract class BasePlugin<T = unknown> {
   /**
    * Command object
    */
@@ -25,6 +25,10 @@ export abstract class BasePlugin {
   async build?() {
     await (await import('@travetto/base/bin/lib/'))
       .BuildUtil.build();
+  }
+
+  get opts(): T {
+    return this._cmd.opts() as T;
   }
 
   /**

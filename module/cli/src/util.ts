@@ -12,8 +12,8 @@ export class CliUtil {
     return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);
   }
 
-  static isTrue(x: string) {
-    return /^(1|yes|on|true)$/i.test(x);
+  static isTrue(x?: string | boolean) {
+    return x === undefined ? false : (typeof x === 'boolean' ? x : /^(1|yes|on|true)$/i.test(x));
   }
 
   /**

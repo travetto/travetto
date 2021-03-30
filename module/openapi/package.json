@@ -31,7 +31,7 @@
     "@travetto/rest": "^2.0.0-alpha.4",
     "@travetto/schema": "^2.0.0-alpha.3",
     "@travetto/yaml": "^2.0.0-alpha.2",
-    "openapi3-ts": "^1.4.0"
+    "openapi3-ts": "^2.0.1"
   },
   "optionalPeerDependencies": {
     "@travetto/cli": "^2.0.0-alpha.2"

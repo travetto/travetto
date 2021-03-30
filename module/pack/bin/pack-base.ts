@@ -16,7 +16,7 @@ const packName = `pack_${Package.name}`
 /**
  * Supports packing a project into a directory, ready for archiving
  */
-export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin {
+export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin<C> {
 
   /**
    * Package stage name
@@ -65,7 +65,7 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
   }
 
   async action() {
-    const resolved = await this.resolveConfigs(this.operation.key ? { [this.operation.key]: this._cmd.opts() } : this._cmd.opts());
+    const resolved = await this.resolveConfigs(this.operation.key ? { [this.operation.key]: this.opts } : this.opts);
     return PackUtil.runOperation(this.operation, resolved as C);
   }
 }

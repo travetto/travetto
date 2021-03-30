@@ -7,7 +7,7 @@ import { EnvInit } from '@travetto/base/bin/init';
 /**
  * CLI for outputting the open api spec to a local file
  */
-export class OpenApiSpecPlugin extends BasePlugin {
+export class OpenApiSpecPlugin extends BasePlugin<{ output: string }> {
   name = 'openapi:spec';
 
   init(cmd: commander.Command) {
@@ -17,14 +17,14 @@ export class OpenApiSpecPlugin extends BasePlugin {
   envInit() {
     EnvInit.init({
       watch: false, debug: '0',
-      set: { API_SPEC_OUTPUT: this._cmd.output }
+      set: { API_SPEC_OUTPUT: this.opts.output }
     });
   }
 
   async action() {
     const result = await ExecUtil.workerMain(require.resolve('./generate')).message;
 
-    if (this._cmd.output === '-' || !this._cmd.output) {
+    if (this.opts.output === '-' || !this.opts.output) {
       console.log!(result);
     }
   }

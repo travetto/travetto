@@ -18,7 +18,6 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "bin",
     "index.ts",
     "src",
     "support"
