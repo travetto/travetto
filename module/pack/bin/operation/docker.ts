@@ -16,12 +16,6 @@ export interface DockerConfig extends CommonConfig {
 export const Docker: PackOperation<DockerConfig> = {
   key: 'docker',
   title: 'Docker-izing',
-  flags: [
-    ['-w --workspace [workspace]', 'Workspace directory', undefined, 'workspace'],
-    ['-i --image [image]', 'Docker Image to extend', undefined, 'image'],
-    ['-t --tag [tag]', 'Image Tag', undefined, 'tag'],
-    ['-p --port [port]', 'Image Port', undefined, 'port']
-  ],
   extend(a: DockerConfig, b: Partial<DockerConfig>) {
     return {
       ...PackUtil.commonExtend(a, b),

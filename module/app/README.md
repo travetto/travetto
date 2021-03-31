@@ -69,10 +69,10 @@ $ trv run --help
 Usage:  run [options] [application] [args...]
 
 Options:
-  -e, --env [env]             Application environment (dev|prod|<other>)
-  -p, --profile [profile]     Specify additional application profiles (default: [])
-  -r, --resource [resources]  Specify additional resource locations (default: [])
-  -h, --help                  display help for command
+  -e, --env <env>            Application environment
+  -p, --profile <profile>    Additional application profiles (default: [])
+  -r, --resource <resource>  Additional resource locations (default: [])
+  -h, --help                 display help for command
 
 Available Applications:
 
@@ -106,10 +106,10 @@ $ trv run
 Usage: trv run [options] [application] [args...]
 
 Options:
-  -e, --env [env]             Application environment (dev|prod|<other>)
-  -p, --profile [profile]     Specify additional application profiles (default: [])
-  -r, --resource [resources]  Specify additional resource locations (default: [])
-  -h, --help                  display help for command
+  -e, --env <env>            Application environment
+  -p, --profile <profile>    Additional application profiles (default: [])
+  -r, --resource <resource>  Additional resource locations (default: [])
+  -h, --help                 display help for command
 
 Available Applications:
 
@@ -149,7 +149,7 @@ Configured {
     version: '2.0.0',
     license: 'MIT',
     author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
-    frameworkVersion: '2.0.0'
+    baseVersion: '2.0.0'
   },
   env: {
     name: 'dev',
@@ -196,13 +196,13 @@ The parameters to `run` will be type checked, to ensure proper evaluation.
 $ trv run simple-domain mydomain.biz orange
 
 Failed application run
- Error: Invalid parameter port: Received orange, but exepcted number  
+Error: Invalid parameter port: Received orange, but exepcted number  
     at Function.enforceParamType (./src/util.ts:19:13)  
     at ./src/registry.ts:45:79  
     at $ApplicationRegistry.resolveParameters (./src/registry.ts:45:24)  
     at Function.run (./bin/lib/run.ts:36:31)  
-    at AppRunPlugin.action (./bin/cli-run.ts:63:11)  
-    at AppRunPlugin.runAction (@trv:cli/src/plugin-base.ts:72:12)
+    at AppRunPlugin.action (./bin/cli-run.ts:66:11)  
+    at AppRunPlugin.runAction (@trv:cli/src/plugin-base.ts:210:12)
 ```
 
 The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) 

@@ -16,6 +16,24 @@ export class CliUtil {
     return x === undefined ? false : (typeof x === 'boolean' ? x : /^(1|yes|on|true)$/i.test(x));
   }
 
+  static toBool(x: string, def: boolean) {
+    return x === undefined ? true : (this.isBoolean(x) ? this.isTrue(x) : def);
+  }
+
+  static toInt(l: number | undefined, u: number | undefined, v: string, d: number) {
+    let n = +v;
+    if (l === undefined && u === undefined) {
+      return n;
+    }
+    if (l !== undefined && n < l) {
+      n = d;
+    }
+    if (u !== undefined && n > u) {
+      n = d;
+    }
+    return n;
+  }
+
   /**
    * Get code completion values
    */

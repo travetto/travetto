@@ -10,7 +10,7 @@ export type RenderContext = {
 
 export type DocumentContext = {
   assemble?: Record<string, (output: string) => string>;
-  text: AllType;
+  text: AllType | (() => (AllType | Promise<AllType>));
 };
 
 export type Renderer = {

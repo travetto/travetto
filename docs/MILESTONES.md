@@ -283,7 +283,6 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 * Modified @travetto/compiler to no longer register extension directly, but 
 
 #### Entrypoint Standardization
-* Updated boot to allow for user provided registration hoooks via `TRV_REQUIRES`
 * Allow for use of `main` functions to allow for direct invocation of any file, primaryily used for plugins and cli activities
 * Removed all `plugin-*.js` files as in lieu of exposing a `main` function in the target files.
 * Removed almost all `*.js` files in the test folders, in lieu of exposing `main` functions. Tests no longer auto execute on import.

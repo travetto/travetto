@@ -40,6 +40,9 @@
   "devDependencies": {
     "@types/vscode": "^1.54.0"
   },
+  "docDependencies": {
+    "@travetto/app": "^2.0.0-alpha.3"
+  },
   "engines": {
     "vscode": "^1.50.0"
   },

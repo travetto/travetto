@@ -5,13 +5,12 @@ CLI=$ROOT/module/cli
 BIN=$ROOT/.bin
 
 rm -rf $BIN
-rm -rf $BIN/@travetto/boot/bin
-mkdir -p $BIN/@travetto/boot/bin
+rm -rf $BIN/@travetto
+mkdir -p $BIN/@travetto/boot
 
 [[ ! -e "$BOOT/src/fs.js" ]] && tsc -p $BOOT/src-ts;
 
-ln -sf $BOOT/bin/register.js $BIN/@travetto/boot/bin/register.js
-ln -sf $BOOT/bin/main.js $BIN/@travetto/boot/bin/main.js
+ln -sf $BOOT/bin/ $BIN/@travetto/boot/bin
 ln -sf $CLI/bin/trv.js $BIN/trv
 
 cd $ROOT

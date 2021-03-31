@@ -38,7 +38,6 @@ Commands:
   <span class="token builtin class-name">echo</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
   run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
   <span class="token builtin class-name">test</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>regexes<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-  test:lerna <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
   <span class="token builtin class-name">help</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>                         display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 
@@ -52,9 +51,7 @@ Extending the <code class="item input">cli</code> is fairly straightforward.  It
       <figcaption class="code">Echo Plugin
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/cli/doc/bin/cli-echo.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> commander <span class="token keyword">from</span> <span class="token string">'commander'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BasePlugin <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli/src/plugin-base'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
@@ -65,20 +62,19 @@ Extending the <code class="item input">cli</code> is fairly straightforward.  It
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CliEchoPlugin</span> <span class="token keyword">extends</span> <span class="token class-name">BasePlugin</span> <span class="token punctuation">{{'{'}}</span>
   name <span class="token operator">=</span> <span class="token string">'echo'</span><span class="token punctuation">;</span>
 
-  <span class="token function">init</span><span class="token punctuation">(</span>cmd<span class="token operator">:</span> commander<span class="token punctuation">.</span>Command<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> cmd<span class="token punctuation">.</span><span class="token function">arguments</span><span class="token punctuation">(</span><span class="token string">'[args...]'</span><span class="token punctuation">)</span>
-      <span class="token punctuation">.</span><span class="token function">option</span><span class="token punctuation">(</span><span class="token string">'-u, --uppercase'</span><span class="token punctuation">,</span> <span class="token string">'Upper case'</span><span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">getOptions</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> uppercase<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">boolOption</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> desc<span class="token operator">:</span> <span class="token string">'Upper case'</span><span class="token punctuation">,</span> def<span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token function">getArgs</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token string">'[args...]'</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">action</span><span class="token punctuation">(</span>args<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>_cmd<span class="token punctuation">.</span>uppercase<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>cmd<span class="token punctuation">.</span>uppercase<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       args <span class="token operator">=</span> args<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>x <span class="token operator">=></span> x<span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
     <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> <span class="token string">''</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'--uppercase'</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>

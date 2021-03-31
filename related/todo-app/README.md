@@ -107,7 +107,7 @@ export class TodoService {
   }
 
   async getAll(search: TodoSearch) {
-    return await this.modelService.list(Todo);
+    return this.modelService.query(Todo, { ...search, sort: [{ priority: -1 }] });
   }
 
   async complete(id: string, completed = true) {
@@ -279,15 +279,15 @@ First we must start the application:
 
 **Terminal: Application Startup**
 ```bash
-2021-03-14T05:00:02.735Z info  [@trv:app/registry:30] Running application { name: 'rest', filename: '/home/tim/@trv:rest/src/application/rest.ts' }
-2021-03-14T05:00:02.839Z info  [@trv:app/registry:34] Configured {
+2021-03-14T05:00:02.183Z info  [@trv:app/registry:30] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
+2021-03-14T05:00:02.508Z info  [@trv:app/registry:34] Configured {
   info: {
     name: '@travetto/todo-app',
     description: '',
     version: undefined,
     license: 'ISC',
-    author: '',
-    frameworkVersion: '2.0.0'
+    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
+    baseVersion: '2.0.0'
   },
   env: {
     name: 'dev',
@@ -304,29 +304,29 @@ First we must start the application:
     local: [ 'doc' ],
     excludeModules: Set(3) { '@travetto/cli', '@travetto/doc', '@travetto/boot' },
     dynamicModules: {
-      '@travetto/app': '/home/tim/@trv:app',
-      '@travetto/base': '/home/tim/@trv:base',
-      '@travetto/boot': '/home/tim/@trv:boot',
-      '@travetto/cli': '/home/tim/@trv:cli',
-      '@travetto/compiler': '/home/tim/@trv:compiler',
-      '@travetto/config': '/home/tim/@trv:config',
-      '@travetto/di': '/home/tim/@trv:di',
-      '@travetto/doc': '/home/tim/@trv:doc',
-      '@travetto/log': '/home/tim/@trv:log',
-      '@travetto/model': '/home/tim/@trv:model',
-      '@travetto/model-elasticsearch': '/home/tim/@trv:model-elasticsearch',
-      '@travetto/model-query': '/home/tim/@trv:model-query',
-      '@travetto/openapi': '/home/tim/@trv:openapi',
-      '@travetto/pack': '/home/tim/@trv:pack',
-      '@travetto/registry': '/home/tim/@trv:registry',
-      '@travetto/rest': '/home/tim/@trv:rest',
-      '@travetto/rest-express': '/home/tim/@trv:rest-express',
-      '@travetto/schema': '/home/tim/@trv:schema',
-      '@travetto/test': '/home/tim/@trv:test',
-      '@travetto/transformer': '/home/tim/@trv:transformer',
-      '@travetto/watch': '/home/tim/@trv:watch',
-      '@travetto/worker': '/home/tim/@trv:worker',
-      '@travetto/yaml': '/home/tim/@trv:yaml'
+      '@travetto/app': '@trv:app',
+      '@travetto/base': '@trv:base',
+      '@travetto/boot': '@trv:boot',
+      '@travetto/cli': '@trv:cli',
+      '@travetto/compiler': '@trv:compiler',
+      '@travetto/config': '@trv:config',
+      '@travetto/di': '@trv:di',
+      '@travetto/doc': '@trv:doc',
+      '@travetto/log': '@trv:log',
+      '@travetto/model': '@trv:model',
+      '@travetto/model-elasticsearch': '@trv:model-elasticsearch',
+      '@travetto/model-query': '@trv:model-query',
+      '@travetto/openapi': '@trv:openapi',
+      '@travetto/pack': '@trv:pack',
+      '@travetto/registry': '@trv:registry',
+      '@travetto/rest': '@trv:rest',
+      '@travetto/rest-express': '@trv:rest-express',
+      '@travetto/schema': '@trv:schema',
+      '@travetto/test': '@trv:test',
+      '@travetto/transformer': '@trv:transformer',
+      '@travetto/watch': '@trv:watch',
+      '@travetto/worker': '@trv:worker',
+      '@travetto/yaml': '@trv:yaml'
     }
   },
   config: {
@@ -335,9 +335,7 @@ First we must start the application:
     sql: { model: { namespace: 'todo', user: 'root', password: 'password' } }
   }
 }
-2021-03-14T05:00:03.032Z info  [@trv:rest/application/rest:192] Listening { port: 3000 }
 ```
- 
 
 next, let's execute [curl](https://curl.haxx.se/) requests to interact with the new api:
 
@@ -364,8 +362,8 @@ $ node @travetto/boot/bin/main ./doc/create-todo.ts
 
 {
   text: 'New Todo',
-  created: '2021-03-14T05:00:00.618Z',
-  id: '3af422e793aed76ee063d13feec2e5e9'
+  created: '2021-03-14T05:00:01.510Z',
+  id: 'f422e793aed76ee063d13feec2e5e95b'
 }
 ```
 
@@ -385,9 +383,9 @@ $ node @travetto/boot/bin/main ./doc/list-todo.ts
 
 [
   {
-    id: '3af422e793aed76ee063d13feec2e5e9',
+    id: 'f422e793aed76ee063d13feec2e5e95b',
     text: 'New Todo',
-    created: '2021-03-14T05:00:00.990Z'
+    created: '2021-03-14T05:00:01.814Z'
   }
 ]
 ```

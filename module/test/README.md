@@ -88,12 +88,12 @@ let SimpleTest = class SimpleTest {
     }
 };
 SimpleTest.ᚕinit = ᚕ_decorator_1.Register.initMeta(SimpleTest, ᚕsrc(__filename), 442873266, { test: { hash: 1426090177 } }, false, false);
-tslib_1.__decorate([
-    test_1.Test({ lines: { start: 8, end: 12, codeStart: 11 } })
+(0, tslib_1.__decorate)([
+    (0, test_1.Test)({ lines: { start: 8, end: 12, codeStart: 11 } })
 ], SimpleTest.prototype, "test", null);
-SimpleTest = tslib_1.__decorate([
+SimpleTest = (0, tslib_1.__decorate)([
     ᚕ_decorator_1.Register(),
-    test_1.Suite({ lines: { start: 5, end: 13 } })
+    (0, test_1.Suite)({ lines: { start: 5, end: 13 } })
 ], SimpleTest);
 Object.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });
 ```
@@ -228,7 +228,7 @@ Usage:  test [options] [regexes...]
 
 Options:
   -f, --format <format>            Output format for test results (default: "tap")
-  -c, --concurrency <concurrency>  Number of tests to run concurrently (default: "4")
+  -c, --concurrency <concurrency>  Number of tests to run concurrently (default: 4)
   -i, --isolated                   Isolated mode
   -m, --mode <mode>                Test run mode (default: "standard")
   -h, --help                       display help for command

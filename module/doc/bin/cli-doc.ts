@@ -1,27 +1,20 @@
-import * as commander from 'commander';
-
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { EnvInit } from '@travetto/base/bin/init';
 
 import { DocBinUtil } from './lib/util';
 
-type Config = {
-  output: string[];
-  format: string;
-  watch: boolean;
-};
-
 /**
  * Command line support for generating module docs.
  */
-export class DocPlugin extends BasePlugin<Config> {
+export class DocPlugin extends BasePlugin {
   name = 'doc';
 
-  init(cmd: commander.Command) {
-    return cmd
-      .option('-o, --output <output>', 'Output files', (v, ls) => { ls.push(v); return ls; }, [] as string[])
-      .option('-f, --format <format>', 'Format', 'md')
-      .option('-w, --watch <watch>', 'Watch', false);
+  getOptions() {
+    return {
+      output: this.listOption({ desc: 'Output files' }),
+      format: this.option({ desc: 'Format', def: 'md' }),
+      watch: this.boolOption({ desc: 'Watch' })
+    };
   }
 
   async envInit() {
@@ -32,6 +25,7 @@ export class DocPlugin extends BasePlugin<Config> {
         TRV_RESOURCES: 'doc/resources'
       },
       set: {
+        TRV_CONSOLE_WIDTH: '140',
         TRV_COLOR: '0',
         TRV_LOG_PLAIN: '1'
       }
@@ -39,6 +33,6 @@ export class DocPlugin extends BasePlugin<Config> {
   }
 
   async action() {
-    await DocBinUtil.generate({ output: this.opts.output, watch: this.opts.watch, format: this.opts.format });
+    await DocBinUtil.generate({ output: this.cmd.output, watch: this.cmd.watch, format: this.cmd.format });
   }
 }

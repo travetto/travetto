@@ -32,7 +32,7 @@ ${Execute('Command Service', 'trv', ['command:service', '--help'])}
 
 A sample of all services available to the entire framework:
 
-${Terminal('All Services', DocRunUtil.run('./bin/service.js', ['status'], { cwd: PathUtil.resolveUnix(__dirname, '..', '..') }))}
+${Terminal('All Services', DocRunUtil.run('trv-service', ['status'], { cwd: PathUtil.resolveUnix(__dirname, '..', '..') }))}
 
 ${SubSection('Defining new Services')}
 

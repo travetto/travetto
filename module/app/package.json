@@ -36,6 +36,9 @@
   "optionalPeerDependencies": {
     "@travetto/cli": "^2.0.0-alpha.2"
   },
+  "docDependencies": {
+    "@travetto/log": "^2.0.0-alpha.2"
+  },
   "publishConfig": {
     "access": "public"
   }

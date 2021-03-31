@@ -1,5 +1,4 @@
 import * as os from 'os';
-import * as commander from 'commander';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
@@ -16,7 +15,7 @@ const packName = `pack_${Package.name}`
 /**
  * Supports packing a project into a directory, ready for archiving
  */
-export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin<C> {
+export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin {
 
   /**
    * Package stage name
@@ -36,14 +35,19 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin<
     return out;
   }
 
-  async init(cmd: commander.Command) {
-    const flags = await this.resolveConfigs();
+  getArgs() {
+    return '[mode]';
+  }
 
-    cmd = cmd.arguments('[mode]');
-    for (const [f, d, fn, prop] of this.operation.flags) {
-      cmd = fn ? cmd.option<unknown>(f, d, fn, flags[prop]) : cmd.option(f, d, flags[prop] as unknown as string);
+  async finalizeOptions() {
+    const flags = await this.resolveConfigs();
+    const opts = await super.finalizeOptions();
+    for (const el of opts) {
+      if (el.key! in flags) {
+        el.def = flags[el.key! as keyof C];
+      }
     }
-    return cmd;
+    return opts;
   }
 
   async help() {
@@ -65,7 +69,7 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin<
   }
 
   async action() {
-    const resolved = await this.resolveConfigs(this.operation.key ? { [this.operation.key]: this.opts } : this.opts);
+    const resolved = await this.resolveConfigs(this.operation.key ? { [this.operation.key]: this.cmd } : this.cmd);
     return PackUtil.runOperation(this.operation, resolved as C);
   }
 }

@@ -1,4 +1,3 @@
-import * as commander from 'commander';
 import * as os from 'os';
 import * as fs from 'fs';
 
@@ -8,13 +7,12 @@ import { EnvInit } from '@travetto/base/bin/init';
 
 import type { RunState } from '../src/execute/types';
 
-const modes = ['single', 'standard'];
-const bound = (l: number, u: number, v: string, d: number) => +v >= l && +v <= u ? +v : d;
+const modes = ['single', 'standard'] as const;
 
 /**
  * Launch test framework and execute tests
  */
-export class TestPlugin extends BasePlugin<RunState> {
+export class TestPlugin extends BasePlugin {
   name = 'test';
   _types: string[];
 
@@ -27,6 +25,15 @@ export class TestPlugin extends BasePlugin<RunState> {
         .map(x => fs.readFileSync(x.file, 'utf8').match(/@Consumable[(]'([^']+)/)?.[1] as string);
     }
     return this._types;
+  }
+
+  getOptions() {
+    return {
+      format: this.choiceOption({ desc: 'Output format for test results', def: 'tap', choices: this.getTypes() }),
+      concurrency: this.intOption({ desc: 'Number of tests to run concurrently', lower: 1, upper: 32, def: Math.min(4, os.cpus().length - 1) }),
+      isolated: this.boolOption({ desc: 'Isolated mode' }),
+      mode: this.choiceOption({ desc: 'Test run mode', def: 'standard', choices: [...modes] })
+    };
   }
 
   envInit() {
@@ -42,13 +49,8 @@ export class TestPlugin extends BasePlugin<RunState> {
     });
   }
 
-  init(cmd: commander.Command) {
-    return cmd
-      .arguments('[regexes...]')
-      .option('-f, --format <format>', 'Output format for test results', (t, d) => this.getTypes().includes(t) ? t : d, 'tap')
-      .option('-c, --concurrency <concurrency>', 'Number of tests to run concurrently', bound.bind(null, 1, 32), Math.min(4, os.cpus().length - 1))
-      .option('-i, --isolated', 'Isolated mode')
-      .option('-m, --mode <mode>', 'Test run mode', (x, d) => modes.includes(x) ? x : d, 'standard');
+  getArgs() {
+    return '[regexes...]';
   }
 
   async isFile(file: string, errorIfNot?: string) {
@@ -88,17 +90,17 @@ export class TestPlugin extends BasePlugin<RunState> {
     }
   }
 
-  async action(args: string[]): Promise<void> {
+  async action(regexes: string[]): Promise<void> {
     const { runTests } = await import('./lib/run');
 
-    const [first] = args;
+    const [first] = regexes;
 
     const state: Partial<RunState> = {
-      args,
-      mode: this.opts.mode,
-      concurrency: +this.opts.concurrency,
-      isolated: this.opts.isolated,
-      format: this.opts.format
+      args: regexes,
+      mode: this.cmd.mode,
+      concurrency: +this.cmd.concurrency,
+      isolated: this.cmd.isolated,
+      format: this.cmd.format
     };
 
     switch (state.mode) {
@@ -107,16 +109,5 @@ export class TestPlugin extends BasePlugin<RunState> {
     }
 
     await runTests(state as RunState);
-  }
-
-  complete() {
-    const formats = this.getTypes();
-    return {
-      '': ['--format', '--mode'],
-      '--format': formats,
-      '-f': formats,
-      '--mode': modes,
-      '-m': modes
-    };
   }
 }
