@@ -95,7 +95,7 @@ Service          Version    Status
 ----------------------------------------------
 
  * dynamodb          1.15.0    Running 93af422e793a
- * elasticsearch      7.4.0    Running ed76ee063d13
+ * elasticsearch     7.12.0    Running ed76ee063d13
  * firestore         latest    Running feec2e5e95b4
  * mongodb              3.6    Running 5513eba6734e
  * mysql                5.6    Running 307bc66d442a

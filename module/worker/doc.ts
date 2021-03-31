@@ -38,7 +38,7 @@ When creating your work, via process spawning, you will need to provide the scri
 
 ${Code('Spawning Pool', 'doc/spawner.ts')}
 
-${Code('Spawned Worker', 'doc/spawned.js')}
+${Code('Spawned Worker', 'doc/spawned.ts')}
 
 ${Execute('Output', 'doc/spawner.ts')}
 `;

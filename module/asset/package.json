@@ -32,6 +32,11 @@
     "file-type": "^16.3.0",
     "mime": "^2.5.2"
   },
+  "docDependencies": {
+    "@travetto/model-mongo": "^2.0.0-alpha.3",
+    "@travetto/model-s3": "^2.0.0-alpha.3",
+    "@travetto/model": "^2.0.0-alpha.3"
+  },
   "publishConfig": {
     "access": "public"
   }

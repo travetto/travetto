@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as commander from 'commander';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
@@ -10,17 +9,12 @@ import { AppListUtil } from './lib/list';
 import { AppRunUtil } from './lib/run';
 import { HelpUtil } from './lib/help';
 
-type Config = {
-  env?: string;
-  profile: string[];
-  resource: string[];
-};
-
 /**
  * The main entry point for the application cli
  */
-export class AppRunPlugin extends BasePlugin<Config> {
+export class AppRunPlugin extends BasePlugin {
   name = 'run';
+  allowUnknownOptions = true;
 
   /**
    * Add help output
@@ -35,13 +29,16 @@ export class AppRunPlugin extends BasePlugin<Config> {
     ].join('\n');
   }
 
-  init(cmd: commander.Command) {
-    return cmd
-      .arguments('[application] [args...]')
-      .allowUnknownOption()
-      .option('-e, --env [env]', 'Application environment (dev|prod|<other>)')
-      .option('-p, --profile [profile]', 'Specify additional application profiles', (v, ls) => { ls.push(v); return ls; }, [] as string[])
-      .option('-r, --resource [resources]', 'Specify additional resource locations', (v, ls) => { ls.push(v); return ls; }, [] as string[]);
+  getOptions() {
+    return {
+      env: this.option({ desc: 'Application environment' }),
+      profile: this.listOption({ desc: 'Additional application profiles' }),
+      resource: this.listOption({ desc: 'Additional resource locations' })
+    };
+  }
+
+  getArgs() {
+    return '[application] [args...]';
   }
 
   /**
@@ -57,10 +54,10 @@ export class AppRunPlugin extends BasePlugin<Config> {
         return await this.showHelp(app ? `${app} is an unknown application` : '');
       } else {
         EnvInit.init({
-          env: this.opts.env, watch: selected.watch,
+          env: this.cmd.env, watch: selected.watch,
           append: {
-            TRV_PROFILES: this.opts.profile,
-            TRV_RESOURCES: this.opts.resource
+            TRV_PROFILES: this.cmd.profile,
+            TRV_RESOURCES: this.cmd.resource
           }
         });
 
@@ -86,7 +83,6 @@ export class AppRunPlugin extends BasePlugin<Config> {
 
   async complete() {
     const apps = await AppListUtil.getList() || [];
-    const env = ['prod', 'dev'];
 
     const profiles = fs.readdirSync(PathUtil.cwd)
       .filter(x => x.endsWith('.yml'))
@@ -94,8 +90,6 @@ export class AppRunPlugin extends BasePlugin<Config> {
 
     return {
       '': apps.map(x => x.name).concat(['--env', '--profile']),
-      '--env': env,
-      '-e': env,
       '--profile': profiles,
       '-p': profiles,
     };

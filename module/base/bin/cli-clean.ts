@@ -1,25 +1,20 @@
-import * as commander from 'commander';
 import * as fs from 'fs';
 
 import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { FileCache, PathUtil } from '@travetto/boot/src';
 
-type Config = {
-  quiet?: boolean;
-};
-
 /**
  * `npx trv clean`
  *
  * Allows for cleaning of the cache dire
  */
-export class BaseCleanPlugin extends BasePlugin<Config> {
+export class BaseCleanPlugin extends BasePlugin {
   name = 'clean';
   build = undefined;
 
-  init(cmd: commander.Command) {
-    return cmd.option('-q, --quiet', 'Quiet operation');
+  getOptions() {
+    return { quiet: this.boolOption({ desc: 'Quiet operation' }) };
   }
 
   async action() {
@@ -27,7 +22,8 @@ export class BaseCleanPlugin extends BasePlugin<Config> {
       if (el.startsWith('.trv') && (await fs.promises.stat(el)).isDirectory()) {
         const cache = new FileCache(el);
         try {
-          if (!this.opts.quiet) {
+          cache.clear(true);
+          if (!this.cmd.quiet) {
             console!.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: cache.cacheDir }}`);
           }
         } catch (e) {
@@ -35,9 +31,5 @@ export class BaseCleanPlugin extends BasePlugin<Config> {
         }
       }
     }
-  }
-
-  complete() {
-    return { '': ['--quiet'] };
   }
 }

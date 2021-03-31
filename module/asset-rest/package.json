@@ -32,6 +32,9 @@
     "@types/busboy": "^0.2.3",
     "busboy": "^0.3.1"
   },
+  "docDependencies": {
+    "@travetto/app": "^2.0.0-alpha.3"
+  },
   "publishConfig": {
     "access": "public"
   }

@@ -31,7 +31,6 @@ Commands:
   echo [options] [args...]
   run [options] [application] [args...]
   test [options] [regexes...]
-  test:lerna [options]
   help [command]                         display help for command
 ```
 
@@ -43,8 +42,6 @@ Extending the `cli` is fairly straightforward.  It is built upon [commander](htt
 
 **Code: Echo Plugin**
 ```typescript
-import * as commander from 'commander';
-
 import '@travetto/base';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
@@ -56,20 +53,19 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
 export class CliEchoPlugin extends BasePlugin {
   name = 'echo';
 
-  init(cmd: commander.Command) {
-    return cmd.arguments('[args...]')
-      .option('-u, --uppercase', 'Upper case', false);
+  getOptions() {
+    return { uppercase: this.boolOption({ desc: 'Upper case', def: false }) };
+  }
+
+  getArgs() {
+    return '[args...]';
   }
 
   async action(args: string[]) {
-    if (this._cmd.uppercase) {
+    if (this.cmd.uppercase) {
       args = args.map(x => x.toUpperCase());
     }
     console.log(args);
-  }
-
-  complete() {
-    return { '': ['--uppercase'] };
   }
 }
 ```

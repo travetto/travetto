@@ -20,7 +20,7 @@ All of the high level configurations can be found in the following structure:
 **Code: Config: OpenAPI Configuration**
 ```typescript
 import * as path from 'path';
-import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
+import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { Config } from '@travetto/config';
 import { PathUtil, EnvUtil, FsUtil } from '@travetto/boot';
@@ -108,7 +108,7 @@ $ trv openapi:spec --help
 Usage:  openapi:spec [options]
 
 Options:
-  -o, --output [output]  Output files (default: "./openapi.yml")
+  -o, --output <output>  Output files (default: "./openapi.yml")
   -h, --help             display help for command
 ```
 

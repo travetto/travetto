@@ -1,4 +1,3 @@
-import * as commander from 'commander';
 import * as rl from 'readline';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
@@ -14,8 +13,8 @@ import { ServiceUtil } from './lib/service';
 export class CliServicePlugin extends BasePlugin {
   name = 'command:service';
 
-  init(cmd: commander.Command) {
-    return cmd.arguments('[start|stop|restart|status] [...services]');
+  getArgs() {
+    return '[start|stop|restart|status] [...services]';
   }
 
   async action(mode: 'start' | 'stop' | 'status' | 'restart', services: string[]) {

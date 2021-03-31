@@ -16,6 +16,13 @@ export class DocUtil {
   }
 
   /**
+   * Read doc comment for node
+   */
+  static getDocComment(o: ts.JSDoc | ts.JSDocTag, def?: string) {
+    return (typeof o.comment === 'string' ? o.comment : undefined) ?? def;
+  }
+
+  /**
    * Read JS Docs from a `ts.Declaration`
    */
   static describeDocs(node: ts.Declaration | ts.Type) {
@@ -39,18 +46,18 @@ export class DocUtil {
       if (docs) {
         const top = docs[docs.length - 1];
         if (ts.isJSDoc(top)) {
-          out.description = top.comment;
+          out.description = this.getDocComment(top, out.description);
         }
       }
 
       if (tags && tags.length) {
         for (const tag of tags) {
           if (ts.isJSDocReturnTag(tag)) {
-            out.return = tag.comment;
+            out.return = this.getDocComment(tag, out.return);
           } else if (ts.isJSDocParameterTag(tag)) {
             out.params!.push({
               name: tag.name && tag.name.getText(),
-              description: tag.comment ?? ''
+              description: this.getDocComment(tag, '')!
             });
           }
         }
@@ -65,8 +72,8 @@ export class DocUtil {
   static readDocTag(type: ts.Type | ts.Symbol, name: string): string[] {
     const tags = CoreUtil.getSymbol(type)?.getJsDocTags() ?? [];
     return tags
-      .filter(el => el.name === name)
-      .map(el => el.text!);
+      .filter(el => el.name === name && !!el.text)
+      .map(el => el.text!.map(x => x.text).join('')); // Join all text
   }
 
   /**

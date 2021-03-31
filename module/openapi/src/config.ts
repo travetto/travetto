@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
+import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { Config } from '@travetto/config';
 import { PathUtil, EnvUtil, FsUtil } from '@travetto/boot';

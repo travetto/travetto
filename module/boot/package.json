@@ -36,7 +36,7 @@
     "@types/source-map-support": "^0.5.3",
     "source-map-support": "^0.5.19",
     "tslib": "^1.14.1",
-    "typescript": "^4.2.3"
+    "typescript": "^4.3.0-beta"
   },
   "engines": {
     "node": ">=12.17.0"

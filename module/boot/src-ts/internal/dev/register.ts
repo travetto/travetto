@@ -3,7 +3,8 @@ import * as Mod from 'module';
 
 import { AppCache } from '../../cache';
 import { EnvUtil } from '../../env';
-import { Package } from '../../package';
+import { readPackage } from '../package';
+import { Package } from '../../main-package';
 import { PathUtil } from '../../path';
 import { ModuleManager } from '../module';
 import { ModType } from '../module-util';
@@ -19,7 +20,7 @@ type DevConfig = {
 class DevRegister {
 
   static TRV_MOD = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
-  static DEFAULT_MODS = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc', '@travetto/app', '@travetto/log']);
+  static DEFAULT_MODS = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc']);
 
   /** Naive hashing */
   static naiveHash(text: string) {
@@ -56,7 +57,8 @@ class DevRegister {
     const keys = [
       ...givenMods, // Givens
       ...Object.keys(Package.dependencies || {}),
-      ...Object.keys(Package.devDependencies || {})
+      ...Object.keys(Package.devDependencies || {}),
+      ...Object.keys(process.argv[2] === 'doc' ? Package.docDependencies || {} : {})
     ]
       .filter(x => x.startsWith('@travetto'));
 
@@ -65,7 +67,7 @@ class DevRegister {
     while (keys.length) {
       const top = keys.shift()!;
       final.set(top, null);
-      const deps = require(PathUtil.resolveFrameworkPath(`${top}/package.json`)).dependencies ?? {};
+      const deps = readPackage(PathUtil.resolveFrameworkPath(top)).dependencies ?? {};
 
       for (const sub of Object.keys(deps)) {
         if (sub.startsWith('@travetto') && !final.has(sub)) {
@@ -79,7 +81,7 @@ class DevRegister {
         TIME: Date.now(),
         ...Object.fromEntries(Object
           .entries(process.env)
-          .filter(([k]) => k.startsWith('TRV_'))
+          .filter(([k]) => /^(TRV_.*|NODE_.*|PATH|DEBUG)$/.test(k))
           .sort((a, b) => a[0].localeCompare(b[0]))),
       },
       entries: Object.fromEntries([...final.entries()].filter(([k, v]) => k !== Package.name))

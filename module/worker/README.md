@@ -68,16 +68,22 @@ Once a pool is constructed, it can be shutdown by calling the `.shutdown()` meth
 
 ## IPC Support
 
-Within the `comm` package, there is support for two primary communication elements: [ChildCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/child.ts#L6) and [ParentCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/parent.ts#L9).  Usually [ParentCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/parent.ts#L9) indicates it is the owner of the sub process.  [ChildCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/child.ts#L6) indicates that it has been created/spawned/forked by the parent and will communicate back to it's parent.  This generally means that a [ParentCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/parent.ts#L9) can be destroyed (i.e. killing the subprocess) where a [ChildCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/child.ts#L6) can only exit the process, but the channel cannot be destroyed.
+Within the `comm` package, there is support for two primary communication elements: [ChildCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/child.ts#L6) and [ParentCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/parent.ts#L8).  Usually [ParentCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/parent.ts#L8) indicates it is the owner of the sub process.  [ChildCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/child.ts#L6) indicates that it has been created/spawned/forked by the parent and will communicate back to it's parent.  This generally means that a [ParentCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/parent.ts#L8) can be destroyed (i.e. killing the subprocess) where a [ChildCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/child.ts#L6) can only exit the process, but the channel cannot be destroyed.
 
 ### IPC as a Worker
-A common pattern is to want to model a sub process as a worker, to be a valid candidate in a [WorkPool](https://github.com/travetto/travetto/tree/master/module/worker/src/pool.ts#L23).  The [WorkUtil](https://github.com/travetto/travetto/tree/master/module/worker/src/util.ts#L8) class provides a utility to facilitate this desire.
+A common pattern is to want to model a sub process as a worker, to be a valid candidate in a [WorkPool](https://github.com/travetto/travetto/tree/master/module/worker/src/pool.ts#L23).  The [WorkUtil](https://github.com/travetto/travetto/tree/master/module/worker/src/util.ts#L14) class provides a utility to facilitate this desire.
 
 **Code: Spawned Worker**
 ```typescript
-import { ExecUtil, ExecutionOptions, } from '@travetto/boot';
+import { ExecutionState } from '@travetto/boot';
+
 import { ParentCommChannel } from './comm/parent';
 import { Worker } from './pool';
+
+type Simple<V> = (ch: ParentCommChannel<V>) => Promise<unknown | void>;
+type Param<V, X> = (ch: ParentCommChannel<V>, input: X) => Promise<unknown | void>;
+
+const empty = async () => { };
 
 /**
  * Spawned worker
@@ -86,32 +92,19 @@ export class WorkUtil {
   /**
    * Create a process channel worker from a given spawn config
    */
-  static spawnedWorker<X>(
-    command: string,
-    { args, opts, handlers }: {
-      args?: string[];
-      opts?: ExecutionOptions;
-      handlers: {
-        init?: (ch: ParentCommChannel) => Promise<any>;
-        execute: (ch: ParentCommChannel, input: X) => Promise<any>;
-        destroy?: (ch: ParentCommChannel) => Promise<any>;
-      };
-    }
-  ): Worker<X> {
-    const channel = new ParentCommChannel(
-      ExecUtil.fork(command, args, {
-        ...(opts ?? {})
-      })
-    );
+  static spawnedWorker<V, X>(
+    worker: () => ExecutionState,
+    init: Simple<V>,
+    execute: Param<V, X>,
+    destroy: Simple<V> = empty): Worker<X> {
+    const channel = new ParentCommChannel<V>(worker());
     return {
       get id() { return channel.id; },
       get active() { return channel.active; },
-      init: handlers.init ? handlers.init.bind(handlers, channel) : undefined,
-      execute: handlers.execute.bind(handlers, channel),
+      init: () => init(channel),
+      execute: inp => execute(channel, inp),
       async destroy() {
-        if (handlers.destroy) {
-          await handlers.destroy(channel);
-        }
+        await destroy(channel);
         await channel.destroy();
       },
     };
@@ -119,20 +112,19 @@ export class WorkUtil {
 }
 ```
 
-When creating your work, via process spawning, you will need to provide the script (and any other features you would like in `SpawnConfig`).   Additionally you must, at a minimum, provide functionality to run whenever an input element is up for grabs in the input source.  This method will be provided the communication channel ([ParentCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/parent.ts#L9)) and the input value.  A simple example could look like:
+When creating your work, via process spawning, you will need to provide the script (and any other features you would like in `SpawnConfig`).   Additionally you must, at a minimum, provide functionality to run whenever an input element is up for grabs in the input source.  This method will be provided the communication channel ([ParentCommChannel](https://github.com/travetto/travetto/tree/master/module/worker/src/comm/parent.ts#L8)) and the input value.  A simple example could look like:
 
 **Code: Spawning Pool**
 ```typescript
 import { WorkPool, WorkUtil, IterableInputSource } from '@travetto/worker';
-import { PathUtil } from '@travetto/boot';
+import { ExecUtil, PathUtil } from '@travetto/boot';
 
-const pool = new WorkPool(() =>
-  WorkUtil.spawnedWorker<string>(PathUtil.resolveUnix(__dirname, 'spawned.js'), {
-    handlers: {
-      async init(channel) {
-        return channel.listenOnce('ready'); // Wait for child to indicate it is ready
-      },
-      async execute(channel, inp) {
+export function main() {
+  const pool = new WorkPool(() =>
+    WorkUtil.spawnedWorker<{ data: string }, string>(
+      () => ExecUtil.forkMain(PathUtil.resolveUnix(__dirname, 'spawned.ts')),
+      ch => ch.listenOnce('ready'), // Wait for child to indicate it is ready
+      async (channel, inp) => {
         const res = channel.listenOnce('response'); //  Register response listener
         channel.send('request', { data: inp }); // Send request
 
@@ -141,25 +133,22 @@ const pool = new WorkPool(() =>
 
         if (!(inp + inp === data)) {
           // Ensure the answer is double the input
-          throw new Error(`Didn't get the double`);
+          throw new Error('Did not get the double');
         }
       }
-    }
-  })
-);
+    )
+  );
 
-if (process.argv.pop() === 'top') {
-  pool.process(new IterableInputSource([1, 2, 3, 4, 5])).then(x => pool.shutdown());
+  return pool.process(new IterableInputSource([1, 2, 3, 4, 5])).then(x => pool.shutdown());
 }
 ```
 
 **Code: Spawned Worker**
-```javascript
-require('@travetto/boot/register');
-require('@travetto/base').PhaseManager.init().then(async () => {
-  const { ChildCommChannel } = require('..');
+```typescript
+import { ChildCommChannel } from '@travetto/worker';
 
-  const exec = new ChildCommChannel();
+export async function main() {
+  const exec = new ChildCommChannel<{ data: string }>();
 
   exec.listenFor('request', data => {
     exec.send('response', { data: (data.data + data.data) }); // When data is received, return double
@@ -169,12 +158,12 @@ require('@travetto/base').PhaseManager.init().then(async () => {
 
   const heartbeat = () => setTimeout(heartbeat, 5000); // Keep-alive
   heartbeat();
-});
+}
 ```
 
 **Terminal: Output**
 ```bash
-$ node -r @travetto/boot/register ./doc/spawner.ts top
+$ node @travetto/base/bin/main ./doc/spawner.ts 
 
 Request complete { input: 1, output: 2 }
 Request complete { input: 2, output: 4 }
@@ -182,4 +171,3 @@ Request complete { input: 3, output: 6 }
 Request complete { input: 4, output: 8 }
 Request complete { input: 5, output: 10 }
 ```
-

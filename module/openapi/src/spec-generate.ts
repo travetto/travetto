@@ -1,4 +1,4 @@
-import { SchemaObject, OpenAPIObject, SchemasObject, ParameterObject, OperationObject } from 'openapi3-ts';
+import { SchemaObject, OpenAPIObject, SchemasObject, ParameterObject, OperationObject, RequestBodyObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { ControllerRegistry, EndpointClassType, EndpointIOType, EndpointConfig, ControllerConfig, ParamConfig } from '@travetto/rest';
 import { Class } from '@travetto/base';
@@ -164,9 +164,9 @@ export class SpecGenerateUtil {
   /**
    * Build response object
    */
-  static buildReqResObject(state: PartialSpec, eType?: EndpointIOType) {
+  static buildReqResObject(state: PartialSpec, eType?: EndpointIOType): RequestBodyObject {
     if (!eType) {
-      return { description: '' };
+      return { description: '', content: {} };
     }
     if (isEndpointClassType(eType)) {
       const schemaName = this.processSchema(eType.type, state);
@@ -181,9 +181,7 @@ export class SpecGenerateUtil {
           description: state.components.schemas[schemaName!].description ?? '',
         };
       } else {
-        return {
-          description: ''
-        };
+        return { description: '', content: {} };
       }
     } else {
       return {
@@ -191,7 +189,7 @@ export class SpecGenerateUtil {
         content: {
           [eType.mime]: {
             schema: {
-              type: eType.type
+              type: eType.type as 'string'
             }
           }
         }
@@ -202,7 +200,7 @@ export class SpecGenerateUtil {
   /**
    * Build request body
    */
-  static buildRequestBody(state: PartialSpec, type: EndpointIOType) {
+  static buildRequestBody(state: PartialSpec, type: EndpointIOType): RequestBodyObject | undefined {
     const cConf = this.buildReqResObject(state, type);
     if (type && type.type === 'file') {
       return {
@@ -220,7 +218,7 @@ export class SpecGenerateUtil {
         }
       };
     } else if (cConf.content) {
-      return cConf;
+      return cConf as RequestBodyObject;
     } else {
       return undefined;
     }

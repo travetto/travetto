@@ -31,6 +31,9 @@
   "optionalPeerDependencies": {
     "@travetto/cli": "^2.0.0-alpha.2"
   },
+  "docDependencies": {
+    "@travetto/model-elasticsearch": "^2.0.0-alpha.3"
+  },
   "publishConfig": {
     "access": "public"
   }

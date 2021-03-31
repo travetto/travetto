@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 const s = Symbol.for('@trv:boot/register');
-global[s] = global[s] || (() => {
-  try { require(`${process.cwd()}/.env`); } catch { } // read env
-  (process.env.TRV_REQUIRES || '').split(/\s*,\s*/).forEach(x => x && require(x)); // read requires
-  require('@travetto/boot/src/internal/module').ModuleManager.init(); // init
-})();
+if (global[s]) {
+  console.error(`@travetto/boot was already loaded at ${global[s]} but now is trying to be loaded in ${__filename}`);
+  console.error('This means you have two versions of the framework installed, which is not supported');
+  process.exit(1);
+}
+global[s] = __filename;
+try { require(`${process.cwd()}/.env`); } catch { } // read env
+require('@travetto/boot/src/internal/module').ModuleManager.init(); // init

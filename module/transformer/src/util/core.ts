@@ -8,7 +8,14 @@ export class CoreUtil {
    * See if inbound node has an original property
    */
   static hasOriginal(o: ts.Node): o is (ts.Node & { original: ts.Node }) {
-    return 'original' in o && !!o['original'];
+    return 'original' in o && !!(o as { original?: ts.Node })['original'];
+  }
+
+  /**
+   * See if type has target
+   */
+  static hasTarget(o: ts.Type): o is (ts.Type & { target: ts.Type }) {
+    return 'target' in o && !!(o as { target?: ts.Type })['target'];
   }
 
   /**
@@ -51,7 +58,11 @@ export class CoreUtil {
    * Get `ts.Symbol` from a `ts.Type`
    */
   static getSymbol(type: ts.Type | ts.Symbol) {
-    return 'valueDeclaration' in type ? type : (type.aliasSymbol ?? type.symbol);
+    if ('valueDeclaration' in type) {
+      return type;
+    } else {
+      return (type as ts.TypeReference).aliasSymbol ?? (type as ts.Type).symbol;
+    }
   }
 
   /**

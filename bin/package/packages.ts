@@ -2,7 +2,8 @@ import * as fs from 'fs';
 
 import '@arcsine/nodesh';
 
-import { PathUtil } from '@travetto/boot/src';
+import { PathUtil } from '@travetto/boot';
+import { PackageType, readPackage } from '@travetto/boot/src/internal/package';
 
 export const DEP_GROUPS = [
   'dependencies', 'devDependencies',
@@ -14,40 +15,13 @@ export type DepGroup = (typeof DEP_GROUPS[number]);
 
 export type PkgInfo = {
   folder: string;
+  mod: string;
   folderRelative: string;
   folderPadded: string;
   file: string;
 };
 
-type RawPkg = {
-  name: string;
-  main?: string;
-  displayName?: string;
-  homepage?: string;
-  files?: string[];
-  license?: string;
-  description?: string;
-  private?: boolean;
-  bin?: Record<string, string>;
-  scripts?: Record<string, string>;
-  engines?: Record<string, string>;
-  author?: {
-    name?: string;
-    email?: string;
-  };
-  repository?: {
-    url: string;
-    directory?: string;
-  };
-  keywords?: string[];
-  version: string;
-  publishConfig?: { access?: 'restricted' | 'public' };
-
-} & Record<DepGroup, Record<string, string> | undefined>;
-
-export type Pkg = RawPkg & { _: RawPkg & PkgInfo };
-
-const clone = <T>(p: T): T => JSON.parse(JSON.stringify(p));
+export type Pkg = PackageType & { _: PackageType & PkgInfo };
 
 export class Packages {
   private static _cache: Pkg[];
@@ -57,19 +31,19 @@ export class Packages {
     return [...new Set([...(a || []), ...(b || [])])];
   }
 
-  private static requireJSON(file: string): Pkg {
-    const r = require(file) as RawPkg;
-    const folder = file.replace('/package.json', '');
+  private static readPackage(folder: string): Pkg {
+    const file = PathUtil.resolveUnix(folder, 'package.json');
     const folderRelative = folder.replace(`${PathUtil.cwd}/`, '');
     return {
       _: {
-        ...clone(r),
+        ...readPackage(folder), // Save original copy
         file,
         folder,
+        mod: folderRelative.split('/').pop()!,
         folderPadded: folderRelative.padEnd(30),
         folderRelative
       },
-      ...r
+      ...readPackage(folder)
     };
   }
 
@@ -77,7 +51,8 @@ export class Packages {
     if (this._cache) {
       return;
     }
-    this._cache = await '{module,related}/*/package.json'.$dir().$map(p => this.requireJSON(p));
+    this._cache = await '{module,related}/*/package.json'.$dir()
+      .$map(p => this.readPackage(p.replace('/package.json', '')));
     this._byFolder = Object.fromEntries(this._cache.map(p => ([p._.folder, p] as const)));
   }
 
@@ -86,6 +61,7 @@ export class Packages {
     files, main, bin, scripts, keywords,
     dependencies, devDependencies, peerDependencies,
     optionalDependencies, optionalPeerDependencies,
+    docDependencies,
     engines, private: priv, repository, author,
     publishConfig, ...rest
   }: Pkg): Pkg {
@@ -114,6 +90,7 @@ export class Packages {
       peerDependencies,
       optionalDependencies,
       optionalPeerDependencies,
+      docDependencies,
       engines,
       private: priv,
       publishConfig: {
@@ -168,12 +145,16 @@ export class Packages {
   }
 
   static async * getTopLevelPackage() {
-    yield this.requireJSON(PathUtil.resolveUnix('package.json'));
+    yield this.readPackage(PathUtil.cwd);
   }
 
   static async getByFolder(folder: string) {
     await this.init();
-    return this._byFolder[folder];
+    return this._byFolder[PathUtil.resolveUnix(folder)];
+  }
+
+  static async * yieldByFolder(folder: string) {
+    yield this.getByFolder(folder);
   }
 
   static async * yieldPackages() {

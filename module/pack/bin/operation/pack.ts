@@ -1,5 +1,5 @@
 import { color } from '@travetto/cli/src/color';
-import type { DeepPartial } from '@travetto/base';
+import type { DeepPartial } from '@travetto/base/src/internal/types';
 
 import { CommonConfig, PackOperation } from '../lib/types';
 import { PackUtil } from '../lib/util';
@@ -23,9 +23,6 @@ export type AllConfigPartial = DeepPartial<AllConfig>;
 export const Pack: PackOperation<AllConfig> = {
   key: '',
   title: 'Packing',
-  flags: [
-    ['-w --workspace [workspace]', 'Workspace directory', undefined, 'workspace']
-  ],
   extend(a: AllConfig, b: Partial<AllConfig>) {
     const ret: Partial<AllConfig> = {
       workspace: b.workspace ?? a.workspace,
