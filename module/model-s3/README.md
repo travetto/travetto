@@ -50,8 +50,8 @@ export class S3ModelConfig {
   bucket = ''; // S3 bucket
   endpoint = ''; // Endpoint url
 
-  accessKeyId = EnvUtil.get('AWS_ACCESS_KEY_ID') ?? '';
-  secretAccessKey = EnvUtil.get('AWS_SECRET_ACCESS_KEY') ?? '';
+  accessKeyId = EnvUtil.get('AWS_ACCESS_KEY_ID', '');
+  secretAccessKey = EnvUtil.get('AWS_SECRET_ACCESS_KEY', '');
   config: S3.S3ClientConfig; // Additional s3 config
 
   chunkSize = 5 * 2 ** 20; // Chunk size in bytes
@@ -76,7 +76,9 @@ export class S3ModelConfig {
     }
 
     this.config = {
+      ...(this.config ?? {}),
       endpoint: this.endpoint,
+      forcePathStyle: true,
       credentials: {
         accessKeyId: this.accessKeyId,
         secretAccessKey: this.secretAccessKey

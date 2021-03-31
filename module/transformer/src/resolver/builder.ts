@@ -53,8 +53,8 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
     return { category: 'shape', type };
   } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
     let resolvedType = type;
-    if ('target' in resolvedType && resolvedType['target']) {
-      resolvedType = resolvedType['target'] as ts.Type;
+    if (CoreUtil.hasTarget(resolvedType)) {
+      resolvedType = resolvedType.target;
       // If resolved target has a concrete type
       if (DocUtil.readDocTag(resolvedType, 'concrete').length) {
         return { category: 'concrete', type: resolvedType };

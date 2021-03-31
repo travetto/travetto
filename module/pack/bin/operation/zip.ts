@@ -13,10 +13,6 @@ export interface ZipConfig extends CommonConfig {
 export const Zip: PackOperation<ZipConfig> = {
   key: 'zip',
   title: 'Zipping',
-  flags: [
-    ['-w --workspace [workspace]', 'Workspace directory', undefined, 'workspace'],
-    ['-o --output [output]', 'Output File', undefined, 'output']
-  ],
   extend(a: ZipConfig, b: Partial<ZipConfig>) {
     return {
       ...PackUtil.commonExtend(a, b),

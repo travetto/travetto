@@ -112,7 +112,7 @@ Now we need to create <code class="item path">src/service.ts</code>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token operator">:</span> TodoSearch<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>modelService<span class="token punctuation">.</span><span class="token function">list</span><span class="token punctuation">(</span>Todo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>modelService<span class="token punctuation">.</span><span class="token function">query</span><span class="token punctuation">(</span>Todo<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token operator">...</span>search<span class="token punctuation">,</span> sort<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{{'{'}}</span> priority<span class="token operator">:</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">complete</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> completed <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -292,15 +292,15 @@ First we must start the application:
       <figcaption class="terminal">Application Startup
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token number">2021</span>-03-14T05:00:01.737Z info  <span class="token punctuation">[</span>@trv:app/registry:30<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'/home/tim/@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2021</span>-03-14T05:00:02.041Z info  <span class="token punctuation">[</span>@trv:app/registry:34<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
+      <pre><code class="language-bash"><span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:30<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
+<span class="token number">2021</span>-03-14T05:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:34<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'@travetto/todo-app'</span>,
     description: <span class="token string">''</span>,
     version: undefined,
     license: <span class="token string">'ISC'</span>,
-    author: <span class="token string">''</span>,
-    frameworkVersion: <span class="token string">'2.0.0'</span>
+    author: <span class="token punctuation">{{'{'}}</span> email: <span class="token string">'travetto.framework@gmail.com'</span>, name: <span class="token string">'Travetto Framework'</span> <span class="token punctuation">{{'}'}}</span>,
+    baseVersion: <span class="token string">'2.0.0'</span>
   <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'dev'</span>,
@@ -317,29 +317,29 @@ First we must start the application:
     local: <span class="token punctuation">[</span> <span class="token string">'doc'</span> <span class="token punctuation">]</span>,
     excludeModules: Set<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token string">'@travetto/cli'</span>, <span class="token string">'@travetto/doc'</span>, <span class="token string">'@travetto/boot'</span> <span class="token punctuation">{{'}'}}</span>,
     dynamicModules: <span class="token punctuation">{{'{'}}</span>
-      <span class="token string">'@travetto/app'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:app'</span>,
-      <span class="token string">'@travetto/base'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:base'</span>,
-      <span class="token string">'@travetto/boot'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:boot'</span>,
-      <span class="token string">'@travetto/cli'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:cli'</span>,
-      <span class="token string">'@travetto/compiler'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:compiler'</span>,
-      <span class="token string">'@travetto/config'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:config'</span>,
-      <span class="token string">'@travetto/di'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:di'</span>,
-      <span class="token string">'@travetto/doc'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:doc'</span>,
-      <span class="token string">'@travetto/log'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:log'</span>,
-      <span class="token string">'@travetto/model'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:model'</span>,
-      <span class="token string">'@travetto/model-elasticsearch'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:model-elasticsearch'</span>,
-      <span class="token string">'@travetto/model-query'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:model-query'</span>,
-      <span class="token string">'@travetto/openapi'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:openapi'</span>,
-      <span class="token string">'@travetto/pack'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:pack'</span>,
-      <span class="token string">'@travetto/registry'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:registry'</span>,
-      <span class="token string">'@travetto/rest'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:rest'</span>,
-      <span class="token string">'@travetto/rest-express'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:rest-express'</span>,
-      <span class="token string">'@travetto/schema'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:schema'</span>,
-      <span class="token string">'@travetto/test'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:test'</span>,
-      <span class="token string">'@travetto/transformer'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:transformer'</span>,
-      <span class="token string">'@travetto/watch'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:watch'</span>,
-      <span class="token string">'@travetto/worker'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:worker'</span>,
-      <span class="token string">'@travetto/yaml'</span><span class="token builtin class-name">:</span> <span class="token string">'/home/tim/@trv:yaml'</span>
+      <span class="token string">'@travetto/app'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:app'</span>,
+      <span class="token string">'@travetto/base'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:base'</span>,
+      <span class="token string">'@travetto/boot'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:boot'</span>,
+      <span class="token string">'@travetto/cli'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:cli'</span>,
+      <span class="token string">'@travetto/compiler'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:compiler'</span>,
+      <span class="token string">'@travetto/config'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:config'</span>,
+      <span class="token string">'@travetto/di'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:di'</span>,
+      <span class="token string">'@travetto/doc'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:doc'</span>,
+      <span class="token string">'@travetto/log'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:log'</span>,
+      <span class="token string">'@travetto/model'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:model'</span>,
+      <span class="token string">'@travetto/model-elasticsearch'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:model-elasticsearch'</span>,
+      <span class="token string">'@travetto/model-query'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:model-query'</span>,
+      <span class="token string">'@travetto/openapi'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:openapi'</span>,
+      <span class="token string">'@travetto/pack'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:pack'</span>,
+      <span class="token string">'@travetto/registry'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:registry'</span>,
+      <span class="token string">'@travetto/rest'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:rest'</span>,
+      <span class="token string">'@travetto/rest-express'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:rest-express'</span>,
+      <span class="token string">'@travetto/schema'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:schema'</span>,
+      <span class="token string">'@travetto/test'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:test'</span>,
+      <span class="token string">'@travetto/transformer'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:transformer'</span>,
+      <span class="token string">'@travetto/watch'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:watch'</span>,
+      <span class="token string">'@travetto/worker'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:worker'</span>,
+      <span class="token string">'@travetto/yaml'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:yaml'</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
@@ -347,9 +347,8 @@ First we must start the application:
     api: <span class="token punctuation">{{'{'}}</span> spec: <span class="token punctuation">{{'{'}}</span> output: <span class="token string">'./openapi.yml'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
     sql: <span class="token punctuation">{{'{'}}</span> model: <span class="token punctuation">{{'{'}}</span> namespace: <span class="token string">'todo'</span>, user: <span class="token string">'root'</span>, password: <span class="token string">'password'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span>
-<span class="token number">2021</span>-03-14T05:00:02.410Z info  <span class="token punctuation">[</span>@trv:rest/application/rest:192<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
-      </figure> 
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://curl.haxx.se/">curl</a> requests to interact with the new api:
 
@@ -378,11 +377,17 @@ next, let's execute <a target="_blank" class="external-link" href="https://curl.
       </figcaption>
       <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/create-todo.ts
 
-<span class="token punctuation">{{'{'}}</span>
-  text: <span class="token string">'New Todo'</span>,
-  created: <span class="token string">'2021-03-14T05:00:00.618Z'</span>,
-  id: <span class="token string">'3af422e793aed76ee063d13feec2e5e9'</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
+/home/tim/Code/travetto/node_modules/node-fetch/src/index.js:94
+			reject<span class="token punctuation">(</span>new FetchError<span class="token punctuation">(</span><span class="token variable"><span class="token variable">`</span>request to $<span class="token punctuation">{{'{'}}</span>request.url<span class="token punctuation">{{'}'}}</span> failed, reason: $<span class="token punctuation">{{'{'}}</span>err.message<span class="token punctuation">{{'}'}}</span><span class="token variable">`</span></span>, <span class="token string">'system'</span>, err<span class="token punctuation">))</span><span class="token punctuation">;</span>
+          ^
+FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNREFUSED <span class="token number">127.0</span>.0.1:3000
+    at ClientRequest.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/node-fetch/src/index.js:94:11<span class="token punctuation">)</span>
+    at ClientRequest.emit <span class="token punctuation">(</span>node:events:369:20<span class="token punctuation">)</span>
+    at Socket.socketErrorListener <span class="token punctuation">(</span>node:_http_client:462:9<span class="token punctuation">)</span>
+    at Socket.emit <span class="token punctuation">(</span>node:events:369:20<span class="token punctuation">)</span>
+    at emitErrorNT <span class="token punctuation">(</span>node:internal/streams/destroy:188:8<span class="token punctuation">)</span>
+    at emitErrorCloseNT <span class="token punctuation">(</span>node:internal/streams/destroy:153:3<span class="token punctuation">)</span>
+    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:81:21<span class="token punctuation">)</span></code></pre>     
       </figure>
 
       <figure class="code">
@@ -403,12 +408,16 @@ next, let's execute <a target="_blank" class="external-link" href="https://curl.
       </figcaption>
       <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/list-todo.ts
 
-<span class="token punctuation">[</span>
-  <span class="token punctuation">{{'{'}}</span>
-    id: <span class="token string">'3af422e793aed76ee063d13feec2e5e9'</span>,
-    text: <span class="token string">'New Todo'</span>,
-    created: <span class="token string">'2021-03-14T05:00:00.990Z'</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">]</span></code></pre>     
+/home/tim/Code/travetto/node_modules/node-fetch/src/index.js:94
+			reject<span class="token punctuation">(</span>new FetchError<span class="token punctuation">(</span><span class="token variable"><span class="token variable">`</span>request to $<span class="token punctuation">{{'{'}}</span>request.url<span class="token punctuation">{{'}'}}</span> failed, reason: $<span class="token punctuation">{{'{'}}</span>err.message<span class="token punctuation">{{'}'}}</span><span class="token variable">`</span></span>, <span class="token string">'system'</span>, err<span class="token punctuation">))</span><span class="token punctuation">;</span>
+          ^
+FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNREFUSED <span class="token number">127.0</span>.0.1:3000
+    at ClientRequest.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/node-fetch/src/index.js:94:11<span class="token punctuation">)</span>
+    at ClientRequest.emit <span class="token punctuation">(</span>node:events:369:20<span class="token punctuation">)</span>
+    at Socket.socketErrorListener <span class="token punctuation">(</span>node:_http_client:462:9<span class="token punctuation">)</span>
+    at Socket.emit <span class="token punctuation">(</span>node:events:369:20<span class="token punctuation">)</span>
+    at emitErrorNT <span class="token punctuation">(</span>node:internal/streams/destroy:188:8<span class="token punctuation">)</span>
+    at emitErrorCloseNT <span class="token punctuation">(</span>node:internal/streams/destroy:153:3<span class="token punctuation">)</span>
+    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:81:21<span class="token punctuation">)</span></code></pre>     
       </figure>
 </div>

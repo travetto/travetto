@@ -1,5 +1,3 @@
-import * as commander from 'commander';
-
 import '@travetto/base';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
@@ -8,22 +6,21 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
  *
  * Allows for cleaning of the cache dire
  */
-export class CliEchoPlugin extends BasePlugin<{ uppercase?: boolean }> {
+export class CliEchoPlugin extends BasePlugin {
   name = 'echo';
 
-  init(cmd: commander.Command) {
-    return cmd.arguments('[args...]')
-      .option('-u, --uppercase', 'Upper case', false);
+  getOptions() {
+    return { uppercase: this.boolOption({ desc: 'Upper case', def: false }) };
+  }
+
+  getArgs() {
+    return '[args...]';
   }
 
   async action(args: string[]) {
-    if (this.opts.uppercase) {
+    if (this.cmd.uppercase) {
       args = args.map(x => x.toUpperCase());
     }
     console.log(args);
-  }
-
-  complete() {
-    return { '': ['--uppercase'] };
   }
 }

@@ -33,6 +33,9 @@
   "optionalPeerDependencies": {
     "@travetto/auth-rest": "^2.0.0-alpha.0"
   },
+  "docDependencies": {
+    "@travetto/app": "^2.0.0-alpha.3"
+  },
   "publishConfig": {
     "access": "public"
   }

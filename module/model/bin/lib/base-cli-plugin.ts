@@ -1,5 +1,3 @@
-import * as commander from 'commander';
-
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
@@ -31,10 +29,12 @@ export abstract class BaseModelPlugin extends BasePlugin {
     await PhaseManager.run('init');
   }
 
-  init(cmd: commander.Command) {
-    return cmd
-      .option('-e, --env [env]', 'Application environment (dev|prod|<other>)')
-      .arguments('[provider] [models...]');
+  getArgs() {
+    return '[provider] [models...]';
+  }
+
+  getOptions() {
+    return { env: this.option({ desc: 'Application environment' }) };
   }
 
   async usage({ providers, models }: { providers: string[], models: string[] }, err = '') {

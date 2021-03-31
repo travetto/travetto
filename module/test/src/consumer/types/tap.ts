@@ -5,7 +5,6 @@ import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
-
 import { TestResultsEnhancer, COLOR_ENHANCER, DUMMY_ENHANCER } from '../enhancer';
 
 /**
@@ -35,7 +34,7 @@ export class TapEmitter implements TestConsumer {
    * Output supplemental data (e.g. logs)
    */
   logMeta(obj: Record<string, unknown>) {
-    let body = YamlUtil.serialize(obj);
+    let body = YamlUtil.serialize(obj, { wordwrap: +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 80) - 5 });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.enhancer.objectInspect(body)}\n...`);
   }

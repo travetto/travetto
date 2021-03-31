@@ -1,6 +1,10 @@
 import { Util } from '@travetto/base';
 
 type SerializableType = (Error & { stack: SerializableType }) | RegExp | Function | Set<unknown> | Map<string, unknown> | number | boolean | null | string | object;
+type SerializeConfig = {
+  indent: number;
+  wordwrap: number;
+};
 
 /**
  * Handles serialization of object to YAML output
@@ -65,20 +69,21 @@ export class Serializer {
   /**
    * Serialize object with indentation and wordwrap support
    */
-  static serialize(o: SerializableType, indent = 2, wordwrap = 120, indentLevel = 0) {
+  static serialize(o: SerializableType, config: Partial<SerializeConfig> = {}, indentLevel = 0) {
+    const cfg = { indent: 2, wordwrap: 120, ...config };
     let out = '';
     const prefix = ' '.repeat(indentLevel);
     if (o instanceof Error) {
-      out = `${this.serialize(o.stack, indent, wordwrap, indentLevel + indent)}\n`;
+      out = `${this.serialize(o.stack, cfg, indentLevel + cfg.indent)}\n`;
     } else if (typeof o === 'function' || o instanceof RegExp || o instanceof Set || o instanceof Map) {
       if (Util.hasToJSON(o)) {
-        out = this.serialize(o.toJSON(), indent, wordwrap, indentLevel);
+        out = this.serialize(o.toJSON(), cfg, indentLevel);
       } else {
         throw new Error('Types are not supported');
       }
     } else if (Array.isArray(o)) {
       if (o.length) {
-        out = o.map(el => `${prefix}-${this.serialize(el, indent, wordwrap, indentLevel + indent)}`).join('\n');
+        out = o.map(el => `${prefix}-${this.serialize(el, cfg, indentLevel + cfg.indent)}`).join('\n');
         if (indentLevel > 0) {
           out = `\n${out}`;
         }
@@ -89,7 +94,7 @@ export class Serializer {
       out = ` ${o}`;
     } else if (typeof o === 'string') {
       o = o.replace(/\t/g, prefix);
-      const lines = this.wordWrap(o, wordwrap);
+      const lines = this.wordWrap(o, cfg.wordwrap);
       if (lines.length > 1) {
         out = [' >', ...lines.map(x => `${prefix}${x}`)].join('\n');
       } else {
@@ -101,7 +106,7 @@ export class Serializer {
       if (keys.length) {
         out = keys
           .filter(x => fin[x] !== undefined)
-          .map(x => `${prefix}${this.clean(x)}:${this.serialize(fin[x], indent, wordwrap, indentLevel + indent)}`)
+          .map(x => `${prefix}${this.clean(x)}:${this.serialize(fin[x], cfg, indentLevel + cfg.indent)}`)
           .join('\n');
         if (indentLevel > 0) {
           out = `\n${out}`;

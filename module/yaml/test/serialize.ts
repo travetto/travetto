@@ -22,7 +22,7 @@ export class SerializeTest {
         3,
         'lorem ipsum whadya think about them apples, huh? lorem ipsum whadya think about them apples, huh? huh?'
       ]
-    }, 2, 100);
+    }, { indent: 2, wordwrap: 100 });
     assert(out === `
 a: 20
 b: 30

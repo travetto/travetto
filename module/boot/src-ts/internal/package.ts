@@ -1,0 +1,46 @@
+import * as fs from 'fs';
+import { PathUtil } from '../path';
+
+export type PackageType = {
+  name: string;
+  displayName?: string;
+  version: string;
+  description?: string;
+  license?: string;
+  repository?: {
+    url: string;
+    directory?: string;
+  };
+  author?: {
+    email?: string;
+    name?: string;
+  };
+  main: string;
+  homepage?: string;
+  files?: string[];
+  bin?: Record<string, string>;
+  scripts?: Record<string, string>;
+  engines?: Record<string, string>;
+  keywords?: string[];
+
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
+  optionalPeerDependencies?: Record<string, string>;
+  docDependencies?: Record<string, string>;
+  private?: boolean;
+  publishConfig?: { access?: 'restricted' | 'public' };
+};
+
+export const readPackage = (folder: string, hideError = false) => {
+  try {
+    return JSON.parse(fs.readFileSync(PathUtil.resolveUnix(folder, 'package.json'), 'utf8')) as PackageType;
+  } catch (e) {
+    if (!hideError) {
+      throw e;
+    } else {
+      return {} as PackageType;
+    }
+  }
+};

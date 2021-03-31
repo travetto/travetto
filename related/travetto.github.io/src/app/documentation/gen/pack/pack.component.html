@@ -24,8 +24,8 @@
 Usage:  pack <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w --workspace <span class="token punctuation">[</span>workspace<span class="token punctuation">]</span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
-  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
+  -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Pack Modes:
   * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
@@ -94,10 +94,10 @@ Assemble is the operation that stages the project's code for deployment.  The as
 Usage:  pack:assemble <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w --workspace <span class="token punctuation">[</span>workspace<span class="token punctuation">]</span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
-  -k --keep-source <span class="token punctuation">[</span>boolean<span class="token punctuation">]</span>  Should <span class="token builtin class-name">source</span> be preserved <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
-  -r --readonly <span class="token punctuation">[</span>boolean<span class="token punctuation">]</span>     Build a <span class="token builtin class-name">readonly</span> deployable <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
-  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>      Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
+  -k, --keep-source <span class="token operator">&lt;</span>keep-source<span class="token operator">></span>  Should <span class="token builtin class-name">source</span> be preserved <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
+  -r, --readonly <span class="token operator">&lt;</span>readonly<span class="token operator">></span>        Build a <span class="token builtin class-name">readonly</span> deployable <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
+  -h, --help                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Pack Modes:
   * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
@@ -128,9 +128,44 @@ Zip is an optional step, that can run post assembly.  The only configuration it 
 Usage:  pack:zip <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w --workspace <span class="token punctuation">[</span>workspace<span class="token punctuation">]</span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
-  -o --output <span class="token punctuation">[</span>output<span class="token punctuation">]</span>        Output File <span class="token punctuation">(</span>default: <span class="token string">"output.zip"</span><span class="token punctuation">)</span>
-  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
+  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>        Output File <span class="token punctuation">(</span>default: <span class="token string">"output.zip"</span><span class="token punctuation">)</span>
+  -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Available Pack Modes:
+  * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
+  * rest/aws-lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.aws-lambda.ts<span class="token punctuation">]</span>
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span></code></pre>     
+      </figure>
+
+<h3 id="cli-pack-docker">CLI - pack:docker</h3>
+
+Docker support is an optional step, that can run post assembly.  This allows for building a docker image, and currently only supports the base images as the only configuration options.
+
+      <figure class="code">
+      <figcaption class="code">Docker Default Config
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/pack/support/pack.config.ts#L55">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript">docker<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+  active<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  image<span class="token operator">:</span> <span class="token string">'node:15.12.0-alpine3.11'</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+      <figure class="terminal">
+      <figcaption class="terminal">Docker Usage
+      
+      </figcaption>
+      <pre><code class="language-bash">$ trv pack:docker --help
+
+Usage:  pack:docker <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
+
+Options:
+  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
+  -i, --image <span class="token operator">&lt;</span>image<span class="token operator">></span>          Docker Image to extend <span class="token punctuation">(</span>default: <span class="token string">"node:15.12.0-alpine3.11"</span><span class="token punctuation">)</span>
+  -t, --tag <span class="token operator">&lt;</span>tag<span class="token operator">></span>              Image Tag <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token string">"app"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -p, --port <span class="token operator">&lt;</span>port<span class="token operator">></span>            Image Port
+  -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Pack Modes:
   * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
@@ -186,8 +221,8 @@ Various modules may provide customizations to the default <code class="item path
 <h3 id="configuration">Configuration</h3>
 
 By default, the configuration consists of two components.
-* The default config in <code class="item path">support/pack.config.ts</code> and
-* The config selected to execute from the cli
+<ul> <li>The default config in <code class="item path">support/pack.config.ts</code> and</li>
+ <li>The config selected to execute from the cli</li></ul>
 
 These two configurations will be loaded and layered, with the selected config taking precedence.
 

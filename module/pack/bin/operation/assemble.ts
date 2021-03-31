@@ -1,6 +1,5 @@
 import { FsUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
-import { CliUtil } from '@travetto/cli/src/util';
 
 import { PackUtil } from '../lib/util';
 import { CommonConfig, PackOperation } from '../lib/types';
@@ -22,11 +21,6 @@ export interface AssembleConfig extends CommonConfig {
 export const Assemble: PackOperation<AssembleConfig> = {
   key: 'assemble',
   title: 'Assembling',
-  flags: [
-    ['-w --workspace [workspace]', 'Workspace directory', undefined, 'workspace'],
-    ['-k --keep-source [boolean]', 'Should source be preserved', CliUtil.isBoolean, 'keepSource'],
-    ['-r --readonly [boolean]', 'Build a readonly deployable', CliUtil.isBoolean, 'readonly']
-  ],
   extend(a: AssembleConfig, b: Partial<AssembleConfig>) {
     return {
       ...PackUtil.commonExtend(a, b),

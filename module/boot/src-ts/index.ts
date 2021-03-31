@@ -6,4 +6,4 @@ export * from './env';
 export * from './fs';
 export * from './path';
 export * from './scan';
-export * from './package';
+export * from './main-package';

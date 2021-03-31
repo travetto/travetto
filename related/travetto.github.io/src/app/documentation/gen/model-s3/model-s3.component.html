@@ -59,8 +59,8 @@ This module provides an <a target="_blank" class="external-link" href="https://a
   bucket <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span> <span class="token comment">// S3 bucket</span>
   endpoint <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span> <span class="token comment">// Endpoint url</span>
 
-  accessKeyId <span class="token operator">=</span> EnvUtil<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'AWS_ACCESS_KEY_ID'</span><span class="token punctuation">)</span> <span class="token operator">??</span> <span class="token string">''</span><span class="token punctuation">;</span>
-  secretAccessKey <span class="token operator">=</span> EnvUtil<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'AWS_SECRET_ACCESS_KEY'</span><span class="token punctuation">)</span> <span class="token operator">??</span> <span class="token string">''</span><span class="token punctuation">;</span>
+  accessKeyId <span class="token operator">=</span> EnvUtil<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'AWS_ACCESS_KEY_ID'</span><span class="token punctuation">,</span> <span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  secretAccessKey <span class="token operator">=</span> EnvUtil<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'AWS_SECRET_ACCESS_KEY'</span><span class="token punctuation">,</span> <span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   config<span class="token operator">:</span> <span class="token constant">S3</span><span class="token punctuation">.</span>S3ClientConfig<span class="token punctuation">;</span> <span class="token comment">// Additional s3 config</span>
 
   chunkSize <span class="token operator">=</span> <span class="token number">5</span> <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">**</span> <span class="token number">20</span><span class="token punctuation">;</span> <span class="token comment">// Chunk size in bytes</span>
@@ -85,7 +85,9 @@ This module provides an <a target="_blank" class="external-link" href="https://a
     <span class="token punctuation">{{'}'}}</span>
 
     <span class="token keyword">this</span><span class="token punctuation">.</span>config <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token operator">...</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>config <span class="token operator">??</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
       endpoint<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>endpoint<span class="token punctuation">,</span>
+      forcePathStyle<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
       credentials<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
         accessKeyId<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>accessKeyId<span class="token punctuation">,</span>
         secretAccessKey<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>secretAccessKey

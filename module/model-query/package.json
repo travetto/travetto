@@ -32,6 +32,11 @@
     "@travetto/model": "^2.0.0-alpha.3",
     "@travetto/schema": "^2.0.0-alpha.3"
   },
+  "docDependencies": {
+    "@travetto/model-mongo": "^2.0.0-alpha.3",
+    "@travetto/model-elasticsearch": "^2.0.0-alpha.3",
+    "@travetto/model-sql": "^2.0.0-alpha.3"
+  },
   "publishConfig": {
     "access": "public"
   }

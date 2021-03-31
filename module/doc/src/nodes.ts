@@ -1,6 +1,5 @@
-import * as fs from 'fs';
-
 import { PathUtil, Package, FsUtil } from '@travetto/boot';
+import { readPackage } from '@travetto/boot/src/internal/package';
 
 import { DocUtil, } from './util';
 import { DocRunUtil, RunConfig } from './run-util';
@@ -57,8 +56,7 @@ export function Execute(title: Content, cmd: string, args: string[] = [], cfg: R
 }
 
 export function Mod(folder: string) {
-  const pkg = JSON.parse(fs.readFileSync(`${folder}/package.json`, 'utf8'));
-  const { description, displayName } = pkg;
+  const { description, displayName } = readPackage(folder);
   return $n('mod', { title: $c(displayName), link: $c(folder), description: $c(description) });
 }
 
@@ -78,7 +76,7 @@ export function Config(title: Content, content: Content, language = 'yaml') {
 }
 
 export function Header(install = true, pkg = Package) {
-  return $n('header', { title: $c(pkg.title ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });
+  return $n('header', { title: $c(pkg.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });
 }
 
 export function Snippet(title: Content, file: string, startPattern: RegExp, endPattern?: RegExp, outline?: boolean) {

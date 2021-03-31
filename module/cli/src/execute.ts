@@ -54,7 +54,11 @@ export class ExecutionManager {
    * @param args argv
    */
   static async run(args: string[]) {
-    commander.version(version);
+    const width = +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 120);
+    commander
+      .version(version)
+      .configureOutput({ getOutHelpWidth: () => width, getErrHelpWidth: () => width });
+
     const cmd = args[2];
 
     if (cmd === 'complete') {

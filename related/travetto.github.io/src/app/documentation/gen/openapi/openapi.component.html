@@ -27,7 +27,7 @@ All of the high level configurations can be found in the following structure:
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/openapi/src/config.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> path <span class="token keyword">from</span> <span class="token string">'path'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ServerObject<span class="token punctuation">,</span> ContactObject<span class="token punctuation">,</span> LicenseObject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'openapi3-ts'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ServerObject<span class="token punctuation">,</span> ContactObject<span class="token punctuation">,</span> LicenseObject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'openapi3-ts/src/model/OpenApi'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PathUtil<span class="token punctuation">,</span> EnvUtil<span class="token punctuation">,</span> FsUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
@@ -117,7 +117,7 @@ The module provides a plugin for the <a class="module-link" href="https://github
 Usage:  openapi:spec <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -o, --output <span class="token punctuation">[</span>output<span class="token punctuation">]</span>  Output files <span class="token punctuation">(</span>default: <span class="token string">"./openapi.yml"</span><span class="token punctuation">)</span>
+  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>  Output files <span class="token punctuation">(</span>default: <span class="token string">"./openapi.yml"</span><span class="token punctuation">)</span>
   -h, --help             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 

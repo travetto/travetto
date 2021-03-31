@@ -49,10 +49,10 @@ export class DocRunUtil {
       cmd,
       args,
       opts: {
-        cwd: config.cwd ?? process.cwd(),
+        cwd: config.cwd ?? PathUtil.cwd,
         shell: '/bin/bash',
         env: {
-          ...Object.fromEntries(Object.entries(process.env).filter(([a, b]) => a.startsWith('TRV') || a === 'PATH')),
+          ...Object.fromEntries(Object.entries(process.env).filter(([a]) => /^(TRV_.*|PATH|NODE_(PATH|OPTIONS))$/.test(a))),
           TRV_DEBUG: '0',
           ...(config.env ?? {})
         }

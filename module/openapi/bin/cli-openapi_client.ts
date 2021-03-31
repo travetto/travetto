@@ -1,64 +1,50 @@
-import * as commander from 'commander';
 import * as path from 'path';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
-import { CliUtil } from '@travetto/cli/src/util';
 import { ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
-
-type Config = {
-  input: string;
-  dockerImage: string;
-  output: string;
-  watch?: boolean;
-};
 
 /**
  * CLI for generating the cli client
  */
-export class OpenApiClientPlugin extends BasePlugin<Config> {
+export class OpenApiClientPlugin extends BasePlugin {
   name = 'openapi:client';
 
-  init(cmd: commander.Command) {
-    return cmd
-      .arguments('<format> [additional-properties]')
-      .option('-i, --input [input]', 'Input file', './openapi.yml')
-      .option('-d, --docker-image [docker]', 'Docker Image to use', 'arcsine/openapi-generator:latest')
-      .option('-o, --output [output]', 'Output folder', './api-client')
-      .option('-w, --watch [watch]', 'Watch for file changes (default: false)', CliUtil.isBoolean);
+  getOptions() {
+    return {
+      input: this.option({ desc: 'Input file', def: './openapi.yml', combine: v => PathUtil.resolveUnix(v), completion: true }),
+      output: this.option({ desc: 'Output folder', def: './api-client', combine: v => PathUtil.resolveUnix(v), completion: true }),
+      dockerImage: this.option({ desc: 'Docker Image to use', def: 'arcsine/openapi-generator:latest' }),
+      watch: this.boolOption({ desc: 'Watch for file changes' })
+    };
+  }
+
+  getArgs() {
+    return '[format] [additional-properties]';
   }
 
   async action(format: string, props?: string) {
-    this.opts.input = PathUtil.resolveUnix(this.opts.input);
-    this.opts.output = PathUtil.resolveUnix(this.opts.output);
-
     // Ensure its there
-    await FsUtil.mkdirp(this.opts.output);
+    await FsUtil.mkdirp(this.cmd.output);
 
     const args = [
       'run',
       '--user', `${process.geteuid()}:${process.getgid()}`,
-      '-v', `${this.opts.output}:/workspace`,
-      '-v', `${path.dirname(this.opts.input)}:/input`,
+      '-v', `${this.cmd.output}:/workspace`,
+      '-v', `${path.dirname(this.cmd.input)}:/input`,
       '-it',
       '--rm',
-      this.opts.dockerImage,
+      this.cmd.dockerImage,
       'generate',
       '--skip-validate-spec',
       '--remove-operation-id-prefix',
       '-g', format,
       '-o', '/workspace',
-      '-i', `/input/${path.basename(this.opts.input)}`,
-      ...(this.opts.watch ? ['-w'] : []),
+      '-i', `/input/${path.basename(this.cmd.input)}`,
+      ...(this.cmd.watch ? ['-w'] : []),
       ...(props ? ['--additional-properties', props] : [])
     ];
 
     const { result } = ExecUtil.spawn('docker', args, { stdio: [0, 1, 2] });
     await result.catch(err => process.exit(1));
-  }
-
-  complete() {
-    return {
-      '': ['-i', '--input', '-o', '--output', '-w', '--watch']
-    };
   }
 }

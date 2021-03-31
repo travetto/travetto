@@ -47,6 +47,9 @@
     "node-forge": "^0.10.0",
     "@types/node-forge": "^0.9.7"
   },
+  "docDependencies": {
+    "@travetto/schema": "^2.0.0-alpha.3"
+  },
   "publishConfig": {
     "access": "public"
   }

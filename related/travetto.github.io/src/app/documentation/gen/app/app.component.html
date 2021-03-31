@@ -80,10 +80,10 @@ The run command allows for invocation of applications as defined by the <a targe
 Usage:  run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
-  -e, --env <span class="token punctuation">[</span>env<span class="token punctuation">]</span>             Application environment <span class="token punctuation">(</span>dev<span class="token operator">|</span>prod<span class="token operator">|</span><span class="token operator">&lt;</span>other<span class="token operator">></span><span class="token punctuation">)</span>
-  -p, --profile <span class="token punctuation">[</span>profile<span class="token punctuation">]</span>     Specify additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -r, --resource <span class="token punctuation">[</span>resources<span class="token punctuation">]</span>  Specify additional resource locations <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -e, --env <span class="token operator">&lt;</span>env<span class="token operator">></span>            Application environment
+  -p, --profile <span class="token operator">&lt;</span>profile<span class="token operator">></span>    Additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -r, --resource <span class="token operator">&lt;</span>resource<span class="token operator">></span>  Additional resource locations <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -h, --help                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Applications:
 
@@ -119,10 +119,10 @@ Running without specifying an application <code class="item command">trv run</co
 Usage: trv run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
-  -e, --env <span class="token punctuation">[</span>env<span class="token punctuation">]</span>             Application environment <span class="token punctuation">(</span>dev<span class="token operator">|</span>prod<span class="token operator">|</span><span class="token operator">&lt;</span>other<span class="token operator">></span><span class="token punctuation">)</span>
-  -p, --profile <span class="token punctuation">[</span>profile<span class="token punctuation">]</span>     Specify additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -r, --resource <span class="token punctuation">[</span>resources<span class="token punctuation">]</span>  Specify additional resource locations <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -h, --help                  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -e, --env <span class="token operator">&lt;</span>env<span class="token operator">></span>            Application environment
+  -p, --profile <span class="token operator">&lt;</span>profile<span class="token operator">></span>    Additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -r, --resource <span class="token operator">&lt;</span>resource<span class="token operator">></span>  Additional resource locations <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -h, --help                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Applications:
 
@@ -164,7 +164,7 @@ Configured <span class="token punctuation">{{'{'}}</span>
     version: <span class="token string">'2.0.0'</span>,
     license: <span class="token string">'MIT'</span>,
     author: <span class="token punctuation">{{'{'}}</span> email: <span class="token string">'travetto.framework@gmail.com'</span>, name: <span class="token string">'Travetto Framework'</span> <span class="token punctuation">{{'}'}}</span>,
-    frameworkVersion: <span class="token string">'2.0.0'</span>
+    baseVersion: <span class="token string">'2.0.0'</span>
   <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'dev'</span>,
@@ -213,13 +213,13 @@ The parameters to <code class="item method">run</code> will be type checked, to 
       <pre><code class="language-bash">$ trv run simple-domain mydomain.biz orange
 
 Failed application run
- Error: Invalid parameter port: Received orange, but exepcted number
+Error: Invalid parameter port: Received orange, but exepcted number
     at Function.enforceParamType <span class="token punctuation">(</span>./src/util.ts:19:13<span class="token punctuation">)</span>
     at ./src/registry.ts:45:79
     at <span class="token variable">$ApplicationRegistry</span>.resolveParameters <span class="token punctuation">(</span>./src/registry.ts:45:24<span class="token punctuation">)</span>
     at Function.run <span class="token punctuation">(</span>./bin/lib/run.ts:36:31<span class="token punctuation">)</span>
-    at AppRunPlugin.action <span class="token punctuation">(</span>./bin/cli-run.ts:63:11<span class="token punctuation">)</span>
-    at AppRunPlugin.runAction <span class="token punctuation">(</span>@trv:cli/src/plugin-base.ts:72:12<span class="token punctuation">)</span></code></pre>     
+    at AppRunPlugin.action <span class="token punctuation">(</span>./bin/cli-run.ts:66:11<span class="token punctuation">)</span>
+    at AppRunPlugin.runAction <span class="token punctuation">(</span>@trv:cli/src/plugin-base.ts:210:12<span class="token punctuation">)</span></code></pre>     
       </figure>
 
 The types are inferred from the <code class="item method">.run()</code> method parameters, but can be overridden in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25">@Application</a> 
