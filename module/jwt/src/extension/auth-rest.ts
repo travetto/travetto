@@ -12,13 +12,14 @@ import { verify } from '../verify';
  */
 export class JWTAuthContextEncoder implements AuthContextEncoder {
 
-  private accessor: ValueAccessor;
+  #accessor: ValueAccessor;
+  #signingKey: string;
 
   constructor(
     /**
      * Singing key
      */
-    private signingKey: string,
+    signingKey: string,
 
     /**
      * Name of cookie/header key
@@ -30,7 +31,8 @@ export class JWTAuthContextEncoder implements AuthContextEncoder {
      */
     location: 'cookie' | 'header'
   ) {
-    this.accessor = new ValueAccessor(name, location);
+    this.#accessor = new ValueAccessor(name, location);
+    this.#signingKey = signingKey;
   }
 
   /**
@@ -38,13 +40,13 @@ export class JWTAuthContextEncoder implements AuthContextEncoder {
    */
   async encode(req: Request, res: Response, ctx: AuthContext) {
     if (ctx) {
-      const expires = ctx.principal.expires || new Date(Date.now() + (1000 * 60 * 60 * 24 * 365));
+      const expires = ctx.principal.expiresAt || new Date(Date.now() + (1000 * 60 * 60 * 24 * 365));
       const body: Pick<AuthContext, 'identity' | 'principal'> & { exp: number } = {
         ...ctx, exp: Math.trunc(expires.getTime() / 1000)
       };
       body.principal.permissions = [...ctx.principal.permissions];
-      const token = await sign(body, { key: this.signingKey });
-      this.accessor.writeValue(res, token, { expires });
+      const token = await sign(body, { key: this.#signingKey });
+      this.#accessor.writeValue(res, token, { expires });
     }
   }
 
@@ -52,9 +54,9 @@ export class JWTAuthContextEncoder implements AuthContextEncoder {
    * Read JWT from location
    */
   async decode(req: Request) {
-    const input = this.accessor.readValue(req);
+    const input = this.#accessor.readValue(req);
     if (input) {
-      const ac = await verify<AuthContext>(input!, { key: this.signingKey });
+      const ac = await verify<AuthContext>(input!, { key: this.#signingKey });
       return new AuthContext(ac.identity, ac.principal);
     }
   }

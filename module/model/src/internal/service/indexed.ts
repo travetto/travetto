@@ -12,7 +12,7 @@ type FlattenedConfig = Omit<IndexConfig<ModelType>, 'fields'> & { fields: Flatte
  * Utils for working with indexed model services
  */
 export class ModelIndexedUtil {
-  private static CACHE = new Map<string, FlattenedConfig>();
+  static #cache = new Map<string, FlattenedConfig>();
 
   /**
    * Project item via index
@@ -49,7 +49,7 @@ export class ModelIndexedUtil {
   static flattenIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, separator = '.'): FlattenedConfig {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
     const key = `${cls.ᚕid}:${cfg.name}`;
-    if (!this.CACHE.has(key)) {
+    if (!this.#cache.has(key)) {
       const fields: [string, 1 | -1 | boolean][] = [];
       for (const el of cfg.fields) {
         let parts = [];
@@ -65,9 +65,9 @@ export class ModelIndexedUtil {
           }
         }
       }
-      this.CACHE.set(key, { unique: cfg.unique, name: cfg.name, fields });
+      this.#cache.set(key, { unique: cfg.unique, name: cfg.name, fields });
     }
-    return this.CACHE.get(key)!;
+    return this.#cache.get(key)!;
   }
 
   /**

@@ -8,14 +8,14 @@ export class CoreUtil {
    * See if inbound node has an original property
    */
   static hasOriginal(o: ts.Node): o is (ts.Node & { original: ts.Node }) {
-    return 'original' in o && !!(o as { original?: ts.Node })['original'];
+    return 'original' in o && !!(o as { original?: ts.Node }).original;
   }
 
   /**
    * See if type has target
    */
   static hasTarget(o: ts.Type): o is (ts.Type & { target: ts.Type }) {
-    return 'target' in o && !!(o as { target?: ts.Type })['target'];
+    return 'target' in o && !!(o as { target?: ts.Type }).target;
   }
 
   /**

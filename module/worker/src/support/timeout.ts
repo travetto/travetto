@@ -6,21 +6,23 @@ import { ExecutionError } from './error';
  */
 export class Timeout extends ExecutionError {
 
-  private id: NodeJS.Timer | undefined;
-  private promise = Util.resolvablePromise();
+  #id: NodeJS.Timer | undefined;
+  #promise = Util.resolvablePromise();
+  #duration: number;
 
-  constructor(private duration: number, op: string = 'Operation') {
+  constructor(duration: number, op: string = 'Operation') {
     super(`${op} timed out after ${duration}ms`);
+    this.#duration = duration;
   }
 
   /**
    * Stop timeout from firing
    */
   cancel() {
-    if (this.id) {
-      clearTimeout(this.id);
-      this.promise.resolve();
-      delete this.id;
+    if (this.#id) {
+      clearTimeout(this.#id);
+      this.#promise.resolve();
+      this.#id = undefined;
     }
   }
 
@@ -28,10 +30,10 @@ export class Timeout extends ExecutionError {
    * Wait for timeout as a promise
    */
   wait() {
-    if (!this.id) {
-      this.id = setTimeout(() => this.promise.reject(this), this.duration);
-      this.id.unref();
+    if (!this.#id) {
+      this.#id = setTimeout(() => this.#promise.reject(this), this.#duration);
+      this.#id.unref();
     }
-    return this.promise;
+    return this.#promise;
   }
 }

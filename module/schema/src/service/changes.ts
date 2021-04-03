@@ -37,15 +37,15 @@ export interface SchemaChangeEvent {
  */
 class $SchemaChangeListener {
 
-  private emitter = new EventEmitter();
-  private mapping = new Map<string, Map<string, FieldMapping>>();
+  #emitter = new EventEmitter();
+  #mapping = new Map<string, Map<string, FieldMapping>>();
 
   /**
    * On schema change, emit the change event for the whole schema
    * @param cb The function to call on schema change
    */
   onSchemaChange(handler: (e: SchemaChangeEvent) => void) {
-    this.emitter.on('schema', handler);
+    this.#emitter.on('schema', handler);
   }
 
   /**
@@ -53,21 +53,21 @@ class $SchemaChangeListener {
    * @param cb The function to call on schema field change
    */
   onFieldChange(handler: (e: FieldChangeEvent) => void) {
-    this.emitter.on('field', handler);
+    this.#emitter.on('field', handler);
   }
 
   /**
    * Reset the listener
    */
   reset() {
-    this.mapping.clear();
+    this.#mapping.clear();
   }
 
   /**
    * Clear dependency mappings for a given class
    */
   clearSchemaDependency(cls: Class) {
-    this.mapping.delete(id(cls));
+    this.#mapping.delete(id(cls));
   }
 
   /**
@@ -79,10 +79,10 @@ class $SchemaChangeListener {
    */
   trackSchemaDependency(src: Class, parent: Class, path: FieldConfig[], config: ClassConfig) {
     const idValue = id(src);
-    if (!this.mapping.has(idValue)) {
-      this.mapping.set(idValue, new Map());
+    if (!this.#mapping.has(idValue)) {
+      this.#mapping.set(idValue, new Map());
     }
-    this.mapping.get(idValue)!.set(id(parent), { path, config });
+    this.#mapping.get(idValue)!.set(id(parent), { path, config });
   }
 
   /**
@@ -94,8 +94,8 @@ class $SchemaChangeListener {
     const updates = new Map<string, SchemaChange>();
     const clsId = id(cls);
 
-    if (this.mapping.has(clsId)) {
-      const deps = this.mapping.get(clsId)!;
+    if (this.#mapping.has(clsId)) {
+      const deps = this.#mapping.get(clsId)!;
       for (const depClsId of deps.keys()) {
         if (!updates.has(depClsId)) {
           updates.set(depClsId, { config: deps.get(depClsId)!.config, subs: [] });
@@ -106,7 +106,7 @@ class $SchemaChangeListener {
     }
 
     for (const key of updates.keys()) {
-      this.emitter.emit('schema', { cls: updates.get(key)!.config.class, change: updates.get(key)! });
+      this.#emitter.emit('schema', { cls: updates.get(key)!.config.class, change: updates.get(key)! });
     }
   }
 
@@ -154,7 +154,7 @@ class $SchemaChangeListener {
     }
 
     // Send field changes
-    this.emitter.emit('field', { cls: curr!.class, changes });
+    this.#emitter.emit('field', { cls: curr!.class, changes });
     this.emitSchemaChanges({ cls: curr!.class, changes });
   }
 }

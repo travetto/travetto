@@ -24,14 +24,14 @@ export type PkgInfo = {
 export type Pkg = PackageType & { _: PackageType & PkgInfo };
 
 export class Packages {
-  private static _cache: Pkg[];
-  private static _byFolder: Record<string, Pkg>;
+  static #cache: Pkg[];
+  static #byFolder: Record<string, Pkg>;
 
-  private static combine(a: string[], ...b: string[]) {
+  static #combine(a: string[], ...b: string[]) {
     return [...new Set([...(a || []), ...(b || [])])];
   }
 
-  private static readPackage(folder: string): Pkg {
+  static #readPackage(folder: string): Pkg {
     const file = PathUtil.resolveUnix(folder, 'package.json');
     const folderRelative = folder.replace(`${PathUtil.cwd}/`, '');
     return {
@@ -47,13 +47,13 @@ export class Packages {
     };
   }
 
-  private static async init() {
-    if (this._cache) {
+  static async #init() {
+    if (this.#cache) {
       return;
     }
-    this._cache = await '{module,related}/*/package.json'.$dir()
-      .$map(p => this.readPackage(p.replace('/package.json', '')));
-    this._byFolder = Object.fromEntries(this._cache.map(p => ([p._.folder, p] as const)));
+    this.#cache = await '{module,related}/*/package.json'.$dir()
+      .$map(p => this.#readPackage(p.replace('/package.json', '')));
+    this.#byFolder = Object.fromEntries(this.#cache.map(p => ([p._.folder, p] as const)));
   }
 
   static standardize({
@@ -70,7 +70,7 @@ export class Packages {
       displayName,
       version,
       description,
-      keywords: this.combine(keywords as string[], 'travetto', 'typescript'),
+      keywords: this.#combine(keywords as string[], 'travetto', 'typescript'),
       homepage: 'https://travetto.io',
       license: 'MIT',
       author: {
@@ -139,18 +139,19 @@ export class Packages {
   }
 
   static writeOut({ _: og, ...pkg }: Pkg) {
-    return `${JSON.stringify(pkg, null, 2)}\n`
+    return new Promise(res => `${JSON.stringify(pkg, null, 2)}\n`
       .$stream('binary')
-      .pipe(fs.createWriteStream(og.file));
+      .pipe(fs.createWriteStream(og.file))
+      .on('close', res));
   }
 
   static async * getTopLevelPackage() {
-    yield this.readPackage(PathUtil.cwd);
+    yield this.#readPackage(PathUtil.cwd);
   }
 
   static async getByFolder(folder: string) {
-    await this.init();
-    return this._byFolder[PathUtil.resolveUnix(folder)];
+    await this.#init();
+    return this.#byFolder[PathUtil.resolveUnix(folder)];
   }
 
   static async * yieldByFolder(folder: string) {
@@ -158,8 +159,8 @@ export class Packages {
   }
 
   static async * yieldPackages() {
-    await this.init();
-    yield* this._cache;
+    await this.#init();
+    yield* this.#cache;
   }
 
   static yieldPublicPackages() {

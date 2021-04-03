@@ -7,7 +7,10 @@ import { MockService } from './mock';
 @Controller('/simple2')
 export class Simple {
 
-  constructor(private service: MockService, public context: AsyncContext) {
+  #service: MockService;
+
+  constructor(service: MockService, public context: AsyncContext) {
+    this.#service = service;
   }
 
   @Get('/name')
@@ -26,7 +29,7 @@ export class Simple {
     if (Math.random() > .66) {
       this.context.get().name = `Roger-${Date.now()}`;
     }
-    return this.service.fetch().middle!.toUpperCase();
+    return this.#service.fetch().middle!.toUpperCase();
   }
 
   @Get('/age3')

@@ -31,17 +31,17 @@ class $ConsoleManager {
   /**
    * Stack of nested appenders
    */
-  private stack: ConsoleListener[] = [];
+  #stack: ConsoleListener[] = [];
 
   /**
    * The current appender
    */
-  private appender: ConsoleListener;
+  #appender: ConsoleListener;
 
   /**
    * List of log levels to exclude
    */
-  private readonly exclude = new Set<string>([]);
+  readonly #exclude = new Set<string>([]);
 
   /**
    * Unique key to use as a logger function
@@ -49,20 +49,20 @@ class $ConsoleManager {
   constructor(public readonly key: string) {
     // @ts-expect-error
     global[this.key] = this.invoke.bind(this);
-    this.exclude = new Set();
+    this.#exclude = new Set();
 
     if (AppManifest.env.debug.status === false) {
-      this.exclude.add('debug');
+      this.#exclude.add('debug');
     }
 
     this.set(console); // Init to console
-    SourceUtil.addPreProcessor(this.instrument.bind(this)); // Register console manager
+    SourceUtil.addPreProcessor(this.#instrument.bind(this)); // Register console manager
   }
 
   /**
    * Modify typescript file to point to the Console Manager
    */
-  private instrument(filename: string, fileContents: string) {
+  #instrument(filename: string, fileContents: string) {
     // Insert filename into all log statements for all components
     let line = 1;
     fileContents = fileContents.replace(CONSOLE_RE, (a, cmd, lvl) => {
@@ -78,14 +78,26 @@ class $ConsoleManager {
   }
 
   /**
+   * Add exclusion
+   * @private
+   */
+  exclude(val: string, add = true) {
+    if (add) {
+      this.#exclude.add(val);
+    } else {
+      this.#exclude.delete(val);
+    }
+  }
+
+  /**
    * Handle direct call in lieu of the console.* commands
    */
   invoke(level: LogLevel, ctx: LineContext, ...args: unknown[]) {
-    if (this.exclude.has(level)) {
+    if (this.#exclude.has(level)) {
       return; // Do nothing
     }
 
-    return this.appender.onLog(level, ctx, args);
+    return this.#appender.onLog(level, ctx, args);
   }
 
   /**
@@ -94,20 +106,20 @@ class $ConsoleManager {
   set(cons: ConsoleListener | Console, replace = false) {
     cons = ('onLog' in cons) ? cons : wrap(cons);
     if (!replace) {
-      this.stack.unshift(cons);
+      this.#stack.unshift(cons);
     } else {
-      this.stack[0] = cons;
+      this.#stack[0] = cons;
     }
-    this.appender = this.stack[0];
+    this.#appender = this.#stack[0];
   }
 
   /**
    * Pop off the logging stack
    */
   clear() {
-    if (this.stack.length > 1) {
-      this.stack.shift();
-      this.appender = this.stack[0];
+    if (this.#stack.length > 1) {
+      this.#stack.shift();
+      this.#appender = this.#stack[0];
     }
   }
 }

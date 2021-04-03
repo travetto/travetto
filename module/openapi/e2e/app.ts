@@ -4,9 +4,13 @@ import { RestApplication } from '@travetto/rest';
 @Application('sample')
 export class SampleApp {
 
-  constructor(private app: RestApplication) { }
+  #app: RestApplication;
+
+  constructor(app: RestApplication) {
+    this.#app = app;
+  }
 
   run() {
-    return this.app.run();
+    return this.#app.run();
   }
 }

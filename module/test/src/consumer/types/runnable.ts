@@ -14,21 +14,21 @@ export class RunnableTestConsumer implements TestConsumer {
     return new RunnableTestConsumer(TestConsumerRegistry.getInstance(consumer));
   }
 
-  private consumers: TestConsumer[];
-  private results: TestResultsSummarizer | undefined;
+  #consumers: TestConsumer[];
+  #results: TestResultsSummarizer | undefined;
 
   constructor(...consumers: TestConsumer[]) {
-    this.consumers = consumers;
+    this.#consumers = consumers;
     for (const c of consumers) {
-      if (!this.results && c.onSummary) { // If expecting summary
-        this.results = new TestResultsSummarizer();
+      if (!this.#results && c.onSummary) { // If expecting summary
+        this.#results = new TestResultsSummarizer();
       }
       c.onEvent = c.onEvent.bind(c);
     }
   }
 
   onStart() {
-    for (const c of this.consumers) {
+    for (const c of this.#consumers) {
       if (c.onStart) {
         c.onStart();
       }
@@ -36,22 +36,22 @@ export class RunnableTestConsumer implements TestConsumer {
   }
 
   onEvent(e: TestEvent) {
-    if (this.results) {
-      this.results.onEvent(e);
+    if (this.#results) {
+      this.#results.onEvent(e);
     }
-    for (const c of this.consumers) {
+    for (const c of this.#consumers) {
       c.onEvent(e);
     }
   }
 
   summarize() {
-    if (this.results) {
-      for (const c of this.consumers) {
+    if (this.#results) {
+      for (const c of this.#consumers) {
         if (c.onSummary) {
-          c.onSummary(this.results.summary);
+          c.onSummary(this.#results.summary);
         }
       }
-      return this.results;
+      return this.#results;
     }
   }
 

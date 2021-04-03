@@ -20,7 +20,7 @@ export class PassportIdentitySource<U> implements IdentitySource {
    * Process request read state from query
    * @param req The travetto request
    */
-  static processLoginContext(req: Request) {
+  static #processLoginContext(req: Request) {
     if (req.query.state) {
       if (typeof req.query.state === 'string' && req.query.state) {
         try {
@@ -37,7 +37,7 @@ export class PassportIdentitySource<U> implements IdentitySource {
    * @param req The travetto request,
    * @param state The passport auth config state
    */
-  static processExtraOptions(req: Request, { state }: PassportAuthOptions): Partial<passport.AuthenticateOptions> {
+  static #processExtraOptions(req: Request, { state }: PassportAuthOptions): Partial<passport.AuthenticateOptions> {
     const stateRec = Util.isFunction(state) ? state.call(null, req) : (state ?? {});
     const json = JSON.stringify({ referrer: req.header('referrer'), ...stateRec });
 
@@ -46,7 +46,13 @@ export class PassportIdentitySource<U> implements IdentitySource {
     };
   }
 
+  #strategyName: string;
+  #strategy: passport.Strategy;
+  #toIdentity: (user: U) => Pick<Identity, 'id' | 'permissions' | 'details'> & { issuer?: string };
+  #passportAuthenticateOptions: passport.AuthenticateOptions;
+  #extraOptions: PassportAuthOptions;
   session = false;
+
 
   /**
    * Creating a new PassportIdentitySource
@@ -57,13 +63,18 @@ export class PassportIdentitySource<U> implements IdentitySource {
    * @param passportAuthenticateOptions Extra passport options
    */
   constructor(
-    private strategyName: string,
-    private strategy: passport.Strategy,
-    private toIdentity: (user: U) => Pick<Identity, 'id' | 'permissions' | 'details'> & { issuer?: string },
-    private passportAuthenticateOptions: passport.AuthenticateOptions = {},
-    private extraOptions: PassportAuthOptions = {}
+    strategyName: string,
+    strategy: passport.Strategy,
+    toIdentity: (user: U) => Pick<Identity, 'id' | 'permissions' | 'details'> & { issuer?: string },
+    passportAuthenticateOptions: passport.AuthenticateOptions = {},
+    extraOptions: PassportAuthOptions = {}
   ) {
-    passport.use(this.strategyName, this.strategy);
+    this.#strategyName = strategyName;
+    this.#strategy = strategy;
+    this.#toIdentity = toIdentity;
+    this.#passportAuthenticateOptions = passportAuthenticateOptions;
+    this.#extraOptions = extraOptions;
+    passport.use(this.#strategyName, this.#strategy);
   }
 
   /**
@@ -75,13 +86,13 @@ export class PassportIdentitySource<U> implements IdentitySource {
     return new Promise<Identity | undefined>((resolve, reject) => {
 
       // Get the login context
-      req.loginContext = PassportIdentitySource.processLoginContext(req);
+      req.loginContext = PassportIdentitySource.#processLoginContext(req);
 
-      const filter = passport.authenticate(this.strategyName,
+      const filter = passport.authenticate(this.#strategyName,
         {
           session: this.session,
-          ...this.passportAuthenticateOptions,
-          ...PassportIdentitySource.processExtraOptions(req, this.extraOptions)
+          ...this.#passportAuthenticateOptions,
+          ...PassportIdentitySource.#processExtraOptions(req, this.#extraOptions)
         },
         (err, u) => this.authHandler(err, u).then(resolve, reject));
 
@@ -104,10 +115,10 @@ export class PassportIdentitySource<U> implements IdentitySource {
       delete du._raw;
       delete du.source;
 
-      const ident = this.toIdentity(user);
+      const ident = this.#toIdentity(user);
 
       if (!ident.issuer) {
-        ident.issuer = this.strategyName;
+        ident.issuer = this.#strategyName;
       }
       return ident as Identity;
     }

@@ -11,14 +11,14 @@ import {
  */
 export class TransformerManager {
 
-  private cached: { before: ts.TransformerFactory<ts.SourceFile>[] } | undefined;
-  transformers: NodeTransformer<TransformerState>[] = [];
+  #cached: { before: ts.TransformerFactory<ts.SourceFile>[] } | undefined;
+  #transformers: NodeTransformer<TransformerState>[] = [];
 
   /**
    * Read all transformers from disk under the pattern support/transformer.*
    */
   async init() {
-    if (this.cached) {
+    if (this.#cached) {
       return;
     }
 
@@ -26,11 +26,11 @@ export class TransformerManager {
     const found = SourceIndex.find({ folder: 'support', filter: /\/transformer.*[.]ts/ });
 
     for (const entry of found) { // Exclude based on blacklist
-      this.transformers.push(...getAllTransformers(await import(entry.file)));
+      this.#transformers.push(...getAllTransformers(await import(entry.file)));
     }
 
     console.debug('Transformers', {
-      order: this.transformers.map(x => {
+      order: this.#transformers.map(x => {
         const flags = [
           ...(x.target ? [] : ['all']),
           ...(x.before ? ['before'] : []),
@@ -46,11 +46,11 @@ export class TransformerManager {
   build(checker: ts.TypeChecker) {
     const visitor = new VisitorFactory(
       (ctx, src) => new TransformerState(src, ctx.factory, checker),
-      this.transformers
+      this.#transformers
     );
 
     // Define transformers for the compiler
-    this.cached = {
+    this.#cached = {
       before: [visitor.visitor()]
     };
   }
@@ -59,14 +59,14 @@ export class TransformerManager {
    * Get typescript transformer object
    */
   getTransformers() {
-    return this.cached!;
+    return this.#cached!;
   }
 
   /**
    * Reset state
    */
   reset() {
-    this.transformers = [];
-    delete this.cached;
+    this.#transformers = [];
+    this.#cached = undefined;
   }
 }

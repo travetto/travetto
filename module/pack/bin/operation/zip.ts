@@ -13,6 +13,9 @@ export interface ZipConfig extends CommonConfig {
 export const Zip: PackOperation<ZipConfig> = {
   key: 'zip',
   title: 'Zipping',
+  context(cfg: ZipConfig) {
+    return `[output=${cfg.output}]`;
+  },
   extend(a: ZipConfig, b: Partial<ZipConfig>) {
     return {
       ...PackUtil.commonExtend(a, b),

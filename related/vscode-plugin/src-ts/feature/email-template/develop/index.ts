@@ -19,14 +19,14 @@ export class EmailTemplateFeature extends BaseFeature {
     return /resources\/email\/.*[.]email[.]html$/.test(f ?? '');
   }
 
-  private server: ProcessServer;
+  #server: ProcessServer;
 
-  private format?: 'text' | 'html';
-  private active = new Set<string>();
-  private _activeFile?: string;
-  private _activeContent?: Content;
-  private _panel?: vscode.WebviewPanel;
-  private emitter = new EventEmitter();
+  #format?: 'text' | 'html';
+  #active = new Set<string>();
+  #activeFile?: string;
+  #activeContent?: Content;
+  #panel?: vscode.WebviewPanel;
+  #emitter = new EventEmitter();
 
   constructor(
     module?: string,
@@ -34,47 +34,47 @@ export class EmailTemplateFeature extends BaseFeature {
   ) {
     super(module, command);
 
-    this.server = new ProcessServer(Workspace.binPath(this.module, 'editor'));
+    this.#server = new ProcessServer(Workspace.binPath(this.module, 'editor'));
 
-    this.server.on('start', () => {
-      this.server.onMessage('changed', (type, msg) => this.emitter.emit('render', msg));
+    this.#server.on('start', () => {
+      this.#server.onMessage('changed', (type, msg) => this.#emitter.emit('render', msg));
     });
   }
 
   getPanel() {
-    if (!this._panel) {
-      this._panel = vscode.window.createWebviewPanel(`${this.commandBase}.content`, 'Email Preview', {
+    if (!this.#panel) {
+      this.#panel = vscode.window.createWebviewPanel(`${this.commandBase}.content`, 'Email Preview', {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: true
       });
-      this._panel.onDidDispose(d => {
-        delete this._panel;
+      this.#panel.onDidDispose(d => {
+        this.#panel = undefined;
       });
     }
-    if (!this._panel.visible) {
-      this._panel.reveal(vscode.ViewColumn.Beside, true);
+    if (!this.#panel.visible) {
+      this.#panel.reveal(vscode.ViewColumn.Beside, true);
     }
-    return this._panel!;
+    return this.#panel!;
   }
 
   setActiveFile(file: string | undefined, force = false) {
     if (!EmailTemplateFeature.isTemplate(file)) {
       return;
     }
-    if (file !== this._activeFile || force) {
-      this._activeFile = file;
+    if (file !== this.#activeFile || force) {
+      this.#activeFile = file;
       this.setActiveContent(undefined);
       if (file) {
-        this.server.sendMessage('redraw', { file });
+        this.#server.sendMessage('redraw', { file });
       }
     }
   }
 
   setActiveContent(content?: Content) {
-    this._activeContent = content;
-    if (this._panel) {
-      this._panel.webview.html = !content ? '' : this.format === 'text' ? `<pre>${content.text ?? ''}</pre>` : (content.html ?? '');
-      this._panel.title = !content ? '' : content.subject;
+    this.#activeContent = content;
+    if (this.#panel) {
+      this.#panel.webview.html = !content ? '' : this.#format === 'text' ? `<pre>${content.text ?? ''}</pre>` : (content.html ?? '');
+      this.#panel.title = !content ? '' : content.subject;
     }
   }
 
@@ -83,14 +83,14 @@ export class EmailTemplateFeature extends BaseFeature {
       return;
     }
     if (open) {
-      if (this.active.size === 0) {
-        this.server.start();
+      if (this.#active.size === 0) {
+        this.#server.start();
       }
-      this.active.add(file.fileName);
+      this.#active.add(file.fileName);
     } else {
-      this.active.delete(file.fileName);
-      if (this.active.size === 0) {
-        this.server.stop();
+      this.#active.delete(file.fileName);
+      if (this.#active.size === 0) {
+        this.#server.stop();
       }
     }
   }
@@ -103,12 +103,12 @@ export class EmailTemplateFeature extends BaseFeature {
     }
 
     await this.getPanel();
-    await this.server.start();
+    await this.#server.start();
 
-    this.format = format;
+    this.#format = format;
 
-    if (this._activeContent) {
-      this.setActiveContent(this._activeContent);
+    if (this.#activeContent) {
+      this.setActiveContent(this.#activeContent);
     } else {
       // Force a refresh
       this.setActiveFile(file, true);
@@ -116,20 +116,20 @@ export class EmailTemplateFeature extends BaseFeature {
   }
 
   async openPreviewContext() {
-    const { file } = await this.server.sendMessageAndWaitFor<{ file: string }>('configure', {}, 'configured');
+    const { file } = await this.#server.sendMessageAndWaitFor<{ file: string }>('configure', {}, 'configured');
     const doc = await vscode.workspace.openTextDocument(file);
     await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
   }
 
   async sendEmail() {
-    if (this.server.running && this._activeFile) {
+    if (this.#server.running && this.#activeFile) {
       await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
           cancellable: false,
           title: 'Sending email'
         },
-        () => this.server.sendMessageAndWaitFor('send', { file: this._activeFile }, 'sent', 'sent-failed').then(console.log)
+        () => this.#server.sendMessageAndWaitFor('send', { file: this.#activeFile }, 'sent', 'sent-failed').then(console.log)
           .catch(err => {
             vscode.window.showErrorMessage(err.message);
           })
@@ -145,8 +145,8 @@ export class EmailTemplateFeature extends BaseFeature {
     vscode.workspace.onDidCloseTextDocument(x => this.trackFile(x, false), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.setActiveFile(vscode.window.activeTextEditor?.document.fileName), null, context.subscriptions);
 
-    this.emitter.on('render', ({ file, content }) => {
-      if (file === this._activeFile) {
+    this.#emitter.on('render', ({ file, content }) => {
+      if (file === this.#activeFile) {
         this.setActiveContent(content);
       }
     });

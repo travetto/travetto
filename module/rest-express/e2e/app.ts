@@ -6,14 +6,20 @@ import { RestConfig, RestApplication } from '@travetto/rest';
 })
 export class SampleApp {
 
+  #server: RestApplication;
+  #config: RestConfig;
+
   constructor(
-    private server: RestApplication,
-    private config: RestConfig
-  ) { }
+    server: RestApplication,
+    config: RestConfig
+  ) {
+    this.#server = server;
+    this.#config = config;
+  }
 
   run(port = 3000, ssl = false, fast?: string, toggle?: 'on' | 'off') {
-    this.config.port = port;
-    this.config.ssl.active = ssl;
-    return this.server.run();
+    this.#config.port = port;
+    this.#config.ssl.active = ssl;
+    return this.#server.run();
   }
 }

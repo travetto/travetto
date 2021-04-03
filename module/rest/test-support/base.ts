@@ -16,22 +16,22 @@ type Multipart = { name: string, type?: string, buffer: Buffer, filename?: strin
  */
 export abstract class BaseRestSuite {
 
-  private handle?: ServerHandle;
-  private support: RestServerSupport;
+  #handle?: ServerHandle;
+  #support: RestServerSupport;
 
   type: string | RestServerSupport = 'core';
 
   @BeforeAll()
   async initServer() {
     if (this.type === 'core') {
-      this.support = new CoreRestServerSupport((SystemUtil.naiveHash(this.constructor.ᚕid) % 60000) + 1000);
+      this.#support = new CoreRestServerSupport((SystemUtil.naiveHash(this.constructor.ᚕid) % 60000) + 1000);
     } else if (this.type === 'lambda') {
-      this.support = new AwsLambdaRestServerSupport();
+      this.#support = new AwsLambdaRestServerSupport();
     } else if (typeof this.type !== 'string') {
-      this.support = this.type;
+      this.#support = this.type;
     }
     await RootRegistry.init();
-    this.handle = await this.support.init();
+    this.#handle = await this.#support.init();
   }
 
   async wait(n: number) {
@@ -48,9 +48,9 @@ export abstract class BaseRestSuite {
 
   @AfterAll()
   async destroySever() {
-    if (this.handle) {
-      await this.handle.close?.();
-      delete this.handle;
+    if (this.#handle) {
+      await this.#handle.close?.();
+      this.#handle = undefined;
     }
   }
 
@@ -111,7 +111,7 @@ export abstract class BaseRestSuite {
 
     cfg.body = body;
 
-    const resp = await this.support.execute(method, path, { ...cfg, body: buffer });
+    const resp = await this.#support.execute(method, path, { ...cfg, body: buffer });
     const out = await this.getOutput<T>(resp.body);
 
     if (resp.status >= 400) {

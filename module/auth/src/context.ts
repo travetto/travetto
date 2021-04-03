@@ -12,8 +12,8 @@ export class AuthContext<
   I extends Identity = Identity,
   P extends Principal = Principal> {
 
-  private permsSet: Set<string>;
-  private permsArr: string[];
+  #permsSet: Set<string>;
+  #permsArr: string[];
 
   /**
    * Identity of the context
@@ -45,22 +45,22 @@ export class AuthContext<
    * Get list of permissions
    */
   get permissions(): Readonly<string[]> {
-    return this.permsArr;
+    return this.#permsArr;
   }
 
   /**
    * Set list of permissions
    */
   set permissions(perms: Readonly<string[]>) {
-    this.permsSet = new Set(perms);
-    this.permsArr = [...this.permsSet];
+    this.#permsSet = new Set(perms);
+    this.#permsArr = [...this.#permsSet];
   }
 
   /**
    * Get permissions as a set
    */
   get permissionSet(): ReadonlySet<string> {
-    return this.permsSet;
+    return this.#permsSet;
   }
 
   /**
@@ -71,7 +71,7 @@ export class AuthContext<
    * @param matchAll Do all permissions need to be matched or any?
    */
   checkPermissions(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') {
-    if (!AuthUtil.permissionSetChecker(include, exclude, mode)(this.permsSet)) {
+    if (!AuthUtil.permissionSetChecker(include, exclude, mode)(this.#permsSet)) {
       throw new AppError('Insufficient permissions', 'permissions');
     }
   }

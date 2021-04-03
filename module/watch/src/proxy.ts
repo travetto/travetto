@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ConcreteClass, Util } from '@travetto/base';
+
 const IsProxiedSym = Symbol.for('@trv:watch/proxy');
 
 /**
@@ -24,13 +25,11 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   apply(target: T, thisArg: T, argArray?: any): any {
-    // @ts-expect-error
-    return this.target.apply(thisArg, argArray);
+    return (this.target as unknown as Function).apply(this.target, argArray);
   }
 
   construct(target: T, argArray: any[], newTarget?: any) {
-    // @ts-expect-error
-    return new this.target(...argArray);
+    return new (this.target as unknown as ConcreteClass)(...argArray);
   }
 
   setPrototypeOf(target: T, v: any): boolean {
@@ -42,21 +41,23 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   get(target: T, prop: PropertyKey, receiver: any) {
-    // @ts-expect-error
-    return this.target[prop];
+    let ret = this.target[prop as keyof T];
+    if (Util.isFunction(ret) && !/^class\s/.test(Function.prototype.toString.call(ret))) {
+      // Bind class members to class instance instead of proxy propagating
+      ret = ret.bind(this.target);
+    }
+    return ret;
   }
 
   has(target: T, prop: PropertyKey) {
     if (prop === IsProxiedSym) {
       return true;
     }
-    // @ts-expect-error
-    return this.target.hasOwnProperty(prop);
+    return (this.target as Object).hasOwnProperty(prop);
   }
 
   set(target: T, prop: PropertyKey, value: any) {
-    // @ts-expect-error
-    this.target[prop] = value;
+    this.target[prop as keyof T] = value;
     return true;
   }
 
@@ -68,12 +69,12 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   deleteProperty(target: T, p: PropertyKey) {
-    // @ts-expect-error
-    return delete this.target[p];
+    return delete this.target[p as keyof T];
   }
 
   defineProperty(target: T, p: PropertyKey, attributes: PropertyDescriptor) {
-    return Object.defineProperty(this.target, p, attributes);
+    Object.defineProperty(this.target, p, attributes);
+    return true;
   }
 }
 
@@ -87,21 +88,22 @@ export class RetargettingProxy<T> {
     return !!o && IsProxiedSym in (o as object);
   }
 
-  private handler: RetargettingHandler<T>;
-  private instance: Proxy<T>;
+  #handler: RetargettingHandler<T>;
+  #instance: Proxy<T>;
+
   constructor(initial: T) {
-    this.handler = new RetargettingHandler(initial);
-    this.instance = new Proxy({}, this.handler);
+    this.#handler = new RetargettingHandler(initial);
+    this.#instance = new Proxy({}, this.#handler);
   }
   setTarget(next: T) {
-    this.handler.target = next;
+    this.#handler.target = next;
   }
 
   getTarget(): T {
-    return this.handler.target;
+    return this.#handler.target;
   }
 
   get(): T {
-    return this.instance as T;
+    return this.#instance as T;
   }
 }

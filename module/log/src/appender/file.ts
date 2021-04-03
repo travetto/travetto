@@ -14,7 +14,7 @@ export interface FileAppenderOpts {
 export class FileAppender implements Appender {
   stream: fs.WriteStream;
 
-  constructor(private opts: FileAppenderOpts) {
+  constructor(opts: FileAppenderOpts) {
     this.stream = fs.createWriteStream(opts.file, {
       autoClose: true,
       flags: 'a'

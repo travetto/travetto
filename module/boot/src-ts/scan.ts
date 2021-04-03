@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { FsUtil } from './fs';
 import { PathUtil } from './path';
 
 const fsp = fs.promises;
@@ -83,9 +84,11 @@ export class ScanFs {
   static async scanDir(handler: ScanHandler, base: string) {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
-    const dirs: ScanEntry[] = [
-      { file: base, children: [] as ScanEntry[] } as ScanEntry
-    ];
+    const dirs: ScanEntry[] = [];
+
+    if (await FsUtil.exists(base)) {
+      dirs.push({ file: base, children: [] as ScanEntry[] } as ScanEntry);
+    }
 
     while (dirs.length) {
       const dir = dirs.shift()!;
@@ -131,9 +134,11 @@ export class ScanFs {
   static scanDirSync(handler: ScanHandler, base: string) {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
-    const dirs: ScanEntry[] = [
-      { file: base, children: [] as ScanEntry[] } as ScanEntry
-    ];
+    const dirs: ScanEntry[] = [];
+
+    if (FsUtil.existsSync(base)) {
+      dirs.push({ file: base, children: [] as ScanEntry[] } as ScanEntry);
+    }
 
     while (dirs.length) {
       const dir = dirs.shift()!;

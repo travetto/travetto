@@ -23,7 +23,7 @@ const FIXED_MODULES = new Set([
  */
 export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
-  private runs = 0;
+  #runs = 0;
 
   /**
    * Start the worker
@@ -94,10 +94,10 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    * Run a specific test/suite
    */
   async onRunCommand(event: RunEvent) {
-    this.runs += 1;
+    this.#runs += 1;
     console.debug('Run');
 
-    if (this.runs > 1) {
+    if (this.#runs > 1) {
       await this.resetForRun();
     }
 

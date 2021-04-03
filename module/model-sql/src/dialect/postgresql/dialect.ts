@@ -17,7 +17,6 @@ import { PostgreSQLConnection } from './connection';
 export class PostgreSQLDialect extends SQLDialect {
 
   conn: PostgreSQLConnection;
-  ns: string;
 
   constructor(context: AsyncContext, public config: SQLModelConfig) {
     super(config.namespace);

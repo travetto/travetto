@@ -8,7 +8,7 @@ import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
  */
 export class MethodSource implements ChangeSource<[Class, Function]> {
 
-  private emitter = new EventEmitter();
+  #emitter = new EventEmitter();
 
   /**
    * Define parent change source, generally will be the class source
@@ -20,7 +20,7 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
   async init() { }
 
   emit(ev: ChangeEvent<[Class, Function]>) {
-    this.emitter.emit('change', ev);
+    this.#emitter.emit('change', ev);
   }
 
   /**
@@ -51,7 +51,7 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
   }
 
   on(callback: ChangeHandler<[Class, Function]>): this {
-    this.emitter.on('change', callback);
+    this.#emitter.on('change', callback);
     return this;
   }
 

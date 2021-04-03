@@ -20,41 +20,41 @@ class $Logger {
   /**
    * Should we enrich the console by default
    */
-  private readonly logFormat: 'line' | 'json' = EnvUtil.get('TRV_LOG_FORMAT', 'line') as 'line';
+  readonly #logFormat: 'line' | 'json' = EnvUtil.get('TRV_LOG_FORMAT', 'line') as 'line';
 
   /**
    * Listeners for logging events
    */
-  private listenerMap = new Map<string | symbol, (ev: LogEvent) => void>();
+  #listenerMap = new Map<string | symbol, (ev: LogEvent) => void>();
   /**
    * List of all listeners
    */
-  private listeners: ((ev: LogEvent) => void)[] = [];
+  #listeners: ((ev: LogEvent) => void)[] = [];
 
   /**
    * List of logging filters
    */
-  private filters: Partial<Record<LogLevel, (x: string) => boolean>> = {};
+  #filters: Partial<Record<LogLevel, (x: string) => boolean>> = {};
   /**
    * Which log levels to exclude
    */
-  private exclude: Partial<Record<LogLevel, boolean>> = { debug: true };
+  #exclude: Partial<Record<LogLevel, boolean>> = { debug: true };
 
   /**
    * Initialize
    */
   init() {
     if (AppManifest.env.debug.status !== false) {
-      delete this.exclude.debug;
+      delete this.#exclude.debug;
       const filter = LogUtil.buildFilter(AppManifest.env.debug.value ?? '@app');
       if (filter) {
-        this.filters.debug = filter;
+        this.#filters.debug = filter;
       }
     }
 
     // Build default formatter
     let formatter: Formatter;
-    switch (this.logFormat) {
+    switch (this.#logFormat) {
       case 'line': formatter = new LineFormatter(); break;
       case 'json': formatter = new JsonFormatter(); break;
     }
@@ -68,8 +68,8 @@ class $Logger {
    */
   listen(key: string | symbol, handler: (ev: LogEvent) => void) {
     this.removeListener(key);
-    this.listenerMap.set(key, handler);
-    this.listeners.push(handler);
+    this.#listenerMap.set(key, handler);
+    this.#listeners.push(handler);
   }
 
   /**
@@ -85,18 +85,18 @@ class $Logger {
    * Clear all listeners
    */
   removeAll() {
-    this.listenerMap.clear();
-    this.listeners = [];
+    this.#listenerMap.clear();
+    this.#listeners = [];
   }
 
   /**
    * Remove specific listener
    */
   removeListener(key: string | symbol) {
-    const handler = this.listenerMap.get(key);
+    const handler = this.#listenerMap.get(key);
     if (handler) {
-      this.listenerMap.delete(key);
-      this.listeners.splice(this.listeners.indexOf(handler), 1);
+      this.#listenerMap.delete(key);
+      this.#listeners.splice(this.#listeners.indexOf(handler), 1);
     }
   }
 
@@ -104,7 +104,7 @@ class $Logger {
    * See if log level is enabled
    */
   enabled(level: LogLevel): boolean {
-    return !(level in this.exclude);
+    return !(level in this.#exclude);
   }
 
   /**
@@ -125,7 +125,7 @@ class $Logger {
 
     const category = ModuleUtil.getId(file);
 
-    if ((level in this.exclude) || (category && level in this.filters && !this.filters[level]!(category))) {
+    if ((level in this.#exclude) || (category && level in this.#filters && !this.#filters[level]!(category))) {
       return;
     }
 
@@ -142,7 +142,7 @@ class $Logger {
       args: args.filter(x => x !== undefined)
     };
 
-    for (const l of this.listeners) {
+    for (const l of this.#listeners) {
       l(finalEvent);
     }
   }

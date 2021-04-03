@@ -16,7 +16,7 @@ export class ActionStorage<T> {
   /**
    * Local stroage
    */
-  private storage: Record<string, TimeEntry<T>> = {};
+  #storage: Record<string, TimeEntry<T>> = {};
 
   constructor(public scope: string, public root: string) {
     this.init();
@@ -36,19 +36,19 @@ export class ActionStorage<T> {
     try {
       FsUtil.mkdirpSync(this.root);
 
-      this.storage = JSON.parse(await readProm(this.resolved, 'utf8'));
+      this.#storage = JSON.parse(await readProm(this.resolved, 'utf8'));
     } catch {
       await this.persist();
     }
   }
 
   reset() {
-    this.storage = {};
+    this.#storage = {};
     return this.persist();
   }
 
   persist() {
-    return writeProm(this.resolved, JSON.stringify(this.storage), 'utf8');
+    return writeProm(this.resolved, JSON.stringify(this.#storage), 'utf8');
   }
 
   /**
@@ -58,9 +58,9 @@ export class ActionStorage<T> {
    */
   async set(key: string, value?: T): Promise<void> {
     if (value) {
-      this.storage[key] = { key, data: value, time: Date.now() };
+      this.#storage[key] = { key, data: value, time: Date.now() };
     } else {
-      delete this.storage[key];
+      delete this.#storage[key];
     }
     return this.persist(); // Don't wait
   }
@@ -70,7 +70,7 @@ export class ActionStorage<T> {
    * @param key
    */
   has(key: string) {
-    return key in this.storage;
+    return key in this.#storage;
   }
 
   /**
@@ -78,7 +78,7 @@ export class ActionStorage<T> {
    * @param key
    */
   get(key: string): T & { time: number } {
-    const ent = this.storage[key];
+    const ent = this.#storage[key];
     return { ...ent.data, time: ent.time };
   }
 
@@ -87,7 +87,7 @@ export class ActionStorage<T> {
    * @param size
    */
   getRecent(size = 5): TimeEntry<T>[] {
-    return Object.values(this.storage)
+    return Object.values(this.#storage)
       .sort((a, b) => b.time - a.time)
       .slice(0, size);
   }

@@ -10,17 +10,17 @@ import { CommandConfig } from './types';
  */
 export class CommandService {
 
-  private static hasDocker: boolean;
+  static #hasDocker: boolean;
 
   /**
    * Check to see if docker is available
    */
   static async dockerAvailable() {
-    if (this.hasDocker === undefined && !EnvUtil.isFalse('TRV_DOCKER')) { // Check for docker existence
+    if (this.#hasDocker === undefined && !EnvUtil.isFalse('TRV_DOCKER')) { // Check for docker existence
       const { result: prom } = ExecUtil.spawn('docker', ['ps']);
-      this.hasDocker = (await prom).valid;
+      this.#hasDocker = (await prom).valid;
     }
-    return this.hasDocker;
+    return this.#hasDocker;
   }
 
   runContainer: Promise<DockerContainer | undefined>;

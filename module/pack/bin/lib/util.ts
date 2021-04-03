@@ -16,8 +16,8 @@ import { CommonConfig, PackOperation } from './types';
  */
 export class PackUtil {
 
-  private static _defaultConfigs: Partial<CommonConfig>[];
-  private static _modes: Partial<CommonConfig>[];
+  static #defaultConfigs: Partial<CommonConfig>[];
+  static #modes: Partial<CommonConfig>[];
 
   static commonExtend<T extends CommonConfig>(a: T, b: Partial<T>): T {
     return {
@@ -32,8 +32,8 @@ export class PackUtil {
    * Find pack modes with associated metadata
    */
   static async modeList() {
-    if (!this._modes) {
-      this._modes = await Promise.all(
+    if (!this.#modes) {
+      this.#modes = await Promise.all(
         SourceIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
           .map(async (x) => {
             const req = (await import(x.file)).config as Partial<CommonConfig>;
@@ -42,19 +42,19 @@ export class PackUtil {
           })
       );
     }
-    return this._modes;
+    return this.#modes;
   }
 
   /**
    * Get Config
    */
   static async getConfigs(): Promise<Partial<CommonConfig>[]> {
-    if (!this._defaultConfigs) {
+    if (!this.#defaultConfigs) {
       const allModes = await this.modeList();
       const mode = allModes.find(x => process.argv.find(a => a === x.name))!;
-      this._defaultConfigs = [allModes.find(x => x.name === 'default')!, mode!];
+      this.#defaultConfigs = [allModes.find(x => x.name === 'default')!, mode!];
     }
-    return this._defaultConfigs;
+    return this.#defaultConfigs;
   }
 
   /**
@@ -116,10 +116,8 @@ export class PackUtil {
    * Run operation with logging
    */
   static async runOperation<T extends CommonConfig>(op: PackOperation<T>, cfg: T, indent = 0) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const spacer = ' '.repeat(indent);
-    const flags = Object.fromEntries(op.flags.map(([, , , f]) => [f, cfg[f]]).filter(x => x[0] !== 'workspace'));
-    const ctx = op.context ? (await op.context(cfg)) : util.inspect(flags, false, undefined, true).replace(/\{/g, '[').replace(/}/g, ']');
+    const ctx = await op.context(cfg);
     const title = color`${{ title: op.title }} ${ctx}`;
     const width = title.replace(/\x1b\[\d+m/g, '').length; // eslint-disable-line
 

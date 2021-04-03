@@ -19,18 +19,21 @@ function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && '$metadata' in (o as object);
 }
 
+function hasContenttype<T>(o: T): o is T & { contenttype?: string } {
+  return o && 'contenttype' in o;
+}
+
 /**
  * Asset source backed by S3
  */
 @Injectable()
 export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, ModelExpirySupport {
 
-  private client: s3.S3;
+  client: s3.S3;
 
-  constructor(public readonly config: S3ModelConfig) {
-  }
+  constructor(public readonly config: S3ModelConfig) { }
 
-  private resolveKey(cls: Class | string, id?: string) {
+  #resolveKey(cls: Class | string, id?: string) {
     let key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
     if (id) {
       key = `${key}:${id}`;
@@ -41,12 +44,12 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return key;
   }
 
-  private q<U extends object>(cls: string | Class, id: string, extra: U = {} as U) {
-    const key = this.resolveKey(cls, id);
+  #q<U extends object>(cls: string | Class, id: string, extra: U = {} as U) {
+    const key = this.#resolveKey(cls, id);
     return { Key: key, Bucket: this.config.bucket, ...extra } as (U & { Key: string, Bucket: string });
   }
 
-  private getExpiryConfig<T extends ModelType>(cls: Class<T>, item: T) {
+  #getExpiryConfig<T extends ModelType>(cls: Class<T>, item: T) {
     if (ModelRegistry.get(cls).expiresAt) {
       const { expiresAt } = ModelExpiryUtil.getExpiryState(cls, item as T);
       if (expiresAt) {
@@ -56,10 +59,10 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return {};
   }
 
-  private async * iterateBucket(cls?: string | Class) {
+  async * #iterateBucket(cls?: string | Class) {
     let Marker: string | undefined;
     for (; ;) {
-      const obs = await this.client.listObjects({ Bucket: this.config.bucket, Prefix: cls ? this.resolveKey(cls) : undefined, Marker });
+      const obs = await this.client.listObjects({ Bucket: this.config.bucket, Prefix: cls ? this.#resolveKey(cls) : undefined, Marker });
       if (obs.Contents && obs.Contents.length) {
         yield (obs.Contents ?? []).map(o => ({ Key: o.Key!, id: o.Key!.split(':').pop()! }));
       }
@@ -74,8 +77,8 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   /**
    * Write multipart file upload, in chunks
    */
-  private async writeMultipart(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta): Promise<void> {
-    const { UploadId } = await this.client.createMultipartUpload(this.q('_stream', id, {
+  async #writeMultipart(id: string, stream: NodeJS.ReadableStream, meta: StreamMeta): Promise<void> {
+    const { UploadId } = await this.client.createMultipartUpload(this.#q('_stream', id, {
       ContentType: meta.contentType,
       ContentLength: meta.size,
     }));
@@ -86,7 +89,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     let n = 1;
     const flush = async () => {
       if (!total) { return; }
-      const part = await this.client.uploadPart(this.q('_stream', id, {
+      const part = await this.client.uploadPart(this.#q('_stream', id, {
         Body: Buffer.concat(buffers),
         PartNumber: n,
         UploadId
@@ -106,12 +109,12 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       }
       await flush();
 
-      await this.client.completeMultipartUpload(this.q('_stream', id, {
+      await this.client.completeMultipartUpload(this.#q('_stream', id, {
         UploadId,
         MultipartUpload: { Parts: parts }
       }));
     } catch (e) {
-      await this.client.abortMultipartUpload(this.q('_stream', id, { UploadId }));
+      await this.client.abortMultipartUpload(this.#q('_stream', id, { UploadId }));
       throw e;
     }
   }
@@ -126,7 +129,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async head<T extends ModelType>(cls: Class<T>, id: string) {
     try {
-      const res = await this.client.headObject(this.q(cls, id));
+      const res = await this.client.headObject(this.#q(cls, id));
       const { expiresAt } = ModelRegistry.get(cls);
       if (expiresAt && res.Expires && res.Expires.getTime() < Date.now()) {
         return false;
@@ -144,7 +147,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
     try {
-      const result = await this.client.getObject(this.q(cls, id));
+      const result = await this.client.getObject(this.#q(cls, id));
       if (result.Body) {
         const body = (await StreamUtil.streamToBuffer(result.Body)).toString('utf8');
         const output = await ModelCrudUtil.load(cls, body);
@@ -175,10 +178,10 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     if (preStore) {
       item = await ModelCrudUtil.preStore(cls, item, this);
     }
-    await this.client.putObject(this.q(cls, item.id, {
+    await this.client.putObject(this.#q(cls, item.id, {
       Body: JSON.stringify(item),
       ContentType: 'application/json',
-      ...this.getExpiryConfig(cls, item)
+      ...this.#getExpiryConfig(cls, item)
     }));
     return item;
   }
@@ -225,11 +228,11 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     if (!(await this.head(cls, id))) {
       throw new NotFoundError(cls, id);
     }
-    await this.client.deleteObject(this.q(cls, id));
+    await this.client.deleteObject(this.#q(cls, id));
   }
 
   async * list<T extends ModelType>(cls: Class<T>) {
-    for await (const batch of this.iterateBucket(cls)) {
+    for await (const batch of this.#iterateBucket(cls)) {
       for (const { id } of batch) {
         try {
           yield await this.get(cls, id);
@@ -250,7 +253,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
     if (meta.size < this.config.chunkSize) { // If bigger than 5 mb
       // Upload to s3
-      await this.client.putObject(this.q('_stream', location, {
+      await this.client.putObject(this.#q('_stream', location, {
         Body: await StreamUtil.toBuffer(stream),
         ContentType: meta.contentType,
         ContentLength: meta.size,
@@ -260,13 +263,13 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         }
       }));
     } else {
-      await this.writeMultipart(location, stream, meta);
+      await this.#writeMultipart(location, stream, meta);
     }
   }
 
   async getStream(location: string) {
     // Read from s3
-    const res = await this.client.getObject(this.q('_stream', location));
+    const res = await this.client.getObject(this.#q('_stream', location));
     if (res.Body instanceof Buffer || // Buffer
       typeof res.Body === 'string' || // string
       res.Body && ('pipe' in res.Body) // Stream
@@ -277,7 +280,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async headStream(location: string) {
-    const query = this.q('_stream', location);
+    const query = this.#q('_stream', location);
     try {
       return await this.client.headObject(query);
     } catch (e) {
@@ -298,8 +301,8 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         ...obj.Metadata,
         size: obj.ContentLength!,
       } as StreamMeta;
-      if ('contenttype' in ret) {
-        ret['contentType'] = ret['contenttype'];
+      if (hasContenttype(ret)) {
+        ret['contentType'] = ret['contenttype']!;
         delete ret['contenttype'];
       }
       return ret;
@@ -309,7 +312,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async deleteStream(location: string) {
-    await this.client.deleteObject(this.q('_stream', location));
+    await this.client.deleteObject(this.#q('_stream', location));
   }
 
   async createStorage() {
@@ -321,7 +324,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async deleteStorage() {
-    for await (const items of this.iterateBucket('')) {
+    for await (const items of this.#iterateBucket('')) {
       await this.client.deleteObjects({
         Bucket: this.config.bucket,
         Delete: {

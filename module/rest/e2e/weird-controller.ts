@@ -4,7 +4,10 @@ import { MockService } from './mock';
 @Controller('/weird')
 export class Weird {
 
-  constructor(private service: MockService) {
+  #service: MockService;
+
+  constructor(service: MockService) {
+    this.#service = service;
   }
 
   @Get('/name')
@@ -19,7 +22,7 @@ export class Weird {
 
   @Get('/age2')
   async age2() {
-    return `${this.service.fetch().middle!.toUpperCase()}s`;
+    return `${this.#service.fetch().middle!.toUpperCase()}s`;
   }
 
   @Get('/age3')

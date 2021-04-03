@@ -42,7 +42,7 @@ class $QueryVerifier {
   /**
    * Internal mapping for various clauses
    */
-  private MAPPING = [
+  #mapping = [
     [SELECT, 'processSelectClause'] as const,
     [WHERE, 'processWhereClause'] as const,
     [SORT, 'processSortClause'] as const,
@@ -286,7 +286,7 @@ class $QueryVerifier {
     };
 
     // Check all the clauses
-    for (const [key, fn] of this.MAPPING) {
+    for (const [key, fn] of this.#mapping) {
       if (!(key in query)
         || query[key as keyof typeof query] === undefined
         || query[key as keyof typeof query] === null

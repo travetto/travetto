@@ -6,17 +6,28 @@ type Prim = string | number | boolean | Date;
  * Utilities for dealing with coloring console text
  */
 export class ColorUtil {
-  private static _colorize: boolean;
+  static #colorize: boolean;
 
+  /**
+   * Set colorization directly
+   * @private
+   */
+  static set colorize(val: boolean) {
+    this.#colorize = val;
+  }
+
+  /**
+   * Get colorization status
+   */
   static get colorize() {
-    if (this._colorize === undefined) {
+    if (this.#colorize === undefined) {
       if (EnvUtil.isSet('TRV_COLOR')) {
-        this._colorize = EnvUtil.isTrue('TRV_COLOR');
+        this.#colorize = EnvUtil.isTrue('TRV_COLOR');
       } else {
-        this._colorize = EnvUtil.isTrue('FORCE_COLOR') || (!EnvUtil.isTrue('NO_COLOR') && process.stdout.isTTY);
+        this.#colorize = EnvUtil.isTrue('FORCE_COLOR') || (!EnvUtil.isTrue('NO_COLOR') && process.stdout.isTTY);
       }
     }
-    return this._colorize;
+    return this.#colorize;
   }
 
   /**

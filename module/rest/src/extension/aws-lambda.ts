@@ -27,12 +27,15 @@ export interface AwsLambdaRestServer extends RestServer, AwsLambdaHandler { }
 
 @Injectable()
 export class AwsLambdaRestApplication extends RestApplication implements AwsLambdaHandler {
-  constructor(@Inject(AwsLambdaSym) private lambdaServer: AwsLambdaRestServer) {
+  #lambdaServer: AwsLambdaRestServer;
+
+  constructor(@Inject(AwsLambdaSym) lambdaServer: AwsLambdaRestServer) {
     super();
     this.server = lambdaServer;
+    this.#lambdaServer = lambdaServer;
   }
 
   handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
-    return this.lambdaServer.handle(event, context);
+    return this.#lambdaServer.handle(event, context);
   }
 }

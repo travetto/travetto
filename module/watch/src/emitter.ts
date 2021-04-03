@@ -10,12 +10,12 @@ type Handler<T> = (payload: T) => void;
  * Standard pattern for watching and emitting
  */
 export class WatchEmitter {
-  private emitter = new EventEmitter();
+  #emitter = new EventEmitter();
   protected suppress = false;
 
   constructor(maxListeners = -1) {
     if (maxListeners > 0) {
-      this.emitter.setMaxListeners(maxListeners);
+      this.#emitter.setMaxListeners(maxListeners);
     }
   }
 
@@ -25,9 +25,9 @@ export class WatchEmitter {
   emit(type: StandardEventType | 'all' | 'error', payload: unknown) {
     if (!this.suppress) {
       if (type !== 'all' && type !== 'error') {
-        this.emitter.emit('all', { event: type, entry: payload });
+        this.#emitter.emit('all', { event: type, entry: payload });
       }
-      this.emitter.emit(type, payload);
+      this.#emitter.emit(type, payload);
     }
   }
 
@@ -35,11 +35,11 @@ export class WatchEmitter {
   on(type: StandardEventType, handler: Handler<ScanEntry>): this;
   on(type: 'error', handler: Handler<Error>): this;
   on<T extends AllEvent | ScanEntry | Error>(type: StandardEventType | 'all' | 'error', handler: Handler<T>): this {
-    this.emitter.on(type, handler);
+    this.#emitter.on(type, handler);
     return this;
   }
 
   removeAllListeners() {
-    this.emitter.removeAllListeners();
+    this.#emitter.removeAllListeners();
   }
 }

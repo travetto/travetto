@@ -71,10 +71,10 @@ export class RestTransformUtil {
       );
     } else {
       // TODO: fix direct access to resolver
-      const props = state['resolver'].getPropertiesOfType(cls);
+      const props = state.getResolver().getPropertiesOfType(cls);
       for (const prop of props) {
-        const decl = prop.declarations[0];
-        if (prop.escapedName === 'render' && ts.isMethodDeclaration(decl)) {
+        const decl = prop.declarations?.[0];
+        if (decl && prop.escapedName === 'render' && ts.isMethodDeclaration(decl)) {
           render = decl;
         }
       }
@@ -84,7 +84,7 @@ export class RestTransformUtil {
       const typeNode = ts.getJSDocReturnType(render);
       if (typeNode) {
         // TODO: fix direct access to tsChecker
-        const resolved = state['resolver']['tsChecker'].getTypeFromTypeNode(typeNode);
+        const resolved = state.getResolver().getChecker().getTypeFromTypeNode(typeNode);
         return state.resolveType(resolved);
       } else {
         throw new Error('All Renderable outputs must declare a @returns type on the render method');

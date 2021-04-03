@@ -13,7 +13,7 @@ export class MarkdownUtil {
   /**
    * Get raw text from DOM node
    */
-  private static getRawText(node: parse5.Node) {
+  static #getRawText(node: parse5.Node) {
     let txt: string;
     if (Parse5Adapter.isTextNode(node)) {
       txt = Parse5Adapter.getTextNodeContent(node);
@@ -26,8 +26,8 @@ export class MarkdownUtil {
   /**
    * Convert to raw text
    */
-  private static getText(node: parse5.Node) {
-    return this.getRawText(node).replace(/ +/g, ' ')
+  static #getText(node: parse5.Node) {
+    return this.#getRawText(node).replace(/ +/g, ' ')
       .replace(/ +[\n]/g, '\n')
       .replace(/^[\n\s]+/, ' ')
       .replace(/[\n\s]+$/, ' ');
@@ -36,14 +36,14 @@ export class MarkdownUtil {
   /**
    * Get attribute as a number
    */
-  private static getIntAttr(attrs: Record<string, string>, name: string, def?: number): number {
+  static #getIntAttr(attrs: Record<string, string>, name: string, def?: number): number {
     return (name in attrs ? parseInt(attrs[name], 10) : def) ?? 0;
   }
 
   /**
    * Get attribute as string
    */
-  private static getAttr(attrs: Record<string, string>, name: string) {
+  static #getAttr(attrs: Record<string, string>, name: string) {
     return (attrs[name] ?? '').trim();
   }
 
@@ -66,7 +66,7 @@ export class MarkdownUtil {
     HtmlUtil.visit(doc, (node, descend) => {
       const attrs = HtmlUtil.getAttrMap(node);
       if (Parse5Adapter.isTextNode(node)) {
-        const text = this.getText(node);
+        const text = this.#getText(node);
         if (!/^[ \n]+$/.test(text)) {
           output.push(text);
         }
@@ -88,11 +88,11 @@ export class MarkdownUtil {
           break;
         case 'spacer':
         case 'br':
-          output.push('\n'.repeat(Math.trunc(this.getIntAttr(attrs, 'size', 16) / 16)));
+          output.push('\n'.repeat(Math.trunc(this.#getIntAttr(attrs, 'size', 16) / 16)));
           break;
         case 'button':
         case 'a':
-          output.push(`[${this.getAttr(attrs, 'title') || this.getText(node).trim()}](${this.getAttr(attrs, 'href')})`);
+          output.push(`[${this.#getAttr(attrs, 'title') || this.#getText(node).trim()}](${this.#getAttr(attrs, 'href')})`);
           break;
         case 'h1':
         case 'h2':
@@ -154,11 +154,11 @@ export class MarkdownUtil {
           output.push('__');
           break;
         case 'img':
-          output.push(`![${this.getAttr(attrs, 'alt')}](${this.getAttr(attrs, 'src')} ${this.getAttr(attrs, 'title')})`);
+          output.push(`![${this.#getAttr(attrs, 'alt')}](${this.#getAttr(attrs, 'src')} ${this.#getAttr(attrs, 'title')})`);
           break;
         case 'pre':
         case 'code':
-          output.push('\n', '```', this.getRawText(node), '```', '\n');
+          output.push('\n', '```', this.#getRawText(node), '```', '\n');
           break;
         case 'script':
         case 'style':

@@ -14,14 +14,14 @@ type Transport = nodemailer.Transport | json.Options | smtp.Options | ses.Option
  * Nodemailer transport, takes in a transport factory as the input
  */
 export class NodemailerTransport implements MailTransport {
-  private transport: nodemailer.Transporter;
+  #transport: nodemailer.Transporter;
 
   constructor(transportFactory: Transport) {
-    this.transport = nodemailer.createTransport(transportFactory);
+    this.#transport = nodemailer.createTransport(transportFactory);
   }
 
   async send(mail: MessageOptions): Promise<SentMessage> {
-    const res = await this.transport.sendMail(mail as nodemailer.SendMailOptions) as {
+    const res = await this.#transport.sendMail(mail as nodemailer.SendMailOptions) as {
       messageId?: string;
       envelope?: Record<string, string>;
       accepted?: string[];

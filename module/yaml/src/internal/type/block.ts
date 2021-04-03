@@ -1,4 +1,4 @@
-import { SimpleObject, SimpleType } from '@travetto/base';
+import type { SimpleObject, SimpleType } from '@travetto/base/src/internal/types';
 import { Node } from './node';
 
 export interface Block<T extends SimpleType = SimpleType> extends Node<T> {

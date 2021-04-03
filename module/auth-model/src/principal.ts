@@ -12,6 +12,9 @@ import { RegisteredIdentity } from './identity';
  */
 export class ModelPrincipalSource<T extends ModelType> implements PrincipalSource {
 
+  #modelService: ModelCrudSupport;
+  #cls: Class<T>;
+
   /**
    * Build a Model Principal Source
    *
@@ -20,15 +23,18 @@ export class ModelPrincipalSource<T extends ModelType> implements PrincipalSourc
    * @param fromIdentity Convert an identity to the model
    */
   constructor(
-    private modelService: ModelCrudSupport,
-    private cls: Class<T>,
+    modelService: ModelCrudSupport,
+    cls: Class<T>,
     public toIdentity: (t: T) => RegisteredIdentity,
     public fromIdentity: (t: Partial<RegisteredIdentity>) => Partial<T>,
-  ) { }
+  ) {
+    this.#modelService = modelService;
+    this.#cls = cls;
+  }
 
   async postConstruct() {
-    if (isStorageSupported(this.modelService) && !EnvUtil.isReadonly()) {
-      await this.modelService.createModel?.(this.cls);
+    if (isStorageSupported(this.#modelService) && !EnvUtil.isReadonly()) {
+      await this.#modelService.createModel?.(this.#cls);
     }
   }
 
@@ -37,7 +43,7 @@ export class ModelPrincipalSource<T extends ModelType> implements PrincipalSourc
    * @param userId The user id to retrieve
    */
   async retrieve(userId: string) {
-    return await this.modelService.get<T>(this.cls, userId);
+    return await this.#modelService.get<T>(this.#cls, userId);
   }
 
   /**
@@ -91,7 +97,7 @@ export class ModelPrincipalSource<T extends ModelType> implements PrincipalSourc
 
     Object.assign(user, this.fromIdentity(fields));
 
-    const res: T = await this.modelService.create(this.cls, user);
+    const res: T = await this.#modelService.create(this.#cls, user);
     return res;
   }
 
@@ -121,7 +127,7 @@ export class ModelPrincipalSource<T extends ModelType> implements PrincipalSourc
     const fields = await AuthUtil.generatePassword(password);
     Object.assign(user, this.fromIdentity(fields));
 
-    return await this.modelService.update(this.cls, user);
+    return await this.#modelService.update(this.#cls, user);
   }
 
   /**
@@ -138,7 +144,7 @@ export class ModelPrincipalSource<T extends ModelType> implements PrincipalSourc
 
     Object.assign(user, this.fromIdentity(ident));
 
-    await this.modelService.update(this.cls, user);
+    await this.#modelService.update(this.#cls, user);
 
     return ident;
   }

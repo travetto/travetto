@@ -15,12 +15,14 @@ import { EsIdentity } from './internal/types';
  */
 export class IndexManager implements ModelStorageSupport {
 
-  private indexToAlias = new Map<string, string>();
-  private aliasToIndex = new Map<string, string>();
+  #indexToAlias = new Map<string, string>();
+  #aliasToIndex = new Map<string, string>();
+  #identities = new Map<Class, EsIdentity>();
+  #client: es.Client;
 
-  private identities = new Map<Class, EsIdentity>();
-
-  constructor(public readonly config: ElasticsearchModelConfig, private client: es.Client) { }
+  constructor(public readonly config: ElasticsearchModelConfig, client: es.Client) {
+    this.#client = client;
+  }
 
   getStore(cls: Class) {
     return ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
@@ -42,28 +44,28 @@ export class IndexManager implements ModelStorageSupport {
    * Build the elasticsearch identity set for a given class (index, type)
    */
   getIdentity<T extends ModelType>(cls: Class<T>): EsIdentity {
-    if (!this.identities.has(cls)) {
+    if (!this.#identities.has(cls)) {
       const col = this.getStore(cls);
       const index = this.getNamespacedIndex(col);
-      this.identities.set(cls, ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { index, type: '_doc' } : { index });
+      this.#identities.set(cls, ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { index, type: '_doc' } : { index });
     }
-    return { ...this.identities.get(cls)! };
+    return { ...this.#identities.get(cls)! };
   }
 
   /**
    * Build alias mappings from the current state in the database
    */
   async computeAliasMappings(force = false) {
-    if (force || !this.indexToAlias.size) {
-      const { body: aliases } = (await this.client.cat.aliases({
+    if (force || !this.#indexToAlias.size) {
+      const { body: aliases } = (await this.#client.cat.aliases({
         format: 'json'
       })) as { body: { index: string, alias: string }[] };
 
-      this.indexToAlias = new Map();
-      this.aliasToIndex = new Map();
+      this.#indexToAlias = new Map();
+      this.#aliasToIndex = new Map();
       for (const al of aliases) {
-        this.indexToAlias.set(al.index, al.alias);
-        this.aliasToIndex.set(al.alias, al.index);
+        this.#indexToAlias.set(al.index, al.alias);
+        this.#aliasToIndex.set(al.alias, al.index);
       }
     }
   }
@@ -78,7 +80,7 @@ export class IndexManager implements ModelStorageSupport {
     const ident = this.getIdentity(cls); // Already namespaced
     const concreteIndex = `${ident.index}_${Date.now()}`;
     try {
-      await this.client.indices.create({
+      await this.#client.indices.create({
         index: concreteIndex,
         body: {
           mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
@@ -104,7 +106,7 @@ export class IndexManager implements ModelStorageSupport {
     cls = ModelRegistry.getBaseModel(cls);
     const ident = this.getIdentity(cls);
     try {
-      await this.client.search(ident);
+      await this.#client.search(ident);
       console.debug('Index already exists, not creating', ident);
     } catch (err) {
       await this.createIndex(cls);
@@ -127,9 +129,9 @@ export class IndexManager implements ModelStorageSupport {
 
   async deleteModel(cls: Class<ModelType>) {
     const alias = this.getNamespacedIndex(this.getStore(cls));
-    if (this.aliasToIndex.get(alias)) {
-      await this.client.indices.delete({
-        index: this.aliasToIndex.get(alias)!
+    if (this.#aliasToIndex.get(alias)) {
+      await this.#client.indices.delete({
+        index: this.#aliasToIndex.get(alias)!
       });
       await this.computeAliasMappings(true);
     }
@@ -162,13 +164,13 @@ export class IndexManager implements ModelStorageSupport {
     if (removes.length || fieldChanges.length) { // Removing and adding
       const next = await this.createIndex(cls, false);
 
-      const aliases = (await this.client.indices.getAlias({ index })).body;
+      const aliases = (await this.#client.indices.getAlias({ index })).body;
       const curr = Object.keys(aliases)[0];
 
       const allChange = removes.concat(fieldChanges);
 
       // Reindex
-      await this.client.reindex({
+      await this.#client.reindex({
         body: {
           source: { index: curr },
           dest: { index: next },
@@ -181,13 +183,13 @@ export class IndexManager implements ModelStorageSupport {
       } as Reindex);
 
       await Promise.all(Object.keys(aliases)
-        .map(x => this.client.indices.delete({ index: x })));
+        .map(x => this.#client.indices.delete({ index: x })));
 
-      await this.client.indices.putAlias({ index: next, name: index });
+      await this.#client.indices.putAlias({ index: next, name: index });
     } else { // Only update the schema
       const schema = ElasticsearchSchemaUtil.generateSourceSchema(cls, this.config.schemaConfig);
 
-      await this.client.indices.putMapping({
+      await this.#client.indices.putMapping({
         index,
         type,
         body: schema
@@ -203,7 +205,7 @@ export class IndexManager implements ModelStorageSupport {
 
   async deleteStorage() {
     console.debug('Deleting storage', { idx: this.getNamespacedIndex('*') });
-    await this.client.indices.delete({
+    await this.#client.indices.delete({
       index: this.getNamespacedIndex('*')
     });
     await this.computeAliasMappings(true);

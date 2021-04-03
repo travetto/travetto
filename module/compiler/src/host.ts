@@ -14,14 +14,14 @@ import { AppManifest } from '@travetto/base';
  */
 export class SourceHost implements ts.CompilerHost {
 
-  private rootFiles = new Set<string>();
-  private hashes = new Map<string, number>();
-  private sources = new Map<string, ts.SourceFile>();
+  #rootFiles = new Set<string>();
+  #hashes = new Map<string, number>();
+  #sources = new Map<string, ts.SourceFile>();
   readonly contents = new Map<string, string>();
 
-  private trackFile(filename: string, content: string) {
+  #trackFile(filename: string, content: string) {
     this.contents.set(filename, content);
-    this.hashes.set(filename, SystemUtil.naiveHash(fs.readFileSync(filename, 'utf8'))); // Get og content for hashing
+    this.#hashes.set(filename, SystemUtil.naiveHash(fs.readFileSync(filename, 'utf8'))); // Get og content for hashing
   }
 
   getCanonicalFileName = (f: string) => f;
@@ -37,11 +37,11 @@ export class SourceHost implements ts.CompilerHost {
    * Get root files
    */
   getRootFiles() {
-    if (!this.rootFiles.size) {
+    if (!this.#rootFiles.size) {
       // Only needed for compilation
-      this.rootFiles = new Set(SourceIndex.findByFolders(AppManifest.source, 'required').map(x => x.file));
+      this.#rootFiles = new Set(SourceIndex.findByFolders(AppManifest.source, 'required').map(x => x.file));
     }
-    return this.rootFiles;
+    return this.#rootFiles;
   }
 
   /**
@@ -64,7 +64,7 @@ export class SourceHost implements ts.CompilerHost {
    */
   writeFile(filename: string, content: string) {
     filename = PathUtil.toUnixTs(filename);
-    this.trackFile(filename, content);
+    this.#trackFile(filename, content);
     AppCache.writeEntry(filename, content);
   }
 
@@ -74,21 +74,21 @@ export class SourceHost implements ts.CompilerHost {
   fetchFile(filename: string) {
     filename = PathUtil.toUnixTs(filename);
     const cached = AppCache.readEntry(filename);
-    this.trackFile(filename, cached);
+    this.#trackFile(filename, cached);
   }
 
   /**
    * Get a source file on demand
    * @returns
    */
-  getSourceFile(filename: string, _tgt: unknown, _onErr: unknown, force?: boolean) {
-    if (!this.sources.has(filename) || force) {
+  getSourceFile(filename: string, __tgt: unknown, __onErr: unknown, force?: boolean) {
+    if (!this.#sources.has(filename) || force) {
       const content = this.readFile(filename)!;
-      this.sources.set(filename, ts.createSourceFile(filename, content ?? '',
+      this.#sources.set(filename, ts.createSourceFile(filename, content ?? '',
         (TranspileUtil.compilerOptions as ts.CompilerOptions).target!
       ));
     }
-    return this.sources.get(filename);
+    return this.#sources.get(filename);
   }
 
   /**
@@ -106,7 +106,7 @@ export class SourceHost implements ts.CompilerHost {
     content ??= fs.readFileSync(filename, 'utf8');
     // Let's see if they are really different
     const hash = SystemUtil.naiveHash(content);
-    if (hash === this.hashes.get(filename)) {
+    if (hash === this.#hashes.get(filename)) {
       console.debug('Contents Unchanged', { filename });
       return false;
     }
@@ -120,12 +120,12 @@ export class SourceHost implements ts.CompilerHost {
     if (this.contents.has(filename)) {
       AppCache.removeExpiredEntry(filename, unlink);
 
-      if (unlink && this.hashes.has(filename)) {
-        this.hashes.delete(filename);
+      if (unlink && this.#hashes.has(filename)) {
+        this.#hashes.delete(filename);
       }
-      this.rootFiles.delete(filename);
+      this.#rootFiles.delete(filename);
       this.contents.delete(filename);
-      this.sources.delete(filename);
+      this.#sources.delete(filename);
     }
   }
 
@@ -134,8 +134,8 @@ export class SourceHost implements ts.CompilerHost {
    */
   reset() {
     this.contents.clear();
-    this.rootFiles.clear();
-    this.hashes.clear();
-    this.sources.clear();
+    this.#rootFiles.clear();
+    this.#hashes.clear();
+    this.#sources.clear();
   }
 }

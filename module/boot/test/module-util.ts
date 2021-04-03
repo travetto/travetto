@@ -8,19 +8,18 @@ import { ModuleUtil } from '../src/internal/module-util';
 export class ModuleUtilSuite {
   @Test()
   async getId() {
-    const og = PathUtil['devPath'];
-    PathUtil['devPath'] = '@@@@';
+    PathUtil.setDevPath('@@@@');
     const modId = ModuleUtil.getId(__filename);
-    assert(modId === './test/system-util');
+    assert(modId === './test/module-util');
 
-    const modId2 = ModuleUtil.getId(`${__dirname}/node_modules/@travetto/base/src/system-util.js`);
-    assert(modId2 === '@trv:base/system-util');
+    const modId2 = ModuleUtil.getId(`${__dirname}/node_modules/@travetto/base/src/module-util.js`);
+    assert(modId2 === '@trv:base/module-util');
 
     const modId3 = ModuleUtil.getId(`${__dirname}/../test/simple.js`);
     assert(modId3 === './test/simple');
 
     const modId4 = ModuleUtil.getId(`${__dirname}/node_modules/lodash/test`);
     assert(modId4 === '@npm/lodash/test');
-    PathUtil['devPath'] = og;
+    PathUtil.setDevPath(undefined);
   }
 }

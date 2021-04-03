@@ -10,7 +10,7 @@ import { ModelQuerySuggestSupport } from '../src/service/suggest';
 @Suite()
 export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySuggestSupport & ModelCrudSupport> {
 
-  private async loadPeople() {
+  async #loadPeople() {
     const names = ['Bob', 'Bo', 'Barry', 'Rob', 'Robert', 'Robbie'];
     const people = [0, 1, 2, 3, 4, 5].map(x =>
       Person.from({
@@ -30,7 +30,7 @@ export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySu
   async testSuggestion() {
     const service = await this.service;
 
-    await this.loadPeople();
+    await this.#loadPeople();
 
     let suggested = await service.suggestValues(Person, 'name', 'bo');
     assert(suggested.length === 2);
@@ -54,7 +54,7 @@ export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySu
   async verifyEntities() {
     const service = await this.service;
 
-    await this.loadPeople();
+    await this.#loadPeople();
 
     const suggestedEntities = await service.suggest(Person, 'name', 'bo');
 

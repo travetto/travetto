@@ -35,16 +35,16 @@ export class PhaseManager {
     return new PhaseManager(scope).load(upto).then(m => m.run(skip));
   }
 
-  initializers: Initializer[] = [];
+  #initializers: Initializer[] = [];
 
-  filter: RegExp;
+  #filter: RegExp;
 
   /**
    * Create a new manager
    * @param scope The scope to run against
    */
   constructor(public scope: Scope) {
-    this.filter = new RegExp(`phase[.]${this.scope}(.*?)[.]ts`);
+    this.#filter = new RegExp(`phase[.]${this.scope}(.*?)[.]ts`);
   }
 
   /**
@@ -58,17 +58,17 @@ export class PhaseManager {
 
     // Load all support files
     const initFiles = await Promise.all(found
-      .filter(x => this.filter.test(x.module))
+      .filter(x => this.#filter.test(x.module))
       .map(x => import(x.file)));
-    this.initializers = OrderingUtil.compute(initFiles.map(x => x.init));
+    this.#initializers = OrderingUtil.compute(initFiles.map(x => x.init));
 
     if (upto) {
-      let end = this.initializers.length - 1;
+      let end = this.#initializers.length - 1;
       let start = 0;
 
-      const endIndex = this.initializers.findIndex(x => x.key === upto);
+      const endIndex = this.#initializers.findIndex(x => x.key === upto);
       if (after) {
-        const startIndex = this.initializers.findIndex(x => x.key === after);
+        const startIndex = this.#initializers.findIndex(x => x.key === after);
         if (startIndex >= 0) {
           start = startIndex + 1;
         }
@@ -76,10 +76,10 @@ export class PhaseManager {
       if (endIndex >= 0) {
         end = endIndex;
       }
-      this.initializers = this.initializers.slice(start, end + 1);
+      this.#initializers = this.#initializers.slice(start, end + 1);
     }
 
-    console.debug('Preparing phase', { scope: this.scope, initializers: this.initializers.map(x => x.key) });
+    console.debug('Preparing phase', { scope: this.scope, initializers: this.#initializers.map(x => x.key) });
 
     return this;
   }
@@ -88,7 +88,7 @@ export class PhaseManager {
    * Run the phase
    */
   async run(skip: string[] = []) {
-    for (const i of this.initializers) {
+    for (const i of this.#initializers) {
       if (skip.includes(i.key)) {
         continue;
       }

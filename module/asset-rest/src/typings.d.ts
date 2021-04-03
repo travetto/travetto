@@ -1,5 +1,5 @@
 import { Asset } from '@travetto/asset';
-import type '@travetto/rest';
+import '@travetto/rest';
 
 declare global {
   interface TravettoRequest {

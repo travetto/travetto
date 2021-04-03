@@ -1,4 +1,5 @@
-import { Util, SimpleObject } from '@travetto/base';
+import { Util } from '@travetto/base';
+import { SimpleObject } from '@travetto/base/src/internal/types';
 
 import { ConfigUtil } from './internal/util';
 
@@ -7,9 +8,9 @@ import { ConfigUtil } from './internal/util';
  */
 class $ConfigManager {
 
-  private initialized?: boolean = false;
-  private storage = {};   // Lowered, and flattened
-  private redactedKeys = [
+  #initialized?: boolean = false;
+  #storage = {};   // Lowered, and flattened
+  #redactedKeys = [
     'passphrase.*',
     'password.*',
     'credential.*',
@@ -27,10 +28,10 @@ class $ConfigManager {
       - Environment vars -> Overrides everything (happens at bind time)
   */
   async init() {
-    if (this.initialized) {
+    if (this.#initialized) {
       return;
     }
-    this.initialized = true;
+    this.#initialized = true;
     await this.load();
   }
 
@@ -62,7 +63,7 @@ class $ConfigManager {
    */
   getSecure(key?: string) {
     return ConfigUtil.sanitizeValuesByKey(this.get(key), [
-      ...this.redactedKeys,
+      ...this.#redactedKeys,
       (this.get('config')?.redacted ?? []) as string[]
     ].flat());
   }
@@ -71,28 +72,29 @@ class $ConfigManager {
    * Output to JSON
    */
   toJSON() {
-    return this.storage;
+    return this.#storage;
   }
 
   /**
    * Reset
    */
   reset() {
-    this.storage = {};
+    this.#storage = {};
+    this.#initialized = false;
   }
 
   /**
    * Update config with a full subtree
    */
   putAll(data: SimpleObject) {
-    Util.deepAssign(this.storage, ConfigUtil.breakDownKeys(data), 'coerce');
+    Util.deepAssign(this.#storage, ConfigUtil.breakDownKeys(data), 'coerce');
   }
 
   /**
    * Apply config subtree to a given object
    */
   bindTo<T extends object>(obj: T, key?: string): T {
-    return ConfigUtil.bindTo(this.storage, obj, key);
+    return ConfigUtil.bindTo(this.#storage, obj, key);
   }
 }
 

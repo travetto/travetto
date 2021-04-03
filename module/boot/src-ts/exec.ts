@@ -250,7 +250,7 @@ export class ExecUtil {
       worker.once('message', d => result.then(() => {
         if (d && 'stack' in d && 'message' in d) {
           const err = new Error(d['message']);
-          err.stack = d['stack'];
+          err.stack = d.stack;
           rej(err);
         } else {
           r(d);
