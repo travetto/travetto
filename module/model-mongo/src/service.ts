@@ -49,17 +49,17 @@ export class MongoModelService implements
   ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySuggestSupport, ModelExpirySupport {
 
-  private client: mongo.MongoClient;
-  private db: mongo.Db;
-  private bucket: mongo.GridFSBucket;
+  client: mongo.MongoClient;
+  #db: mongo.Db;
+  #bucket: mongo.GridFSBucket;
 
   constructor(public readonly config: MongoModelConfig) {
   }
 
   async postConstruct() {
     this.client = await mongo.MongoClient.connect(this.config.url, this.config.clientOptions);
-    this.db = this.client.db(this.config.namespace);
-    this.bucket = new mongo.GridFSBucket(this.db, {
+    this.#db = this.client.db(this.config.namespace);
+    this.#bucket = new mongo.GridFSBucket(this.#db, {
       bucketName: STREAMS_BUCKET,
       writeConcern: { w: 1 }
     });
@@ -83,7 +83,7 @@ export class MongoModelService implements
   async createStorage() { }
 
   async deleteStorage() {
-    await this.db.dropDatabase();
+    await this.#db.dropDatabase();
   }
 
   getGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls): Record<string, '2d'>[] {
@@ -138,7 +138,7 @@ export class MongoModelService implements
    * Get mongo collection
    */
   async getStore<T extends ModelType>(cls: Class<T>): Promise<mongo.Collection> {
-    return this.db.collection(ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
+    return this.#db.collection(ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
   }
 
   // Crud
@@ -254,7 +254,7 @@ export class MongoModelService implements
 
   // Stream
   async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
-    const writeStream = this.bucket.openUploadStream(location, {
+    const writeStream = this.#bucket.openUploadStream(location, {
       contentType: meta.contentType,
       metadata: meta
     });
@@ -269,7 +269,7 @@ export class MongoModelService implements
   async getStream(location: string) {
     await this.describeStream(location);
 
-    const res = await this.bucket.openDownloadStreamByName(location);
+    const res = await this.#bucket.openDownloadStreamByName(location);
     if (!res) {
       throw new NotFoundError(STREAMS_BUCKET, location);
     }
@@ -277,7 +277,7 @@ export class MongoModelService implements
   }
 
   async describeStream(location: string) {
-    const files = await this.bucket.find({ filename: location }, { limit: 1 }).toArray();
+    const files = await this.#bucket.find({ filename: location }, { limit: 1 }).toArray();
 
     if (!files?.length) {
       throw new NotFoundError(STREAMS_BUCKET, location);
@@ -288,14 +288,14 @@ export class MongoModelService implements
   }
 
   async deleteStream(location: string) {
-    const files = await this.bucket.find({ filename: location }, { limit: 1 }).toArray();
+    const files = await this.#bucket.find({ filename: location }, { limit: 1 }).toArray();
 
     if (!files?.length) {
       throw new NotFoundError(STREAMS_BUCKET, location);
     }
 
     const [{ _id: fileId }] = files;
-    await new Promise((res, rej) => this.bucket.delete(fileId, (err, value) => err ? rej(err) : res(value)));
+    await new Promise((res, rej) => this.#bucket.delete(fileId, (err, value) => err ? rej(err) : res(value)));
   }
 
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {

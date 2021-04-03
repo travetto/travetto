@@ -14,13 +14,15 @@ export const AssetModelSym = Symbol.for('@trv:asset/model');
 @Injectable()
 export class AssetService {
 
+  #store: ModelStreamSupport;
+  #namingStrategy: AssetNamingStrategy;
+
   constructor(
-    @Inject(AssetModelSym) private store: ModelStreamSupport,
-    private namingStrategy?: AssetNamingStrategy
+    @Inject(AssetModelSym) store: ModelStreamSupport,
+    namingStrategy?: AssetNamingStrategy
   ) {
-    if (!namingStrategy) {
-      this.namingStrategy = new SimpleNamingStrategy();
-    }
+    this.#namingStrategy = namingStrategy ?? new SimpleNamingStrategy();
+    this.#store = store;
   }
 
   /**
@@ -28,7 +30,7 @@ export class AssetService {
    * @param location The location to an asset
    */
   delete(location: string) {
-    return this.store.deleteStream(location);
+    return this.#store.deleteStream(location);
   }
 
   /**
@@ -36,7 +38,7 @@ export class AssetService {
    * @param location The location to get metadata for
    */
   describeStream(location: string) {
-    return this.store.describeStream(location);
+    return this.#store.describeStream(location);
   }
 
   /**
@@ -49,7 +51,7 @@ export class AssetService {
    */
   async upsert({ stream, ...asset }: Asset & { stream: NodeJS.ReadableStream }, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
     // Apply strategy on save
-    const location = (strategy ?? this.namingStrategy!).resolve(asset);
+    const location = (strategy ?? this.#namingStrategy!).resolve(asset);
 
     if (!overwriteIfFound) {
       let missing = false;
@@ -67,7 +69,7 @@ export class AssetService {
       }
     }
 
-    await this.store.upsertStream(location, stream, asset);
+    await this.#store.upsertStream(location, stream, asset);
     return location;
   }
 
@@ -79,7 +81,7 @@ export class AssetService {
    * @param location The location to find.
    */
   async get(location: string): Promise<Asset> {
-    const stream = await this.store.getStream(location);
+    const stream = await this.#store.getStream(location);
     const info = await this.describeStream(location);
     return { stream, ...info };
   }

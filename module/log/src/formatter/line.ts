@@ -31,11 +31,11 @@ export interface LineFormatterOpts {
  * Line formatter
  */
 export class LineFormatter implements Formatter {
-  private opts: LineFormatterOpts;
+  #opts: LineFormatterOpts;
 
   constructor(opts: LineFormatterOpts = {}) {
     const notPlain = !EnvUtil.isTrue('TRV_LOG_PLAIN');
-    this.opts = {
+    this.#opts = {
       colorize: notPlain && ColorUtil.colorize,
       timestamp: notPlain ? EnvUtil.isValueOrFalse('TRV_LOG_TIME', ['s', 'ms'] as const, 'ms') : undefined,
       align: true, level: notPlain, location: notPlain,
@@ -47,7 +47,7 @@ export class LineFormatter implements Formatter {
     return util.inspect(o, {
       showHidden: ev.level === 'debug',
       depth: 4,
-      colors: this.opts.colorize !== false,
+      colors: this.#opts.colorize !== false,
       breakLength: 100
     });
   }
@@ -56,7 +56,7 @@ export class LineFormatter implements Formatter {
    * Format an event into a single line
    */
   format(ev: LogEvent) {
-    const opts = this.opts;
+    const opts = this.#opts;
     const out = [];
 
     if (opts.timestamp) {

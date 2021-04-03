@@ -1,3 +1,5 @@
+import { Writable } from 'stream';
+
 import { ColorUtil } from '@travetto/boot';
 
 import { SuitesSummary, TestConsumer } from '../types';
@@ -12,13 +14,19 @@ import { TestEvent } from '../../model/event';
 @Consumable('summary')
 export class SummaryEmitter implements TestConsumer {
 
+  #stream: Writable;
+  #enhancer: TestResultsEnhancer;
+
   constructor(
-    protected stream: NodeJS.WriteStream = process.stdout,
-    protected enhancer: TestResultsEnhancer = ColorUtil.colorize ? COLOR_ENHANCER : DUMMY_ENHANCER
-  ) { }
+    stream: Writable = process.stdout,
+    enhancer: TestResultsEnhancer = ColorUtil.colorize ? COLOR_ENHANCER : DUMMY_ENHANCER
+  ) {
+    this.#stream = stream;
+    this.#enhancer = enhancer;
+  }
 
   protected log(message: string) {
-    this.stream.write(`${message}\n`);
+    this.#stream.write(`${message}\n`);
   }
 
   onEvent(e: TestEvent) {
@@ -29,24 +37,24 @@ export class SummaryEmitter implements TestConsumer {
    * Summarize all results
    */
   onSummary(summary: SuitesSummary) {
-    this.log(`${this.enhancer.testNumber(1)}..${this.enhancer.testNumber(summary.total)}`);
+    this.log(`${this.#enhancer.testNumber(1)}..${this.#enhancer.testNumber(summary.total)}`);
 
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.enhancer.failure(err instanceof Error ? err.toJSON() : `${err}`) as string);
+        this.log(this.#enhancer.failure(err instanceof Error ? err.toJSON() : `${err}`) as string);
       }
     }
 
     const allPassed = summary.failed === 0;
 
     this.log([
-      this.enhancer[allPassed ? 'success' : 'failure']('Results'),
-      `${this.enhancer.total(summary.passed)}/${this.enhancer.total(summary.total)},`,
-      allPassed ? 'failed' : this.enhancer.failure('failed'),
-      `${this.enhancer.total(summary.failed)}`,
+      this.#enhancer[allPassed ? 'success' : 'failure']('Results'),
+      `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`,
+      allPassed ? 'failed' : this.#enhancer.failure('failed'),
+      `${this.#enhancer.total(summary.failed)}`,
       'skipped',
-      this.enhancer.total(summary.skipped),
+      this.#enhancer.total(summary.skipped),
       `# (Total Time: ${summary.duration}ms)`
     ].join(' '));
 

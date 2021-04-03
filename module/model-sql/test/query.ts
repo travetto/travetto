@@ -47,7 +47,7 @@ class WhereType {
 export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
 
   get dialect() {
-    return this.service.then(s => s.dialect);
+    return this.service.then(s => s.client);
   }
 
   @Test()

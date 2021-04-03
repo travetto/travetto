@@ -15,14 +15,14 @@ import type { ApplicationConfig } from '../../src/types';
  */
 export class AppListUtil {
 
-  private static CACHE_CONFIG = `app-cache-${SystemUtil.naiveHash(EnvUtil.get('TRV_SRC_LOCAL', ''))}.json`;
+  static #cacheConfig = `app-cache-${SystemUtil.naiveHash(EnvUtil.get('TRV_SRC_LOCAL', ''))}.json`;
 
   /**
    * Read list
    */
-  private static async readList(): Promise<ApplicationConfig[] | undefined> {
-    if (AppCache.hasEntry(this.CACHE_CONFIG)) {
-      return JSON.parse(AppCache.readEntry(this.CACHE_CONFIG)) as ApplicationConfig[];
+  static async #readList(): Promise<ApplicationConfig[] | undefined> {
+    if (AppCache.hasEntry(this.#cacheConfig)) {
+      return JSON.parse(AppCache.readEntry(this.#cacheConfig)) as ApplicationConfig[];
     }
   }
 
@@ -30,15 +30,15 @@ export class AppListUtil {
    * Store list of cached items
    * @param items
    */
-  private static storeList(items: ApplicationConfig[]) {
+  static #storeList(items: ApplicationConfig[]) {
     const toStore = items.map(x => ({ ...x, target: undefined }));
-    AppCache.writeEntry(this.CACHE_CONFIG, JSON.stringify(toStore));
+    AppCache.writeEntry(this.#cacheConfig, JSON.stringify(toStore));
   }
 
   /**
    * Request list of applications
    */
-  private static async verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
+  static async #verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
     try {
       for (const el of items) {
         const elStat = (await fs.promises.lstat(el.filename).catch(e => { delete el.generatedTime; }));
@@ -49,7 +49,7 @@ export class AppListUtil {
       }
       return items;
     } catch (e) {
-      AppCache.removeExpiredEntry(this.CACHE_CONFIG, true);
+      AppCache.removeExpiredEntry(this.#cacheConfig, true);
       throw e;
     }
   }
@@ -86,16 +86,16 @@ export class AppListUtil {
    */
   static async getList(): Promise<ApplicationConfig[] | undefined> {
     let items: ApplicationConfig[] | undefined;
-    if (!(items = await this.readList())) { // no list
+    if (!(items = await this.#readList())) { // no list
       items = await this.buildList();
       if (items && !EnvUtil.isReadonly()) {
-        this.storeList(items);
+        this.#storeList(items);
       }
     }
 
     if (items && !EnvUtil.isReadonly()) {
       try {
-        await this.verifyList(items);
+        await this.#verifyList(items);
       } catch (e) {
         if (e.message.includes('Expired')) {
           return await this.getList();

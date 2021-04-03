@@ -11,14 +11,24 @@ import { AppUtil } from './util';
  * the `@Application` decorator, but can be used directly as well.
  */
 class $ApplicationRegistry {
-  private applications = new Map<string, ApplicationConfig>();
+  #applications = new Map<string, ApplicationConfig>();
 
   register(app: string, config: ApplicationConfig) {
-    this.applications.set(app, config);
+    this.#applications.set(app, config);
   }
 
+  /**
+   * Get application by name
+   */
+  getByName(name: string) {
+    return this.#applications.get(name);
+  }
+
+  /**
+   * Get all applications
+   */
   getAll() {
-    return Array.from(this.applications.values());
+    return Array.from(this.#applications.values());
   }
 
   /**
@@ -54,7 +64,7 @@ class $ApplicationRegistry {
    * Runs the application, by name
    */
   async run(name: string, args: string[]) {
-    const config = this.applications.get(name);
+    const config = this.#applications.get(name);
     if (!config) {
       throw new InjectionError('Application not found', { ᚕid: name } as Class);
     }
@@ -85,7 +95,7 @@ class $ApplicationRegistry {
    * Clear all apps on reset
    */
   onReset() {
-    this.applications.clear();
+    this.#applications.clear();
   }
 }
 

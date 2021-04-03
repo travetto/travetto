@@ -9,21 +9,33 @@ import { DocUtil } from '../util';
  * Type resolver
  */
 export class TypeResolver implements Checker {
-  constructor(private tsChecker: ts.TypeChecker) { }
+  #tsChecker: ts.TypeChecker;
+
+  constructor(tsChecker: ts.TypeChecker) {
+    this.#tsChecker = tsChecker;
+  }
+
+  /**
+   * Get type checker
+   * @private
+   */
+  getChecker() {
+    return this.#tsChecker;
+  }
 
   /**
    * Get type from element
    * @param el
    */
   getType(el: ts.Type | ts.Node) {
-    return 'getSourceFile' in el ? this.tsChecker.getTypeAtLocation(el as ts.Node) : el;
+    return 'getSourceFile' in el ? this.#tsChecker.getTypeAtLocation(el as ts.Node) : el;
   }
 
   /**
    * Fetch all type arguments for a give type
    */
   getAllTypeArguments(ref: ts.Type): ts.Type[] {
-    return this.tsChecker.getTypeArguments(ref as ts.TypeReference) as ts.Type[];
+    return this.#tsChecker.getTypeArguments(ref as ts.TypeReference) as ts.Type[];
   }
 
   /**
@@ -32,21 +44,21 @@ export class TypeResolver implements Checker {
   getReturnType(node: ts.MethodDeclaration) {
     const type = this.getType(node);
     const [sig] = type.getCallSignatures();
-    return this.tsChecker.getReturnTypeOfSignature(sig);
+    return this.#tsChecker.getReturnTypeOfSignature(sig);
   }
 
   /**
    * Get type as a string representation
    */
   getTypeAsString(type: ts.Type) {
-    return this.tsChecker.typeToString(this.tsChecker.getApparentType(type)) || undefined;
+    return this.#tsChecker.typeToString(this.#tsChecker.getApparentType(type)) || undefined;
   }
 
   /**
    * Get list of properties
    */
   getPropertiesOfType(type: ts.Type) {
-    return this.tsChecker.getPropertiesOfType(type);
+    return this.#tsChecker.getPropertiesOfType(type);
   }
 
   /**
@@ -60,7 +72,7 @@ export class TypeResolver implements Checker {
         throw new Error('Object structure too nested');
       }
 
-      const { category, type } = TypeCategorize(this.tsChecker, resType);
+      const { category, type } = TypeCategorize(this.#tsChecker, resType);
       const { build, finalize } = TypeBuilder[category];
 
       let result = build(this, type, alias);

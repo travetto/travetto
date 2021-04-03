@@ -13,13 +13,17 @@ import { SQLUtil, VisitStack } from './internal/util';
  */
 export class TableManager {
 
+  #dialect: SQLDialect;
+
   constructor(
     public context: AsyncContext,
-    private dialect: SQLDialect
-  ) { }
+    dialect: SQLDialect
+  ) {
+    this.#dialect = dialect;
+  }
 
-  private exec<T = unknown>(sql: string) {
-    return this.dialect.executeSQL<T>(sql);
+  #exec<T = unknown>(sql: string) {
+    return this.#dialect.executeSQL<T>(sql);
   }
 
   /**
@@ -29,14 +33,14 @@ export class TableManager {
   @Connected()
   @Transactional()
   async createTables(cls: Class): Promise<void> {
-    for (const op of this.dialect.getCreateAllTablesSQL(cls)) {
-      await this.exec(op);
+    for (const op of this.#dialect.getCreateAllTablesSQL(cls)) {
+      await this.#exec(op);
     }
     const indices = ModelRegistry.get(cls).indices;
     if (indices) {
-      for (const op of this.dialect.getCreateAllIndicesSQL(cls, indices)) {
+      for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {
-          await this.exec(op);
+          await this.#exec(op);
         } catch (e) {
           if (!/\bexists|duplicate\b/i.test(e.message)) {
             throw e;
@@ -53,8 +57,8 @@ export class TableManager {
   @Connected()
   @Transactional()
   async dropTables(cls: Class): Promise<void> {
-    for (const op of this.dialect.getDropAllTablesSQL(cls)) {
-      await this.exec(op);
+    for (const op of this.#dialect.getDropAllTablesSQL(cls)) {
+      await this.#exec(op);
     }
   }
 
@@ -65,8 +69,8 @@ export class TableManager {
   @Connected()
   @Transactional()
   async truncateTables(cls: Class): Promise<void> {
-    for (const op of this.dialect.getTruncateAllTablesSQL(cls)) {
-      await this.exec(op);
+    for (const op of this.#dialect.getTruncateAllTablesSQL(cls)) {
+      await this.#exec(op);
     }
   }
 
@@ -75,7 +79,7 @@ export class TableManager {
    * Get a valid connection
    */
   get conn() {
-    return this.dialect.conn;
+    return this.#dialect.conn;
   }
 
   /**
@@ -96,9 +100,9 @@ export class TableManager {
         return acc;
       }, { added: [], changed: [], removing: [] } as Record<ChangeEvent<unknown>['type'], VisitStack[][]>);
 
-      await Promise.all(changes.added.map(v => this.dialect.executeSQL(this.dialect.getAddColumnSQL(v))));
-      await Promise.all(changes.changed.map(v => this.dialect.executeSQL(this.dialect.getModifyColumnSQL(v))));
-      await Promise.all(changes.removing.map(v => this.dialect.executeSQL(this.dialect.getDropColumnSQL(v))));
+      await Promise.all(changes.added.map(v => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(v))));
+      await Promise.all(changes.changed.map(v => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(v))));
+      await Promise.all(changes.removing.map(v => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(v))));
     } catch (e) {
       // Failed to change
       console.error('Unable to change field', { error: e });

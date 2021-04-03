@@ -4,25 +4,28 @@ import { MockService } from './mock';
 @Controller('/simple')
 export class Simple {
 
-  constructor(private service: MockService) {
+  #service: MockService;
+
+  constructor(service: MockService) {
+    this.#service = service;
   }
 
   @Get('/name')
   async doIt(req: Request, res: Response): Promise<string> {
-    const user = await this.service.fetch();
+    const user = await this.#service.fetch();
     return `/simple/name => ${user.first.toLowerCase()}`;
   }
 
   @CacheControl(1, 'd')
   @Get('/nameAngry')
   async doItAngry() {
-    const user = await this.service.fetch();
+    const user = await this.#service.fetch();
     return user.first.toUpperCase();
   }
 
   @Get('/name2')
   async doIt2() {
-    const user = await this.service.fetch2();
+    const user = await this.#service.fetch2();
     return user.last;
   }
 
@@ -34,7 +37,7 @@ export class Simple {
 
   @Get('/age2')
   async age2() {
-    return this.service.fetch().middle!.toUpperCase();
+    return this.#service.fetch().middle!.toUpperCase();
   }
 
   @Get('/age3')

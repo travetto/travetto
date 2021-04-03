@@ -20,7 +20,6 @@ class $PendingRegister {
     const meta = {
       ᚕid: ModuleUtil.getId(ᚕfile, cls.name),
       ᚕfile,
-      ᚕinit: true,
       ᚕhash,
       ᚕmethods,
       ᚕabstract,
@@ -33,7 +32,7 @@ class $PendingRegister {
         value: meta[k],
         enumerable: false,
         configurable: false,
-        writable: k === 'ᚕinit'
+        writable: false
       };
       return all;
     }, {} as { [K in keyof typeof meta]: PropertyDescriptor }));

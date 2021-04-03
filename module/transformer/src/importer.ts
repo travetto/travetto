@@ -14,24 +14,24 @@ import { Import } from './types/shared';
  */
 export class ImportManager {
 
-  private newImports = new Map<string, Import>();
-  private imports: Map<string, Import>;
-  private idx: Record<string, number> = {};
-  private ids = new Map<string, string>();
+  #newImports = new Map<string, Import>();
+  #imports: Map<string, Import>;
+  #idx: Record<string, number> = {};
+  #ids = new Map<string, string>();
 
   constructor(public source: ts.SourceFile, public factory: ts.NodeFactory) {
-    this.imports = ImportUtil.collectImports(source);
+    this.#imports = ImportUtil.collectImports(source);
   }
 
   /**
    * Produces a unique ID for a given file, importing if needed
    */
   getId(file: string) {
-    if (!this.ids.has(file)) {
+    if (!this.#ids.has(file)) {
       const key = basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
-      this.ids.set(file, `ᚕ_${key}_${this.idx[key] = (this.idx[key] || 0) + 1}`);
+      this.#ids.set(file, `ᚕ_${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
     }
-    return this.ids.get(file)!;
+    return this.#ids.get(file)!;
   }
 
   /**
@@ -52,19 +52,19 @@ export class ImportManager {
       }
     }
 
-    if (!file.endsWith('.d.ts') && !this.newImports.has(file)) {
+    if (!file.endsWith('.d.ts') && !this.#newImports.has(file)) {
       const id = this.getId(file);
 
-      if (this.imports.has(id)) { // Already imported, be cool
-        return this.imports.get(id)!;
+      if (this.#imports.has(id)) { // Already imported, be cool
+        return this.#imports.get(id)!;
       }
 
       const ident = this.factory.createIdentifier(id);
       const imprt = { path: file, ident };
-      this.imports.set(ident.escapedText.toString(), imprt);
-      this.newImports.set(file, imprt);
+      this.#imports.set(ident.escapedText.toString(), imprt);
+      this.#newImports.set(file, imprt);
     }
-    return this.newImports.get(file)!;
+    return this.#newImports.get(file)!;
   }
 
   /**
@@ -89,12 +89,12 @@ export class ImportManager {
    * Add imports to a source file
    */
   finalizeNewImports(file: ts.SourceFile) {
-    if (!this.newImports.size) {
+    if (!this.#newImports.size) {
       return;
     }
 
     try {
-      const importStmts = [...this.newImports.values()].map(({ path, ident }) => {
+      const importStmts = [...this.#newImports.values()].map(({ path, ident }) => {
         const imptStmt = this.factory.createImportDeclaration(
           undefined, undefined,
           this.factory.createImportClause(false, undefined, this.factory.createNamespaceImport(ident)),
@@ -128,7 +128,7 @@ export class ImportManager {
     if (type.source === this.source.fileName) {
       return factory.createIdentifier(type.name!);
     } else {
-      const { ident } = this.imports.get(type.source) ?? this.importFile(type.source, this.source.fileName);
+      const { ident } = this.#imports.get(type.source) ?? this.importFile(type.source, this.source.fileName);
       return factory.createPropertyAccessExpression(ident, type.name!);
     }
   }

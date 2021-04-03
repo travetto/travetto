@@ -8,13 +8,13 @@ import { ConfigUtil } from './config';
  */
 export class SendUtil {
 
-  private static _svc: Promise<MailService>;
+  static #svc: Promise<MailService>;
 
   /**
    * Get mail service
    */
   static async getMailService() {
-    if (!this._svc) {
+    if (!this.#svc) {
       const { MailService: M, NodemailerTransport } = await import('@travetto/email');
       const { MailTransportTarget } = await import('@travetto/email/src/internal/types');
       const { DependencyRegistry } = await import('@travetto/di');
@@ -41,9 +41,9 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
         throw new Error(errorMessage);
       }
 
-      this._svc = DependencyRegistry.getInstance(M);
+      this.#svc = DependencyRegistry.getInstance(M);
     }
-    return this._svc;
+    return this.#svc;
   }
 
   /**

@@ -7,11 +7,11 @@ import { ProcessCommChannel } from './channel';
  */
 export class ParentCommChannel<U = unknown> extends ProcessCommChannel<ChildProcess, U> {
 
-  private complete: ExecutionState['result'];
+  #complete: ExecutionState['result'];
 
   constructor(state: ExecutionState) {
     super(state.process);
-    this.complete = state.result
+    this.#complete = state.result
       .finally(() => { delete this.proc; });
   }
 
@@ -21,7 +21,7 @@ export class ParentCommChannel<U = unknown> extends ProcessCommChannel<ChildProc
   async destroy() {
     if (this.proc) {
       ExecUtil.kill(this.proc);
-      await this.complete;
+      await this.#complete;
     }
 
     return super.destroy();

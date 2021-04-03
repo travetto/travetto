@@ -25,13 +25,13 @@ declare const global: {
  */
 export class ModuleManager {
   // @ts-expect-error
-  private static objectProto = Object.prototype.__proto__; // Remove to prevent __proto__ pollution in JSON
+  static #objectProto = Object.prototype.__proto__; // Remove to prevent __proto__ pollution in JSON
 
-  private static moduleResolveFilename = Module._resolveFilename!.bind(Module);
-  private static moduleLoad = Module._load!.bind(Module);
-  private static resolveFilename?: (filename: string) => string;
-  private static initialized = false;
-  private static unloadHandlers: UnloadHandler[] = [];
+  static #moduleResolveFilename = Module._resolveFilename!.bind(Module);
+  static #moduleLoad = Module._load!.bind(Module);
+  static #resolveFilename?: (filename: string) => string;
+  static #initialized = false;
+  static #unloadHandlers: UnloadHandler[] = [];
 
   static readonly transpile: (filename: string) => string;
 
@@ -40,10 +40,10 @@ export class ModuleManager {
    * @param request path to file
    * @param parent parent Module
    */
-  private static onModuleLoad(request: string, parent: ModType): unknown {
+  static #onModuleLoad(request: string, parent: ModType): unknown {
     let mod: unknown;
     try {
-      mod = this.moduleLoad.apply(null, [request, parent]);
+      mod = this.#moduleLoad.apply(null, [request, parent]);
       ModuleUtil.checkForCycles(mod, request, parent);
     } catch (e) {
       const name = Module._resolveFilename!(request, parent);
@@ -53,11 +53,27 @@ export class ModuleManager {
   }
 
   /**
+   * Set filename resolver
+   * @private
+   */
+  static setFilenameResolver(fn: (filename: string) => string) {
+    this.#resolveFilename = fn;
+  }
+
+  /**
    * Listen for when files are unloaded
    * @param handler
    */
   static onUnload(handler: UnloadHandler) {
-    this.unloadHandlers.push(handler);
+    this.#unloadHandlers.push(handler);
+  }
+
+  /**
+   * Clear all unload handlers
+   * @private
+   */
+  static clearUnloadHandlers() {
+    this.#unloadHandlers = [];
   }
 
   /**
@@ -111,7 +127,7 @@ export class ModuleManager {
    * Enable compile support
    */
   static init() {
-    if (this.initialized) {
+    if (this.#initialized) {
       return;
     }
 
@@ -129,15 +145,15 @@ export class ModuleManager {
     });
 
     // Supports bootstrapping with framework resolution
-    if (this.resolveFilename) {
-      Module._resolveFilename = (req, p) => this.moduleResolveFilename(this.resolveFilename!(req), p);
+    if (this.#resolveFilename) {
+      Module._resolveFilename = (req, p) => this.#moduleResolveFilename(this.#resolveFilename!(req), p);
     }
-    Module._load = (req, p) => this.onModuleLoad(req, p);
+    Module._load = (req, p) => this.#onModuleLoad(req, p);
     require.extensions[SourceUtil.EXT] = this.compile.bind(this);
 
-    Object.defineProperty(Object.prototype, '__proto__', { configurable: false, enumerable: false, get: () => this.objectProto });
+    Object.defineProperty(Object.prototype, '__proto__', { configurable: false, enumerable: false, get: () => this.#objectProto });
 
-    this.initialized = true;
+    this.#initialized = true;
   }
 
   /**
@@ -164,7 +180,7 @@ export class ModuleManager {
    */
   static unload(filename: string, unlink = false) {
     const native = PathUtil.toNative(filename);
-    for (const el of this.unloadHandlers) {
+    for (const el of this.#unloadHandlers) {
       el(filename, unlink);
     }
     if (native in require.cache) {
@@ -177,15 +193,15 @@ export class ModuleManager {
    * Turn off compile support
    */
   static reset() {
-    if (!this.initialized) {
+    if (!this.#initialized) {
       return;
     }
 
     delete require.extensions[SourceUtil.EXT];
-    this.initialized = false;
-    Module._load = this.moduleLoad;
-    if (this.resolveFilename) {
-      Module._resolveFilename = this.moduleResolveFilename;
+    this.#initialized = false;
+    Module._load = this.#moduleLoad;
+    if (this.#resolveFilename) {
+      Module._resolveFilename = this.#moduleResolveFilename;
     }
     ModuleUtil.reset();
     SourceUtil.reset();

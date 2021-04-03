@@ -32,13 +32,13 @@ type IndexRecord = { index?: SimpleEntry, base: string, files: Map<string, Simpl
  */
 export class SourceIndex {
 
-  private static _INDEX = new Map<string, IndexRecord>();
+  static #cache = new Map<string, IndexRecord>();
 
   /**
    * Compute index for a scan entry
    * @param entry
    */
-  private static compute(entry: ScanEntry) {
+  static #compute(entry: ScanEntry) {
     const file = entry.module;
     if (file.includes('node_modules')) {
       const mod = file.match(/^.*node_modules\/((?:@[^/]+\/)?[^/]+)/)?.[1];
@@ -61,7 +61,7 @@ export class SourceIndex {
    * Scan the framework for folder/files only the framework should care about
    * @param testFile The test to determine if a file is desired
    */
-  private static scanFramework(test: ScanTest) {
+  static #scanFramework(test: ScanTest) {
     const testFile = 'test' in test ? test.test.bind(test) : test;
 
     // Folders to check
@@ -97,13 +97,13 @@ export class SourceIndex {
   /**
    * Get index of all source files
    */
-  private static get index() {
-    if (this._INDEX.size === 0) {
+  static get #index() {
+    if (this.#cache.size === 0) {
       const idx = new Map<string, IndexRecord>();
       idx.set('.', { base: PathUtil.cwd, files: new Map() });
 
-      for (const el of this.scanFramework(x => x.endsWith('.ts') && !x.endsWith('.d.ts'))) {
-        const res = this.compute(el);
+      for (const el of this.#scanFramework(x => x.endsWith('.ts') && !x.endsWith('.d.ts'))) {
+        const res = this.#compute(el);
 
         if (!res) {
           continue;
@@ -126,23 +126,23 @@ export class SourceIndex {
           idx.get(mod)!.files.get(sub)!.push({ file: el.file, module: el.module });
         }
       }
-      this._INDEX = idx;
+      this.#cache = idx;
     }
-    return this._INDEX;
+    return this.#cache;
   }
 
   /**
    * Clears the app scanning cache
    */
   static reset() {
-    this._INDEX.clear();
+    this.#cache.clear();
   }
 
   /**
    * Get paths from index
    */
   static getPaths() {
-    return [...this.index.keys()];
+    return [...this.#index.keys()];
   }
 
   /**
@@ -159,7 +159,7 @@ export class SourceIndex {
       config.includeIndex = config.includeIndex ?? true;
     }
     const all: SimpleEntry[][] = [];
-    const idx = this.index;
+    const idx = this.#index;
     for (const key of paths) {
       if (idx.has(key)) {
         const tgt = idx.get(key)!;

@@ -32,7 +32,7 @@ export class SchemaValidator {
    * @param o The object to validate
    * @param relative The relative path as the validation recurses
    */
-  private static validateSchema<T>(schema: SchemaConfig, o: T, relative: string) {
+  static #validateSchema<T>(schema: SchemaConfig, o: T, relative: string) {
     let errors: ValidationError[] = [];
 
     for (const field of Object.keys(schema)) {
@@ -61,7 +61,7 @@ export class SchemaValidator {
         }
         if (complex) {
           for (let i = 0; i < val.length; i++) {
-            const subErrors = this.validateSchema(resolveSchema(type, val[i]), val[i], `${path}[${i}]`);
+            const subErrors = this.#validateSchema(resolveSchema(type, val[i]), val[i], `${path}[${i}]`);
             errors = errors.concat(subErrors);
           }
         } else {
@@ -71,7 +71,7 @@ export class SchemaValidator {
           }
         }
       } else if (complex) {
-        const subErrors = this.validateSchema(resolveSchema(type, val), val, path);
+        const subErrors = this.#validateSchema(resolveSchema(type, val), val, path);
         errors.push(...subErrors);
       } else {
         const fieldErrors = this.validateField(fieldSchema, val);
@@ -221,7 +221,7 @@ export class SchemaValidator {
     const validators = SchemaRegistry.get(cls).validators;
 
     // Validate using standard behaviors
-    const errors = this.validateSchema(config.schema, o, '');
+    const errors = this.#validateSchema(config.schema, o, '');
 
     // Handle class level validators
     for (const fn of validators) {

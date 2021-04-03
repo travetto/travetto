@@ -28,39 +28,48 @@ function hasEscapedName(n: unknown): n is { name: { escapedText: string } } {
 export class TransformerState implements State {
   static SYNTHETIC_EXT = 'ᚕsyn';
 
-  private resolver: TypeResolver;
-  private imports: ImportManager;
-  private syntheticIdentifiers = new Map<string, ts.Identifier>();
-  private decorators = new Map<string, ts.PropertyAccessExpression>();
+  #resolver: TypeResolver;
+  #imports: ImportManager;
+  #syntheticIdentifiers = new Map<string, ts.Identifier>();
+  #decorators = new Map<string, ts.PropertyAccessExpression>();
+
   added = new Map<number, ts.Statement[]>();
   module: string;
 
   constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker) {
-    this.imports = new ImportManager(source, factory);
-    this.resolver = new TypeResolver(checker);
+    this.#imports = new ImportManager(source, factory);
+    this.#resolver = new TypeResolver(checker);
     this.module = ModuleUtil.normalizePath(this.source.fileName);
+  }
+
+  /**
+   * Allow access to resolver
+   * @private
+   */
+  getResolver() {
+    return this.#resolver;
   }
 
   /**
    * Get or import the node or external type
    */
   getOrImport(type: ExternalType) {
-    return this.imports.getOrImport(this.factory, type);
+    return this.#imports.getOrImport(this.factory, type);
   }
 
   /**
    * Import a given file
    */
   importFile(file: string) {
-    return this.imports.importFile(file);
+    return this.#imports.importFile(file);
   }
 
   /**
    * Resolve an `AnyType` from a `ts.Type` or `ts.Node`
    */
   resolveType(node: ts.Type | ts.Node) {
-    const resolved = this.resolver.resolveType(node);
-    this.imports.importFromResolved(resolved);
+    const resolved = this.#resolver.resolveType(node);
+    this.#imports.importFromResolved(resolved);
     return resolved;
   }
 
@@ -91,26 +100,26 @@ export class TransformerState implements State {
    * Resolve the return type
    */
   resolveReturnType(node: ts.MethodDeclaration) {
-    return this.resolveType(this.resolver.getReturnType(node));
+    return this.resolveType(this.#resolver.getReturnType(node));
   }
 
   /**
    * Read all JSDoc tags
    */
   readDocTag(node: ts.Declaration, name: string) {
-    return DocUtil.readDocTag(this.resolver.getType(node), name);
+    return DocUtil.readDocTag(this.#resolver.getType(node), name);
   }
 
   /**
    * Import a decorator, generally to handle erasure
    */
   importDecorator(pth: string, name: string) {
-    if (!this.decorators.has(`${pth}:${name}`)) {
-      const ref = this.imports.importFile(pth);
+    if (!this.#decorators.has(`${pth}:${name}`)) {
+      const ref = this.#imports.importFile(pth);
       const ident = this.factory.createIdentifier(name);
-      this.decorators.set(name, this.factory.createPropertyAccessExpression(ref.ident, ident));
+      this.#decorators.set(name, this.factory.createPropertyAccessExpression(ref.ident, ident));
     }
-    return this.decorators.get(name);
+    return this.#decorators.get(name);
   }
 
   /**
@@ -118,7 +127,7 @@ export class TransformerState implements State {
    */
   createDecorator(pth: string, name: string, ...contents: (ts.Expression | undefined)[]) {
     this.importDecorator(pth, name);
-    return CoreUtil.createDecorator(this.factory, this.decorators.get(name)!, ...contents);
+    return CoreUtil.createDecorator(this.factory, this.#decorators.get(name)!, ...contents);
   }
 
   /**
@@ -127,15 +136,15 @@ export class TransformerState implements State {
   getDecoratorMeta(dec: ts.Decorator): DecoratorMeta {
     const ident = DecoratorUtil.getDecoratorIdent(dec);
     const decl = DeclarationUtil.getPrimaryDeclarationNode(
-      this.resolver.getType(ident)
+      this.#resolver.getType(ident)
     );
 
     return {
       dec,
       ident,
       file: decl?.getSourceFile().fileName,
-      module: decl ? ModuleUtil.normalizePath(decl.getSourceFile().fileName) : undefined, // All decorators will be absolute
-      targets: DocUtil.readAugments(this.resolver.getType(ident)),
+      module: decl ? ModuleUtil.normalizePath(decl.getSourceFile().fileName) : undefined, // All #decorators will be absolute
+      targets: DocUtil.readAugments(this.#resolver.getType(ident)),
       name: ident ?
         ident.escapedText! as string :
         undefined
@@ -143,7 +152,7 @@ export class TransformerState implements State {
   }
 
   /**
-   * Get list of all decorators for a node
+   * Get list of all #decorators for a node
    */
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
     return ((node.decorators ?? []) as ts.Decorator[])
@@ -155,7 +164,7 @@ export class TransformerState implements State {
    * Get all declarations for a node
    */
   getDeclarations(node: ts.Node): ts.Declaration[] {
-    return DeclarationUtil.getDeclarations(this.resolver.getType(node));
+    return DeclarationUtil.getDeclarations(this.#resolver.getType(node));
   }
 
   /**
@@ -186,7 +195,7 @@ export class TransformerState implements State {
    * Finalize the source file for emission
    */
   finalize(ret: ts.SourceFile) {
-    ret = this.imports.finalize(ret);
+    ret = this.#imports.finalize(ret);
     return ret;
   }
 
@@ -286,10 +295,10 @@ export class TransformerState implements State {
   createSyntheticIdentifier(id: string) {
     id = `${id}${TransformerState.SYNTHETIC_EXT}`;
     let exists = true;
-    if (!this.syntheticIdentifiers.has(id)) {
-      this.syntheticIdentifiers.set(id, this.factory.createIdentifier(id));
+    if (!this.#syntheticIdentifiers.has(id)) {
+      this.#syntheticIdentifiers.set(id, this.factory.createIdentifier(id));
       exists = false;
     }
-    return [this.syntheticIdentifiers.get(id), exists] as [id: ts.Identifier, exists: boolean];
+    return [this.#syntheticIdentifiers.get(id), exists] as [id: ts.Identifier, exists: boolean];
   }
 }

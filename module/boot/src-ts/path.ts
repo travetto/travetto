@@ -5,9 +5,18 @@ import * as path from 'path';
  */
 export class PathUtil {
 
-  private static devPath = process.env.TRV_DEV;
+  static #devPath = process.env.TRV_DEV;
 
   static readonly cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
+
+  /**
+   * Set Dev path
+   * 
+   * @private 
+   */
+  static setDevPath(path?: string) {
+    this.#devPath = path ?? process.env.TRV_DEV;
+  }
 
   /**
    * Convert file to a unix format
@@ -55,7 +64,7 @@ export class PathUtil {
    * @returns
    */
   static normalizeFrameworkPath(file: string, prefix = '') {
-    return this.devPath ? file.replace(this.devPath, `${prefix}@travetto`) : file;
+    return this.#devPath ? file.replace(this.#devPath, `${prefix}@travetto`) : file;
   }
 
   /**
@@ -65,6 +74,6 @@ export class PathUtil {
    * @returns
    */
   static resolveFrameworkPath(file: string) {
-    return this.devPath ? file.replace(/.*@travetto/, m => this.devPath || m) : file;
+    return this.#devPath ? file.replace(/.*@travetto/, m => this.#devPath || m) : file;
   }
 }

@@ -7,7 +7,7 @@ const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
  * Common utilities for object detection/manipulation
  */
 export class Util {
-  private static deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
+  static #deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;
     const isArrA = Array.isArray(a);
@@ -37,7 +37,7 @@ export class Util {
           const retArr = ret as unknown[];
           const bArr = b as unknown[];
           for (let i = 0; i < bArr.length; i++) {
-            retArr[i] = this.deepAssignRaw(retArr[i], bArr[i], mode);
+            retArr[i] = this.#deepAssignRaw(retArr[i], bArr[i], mode);
           }
         }
       } else if (isSimpB) { // Scalars
@@ -57,7 +57,7 @@ export class Util {
         const retObj = ret as Record<string, unknown>;
 
         for (const key of Object.keys(bObj)) {
-          retObj[key] = this.deepAssignRaw(retObj[key], bObj[key], mode);
+          retObj[key] = this.#deepAssignRaw(retObj[key], bObj[key], mode);
         }
       }
     }
@@ -224,7 +224,7 @@ export class Util {
     if (!a || this.isSimple(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
     }
-    return this.deepAssignRaw(a, b, mode) as T & U;
+    return this.#deepAssignRaw(a, b, mode) as T & U;
   }
 
   /**

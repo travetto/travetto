@@ -17,11 +17,11 @@ const authenticator = (passport as passport.Authenticator<Handler>);
 @Injectable()
 export class PassportInterceptor implements RestInterceptor {
 
-  private init = authenticator.initialize();
+  #init = authenticator.initialize();
 
   after = [AuthInterceptor];
 
   async intercept(req: Request, res: Response) {
-    await new Promise<void>((resolve) => this.init(req, res, resolve));
+    await new Promise<void>((resolve) => this.#init(req, res, resolve));
   }
 }

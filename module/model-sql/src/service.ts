@@ -38,19 +38,30 @@ export class SQLModelService implements
   ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySuggestSupport {
 
-  private manager: TableManager;
+  #manager: TableManager;
+  #context: AsyncContext;
+  #dialect: SQLDialect;
+
+  readonly config: SQLModelConfig;
+
+  get client() {
+    return this.#dialect;
+  }
 
   constructor(
-    public readonly context: AsyncContext,
-    public readonly config: SQLModelConfig,
-    public readonly dialect: SQLDialect
+    context: AsyncContext,
+    config: SQLModelConfig,
+    dialect: SQLDialect
   ) {
+    this.#context = context;
+    this.#dialect = dialect;
+    this.config = config;
   }
 
   /**
    * Compute new ids for bulk operations
    */
-  private async computeInsertedIds<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {
+  async #computeInsertedIds<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {
     const addedIds = new Map<number, string>();
     const toCheck = new Map<string, number>();
 
@@ -72,9 +83,9 @@ export class SQLModelService implements
 
     // Get all upsert ids
     const all = toCheck.size ?
-      (await this.exec<ModelType>(
-        this.dialect.getSelectRowsByIdsSQL(
-          SQLUtil.classToStack(cls), [...toCheck.keys()], [this.dialect.idField]
+      (await this.#exec<ModelType>(
+        this.#dialect.getSelectRowsByIdsSQL(
+          SQLUtil.classToStack(cls), [...toCheck.keys()], [this.#dialect.idField]
         )
       )).records : [];
 
@@ -89,12 +100,12 @@ export class SQLModelService implements
     return addedIds;
   }
 
-  private exec<T = unknown>(sql: string) {
-    return this.dialect.executeSQL<T>(sql);
+  #exec<T = unknown>(sql: string) {
+    return this.#dialect.executeSQL<T>(sql);
   }
 
-  private async deleteRaw<T extends ModelType>(cls: Class<T>, id: string, checkExpiry = true) {
-    const count = await this.dialect.deleteAndGetCount<ModelType>(cls, {
+  async #deleteRaw<T extends ModelType>(cls: Class<T>, id: string, checkExpiry = true) {
+    const count = await this.#dialect.deleteAndGetCount<ModelType>(cls, {
       where: ModelQueryUtil.getWhereClause(cls, { id } as WhereClauseRaw<T>, checkExpiry)
     });
     if (count === 0) {
@@ -103,38 +114,38 @@ export class SQLModelService implements
   }
 
   async postConstruct() {
-    if (this.dialect) {
-      if (this.dialect.conn.init) {
-        await this.dialect.conn.init();
+    if (this.#dialect) {
+      if (this.#dialect.conn.init) {
+        await this.#dialect.conn.init();
       }
-      this.manager = new TableManager(this.context, this.dialect);
+      this.#manager = new TableManager(this.#context, this.#dialect);
       await ModelStorageUtil.registerModelChangeListener(this);
       ModelExpiryUtil.registerCull(this);
     }
   }
 
   get conn() {
-    return this.dialect.conn;
+    return this.#dialect.conn;
   }
 
   uuid() {
-    return this.dialect.generateId();
+    return this.#dialect.generateId();
   }
 
   async changeSchema(cls: Class, change: SchemaChange) {
-    await this.manager.changeSchema(cls, change);
+    await this.#manager.changeSchema(cls, change);
   }
 
   async createModel(cls: Class) {
-    await this.manager.createTables(cls);
+    await this.#manager.createTables(cls);
   }
 
   async deleteModel(cls: Class) {
-    await this.manager.dropTables(cls);
+    await this.#manager.dropTables(cls);
   }
 
   async truncateModel(cls: Class) {
-    await this.manager.truncateTables(cls);
+    await this.#manager.truncateTables(cls);
   }
 
   async createStorage() { }
@@ -144,8 +155,8 @@ export class SQLModelService implements
   async create<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     await ModelCrudUtil.preStore(cls, item, this);
     try {
-      for (const ins of this.dialect.getAllInsertSQL(cls, item)) {
-        await this.exec(ins);
+      for (const ins of this.#dialect.getAllInsertSQL(cls, item)) {
+        await this.#exec(ins);
       }
     } catch (err) {
       if (err instanceof ExistsError) {
@@ -159,14 +170,14 @@ export class SQLModelService implements
 
   @Transactional()
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    await this.deleteRaw(cls, item.id, true);
+    await this.#deleteRaw(cls, item.id, true);
     return await this.create(cls, item);
   }
 
   @Transactional()
   async upsert<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     try {
-      await this.deleteRaw(cls, item.id, false);
+      await this.#deleteRaw(cls, item.id, false);
     } catch (err) {
       if (!(err instanceof NotFoundError)) {
         throw err;
@@ -200,7 +211,7 @@ export class SQLModelService implements
 
   @Transactional()
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    await this.deleteRaw(cls, id, false);
+    await this.#deleteRaw(cls, id, false);
   }
 
   @Transactional()
@@ -210,14 +221,14 @@ export class SQLModelService implements
     const upsertOps = operations.map(x => x.upsert).filter(x => !!x) as T[];
     const updateOps = operations.map(x => x.update).filter(x => !!x) as T[];
 
-    const insertedIds = await this.computeInsertedIds(cls, operations);
+    const insertedIds = await this.#computeInsertedIds(cls, operations);
 
     const deletes = [{ stack: SQLUtil.classToStack(cls), ids: deleteOps.map(x => x.id) }].filter(x => !!x.ids.length);
     const inserts = (await SQLUtil.getInserts(cls, insertOps)).filter(x => !!x.records.length);
     const upserts = (await SQLUtil.getInserts(cls, upsertOps)).filter(x => !!x.records.length);
     const updates = (await SQLUtil.getInserts(cls, updateOps)).filter(x => !!x.records.length);
 
-    const ret = await this.dialect.bulkProcess(deletes, inserts, upserts, updates);
+    const ret = await this.#dialect.bulkProcess(deletes, inserts, upserts, updates);
     ret.insertedIds = insertedIds;
     return ret;
   }
@@ -230,12 +241,12 @@ export class SQLModelService implements
 
   @Connected()
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
-    const { records: res } = await this.exec<T>(this.dialect.getQuerySQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query)));
+    const { records: res } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query)));
     if (ModelRegistry.has(cls)) {
-      await this.dialect.fetchDependents(cls, res, query && query.select);
+      await this.#dialect.fetchDependents(cls, res, query && query.select);
     }
 
-    const cleaned = SQLUtil.cleanResults<T>(this.dialect, res);
+    const cleaned = SQLUtil.cleanResults<T>(this.#dialect, res);
     return await Promise.all(cleaned.map(m => ModelCrudUtil.load(cls, m)));
   }
 
@@ -247,21 +258,21 @@ export class SQLModelService implements
 
   @Connected()
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
-    const { records } = await this.exec<{ total: string | number }>(this.dialect.getQueryCountSQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query)));
+    const { records } = await this.#exec<{ total: string | number }>(this.#dialect.getQueryCountSQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query)));
     return +records[0].total;
   }
 
   @Connected()
   @Transactional()
   async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
-    const { count } = await this.exec(this.dialect.getUpdateSQL(SQLUtil.classToStack(cls), data, ModelQueryUtil.getQueryAndVerify(cls, query).where));
+    const { count } = await this.#exec(this.#dialect.getUpdateSQL(SQLUtil.classToStack(cls), data, ModelQueryUtil.getQueryAndVerify(cls, query).where));
     return count;
   }
 
   @Connected()
   @Transactional()
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
-    const { count } = await this.exec(this.dialect.getDeleteSQL(SQLUtil.classToStack(cls), ModelQueryUtil.getQueryAndVerify(cls, query, false).where));
+    const { count } = await this.#exec(this.#dialect.getDeleteSQL(SQLUtil.classToStack(cls), ModelQueryUtil.getQueryAndVerify(cls, query, false).where));
     return count;
   }
 
@@ -281,22 +292,22 @@ export class SQLModelService implements
 
   @Connected()
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
-    const col = this.dialect.ident(field as string);
-    const ttl = this.dialect.ident('count');
-    const key = this.dialect.ident('key');
+    const col = this.#dialect.ident(field as string);
+    const ttl = this.#dialect.ident('count');
+    const key = this.#dialect.ident('key');
     const q = [
       `SELECT ${col} as ${key}, COUNT(${col}) as ${ttl}`,
-      this.dialect.getFromSQL(cls),
+      this.#dialect.getFromSQL(cls),
     ];
     q.push(
-      this.dialect.getWhereSQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query ?? {}).where)
+      this.#dialect.getWhereSQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query ?? {}).where)
     );
     q.push(
       `GROUP BY ${col}`,
       `ORDER BY ${ttl} DESC`
     );
 
-    const results = await this.exec<{ key: string, count: number }>(q.join('\n'));
+    const results = await this.#exec<{ key: string, count: number }>(q.join('\n'));
     return results.records.map(x => {
       x.count = Util.coerceType(x.count, Number);
       return x;

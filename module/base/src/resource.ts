@@ -12,18 +12,20 @@ const cleanPath = (p: string) => p.charAt(0) === '/' ? p.substring(1) : p;
  * across multiple resource paths
  */
 class $ResourceManager {
-  private cache = new Map<string, string>();
+  #cache = new Map<string, string>();
 
-  private paths: string[] = [];
+  #paths: string[] = [];
+  #rootPaths: string[];
 
-  constructor(private rootPaths: string[]) {
-    this.init();
+  constructor(rootPaths: string[]) {
+    this.#rootPaths = rootPaths;
+    this.#init();
   }
 
-  private init() {
-    this.paths.push(...this.rootPaths);
+  #init() {
+    this.#paths.push(...this.#rootPaths);
 
-    this.paths = this.paths
+    this.#paths = this.#paths
       .map(x => PathUtil.resolveUnix(x))
       .filter(x => FsUtil.existsSync(x));
   }
@@ -31,11 +33,11 @@ class $ResourceManager {
   /**
    * Consume Scan entry into indexing all resources available
    */
-  private scanEntry(base: string, found: Set<string>, out: string[], r: ScanEntry) {
+  #scanEntry(base: string, found: Set<string>, out: string[], r: ScanEntry) {
     if (r.stats.isDirectory()) {
       if (r.children) {
         for (const el of r.children!) {
-          this.scanEntry(base, found, out, el);
+          this.#scanEntry(base, found, out, el);
         }
       }
       return;
@@ -44,7 +46,7 @@ class $ResourceManager {
     if (!found.has(p)) {
       found.add(p);
       out.push(p);
-      this.cache.set(p, r.file);
+      this.#cache.set(p, r.file);
     }
   }
 
@@ -54,21 +56,21 @@ class $ResourceManager {
    * @param full Is the path fully qualified or should it be relative to the cwd
    */
   addPath(searchPath: string) {
-    this.paths.push(PathUtil.resolveUnix(searchPath));
+    this.#paths.push(PathUtil.resolveUnix(searchPath));
   }
 
   /**
    * List all paths
    */
   getPaths() {
-    return this.paths.slice(0);
+    return this.#paths.slice(0);
   }
 
   /**
    * List all paths as relative to the cwd
    */
   getRelativePaths() {
-    return this.paths.slice(0).map(x => x.replace(`${PathUtil.cwd}/`, ''));
+    return this.#paths.slice(0).map(x => x.replace(`${PathUtil.cwd}/`, ''));
   }
 
   /**
@@ -78,7 +80,7 @@ class $ResourceManager {
   async findAbsolute(rel: string) {
     rel = cleanPath(rel);
     await this.find(rel);
-    return this.cache.get(rel)!;
+    return this.#cache.get(rel)!;
   }
 
   /**
@@ -87,18 +89,18 @@ class $ResourceManager {
    */
   async find(pth: string) {
     pth = cleanPath(pth);
-    if (this.cache.has(pth)) {
-      return this.cache.get(pth)!;
+    if (this.#cache.has(pth)) {
+      return this.#cache.get(pth)!;
     }
 
-    for (const f of this.paths.map(x => PathUtil.joinUnix(x, pth))) {
+    for (const f of this.#paths.map(x => PathUtil.joinUnix(x, pth))) {
       if (await FsUtil.exists(f)) {
-        this.cache.set(pth, f);
+        this.#cache.set(pth, f);
         return f;
       }
     }
 
-    throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`, 'notfound');
+    throw new AppError(`Cannot find resource: ${pth}, searched: ${this.#paths}`, 'notfound');
   }
 
   /**
@@ -136,12 +138,12 @@ class $ResourceManager {
     const out: string[] = [];
     const found = new Set<string>();
 
-    for (const root of this.paths) {
+    for (const root of this.#paths) {
       const results = await ScanFs.scanDir({ testFile: x => pattern.test(x) },
         PathUtil.resolveUnix(root, base));
 
       for (const r of results) {
-        this.scanEntry(base, found, out, r);
+        this.#scanEntry(base, found, out, r);
       }
     }
     return out;

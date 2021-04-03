@@ -6,7 +6,12 @@ import { ModelType } from '../types/model';
  *
  * @concrete ../internal/service/common:ModelBasicSupportTarget
  */
-export interface ModelBasicSupport {
+export interface ModelBasicSupport<C extends any = any> {
+  /**
+   * Get underlying client
+   */
+  get client(): C;
+
   /**
    * Get by Id
    * @param id The identifier of the document to retrieve

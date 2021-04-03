@@ -13,12 +13,17 @@ import { MailUtil } from './util';
 @Injectable()
 export class MailService {
 
-  private compiled = new Map<string, MessageOptions>();
+  #compiled = new Map<string, MessageOptions>();
+  #transport: MailTransport;
+  #tplEngine: MailTemplateEngine;
 
   constructor(
-    private transport: MailTransport,
-    private tplEngine: MailTemplateEngine
-  ) { }
+    transport: MailTransport,
+    tplEngine: MailTemplateEngine
+  ) {
+    this.#tplEngine = tplEngine;
+    this.#transport = transport;
+  }
 
   /**
    * Send multiple messages.
@@ -40,16 +45,16 @@ export class MailService {
    * Send a pre compiled email that has a relevant html, subject and optional text file associated
    */
   async sendCompiled(key: string, msg: Omit<MessageOptions, 'html' | 'text' | 'subject'>): Promise<unknown> {
-    if (!EnvUtil.isReadonly() || !this.compiled.has(key)) {
+    if (!EnvUtil.isReadonly() || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         ResourceManager.read(`${key}.compiled.html`, 'utf8'),
         ResourceManager.read(`${key}.compiled.text`, 'utf8').catch(() => ''),
         ResourceManager.read(`${key}.compiled.subject`, 'utf8')
       ]);
 
-      this.compiled.set(key, { html, text, subject });
+      this.#compiled.set(key, { html, text, subject });
     }
-    return this.send({ ...msg, ...this.compiled.get(key)! });
+    return this.send({ ...msg, ...this.#compiled.get(key)! });
   }
 
   /**
@@ -59,9 +64,9 @@ export class MailService {
     // Template if context is provided
     if (msg.context) {
       const [html, text, subject] = await Promise.all([
-        msg.html ? this.tplEngine!.template(msg.html, msg.context) : undefined,
-        msg.text ? this.tplEngine!.template(msg.text, msg.context) : undefined,
-        msg.subject ? this.tplEngine!.template(msg.subject, msg.context) : undefined
+        msg.html ? this.#tplEngine!.template(msg.html, msg.context) : undefined,
+        msg.text ? this.#tplEngine!.template(msg.text, msg.context) : undefined,
+        msg.subject ? this.#tplEngine!.template(msg.subject, msg.context) : undefined
       ]);
 
       Object.assign(msg, { html, text, subject });
@@ -86,6 +91,6 @@ export class MailService {
       delete msg.html; // This is a hack to fix nodemailer
     }
 
-    return this.transport.send(msg);
+    return this.#transport.send(msg);
   }
 }

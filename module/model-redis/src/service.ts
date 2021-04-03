@@ -21,13 +21,13 @@ import { RedisModelConfig } from './config';
 @Injectable()
 export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
-  cl: redis.RedisClient;
+  client: redis.RedisClient;
 
   constructor(public readonly config: RedisModelConfig) { }
 
-  private wrap = <T>(fn: T): T => (fn as unknown as Function).bind(this.cl) as T;
+  #wrap = <T>(fn: T): T => (fn as unknown as Function).bind(this.client) as T;
 
-  private resolveKey(cls: Class | string, id?: string) {
+  #resolveKey(cls: Class | string, id?: string) {
     let key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
     if (id) {
       key = `${key}:${id}`;
@@ -38,14 +38,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return key;
   }
 
-  private async * iterate(prefix: Class | string): AsyncIterable<string[]> {
+  async * #iterate(prefix: Class | string): AsyncIterable<string[]> {
     let prevCursor: string | undefined;
     let done = false;
-    const query = `${this.resolveKey(prefix)}*`;
+    const query = `${this.#resolveKey(prefix)}*`;
 
     while (!done) {
-      const [cursor, results] = await this.wrap(util.promisify(
-        this.cl.scan as
+      const [cursor, results] = await this.#wrap(util.promisify(
+        this.client.scan as
         (cursorNum: string, matchOp: 'MATCH', match: string, countOp: 'COUNT', count: string, cb: redis.Callback<[string, string[]]>) => void
       ))(prevCursor ?? '0', 'MATCH', query, 'COUNT', '100');
       prevCursor = cursor;
@@ -58,21 +58,21 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  private async store<T extends ModelType>(cls: Class<T>, item: T) {
-    const key = this.resolveKey(cls, item.id);
+  async #store<T extends ModelType>(cls: Class<T>, item: T) {
+    const key = this.#resolveKey(cls, item.id);
     const config = ModelRegistry.get(cls);
     // Store with indices
     if (config.indices?.length) {
-      const multi = this.cl.multi();
+      const multi = this.client.multi();
       multi.set(key, JSON.stringify(item));
 
       for (const idx of config.indices) {
-        multi.hmset(this.resolveKey(cls, idx.name), ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id);
+        multi.hmset(this.#resolveKey(cls, idx.name), ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id);
       }
 
       await new Promise<void>((resolve, reject) => multi.exec(err => err ? reject(err) : resolve()));
     } else {
-      await this.wrap(util.promisify(this.cl.set))(key, JSON.stringify(item));
+      await this.#wrap(util.promisify(this.client.set))(key, JSON.stringify(item));
     }
 
     // Set expiry
@@ -80,20 +80,20 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       const expiry = ModelExpiryUtil.getExpiryState(cls, item);
       if (expiry.expiresAt !== undefined) {
         if (expiry.expiresAt) {
-          await this.wrap(util.promisify(this.cl.pexpireat))(
-            this.resolveKey(cls, item.id), expiry.expiresAt.getTime()
+          await this.#wrap(util.promisify(this.client.pexpireat))(
+            this.#resolveKey(cls, item.id), expiry.expiresAt.getTime()
           );
         } else {
-          await this.wrap(util.promisify(this.cl.persist))(this.resolveKey(cls, item.id));
+          await this.#wrap(util.promisify(this.client.persist))(this.#resolveKey(cls, item.id));
         }
       }
     }
   }
 
   async postConstruct() {
-    this.cl = new redis.RedisClient(this.config.client);
+    this.client = new redis.RedisClient(this.config.client);
     await ModelStorageUtil.registerModelChangeListener(this);
-    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.cl.quit());
+    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.quit());
   }
 
   uuid() {
@@ -101,7 +101,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async has<T extends ModelType>(cls: Class<T>, id: string, error?: 'notfound' | 'data') {
-    const res = await this.wrap(util.promisify(this.cl.exists as (key: string, cb: redis.Callback<number>) => void))(this.resolveKey(cls, id));
+    const res = await this.#wrap(util.promisify(this.client.exists as (key: string, cb: redis.Callback<number>) => void))(this.#resolveKey(cls, id));
     if (res === 0 && error === 'notfound') {
       throw new NotFoundError(cls, id);
     } else if (res === 1 && error === 'data') {
@@ -110,7 +110,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
-    const payload = await this.wrap(util.promisify(this.cl.get))(this.resolveKey(cls, id));
+    const payload = await this.#wrap(util.promisify(this.client.get))(this.#resolveKey(cls, id));
     if (payload) {
       const item = await ModelCrudUtil.load(cls, payload);
       if (item) {
@@ -125,7 +125,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       await this.has(cls, item.id, 'data');
     }
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.store(cls, item);
+    await this.#store(cls, item);
     return item;
   }
 
@@ -142,7 +142,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       throw new SubTypeNotSupportedError(cls);
     }
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.store(cls, item);
+    await this.#store(cls, item);
     return item;
   }
 
@@ -152,7 +152,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
-    await this.store(cls, item as T);
+    await this.#store(cls, item as T);
     return item as T;
   }
 
@@ -160,16 +160,16 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
-    const count = await this.wrap(util.promisify(this.cl.del as (key: string, cb: redis.Callback<number>) => void))(this.resolveKey(cls, id));
+    const count = await this.#wrap(util.promisify(this.client.del as (key: string, cb: redis.Callback<number>) => void))(this.#resolveKey(cls, id));
     if (count === 0) {
       throw new NotFoundError(cls, id);
     }
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    for await (const ids of this.iterate(cls)) {
+    for await (const ids of this.#iterate(cls)) {
 
-      const bodies = (await this.wrap(util.promisify(this.cl.mget as (keys: string[], cb: redis.Callback<(string | null)[]>) => void))(ids))
+      const bodies = (await this.#wrap(util.promisify(this.client.mget as (keys: string[], cb: redis.Callback<(string | null)[]>) => void))(ids))
         .filter(x => !!x) as string[];
 
       for (const body of bodies) {
@@ -197,11 +197,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async deleteStorage() {
     if (!this.config.namespace) {
-      await this.wrap(util.promisify(this.cl.flushdb))();
+      await this.#wrap(util.promisify(this.client.flushdb))();
     } else {
-      for await (const ids of this.iterate('')) {
+      for await (const ids of this.#iterate('')) {
         if (ids.length) {
-          await this.wrap(util.promisify(this.cl.del) as (...keys: string[]) => Promise<number>)(...ids);
+          await this.#wrap(util.promisify(this.client.del) as (...keys: string[]) => Promise<number>)(...ids);
         }
       }
     }
@@ -213,7 +213,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       throw new SubTypeNotSupportedError(cls);
     }
     const key = ModelIndexedUtil.computeIndexKey(cls, idx, body);
-    const id = await this.wrap(util.promisify(this.cl.hget))(this.resolveKey(cls, idx), key);
+    const id = await this.#wrap(util.promisify(this.client.hget))(this.#resolveKey(cls, idx), key);
     if (id) {
       return this.get(cls, id);
     }
@@ -225,7 +225,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       throw new SubTypeNotSupportedError(cls);
     }
     const key = ModelIndexedUtil.computeIndexKey(cls, idx, body);
-    const id = await this.wrap(util.promisify(this.cl.hget))(this.resolveKey(cls, idx), key);
+    const id = await this.#wrap(util.promisify(this.client.hget))(this.#resolveKey(cls, idx), key);
     if (id) {
       return this.delete(cls, id);
     }

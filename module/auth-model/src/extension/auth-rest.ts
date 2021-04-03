@@ -12,10 +12,14 @@ import { ModelPrincipalSource } from '../principal';
  */
 export class ModelIdentitySource<U extends ModelType> implements IdentitySource {
 
-  constructor(private source: ModelPrincipalSource<U>) { }
+  #source: ModelPrincipalSource<U>;
+
+  constructor(source: ModelPrincipalSource<U>) {
+    this.#source = source;
+  }
 
   async authenticate(req: Request, res: Response): Promise<Identity | undefined> {
-    const ident = this.source.toIdentity(req.body);
-    return this.source.authenticate(ident.id, ident.password!);
+    const ident = this.#source.toIdentity(req.body);
+    return this.#source.authenticate(ident.id, ident.password!);
   }
 }

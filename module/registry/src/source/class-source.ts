@@ -13,26 +13,26 @@ import { PendingRegister } from '../decorator';
  */
 export class ClassSource implements ChangeSource<Class> {
 
-  private classes = new Map<string, Map<string, Class>>();
-  private emitter = new EventEmitter();
+  #classes = new Map<string, Map<string, Class>>();
+  #emitter = new EventEmitter();
 
   constructor() {
     Compiler
-      .on('added', () => { this.processFiles(); this.flush(); })
+      .on('added', () => { this.processFiles(); this.#flush(); })
       .on('changed', () => this.processFiles());
   }
 
   /**
    * Flush classes
    */
-  private flush() {
+  #flush() {
     for (const [file, classes] of PendingRegister.flush()) {
       if (!classes || !classes.length) {
         continue;
       }
-      this.classes.set(file, new Map());
+      this.#classes.set(file, new Map());
       for (const cls of classes) {
-        this.classes.get(cls.ᚕfile)!.set(cls.ᚕid, cls);
+        this.#classes.get(cls.ᚕfile)!.set(cls.ᚕid, cls);
         this.emit({ type: 'added', curr: cls });
       }
     }
@@ -45,14 +45,14 @@ export class ClassSource implements ChangeSource<Class> {
     const next = new Map(classes.map(cls => [cls.ᚕid, cls] as [string, Class]));
 
     let prev = new Map<string, Class>();
-    if (this.classes.has(file)) {
-      prev = new Map(this.classes.get(file)!.entries());
+    if (this.#classes.has(file)) {
+      prev = new Map(this.#classes.get(file)!.entries());
     }
 
     const keys = new Set([...Array.from(prev.keys()), ...Array.from(next.keys())]);
 
-    if (!this.classes.has(file)) {
-      this.classes.set(file, new Map());
+    if (!this.#classes.has(file)) {
+      this.#classes.set(file, new Map());
     }
 
     /**
@@ -61,9 +61,9 @@ export class ClassSource implements ChangeSource<Class> {
     for (const k of keys) {
       if (!next.has(k)) {
         this.emit({ type: 'removing', prev: prev.get(k)! });
-        this.classes.get(file)!.delete(k);
+        this.#classes.get(file)!.delete(k);
       } else {
-        this.classes.get(file)!.set(k, next.get(k)!);
+        this.#classes.get(file)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
           this.emit({ type: 'added', curr: next.get(k)! });
         } else if (prev.get(k)!.ᚕhash !== next.get(k)!.ᚕhash) {
@@ -88,27 +88,27 @@ export class ClassSource implements ChangeSource<Class> {
    */
   emit(e: ChangeEvent<Class>) {
     console.debug('Emitting change', { type: e.type, curr: e.curr?.ᚕid, prev: e.prev?.ᚕid });
-    this.emitter.emit('change', e);
+    this.#emitter.emit('change', e);
   }
 
   /**
    * Clear all classes
    */
   reset() {
-    this.classes.clear();
+    this.#classes.clear();
   }
 
   /**
    * Initialize
    */
   async init() {
-    this.flush();
+    this.#flush();
   }
 
   /**
    * Add callback for change events
    */
   on(callback: ChangeHandler<Class>): void {
-    this.emitter.on('change', callback);
+    this.#emitter.on('change', callback);
   }
 }

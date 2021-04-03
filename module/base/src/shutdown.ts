@@ -26,18 +26,18 @@ type Listener = { name: string, handler: Function, final?: boolean };
  * it will shutdown immediately.
  */
 class $ShutdownManager {
-  private listeners: Listener[] = [];
-  private shutdownCode = -1;
-  private unhandled: UnhandledHandler[] = [];
+  #listeners: Listener[] = [];
+  #shutdownCode = -1;
+  #unhandled: UnhandledHandler[] = [];
 
-  private async getAvailableListeners(exitCode: number) {
+  async #getAvailableListeners(exitCode: number) {
     const promises: Promise<unknown>[] = [];
 
     // Get valid listeners depending on lifecycle
-    const listeners = this.listeners.filter(x => exitCode >= 0 || !x.final);
+    const listeners = this.#listeners.filter(x => exitCode >= 0 || !x.final);
 
     // Retain unused listeners for final attempt, if needed
-    this.listeners = this.listeners.filter(x => exitCode < 0 && x.final);
+    this.#listeners = this.#listeners.filter(x => exitCode < 0 && x.final);
 
     // Handle each listener
     for (const listener of listeners) {
@@ -65,14 +65,14 @@ class $ShutdownManager {
 
   async executeAsync(exitCode: number = 0, err?: unknown) {
 
-    if (this.shutdownCode > 0) { // Killed twice
+    if (this.#shutdownCode > 0) { // Killed twice
       if (exitCode > 0) { // Handle force kill
         ogExit(exitCode);
       } else {
         return;
       }
     } else {
-      this.shutdownCode = exitCode;
+      this.#shutdownCode = exitCode;
     }
 
     try {
@@ -82,7 +82,7 @@ class $ShutdownManager {
       }
 
       // Get list of all pending listeners
-      const promises = await this.getAvailableListeners(exitCode);
+      const promises = await this.#getAvailableListeners(exitCode);
 
       // Run them all, with the ability for the shutdown to preempt
       if (promises.length) {
@@ -97,8 +97,8 @@ class $ShutdownManager {
       console.warn('Error on shutdown', { error: e });
     }
 
-    if (this.shutdownCode >= 0) {
-      ogExit(this.shutdownCode);
+    if (this.#shutdownCode >= 0) {
+      ogExit(this.#shutdownCode);
     }
   }
 
@@ -117,9 +117,9 @@ class $ShutdownManager {
     process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
     process.on('SIGTERM', this.execute.bind(this, 143));
-    process.on('uncaughtException', (err) => this.unhandled.find(x => !!x(err as Error)));
-    process.on('unhandledRejection', (err, p) => this.unhandled.find(x => !!x(err as Error, p)));
-    this.unhandled.push(this.execute.bind(this, 1));
+    process.on('uncaughtException', (err) => this.#unhandled.find(x => !!x(err as Error)));
+    process.on('unhandledRejection', (err, p) => this.#unhandled.find(x => !!x(err as Error, p)));
+    this.#unhandled.push(this.execute.bind(this, 1));
   }
 
   /**
@@ -146,7 +146,7 @@ class $ShutdownManager {
     if (/[.][jt]s$/.test(name)) {
       name = ModuleUtil.getId(name);
     }
-    this.listeners.push({ name, handler, final });
+    this.#listeners.push({ name, handler, final });
   }
 
   /**
@@ -156,9 +156,9 @@ class $ShutdownManager {
    */
   onUnhandled(handler: UnhandledHandler, position = -1) {
     if (position < 0) {
-      this.unhandled.push(handler);
+      this.#unhandled.push(handler);
     } else {
-      this.unhandled.splice(position, 0, handler);
+      this.#unhandled.splice(position, 0, handler);
     }
     return this.removeUnhandledHandler.bind(this, handler);
   }
@@ -168,9 +168,9 @@ class $ShutdownManager {
    * @param handler The handler to remove
    */
   removeUnhandledHandler(handler: UnhandledHandler) {
-    const index = this.unhandled.indexOf(handler);
+    const index = this.#unhandled.indexOf(handler);
     if (index >= 0) {
-      this.unhandled.splice(index, 1);
+      this.#unhandled.splice(index, 1);
     }
   }
 

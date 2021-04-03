@@ -14,9 +14,9 @@ import { BaseFeature } from '../../base';
 @Activatible('app', 'run')
 export class AppRunFeature extends BaseFeature {
 
-  private storage = new ActionStorage<AppChoice>('app.run', Workspace.path);
+  #storage = new ActionStorage<AppChoice>('app.run', Workspace.path);
 
-  private runner(title: string, choices: () => Promise<AppChoice[] | AppChoice | undefined>, line?: number) {
+  #runner(title: string, choices: () => Promise<AppChoice[] | AppChoice | undefined>, line?: number) {
     return async () => {
       const choice = await choices();
       if (choice) {
@@ -44,7 +44,7 @@ export class AppRunFeature extends BaseFeature {
   async getValidRecent(count: number): Promise<AppChoice[]> {
     const appList = await this.getAppList();
 
-    return this.storage.getRecentAndFilterState(count * 2, x =>
+    return this.#storage.getRecentAndFilterState(count * 2, x =>
       !appList.some(a => a.targetId === x.targetId && a.name === x.name)
     )
       .map(x => x.data)
@@ -60,7 +60,7 @@ export class AppRunFeature extends BaseFeature {
     const choice = await AppSelectorUtil.resolveChoices(title, choices);
     if (choice) {
       const key = `${choice.targetId}#${choice.name}:${choice.inputs.join(',')}`;
-      this.storage.set(key, { ...choice, time: Date.now(), key });
+      this.#storage.set(key, { ...choice, time: Date.now(), key });
       return choice;
     }
   }
@@ -159,13 +159,13 @@ export class AppRunFeature extends BaseFeature {
    */
   activate() {
     this.register('new', (name?: string, line?: number) =>
-      this.runner('Run New Application', async () => {
+      this.#runner('Run New Application', async () => {
         const list = await this.getAppList();
         return name ? list.find(x => x.name === name) : list;
       }, line)()
     );
-    this.register('recent', this.runner('Run Recent Application', () => this.getValidRecent(10)));
-    this.register('mostRecent', this.runner('Run Most Recent Application', () => this.getValidRecent(1).then(([x]) => x)));
+    this.register('recent', this.#runner('Run Recent Application', () => this.getValidRecent(10)));
+    this.register('mostRecent', this.#runner('Run Most Recent Application', () => this.getValidRecent(1).then(([x]) => x)));
     this.register('export', async () => this.exportLaunchConfig());
   }
 }

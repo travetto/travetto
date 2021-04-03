@@ -10,12 +10,15 @@ import { Consumable } from '../registry';
  */
 @Consumable('event')
 export class EventStreamer implements TestConsumer {
+  #stream: Writable;
 
-  constructor(private stream: Writable = process.stdout) { }
+  constructor(stream: Writable = process.stdout) {
+    this.#stream = stream;
+  }
 
   onEvent(event: TestEvent) {
     const out = { ...event };
     ConsumerUtil.serializeErrors(out);
-    this.stream.write(`${JSON.stringify(out)}\n`);
+    this.#stream.write(`${JSON.stringify(out)}\n`);
   }
 }

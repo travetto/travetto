@@ -14,26 +14,24 @@ type Diag = {
   };
 };
 
-const CompilerOptionsSym = Symbol.for('@trv:compiler/options');
-
 const NODE_VERSION = EnvUtil.get('TRV_NODE_MAJOR', process.version.split(/[v.]/)[1]) as '12';
 const TS_TARGET = ({
   12: 'ES2019',
   13: 'ES2019',
   14: 'ES2020',
-  15: 'ES2020',
-  16: 'ES2020'
+  15: 'ESNext',
+  16: 'ESNext'
 } as const)[NODE_VERSION] ?? 'ES2019'; // Default if not found
 
 /**
  * Standard transpilation support
  */
 export class TranspileUtil {
-  private static [CompilerOptionsSym]: Record<string, unknown>; // Untyped so that the typescript typings do not make it into the API
+  static #options: Record<string, unknown>; // Untyped so that the typescript typings do not make it into the API
 
-  private static optionsExtra?: Record<string, unknown>;
+  static #optionsExtra?: Record<string, unknown>;
 
-  private static readTsConfigOptions(path: string) {
+  static #readTsConfigOptions(path: string) {
     const ts = require('typescript') as typeof tsi;
     return ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(path, ts.sys.readFile), ts.sys, PathUtil.cwd
@@ -41,11 +39,23 @@ export class TranspileUtil {
   }
 
   /**
+   * Set extra transpiler options
+   * @privates
+   */
+  static setExtraOptions(opts: Record<string, unknown>) {
+    this.#optionsExtra = opts;
+  }
+
+  /**
    * Get loaded compiler options
    */
   static get compilerOptions(): Record<string, unknown> {
-    if (!this[CompilerOptionsSym]) {
-      const opts = this.optionsExtra ?? {};
+    let o = {} as Record<string, unknown>;
+    if (this.#optionsExtra) {
+      o = this.#optionsExtra;
+    }
+    if (!this.#options) {
+      const opts = o ?? {};
       const rootDir = opts.rootDir ?? PathUtil.cwd;
       const ts = require('typescript') as typeof tsi;
       const projTsconfig = PathUtil.resolveUnix('tsconfig.json');
@@ -53,16 +63,16 @@ export class TranspileUtil {
       // Fallback to base tsconfig if not found in local folder
       const config = FsUtil.existsSync(projTsconfig) ? projTsconfig : baseTsconfig;
 
-      this[CompilerOptionsSym] = {
-        ...this.readTsConfigOptions(config),
+      this.#options = {
+        ...this.#readTsConfigOptions(config),
         target: ts.ScriptTarget[TS_TARGET],
         rootDir,
         outDir: rootDir,
         sourceRoot: rootDir,
-        ...(this.optionsExtra ?? {})
+        ...(o ?? {})
       } as tsi.CompilerOptions;
     }
-    return this[CompilerOptionsSym];
+    return this.#options;
   }
 
   /**

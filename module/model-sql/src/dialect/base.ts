@@ -757,7 +757,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       return;
     }
 
-    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, inst.value[c.name])));
+    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, (inst.value as Record<string, string>)[c.name])));
 
     columnNames.push(this.pathField.name);
     if (hasParent) {
@@ -959,10 +959,10 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
 
       await Promise.all([
         ...upserts.filter(x => x.stack.length === 1).map(i =>
-          this.deleteByIds(i.stack, i.records.map(v => v.value[idx]))
+          this.deleteByIds(i.stack, i.records.map(v => (v.value as Record<string, string>)[idx]))
         ),
         ...updates.filter(x => x.stack.length === 1).map(i =>
-          this.deleteByIds(i.stack, i.records.map(v => v.value[idx]))
+          this.deleteByIds(i.stack, i.records.map(v => (v.value as Record<string, string>)[idx]))
         ),
       ]);
     }

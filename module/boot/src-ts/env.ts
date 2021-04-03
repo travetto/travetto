@@ -5,7 +5,7 @@ import { PathUtil } from './path';
  */
 export class EnvUtil {
 
-  private static DYNAMIC_MODULES: Record<string, string>;
+  static #dynamicModules: Record<string, string>;
 
   /**
    * Get, check for key as passed, as all upper and as all lowercase
@@ -127,13 +127,13 @@ export class EnvUtil {
    * Get dynamic modules
    */
   static getDynamicModules() {
-    if (this.DYNAMIC_MODULES === undefined) {
-      this.DYNAMIC_MODULES = Object.fromEntries(
+    if (this.#dynamicModules === undefined) {
+      this.#dynamicModules = Object.fromEntries(
         this.getEntries('TRV_MODULES')
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([k, v]) => [k, v || PathUtil.resolveFrameworkPath(PathUtil.resolveUnix('node_modules', k))])
       );
     }
-    return this.DYNAMIC_MODULES;
+    return this.#dynamicModules;
   }
 }

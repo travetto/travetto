@@ -21,9 +21,9 @@ const Module = Mod as unknown as ModType;
  */
 export class ModuleUtil {
 
-  private static modCache = new Map<string, string>();
+  static #modCache = new Map<string, string>();
 
-  private static handlers: ModuleHandler[] = [];
+  static #handlers: ModuleHandler[] = [];
 
   /**
    * Process error response
@@ -53,7 +53,7 @@ export class ModuleUtil {
    * @param handler The code to run on post module load
    */
   static addHandler(handler: ModuleHandler) {
-    this.handlers.push(handler);
+    this.#handlers.push(handler);
   }
 
   /**
@@ -79,9 +79,9 @@ export class ModuleUtil {
    * Handle module post processing
    */
   static handleModule(mod: unknown, request: string, parent: ModType) {
-    if (this.handlers) {
+    if (this.#handlers) {
       const name = Module._resolveFilename!(request, parent);
-      for (const handler of this.handlers) {
+      for (const handler of this.#handlers) {
         mod = handler(name, mod);
       }
     }
@@ -118,8 +118,8 @@ export class ModuleUtil {
       return `${this.getId(filename)}￮${clsName}`;
     }
 
-    if (this.modCache.has(filename)) {
-      return this.modCache.get(filename)!;
+    if (this.#modCache.has(filename)) {
+      return this.#modCache.get(filename)!;
     }
 
     let mod = this.normalizePath(filename);
@@ -142,7 +142,7 @@ export class ModuleUtil {
     }
 
     const name = `${ns}/${mod}`;
-    this.modCache.set(filename, name);
+    this.#modCache.set(filename, name);
     return name;
   }
 
@@ -150,7 +150,7 @@ export class ModuleUtil {
    * Clear out on cleanup
    */
   static reset() {
-    this.modCache.clear();
-    this.handlers = [];
+    this.#modCache.clear();
+    this.#handlers = [];
   }
 }

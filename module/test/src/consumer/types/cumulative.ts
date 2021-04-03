@@ -13,9 +13,12 @@ export class CumulativeSummaryConsumer implements TestConsumer {
   /**
    * Total state of all tests run so far
    */
-  private state: Record<string, Record<string, TestResult['status']>> = {};
+  #state: Record<string, Record<string, TestResult['status']>> = {};
+  #target: TestConsumer;
 
-  constructor(private target: TestConsumer) { }
+  constructor(target: TestConsumer) {
+    this.#target = target;
+  }
 
   /**
    * Summarize a given test suite using the new result and the historical
@@ -25,8 +28,8 @@ export class CumulativeSummaryConsumer implements TestConsumer {
     try {
       // TODO: Load asyncronously
       require(test.file);
-      this.state[test.classId] = this.state[test.classId] ?? {};
-      this.state[test.classId][test.methodName] = test.status;
+      this.#state[test.classId] = this.#state[test.classId] ?? {};
+      this.#state[test.classId][test.methodName] = test.status;
       const SuiteCls = SuiteRegistry.getClasses().find(x =>
         x.ᚕid === test.classId
       )!;
@@ -40,7 +43,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    * Remove a class
    */
   removeClass(clsId: string) {
-    this.state[clsId] = {};
+    this.#state[clsId] = {};
     return {
       classId: clsId, passed: 0, failed: 0, skipped: 0, total: 0, tests: [], duration: 0, file: '', lines: { start: 0, end: 0 }
     };
@@ -52,7 +55,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
   computeTotal(cls: Class) {
     const suite = SuiteRegistry.get(cls);
     const total = suite.tests.reduce((acc, x) => {
-      const status = this.state[x.classId][x.methodName] ?? 'unknown';
+      const status = this.#state[x.classId][x.methodName] ?? 'unknown';
       acc[status] += 1;
       return acc;
     }, { skipped: 0, passed: 0, failed: 0, unknown: 0 });
@@ -75,10 +78,10 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    * send a full suite summary
    */
   onEvent(e: TestEvent) {
-    this.target.onEvent(e);
+    this.#target.onEvent(e);
     try {
       if (e.type === 'test' && e.phase === 'after') {
-        this.target.onEvent({
+        this.#target.onEvent({
           type: 'suite',
           phase: 'after',
           suite: this.summarizeSuite(e.test)

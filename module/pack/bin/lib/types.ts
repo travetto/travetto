@@ -11,6 +11,6 @@ export type PackOperation<T extends CommonConfig> = {
   key: string;
   title: string;
   extend(a: T, b: Partial<T>): T;
-  context?(cfg: T): Promise<string>;
+  context(cfg: T): Promise<string> | string;
   exec(cfg: T): AsyncGenerator<string>;
 };

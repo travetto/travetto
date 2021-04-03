@@ -41,11 +41,11 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   static app: firebase.app.App;
 
-  cl: firebase.firestore.Firestore;
+  client: firebase.firestore.Firestore;
 
   constructor(public readonly config: FirestoreModelConfig) { }
 
-  private resolveTable(cls: Class) {
+  #resolveTable(cls: Class) {
     let table = ModelRegistry.getStore(cls);
     if (this.config.namespace) {
       table = `${this.config.namespace}_${table}`;
@@ -53,8 +53,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return table;
   }
 
-  private getCollection(cls: Class) {
-    return this.cl.collection(this.resolveTable(cls));
+  #getCollection(cls: Class) {
+    return this.client.collection(this.#resolveTable(cls));
   }
 
   async postConstruct() {
@@ -65,8 +65,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
         databaseURL: this.config.databaseURL
       });
     }
-    this.cl = FirestoreModelService.app.firestore();
-    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.cl.terminate());
+    this.client = FirestoreModelService.app.firestore();
+    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.terminate());
   }
 
   // Storage
@@ -85,7 +85,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
-    const res = await this.getCollection(cls).doc(id).get();
+    const res = await this.#getCollection(cls).doc(id).get();
 
     if (res && res.exists) {
       return await ModelCrudUtil.load(cls, res.data()!);
@@ -95,7 +95,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.getCollection(cls).doc(item.id).create(toSimpleObj(item));
+    await this.#getCollection(cls).doc(item.id).create(toSimpleObj(item));
     return item;
   }
 
@@ -104,7 +104,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       throw new SubTypeNotSupportedError(cls);
     }
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.getCollection(cls).doc(item.id).update(toSimpleObj(item));
+    await this.#getCollection(cls).doc(item.id).update(toSimpleObj(item));
     return item;
   }
 
@@ -113,7 +113,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       throw new SubTypeNotSupportedError(cls);
     }
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.getCollection(cls).doc(item.id).set(toSimpleObj(item));
+    await this.#getCollection(cls).doc(item.id).set(toSimpleObj(item));
     return item;
   }
 
@@ -123,7 +123,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
-    await this.getCollection(cls).doc(id).set(toSimpleObj(item, firebase.firestore.FieldValue.delete()), { merge: true });
+    await this.#getCollection(cls).doc(id).set(toSimpleObj(item, firebase.firestore.FieldValue.delete()), { merge: true });
     return this.get(cls, id);
   }
 
@@ -132,7 +132,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       throw new SubTypeNotSupportedError(cls);
     }
     try {
-      await this.getCollection(cls).doc(id).delete({ exists: true } as unknown as firebase.firestore.Precondition);
+      await this.#getCollection(cls).doc(id).delete({ exists: true } as unknown as firebase.firestore.Precondition);
     } catch (err) {
       if (`${err.message}`.includes('NOT_FOUND')) {
         throw new NotFoundError(cls, id);
@@ -142,7 +142,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async * list<T extends ModelType>(cls: Class<T>) {
-    const batch = await this.getCollection(cls).select().get();
+    const batch = await this.#getCollection(cls).select().get();
     for (const el of batch.docs) {
       try {
         yield await this.get(cls, el.id);
@@ -161,7 +161,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
     const res = ModelIndexedUtil.flattenIndexItem(cls, idx, body);
     const query = res.reduce((q, [k, v]) =>
-      q.where(k, '==', v), this.getCollection(cls) as firebase.firestore.Query);
+      q.where(k, '==', v), this.#getCollection(cls) as firebase.firestore.Query);
 
     const item = await query.get();
 
@@ -178,7 +178,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
     const res = ModelIndexedUtil.flattenIndexItem(cls, idx, body);
     const query = res.reduce((q, [k, v]) =>
-      q.where(k, '==', v), this.getCollection(cls) as firebase.firestore.Query);
+      q.where(k, '==', v), this.#getCollection(cls) as firebase.firestore.Query);
 
     const item = await query.get();
 

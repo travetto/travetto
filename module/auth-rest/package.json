@@ -36,12 +36,12 @@
     "@types/passport": "^1.0.6",
     "passport": "^0.4.1"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "docDependencies": {
     "@types/passport-facebook": "^2.1.10",
     "passport-facebook": "^3.0.0",
     "@travetto/app": "^2.0.0-alpha.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

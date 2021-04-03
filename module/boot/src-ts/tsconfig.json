@@ -1,7 +1,6 @@
 {
   "extends": "../tsconfig.trv.json",
   "compilerOptions": {
-    "target": "ES2019",
     "declaration": true,
     "removeComments": false,
     "outDir": "../src"

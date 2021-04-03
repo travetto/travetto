@@ -1,3 +1,5 @@
+import { Writable } from 'stream';
+
 import { ColorUtil, PathUtil } from '@travetto/boot';
 import { YamlUtil } from '@travetto/yaml';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
@@ -12,22 +14,27 @@ import { TestResultsEnhancer, COLOR_ENHANCER, DUMMY_ENHANCER } from '../enhancer
  */
 @Consumable('tap')
 export class TapEmitter implements TestConsumer {
-  private count = 0;
+  #count = 0;
+  #stream: Writable;
+  #enhancer: TestResultsEnhancer;
 
   constructor(
-    private stream: NodeJS.WriteStream = process.stdout,
-    private enhancer: TestResultsEnhancer = ColorUtil.colorize ? COLOR_ENHANCER : DUMMY_ENHANCER
-  ) { }
+    stream: Writable = process.stdout,
+    enhancer: TestResultsEnhancer = ColorUtil.colorize ? COLOR_ENHANCER : DUMMY_ENHANCER
+  ) {
+    this.#stream = stream;
+    this.#enhancer = enhancer;
+  }
 
   protected log(message: string) {
-    this.stream.write(`${message}\n`);
+    this.#stream.write(`${message}\n`);
   }
 
   /**
    * Preamble
    */
   onStart() {
-    this.log(this.enhancer.suiteName('TAP version 13')!);
+    this.log(this.#enhancer.suiteName('TAP version 13')!);
   }
 
   /**
@@ -36,7 +43,7 @@ export class TapEmitter implements TestConsumer {
   logMeta(obj: Record<string, unknown>) {
     let body = YamlUtil.serialize(obj, { wordwrap: +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 80) - 5 });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
-    this.log(`---\n${this.enhancer.objectInspect(body)}\n...`);
+    this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
   }
 
   /**
@@ -45,10 +52,10 @@ export class TapEmitter implements TestConsumer {
   onEvent(e: TestEvent) {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
-      const suiteId = this.enhancer.suiteName(test.classId);
-      let header = `${suiteId} - ${this.enhancer.testName(test.methodName)}`;
+      const suiteId = this.#enhancer.suiteName(test.classId);
+      let header = `${suiteId} - ${this.#enhancer.testName(test.methodName)}`;
       if (test.description) {
-        header += `: ${this.enhancer.testDescription(test.description)}`;
+        header += `: ${this.#enhancer.testDescription(test.description)}`;
       }
       this.log(`# ${header}`);
 
@@ -56,18 +63,18 @@ export class TapEmitter implements TestConsumer {
       if (test.assertions.length) {
         let subCount = 0;
         for (const a of test.assertions) {
-          const text = a.message ? `${a.text} (${this.enhancer.failure(a.message)})` : a.text;
+          const text = a.message ? `${a.text} (${this.#enhancer.failure(a.message)})` : a.text;
           let subMessage = [
-            this.enhancer.assertNumber(++subCount),
+            this.#enhancer.assertNumber(++subCount),
             '-',
-            this.enhancer.assertDescription(text),
-            `${this.enhancer.assertFile(a.file.replace(PathUtil.cwd, '.'))}:${this.enhancer.assertLine(a.line)}`
+            this.#enhancer.assertDescription(text),
+            `${this.#enhancer.assertFile(a.file.replace(PathUtil.cwd, '.'))}:${this.#enhancer.assertLine(a.line)}`
           ].join(' ');
 
           if (a.error) {
-            subMessage = `${this.enhancer.failure('not ok')} ${subMessage}`;
+            subMessage = `${this.#enhancer.failure('not ok')} ${subMessage}`;
           } else {
-            subMessage = `${this.enhancer.success('ok')} ${subMessage}`;
+            subMessage = `${this.#enhancer.success('ok')} ${subMessage}`;
           }
           this.log(`    ${subMessage}`);
 
@@ -75,15 +82,15 @@ export class TapEmitter implements TestConsumer {
             this.logMeta({ message: a.message.replace(/\\n/g, '\n') });
           }
         }
-        this.log(`    ${this.enhancer.assertNumber(1)}..${this.enhancer.assertNumber(subCount)}`);
+        this.log(`    ${this.#enhancer.assertNumber(1)}..${this.#enhancer.assertNumber(subCount)}`);
       }
 
       // Track test result
-      let status = `${this.enhancer.testNumber(++this.count)} `;
+      let status = `${this.#enhancer.testNumber(++this.#count)} `;
       switch (test.status) {
         case 'skipped': status += ' # SKIP'; break;
-        case 'failed': status = `${this.enhancer.failure('not ok')} ${status}`; break;
-        default: status = `${this.enhancer.success('ok')} ${status}`;
+        case 'failed': status = `${this.#enhancer.failure('not ok')} ${status}`; break;
+        default: status = `${this.#enhancer.success('ok')} ${status}`;
       }
       status += header;
 
@@ -112,24 +119,24 @@ export class TapEmitter implements TestConsumer {
    * Summarize all results
    */
   onSummary(summary: SuitesSummary) {
-    this.log(`${this.enhancer.testNumber(1)}..${this.enhancer.testNumber(summary.total)}`);
+    this.log(`${this.#enhancer.testNumber(1)}..${this.#enhancer.testNumber(summary.total)}`);
 
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.enhancer.failure(err instanceof Error ? err.toJSON() : `${err}`) as string);
+        this.log(this.#enhancer.failure(err instanceof Error ? err.toJSON() : `${err}`) as string);
       }
     }
 
     const allPassed = summary.failed === 0;
 
     this.log([
-      this.enhancer[allPassed ? 'success' : 'failure']('Results'),
-      `${this.enhancer.total(summary.passed)}/${this.enhancer.total(summary.total)},`,
-      allPassed ? 'failed' : this.enhancer.failure('failed'),
-      `${this.enhancer.total(summary.failed)}`,
+      this.#enhancer[allPassed ? 'success' : 'failure']('Results'),
+      `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`,
+      allPassed ? 'failed' : this.#enhancer.failure('failed'),
+      `${this.#enhancer.total(summary.failed)}`,
       'skipped',
-      this.enhancer.total(summary.skipped),
+      this.#enhancer.total(summary.skipped),
       `# (Total Time: ${summary.duration}ms)`
     ].join(' '));
   }

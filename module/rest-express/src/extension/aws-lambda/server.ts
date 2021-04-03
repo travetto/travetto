@@ -16,24 +16,24 @@ import { ExpressRestServer } from '../../server';
 @Injectable(AwsLambdaSym)
 export class AwsLambdaExpressRestServer extends ExpressRestServer implements AwsLambdaRestServer {
 
-  private server: http.Server;
+  #server: http.Server;
 
   /**
    * Handler method for the proxy
    */
   handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
-    return awsServerlessExpress.proxy(this.server, event, context, 'PROMISE').promise;
+    return awsServerlessExpress.proxy(this.#server, event, context, 'PROMISE').promise;
   }
 
   init() {
     const ret = super.init();
     const config = ConfigManager.get('rest.aws');
-    this.server = awsServerlessExpress.createServer(ret, undefined, config.binaryMimeTypes as string[] ?? []);
+    this.#server = awsServerlessExpress.createServer(ret, undefined, config.binaryMimeTypes as string[] ?? []);
     return ret;
   }
 
   async listen() {
     this.listening = true;
-    return this.server;
+    return this.#server;
   }
 }

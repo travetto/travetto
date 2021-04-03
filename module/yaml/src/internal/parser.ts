@@ -14,7 +14,7 @@ export class Parser {
   /**
    * Start an Array
    */
-  private static startList(state: State, indent: number) {
+  static #startList(state: State, indent: number) {
     if (indent === state.top.indent) { // If at the same level
       if (!(state.top instanceof ListBlock) && !(state.top instanceof MapBlock)) { // If not a map or a list, as maps can have lists at same level
         throw new Error('Invalid mixing of elements');
@@ -29,7 +29,7 @@ export class Parser {
   /**
    * Start a map object
    */
-  private static startMap(state: State, field: string, indent: number) {
+  static #startMap(state: State, field: string, indent: number) {
     state.nestField(new TextNode(field).value, indent);
 
     if (indent === state.top.indent) { // If at the same level
@@ -44,7 +44,7 @@ export class Parser {
   /**
    * Read a single line, and return continuation point, and optionally list of tokens produced
    */
-  private static readLine(state: State, text: string, pos: number): [number] | [number, number, string[]] {
+  static #readLine(state: State, text: string, pos: number): [number] | [number, number, string[]] {
     const nlPos = text.indexOf('\n', pos);
     const nextLineStart = nlPos < 0 ? text.length + 1 : nlPos + 1;
     let tokens = Tokenizer.tokenize(text, pos, nextLineStart);
@@ -79,7 +79,7 @@ export class Parser {
     while (pos < end) {
       state.lineCount += 1;
 
-      const res = this.readLine(state, text, pos);
+      const res = this.#readLine(state, text, pos);
 
       if (res.length === 1) {
         pos = res[0];
@@ -97,13 +97,13 @@ export class Parser {
         const lastToken = i === tokens.length - 1;
         const isEndOrSpace = (lastToken || Tokenizer.isWhitespaceStr(tokens[i + 1]));
         if (pending.length === 0 && token === DASH && isEndOrSpace) {
-          this.startList(state, subIndent);
+          this.#startList(state, subIndent);
           subIndent += token.length + 1;
           if (!lastToken) { // Consume whitespace
             i += 1;
           }
         } else if (pending.length === 1 && token === COLON && isEndOrSpace) {
-          this.startMap(state, pending[0], subIndent);
+          this.#startMap(state, pending[0], subIndent);
           subIndent += pending[0].length;
           if (!lastToken) {  // Consume whitespace
             i += 1;

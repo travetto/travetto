@@ -5,12 +5,12 @@ import { Controller, Get, Query, Request, Response } from '@travetto/rest';
 @Controller('/simple')
 export class SimpleRoutes {
 
-  private getOptions: GetOption;
-  private setOptions: SetOption;
+  #getOptions: GetOption;
+  #setOptions: SetOption;
 
   @Get('/cookies')
   cookies(req: Request, res: Response, @Query() value: string) {
-    req.cookies.get('name', this.getOptions);
-    res.cookies.set('name', value, this.setOptions);
+    req.cookies.get('name', this.#getOptions);
+    res.cookies.set('name', value, this.#setOptions);
   }
 }

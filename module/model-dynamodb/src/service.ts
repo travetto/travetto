@@ -54,11 +54,11 @@ async function loadAndCheckExpiry<T extends ModelType>(cls: Class<T>, doc: strin
 @Injectable()
 export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
-  cl: dynamodb.DynamoDB;
+  client: dynamodb.DynamoDB;
 
   constructor(public readonly config: DynamoDBModelConfig) { }
 
-  private resolveTable(cls: Class) {
+  #resolveTable(cls: Class) {
     let table = ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
     if (this.config.namespace) {
       table = `${this.config.namespace}_${table}`;
@@ -66,7 +66,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return table;
   }
 
-  private async putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert') {
+  async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert') {
     const config = ModelRegistry.get(cls);
     let expiry: number | undefined;
 
@@ -80,7 +80,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     try {
       if (mode === 'create') {
         const query = {
-          TableName: this.resolveTable(cls),
+          TableName: this.#resolveTable(cls),
           ConditionExpression: 'attribute_not_exists(body)',
           Item: {
             id: toValue(item.id),
@@ -91,10 +91,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           ReturnValues: 'NONE'
         };
         console.debug('Querying', { query } as unknown as Record<string, string>);
-        return await this.cl.putItem(query);
+        return await this.client.putItem(query);
       } else {
-        return await this.cl.updateItem({
-          TableName: this.resolveTable(cls),
+        return await this.client.updateItem({
+          TableName: this.#resolveTable(cls),
           ConditionExpression: mode === 'update' ? 'attribute_exists(body)' : undefined,
           Key: { id: { S: id } },
           UpdateExpression: `SET ${[
@@ -122,7 +122,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
   }
 
-  private computeIndexConfig<T extends ModelType>(cls: Class<T>) {
+  #computeIndexConfig<T extends ModelType>(cls: Class<T>) {
     const config = ModelRegistry.get(cls);
     const attributes = config.indices?.flatMap(idx => ({ AttributeName: `${simpleName(idx.name)}__`, AttributeType: 'S' })) ?? [];
 
@@ -142,9 +142,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async postConstruct() {
-    this.cl = new dynamodb.DynamoDB({ ...this.config.config });
+    this.client = new dynamodb.DynamoDB({ ...this.config.config });
     await ModelStorageUtil.registerModelChangeListener(this);
-    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.cl.destroy());
+    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.destroy());
   }
 
   // Storage
@@ -154,16 +154,16 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * @param cls
    */
   async createModel(cls: Class<ModelType>) {
-    const table = this.resolveTable(cls);
-    const idx = this.computeIndexConfig(cls);
+    const table = this.#resolveTable(cls);
+    const idx = this.#computeIndexConfig(cls);
 
-    const existing = await this.cl.describeTable({ TableName: table }).then(() => true, () => false);
+    const existing = await this.client.describeTable({ TableName: table }).then(() => true, () => false);
 
     if (existing) {
       return;
     }
 
-    await this.cl.createTable({
+    await this.client.createTable({
       TableName: table,
       KeySchema: [{ KeyType: 'HASH', AttributeName: 'id' }],
       BillingMode: 'PAY_PER_REQUEST',
@@ -175,7 +175,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     });
 
     if (ModelRegistry.get(cls).expiresAt) {
-      await this.cl.updateTimeToLive({
+      await this.client.updateTimeToLive({
         TableName: table,
         TimeToLiveSpecification: { AttributeName: EXP_ATTR, Enabled: true }
       });
@@ -187,10 +187,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * @param cls
    */
   async deleteModel(cls: Class<ModelType>) {
-    const table = this.resolveTable(cls);
-    const { Table: verify } = (await this.cl.describeTable({ TableName: table }).catch(err => ({ Table: undefined })));
+    const table = this.#resolveTable(cls);
+    const { Table: verify } = (await this.client.describeTable({ TableName: table }).catch(err => ({ Table: undefined })));
     if (verify) {
-      await this.cl.deleteTable({ TableName: table });
+      await this.client.deleteTable({ TableName: table });
     }
   }
 
@@ -199,11 +199,11 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    * @param cls
    */
   async changeModel(cls: Class<ModelType>) {
-    const table = this.resolveTable(cls);
-    const idx = this.computeIndexConfig(cls);
+    const table = this.#resolveTable(cls);
+    const idx = this.#computeIndexConfig(cls);
     // const existing = await this.cl.describeTable({ TableName: table });
 
-    await this.cl.updateTable({
+    await this.client.updateTable({
       TableName: table,
       AttributeDefinitions: [
         { AttributeName: 'id', AttributeType: 'S' },
@@ -219,8 +219,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async deleteStorage() {
     for (const model of ModelRegistry.getClasses()) {
-      await this.cl.deleteTable({
-        TableName: this.resolveTable(model)
+      await this.client.deleteTable({
+        TableName: this.#resolveTable(model)
       }).catch(err => { });
     }
   }
@@ -231,8 +231,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
-    const res = await this.cl.getItem({
-      TableName: this.resolveTable(cls),
+    const res = await this.client.getItem({
+      TableName: this.#resolveTable(cls),
       Key: { id: toValue(id) }
     });
 
@@ -244,7 +244,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.putItem(cls, item.id, item, 'create');
+    await this.#putItem(cls, item.id, item, 'create');
     return item;
   }
 
@@ -256,7 +256,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     if (ModelRegistry.get(cls).expiresAt) {
       await this.get(cls, item.id);
     }
-    await this.putItem(cls, item.id, item, 'update');
+    await this.#putItem(cls, item.id, item, 'update');
     return item;
   }
 
@@ -265,7 +265,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       throw new SubTypeNotSupportedError(cls);
     }
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.putItem(cls, item.id, item, 'upsert');
+    await this.#putItem(cls, item.id, item, 'upsert');
     return item;
   }
 
@@ -275,7 +275,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
-    await this.putItem(cls, id, item as T, 'update');
+    await this.#putItem(cls, id, item as T, 'update');
     return item as T;
   }
 
@@ -283,8 +283,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
-    const res = await this.cl.deleteItem({
-      TableName: this.resolveTable(cls),
+    const res = await this.client.deleteItem({
+      TableName: this.#resolveTable(cls),
       ReturnValues: 'ALL_OLD',
       Key: { id: { S: id } }
     });
@@ -297,8 +297,8 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     let done = false;
     let token: Record<string, dynamodb.AttributeValue> | undefined;
     while (!done) {
-      const batch = await this.cl.scan({
-        TableName: this.resolveTable(cls),
+      const batch = await this.client.scan({
+        TableName: this.#resolveTable(cls),
         ExclusiveStartKey: token
       });
 
@@ -334,7 +334,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
 
     const query = {
-      TableName: this.resolveTable(cls),
+      TableName: this.#resolveTable(cls),
       IndexName: simpleName(idx),
       ProjectionExpression: 'id',
       KeyConditionExpression: `${simpleName(idx)}__ = :${simpleName(idx)}`,
@@ -343,7 +343,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       }
     };
 
-    const result = await this.cl.query(query);
+    const result = await this.client.query(query);
 
     if (result.Count && result.Items && result.Items[0]) {
       return this.get(cls, result.Items[0].id.S!);
@@ -357,7 +357,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
 
     const query = {
-      TableName: this.resolveTable(cls),
+      TableName: this.#resolveTable(cls),
       IndexName: simpleName(idx),
       ProjectionExpression: 'id',
       KeyConditionExpression: `${simpleName(idx)}__ = :${simpleName(idx)}`,
@@ -366,7 +366,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       }
     };
 
-    const result = await this.cl.query(query);
+    const result = await this.client.query(query);
 
     if (result.Count && result.Items && result.Items[0]) {
       await this.delete(cls, result.Items[0].id.S!);

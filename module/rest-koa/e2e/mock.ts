@@ -8,7 +8,7 @@ class User {
 @Injectable()
 export class MockService {
 
-  private count = 0;
+  #count = 0;
 
   fetch2() {
     return new User('Goodbye', 'Cruel', 'World');
@@ -16,7 +16,7 @@ export class MockService {
 
   fetch() {
     return new User(
-      `Hello-${this.count++}`,
+      `Hello-${this.#count++}`,
       `World ${hi}`,
       `!!! ${hi}`
     );

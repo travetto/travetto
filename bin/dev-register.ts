@@ -102,13 +102,13 @@ class DevRegister {
 
     // Override compiler options
     const key = `@travetto/${'*'}`;
-    TranspileUtil['optionsExtra'] = {
+    TranspileUtil.setExtraOptions({
       rootDir: process.env.TRV_DEV_ROOT!,
       paths: { [key]: [PathUtil.resolveFrameworkPath(key)] }
-    };
+    });
 
     // Override filename resolution
-    ModuleManager['resolveFilename'] = (p: string) => this.resolveFilename(p);
+    ModuleManager.setFilenameResolver((p: string) => this.resolveFilename(p));
 
     ModuleManager.init();
   }

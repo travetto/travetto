@@ -33,25 +33,29 @@ export class VisitorFactory<S extends State = State> {
     }
   }
 
-  private transformers = new Map<TransformerType, TransformerSet<S>>();
+  #transformers = new Map<TransformerType, TransformerSet<S>>();
+  #logTarget: string;
+  #getState: (context: ts.TransformationContext, src: ts.SourceFile) => S;
 
   constructor(
-    private getState: (context: ts.TransformationContext, src: ts.SourceFile) => S,
+    getState: (context: ts.TransformationContext, src: ts.SourceFile) => S,
     transformers: NodeTransformer<S, TransformerType, ts.Node>[],
-    private logTarget = 'compiler.log'
+    logTarget = 'compiler.log'
   ) {
-    this.init(transformers);
+    this.#logTarget = logTarget;
+    this.#getState = getState;
+    this.#init(transformers);
   }
 
   /**
    * Initialize internal mapping given a list of transformers
    */
-  private init(transformers: NodeTransformer<S, TransformerType, ts.Node>[]) {
+  #init(transformers: NodeTransformer<S, TransformerType, ts.Node>[]) {
     for (const trn of transformers) {
-      if (!this.transformers.has(trn.type)) {
-        this.transformers.set(trn.type, {});
+      if (!this.#transformers.has(trn.type)) {
+        this.#transformers.set(trn.type, {});
       }
-      const set = this.transformers.get(trn.type)!;
+      const set = this.#transformers.get(trn.type)!;
       const targets = trn.target && trn.target.length ? trn.target : ['ALL'];
 
       for (const target of targets) {
@@ -77,7 +81,7 @@ export class VisitorFactory<S extends State = State> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
         const c = new console.Console({
-          stdout: fs.createWriteStream(AppCache.toEntryName(this.logTarget), { flags: 'a' }),
+          stdout: fs.createWriteStream(AppCache.toEntryName(this.#logTarget), { flags: 'a' }),
           inspectOptions: { depth: 4 },
         });
 
@@ -86,7 +90,7 @@ export class VisitorFactory<S extends State = State> {
         });
 
         console.debug('Processing', { file: file.fileName, pid: process.pid });
-        const state = this.getState(context, file);
+        const state = this.#getState(context, file);
         let ret = this.visit(state, context, file);
 
         // Process added content
@@ -170,7 +174,7 @@ export class VisitorFactory<S extends State = State> {
    */
   visit<T extends ts.Node>(state: S, context: ts.TransformationContext, node: T): T {
     const targetType = VisitorFactory.nodeToType(node)!;
-    const target = this.transformers.get(targetType);
+    const target = this.#transformers.get(targetType);
 
     if (!target) {
       return ts.visitEachChild(node, c => this.visit(state, context, c), context);

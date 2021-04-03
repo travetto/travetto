@@ -26,7 +26,7 @@ const baseLambdaContext = {
  */
 export class AwsLambdaRestServerSupport implements RestServerSupport {
 
-  private lambda: AwsLambdaRestApplication;
+  #lambda: AwsLambdaRestApplication;
 
   async init() {
     const rest = await import('../..');
@@ -37,13 +37,13 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
     );
 
     const { AwsLambdaRestApplication: App } = await import('../../src/extension/aws-lambda');
-    this.lambda = await DependencyRegistry.getInstance(App);
-    return await this.lambda.run();
+    this.#lambda = await DependencyRegistry.getInstance(App);
+    return await this.#lambda.run();
   }
 
   async execute(method: Request['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}) {
 
-    const res = (await this.lambda.handle({
+    const res = (await this.#lambda.handle({
       ...baseLambdaEvent,
       path,
       httpMethod: method,

@@ -7,31 +7,30 @@ import * as jwt from '..';
 @Suite('HS256')
 class HS256Suite {
 
-  private secret = 'shhhhhh';
-
-  private token: string;
+  #secret = 'shhhhhh';
+  #token: string;
 
   @BeforeEach()
   async init() {
-    this.token = await jwt.sign({ foo: 'bar' }, { key: this.secret, alg: 'HS256' });
+    this.#token = await jwt.sign({ foo: 'bar' }, { key: this.#secret, alg: 'HS256' });
   }
 
   @Test('should be syntactically valid')
   async testValid() {
-    assert(typeof this.token === 'string');
-    assert(this.token.split('.').length === 3);
+    assert(typeof this.#token === 'string');
+    assert(this.#token.split('.').length === 3);
   }
 
   @Test('should be able to validate without options')
   async testValidate() {
-    const decoded = await jwt.verify(this.token, { key: this.secret });
+    const decoded = await jwt.verify(this.#token, { key: this.#secret });
     assert(!!decoded.foo);
     assert('bar' === decoded.foo);
   }
 
   @Test('should validate with secret')
   async testSecret() {
-    const decoded = await jwt.verify(this.token, { key: this.secret });
+    const decoded = await jwt.verify(this.#token, { key: this.#secret });
     assert(!!decoded.foo);
     assert('bar' === decoded.foo);
   }
@@ -39,13 +38,13 @@ class HS256Suite {
   @Test('should throw with invalid secret')
   @ShouldThrow(jwt.JWTError)
   async testBadSecret() {
-    await jwt.verify(this.token, { key: 'invalid secret' });
+    await jwt.verify(this.#token, { key: 'invalid secret' });
   }
 
   @Test('should throw with secret and token not signed')
   @ShouldThrow(jwt.JWTError)
   async testUnsigned() {
-    const signed = await jwt.sign({ foo: 'bar' }, { key: this.secret, alg: 'none' });
+    const signed = await jwt.sign({ foo: 'bar' }, { key: this.#secret, alg: 'none' });
     const [h, p,] = signed.split('.');
     const unsigned = `${h}.${p}.`;
     await jwt.verify(unsigned, { key: 'secret' });
@@ -63,22 +62,22 @@ class HS256Suite {
   @Test('should return an error when the token is expired')
   @ShouldThrow(jwt.JWTError)
   async testExpired() {
-    const token = await jwt.sign({ exp: 1 }, { key: this.secret, alg: 'HS256' });
-    await jwt.verify(token, { key: this.secret, alg: 'HS256' });
+    const token = await jwt.sign({ exp: 1 }, { key: this.#secret, alg: 'HS256' });
+    await jwt.verify(token, { key: this.#secret, alg: 'HS256' });
   }
 
   @Test('should NOT return an error when the token is expired with "ignoreExpiration"')
   async testIgnoreExp() {
-    const token = await jwt.sign({ exp: 1, foo: 'bar' }, { key: this.secret, alg: 'HS256' });
-    const decoded = await jwt.verify(token, { key: this.secret, alg: 'HS256', ignore: { exp: true } });
+    const token = await jwt.sign({ exp: 1, foo: 'bar' }, { key: this.#secret, alg: 'HS256' });
+    const decoded = await jwt.verify(token, { key: this.#secret, alg: 'HS256', ignore: { exp: true } });
     assert(!!decoded.foo);
     assert('bar' === decoded.foo);
   }
 
   @Test('should default to HS256 algorithm when no options are passed')
   async testAlgo() {
-    const token = await jwt.sign({ foo: 'bar' }, { key: this.secret });
-    const verifiedToken = await jwt.verify(token, { key: this.secret });
+    const token = await jwt.sign({ foo: 'bar' }, { key: this.#secret });
+    const verifiedToken = await jwt.verify(token, { key: this.#secret });
     assert(!!verifiedToken.foo);
     assert('bar' === verifiedToken.foo);
   }
@@ -86,7 +85,7 @@ class HS256Suite {
   @Test('should return the "invalid token" error')
   @ShouldThrow(jwt.JWTError)
   async testInvalid() {
-    const malformedToken = `${this.token} `; // corrupt the token by adding a space
-    await jwt.verify(malformedToken, { key: this.secret, alg: 'HS256', ignore: { exp: true } });
+    const malformedToken = `${this.#token} `; // corrupt the token by adding a space
+    await jwt.verify(malformedToken, { key: this.#secret, alg: 'HS256', ignore: { exp: true } });
   }
 }

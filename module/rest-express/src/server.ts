@@ -29,7 +29,7 @@ declare global {
 @Injectable()
 export class ExpressRestServer implements RestServer<express.Application> {
 
-  private raw: express.Application;
+  #raw: express.Application;
 
   listening: boolean;
 
@@ -56,13 +56,13 @@ export class ExpressRestServer implements RestServer<express.Application> {
       app.enable('trust proxy');
     }
 
-    this.raw = app;
+    this.#raw = app;
 
     return app;
   }
 
   async unregisterRoutes(key: string | symbol) {
-    const routes = (this.raw._router.stack as RouteStack[]);
+    const routes = (this.#raw._router.stack as RouteStack[]);
     const pos = routes.findIndex(x => x.handle.key === key);
     if (pos >= 0) {
       routes.splice(pos, 1);
@@ -95,14 +95,14 @@ export class ExpressRestServer implements RestServer<express.Application> {
     }
 
     router.key = key;
-    this.raw.use(path, router);
+    this.#raw.use(path, router);
   }
 
   async listen() {
-    let raw: express.Application | https.Server = this.raw;
+    let raw: express.Application | https.Server = this.#raw;
     if (this.config.ssl.active) {
       const keys = await this.config.getKeys();
-      raw = (await import('https')).createServer(keys!, this.raw);
+      raw = (await import('https')).createServer(keys!, this.#raw);
     }
     this.listening = true;
     return raw.listen(this.config.port, this.config.bindAddress!);

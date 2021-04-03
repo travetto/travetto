@@ -19,18 +19,18 @@ export const SUMMARY_STYLE = Object.entries({
  */
 export class InkyComponentFactory implements ComponentFactory {
 
-  private _spacer16: string;
+  #_spacer16: string;
 
   constructor(public columnCount: number = 12, public ns: string = '') { }
 
   get spacer16() {
-    if (!this._spacer16) {
-      this._spacer16 = this.render(`<${this.ns}spacer size="16"></${this.ns}spacer>`);
+    if (!this.#_spacer16) {
+      this.#_spacer16 = this.render(`<${this.ns}spacer size="16"></${this.ns}spacer>`);
     }
-    return this._spacer16;
+    return this.#_spacer16;
   }
 
-  private generate(element: Node) {
+  #generate(element: Node) {
     const tag = TagRegistry.getTag(element, this.ns);
     if (TagRegistry.has(this, tag)) {
       return TagRegistry.resolve(this, tag)!.call(this, element).trim();
@@ -42,7 +42,7 @@ export class InkyComponentFactory implements ComponentFactory {
   /**
    * Traverse nodes
    */
-  private traverse(node: Node & { hasColumns?: boolean }) {
+  #traverse(node: Node & { hasColumns?: boolean }) {
     const children = (Parse5Adapter.getChildNodes(node) ?? []) as Node[];
     const out = [];
 
@@ -51,7 +51,7 @@ export class InkyComponentFactory implements ComponentFactory {
       if (!tagName) {
         out.push(child);
       } else {
-        this.traverse(child);
+        this.#traverse(child);
         if (TagRegistry.has(this, TagRegistry.getTag(tagName, this.ns))) {
           if (tagName === 'columns' && !('hasColumns' in node)) {
             node.hasColumns = true;
@@ -59,7 +59,7 @@ export class InkyComponentFactory implements ComponentFactory {
             HtmlUtil.setDomAttribute(all[0], 'class', 'first');
             HtmlUtil.setDomAttribute(all[all.length - 1], 'class', 'last');
           }
-          const text = this.generate(child);
+          const text = this.#generate(child);
           const newFrag = parseFragment(text);
           const newNodes = (Parse5Adapter.getChildNodes(newFrag).filter(x => Parse5Adapter.isElementNode(x)))!;
           out.push(...newNodes);
@@ -400,11 +400,11 @@ export class InkyComponentFactory implements ComponentFactory {
 
     if (typeof document === 'string') {
       const node = document.includes('<html') ? parse(document) : parseFragment(document);
-      const ret = this.traverse(node);
+      const ret = this.#traverse(node);
       const out = serialize(ret);
       return out;
     } else {
-      return this.traverse(document);
+      return this.#traverse(document);
     }
   }
 }

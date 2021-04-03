@@ -9,12 +9,14 @@ import { TestEvent, StatusUnknown, RemoveEvent } from './types';
  * Manages results for the entire workspace, including the statusbar
  */
 export class WorkspaceResultsManager {
-  private status: vscode.StatusBarItem;
-  private results: Map<string, DocumentResultsManager> = new Map();
+  #status: vscode.StatusBarItem;
+  #results: Map<string, DocumentResultsManager> = new Map();
+  #window: typeof vscode.window;
 
-  constructor(private window: typeof vscode.window) {
-    this.status = this.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-    this.status.command = 'workbench.action.showErrorsWarnings';
+  constructor(window: typeof vscode.window) {
+    this.#window = window;
+    this.#status = this.#window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    this.#status.command = 'workbench.action.showErrorsWarnings';
   }
 
   /**
@@ -27,7 +29,7 @@ export class WorkspaceResultsManager {
       passed: 0,
       unknown: 0
     };
-    for (const mgr of this.results.values()) {
+    for (const mgr of this.#results.values()) {
       const test = mgr.getTotals();
       totals.skipped += test.skipped;
       totals.failed += test.failed;
@@ -44,11 +46,11 @@ export class WorkspaceResultsManager {
    */
   setStatus(message: string, color?: string) {
     if (!message) {
-      this.status.hide();
+      this.#status.hide();
     } else {
-      this.status.color = color || '#fff';
-      this.status.text = message;
-      this.status.show();
+      this.#status.color = color || '#fff';
+      this.#status.text = message;
+      this.#status.show();
     }
   }
 
@@ -82,12 +84,12 @@ export class WorkspaceResultsManager {
   getResults(target: vscode.TextDocument | RemoveEvent | TestEvent) {
     const file = this.getLocation(target);
     if (file) {
-      if (!this.results.has(file)) {
+      if (!this.#results.has(file)) {
         const rm = new DocumentResultsManager(file);
         console.debug('Generating results manager', { file });
-        this.results.set(file, rm);
+        this.#results.set(file, rm);
       }
-      return this.results.get(file)!;
+      return this.#results.get(file)!;
     }
   }
 
@@ -112,8 +114,8 @@ export class WorkspaceResultsManager {
   async dispose() {
     // Remove all state
     this.setStatus('');
-    const entries = [...this.results.entries()];
-    this.results.clear();
+    const entries = [...this.#results.entries()];
+    this.#results.clear();
     for (const [, v] of entries) {
       v.dispose();
     }
@@ -135,8 +137,8 @@ export class WorkspaceResultsManager {
   async untrackEditor(editor: vscode.TextEditor | vscode.TextDocument | undefined) {
     editor = Workspace.getDocumentEditor(editor);
     if (editor) {
-      if (this.results.has(editor.document.fileName)) {
-        this.results.get(editor.document.fileName)!.dispose();
+      if (this.#results.has(editor.document.fileName)) {
+        this.#results.get(editor.document.fileName)!.dispose();
       }
     }
   }

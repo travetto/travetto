@@ -111,7 +111,13 @@ export class BindUtil {
     if (data instanceof cls) {
       return data as T;
     } else {
-      return this.bindSchemaToObject(cls, new (cls as ConcreteClass<T>)(), data as object, view);
+      const tgt = new (cls as ConcreteClass<T>)();
+      for (const k in tgt) { // Do not retain undefined fields
+        if (tgt[k] === undefined) {
+          delete tgt[k];
+        }
+      }
+      return this.bindSchemaToObject(cls, tgt, data as object, view);
     }
   }
 
