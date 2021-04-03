@@ -18,5 +18,14 @@ module.exports = {
   ],
   extends: [...all.extends, 'plugin:travetto/all'],
   plugins: [...all.plugins, 'unused-imports'],
-  rules: { ...all.rules, 'unused-imports/no-unused-imports': 'error' }
+  rules: { ...all.rules, 'unused-imports/no-unused-imports': 'error' },
+  overrides: [
+    ...all.overrides,
+    {
+      files: ['module/*/test/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off'
+      }
+    }
+  ]
 };

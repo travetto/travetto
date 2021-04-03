@@ -42,32 +42,28 @@ export class SourceUtilTest {
 
   @Test()
   resolveModToken() {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { err, ...rest } = SourceUtil.resolveToken('-fsa');
+    const { err: __err1, ...rest } = SourceUtil.resolveToken('-fsa');
     assert(rest === {
       minus: true,
       key: 'fsa',
       valid: true
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { err: err2, ...rest2 } = SourceUtil.resolveToken('fsa');
+    const { err: __err2, ...rest2 } = SourceUtil.resolveToken('fsa');
     assert(rest2 === {
       minus: false,
       key: 'fsa',
       valid: false
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { err: err3, ...rest3 } = SourceUtil.resolveToken('-fs');
+    const { err: __err3, ...rest3 } = SourceUtil.resolveToken('-fs');
     assert(rest3 === {
       minus: true,
       key: 'fs',
       valid: false
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { err: err4, ...rest4 } = SourceUtil.resolveToken('fs');
+    const { err: __err4, ...rest4 } = SourceUtil.resolveToken('fs');
     assert(rest4 === {
       minus: false,
       key: 'fs',

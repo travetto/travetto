@@ -1,14 +1,15 @@
 // @ts-ignore
 import * as Mod from 'module';
 
-import { AppCache } from '../../cache';
-import { EnvUtil } from '../../env';
-import { readPackage } from '../package';
-import { Package } from '../../main-package';
-import { PathUtil } from '../../path';
-import { ModuleManager } from '../module';
-import { ModType } from '../module-util';
-import { TranspileUtil } from '../transpile-util';
+import { AppCache } from '../module/boot/src/cache';
+import { EnvUtil } from '../module/boot/src/env';
+import { readPackage } from '../module/boot/src/internal/package';
+import { Package } from '../module/boot/src/main-package';
+import { PathUtil } from '../module/boot/src/path';
+import { ModuleManager } from '../module/boot/src/internal/module';
+import { ModType } from '../module/boot/src/internal/module-util';
+import { TranspileUtil } from '../module/boot/src/internal/transpile-util';
+import { SystemUtil } from '../module/boot/src/internal/system';
 
 export const Module = Mod as unknown as ModType;
 
@@ -21,18 +22,6 @@ class DevRegister {
 
   static TRV_MOD = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
   static DEFAULT_MODS = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc']);
-
-  /** Naive hashing */
-  static naiveHash(text: string) {
-    let hash = 5381;
-
-    for (let i = 0; i < text.length; i++) {
-      // eslint-disable-next-line no-bitwise
-      hash = (hash * 33) ^ text.charCodeAt(i);
-    }
-
-    return Math.abs(hash);
-  }
 
   /**
    * Resolve filename for dev mode
@@ -95,7 +84,7 @@ class DevRegister {
   }
 
   static getContent(envMods: string) {
-    return AppCache.getOrSet(`isolated-modules.${this.naiveHash(envMods)}.json`,
+    return AppCache.getOrSet(`isolated-modules.${SystemUtil.naiveHash(envMods)}.json`,
       () => JSON.stringify(this.readDeps(this.getMods(envMods)), null, 2)
     );
   }
@@ -104,7 +93,7 @@ class DevRegister {
     const envMods = process.env.TRV_MODULES ?? '';
     if (envMods && !process.env.TRV_CACHE) { // Is specifying modules, build out
       // @ts-expect-error
-      AppCache.cacheDir = `.trv_cache_${this.naiveHash(process.env.TRV_MODULES)}`;
+      AppCache.cacheDir = `.trv_cache_${SystemUtil.naiveHash(process.env.TRV_MODULES)}`;
     }
 
     AppCache.init(true);
@@ -119,7 +108,7 @@ class DevRegister {
     };
 
     // Override filename resolution
-    ModuleManager['resolveFilename'] = p => this.resolveFilename(p);
+    ModuleManager['resolveFilename'] = (p: string) => this.resolveFilename(p);
 
     ModuleManager.init();
   }

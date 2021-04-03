@@ -1,7 +1,7 @@
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 
-import { SystemUtil } from './internal/system';
+import { OrderingUtil } from './internal/ordering';
 
 interface Initializer {
   action: Function;
@@ -60,7 +60,7 @@ export class PhaseManager {
     const initFiles = await Promise.all(found
       .filter(x => this.filter.test(x.module))
       .map(x => import(x.file)));
-    this.initializers = SystemUtil.computeOrdering(initFiles.map(x => x.init));
+    this.initializers = OrderingUtil.compute(initFiles.map(x => x.init));
 
     if (upto) {
       let end = this.initializers.length - 1;

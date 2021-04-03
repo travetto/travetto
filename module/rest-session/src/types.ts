@@ -1,4 +1,4 @@
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { ContextProvider } from '@travetto/rest';
 
 /**
