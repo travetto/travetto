@@ -31,8 +31,8 @@
   "optionalPeerDependencies": {
     "@travetto/cli": "^2.0.0-alpha.2"
   },
-  "private": true,
+  "private": false,
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

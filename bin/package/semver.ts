@@ -10,11 +10,15 @@ export class Semver {
   }
 
   static increment(ver: Semversion, level: SemverLevel, prefix?: string) {
+    // Set
     switch (level) {
-      case 'major': ver.minor = 0;
-      // eslint-disable-next-line no-fallthrough
-      case 'minor': ver.patch = 0;
-      // eslint-disable-next-line no-fallthrough
+      case 'major': ver.minor = ver.patch = 0; break;
+      case 'minor': ver.patch = 0; break;
+    }
+    // Increment
+    switch (level) {
+      case 'major':
+      case 'minor':
       case 'patch': {
         ver[level] += 1;
         delete ver.prerelease;

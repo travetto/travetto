@@ -6,7 +6,7 @@ import { FsUtil } from '@travetto/boot/src/fs';
 import { AppCache } from '@travetto/boot/src/cache';
 import { ExecUtil } from '@travetto/boot/src/exec';
 import { CliUtil } from '@travetto/cli/src/util';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { SystemUtil } from '@travetto/boot/src/internal/system';
 
 import type { ApplicationConfig } from '../../src/types';
 

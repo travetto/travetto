@@ -1,5 +1,6 @@
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
+
 import { Util } from './util';
-import { SystemUtil } from './internal/system';
 import { AppManifest } from './manifest';
 
 const ogExit = process.exit;
@@ -143,7 +144,7 @@ class $ShutdownManager {
       handler = handler!;
     }
     if (/[.][jt]s$/.test(name)) {
-      name = SystemUtil.computeModule(name);
+      name = ModuleUtil.getId(name);
     }
     this.listeners.push({ name, handler, final });
   }

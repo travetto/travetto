@@ -2,7 +2,7 @@ import { RootRegistry } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 import { AfterAll, BeforeAll } from '@travetto/test';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { SystemUtil } from '@travetto/boot/src/internal/system';
 
 import { MethodOrAll, Request, ServerHandle } from '../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';

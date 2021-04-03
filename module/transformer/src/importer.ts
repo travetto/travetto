@@ -1,8 +1,8 @@
 import * as ts from 'typescript';
-import { basename } from 'path';
+import { basename, dirname, relative } from 'path';
 
 import { PathUtil } from '@travetto/boot';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { AnyType, ExternalType } from './resolver/types';
 import { ImportUtil } from './util/import';
@@ -38,7 +38,19 @@ export class ImportManager {
    * Import a file if needed, and record it's identifier
    */
   importFile(file: string, base?: string) {
-    file = SystemUtil.convertFileToModule(file, base);
+    file = ModuleUtil.normalizePath(file);
+
+    // Handle relative imports
+    if (file.startsWith('.') && base &&
+      !base.startsWith('@travetto') && !base.includes('node_modules')
+    ) { // Relative path
+      const fileDir = dirname(PathUtil.resolveUnix(file));
+      const baseDir = dirname(PathUtil.resolveUnix(base));
+      file = `${relative(baseDir, fileDir) || '.'}/${basename(file)}`;
+      if (/^[A-Za-z]/.test(file)) {
+        file = `./${file}`;
+      }
+    }
 
     if (!file.endsWith('.d.ts') && !this.newImports.has(file)) {
       const id = this.getId(file);

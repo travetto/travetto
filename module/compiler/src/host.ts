@@ -4,7 +4,7 @@ import * as path from 'path';
 
 import { PathUtil, AppCache } from '@travetto/boot';
 import { SourceUtil } from '@travetto/boot/src/internal/source-util';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { AppManifest } from '@travetto/base';
