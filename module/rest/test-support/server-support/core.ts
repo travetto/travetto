@@ -12,9 +12,12 @@ import type { RestServerSupport, MakeRequestConfig } from './base';
  */
 export class CoreRestServerSupport implements RestServerSupport {
 
-  private app: RestApplication;
+  #app: RestApplication;
+  #port: number;
 
-  constructor(private port: number) { }
+  constructor(port: number) {
+    this.#port = port;
+  }
 
   async init() {
     const rest = await import('../..');
@@ -25,11 +28,11 @@ export class CoreRestServerSupport implements RestServerSupport {
     );
 
     const config = await DependencyRegistry.getInstance(rest.RestConfig);
-    config.port = this.port;
+    config.port = this.#port;
     config.ssl.active = false; // Update config object
 
-    this.app = await DependencyRegistry.getInstance(rest.RestApplication);
-    const handle = await this.app.run();
+    this.#app = await DependencyRegistry.getInstance(rest.RestApplication);
+    const handle = await this.#app.run();
 
     const start = Date.now();
 
@@ -61,6 +64,6 @@ export class CoreRestServerSupport implements RestServerSupport {
   }
 
   get url() {
-    return `http://localhost:${this.port}`;
+    return `http://localhost:${this.#port}`;
   }
 }

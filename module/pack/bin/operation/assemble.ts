@@ -21,6 +21,9 @@ export interface AssembleConfig extends CommonConfig {
 export const Assemble: PackOperation<AssembleConfig> = {
   key: 'assemble',
   title: 'Assembling',
+  context(cfg: AssembleConfig) {
+    return `[readonly=${cfg.readonly}]`;
+  },
   extend(a: AssembleConfig, b: Partial<AssembleConfig>) {
     return {
       ...PackUtil.commonExtend(a, b),

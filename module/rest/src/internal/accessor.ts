@@ -5,7 +5,13 @@ import { Response, Request } from '../types';
  * Utils for context encoding
  */
 export class ValueAccessor {
-  constructor(private name: string, private location: 'header' | 'cookie') { }
+  #name: string;
+  #location: 'header' | 'cookie';
+
+  constructor(name: string, location: 'header' | 'cookie') {
+    this.#name = name;
+    this.#location = location;
+  }
 
   /**
    * Write to Response
@@ -13,13 +19,13 @@ export class ValueAccessor {
    * @param token
    */
   writeValue(res: Response, token: string | null, cookieArgs: SetOption = {}) {
-    if (this.location === 'cookie') {
-      res.cookies.set(this.name, token, {
+    if (this.#location === 'cookie') {
+      res.cookies.set(this.#name, token, {
         ...cookieArgs,
         maxAge: cookieArgs.expires ? undefined : -1,
       });
     } else if (token) {
-      res.setHeader(this.name, token);
+      res.setHeader(this.#name, token);
     }
   }
 
@@ -28,6 +34,6 @@ export class ValueAccessor {
    * @param req
    */
   readValue(req: Request) {
-    return this.location === 'cookie' ? req.cookies.get(this.name) : req.header(this.name) as string;
+    return this.#location === 'cookie' ? req.cookies.get(this.#name) : req.header(this.#name) as string;
   }
 }

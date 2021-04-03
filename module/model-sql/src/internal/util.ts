@@ -172,7 +172,7 @@ export class SQLUtil {
     this.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: (config) => {
         const { path } = config;
-        path[0].name = instance['id']!;
+        path[0].name = instance.id!;
         handler.onRoot({ ...config, value: instance });
         return config.descend();
       },

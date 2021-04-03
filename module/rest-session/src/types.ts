@@ -17,11 +17,11 @@ export class Session<T extends SessionData = SessionData>  {
   /**
    * The expiry time when the session was loaded
    */
-  private expiresAtLoaded: Date | undefined;
+  #expiresAtLoaded: Date | undefined;
   /**
    * The hash of the session at load
    */
-  private hash: number;
+  #hash: number;
   /**
    * The session identifer
    */
@@ -63,7 +63,7 @@ export class Session<T extends SessionData = SessionData>  {
     Object.assign(this, data);
 
     // Mark the expiry load time
-    this.expiresAtLoaded = this.expiresAt ?? new Date();
+    this.#expiresAtLoaded = this.expiresAt ?? new Date();
 
     // Mark expiry time
     if (this.maxAge && !this.expiresAt) {
@@ -71,7 +71,7 @@ export class Session<T extends SessionData = SessionData>  {
     }
 
     // Hash the session as it stands
-    this.hash = SystemUtil.naiveHash(JSON.stringify(this));
+    this.#hash = SystemUtil.naiveHash(JSON.stringify(this));
   }
 
   /**
@@ -93,14 +93,14 @@ export class Session<T extends SessionData = SessionData>  {
    * Determine if session has changed
    */
   isChanged() {
-    return this.isTimeChanged() || this.hash !== SystemUtil.naiveHash(JSON.stringify(this));
+    return this.isTimeChanged() || this.#hash !== SystemUtil.naiveHash(JSON.stringify(this));
   }
 
   /**
    * Determine if the expiry time has changed
    */
   isTimeChanged() {
-    return this.expiresAt !== undefined && this.expiresAt !== this.expiresAtLoaded;
+    return this.expiresAt !== undefined && this.expiresAt !== this.#expiresAtLoaded;
   }
 
   /**

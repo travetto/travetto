@@ -31,7 +31,7 @@ export class TestExecutor {
    *
    * This method should never throw under any circumstances.
    */
-  private static _executeTestMethod(test: TestConfig): Promise<Error | undefined> {
+  static #executeTestMethod(test: TestConfig): Promise<Error | undefined> {
     const suite = SuiteRegistry.get(test.class);
     const promCleanup = Util.resolvablePromise();
 
@@ -54,7 +54,7 @@ export class TestExecutor {
   /**
    * Determining if we should skip
    */
-  private static async skip(cfg: TestConfig | SuiteConfig, inst: unknown) {
+  static async #skip(cfg: TestConfig | SuiteConfig, inst: unknown) {
     if (cfg.skip !== undefined) {
       if (typeof cfg.skip === 'boolean' ? cfg.skip : await cfg.skip(inst)) {
         return true;
@@ -114,7 +114,7 @@ export class TestExecutor {
       status: 'skipped'
     };
 
-    if (await this.skip(test, suite.instance)) {
+    if (await this.#skip(test, suite.instance)) {
       return result as TestResult;
     }
 
@@ -130,7 +130,7 @@ export class TestExecutor {
     ConsoleCapture.start(); // Capture all output from transpiled code
 
     // Run method and get result
-    let error = await this._executeTestMethod(test);
+    let error = await this.#executeTestMethod(test);
     if (error) {
       if (error instanceof ExecutionError) { // Errors that are not expected
         AssertCheck.checkUnhandled(test, error);
@@ -163,7 +163,7 @@ export class TestExecutor {
 
     try {
       await mgr.startPhase('all');
-      const skip = await this.skip(test, suite.instance);
+      const skip = await this.#skip(test, suite.instance);
       if (!skip) {
         await mgr.startPhase('each');
       }
@@ -196,7 +196,7 @@ export class TestExecutor {
 
       for (const test of suite.tests) {
         const testStart = Date.now();
-        const skip = await this.skip(test, suite.instance);
+        const skip = await this.#skip(test, suite.instance);
         if (!skip) {
           // Handle BeforeEach
           await mgr.startPhase('each');
@@ -255,7 +255,7 @@ export class TestExecutor {
     // If running specific suites
     if ('suites' in params) {
       for (const suite of params.suites) {
-        if (!(await this.skip(suite, suite.instance)) && suite.tests.length) {
+        if (!(await this.#skip(suite, suite.instance)) && suite.tests.length) {
           await this.executeSuite(consumer, suite);
         }
       }

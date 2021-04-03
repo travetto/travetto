@@ -27,15 +27,13 @@ class TestConfig {
     const src = new ModelPrincipalSource<User>(
       svc,
       User,
-      (u) => ({
+      u => ({
         ...(u as unknown as RegisteredIdentity),
         details: u,
         permissions: u.permissions ?? [],
         source: 'model'
       }),
-      (registered) => User.from({
-        ...(registered as User)
-      })
+      reg => User.from({ ...(reg as User) })
     );
     return src;
   }
@@ -70,8 +68,11 @@ export abstract class AuthModelServiceSuite {
       password: 'bob'
     });
 
+    console.log(pre);
+
     try {
       await this.principalSource.authenticate(pre.id, pre.password!);
+      assert.fail('Should not have gotten here');
     } catch (err) {
       if (err instanceof AppError && err.category === 'notfound') {
         const user = await this.principalSource.register(pre);

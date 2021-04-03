@@ -15,19 +15,26 @@ const TEST_PHASE_TIMEOUT = TimeUtil.getEnv('TRV_TEST_PHASE_TIMEOUT', 15, 's');
  * Handles BeforeAll, BeforeEach, AfterEach, AfterAll
  */
 export class TestPhaseManager {
-  private progress: ('all' | 'each')[] = [];
+  #progress: ('all' | 'each')[] = [];
+  #consumer: TestConsumer;
+  #suite: SuiteConfig;
+  #result: SuiteResult;
 
-  constructor(private consumer: TestConsumer, private suite: SuiteConfig, private result: SuiteResult) { }
+  constructor(consumer: TestConsumer, suite: SuiteConfig, result: SuiteResult) {
+    this.#consumer = consumer;
+    this.#suite = suite;
+    this.#result = result;
+  }
 
   /**
    * Create the appropriate events when a suite has an error
    */
   async triggerSuiteError(methodName: string, error: Error) {
-    const bad = AssertUtil.generateSuiteError(this.suite, methodName, error);
+    const bad = AssertUtil.generateSuiteError(this.#suite, methodName, error);
 
-    this.consumer.onEvent({ type: 'test', phase: 'before', test: bad.testConfig });
-    this.consumer.onEvent({ type: 'assertion', phase: 'after', assertion: bad.assert });
-    this.consumer.onEvent({ type: 'test', phase: 'after', test: bad.testResult });
+    this.#consumer.onEvent({ type: 'test', phase: 'before', test: bad.testConfig });
+    this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: bad.assert });
+    this.#consumer.onEvent({ type: 'test', phase: 'after', test: bad.testResult });
 
     return bad.testResult;
   }
@@ -37,11 +44,11 @@ export class TestPhaseManager {
    */
   async runPhase(phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
     let error: Error | undefined;
-    for (const fn of this.suite[phase]) {
+    for (const fn of this.#suite[phase]) {
 
       // Ensure all the criteria below are satisfied before moving forward
       error = await new Barrier(TEST_PHASE_TIMEOUT, true)
-        .add(async () => fn.call(this.suite.instance))
+        .add(async () => fn.call(this.#suite.instance))
         .wait();
 
       if (error) {
@@ -50,8 +57,8 @@ export class TestPhaseManager {
     }
     if (error) {
       const res = await this.triggerSuiteError(`[[${phase}]]`, error);
-      this.result.tests.push(res);
-      this.result.failed++;
+      this.#result.tests.push(res);
+      this.#result.failed++;
       throw TestBreakoutSym;
     }
   }
@@ -60,7 +67,7 @@ export class TestPhaseManager {
    * Start a new phase
    */
   async startPhase(phase: 'all' | 'each') {
-    this.progress.unshift(phase);
+    this.#progress.unshift(phase);
     return this.runPhase(phase === 'all' ? 'beforeAll' : 'beforeEach');
   }
 
@@ -68,7 +75,7 @@ export class TestPhaseManager {
    * End a phase
    */
   async endPhase(phase: 'all' | 'each') {
-    this.progress.shift();
+    this.#progress.shift();
     return this.runPhase(phase === 'all' ? 'afterAll' : 'afterEach');
   }
 
@@ -76,18 +83,18 @@ export class TestPhaseManager {
    * On error, handle stubbing out error for the phases in progress
    */
   async onError(err: Error | typeof TestBreakoutSym) {
-    for (const ph of this.progress) {
+    for (const ph of this.#progress) {
       try {
         await this.runPhase(ph === 'all' ? 'afterAll' : 'afterEach');
       } catch (e) { /* Do nothing */ }
     }
 
-    this.progress = [];
+    this.#progress = [];
 
     if (err !== TestBreakoutSym) {
       const res = await this.triggerSuiteError('all', err);
-      this.result.tests.push(res);
-      this.result.failed++;
+      this.#result.tests.push(res);
+      this.#result.failed++;
     }
   }
 }

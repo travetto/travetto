@@ -2,7 +2,8 @@ import * as assert from 'assert';
 
 import { YamlUtil } from '@travetto/yaml';
 import { Test, Suite, BeforeEach, AfterEach } from '@travetto/test';
-import { SimpleObject, Util } from '@travetto/base';
+import { Util } from '@travetto/base';
+import { SimpleObject } from '@travetto/base/src/internal/types';
 
 import { ConfigManager } from '../src/manager';
 
@@ -44,15 +45,15 @@ export class ManagerTest {
 
   envCopy: NodeJS.ProcessEnv;
 
-  private async reinit() {
-    delete ConfigManager['initialized'];
+  async #reinit() {
+    ConfigManager.reset();
     await ConfigManager.init();
   }
 
   @BeforeEach()
   async before() {
     this.envCopy = { ...process.env };
-    await this.reinit();
+    await this.#reinit();
   }
 
   @AfterEach()
@@ -70,7 +71,7 @@ export class ManagerTest {
   @Test()
   async verifyEnv() {
     process.env.DB_MYSQL_NAME = 'Roger';
-    await this.reinit();
+    await this.#reinit();
 
     const conf = new TestConfig();
     ConfigManager.bindTo(conf, 'db.mysql');
@@ -86,7 +87,7 @@ export class ManagerTest {
     assert(conf.anonHosts === ['a', 'b']);
 
     process.env.MODEL_MONGO_ANONHOSTS = 'a,b,c,d';
-    await this.reinit();
+    await this.#reinit();
 
     const newConf = new TestConfig();
     ConfigManager.bindTo(newConf, 'model.mongo');
@@ -111,7 +112,7 @@ export class ManagerTest {
   @Test()
   async environmentOverrideFalse() {
     process.env.NAME_ACTIVE = 'false';
-    await this.reinit();
+    await this.#reinit();
 
     const res = ConfigManager.bindTo(new NameConfig(), 'name');
 
@@ -120,7 +121,7 @@ export class ManagerTest {
 
   @Test()
   async testSecret() {
-    await this.reinit();
+    await this.#reinit();
 
     ConfigManager.putAll(YamlUtil.parse(`
 --

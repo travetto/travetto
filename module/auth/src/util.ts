@@ -17,8 +17,8 @@ type PermissionChecker = {
  */
 export class AuthUtil {
 
-  private static CHECK_EXC_CACHE = new Map<string, PermissionChecker>();
-  private static CHECK_INC_CACHE = new Map<string, PermissionChecker>();
+  static #checkExcCache = new Map<string, PermissionChecker>();
+  static #checkIncCache = new Map<string, PermissionChecker>();
 
   /**
    * Build a permission checker against the provided permissions
@@ -26,7 +26,7 @@ export class AuthUtil {
    * @param perms Set of permissions to check
    * @param defaultIfEmpty If no perms passed, default to empty
    */
-  private static buildChecker(perms: Iterable<string>, defaultIfEmpty: boolean): PermissionChecker {
+  static #buildChecker(perms: Iterable<string>, defaultIfEmpty: boolean): PermissionChecker {
     const permArr = [...perms].map(x => x.toLowerCase());
     let all = (_: PermSet) => defaultIfEmpty;
     let any = (_: PermSet) => defaultIfEmpty;
@@ -80,15 +80,15 @@ export class AuthUtil {
     const incKey = [...include].sort().join(',');
     const excKey = [...exclude].sort().join(',');
 
-    if (!this.CHECK_INC_CACHE.has(incKey)) {
-      this.CHECK_INC_CACHE.set(incKey, this.buildChecker(include, true));
+    if (!this.#checkIncCache.has(incKey)) {
+      this.#checkIncCache.set(incKey, this.#buildChecker(include, true));
     }
-    if (!this.CHECK_EXC_CACHE.has(excKey)) {
-      this.CHECK_EXC_CACHE.set(excKey, this.buildChecker(exclude, false));
+    if (!this.#checkExcCache.has(excKey)) {
+      this.#checkExcCache.set(excKey, this.#buildChecker(exclude, false));
     }
 
-    const includes = this.CHECK_INC_CACHE.get(incKey)![mode];
-    const excludes = this.CHECK_EXC_CACHE.get(excKey)![mode];
+    const includes = this.#checkIncCache.get(incKey)![mode];
+    const excludes = this.#checkExcCache.get(excKey)![mode];
 
     return (perms: PermSet) => includes(perms) && !excludes(perms);
   }

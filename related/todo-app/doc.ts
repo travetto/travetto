@@ -39,7 +39,7 @@ ${Section('Prerequisites')}
 
 Install
 ${List(
-    d`${lib.NodeDownload} v12.x + (required)`,
+    d`${lib.NodeDownload} v15.x+ (recommanded, but v12.x+ supported)`,
     d`${lib.MongoDownload} 3.6+ (required)`,
     d`${lib.VSCodeDownload} (recommended)`,
     d`${lib.TravettoPlugin} (recommended)`

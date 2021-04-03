@@ -8,7 +8,7 @@ type SourceHandler = (name: string, contents: string) => string;
  */
 export class SourceUtil {
 
-  private static handlers: SourceHandler[] = [];
+  static #handlers: SourceHandler[] = [];
 
   static readonly EXT = '.ts';
 
@@ -101,7 +101,7 @@ export class SourceUtil {
       fileContents = text;
     }
 
-    for (const handler of this.handlers) {
+    for (const handler of this.#handlers) {
       fileContents = handler(filename, fileContents);
     }
 
@@ -113,13 +113,13 @@ export class SourceUtil {
    * @param fn The preprocessor to add
    */
   static addPreProcessor(fn: SourceHandler) {
-    this.handlers.unshift(fn);
+    this.#handlers.unshift(fn);
   }
 
   /**
    * Clear out on cleanup
    */
   static reset() {
-    this.handlers = [];
+    this.#handlers = [];
   }
 }

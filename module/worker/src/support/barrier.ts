@@ -9,8 +9,8 @@ function canCancel(o: unknown): o is { cancel(): unknown } {
  * Build an execution barrier to handle various limitations
  */
 export class Barrier {
-  private support = [] as string[];
-  private barriers = new Map<string, Promise<unknown>>([]);
+  #support = [] as string[];
+  #barriers = new Map<string, Promise<unknown>>([]);
 
   constructor(
     timeout?: number,
@@ -33,16 +33,16 @@ export class Barrier {
     }
     const k = Util.uuid();
     p = p
-      .finally(() => this.barriers.delete(k))
+      .finally(() => this.#barriers.delete(k))
       .catch(err => { this.cleanup(); throw err; });
 
     if (!support) {
       p = p.then(() => this.cleanup());
     } else {
-      this.support.push(k);
+      this.#support.push(k);
     }
 
-    this.barriers.set(k, p);
+    this.#barriers.set(k, p);
     return this;
   }
 
@@ -50,13 +50,13 @@ export class Barrier {
    * Clean up, and cancel all cancellable barriers
    */
   cleanup() {
-    for (const k of this.support) {
-      const el = this.barriers.get(k);
+    for (const k of this.#support) {
+      const el = this.#barriers.get(k);
       if (canCancel(el)) {
         el.cancel();
       }
     }
-    this.barriers.clear();
+    this.#barriers.clear();
   }
 
   /**
@@ -65,8 +65,8 @@ export class Barrier {
   async wait(): Promise<Error | undefined> {
     let err: Error | undefined;
     // Wait for all barriers to be satisfied
-    while (this.barriers.size) {
-      await Promise.race(this.barriers.values()).catch(e => err = err || e);
+    while (this.#barriers.size) {
+      await Promise.race(this.#barriers.values()).catch(e => err = err || e);
     }
     return err;
   }

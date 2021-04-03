@@ -1,3 +1,5 @@
+import { Writable } from 'stream';
+
 import { YamlUtil } from '@travetto/yaml';
 
 import { TestEvent } from '../../model/event';
@@ -9,12 +11,13 @@ import { Consumable } from '../registry';
  */
 @Consumable('xunit')
 export class XunitEmitter implements TestConsumer {
-  private tests: string[] = [];
-  private suites: string[] = [];
+  #tests: string[] = [];
+  #suites: string[] = [];
+  #stream: Writable;
 
-  constructor(
-    private stream: NodeJS.WriteStream = process.stdout
-  ) { }
+  constructor(stream: Writable = process.stdout) {
+    this.#stream = stream;
+  }
 
   /**
    * Process metadata information (e.g. logs)
@@ -58,7 +61,7 @@ export class XunitEmitter implements TestConsumer {
         body = `<failure type="${assertErr.text}" message="${encodeURIComponent(assertErr.message!)}"><![CDATA[${assertErr.error!.stack}]]></failure>`;
       }
 
-      this.tests.push(`
+      this.#tests.push(`
     <testcase
       name="${name}"
       time="${test.duration}"
@@ -71,8 +74,8 @@ export class XunitEmitter implements TestConsumer {
       );
     } else if (e.type === 'suite' && e.phase === 'after') {
       const { suite } = e;
-      const testBodies = this.tests.slice(0);
-      this.tests = [];
+      const testBodies = this.#tests.slice(0);
+      this.#tests = [];
 
       const out = `
   <testsuite
@@ -87,7 +90,7 @@ export class XunitEmitter implements TestConsumer {
       ${testBodies.join('\n')}
       </testsuite>
 `;
-      this.suites.push(out);
+      this.#suites.push(out);
     }
   }
 
@@ -95,7 +98,7 @@ export class XunitEmitter implements TestConsumer {
    * Summarize all results
    */
   onSummary(summary: SuitesSummary) {
-    this.stream.write(`
+    this.#stream.write(`
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites
   name="${summary.suites.length ? summary.suites[0].file : 'nameless'}"
@@ -104,7 +107,7 @@ export class XunitEmitter implements TestConsumer {
   failures="${summary.failed}"
   errors="${summary.failed}"
 >
- ${this.suites.join('\n')}
+ ${this.#suites.join('\n')}
 </testsuites>
 `);
   }

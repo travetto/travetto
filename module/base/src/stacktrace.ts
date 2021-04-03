@@ -6,9 +6,9 @@ import { AppManifest } from './manifest';
  */
 export class StacktraceUtil {
 
-  private static FILTERS: string[] = [];
+  static #filters: string[] = [];
 
-  private static FILTER_REGEX: RegExp = /./g;
+  static #filterRegex: RegExp = /./g;
 
   /**
    * Initialize
@@ -37,9 +37,9 @@ export class StacktraceUtil {
    * @param names List files to exclude from the stack traces
    */
   static addStackFilters(...names: string[]) {
-    if (this.FILTERS) {
-      this.FILTERS.push(...names);
-      this.FILTER_REGEX = new RegExp(`(${this.FILTERS.join('|')})`);
+    if (this.#filters) {
+      this.#filters.push(...names);
+      this.#filterRegex = new RegExp(`(${this.#filters.join('|')})`);
     }
   }
 
@@ -47,8 +47,8 @@ export class StacktraceUtil {
    * Unset all filters
    */
   static clearStackFilters() {
-    this.FILTERS = [];
-    this.FILTER_REGEX = /##/;
+    this.#filters = [];
+    this.#filterRegex = /##/;
   }
 
   /**
@@ -59,7 +59,7 @@ export class StacktraceUtil {
   static simplifyStack(err: Error | string, filter = true): string {
     let lastLocation: string = '';
     const body = (typeof err === 'string' ? err : err.stack!).replace(/\\/g, '/').split('\n')
-      .filter(x => !filter || !this.FILTERS.length || !this.FILTER_REGEX.test(x)) // Exclude framework boilerplate
+      .filter(x => !filter || !this.#filters.length || !this.#filterRegex.test(x)) // Exclude framework boilerplate
       .reduce((acc, line) => {
         const [, location] = line.split(PathUtil.cwd);
 

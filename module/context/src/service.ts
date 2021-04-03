@@ -21,7 +21,7 @@ export class AsyncContext {
     this.iterate = this.iterate.bind(this);
   }
 
-  private store(setAs?: Ctx | null) {
+  #store(setAs?: Ctx | null) {
     const val = this.alStorage.getStore();
     if (!val) {
       throw new AppError('Context is not initialized', 'general');
@@ -42,7 +42,7 @@ export class AsyncContext {
   get<T = unknown>(key: string | symbol): T;
   get(): Record<string | symbol, unknown>;
   get<T>(key?: string | symbol) {
-    const root = this.store();
+    const root = this.#store();
     if (key) {
       return root[key as string];
     } else {
@@ -59,7 +59,7 @@ export class AsyncContext {
     if (valWithKey) {
       this.get()[keyOrVal as string] = valWithKey;
     } else {
-      this.store(keyOrVal as Ctx);
+      this.#store(keyOrVal as Ctx);
     }
   }
 
@@ -68,7 +68,7 @@ export class AsyncContext {
    */
   async run<T = unknown>(fn: () => Promise<T>, init: Ctx = {}): Promise<T> {
     if (this.alStorage.getStore()) {
-      init = { ...this.store(), ...init };
+      init = { ...this.#store(), ...init };
     }
     this.active += 1;
     this.alStorage.enterWith({ value: init });
@@ -88,7 +88,7 @@ export class AsyncContext {
    */
   async * iterate<T>(fn: () => AsyncGenerator<T>, init: Ctx = {}): AsyncGenerator<T> {
     if (this.alStorage.getStore()) {
-      init = { ...this.store(), ...init };
+      init = { ...this.#store(), ...init };
     }
     this.active += 1;
     this.alStorage.enterWith({ value: init });

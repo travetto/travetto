@@ -7,7 +7,7 @@ import { ColorUtil } from '../src';
 export class ColorUtilTest {
   @BeforeEach()
   init() {
-    ColorUtil['_colorize'] = true;
+    ColorUtil.colorize = true;
   }
 
   @Test()
@@ -20,7 +20,7 @@ export class ColorUtilTest {
 
   @Test()
   async noColor() {
-    ColorUtil['_colorize'] = false;
+    ColorUtil.colorize = false;
     const output = ColorUtil.color('red', ['bold', 'underline'], 'apple');
     assert(output === 'apple');
     assert(!output.includes('\x1b[22'));

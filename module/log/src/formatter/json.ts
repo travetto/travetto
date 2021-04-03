@@ -11,9 +11,13 @@ export interface JSONFormatterOpts {
  * JSON Formatter
  */
 export class JsonFormatter implements Formatter {
-  constructor(private opts: JSONFormatterOpts = {}) { }
+  #opts: JSONFormatterOpts;
+
+  constructor(opts: JSONFormatterOpts = {}) {
+    this.#opts = opts;
+  }
 
   format(ev: LogEvent) {
-    return JSON.stringify(ev, null, this.opts.depth);
+    return JSON.stringify(ev, null, this.#opts.depth);
   }
 }

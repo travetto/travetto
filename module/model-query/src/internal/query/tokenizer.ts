@@ -42,7 +42,7 @@ export class QueryLanguageTokenizer {
   /**
    * Process the next token.  Can specify expected type as needed
    */
-  private static processToken(state: TokenizeState, mode?: TokenType) {
+  static #processToken(state: TokenizeState, mode?: TokenType) {
     const text = state.text.substring(state.start, state.pos);
     const res = TOKEN_MAPPING[text.toLowerCase()];
     let value: unknown = text;
@@ -68,10 +68,10 @@ export class QueryLanguageTokenizer {
   /**
    * Flush state to output
    */
-  private static flush(state: TokenizeState, mode?: TokenType) {
+  static #flush(state: TokenizeState, mode?: TokenType) {
     if ((!mode || !state.mode || mode !== state.mode) && state.start !== state.pos) {
       if (state.mode !== 'whitespace') {
-        state.out.push(this.processToken(state, mode));
+        state.out.push(this.#processToken(state, mode));
       }
       state.start = state.pos;
     }
@@ -81,14 +81,14 @@ export class QueryLanguageTokenizer {
   /**
    * Determine if valid regex flag
    */
-  private static isValidRegexFlag(ch: number) {
+  static #isValidRegexFlag(ch: number) {
     return ch === 0x69 /* i */ || ch === 0x67 /* g */ || ch === 0x6D /* m */ || ch === 0x73 /* s */;
   }
 
   /**
    * Determine if valid token identifier
    */
-  private static isValidIdentToken(ch: number) {
+  static #isValidIdentToken(ch: number) {
     return (ch >= 0x30 /* ZERO */ && ch <= 0x39 /* NINE */) ||
       (ch >= 0x41 /* A */ && ch <= 0x5a /* Z */) ||
       (ch >= 0x61 /* a */ && ch <= 0x7a /* z */) ||
@@ -139,34 +139,34 @@ export class QueryLanguageTokenizer {
       switch (ch) {
         // Handle punctuation
         case OPEN_PARENS: case CLOSE_PARENS: case OPEN_BRACKET: case CLOSE_BRACKET: case COMMA:
-          this.flush(state);
+          this.#flush(state);
           state.mode = 'punctuation';
           break;
         // Handle operator
         case GREATER_THAN: case LESS_THAN: case EQUAL:
         case MODULO: case NOT: case TILDE: case AND: case OR:
-          this.flush(state, 'operator');
+          this.#flush(state, 'operator');
           break;
         // Handle whitespace
         case SPACE: case TAB:
-          this.flush(state, 'whitespace');
+          this.#flush(state, 'whitespace');
           break;
         // Handle quotes and slashes
         case DBL_QUOTE: case SGL_QUOTE: case FORWARD_SLASH:
-          this.flush(state);
+          this.#flush(state);
           state.mode = 'literal';
           state.pos = this.readString(text, state.pos) + 1;
           if (ch === FORWARD_SLASH) { // Read modifiers, not used by all, but useful in general
-            while (this.isValidRegexFlag(text.charCodeAt(state.pos))) {
+            while (this.#isValidRegexFlag(text.charCodeAt(state.pos))) {
               state.pos += 1;
             }
           }
-          this.flush(state);
+          this.#flush(state);
           continue;
         // Handle literal
         default:
-          if (this.isValidIdentToken(ch)) {
-            this.flush(state, 'literal');
+          if (this.#isValidIdentToken(ch)) {
+            this.#flush(state, 'literal');
           } else {
             throw new Error(`Invalid character: ${text.substring(Math.max(0, state.pos - 10), state.pos + 1)}`);
           }
@@ -174,7 +174,7 @@ export class QueryLanguageTokenizer {
       state.pos += 1;
     }
 
-    this.flush(state);
+    this.#flush(state);
 
     return state.out;
   }

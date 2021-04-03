@@ -15,7 +15,7 @@ export class FsUtil {
    * Command to remove a folder
    * @param pth Thefolder to delete
    */
-  private static unlinkCommand(pth: string): [string, string[]] {
+  static #unlinkCommand(pth: string): [string, string[]] {
     if (!pth || pth === '/') {
       throw new Error('Path has not been defined');
     }
@@ -30,7 +30,7 @@ export class FsUtil {
    * Command to copy a folder
    * @param pth The folder to copy
    */
-  private static copyCommand(src: string, dest: string): [string, string[]] {
+  static #copyCommand(src: string, dest: string): [string, string[]] {
     if (process.platform === 'win32') {
       return ['xcopy', ['/y', '/h', '/s', PathUtil.toNative(src), PathUtil.toNative(dest)]];
     } else {
@@ -103,7 +103,7 @@ export class FsUtil {
    * @param ignore Should errors be ignored
    */
   static unlinkRecursiveSync(pth: string, ignore = false) {
-    const cmd = this.unlinkCommand(pth);
+    const cmd = this.#unlinkCommand(pth);
     try {
       return ExecUtil.execSync(...cmd);
     } catch (err) {
@@ -119,7 +119,7 @@ export class FsUtil {
    * @param ignore Should errors be ignored
    */
   static unlinkRecursive(pth: string, ignore = false) {
-    const prom = ExecUtil.spawn(...this.unlinkCommand(pth)).result;
+    const prom = ExecUtil.spawn(...this.#unlinkCommand(pth)).result;
     return ignore ? prom.catchAsResult() : prom;
   }
 
@@ -131,7 +131,7 @@ export class FsUtil {
    */
   static copyRecursiveSync(src: string, dest: string, ignore = false) {
     try {
-      return ExecUtil.execSync(...this.copyCommand(src, dest));
+      return ExecUtil.execSync(...this.#copyCommand(src, dest));
     } catch (err) {
       if (!ignore) {
         throw err;

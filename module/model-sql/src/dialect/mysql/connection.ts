@@ -13,29 +13,31 @@ import { SQLModelConfig } from '../../config';
  */
 export class MySQLConnection extends Connection<mysql.PoolConnection> {
 
-  pool: mysql.Pool;
+  #pool: mysql.Pool;
+  #config: SQLModelConfig;
 
   constructor(
     context: AsyncContext,
-    private config: SQLModelConfig
+    config: SQLModelConfig
   ) {
     super(context);
+    this.#config = config;
   }
 
   async init() {
-    this.pool = mysql.createPool({
-      user: this.config.user,
-      password: this.config.password,
-      database: this.config.database,
-      host: this.config.host,
-      port: this.config.port,
+    this.#pool = mysql.createPool({
+      user: this.#config.user,
+      password: this.#config.password,
+      database: this.#config.database,
+      host: this.#config.host,
+      port: this.#config.port,
       timezone: 'utc',
       typeCast: this.typeCast.bind(this),
-      ...(this.config.options || {})
+      ...(this.#config.options || {})
     });
 
     // Close mysql
-    ShutdownManager.onShutdown(this.constructor.ᚕid, () => new Promise(r => this.pool.end(r)));
+    ShutdownManager.onShutdown(this.constructor.ᚕid, () => new Promise(r => this.#pool.end(r)));
   }
 
   /**
@@ -74,7 +76,7 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
 
   acquire() {
     return new Promise<mysql.PoolConnection>((res, rej) =>
-      this.pool.getConnection((err, conn) => err ? rej(err) : res(conn)));
+      this.#pool.getConnection((err, conn) => err ? rej(err) : res(conn)));
   }
 
   release(conn: mysql.PoolConnection) {

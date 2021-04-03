@@ -13,7 +13,7 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
    * Extending the $DependencyRegistry class to add some functionality for watching
    */
   const Cls = class extends $DependencyRegistry {
-    private proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<unknown>>>();
+    #proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<unknown>>>();
 
     /**
      * Proxy the created instance
@@ -22,16 +22,16 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
       const { qualifier, id: classId } = this.resolveTarget(target, qual);
       let proxy: RetargettingProxy<T>;
 
-      if (!this.proxies.has(classId)) {
-        this.proxies.set(classId, new Map());
+      if (!this.#proxies.has(classId)) {
+        this.#proxies.set(classId, new Map());
       }
 
-      if (!this.proxies.get(classId)!.has(qualifier)) {
+      if (!this.#proxies.get(classId)!.has(qualifier)) {
         proxy = new RetargettingProxy(instance);
-        this.proxies.get(classId)!.set(qualifier, proxy);
+        this.#proxies.get(classId)!.set(qualifier, proxy);
         console.debug('Registering proxy', { id: target.ᚕid, qualifier: qualifier.toString() });
       } else {
-        proxy = this.proxies.get(classId)!.get(qualifier)! as RetargettingProxy<T>;
+        proxy = this.#proxies.get(classId)!.get(qualifier)! as RetargettingProxy<T>;
         proxy.setTarget(instance);
         console.debug('Updating target', {
           id: target.ᚕid, qualifier: qualifier.toString(), instanceType: (instance as unknown as ClassInstance<T>).constructor.name as string
@@ -63,8 +63,8 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
 
       if (
         !cls.ᚕabstract &&
-        this.proxies.has(classId) &&
-        this.proxies.get(classId)!.has(config.qualifier)
+        this.#proxies.has(classId) &&
+        this.#proxies.get(classId)!.has(config.qualifier)
       ) {
         console.debug('Reloading on next tick');
         // Timing matters due to create instance being asynchronous
@@ -76,7 +76,7 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
 
     destroyInstance(cls: Class, qualifier: symbol) {
       const classId = cls.ᚕid;
-      const proxy = this.proxies.get(classId)!.get(qualifier);
+      const proxy = this.#proxies.get(classId)!.get(qualifier);
       super.destroyInstance(cls, qualifier);
       if (proxy) {
         proxy.setTarget(null);
@@ -85,7 +85,7 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
 
     onReset() {
       super.reset();
-      this.proxies.clear();
+      this.#proxies.clear();
     }
   };
 

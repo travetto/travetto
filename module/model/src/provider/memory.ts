@@ -30,21 +30,23 @@ export class MemoryModelConfig {
 @Injectable()
 export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
-  private store = new Map<string, Map<string, Buffer>>();
-  private indexes = new Map<string, Map<string, string>>();
+  #store = new Map<string, Map<string, Buffer>>();
+  #indexes = new Map<string, Map<string, string>>();
+
+  get client() { return this.#store; }
 
   constructor(public readonly config: MemoryModelConfig) { }
 
-  private getStore<T extends ModelType>(cls: Class<T> | string): Map<string, Buffer> {
+  #getStore<T extends ModelType>(cls: Class<T> | string): Map<string, Buffer> {
     const key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
-    if (!this.store.has(key)) {
-      this.store.set(key, new Map());
+    if (!this.#store.has(key)) {
+      this.#store.set(key, new Map());
     }
-    return this.store.get(key)!;
+    return this.#store.get(key)!;
   }
 
-  private find<T extends ModelType>(cls: Class<T> | string, id?: string, errorState?: 'data' | 'notfound') {
-    const store = this.getStore(cls);
+  #find<T extends ModelType>(cls: Class<T> | string, id?: string, errorState?: 'data' | 'notfound') {
+    const store = this.#getStore(cls);
 
     if (id && errorState && (errorState === 'notfound' ? !store.has(id) : store.has(id))) {
       throw errorState === 'notfound' ? new NotFoundError(cls, id) : new ExistsError(cls, id);
@@ -53,11 +55,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     return store;
   }
 
-  private async removeIndices<T extends ModelType>(cls: Class<T>, id: string) {
+  async #removeIndices<T extends ModelType>(cls: Class<T>, id: string) {
     try {
       const item = await this.get(cls, id);
       for (const idx of ModelRegistry.get(cls).indices ?? []) {
-        this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.delete(ModelIndexedUtil.computeIndexKey(cls, idx, item));
+        this.#indexes.get(`${cls.ᚕid}:${idx.name}`)?.delete(ModelIndexedUtil.computeIndexKey(cls, idx, item));
       }
     } catch (e) {
       if (!(e instanceof NotFoundError)) {
@@ -66,17 +68,17 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     }
   }
 
-  private async writeIndices<T extends ModelType>(cls: Class<T>, item: T) {
+  async #writeIndices<T extends ModelType>(cls: Class<T>, item: T) {
     for (const idx of ModelRegistry.get(cls).indices ?? []) {
-      this.indexes.get(`${cls.ᚕid}:${idx.name}`)?.set(ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id);
+      this.#indexes.get(`${cls.ᚕid}:${idx.name}`)?.set(ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id);
     }
   }
 
-  private async write<T extends ModelType>(cls: Class<T>, item: T) {
-    const store = this.getStore(cls);
-    await this.removeIndices(cls, item.id);
+  async #write<T extends ModelType>(cls: Class<T>, item: T) {
+    const store = this.#getStore(cls);
+    await this.#removeIndices(cls, item.id);
     store.set(item.id, Buffer.from(JSON.stringify(item)));
-    await this.writeIndices(cls, item);
+    await this.#writeIndices(cls, item);
     return item;
   }
 
@@ -91,7 +93,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string) {
-    const store = this.getStore(cls);
+    const store = this.#getStore(cls);
     if (store.has(id)) {
       const res = await ModelCrudUtil.load(cls, store.get(id)!);
       if (res) {
@@ -111,7 +113,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     if (!item.id) {
       item.id = this.uuid();
     }
-    this.find(cls, item.id, 'data');
+    this.#find(cls, item.id, 'data');
     return await this.upsert(cls, item);
   }
 
@@ -122,22 +124,22 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    return await this.write(cls, item);
+    return await this.#write(cls, item);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
     const id = item.id;
     const clean = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
-    return await this.write(cls, clean);
+    return await this.#write(cls, clean);
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    const store = this.find(cls, id, 'notfound');
+    const store = this.#find(cls, id, 'notfound');
     store.delete(id);
   }
 
   async * list<T extends ModelType>(cls: Class<T>) {
-    for (const id of this.getStore(cls).keys()) {
+    for (const id of this.#getStore(cls).keys()) {
       try {
         yield await this.get(cls, id);
       } catch (e) {
@@ -150,25 +152,25 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   // Stream Support
   async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
-    const streams = this.getStore('_streams');
-    const metas = this.getStore('_streams_meta');
+    const streams = this.#getStore('_streams');
+    const metas = this.#getStore('_streams_meta');
     metas.set(location, Buffer.from(JSON.stringify(meta)));
     streams.set(location, await StreamUtil.streamToBuffer(stream));
   }
 
   async getStream(location: string) {
-    const streams = this.find('_streams', location, 'notfound');
+    const streams = this.#find('_streams', location, 'notfound');
     return StreamUtil.bufferToStream(streams.get(location)!);
   }
 
   async describeStream(location: string) {
-    const metas = this.find('_streams_meta', location, 'notfound');
+    const metas = this.#find('_streams_meta', location, 'notfound');
     return JSON.parse(metas.get(location)!.toString('utf8')) as StreamMeta;
   }
 
   async deleteStream(location: string) {
-    const streams = this.getStore('_streams');
-    const metas = this.getStore('_streams_meta');
+    const streams = this.#getStore('_streams');
+    const metas = this.#getStore('_streams_meta');
     if (streams.has(location)) {
       streams.delete(location);
       metas.delete(location);
@@ -180,7 +182,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   // Expiry Support
   async deleteExpired<T extends ModelType>(cls: Class<T>) {
     const deleting = [];
-    const store = this.getStore(cls);
+    const store = this.#getStore(cls);
     for await (const id of [...store.keys()]) {
       if ((ModelExpiryUtil.getExpiryState(cls, await this.get(cls, id))).expired) {
         deleting.push(this.delete(cls, id));
@@ -194,13 +196,13 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async deleteStorage() {
-    this.store.clear();
-    this.indexes.clear();
+    this.#store.clear();
+    this.#indexes.clear();
   }
 
   async createModel(cls: Class<ModelType>) {
     for (const idx of ModelRegistry.get(cls).indices ?? []) {
-      this.indexes.set(`${cls.ᚕid}:${idx.name}`, new Map());
+      this.#indexes.set(`${cls.ᚕid}:${idx.name}`, new Map());
     }
   }
 
@@ -211,7 +213,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       throw new NotFoundError(cls, `Index ${idx}`);
     }
     const id = ModelIndexedUtil.computeIndexKey(cls, config, body);
-    const index = this.indexes.get(`${cls.ᚕid}:${idx}`);
+    const index = this.#indexes.get(`${cls.ᚕid}:${idx}`);
     if (index && index.has(id)) {
       return this.get(cls, index.get(id)!);
 
@@ -225,7 +227,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       throw new NotFoundError(cls, `Index ${idx}`);
     }
     const id = ModelIndexedUtil.computeIndexKey(cls, config, body);
-    const index = this.indexes.get(`${cls.ᚕid}:${idx}`);
+    const index = this.#indexes.get(`${cls.ᚕid}:${idx}`);
     if (index && index.has(id)) {
       index.delete(id);
     }

@@ -20,18 +20,18 @@ export class AppRunUtil {
 
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 
-    ConsoleManager['exclude'].add('debug');
+    ConsoleManager.exclude('debug', true);
 
     // Init
     await PhaseManager.run('init');
 
-    ConsoleManager['exclude'].delete('debug');
+    ConsoleManager.exclude('debug', false);
 
     // And run
     const { ApplicationRegistry } = await import('../../src/registry');
 
     // Convert to full app
-    app = typeof app === 'string' ? ApplicationRegistry['applications'].get(app)! : app;
+    app = typeof app === 'string' ? ApplicationRegistry.getByName(app)! : app;
 
     await ApplicationRegistry.resolveParameters(app, sub);
 

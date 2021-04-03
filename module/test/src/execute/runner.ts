@@ -15,32 +15,36 @@ import { RunnableTestConsumer } from '../consumer/types/runnable';
  */
 export class Runner {
 
-  constructor(private state: RunState) { }
+  #state: RunState;
+
+  constructor(state: RunState) {
+    this.#state = state;
+  }
 
   get patterns() {
-    return this.state.args.map(x => new RegExp(PathUtil.toUnix(x)));
+    return this.#state.args.map(x => new RegExp(PathUtil.toUnix(x)));
   }
 
   /**
    * Run all files
    */
   async runFiles() {
-    const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
+    const consumer = RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
 
-    const files = (await RunnerUtil.getTestFiles(this.patterns, this.state.isolated ? 'test-isolated' : 'test'));
+    const files = (await RunnerUtil.getTestFiles(this.patterns, this.#state.isolated ? 'test-isolated' : 'test'));
 
     console.debug('Running', { files });
 
     await PhaseManager.run('test');
 
-    const manager = this.state.isolated ?
+    const manager = this.#state.isolated ?
       buildIsolatedTestManager :
       buildStandardTestManager;
 
     const pool = new WorkPool(manager(consumer), {
       idleTimeoutMillis: 10000,
       min: 1,
-      max: this.state.concurrency
+      max: this.#state.concurrency
     });
 
     consumer.onStart();
@@ -56,13 +60,13 @@ export class Runner {
    * Run a single file
    */
   async runSingle() {
-    const consumer = RunnableTestConsumer.get(this.state.consumer ?? this.state.format);
+    const consumer = RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
     consumer.onStart();
 
-    const [file, ...args] = this.state.args;
+    const [file, ...args] = this.#state.args;
 
     await PhaseManager.run('test');
-    if (this.state.isolated) {
+    if (this.#state.isolated) {
       await TestExecutor.executeIsolated(consumer, file, ...args);
     } else {
       await TestExecutor.execute(consumer, file, ...args);
@@ -75,7 +79,7 @@ export class Runner {
    * Run the runner, based on the inputs passed to the constructor
    */
   async run() {
-    switch (this.state.mode) {
+    switch (this.#state.mode) {
       case 'single': return await this.runSingle();
       case 'standard': return await this.runFiles();
     }

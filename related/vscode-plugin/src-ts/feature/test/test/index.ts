@@ -16,40 +16,40 @@ import { TestEvent } from './types';
 @Activatible('test', 'test')
 class TestRunnerFeature extends BaseFeature {
 
-  private server: ProcessServer;
-  private consumer = new WorkspaceResultsManager(vscode.window);
-  private cacheDir = `${Workspace.path}/.trv_cache_plugin`;
-  private codeLensUpdated: (e: void) => unknown;
+  #server: ProcessServer;
+  #consumer = new WorkspaceResultsManager(vscode.window);
+  #cacheDir = `${Workspace.path}/.trv_cache_plugin`;
+  #codeLensUpdated: (e: void) => unknown;
 
   constructor(
     module?: string,
     command?: string
   ) {
     super(module, command);
-    this.server = new ProcessServer(Workspace.binPath(this.module, 'test-watch'), ['exec'], {
-      env: { TRV_CACHE: this.cacheDir, }
+    this.#server = new ProcessServer(Workspace.binPath(this.module, 'test-watch'), ['exec'], {
+      env: { TRV_CACHE: this.#cacheDir, }
     });
 
-    this.server
+    this.#server
       .on('stop', () => this.clean())
       .on('pre-start', () => this.clean(true))
       .on('start', () => {
-        this.server.onMessage('*', (type, ev) => {
-          this.consumer.onEvent(ev as TestEvent);
-          this.codeLensUpdated?.();
+        this.#server.onMessage('*', (type, ev) => {
+          this.#consumer.onEvent(ev as TestEvent);
+          this.#codeLensUpdated?.();
         });
 
-        this.server.onceMessage('*', () =>  // Listen for first message
-          this.consumer.trackEditor(vscode.window.activeTextEditor));
+        this.#server.onceMessage('*', () =>  // Listen for first message
+          this.#consumer.trackEditor(vscode.window.activeTextEditor));
       });
   }
 
   /** Clean up */
   clean(recopy = false) {
-    this.consumer.dispose();
-    FsUtil.unlinkRecursiveSync(this.cacheDir, true);
+    this.#consumer.dispose();
+    FsUtil.unlinkRecursiveSync(this.#cacheDir, true);
     if (recopy) {
-      FsUtil.copyRecursiveSync(`${Workspace.path}/.trv_cache`, this.cacheDir, true);
+      FsUtil.copyRecursiveSync(`${Workspace.path}/.trv_cache`, this.#cacheDir, true);
     }
   }
 
@@ -83,7 +83,7 @@ class TestRunnerFeature extends BaseFeature {
    * @param doc
    */
   buildCodeLenses(doc: vscode.TextDocument) {
-    return (this.consumer.getResults(doc)?.getListOfTests() || [])
+    return (this.#consumer.getResults(doc)?.getListOfTests() || [])
       .filter(x => x.start < doc.lineCount && doc.lineAt(x.start - 1).text.includes('@Test'))
       .map(test => ({
         range: doc.lineAt(test.start - 1).range,
@@ -101,14 +101,14 @@ class TestRunnerFeature extends BaseFeature {
    */
   async activate(context: vscode.ExtensionContext) {
     this.register('line', this.launchTestDebugger.bind(this));
-    this.register('reload', () => this.server.restart());
-    this.register('rerun', () => this.consumer.trackEditor(vscode.window.activeTextEditor));
+    this.register('reload', () => this.#server.restart());
+    this.register('rerun', () => this.#consumer.trackEditor(vscode.window.activeTextEditor));
 
-    vscode.workspace.onDidOpenTextDocument(x => this.consumer.trackEditor(x), null, context.subscriptions);
-    vscode.workspace.onDidCloseTextDocument(x => this.consumer.untrackEditor(x), null, context.subscriptions);
-    vscode.window.onDidChangeActiveTextEditor(x => this.consumer.trackEditor(x), null, context.subscriptions);
+    vscode.workspace.onDidOpenTextDocument(x => this.#consumer.trackEditor(x), null, context.subscriptions);
+    vscode.workspace.onDidCloseTextDocument(x => this.#consumer.untrackEditor(x), null, context.subscriptions);
+    vscode.window.onDidChangeActiveTextEditor(x => this.#consumer.trackEditor(x), null, context.subscriptions);
 
-    setTimeout(() => vscode.window.visibleTextEditors.forEach(x => this.consumer.trackEditor(x)), 1000);
+    setTimeout(() => vscode.window.visibleTextEditors.forEach(x => this.#consumer.trackEditor(x)), 1000);
 
     vscode.languages.registerCodeLensProvider({
       language: 'typescript',
@@ -119,11 +119,11 @@ class TestRunnerFeature extends BaseFeature {
     }, {
       provideCodeLenses: this.buildCodeLenses.bind(this),
       onDidChangeCodeLenses: l => {
-        this.codeLensUpdated = l;
+        this.#codeLensUpdated = l;
         return { dispose: () => { } };
       }
     });
 
-    await this.server.start();
+    await this.#server.start();
   }
 }

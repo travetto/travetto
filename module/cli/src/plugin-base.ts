@@ -30,7 +30,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Command object
    */
-  private _cmd: commander.Command;
+  #cmd: commander.Command;
 
   /**
    * Allow unknown options
@@ -133,7 +133,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   }
 
   get cmd() {
-    return this._cmd.opts() as Shape<ReturnType<Exclude<this['getOptions'], undefined>>>;
+    return this.#cmd.opts() as Shape<ReturnType<Exclude<this['getOptions'], undefined>>>;
   }
 
   /**
@@ -150,7 +150,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
     if (err && typeof err !== 'string') {
       err = err.message;
     }
-    HelpUtil.showHelp(this._cmd, err, extra || await this.help());
+    HelpUtil.showHelp(this.#cmd, err, extra || await this.help());
   }
 
   /**
@@ -198,7 +198,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
     }
 
     cmd = cmd.action(this.runAction.bind(this));
-    return this._cmd = cmd;
+    return this.#cmd = cmd;
   }
 
   /**

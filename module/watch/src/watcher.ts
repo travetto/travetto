@@ -20,25 +20,27 @@ export interface WatcherOptions {
  */
 export class Watcher extends WatchEmitter {
 
-  private watched = new Map<string, ScanEntry>();
-  private directories = new Map<string, { close: () => void }>();
-  private files = new Map<string, { close: () => void }>();
+  #watched = new Map<string, ScanEntry>();
+  #directories = new Map<string, { close: () => void }>();
+  #files = new Map<string, { close: () => void }>();
+  #folder: string;
+  #options: WatcherOptions;
 
   /**
    * Create a new watcher, priming the root direction
    * as the starting point
    * @param opts
    */
-  constructor(private folder: string, private options: WatcherOptions = {}) {
+  constructor(folder: string, options: WatcherOptions = {}) {
     super(options.maxListeners);
-    this.options = { interval: 100, ...this.options };
-    this.folder = PathUtil.resolveUnix(this.options.cwd || PathUtil.cwd, this.folder);
+    this.#options = { interval: 100, ...options };
+    this.#folder = PathUtil.resolveUnix(this.#options.cwd ?? PathUtil.cwd, folder);
 
-    this.suppress = !!this.options.ignoreInitial;
+    this.suppress = !!this.#options.ignoreInitial;
 
-    this.watch(
-      { file: this.folder, module: this.folder, stats: fs.statSync(this.folder) },
-      ...ScanFs.scanDirSync(this.options.exclude ?? { testFile: x => true, testDir: x => true }, this.folder)
+    this.#watch(
+      { file: this.#folder, module: this.#folder, stats: fs.statSync(this.#folder) },
+      ...ScanFs.scanDirSync(this.#options.exclude ?? { testFile: x => true, testDir: x => true }, this.#folder)
     );
 
     // Allow initial suppression for 1s
@@ -48,11 +50,11 @@ export class Watcher extends WatchEmitter {
   /**
    * Handle when a directory if the target of a change event
    */
-  private processDirectoryChange(dir: ScanEntry) {
+  #processDirectoryChange(dir: ScanEntry) {
     dir.children = dir.children ?? [];
 
     fs.readdir(dir.file, (err, current) => {
-      if (err && !this.handleError(err)) {
+      if (err && !this.#handleError(err)) {
         current = [];
       }
 
@@ -67,7 +69,7 @@ export class Watcher extends WatchEmitter {
         if (current.indexOf(child.file) < 0) {
 
           // Remove from watching
-          this.unwatch(child.file);
+          this.#unwatch(child.file);
           dir.children!.splice(dir.children!.indexOf(child), 1);
 
           this.emit(ScanFs.isNotDir(child) ? 'removed' : 'removedDir', child);
@@ -82,7 +84,7 @@ export class Watcher extends WatchEmitter {
 
         if (!prevSet.has(next)) {
           const sub = { file: next, module: next, stats: nextStats };
-          this.watch(sub);
+          this.#watch(sub);
           dir.children!.push(sub);
 
           this.emit(ScanFs.isNotDir(sub) ? 'added' : 'addedDir', sub);
@@ -94,7 +96,7 @@ export class Watcher extends WatchEmitter {
   /**
    * Start watching a directory using fs.watch
    */
-  private watchDirectory(entry: ScanEntry) {
+  #watchDirectory(entry: ScanEntry) {
     if (ScanFs.isNotDir(entry)) {
       throw new Error(`Not a directory: ${entry.file}`);
     }
@@ -102,27 +104,27 @@ export class Watcher extends WatchEmitter {
     try {
       console.debug('Watching Directory', { directory: entry.file });
       // const watcher = fs.watch(PathUtil.resolveUnix(entry.file), { persistent: false }, () => this.processDirectoryChange(entry);
-      const watcher = ts.sys.watchDirectory!(PathUtil.resolveUnix(entry.file), () => this.processDirectoryChange(entry), false);
+      const watcher = ts.sys.watchDirectory!(PathUtil.resolveUnix(entry.file), () => this.#processDirectoryChange(entry), false);
 
       // watcher.on('error', this.handleError.bind(this));
-      this.directories.set(entry.file, watcher);
+      this.#directories.set(entry.file, watcher);
 
-      this.processDirectoryChange(entry);
+      this.#processDirectoryChange(entry);
 
     } catch (err) {
-      return this.handleError(err);
+      return this.#handleError(err);
     }
   }
 
   /**
    * Start watching a file.  Registers a poller using fs.watch
    */
-  private watchFile(entry: ScanEntry) {
+  #watchFile(entry: ScanEntry) {
     if (ScanFs.isDir(entry)) {
       throw new Error(`Not a file: ${entry.file}`);
     }
 
-    const opts = { persistent: false, interval: this.options.interval };
+    const opts = { persistent: false, interval: this.#options.interval };
 
     // const poller = () => {
     //   // Only emit changed if the file still exists
@@ -154,50 +156,50 @@ export class Watcher extends WatchEmitter {
       }
     };
 
-    this.files.set(entry.file, ts.sys.watchFile!(entry.file, poller, opts.interval, opts));
-    // this.files.set(entry.file, { close: () => fs.unwatchFile(entry.file, poller) });
+    this.#files.set(entry.file, ts.sys.watchFile!(entry.file, poller, opts.interval, opts));
+    // this.#files.set(entry.file, { close: () => fs.unwatchFile(entry.file, poller) });
     // fs.watchFile(entry.file, opts, poller);
   }
 
   /**
    * Stop watching a file
    */
-  private unwatchFile(entry: ScanEntry) {
-    if (this.files.has(entry.file)) {
+  #unwatchFile(entry: ScanEntry) {
+    if (this.#files.has(entry.file)) {
       console.debug('Unwatching File', { file: entry.file });
 
-      this.files.get(entry.file)!.close();
-      this.files.delete(entry.file);
+      this.#files.get(entry.file)!.close();
+      this.#files.delete(entry.file);
     }
   }
 
   /**
    * Stop watching a directory
    */
-  private unwatchDirectory(entry: ScanEntry) {
-    if (this.directories.has(entry.file)) {
+  #unwatchDirectory(entry: ScanEntry) {
+    if (this.#directories.has(entry.file)) {
       console.debug('Unwatching Directory', { directory: entry.file });
 
       for (const child of (entry.children ?? [])) {
-        this.unwatch(child.file);
+        this.#unwatch(child.file);
       }
 
-      this.directories.get(entry.file)!.close();
-      this.directories.delete(entry.file);
+      this.#directories.get(entry.file)!.close();
+      this.#directories.delete(entry.file);
     }
   }
 
   /**
    * Watch an entry, could be a file or a folder
    */
-  private watch(...entries: ScanEntry[]) {
-    for (const entry of entries.filter(x => !this.watched.has(x.file))) {
-      this.watched.set(entry.file, entry);
+  #watch(...entries: ScanEntry[]) {
+    for (const entry of entries.filter(x => !this.#watched.has(x.file))) {
+      this.#watched.set(entry.file, entry);
 
       if (ScanFs.isDir(entry)) { // Watch Directory
-        this.watchDirectory(entry);
+        this.#watchDirectory(entry);
       } else { // Watch File
-        this.watchFile(entry);
+        this.#watchFile(entry);
       }
     }
     return this;
@@ -206,18 +208,18 @@ export class Watcher extends WatchEmitter {
   /**
    * Unwatch a path
    */
-  private unwatch(...files: string[]) {
-    for (const file of files.filter(x => this.watched.has(x))) {
-      const entry = this.watched.get(file)!;
+  #unwatch(...files: string[]) {
+    for (const file of files.filter(x => this.#watched.has(x))) {
+      const entry = this.#watched.get(file)!;
       if (!entry) {
         return;
       }
-      this.watched.delete(file);
+      this.#watched.delete(file);
 
       if (ScanFs.isDir(entry)) {
-        this.unwatchDirectory(entry);
+        this.#unwatchDirectory(entry);
       } else {
-        this.unwatchFile(entry);
+        this.#unwatchFile(entry);
       }
     }
     return this;
@@ -226,7 +228,7 @@ export class Watcher extends WatchEmitter {
   /**
    * Handle watch error
    */
-  private handleError(err: Error & { code?: string }) {
+  #handleError(err: Error & { code?: string }) {
     switch (err.code) {
       case 'EMFILE': this.emit('error', new Error('EMFILE: Too many opened files.')); break;
       case 'ENOENT': return false;
@@ -239,7 +241,7 @@ export class Watcher extends WatchEmitter {
    * Close the watcher, releasing all the file system pollers
    */
   close() {
-    this.unwatch(...this.watched.keys());
+    this.#unwatch(...this.#watched.keys());
     setImmediate(() => this.removeAllListeners());
     return this;
   }

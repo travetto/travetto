@@ -1,3 +1,5 @@
+import { Writable } from 'stream';
+
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
@@ -8,11 +10,15 @@ import { Consumable } from '../registry';
 @Consumable('json')
 export class JSONEmitter implements TestConsumer {
 
-  constructor(private stream: NodeJS.WriteStream = process.stdout) { }
+  #stream: Writable;
+
+  constructor(stream: Writable = process.stdout) {
+    this.#stream = stream;
+  }
 
   onEvent(event: TestEvent) { }
 
   onSummary(summary: SuitesSummary) {
-    this.stream.write(JSON.stringify(summary, undefined, 2));
+    this.#stream.write(JSON.stringify(summary, undefined, 2));
   }
 }

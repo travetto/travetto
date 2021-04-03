@@ -27,20 +27,20 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Generic-pool pool
    */
-  private pool: gp.Pool<T>;
+  #pool: gp.Pool<T>;
   /**
    * Number of acquisitions in process
    */
-  private pendingAcquires = 0;
+  #pendingAcquires = 0;
   /**
    * List of errors during processing
    */
-  private errors: Error[] = [];
+  #errors: Error[] = [];
 
   /**
    * Error count during creation
    */
-  private createErrors = 0;
+  #createErrors = 0;
 
   /**
    *
@@ -56,7 +56,7 @@ export class WorkPool<X, T extends Worker<X>> {
     };
 
     // Create the pool
-    this.pool = gp.createPool({
+    this.#pool = gp.createPool({
       create: () => this.createAndTrack(getWorker, args),
       destroy: x => this.destroy(x),
       validate: async (x: T) => x.active
@@ -70,24 +70,24 @@ export class WorkPool<X, T extends Worker<X>> {
    */
   async createAndTrack(getWorker: () => Promise<T> | T, opts: gp.Options) {
     try {
-      this.pendingAcquires += 1;
+      this.#pendingAcquires += 1;
       const res = await getWorker();
 
       if (res.init) {
         await res.init();
       }
 
-      this.createErrors = 0; // Reset errors on success
+      this.#createErrors = 0; // Reset errors on success
 
       return res;
     } catch (e) {
-      if (this.createErrors++ > opts.max!) { // If error count is bigger than pool size, we broke
+      if (this.#createErrors++ > opts.max!) { // If error count is bigger than pool size, we broke
         console.error('Failed in creating pool', { error: e });
         process.exit(1);
       }
       throw e;
     } finally {
-      this.pendingAcquires -= 1;
+      this.#pendingAcquires -= 1;
     }
   }
 
@@ -111,9 +111,9 @@ export class WorkPool<X, T extends Worker<X>> {
             await worker.release();
           } catch { }
         }
-        await this.pool.release(worker);
+        await this.#pool.release(worker);
       } else {
-        await this.pool.destroy(worker);
+        await this.#pool.destroy(worker);
       }
     } catch { }
   }
@@ -125,12 +125,12 @@ export class WorkPool<X, T extends Worker<X>> {
     const pending = new Set<Promise<unknown>>();
 
     while (await src.hasNext()) {
-      const worker = (await this.pool.acquire())!;
+      const worker = (await this.#pool.acquire())!;
       console.debug('Acquired', { pid: process.pid, worker: worker.id });
       const nextInput = await src.next();
 
       const completion = worker.execute(nextInput)
-        .catch(err => this.errors.push(err)) // Catch error
+        .catch(err => this.#errors.push(err)) // Catch error
         .finally(() => this.release(worker));
 
       completion.finally(() => pending.delete(completion));
@@ -140,8 +140,8 @@ export class WorkPool<X, T extends Worker<X>> {
 
     await Promise.all(Array.from(pending));
 
-    if (this.errors.length) {
-      throw this.errors[0];
+    if (this.#errors.length) {
+      throw this.#errors[0];
     }
   }
 
@@ -149,10 +149,10 @@ export class WorkPool<X, T extends Worker<X>> {
    * Shutdown pool
    */
   async shutdown() {
-    while (this.pendingAcquires) {
+    while (this.#pendingAcquires) {
       await new Promise(r => setTimeout(r, 10));
     }
-    await this.pool.drain();
-    await this.pool.clear();
+    await this.#pool.drain();
+    await this.#pool.clear();
   }
 }

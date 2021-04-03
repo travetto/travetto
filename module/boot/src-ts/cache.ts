@@ -13,7 +13,7 @@ export class FileCache {
     return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
   }
 
-  private cache = new Map<string, fs.Stats>();
+  #cache = new Map<string, fs.Stats>();
 
   /**
    * Directory to cache into
@@ -27,7 +27,7 @@ export class FileCache {
   /**
    * Purge all expired data
    */
-  private purgeExpired() {
+  #purgeExpired() {
     for (const f of fs.readdirSync(this.cacheDir)) {
       const full = this.fromEntryName(f);
       try {
@@ -56,7 +56,7 @@ export class FileCache {
         throw new Error(`Unable to write to cache directory: ${this.cacheDir}`);
       }
       if (purgeExpired) {
-        this.purgeExpired();
+        this.#purgeExpired();
       }
     }
   }
@@ -112,7 +112,7 @@ export class FileCache {
    * @param local The location to delete
    */
   removeEntry(local: string) {
-    this.cache.delete(local);
+    this.#cache.delete(local);
   }
 
   /**
@@ -120,7 +120,7 @@ export class FileCache {
    * @param local The location to verify
    */
   hasEntry(local: string) {
-    return this.cache.has(local) || FsUtil.existsSync(this.toEntryName(local));
+    return this.#cache.has(local) || FsUtil.existsSync(this.toEntryName(local));
   }
 
   /**
@@ -128,11 +128,11 @@ export class FileCache {
    * @param local The location to stat
    */
   statEntry(local: string) {
-    if (!this.cache.has(local)) {
+    if (!this.#cache.has(local)) {
       const stat = fs.statSync(this.toEntryName(local));
-      this.cache.set(local, stat);
+      this.#cache.set(local, stat);
     }
-    return this.cache.get(local)!;
+    return this.#cache.get(local)!;
   }
 
   /**
@@ -146,7 +146,7 @@ export class FileCache {
         if (!quiet) {
           console.debug('Deleted', { cacheDir: this.cacheDir });
         }
-        this.cache.clear(); // Clear it out
+        this.#cache.clear(); // Clear it out
       } catch (e) {
         console.error('Failed in deleting');
       }

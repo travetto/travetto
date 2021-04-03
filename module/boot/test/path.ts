@@ -3,14 +3,12 @@ import * as assert from 'assert';
 import { Test, Suite, AfterEach } from '@travetto/test';
 import { PathUtil } from '../src';
 
-const ogPath = PathUtil['devPath'];
-
 @Suite()
 export class PathTest {
 
   @AfterEach()
   after() {
-    PathUtil['devPath'] = ogPath;
+    PathUtil.setDevPath(undefined);
   }
 
   @Test()
@@ -37,10 +35,10 @@ export class PathTest {
     assert(PathUtil.resolveFrameworkPath('test/test2') === 'test/test2');
     assert(PathUtil.resolveFrameworkPath('test\\test2') === 'test\\test2');
 
-    delete PathUtil['devPath'];
+    PathUtil.setDevPath('');
     assert(PathUtil.resolveFrameworkPath('@travetto/temp') === '@travetto/temp');
     assert(PathUtil.resolveFrameworkPath('node_modules/@travetto/temp') === 'node_modules/@travetto/temp');
-    PathUtil['devPath'] = 'base';
+    PathUtil.setDevPath('base');
     assert(PathUtil.resolveFrameworkPath('@travetto/temp') === 'base/temp');
     assert(PathUtil.resolveFrameworkPath('node_modules/@travetto/temp') === 'base/temp');
   }
@@ -51,10 +49,10 @@ export class PathTest {
     assert(PathUtil.normalizeFrameworkPath('test/test2') === 'test/test2');
     assert(PathUtil.normalizeFrameworkPath('test\\test2') === 'test\\test2');
 
-    delete PathUtil['devPath'];
+    PathUtil.setDevPath('');
     assert(PathUtil.normalizeFrameworkPath('@travetto/temp') === '@travetto/temp');
     assert(PathUtil.normalizeFrameworkPath('@travetto/temp', 'node_modules/') === '@travetto/temp');
-    PathUtil['devPath'] = 'base';
+    PathUtil.setDevPath('base');
     assert(PathUtil.normalizeFrameworkPath('base/temp') === '@travetto/temp');
     assert(PathUtil.normalizeFrameworkPath('base/temp', 'node_modules/') === 'node_modules/@travetto/temp');
   }

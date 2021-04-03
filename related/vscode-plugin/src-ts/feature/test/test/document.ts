@@ -22,24 +22,27 @@ function isDisposable(o: unknown): o is { _disposed: boolean } {
  */
 export class DocumentResultsManager {
 
-  private results: AllState = {
+  #results: AllState = {
     suite: {},
     test: {}
   };
 
-  private failedAssertions: Record<number, Assertion> = {};
-  private diagnostics: vscode.Diagnostic[] = [];
-  private editors = new Set<vscode.TextEditor>();
-  private document: vscode.TextDocument;
+  #failedAssertions: Record<number, Assertion> = {};
+  #diagnostics: vscode.Diagnostic[] = [];
+  #editors = new Set<vscode.TextEditor>();
+  #document: vscode.TextDocument;
+  #file: string;
   active = false;
 
-  constructor(private file: string) { }
+  constructor(file: string) {
+    this.#file = file;
+  }
 
   /**
    * Get list of known tests
    */
   getListOfTests() {
-    return Object.values(this.results.test)
+    return Object.values(this.#results.test)
       .map(v => ({
         name: v.src.methodName,
         start: v.src.lines.start,
@@ -52,10 +55,10 @@ export class DocumentResultsManager {
    * @param e
    */
   addEditor(e: vscode.TextEditor) {
-    if (!this.editors.has(e)) {
-      const elements = [...this.editors].filter(x => isDisposable(x) && x._disposed);
-      this.editors = new Set([...elements, e]);
-      this.document = e.document;
+    if (!this.#editors.has(e)) {
+      const elements = [...this.#editors].filter(x => isDisposable(x) && x._disposed);
+      this.#editors = new Set([...elements, e]);
+      this.#document = e.document;
       try {
         this.refresh();
       } catch (err) {
@@ -71,7 +74,7 @@ export class DocumentResultsManager {
    */
   setStyle(type: vscode.TextEditorDecorationType, decs: vscode.DecorationOptions[]) {
     if (type) {
-      for (const ed of this.editors) {
+      for (const ed of this.#editors) {
         if (isDisposable(ed) && !ed._disposed) {
           ed.setDecorations(type, decs);
         }
@@ -83,10 +86,10 @@ export class DocumentResultsManager {
    * Shutdown results manager
    */
   dispose() {
-    this.editors.clear();
+    this.#editors.clear();
 
     for (const l of ['suite', 'test'] as const) {
-      for (const e of Object.values(this.results[l])) {
+      for (const e of Object.values(this.#results[l])) {
         for (const x of Object.values(e.styles)) { x.dispose(); }
         if (l === 'test') {
           for (const x of Object.values((e as TestState).assertStyles)) {
@@ -99,7 +102,7 @@ export class DocumentResultsManager {
 
   refreshTest(test: TestState | string) {
     if (typeof test === 'string') {
-      test = this.results.test[test];
+      test = this.#results.test[test];
     }
     if (test.decoration && test.status) {
       this.setStyle(test.styles[test.status], [test.decoration]);
@@ -118,12 +121,12 @@ export class DocumentResultsManager {
    * Refresh all results
    */
   refresh() {
-    for (const suite of Object.values(this.results.suite)) {
+    for (const suite of Object.values(this.#results.suite)) {
       if (suite.decoration && suite.status) {
         this.setStyle(suite.styles[suite.status], [suite.decoration]);
       }
     }
-    for (const test of Object.values(this.results.test)) {
+    for (const test of Object.values(this.#results.test)) {
       this.refreshTest(test);
     }
   }
@@ -146,9 +149,9 @@ export class DocumentResultsManager {
    * Refresh global diagnostics
    */
   refreshDiagnostics() {
-    let document = this.document;
+    let document = this.#document;
 
-    this.diagnostics = Object.values(this.results.test)
+    this.#diagnostics = Object.values(this.#results.test)
       .filter(x => x.status === 'failed')
       .reduce((acc, ts) => {
         for (const as of ts.assertions) {
@@ -158,7 +161,7 @@ export class DocumentResultsManager {
           const { bodyFirst } = Decorations.buildErrorHover(as.src as unknown as ErrorHoverAssertion);
           const rng = as.decoration!.range;
 
-          document = document || this.findDocument(this.file);
+          document = document || this.findDocument(this.#file);
 
           const diagRng = new vscode.Range(
             new vscode.Position(rng.start.line,
@@ -171,7 +174,7 @@ export class DocumentResultsManager {
           acc.push(diag);
         }
         if (ts.status === 'failed' && ts.assertions.length === 0) {
-          document = document || this.findDocument(this.file);
+          document = document || this.findDocument(this.#file);
           const rng = ts.decoration!.range!;
           const diagRng = new vscode.Range(
             new vscode.Position(rng.start?.line,
@@ -186,7 +189,7 @@ export class DocumentResultsManager {
         }
         return acc;
       }, [] as vscode.Diagnostic[]);
-    diagColl.set(vscode.Uri.file(this.file), this.diagnostics);
+    diagColl.set(vscode.Uri.file(this.#file), this.#diagnostics);
   }
 
   /**
@@ -200,7 +203,7 @@ export class DocumentResultsManager {
   store(level: Level, key: string, status: StatusUnknown, decoration: vscode.DecorationOptions, src?: Assertion | SuiteResult | SuiteConfig | TestResult | TestEvent) {
     switch (level) {
       case 'assertion': {
-        const el = this.results.test[key];
+        const el = this.#results.test[key];
         const groups: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
 
         el.assertions.push({ status, decoration, src: src as Assertion });
@@ -215,7 +218,7 @@ export class DocumentResultsManager {
         break;
       }
       case 'suite': {
-        const el = this.results.suite[key];
+        const el = this.#results.suite[key];
         el.src = src as SuiteResult;
         el.status = status;
         el.decoration = decoration;
@@ -226,7 +229,7 @@ export class DocumentResultsManager {
         break;
       }
       case 'test': {
-        const el = this.results.test[key];
+        const el = this.#results.test[key];
         el.src = src as TestResult;
         el.status = status;
         el.decoration = decoration;
@@ -253,7 +256,7 @@ export class DocumentResultsManager {
    * @param key The file to reset
    */
   reset(level: Exclude<Level, 'assertion'>, key: string) {
-    const existing = this.results[level][key];
+    const existing = this.#results[level][key];
     const base: ResultState<unknown> = {
       status: 'unknown',
       styles: this.genStyles(level),
@@ -271,12 +274,12 @@ export class DocumentResultsManager {
         const testBase = (base as TestState);
         testBase.assertions = [];
         testBase.assertStyles = this.genStyles('assertion');
-        this.results[level][key] = testBase;
+        this.#results[level][key] = testBase;
         break;
       }
       case 'suite': {
         const suiteBase = (base as SuiteState);
-        this.results[level][key] = suiteBase;
+        this.#results[level][key] = suiteBase;
         break;
       }
     }
@@ -314,7 +317,7 @@ export class DocumentResultsManager {
     const key = `${assertion.classId}:${assertion.methodName}`;
     const dec = Decorations.buildAssertion(assertion);
     if (status === 'failed') {
-      this.failedAssertions[Decorations.line(assertion.line).range.start.line] = assertion;
+      this.#failedAssertions[Decorations.line(assertion.line).range.start.line] = assertion;
     }
     this.store('assertion', key, status, dec, assertion);
   }
@@ -331,7 +334,7 @@ export class DocumentResultsManager {
           this.reset('suite', e.suite.classId);
           this.store('suite', e.suite.classId, 'unknown', Decorations.buildSuite(e.suite), e.suite as SuiteResult);
 
-          for (const test of Object.values(this.results.test).filter(x => x.src.classId === e.suite.classId)) {
+          for (const test of Object.values(this.#results.test).filter(x => x.src.classId === e.suite.classId)) {
             this.reset('test', `${test.src.classId}:${test.src.methodName}`);
           }
           break;
@@ -358,7 +361,7 @@ export class DocumentResultsManager {
    * Get full totals
    */
   getTotals() {
-    const vals = Object.values(this.results.test);
+    const vals = Object.values(this.#results.test);
     const total = vals.length;
     let passed = 0;
     let unknown = 0;

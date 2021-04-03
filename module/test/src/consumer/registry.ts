@@ -5,8 +5,8 @@ import { TestConsumer } from './types';
  * Test Results Handler Registry
  */
 class $TestConsumerRegistry {
-  private registered = new Map<string, Class<TestConsumer>>();
-  private primary: Class<TestConsumer>;
+  #registered = new Map<string, Class<TestConsumer>>();
+  #primary: Class<TestConsumer>;
 
   /**
    * Manual initialization when running oustide of the bootstrap process
@@ -23,9 +23,9 @@ class $TestConsumerRegistry {
    */
   add(type: string, cls: Class<TestConsumer>, isDefault = false) {
     if (isDefault) {
-      this.primary = cls;
+      this.#primary = cls;
     }
-    this.registered.set(type, cls);
+    this.#registered.set(type, cls);
   }
 
   /**
@@ -33,7 +33,7 @@ class $TestConsumerRegistry {
    * @param type The unique identifier
    */
   get(type: string) {
-    return this.registered.get(type);
+    return this.#registered.get(type);
   }
 
   /**
@@ -42,7 +42,7 @@ class $TestConsumerRegistry {
    */
   getInstance(consumer: string | TestConsumer): TestConsumer {
     return typeof consumer === 'string' ?
-      new ((this.get(consumer) ?? this.primary) as ConcreteClass)() :
+      new ((this.get(consumer) ?? this.#primary) as ConcreteClass)() :
       consumer;
   }
 }

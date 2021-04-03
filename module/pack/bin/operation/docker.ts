@@ -16,6 +16,9 @@ export interface DockerConfig extends CommonConfig {
 export const Docker: PackOperation<DockerConfig> = {
   key: 'docker',
   title: 'Docker-izing',
+  context(cfg: DockerConfig) {
+    return `[image=${cfg.image}, port=${cfg.port}]`;
+  },
   extend(a: DockerConfig, b: Partial<DockerConfig>) {
     return {
       ...PackUtil.commonExtend(a, b),

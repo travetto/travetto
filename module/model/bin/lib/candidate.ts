@@ -15,7 +15,7 @@ export class ModelCandidateUtil {
   /**
    * Get all models
    */
-  private static async getModels(models?: string[]) {
+  static async #getModels(models?: string[]) {
     const names = new Set(models ?? []);
     const all = names.has('*');
     const { ModelRegistry } = await import('@travetto/model');
@@ -29,7 +29,7 @@ export class ModelCandidateUtil {
    */
   static async getModelNames() {
     const { ModelRegistry } = await import('@travetto/model');
-    return (await this.getModels()).map(x => ModelRegistry.getStore(x)).sort();
+    return (await this.#getModels()).map(x => ModelRegistry.getStore(x)).sort();
   }
 
   /**
@@ -81,7 +81,7 @@ export class ModelCandidateUtil {
   static async resolve(provider: string, models: string[]): Promise<{ provider: ModelStorageSupport, models: Class<ModelType>[] }> {
     return {
       provider: await this.getProvider(provider),
-      models: await this.getModels(models)
+      models: await this.#getModels(models)
     };
   }
 }
