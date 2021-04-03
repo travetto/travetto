@@ -1,7 +1,10 @@
 import * as ts from 'typescript';
 
-import { SystemUtil } from '@travetto/base/src/internal/system';
-import { TransformerState, OnMethod, OnClass, AfterClass, DecoratorUtil, TransformerId, AfterFunction } from '@travetto/transformer';
+import { SystemUtil } from '@travetto/boot/src/internal/system';
+import {
+  TransformerState, OnMethod, OnClass, AfterClass,
+  DecoratorUtil, TransformerId, AfterFunction, CoreUtil
+} from '@travetto/transformer';
 
 const REGISTER_MOD = '@travetto/registry/src/decorator';
 
@@ -36,10 +39,7 @@ export class RegisterTransformer {
    */
   @OnMethod()
   static processMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration) {
-    // eslint-disable-next-line no-bitwise
-    const isAbstract = !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
-
-    if (ts.isIdentifier(node.name) && !isAbstract && ts.isClassDeclaration(node.parent)) {
+    if (ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
       const hash = SystemUtil.naiveHash(node.getText());
       const conf = { hash };
       state[methods] = state[methods] || {};
@@ -57,9 +57,6 @@ export class RegisterTransformer {
       return node;
     }
 
-    // eslint-disable-next-line no-bitwise
-    const isAbstract = !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
-
     const ident = state.importDecorator(REGISTER_MOD, 'Register')!;
 
     const name = node.name?.escapedText.toString() ?? '';
@@ -72,7 +69,7 @@ export class RegisterTransformer {
         state.getFilenameAsSrc(),
         state.fromLiteral(state[cls]!),
         state.extendObjectLiteral(state[methods] || {}),
-        state.fromLiteral(isAbstract),
+        state.fromLiteral(CoreUtil.isAbstract(node)),
         state.fromLiteral(name.endsWith(TransformerState.SYNTHETIC_EXT))
       ]
     );

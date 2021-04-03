@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { SystemUtil } from '@travetto/boot/src/internal/system';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 import { Util } from '@travetto/base';
 
 import { ExternalType, AnyType } from './resolver/types';
@@ -37,7 +38,7 @@ export class TransformerState implements State {
   constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker) {
     this.imports = new ImportManager(source, factory);
     this.resolver = new TypeResolver(checker);
-    this.module = SystemUtil.convertFileToModule(this.source.fileName);
+    this.module = ModuleUtil.normalizePath(this.source.fileName);
   }
 
   /**
@@ -133,7 +134,7 @@ export class TransformerState implements State {
       dec,
       ident,
       file: decl?.getSourceFile().fileName,
-      module: SystemUtil.convertFileToModule(decl?.getSourceFile().fileName), // All decorators will be absolute
+      module: decl ? ModuleUtil.normalizePath(decl.getSourceFile().fileName) : undefined, // All decorators will be absolute
       targets: DocUtil.readAugments(this.resolver.getType(ident)),
       name: ident ?
         ident.escapedText! as string :

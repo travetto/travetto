@@ -12,18 +12,19 @@ const Init = Symbol();
  */
 export function WithSuiteContext(data: Record<string, unknown> = {}) {
   return (target: Class) => {
+    function wrapped(ctx: AsyncContext, og: Function) {
+      return function (this: unknown) {
+        return ctx.run(og.bind(this), JSON.parse(JSON.stringify(data)));
+      };
+    }
+
     SuiteRegistry.registerPendingListener(target,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       async function (this: { [Init]?: boolean } & Record<string, Function>) {
         if (!this[Init]) {
           this[Init] = true;
           const ctx = await DependencyRegistry.getInstance(AsyncContext);
           for (const t of SuiteRegistry.get(target).tests) {
-            const og = this[t.methodName] as Function;
-            // eslint-disable-next-line no-shadow
-            const fn = function (this: unknown) {
-              return ctx.run(og.bind(this), JSON.parse(JSON.stringify(data)));
-            };
+            const fn = wrapped(ctx, this[t.methodName] as Function);
             Object.defineProperty(fn, 'name', { value: t.methodName });
             this[t.methodName] = fn;
           }

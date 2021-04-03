@@ -4,8 +4,9 @@ import * as fs from 'fs';
 import { Util } from '@travetto/base';
 import { ExecUtil, PathUtil } from '@travetto/boot';
 import { Barrier, ExecutionError } from '@travetto/worker';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { TimeUtil } from '@travetto/base/src/internal/time';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig, TestResult } from '../model/test';
@@ -66,7 +67,7 @@ export class TestExecutor {
    */
   static failFile(consumer: TestConsumer, file: string, err: Error) {
     const name = path.basename(file);
-    const classId = SystemUtil.computeModuleClass(file, name);
+    const classId = ModuleUtil.getId(file, name);
     const suite = { class: { name }, classId, duration: 0, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
     err.message = err.message.replace(PathUtil.cwd, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);

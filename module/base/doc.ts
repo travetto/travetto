@@ -2,12 +2,10 @@ import { doc as d, mod, Code, Section, List, inp, meth, SubSection, Ref, Execute
 
 import { AppError } from './src/error';
 import { Util } from './src/util';
-import { SystemUtil } from './src/internal/system';
 
 const UtilLink = Ref(Util.name, 'src/util.ts');
 const AppErrorLink = Ref(AppError.name, 'src/error.ts');
 const ResourceManagerLink = Ref('ResourceManager', 'src/resource.ts');
-const SystemUtilLink = Ref(SystemUtil.name, 'src/internal/system.ts');
 
 export const text = d`
 ${Header()}
@@ -121,15 +119,6 @@ ${List(
     d`${inp`strict`}, will error out if the types do not match`,
   )}`,
   d`${meth`uuid(len: number)`} generates a simple uuid for use within the application.`
-)}
-
-${Section('SystemUtil')}
-
-Unlike ${UtilLink}, the ${SystemUtilLink} is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful.  ${SystemUtilLink} has functionality for:
-
-${List(
-  d`${meth`naiveHash(text: string): number`} computes a very naive hash. Should not be relied upon for scenarios where collisions cannot be tolerated.`,
-  d`${meth`computeModule(file: string): string`} computes the internal module name from a given file.`
 )}
 
 ${Section('CLI - build')} 

@@ -101,4 +101,12 @@ export class CoreUtil {
       )
     );
   }
+
+  /**
+   * Is declaration abstract?
+   */
+  static isAbstract(node: ts.Declaration) {
+    // eslint-disable-next-line no-bitwise
+    return !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
+  }
 }

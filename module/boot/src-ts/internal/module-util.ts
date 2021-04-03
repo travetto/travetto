@@ -21,6 +21,8 @@ const Module = Mod as unknown as ModType;
  */
 export class ModuleUtil {
 
+  private static modCache = new Map<string, string>();
+
   private static handlers: ModuleHandler[] = [];
 
   /**
@@ -96,9 +98,59 @@ export class ModuleUtil {
   }
 
   /**
+   * Convert a file name, to a proper module reference for importing, and comparing
+   * @param file
+   */
+  static normalizePath(file: string): string {
+    return PathUtil.normalizeFrameworkPath(file)
+      .replace(/[.][tj]s$/, '')
+      .replace(PathUtil.cwd, '.')
+      .replace(/^.*node_modules\//, '');
+  }
+
+  /**
+   * Compute internal module id from file name and optionally, class name
+   */
+  static getId(filename: string, clsName?: string): string {
+    filename = PathUtil.resolveUnix(filename);
+
+    if (clsName) {
+      return `${this.getId(filename)}￮${clsName}`;
+    }
+
+    if (this.modCache.has(filename)) {
+      return this.modCache.get(filename)!;
+    }
+
+    let mod = this.normalizePath(filename);
+
+    let ns: string;
+
+    if (mod.startsWith('@travetto')) {
+      const [, ns2, ...rest] = mod.split(/\/+/);
+      ns = `@trv:${ns2}`;
+      if (rest[0] === 'src') {
+        rest.shift();
+      }
+      mod = rest.join('/');
+    } else if (!mod.startsWith('.')) {
+      ns = '@npm';
+    } else {
+      const [ns1, ...rest] = mod.split(/\/+/);
+      ns = ns1;
+      mod = rest.join('/');
+    }
+
+    const name = `${ns}/${mod}`;
+    this.modCache.set(filename, name);
+    return name;
+  }
+
+  /**
    * Clear out on cleanup
    */
   static reset() {
+    this.modCache.clear();
     this.handlers = [];
   }
 }

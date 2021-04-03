@@ -33,7 +33,7 @@ const htmlPage = (mod: string) =>
   })[mod] ?? `app/documentation/gen/${mod}/${mod}.component.html`);
 
 const markdownPage = (mod: string) =>
-  ({ 'overview': PathUtil.resolveUnix('README.md') })[mod] ?? './README.md';
+  ({ overview: PathUtil.resolveUnix('README.md') })[mod] ?? './README.md';
 
 [
   !target || target === 'todo-app' ?

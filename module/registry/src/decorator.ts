@@ -1,5 +1,5 @@
-import { SystemUtil } from '@travetto/base/src/internal/system';
 import { Class } from '@travetto/base';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 /**
  * Register a class as pending
@@ -18,7 +18,7 @@ class $PendingRegister {
    */
   initMeta(cls: Class, ᚕfile: string, ᚕhash: number, ᚕmethods: Record<string, { hash: number }>, ᚕabstract: boolean, ᚕsynthetic: boolean) {
     const meta = {
-      ᚕid: SystemUtil.computeModuleClass(ᚕfile, cls.name),
+      ᚕid: ModuleUtil.getId(ᚕfile, cls.name),
       ᚕfile,
       ᚕinit: true,
       ᚕhash,

@@ -79,7 +79,6 @@ export class DocUtil {
         if (!methodPrefix) {
           const info = x.match(/^(\s+)(?:(private|public)\s+)?(?:static\s+)?(?:async\s+)?(?:[*]\s*)?(?:(?:get|set)\s+)?(\S+)[<(](.*)/);
           if (info) {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             const [, space, __name, rest] = info;
             if (!rest.endsWith(';')) {
               methodPrefix = space;

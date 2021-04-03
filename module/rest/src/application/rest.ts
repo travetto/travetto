@@ -1,5 +1,5 @@
 import { Class, AppManifest, AppError } from '@travetto/base';
-import { SystemUtil } from '@travetto/base/src/internal/system';
+import { OrderingUtil } from '@travetto/base/src/internal/ordering';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
 import { EnvUtil } from '@travetto/boot';
@@ -92,7 +92,7 @@ export class RestApplication<T extends unknown = unknown>  {
     }
 
     const ordered = instances.map(x => ({ key: x.constructor, before: x.before, after: x.after, target: x }));
-    const sorted = SystemUtil.computeOrdering(ordered).map(x => x.target);
+    const sorted = OrderingUtil.compute(ordered).map(x => x.target);
 
     console.debug('Sorting interceptors', { count: sorted.length, names: sorted.map(x => x.constructor.name) });
     return sorted;
