@@ -1,16 +1,8 @@
-import { html } from 'js-beautify';
-
 import { Inky } from '../../bin/lib/inky';
 import { InkyComponentFactory } from '../../bin/lib/inky/factory';
 
-const OPTS = {
-  ['indent_size']: 2,
-  quiet: true,
-  ['max_preserve_newlines']: 0
-};
-
 export function cleanseOutput(output: string) {
-  return html(output, OPTS);
+  return output.trim().replace(/>[ \n]+</gm, '><').replace(/>/g, '>\n');
 }
 
 export function cleanseTemplate(input: string, factory?: InkyComponentFactory) {

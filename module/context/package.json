@@ -30,7 +30,7 @@
     "@travetto/di": "^2.0.0-alpha.3"
   },
   "optionalPeerDependencies": {
-    "@travetto/rest": "^2.0.0-alpha.0"
+    "@travetto/rest": "^2.0.0-alpha.4"
   },
   "publishConfig": {
     "access": "public"

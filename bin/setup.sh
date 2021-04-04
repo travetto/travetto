@@ -14,7 +14,7 @@ ln -sf $BOOT/bin/ $BIN/@travetto/boot/bin
 ln -sf $CLI/bin/trv.js $BIN/trv
 
 cd $ROOT
-for TS in ./bin/trv*.ts; do 
+for TS in ./bin/trv*.ts; do
   SH=.bin/$(basename -s .ts $TS)
   echo -e "#!/usr/bin/sh\ncd $ROOT\nnode -r @travetto/boot/bin/register $TS \${@}" > $SH
   chmod +x $SH

@@ -41,7 +41,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Listen for a single file, and process all the classes within
    */
-  protected async handleFileChanges(file: string, classes: Class[] = []) {
+  async #handleFileChanges(file: string, classes: Class[] = []) {
     const next = new Map(classes.map(cls => [cls.ᚕid, cls] as [string, Class]));
 
     let prev = new Map<string, Class>();
@@ -79,7 +79,7 @@ export class ClassSource implements ChangeSource<Class> {
   processFiles() {
     console.debug('Pending changes', { changes: PendingRegister.ordered.map(([, x]) => x.map(y => y.ᚕid)) });
     for (const [file, classes] of PendingRegister.flush()) {
-      this.handleFileChanges(file, classes);
+      this.#handleFileChanges(file, classes);
     }
   }
 

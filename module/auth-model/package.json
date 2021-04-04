@@ -31,7 +31,7 @@
     "@travetto/model": "^2.0.0-alpha.3"
   },
   "optionalPeerDependencies": {
-    "@travetto/auth-rest": "^2.0.0-alpha.0"
+    "@travetto/auth-rest": "^2.0.0-alpha.4"
   },
   "docDependencies": {
     "@travetto/app": "^2.0.0-alpha.3"

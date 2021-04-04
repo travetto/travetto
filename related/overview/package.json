@@ -22,8 +22,5 @@
   "dependencies": {
     "@travetto/boot": "^2.0.0-alpha.2"
   },
-  "private": true,
-  "publishConfig": {
-    "access": "restricted"
-  }
+  "private": true
 }

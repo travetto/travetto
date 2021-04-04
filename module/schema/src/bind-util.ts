@@ -112,9 +112,9 @@ export class BindUtil {
       return data as T;
     } else {
       const tgt = new (cls as ConcreteClass<T>)();
-      for (const k in tgt) { // Do not retain undefined fields
-        if (tgt[k] === undefined) {
-          delete tgt[k];
+      for (const [k, v] of Object.entries(tgt)) { // Do not retain undefined fields
+        if (v === undefined) {
+          delete tgt[k as keyof T];
         }
       }
       return this.bindSchemaToObject(cls, tgt, data as object, view);

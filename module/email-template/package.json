@@ -43,10 +43,6 @@
     "sass": "^1.32.8",
     "parse5": "^6.0.1"
   },
-  "devDependencies": {
-    "@types/js-beautify": "^1.13.1",
-    "js-beautify": "^1.13.5"
-  },
   "optionalPeerDependencies": {
     "@travetto/cli": "^2.0.0-alpha.2"
   },

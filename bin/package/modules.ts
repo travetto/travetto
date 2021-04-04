@@ -68,7 +68,7 @@ export class Modules {
       for (const key of DEP_GROUPS) {
         const grp = dPkg[key];
         if (grp?.[pkg.name]) {
-          grp[pkg.name] = grp[pkg.name].replace(pkg.version, final); // Only bump if matching
+          grp[pkg.name] = grp[pkg.name] = final;
         }
       }
     }

@@ -20,18 +20,17 @@
     "start": "npx travetto run"
   },
   "dependencies": {
-    "@travetto/log": "^2.0.0-alpha.0",
-    "@travetto/cli": "^2.0.0-alpha.0",
-    "@travetto/app": "^2.0.0-alpha.0",
-    "@travetto/model-elasticsearch": "^2.0.0-alpha.0",
-    "@travetto/rest-express": "^2.0.0-alpha.0",
-    "@travetto/openapi": "^2.0.0-alpha.0"
+    "@travetto/log": "^2.0.0-alpha.2",
+    "@travetto/cli": "^2.0.0-alpha.2",
+    "@travetto/app": "^2.0.0-alpha.3",
+    "@travetto/model-elasticsearch": "^2.0.0-alpha.3",
+    "@travetto/rest-express": "^2.0.0-alpha.4",
+    "@travetto/openapi": "^2.0.0-alpha.4"
   },
   "devDependencies": {
-    "@travetto/pack": "^2.0.0-alpha.0",
-    "@travetto/test": "^2.0.0-alpha.0"
+    "@travetto/pack": "^2.0.0-alpha.2",
+    "@travetto/test": "^2.0.0-alpha.3"
   },
-  "private": true,
   "publishConfig": {
     "access": "restricted"
   }
