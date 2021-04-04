@@ -19,7 +19,12 @@ All [Data Modeling Support](https://github.com/travetto/travetto/tree/master/mod
 
 **Code: Basic Contract**
 ```typescript
-export interface ModelBasicSupport {
+export interface ModelBasicSupport<C extends any = any> {
+  /**
+   * Get underlying client
+   */
+  get client(): C;
+
   /**
    * Get by Id
    * @param id The identifier of the document to retrieve
@@ -210,8 +215,8 @@ export class MemoryModelConfig {
  */
 @Injectable()
 export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
-  constructor(public readonly config: MemoryModelConfig) { }
-  postConstruct() ;
+  get client() { return this.#store; }
+  async postConstruct() ;
   // CRUD Support
   uuid() ;
   async get<T extends ModelType>(cls: Class<T>, id: string) ;
@@ -293,7 +298,7 @@ $ trv model:export --help
 Usage:  model:export [options] [provider] [models...]
 
 Options:
-  -e, --env [env]  Application environment (dev|prod|<other>)
+  -e, --env <env>  Application environment
   -h, --help       display help for command
 ```
 
@@ -308,6 +313,6 @@ $ trv model:install --help
 Usage:  model:install [options] [provider] [models...]
 
 Options:
-  -e, --env [env]  Application environment (dev|prod|<other>)
+  -e, --env <env>  Application environment
   -h, --help       display help for command
 ```

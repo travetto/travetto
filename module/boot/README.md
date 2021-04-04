@@ -41,17 +41,13 @@ import * as fs from 'fs';
  * Standard file cache, with output file name normalization and truncation
  */
 export declare class FileCache {
+    #private;
     static isOlder(cacheStat: fs.Stats, fullStat: fs.Stats): boolean;
-    private cache;
-    readonly cacheDir: string;
     /**
      * Directory to cache into
      */
-    constructor(cacheDir?: string);
-    /**
-     * Purge all expired data
-     */
-    private purgeExpired;
+    readonly cacheDir: string;
+    constructor(cacheDir: string);
     /**
      * Initialize the cache behavior
      */
@@ -125,7 +121,7 @@ Everything is based on absolute paths being passed in, and translated into cache
 [FsUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/fs.ts#L12) provides some high level functionality (like recursive directory delete).
 
 ### File System Scanning
-[ScanFs](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L57) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
+[ScanFs](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/scan.ts#L58) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 ## Typescript Bootstrapping
 
@@ -136,7 +132,7 @@ The bootstrap process will also requires an index of all source files, which all
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L75) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/master/module/boot/src-ts/exec.ts#L79) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

@@ -101,7 +101,7 @@ class DevRegister {
     process.env.TRV_MODULES = `${envMods.replace(this.TRV_MOD, '')},${Object.entries(entries).map(([k, v]) => `${k}=${v ?? ''}`).join(',')}`;
 
     // Override compiler options
-    const key = `@travetto/${'*'}`;
+    const key = '@travetto/*';
     TranspileUtil.setExtraOptions({
       rootDir: process.env.TRV_DEV_ROOT!,
       paths: { [key]: [PathUtil.resolveFrameworkPath(key)] }

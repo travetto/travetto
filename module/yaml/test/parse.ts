@@ -1,7 +1,8 @@
 
 import * as assert from 'assert';
 
-import { SimpleObject, Util } from '@travetto/base';
+import { Util } from '@travetto/base';
+import { SimpleObject } from '@travetto/base/src/internal/types';
 import { Suite, Test } from '@travetto/test';
 
 import { YamlUtil } from '../src/util';

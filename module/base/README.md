@@ -204,14 +204,6 @@ Simple functions for providing a minimal facsimile to [lodash](https://lodash.co
       *  `strict`, will error out if the types do not match
    *  `uuid(len: number)` generates a simple uuid for use within the application.
 
-## SystemUtil
-
-Unlike [Util](https://github.com/travetto/travetto/tree/master/module/base/src/util.ts#L9), the [SystemUtil](https://github.com/travetto/travetto/tree/master/module/base/src/internal/system.ts#L13) is primarily meant for internal framework support. That being said, there are places where this functionality can prove useful.  [SystemUtil](https://github.com/travetto/travetto/tree/master/module/base/src/internal/system.ts#L13) has functionality for:
-
-   
-   *  `naiveHash(text: string): number` computes a very naive hash. Should not be relied upon for scenarios where collisions cannot be tolerated.
-   *  `computeModule(file: string): string` computes the internal module name from a given file.
-
 ## CLI - build 
 
 **Terminal: Build usage**

@@ -1,7 +1,11 @@
-import { doc as d, mod, Config, List, inp, Section, meth, Code, Ordered, Execute, pth, lib, fld, Header } from '@travetto/doc';
+import {
+  doc as d, mod, Config, List, inp, Section,
+  meth, Code, Ordered, Execute, pth, lib, fld, Header, Ref
+} from '@travetto/doc';
 
-import { ConfigManager } from './src/manager';
 import { Config as ConfigDec } from './src/decorator';
+
+const ConfigLink = Ref('ConfigManager', './src/manager.ts');
 
 export const text = d`
 ${Header()}
@@ -43,7 +47,7 @@ ${Section('Secrets')}
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under ${inp`config.redacted`}.
 
 ${Section('Consuming')}
-The ${ConfigManager.constructor} service provides direct access to all of the loaded configuration. For simplicity, a decorator, ${ConfigDec} allows for classes to automatically be bound with config information on post construction via the ${mod.Di} module. The decorator will install a ${meth`postConstruct`} method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The ${ConfigLink} service provides direct access to all of the loaded configuration. For simplicity, a decorator, ${ConfigDec} allows for classes to automatically be bound with config information on post construction via the ${mod.Di} module. The decorator will install a ${meth`postConstruct`} method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 

@@ -2,9 +2,11 @@ import { ConcreteClass, Util } from '@travetto/base';
 
 const IsProxiedSym = Symbol.for('@trv:watch/proxy');
 
+
 /**
  * Handler for for proxying modules while watching
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class RetargettingHandler<T> implements ProxyHandler<any> {
   constructor(public target: T) { }
 
@@ -24,23 +26,23 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
     return !!Object.preventExtensions(this.target);
   }
 
-  apply(target: T, thisArg: T, argArray?: any): any {
+  apply(target: T, thisArg: T, argArray?: unknown[]): unknown {
     return (this.target as unknown as Function).apply(this.target, argArray);
   }
 
-  construct(target: T, argArray: any[], newTarget?: any) {
+  construct(target: T, argArray: unknown[], newTarget?: unknown) {
     return new (this.target as unknown as ConcreteClass)(...argArray);
   }
 
-  setPrototypeOf(target: T, v: any): boolean {
-    return Object.setPrototypeOf(this.target, v);
+  setPrototypeOf(target: T, v: unknown): boolean {
+    return Object.setPrototypeOf(this.target, v as Record<string, unknown>);
   }
 
   getPrototypeOf(target: T): object | null {
     return Object.getPrototypeOf(this.target);
   }
 
-  get(target: T, prop: PropertyKey, receiver: any) {
+  get(target: T, prop: PropertyKey, receiver: unknown) {
     let ret = this.target[prop as keyof T];
     if (Util.isFunction(ret) && !/^class\s/.test(Function.prototype.toString.call(ret))) {
       // Bind class members to class instance instead of proxy propagating
@@ -56,8 +58,9 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
     return (this.target as Object).hasOwnProperty(prop);
   }
 
-  set(target: T, prop: PropertyKey, value: any) {
-    this.target[prop as keyof T] = value;
+  set(target: T, prop: PropertyKey, value: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.target[prop as keyof T] = value as any;
     return true;
   }
 

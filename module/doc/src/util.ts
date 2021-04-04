@@ -93,7 +93,7 @@ export class DocUtil {
           return '';
         }
       })
-        .filter(x => !/^\s+private /.test(x))
+        .filter(x => !/^\s+(#|private |static #|async #)/.test(x))
         .filter(x => !!x)
         .join('\n');
     }

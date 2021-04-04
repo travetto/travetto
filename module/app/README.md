@@ -198,8 +198,8 @@ $ trv run simple-domain mydomain.biz orange
 Failed application run
 Error: Invalid parameter port: Received orange, but exepcted number  
     at Function.enforceParamType (./src/util.ts:19:13)  
-    at ./src/registry.ts:45:79  
-    at $ApplicationRegistry.resolveParameters (./src/registry.ts:45:24)  
+    at ./src/registry.ts:55:79  
+    at $ApplicationRegistry.resolveParameters (./src/registry.ts:55:24)  
     at Function.run (./bin/lib/run.ts:36:31)  
     at AppRunPlugin.action (./bin/cli-run.ts:66:11)  
     at AppRunPlugin.runAction (@trv:cli/src/plugin-base.ts:210:12)

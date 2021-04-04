@@ -17,7 +17,7 @@ The following tutorial wil walk you through setting up a [Travetto](https://trav
 
 Install
    
-   *  [Node](https://nodejs.org/en/download/current/) v12.x + (required)
+   *  [Node](https://nodejs.org/en/download/current/) v15.x+ (recommanded, but v12.x+ supported)
    *  [Mongodb](https://docs.mongodb.com/manual/administration/install-community/) 3.6+ (required)
    *  [VSCode](https://code.visualstudio.com/download) (recommended)
    *  [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) (recommended)
@@ -279,8 +279,8 @@ First we must start the application:
 
 **Terminal: Application Startup**
 ```bash
-2021-03-14T05:00:02.183Z info  [@trv:app/registry:30] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
-2021-03-14T05:00:02.508Z info  [@trv:app/registry:34] Configured {
+2021-03-14T05:00:02.183Z info  [@trv:app/registry:40] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
+2021-03-14T05:00:02.508Z info  [@trv:app/registry:44] Configured {
   info: {
     name: '@travetto/todo-app',
     description: '',
