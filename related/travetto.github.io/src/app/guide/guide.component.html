@@ -18,7 +18,7 @@ The following tutorial wil walk you through setting up a <a target="_blank" clas
 <h2 id="prerequisites">Prerequisites</h2>
 
 Install
-<ul> <li><a target="_blank" class="external-link" href="https://nodejs.org/en/download/current/">Node</a> v12.x + (required)</li>
+<ul> <li><a target="_blank" class="external-link" href="https://nodejs.org/en/download/current/">Node</a> v15.x+ (recommanded, but v12.x+ supported)</li>
  <li><a target="_blank" class="external-link" href="https://docs.mongodb.com/manual/administration/install-community/">Mongodb</a> 3.6+ (required)</li>
  <li><a target="_blank" class="external-link" href="https://code.visualstudio.com/download">VSCode</a> (recommended)</li>
  <li><a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a> (recommended)</li></ul>
@@ -292,8 +292,8 @@ First we must start the application:
       <figcaption class="terminal">Application Startup
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:30<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2021</span>-03-14T05:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:34<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
+      <pre><code class="language-bash"><span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:40<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
+<span class="token number">2021</span>-03-14T05:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:44<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'@travetto/todo-app'</span>,
     description: <span class="token string">''</span>,
@@ -383,7 +383,7 @@ next, let's execute <a target="_blank" class="external-link" href="https://curl.
 FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNREFUSED <span class="token number">127.0</span>.0.1:3000
     at ClientRequest.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/node-fetch/src/index.js:94:11<span class="token punctuation">)</span>
     at ClientRequest.emit <span class="token punctuation">(</span>node:events:369:20<span class="token punctuation">)</span>
-    at Socket.socketErrorListener <span class="token punctuation">(</span>node:_http_client:462:9<span class="token punctuation">)</span>
+    at Socket.socketErrorListener <span class="token punctuation">(</span>node:_http_client:469:9<span class="token punctuation">)</span>
     at Socket.emit <span class="token punctuation">(</span>node:events:369:20<span class="token punctuation">)</span>
     at emitErrorNT <span class="token punctuation">(</span>node:internal/streams/destroy:188:8<span class="token punctuation">)</span>
     at emitErrorCloseNT <span class="token punctuation">(</span>node:internal/streams/destroy:153:3<span class="token punctuation">)</span>
@@ -408,16 +408,6 @@ FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNR
       </figcaption>
       <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/list-todo.ts
 
-/home/tim/Code/travetto/node_modules/node-fetch/src/index.js:94
-			reject<span class="token punctuation">(</span>new FetchError<span class="token punctuation">(</span><span class="token variable"><span class="token variable">`</span>request to $<span class="token punctuation">{{'{'}}</span>request.url<span class="token punctuation">{{'}'}}</span> failed, reason: $<span class="token punctuation">{{'{'}}</span>err.message<span class="token punctuation">{{'}'}}</span><span class="token variable">`</span></span>, <span class="token string">'system'</span>, err<span class="token punctuation">))</span><span class="token punctuation">;</span>
-          ^
-FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNREFUSED <span class="token number">127.0</span>.0.1:3000
-    at ClientRequest.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>/home/tim/Code/travetto/node_modules/node-fetch/src/index.js:94:11<span class="token punctuation">)</span>
-    at ClientRequest.emit <span class="token punctuation">(</span>node:events:369:20<span class="token punctuation">)</span>
-    at Socket.socketErrorListener <span class="token punctuation">(</span>node:_http_client:462:9<span class="token punctuation">)</span>
-    at Socket.emit <span class="token punctuation">(</span>node:events:369:20<span class="token punctuation">)</span>
-    at emitErrorNT <span class="token punctuation">(</span>node:internal/streams/destroy:188:8<span class="token punctuation">)</span>
-    at emitErrorCloseNT <span class="token punctuation">(</span>node:internal/streams/destroy:153:3<span class="token punctuation">)</span>
-    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:81:21<span class="token punctuation">)</span></code></pre>     
+<span class="token punctuation">[</span><span class="token punctuation">]</span></code></pre>     
       </figure>
 </div>

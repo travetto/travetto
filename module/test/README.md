@@ -32,20 +32,20 @@ import { Suite, Test } from '@travetto/test';
 @Suite()
 class SimpleTest {
 
-  private complexService: {
+  #complexService: {
     doLongOp(): Promise<number>;
     getText(): string;
   };
 
   @Test()
   async test1() {
-    const val = await this.complexService.doLongOp();
+    const val = await this.#complexService.doLongOp();
     assert(val === 5);
   }
 
   @Test()
   test2() {
-    const text = this.complexService.getText();
+    const text = this.#complexService.getText();
     assert(/abc/.test(text));
   }
 }
@@ -83,11 +83,11 @@ const ᚕ_decorator_1 = require("@travetto/registry/src/decorator");
 const assert = require("assert");
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
+    static ᚕinit = ᚕ_decorator_1.Register.initMeta(SimpleTest, ᚕsrc(__filename), 442873266, { test: { hash: 1426090177 } }, false, false);
     async test() {
         ᚕ_check_1.AssertCheck.check({ file: ᚕsrc(__filename), line: 11, text: "{ size: 20, address: { state: 'VA' } } === {}", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
     }
 };
-SimpleTest.ᚕinit = ᚕ_decorator_1.Register.initMeta(SimpleTest, ᚕsrc(__filename), 442873266, { test: { hash: 1426090177 } }, false, false);
 (0, tslib_1.__decorate)([
     (0, test_1.Test)({ lines: { start: 8, end: 12, codeStart: 11 } })
 ], SimpleTest.prototype, "test", null);

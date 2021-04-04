@@ -1,5 +1,4 @@
 import { promises as fs } from 'fs';
-import * as util from 'util';
 import * as path from 'path';
 
 // TODO: Get proper typings

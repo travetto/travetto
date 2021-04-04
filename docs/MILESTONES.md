@@ -230,7 +230,6 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 #### Rest Internals Overhaul
 * Testing support greatly increased, and provides clearer behavior for testing as a server, and as a lambda.
 * Streamlined internals, and separated lambda from general usage
-* 
 
 #### Support for Dynamic Module references, specifically, third party
 * No longer symlinking for local dev
@@ -262,7 +261,8 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 
 #### Typescript Upgrade
 * Shifted codebase away from use of `any` to `unknown` where applicable (over 750 instances migrated)
-* Moving to typescripti 4.2
+* Migrated all `private var` usages to `#var`, and aligning with class initialization changes.
+* Moving to typescripti 4.3
 * Converted all available files to `.ts`, only build scripts remain in `.js`
 
 #### Dependency Injection Enhancements
@@ -298,3 +298,7 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 * Proper typechecking on all docs
 * Renamed file from DOCS.js to doc.ts
 * Moved main README.md to `related/overview/doc.ts`
+
+### Lerna Removal
+* Removed usage of lerna within framework, handling mono repo tasks manually
+* Reduced hoisted node_module size by 40%

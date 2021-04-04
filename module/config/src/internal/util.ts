@@ -1,6 +1,7 @@
 import * as path from 'path';
 
-import { SimpleType, ResourceManager, Util, AppManifest, ClassInstance, AppError, SimpleObject } from '@travetto/base';
+import { ResourceManager, Util, AppManifest, ClassInstance, AppError } from '@travetto/base';
+import { SimpleType, SimpleObject } from '@travetto/base/src/internal/types';
 import { YamlUtil } from '@travetto/yaml';
 
 /**

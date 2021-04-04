@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 import { YamlUtil } from '@travetto/yaml';
-import { SimpleObject } from '@travetto/base';
+import { SimpleObject } from '@travetto/base/src/internal/types';
 
 import { ConfigUtil } from '../src/internal/util';
 

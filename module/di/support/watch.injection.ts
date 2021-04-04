@@ -20,25 +20,25 @@ export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
      */
     protected proxyInstance<T>(target: ClassTarget<T>, qual: symbol | undefined, instance: T): T {
       const { qualifier, id: classId } = this.resolveTarget(target, qual);
-      let proxy: RetargettingProxy<T>;
+      let proxy: RetargettingProxy<unknown>;
 
       if (!this.#proxies.has(classId)) {
         this.#proxies.set(classId, new Map());
       }
 
       if (!this.#proxies.get(classId)!.has(qualifier)) {
-        proxy = new RetargettingProxy(instance);
+        proxy = new RetargettingProxy<unknown>(instance);
         this.#proxies.get(classId)!.set(qualifier, proxy);
         console.debug('Registering proxy', { id: target.ᚕid, qualifier: qualifier.toString() });
       } else {
-        proxy = this.#proxies.get(classId)!.get(qualifier)! as RetargettingProxy<T>;
+        proxy = this.#proxies.get(classId)!.get(qualifier)! as RetargettingProxy<unknown>;
         proxy.setTarget(instance);
         console.debug('Updating target', {
           id: target.ᚕid, qualifier: qualifier.toString(), instanceType: (instance as unknown as ClassInstance<T>).constructor.name as string
         });
       }
 
-      return proxy.get();
+      return proxy.get() as T;
     }
 
     /**

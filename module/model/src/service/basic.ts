@@ -6,7 +6,7 @@ import { ModelType } from '../types/model';
  *
  * @concrete ../internal/service/common:ModelBasicSupportTarget
  */
-export interface ModelBasicSupport<C extends any = any> {
+export interface ModelBasicSupport<C = unknown> {
   /**
    * Get underlying client
    */

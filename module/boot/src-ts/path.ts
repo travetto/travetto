@@ -11,11 +11,11 @@ export class PathUtil {
 
   /**
    * Set Dev path
-   * 
-   * @private 
+   *
+   * @private
    */
-  static setDevPath(path?: string) {
-    this.#devPath = path ?? process.env.TRV_DEV;
+  static setDevPath(pth?: string) {
+    this.#devPath = pth ?? process.env.TRV_DEV;
   }
 
   /**
