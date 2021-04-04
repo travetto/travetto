@@ -24,6 +24,7 @@ class AuthConfig {
 
         if (obj.username && obj.password === 'password') {
           return {
+            issuer: 'self',
             id: obj.username,
             permissions: [],
             details: {},

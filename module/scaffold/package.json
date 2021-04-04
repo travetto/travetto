@@ -1,13 +1,12 @@
 {
-  "name": "@travetto/generator-app",
-  "displayName": "Yeoman Generator",
+  "name": "@travetto/scaffold",
+  "displayName": "App Scaffold",
   "version": "2.0.0-alpha.2",
-  "description": "Yeoman app generator for the Travetto framework",
+  "description": "App Scaffold for the Travetto framework",
   "keywords": [
-    "travetto",
-    "yeoman",
     "generator",
     "scaffolding",
+    "travetto",
     "typescript"
   ],
   "homepage": "https://travetto.io",
@@ -17,29 +16,29 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "app",
+    "bin",
+    "src",
     "templates",
-    "tsconfig.json",
-    ".eslintrc.js",
-    ".eslintignore"
+    ".eslintrc.js"
   ],
-  "main": "app/index.js",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "related/generator-app"
+    "directory": "related/scaffold"
   },
   "scripts": {
     "prepack": "cp ../../.trv_cache/bin~eslint~core.ts templates/todo/.eslintrc.js"
   },
+  "bin": {
+    "trv-scaffold": "./bin/trv-scaffold.js"
+  },
   "dependencies": {
     "@travetto/boot": "^2.0.0-alpha.2",
+    "@travetto/cli": "^2.0.0-alpha.2",
     "mustache": "^4.2.0",
-    "yeoman-generator": "^5.2.0",
-    "yo": "^3.1.1"
+    "enquirer": "^2.3.6"
   },
   "devDependencies": {
-    "@types/mustache": "^4.1.1",
-    "@types/yeoman-generator": "^4.11.3"
+    "@types/mustache": "^4.1.1"
   },
   "publishConfig": {
     "access": "public"
