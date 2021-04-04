@@ -63,7 +63,6 @@
     "@types/sass": "^1.16.0",
     "@types/source-map-support": "^0.5.3",
     "@types/vscode": "^1.54.0",
-    "@types/yeoman-generator": "^4.11.3",
     "aws-lambda-fastify": "^1.4.4",
     "aws-serverless-express": "^3.4.0",
     "body-parser": "^1.19.0",
@@ -72,6 +71,7 @@
     "commander": "^7.2.0",
     "compression": "^1.7.4",
     "cookies": "^0.8.0",
+    "enquirer": "^2.3.6",
     "express": "^4.17.1",
     "faker": "^5.5.2",
     "fastify": "^3.14.1",
@@ -104,9 +104,7 @@
     "redis": "^3.0.2",
     "sass": "^1.32.8",
     "source-map-support": "^0.5.19",
-    "tslib": "https://github.com/microsoft/tslib.git",
-    "typescript": "^4.3.0-beta",
-    "yeoman-generator": "^5.2.0",
-    "yo": "^3.1.1"
+    "tslib": "^2.1.0",
+    "typescript": "^4.3.0-beta"
   }
 }
