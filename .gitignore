@@ -35,5 +35,5 @@ related/*/LICENSE
 module/*/*.tgz
 
 module/boot/src/
-related/generator-app/**/.eslintrc.js
+module/scaffold/**/.eslintrc.js
 related/travetto.github.io/src/assets/images/vscode-plugin
