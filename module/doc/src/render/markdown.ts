@@ -1,40 +1,32 @@
-import { PathUtil } from '@travetto/boot';
+import { AllType, node as n } from '../nodes';
+import { DocNode, Renderer } from '../types';
+import { AllChildren, RenderContext } from './context';
 
-import * as n from '../nodes';
-import { AllChildren, RenderContext, Renderer } from './types';
-import { RenderUtil } from './util';
-
-const { getId, clean, titleCase } = RenderUtil;
-
-const ROOT = PathUtil.resolveUnix('..', '..');
+const titleCase = (a: string) => a.replace(/^[a-z]/, a => a.toUpperCase());
 
 export const Markdown: Renderer = {
   ext: 'md',
-  render(c: AllChildren, context: RenderContext) {
-    const recurse = (s: AllChildren | n.DocNode) => this.render(s as AllChildren, context);
-    const link = (s: n.DocNode, ctx: { _type: string, line?: number }) =>
-      `${recurse(s)
-        .replace(ROOT, context.gitRoot)
-        .replace('@travetto/', `${context.gitRoot}/module/`)}${ctx.line ? `#L${ctx.line}` : ''}`;
+  render(c: AllChildren, context: RenderContext, root: AllType = c) {
+    const recurse = (s: AllChildren | DocNode) => this.render(s as AllChildren, context, root);
     switch (c._type) {
-      case 'future': return recurse(c.content());
-      case 'toc': return recurse(n.Group([n.SubSection(c.title), context.toc]));
+      case 'toc': return recurse(n.Group([n.SubSection(c.title), context.toc(root)]));
       case 'strong': return `**${recurse(c.content)}**`;
       case 'group': return c.nodes.map(cc => recurse(cc,)).join('');
+      case 'comment': return `<!-- ${recurse(c.text)} -->`;
       case 'code':
       case 'install':
       case 'terminal':
       case 'config': return `
 **${titleCase(c._type)}: ${recurse(c.title)}**
 \`\`\`${c.language}
-${clean(recurse(c.content))}
+${context.cleanText(recurse(c.content))}
 \`\`\`\n`;
-      case 'anchor': return `[${recurse(c.title)}](#${getId(recurse(c.fragment))}})`;
+      case 'anchor': return `[${recurse(c.title)}](#${context.getAnchorId(recurse(c.fragment))}})`;
       case 'library':
       case 'file':
-      case 'ref': return `[${recurse(c.title)}](${link(c.link, c)})`;
-      case 'mod': return `[${recurse(c.title)}](${link(c.link, c)}#readme "${recurse(c.description)}")`;
-      case 'image': return `![${recurse(c.title)}](${link(c.link, c)})`;
+      case 'ref': return `[${recurse(c.title)}](${context.link(recurse(c.link), c)})`;
+      case 'mod': return `[${recurse(c.title)}](${context.link(recurse(c.link), c)}#readme "${recurse(c.description)}")`;
+      case 'image': return `![${recurse(c.title)}](${context.link(recurse(c.link), c)})`;
       case 'section': return `## ${recurse(c.title)}`;
       case 'subsection': return `### ${recurse(c.title)}`;
       case 'command':
@@ -42,8 +34,8 @@ ${clean(recurse(c.content))}
       case 'path':
       case 'class':
       case 'field':
-      case 'input': return `\`${clean(recurse(c.content))}\``;
-      case 'note': return `**Note**: ${clean(recurse(c.content))}`;
+      case 'input': return `\`${context.cleanText(recurse(c.content))}\``;
+      case 'note': return `**Note**: ${context.cleanText(recurse(c.content))}`;
       case 'item': return `${c.ordered ? '1.' : '* '} ${recurse(c.node)}`;
       case 'list': {
         const out: string[] = [''];
@@ -68,8 +60,6 @@ ${clean(recurse(c.content))}
         return `# ${recurse(c.title)}\n${c.description ? `## ${recurse(c.description)}\n` : ''}${'install' in c ? recurse(n.Install(c.package, c.package)) : ''}\n`;
       case 'text':
         return c.content;
-      case 'hidden':
-        return '';
     }
   }
 };

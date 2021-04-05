@@ -1,129 +1,296 @@
 import { PathUtil, Package, FsUtil } from '@travetto/boot';
 import { readPackage } from '@travetto/boot/src/internal/package';
 
-import { DocUtil, } from './util';
-import { DocRunUtil, RunConfig } from './run-util';
-
-export interface DocNode { _type: string }
-type Content = DocNode | string;
-
-export const Text = (text: string) => ({ _type: 'text' as const, content: text });
-type TextType = ReturnType<typeof Text>;
+import { FileUtil, } from './util/file';
+import { DocRunUtil, RunConfig } from './util/run';
+import { Content, DocNode, TextType } from './types';
+import { ResolveUtil } from './util/resolve';
 
 function $c(val: string): TextType;
 function $c(val: DocNode | string): DocNode;
 function $c(val: DocNode | string | undefined): DocNode | undefined;
 function $c(val: string | DocNode | undefined): DocNode | undefined {
-  return val === undefined ? undefined : typeof val === 'string' ? Text(val) : val;
+  return val === undefined ? undefined : typeof val === 'string' ? { _type: 'text' as const, content: val } as TextType : val;
 }
 const $n = <T extends string, U extends Record<string, unknown>>(t: T, vals: U) => ({ _type: t, ...vals } as { _type: T } & U);
 
-export const Future = (cb: () => Content) => $n('future', { content: () => $c(cb()) });
-export const Strong = (content: Content) => $n('strong', { content: $c(content) });
-export const Group = (node: DocNode | DocNode[]) => $n('group', { nodes: [node].flat() });
-export const Method = (content: Content) => $n('method', { content: $c(content) });
-export const Command = (script: Content, ...args: Content[]) => $n('command', { content: $c([script, ...args].join(' ')) });
-export const Terminal = (title: Content, script: Content) => $n('terminal', { title: $c(title), content: $c(script), language: 'bash' });
-export const Hidden = (_: unknown) => $n('hidden', { content: $c('') });
-export const Input = (content: Content) => $n('input', { content: $c(content) });
-export const Path = (content: Content) => $n('path', { content: $c(content) });
-export const Class = (content: Content) => $n('class', { content: $c(content) });
-export const Field = (content: Content) => $n('field', { content: $c(content) });
-export const Section = (title: Content) => $n('section', { title: $c(title) });
-export const SubSection = (title: Content) => $n('subsection', { title: $c(title) });
-export const Library = (title: Content, link: Content) => $n('library', { title: $c(title), link: $c(link) });
-export const Anchor = (title: Content, fragment: Content) => $n('anchor', { title: $c(title), fragment: $c(fragment) });
-export const Note = (content: Content) => $n('note', { content: $c(content) });
-export const Item = (node: DocNode, ordered = false) => $n('item', { node, ordered });
-export const RawHeader = (title: Content, description?: string) => $n('header', { title: $c(title), description: $c(description) });
-export const TableOfContents = (title: Content) => $n('toc', { title: $c(title) });
 
-export function SnippetLink(title: Content, file: string, startPattern: RegExp) {
-  const res = DocUtil.resolveSnippetLink(file, startPattern);
-  return $n('file', { title: $c(title), link: $c(res.file), line: res.line });
-}
+/**
+ * All Node Types
+ */
+export const node = {
 
-export function Execute(title: Content, cmd: string, args: string[] = [], cfg: RunConfig = {}) {
-  if (cmd !== 'trv') {
-    cmd = DocUtil.resolveFile(cmd).resolved.replace(PathUtil.cwd, '.');
+  buildList(items: Content[], ordered = false) {
+    return $n('list', {
+      items: items.map(x => {
+        if (Array.isArray(x)) {
+          x = node.Item(node.Group(x), ordered);
+        } else if (typeof x === 'string') {
+          x = $c(x);
+        }
+        switch (x._type) {
+          case 'list': return x;
+          case 'item': return { ...x, ordered };
+          default: return node.Item(x, ordered);
+        }
+      })
+    });
+  },
+
+  /**
+   * Simple Text Content
+   * @param text 
+   */
+  Text: (text: string) => ({ _type: 'text' as const, content: text }),
+
+  /**
+   * Strong Content
+   * @param content 
+   */
+  Strong: (content: Content) => $n('strong', { content: $c(content) }),
+  /**
+   * Group of content nodes
+   * @param node 
+   */
+  Group: (node: DocNode | DocNode[]) => $n('group', { nodes: [node].flat() }),
+  /**
+   * Method declaration
+   * @param content 
+   */
+  Method: (content: Content) => $n('method', { content: $c(content) }),
+  /**
+   * Command invocation
+   * @param script 
+   * @param args 
+   */
+  Command: (script: Content, ...args: Content[]) => $n('command', { content: $c([script, ...args].join(' ')) }),
+  /**
+   * Terminal output
+   * @param title 
+   * @param script 
+   */
+  Terminal: (title: Content, script: Content) => $n('terminal', { title: $c(title), content: $c(script), language: 'bash' }),
+  /**
+   * Input text
+   * @param content 
+   */
+  Input: (content: Content) => $n('input', { content: $c(content) }),
+  /**
+   * Path reference
+   * @param content 
+   */
+  Path: (content: Content) => $n('path', { content: $c(content) }),
+  /**
+   * Class reference
+   * @param content 
+   */
+  Class: (content: Content) => $n('class', { content: $c(content) }),
+  /**
+   * Field reference
+   * @param content 
+   */
+  Field: (content: Content) => $n('field', { content: $c(content) }),
+  /**
+   * Primary Section
+   * @param content 
+   */
+  Section: (title: Content) => $n('section', { title: $c(title) }),
+  /**
+   * Sub-section
+   * @param content 
+   */
+  SubSection: (title: Content) => $n('subsection', { title: $c(title) }),
+  /**
+   * Library reference
+   * @param content 
+   */
+  Library: (title: Content, link: Content) => $n('library', { title: $c(title), link: $c(link) }),
+  /**
+   * In page anchor reference
+   * @param title 
+   * @param fragment 
+   */
+  Anchor: (title: Content, fragment: Content) => $n('anchor', { title: $c(title), fragment: $c(fragment) }),
+  /**
+   * A note
+   * @param content 
+   */
+  Note: (content: Content) => $n('note', { content: $c(content) }),
+  /**
+   * List item
+   * @param node 
+   * @param ordered 
+   */
+  Item: (node: DocNode, ordered = false) => $n('item', { node, ordered }),
+  /**
+   * Raw Doc Header
+   * @param title 
+   * @param description 
+   */
+  RawHeader: (title: Content, description?: string) => $n('header', { title: $c(title), description: $c(description) }),
+  /**
+   * Table Of Contents
+   * @param title 
+   */
+  TableOfContents: (title: Content) => $n('toc', { title: $c(title) }),
+
+  /**
+   * Link to a snippet of code, including line number
+   * @param title 
+   * @param file 
+   * @param startPattern 
+   */
+  SnippetLink: (title: Content, file: string, startPattern: RegExp) => {
+    const res = ResolveUtil.resolveSnippetLink(file, startPattern);
+    return $n('file', { title: $c(title), link: $c(res.file), line: res.line });
+  },
+
+  /**
+   * Run a command, and include the output as part of the document
+   * @param title 
+   * @param cmd 
+   * @param args 
+   * @param cfg 
+   */
+  Execute: (title: Content, cmd: string, args: string[] = [], cfg: RunConfig = {}) => {
+    if (cmd !== 'trv') {
+      cmd = FileUtil.resolveFile(cmd).resolved.replace(PathUtil.cwd, '.');
+    }
+
+    const script = DocRunUtil.run(cmd, args, cfg);
+    const prefix = !/.*\/doc\/.*[.]ts$/.test(cmd) ? '$' :
+      `$ node @travetto/${cfg.module ?? 'base'}/bin/main`;
+
+    return node.Terminal(title, `${prefix} ${cmd} ${args.join(' ')}\n\n${script}`);
+  },
+
+  /**
+   * Node Module Reference
+   * @param folder 
+   */
+  Mod(folder: string) {
+    folder = PathUtil.resolveFrameworkPath(PathUtil.resolveUnix('node_modules', folder));
+
+    const { description, displayName } = readPackage(folder);
+    return $n('mod', { title: $c(displayName!), link: $c(folder), description: $c(description!) });
+  },
+
+  /**
+   * File reference
+   * @param title 
+   * @param file 
+   */
+  Ref: (title: Content, file: string) => {
+    const res = ResolveUtil.resolveRef(title, file);
+    return $n('ref', { title: $c(res.title), link: $c(res.file), line: res.line });
+  },
+
+  /**
+   * Code sample
+   * @param title 
+   * @param content 
+   * @param outline 
+   * @param language 
+   */
+  Code: (title: Content, content: Content, outline = false, language = 'typescript') => {
+    const res = ResolveUtil.resolveCode(content, language, outline);
+    return $n('code', { title: $c(title), content: $c(res.content), language: res.language, file: $c(res.file) });
+  },
+
+  /**
+   * Configuration Block
+   * @param title 
+   * @param content 
+   * @param language 
+   */
+  Config: (title: Content, content: Content, language = 'yaml') => {
+    const res = ResolveUtil.resolveConfig(content, language);
+    return $n('config', { title: $c(title), content: $c(res.content), language: res.language, file: $c(res.file) });
+  },
+
+  /**
+   * Standard header
+   * @param install 
+   * @param pkg 
+   */
+  Header: (install = true, pkg = Package) => {
+    return $n('header', { title: $c(pkg.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });
+  },
+
+  /**
+   * Comment
+   * @param text 
+   * @returns 
+   */
+  Comment: (text: string) => {
+    return $n('comment', { text: $c(text) });
+  },
+
+  /**
+   * Code Snippet
+   * @param title 
+   * @param file 
+   * @param startPattern 
+   * @param endPattern 
+   * @param outline 
+   */
+  Snippet: (title: Content, file: string, startPattern: RegExp, endPattern?: RegExp, outline?: boolean) => {
+    const res = ResolveUtil.resolveSnippet(file, startPattern, endPattern, outline);
+    return $n('code', {
+      title: $c(title), content: $c(res.text), line: res.line, file: $c(res.file), language: res.language,
+      link: node.SnippetLink(title, file, startPattern)
+    });
+  },
+
+  /**
+   * NPM Installation
+   * @param title 
+   * @param pkg 
+   */
+  Install: (title: Content, pkg: Content) => {
+    pkg = typeof pkg === 'string' && !pkg.includes(' ') ? `npm install ${pkg}` : pkg;
+    return $n('install', { title: $c(title), language: 'bash', content: $c(pkg) });
+  },
+
+  /**
+   * Standard List
+   * @param items 
+   */
+  List: (...items: Content[]) => node.buildList(items),
+
+  /**
+   * Ordered List
+   * @param items 
+   */
+  Ordered: (...items: Content[]) => node.buildList(items, true),
+
+  /**
+   * Table
+   * @param headers 
+   * @param rows 
+   */
+  Table: (headers: Content[], ...rows: Content[][]) =>
+    $n('table', {
+      headers: headers.map(x => typeof x === 'string' ? $c(x) : x),
+      rows: rows.map(row =>
+        row.map(x => typeof x === 'string' ? $c(x) : x)
+      )
+    }),
+
+  /**
+   * Image reference
+   * @param title 
+   * @param file 
+   */
+  Image: (title: Content, file: string) => {
+    if (!/^https?:/.test(file) && !FsUtil.existsSync(file)) {
+      throw new Error(`${file} is not a valid location`);
+    }
+    return $n('image', { title: $c(title), link: $c(file) });
   }
-
-  const script = DocRunUtil.run(cmd, args, cfg);
-  const prefix = !/.*\/doc\/.*[.]ts$/.test(cmd) ? '$' :
-    `$ node @travetto/${cfg.module ?? 'base'}/bin/main`;
-
-  return Terminal(title, `${prefix} ${cmd} ${args.join(' ')}\n\n${script}`);
 }
 
-export function Mod(folder: string) {
-  const { description, displayName } = readPackage(folder);
-  return $n('mod', { title: $c(displayName), link: $c(folder), description: $c(description) });
-}
+type NodeType = typeof node;
 
-export function Ref(title: Content, file: string) {
-  const res = DocUtil.resolveRef(title, file);
-  return $n('ref', { title: $c(res.title), link: $c(res.file), line: res.line });
-}
-
-export function Code(title: Content, content: Content, outline = false, language = 'typescript') {
-  const res = DocUtil.resolveCode(content, language, outline);
-  return $n('code', { title: $c(title), content: $c(res.content), language: res.language, file: $c(res.file) });
-}
-
-export function Config(title: Content, content: Content, language = 'yaml') {
-  const res = DocUtil.resolveConfig(content, language);
-  return $n('config', { title: $c(title), content: $c(res.content), language: res.language, file: $c(res.file) });
-}
-
-export function Header(install = true, pkg = Package) {
-  return $n('header', { title: $c(pkg.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });
-}
-
-export function Snippet(title: Content, file: string, startPattern: RegExp, endPattern?: RegExp, outline?: boolean) {
-  const res = DocUtil.resolveSnippet(file, startPattern, endPattern, outline);
-  return $n('code', {
-    title: $c(title), content: $c(res.text), line: res.line, file: $c(res.file), language: res.language,
-    link: SnippetLink(title, file, startPattern)
-  });
-}
-
-export function Install(title: Content, pkg: Content) {
-  pkg = typeof pkg === 'string' && !pkg.includes(' ') ? `npm install ${pkg}` : pkg;
-  return $n('install', { title: $c(title), language: 'bash', content: $c(pkg) });
-}
-
-function BuildList(items: Content[], ordered = false) {
-  return $n('list', {
-    items: items.map(x => {
-      if (Array.isArray(x)) {
-        x = Item(Group(x), ordered);
-      } else if (typeof x === 'string') {
-        x = $c(x);
-      }
-      switch (x._type) {
-        case 'list': return x;
-        case 'item': return { ...x, ordered };
-        default: return Item(x, ordered);
-      }
-    })
-  });
-}
-
-export const List = (...items: Content[]) => BuildList(items);
-export const Ordered = (...items: Content[]) => BuildList(items, true);
-
-export const Table = (headers: Content[], ...rows: Content[][]) =>
-  $n('table', {
-    headers: headers.map(x => typeof x === 'string' ? $c(x) : x),
-    rows: rows.map(row =>
-      row.map(x => typeof x === 'string' ? $c(x) : x)
-    )
-  });
-
-
-export function Image(title: Content, file: string) {
-  if (!/^https?:/.test(file) && !FsUtil.existsSync(file)) {
-    throw new Error(`${file} is not a valid location`);
-  }
-  return $n('image', { title: $c(title), link: $c(file) });
-}
+export type AllTypeMap = { [K in keyof NodeType]: ReturnType<NodeType[K]> };
+export type AllType = ReturnType<(NodeType)[keyof NodeType]>;

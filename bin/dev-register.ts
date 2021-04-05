@@ -47,7 +47,10 @@ class DevRegister {
       ...givenMods, // Givens
       ...Object.keys(Package.dependencies || {}),
       ...Object.keys(Package.devDependencies || {}),
-      ...Object.keys(process.argv[2] === 'doc' ? Package.docDependencies || {} : {})
+      ...(process.argv[2] === 'doc' ? [
+        ...Object.keys(Package.docDependencies ?? {}),
+        ...Object.keys(Package.optionalPeerDependencies ?? {})
+      ] : [])
     ]
       .filter(x => x.startsWith('@travetto'));
 

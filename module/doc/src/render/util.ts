@@ -1,15 +1,48 @@
+import { RenderContext } from './context';
+import { Html } from './html';
+import { Markdown } from './markdown';
+import { DocumentShape, Wrapper } from '../types';
+import { AllType } from '../nodes';
+
+const renderers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
+
+/**
+ * Render utilities
+ */
 export class RenderUtil {
-  static TOKENS: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
 
-  static titleCase(a: string) {
-    return `${a.charAt(0).toUpperCase()}${a.substr(1)}`;
+  static #imported = new Map<string, { root: AllType, wrap?: Wrapper }>();
+
+  static purge(file: string) {
+    this.#imported.delete(file);
   }
 
-  static clean(a?: string) {
-    return a ? a.replace(/^[\n ]+|[\n ]+$/gs, '') : '';
-  }
+  /**
+   * Render content of file and format
+   * @param file 
+   * @param fmt 
+   * @returns 
+   */
+  static async render(file: string, fmt: string = Markdown.ext) {
+    fmt = fmt.replace(/^[.]/, ''); // Strip leading .
+    if (!renderers[fmt]) {
+      throw new Error(`Unknown renderer with format: ${fmt}`);
+    }
 
-  static getId(a: string) {
-    return a.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/ /g, '-');
+    const res = (await import(file)) as DocumentShape;
+
+    if (!this.#imported.has(file)) {
+      this.#imported.set(file, {
+        wrap: res.wrap,
+        root: ('_type' in res.text ? res.text : await res.text()) as AllType
+      });
+    }
+
+    const { wrap, root } = this.#imported.get(file)!;
+
+    const ctx = new RenderContext(file);
+    const content = renderers[fmt].render(root as AllType, ctx).replace(/\n{3,100}/msg, '\n\n').trim();
+    const preamble = renderers[fmt].render(ctx.preamble, ctx);
+    return `${preamble}\n${wrap?.[fmt]?.(content) ?? content}\n`;
   }
 }

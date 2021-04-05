@@ -1,0 +1,3 @@
+class TestFile {
+  static method() { }
+}

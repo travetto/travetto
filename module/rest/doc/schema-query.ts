@@ -11,12 +11,12 @@ class SearchParams {
 @Controller('/user')
 class UserController {
 
-  #service: {
+  private service: {
     search(query: SearchParams): Promise<number[]>;
   };
 
   @Get('/search')
   async search(@SchemaQuery() query: SearchParams) {
-    return await this.#service.search(query);
+    return await this.service.search(query);
   }
 }
