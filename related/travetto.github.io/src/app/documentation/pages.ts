@@ -1,6 +1,6 @@
 import { CliComponent } from './gen/cli/cli.component';
 import { VSCodePluginComponent } from './vscode-plugin/vscode-plugin.component';
-import { GeneratorAppComponent } from './gen/generator-app/generator-app.component';
+import { ScaffoldComponent } from './gen/scaffold/scaffold.component';
 import { ConfigComponent } from './gen/config/config.component';
 import { AppComponent } from './gen/app/app.component';
 import { DiComponent } from './gen/di/di.component';
@@ -111,7 +111,7 @@ export const PAGES = [
   {
     path: 'tools', title: 'Tooling', subs: [
       { path: 'vscode-plugin', title: 'VS Code Plugin', component: VSCodePluginComponent },
-      { path: 'generator-app', title: 'Yeoman App Generator', component: GeneratorAppComponent },
+      { path: 'scaffold', title: 'App Scaffold', component: ScaffoldComponent },
     ]
   },
   { path: 'cli', title: 'CLI Support', component: CliComponent },

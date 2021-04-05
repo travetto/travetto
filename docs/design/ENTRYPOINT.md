@@ -45,9 +45,9 @@ t = typescript, i = init, r = run, a = await
   ------------------------------------------------------
   [ ira] ./cli-email-template.ts  
 
-* generator-app/app (Used as a bootstrap)
+* scaffold/app (Used as a bootstrap)
   ------------------------------------------------------
-  [t   ] ./index.js                        
+  [t   ] ./bin/trv-scaffold.js                        
 
 * model/bin (Run app to collect data)
   ------------------------------------------------------

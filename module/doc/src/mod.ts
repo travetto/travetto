@@ -48,7 +48,7 @@ const MAPPING = {
   Watch: 'module/watch',
   Worker: 'module/worker',
   Yaml: 'module/yaml',
-  GeneratorApp: 'related/generator-app'
+  Scaffold: 'module/scaffold'
 };
 
 export const mod = new Proxy({}, {
