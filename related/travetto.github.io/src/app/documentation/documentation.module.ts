@@ -34,7 +34,7 @@ import { RestFastifyComponent } from './gen/rest-fastify/rest-fastify.component'
 import { TestComponent } from './gen/test/test.component';
 import { CacheComponent } from './gen/cache/cache.component';
 import { CliComponent } from './gen/cli/cli.component';
-import { GeneratorAppComponent } from './gen/generator-app/generator-app.component';
+import { ScaffoldComponent } from './gen/scaffold/scaffold.component';
 import { ModuleChartComponent } from './module-chart/module-chart.component';
 import { YamlComponent } from './gen/yaml/yaml.component';
 import { JwtComponent } from './gen/jwt/jwt.component';
@@ -99,7 +99,7 @@ import { ModelQueryComponent } from './gen/model-query/model-query.component';
     TestComponent,
     CacheComponent,
     CliComponent,
-    GeneratorAppComponent,
+    ScaffoldComponent,
     ModuleChartComponent,
     YamlComponent,
     JwtComponent,

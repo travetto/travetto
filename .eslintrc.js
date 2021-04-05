@@ -14,7 +14,7 @@ module.exports = {
   ignorePatterns: [
     ...all.ignorePatterns,
     'module/boot/src/**/*.js',
-    'related/generator-app/templates'
+    'module/scaffold/templates'
   ],
   extends: [...all.extends, 'plugin:travetto/all'],
   plugins: [...all.plugins, 'unused-imports'],
