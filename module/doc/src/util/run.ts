@@ -36,7 +36,7 @@ class DocState {
  * Utils for running commands within a doc
  */
 export class DocRunUtil {
-  static DOC_STATE = new DocState();
+  static #docState = new DocState();
 
   static runState(cmd: string, args: string[], config: RunConfig = {}) {
     args = [...args];
@@ -60,14 +60,17 @@ export class DocRunUtil {
     };
   }
 
+  /**
+   * Clean run output
+   */
   static cleanRunOutput(text: string, cfg: RunConfig) {
     text = text.trim()
       // eslint-disable-next-line no-control-regex
       .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@trv:')
       .replace(new RegExp(PathUtil.cwd, 'g'), '.')
-      .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.DOC_STATE.getDate.bind(this.DOC_STATE))
-      .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.DOC_STATE.getId.bind(this.DOC_STATE))
+      .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
+      .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))
       .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);
     if (cfg.filter) {
       text = text.split(/\n/g).filter(cfg.filter).join('\n');
@@ -75,6 +78,9 @@ export class DocRunUtil {
     return text;
   }
 
+  /**
+   * Run process in the background
+   */
   static runBackground(cmd: string, args: string[], config: RunConfig = {}) {
     const state = this.runState(cmd, args, config);
     return ExecUtil.spawn(state.cmd, state.args, {
@@ -83,6 +89,9 @@ export class DocRunUtil {
     });
   }
 
+  /**
+   * Run command synchronously and return output
+   */
   static run(cmd: string, args: string[], config: RunConfig = {}) {
     let final: string;
     try {

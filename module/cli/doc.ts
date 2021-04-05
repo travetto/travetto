@@ -1,30 +1,30 @@
-import { doc as d, pth, inp, Execute, Section, lib, Code, Header } from '@travetto/doc';
+import { d, lib } from '@travetto/doc';
 
 export const text = d`
-${Header()}
+${d.Header()}
 
 The cli is the primary structure for interacting with the external requirements of the framework.  This can range from running tests, to running applications, to generating email templates. The main executable can be installed globally or locally.  If installed globally and locally, it will defer to the local installation for execution.
 
-As is the custom, modules are able to register their own cli extensions as scripts, whose name starts with ${pth`cli-`}.  These scripts are then picked up at runtime and all available options are provided when viewing the help documentation.  The following are all the supported cli operations and the various settings they allow.
+As is the custom, modules are able to register their own cli extensions as scripts, whose name starts with ${d.Path('cli-')}.  These scripts are then picked up at runtime and all available options are provided when viewing the help documentation.  The following are all the supported cli operations and the various settings they allow.
 
-${Section('General')}
+${d.Section('General')}
 
-${Execute('General Usage', 'trv', ['--help'])}
+${d.Execute('General Usage', 'trv', ['--help'])}
 
 This will show all the available options/choices that are exposed given the currently installed modules.
 
-${Section('Extending')}
+${d.Section('Extending')}
 
-Extending the ${inp`cli`} is fairly straightforward.  It is built upon ${lib.Commander}, with a plugin model that is extensible:
+Extending the ${d.Input('cli')} is fairly straightforward.  It is built upon ${lib.Commander}, with a plugin model that is extensible:
 
-${Code('Echo Plugin', 'doc/bin/cli-echo.ts')}
+${d.Code('Echo Plugin', 'doc/bin/cli-echo.ts')}
 
 With the corresponding output:
 
-${Execute('Echo Plugin Help', 'trv', ['echo', '--help'])}
+${d.Execute('Echo Plugin Help', 'trv', ['echo', '--help'])}
 
 And actually using it:
 
-${Execute('Echo Plugin Run', 'trv', ['echo', '-u', 'bOb', 'rOb', 'DRoP'])}
+${d.Execute('Echo Plugin Run', 'trv', ['echo', '-u', 'bOb', 'rOb', 'DRoP'])}
 
 `;

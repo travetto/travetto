@@ -1,26 +1,26 @@
 // @ts-check
-import { pth, doc as d, mod, Code, Terminal, Section, List, Execute, SubSection, Ordered, Snippet, Header } from '@travetto/doc';
+import { d, mod } from '@travetto/doc';
 
 export const text = d`
-${Header()}
+${d.Header()}
 
-${Section('CLI - pack')} 
+${d.Section('CLI - pack')} 
 
-${Execute('Pack usage', 'trv', ['pack', '--help'])}
+${d.Execute('Pack usage', 'trv', ['pack', '--help'])}
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. The pack operation is actually a wrapper around multiple sub-operations that are run in series to produce the desired final structure for deployment.  The currently support operations are:
 
-${List(
+${d.List(
   'assemble',
   'zip',
   'docker'
 )}
 
-${SubSection('CLI - pack:assemble')}
+${d.SubSection('CLI - pack:assemble')}
 
 Assemble is the operation that stages the project's code for deployment.  The assembly process goes through the following operations:
 
-${Ordered(
+${d.Ordered(
   'Cleaning Workspace - Cleans workspace to start with an empty workspace',
   'Copying Dependencies - Computes the prod depedencies and copies them into the new workspace',
   'Copying App Content - Copies over application content (src/resources/support/bin)',
@@ -34,43 +34,43 @@ ${Ordered(
   'Emptying .ts Files - If keep source is false, all .ts files are emptied, as compilation will not occur at runtime',
 )}
 
-${Snippet('Assemble Default Config', 'support/pack.config.ts', /assemble:/, /[.]d[.]ts/)}
+${d.Snippet('Assemble Default Config', 'support/pack.config.ts', /assemble:/, /[.]d[.]ts/)}
 
-${Execute('Assemble Usage', 'trv', ['pack:assemble', '--help'])}
+${d.Execute('Assemble Usage', 'trv', ['pack:assemble', '--help'])}
 
-${SubSection('CLI - pack:zip')}
+${d.SubSection('CLI - pack:zip')}
 
 Zip is an optional step, that can run post assembly.  The only configuration it currently provides is the ability to specify the output location for the zip file.
 
-${Snippet('Zip Default Config', 'support/pack.config.ts', /zip:/, /\}/)}
+${d.Snippet('Zip Default Config', 'support/pack.config.ts', /zip:/, /\}/)}
 
-${Execute('Zip Usage', 'trv', ['pack:zip', '--help'])}
+${d.Execute('Zip Usage', 'trv', ['pack:zip', '--help'])}
 
-${SubSection('CLI - pack:docker')}
+${d.SubSection('CLI - pack:docker')}
 
 Docker support is an optional step, that can run post assembly.  This allows for building a docker image, and currently only supports the base images as the only configuration options.
 
-${Snippet('Docker Default Config', 'support/pack.config.ts', /docker:/, /\}/)}
+${d.Snippet('Docker Default Config', 'support/pack.config.ts', /docker:/, /\}/)}
 
-${Execute('Docker Usage', 'trv', ['pack:docker', '--help'])}
+${d.Execute('Docker Usage', 'trv', ['pack:docker', '--help'])}
 
 
-${SubSection('Modes')}
-Various modules may provide customizations to the default ${pth`pack.config.ts`} to allow for easy integration with the packing process.  A simple example of this is via the ${mod.Rest} module, for how to publish lambda packages.
+${d.SubSection('Modes')}
+Various modules may provide customizations to the default ${d.Path('pack.config.ts')} to allow for easy integration with the packing process.  A simple example of this is via the ${mod.Rest} module, for how to publish lambda packages.
 
-${Code('Rest, pack.lambda.ts', '@travetto/rest/support/pack.aws-lambda.ts')}
+${d.Code('Rest, pack.lambda.ts', '@travetto/rest/support/pack.aws-lambda.ts')}
 
-${Terminal('Invoking Pack with Mode', 'npx trv pack <mode>')}
+${d.Terminal('Invoking Pack with Mode', 'npx trv pack <mode>')}
 
-${SubSection('Configuration')}
+${d.SubSection('Configuration')}
 
 By default, the configuration consists of two components.
-${List(
-  d`The default config in ${pth`support/pack.config.ts`} and`,
+${d.List(
+  d`The default config in ${d.Path('support/pack.config.ts')} and`,
   'The config selected to execute from the cli'
 )}
 
 These two configurations will be loaded and layered, with the selected config taking precedence.
 
-${Code('Example pack.config.ts', 'doc/support/pack.config.ts')}
+${d.Code('Example pack.config.ts', 'doc/support/pack.config.ts')}
 `;

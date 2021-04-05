@@ -11,13 +11,13 @@ class User {
 @Controller('/user')
 class UserController {
 
-  #service: {
+  private service: {
     update(user: User): Promise<User>;
   };
 
   @Post('/saveUser')
   async save(@SchemaBody() user: User) {
-    user = await this.#service.update(user);
+    user = await this.service.update(user);
     return { success: true };
   }
 }

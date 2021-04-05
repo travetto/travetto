@@ -43,7 +43,7 @@ export class TranspileUtil {
    * @privates
    */
   static setExtraOptions(opts: Record<string, unknown>) {
-    this.#optionsExtra = opts;
+    this.#optionsExtra = { ...this.#optionsExtra ?? {}, ...opts };
   }
 
   /**

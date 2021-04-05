@@ -43,20 +43,23 @@ const markdownPage = (mod: string) =>
         spawnSync('trv-service', ['restart'], { stdio: 'inherit', encoding: 'utf8' });
       }) : undefined,
 
-  Packages.yieldByFolder('related/overview').$concat(
-    Packages.yieldByFolder('related/todo-app'),
-    Packages.yieldByFolder('related/vscode-plugin'),
-    Packages.yieldPublicPackages()
-  )
+  Packages.yieldByFolder('related/overview')
+    .$concat(
+      Packages.yieldByFolder('related/todo-app'),
+      //   Packages.yieldByFolder('related/vscode-plugin'),
+      Packages.yieldPublicPackages()
+    )
     .$filter(x => !target || (x._.mod === target))
     .$parallel(async pkg => {
+      const html = htmlPage(pkg._.mod);
+      const md = markdownPage(pkg._.mod);
       console.log(`Building out docs for ${pkg.name}`);
       if (pkg._.folder.endsWith('vscode-plugin')) {
         await copyPluginImages();
       }
 
       return $exec('trv', {
-        args: ['doc', '-o', htmlPage(pkg._.mod), '-o', markdownPage(pkg._.mod)],
+        args: ['doc', '-o', html, '-o', md],
         spawn: {
           shell: true,
           detached: true,
@@ -64,7 +67,27 @@ const markdownPage = (mod: string) =>
           env: process.env
         }
       })
-        .then(() => { }, () => console.log(`${pkg.name}... failed`));
+        .then((val) => {
+          return html
+            .$read()
+            .$collect()
+            .$map(contents => {
+              const content = contents.join('\n').replace(/href="[^"]+@travetto\/([^.]+)"/g, (_, attr, ref) => `href="/docs/${ref}"`)
+                .replace(/^src="images\//g, `src="/assets/images/${pkg._.mod}/`)
+                .replace(/href="https?:\/\/travetto.dev\//g, _ => `href="/`)
+                .replace(
+                  !['todo-app', 'overview'].includes(pkg._.mod) ? /<h1>([\n\r]|.)*/m : '##',
+                  t => `<div class="documentation">\n${t}\n</div>\n`
+                )
+                .replace(
+                  ['vscode-plugin'].includes(pkg._.mod) ? /src="https:\/\/travetto.dev\/assets/g : '##',
+                  t => `src="/assets`
+                );
+              return content;
+            })
+            .$writeFinal(html)
+            , () => console.log(`${pkg.name}... failed`)
+        });
     }, { concurrent: 4 })
 ]
   .$forEach(() => { });

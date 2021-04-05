@@ -1,7 +1,4 @@
-export * from './src/util';
-export * from './src/run-util';
-export * from './src/nodes';
-export * from './src/render/types';
-export * from './src/helper';
-export * as lib from './src/lib';
-export * from './src/mod';
+export { node } from './src/nodes';
+export { lib } from './src/lib';
+export { mod } from './src/mod';
+export { doc, d } from './src/doc';
