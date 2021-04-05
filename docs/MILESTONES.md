@@ -287,6 +287,9 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 * Removed all `plugin-*.js` files as in lieu of exposing a `main` function in the target files.
 * Removed almost all `*.js` files in the test folders, in lieu of exposing `main` functions. Tests no longer auto execute on import.
 
+#### Generator Simplification
+* Moved away from using yeoman due to dependency bloat, and went with a simple `@travetto/cli` based solution. Can be invoked with `npx @travetto/scaffold`
+
 ### Non-Breaking Changes
 
 #### Standard dependency upgrades
