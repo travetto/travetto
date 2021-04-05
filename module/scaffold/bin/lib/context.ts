@@ -10,7 +10,8 @@ import { Feature } from './features';
 export class Context {
 
   static #finalize(path: string) {
-    return path.replace('gitignore.txt', '.gitignore');
+    return path.replace('gitignore.txt', '.gitignore')
+      .replace('package.json.txt', 'package.json');
   }
 
   static #meetsRequirement(modules: string[], desired: string[]) {

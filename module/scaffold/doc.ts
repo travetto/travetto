@@ -6,7 +6,7 @@ import { TodoController } from './templates/todo/src/rest/todo';
 export const text = d`
 ${Header(false)}
 
-A simple generator for scaffolding a reference project.  To get started, you need to make sure:
+A simple tool for scaffolding a reference project.  To get started, you need to make sure:
 
 ${Install('Setting up the necessary config', `
 $ git config --global.username <Username> #Set your git username
