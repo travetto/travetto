@@ -27,18 +27,18 @@
   grid-template-columns: auto repeat(6, 1fr) auto auto;
   grid-template-rows: 6;
 
-  .cli {           grid-column: 1; @extend .vertical; @extend .group-external; }
-  .vscode-plugin { grid-column: 8; @extend .vertical; @extend .group-external; }
-  .generator-app { grid-column: 9; @extend .vertical; @extend .group-external; }
+  .cli           { grid-column: 1; @extend .vertical;    @extend .group-external; }
+  .vscode-plugin { grid-column: 8; @extend .vertical;    @extend .group-external; }
+  .scaffold      { grid-column: 9; @extend .vertical;    @extend .group-external; }
   
-  .app {      grid-row: 1;  @extend .full;        @extend .group-common; }
-  .asset {    grid-row: 2;  @extend .left-third;  @extend .group-lib; }
-  .email {    grid-row: 2;  @extend .mid-third;   @extend .group-lib; }
-  .auth {     grid-row: 2;  @extend .right-third; @extend .group-lib; }
-  .model {    grid-row: 3;  @extend .left-half;   @extend .group-core; }
-  .rest {     grid-row: 3;  @extend .right-half;  @extend .group-core; }
-  .core {     grid-row: 4;  @extend .full;        @extend .group-core; }
-  .compiler { grid-row: 5;  @extend .left-half;   @extend .group-system; }  
-  .registry { grid-row: 5;  @extend .right-half;  @extend .group-system; }  
-  .base {     grid-row: 6;  @extend .full;        @extend .group-system; }  
+  .app           { grid-row: 1;    @extend .full;        @extend .group-common;   }
+  .asset         { grid-row: 2;    @extend .left-third;  @extend .group-lib;      }
+  .email         { grid-row: 2;    @extend .mid-third;   @extend .group-lib;      }
+  .auth          { grid-row: 2;    @extend .right-third; @extend .group-lib;      }
+  .model         { grid-row: 3;    @extend .left-half;   @extend .group-core;     }
+  .rest          { grid-row: 3;    @extend .right-half;  @extend .group-core;     }
+  .core          { grid-row: 4;    @extend .full;        @extend .group-core;     }
+  .compiler      { grid-row: 5;    @extend .left-half;   @extend .group-system;   }  
+  .registry      { grid-row: 5;    @extend .right-half;  @extend .group-system;   }  
+  .base          { grid-row: 6;    @extend .full;        @extend .group-system;   }  
 }
