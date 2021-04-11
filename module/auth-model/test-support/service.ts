@@ -7,12 +7,12 @@ import { ModelCrudSupport, BaseModel, Model } from '@travetto/model';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
 import { ModelSuite } from '@travetto/model/test-support/suite';
 
-import { ModelPrincipalSource, RegisteredIdentity } from '..';
+import { ModelAuthService, RegisteredPrincipal } from '..';
 
 export const TestModelSvcSym = Symbol.for('@trv:auth-model/test-model-svc');
 
 @Model({ autoCreate: false })
-class User extends BaseModel {
+class User extends BaseModel implements RegisteredPrincipal {
   password?: string;
   salt?: string;
   hash?: string;
@@ -23,17 +23,12 @@ class User extends BaseModel {
 
 class TestConfig {
   @InjectableFactory()
-  static getPrincipalSource(@Inject(TestModelSvcSym) svc: ModelCrudSupport): ModelPrincipalSource<User> {
-    const src = new ModelPrincipalSource<User>(
+  static getauthService(@Inject(TestModelSvcSym) svc: ModelCrudSupport): ModelAuthService<User> {
+    const src = new ModelAuthService<User>(
       svc,
       User,
-      u => ({
-        ...(u as unknown as RegisteredIdentity),
-        details: u,
-        permissions: u.permissions ?? [],
-        source: 'model'
-      }),
-      reg => User.from({ ...(reg as User) })
+      u => ({ ...u, details: u, source: 'model' }),
+      reg => User.from({ ...reg })
     );
     return src;
   }
@@ -48,7 +43,7 @@ export abstract class AuthModelServiceSuite {
   configClass: Class;
 
   @Inject()
-  principalSource: ModelPrincipalSource<User>;
+  authService: ModelAuthService<User>;
 
   @Test()
   async register() {
@@ -56,7 +51,7 @@ export abstract class AuthModelServiceSuite {
       password: 'bob'
     });
 
-    const user = await this.principalSource.register(pre);
+    const user = await this.authService.register(pre);
     assert.ok(user.hash);
     assert.ok(user.id);
   }
@@ -71,11 +66,11 @@ export abstract class AuthModelServiceSuite {
     console.log(pre);
 
     try {
-      await this.principalSource.authenticate(pre.id, pre.password!);
+      await this.authService.authenticate(pre);
       assert.fail('Should not have gotten here');
     } catch (err) {
       if (err instanceof AppError && err.category === 'notfound') {
-        const user = await this.principalSource.register(pre);
+        const user = await this.authService.register(pre);
         assert.ok(user.hash);
         assert.ok(user.id);
       } else {
@@ -83,6 +78,6 @@ export abstract class AuthModelServiceSuite {
       }
     }
 
-    await assert.doesNotReject(() => this.principalSource.authenticate(pre.id, pre.password!));
+    await assert.doesNotReject(() => this.authService.authenticate(pre));
   }
 }

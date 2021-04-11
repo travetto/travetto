@@ -1,11 +1,9 @@
 import { d, mod } from '@travetto/doc';
 
-import { AuthContext } from './src/context';
 import { AuthUtil } from './src/util';
 
-const PrincipalSource = d.SnippetLink('PrincipalSource', './src/types.ts', /interface PrincipalSource/);
-const Principal = d.SnippetLink('Principal', './src/types.ts', /interface Principal/);
-const Identity = d.SnippetLink('Identity', './src/types.ts', /interface Identity/);
+const Principal = d.SnippetLink('Principal', '@travetto/auth/src/types.ts', /interface Principal/);
+const Authorizer = d.SnippetLink('Authorizer', './src/types.ts', /interface Authorizer/);
 
 export const text = d`
 ${d.Header()}
@@ -39,9 +37,9 @@ ${d.List(
 )}
 
 ${d.Section('Customization')}
-By default, the module does not provide an implementation for the ${PrincipalSource}. By default the structure of the provider can be boiled down to:
+By default, the module does not provide an implementation for the ${Authorizer}. By default the structure of the provider can be boiled down to:
 
-${d.Code('Principal Source', PrincipalSource.link, true)}
+${d.Code('Principal Source', Authorizer.link, true)}
 
 The provider only requires one method to be defined, and that is ${d.Method('resolvePrincipal')}.  This method receives an identity as an input, and is responsible for converting that to a principal (external user to internal user).  If you want to be able to auto-provision users from a remote source, you can set ${d.Input('autoCreate')} to ${d.Input('true')}, and supply ${d.Method('createPrincipal')}'s functionality for storing the user as well.
 

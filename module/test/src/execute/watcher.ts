@@ -2,7 +2,7 @@ import * as os from 'os';
 
 import { Class } from '@travetto/base';
 import { RootRegistry, MethodSource } from '@travetto/registry';
-import { WorkPool, IterableInputSource, DynamicAsyncIterator } from '@travetto/worker';
+import { WorkPool, IterableWorkSet, DynamicAsyncIterator } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
@@ -24,7 +24,7 @@ export class TestWatcher {
     console.debug('Listening for changes');
 
     const itr = new DynamicAsyncIterator<RunEvent>();
-    const src = new IterableInputSource(itr);
+    const src = new IterableWorkSet(itr);
 
     await SuiteRegistry.init();
     SuiteRegistry.listen(RootRegistry);

@@ -5,7 +5,7 @@ import { ResourceManager } from '@travetto/base';
 import { ExecUtil } from '@travetto/boot/src';
 
 import { WorkPool } from '../src/pool';
-import { IterableInputSource } from '../src/input/iterable';
+import { IterableWorkSet } from '../src/input/iterable';
 import { WorkUtil } from '../src/util';
 
 @Suite()
@@ -14,8 +14,8 @@ export class PoolExecTest {
   @Test()
   async simple() {
 
-    // new IterableInputSource(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
-    const input = new IterableInputSource(function* () {
+    // new IterableWorkSet(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+    const input = new IterableWorkSet(function* () {
       for (let i = 0; i < 5; i++) {
         yield `${i}-`;
       }

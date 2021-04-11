@@ -1,16 +1,16 @@
 import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
-import { IterableInputSource } from '../src/input/iterable';
+import { IterableWorkSet } from '../src/input/iterable';
 import { DynamicAsyncIterator } from '../src/input/async-iterator';
 
 @Suite()
-export class InputSourceTest {
+export class WorkSetTest {
   @Test()
   async iterable() {
     const items = [1, 2, 3];
     const comp = items.slice(0);
-    const src = new IterableInputSource(items);
+    const src = new IterableWorkSet(items);
     while (await src.hasNext()) {
       assert((await src.next()) === comp.shift()!);
     }
@@ -22,7 +22,7 @@ export class InputSourceTest {
   async iterator() {
     const items = [1, 2, 3];
     const comp = items.slice(0);
-    const src = new IterableInputSource(items[Symbol.iterator]());
+    const src = new IterableWorkSet(items[Symbol.iterator]());
     while (await src.hasNext()) {
       assert((await src.next()) === comp.shift()!);
     }
@@ -35,7 +35,7 @@ export class InputSourceTest {
     const items = [1, 2, 3];
     const gen = function* () { yield* items; };
     const comp = items.slice(0);
-    const src = new IterableInputSource(gen);
+    const src = new IterableWorkSet(gen);
     while (await src.hasNext()) {
       assert((await src.next()) === comp.shift()!);
     }
@@ -52,7 +52,7 @@ export class InputSourceTest {
       }
     };
     const comp = items.slice(0);
-    const src = new IterableInputSource(gen);
+    const src = new IterableWorkSet(gen);
     while (await src.hasNext()) {
       assert((await src.next()) === comp.shift()!);
     }
@@ -65,7 +65,7 @@ export class InputSourceTest {
     const items = [1, 2, 3];
     const comp = items.slice(0);
     const itr = new DynamicAsyncIterator();
-    const src = new IterableInputSource(itr);
+    const src = new IterableWorkSet(itr);
 
     for (let i = 0; i < items.length; i++) {
       setTimeout(() => itr.add(items[i]), (i + 1) * 1000);

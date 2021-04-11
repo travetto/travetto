@@ -1,6 +1,6 @@
 import { PathUtil } from '@travetto/boot';
 import { PhaseManager } from '@travetto/base';
-import { WorkPool, IterableInputSource } from '@travetto/worker';
+import { WorkPool, IterableWorkSet } from '@travetto/worker';
 
 import { TestExecutor } from './executor';
 import { buildStandardTestManager } from '../worker/standard';
@@ -50,7 +50,7 @@ export class Runner {
     consumer.onStart();
 
     await pool
-      .process(new IterableInputSource(files))
+      .process(new IterableWorkSet(files))
       .finally(() => pool.shutdown());
 
     return consumer.summarizeAsBoolean();

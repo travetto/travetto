@@ -1,21 +1,21 @@
+import { Principal } from '@travetto/auth/src/types';
 import { Request, Response } from '@travetto/rest';
-import { AuthContext } from '@travetto/auth';
 
 /**
  * Encoder for auth context for request/response
- * @concrete ./internal/types:AuthContextEncoderTarget
+ * @concrete ./internal/types:PrincipalEncoderTarget
  */
-export interface AuthContextEncoder {
+export interface PrincipalEncoder {
   /**
-   * Write context
+   * Write principal
    * @param req The travetto request
    * @param res The travetto response
-   * @param ctx The auth context
+   * @param p The auth principal
    */
-  encode(req: Request, res: Response, ctx: AuthContext): Promise<void>;
+  encode(req: Request, res: Response, p: Principal | undefined): Promise<void>;
   /**
-   * Read context from request
+   * Read principal from request
    * @param req The travetto request
    */
-  decode(req: Request): Promise<AuthContext | undefined>;
+  decode(req: Request): Promise<Principal | undefined>;
 }

@@ -1,14 +1,16 @@
 import { InjectableFactory } from '@travetto/di';
-import { ModelPrincipalSource, RegisteredIdentity } from '@travetto/auth-model';
+import { ModelAuthService, RegisteredPrincipal } from '@travetto/auth-model';
+import { ModelCrudSupport } from '@travetto/model';
 
 import { User } from './model';
 
 class AuthConfig {
   @InjectableFactory()
-  static getModelPrincipalSource() {
-    return new ModelPrincipalSource(
+  static getModelAuthService(svc: ModelCrudSupport) {
+    return new ModelAuthService(
+      svc,
       User,
-      (u: User) => ({    // This converts User to a RegisteredIdentity
+      (u: User) => ({    // This converts User to a RegisteredPrincipal
         source: 'model',
         provider: 'model',
         id: u.id,
@@ -20,7 +22,7 @@ class AuthConfig {
         password: u.password,
         details: u,
       }),
-      (u: Partial<RegisteredIdentity>) => User.from(({   // This converts a RegisteredIdentity to a User
+      (u: Partial<RegisteredPrincipal>) => User.from(({   // This converts a RegisteredPrincipal to a User
         id: u.id,
         permissions: [...(u.permissions || [])],
         hash: u.hash,

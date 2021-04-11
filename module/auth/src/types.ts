@@ -1,8 +1,7 @@
-import { AuthContext } from './context';
-
 /**
- * A user principal, including permissions and details, does not imply
- * authentication
+ * A user principal, including permissions and details
+ * 
+ * @concrete ./internal/types:PrincipalTarget
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Principal<D = any> {
@@ -11,14 +10,6 @@ export interface Principal<D = any> {
    */
   id: string;
   /**
-   * List of all provided permissions
-   */
-  permissions: string[];
-  /**
-   * Supplemental details
-   */
-  details: D;
-  /**
    * Date of expiration
    */
   expiresAt?: Date;
@@ -26,23 +17,46 @@ export interface Principal<D = any> {
    * Date of issuance
    */
   issuedAt?: Date;
-}
-
-/**
- * A principal that has been authenticated by an identity source
- */
-export interface Identity extends Principal {
   /**
-   * The source of the identity verification
+   * The source of the issuance
    */
-  issuer: string;
+  issuer?: string;
+  /**
+   * Supplemental details
+   */
+  details?: D;
+  /**
+   * List of all provided permissions
+   */
+  permissions?: string[];
 }
 
 /**
- * Definition of a principal source, authorizers an identity into a principal
+ * Definition of an authorization source, which validates a principal into an authorized principal
  *
- * @concrete ./internal/types:PrincipalSourceTarget
+ * @concrete ./internal/types:AuthorizerTarget
  */
-export interface PrincipalSource {
-  authorize(ident: Identity): Promise<AuthContext>;
+export interface Authorizer<P extends Principal = Principal> {
+  /**
+   * Authorize inbound principal, verifying it's permission to access the system.
+   * @param principal 
+   * @returns New principal that conforms to the required principal shape
+   */
+  authorize(principal: Principal): Promise<P> | P;
+}
+
+/**
+ * Supports validation payload of type T into an authenticated principal
+ *
+ * @concrete ./internal/types:AuthenticatorTarget
+ */
+export interface Authenticator<T = unknown, P extends Principal = Principal, C = unknown> {
+
+  /**
+   * Verify the payload, verifying the payload is correctly identified.
+   * @returns Valid principal if authenticated
+   * @returns undefined if authentication is valid, but incomplete (multi-step)
+   * @throws AppError if authentication fails
+   */
+  authenticate(payload: T, ctx?: C): Promise<P | undefined> | P | undefined;
 }

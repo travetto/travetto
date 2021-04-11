@@ -38,7 +38,7 @@ export class TodoController {
   async getAll(@SchemaQuery() query: Query): Promise<Todo[]> {
     query.q = query.q || {};
     // {{#modules.auth-rest}} // @doc-exclude
-    query.q.userId = this.auth.getId(); // @doc-exclude
+    query.q.userId = this.auth.get()?.id; // @doc-exclude
     // {{/modules.auth-rest}} // @doc-exclude
     return this.source.query(Todo, { where: query.q });
   }
@@ -51,7 +51,7 @@ export class TodoController {
     const q: ModelQuery<Todo> = { where: { id } };
     // {{#modules.auth-rest}} // @doc-exclude
     if (typeof q.where !== 'string') {
-      q.where!.userId = this.auth.getId(); // @doc-exclude
+      q.where!.userId = this.auth.get()?.id; // @doc-exclude
     }
     // {{/modules.auth-rest}} // @doc-exclude
     return this.source.queryOne(Todo, q);
@@ -63,7 +63,7 @@ export class TodoController {
   @Post('/')
   async save(@SchemaBody() todo: Todo): Promise<Todo> {
     // {{#modules.auth-rest}} // @doc-exclude
-    todo.userId = this.auth.getId(); // @doc-exclude
+    todo.userId = this.auth.get()?.id; // @doc-exclude
     // {{/modules.auth-rest}} // @doc-exclude
     return this.source.create(Todo, todo);
   }
@@ -74,7 +74,7 @@ export class TodoController {
   @Put('/:id')
   async update(@SchemaBody() todo: Todo): Promise<Todo> {
     // {{#modules.auth-rest}} // @doc-exclude
-    todo.userId = this.auth.getId(); // @doc-exclude
+    todo.userId = this.auth.get()?.id; // @doc-exclude
     // {{/modules.auth-rest}} // @doc-exclude
     return this.source.update(Todo, todo);
   }
@@ -87,7 +87,7 @@ export class TodoController {
     const q: ModelQuery<Todo> = { where: { id } };
     // {{#modules.auth-rest}} // @doc-exclude    
     if (typeof q.where !== 'string') {
-      q.where!.userId = this.auth.getId(); // @doc-exclude
+      q.where!.userId = this.auth.get()?.id; // @doc-exclude
     }
     // {{/modules.auth-rest}} // @doc-exclude
     if (await this.source.deleteByQuery(Todo, q) !== 1) {

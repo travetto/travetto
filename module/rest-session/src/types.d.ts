@@ -1,4 +1,4 @@
-import { Session } from './types';
+import { Session } from './session';
 import { SessionSym } from './internal/types';
 
 /**

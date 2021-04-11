@@ -1,7 +1,7 @@
 /**
- * Definition for an input source
+ * Definition for an work set
  */
-export interface InputSource<X> {
+export interface WorkSet<X> {
   /**
    * Determines if there is more work to do
    */
