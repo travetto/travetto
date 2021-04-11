@@ -1,9 +1,7 @@
-import { PrincipalSource, Identity } from '@travetto/auth';
-import { AuthContext } from '@travetto/auth/src/context';
+import { } from '@travetto/auth';
+import { Authenticator, Authorizer, Principal } from '@travetto/auth/src/types';
 import { TimeUtil } from '@travetto/base/src/internal/time';
 import { InjectableFactory } from '@travetto/di';
-
-import { IdentitySource } from '../..';
 
 export class FbUser {
   id: string;
@@ -15,18 +13,16 @@ export const SIMPLE_AUTH = Symbol.for('simple-auth');
 export class AppConfig {
 
   @InjectableFactory()
-  static principalSource(): PrincipalSource {
-    return new class implements PrincipalSource {
-      async authorize(ident: Identity) {
-        return new AuthContext(ident, ident);
-      }
+  static principalSource(): Authorizer {
+    return new class implements Authorizer {
+      authorize(p: Principal) { return p; }
     }();
   }
 
   @InjectableFactory(SIMPLE_AUTH)
-  static facebookPassport(): IdentitySource {
+  static facebookPassport(): Authenticator {
     return {
-      async authenticate(req, res) {
+      async authenticate(user) {
         return {
           id: '5',
           expires: TimeUtil.withAge(1, 'm'),

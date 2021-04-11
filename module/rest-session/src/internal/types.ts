@@ -5,8 +5,6 @@ import { ContextProvider } from '@travetto/rest/src/decorator/param';
  */
 export const SessionSym = Symbol.for('@trv:rest-session/self');
 
-export class SessionProviderTarget { }
-
 /**
  * Session data, will basically be a key/value map
  */

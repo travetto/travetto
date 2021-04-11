@@ -1,6 +1,9 @@
 import { ControllerRegistry } from '@travetto/rest';
 import { AppError } from '@travetto/base';
 import { AuthUtil } from '@travetto/auth';
+import { DependencyRegistry } from '@travetto/di';
+
+import { AuthService } from './service';
 
 /**
  * Authenticate an endpoint with a list of available identity sources
@@ -9,7 +12,10 @@ import { AuthUtil } from '@travetto/auth';
  */
 export function Authenticate(source: symbol, ...sources: symbol[]) {
   const computed = [source, ...sources];
-  return ControllerRegistry.createFilterDecorator(req => req.login(computed));
+  return ControllerRegistry.createFilterDecorator(async (req, res) => {
+    const svc = await DependencyRegistry.getInstance(AuthService);
+    return svc.login(req, res, computed);
+  });
 }
 
 /**
@@ -19,12 +25,12 @@ export function Authenticate(source: symbol, ...sources: symbol[]) {
  * @augments `@trv:auth/Authenticated`
  */
 export function Authenticated(include: string[] = [], exclude: string[] = []) {
-  const checker = AuthUtil.permissionSetChecker(include, exclude);
+  const { check } = AuthUtil.permissionChecker(include, exclude);
 
   return ControllerRegistry.createFilterDecorator((req, res) => {
-    if (!req.auth || !req.auth.principal) {
+    if (!req.auth) {
       throw new AppError('User is unauthenticated', 'authentication');
-    } else if (!checker(req.auth.permissionSet)) {
+    } else if (!check(new Set(req.auth.permissions ?? []))) {
       throw new AppError('Access denied', 'permissions');
     }
   });
@@ -36,7 +42,7 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
  */
 export function Unauthenticated() {
   return ControllerRegistry.createFilterDecorator(req => {
-    if (req.auth && req.auth.principal) {
+    if (req.auth) {
       throw new AppError('User is authenticated', 'authentication');
     }
   });

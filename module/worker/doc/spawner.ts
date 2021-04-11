@@ -1,4 +1,4 @@
-import { WorkPool, WorkUtil, IterableInputSource } from '@travetto/worker';
+import { WorkPool, WorkUtil, IterableWorkSet } from '@travetto/worker';
 import { ExecUtil, PathUtil } from '@travetto/boot';
 
 export function main() {
@@ -21,5 +21,5 @@ export function main() {
     )
   );
 
-  return pool.process(new IterableInputSource([1, 2, 3, 4, 5])).then(x => pool.shutdown());
+  return pool.process(new IterableWorkSet([1, 2, 3, 4, 5])).then(x => pool.shutdown());
 }

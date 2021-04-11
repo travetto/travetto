@@ -1,6 +1,6 @@
 // @file-if @travetto/auth-rest
-import { AuthContext } from '@travetto/auth';
-import { AuthContextEncoder } from '@travetto/auth-rest';
+import { Principal } from '@travetto/auth';
+import { PrincipalEncoder } from '@travetto/auth-rest';
 import { Response, Request } from '@travetto/rest';
 import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 
@@ -10,7 +10,7 @@ import { verify } from '../verify';
 /**
  * Auth context store via JWT
  */
-export class JWTAuthContextEncoder implements AuthContextEncoder {
+export class JWTAuthContextEncoder implements PrincipalEncoder {
 
   #accessor: ValueAccessor;
   #signingKey: string;
@@ -38,26 +38,27 @@ export class JWTAuthContextEncoder implements AuthContextEncoder {
   /**
    * Write context
    */
-  async encode(req: Request, res: Response, ctx: AuthContext) {
-    if (ctx) {
-      const expires = ctx.principal.expiresAt || new Date(Date.now() + (1000 * 60 * 60 * 24 * 365));
-      const body: Pick<AuthContext, 'identity' | 'principal'> & { exp: number } = {
-        ...ctx, exp: Math.trunc(expires.getTime() / 1000)
+  async encode(req: Request, res: Response, p: Principal | undefined) {
+    if (p) {
+      const expires = p.expiresAt || new Date(Date.now() + (1000 * 60 * 60 * 24 * 365));
+      const body = {
+        ...p, exp: Math.trunc(expires.getTime() / 1000)
       };
-      body.principal.permissions = [...ctx.principal.permissions];
+      if (p.permissions) {
+        body.permissions = [...p.permissions];
+      }
       const token = await sign(body, { key: this.#signingKey });
       this.#accessor.writeValue(res, token, { expires });
     }
   }
 
   /**
-   * Read JWT from location
+   * Read JWT from request
    */
   async decode(req: Request) {
     const input = this.#accessor.readValue(req);
     if (input) {
-      const ac = await verify<AuthContext>(input!, { key: this.#signingKey });
-      return new AuthContext(ac.identity, ac.principal);
+      return await verify<Principal>(input!, { key: this.#signingKey });
     }
   }
 }

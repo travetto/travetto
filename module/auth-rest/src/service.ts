@@ -1,27 +1,26 @@
 import { AppError, Class } from '@travetto/base';
 import { Request, Response } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { AuthContext } from '@travetto/auth/src/context';
-import { PrincipalSource } from '@travetto/auth';
-
-import { IdentitySource } from './identity';
-import { IdentitySourceTarget } from './internal/types';
+import { Principal, Authorizer, Authenticator } from '@travetto/auth';
+import { AuthenticatorTarget } from '@travetto/auth/src/internal/types';
 
 /**
  * Auth service to allow for rest-based interaction
  */
 @Injectable()
 export class AuthService {
-  identitySources = new Map<string, IdentitySource>();
+  #authenticators = new Map<string, Authenticator>();
 
   @Inject()
-  principalSource?: PrincipalSource;
+  authorizer?: Authorizer;
 
   async postConstruct() {
     // Find all identity sources
-    for (const source of DependencyRegistry.getCandidateTypes<IdentitySource>(IdentitySourceTarget as unknown as Class<IdentitySource>)) {
-      const dep = await DependencyRegistry.getInstance<IdentitySource>(IdentitySourceTarget, source.qualifier);
-      this.identitySources.set(source.qualifier.toString(), dep);
+    for (const source of DependencyRegistry.getCandidateTypes<Authenticator>(
+      AuthenticatorTarget as unknown as Class<Authenticator>
+    )) {
+      const dep = await DependencyRegistry.getInstance<Authenticator>(AuthenticatorTarget, source.qualifier);
+      this.#authenticators.set(source.qualifier.toString(), dep);
     }
   }
 
@@ -29,26 +28,25 @@ export class AuthService {
    * Login user via the request. Supports multi-step login.
    * @param req The travetto request
    * @param res The travetto response
-   * @param identitySources List of valid identity sources
+   * @param authenticators List of valid identity sources
    */
-  async login(req: Request, res: Response, identitySources: symbol[]): Promise<AuthContext | undefined> {
+  async login(req: Request, res: Response, authenticators: symbol[]): Promise<Principal | undefined> {
     let lastError: Error | undefined;
 
     /**
      * Attempt to check login with multiple identity sources
      */
-    for (const source of identitySources) {
+    for (const auth of authenticators) {
       try {
-        const idp = this.identitySources.get(source.toString())!;
-        const ident = await idp.authenticate(req, res);
-        if (ident) { // Multi-step login process
-          if (this.principalSource) {
-            return await this.principalSource.authorize(ident);
-          } else {
-            return new AuthContext(ident, ident);
-          }
-        } else {
+        const idp = this.#authenticators.get(auth.toString())!;
+        const principal = await idp.authenticate(req.body, { req, res });
+        if (!principal) { // Multi-step login process
           return;
+        }
+        if (this.authorizer) {
+          return await this.authorizer.authorize(principal);
+        } else {
+          return principal;
         }
       } catch (e) {
         lastError = e;
@@ -56,12 +54,16 @@ export class AuthService {
     }
 
     if (lastError) {
-      console.warn('Failed to authenticate', { error: lastError, sources: identitySources.map(x => x.toString()) });
+      console.warn('Failed to authenticate', { error: lastError, sources: authenticators.map(x => x.toString()) });
     }
 
     // Take the last error and return
     const err = new AppError('Unable to authenticate', 'authentication');
     err.stack = lastError?.stack ?? err.stack;
     throw err;
+  }
+
+  async logout(req: Request) {
+    delete req.auth;
   }
 }

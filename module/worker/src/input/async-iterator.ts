@@ -1,30 +1,30 @@
 import { Util } from '@travetto/base';
 
 /**
- * Dynamic async iterator.  Supports ability to add new work dynamically
+ * Dynamic async iterator.  Supports ability to add new items dynamically
  */
 export class DynamicAsyncIterator<X> implements AsyncIterator<X> {
 
-  queue: X[] = [];
-  done = false;
-  ready = Util.resolvablePromise();
+  #queue: X[] = [];
+  #done = false;
+  #ready = Util.resolvablePromise();
 
   /**
    * Initial set of items
    */
   constructor(initial: Iterable<X> = []) {
-    this.queue.push(...initial);
+    this.#queue.push(...initial);
   }
 
   /**
    * Wait for next event to fire
    */
   async next() {
-    if (!this.done && !this.queue.length) {
-      await this.ready;
-      this.ready = Util.resolvablePromise();
+    if (!this.#done && !this.#queue.length) {
+      await this.#ready;
+      this.#ready = Util.resolvablePromise();
     }
-    return { value: (this.queue.length ? this.queue.shift() : undefined)!, done: this.done };
+    return { value: (this.#queue.length ? this.#queue.shift() : undefined)!, done: this.#done };
   }
 
   /**
@@ -34,18 +34,18 @@ export class DynamicAsyncIterator<X> implements AsyncIterator<X> {
   add(item: X | X[], immediate = false) {
     item = Array.isArray(item) ? item : [item];
     if (!immediate) {
-      this.queue.push(...item);
+      this.#queue.push(...item);
     } else {
-      this.queue.unshift(...item);
+      this.#queue.unshift(...item);
     }
-    this.ready.resolve();
+    this.#ready.resolve();
   }
 
   /**
    * Close the iterator
    */
   close() {
-    this.done = true;
-    this.ready.resolve();
+    this.#done = true;
+    this.#ready.resolve();
   }
 }

@@ -1,10 +1,10 @@
-import { Response, Request } from '@travetto/rest';
 import { AppError } from '@travetto/base';
-import { IdentitySource } from '@travetto/auth-rest';
+import { Authenticator } from '@travetto/auth';
 
-export class SimpleIdentitySource implements IdentitySource {
-  async authenticate(req: Request, res: Response) {
-    const { username, password } = req.body;
+type User = { username: string, password: string };
+
+export class SimpleAuthenticator implements Authenticator<User>{
+  async authenticate({ username, password }: User) {
     if (username === 'test' && password === 'test') {
       return {
         id: 'test',

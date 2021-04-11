@@ -1,5 +1,5 @@
 import { ExecUtil, ExecutionState } from '@travetto/boot';
-import { Worker, WorkPool, IterableInputSource, DynamicAsyncIterator } from '@travetto/worker';
+import { Worker, WorkPool, IterableWorkSet, DynamicAsyncIterator } from '@travetto/worker';
 
 class ImageProcessor implements Worker<string> {
   active = false;
@@ -34,7 +34,7 @@ export class ImageCompressor extends WorkPool<string, ImageProcessor> {
   }
 
   begin() {
-    this.process(new IterableInputSource(this.pendingImages));
+    this.process(new IterableWorkSet(this.pendingImages));
   }
 
   convert(...images: string[]) {

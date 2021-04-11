@@ -3,7 +3,7 @@ import * as gp from 'generic-pool';
 
 import { ShutdownManager } from '@travetto/base';
 
-import { InputSource } from './input/types';
+import { WorkSet } from './input/types';
 
 /**
  * Worker definition
@@ -57,7 +57,7 @@ export class WorkPool<X, T extends Worker<X>> {
 
     // Create the pool
     this.#pool = gp.createPool({
-      create: () => this.createAndTrack(getWorker, args),
+      create: () => this.#createAndTrack(getWorker, args),
       destroy: x => this.destroy(x),
       validate: async (x: T) => x.active
     }, args);
@@ -68,7 +68,7 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Creates and tracks new worker
    */
-  async createAndTrack(getWorker: () => Promise<T> | T, opts: gp.Options) {
+  async #createAndTrack(getWorker: () => Promise<T> | T, opts: gp.Options) {
     try {
       this.#pendingAcquires += 1;
       const res = await getWorker();
@@ -121,7 +121,7 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Process a given input source
    */
-  async process(src: InputSource<X>) {
+  async process(src: WorkSet<X>) {
     const pending = new Set<Promise<unknown>>();
 
     while (await src.hasNext()) {

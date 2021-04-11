@@ -1,12 +1,12 @@
 import { d, lib, mod } from '@travetto/doc';
 import { InjectableFactory } from '@travetto/di';
 import { Context } from '@travetto/rest';
-import { AuthContext } from '@travetto/auth/src/context';
 
 import { AuthService } from './src/service';
 import { Authenticate, Unauthenticated, Authenticated } from './src/decorator';
-import { PassportIdentitySource } from './src/extension/passport/identity';
+import { PassportAuthenticator } from './src/extension/passport/authenticator';
 
+const Principal = d.SnippetLink('Principal', '@travetto/auth/src/types.ts', /interface Principal/);
 const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/types.d.ts', /interface TravettoRequest/);
 const Response = d.SnippetLink('TravettoResponse', '@travetto/rest/src/types.d.ts', /interface TravettoResponse/);
 const Identity = d.SnippetLink('Identity', '@travetto/auth/src/types.ts', /interface Identity/);
@@ -64,7 +64,7 @@ ${Authenticate} provides middleware that will authenticate the user as defined b
 
 ${d.Code('Using provider with routes', 'doc/route.ts')}
 
-${Authenticated} and ${Unauthenticated} will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, ${AuthContext} is accessible via ${Context} directly, without wiring in a request object, but is also accessible on the request object as ${Request}.auth.
+${Authenticated} and ${Unauthenticated} will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the ${Principal} is accessible via ${Context} directly, without wiring in a request object, but is also accessible on the request object as ${Request}.auth.
 
 ${d.Section('Passport - Extension')}
 
@@ -72,7 +72,7 @@ Within the node ecosystem, the most prevalent auth framework is ${lib.Passport}.
 
 ${d.Code('Sample Facebook/passport config', 'doc/passport/conf.ts')}
 
-As you can see, ${PassportIdentitySource} will take care of the majority of the work, and all that is required is:
+As you can see, ${PassportAuthenticator} will take care of the majority of the work, and all that is required is:
 ${d.List(
   'Provide the name of the strategy (should be unique)',
   d`Provide the strategy instance. ${d.Note('you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework')}`,

@@ -4,7 +4,7 @@ import '@travetto/model';
 
 import { Session } from '.';
 import { StatelessSessionProvider } from './src/provider/stateless';
-import { ModelSessionProvider } from './src/extension/model';
+import { ModelSessionProvider } from './src/model';
 
 const Request = d.SnippetLink('TravettoRequest', 'src/types.d.ts', /interface TravettoRequest/);
 const SessionData = d.SnippetLink('SessionData', 'src/types.ts', /interface SessionData/);

@@ -8,8 +8,7 @@ import { AuthInterceptor } from '../../interceptor';
 
 type Handler = (req: Request, res: Response, next: Function) => unknown;
 
-// @ts-expect-error
-const authenticator = (passport as passport.Authenticator<Handler>);
+const authenticator = (passport as unknown as passport.Authenticator<Handler>);
 
 /**
  * Passport rest interceptor

@@ -22,11 +22,11 @@ ${d.List(
   d`${mod.ModelSql} @travetto/model-sql`,
 )}
 
-The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a ${d.SnippetLink('RegisteredIdentity', './src/identity.ts', /interface RegisteredIdentity/)}
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a ${d.SnippetLink('RegisteredPrincipal', './src/princicpal.ts', /interface RegisteredPrincipal/)}
 
-A registered identity extends the base concept of an identity, by adding in additional fields needed for local registration, specifically password management information.
+A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 
-${d.Snippet('Registered Identity', 'src/identity.ts', /interface RegisteredIdentity/, /^[}]/)}
+${d.Snippet('Registered Principal', 'src/princicpal.ts', /interface RegisteredPrincipal/, /^[}]/)}
 
 ${d.Code('A valid user model', 'doc/model.ts')}
 

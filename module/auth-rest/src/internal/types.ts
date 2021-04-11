@@ -1,2 +1,1 @@
-export class AuthContextEncoderTarget { }
-export class IdentitySourceTarget { }
+export class PrincipalEncoderTarget { }

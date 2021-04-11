@@ -3,30 +3,32 @@ import * as assert from 'assert';
 import { Controller, Get, Post, Redirect, Request, Response } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/test-support/base';
 import { Suite, Test } from '@travetto/test';
-import { Injectable, InjectableFactory } from '@travetto/di';
+import { Inject, Injectable, InjectableFactory } from '@travetto/di';
 import { AppError } from '@travetto/base';
-import { AuthContext } from '@travetto/auth/src/context';
+import { Authenticator, Principal } from '@travetto/auth';
 
 import { Authenticate, Authenticated } from '../src/decorator';
-import { IdentitySource } from '../src/identity';
-import { AuthContextEncoder } from '../src/encoder';
+import { PrincipalEncoder } from '../src/encoder';
+import { AuthService } from '../src/service';
 
 const TestAuthSym = Symbol.for('TEST_AUTH');
 
 @Injectable({
   primary: true
 })
-class AuthorizationEncoder implements AuthContextEncoder {
-  async encode(req: Request, res: Response, ctx: AuthContext) {
-    const value = JSON.stringify({ principal: ctx.principal, identity: ctx.identity });
-    res.setHeader('Authorization', Buffer.from(value).toString('base64'));
+class AuthorizationEncoder implements PrincipalEncoder {
+  async encode(req: Request, res: Response, p: Principal | undefined) {
+    if (p) {
+      const value = JSON.stringify(p);
+      res.setHeader('Authorization', Buffer.from(value).toString('base64'));
+    }
   }
   async decode(req: Request) {
     try {
       if (req.headers.authorization) {
-        const config = JSON.parse(Buffer.from(req.headers.authorization as string, 'base64').toString('utf8'));
-        if (config.identity && config.principal) {
-          return new AuthContext(config.identity, config.principal);
+        const p = JSON.parse(Buffer.from(req.headers.authorization as string, 'base64').toString('utf8'));
+        if (p) {
+          return p;
         }
       }
     } catch { }
@@ -35,7 +37,7 @@ class AuthorizationEncoder implements AuthContextEncoder {
 
 class Config {
   @InjectableFactory(TestAuthSym)
-  static getAuthenticator(): IdentitySource {
+  static getAuthenticator(): Authenticator {
     return {
       async authenticate(req: Request) {
         if (req.body.username === 'super-user' && req.body.password === 'password') {
@@ -55,6 +57,9 @@ class Config {
 @Controller('/test/auth')
 class TestAuthController {
 
+  @Inject()
+  svc: AuthService;
+
   @Post('/login')
   @Authenticate(TestAuthSym)
   async simpleLogin() {
@@ -63,13 +68,13 @@ class TestAuthController {
   @Get('/self')
   @Authenticated()
   async getSelf(req: Request) {
-    return req.auth?.principal;
+    return req.auth;
   }
 
   @Get('/logout')
   @Authenticated()
   async logout(req: Request) {
-    await req.logout();
+    await this.svc.logout(req);
     return new Redirect('/auth/self', 301);
   }
 }
@@ -80,7 +85,7 @@ class TestAuthAllController {
 
   @Get('/self')
   async getSelf(req: Request) {
-    return req.auth?.principal;
+    return req.auth;
   }
 }
 

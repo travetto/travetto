@@ -1,4 +1,4 @@
-import { InputSource } from './types';
+import { WorkSet } from './types';
 
 type Itr<T> = Iterator<T> | AsyncIterator<T>;
 
@@ -8,7 +8,7 @@ const hasItr = (o: unknown): o is Iterable<unknown> => !!o && Symbol.iterator in
 /**
  * Basic input source given an iterable input
  */
-export class IterableInputSource<X> implements InputSource<X> {
+export class IterableWorkSet<X> implements WorkSet<X> {
 
   #src: Itr<X>;
   #ondeck?: X;

@@ -1,6 +1,6 @@
 import { AppError } from '@travetto/base';
 import { Injectable, Inject } from '@travetto/di';
-import { ModelPrincipalSource } from '@travetto/auth-model';
+import { ModelAuthService } from '@travetto/auth-model';
 
 import { User } from './model';
 
@@ -8,11 +8,11 @@ import { User } from './model';
 class UserService {
 
   @Inject()
-  private auth: ModelPrincipalSource<User>;
+  private auth: ModelAuthService<User>;
 
   async authenticate(identity: User) {
     try {
-      return await this.auth.authenticate(identity.id, identity.password!);
+      return await this.auth.authenticate(identity);
     } catch (err) {
       if (err instanceof AppError && err.category === 'notfound') {
         return await this.auth.register(identity);
