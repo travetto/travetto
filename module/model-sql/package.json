@@ -40,7 +40,7 @@
     "@types/mysql": "^2.15.18",
     "@types/pg": "^7.14.11",
     "mysql": "^2.18.1",
-    "pg": "^8.5.1"
+    "pg": "^8.6.0"
   },
   "publishConfig": {
     "access": "public"

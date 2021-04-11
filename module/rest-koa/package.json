@@ -29,7 +29,7 @@
     "@types/koa": "^2.13.1",
     "@types/co-body": "^5.1.0",
     "@types/koa-compress": "^4.0.1",
-    "@types/koa-router": "^7.4.1",
+    "@types/koa-router": "^7.4.2",
     "koa": "^2.13.1",
     "co-body": "^6.1.0",
     "koa-compress": "^5.0.1",

@@ -40,7 +40,7 @@
     "foundation-emails": "^2.3.1",
     "html-entities": "^2.3.2",
     "inline-css": "^3.0.0",
-    "sass": "^1.32.8",
+    "sass": "^1.32.10",
     "parse5": "^6.0.1"
   },
   "optionalPeerDependencies": {
