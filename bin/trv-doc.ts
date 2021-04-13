@@ -67,27 +67,26 @@ const markdownPage = (mod: string) =>
           env: process.env
         }
       })
-        .then((val) => {
-          return html
-            .$read()
-            .$collect()
-            .$map(contents => {
-              const content = contents.join('\n').replace(/href="[^"]+@travetto\/([^.]+)"/g, (_, attr, ref) => `href="/docs/${ref}"`)
-                .replace(/^src="images\//g, `src="/assets/images/${pkg._.mod}/`)
-                .replace(/href="https?:\/\/travetto.dev\//g, _ => `href="/`)
-                .replace(
-                  !['todo-app', 'overview'].includes(pkg._.mod) ? /<h1>([\n\r]|.)*/m : '##',
-                  t => `<div class="documentation">\n${t}\n</div>\n`
-                )
-                .replace(
-                  ['vscode-plugin'].includes(pkg._.mod) ? /src="https:\/\/travetto.dev\/assets/g : '##',
-                  t => `src="/assets`
-                );
-              return content;
-            })
-            .$writeFinal(html)
-            , () => console.log(`${pkg.name}... failed`)
-        });
+        .then(() => html
+          .$read()
+          .$collect()
+          .$map(contents => {
+            const content = contents.join('\n').replace(/href="[^"]+@travetto\/([^.]+)"/g, (_, attr, ref) => `href="/docs/${ref}"`)
+              .replace(/^src="images\//g, `src="/assets/images/${pkg._.mod}/`)
+              .replace(/href="https?:\/\/travetto.dev\//g, _ => 'href="/')
+              .replace(
+                !['todo-app', 'overview'].includes(pkg._.mod) ? /<h1>([\n\r]|.)*/m : '##',
+                t => `<div class="documentation">\n${t}\n</div>\n`
+              )
+              .replace(
+                ['vscode-plugin'].includes(pkg._.mod) ? /src="https:\/\/travetto.dev\/assets/g : '##',
+                t => 'src="/assets'
+              );
+            return content;
+          })
+          .$writeFinal(html)
+        )
+        .catch(() => console.log(`${pkg.name}... failed`));
     }, { concurrent: 4 })
 ]
   .$forEach(() => { });

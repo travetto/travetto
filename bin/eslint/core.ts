@@ -146,7 +146,8 @@ export = {
     files: ['doc.ts'],
     rules: {
       'max-len': 'off',
-      '@typescript-eslint/indent': 'off'
+      '@typescript-eslint/quotes': 'warn',
+      '@typescript-eslint/indent': 'off',
     }
   }]
 };

@@ -58,7 +58,7 @@ export interface RenderContextShape {
    * Get a consistent anchor id
    */
   getAnchorId(a: string): string;
-};
+}
 
 /**
  * Renderer support

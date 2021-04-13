@@ -2,7 +2,7 @@ import { AllType, node as n } from '../nodes';
 import { DocNode, Renderer } from '../types';
 import { AllChildren, RenderContext } from './context';
 
-const titleCase = (a: string) => a.replace(/^[a-z]/, a => a.toUpperCase());
+const titleCase = (a: string) => a.replace(/^[a-z]/, v => v.toUpperCase());
 
 export const Markdown: Renderer = {
   ext: 'md',

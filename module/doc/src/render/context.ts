@@ -3,7 +3,7 @@ import * as path from 'path';
 import { PathUtil, FsUtil, Package, EnvUtil } from '@travetto/boot/src';
 
 import { AllType, AllTypeMap, node as n } from '../nodes';
-import { DocNode, RenderContextShape, Renderer, Wrapper } from '../types';
+import { DocNode, RenderContextShape } from '../types';
 
 export type AllChildren = AllType;
 
@@ -27,7 +27,7 @@ export class RenderContext implements RenderContextShape {
   }
 
   get travettoGitBaseUrl() {
-    return this.#repoUrl.includes('travetto/travetto') ? this.gitBaseUrl : `https://github.com/travetto/travetto/master`;
+    return this.#repoUrl.includes('travetto/travetto') ? this.gitBaseUrl : 'https://github.com/travetto/travetto/master';
   }
 
   get gitFolder() {
@@ -73,4 +73,4 @@ export class RenderContext implements RenderContextShape {
   getAnchorId(a: string) {
     return a.toLowerCase().replace(/<[^>]+>/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim().replace(/ /g, '-');
   }
-};
+}

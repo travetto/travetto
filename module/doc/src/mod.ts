@@ -1,4 +1,3 @@
-import { PathUtil } from '@travetto/boot/src';
 import { AllTypeMap, node } from './nodes';
 
 const MAPPING = {

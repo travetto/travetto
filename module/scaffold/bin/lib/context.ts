@@ -9,8 +9,8 @@ import { Feature } from './features';
 
 export class Context {
 
-  static #finalize(path: string) {
-    return path.replace('gitignore.txt', '.gitignore')
+  static #finalize(pth: string) {
+    return pth.replace('gitignore.txt', '.gitignore')
       .replace('package.json.txt', 'package.json');
   }
 
