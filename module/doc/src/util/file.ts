@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { AppCache, FsUtil, PathUtil } from '@travetto/boot';
+import { FsUtil, PathUtil } from '@travetto/boot';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 
@@ -20,8 +20,8 @@ export class FileUtil {
 
   /**
    * Resolve file
-   * @param file 
-   * @returns 
+   * @param file
+   * @returns
    */
   static resolveFile(file: string) {
     if (!FsUtil.existsSync(PathUtil.resolveUnix(file))) {
@@ -33,9 +33,9 @@ export class FileUtil {
 
   /**
    * Read file
-   * 
-   * @param file 
-   * @returns 
+   *
+   * @param file
+   * @returns
    */
   static read(file: string) {
     const { resolved, cleaned } = this.resolveFile(file);
@@ -92,7 +92,7 @@ export class FileUtil {
 
   /**
    * Clean code snippet
-   * @returns 
+   * @returns
    */
   static buildOutline(code: string) {
     let methodPrefix = '';

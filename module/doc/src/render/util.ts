@@ -19,9 +19,9 @@ export class RenderUtil {
 
   /**
    * Render content of file and format
-   * @param file 
-   * @param fmt 
-   * @returns 
+   * @param file
+   * @param fmt
+   * @returns
    */
   static async render(file: string, fmt: string = Markdown.ext) {
     fmt = fmt.replace(/^[.]/, ''); // Strip leading .

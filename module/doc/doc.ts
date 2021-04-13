@@ -3,12 +3,12 @@ import * as fs from 'fs';
 import { d } from './src/doc';
 import { lib } from '.';
 
-type Feature = { text: string, name: string }
+type Feature = { text: string, name: string };
 
 function getNodes() {
   const lines = fs.readFileSync('./src/nodes.ts', 'utf8').split(/\n/g);
   let feature: Partial<Feature> | undefined;
-  let features: Feature[] = [];
+  const features: Feature[] = [];
   for (const line of lines) {
     if (/^\s+\/[*]/.test(line)) { // block start
       feature = {};
@@ -31,7 +31,7 @@ ${d.Header()}
 
 This module provides the ability to generate documentation in ${lib.HTML} and/or ${lib.Markdown}.  The module relies on integrating with the source of the project, and providing a fully referenced code-base.  This allows for automatic updates when code is changed and/or refactored. 
 
-${d.Code('Document Sample', './docs/sample.ts')}
+${d.Code('Document Sample', './docs/sample/doc.ts')}
 
 ${d.Snippet('Document Context', './src/types.ts', /interface DocumentShape/, /^}/)}
 
@@ -60,7 +60,5 @@ ${d.Execute('CLI Doc Help', 'trv', ['doc', '--help'])}
 
 By default, running the command will output the ${lib.Markdown} content directly to the terminal.
 
-${d.Execute('Sample CLI Output', 'trv', ['doc', '-i', 'docs/sample.ts', '-f', 'html'])}
-
-
+${d.Execute('Sample CLI Output', 'trv', ['doc', '-i', 'docs/sample/doc.ts', '-f', 'html'])}
 `;

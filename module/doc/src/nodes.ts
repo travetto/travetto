@@ -14,7 +14,6 @@ function $c(val: string | DocNode | undefined): DocNode | undefined {
 }
 const $n = <T extends string, U extends Record<string, unknown>>(t: T, vals: U) => ({ _type: t, ...vals } as { _type: T } & U);
 
-
 /**
  * All Node Types
  */
@@ -39,106 +38,106 @@ export const node = {
 
   /**
    * Simple Text Content
-   * @param text 
+   * @param text
    */
   Text: (text: string) => ({ _type: 'text' as const, content: text }),
 
   /**
    * Strong Content
-   * @param content 
+   * @param content
    */
   Strong: (content: Content) => $n('strong', { content: $c(content) }),
   /**
    * Group of content nodes
-   * @param node 
+   * @param items
    */
-  Group: (node: DocNode | DocNode[]) => $n('group', { nodes: [node].flat() }),
+  Group: (items: DocNode | DocNode[]) => $n('group', { nodes: [items].flat() }),
   /**
    * Method declaration
-   * @param content 
+   * @param content
    */
   Method: (content: Content) => $n('method', { content: $c(content) }),
   /**
    * Command invocation
-   * @param script 
-   * @param args 
+   * @param script
+   * @param args
    */
   Command: (script: Content, ...args: Content[]) => $n('command', { content: $c([script, ...args].join(' ')) }),
   /**
    * Terminal output
-   * @param title 
-   * @param script 
+   * @param title
+   * @param script
    */
   Terminal: (title: Content, script: Content) => $n('terminal', { title: $c(title), content: $c(script), language: 'bash' }),
   /**
    * Input text
-   * @param content 
+   * @param content
    */
   Input: (content: Content) => $n('input', { content: $c(content) }),
   /**
    * Path reference
-   * @param content 
+   * @param content
    */
   Path: (content: Content) => $n('path', { content: $c(content) }),
   /**
    * Class reference
-   * @param content 
+   * @param content
    */
   Class: (content: Content) => $n('class', { content: $c(content) }),
   /**
    * Field reference
-   * @param content 
+   * @param content
    */
   Field: (content: Content) => $n('field', { content: $c(content) }),
   /**
    * Primary Section
-   * @param content 
+   * @param content
    */
   Section: (title: Content) => $n('section', { title: $c(title) }),
   /**
    * Sub-section
-   * @param content 
+   * @param content
    */
   SubSection: (title: Content) => $n('subsection', { title: $c(title) }),
   /**
    * Library reference
-   * @param content 
+   * @param content
    */
   Library: (title: Content, link: Content) => $n('library', { title: $c(title), link: $c(link) }),
   /**
    * In page anchor reference
-   * @param title 
-   * @param fragment 
+   * @param title
+   * @param fragment
    */
   Anchor: (title: Content, fragment: Content) => $n('anchor', { title: $c(title), fragment: $c(fragment) }),
   /**
    * A note
-   * @param content 
+   * @param content
    */
   Note: (content: Content) => $n('note', { content: $c(content) }),
   /**
    * List item
-   * @param node 
-   * @param ordered 
+   * @param item
+   * @param ordered
    */
-  Item: (node: DocNode, ordered = false) => $n('item', { node, ordered }),
+  Item: (item: DocNode, ordered = false) => $n('item', { node: item, ordered }),
   /**
    * Raw Doc Header
-   * @param title 
-   * @param description 
+   * @param title
+   * @param description
    */
   RawHeader: (title: Content, description?: string) => $n('header', { title: $c(title), description: $c(description) }),
   /**
    * Table Of Contents
-   * @param title 
+   * @param title
    */
   TableOfContents: (title: Content) => $n('toc', { title: $c(title) }),
 
   /**
    * Link to a snippet of code, including line number
-   * @param title 
-   * @param file 
-   * @param startPattern 
+   * @param title
+   * @param file
+   * @param startPattern
    */
   SnippetLink: (title: Content, file: string, startPattern: RegExp) => {
     const res = ResolveUtil.resolveSnippetLink(file, startPattern);
@@ -147,10 +146,10 @@ export const node = {
 
   /**
    * Run a command, and include the output as part of the document
-   * @param title 
-   * @param cmd 
-   * @param args 
-   * @param cfg 
+   * @param title
+   * @param cmd
+   * @param args
+   * @param cfg
    */
   Execute: (title: Content, cmd: string, args: string[] = [], cfg: RunConfig = {}) => {
     if (cmd !== 'trv') {
@@ -166,7 +165,7 @@ export const node = {
 
   /**
    * Node Module Reference
-   * @param folder 
+   * @param folder
    */
   Mod(folder: string) {
     folder = PathUtil.resolveFrameworkPath(PathUtil.resolveUnix('node_modules', folder));
@@ -177,8 +176,8 @@ export const node = {
 
   /**
    * File reference
-   * @param title 
-   * @param file 
+   * @param title
+   * @param file
    */
   Ref: (title: Content, file: string) => {
     const res = ResolveUtil.resolveRef(title, file);
@@ -187,10 +186,10 @@ export const node = {
 
   /**
    * Code sample
-   * @param title 
-   * @param content 
-   * @param outline 
-   * @param language 
+   * @param title
+   * @param content
+   * @param outline
+   * @param language
    */
   Code: (title: Content, content: Content, outline = false, language = 'typescript') => {
     const res = ResolveUtil.resolveCode(content, language, outline);
@@ -199,9 +198,9 @@ export const node = {
 
   /**
    * Configuration Block
-   * @param title 
-   * @param content 
-   * @param language 
+   * @param title
+   * @param content
+   * @param language
    */
   Config: (title: Content, content: Content, language = 'yaml') => {
     const res = ResolveUtil.resolveConfig(content, language);
@@ -210,29 +209,26 @@ export const node = {
 
   /**
    * Standard header
-   * @param install 
-   * @param pkg 
+   * @param install
+   * @param pkg
    */
-  Header: (install = true, pkg = Package) => {
-    return $n('header', { title: $c(pkg.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });
-  },
+  Header: (install = true, pkg = Package) =>
+    $n('header', { title: $c(pkg.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install }),
 
   /**
    * Comment
-   * @param text 
-   * @returns 
+   * @param text
+   * @returns
    */
-  Comment: (text: string) => {
-    return $n('comment', { text: $c(text) });
-  },
+  Comment: (text: string) => $n('comment', { text: $c(text) }),
 
   /**
    * Code Snippet
-   * @param title 
-   * @param file 
-   * @param startPattern 
-   * @param endPattern 
-   * @param outline 
+   * @param title
+   * @param file
+   * @param startPattern
+   * @param endPattern
+   * @param outline
    */
   Snippet: (title: Content, file: string, startPattern: RegExp, endPattern?: RegExp, outline?: boolean) => {
     const res = ResolveUtil.resolveSnippet(file, startPattern, endPattern, outline);
@@ -244,8 +240,8 @@ export const node = {
 
   /**
    * NPM Installation
-   * @param title 
-   * @param pkg 
+   * @param title
+   * @param pkg
    */
   Install: (title: Content, pkg: Content) => {
     pkg = typeof pkg === 'string' && !pkg.includes(' ') ? `npm install ${pkg}` : pkg;
@@ -254,20 +250,20 @@ export const node = {
 
   /**
    * Standard List
-   * @param items 
+   * @param items
    */
   List: (...items: Content[]) => node.buildList(items),
 
   /**
    * Ordered List
-   * @param items 
+   * @param items
    */
   Ordered: (...items: Content[]) => node.buildList(items, true),
 
   /**
    * Table
-   * @param headers 
-   * @param rows 
+   * @param headers
+   * @param rows
    */
   Table: (headers: Content[], ...rows: Content[][]) =>
     $n('table', {
@@ -279,8 +275,8 @@ export const node = {
 
   /**
    * Image reference
-   * @param title 
-   * @param file 
+   * @param title
+   * @param file
    */
   Image: (title: Content, file: string) => {
     if (!/^https?:/.test(file) && !FsUtil.existsSync(file)) {
@@ -288,7 +284,7 @@ export const node = {
     }
     return $n('image', { title: $c(title), link: $c(file) });
   }
-}
+};
 
 type NodeType = typeof node;
 

@@ -53,7 +53,7 @@ ${d.List(
   d`${Integer} ensures number passed in is only a whole number`,
   d`${Float} ensures number passed in allows fractional values`,
   d`${Currency} provides support for standard currency`,
-  d`${d.Text} indicates that a field is expecting natural language input, not just discrete values`,
+  d`${Text} indicates that a field is expecting natural language input, not just discrete values`,
   d`${LongText} same as text, but expects longer form content`,
 )}
 

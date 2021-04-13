@@ -1,4 +1,4 @@
-import { FsUtil, PathUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 import { FileUtil } from './file';
 
 /**

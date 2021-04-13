@@ -77,7 +77,7 @@ ${d.List(
 ${d.SubSection('Geo Point Fields')}
 ${d.List(
   d`${d.Input('field: { $geoWithin: Point[] }')} determines if the value is within the bounding region of the points`,
-  d`${d.Input(`field: { $near: Point, $maxDistance: number, $unit: 'km' | 'm' | 'mi' | 'ft' }`)} searches at a point, and looks out radially`,
+  d`${d.Input(d`field: { $near: Point, $maxDistance: number, $unit: 'km' | 'm' | 'mi' | 'ft' }`)} searches at a point, and looks out radially`,
 )}
 
 ${d.SubSection('Groupings')}
@@ -120,7 +120,7 @@ ${d.Code('Query language with more complex needs',
 
 ${d.SubSection('Regular Expression')}
 
-When querying with regular expressions,patterns can be specified as ${d.Input(`'strings'`)} or as ${d.Input('/patterns/')}.  The latter allows for the case insensitive modifier: ${d.Input('/pattern/i')}.  Supporting the insensitive flag is up to the underlying model implementation.
+When querying with regular expressions,patterns can be specified as ${d.Input('\'strings\'')} or as ${d.Input('/patterns/')}.  The latter allows for the case insensitive modifier: ${d.Input('/pattern/i')}.  Supporting the insensitive flag is up to the underlying model implementation.
 
 ${d.Section('Custom Model Query Service')}
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
