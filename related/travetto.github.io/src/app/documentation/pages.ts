@@ -30,7 +30,6 @@ import { CommandComponent } from './gen/command/command.component';
 import { WorkerComponent } from './gen/worker/worker.component';
 import { WatchComponent } from './gen/watch/watch.component';
 import { AssetRestComponent } from './gen/asset-rest/asset-rest.component';
-import { AuthModelComponent } from './gen/auth-model/auth-model.component';
 import { AuthRestComponent } from './gen/auth-rest/auth-rest.component';
 import { JwtComponent } from './gen/jwt/jwt.component';
 import { EmailTemplateComponent } from './gen/email-template/email-template.component';
@@ -83,7 +82,6 @@ export const PAGES = [
   },
   {
     path: 'auth', title: 'Auth', component: AuthComponent, subs: [
-      { path: 'auth-model', title: 'Model', component: AuthModelComponent },
       { path: 'auth-rest', title: 'Rest', component: AuthRestComponent },
       { path: 'jwt', title: 'JWT', component: JwtComponent }
     ]

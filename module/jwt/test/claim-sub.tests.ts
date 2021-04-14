@@ -3,6 +3,7 @@ import * as assert from 'assert';
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 
 import { JWTUtil } from '..';
+import { JWTError } from '../src/error';
 
 @Suite('subject')
 class SuiteTest {
@@ -10,7 +11,7 @@ class SuiteTest {
   @Test('should verify with a string "subject"')
   async testVerify() {
     const token = await JWTUtil.create({ sub: 'foo' }, { alg: 'none' });
-    const decoded = JWTUtil.read(token);
+    const { payload: decoded } = JWTUtil.read(token);
     const verified = await JWTUtil.verify(token, { alg: 'none', payload: { sub: 'foo' } });
     assert.deepStrictEqual(decoded, verified);
     assert(decoded.sub === 'foo');
@@ -19,7 +20,7 @@ class SuiteTest {
   @Test('should verify with a string "sub"')
   async testVerify2() {
     const token = await JWTUtil.create({ sub: 'foo' }, { alg: 'none' });
-    const decoded = JWTUtil.read(token);
+    const { payload: decoded } = JWTUtil.read(token);
     const verified = await JWTUtil.verify(token, { alg: 'none', payload: { sub: 'foo' } });
     assert.deepStrictEqual(decoded, verified);
     assert(decoded.sub === 'foo');
@@ -28,7 +29,7 @@ class SuiteTest {
   @Test('should not verify "sub" if "verify.subject" option not provided')
   async tetVerify3() {
     const token = await JWTUtil.create({ sub: 'foo' }, { alg: 'none' });
-    const decoded = JWTUtil.read(token);
+    const { payload: decoded } = JWTUtil.read(token);
     const verified = await JWTUtil.verify(token, { alg: 'none' });
     assert.deepStrictEqual(decoded, verified);
     assert(decoded.sub === 'foo');

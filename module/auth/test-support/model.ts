@@ -1,3 +1,4 @@
+// @file-if @travetto/model
 import * as assert from 'assert';
 
 import { AppError, Class } from '@travetto/base';
@@ -9,7 +10,7 @@ import { ModelSuite } from '@travetto/model/test-support/suite';
 
 import { ModelAuthService, RegisteredPrincipal } from '..';
 
-export const TestModelSvcSym = Symbol.for('@trv:auth-model/test-model-svc');
+export const TestModelSvcSym = Symbol.for('@trv:auth/test-model-svc');
 
 @Model({ autoCreate: false })
 class User extends BaseModel implements RegisteredPrincipal {

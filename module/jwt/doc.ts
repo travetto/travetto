@@ -8,7 +8,6 @@ This module is a simple component to support ${lib.JWT} signing and verification
 The API exposes:
 
 ${d.Snippet('Signing Options', 'src/types.ts', /export.*SignOptions/, /^[}]/)}
-${d.Snippet('Signing API', 'src/sign.ts', /export.*function sign/)}
 ${d.Snippet('Verify Options', 'src/types.ts', /export.*VerifyOptions/, /^[}]/)}
-${d.Snippet('Verify API', 'src/verify.ts', /export.*function verify/)}
+${d.Snippet('API', 'src/util.ts', /export.*class JWTUtil/)}
 `;

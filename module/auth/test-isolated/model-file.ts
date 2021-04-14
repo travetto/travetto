@@ -2,7 +2,7 @@ import { InjectableFactory } from '@travetto/di';
 import { FileModelConfig, FileModelService } from '@travetto/model';
 import { Suite } from '@travetto/test';
 
-import { AuthModelServiceSuite, TestModelSvcSym } from '../../test-support/service';
+import { AuthModelServiceSuite, TestModelSvcSym } from '../test-support/model';
 
 class Init {
   @InjectableFactory(TestModelSvcSym)

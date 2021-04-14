@@ -1,9 +1,8 @@
 import { Model, BaseModel } from '@travetto/model';
-import { RegisteredIdentity } from '@travetto/auth-model';
+import { RegisteredPrincipal } from '@travetto/auth';
 
 @Model()
-export class User extends BaseModel implements RegisteredIdentity {
-  id: string;
+export class User extends BaseModel implements RegisteredPrincipal {
   source: string;
   details: Record<string, unknown>;
   password?: string;
