@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 
-import * as jwt from '..';
+import { JWTUtil, JWTError } from '..';
 
 const key = 'shhhhhh';
 
@@ -11,33 +11,33 @@ class AsyncSignTest {
 
   @Test('should work with empty options')
   async testEmptyOptions() {
-    await jwt.sign({ abc: 1 }, { key: 'secret' });
+    await JWTUtil.create({ abc: 1 }, { key: 'secret' });
   }
 
   @Test('should work with none algorithm where secret is set')
   async testAlgoNone() {
-    const token = await jwt.sign({ foo: 'bar' }, { key: 'secret', alg: 'none' });
+    const token = await JWTUtil.create({ foo: 'bar' }, { key: 'secret', alg: 'none' });
     assert(typeof token === 'string');
     assert(token.split('.').length === 3);
   }
 
   @Test('should return error when secret is not a cert for RS256')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testCert() {
-    await jwt.sign({ foo: 'bar' }, { key, alg: 'RS256' });
+    await JWTUtil.create({ foo: 'bar' }, { key, alg: 'RS256' });
   }
 
   @Test('should return error on wrong arguments')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testBadArgs() {
     // this throw an error because the secret is not a cert and RS256 requires a cert.
-    await jwt.sign({ foo: 'bar', nbf: -1 }, { key, alg: 'RS256' });
+    await JWTUtil.create({ foo: 'bar', nbf: -1 }, { key, alg: 'RS256' });
   }
 
   @Test('should not apply claims to the original payload object (mutatePayload defaults to false)')
   async testClaimsImmutable() {
     const originalPayload: Record<string, unknown> = { foo: 'bar' };
-    await jwt.sign({ ...originalPayload, nbf: 60, exp: 600 }, { key });
+    await JWTUtil.create({ ...originalPayload, nbf: 60, exp: 600 }, { key });
     assert(originalPayload.nbf === undefined);
     assert(originalPayload.exp === undefined);
   }

@@ -1,7 +1,8 @@
 import * as assert from 'assert';
 import { Suite, Test, ShouldThrow, BeforeEach } from '@travetto/test';
 
-import * as jwt from '..';
+import { JWTUtil } from '..';
+import { JWTError } from '../src/error';
 
 @Suite('Audience - Signing with a string for aud')
 class AudSignStringSuite {
@@ -9,13 +10,13 @@ class AudSignStringSuite {
 
   @BeforeEach()
   async init() {
-    this.#token = await jwt.sign({ aud: 'urn:foo' }, { alg: 'none' });
+    this.#token = await JWTUtil.create({ aud: 'urn:foo' }, { alg: 'none' });
   }
 
   @Test('should verify and decode without verify "audience" option')
   async testDecodeVerifyWithout() {
-    const decoded = jwt.decode(this.#token);
-    const verified = await jwt.verify(this.#token);
+    const { payload: decoded } = JWTUtil.read(this.#token);
+    const verified = await JWTUtil.verify(this.#token);
 
     assert.deepEqual(decoded, verified);
     assert(decoded.aud === 'urn:foo');
@@ -23,45 +24,45 @@ class AudSignStringSuite {
 
   @Test('should verify with a string "verify.audience" option')
   async testAudStringOption() {
-    assert(await jwt.verify(this.#token, { payload: { aud: 'urn:foo' } }));
+    assert(await JWTUtil.verify(this.#token, { payload: { aud: 'urn:foo' } }));
   }
 
   @Test('should verify with an array of strings "verify.audience" option')
   async testAudStrings() {
-    assert(await jwt.verify(this.#token, { payload: { aud: ['urn:no_match', 'urn:foo'] } }));
+    assert(await JWTUtil.verify(this.#token, { payload: { aud: ['urn:no_match', 'urn:foo'] } }));
   }
 
   @Test('should verify with a Regex "verify.audience" option')
   async testRegex() {
-    assert(await jwt.verify(this.#token, { payload: { aud: /^urn:f[o]{2}$/ } }));
+    assert(await JWTUtil.verify(this.#token, { payload: { aud: /^urn:f[o]{2}$/ } }));
   }
 
   @Test('should verify with an array of Regex "verify.audience" option')
   async testRegexArray() {
-    assert(await jwt.verify(this.#token, { payload: { aud: [/^urn:no_match$/, /^urn:f[o]{2}$/] } }));
+    assert(await JWTUtil.verify(this.#token, { payload: { aud: [/^urn:no_match$/, /^urn:f[o]{2}$/] } }));
   }
 
   @Test('should verify with an array containing a string and a Regex "verify.audience" option')
   async testMix() {
-    assert(await jwt.verify(this.#token, { payload: { aud: ['urn:no_match', /^urn:f[o]{2}$/] } }));
+    assert(await JWTUtil.verify(this.#token, { payload: { aud: ['urn:no_match', /^urn:f[o]{2}$/] } }));
   }
 
   @Test('invalid audience')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testInvalidAud() {
-    await jwt.verify(this.#token, { payload: { aud: 'urn:no-match' } });
+    await JWTUtil.verify(this.#token, { payload: { aud: 'urn:no-match' } });
   }
 
   @Test('should error on no match with an array of string "verify.audience" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testInvalidArray() {
-    await jwt.verify(this.#token, { payload: { aud: ['urn:no-match-1', 'urn:no-match-2'] } });
+    await JWTUtil.verify(this.#token, { payload: { aud: ['urn:no-match-1', 'urn:no-match-2'] } });
   }
 
   @Test('should error on no match with a Regex "verify.audience" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testInvalidRegex() {
-    await jwt.verify(this.#token, { payload: { aud: /^urn:no-match$/ } });
+    await JWTUtil.verify(this.#token, { payload: { aud: /^urn:no-match$/ } });
   }
 }
 
@@ -71,57 +72,57 @@ class AudSignStringArraySuite {
 
   @BeforeEach()
   async init() {
-    this.#token = await jwt.sign({ aud: ['urn:foo', 'urn:bar'] }, { alg: 'none' });
+    this.#token = await JWTUtil.create({ aud: ['urn:foo', 'urn:bar'] }, { alg: 'none' });
   }
 
   @Test('should verify and decode without verify "audience" option')
   async testSingle() {
-    const decoded = jwt.decode(this.#token);
-    const verified = await jwt.verify(this.#token, { alg: 'none' });
+    const { payload: decoded } = JWTUtil.read(this.#token);
+    const verified = await JWTUtil.verify(this.#token, { alg: 'none' });
 
     assert.deepEqual(decoded, verified);
     assert(decoded.aud === ['urn:foo', 'urn:bar']);
   }
 
   @Test('should error on no match with a string "verify.audience" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testNoMatch() {
-    await jwt.verify(this.#token, { payload: { aud: 'urn:no-match' } });
+    await JWTUtil.verify(this.#token, { payload: { aud: 'urn:no-match' } });
   }
 
   @Test('should error on no match with an array of string "verify.audience" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testArray() {
-    await jwt.verify(this.#token, {
+    await JWTUtil.verify(this.#token, {
       payload: { aud: ['urn:no-match-1', 'urn:no-match-2'] }
     });
   }
 
   @Test('should error on no match with a Regex "verify.audience" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testRegex() {
-    await jwt.verify(this.#token, {
+    await JWTUtil.verify(this.#token, {
       payload: { aud: /^urn:no-match$/ }
     });
   }
 
   @Test('should verify with an array of stings "verify.audience" option')
   async testMultiMatch() {
-    await jwt.verify(this.#token, {
+    await JWTUtil.verify(this.#token, {
       payload: { aud: ['urn:foo', 'urn:bar'] }
     });
   }
 
   @Test('should verify with a Regex "verify.audience" option')
   async testMulti() {
-    await jwt.verify(this.#token, {
+    await JWTUtil.verify(this.#token, {
       payload: { aud: /^urn:[a-z]{3}$/ }
     });
   }
 
   @Test('should verify with an array of Regex "verify.audience" option')
   async testMultiArray() {
-    await jwt.verify(this.#token, {
+    await JWTUtil.verify(this.#token, {
       payload: {
         aud: [/^urn:f[o]{2}$/, /^urn:b[ar]{2}$/]
       }
@@ -135,22 +136,22 @@ class AudSignEmptySuite {
 
   @BeforeEach()
   async init() {
-    this.#token = await jwt.sign({}, { alg: 'none' });
+    this.#token = await JWTUtil.create({}, { alg: 'none' });
   }
 
   @Test('should verify and decode without verify "audience" option')
   async testDecodeWithout() {
-    const decoded = jwt.decode(this.#token);
-    const verified = await jwt.verify(this.#token);
+    const { payload: decoded } = JWTUtil.read(this.#token);
+    const verified = await JWTUtil.verify(this.#token);
 
     assert.deepEqual(decoded, verified);
     assert(decoded.aud === undefined);
   }
 
   @Test('should error on no match with a string "verify.audience" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testString() {
-    await jwt.verify(this.#token, {
+    await JWTUtil.verify(this.#token, {
       payload: {
         aud: 'urn:no-match'
       }
@@ -158,9 +159,9 @@ class AudSignEmptySuite {
   }
 
   @Test('should error on no match with an array of string "verify.audience" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async test() {
-    await jwt.verify(this.#token, {
+    await JWTUtil.verify(this.#token, {
       payload: {
         aud: ['urn:no-match-1', 'urn:no-match-2']
       }
@@ -168,9 +169,9 @@ class AudSignEmptySuite {
   }
 
   @Test('should error on no match with a Regex "verify.audience" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testSingle() {
-    await jwt.verify(this.#token, {
+    await JWTUtil.verify(this.#token, {
       payload: {
         aud: /^urn:no-match$/
       }
@@ -178,9 +179,9 @@ class AudSignEmptySuite {
   }
 
   @Test('should error on no match with an array of a Regex and a string in "verify.audience" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async testNoMatch() {
-    await jwt.verify(this.#token, {
+    await JWTUtil.verify(this.#token, {
       payload: {
         aud: [/^urn:no-match$/, 'urn:no-match']
       }

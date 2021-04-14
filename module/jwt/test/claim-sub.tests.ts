@@ -2,49 +2,49 @@ import * as assert from 'assert';
 
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 
-import * as jwt from '..';
+import { JWTUtil } from '..';
 
 @Suite('subject')
 class SuiteTest {
 
   @Test('should verify with a string "subject"')
   async testVerify() {
-    const token = await jwt.sign({ sub: 'foo' }, { alg: 'none' });
-    const decoded = jwt.decode(token);
-    const verified = await jwt.verify(token, { alg: 'none', payload: { sub: 'foo' } });
+    const token = await JWTUtil.create({ sub: 'foo' }, { alg: 'none' });
+    const decoded = JWTUtil.read(token);
+    const verified = await JWTUtil.verify(token, { alg: 'none', payload: { sub: 'foo' } });
     assert.deepStrictEqual(decoded, verified);
     assert(decoded.sub === 'foo');
   }
 
   @Test('should verify with a string "sub"')
   async testVerify2() {
-    const token = await jwt.sign({ sub: 'foo' }, { alg: 'none' });
-    const decoded = jwt.decode(token);
-    const verified = await jwt.verify(token, { alg: 'none', payload: { sub: 'foo' } });
+    const token = await JWTUtil.create({ sub: 'foo' }, { alg: 'none' });
+    const decoded = JWTUtil.read(token);
+    const verified = await JWTUtil.verify(token, { alg: 'none', payload: { sub: 'foo' } });
     assert.deepStrictEqual(decoded, verified);
     assert(decoded.sub === 'foo');
   }
 
   @Test('should not verify "sub" if "verify.subject" option not provided')
   async tetVerify3() {
-    const token = await jwt.sign({ sub: 'foo' }, { alg: 'none' });
-    const decoded = jwt.decode(token);
-    const verified = await jwt.verify(token, { alg: 'none' });
+    const token = await JWTUtil.create({ sub: 'foo' }, { alg: 'none' });
+    const decoded = JWTUtil.read(token);
+    const verified = await JWTUtil.verify(token, { alg: 'none' });
     assert.deepStrictEqual(decoded, verified);
     assert(decoded.sub === 'foo');
   }
 
   @Test('should error if "sub" does not match "verify.subject" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async matchSub() {
-    const token = await jwt.sign({ sub: 'foo' });
-    await jwt.verify(token, { payload: { sub: 'bar' } });
+    const token = await JWTUtil.create({ sub: 'foo' });
+    await JWTUtil.verify(token, { payload: { sub: 'bar' } });
   }
 
   @Test('should error without "sub" and with "verify.subject" option')
-  @ShouldThrow(jwt.JWTError)
+  @ShouldThrow(JWTError)
   async errorOnMissing() {
-    const token = await jwt.sign({});
-    await jwt.verify(token, { payload: { sub: 'foo' } });
+    const token = await JWTUtil.create({});
+    await JWTUtil.verify(token, { payload: { sub: 'foo' } });
   }
 }

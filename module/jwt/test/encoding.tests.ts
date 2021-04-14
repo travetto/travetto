@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import * as jwt from '..';
+import { JWTUtil } from '..';
 
 function atob(str: string) {
   return Buffer.from(str, 'base64').toString('binary');
@@ -17,7 +17,7 @@ class EncodingTest {
   @Test('should properly encode the token (utf8)')
   async testUTF8() {
     const expected = 'José';
-    const token = await jwt.sign({ name: expected }, { key: 'shhhhh' });
+    const token = await JWTUtil.create({ name: expected }, { key: 'shhhhh' });
     const decodedName = JSON.parse(base64toUtf8(token.split('.')[1])).name;
     assert(decodedName === expected);
   }
@@ -25,7 +25,7 @@ class EncodingTest {
   @Test('should properly encode the token (binary)')
   async tesBinary() {
     const expected = 'José';
-    const token = await jwt.sign({ name: expected }, { key: 'shhhhh', encoding: 'binary' });
+    const token = await JWTUtil.create({ name: expected }, { key: 'shhhhh', encoding: 'binary' });
     const decodedName = JSON.parse(atob(token.split('.')[1])).name;
     assert(decodedName === expected);
   }
@@ -34,9 +34,9 @@ class EncodingTest {
   async decoding() {
     const username = '測試';
 
-    const token = await jwt.sign({ username }, { key: 'test' });
+    const token = await JWTUtil.create({ username }, { key: 'test' });
 
-    const payload = await jwt.verify(token, { key: 'test' });
+    const payload = await JWTUtil.verify(token, { key: 'test' });
 
     assert(payload.username === username);
   }

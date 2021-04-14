@@ -4,7 +4,8 @@ import * as assert from 'assert';
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 
-import * as jwt from '..';
+import { JWTUtil } from '..';
+import { JWTError } from '../src/error';
 
 @Suite('verify')
 class VerifySuite {
@@ -22,7 +23,7 @@ class VerifySuite {
       encoding: 'utf8'
     });
 
-    const res = await jwt.verify(signed, { key: pub, alg: 'RS256' });
+    const res = await JWTUtil.verify(signed, { key: pub, alg: 'RS256' });
     assert.deepEqual(res, payload);
   }
 
@@ -38,7 +39,7 @@ class VerifySuite {
       encoding: 'utf8'
     });
 
-    const p = await jwt.verify(signed, { alg: 'none' });
+    const p = await JWTUtil.verify(signed, { alg: 'none' });
     assert.deepEqual(p, payload);
   }
 
@@ -55,10 +56,8 @@ class VerifySuite {
       encoding: 'utf8'
     });
 
-    const options: jwt.VerifyOptions = {
-      alg: 'none'
-    };
-    await jwt.verify(signed, options);
+    const options = { alg: 'none' } as const;
+    await JWTUtil.verify(signed, options);
     assert.deepEqual(Object.keys(options).length, 1);
   }
 
@@ -68,16 +67,16 @@ class VerifySuite {
     const key = 'key';
 
     const payload = { foo: 'bar', iat: 1437018582, exp: 1437018592 };
-    const options: jwt.VerifyOptions = { alg: 'HS256', ignore: { exp: true }, key };
+    const options = { alg: 'HS256', ignore: { exp: true }, key } as const;
 
-    const p = await jwt.verify(token, options);
+    const p = await JWTUtil.verify(token, options);
     assert.deepEqual(p, payload);
 
-    const p2 = await jwt.verify(token, { ...options, key: Promise.resolve(key) });
+    const p2 = await JWTUtil.verify(token, { ...options, key: Promise.resolve(key) });
     assert.deepEqual(p2, payload);
 
     await assert.rejects(
-      () => jwt.verify(token, { ...options, key: Promise.reject('key not found') }),
+      () => JWTUtil.verify(token, { ...options, key: Promise.reject('key not found') }),
       'key not found');
   }
 }
@@ -91,11 +90,11 @@ class VerifyExpirationSuite {
   @Test('should error on expired token')
   async verifyExpired() {
     // clock = sinon.useFakeTimers(1437018650000); // iat + 58s, exp + 48s
-    const options: jwt.VerifyOptions = { key: this.key, alg: 'HS256' };
+    const options = { key: this.key, alg: 'HS256' } as const;
     try {
-      await jwt.verify(this.token, options);
+      await JWTUtil.verify(this.token, options);
     } catch (err) {
-      assert(err instanceof jwt.JWTError);
+      assert(err instanceof JWTError);
       assert(err.message === 'Token is expired');
       assert(!!err.payload);
       assert(!!err.payload.expiredAt);
@@ -106,9 +105,9 @@ class VerifyExpirationSuite {
   @Test('should not error on expired token within clockTolerance interval')
   async verifyTolerance() {
     // clock = sinon.useFakeTimers(1437018594000); // iat + 12s, exp + 2s
-    const options: jwt.VerifyOptions = { key: this.key, alg: ['HS256'], clock: { timestamp: new Date(1437018594000), tolerance: 5 } };
+    const options = { key: this.key, alg: 'HS256', clock: { timestamp: new Date(1437018594000), tolerance: 5 } } as const;
 
-    const res = await jwt.verify(this.token, options);
+    const res = await JWTUtil.verify(this.token, options);
     assert(res.foo === 'bar');
   }
 
@@ -118,16 +117,16 @@ class VerifyExpirationSuite {
   @Test('clockTimestamp - should verify unexpired token relative to user-provided clockTimestamp')
   async testStampValid() {
     const clockTimestamp = 1000000000;
-    const token = await jwt.sign({ foo: 'bar', iat: clockTimestamp, exp: clockTimestamp + 1 }, { key: this.key });
-    await jwt.verify(token, { key: this.key, clock: { timestamp: clockTimestamp } });
+    const token = await JWTUtil.create({ foo: 'bar', iat: clockTimestamp, exp: clockTimestamp + 1 }, { key: this.key });
+    await JWTUtil.verify(token, { key: this.key, clock: { timestamp: clockTimestamp } });
   }
 
   @Test('clockTimestamp - should error on expired token relative to user-provided clockTimestamp')
   @ShouldThrow('expired')
   async testStampInvalid() {
     const clockTimestamp = 10000000000;
-    const token = await jwt.sign({ foo: 'bar', iat: clockTimestamp + 1, exp: 1 }, { key: this.key });
-    await jwt.verify(token, { key: this.key, clock: { timestamp: clockTimestamp } });
+    const token = await JWTUtil.create({ foo: 'bar', iat: clockTimestamp + 1, exp: 1 }, { key: this.key });
+    await JWTUtil.verify(token, { key: this.key, clock: { timestamp: clockTimestamp } });
   }
 
   @Test('option: maxAge and clockTimestamp')
@@ -135,17 +134,17 @@ class VerifyExpirationSuite {
     // { foo: 'bar', iat: 1437018582, exp: 1437018800 } exp = iat + 218s
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE0MzcwMTg1ODIsImV4cCI6MTQzNzAxODgwMH0.AVOsNC7TiT-XVSpCpkwB1240izzCIJ33Lp07gjnXVpA';
     const clockTimestamp = 1437018900;  // iat + 318s (exp: iat + 218s)
-    const options: jwt.VerifyOptions = {
+    const options = {
       key: this.key, alg: 'HS256', clock: { timestamp: clockTimestamp }, maxAgeSec: 60 * 60 * 24 * 365 * 1000
-    };
+    } as const;
 
     try {
-      await jwt.verify(token, options);
+      await JWTUtil.verify(token, options);
     } catch (err) {
       // maxAge not exceeded, but still expired
-      assert(err instanceof jwt.JWTError);
+      assert(err instanceof JWTError);
       assert(err.message === 'Token is expired');
-      assert(+err.payload!.expiredAt === 1437018800000);
+      assert(+(err.payload as { expiredAt: string }).expiredAt === 1437018800000);
     }
   }
 }
