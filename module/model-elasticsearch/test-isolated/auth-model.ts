@@ -1,8 +1,7 @@
-// @file-if @travetto/auth-model
-
+// @file-if @travetto/auth
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcSym } from '@travetto/auth-model/test-support/service';
+import { AuthModelServiceSuite, TestModelSvcSym } from '@travetto/auth/test-support/model';
 
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
 

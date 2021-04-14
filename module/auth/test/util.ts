@@ -21,4 +21,17 @@ export class UtilTest {
     assert(checker3(new Set(['a'])) === true);
     assert(checker3(new Set([])) === true);
   }
+
+  @Test()
+  async testHash() {
+    const hash = AuthUtil.generateHash('hello', 'test', 100, 20);
+    assert((await hash).length === 20);
+  }
+
+  @Test()
+  async testPassword() {
+    const { hash, salt } = await AuthUtil.generatePassword('hello', 32);
+    assert(salt.length === 32);
+    assert(hash !== 'hello');
+  }
 }

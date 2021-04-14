@@ -1,6 +1,6 @@
 /**
  * A user principal, including permissions and details
- * 
+ *
  * @concrete ./internal/types:PrincipalTarget
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,6 +17,10 @@ export interface Principal<D = any> {
    * Date of issuance
    */
   issuedAt?: Date;
+  /**
+   * Max age in seconds a principal is valid
+   */
+  maxAge?: number;
   /**
    * The source of the issuance
    */
@@ -39,7 +43,7 @@ export interface Principal<D = any> {
 export interface Authorizer<P extends Principal = Principal> {
   /**
    * Authorize inbound principal, verifying it's permission to access the system.
-   * @param principal 
+   * @param principal
    * @returns New principal that conforms to the required principal shape
    */
   authorize(principal: Principal): Promise<P> | P;
@@ -51,7 +55,6 @@ export interface Authorizer<P extends Principal = Principal> {
  * @concrete ./internal/types:AuthenticatorTarget
  */
 export interface Authenticator<T = unknown, P extends Principal = Principal, C = unknown> {
-
   /**
    * Verify the payload, verifying the payload is correctly identified.
    * @returns Valid principal if authenticated

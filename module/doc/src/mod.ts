@@ -5,7 +5,6 @@ const MAPPING = {
   Asset: '@travetto/asset',
   AssetRest: '@travetto/asset-rest',
   Auth: '@travetto/auth',
-  AuthModel: '@travetto/auth-model',
   AuthRest: '@travetto/auth-rest',
   Base: '@travetto/base',
   Boot: '@travetto/boot',

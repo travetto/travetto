@@ -23,7 +23,7 @@ All ${mod.Model} implementations, must honor the BasicCrud contract to be able t
 ${d.Snippet('Basic Contract', './src/service/basic.ts', /export interface ModelBasic/, /^}/)}
 
 ${d.SubSection(Links.Crud)}
-The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  ${mod.AuthModel}, is an example of a module that only needs create, read and delete, and so any implementation of ${mod.Model} that honors this contract, can be used with the ${mod.AuthModel}.
+The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in ${mod.Auth}, is an example of a module that only needs create, read and delete, and so any implementation of ${mod.Model} that honors this contract, can be used with the ${mod.Auth} model extension.
 
 ${d.Snippet('Crud Contract', './src/service/crud.ts', /export interface ModelCrud/, /^}/)}
 

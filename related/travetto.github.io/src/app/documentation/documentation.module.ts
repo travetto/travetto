@@ -10,7 +10,6 @@ import { VSCodePluginComponent } from './vscode-plugin/vscode-plugin.component';
 import { AssetComponent } from './gen/asset/asset.component';
 import { AssetRestComponent } from './gen/asset-rest/asset-rest.component';
 import { AuthComponent } from './gen/auth/auth.component';
-import { AuthModelComponent } from './gen/auth-model/auth-model.component';
 import { AuthRestComponent } from './gen/auth-rest/auth-rest.component';
 import { BaseComponent } from './gen/base/base.component';
 import { CompilerComponent } from './gen/compiler/compiler.component';
@@ -77,7 +76,6 @@ import { ModelQueryComponent } from './gen/model-query/model-query.component';
     AssetComponent,
     AssetRestComponent,
     AuthComponent,
-    AuthModelComponent,
     AuthRestComponent,
     BaseComponent,
     CompilerComponent,
