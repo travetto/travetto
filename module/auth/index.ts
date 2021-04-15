@@ -1,5 +1,8 @@
 export * from './src/util';
-export * from './src/types';
+export * from './src/types/authenticator';
+export * from './src/types/authorizer';
+export * from './src/types/serializer';
+export * from './src/types/principal';
 
 // Named export needed for proxying
-export * from './src/extension/model';
+export { ModelAuthService, RegisteredPrincipal } from './src/extension/model';

@@ -1,5 +1,6 @@
 import { RestInterceptor, Request, Response, ContextProvider } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
+import { Principal } from '@travetto/auth';
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
 import { PrincipalEncoder } from './encoder';
@@ -18,11 +19,12 @@ export class AuthInterceptor implements RestInterceptor {
   encoder: PrincipalEncoder;
 
   async intercept(req: Request, res: Response, next: () => Promise<unknown>) {
+    let og: Principal | undefined;
     try {
-      req.auth = await this.encoder.decode(req);
+      og = req.auth = await this.encoder.decode(req);
       return await next();
     } finally {
-      if (req.auth) {
+      if (og !== req.auth || (req.auth && og && og.expiresAt !== req.auth.expiresAt)) { // If it changed
         await this.encoder.encode(req, res, req.auth);
       }
       delete req.auth;

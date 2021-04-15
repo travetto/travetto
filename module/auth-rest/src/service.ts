@@ -9,7 +9,7 @@ import { AuthenticatorTarget } from '@travetto/auth/src/internal/types';
  */
 @Injectable()
 export class AuthService {
-  #authenticators = new Map<string, Authenticator>();
+  #authenticators = new Map<symbol, Authenticator>();
 
   @Inject()
   authorizer?: Authorizer;
@@ -20,7 +20,7 @@ export class AuthService {
       AuthenticatorTarget as unknown as Class<Authenticator>
     )) {
       const dep = await DependencyRegistry.getInstance<Authenticator>(AuthenticatorTarget, source.qualifier);
-      this.#authenticators.set(source.qualifier.toString(), dep);
+      this.#authenticators.set(source.qualifier, dep);
     }
   }
 
@@ -38,16 +38,13 @@ export class AuthService {
      */
     for (const auth of authenticators) {
       try {
-        const idp = this.#authenticators.get(auth.toString())!;
+        const idp = this.#authenticators.get(auth)!;
         const principal = await idp.authenticate(req.body, { req, res });
         if (!principal) { // Multi-step login process
           return;
         }
-        if (this.authorizer) {
-          return await this.authorizer.authorize(principal);
-        } else {
-          return principal;
-        }
+        req.auth = this.authorizer ? await this.authorizer.authorize(principal) : principal;
+        return req.auth;
       } catch (e) {
         lastError = e;
       }
@@ -63,6 +60,9 @@ export class AuthService {
     throw err;
   }
 
+  /**
+   * Log user out
+   */
   async logout(req: Request) {
     delete req.auth;
   }

@@ -1,12 +1,13 @@
 // @file-if @travetto/model
 import { AppError, Util, Class } from '@travetto/base';
 import { ModelCrudSupport, ModelType, NotFoundError } from '@travetto/model';
-import { Authenticator, Authorizer } from '@travetto/auth';
 import { EnvUtil } from '@travetto/boot';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 import { TimeUtil } from '@travetto/base/src/internal/time';
-import { Principal } from '@travetto/auth/src/types';
 
+import { Principal } from '../types/principal';
+import { Authenticator } from '../types/authenticator';
+import { Authorizer } from '../types/authorizer';
 import { AuthUtil } from '../util';
 
 /**

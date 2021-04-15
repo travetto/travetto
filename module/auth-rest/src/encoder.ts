@@ -1,4 +1,4 @@
-import { Principal } from '@travetto/auth/src/types';
+import { Principal } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
 
 /**
@@ -12,10 +12,10 @@ export interface PrincipalEncoder {
    * @param res The travetto response
    * @param p The auth principal
    */
-  encode(req: Request, res: Response, p: Principal | undefined): Promise<void>;
+  encode(req: Request, res: Response, p: Principal | undefined): Promise<void> | void;
   /**
    * Read principal from request
    * @param req The travetto request
    */
-  decode(req: Request): Promise<Principal | undefined>;
+  decode(req: Request): Promise<Principal | undefined> | Principal | undefined;
 }
