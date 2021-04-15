@@ -3,7 +3,8 @@ import * as assert from 'assert';
 import { AppError } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 
-import { Authorizer, Principal } from '../src/types';
+import { Authorizer } from '../src/types/authorizer';
+import { Principal } from '../src/types/principal';
 
 const USERS: Record<string, Principal> = {
   a: {

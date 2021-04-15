@@ -1,15 +1,30 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Util } from '@travetto/base';
-import { AppError } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
 import { isExpirySupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 import { EnvUtil } from '@travetto/boot';
 import { ExpiresAt, Model, ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
+import { Request, Response } from '@travetto/rest';
+import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 
 import { Session } from './session';
 import { SessionConfig } from './config';
 
 export const SessionModelSym = Symbol.for('@trv:rest-session/model');
+
+/**
+ * Symbol for accessing the raw session
+ */
+const SessionSym = Symbol.for('@trv:rest-session/data');
+
+/**
+ * Declare the session on the request
+ */
+declare global {
+  interface TravettoRequest {
+    [SessionSym]: Session;
+  }
+}
 
 @Model({ autoCreate: false })
 export class SessionEntry {
@@ -29,6 +44,8 @@ export class SessionEntry {
 @Injectable()
 export class SessionService {
 
+  #accessor: ValueAccessor;
+
   @Inject()
   config: SessionConfig;
 
@@ -47,13 +64,15 @@ export class SessionService {
         await this.modelService.createModel?.(SessionEntry);
       }
     }
+
+    this.#accessor = new ValueAccessor(this.config.keyName, this.config.transport);
   }
 
   /**
    * Load session by id
    * @returns Session if valid
    */
-  async load(id: string): Promise<Session | undefined> {
+  async #load(id: string): Promise<Session | undefined> {
     try {
       const record = await this.modelService.get(SessionEntry, id);
 
@@ -82,7 +101,7 @@ export class SessionService {
    * @returns null if it needs to be removed
    * @returns undefined if nothing should happen
    */
-  async store(session: Session | undefined): Promise<Session | undefined | null> {
+  async #store(session: Session | undefined): Promise<Session | undefined | null> {
     if (!session) {
       return;
     }
@@ -111,5 +130,39 @@ export class SessionService {
       return null;
     }
   }
-}
 
+  /**
+   * Get or recreate session
+   */
+  ensureCreated(req: Request) {
+    if (!(SessionSym in req) || req[SessionSym].action === 'destroy') {
+      req[SessionSym] = new Session({ action: 'create', data: {} });
+    }
+    return req[SessionSym];
+  }
+
+  /**
+   * Load from request
+   */
+  async readRequest(req: Request) {
+    if (!req[SessionSym]) {
+      const id = req.auth?.details?.sessionId ?? req.auth?.id ?? this.#accessor.readValue(req);
+      if (id) {
+        req[SessionSym] = (await this.#load(id))!;
+      }
+    }
+  }
+
+  /**
+   * Store to response
+   */
+  async writeResponse(req: Request, res: Response) {
+    const value = await this.#store(req[SessionSym]);
+    if (value === null) {
+      // Send updated info only if expiry changed
+      this.#accessor.writeValue(res, null, { expires: new Date() });
+    } else if (value?.isTimeChanged()) {
+      this.#accessor.writeValue(res, value.id, { expires: value.expiresAt });
+    }
+  }
+}

@@ -17,12 +17,12 @@ export class JWTUtil {
 
     payload = { ...(payload as object) } as T;
 
-    const NOW = Math.trunc(Date.now() / 1000);
+    const now = Math.trunc(Date.now() / 1000);
 
     if (options.iatExclude) {
       delete payload.iat;
     } else {
-      payload.iat ??= NOW;
+      payload.iat ??= now;
     }
 
     let privateKey: string | Buffer = '';

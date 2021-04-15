@@ -1,5 +1,5 @@
 import { } from '@travetto/auth';
-import { Authenticator, Authorizer, Principal } from '@travetto/auth/src/types';
+import { Authenticator, Authorizer, Principal } from '@travetto/auth';
 import { TimeUtil } from '@travetto/base/src/internal/time';
 import { InjectableFactory } from '@travetto/di';
 
