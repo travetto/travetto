@@ -4,7 +4,7 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { RestSessionServerSuite } from '@travetto/rest-session/test-support/server';
-import { SessionModelSym, ModelSessionProvider } from '@travetto/rest-session';
+import { SessionModelSym } from '@travetto/rest-session';
 import { ModelSuite } from '@travetto/model/test-support/suite';
 
 import { MongoModelService } from '../src/service';
@@ -14,11 +14,6 @@ class Config {
   @InjectableFactory(SessionModelSym)
   static model(svc: MongoModelService) {
     return svc;
-  }
-
-  @InjectableFactory({ primary: true })
-  static provider() {
-    return new ModelSessionProvider();
   }
 }
 

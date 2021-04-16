@@ -5,16 +5,22 @@ import { Inject, Injectable } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
 import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
+import { Principal } from '@travetto/auth/src/types/principal';
+import { Config } from '@travetto/config';
 
-import { Session } from '../src/session';
-import { SessionConfig } from '../src/config';
-import { SessionProvider } from '../src/provider';
+import { PrincipalEncoder } from '../src/encoder';
+
+@Config('stateless')
+class StatelessEncoderConfig {
+  transport: 'header' | 'cookie' = 'header';
+  keyName = 'secret';
+}
 
 @Injectable()
-export class StatelessSessionProvider implements SessionProvider {
+export class StatelessPrincipalEncoder implements PrincipalEncoder {
 
   @Inject()
-  config: SessionConfig;
+  config: StatelessEncoderConfig;
 
   accessor: ValueAccessor;
 
@@ -22,25 +28,25 @@ export class StatelessSessionProvider implements SessionProvider {
     this.accessor = new ValueAccessor(this.config.keyName, this.config.transport);
   }
 
-  async encode(req: Request, res: Response, session: Session | null): Promise<void> {
-    if (session) {
-      const text = Buffer.from(JSON.stringify(session.toJSON())).toString('base64');
-      this.accessor.writeValue(res, text, { expires: session?.expiresAt });
+  async encode(req: Request, res: Response, principal?: Principal): Promise<void> {
+    if (principal) {
+      const text = Buffer.from(JSON.stringify(principal)).toString('base64');
+      this.accessor.writeValue(res, text, { expires: principal?.expiresAt });
     } else {
       this.accessor.writeValue(res, null, { expires: new Date() });
     }
     return;
   }
 
-  async decode(req: Request): Promise<Session | undefined> {
+  async decode(req: Request): Promise<Principal | undefined> {
     const text = this.accessor.readValue(req);
     if (text) {
       const parsed = JSON.parse(Buffer.from(text, 'base64').toString('utf8'));
-      return new Session({
+      return {
         ...parsed,
         expiresAt: parsed.expiresAt ? new Date(parsed.expiresAt) : parsed.expiresAt,
         issuedAt: parsed.issuedAt ? new Date(parsed.issuedAt) : parsed.issuedAt
-      });
+      };
     }
   }
 }
@@ -51,13 +57,13 @@ export class StatelessSessionProvider implements SessionProvider {
 export class EncoderTest {
 
   @Inject()
-  instance: StatelessSessionProvider;
+  config: StatelessEncoderConfig;
 
   @Inject()
-  config: SessionConfig;
+  instance: PrincipalEncoder;
 
   @Test()
-  async testSessionHeader() {
+  async testHeader() {
     this.config.transport = 'header';
 
     const headers: Record<string, string> = {};
@@ -66,18 +72,18 @@ export class EncoderTest {
       setHeader(key: string, value: string) {
         headers[key] = value;
       }
-    } as Response, new Session({
+    } as Response, {
       id: 'true',
-      data: {
+      details: {
         data: 'hello'
       }
-    }));
+    });
 
     assert(headers[this.config.keyName] !== undefined);
   }
 
   @Test()
-  async testSessionHeaderMissing() {
+  async testHeaderMissing() {
     this.config.transport = 'header';
 
     const headers: Record<string, string> = {};
@@ -86,7 +92,7 @@ export class EncoderTest {
       setHeader(key: string, value: string) {
         headers[key] = value;
       }
-    } as Response, null);
+    } as Response, undefined);
 
     assert(headers[this.config.keyName] === undefined);
   }

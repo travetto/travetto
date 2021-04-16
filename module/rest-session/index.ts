@@ -2,7 +2,8 @@
 
 export * from './src/config';
 export * from './src/interceptor';
-export * from './src/types';
 export * from './src/service';
 export * from './src/session';
-export * from './src/encoder';
+
+// Named exports required for lazy loading
+export { SessionPrincipalEncoder } from './src/extension/auth-rest';

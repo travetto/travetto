@@ -203,6 +203,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       activeInstance.preDestroy();
     }
 
+    this.defaultSymbols.delete(qualifier);
     this.instances.get(classId)!.delete(qualifier);
     this.instancePromises.get(classId)!.delete(qualifier);
     this.classToTarget.get(cls.ᚕid)!.delete(qualifier);

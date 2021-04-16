@@ -1,3 +1,5 @@
+// @file-if @travetto/model
+// @file-if @travetto/di
 import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
 import { Suite } from '@travetto/test';

@@ -9,6 +9,7 @@ import { Principal } from '../src/types/principal';
 const USERS: Record<string, Principal> = {
   a: {
     id: 'a',
+    issuer: 'none',
     permissions: ['1', '2', '3'],
     details: {}
   }

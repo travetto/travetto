@@ -16,11 +16,16 @@ async function run(isolated = false) {
   return Git.yieldChangedPackges()
     .$filter(async p => !isolated || !!(await FsUtil.exists(`${p._.folder}/test-isolated`)))
     .$parallel(async p => {
-      const args = ['test', '-f', 'exec', ...(isolated ? ['-i'] : ['-c', '1'])];
+      const args = ['test', '-f', 'exec', ...(isolated ? ['-i'] : ['-c', '3'])];
       const { process: proc, result } = ExecUtil.spawn('trv', args, { cwd: p._.folder, stdio: [0, 'pipe', 2, 'ipc'] });
+
       proc.on('message', ev => consumer.onEvent(ev));
+      proc.on('error', e => {
+        console.error(e);
+        proc.kill('SIGTERM');
+      });
       await result;
-    }, { concurrent: isolated ? 1 : 6 }).then(x => consumer.summarizeAsBoolean());
+    }, { concurrent: isolated ? 1 : 4 }).then(x => consumer.summarizeAsBoolean());
 }
 
 run(/^true|1|yes|on$/.test(process.argv[2]));
