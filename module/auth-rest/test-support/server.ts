@@ -37,8 +37,8 @@ class Config {
   @InjectableFactory(TestAuthSym)
   static getAuthenticator(): Authenticator {
     return {
-      async authenticate(req: Request) {
-        if (req.body.username === 'super-user' && req.body.password === 'password') {
+      async authenticate(body: { username?: string, password?: string }) {
+        if (body.username === 'super-user' && body.password === 'password') {
           return {
             id: '5',
             details: { name: 'Billy' },

@@ -64,6 +64,6 @@ export class AuthService {
    * Log user out
    */
   async logout(req: Request) {
-    delete req.auth;
+    req.auth = undefined;
   }
 }
