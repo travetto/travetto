@@ -27,7 +27,7 @@ export class AuthInterceptor implements RestInterceptor {
       if (og !== req.auth || (req.auth && og && og.expiresAt !== req.auth.expiresAt)) { // If it changed
         await this.encoder.encode(req, res, req.auth);
       }
-      delete req.auth;
+      req.auth = undefined;
     }
   }
 }

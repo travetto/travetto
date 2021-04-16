@@ -56,7 +56,7 @@ export class AsyncContext {
   set(key: string | symbol, val: unknown): void;
   set(val: Ctx): void;
   set(keyOrVal: string | symbol | Ctx, valWithKey?: unknown) {
-    if (valWithKey) {
+    if (typeof keyOrVal === 'string' || typeof keyOrVal === 'symbol') {
       this.get()[keyOrVal as string] = valWithKey;
     } else {
       this.#store(keyOrVal as Ctx);
