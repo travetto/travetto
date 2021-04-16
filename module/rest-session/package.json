@@ -26,12 +26,12 @@
     "directory": "module/rest-session"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^2.0.0-alpha.4",
     "@travetto/config": "^2.0.0-alpha.2",
+    "@travetto/model": "^2.0.0-alpha.3",
     "@travetto/rest": "^2.0.0-alpha.4"
   },
   "optionalPeerDependencies": {
-    "@travetto/model": "^2.0.0-alpha.3"
+    "@travetto/auth-rest": "^2.0.0-alpha.4"
   },
   "publishConfig": {
     "access": "public"

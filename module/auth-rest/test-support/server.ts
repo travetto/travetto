@@ -13,9 +13,7 @@ import { AuthService } from '../src/service';
 
 const TestAuthSym = Symbol.for('TEST_AUTH');
 
-@Injectable({
-  primary: true
-})
+@Injectable({ primary: true })
 class AuthorizationEncoder implements PrincipalEncoder {
   async encode(req: Request, res: Response, p: Principal | undefined) {
     if (p) {

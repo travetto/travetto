@@ -1,9 +1,10 @@
+// @file-if @travetto/auth-rest
 import { Inject, Injectable } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { Principal } from '@travetto/auth';
 import { PrincipalEncoder } from '@travetto/auth-rest';
 
-import { SessionService } from './service';
+import { SessionService } from '../service';
 
 /**
  * Integration with the auth module, using the session as a backing
@@ -18,7 +19,7 @@ export class SessionPrincipalEncoder implements PrincipalEncoder {
 
   encode(req: Request, res: Response, p: Principal) {
     if (p) {
-      p.expiresAt = req.session.expiresAt; // Let principal live as long as the session 
+      p.expiresAt = req.session.expiresAt; // Let principal live as long as the session
       req.session.setValue(this.#key, p);
     } else {
       req.session.destroy(); // Kill session

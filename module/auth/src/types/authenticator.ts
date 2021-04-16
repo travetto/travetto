@@ -3,7 +3,7 @@ import { Principal } from './principal';
 /**
  * Supports validation payload of type T into an authenticated principal
  *
- * @concrete ./internal/types:AuthenticatorTarget
+ * @concrete ../internal/types:AuthenticatorTarget
  */
 export interface Authenticator<T = unknown, P extends Principal = Principal, C = unknown> {
   /**

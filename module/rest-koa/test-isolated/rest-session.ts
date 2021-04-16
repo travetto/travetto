@@ -2,14 +2,15 @@
 // @file-if aws-serverless-express
 
 import { InjectableFactory } from '@travetto/di';
-import { StatelessSessionProvider } from '@travetto/rest-session';
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
+import { SessionModelSym } from '@travetto/rest-session';
 import { RestSessionServerSuite } from '@travetto/rest-session/test-support/server';
 import { Suite } from '@travetto/test';
 
 class Config {
-  @InjectableFactory({ primary: true })
+  @InjectableFactory({ primary: true, qualifier: SessionModelSym })
   static provider() {
-    return new StatelessSessionProvider();
+    return new MemoryModelService(new MemoryModelConfig());
   }
 }
 

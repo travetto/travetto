@@ -1,11 +1,10 @@
-import { Injectable, Inject } from '@travetto/di';
+import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AppError, Util } from '@travetto/base';
-import { isExpirySupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
+import { isExpirySupported, isStorageSupported, ModelCrudSupportTarget } from '@travetto/model/src/internal/service/common';
 import { EnvUtil } from '@travetto/boot';
 import { ExpiresAt, Model, ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Request, Response } from '@travetto/rest';
-import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 
 import { Session } from './session';
 import { SessionConfig } from './config';
@@ -44,18 +43,24 @@ export class SessionEntry {
 @Injectable()
 export class SessionService {
 
-  #accessor: ValueAccessor;
-
   @Inject()
   config: SessionConfig;
 
-  @Inject(SessionModelSym)
   modelService: ModelCrudSupport;
 
   /**
    * Initialize service if none defined
    */
   async postConstruct() {
+    // Try to load a specific instance
+    if (!this.modelService) {
+      try {
+        this.modelService = await DependencyRegistry.getInstance<ModelCrudSupport>(ModelCrudSupportTarget, SessionModelSym);
+      } catch {
+        this.modelService = await DependencyRegistry.getInstance<ModelCrudSupport>(ModelCrudSupportTarget);
+      }
+    }
+
     if (!isExpirySupported(this.modelService)) {
       throw new AppError(`Model service must provide expiry support, ${this.modelService.constructor.name} does not.`);
     }
@@ -64,8 +69,6 @@ export class SessionService {
         await this.modelService.createModel?.(SessionEntry);
       }
     }
-
-    this.#accessor = new ValueAccessor(this.config.keyName, this.config.transport);
   }
 
   /**
@@ -108,16 +111,12 @@ export class SessionService {
 
     // If not destroying, write to response, and store in cache source
     if (session.action !== 'destroy') {
-      if (session.action === 'create') {
-        const issuedAt = session?.issuedAt ?? Date.now();
-        session = new Session({ id: Util.uuid(), issuedAt, maxAge: this.config.maxAge, data: session.data });
-        session.refresh();
-      } else if (this.config.rolling || (this.config.renew && session.isAlmostExpired())) {
+      if (this.config.rolling || (this.config.renew && session.isAlmostExpired())) {
         session.refresh();
       }
 
       // If expiration time has changed, send new session information
-      if (session.isChanged()) {
+      if (session.action === 'create' || session.isChanged()) {
         await this.modelService.upsert(SessionEntry, SessionEntry.from({
           ...session,
           data: Buffer.from(JSON.stringify(session.data)).toString('base64')
@@ -135,18 +134,19 @@ export class SessionService {
    * Get or recreate session
    */
   ensureCreated(req: Request) {
-    if (!(SessionSym in req) || req[SessionSym].action === 'destroy') {
-      req[SessionSym] = new Session({ action: 'create', data: {} });
+    if (req[SessionSym]?.action === 'destroy') {
+      // @ts-expect-error
+      req[SessionSym] = undefined;
     }
-    return req[SessionSym];
+    return req[SessionSym] ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
   }
 
   /**
    * Load from request
    */
-  async readRequest(req: Request) {
+  async readRequest(req: Request, id?: string) {
     if (!req[SessionSym]) {
-      const id = req.auth?.details?.sessionId ?? req.auth?.id ?? this.#accessor.readValue(req);
+      id = this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.header(this.config.keyName) as string;
       if (id) {
         req[SessionSym] = (await this.#load(id))!;
       }
@@ -158,11 +158,28 @@ export class SessionService {
    */
   async writeResponse(req: Request, res: Response) {
     const value = await this.#store(req[SessionSym]);
+    if (value === undefined) {
+      return;
+    }
     if (value === null) {
       // Send updated info only if expiry changed
-      this.#accessor.writeValue(res, null, { expires: new Date() });
-    } else if (value?.isTimeChanged()) {
-      this.#accessor.writeValue(res, value.id, { expires: value.expiresAt });
+      if (this.config.transport === 'cookie') {
+        res.cookies.set(this.config.keyName, null, {
+          expires: new Date(),
+          maxAge: undefined,
+        });
+      }
+    } else {
+      if (this.config.transport === 'cookie') {
+        if (value.action === 'create' || value.isTimeChanged()) {
+          res.cookies.set(this.config.keyName, value.id, {
+            expires: value.expiresAt,
+            maxAge: undefined,
+          });
+        }
+      } else if (value.action === 'create') {
+        res.setHeader(this.config.keyName, value.id);
+      }
     }
   }
 }
