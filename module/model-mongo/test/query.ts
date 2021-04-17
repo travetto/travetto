@@ -14,12 +14,12 @@ export class QueryTest {
   @Test()
   async validateQuery() {
 
-    let out: any = MongoUtil.extractSimple({ a: { b: { c: 5 } } });
+    const out = MongoUtil.extractSimple({ a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
     type Type = { a: { d: number, b: { c: number } }, d: { e: boolean }, g: { z: string[] }, name: number, age: number };
 
-    out = MongoUtil.extractWhereClause<Type>({
+    const out2 = MongoUtil.extractWhereClause<Type>({
       $and: [
         { a: { b: { c: 5 } } },
         { d: { e: true } },
@@ -29,37 +29,45 @@ export class QueryTest {
         { g: { z: 'a' } },
         { a: { d: { $gt: 20 } } }
       ]
-    });
+    }) as {
+      $and: [
+        { ['a.b.c']: number },
+        { ['d.e']: boolean },
+        { $or: [{ name: number }, { age: number }] },
+        { ['g.z']: string },
+        { ['a.d']: { $gt: number } },
+      ];
+    };
 
-    assert(out.$and[0]['a.b.c'] === 5);
+    assert(out2.$and[0]['a.b.c'] === 5);
 
-    assert(out.$and[1]['d.e'] === true);
+    assert(out2.$and[1]['d.e'] === true);
 
-    assert(out.$and[2].$or[0]['name'] === 5);
+    assert(out2.$and[2].$or[0]['name'] === 5);
 
-    assert(out.$and[2].$or[1]['age'] === 10);
+    assert(out2.$and[2].$or[1]['age'] === 10);
 
-    assert(out.$and[4]['a.d'].$gt === 20);
+    assert(out2.$and[4]['a.d'].$gt === 20);
 
-    assert(out.$and[3]['g.z'] === 'a');
+    assert(out2.$and[3]['g.z'] === 'a');
   }
 
   @Test()
   async translateIds() {
-    const out: any = MongoUtil.extractWhereClause<User>({
+    const out = MongoUtil.extractWhereClause<User>({
       $and: [
         { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
       ]
-    });
+    }) as { $and: [{ _id: string }] };
 
     assert(!!out.$and[0]._id);
   }
 
   @Test()
   async translateRegex() {
-    const out: any = MongoUtil.extractWhereClause<User>({
+    const out = MongoUtil.extractWhereClause<User>({
       name: { $regex: '/google.$/' }
-    });
+    }) as { name: { $regex: RegExp } };
 
     assert(out.name.$regex instanceof RegExp);
     assert(out.name.$regex.source === 'google.$');

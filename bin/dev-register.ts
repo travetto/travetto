@@ -101,7 +101,8 @@ class DevRegister {
 
     AppCache.init(true);
     const { entries } = JSON.parse(this.getContent(envMods)) as DevConfig;
-    process.env.TRV_MODULES = `${envMods.replace(this.TRV_MOD, '')},${Object.entries(entries).map(([k, v]) => `${k}=${v ?? ''}`).join(',')}`;
+    process.env.TRV_MODULES = `${envMods.replace(this.TRV_MOD, '')},${Object.entries(entries).map(([k, v]) => `${k}=${v ?? ''}`).join(',')}`
+      .replace(/,=/g, '');
 
     // Override compiler options
     const key = '@travetto/*';

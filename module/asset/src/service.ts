@@ -17,8 +17,7 @@ export class AssetService {
   #store: ModelStreamSupport;
   #namingStrategy: AssetNamingStrategy;
 
-  constructor(
-    @Inject(AssetModelSym) store: ModelStreamSupport,
+  constructor(@Inject(AssetModelSym, { resolution: 'loose' }) store: ModelStreamSupport,
     namingStrategy?: AssetNamingStrategy
   ) {
     this.#namingStrategy = namingStrategy ?? new SimpleNamingStrategy();

@@ -28,24 +28,26 @@ export class CacheRecord {
 @Injectable()
 export class CacheService {
 
-  constructor(@Inject(CacheModelSym) private modelService: ModelExpirySupport) { }
+  #modelService: ModelExpirySupport;
+
+  constructor(@Inject(CacheModelSym, { resolution: 'loose' }) modelService: ModelExpirySupport) {
+    this.#modelService = modelService;
+  }
 
   async postConstruct() {
-    if (isStorageSupported(this.modelService)) {
-      if (!EnvUtil.isReadonly()) {
-        await this.modelService.createModel?.(CacheRecord);
-      }
+    if (isStorageSupported(this.#modelService) && !EnvUtil.isReadonly()) {
+      await this.#modelService.createModel?.(CacheRecord);
     }
   }
 
   async get(id: string, extendOnAccess = true) {
-    const { expiresAt, issuedAt } = await this.modelService.get(CacheRecord, id);
+    const { expiresAt, issuedAt } = await this.#modelService.get(CacheRecord, id);
 
     const delta = expiresAt.getTime() - Date.now();
     const maxAge = expiresAt.getTime() - issuedAt.getTime();
 
     if (delta < 0) { // Expired
-      await this.modelService.delete(CacheRecord, id);
+      await this.#modelService.delete(CacheRecord, id);
       throw new CacheError('Key expired', 'data');
     }
 
@@ -53,7 +55,7 @@ export class CacheService {
     if (extendOnAccess) {
       const threshold = maxAge / 2;
       if (delta < threshold) {
-        await this.modelService.updatePartial(CacheRecord, {
+        await this.#modelService.updatePartial(CacheRecord, {
           id,
           expiresAt: new Date(Date.now() + maxAge),
           issuedAt: new Date()
@@ -61,7 +63,7 @@ export class CacheService {
       }
     }
 
-    const res = await this.modelService.get(CacheRecord, id);
+    const res = await this.#modelService.get(CacheRecord, id);
     return CacheUtil.fromSafeJSON(res.entry);
   }
 
@@ -73,7 +75,7 @@ export class CacheService {
   async set(id: string, entry: unknown, maxAge?: number) {
     const entryText = CacheUtil.toSafeJSON(entry);
 
-    const store = await this.modelService.upsert(CacheRecord,
+    const store = await this.#modelService.upsert(CacheRecord,
       CacheRecord.from({
         id,
         entry: entryText!,
@@ -86,7 +88,7 @@ export class CacheService {
   }
 
   async delete(id: string) {
-    await this.modelService.delete(CacheRecord, id);
+    await this.#modelService.delete(CacheRecord, id);
   }
 
   async getOptional(id: string, extendOnAccess = true) {

@@ -31,22 +31,9 @@ object.  The auth functionality is exposed on the request as the property <code 
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">TravettoRequest</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
-   * The auth context
+   * The authenticated principal
    */</span>
-  auth<span class="token operator">?</span><span class="token operator">:</span> AuthContext<span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * The login context
-   */</span>
-  loginContext<span class="token operator">?</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">any</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Log the user out
-   */</span>
-  <span class="token function">logout</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Perform a login
-   * @param providers  List of providers to authenticate against
-   */</span>
-  <span class="token function">login</span><span class="token punctuation">(</span>providers<span class="token operator">:</span> <span class="token builtin">symbol</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>AuthContext <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span><span class="token punctuation">;</span> <span class="token comment">// Undefined is for multi step logins</span>
+  auth<span class="token operator">?</span><span class="token operator">:</span> Principal<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -55,18 +42,18 @@ This allows for any filters/middleware to access this information without deeper
 When authenticating, with a multi-step process, it is useful to share information between steps.  The <code class="item method">loginContext</code> property is intended to be a location in which that information is persisted. Currently only <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> support is included, when dealing with multi-step logins.
 
 <h2 id="patterns-for-integration">Patterns for Integration</h2>
-Every external framework integration relies upon the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/identity.ts#L9">IdentitySource</a> contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
+Every external framework integration relies upon the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types/authenticator.ts#L8">Authenticator</a> contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
       <figure class="code">
       <figcaption class="code">Structure for the Identity Source
       
       </figcaption>
-      <pre><code class="language-typescript"><span class="token operator">&lt;</span>a target<span class="token operator">=</span><span class="token string">"_blank"</span> <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"source-link"</span> href<span class="token operator">=</span><span class="token string">"https://github.com/travetto/travetto/tree/master/module/auth-rest/src/identity.ts#L9"</span><span class="token operator">></span>IdentitySource<span class="token operator">&lt;</span><span class="token operator">/</span>a<span class="token operator">></span></code></pre>     
+      <pre><code class="language-typescript"><span class="token operator">&lt;</span>a target<span class="token operator">=</span><span class="token string">"_blank"</span> <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"source-link"</span> href<span class="token operator">=</span><span class="token string">"https://github.com/travetto/travetto/tree/master/module/auth/src/types/authenticator.ts#L8"</span><span class="token operator">></span>Authenticator<span class="token operator">&lt;</span><span class="token operator">/</span>a<span class="token operator">></span></code></pre>     
       </figure>
 
 The only required method to be defined is the <code class="item method">authenticate</code> method.  This takes in a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88">TravettoResponse</a>, and is responsible for:
 
-<ul> <li>Returning an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L34">Identity</a> if authentication was successful</li>
+<ul> <li>Returning an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7">Principal</a> if authentication was successful</li>
  <li>Throwing an error if it failed</li>
  <li>Returning undefined if the authentication is multi-staged and has not completed yet</li></ul>
 A sample auth provider would look like:
@@ -75,13 +62,13 @@ A sample auth provider would look like:
       <figcaption class="code">Sample Identity Source
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/doc/source.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Response<span class="token punctuation">,</span> Request <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> IdentitySource <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Authenticator <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SimpleIdentitySource</span> <span class="token keyword">implements</span> <span class="token class-name">IdentitySource</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">async</span> <span class="token function">authenticate</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">,</span> res<span class="token operator">:</span> Response<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> username<span class="token punctuation">,</span> password <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> req<span class="token punctuation">.</span>body<span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> username<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> password<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SimpleAuthenticator</span> <span class="token keyword">implements</span> <span class="token class-name">Authenticator<span class="token operator">&lt;</span>User<span class="token operator">></span></span><span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">authenticate</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> username<span class="token punctuation">,</span> password <span class="token punctuation">{{'}'}}</span><span class="token operator">:</span> User<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>username <span class="token operator">===</span> <span class="token string">'test'</span> <span class="token operator">&amp;&amp;</span> password <span class="token operator">===</span> <span class="token string">'test'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
         id<span class="token operator">:</span> <span class="token string">'test'</span><span class="token punctuation">,</span>
@@ -98,7 +85,7 @@ A sample auth provider would look like:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/identity.ts#L9">IdentitySource</a>'s are collected and stored for reference at runtime, via symbol. For example:
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types/authenticator.ts#L8">Authenticator</a>'s are collected and stored for reference at runtime, via symbol. For example:
 
       <figure class="code">
       <figcaption class="code">Potential Facebook provider
@@ -106,14 +93,14 @@ The provider must be registered with a custom symbol to be used within the frame
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SimpleIdentitySource <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./source'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SimpleAuthenticator <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./source'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token constant">FB_AUTH</span> <span class="token operator">=</span> Symbol<span class="token punctuation">.</span><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token string">'auth-facebook'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AppConfig</span> <span class="token punctuation">{{'{'}}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token constant">FB_AUTH</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">facebookIdentity</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">SimpleIdentitySource</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">SimpleAuthenticator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
@@ -121,9 +108,9 @@ The provider must be registered with a custom symbol to be used within the frame
 The symbol <code class="item input">FB_AUTH</code> is what will be used to reference providers at runtime.  This was chosen, over <code class="item input">class</code> references due to the fact that most providers will not be defined via a new class, but via an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L72">@InjectableFactory</a> method.
 
 <h2 id="route-declaration">Route Declaration</h2>
-Like the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/service.ts#L14">AuthService</a>, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
+Like the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/service.ts#L11">AuthService</a>, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L10">Authenticate</a> provides middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L13">Authenticate</a> provides middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
       <figure class="code">
       <figcaption class="code">Using provider with routes
@@ -158,7 +145,7 @@ Like the <a target="_blank" class="source-link" href="https://github.com/travett
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L21">@Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L37">@Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11">AuthContext</a> is accessible via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46">@Context</a> directly, without wiring in a request object, but is also accessible on the request object as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a>.auth.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L27">@Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L43">@Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7">Principal</a> is accessible via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46">@Context</a> directly, without wiring in a request object, but is also accessible on the request object as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a>.auth.
 
 <h2 id="passport-extension">Passport - Extension</h2>
 
@@ -171,8 +158,8 @@ Within the node ecosystem, the most prevalent auth framework is <a target="_blan
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Strategy <span class="token keyword">as</span> FacebookStrategy <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'passport-facebook'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PrincipalSource<span class="token punctuation">,</span> Identity<span class="token punctuation">,</span> AuthContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PassportIdentitySource<span class="token punctuation">,</span> IdentitySource <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Authenticator<span class="token punctuation">,</span> Authorizer<span class="token punctuation">,</span> Principal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PassportAuthenticator <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest/src/extension/passport/authenticator'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">FbUser</span> <span class="token punctuation">{{'{'}}</span>
   username<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
@@ -183,8 +170,8 @@ Within the node ecosystem, the most prevalent auth framework is <a target="_blan
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AppConfig</span> <span class="token punctuation">{{'{'}}</span>
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token constant">FB_AUTH</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">facebookPassport</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> IdentitySource <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">PassportIdentitySource</span><span class="token punctuation">(</span><span class="token string">'facebook'</span><span class="token punctuation">,</span>
+  <span class="token keyword">static</span> <span class="token function">facebookPassport</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Authenticator <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">PassportAuthenticator</span><span class="token punctuation">(</span><span class="token string">'facebook'</span><span class="token punctuation">,</span>
       <span class="token keyword">new</span> <span class="token class-name">FacebookStrategy</span><span class="token punctuation">(</span>
         <span class="token punctuation">{{'{'}}</span>
           clientID<span class="token operator">:</span> <span class="token string">'&lt;appId>'</span><span class="token punctuation">,</span>
@@ -204,17 +191,17 @@ Within the node ecosystem, the most prevalent auth framework is <a target="_blan
   <span class="token punctuation">{{'}'}}</span>
 
   @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">static</span> <span class="token function">principalSource</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> PrincipalSource <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token keyword">class</span></span> <span class="token keyword">implements</span> <span class="token class-name">PrincipalSource</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">async</span> <span class="token function">authorize</span><span class="token punctuation">(</span>ident<span class="token operator">:</span> Identity<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">AuthContext</span><span class="token punctuation">(</span>ident<span class="token punctuation">,</span> ident<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">principalSource</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Authorizer <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token keyword">class</span></span> <span class="token keyword">implements</span> <span class="token class-name">Authorizer</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">async</span> <span class="token function">authorize</span><span class="token punctuation">(</span>p<span class="token operator">:</span> Principal<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">return</span> p<span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-As you can see, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/extension/passport/identity.ts#L17">PassportIdentitySource</a> will take care of the majority of the work, and all that is required is:
+As you can see, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest/src/extension/passport/authenticator.ts#L14">PassportAuthenticator</a> will take care of the majority of the work, and all that is required is:
 <ul> <li>Provide the name of the strategy (should be unique)</li>
  <li>Provide the strategy instance. <p class="note"><strong>Note</strong> you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework</p></li>
  <li>The conversion functions which defines the mapping between external and local identities.</li></ul>

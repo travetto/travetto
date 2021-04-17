@@ -101,7 +101,7 @@ class SchemaSuite {
 
   @Test('Numeric schema')
   async testNumericSchema() {
-    const schema3: any = ElasticsearchSchemaUtil.generateSourceSchema(Numerical);
+    const schema3 = ElasticsearchSchemaUtil.generateSourceSchema(Numerical);
 
     assert(schema3.properties.money.type === 'scaled_float');
     assert(schema3.properties.whole.type === 'integer');

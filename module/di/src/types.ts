@@ -24,6 +24,12 @@ export interface Dependency<T = unknown> extends Core<T> {
    * Whether or not the dependency is optional
    */
   optional?: boolean;
+
+  /**
+   * Whether or not resolution of dependency should be flexible,
+   * or should be strict.  Default is strict.
+   */
+  resolution?: 'loose' | 'strict';
 }
 
 /**

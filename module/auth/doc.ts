@@ -3,9 +3,10 @@ import { Links } from '@travetto/model/support/doc-support';
 
 import { AuthUtil } from './src/util';
 
-const Principal = d.Snippet('Principal Structure', '@travetto/auth/src/types.ts', /interface Principal/, /^}/);
-const Authorizer = d.Snippet('Authorizer', './src/types.ts', /interface Authorizer/, /^}/);
-const Authenticator = d.Snippet('Authenticator', './src/types.ts', /interface Authenticator/, /^}/);
+const Principal = d.Snippet('Principal Structure', './src/types/principal.ts', /interface Principal/, /^}/);
+const Authorizer = d.Snippet('Authorizer', './src/types/authorizer.ts', /interface Authorizer/, /^}/);
+const Authenticator = d.Snippet('Authenticator', './src/types/authenticator.ts', /interface Authenticator/, /^}/);
+const RegisteredPrincipal = d.Snippet('Registered Principal', 'src/extension/model.ts', /interface RegisteredPrincipal/, /^[}]/);
 
 export const text = d`
 ${d.Header()}
@@ -95,19 +96,19 @@ ${d.List(
   d`${mod.ModelSql} @travetto/model-sql`,
 )}
 
-The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a ${d.SnippetLink('RegisteredPrincipal', './src/princicpal.ts', /interface RegisteredPrincipal/)}
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a ${RegisteredPrincipal.link}
 
 A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 
-${d.Snippet('Registered Principal', 'src/princicpal.ts', /interface RegisteredPrincipal/, /^[}]/)}
+${RegisteredPrincipal}
 
-${d.Code('A valid user model', 'doc/model.ts')}
+${d.Code('A valid user model', 'doc/model/model.ts')}
 
 ${d.Section('Configuration')}
 
 Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogeonized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
 
-${d.Code('Principal Source configuration', 'doc/config.ts')}
+${d.Code('Principal Source configuration', 'doc/model/config.ts')}
 
-${d.Code('Sample usage', 'doc/usage.ts')}
+${d.Code('Sample usage', 'doc/model/usage.ts')}
 `;

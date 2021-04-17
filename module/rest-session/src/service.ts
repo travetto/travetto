@@ -1,8 +1,8 @@
-import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
-import { AppError, Util } from '@travetto/base';
-import { isExpirySupported, isStorageSupported, ModelCrudSupportTarget } from '@travetto/model/src/internal/service/common';
+import { Injectable, Inject } from '@travetto/di';
+import { Util } from '@travetto/base';
+import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 import { EnvUtil } from '@travetto/boot';
-import { ExpiresAt, Model, ModelCrudSupport, NotFoundError } from '@travetto/model';
+import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Request, Response } from '@travetto/rest';
 
@@ -46,28 +46,18 @@ export class SessionService {
   @Inject()
   config: SessionConfig;
 
-  modelService: ModelCrudSupport;
+  #modelService: ModelExpirySupport;
+
+  constructor(@Inject(SessionModelSym, { resolution: 'loose' }) service: ModelExpirySupport) {
+    this.#modelService = service;
+  }
 
   /**
    * Initialize service if none defined
    */
   async postConstruct() {
-    // Try to load a specific instance
-    if (!this.modelService) {
-      try {
-        this.modelService = await DependencyRegistry.getInstance<ModelCrudSupport>(ModelCrudSupportTarget, SessionModelSym);
-      } catch {
-        this.modelService = await DependencyRegistry.getInstance<ModelCrudSupport>(ModelCrudSupportTarget);
-      }
-    }
-
-    if (!isExpirySupported(this.modelService)) {
-      throw new AppError(`Model service must provide expiry support, ${this.modelService.constructor.name} does not.`);
-    }
-    if (isStorageSupported(this.modelService)) {
-      if (!EnvUtil.isReadonly()) {
-        await this.modelService.createModel?.(SessionEntry);
-      }
+    if (isStorageSupported(this.#modelService) && !EnvUtil.isReadonly()) {
+      await this.#modelService.createModel?.(SessionEntry);
     }
   }
 
@@ -77,7 +67,7 @@ export class SessionService {
    */
   async #load(id: string): Promise<Session | undefined> {
     try {
-      const record = await this.modelService.get(SessionEntry, id);
+      const record = await this.#modelService.get(SessionEntry, id);
 
       const session = new Session({
         ...record,
@@ -86,7 +76,7 @@ export class SessionService {
 
       // Validate session
       if (session.isExpired()) {
-        await this.modelService.delete(SessionEntry, session.id).catch(() => { });
+        await this.#modelService.delete(SessionEntry, session.id).catch(() => { });
         return new Session({ action: 'destroy' });
       } else {
         return session;
@@ -117,7 +107,7 @@ export class SessionService {
 
       // If expiration time has changed, send new session information
       if (session.action === 'create' || session.isChanged()) {
-        await this.modelService.upsert(SessionEntry, SessionEntry.from({
+        await this.#modelService.upsert(SessionEntry, SessionEntry.from({
           ...session,
           data: Buffer.from(JSON.stringify(session.data)).toString('base64')
         }));
@@ -125,7 +115,7 @@ export class SessionService {
       }
       // If destroying
     } else if (session.id) { // If destroy and id
-      await this.modelService.delete(SessionEntry, session.id).catch(() => { });
+      await this.#modelService.delete(SessionEntry, session.id).catch(() => { });
       return null;
     }
   }

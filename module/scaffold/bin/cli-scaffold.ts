@@ -44,7 +44,7 @@ export class ScaffoldPlugin extends BasePlugin {
       message: 'Please select one',
       initial: feature.default,
       choices: feature.choices!.map(x => x.title),
-    } as any);
+    } as Parameters<typeof enquirer['prompt']>[0]);
 
     return feature.choices?.find(x => x.title === res.choice);
   }

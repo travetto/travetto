@@ -6,11 +6,10 @@ import { AuthService } from './src/service';
 import { Authenticate, Unauthenticated, Authenticated } from './src/decorator';
 import { PassportAuthenticator } from './src/extension/passport/authenticator';
 
-const Principal = d.SnippetLink('Principal', '@travetto/auth/src/types.ts', /interface Principal/);
+const Principal = d.SnippetLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
 const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/types.d.ts', /interface TravettoRequest/);
 const Response = d.SnippetLink('TravettoResponse', '@travetto/rest/src/types.d.ts', /interface TravettoResponse/);
-const Identity = d.SnippetLink('Identity', '@travetto/auth/src/types.ts', /interface Identity/);
-const IdentitySource = d.SnippetLink('IdentitySource', './src/identity.ts', /interface IdentitySource/);
+const Authenticator = d.SnippetLink('Authenticator', '@travetto/auth/src/types/authenticator.ts', /interface Authenticator/);
 
 export const text = d`
 ${d.Header()}
@@ -36,14 +35,14 @@ This allows for any filters/middleware to access this information without deeper
 When authenticating, with a multi-step process, it is useful to share information between steps.  The ${d.Method('loginContext')} property is intended to be a location in which that information is persisted. Currently only ${lib.Passport} support is included, when dealing with multi-step logins.
 
 ${d.Section('Patterns for Integration')}
-Every external framework integration relies upon the ${IdentitySource} contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
+Every external framework integration relies upon the ${Authenticator} contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
-${d.Code('Structure for the Identity Source', IdentitySource)}
+${d.Code('Structure for the Identity Source', Authenticator)}
 
 The only required method to be defined is the ${d.Method('authenticate')} method.  This takes in a ${Request} and ${Response}, and is responsible for:
 
 ${d.List(
-  d`Returning an ${Identity} if authentication was successful`,
+  d`Returning an ${Principal} if authentication was successful`,
   'Throwing an error if it failed',
   'Returning undefined if the authentication is multi-staged and has not completed yet'
 )}
@@ -51,7 +50,7 @@ A sample auth provider would look like:
 
 ${d.Code('Sample Identity Source', 'doc/source.ts')}
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered ${IdentitySource}'s are collected and stored for reference at runtime, via symbol. For example:
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered ${Authenticator}'s are collected and stored for reference at runtime, via symbol. For example:
 
 ${d.Code('Potential Facebook provider', 'doc/facebook.ts')}
 

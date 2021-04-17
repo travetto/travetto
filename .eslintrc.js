@@ -1,31 +1,19 @@
 require('@travetto/boot/bin/register');
-
-// Hack Node module system to recognize our plugin.
 const Module = require('module');
-Module._resolveFilename = (original => function (request) {
-  return request.startsWith('eslint-plugin-travetto') ?
-    require.resolve('./bin/eslint/local') :
-    original.apply(this, arguments);
-})(Module._resolveFilename);
 
-const all = require('./bin/eslint/core');
+const og = Module._resolveFilename.bind(Module);
+// Hack Node module system to recognize our plugin.
+Module._resolveFilename = (r, ...args) => /plugin-travetto/.test(r) ? require.resolve('./bin/eslint') : og(r, ...args);
+
+const { ignorePatterns, plugins, rules, extends: ext, ...rest } = require('./bin/eslint/rules.json');
 module.exports = {
-  ...all,
+  ...rest,
   ignorePatterns: [
-    ...all.ignorePatterns,
-    'module/boot/src/**/*.js',
+    ...ignorePatterns,
+    'module/boot/src',
     'module/scaffold/templates'
   ],
-  extends: [...all.extends, 'plugin:travetto/all'],
-  plugins: [...all.plugins, 'unused-imports'],
-  rules: { ...all.rules, 'unused-imports/no-unused-imports': 'error' },
-  overrides: [
-    ...all.overrides,
-    {
-      files: ['module/*/test/**/*.ts'],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'off'
-      }
-    }
-  ]
+  extends: [...ext, 'plugin:travetto/all'],
+  plugins: [...plugins, 'unused-imports'],
+  rules: { ...rules, 'unused-imports/no-unused-imports': 'error' }
 };

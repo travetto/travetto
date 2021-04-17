@@ -1,8 +1,14 @@
 {
-  "package.json": {},
+  "package.json.txt": {
+    "rename": "package.json"
+  },
   "README.md": {},
-  "gitignore.txt": {},
-  ".eslintrc.js": {},
+  "gitignore.txt": {
+    "rename": ".gitignore"
+  },
+  "eslintrc.json": {
+    "rename": ".eslintrc.json"
+  },
   "resources/application.yml": {},
   "src/model/todo.ts": {
     "requires": [

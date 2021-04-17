@@ -7,6 +7,8 @@ import { InjectionError } from './error';
 
 type TargetId = string;
 type ClassId = string;
+type Resolution = 'strict' | 'loose';
+type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: string };
 
 const PrimaryCandidateSym = Symbol.for('@trv:di/primary');
 
@@ -45,7 +47,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * @param target
    * @param qualifier
    */
-  protected resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol) {
+  protected resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: Resolution): Resolved<T> {
     const qualifiers = this.targetToClass.get(target.ᚕid) ?? new Map<symbol, string>();
 
     let cls: string | undefined;
@@ -78,6 +80,14 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       if (!qualifier) {
         throw new InjectionError('Dependency not found', target);
       } else if (!qualifiers.has(qualifier)) {
+        if (!this.defaultSymbols.has(qualifier) && resolution === 'loose') {
+          const general = Symbol.for(target.ᚕid);
+          if (this.defaultSymbols.has(general)) {
+            const ret = this.resolveTarget(target, general);
+            console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: target.ᚕid });
+            return ret;
+          }
+        }
         throw new InjectionError('Dependency not found', target, [qualifier]);
       } else {
         cls = qualifiers.get(qualifier!)!;
@@ -102,10 +112,9 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     const promises = deps.map(async x => {
       try {
-        return await this.getInstance(x.target, x.qualifier);
+        return await this.getInstance(x.target, x.qualifier, x.resolution);
       } catch (e) {
         if (x.optional && e instanceof InjectionError && e.category === 'notfound') {
-
           return undefined;
         } else {
           e.message = `${e.message} for ${managed.class.ᚕid}`;
@@ -246,10 +255,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Get an instance by type and qualifier
    */
-  async getInstance<T>(target: ClassTarget<T>, qual?: symbol): Promise<T> {
+  async getInstance<T>(target: ClassTarget<T>, qual?: symbol, resolution?: Resolution): Promise<T> {
     this.verifyInitialized();
 
-    const { id: classId, qualifier } = this.resolveTarget(target, qual);
+    const { id: classId, qualifier } = this.resolveTarget(target, qual, resolution);
     if (!this.instances.has(classId) || !this.instances.get(classId)!.has(qualifier)) {
       await this.createInstance(target, qualifier); // Wait for proxy
     }
