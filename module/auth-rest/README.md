@@ -25,22 +25,9 @@ object.  The auth functionality is exposed on the request as the property `auth`
 ```typescript
 export interface TravettoRequest {
     /**
-     * The auth context
+     * The authenticated principal
      */
-    auth?: AuthContext;
-    /**
-     * The login context
-     */
-    loginContext?: Record<string, any>;
-    /**
-     * Log the user out
-     */
-    logout(): Promise<void>;
-    /**
-     * Perform a login
-     * @param providers  List of providers to authenticate against
-     */
-    login(providers: symbol[]): Promise<AuthContext | undefined>; // Undefined is for multi step logins
+    auth?: Principal;
   }
 ```
 
@@ -49,30 +36,30 @@ This allows for any filters/middleware to access this information without deeper
 When authenticating, with a multi-step process, it is useful to share information between steps.  The `loginContext` property is intended to be a location in which that information is persisted. Currently only [passport](http://passportjs.org) support is included, when dealing with multi-step logins.
 
 ## Patterns for Integration
-Every external framework integration relies upon the [IdentitySource](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/identity.ts#L9) contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
+Every external framework integration relies upon the [Authenticator](https://github.com/travetto/travetto/tree/master/module/auth/src/types/authenticator.ts#L8) contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
 **Code: Structure for the Identity Source**
 ```typescript
-[IdentitySource](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/identity.ts#L9)
+[Authenticator](https://github.com/travetto/travetto/tree/master/module/auth/src/types/authenticator.ts#L8)
 ```
 
 The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), and is responsible for:
 
    
-   *  Returning an [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L34) if authentication was successful
+   *  Returning an [Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7) if authentication was successful
    *  Throwing an error if it failed
    *  Returning undefined if the authentication is multi-staged and has not completed yet
 A sample auth provider would look like:
 
 **Code: Sample Identity Source**
 ```typescript
-import { Response, Request } from '@travetto/rest';
 import { AppError } from '@travetto/base';
-import { IdentitySource } from '@travetto/auth-rest';
+import { Authenticator } from '@travetto/auth';
 
-export class SimpleIdentitySource implements IdentitySource {
-  async authenticate(req: Request, res: Response) {
-    const { username, password } = req.body;
+type User = { username: string, password: string };
+
+export class SimpleAuthenticator implements Authenticator<User>{
+  async authenticate({ username, password }: User) {
     if (username === 'test' && password === 'test') {
       return {
         id: 'test',
@@ -89,20 +76,20 @@ export class SimpleIdentitySource implements IdentitySource {
 }
 ```
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered [IdentitySource](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/identity.ts#L9)'s are collected and stored for reference at runtime, via symbol. For example:
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered [Authenticator](https://github.com/travetto/travetto/tree/master/module/auth/src/types/authenticator.ts#L8)'s are collected and stored for reference at runtime, via symbol. For example:
 
 **Code: Potential Facebook provider**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 
-import { SimpleIdentitySource } from './source';
+import { SimpleAuthenticator } from './source';
 
 export const FB_AUTH = Symbol.for('auth-facebook');
 
 export class AppConfig {
   @InjectableFactory(FB_AUTH)
   static facebookIdentity() {
-    return new SimpleIdentitySource();
+    return new SimpleAuthenticator();
   }
 }
 ```
@@ -110,9 +97,9 @@ export class AppConfig {
 The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L72) method.
 
 ## Route Declaration
-Like the [AuthService](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/service.ts#L14), there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
+Like the [AuthService](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/service.ts#L11), there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
 
-[Authenticate](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L10) provides middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
+[Authenticate](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L13) provides middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
 **Code: Using provider with routes**
 ```typescript
@@ -145,7 +132,7 @@ export class SampleAuth {
 }
 ```
 
-[@Authenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L21) and [@Unauthenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L37) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, [AuthContext](https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11) is accessible via [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) directly, without wiring in a request object, but is also accessible on the request object as [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12).auth.
+[@Authenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L27) and [@Unauthenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L43) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7) is accessible via [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) directly, without wiring in a request object, but is also accessible on the request object as [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12).auth.
 
 ## Passport - Extension
 
@@ -156,8 +143,8 @@ Within the node ecosystem, the most prevalent auth framework is [passport](http:
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 
 import { InjectableFactory } from '@travetto/di';
-import { PrincipalSource, Identity, AuthContext } from '@travetto/auth';
-import { PassportIdentitySource, IdentitySource } from '@travetto/auth-rest';
+import { Authenticator, Authorizer, Principal } from '@travetto/auth';
+import { PassportAuthenticator } from '@travetto/auth-rest/src/extension/passport/authenticator';
 
 export class FbUser {
   username: string;
@@ -168,8 +155,8 @@ export const FB_AUTH = Symbol.for('auth_facebook');
 
 export class AppConfig {
   @InjectableFactory(FB_AUTH)
-  static facebookPassport(): IdentitySource {
-    return new PassportIdentitySource('facebook',
+  static facebookPassport(): Authenticator {
+    return new PassportAuthenticator('facebook',
       new FacebookStrategy(
         {
           clientID: '<appId>',
@@ -189,17 +176,17 @@ export class AppConfig {
   }
 
   @InjectableFactory()
-  static principalSource(): PrincipalSource {
-    return new class implements PrincipalSource {
-      async authorize(ident: Identity) {
-        return new AuthContext(ident, ident);
+  static principalSource(): Authorizer {
+    return new class implements Authorizer {
+      async authorize(p: Principal) {
+        return p;
       }
     }();
   }
 }
 ```
 
-As you can see, [PassportIdentitySource](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/extension/passport/identity.ts#L17) will take care of the majority of the work, and all that is required is:
+As you can see, [PassportAuthenticator](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/extension/passport/authenticator.ts#L14) will take care of the majority of the work, and all that is required is:
    
    *  Provide the name of the strategy (should be unique)
    *  Provide the strategy instance. **Note**: you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework

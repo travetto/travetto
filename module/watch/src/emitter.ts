@@ -10,8 +10,9 @@ type Handler<T> = (payload: T) => void;
  * Standard pattern for watching and emitting
  */
 export class WatchEmitter {
-  #emitter = new EventEmitter();
   protected suppress = false;
+
+  #emitter = new EventEmitter();
 
   constructor(maxListeners = -1) {
     if (maxListeners > 0) {

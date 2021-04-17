@@ -7,12 +7,9 @@ import { version } from '@travetto/boot/package.json';
 
 import { Feature } from './features';
 
-export class Context {
+type ListingEntry = { requires?: string[], rename?: string };
 
-  static #finalize(pth: string) {
-    return pth.replace('gitignore.txt', '.gitignore')
-      .replace('package.json.txt', 'package.json');
-  }
+export class Context {
 
   static #meetsRequirement(modules: string[], desired: string[]) {
     let valid = true;
@@ -65,7 +62,7 @@ export class Context {
   }
 
   get sourceListing() {
-    return import(this.source('listing.json')) as Promise<Record<string, { requires?: string[] }>>;
+    return import(this.source('listing.json')) as Promise<Record<string, ListingEntry>>;
   }
 
   async resolvedSourceListing() {
@@ -87,16 +84,17 @@ export class Context {
     }
   }
 
-  async template(file: string) {
+  async template(file: string, { rename }: ListingEntry) {
     const contents = await fs.promises.readFile(this.source(file), 'utf-8');
+    const out = this.destination(rename ?? file);
     const rendered = mustache.render(contents, this).replace(/^\s*(\/\/|#)\s*\n/gsm, '');
-    await FsUtil.mkdirp(path.dirname(this.destination(file)));
-    await fs.promises.writeFile(Context.#finalize(this.destination(file)), rendered, 'utf8');
+    await FsUtil.mkdirp(path.dirname(out));
+    await fs.promises.writeFile(out, rendered, 'utf8');
   }
 
   async templateResolvedFiles() {
-    for (const [key] of await this.resolvedSourceListing()) {
-      await this.template(key);
+    for (const [key, config] of await this.resolvedSourceListing()) {
+      await this.template(key, config);
     }
   }
 

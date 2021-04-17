@@ -11,86 +11,98 @@ npm install @travetto/auth
 This module provides the high-level backdrop for managing security principals.  The goal of this module is to be a centralized location for various security frameworks to plug into.  The primary contributions are:
 
    
-   *  Interfaces for standard security primitive
-   *  Patterns for producing a [Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L8)
+   *  Standard Types
+   *  Authentication Contract
+   *  Authorization Contract
    *  Common security-related utilities for    
       *  Checking permissions
       *  Generating passwords
 
-## Interfaces / Primitives
-The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [AuthContext](https://github.com/travetto/travetto/tree/master/module/auth/src/context.ts#L11).
+## Standard Types
+The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [Principal Structure](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7).
 
-**Code: Auth context structure**
+**Code: Principal Structure**
 ```typescript
-import { AppError } from '@travetto/base';
-import { AuthUtil } from './util';
-import { Principal, Identity } from './types';
-/**
- * Combination of an identity and a principal, to be used for
- * authorizing. Provides simple access to permissions and
- * additional principal details.
- */
-export class AuthContext<
-  I extends Identity = Identity,
-  P extends Principal = Principal> {
+export interface Principal<D = any> {
   /**
-   * Identity of the context
+   * Primary identifier for a user
    */
-  identity: I;
+  id: string;
   /**
-   * The principal of the context
+   * Date of expiration
    */
-  principal: P;
-  constructor(identity: I, principal?: P) ;
+  expiresAt?: Date;
   /**
-   * Get the principal/identity id
+   * Date of issuance
    */
-  get id() ;
+  issuedAt?: Date;
   /**
-   * Get list of permissions
+   * Max age in seconds a principal is valid
    */
-  get permissions(): Readonly<string[]> ;
+  maxAge?: number;
   /**
-   * Set list of permissions
+   * The source of the issuance
    */
-  set permissions(perms: Readonly<string[]>) ;
+  issuer?: string;
   /**
-   * Get permissions as a set
+   * Supplemental details
    */
-  get permissionSet(): ReadonlySet<string> ;
+  details?: D;
   /**
-   * Check permissions for a given principal
-   *
-   * @param include The list of permissions that should be included.
-   * @param exclude The list of permissions that should be excluded.
-   * @param matchAll Do all permissions need to be matched or any?
+   * List of all provided permissions
    */
-  checkPermissions(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') ;
+  permissions?: string[];
 }
 ```
 
-As referenced above, a [Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L8) is defined as a user with respect to a security context.  This is generally understood to be the information that the application knows about a user, specifically the configuration the application has about a user.
+As referenced above, a [Principal Structure](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authenticatino).
 
-Comparatively, [Identity](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L34) is defined as an authenticated user session that can be provided by the application or derived from some other source.  In simpler systems the identity will be equal to the principal, but in systems where you support 3rd party logins (e.g. Google/Facebook/Twitter/etc.) your identity will be external to the system.
+## Authentication
 
-Overall, the structure is simple, but drives home the primary use cases of the framework.  The goals are:
+**Code: Authenticator**
+```typescript
+export interface Authenticator<T = unknown, P extends Principal = Principal, C = unknown> {
+  /**
+   * Verify the payload, verifying the payload is correctly identified.
+   * @returns Valid principal if authenticated
+   * @returns undefined if authentication is valid, but incomplete (multi-step)
+   * @throws AppError if authentication fails
+   */
+  authenticate(payload: T, ctx?: C): Promise<P | undefined> | P | undefined;
+}
+```
+
+The [Authenticator](https://github.com/travetto/travetto/tree/master/module/auth/src/types/authenticator.ts#L8) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is respon for converting that to an authenticated principal.
+
+### Example
+The [JWT](https://github.com/travetto/travetto/tree/master/module/jwt#readme "JSON Web Token implementation") module is a good example of an authenticator. This is a common use case for simple internal auth.
+
+## Authorization
+
+**Code: Authorizer**
+```typescript
+export interface Authorizer<P extends Principal = Principal> {
+  /**
+   * Authorize inbound principal, verifying it's permission to access the system.
+   * @param principal
+   * @returns New principal that conforms to the required principal shape
+   */
+  authorize(principal: Principal): Promise<P> | P;
+}
+```
+
+Authorizers are generally seen as a secondary step post-authentication. Authentication acts as a very basic form of authorization, assuming the principal store is owned by the application.
+
+The [Authorizer](https://github.com/travetto/travetto/tree/master/module/auth/src/types/authorizer.ts#L8) only requires one method to be defined, and that is `authorizer`. This method receives an authenticated principal as an input, and is responsible for converting that to an authorized principal.
+
+### Example
+The [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") extension is a good example of an authenticator. This is a common use case for simple internal auth.
+
+Overall, the structure is simple, but drives home the primary use cases of the framework. The goals are:
    
    *  Be able to identify a user uniquely
    *  To have a reference to a user's set of permissions
-   *  To have access to the raw principal
-   *  To have access to the raw identity
-
-## Customization
-By default, the module does not provide an implementation for the [PrincipalSource](https://github.com/travetto/travetto/tree/master/module/auth/src/types.ts#L46). By default the structure of the provider can be boiled down to:
-
-**Code: Principal Source**
-```typescript
-/home/tim/Code/travetto/module/auth/src/types.ts
-```
-
-The provider only requires one method to be defined, and that is `resolvePrincipal`.  This method receives an identity as an input, and is responsible for converting that to a principal (external user to internal user).  If you want to be able to auto-provision users from a remote source, you can set `autoCreate` to `true`, and supply `createPrincipal`'s functionality for storing the user as well.
-
-The [Model Auth Source](https://github.com/travetto/travetto/tree/master/module/auth-model#readme "Model-based authentication and registration support for the travetto framework") module is a good example of a principal provider that is also an identity source.  This is a common use case for simple internal auth.
+   *  To have access to the principal
 
 ## Common Utilities
 The [AuthUtil](https://github.com/travetto/travetto/tree/master/module/auth/src/util.ts#L18) provides the following functionality:
@@ -99,7 +111,7 @@ The [AuthUtil](https://github.com/travetto/travetto/tree/master/module/auth/src/
 ```typescript
 import * as crypto from 'crypto';
 import * as util from 'util';
-import { Util, AppError } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 type PermSet = Set<string> | ReadonlySet<string>;
 type PermissionChecker = {
@@ -117,6 +129,22 @@ export class AuthUtil {
    * @param defaultIfEmpty If no perms passed, default to empty
    */
   /**
+   * Build a permission checker off of an include, and exclude set
+   *
+   * @param include Which permissions to include
+   * @param exclude Which permissions to exclude
+   * @param matchAll Whether not all permissions should be matched
+   */
+  static permissionChecker(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') ;
+  /**
+   * Build a permission checker off of an include, and exclude set
+   *
+   * @param include Which permissions to include
+   * @param exclude Which permissions to exclude
+   * @param matchAll Whether not all permissions should be matched
+   */
+  static checkPermissions(permissions: Iterable<string>, include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') ;
+  /**
    * Generate a hash for a given value
    *
    * @param value Value to hash
@@ -130,22 +158,14 @@ export class AuthUtil {
    * Generate a salted password, with the ability to validate the password
    *
    * @param password
-   * @param saltLen Length of salt
+   * @param salt Salt value, or if a number, length of salt
    * @param validator Optional function to validate your password
    */
-  static async generatePassword(password: string, saltLen = 32) ;
-  /**
-   * Build a permission checker off of an include, and exclude set
-   *
-   * @param include Which permissions to include
-   * @param exclude Which permissions to exclude
-   * @param matchAll Whether not all permissions should be matched
-   */
-  static permissionSetChecker(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') ;
+  static async generatePassword(password: string, salt: number | string = 32) ;
 }
 ```
 
-`permissionSetChecker` is probably the only functionality that needs to be explained. The function operates in a `DENY` / `ALLOW` mode.  This means that a permission check will succeed only if:
+`permissionSetChecker` is probably the only functionality that needs to be explained.The function operates in a `DENY` / `ALLOW` mode.  This means that a permission check will succeed only if:
 
    
    *  The user is logged in     
@@ -154,4 +174,145 @@ export class AuthUtil {
          *  The include list is empty, or the user has at least one permission in the include list.
       *  Else    
          *  The user does not have all permissions in the exclusion list
-         *  The include list is empty, or the user has all permissions in the include list.
+         *  The include list is empty, or the user has all permissions in the include list. 
+
+## Extension - Model
+
+This module also supports the integration between the [Authentication](https://github.com/travetto/travetto/tree/master/module/auth#readme "Authentication scaffolding for the travetto framework") module and the [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations."). 
+
+The asset module requires an [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11) to provide functionality for reading and storing user information. You can use any existing providers to serve as your [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11), or you can roll your own.
+
+**Install: provider**
+```bash
+npm install @travetto/model-{provider}
+```
+
+Currently, the following are packages that provide [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11):
+   
+   *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - @travetto/model-dynamodb
+   *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/master/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.") @travetto/model-elasticsearch
+   *  [Firestore Model Support](https://github.com/travetto/travetto/tree/master/module/model-firestore#readme "Firestore backing for the travetto model module.") @travetto/model-firestore
+   *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-mongo#readme "Mongo backing for the travetto model module.") @travetto/model-mongo
+   *  [Redis Model Support](https://github.com/travetto/travetto/tree/master/module/model-redis#readme "Redis backing for the travetto model module.") @travetto/model-redis
+   *  [S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.") @travetto/model-s3
+   *  [SQL Model Service](https://github.com/travetto/travetto/tree/master/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") @travetto/model-sql
+
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a [Registered Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/extension/model.ts#L16)
+
+A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
+
+**Code: Registered Principal**
+```typescript
+export interface RegisteredPrincipal extends Principal {
+  /**
+   * Password hash
+   */
+  hash?: string;
+  /**
+   * Password salt
+   */
+  salt?: string;
+  /**
+   * Temporary Reset Token
+   */
+  resetToken?: string;
+  /**
+   * End date for the reset token
+   */
+  resetExpires?: Date;
+  /**
+   * The actual password, only used on password set/update
+   */
+  password?: string;
+}
+```
+
+**Code: A valid user model**
+```typescript
+import { Model, BaseModel } from '@travetto/model';
+import { RegisteredPrincipal } from '@travetto/auth';
+
+@Model()
+export class User extends BaseModel implements RegisteredPrincipal {
+  source: string;
+  details: Record<string, unknown>;
+  password?: string;
+  salt: string;
+  hash: string;
+  resetToken?: string;
+  resetExpires?: Date;
+  permissions: string[];
+}
+```
+
+## Configuration
+
+Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogeonized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
+
+**Code: Principal Source configuration**
+```typescript
+import { InjectableFactory } from '@travetto/di';
+import { ModelAuthService, RegisteredPrincipal } from '@travetto/auth';
+import { ModelCrudSupport } from '@travetto/model';
+
+import { User } from './model';
+
+class AuthConfig {
+  @InjectableFactory()
+  static getModelAuthService(svc: ModelCrudSupport) {
+    return new ModelAuthService(
+      svc,
+      User,
+      (u: User) => ({    // This converts User to a RegisteredPrincipal
+        source: 'model',
+        provider: 'model',
+        id: u.id,
+        permissions: u.permissions,
+        hash: u.hash,
+        salt: u.salt,
+        resetToken: u.resetToken,
+        resetExpires: u.resetExpires,
+        password: u.password,
+        details: u,
+      }),
+      (u: Partial<RegisteredPrincipal>) => User.from(({   // This converts a RegisteredPrincipal to a User
+        id: u.id,
+        permissions: [...(u.permissions || [])],
+        hash: u.hash,
+        salt: u.salt,
+        resetToken: u.resetToken,
+        resetExpires: u.resetExpires,
+      })
+      )
+    );
+  }
+}
+```
+
+**Code: Sample usage**
+```typescript
+import { AppError } from '@travetto/base';
+import { Injectable, Inject } from '@travetto/di';
+import { ModelAuthService } from '@travetto/auth';
+
+import { User } from './model';
+
+@Injectable()
+class UserService {
+
+  @Inject()
+  private auth: ModelAuthService<User>;
+
+  async authenticate(identity: User) {
+    try {
+      return await this.auth.authenticate(identity);
+    } catch (err) {
+      if (err instanceof AppError && err.category === 'notfound') {
+        return await this.auth.register(identity);
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+```

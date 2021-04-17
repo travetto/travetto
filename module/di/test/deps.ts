@@ -128,3 +128,19 @@ export class UsableSubSubAClass extends UsableSubSubClass { }
 
 @Injectable()
 export class UsableSubSubBClass extends UsableSubSubClass { }
+
+export const LOOSE_SYM = Symbol.for('loose');
+
+@Injectable()
+export class LooseResolutionClass {
+  name = 'bob';
+}
+
+class Config {
+  @InjectableFactory(LOOSE_SYM)
+  static getLoose(): LooseResolutionClass {
+    return new class extends LooseResolutionClass {
+      name = 'george';
+    }();
+  }
+}

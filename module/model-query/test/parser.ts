@@ -171,12 +171,12 @@ export class QueryStringTest {
 
   @Test('Parse Regex')
   async parseRegex() {
-    const res: any = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /^admin/');
+    const res = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /^admin/') as { user: { role: { $regex: RegExp } } };
     assert(res === { user: { role: { $regex: /^admin/ } } });
     assert(res.user.role.$regex instanceof RegExp);
     assert(res.user.role.$regex.toString() === '/^admin/');
 
-    const res2: any = QueryLanguageParser.parseToQuery<UserType>("user.role ~ 'admin'");
+    const res2 = QueryLanguageParser.parseToQuery<UserType>("user.role ~ 'admin'") as { user: { role: { $regex: RegExp } } };
     assert(res2 === { user: { role: { $regex: /^admin/ } } });
     assert(res2.user.role.$regex instanceof RegExp);
     assert(res2.user.role.$regex.toString() === '/^admin/');
@@ -184,7 +184,7 @@ export class QueryStringTest {
 
   @Test('Parse Regex with flags')
   async parseRegexWithFlags() {
-    const res: any = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /^admin/i');
+    const res = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /^admin/i') as { user: { role: { $regex: RegExp } } };
     assert(res === { user: { role: { $regex: /^admin/i } } });
     assert(res.user.role.$regex instanceof RegExp);
     assert(res.user.role.$regex.toString() === '/^admin/i');
@@ -196,7 +196,7 @@ export class QueryStringTest {
 
   @Test('Parse Regex with word boundaries')
   async parseRegexWithWordBoundaries() {
-    const res: any = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /\badmin\b/i');
+    const res = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /\badmin\b/i') as { user: { role: { $regex: RegExp } } };
     assert(res.user.role.$regex instanceof RegExp);
     assert(res.user.role.$regex.toString() === '/\badmin\b/i');
   }

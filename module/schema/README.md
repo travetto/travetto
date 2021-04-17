@@ -76,7 +76,7 @@ This schema provides a powerful base for data binding and validation at runtime.
    *  [@Integer](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L156) ensures number passed in is only a whole number
    *  [@Float](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L162) ensures number passed in allows fractional values
    *  [@Currency](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L174) provides support for standard currency
-   *   indicates that a field is expecting natural language input, not just discrete values
+   *  [@Text](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L76) indicates that a field is expecting natural language input, not just discrete values
    *  [@LongText](https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L81) same as text, but expects longer form content
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated.

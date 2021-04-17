@@ -37,7 +37,7 @@ export function Injectable(first?: Partial<InjectableConfig> | symbol, ...args: 
   };
 }
 
-export type InjectConfig = { qualifier?: symbol, optional?: boolean };
+export type InjectConfig = { qualifier?: symbol, optional?: boolean, resolution?: 'loose' | 'strict' };
 
 export function InjectArgs(configs?: InjectConfig[][]) {
   return <T extends Class>(target: T) => {

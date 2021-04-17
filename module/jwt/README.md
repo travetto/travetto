@@ -42,11 +42,6 @@ export interface SignOptions {
 }
 ```
 
-**Code: Signing API**
-```typescript
-export async function sign<T extends Payload>(payload: T, options: SignOptions = {}): Promise<string> {
-```
-
 **Code: Verify Options**
 ```typescript
 export type VerifyOptions = {
@@ -106,7 +101,7 @@ export type VerifyOptions = {
 };
 ```
 
-**Code: Verify API**
+**Code: API**
 ```typescript
-export async function verify<T>(jwt: string, options: VerifyOptions = {}): Promise<Payload & T> {
+export class JWTUtil {
 ```

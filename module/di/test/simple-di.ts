@@ -9,10 +9,13 @@ import {
   ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT,
   CUSTOM_DATABASE, Database, CUSTOM_EMPTY, BasePattern,
   SpecificPattern, InterfaceType, BaseTypeTarget, CUSTOM_INTERFACE, UsableMainClass, UsableSubClass,
-  UsableSubSubClass
+  UsableSubSubClass,
+  LooseResolutionClass,
+  LOOSE_SYM
 } from './deps';
 
 import { DbConfig } from './config';
+import { InjectionError } from '../src/error';
 
 const FOUR = 4;
 
@@ -191,5 +194,25 @@ class DiTest2 {
     assert(specSpec.length === 2);
 
     await assert.rejects(() => DependencyRegistry.getInstance(UsableSubSubClass), /Multiple candidate/i);
+  }
+
+  @Test('loose resolution')
+  async looseResolution() {
+    const types = DependencyRegistry.getCandidateTypes(LooseResolutionClass);
+    assert(types.length === 2);
+
+    const inst = await DependencyRegistry.getInstance(LooseResolutionClass);
+
+    const spec = await DependencyRegistry.getInstance(LooseResolutionClass, LOOSE_SYM);
+
+    assert(spec.name !== inst.name);
+
+    await assert.rejects(() => DependencyRegistry.getInstance(LooseResolutionClass, Symbol.for('')), InjectionError);
+
+    await assert.doesNotReject(() => DependencyRegistry.getInstance(LooseResolutionClass, Symbol.for(''), 'loose'), InjectionError);
+
+    const specLoose = await DependencyRegistry.getInstance(LooseResolutionClass, Symbol.for(''), 'loose');
+
+    assert(specLoose.name === inst.name);
   }
 }
