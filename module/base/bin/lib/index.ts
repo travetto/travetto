@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 import { CliUtil } from '@travetto/cli/src/util';
-import { AppCache, FileCache, ExecUtil, EnvUtil } from '@travetto/boot/src';
+import { AppCache, FileCache, ExecUtil, EnvUtil } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 
 /**

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { EnvInit } from '@travetto/base/bin/init';
-import { PathUtil } from '@travetto/boot/src';
+import { PathUtil } from '@travetto/boot';
 
 /**
  * Command line support for generating module docs.

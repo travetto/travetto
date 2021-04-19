@@ -1,4 +1,4 @@
-import { ExecUtil } from '@travetto/boot/src';
+import { ExecUtil } from '@travetto/boot';
 
 export async function main() {
   const { PhaseManager } = await import('@travetto/base');

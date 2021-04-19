@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
-import { ExecUtil } from '@travetto/boot/src';
+import { ExecUtil } from '@travetto/boot';
 
 import { WorkPool } from '../src/pool';
 import { IterableWorkSet } from '../src/input/iterable';

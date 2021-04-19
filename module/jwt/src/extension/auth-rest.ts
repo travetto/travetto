@@ -3,7 +3,7 @@ import { Principal } from '@travetto/auth';
 import { PrincipalEncoder } from '@travetto/auth-rest';
 import { AppError } from '@travetto/base';
 import { TimeUtil } from '@travetto/base/src/internal/time';
-import { EnvUtil } from '@travetto/boot/src';
+import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 import { Injectable } from '@travetto/di';
 import { Response, Request } from '@travetto/rest';

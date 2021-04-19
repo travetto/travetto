@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process';
 
-import { PathUtil, ExecUtil } from '@travetto/boot';
+import { PathUtil, ExecUtil, EnvUtil } from '@travetto/boot';
 
 export type RunConfig = {
   filter?: (line: string) => boolean;
@@ -52,7 +52,8 @@ export class DocRunUtil {
         cwd: config.cwd ?? PathUtil.cwd,
         shell: '/bin/bash',
         env: {
-          ...Object.fromEntries(Object.entries(process.env).filter(([a]) => /^(TRV_.*|PATH|NODE_(PATH|OPTIONS))$/.test(a))),
+          ...EnvUtil.getAll(),
+          DEBUG: '',
           TRV_DEBUG: '0',
           ...(config.env ?? {})
         }

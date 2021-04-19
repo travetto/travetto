@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
-import { FileCache, PathUtil } from '@travetto/boot/src';
+import { FileCache, PathUtil } from '@travetto/boot';
 
 /**
  * `npx trv clean`

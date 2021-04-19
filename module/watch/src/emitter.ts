@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { ScanEntry } from '@travetto/boot/src';
+import { ScanEntry } from '@travetto/boot';
 
 export type StandardEventType = 'added' | 'addedDir' | 'removed' | 'removedDir' | 'changed';
 export type AllEvent = { event: StandardEventType, entry: ScanEntry };

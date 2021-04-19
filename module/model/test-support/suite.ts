@@ -1,5 +1,5 @@
 import { Class, ResourceManager } from '@travetto/base';
-import { PathUtil } from '@travetto/boot/src';
+import { PathUtil } from '@travetto/boot';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry } from '@travetto/test';

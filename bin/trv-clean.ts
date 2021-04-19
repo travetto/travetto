@@ -1,6 +1,6 @@
 import '@arcsine/nodesh';
 
-import { FsUtil } from '@travetto/boot/src';
+import { FsUtil } from '@travetto/boot';
 
 import { Packages } from './package/packages';
 

@@ -1,5 +1,5 @@
 import '@arcsine/nodesh';
-import { PathUtil } from '@travetto/boot/src';
+import { PathUtil } from '@travetto/boot';
 import { Modules } from './package/modules';
 
 const prep = (v: string) => v.replace(PathUtil.cwd, '').replace(/\/(module|related)\//, '');

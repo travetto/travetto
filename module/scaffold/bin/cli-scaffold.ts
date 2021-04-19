@@ -1,6 +1,6 @@
 import * as enquirer from 'enquirer';
 
-import { EnvUtil, ExecUtil } from '@travetto/boot/src';
+import { EnvUtil, ExecUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 import { Context } from './lib/context';
@@ -90,7 +90,7 @@ export class ScaffoldPlugin extends BasePlugin {
       name, this.cmd.template, this.cmd.dir ?? name
     );
 
-    if (!EnvUtil.isFalse('TRV_GEN_VERIFY')) {
+    if (!EnvUtil.isFalse('TRV_SCAFFOLD_EXISTING')) {
       await ctx.initialize();
     }
 

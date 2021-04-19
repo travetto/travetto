@@ -1,5 +1,5 @@
 import { TimeUtil } from '@travetto/base/src/internal/time';
-import { PathUtil } from '@travetto/boot/src';
+import { PathUtil } from '@travetto/boot';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 
 import { Watcher } from './watcher';

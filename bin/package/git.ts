@@ -1,4 +1,4 @@
-import { PathUtil } from '@travetto/boot/src';
+import { PathUtil } from '@travetto/boot';
 
 import { Modules } from './modules';
 import { Packages } from './packages';

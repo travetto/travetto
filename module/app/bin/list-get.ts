@@ -1,5 +1,5 @@
 import { EnvInit } from '@travetto/base/bin/init';
-import { ExecUtil } from '@travetto/boot/src';
+import { ExecUtil } from '@travetto/boot';
 
 import { AppListUtil } from './lib/list';
 

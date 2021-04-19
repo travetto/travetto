@@ -8,6 +8,16 @@ export class EnvUtil {
   static #dynamicModules: Record<string, string>;
 
   /**
+   * Get all relevant environment values
+   */
+  static getAll() {
+    return Object.fromEntries(Object.entries(process.env)
+      .filter(([k]) => /^(TRV_.*|NODE_(PATH|OPTIONS)|PATH)$/.test(k))
+      .sort((a, b) => a[0].localeCompare(b[0]))
+    );
+  }
+
+  /**
    * Get, check for key as passed, as all upper and as all lowercase
    * @param k The environment key to search for
    * @param def The default value if the key isn't found

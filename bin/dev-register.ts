@@ -69,13 +69,7 @@ class DevRegister {
     }
 
     return {
-      env: {
-        TIME: Date.now(),
-        ...Object.fromEntries(Object
-          .entries(process.env)
-          .filter(([k]) => /^(TRV_.*|NODE_.*|PATH|DEBUG)$/.test(k))
-          .sort((a, b) => a[0].localeCompare(b[0]))),
-      },
+      env: { TIME: Date.now(), DEBUG: process.env.DEBUG!, ...EnvUtil.getAll(), },
       entries: Object.fromEntries([...final.entries()].filter(([k, v]) => k !== Package.name))
     };
   }

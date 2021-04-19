@@ -1,13 +1,13 @@
 import { PathUtil } from '@travetto/boot/src/path';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
-import { EnvUtil } from '@travetto/boot/src';
+import { EnvUtil } from '@travetto/boot';
 
 /**
  * Entry point
  */
 export async function main() {
-  if (!EnvUtil.isFalse('TRV_CLI_VERIFY') && !PathUtil.toUnix(__filename).includes(PathUtil.cwd)) { // If the current file is not under the working directory
+  if (!EnvUtil.isFalse('TRV_CLI_LOCAL') && !PathUtil.toUnix(__filename).includes(PathUtil.cwd)) { // If the current file is not under the working directory
     console.error(`
 The @travetto/cli is not intended to be installed globally.  Please install it within your local project
 

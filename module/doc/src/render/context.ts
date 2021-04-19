@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { PathUtil, FsUtil, Package, EnvUtil } from '@travetto/boot/src';
+import { PathUtil, FsUtil, Package, EnvUtil } from '@travetto/boot';
 
 import { AllType, AllTypeMap, node as n } from '../nodes';
 import { DocNode, RenderContextShape } from '../types';

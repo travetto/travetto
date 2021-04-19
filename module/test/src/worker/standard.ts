@@ -1,6 +1,6 @@
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { ParentCommChannel, WorkUtil } from '@travetto/worker';
-import { AppCache, ExecUtil } from '@travetto/boot/src';
+import { AppCache, ExecUtil } from '@travetto/boot';
 
 import { Events, RunEvent } from './types';
 import { TestConsumer } from '../consumer/types';
