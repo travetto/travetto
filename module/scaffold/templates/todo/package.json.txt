@@ -18,13 +18,14 @@
   },
   "description": "A Travetto-based project",
   "keywords": [
-    // {{#modules}}
+    // {{#moduleNames}}
     "{{{.}}}",
-    // {{/modules}}
+    // {{/moduleNames}}
     "travetto"
   ],
   "license": "MIT",
   "scripts": {
+    "build": "npx trv build",
     "start": "npx trv run rest",
     "test": "npx trv test",
     "lint": "npx eslint --ext .ts --ext .js ."
@@ -33,6 +34,6 @@
     "src",
     "resources"
   ],
-  "name": "{{{app.name}}}",
+  "name": "{{{name}}}",
   "version": "1.0.0"
 }

@@ -8,6 +8,7 @@ import { version } from '@travetto/boot/package.json';
 import { Feature } from './features';
 
 type ListingEntry = { requires?: string[], rename?: string };
+type Listing = Record<string, ListingEntry>;
 
 export class Context {
 
@@ -28,6 +29,9 @@ export class Context {
 
   #template: string;
   #targetDir: string;
+  #frameworkDependencies: string[] = [];
+  #peerDependencies: string[] = [];
+  #modules: Record<string, boolean>;
 
   readonly name: string;
   readonly frameworkVersion = version.replace(/[.]\d+$/, '.0');
@@ -35,10 +39,6 @@ export class Context {
     name: ExecUtil.execSync('git', ['config', 'user.name']).trim() || EnvUtil.get('USER'),
     email: ExecUtil.execSync('git', ['config', 'user.email']).trim()
   };
-
-  frameworkDependencies: string[] = [];
-  peerDependencies: string[] = [];
-  #modules: Record<string, boolean> = {};
 
   constructor(name: string, template: string, targetDir: string) {
     this.name = name;
@@ -48,9 +48,21 @@ export class Context {
 
   get modules() {
     if (!this.#modules) {
-      this.#modules = this.frameworkDependencies.map(x => x.split('/')).reduce((acc, [, v]) => ({ ...acc, [v]: true }), {});
+      this.#modules = this.#frameworkDependencies.map(x => x.split('/')).reduce((acc, [, v]) => ({ ...acc, [v]: true }), {});
     }
     return this.#modules;
+  }
+
+  get frameworkDependencies() {
+    return this.#frameworkDependencies;
+  }
+
+  get peerDependencies() {
+    return this.#peerDependencies;
+  }
+
+  get moduleNames() {
+    return [...Object.keys(this.modules)].filter(x => !x.includes('-'));
   }
 
   source(file?: string) {
@@ -62,12 +74,12 @@ export class Context {
   }
 
   get sourceListing() {
-    return import(this.source('listing.json')) as Promise<Record<string, ListingEntry>>;
+    return import(this.source('listing.json')) as Promise<Listing>;
   }
 
   async resolvedSourceListing() {
     return Object.entries(await this.sourceListing)
-      .filter(([, conf]) => !conf.requires || Context.#meetsRequirement(this.frameworkDependencies, conf.requires));
+      .filter(([, conf]) => !conf.requires || Context.#meetsRequirement(this.#frameworkDependencies, conf.requires));
   }
 
   async initialize() {
@@ -100,13 +112,17 @@ export class Context {
 
   async addDependency(feat: Feature) {
     if (feat.npm.startsWith('@travetto')) {
-      this.frameworkDependencies.push(feat.npm);
+      this.#frameworkDependencies.push(feat.npm);
     } else {
-      this.peerDependencies.push(feat.npm);
+      this.#peerDependencies.push(feat.npm);
     }
 
     for (const addon of (feat.addons ?? [])) {
       this.addDependency(addon);
     }
+  }
+
+  exec(cmd: string, args: string[]) {
+    return ExecUtil.spawn(cmd, args, { cwd: this.destination(), stdio: [0, 1, 2], isolatedEnv: true }).result;
   }
 }

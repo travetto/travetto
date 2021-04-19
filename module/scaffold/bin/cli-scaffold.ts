@@ -1,6 +1,5 @@
 import * as enquirer from 'enquirer';
 
-import { EnvUtil, ExecUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 import { Context } from './lib/context';
@@ -15,7 +14,8 @@ export class ScaffoldPlugin extends BasePlugin {
   getOptions() {
     return {
       template: this.option({ def: 'todo', desc: 'Template' }),
-      dir: this.option({ desc: 'Target Directory' })
+      dir: this.option({ desc: 'Target Directory' }),
+      force: this.boolOption({ desc: 'Force writing into an existing directory', def: false })
     };
   }
 
@@ -90,7 +90,7 @@ export class ScaffoldPlugin extends BasePlugin {
       name, this.cmd.template, this.cmd.dir ?? name
     );
 
-    if (!EnvUtil.isFalse('TRV_SCAFFOLD_EXISTING')) {
+    if (!this.cmd.force) {
       await ctx.initialize();
     }
 
@@ -105,8 +105,7 @@ export class ScaffoldPlugin extends BasePlugin {
 
     await ctx.templateResolvedFiles();
 
-    // Trigger install
-    await ExecUtil.spawn('npm', ['i'], { cwd: ctx.destination(), stdio: [0, 1, 2], isolatedEnv: true }).result;
-    await ExecUtil.spawn('npx', ['trv', 'build'], { cwd: ctx.destination(), stdio: [0, 1, 2], isolatedEnv: true }).result;
+    await ctx.exec('npm', ['i']);
+    await ctx.exec('npm', ['run', 'build']);
   }
 }
