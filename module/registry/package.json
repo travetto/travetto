@@ -28,11 +28,11 @@
     "directory": "module/registry"
   },
   "dependencies": {
-    "@travetto/compiler": "2.0.0-alpha.3",
-    "@travetto/transformer": "2.0.0-alpha.3"
+    "@travetto/compiler": "^2.0.0-alpha.3",
+    "@travetto/transformer": "^2.0.0-alpha.3"
   },
   "docDependencies": {
-    "@travetto/di": "2.0.0-alpha.4"
+    "@travetto/di": "^2.0.0-alpha.4"
   },
   "publishConfig": {
     "access": "public"

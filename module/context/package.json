@@ -27,10 +27,10 @@
     "directory": "module/context"
   },
   "dependencies": {
-    "@travetto/di": "2.0.0-alpha.4"
+    "@travetto/di": "^2.0.0-alpha.4"
   },
   "optionalPeerDependencies": {
-    "@travetto/rest": "2.0.0-alpha.5"
+    "@travetto/rest": "^2.0.0-alpha.5"
   },
   "publishConfig": {
     "access": "public"

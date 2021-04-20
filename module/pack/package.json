@@ -24,15 +24,15 @@
     "directory": "module/pack"
   },
   "dependencies": {
-    "@travetto/base": "2.0.0-alpha.3",
+    "@travetto/base": "^2.0.0-alpha.3",
     "@types/picomatch": "^2.2.2",
     "picomatch": "^2.2.3"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "2.0.0-alpha.3"
+    "@travetto/cli": "^2.0.0-alpha.3"
   },
   "docDependencies": {
-    "@travetto/rest": "2.0.0-alpha.5"
+    "@travetto/rest": "^2.0.0-alpha.5"
   },
   "publishConfig": {
     "access": "public"

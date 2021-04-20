@@ -26,8 +26,8 @@
     "directory": "module/model-firestore"
   },
   "dependencies": {
-    "@travetto/config": "2.0.0-alpha.3",
-    "@travetto/model": "2.0.0-alpha.4",
+    "@travetto/config": "^2.0.0-alpha.3",
+    "@travetto/model": "^2.0.0-alpha.4",
     "firebase-admin": "^9.6.0"
   },
   "publishConfig": {

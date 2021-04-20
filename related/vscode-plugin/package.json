@@ -34,7 +34,7 @@
     "watch": "npx tsc -watch -p ./"
   },
   "dependencies": {
-    "@travetto/boot": "file://../../module/boot",
+    "@travetto/boot": "^file://../../module/boot",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {

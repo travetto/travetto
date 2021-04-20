@@ -27,11 +27,11 @@
     "directory": "module/cli"
   },
   "dependencies": {
-    "@travetto/base": "2.0.0-alpha.3",
+    "@travetto/base": "^2.0.0-alpha.3",
     "commander": "^7.2.0"
   },
   "docDependencies": {
-    "@travetto/app": "2.0.0-alpha.4"
+    "@travetto/app": "^2.0.0-alpha.4"
   },
   "publishConfig": {
     "access": "public"

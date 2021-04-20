@@ -26,9 +26,9 @@
     "directory": "module/rest-session"
   },
   "dependencies": {
-    "@travetto/config": "2.0.0-alpha.3",
-    "@travetto/model": "2.0.0-alpha.4",
-    "@travetto/rest": "2.0.0-alpha.5"
+    "@travetto/config": "^2.0.0-alpha.3",
+    "@travetto/model": "^2.0.0-alpha.4",
+    "@travetto/rest": "^2.0.0-alpha.5"
   },
   "optionalPeerDependencies": {
     "@travetto/auth-rest": "2.0.0-alpha.5"

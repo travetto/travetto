@@ -26,10 +26,10 @@
     "directory": "module/command"
   },
   "dependencies": {
-    "@travetto/base": "2.0.0-alpha.3"
+    "@travetto/base": "^2.0.0-alpha.3"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "2.0.0-alpha.3"
+    "@travetto/cli": "^2.0.0-alpha.3"
   },
   "docDependencies": {
     "@travetto/model-elasticsearch": "2.0.0-alpha.4"

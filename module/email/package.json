@@ -24,8 +24,8 @@
     "directory": "module/email"
   },
   "dependencies": {
-    "@travetto/config": "2.0.0-alpha.3",
-    "@travetto/di": "2.0.0-alpha.4",
+    "@travetto/config": "^2.0.0-alpha.3",
+    "@travetto/di": "^2.0.0-alpha.4",
     "@types/mustache": "^4.1.1",
     "mustache": "^4.2.0"
   },

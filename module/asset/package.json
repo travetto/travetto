@@ -26,8 +26,8 @@
     "directory": "module/asset"
   },
   "dependencies": {
-    "@travetto/di": "2.0.0-alpha.4",
-    "@travetto/model": "2.0.0-alpha.4",
+    "@travetto/di": "^2.0.0-alpha.4",
+    "@travetto/model": "^2.0.0-alpha.4",
     "@types/mime": "^2.0.3",
     "file-type": "^16.3.0",
     "mime": "^2.5.2"

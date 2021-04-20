@@ -28,13 +28,13 @@
     "directory": "module/model-sql"
   },
   "dependencies": {
-    "@travetto/config": "2.0.0-alpha.3",
-    "@travetto/context": "2.0.0-alpha.4",
-    "@travetto/model": "2.0.0-alpha.4",
+    "@travetto/config": "^2.0.0-alpha.3",
+    "@travetto/context": "^2.0.0-alpha.4",
+    "@travetto/model": "^2.0.0-alpha.4",
     "@travetto/model-query": "2.0.0-alpha.4"
   },
   "devDependencies": {
-    "@travetto/app": "2.0.0-alpha.4"
+    "@travetto/app": "^2.0.0-alpha.4"
   },
   "optionalPeerDependencies": {
     "@types/mysql": "^2.15.18",

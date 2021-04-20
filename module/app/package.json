@@ -28,16 +28,16 @@
     "directory": "module/app"
   },
   "dependencies": {
-    "@travetto/config": "2.0.0-alpha.3",
-    "@travetto/transformer": "2.0.0-alpha.3",
-    "@travetto/registry": "2.0.0-alpha.4",
-    "@travetto/di": "2.0.0-alpha.4"
+    "@travetto/config": "^2.0.0-alpha.3",
+    "@travetto/transformer": "^2.0.0-alpha.3",
+    "@travetto/registry": "^2.0.0-alpha.4",
+    "@travetto/di": "^2.0.0-alpha.4"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "2.0.0-alpha.3"
+    "@travetto/cli": "^2.0.0-alpha.3"
   },
   "docDependencies": {
-    "@travetto/log": "2.0.0-alpha.3"
+    "@travetto/log": "^2.0.0-alpha.3"
   },
   "publishConfig": {
     "access": "public"

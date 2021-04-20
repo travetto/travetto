@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.13.0",
-    "@travetto/config": "2.0.0-alpha.3",
-    "@travetto/model": "2.0.0-alpha.4"
+    "@travetto/config": "^2.0.0-alpha.3",
+    "@travetto/model": "^2.0.0-alpha.4"
   },
   "publishConfig": {
     "access": "public"

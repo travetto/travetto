@@ -25,10 +25,10 @@
     "directory": "module/auth"
   },
   "dependencies": {
-    "@travetto/base": "2.0.0-alpha.3"
+    "@travetto/base": "^2.0.0-alpha.3"
   },
   "optionalPeerDependencies": {
-    "@travetto/model": "2.0.0-alpha.4"
+    "@travetto/model": "^2.0.0-alpha.4"
   },
   "publishConfig": {
     "access": "public"

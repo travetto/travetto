@@ -25,7 +25,7 @@
     "directory": "module/yaml"
   },
   "dependencies": {
-    "@travetto/base": "2.0.0-alpha.3"
+    "@travetto/base": "^2.0.0-alpha.3"
   },
   "publishConfig": {
     "access": "public"

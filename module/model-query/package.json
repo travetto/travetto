@@ -28,9 +28,9 @@
     "directory": "module/model-query"
   },
   "dependencies": {
-    "@travetto/di": "2.0.0-alpha.4",
-    "@travetto/model": "2.0.0-alpha.4",
-    "@travetto/schema": "2.0.0-alpha.4"
+    "@travetto/di": "^2.0.0-alpha.4",
+    "@travetto/model": "^2.0.0-alpha.4",
+    "@travetto/schema": "^2.0.0-alpha.4"
   },
   "docDependencies": {
     "@travetto/model-mongo": "2.0.0-alpha.4",

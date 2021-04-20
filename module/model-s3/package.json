@@ -27,8 +27,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.13.0",
     "@aws-sdk/credential-provider-ini": "^3.13.0",
-    "@travetto/config": "2.0.0-alpha.3",
-    "@travetto/model": "2.0.0-alpha.4"
+    "@travetto/config": "^2.0.0-alpha.3",
+    "@travetto/model": "^2.0.0-alpha.4"
   },
   "publishConfig": {
     "access": "public"

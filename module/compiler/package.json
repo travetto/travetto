@@ -29,9 +29,9 @@
     "directory": "module/compiler"
   },
   "dependencies": {
-    "@travetto/base": "2.0.0-alpha.3",
-    "@travetto/transformer": "2.0.0-alpha.3",
-    "@travetto/watch": "2.0.0-alpha.3"
+    "@travetto/base": "^2.0.0-alpha.3",
+    "@travetto/transformer": "^2.0.0-alpha.3",
+    "@travetto/watch": "^2.0.0-alpha.3"
   },
   "publishConfig": {
     "access": "public"

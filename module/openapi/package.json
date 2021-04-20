@@ -27,14 +27,14 @@
     "directory": "module/openapi"
   },
   "dependencies": {
-    "@travetto/config": "2.0.0-alpha.3",
-    "@travetto/rest": "2.0.0-alpha.5",
-    "@travetto/schema": "2.0.0-alpha.4",
-    "@travetto/yaml": "2.0.0-alpha.3",
+    "@travetto/config": "^2.0.0-alpha.3",
+    "@travetto/rest": "^2.0.0-alpha.5",
+    "@travetto/schema": "^2.0.0-alpha.4",
+    "@travetto/yaml": "^2.0.0-alpha.3",
     "openapi3-ts": "^2.0.1"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "2.0.0-alpha.3"
+    "@travetto/cli": "^2.0.0-alpha.3"
   },
   "publishConfig": {
     "access": "public"
