@@ -34,8 +34,9 @@
     "@travetto/cli": "^2.0.0-alpha.4"
   },
   "docDependencies": {
-    "@travetto/config": "^2.0.0-alpha.4"
+    "@travetto/config": true
   },
+  "private": false,
   "publishConfig": {
     "access": "public"
   }

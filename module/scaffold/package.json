@@ -41,9 +41,9 @@
     "@types/mustache": "^4.1.1"
   },
   "docDependencies": {
-    "@travetto/auth-rest": "2.0.0-alpha.6",
-    "@travetto/model": "^2.0.0-alpha.5",
-    "@travetto/model-query": "2.0.0-alpha.5"
+    "@travetto/auth-rest": true,
+    "@travetto/model": true,
+    "@travetto/model-query": true
   },
   "publishConfig": {
     "access": "public"

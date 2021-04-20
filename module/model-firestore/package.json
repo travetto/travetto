@@ -30,6 +30,7 @@
     "@travetto/model": "^2.0.0-alpha.5",
     "firebase-admin": "^9.6.0"
   },
+  "private": false,
   "publishConfig": {
     "access": "public"
   }

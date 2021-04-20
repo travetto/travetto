@@ -32,7 +32,7 @@
     "@travetto/cli": "^2.0.0-alpha.4"
   },
   "docDependencies": {
-    "@travetto/rest": "^2.0.0-alpha.7"
+    "@travetto/rest": true
   },
   "publishConfig": {
     "access": "public"

@@ -36,8 +36,8 @@
     "@travetto/config": "^2.0.0-alpha.4"
   },
   "docDependencies": {
-    "@travetto/model-mongo": "2.0.0-alpha.5",
-    "@travetto/rest": "^2.0.0-alpha.7"
+    "@travetto/model-mongo": true,
+    "@travetto/rest": true
   },
   "publishConfig": {
     "access": "public"

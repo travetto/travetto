@@ -6,7 +6,11 @@ export class Modules {
   static #graphByFolder: Record<string, Set<string>>;
 
   static #getDeps(pkg: Pkg) {
-    return [...DEP_GROUPS].$flatMap(k => Object.keys(pkg[k] ?? {}));
+    return [...DEP_GROUPS].$flatMap(k =>
+      Object.entries(pkg[k] ?? {})
+        .filter(([, v]) => typeof v === 'string')
+        .map(([k]) => k)
+    );
   }
 
   static async #init() {
@@ -67,8 +71,8 @@ export class Modules {
     for await (const dPkg of this.getDependentPackages(pkg)) {
       for (const key of DEP_GROUPS) {
         const grp = dPkg[key];
-        if (grp?.[pkg.name]) {
-          grp[pkg.name] = grp[pkg.name].replace(/\d.*/, final);
+        if (grp?.[pkg.name] && typeof grp[pkg.name] === 'string') {
+          grp[pkg.name] = (grp[pkg.name] as string).replace(/\d.*/, final);
         }
       }
     }

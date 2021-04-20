@@ -41,7 +41,7 @@
     "@types/vscode": "^1.55.0"
   },
   "docDependencies": {
-    "@travetto/app": "^2.0.0-alpha.3"
+    "@travetto/app": true
   },
   "engines": {
     "vscode": "^1.50.0"

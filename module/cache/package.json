@@ -32,12 +32,12 @@
     "@travetto/model": "^2.0.0-alpha.5"
   },
   "docDependencies": {
-    "@travetto/model-dynamodb": "2.0.0-alpha.5",
-    "@travetto/model-mongo": "2.0.0-alpha.5",
-    "@travetto/model-elasticsearch": "2.0.0-alpha.5",
-    "@travetto/model-redis": "2.0.0-alpha.5",
-    "@travetto/model-sql": "2.0.0-alpha.5",
-    "@travetto/model-s3": "2.0.0-alpha.5"
+    "@travetto/model-dynamodb": true,
+    "@travetto/model-mongo": true,
+    "@travetto/model-elasticsearch": true,
+    "@travetto/model-redis": true,
+    "@travetto/model-sql": true,
+    "@travetto/model-s3": true
   },
   "publishConfig": {
     "access": "public"

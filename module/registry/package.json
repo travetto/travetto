@@ -32,7 +32,7 @@
     "@travetto/transformer": "^2.0.0-alpha.4"
   },
   "docDependencies": {
-    "@travetto/di": "^2.0.0-alpha.5"
+    "@travetto/di": true
   },
   "publishConfig": {
     "access": "public"

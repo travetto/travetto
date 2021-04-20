@@ -92,7 +92,7 @@ export class Packages {
       optionalPeerDependencies,
       docDependencies,
       engines,
-      private: priv,
+      private: !!priv,
       publishConfig: {
         access: priv ? 'restricted' : 'public'
       },
@@ -110,7 +110,8 @@ export class Packages {
         if (!res.valid && !res.stderr.includes('E404')) {
           throw new Error(res.stderr);
         }
-        return JSON.parse(res.stdout || '[]')[0];
+        const item = res.stdout ? JSON.parse(res.stdout) : [];
+        return Array.isArray(item) ? item.pop() : item;
       });
   }
 
@@ -121,19 +122,22 @@ export class Packages {
   static upgrade(pkg: Pkg, groups: DepGroup[]) {
     return groups
       .$flatMap(type =>
-        Object.entries<string>(pkg[type] || {})
-          .$map(([name, version]) => ({ name, type, version }))
+        Object.entries<string | true>(pkg[type] || {})
+          .$map(([name, version]) => ({ name, type, version: version as string }))
       )
       .$filter(x => !x.name.startsWith('@travetto'))
       .$filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
-      .$parallel(d => this.findPublishedVersion(pkg._.folder, d.name, d.version).then(top => {
-        const curr = pkg[d.type]![d.name];
-        const next = d.version.replace(/\d.*$/, top);
-        if (next !== curr) {
-          pkg[d.type]![d.name] = next;
-          return `${d.name}@(${curr} -> ${next})`;
-        }
-      })
+      .$parallel(d => this.findPublishedVersion(pkg._.folder, d.name, d.version)
+        .then(top => {
+          if (top) {
+            const curr = pkg[d.type]![d.name];
+            const next = d.version.replace(/\d.*$/, top);
+            if (next !== curr) {
+              pkg[d.type]![d.name] = next;
+              return `${d.name}@(${curr} -> ${next})`;
+            }
+          }
+        })
       )
       .$notEmpty()
       .$collect();
