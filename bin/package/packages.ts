@@ -126,16 +126,14 @@ export class Packages {
       )
       .$filter(x => !x.name.startsWith('@travetto'))
       .$filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
-      .$parallel(d => this.findPublishedVersion(pkg._.folder, d.name, d.version)
-        .$map(top => {
-          const curr = pkg[d.type]![d.name];
-          const next = d.version.replace(/\d.*$/, top);
-          if (next !== curr) {
-            pkg[d.type]![d.name] = next;
-            return `${d.name}@(${curr} -> ${next})`;
-          }
-        })
-        .$onError(() => [])
+      .$parallel(d => this.findPublishedVersion(pkg._.folder, d.name, d.version).then(top => {
+        const curr = pkg[d.type]![d.name];
+        const next = d.version.replace(/\d.*$/, top);
+        if (next !== curr) {
+          pkg[d.type]![d.name] = next;
+          return `${d.name}@(${curr} -> ${next})`;
+        }
+      })
       )
       .$notEmpty()
       .$collect();
