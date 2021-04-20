@@ -1,7 +1,7 @@
 {
   "name": "@travetto/di",
   "displayName": "Dependency Injection",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-alpha.5",
   "description": "Dependency registration/management and injection support.",
   "keywords": [
     "ast-transformations",
@@ -29,15 +29,15 @@
     "directory": "module/di"
   },
   "dependencies": {
-    "@travetto/transformer": "^2.0.0-alpha.3",
-    "@travetto/registry": "^2.0.0-alpha.4"
+    "@travetto/transformer": "^2.0.0-alpha.4",
+    "@travetto/registry": "^2.0.0-alpha.5"
   },
   "devDependencies": {
-    "@travetto/config": "^2.0.0-alpha.3"
+    "@travetto/config": "^2.0.0-alpha.4"
   },
   "docDependencies": {
-    "@travetto/model-mongo": "2.0.0-alpha.4",
-    "@travetto/rest": "^2.0.0-alpha.5"
+    "@travetto/model-mongo": "2.0.0-alpha.5",
+    "@travetto/rest": "^2.0.0-alpha.7"
   },
   "publishConfig": {
     "access": "public"

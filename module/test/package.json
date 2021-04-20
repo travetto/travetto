@@ -1,7 +1,7 @@
 {
   "name": "@travetto/test",
   "displayName": "Testing",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-alpha.5",
   "description": "Declarative test framework",
   "keywords": [
     "unit-testing",
@@ -29,15 +29,15 @@
     "directory": "module/test"
   },
   "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.3",
-    "@travetto/transformer": "^2.0.0-alpha.3",
-    "@travetto/registry": "^2.0.0-alpha.4",
-    "@travetto/watch": "^2.0.0-alpha.3",
-    "@travetto/worker": "^2.0.0-alpha.3",
-    "@travetto/yaml": "^2.0.0-alpha.3"
+    "@travetto/base": "^2.0.0-alpha.4",
+    "@travetto/transformer": "^2.0.0-alpha.4",
+    "@travetto/registry": "^2.0.0-alpha.5",
+    "@travetto/watch": "^2.0.0-alpha.4",
+    "@travetto/worker": "^2.0.0-alpha.4",
+    "@travetto/yaml": "^2.0.0-alpha.4"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "^2.0.0-alpha.3"
+    "@travetto/cli": "^2.0.0-alpha.4"
   },
   "publishConfig": {
     "access": "public"

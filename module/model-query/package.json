@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model-query",
   "displayName": "Data Model Querying",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-alpha.5",
   "description": "Datastore abstraction for advanced query support.",
   "keywords": [
     "datastore",
@@ -28,14 +28,14 @@
     "directory": "module/model-query"
   },
   "dependencies": {
-    "@travetto/di": "^2.0.0-alpha.4",
-    "@travetto/model": "^2.0.0-alpha.4",
-    "@travetto/schema": "^2.0.0-alpha.4"
+    "@travetto/di": "^2.0.0-alpha.5",
+    "@travetto/model": "^2.0.0-alpha.5",
+    "@travetto/schema": "^2.0.0-alpha.6"
   },
   "docDependencies": {
-    "@travetto/model-mongo": "2.0.0-alpha.4",
-    "@travetto/model-elasticsearch": "2.0.0-alpha.4",
-    "@travetto/model-sql": "2.0.0-alpha.4"
+    "@travetto/model-mongo": "2.0.0-alpha.5",
+    "@travetto/model-elasticsearch": "2.0.0-alpha.5",
+    "@travetto/model-sql": "2.0.0-alpha.5"
   },
   "publishConfig": {
     "access": "public"
