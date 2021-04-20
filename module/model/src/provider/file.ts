@@ -226,6 +226,10 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   async deleteStorage() {
-    await FsUtil.unlinkRecursiveSync(PathUtil.resolveUnix(this.config.folder, this.config.namespace), true);
+    await FsUtil.unlinkRecursive(PathUtil.resolveUnix(this.config.folder, this.config.namespace), true);
+  }
+
+  async truncateModel(cls: Class<ModelType>) {
+    await FsUtil.unlinkRecursive(await this.#resolveName(cls, '.json'), true)
   }
 }

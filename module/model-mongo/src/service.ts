@@ -134,6 +134,11 @@ export class MongoModelService implements
     await this.establishIndices(cls);
   }
 
+  async truncateModel<T extends ModelType>(cls: Class<T>) {
+    const col = await this.getStore(cls);
+    await col.deleteMany({});
+  }
+
   /**
    * Get mongo collection
    */

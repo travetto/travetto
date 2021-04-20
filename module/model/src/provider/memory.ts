@@ -206,6 +206,10 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     }
   }
 
+  async truncateModel(cls: Class<ModelType>) {
+    this.#getStore(cls).clear();
+  }
+
   // Indexed
   getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> {
     const config = ModelRegistry.get(cls).indices!.find(i => i.name === idx);

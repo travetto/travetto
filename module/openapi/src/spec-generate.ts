@@ -260,7 +260,7 @@ export class SpecGenerateUtil {
     };
 
     const pConf = this.buildReqResObject(state, ep.responseType);
-    const code = pConf.content ? 200 : 201;
+    const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses[code] = pConf;
 
     ep.params.forEach(param => this.processEndpointParam(op, param, state));

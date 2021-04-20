@@ -207,6 +207,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
+  async truncateModel<T extends ModelType>(model: Class<T>) {
+    for await (const ids of this.#iterate(model)) {
+      if (ids.length) {
+        await this.#wrap(util.promisify(this.client.del) as (...keys: string[]) => Promise<number>)(...ids);
+      }
+    }
+  }
+
   // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     if (ModelRegistry.get(cls).subType) {
