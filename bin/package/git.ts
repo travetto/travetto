@@ -7,7 +7,7 @@ export class Git {
 
   static findLastRelease() {
     return $exec('git', ['log', '--pretty=oneline'])
-      .$filter(x => /Publish/.test(x))
+      .$filter(x => /Publish /.test(x))
       .$first(1)
       .$columns()
       .$map(([hash]) => hash);

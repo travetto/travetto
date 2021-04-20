@@ -15,7 +15,12 @@ Git.checkWorkspaceDirty('Cannot update versions with uncomitted changes').then((
     .$flatMap((all) =>
       'Continue?'.$prompt().$flatMap(res => res === 'yes' ? all : [])
     )
-    .$map(p => Packages.writeOut(p))
-    .$notEmpty()
+    .$map(p => Packages.writeOut(p).then(() => p))
+    .$collect()
+    .$map(all => {
+      if (all.length) {
+        return Git.publishCommit(all.map(x => x.name).join(','))
+      }
+    })
     .$console
 );
