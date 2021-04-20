@@ -68,6 +68,7 @@ export class AppRunPlugin extends BasePlugin {
         } catch (err) {
           const { StacktraceUtil } = await import('@travetto/base');
           console.error(color`${{ failure: 'Failed application run' }}`);
+          console.error(err.message);
           console.error(StacktraceUtil.simplifyStack(err));
           process.exit(1);
         }

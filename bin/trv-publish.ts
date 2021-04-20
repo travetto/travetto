@@ -7,13 +7,17 @@ import { ExecUtil } from '@travetto/boot';
 import { Packages } from './package/packages';
 
 Packages.yieldPublicPackages()
-  .$parallel(pkg => Packages.showPackageVersion(pkg).$value
-    .then(val => !val ? pkg : undefined))
-  .$notEmpty()
+  .$filter(p => p.name.startsWith('@travetto'))
+  .$parallel(async pkg => [await Packages.findPublishedPackageVersion(pkg), pkg] as const)
+  .$filter(([v,]) => !v)
+  .$map(([, pkg]) => pkg)
   .$tap(pkg => fs.promises.copyFile('LICENSE', `${pkg!._.folder}/LICENSE`))
-  .$parallel(pkg =>
-    ExecUtil.spawn('npm', ['publish', '--dry-run'],
-      { cwd: pkg!._.folder, stdio: ['pipe', 'pipe', 1] }
-    ).result
-  )
+  .$map(pkg => {
+    const args = [
+      'publish',
+      '--tag', pkg?.version?.replace(/^.*-([^.]+)[.]\d+$/, (a, b) => b) || 'latest',
+      '--access', 'public'
+    ];
+    return ExecUtil.spawn('npm', args, { cwd: pkg!._.folder, stdio: [0, 1, 2] }).result;
+  })
   .$stdout;

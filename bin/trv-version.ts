@@ -8,6 +8,7 @@ const [level, prefix] = process.argv.slice(2);
 
 Git.checkWorkspaceDirty('Cannot update versions with uncomitted changes').then(() =>
   Git.yieldChangedPackges()
+    .$filter(p => p.name.startsWith('@travetto'))
     .$map(p => Modules.updateVersion(p, level as 'major', prefix))
     .$tap(p => console.log(`Upgrading ${p.name} from ${p._.version} to ${p.version}`))
     .$collect()

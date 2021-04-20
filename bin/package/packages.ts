@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 import '@arcsine/nodesh';
 
-import { PathUtil } from '@travetto/boot';
+import { ExecUtil, PathUtil } from '@travetto/boot';
 import { PackageType, readPackage } from '@travetto/boot/src/internal/package';
 
 export const DEP_GROUPS = [
@@ -100,19 +100,22 @@ export class Packages {
     };
   }
 
-  static showVersion(folder: string, dep: string, version: string) {
-    return $exec('npm', {
-      args: ['show', `${dep}@${version}`, 'version', '--json'],
-      spawn: { cwd: folder },
-      singleValue: true
-    })
-      .$map(v => v ? JSON.parse(v) as (string | string[]) : '')
-      .$map(v => Array.isArray(v) ? v.pop()! : v)
-      .$notEmpty();
+  static findPublishedVersion(folder: string, dep: string, version: string) {
+    return ExecUtil.spawn('npm',
+      ['show', `${dep}@${version}`, 'version', '--json'],
+      { cwd: folder, stdio: 'pipe' }
+    ).result
+      .catchAsResult()
+      .then(res => {
+        if (!res.valid && !res.stderr.includes('E404')) {
+          throw new Error(res.stderr);
+        }
+        return JSON.parse(res.stdout || '[]')[0];
+      });
   }
 
-  static showPackageVersion(pkg: Pkg) {
-    return this.showVersion(pkg._.folder, pkg.name, pkg.version);
+  static findPublishedPackageVersion(pkg: Pkg) {
+    return this.findPublishedVersion(pkg._.folder, pkg.name, pkg.version);
   }
 
   static upgrade(pkg: Pkg, groups: DepGroup[]) {
@@ -123,7 +126,7 @@ export class Packages {
       )
       .$filter(x => !x.name.startsWith('@travetto'))
       .$filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
-      .$parallel(d => this.showVersion(pkg._.folder, d.name, d.version)
+      .$parallel(d => this.findPublishedVersion(pkg._.folder, d.name, d.version)
         .$map(top => {
           const curr = pkg[d.type]![d.name];
           const next = d.version.replace(/\d.*$/, top);

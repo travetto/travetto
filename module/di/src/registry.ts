@@ -81,12 +81,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         throw new InjectionError('Dependency not found', target);
       } else if (!qualifiers.has(qualifier)) {
         if (!this.defaultSymbols.has(qualifier) && resolution === 'loose') {
-          const general = Symbol.for(target.ᚕid);
-          if (this.defaultSymbols.has(general)) {
-            const ret = this.resolveTarget(target, general);
-            console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: target.ᚕid });
-            return ret;
-          }
+          console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: target.ᚕid });
+          return this.resolveTarget(target);
         }
         throw new InjectionError('Dependency not found', target, [qualifier]);
       } else {
