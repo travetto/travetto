@@ -1,7 +1,7 @@
 {
   "name": "@travetto/schema",
   "displayName": "Schema",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-alpha.5",
   "description": "Data type registry for runtime validation, reflection and binding. ",
   "keywords": [
     "schema",

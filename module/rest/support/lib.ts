@@ -6,9 +6,9 @@ import { SchemaTransformUtil } from '@travetto/schema/support/lib'; // @line-if 
 
 import { ParamConfig } from '../src/types';
 
-/* // @line-if !@travetto/schema
+/* // @line-if @travetto/schema
 const SchemaTransformUtil = undefined;
-*/ // @line-if !@travetto/schema
+*/ // @line-if @travetto/schema
 
 /**
  * Support tools for transforming rest endpoints
