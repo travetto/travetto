@@ -1,5 +1,11 @@
 import { StacktraceUtil } from '../stacktrace';
 
+declare global {
+  interface Error { toJSON(sub?: any): any; }
+  interface Map<K, V> { toJSON(): any; }
+  interface Set<T> { toJSON(): any; }
+}
+
 export type Primitive = number | boolean | string | Date | Error;
 
 // Enable maps to be serialized as json

@@ -1,5 +1,3 @@
-/// <reference path="error.d.ts" />
-
 import * as assert from 'assert';
 
 import { PathUtil } from '@travetto/boot';
@@ -11,6 +9,12 @@ import { AssertUtil } from './util';
 import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types';
 
 const { AssertionError } = assert;
+
+declare module "assert" {
+  interface AssertionError {
+    toJSON(): Record<string, any>;
+  }
+}
 
 /**
  * Check assertion

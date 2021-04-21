@@ -9,5 +9,5 @@ The API exposes:
 
 ${d.Snippet('Signing Options', 'src/types.ts', /export.*SignOptions/, /^[}]/)}
 ${d.Snippet('Verify Options', 'src/types.ts', /export.*VerifyOptions/, /^[}]/)}
-${d.Snippet('API', 'src/util.ts', /export.*class JWTUtil/)}
+${d.Snippet('API', 'src/util.ts', /export.*class JWTUtil/, /^[}]/, true)}
 `;

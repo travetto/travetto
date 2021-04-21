@@ -27,9 +27,9 @@ ${d.Section('Nodmailer - Extension')}
 
 Given the integration with ${lib.NodeMailer}, all extensions should be usable out of the box. The primary ${lib.NodeMailer} modules are provided (assuming dependencies are installed):
 
-${d.Code(d`${d.Input('sendmail')} to send all messages via the sendmail operation`, 'doc/sendmail.ts')}
+${d.Code(d`sendmail to send all messages via the sendmail operation`, 'doc/sendmail.ts')}
 
-${d.Code(d`${d.Input('smtp')} to send all messages via the smtp operation`, 'doc/smtp.ts')}
+${d.Code(d`smtp to send all messages via the smtp operation`, 'doc/smtp.ts')}
 
-${d.Code(d`${d.Input('ses')} to send all messages via the ses operation`, 'doc/ses.ts')}
+${d.Code(d`ses to send all messages via the ses operation`, 'doc/ses.ts')}
 `;

@@ -15,13 +15,13 @@ The asset module requires an [Streaming](https://github.com/travetto/travetto/tr
 npm install @travetto/model-{provider}
 ```
 
-Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1):
+Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1) support:
    
-   *  @travetto/model - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L42), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)
-   *  @travetto/model-mongo - [MongoModelService](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L45)
-   *  @travetto/model-s3 - [S3ModelService](https://github.com/travetto/travetto/tree/master/module/model-s3/src/service.ts#L30)
+   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L42), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)
+   *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-mongo#readme "Mongo backing for the travetto model module.")
+   *  [S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.")
 
-If you are using more than one [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1)-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
+If you are using more than one [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1) service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
 
 **Code: Configuration Methods**
 ```typescript

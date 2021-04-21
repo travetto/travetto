@@ -4,7 +4,7 @@
           
         </h1>
 
-The following tutorial wil walk you through setting up a <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master">Todo App</a>.  Additionally, you can use the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/scaffold" title="App Scaffold for the Travetto framework">App Scaffold</a>.
+The following tutorial wil walk you through setting up a <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master">Todo App</a>.  Additionally, you can use the <a class="module-link" routerLink="/docs/scaffold" title="App Scaffold for the Travetto framework">App Scaffold</a>.
 
 <div class="toc"><div class="inner"><h3 id="overview">Overview</h3><ol> <li><a class="anchor-link" routerLink="." fragment="prerequisites">Prerequisites</a></li>
  <li><a class="anchor-link" routerLink="." fragment="project-initialization">Project Initialization</a></li>
@@ -111,7 +111,7 @@ Now we need to create <code class="item path">src/service.ts</code>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token operator">:</span> TodoSearch<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>modelService<span class="token punctuation">.</span><span class="token function">query</span><span class="token punctuation">(</span>Todo<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token operator">...</span>search<span class="token punctuation">,</span> sort<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{{'{'}}</span> priority<span class="token operator">:</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>modelService<span class="token punctuation">.</span><span class="token function">query</span><span class="token punctuation">(</span>Todo<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token operator">...</span>search<span class="token punctuation">,</span> sort<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{{'{'}}</span> created<span class="token operator">:</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">complete</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> completed <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -317,11 +317,14 @@ First we must start the application:
     excludeModules: Set<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token string">'@travetto/cli'</span>, <span class="token string">'@travetto/doc'</span>, <span class="token string">'@travetto/boot'</span> <span class="token punctuation">{{'}'}}</span>,
     dynamicModules: <span class="token punctuation">{{'{'}}</span>
       <span class="token string">'@travetto/app'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:app'</span>,
+      <span class="token string">'@travetto/auth'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:auth'</span>,
+      <span class="token string">'@travetto/auth-rest'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:auth-rest'</span>,
       <span class="token string">'@travetto/base'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:base'</span>,
       <span class="token string">'@travetto/boot'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:boot'</span>,
       <span class="token string">'@travetto/cli'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:cli'</span>,
       <span class="token string">'@travetto/compiler'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:compiler'</span>,
       <span class="token string">'@travetto/config'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:config'</span>,
+      <span class="token string">'@travetto/context'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:context'</span>,
       <span class="token string">'@travetto/di'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:di'</span>,
       <span class="token string">'@travetto/doc'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:doc'</span>,
       <span class="token string">'@travetto/log'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:log'</span>,
@@ -333,6 +336,7 @@ First we must start the application:
       <span class="token string">'@travetto/registry'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:registry'</span>,
       <span class="token string">'@travetto/rest'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:rest'</span>,
       <span class="token string">'@travetto/rest-express'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:rest-express'</span>,
+      <span class="token string">'@travetto/rest-session'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:rest-session'</span>,
       <span class="token string">'@travetto/schema'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:schema'</span>,
       <span class="token string">'@travetto/test'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:test'</span>,
       <span class="token string">'@travetto/transformer'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:transformer'</span>,

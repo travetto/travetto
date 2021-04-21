@@ -13,7 +13,7 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/config</code></pre>     
       </figure>
 
-The config module provides support for loading application config on startup. Configuration values support the common <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> constructs as defined in <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/yaml" title="Simple YAML support, provides only clean subset of yaml">YAML</a>.  The configuration information is comprised of:
+The config module provides support for loading application config on startup. Configuration values support the common <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> constructs as defined in <a class="module-link" routerLink="/docs/yaml" title="Simple YAML support, provides only clean subset of yaml">YAML</a>.  The configuration information is comprised of:
 
 <ul> <li><a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> files</li>
  <li>environment variables</li></ul>
@@ -86,7 +86,7 @@ Config <span class="token punctuation">{{'{'}}</span>
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under <code class="item input">config.redacted</code>.
 
 <h2 id="consuming">Consuming</h2>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/config/src/manager.ts">ConfigManager</a> service provides direct access to all of the loaded configuration. For simplicity, a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/config/src/decorator.ts#L10">@Config</a> allows for classes to automatically be bound with config information on post construction via the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module. The decorator will install a <code class="item method">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/config/src/manager.ts">ConfigManager</a> service provides direct access to all of the loaded configuration. For simplicity, a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/config/src/decorator.ts#L10">@Config</a> allows for classes to automatically be bound with config information on post construction via the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module. The decorator will install a <code class="item method">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 

@@ -13,7 +13,7 @@
       padding: 0;
       margin: 0;
 
-      & /deep/ {
+      & ::ng-deep {
         div {
           color: #333;
         }

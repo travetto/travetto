@@ -17,9 +17,6 @@ ${d.Code('Config: OpenAPI Configuration', 'src/config.ts')}
 ${d.Section('Spec Generation')}
 The framework, when in watch mode, will generate the ${lib.OpenAPI} specification in either ${lib.JSON} or ${lib.YAML}. This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development.  The output format is defined by the suffix of the output file, ${d.Input('.yaml')} or ${d.Input('.json')}.  
 
-${d.Section('Client Generation')}
-The outputted spec can be consumed using the ${lib.OpenAPIGenerator}.
-
 ${d.Section('CLI - openapi:spec')}
 
 The module provides a plugin for the ${mod.Cli} to allow scripting file generation.
@@ -29,4 +26,12 @@ ${d.Execute('OpenAPI usage', 'trv', ['openapi:spec', '--help'])}
 The command will run your application, in non-server mode, to collect all the routes and model information, to produce the ${d.Path('openapi.yml')}.  Once produced, the code will store the output in the specified location.
 
 ${d.Note(d`The module supports generating the OpenAPI spec in real-time while listening for changes to routes and models.`)}
+
+${d.Section('CLI - openapi:client')}
+
+The module provides a plugin for the ${mod.Cli} to allow client generation from the API structure.
+
+${d.Execute('OpenAPI usage', 'trv', ['openapi:client', '--help'])}
+
+This tool relies upon a custom build of ${lib.OpenAPIGenerator}, which supports watching.  This allows for fast responsive client generation as the shape of the API changes.  
 `;

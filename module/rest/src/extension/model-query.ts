@@ -1,22 +1,23 @@
 // @file-if @travetto/model-query
 // @file-if @travetto/schema
 
-import { Class } from '@travetto/base';
+import { AppError, Class } from '@travetto/base';
 import { ModelType, ModelRegistry } from '@travetto/model';
 import { Schema } from '@travetto/schema';
 import {
   ModelQueryFacetSupport, ModelQuerySupport, ModelQuerySuggestSupport,
   SortClause, ValidStringFields
 } from '@travetto/model-query';
+import { isQuerySuggestSupported, isQuerySupported } from '@travetto/model-query/src/internal/service/common';
 
 import { schemaParamConfig } from './schema';
 import { ControllerRegistry } from '../registry/controller';
 import { paramConfig } from '../decorator/param';
 
-type Svc = { source: ModelQuerySupport & ModelQueryFacetSupport & ModelQuerySuggestSupport };
+type Svc = { source: Partial<ModelQuerySupport & ModelQuerySuggestSupport & ModelQueryFacetSupport> };
 
 @Schema()
-class Query {
+export class RestModelQuery {
   where?: string;
   sort?: string;
   limit?: number;
@@ -24,7 +25,7 @@ class Query {
 }
 
 @Schema()
-class SuggestQuery {
+export class RestModelSuggestQuery {
   q: string;
   limit?: number;
   offset?: number;
@@ -46,13 +47,17 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
   return (target: Class<Svc>) => {
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(target,
-        function getAll(this: Svc, full: Query) {
-          return this.source.query(getCls(), {
-            limit: full.limit,
-            offset: full.offset,
-            sort: convert(full.sort) as SortClause<T>[],
-            where: convert(full.where)
-          });
+        function getAll(this: Svc, full: RestModelQuery) {
+          if (isQuerySupported(this.source)) {
+            return this.source.query(getCls(), {
+              limit: full.limit,
+              offset: full.offset,
+              sort: convert(full.sort) as SortClause<T>[],
+              where: convert(full.where)
+            });
+          } else {
+            throw new AppError(`${this.source.constructor.ᚕid} does not support querying`);
+          }
         }
       ),
       {
@@ -61,15 +66,19 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
         },
-        params: [schemaParamConfig('query', { type: Query, name: 'full', required: false })],
+        params: [schemaParamConfig('query', { type: RestModelQuery, name: 'full', required: false })],
         responseType: { type: cls, array: true, description: `List of ${cls.name}` }
       }
     );
 
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
-        target, function suggestField(this: Svc, field: ValidStringFields<T>, suggest: SuggestQuery) {
-          return this.source.suggest<T>(getCls(), field, suggest.q, suggest);
+        target, function suggestField(this: Svc, field: ValidStringFields<T>, suggest: RestModelSuggestQuery) {
+          if (isQuerySuggestSupported(this.source)) {
+            return this.source.suggest<T>(getCls(), field, suggest.q, suggest);
+          } else {
+            throw new AppError(`${this.source.constructor.ᚕid} does not support suggesting by query`);
+          }
         }),
       {
         description: `Suggest ${cls.name} by specific field`,
@@ -79,7 +88,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
         },
         params: [
           paramConfig('path', { name: 'field', required: true }),
-          schemaParamConfig('query', { type: SuggestQuery, required: false })
+          schemaParamConfig('query', { type: RestModelSuggestQuery, required: false })
         ],
         responseType: { type: cls, description: cls.name }
       }

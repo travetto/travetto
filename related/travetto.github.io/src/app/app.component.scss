@@ -12,12 +12,12 @@ $SMALL-HEADER-HEIGHT: 40px;
     background: linear-gradient(180deg, rgba(76, 175, 80, 1) 0%, rgba(76, 175, 80, .8) 100%) !important;
   }
 
-  .main-module /deep/>* {
+  .main-module ::ng-deep>* {
     padding-top: 0px;
   }
 }
 
-.main-module /deep/>* {
+.main-module ::ng-deep>* {
   padding-top: $HEADER-HEIGHT;
 
   .toc {
@@ -114,7 +114,7 @@ footer {
 @media (min-width: 700px) {
   :host {
 
-    .main-module /deep/>* {
+    .main-module ::ng-deep>* {
       min-height: calc(100vh - #{$FOOTER-HEIGHT + $HEADER-HEIGHT});
 
       p {

@@ -104,4 +104,17 @@ export type VerifyOptions = {
 **Code: API**
 ```typescript
 export class JWTUtil {
+  /**
+   * Sign the payload and return a token
+   */
+  static async create<T extends Payload>(payload: T, options: SignOptions = {}): Promise<string> ;
+  /**
+   * Read and return full object with signatures
+   */
+  static read<T extends Payload = Payload>(jwt: string): TypedSig<T> ;
+  /**
+   * Verify the token
+   */
+  static async verify<T>(jwt: string, options: VerifyOptions = {}): Promise<Payload & T> ;
+}
 ```

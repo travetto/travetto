@@ -1,8 +1,17 @@
-/// <reference path="./error.d.ts" />
 import { AppError } from '@travetto/base';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 
 import { Response } from '../types';
+
+declare global {
+  export interface Error {
+    /**
+     * Provides the render implementation for sending a response
+     * @param res 
+     */
+    render?(res: Response): void;
+  }
+}
 
 /**
  * Render the error to the response object

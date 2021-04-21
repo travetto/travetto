@@ -39,14 +39,14 @@ By design, sending an email requires the sender to specify the html, text option
 <ul> <li><code class="item input">resources/&lt;key&gt;.compiled.html</code></li>
  <li><code class="item input">resources/&lt;key&gt;.compiled.text</code></li>
  <li><code class="item input">resources/&lt;key&gt;.compiled.subject</code></li></ul>
-With <code class="item input">.html</code> being the only required field.  The <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/email-template" title="Email templating module">Email Templating</a> module supports this format, and will generate files accordingly. Also, note that <code class="item input">&lt;key&gt;</code> can include slashes, allowing for nesting folders.
+With <code class="item input">.html</code> being the only required field.  The <a class="module-link" routerLink="/docs/email-template" title="Email templating module">Email Templating</a> module supports this format, and will generate files accordingly. Also, note that <code class="item input">&lt;key&gt;</code> can include slashes, allowing for nesting folders.
 
 <h2 id="nodmailer-extension">Nodmailer - Extension</h2>
 
 Given the integration with <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a>, all extensions should be usable out of the box. The primary <a target="_blank" class="external-link" href="https://nodemailer.com/about/">nodemailer</a> modules are provided (assuming dependencies are installed):
 
       <figure class="code">
-      <figcaption class="code"><code class="item input">sendmail</code> to send all messages via the sendmail operation
+      <figcaption class="code">sendmail to send all messages via the sendmail operation
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email/doc/sendmail.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
@@ -61,7 +61,7 @@ Given the integration with <a target="_blank" class="external-link" href="https:
       </figure>
 
       <figure class="code">
-      <figcaption class="code"><code class="item input">smtp</code> to send all messages via the smtp operation
+      <figcaption class="code">smtp to send all messages via the smtp operation
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email/doc/smtp.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
@@ -78,7 +78,7 @@ Given the integration with <a target="_blank" class="external-link" href="https:
       </figure>
 
       <figure class="code">
-      <figcaption class="code"><code class="item input">ses</code> to send all messages via the ses operation
+      <figcaption class="code">ses to send all messages via the ses operation
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/email/doc/ses.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SESClient <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@aws-sdk/client-ses'</span><span class="token punctuation">;</span>

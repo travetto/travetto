@@ -88,7 +88,7 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
    *  [@Query](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L58) - Query params
    *  [@Body](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L70) - Request body (in it's entirety)
    *  [@Header](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L64) - Header values
-   *  [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12), [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), Session, AuthContext, etc.)
+   *  [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12), [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), etc.)
 
 Each [@Param](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L33) can be configured to indicate:
    
@@ -158,6 +158,80 @@ Per the [Base](https://github.com/travetto/travetto/tree/master/module/base#read
 
 Additionally, the [Schema](https://github.com/travetto/travetto/tree/master/module/schema#readme "Data type registry for runtime validation, reflection and binding. ") module supports typing requests and request bodies for run-time validation of requests. 
 
+## Running an App
+
+By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) at [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to execute.  
+
+**Install: Installing app support**
+```bash
+npm install @travetto/app
+```
+
+**Terminal: Standard application**
+```bash
+$ trv run
+
+Usage: trv run [options] [application] [args...]
+
+Options:
+  -e, --env <env>            Application environment
+  -p, --profile <profile>    Additional application profiles (default: [])
+  -r, --resource <resource>  Additional resource locations (default: [])
+  -h, --help                 display help for command
+
+Available Applications:
+
+   ● rest Default rest application entrypoint
+     ----------------------------------------
+     usage: rest 
+     file:  src/application/rest.ts
+```
+
+### Creating a Custom App
+To customize a REST server, you may need to construct an entry point using the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) decorator. This could look like:
+
+**Code: Application entry point for Rest Applications**
+```typescript
+import { Application } from '@travetto/app';
+import { RestApplication } from '@travetto/rest';
+
+@Application('custom')
+export class SampleApp extends RestApplication {
+
+  run() {
+    // Configure server before running
+    return super.run();
+  }
+}
+```
+
+And using the pattern established in the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module, you would run your program using `npx trv run custom`.
+
+**Terminal: Custom application**
+```bash
+$ trv run
+
+Usage: trv run [options] [application] [args...]
+
+Options:
+  -e, --env <env>            Application environment
+  -p, --profile <profile>    Additional application profiles (default: [])
+  -r, --resource <resource>  Additional resource locations (default: [])
+  -h, --help                 display help for command
+
+Available Applications:
+
+   ● custom 
+     ------------------------
+     usage: custom 
+     file:  doc/custom-app.ts
+
+   ● rest Default rest application entrypoint
+     ----------------------------------------
+     usage: rest 
+     file:  src/application/rest.ts
+```
+
 ## Interceptors
 
 [RestInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/types.ts#L11)s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
@@ -182,7 +256,7 @@ export class HelloWorldInterceptor implements RestInterceptor {
 
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
    
-   1. [SerializeInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/serialize.ts#L17) - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+   1. [SerializeInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/serialize.ts#L20) - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
    1. [CorsInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/cors.ts#L39) - This interceptor allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, `rest.cors.active: true`
      
    **Code: Cors Config**
@@ -247,7 +321,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
    }
    ```
    
-   1. [GetCacheInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/get-cache.ts#L12) - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting `res.disableGetCache: true` in your config.
+   1. [GetCacheInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/get-cache.ts#L12) - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting `rest.disableGetCache: true` in your config.
    1. [LoggingInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/logging.ts#L61) - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
    
      
@@ -261,35 +335,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
    ```
    
 
-## Creating and Running an App
-
-By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) at [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to execute.  
-
-**Install: Installing app support**
-```bash
-npm install @travett/app
-```
-
-To customize a REST server, you may need to construct an entry point using the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) decorator. This could look like:
-
-**Code: Application entry point for Rest Applications**
-```typescript
-import { Application } from '@travetto/app';
-import { RestApplication } from '@travetto/rest';
-
-@Application('custom')
-export class SampleApp extends RestApplication {
-
-  run() {
-    // Configure server before running
-    return super.run();
-  }
-}
-```
-
-And using the pattern established in the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module, you would run your program using `npx trv run custom`.
-
-## Custom Interceptors
+### Custom Interceptors
 Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") by extending the [RestInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/types.ts#L11) class.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
@@ -541,4 +587,63 @@ class UserController {
 
 ## Extension - Model Query
 
-Additionally, [Data Model Querying](https://github.com/travetto/travetto/tree/master/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L41). This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
+Additionally, [Data Model Querying](https://github.com/travetto/travetto/tree/master/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L42). This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
+
+**Code: ModelQueryRoutes example**
+```typescript
+import { Inject } from '@travetto/di';
+import { ModelQuerySupport } from '@travetto/model-query';
+import { Controller } from '@travetto/rest';
+import { ModelQueryRoutes } from '../src/extension/model-query';
+
+import { User } from './user';
+
+@Controller('/user')
+@ModelQueryRoutes(User)
+class UserQueryController {
+  @Inject()
+  source: ModelQuerySupport;
+}
+```
+
+is a shorthand that is equal to:
+
+**Code: Comparable UserController, built manually**
+```typescript
+import { Inject } from '@travetto/di';
+import { ModelQuerySupport, SortClause, ValidStringFields } from '@travetto/model-query';
+import { isQuerySuggestSupported } from '@travetto/model-query/src/internal/service/common';
+import { Controller, Get } from '@travetto/rest';
+
+import { Path } from '../src/decorator/param';
+import { RestModelQuery, RestModelSuggestQuery } from '../src/extension/model-query';
+import { SchemaQuery } from '../src/extension/schema';
+
+import { User } from './user';
+
+const convert = <T>(k?: string) => k && typeof k === 'string' && /^[\{\[]/.test(k) ? JSON.parse(k) as T : k;
+
+@Controller('/user')
+class UserQueryController {
+
+  @Inject()
+  service: ModelQuerySupport;
+
+  @Get('')
+  async getAllUser(@SchemaQuery() query: RestModelQuery) {
+    return this.service.query(User, {
+      limit: query.limit,
+      offset: query.offset,
+      sort: convert(query.sort) as SortClause<User>[],
+      where: convert(query.where)
+    });
+  }
+
+  @Get('/suggest/:field')
+  async suggest(@Path() field: ValidStringFields<User>, @SchemaQuery() suggest: RestModelSuggestQuery) {
+    if (isQuerySuggestSupported(this.service)) {
+      return this.service.suggest(User, field, suggest.q, suggest);
+    }
+  }
+}
+```

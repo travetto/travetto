@@ -4,7 +4,7 @@ import { spawnSync } from 'child_process';
 
 import '@arcsine/nodesh';
 
-import { PathUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot/src';
 import { Packages } from './package/packages';
 
 const page = (f: string) =>
@@ -71,16 +71,12 @@ const markdownPage = (mod: string) =>
           .$read()
           .$collect()
           .$map(contents => {
-            const content = contents.join('\n').replace(/href="[^"]+@travetto\/([^.]+)"/g, (_, attr, ref) => `href="/docs/${ref}"`)
+            const content = contents.join('\n').replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
               .replace(/^src="images\//g, `src="/assets/images/${pkg._.mod}/`)
-              .replace(/href="https?:\/\/travetto.dev\//g, _ => 'href="/')
+              .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`)
               .replace(
                 !['todo-app', 'overview'].includes(pkg._.mod) ? /<h1>([\n\r]|.)*/m : '##',
                 t => `<div class="documentation">\n${t}\n</div>\n`
-              )
-              .replace(
-                ['vscode-plugin'].includes(pkg._.mod) ? /src="https:\/\/travetto.dev\/assets/g : '##',
-                t => 'src="/assets'
               );
             return content;
           })

@@ -86,7 +86,7 @@ ${d.List(
   d`${Query} - Query params`,
   d`${Body} - Request body (in it's entirety)`,
   d`${Header} - Header values`,
-  d`${Context} - Special values exposed (e.g. ${Request}, ${Response}, Session, AuthContext, etc.)`,
+  d`${Context} - Special values exposed (e.g. ${Request}, ${Response}, etc.)`,
 )}
 
 Each ${Param} can be configured to indicate:
@@ -120,6 +120,23 @@ ${d.List(
 
 Additionally, the ${mod.Schema} module supports typing requests and request bodies for run-time validation of requests. 
 
+${d.Section('Running an App')}
+
+By default, the framework provices a default ${Application} at ${RestApplication} that will follow default behaviors, and spin up the REST server.  You will need to install the ${mod.App} module to execute.  
+
+${d.Install('Installing app support', '@travetto/app')}
+
+${d.Execute('Standard application', 'trv', ['run'], { env: { TRV_SRC_LOCAL: 'src' } })}
+
+${d.SubSection('Creating a Custom App')}
+To customize a REST server, you may need to construct an entry point using the ${Application} decorator. This could look like:
+
+${d.Code('Application entry point for Rest Applications', 'doc/custom-app.ts')}
+
+And using the pattern established in the ${mod.App} module, you would run your program using ${d.Command('npx trv run custom')}.
+
+${d.Execute('Custom application', 'trv', ['run'])}
+
 ${d.Section('Interceptors')}
 
 ${RestInterceptor}s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
@@ -135,24 +152,12 @@ ${d.Ordered(
   ${d.Snippet('Cors Config', RestCorsConfig.ᚕfile, /class.*Config/, /^\}/)}`,
   d`${CookiesInterceptor} - This interceptor is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
   ${d.Snippet('Cookies Config', RestCookieConfig.ᚕfile, /class.*Config/, /^\}/)}`,
-  d`${GetCacheInterceptor} - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting ${d.Input('res.disableGetCache: true')} in your config.`,
+  d`${GetCacheInterceptor} - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting ${d.Input('rest.disableGetCache: true')} in your config.`,
   d`${LoggingInterceptor} - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so\n
   ${d.Code('Control Logging', 'doc/resources/log.yml')}`,
 )}
 
-${d.Section('Creating and Running an App')}
-
-By default, the framework provices a default ${Application} at ${RestApplication} that will follow default behaviors, and spin up the REST server.  You will need to install the ${mod.App} module to execute.  
-
-${d.Install('Installing app support', '@travett/app')}
-
-To customize a REST server, you may need to construct an entry point using the ${Application} decorator. This could look like:
-
-${d.Code('Application entry point for Rest Applications', 'doc/custom-app.ts')}
-
-And using the pattern established in the ${mod.App} module, you would run your program using ${d.Command('npx trv run custom')}.
-
-${d.Section('Custom Interceptors')}
+${d.SubSection('Custom Interceptors')}
 Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the ${mod.Di} by extending the ${RestInterceptor} class.  The interceptors are tied to the defined ${Request} and ${Response} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 ${d.Code('Defining a new Interceptor', 'doc/interceptor-logging.ts')}
@@ -226,4 +231,11 @@ ${d.Code('Comparable UserController, built manually', 'doc/controller-without-mo
 ${d.Section('Extension - Model Query')}
 
 Additionally, ${mod.ModelQuery} support can also be added support in the form of ${ModelQueryRoutes}. This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
+
+${d.Code('ModelQueryRoutes example', 'doc/controller-with-model-query.ts')}
+
+is a shorthand that is equal to:
+
+${d.Code('Comparable UserController, built manually', 'doc/controller-without-model-query.ts')}
+
 `;

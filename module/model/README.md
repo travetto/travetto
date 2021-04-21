@@ -278,6 +278,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async createStorage() ;
   async deleteStorage() ;
   async createModel(cls: Class<ModelType>) ;
+  async truncateModel(cls: Class<ModelType>) ;
   // Indexed
   getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> ;
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) ;

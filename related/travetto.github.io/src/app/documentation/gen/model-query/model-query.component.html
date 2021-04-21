@@ -13,7 +13,7 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-query</code></pre>     
       </figure>
 
-This module provides an enhanced query contract for <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations.  This contract has been externalized due to it being more complex than many implemenations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
+This module provides an enhanced query contract for <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations.  This contract has been externalized due to it being more complex than many implemenations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
 
 <h2 id="contracts">Contracts</h2>
 
@@ -125,9 +125,9 @@ Additionally, this same pattern avails it self in a set of suggestion methods th
 <tr><th>Service</th><th>Query</th><th>QueryCrud</th><th>QueryFacet</th></tr>
 </thead>
 <tbody>
-<tr><td><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-elasticsearch" title="Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.">Elasticsearch Model Source</a></td><td>X</td><td>X</td><td>X</td></tr>
-<tr><td><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a></td><td>X</td><td>X</td><td>X</td></tr>
-<tr><td><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a></td><td>X</td><td>X</td><td>X</td></tr>
+<tr><td><a class="module-link" routerLink="/docs/model-elasticsearch" title="Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.">Elasticsearch Model Source</a></td><td>X</td><td>X</td><td>X</td></tr>
+<tr><td><a class="module-link" routerLink="/docs/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a></td><td>X</td><td>X</td><td>X</td></tr>
+<tr><td><a class="module-link" routerLink="/docs/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a></td><td>X</td><td>X</td><td>X</td></tr>
 </tbody>
 </table>
 
@@ -145,11 +145,19 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 <ul> <li><code class="item input">field: {{'{'}} $in: T[] {{'}'}}</code> to see if a record's value appears in the array provided to <code class="item input">$in</code></li>
  <li><code class="item input">field: {{'{'}} $nin: T[] {{'}'}}</code> to see if a record's value does not appear in the array provided to <code class="item input">$in</code></li></ul>
 
-<h3 id="ordered-fields">Ordered Fields</h3>
-<ul> <li><code class="item input">field: {{'{'}} $lt: T {{'}'}}</code> checks if value is less than</li>
- <li><code class="item input">field: {{'{'}} $lte: T {{'}'}}</code> checks if value is less than or equal to</li>
- <li><code class="item input">field: {{'{'}} $gt: T {{'}'}}</code> checks if value is greater than</li>
- <li><code class="item input">field: {{'{'}} $gte: T {{'}'}}</code> checks if value is greater than or equal to</li></ul>
+<h3 id="ordered-numberic-fields">Ordered Numberic Fields</h3>
+<ul> <li><code class="item input">field: {{'{'}} $lt: number {{'}'}}</code> checks if value is less than</li>
+ <li><code class="item input">field: {{'{'}} $lte: number {{'}'}}</code> checks if value is less than or equal to</li>
+ <li><code class="item input">field: {{'{'}} $gt: number {{'}'}}</code> checks if value is greater than</li>
+ <li><code class="item input">field: {{'{'}} $gte: number {{'}'}}</code> checks if value is greater than or equal to</li></ul>
+<h3 id="ordered-date-fields">Ordered Date Fields</h3>
+<ul> <li><code class="item input">field: {{'{'}} $lt: Date | RelativeTime {{'}'}}</code> checks if value is less than</li>
+ <li><code class="item input">field: {{'{'}} $lte: Date | RelativeTime {{'}'}}</code> checks if value is less than or equal to</li>
+ <li><code class="item input">field: {{'{'}} $gt: Date | RelativeTime {{'}'}}</code> checks if value is greater than</li>
+ <li><code class="item input">field: {{'{'}} $gte: Date | RelativeTime {{'}'}}</code> checks if value is greater than or equal to</li></ul>
+
+<p class="note"><strong>Note</strong> Relative times are strings consisting of a number and a unit.  e.g. -1w or 30d.  These times are always relative to Date.now, but should make building  quieries more natural.</p>
+
 <h3 id="array-fields">Array Fields</h3>
 <ul> <li><code class="item input">field: {{'{'}} $all: T[]] {{'}'}}</code> checks to see if the records value contains everything within <code class="item input">$all</code></li></ul>
 
@@ -240,7 +248,7 @@ When querying with regular expressions,patterns can be specified as <code class=
 
 <h2 id="custom-model-query-service">Custom Model Query Service</h2>
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
-repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a> implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
+repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the <a class="module-link" routerLink="/docs/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a> implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
 
 To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.
 

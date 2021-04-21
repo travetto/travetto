@@ -114,6 +114,19 @@ The API exposes:
       <figcaption class="code">API
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/jwt/src/util.ts#L7">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">JWTUtil</span> <span class="token punctuation">{{'{'}}</span></code></pre>     
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">JWTUtil</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Sign the payload and return a token
+   */</span>
+  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">create</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> Payload<span class="token operator">></span></span></span><span class="token punctuation">(</span>payload<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">,</span> options<span class="token operator">:</span> SignOptions <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Read and return full object with signatures
+   */</span>
+  <span class="token keyword">static</span> <span class="token generic-function"><span class="token function">read</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> Payload <span class="token operator">=</span> Payload<span class="token operator">></span></span></span><span class="token punctuation">(</span>jwt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> TypedSig<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span> <span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Verify the token
+   */</span>
+  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">verify</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>jwt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> options<span class="token operator">:</span> VerifyOptions <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Payload <span class="token operator">&amp;</span> <span class="token constant">T</span><span class="token operator">></span> <span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 </div>

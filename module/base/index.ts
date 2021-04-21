@@ -1,5 +1,3 @@
-/// <reference path="./src/internal/global-types.d.ts" />
-
 export * from './src/manifest';
 export * from './src/stacktrace';
 export * from './src/error';

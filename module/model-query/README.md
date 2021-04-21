@@ -129,12 +129,21 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
    *  `field: { $in: T[] }` to see if a record's value appears in the array provided to `$in`
    *  `field: { $nin: T[] }` to see if a record's value does not appear in the array provided to `$in`
 
-### Ordered Fields
+### Ordered Numberic Fields
    
-   *  `field: { $lt: T }` checks if value is less than
-   *  `field: { $lte: T }` checks if value is less than or equal to
-   *  `field: { $gt: T }` checks if value is greater than
-   *  `field: { $gte: T }` checks if value is greater than or equal to
+   *  `field: { $lt: number }` checks if value is less than
+   *  `field: { $lte: number }` checks if value is less than or equal to
+   *  `field: { $gt: number }` checks if value is greater than
+   *  `field: { $gte: number }` checks if value is greater than or equal to
+### Ordered Date Fields
+   
+   *  `field: { $lt: Date | RelativeTime }` checks if value is less than
+   *  `field: { $lte: Date | RelativeTime }` checks if value is less than or equal to
+   *  `field: { $gt: Date | RelativeTime }` checks if value is greater than
+   *  `field: { $gte: Date | RelativeTime }` checks if value is greater than or equal to
+
+**Note**: Relative times are strings consisting of a number and a unit.  e.g. -1w or 30d.  These times are always relative to Date.now, but should make building  quieries more natural.
+
 ### Array Fields
    
    *  `field: { $all: T[]] }` checks to see if the records value contains everything within `$all`

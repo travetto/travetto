@@ -1,5 +1,3 @@
-/// <reference path="./src/assert/error.d.ts" />
-
 export * from './src/decorator/suite';
 export * from './src/decorator/test';
 export * from './src/model/suite';

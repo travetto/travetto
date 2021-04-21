@@ -1,5 +1,3 @@
-/// <reference path="./typings.d.ts" />
-
 import { Class, AppError, ClassInstance } from '@travetto/base';
 import { ControllerRegistry, Request, ParamConfig } from '@travetto/rest';
 import { AssetImpl } from '@travetto/asset/src/internal/types';
@@ -8,16 +6,13 @@ import { DependencyRegistry } from '@travetto/di';
 import { AssetRestUtil } from './util';
 import { RestAssetConfig } from './config';
 
-const extractUpload = (config: ParamConfig, req: Request) => req.files[config.name!];
-
-const doUpload =
-  (config: Partial<RestAssetConfig>) =>
-    async (req: Request) => {
-      if (!req.files) { // Prevent duplication if given multiple decorators
-        const assetConfig = await DependencyRegistry.getInstance(RestAssetConfig);
-        req.files = await AssetRestUtil.upload(req, { ...assetConfig, ...config });
-      }
-    };
+const doUpload = (config: Partial<RestAssetConfig>) =>
+  async (req: Request) => {
+    if (!req.files) { // Prevent duplication if given multiple decorators
+      const assetConfig = await DependencyRegistry.getInstance(RestAssetConfig);
+      req.files = await AssetRestUtil.upload(req, { ...assetConfig, ...config });
+    }
+  };
 
 /**
  * Allows for supporting uploads
@@ -43,7 +38,7 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
       ...param as ParamConfig,
       location: 'files' as 'body',
       resolve: doUpload(finalConf),
-      extract: extractUpload
+      extract: (config, req) => req?.files[config.name!]
     }, index);
   };
 }

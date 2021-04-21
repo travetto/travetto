@@ -34,7 +34,7 @@ Once installed you can invoke the scaffolding by running
 The generator will ask about enabling the following features:
 
 <h2 id="restful-architecture">Restful Architecture</h2>
-The <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> provides the necessary integration for exposing restful apis.  When selecting the <code class="item input">rest</code> feature, you will need to specify which backend you want to include with your application, the default being <a target="_blank" class="external-link" href="https://expressjs.com">express</a>.  Currently you can select from:
+The <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> provides the necessary integration for exposing restful apis.  When selecting the <code class="item input">rest</code> feature, you will need to specify which backend you want to include with your application, the default being <a target="_blank" class="external-link" href="https://expressjs.com">express</a>.  Currently you can select from:
 
 <ul> <li><a target="_blank" class="external-link" href="https://expressjs.com">express</a></li>
  <li><a target="_blank" class="external-link" href="https://koajs.com/">koa</a></li>
@@ -45,19 +45,19 @@ The code will establish some basic routes, specifically, <code class="item input
 <h3 id="additional-rest-features">Additional Rest Features</h3>
 In addition to the core functionality, the <code class="item input">rest</code> feature has some useful sub-features.  Specifically:
 
-<a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/openapi" title="OpenAPI integration support for the travetto framework">OpenAPI Specification</a> support for the restful api.  This will automatically expose a <code class="item path">openapi.yml</code> endpoint, and provide the necessary plumbing to support client generation.
+<a class="module-link" routerLink="/docs/openapi" title="OpenAPI integration support for the travetto framework">OpenAPI Specification</a> support for the restful api.  This will automatically expose a <code class="item path">openapi.yml</code> endpoint, and provide the necessary plumbing to support client generation.
 
-<a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/log" title="Logging framework that integrates at the console.log level.">Logging</a> support for better formatting, <a target="_blank" class="external-link" href="https://www.npmjs.com/package/debug">debug</a> like support, and colorized output.  This is generally useful for server logs, especially during development.
+<a class="module-link" routerLink="/docs/log" title="Logging framework that integrates at the console.log level.">Logging</a> support for better formatting, <a target="_blank" class="external-link" href="https://www.npmjs.com/package/debug">debug</a> like support, and colorized output.  This is generally useful for server logs, especially during development.
 
 <h2 id="authentication">Authentication</h2>
-Authentication is also supported on the Restful endpoints by selecting <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest" title="Rest authentication integration support for the travetto framework">Rest Auth</a> during setup.  This will support basic authentication running out of local memory, with user <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/rest-session" title="Session provider for the travetto rest module.">REST Session</a>s.
+Authentication is also supported on the Restful endpoints by selecting <a class="module-link" routerLink="/docs/auth-rest" title="Rest authentication integration support for the travetto framework">Rest Auth</a> during setup.  This will support basic authentication running out of local memory, with user <a class="module-link" routerLink="/docs/rest-session" title="Session provider for the travetto rest module.">REST Session</a>s.
 
 <h2 id="testing">Testing</h2>
-<a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/test" title="Declarative test framework">Testing</a> can also be configured out of the box to provide simple test cases for the data model.
+<a class="module-link" routerLink="/docs/test" title="Declarative test framework">Testing</a> can also be configured out of the box to provide simple test cases for the data model.
 
 <h2 id="data-modelling-and-storage">Data Modelling and Storage</h2>
 
-The <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:
+The <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> allows for modeling of application data, and provides mechanisms for storage and retrieval.  When setting up your application, you will need to select which database backend you want to use:
 
 <ul> <li><a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a></li>
  <li><a target="_blank" class="external-link" href="https://mongodb.com">mongodb</a></li>

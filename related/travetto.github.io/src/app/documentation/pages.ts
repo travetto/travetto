@@ -99,13 +99,13 @@ export const PAGES = [
       { path: 'test', title: 'Test', component: TestComponent },
     ]
   },
-
   {
-    path: 'compiler', title: 'Compiler', component: CompilerComponent, subs: [
+    path: 'registry', title: 'Registry', component: RegistryComponent, subs: [
+      { path: 'compiler', title: 'Compiler', component: CompilerComponent },
       { path: 'transformer', title: 'Transformer', component: TransformerComponent },
+      { path: 'watch', title: 'Watch', component: WatchComponent }
     ]
   },
-  { path: 'registry', title: 'Registry', component: RegistryComponent },
   {
     path: 'tools', title: 'Tooling', subs: [
       { path: 'vscode-plugin', title: 'VS Code Plugin', component: VSCodePluginComponent },
@@ -116,9 +116,8 @@ export const PAGES = [
   {
     path: 'base', title: 'Base', component: BaseComponent, subs: [
       { path: 'boot', title: 'Boot', component: BootComponent },
-      { path: 'yaml', title: 'YAML Parser', component: YamlComponent },
       { path: 'worker', title: 'Worker', component: WorkerComponent },
-      { path: 'watch', title: 'Watch', component: WatchComponent }
+      { path: 'yaml', title: 'YAML Parser', component: YamlComponent },
     ]
   }
 ];

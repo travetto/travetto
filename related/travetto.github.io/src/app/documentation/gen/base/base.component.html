@@ -94,7 +94,7 @@ During the lifecycle of an application, there is a need to handle different phas
  <li>The list of handlers that should be dependent on the current handler, if any.</li>
  <li>The actual functionality to execute</li></ul>
 
-An example would be something like <code class="item path">phase.init.ts</code> in the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/config" title="Environment-aware config management using yaml files">Configuration</a> module.  
+An example would be something like <code class="item path">phase.init.ts</code> in the <a class="module-link" routerLink="/docs/config" title="Environment-aware config management using yaml files">Configuration</a> module.  
 
       <figure class="code">
       <figcaption class="code">Config phase init
@@ -135,7 +135,7 @@ As a registered shutdown handler, you can do.
 
 <h2 id="standard-error-support">Standard Error Support</h2>
 
-While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
+While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
 
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/base/src/error.ts#L9">AppError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
 <ul> <li><code class="item input">general</code> - General purpose errors</li>

@@ -30,7 +30,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
 
   postConstruct() {
     if (EnvUtil.isReadonly() && this.#signingKey === 'dummy') {
-      throw new AppError('The default signing key is not valid for production use, please specify a value at jwt.signingKey');
+      throw new AppError('The default signing key is not valid for production use, please specify a config value at jwt.signingKey');
     }
   }
 

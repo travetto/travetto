@@ -13,14 +13,14 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model</code></pre>     
       </figure>
 
-This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a>, which is used for data model validation.
+This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a>, which is used for data model validation.
 
 <h2 id="contracts">Contracts</h2>
 
 The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1">Streaming</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19">Bulk</a>.
 
 <h3 id="basic"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9">Basic</a></h3>
-All <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
+All <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
 
       <figure class="code">
       <figcaption class="code">Basic Contract
@@ -56,7 +56,7 @@ All <a class="module-link" href="https://github.com/travetto/travetto/tree/maste
       </figure>
 
 <h3 id="crud"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11">CRUD</a></h3>
-The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth" title="Authentication scaffolding for the travetto framework">Authentication</a>, is an example of a module that only needs create, read and delete, and so any implementation of <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> that honors this contract, can be used with the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth" title="Authentication scaffolding for the travetto framework">Authentication</a> model extension.
+The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in <a class="module-link" routerLink="/docs/auth" title="Authentication scaffolding for the travetto framework">Authentication</a>, is an example of a module that only needs create, read and delete, and so any implementation of <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> that honors this contract, can be used with the <a class="module-link" routerLink="/docs/auth" title="Authentication scaffolding for the travetto framework">Authentication</a> model extension.
 
       <figure class="code">
       <figcaption class="code">Crud Contract
@@ -101,7 +101,7 @@ The crud contract, builds upon the basic contract, and is built around the idea 
       </figure>
 
 <h3 id="indexed"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11">Indexed</a></h3>
-Additionally, an implementation may support the ability for basic indexed queries. This is not the full featured query support of <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a>, but
+Additionally, an implementation may support the ability for basic indexed queries. This is not the full featured query support of <a class="module-link" routerLink="/docs/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a>, but
 allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.  
 
       <figure class="code">
@@ -129,7 +129,7 @@ allowing for indexed lookups.  This does not support listing by index, but may b
 
 <h3 id="expiry"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11">Expiry</a></h3>
 
-Certain implementations will also provide support for automatic expiry of data at runtime.  This is extremely useful for temporary data as, and is used in the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/cache" title="Caching functionality with decorators for declarative use.">Caching</a> module for expiring data accordingly.
+Certain implementations will also provide support for automatic expiry of data at runtime.  This is extremely useful for temporary data as, and is used in the <a class="module-link" routerLink="/docs/cache" title="Caching functionality with decorators for declarative use.">Caching</a> module for expiring data accordingly.
 
       <figure class="code">
       <figcaption class="code">Expiry Contract
@@ -147,7 +147,7 @@ Certain implementations will also provide support for automatic expiry of data a
 
 <h3 id="streaming"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1">Streaming</a></h3>
 
-Some implementations also allow for the ability to read/write binary data as a stream.  Given that all implementations can store <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.  This pattern is currently used by <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/asset" title="Modular library for storing and retrieving binary assets">Asset</a> for reading and writing asset data.
+Some implementations also allow for the ability to read/write binary data as a stream.  Given that all implementations can store <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.  This pattern is currently used by <a class="module-link" routerLink="/docs/asset" title="Modular library for storing and retrieving binary assets">Asset</a> for reading and writing asset data.
 
       <figure class="code">
       <figcaption class="code">Stream Contract
@@ -225,7 +225,7 @@ Models are declared via the <a target="_blank" class="source-link" href="https:/
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-All fields are optional, but the <code class="item field">id</code> and <code class="item field">type</code> are important as those field types are unable to be changed.  This may make using existing data models impossible if types other than strings are required.  Additionally, the type field, is intended to record the base model type and cannot be remapped. This is important to support polymorphism, not only in <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>, but also in <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a>.
+All fields are optional, but the <code class="item field">id</code> and <code class="item field">type</code> are important as those field types are unable to be changed.  This may make using existing data models impossible if types other than strings are required.  Additionally, the type field, is intended to record the base model type and cannot be remapped. This is important to support polymorphism, not only in <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>, but also in <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a>.
 
 <h2 id="implementations">Implementations</h2>
 
@@ -234,13 +234,13 @@ All fields are optional, but the <code class="item field">id</code> and <code cl
 <tr><th>Service</th><th>Basic</th><th>CRUD</th><th>Indexed</th><th>Expiry</th><th>Stream</th><th>Bulk</th></tr>
 </thead>
 <tbody>
-<tr><td><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-dynamodb" title="DynamoDB backing for the travetto model module.">DynamoDB Model Support</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td> </td><td> </td></tr>
-<tr><td><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-elasticsearch" title="Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.">Elasticsearch Model Source</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td> </td><td>X</td></tr>
-<tr><td><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-firestore" title="Firestore backing for the travetto model module.">Firestore Model Support</a></td><td>X</td><td>X</td><td>X</td><td> </td><td> </td><td> </td></tr>
-<tr><td><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td></tr>
-<tr><td><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-redis" title="Redis backing for the travetto model module.">Redis Model Support</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td> </td><td></td></tr>
-<tr><td><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-s3" title="S3 backing for the travetto model module.">S3 Model Support</a></td><td>X</td><td>X</td><td> </td><td>X</td><td>X</td><td> </td></tr>
-<tr><td><a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td> </td><td>X</td></tr>
+<tr><td><a class="module-link" routerLink="/docs/model-dynamodb" title="DynamoDB backing for the travetto model module.">DynamoDB Model Support</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td> </td><td> </td></tr>
+<tr><td><a class="module-link" routerLink="/docs/model-elasticsearch" title="Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.">Elasticsearch Model Source</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td> </td><td>X</td></tr>
+<tr><td><a class="module-link" routerLink="/docs/model-firestore" title="Firestore backing for the travetto model module.">Firestore Model Support</a></td><td>X</td><td>X</td><td>X</td><td> </td><td> </td><td> </td></tr>
+<tr><td><a class="module-link" routerLink="/docs/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td></tr>
+<tr><td><a class="module-link" routerLink="/docs/model-redis" title="Redis backing for the travetto model module.">Redis Model Support</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td> </td><td></td></tr>
+<tr><td><a class="module-link" routerLink="/docs/model-s3" title="S3 backing for the travetto model module.">S3 Model Support</a></td><td>X</td><td>X</td><td> </td><td>X</td><td>X</td><td> </td></tr>
+<tr><td><a class="module-link" routerLink="/docs/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td> </td><td>X</td></tr>
 <tr><td><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31">MemoryModelService</a></td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td></tr>
 <tr><td><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L42">FileModelService</a></td><td>X</td><td>X</td><td> </td><td>X</td><td>X</td><td>X</td></tr>
 </tbody>
@@ -248,7 +248,7 @@ All fields are optional, but the <code class="item field">id</code> and <code cl
 
 <h2 id="custom-model-service">Custom Model Service</h2>
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
-repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
+repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
 
       <figure class="code">
       <figcaption class="code">Memory Service
@@ -304,6 +304,7 @@ repetitive functionality, that is unable to be shared due to not relying upon in
   <span class="token keyword">async</span> <span class="token function">createStorage</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
   <span class="token keyword">async</span> <span class="token function">deleteStorage</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
   <span class="token keyword">async</span> <span class="token function">createModel</span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span>ModelType<span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
+  <span class="token keyword">async</span> <span class="token function">truncateModel</span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span>ModelType<span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
   <span class="token comment">// Indexed</span>
   <span class="token generic-function"><span class="token function">getByIndex</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> idx<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">:</span> Partial<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span> <span class="token punctuation">;</span>
   <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">deleteByIndex</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> idx<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> body<span class="token operator">:</span> Partial<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">;</span>

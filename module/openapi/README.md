@@ -94,9 +94,6 @@ export class ApiSpecConfig {
 ## Spec Generation
 The framework, when in watch mode, will generate the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification in either [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML). This module integrates with the file watching paradigm and can regenerate the openapi spec as changes to endpoints and models are made during development.  The output format is defined by the suffix of the output file, `.yaml` or `.json`.  
 
-## Client Generation
-The outputted spec can be consumed using the [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator).
-
 ## CLI - openapi:spec
 
 The module provides a plugin for the [Command Line Interface](https://github.com/travetto/travetto/tree/master/module/cli#readme "CLI infrastructure for travetto framework") to allow scripting file generation.
@@ -115,3 +112,23 @@ Options:
 The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
 
 **Note**: The module supports generating the OpenAPI spec in real-time while listening for changes to routes and models.
+
+## CLI - openapi:client
+
+The module provides a plugin for the [Command Line Interface](https://github.com/travetto/travetto/tree/master/module/cli#readme "CLI infrastructure for travetto framework") to allow client generation from the API structure.
+
+**Terminal: OpenAPI usage**
+```bash
+$ trv openapi:client --help
+
+Usage:  openapi:client [options] [format] [additional-properties]
+
+Options:
+  -i, --input <input>                Input file (default: "@trv:openapi/openapi.yml")
+  -o, --output <output>              Output folder (default: "@trv:openapi/api-client")
+  -d, --docker-image <docker-image>  Docker Image to use (default: "arcsine/openapi-generator:latest")
+  -w, --watch                        Watch for file changes
+  -h, --help                         display help for command
+```
+
+This tool relies upon a custom build of [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator), which supports watching.  This allows for fast responsive client generation as the shape of the API changes.

@@ -1,8 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppComponent } from './app.component';
 import { LandingComponent } from './landing/landing.component';
@@ -47,8 +48,8 @@ const routes: Routes = [
     BrowserModule,
     HttpClientModule,
     DocumentationModule,
-    RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled', relativeLinkResolution: 'legacy' }),
     BrowserAnimationsModule,
+    RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled', relativeLinkResolution: 'legacy' }),
     SharedModule
   ],
   providers: [],

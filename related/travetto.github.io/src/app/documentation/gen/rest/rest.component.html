@@ -22,7 +22,7 @@ To define a route, you must first declare a <a target="_blank" class="source-lin
 <ul> <li><code class="item input">title</code> - The definition of the controller</li>
  <li><code class="item input">description</code> - High level description fo the controller</li></ul>
 
-Additionally, the module is predicated upon <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a>, and so all standard injection techniques (constructor, fields) work for registering dependencies.
+Additionally, the module is predicated upon <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a>, and so all standard injection techniques (constructor, fields) work for registering dependencies.
 
 <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a> comments can also be used to define the <code class="item input">title</code> attribute.
 
@@ -93,7 +93,7 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L58">@Query</a> - Query params</li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L70">@Body</a> - Request body (in it's entirety)</li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L64">@Header</a> - Header values</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46">@Context</a> - Special values exposed (e.g. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88">TravettoResponse</a>, Session, AuthContext, etc.)</li></ul>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46">@Context</a> - Special values exposed (e.g. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88">TravettoResponse</a>, etc.)</li></ul>
 
 Each <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L33">@Param</a> can be configured to indicate:
 <ul> <li><code class="item input">name</code> - Name of param, field name, defaults to handler parameter name if necessary</li>
@@ -154,13 +154,95 @@ The module provides standard structure for rendering content on the response.  T
  <li>String responses</li>
  <li>Files</li></ul>
 
-Per the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/base" title="Application phase management, environment config and common utilities for travetto applications.">Base</a> module, the following types automatically have rest support as well:
+Per the <a class="module-link" routerLink="/docs/base" title="Application phase management, environment config and common utilities for travetto applications.">Base</a> module, the following types automatically have rest support as well:
 <ul> <li><code class="item input">Map</code> - Serializes as a JSON object</li>
  <li><code class="item input">Set</code> - Serializes as an array</li>
  <li><code class="item input">Error</code> - Serializes to a standard object, with status, and the error message.</li>
  <li><code class="item input">AppError</code> - Serializes like <code class="item input">Error</code> but translates the error category to an HTTP status</li></ul>
 
-Additionally, the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a> module supports typing requests and request bodies for run-time validation of requests. 
+Additionally, the <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a> module supports typing requests and request bodies for run-time validation of requests. 
+
+<h2 id="running-an-app">Running an App</h2>
+
+By default, the framework provices a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25">@Application</a> at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23">RestApplication</a> that will follow default behaviors, and spin up the REST server.  You will need to install the <a class="module-link" routerLink="/docs/app" title="Application registration/management and run support.">Application</a> module to execute.  
+
+      <figure class="install">
+      <figcaption class="install">Installing app support
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/app</code></pre>     
+      </figure>
+
+      <figure class="terminal">
+      <figcaption class="terminal">Standard application
+      
+      </figcaption>
+      <pre><code class="language-bash">$ trv run
+
+Usage: trv run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+Options:
+  -e, --env <span class="token operator">&lt;</span>env<span class="token operator">></span>            Application environment
+  -p, --profile <span class="token operator">&lt;</span>profile<span class="token operator">></span>    Additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -r, --resource <span class="token operator">&lt;</span>resource<span class="token operator">></span>  Additional resource locations <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -h, --help                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Available Applications:
+
+   ● rest Default rest application entrypoint
+     ----------------------------------------
+     usage: rest
+     file:  src/application/rest.ts</code></pre>     
+      </figure>
+
+<h3 id="creating-a-custom-app">Creating a Custom App</h3>
+To customize a REST server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25">@Application</a> decorator. This could look like:
+
+      <figure class="code">
+      <figcaption class="code">Application entry point for Rest Applications
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest/doc/custom-app.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestApplication <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'custom'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token keyword">extends</span> <span class="token class-name">RestApplication</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token comment">// Configure server before running</span>
+    <span class="token keyword">return</span> <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+And using the pattern established in the <a class="module-link" routerLink="/docs/app" title="Application registration/management and run support.">Application</a> module, you would run your program using <code class="item command">npx trv run custom</code>.
+
+      <figure class="terminal">
+      <figcaption class="terminal">Custom application
+      
+      </figcaption>
+      <pre><code class="language-bash">$ trv run
+
+Usage: trv run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+Options:
+  -e, --env <span class="token operator">&lt;</span>env<span class="token operator">></span>            Application environment
+  -p, --profile <span class="token operator">&lt;</span>profile<span class="token operator">></span>    Additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -r, --resource <span class="token operator">&lt;</span>resource<span class="token operator">></span>  Additional resource locations <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -h, --help                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Available Applications:
+
+   ● custom
+     ------------------------
+     usage: custom
+     file:  doc/custom-app.ts
+
+   ● rest Default rest application entrypoint
+     ----------------------------------------
+     usage: rest
+     file:  src/application/rest.ts</code></pre>     
+      </figure>
 
 <h2 id="interceptors">Interceptors</h2>
 
@@ -187,7 +269,7 @@ Additionally, the <a class="module-link" href="https://github.com/travetto/trave
 <p class="note"><strong>Note</strong> The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after reuirements to ensure the appropriate order of execution.</p>
 
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
-<ol> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/serialize.ts#L17">SerializeInterceptor</a> - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.</li>
+<ol> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/serialize.ts#L20">SerializeInterceptor</a> - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.</li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/cors.ts#L39">CorsInterceptor</a> - This interceptor allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, <code class="item input">rest.cors.active: true</code>
   
       <figure class="code">
@@ -254,7 +336,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
   domain<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure></li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/get-cache.ts#L12">GetCacheInterceptor</a> - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting <code class="item input">res.disableGetCache: true</code> in your config.</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/get-cache.ts#L12">GetCacheInterceptor</a> - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting <code class="item input">rest.disableGetCache: true</code> in your config.</li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/logging.ts#L61">LoggingInterceptor</a> - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
 
   
@@ -269,40 +351,8 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 <span class="token punctuation">-</span> '/controller3<span class="token punctuation">:</span>/path/<span class="token important">*`</span></code></pre>     
       </figure></li></ol>
 
-<h2 id="creating-and-running-an-app">Creating and Running an App</h2>
-
-By default, the framework provices a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25">@Application</a> at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23">RestApplication</a> that will follow default behaviors, and spin up the REST server.  You will need to install the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/app" title="Application registration/management and run support.">Application</a> module to execute.  
-
-      <figure class="install">
-      <figcaption class="install">Installing app support
-      
-      </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travett/app</code></pre>     
-      </figure>
-
-To customize a REST server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25">@Application</a> decorator. This could look like:
-
-      <figure class="code">
-      <figcaption class="code">Application entry point for Rest Applications
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest/doc/custom-app.ts">Source</a></cite>
-      </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestApplication <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-
-@<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'custom'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token keyword">extends</span> <span class="token class-name">RestApplication</span> <span class="token punctuation">{{'{'}}</span>
-
-  <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token comment">// Configure server before running</span>
-    <span class="token keyword">return</span> <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
-      </figure>
-
-And using the pattern established in the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/app" title="Application registration/management and run support.">Application</a> module, you would run your program using <code class="item command">npx trv run custom</code>.
-
-<h2 id="custom-interceptors">Custom Interceptors</h2>
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by extending the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/types.ts#L11">RestInterceptor</a> class.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88">TravettoResponse</a> objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+<h3 id="custom-interceptors">Custom Interceptors</h3>
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by extending the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/types.ts#L11">RestInterceptor</a> class.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88">TravettoResponse</a> objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
       <figure class="code">
       <figcaption class="code">Defining a new Interceptor
@@ -349,7 +399,7 @@ A <code class="item input">next</code> parameter is also available to allow for 
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-Currently <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/asset-rest" title="Provides integration between the travetto asset and rest module.">Asset Rest Support</a> is implemented in this fashion, as well as <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/auth-rest" title="Rest authentication integration support for the travetto framework">Rest Auth</a>.
+Currently <a class="module-link" routerLink="/docs/asset-rest" title="Provides integration between the travetto asset and rest module.">Asset Rest Support</a> is implemented in this fashion, as well as <a class="module-link" routerLink="/docs/auth-rest" title="Rest authentication integration support for the travetto framework">Rest Auth</a>.
 
 <h2 id="cookie-support">Cookie Support</h2>
 <a target="_blank" class="external-link" href="https://expressjs.com">express</a>/<a target="_blank" class="external-link" href="https://koajs.com/">koa</a>/<a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using <a target="_blank" class="external-link" href="https://www.npmjs.com/package/cookies">cookies</a>.  This functionality is exposed onto the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12">TravettoRequest</a>/<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88">TravettoResponse</a> object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
@@ -394,7 +444,7 @@ The entire <a target="_blank" class="source-link" href="https://github.com/trave
 <h2 id="serverless">Serverless</h2>
 <h3 id="aws-lambda">AWS Lambda</h3>
 
-The module provides support basic support with AWS lambdas. When using one of the specific rest modules (e.g. <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/rest-express" title="Express provider for the travetto rest module.">Express REST Source</a>), you can install the appropriate lambda-related dependencies installed (e.g. <a target="_blank" class="external-link" href="https://github.com/awslabs/aws-serverless-express/blob/master/README.md">aws-serverless-express</a>) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers. 
+The module provides support basic support with AWS lambdas. When using one of the specific rest modules (e.g. <a class="module-link" routerLink="/docs/rest-express" title="Express provider for the travetto rest module.">Express REST Source</a>), you can install the appropriate lambda-related dependencies installed (e.g. <a target="_blank" class="external-link" href="https://github.com/awslabs/aws-serverless-express/blob/master/README.md">aws-serverless-express</a>) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers. 
 
 <h2 id="packaging-lambdas">Packaging Lambdas</h2>
 
@@ -413,7 +463,7 @@ To use pack please run:
 
 <h2 id="extension-schema">Extension - Schema</h2>
 
-The module provides high level access for <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a> support, via decorators, for validating and typing request bodies.
+The module provides high level access for <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a> support, via decorators, for validating and typing request bodies.
 
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L83">@SchemaBody</a> provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
 
@@ -503,7 +553,7 @@ Addtionally, <a target="_blank" class="source-link" href="https://github.com/tra
 
 <h2 id="extension-model">Extension - Model</h2>
 
-To facilitate common RESTful patterns, the module exposes  <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model.ts#L21">ModelRoutes</a>.
+To facilitate common RESTful patterns, the module exposes  <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model.ts#L21">ModelRoutes</a>.
 
       <figure class="code">
       <figcaption class="code">ModelRoutes example
@@ -570,5 +620,68 @@ is a shorthand that is equal to:
 
 <h2 id="extension-model-query">Extension - Model Query</h2>
 
-Additionally, <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a> support can also be added support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L41">ModelQueryRoutes</a>. This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
+Additionally, <a class="module-link" routerLink="/docs/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a> support can also be added support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L42">ModelQueryRoutes</a>. This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
+
+      <figure class="code">
+      <figcaption class="code">ModelQueryRoutes example
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest/doc/controller-with-model-query.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQuerySupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQueryRoutes <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/extension/model-query'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
+
+@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/user'</span><span class="token punctuation">)</span>
+@<span class="token meta">ModelQueryRoutes</span><span class="token punctuation">(</span>User<span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">UserQueryController</span> <span class="token punctuation">{{'{'}}</span>
+  @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  source<span class="token operator">:</span> ModelQuerySupport<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+is a shorthand that is equal to:
+
+      <figure class="code">
+      <figcaption class="code">Comparable UserController, built manually
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/module/rest/doc/controller-without-model-query.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQuerySupport<span class="token punctuation">,</span> SortClause<span class="token punctuation">,</span> ValidStringFields <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> isQuerySuggestSupported <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query/src/internal/service/common'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Path <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/decorator/param'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestModelQuery<span class="token punctuation">,</span> RestModelSuggestQuery <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/extension/model-query'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaQuery <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/extension/schema'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> convert <span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">(</span>k<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token operator">=></span> k <span class="token operator">&amp;&amp;</span> <span class="token keyword">typeof</span> k <span class="token operator">===</span> <span class="token string">'string'</span> <span class="token operator">&amp;&amp;</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^[\{{'{'}}\[]</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">.</span><span class="token function">test</span><span class="token punctuation">(</span>k<span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>k<span class="token punctuation">)</span> <span class="token keyword">as</span> <span class="token constant">T</span> <span class="token operator">:</span> k<span class="token punctuation">;</span>
+
+@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/user'</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">UserQueryController</span> <span class="token punctuation">{{'{'}}</span>
+
+  @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  service<span class="token operator">:</span> ModelQuerySupport<span class="token punctuation">;</span>
+
+  @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">getAllUser</span><span class="token punctuation">(</span>@<span class="token meta">SchemaQuery</span><span class="token punctuation">(</span><span class="token punctuation">)</span> query<span class="token operator">:</span> RestModelQuery<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">query</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
+      limit<span class="token operator">:</span> query<span class="token punctuation">.</span>limit<span class="token punctuation">,</span>
+      offset<span class="token operator">:</span> query<span class="token punctuation">.</span>offset<span class="token punctuation">,</span>
+      sort<span class="token operator">:</span> <span class="token function">convert</span><span class="token punctuation">(</span>query<span class="token punctuation">.</span>sort<span class="token punctuation">)</span> <span class="token keyword">as</span> SortClause<span class="token operator">&lt;</span>User<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      where<span class="token operator">:</span> <span class="token function">convert</span><span class="token punctuation">(</span>query<span class="token punctuation">.</span>where<span class="token punctuation">)</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/suggest/:field'</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">suggest</span><span class="token punctuation">(</span>@<span class="token meta">Path</span><span class="token punctuation">(</span><span class="token punctuation">)</span> field<span class="token operator">:</span> ValidStringFields<span class="token operator">&lt;</span>User<span class="token operator">></span><span class="token punctuation">,</span> @<span class="token meta">SchemaQuery</span><span class="token punctuation">(</span><span class="token punctuation">)</span> suggest<span class="token operator">:</span> RestModelSuggestQuery<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isQuerySuggestSupported</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">suggest</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> field<span class="token punctuation">,</span> suggest<span class="token punctuation">.</span>q<span class="token punctuation">,</span> suggest<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 </div>

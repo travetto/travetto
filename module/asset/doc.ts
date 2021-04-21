@@ -1,8 +1,6 @@
-import { d } from '@travetto/doc';
+import { d, mod } from '@travetto/doc';
 import { Injectable } from '@travetto/di';
 import { FileModelService, MemoryModelService } from '@travetto/model';
-import { MongoModelService } from '@travetto/model-mongo';
-import { S3ModelService } from '@travetto/model-s3';
 import { Links } from '@travetto/model/support/doc-support';
 
 import { AssetService } from '.';
@@ -17,14 +15,14 @@ The asset module requires an ${Links.Stream} to provide functionality for readin
 
 ${d.Install('provider', '@travetto/model-{provider}')}
 
-Currently, the following are packages that provide ${Links.Stream}:
+Currently, the following are packages that provide ${Links.Stream} support:
 ${d.List(
-  d`@travetto/model - ${FileModelService}, ${MemoryModelService}`,
-  d`@travetto/model-mongo - ${MongoModelService}`,
-  d`@travetto/model-s3 - ${S3ModelService}`,
+  d`${mod.Model} - ${FileModelService}, ${MemoryModelService}`,
+  d`${mod.ModelMongo}`,
+  d`${mod.ModelS3}`,
 )}
 
-If you are using more than one ${Links.Stream}-based service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
+If you are using more than one ${Links.Stream} service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
 
 ${d.Code('Configuration Methods', 'doc/asset-config.ts')}
 

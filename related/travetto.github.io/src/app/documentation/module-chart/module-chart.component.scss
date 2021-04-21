@@ -28,8 +28,16 @@
       border-left: 15px solid transparent;
     }
 
-    a, .title {
+    a {
       color: #333;
+    }
+
+    .title, >a {
+      color: #000;
+      font-family: 'Julius Sans One', sans-serif;
+    }
+
+    a, .title {
       font-size: 20pt;
       line-height: 2em;
       text-decoration: none;
@@ -43,14 +51,11 @@
 
     .sub {
       display: inline-block;
-      padding-right: 1em;
+      padding-right: .5em;
+      padding-left: .5em;
 
       & a {
         font-size: .9em;
-      }
-
-      &:last-of-type {
-        padding-right: 0em;
       }
     }
 

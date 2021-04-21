@@ -5,7 +5,7 @@
           
         </h1>
 
-The <a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a> directly integrates with <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework, exposing some of the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/cli" title="CLI infrastructure for travetto framework">Command Line Interface</a> functionality.
+The <a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a> directly integrates with <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework, exposing some of the <a class="module-link" routerLink="/docs/cli" title="CLI infrastructure for travetto framework">Command Line Interface</a> functionality.
 
 The currently supported features are:
 <ul> <li>Real-time test evaluation and debugging</li>
@@ -15,7 +15,7 @@ The currently supported features are:
 
 <h2 id="testing">Testing</h2>
 
-The test related functionality relies upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/test" title="Declarative test framework">Testing</a> module being installed, and used to define tests (<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L13">@Suite</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L11">@Test</a>).
+The test related functionality relies upon the <a class="module-link" routerLink="/docs/test" title="Declarative test framework">Testing</a> module being installed, and used to define tests (<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/test/src/decorator/suite.ts#L13">@Suite</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/test/src/decorator/test.ts#L11">@Test</a>).
 
 <h3 id="real-time-test-evaluation">Real-time Test Evaluation</h3>
 
@@ -40,7 +40,7 @@ In addition to manual invocation at a line, each test has a <a target="_blank" c
 
 <h2 id="application-launching">Application Launching</h2>
 
-While using the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/app" title="Application registration/management and run support.">Application</a>, a common pattern is to use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25">@Application</a> annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated.
+While using the <a class="module-link" routerLink="/docs/app" title="Application registration/management and run support.">Application</a>, a common pattern is to use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25">@Application</a> annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated.
 
 The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.
 
@@ -67,7 +67,7 @@ If at any point in time, you wish to modify the launch configuration of any appl
 
 <h2 id="email-template-development">Email Template Development</h2>
 
-While using the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/email-template" title="Email templating module">Email Templating</a> module, the desire to visual inspect output, as well as quickly test changes is paramount.  To that end, the plugin supports the ability to compile, view, and send email templates all from within the plugin.
+While using the <a class="module-link" routerLink="/docs/email-template" title="Email templating module">Email Templating</a> module, the desire to visual inspect output, as well as quickly test changes is paramount.  To that end, the plugin supports the ability to compile, view, and send email templates all from within the plugin.
 
 The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.
 
@@ -93,8 +93,8 @@ Currently the supported commands are:
 
 <h3 id="requirements">Requirements</h3>
 <ul> <li>You should have the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework installed, version 1.1.0 and higher.</li>
- <li>Tests require the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/test" title="Declarative test framework">Testing</a> module to be installed.</li>
- <li>Application running requires the <a class="module-link" href="https://github.com/travetto/travetto/tree/master/module/app" title="Application registration/management and run support.">Application</a> module to be installed.</li></ul>
+ <li>Tests require the <a class="module-link" routerLink="/docs/test" title="Declarative test framework">Testing</a> module to be installed.</li>
+ <li>Application running requires the <a class="module-link" routerLink="/docs/app" title="Application registration/management and run support.">Application</a> module to be installed.</li></ul>
 
 <h2 id="known-issues">Known Issues</h2>
 

@@ -76,7 +76,7 @@ export class ResolveUtil {
       throw new Error(`Pattern ${startPattern.source} not found in ${file}`);
     }
 
-    const endIdx = endPattern ? content.findIndex((l, i) => i > startIdx && endPattern.test(l)) : startIdx;
+    const endIdx = endPattern ? content.findIndex((l, i) => i > startIdx && endPattern.test(l)) : content.length;
     let text = content.slice(startIdx, endIdx + 1).join('\n');
 
     if (outline) {

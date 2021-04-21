@@ -39,7 +39,7 @@ With `.html` being the only required field.  The [Email Templating](https://gith
 
 Given the integration with [nodemailer](https://nodemailer.com/about/), all extensions should be usable out of the box. The primary [nodemailer](https://nodemailer.com/about/) modules are provided (assuming dependencies are installed):
 
-**Code: `sendmail` to send all messages via the sendmail operation**
+**Code: sendmail to send all messages via the sendmail operation**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 import { NodemailerTransport } from '@travetto/email';
@@ -52,7 +52,7 @@ class Config {
 }
 ```
 
-**Code: `smtp` to send all messages via the smtp operation**
+**Code: smtp to send all messages via the smtp operation**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 import { NodemailerTransport } from '@travetto/email';
@@ -67,7 +67,7 @@ class Config {
 }
 ```
 
-**Code: `ses` to send all messages via the ses operation**
+**Code: ses to send all messages via the ses operation**
 ```typescript
 import { SESClient } from '@aws-sdk/client-ses';
 

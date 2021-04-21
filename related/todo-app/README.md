@@ -107,7 +107,7 @@ export class TodoService {
   }
 
   async getAll(search: TodoSearch) {
-    return this.modelService.query(Todo, { ...search, sort: [{ priority: -1 }] });
+    return this.modelService.query(Todo, { ...search, sort: [{ created: -1 }] });
   }
 
   async complete(id: string, completed = true) {
@@ -305,11 +305,14 @@ First we must start the application:
     excludeModules: Set(3) { '@travetto/cli', '@travetto/doc', '@travetto/boot' },
     dynamicModules: {
       '@travetto/app': '@trv:app',
+      '@travetto/auth': '@trv:auth',
+      '@travetto/auth-rest': '@trv:auth-rest',
       '@travetto/base': '@trv:base',
       '@travetto/boot': '@trv:boot',
       '@travetto/cli': '@trv:cli',
       '@travetto/compiler': '@trv:compiler',
       '@travetto/config': '@trv:config',
+      '@travetto/context': '@trv:context',
       '@travetto/di': '@trv:di',
       '@travetto/doc': '@trv:doc',
       '@travetto/log': '@trv:log',
@@ -321,6 +324,7 @@ First we must start the application:
       '@travetto/registry': '@trv:registry',
       '@travetto/rest': '@trv:rest',
       '@travetto/rest-express': '@trv:rest-express',
+      '@travetto/rest-session': '@trv:rest-session',
       '@travetto/schema': '@trv:schema',
       '@travetto/test': '@trv:test',
       '@travetto/transformer': '@trv:transformer',
