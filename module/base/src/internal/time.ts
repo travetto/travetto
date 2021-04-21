@@ -12,6 +12,9 @@ const TIME_UNITS = {
   ms: 1
 };
 
+const timeUnitRegex = new RegExp(`(${Object.keys(TIME_UNITS).join('|')})$`, 'i');
+export type RelativeTime = `${number}${keyof typeof TIME_UNITS}`;
+
 export type TimeUnit = keyof typeof TIME_UNITS;
 
 /**
@@ -24,10 +27,12 @@ export class TimeUtil {
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static toMillis(amount: number | string, unit: TimeUnit = 'ms') {
+  static toMillis(amount: number, unit?: TimeUnit): number;
+  static toMillis(amount: RelativeTime): number;
+  static toMillis(amount: number | RelativeTime, unit: TimeUnit = 'ms') {
     if (typeof amount === 'string') {
-      if (/[smhdwy]$/i.test(amount)) { // If unit provided
-        [, amount, unit] = amount.match(/^([\-.0-9]+)(.*)$/i) as [undefined, string, 'm'] ?? [undefined, amount, unit];
+      if (timeUnitRegex.test(amount)) { // If unit provided
+        [, amount, unit] = amount.match(/^(-?[0-9.]+)(.*)$/i) as [undefined, '1m', 'm'] ?? [undefined, amount, unit];
         unit = unit.toLowerCase() as 'm';
         if (!TIME_UNITS[unit]) {
           return NaN;
@@ -43,8 +48,10 @@ export class TimeUtil {
    * @param age Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static withAge(age: number | string, unit: TimeUnit = 'ms') {
-    return new Date(Date.now() + this.toMillis(age, unit));
+  static withAge(age: number, unit: TimeUnit): Date;
+  static withAge(age: RelativeTime): Date
+  static withAge(age: number | RelativeTime, unit: TimeUnit = 'ms') {
+    return new Date(Date.now() + this.toMillis(age as number, unit));
   }
 
   /**
@@ -54,7 +61,7 @@ export class TimeUtil {
    * @param unit The unit for the default time, ms is default if not specified
    */
   static getEnv(k: string, defTime: number, unit: TimeUnit = 'ms'): number {
-    return this.toMillis(EnvUtil.get(k, '') || defTime, unit);
+    return this.toMillis(EnvUtil.get(k, '') as unknown as number || defTime, unit);
   }
 
   /**

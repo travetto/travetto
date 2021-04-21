@@ -9,13 +9,10 @@ class TimeUtilSuite {
   @Test()
   verifyMillis() {
     assert(TimeUtil.toMillis(1000, 'ms') === 1000);
-    assert(TimeUtil.toMillis('1000', 'ms') === 1000);
     assert(TimeUtil.toMillis('1000ms') === 1000);
     assert(TimeUtil.toMillis(1, 's') === 1000);
-    assert(TimeUtil.toMillis('1', 's') === 1000);
     assert(TimeUtil.toMillis('1s') === 1000);
     assert(TimeUtil.toMillis(.0166666666666666666666, 'm') === 1000);
-    assert(TimeUtil.toMillis('.0166666666666666666666', 'm') === 1000);
     assert(TimeUtil.toMillis('.0166666666666666666666m') === 1000);
   }
 

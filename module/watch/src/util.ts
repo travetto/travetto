@@ -21,6 +21,6 @@ export class WatchUtil {
         }
         cb(e);
       });
-    await new Promise(r => setTimeout(r, TimeUtil.toMillis(1, 'd')));
+    await new Promise(r => setTimeout(r, TimeUtil.toMillis('1d')));
   }
 }

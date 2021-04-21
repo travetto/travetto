@@ -21,7 +21,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   #header = 'Authorization';
   #signingKey = 'dummy';
   #headerPrefix = 'Bearer ';
-  #defaultAge = TimeUtil.toMillis(1, 'y');
+  #defaultAge = TimeUtil.toMillis('1y');
 
   set signingKey(v: string) { this.#signingKey = v; }
   set header(n: string) { this.#header = n; }
