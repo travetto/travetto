@@ -230,6 +230,6 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   async truncateModel(cls: Class<ModelType>) {
-    await FsUtil.unlinkRecursive(await this.#resolveName(cls, '.json'), true)
+    await FsUtil.unlinkRecursive(await this.#resolveName(cls, '.json'), true);
   }
 }

@@ -227,6 +227,12 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 * `model-core` is a series of interfaces/contracts, and some minor utility functions. All ownership has been pushed to the various providers.
 * Method names have been standardized as `verbNoun` e.g. `getStream` or `deleteExpired`
 
+### Auth Overhaul
+* Greatly simplified number of interfaces/classes to understand
+* Identity has been folded into principal, and is now the standard bearer for a known user
+* Request object has been reduced in complexity, and AuthContext is gone.
+* Session has been reworked to be the counterpart to the JWT for encoding a principal to the user
+
 #### Rest Internals Overhaul
 * Testing support greatly increased, and provides clearer behavior for testing as a server, and as a lambda.
 * Streamlined internals, and separated lambda from general usage
@@ -255,14 +261,15 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 
 #### Module reorg
 * `auth-passport` is gone, and is now an extension of `auth-rest`.
+* `auth-model` is gone, and is now an extension of `auth`.
 * `asset-*` for implementations, are now model modules
-* `cache`'s built in extensions are not model modules
+* `cache`'s built in extensions have been removed.  `model` with expiry support is all that is needed now.
 * Extensions have been moved to the module which owns the complexity (e.,g. schema rest support dealt more with the internals of rest than schema, and has been moved).
 
 #### Typescript Upgrade
 * Shifted codebase away from use of `any` to `unknown` where applicable (over 750 instances migrated)
 * Migrated all `private var` usages to `#var`, and aligning with class initialization changes.
-* Moving to typescripti 4.3
+* Moving to typescript 4.3
 * Converted all available files to `.ts`, only build scripts remain in `.js`
 
 #### Dependency Injection Enhancements
@@ -280,7 +287,7 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 
 #### Compiler Ownership
 * Reworked @travetto/boot compiler to create clear responsiblity for managing the compiler/transpiler relationsip with node runtime.
-* Modified @travetto/compiler to no longer register extension directly, but 
+* Modified @travetto/compiler to no longer register extension directly, but extend functionality defined in boot 
 
 #### Entrypoint Standardization
 * Allow for use of `main` functions to allow for direct invocation of any file, primaryily used for plugins and cli activities

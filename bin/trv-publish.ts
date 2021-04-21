@@ -8,7 +8,7 @@ import { Packages } from './package/packages';
 
 Packages.yieldPublicPackages()
   .$filter(p => p.name.startsWith('@travetto'))
-  .$parallel(async pkg => [await Packages.findPublishedPackageVersion(pkg), pkg] as const)
+  .$map(async pkg => [await Packages.findPublishedPackageVersion(pkg), pkg] as const)
   .$filter(([v,]) => !v)
   .$map(([, pkg]) => pkg)
   .$tap(pkg => fs.promises.copyFile('LICENSE', `${pkg!._.folder}/LICENSE`))

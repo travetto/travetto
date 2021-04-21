@@ -19,7 +19,7 @@ Git.checkWorkspaceDirty('Cannot update versions with uncomitted changes').then((
     .$collect()
     .$map(all => {
       if (all.length) {
-        return Git.publishCommit(all.map(x => x.name).join(','))
+        return Git.publishCommit(all.map(x => x.name).join(','));
       }
     })
     .$console

@@ -9,7 +9,7 @@ export class Modules {
     return [...DEP_GROUPS].$flatMap(k =>
       Object.entries(pkg[k] ?? {})
         .filter(([, v]) => typeof v === 'string')
-        .map(([k]) => k)
+        .map(([n]) => n)
     );
   }
 
