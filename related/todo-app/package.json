@@ -26,6 +26,7 @@
     "@travetto/model-elasticsearch": "^2.0.0-alpha.6",
     "@travetto/rest-express": "^2.0.0-alpha.7",
     "@travetto/auth-rest": "^2.0.0-alpha.7",
+    "@travetto/rest-session": "^2.0.0-alpha.7",
     "@travetto/openapi": "^2.0.0-alpha.7"
   },
   "devDependencies": {

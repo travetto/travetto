@@ -20,7 +20,7 @@ export class TodoService {
   }
 
   async getAll(search: TodoSearch) {
-    return this.modelService.query(Todo, { ...search, sort: [{ priority: -1 }] });
+    return this.modelService.query(Todo, { ...search, sort: [{ created: -1 }] });
   }
 
   async complete(id: string, completed = true) {
