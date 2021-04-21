@@ -1,7 +1,7 @@
 {
   "name": "@travetto/scaffold",
   "displayName": "App Scaffold",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-alpha.5",
   "description": "App Scaffold for the Travetto framework",
   "keywords": [
     "generator",
@@ -32,8 +32,8 @@
     "trv-scaffold": "./bin/trv-scaffold.js"
   },
   "dependencies": {
-    "@travetto/boot": "^2.0.0-alpha.4",
-    "@travetto/cli": "^2.0.0-alpha.4",
+    "@travetto/boot": "^2.0.0-alpha.5",
+    "@travetto/cli": "^2.0.0-alpha.5",
     "mustache": "^4.2.0",
     "enquirer": "^2.3.6"
   },
