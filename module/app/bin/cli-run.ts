@@ -68,8 +68,11 @@ export class AppRunPlugin extends BasePlugin {
         } catch (err) {
           const { StacktraceUtil } = await import('@travetto/base');
           console.error(color`${{ failure: 'Failed application run' }}`);
-          console.error(err.message);
-          console.error(StacktraceUtil.simplifyStack(err));
+          const stack = StacktraceUtil.simplifyStack(err);
+          if (!stack.includes(err.message)) {
+            console.error(err.message);
+          }
+          console.error(stack);
           process.exit(1);
         }
       }
@@ -86,8 +89,8 @@ export class AppRunPlugin extends BasePlugin {
     const apps = await AppListUtil.getList() || [];
 
     const profiles = fs.readdirSync(PathUtil.cwd)
-      .filter(x => x.endsWith('.yml'))
-      .map(x => x.replace('.yml', ''));
+      .filter(x => /[.]ya?ml/.test(x))
+      .map(x => x.replace(/[.]ya?ml/, ''));
 
     return {
       '': apps.map(x => x.name).concat(['--env', '--profile']),

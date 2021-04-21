@@ -119,7 +119,7 @@ class $AppManifest {
         value: (status ? EnvUtil.get('TRV_DEBUG') : '') || undefined
       },
       resources: ['resources', ...EnvUtil.getList('TRV_RESOURCES')],
-      shutdownWait: TimeUtil.getEnv('TRV_SHUTDOWN_WAIT', 2, 's')
+      shutdownWait: TimeUtil.getEnvAsMillis('TRV_SHUTDOWN_WAIT', 2000)
     };
 
     this.#profileSet = new Set(this.env.profiles);

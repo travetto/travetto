@@ -1,4 +1,4 @@
-import { Closeable, Util } from '@travetto/base';
+import { AppError, Closeable, Util } from '@travetto/base';
 import { ApplicationParameter, Waitable } from './types';
 
 /**
@@ -16,10 +16,10 @@ export class AppUtil {
         case 'number': return Util.coerceType(param, Number);
       }
     } catch (err) {
-      throw new Error(`Invalid parameter ${config.name}: Received ${param}, but exepcted ${config.type}`);
+      throw new AppError(`Invalid parameter ${config.name}: Received ${param}, but exepcted ${config.type}`, 'data');
     }
     if (config.meta?.choices && !config.meta.choices.find(c => `${c}` === param)) {
-      throw new Error(`Invalid parameter ${config.name}: Received ${param} expected ${config.meta.choices.join('|')}`);
+      throw new AppError(`Invalid parameter ${config.name}: Received ${param} expected ${config.meta.choices.join('|')}`, 'data');
     }
     return Util.coerceType(param, String);
   }

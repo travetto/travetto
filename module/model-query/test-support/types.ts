@@ -61,3 +61,9 @@ export class Region {
   id: string;
   points: Point[];
 }
+
+@Model()
+export class Aged {
+  id: string;
+  createdAt: Date;
+}

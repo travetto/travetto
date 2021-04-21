@@ -41,7 +41,7 @@ export class FileUtil {
     const { resolved, cleaned } = this.resolveFile(file);
 
     const ext = path.extname(resolved).replace(/^[.]/, '');
-    const language = this.#extToLang[ext] || ext;
+    const language = this.#extToLang[ext] ?? ext;
 
     let text: string | undefined;
     if (language) {

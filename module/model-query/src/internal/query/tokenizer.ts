@@ -1,3 +1,4 @@
+import { TimeUtil } from '@travetto/base/src/internal/time';
 import { Token, TokenizeState, TokenType } from './types';
 
 const OPEN_PARENS = 0x28, CLOSE_PARENS = 0x29, OPEN_BRACKET = 0x5b, CLOSE_BRACKET = 0x5d, COMMA = 0x2c;
@@ -5,6 +6,8 @@ const GREATER_THAN = 0x3e, LESS_THAN = 0x3c, EQUAL = 0x3d, NOT = 0x21, MODULO = 
 const SPACE = 0x20, TAB = 0x09;
 const DBL_QUOTE = 0x22, SGL_QUOTE = 0x27, FORWARD_SLASH = 0x2f, BACKSLASH = 0x5c;
 const PERIOD = 0x2e, UNDERSCORE = 0x54, DOLLARSIGN = 0x24, DASH = 0x2d;
+const ZERO = 0x30, NINE = 0x39, UPPER_A = 0x41, UPPER_Z = 0x5a, LOWER_A = 0x61, LOWER_Z = 0x7a;
+const LOWER_I = 0x69, LOWER_G = 0x67, LOWER_M = 0x6d, LOWER_S = 0x73;
 
 const ESCAPE: Record<string, string> = {
   '\\n': '\n',
@@ -54,10 +57,12 @@ export class QueryLanguageTokenizer {
         const start = 1;
         const end = text.lastIndexOf('/');
         value = new RegExp(text.substring(start, end), text.substring(end + 1));
-      } else if (/^\d+$/.test(text)) {
+      } else if (/^-?\d+$/.test(text)) {
         value = parseInt(text, 10);
-      } else if (/^\d+[.]\d+$/.test(text)) {
+      } else if (/^-?\d+[.]\d+$/.test(text)) {
         value = parseFloat(text);
+      } else if (TimeUtil.isRelativeTime(text)) {
+        value = text;
       } else {
         state.mode = 'identifier';
       }
@@ -82,16 +87,16 @@ export class QueryLanguageTokenizer {
    * Determine if valid regex flag
    */
   static #isValidRegexFlag(ch: number) {
-    return ch === 0x69 /* i */ || ch === 0x67 /* g */ || ch === 0x6D /* m */ || ch === 0x73 /* s */;
+    return ch === LOWER_I || ch === LOWER_G || ch === LOWER_M || ch === LOWER_S;
   }
 
   /**
    * Determine if valid token identifier
    */
   static #isValidIdentToken(ch: number) {
-    return (ch >= 0x30 /* ZERO */ && ch <= 0x39 /* NINE */) ||
-      (ch >= 0x41 /* A */ && ch <= 0x5a /* Z */) ||
-      (ch >= 0x61 /* a */ && ch <= 0x7a /* z */) ||
+    return (ch >= ZERO && ch <= NINE) ||
+      (ch >= UPPER_A && ch <= UPPER_Z) ||
+      (ch >= LOWER_A && ch <= LOWER_Z) ||
       (ch === UNDERSCORE) ||
       (ch === DASH) ||
       (ch === DOLLARSIGN) ||

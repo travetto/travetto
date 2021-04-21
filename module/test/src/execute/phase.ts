@@ -7,7 +7,7 @@ import { AssertUtil } from '../assert/util';
 
 export const TestBreakoutSym = Symbol.for('@trv:test/breakout');
 
-const TEST_PHASE_TIMEOUT = TimeUtil.getEnv('TRV_TEST_PHASE_TIMEOUT', 15, 's');
+const TEST_PHASE_TIMEOUT = TimeUtil.getEnvAsMillis('TRV_TEST_PHASE_TIMEOUT', 15000);
 
 /**
  * Test Phase Execution Manager.

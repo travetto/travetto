@@ -126,7 +126,11 @@ export class MongoUtil {
         if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.ᚕid) {
           Object.assign(out, this.extractSimple(v, `${subpath}.`));
         } else {
-          if (firstKey === '$regex') {
+          if (firstKey === '$gt' || firstKey === '$lt' || firstKey === '$gte' || firstKey === '$lte') {
+            for (const [sk, sv] of Object.entries(v)) {
+              v[sk] = ModelQueryUtil.resolveComparator(sv);
+            }
+          } else if (firstKey === '$regex') {
             v.$regex = Util.toRegex(v.$regex as string | RegExp);
           } else if (firstKey && '$near' in v) {
             const dist = v.$maxDistance as number;

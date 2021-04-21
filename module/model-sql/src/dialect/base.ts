@@ -4,6 +4,7 @@ import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model-qu
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelType } from '@travetto/model/src/types/model';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 
 import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
@@ -183,6 +184,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Number) {
       return `${value}`;
     } else if (conf.type === Date) {
+      value = ModelQueryUtil.resolveComparator(value);
       const [day, time] = (value as Date).toISOString().split(/[TZ]/);
       return this.quote(`${day} ${time}`);
     } else if (conf.type === PointImpl && Array.isArray(value)) {

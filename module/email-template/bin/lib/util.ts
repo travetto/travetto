@@ -146,7 +146,7 @@ export class TemplateUtil {
       ignoreInitial: true,
       validFile: x =>
         !/[.]compiled[.]/.test(x) && (
-          /[.](html|scss|css|png|jpe?g|gif|yml)$/.test(x)
+          /[.](html|scss|css|png|jpe?g|gif|ya?ml)$/.test(x)
         )
     }).on('changed', async ({ file }) => {
       console.log('Contents changed', { file });

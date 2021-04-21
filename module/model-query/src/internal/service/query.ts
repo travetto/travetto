@@ -1,4 +1,5 @@
 import { Class, AppError } from '@travetto/base';
+import { TimeUtil } from '@travetto/base/src/internal/time';
 import { ModelRegistry, NotFoundError } from '@travetto/model';
 import { ModelType } from '@travetto/model/src/types/model';
 
@@ -11,6 +12,20 @@ import { QueryVerifier } from '../query/verifier';
  * Common model utils, that should be usable by end users
  */
 export class ModelQueryUtil {
+
+  /**
+   * Resolve comparator
+   * @param val 
+   * @returns 
+   */
+  static resolveComparator(val: unknown) {
+    if (typeof val === 'string') {
+      return TimeUtil.withAge(val as '1m');
+    } else {
+      return val;
+    }
+  }
+
   /**
    * Verify result set is singular, and decide if failing on many should happen
    */

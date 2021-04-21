@@ -3,9 +3,10 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
 import { ModelCrudSupport } from '@travetto/model/src/service/crud';
+import { TimeUtil } from '@travetto/base/src/internal/time';
 
 import { ModelQuerySupport } from '../src/service/query';
-import { Location, Names, Note, Person, SimpleList } from './types';
+import { Aged, Location, Names, Note, Person, SimpleList } from './types';
 
 @Suite()
 export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {
@@ -244,6 +245,56 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
 
     assert(out2.length === 1);
+  }
+
+  @Test()
+  async verifyDateRange() {
+    const service = await this.service;
+    await this.saveAll(Aged, (['-5d', '-4d', '-3d', '-2d', '-1d', '0d', '1d', '2d', '3d', '4d', '5d'] as const).map(delta =>
+      Aged.from({ createdAt: TimeUtil.withAge(delta) })
+    ));
+
+    const simple = await service.queryCount(Aged, {
+      where: {
+        createdAt: {
+          $gt: new Date()
+        }
+      }
+    });
+    assert(simple === 5);
+
+
+    const simple2 = await service.queryCount(Aged, {
+      where: {
+        createdAt: {
+          $gt: '-1d'
+        }
+      }
+    });
+    assert(simple2 === 6);
+
+
+    const simple3 = await service.queryCount(Aged, {
+      where: {
+        createdAt: {
+          $gt: '-1d',
+          $lt: '3d'
+        }
+      }
+    });
+    assert(simple3 === 4);
+
+    const simple4 = await service.queryCount(Aged, {
+      where: {
+        createdAt: {
+          $gt: new Date(),
+          $lt: TimeUtil.withAge('3d')
+        }
+      }
+    });
+    assert(simple4 === 3);
+
+
   }
 }
 

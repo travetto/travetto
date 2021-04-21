@@ -3,12 +3,13 @@ import { Class } from '@travetto/base';
 
 import { PointImpl } from '../model/point';
 
-const st = (t: string, arr: boolean = false) => new Set([arr ? `${t}[]` : t]);
+const st = (t: string | string[], arr: boolean = false) =>
+  new Set((Array.isArray(t) ? t : [t]).map(v => arr ? `${v}[]` : v));
 
-const basic = (type: string) => ({ $ne: st(type), $eq: st(type), $exists: st('boolean') });
-const scalar = (type: string) => ({ $in: st(type, true), $nin: st(type, true) });
-const str = (type: string) => ({ $regex: new Set(['RegExp', 'string']) });
-const comp = (type: string) => ({ $lt: st(type), $lte: st(type), $gt: st(type), $gte: st(type) });
+const basic = (types: Set<string>) => ({ $ne: types, $eq: types, $exists: st('boolean') });
+const scalar = (types: Set<string>) => ({ $in: types, $nin: types });
+const str = () => ({ $regex: st(['RegExp', 'string']) });
+const comp = (types: Set<string>) => ({ $lt: types, $lte: types, $gt: types, $gte: types });
 const geo = (type: string) => ({
   $near: st(type),
   $maxDistance: st('number'),
@@ -25,11 +26,11 @@ export class TypeUtil {
    * Mapping types to various operators
    */
   static OPERATORS = {
-    string: { ...basic('string'), ...scalar('string'), ...str('string') } as Record<string, Set<string>>,
-    number: { ...basic('number'), ...scalar('number'), ...comp('number') } as Record<string, Set<string>>,
-    boolean: { ...basic('boolean'), ...scalar('boolean') } as Record<string, Set<string>>,
-    Date: { ...basic('Date'), ...scalar('Date'), ...comp('Date') } as Record<string, Set<string>>,
-    Point: { ...basic('Point'), ...geo('Point') } as Record<string, Set<string>>,
+    string: { ...basic(st('string')), ...scalar(st('string', true)), ...str() } as Record<string, Set<string>>,
+    number: { ...basic(st('number')), ...scalar(st('number', true)), ...comp(st('number')) } as Record<string, Set<string>>,
+    boolean: { ...basic(st('boolean')), ...scalar(st('boolean', true)) } as Record<string, Set<string>>,
+    Date: { ...basic(st('Date')), ...scalar(st('Date', true)), ...comp(st(['string', 'Date'])) } as Record<string, Set<string>>,
+    Point: { ...basic(st('Point')), ...geo('Point') } as Record<string, Set<string>>,
   };
 
   /**

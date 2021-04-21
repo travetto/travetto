@@ -1,4 +1,5 @@
 import { Primitive as Prim } from '@travetto/base/src/internal/global-types';
+import { RelativeTime } from '@travetto/base/src/internal/time';
 
 /**
  * Point as [number,number] with validation and binding support
@@ -20,30 +21,25 @@ export type ValidFieldNames<T> = {
 
 export type RetainFields<T> = Pick<T, ValidFieldNames<T>>;
 
-type GeneralFieldQuery<T> = {
+type General<T> = {
   $eq?: T;
   $ne?: T;
   $exists?: boolean;
 };
 
-type GeneralScalarFieldQuery<T> =
-  GeneralFieldQuery<T> |
-  // Array
-  {
-    $in?: T[];
-    $nin?: T[];
-  };
+type ScalarField<T> = {
+  $in?: T[];
+  $nin?: T[];
+};
 
-type ComparableFieldQuery<T> =
-  GeneralScalarFieldQuery<T> |
-  {
-    $lt?: T;
-    $lte?: T;
-    $gt?: T;
-    $gte?: T;
-  };
+type ComparableField<T> = {
+  $lt?: T;
+  $lte?: T;
+  $gt?: T;
+  $gte?: T;
+};
 
-type ArrayFieldQuery<T> =
+type ArrayField<T> =
   { $exists?: boolean } |
   { $eq?: T | T[] } |
   { $ne?: T | T[] } |
@@ -52,29 +48,23 @@ type ArrayFieldQuery<T> =
   PropWhereClause<RetainFields<T>> |
   T | T[];
 
-type StringFieldQuery =
-  GeneralScalarFieldQuery<string> |
-  { $regex?: RegExp | string } |
-  string;
+type StringField = { $regex?: RegExp | string };
 
-type GeoFieldQuery =
-  GeneralScalarFieldQuery<Point> |
-  {
-    $geoWithin?: Point[];
-    $near?: Point;
-    $maxDistance?: number;
-    $unit?: DistanceUnit;
-  } |
-  Point;
+type GeoField = {
+  $geoWithin?: Point[];
+  $near?: Point;
+  $maxDistance?: number;
+  $unit?: DistanceUnit;
+};
 
 export type PropWhereClause<T> = {
   [P in keyof T]?:
-  (T[P] extends (number | undefined) ? ComparableFieldQuery<number> | number :
-    (T[P] extends (string | undefined) ? StringFieldQuery :
-      (T[P] extends (boolean | undefined) ? (GeneralFieldQuery<boolean> | boolean) :
-        (T[P] extends (Date | undefined) ? ComparableFieldQuery<Date> | RetainFields<Date> :
-          (T[P] extends (Point | undefined) ? GeoFieldQuery :
-            (T[P] extends ((infer U)[] | undefined) ? ArrayFieldQuery<U> :
+  (T[P] extends (number | undefined) ? (General<number> | ScalarField<number> | ComparableField<number> | number) :
+    (T[P] extends (string | undefined) ? (General<string> | ScalarField<string> | StringField | string) :
+      (T[P] extends (boolean | undefined) ? (General<boolean> | boolean) :
+        (T[P] extends (Date | undefined) ? (General<Date> | ScalarField<Date> | ComparableField<Date | RelativeTime> | Date) :
+          (T[P] extends (Point | undefined) ? (General<Point> | ScalarField<Point> | GeoField | Point) :
+            (T[P] extends ((infer U)[] | undefined) ? ArrayField<U> :
               (T[P] extends (object | undefined) ? PropWhereClause<RetainFields<T[P]>> : never)))))));
 };
 

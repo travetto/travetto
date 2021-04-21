@@ -57,13 +57,23 @@ ${d.List(
   d`${d.Input('field: { $nin: T[] }')} to see if a record's value does not appear in the array provided to ${d.Input('$in')}`,
 )}
 
-${d.SubSection('Ordered Fields')}
+${d.SubSection('Ordered Numberic Fields')}
 ${d.List(
-  d`${d.Input('field: { $lt: T }')} checks if value is less than`,
-  d`${d.Input('field: { $lte: T }')} checks if value is less than or equal to`,
-  d`${d.Input('field: { $gt: T }')} checks if value is greater than`,
-  d`${d.Input('field: { $gte: T }')} checks if value is greater than or equal to`,
+  d`${d.Input('field: { $lt: number }')} checks if value is less than`,
+  d`${d.Input('field: { $lte: number }')} checks if value is less than or equal to`,
+  d`${d.Input('field: { $gt: number }')} checks if value is greater than`,
+  d`${d.Input('field: { $gte: number }')} checks if value is greater than or equal to`,
 )}
+${d.SubSection('Ordered Date Fields')}
+${d.List(
+  d`${d.Input('field: { $lt: Date | RelativeTime }')} checks if value is less than`,
+  d`${d.Input('field: { $lte: Date | RelativeTime }')} checks if value is less than or equal to`,
+  d`${d.Input('field: { $gt: Date | RelativeTime }')} checks if value is greater than`,
+  d`${d.Input('field: { $gte: Date | RelativeTime }')} checks if value is greater than or equal to`,
+)}
+
+${d.Note('Relative times are strings consisting of a number and a unit.  e.g. -1w or 30d.  These times are always relative to Date.now, but should make building  quieries more natural.')}
+
 ${d.SubSection('Array Fields')}
 ${d.List(
   d`${d.Input('field: { $all: T[]] }')} checks to see if the records value contains everything within ${d.Input('$all')}`,

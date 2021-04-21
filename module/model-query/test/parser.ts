@@ -6,7 +6,7 @@ import { WhereClause } from '../src/model/where-clause';
 import { QueryLanguageParser } from '../src/internal/query/parser';
 import { QueryLanguageTokenizer } from '../src/internal/query/tokenizer';
 
-type UserType = { user: { address: { state: String, city: string }, role: string } };
+type UserType<R = string> = { user: { address: { state: String, city: string }, role: R } };
 
 @Suite('Query String Tests')
 export class QueryStringTest {
@@ -51,7 +51,7 @@ export class QueryStringTest {
 
   @Test('Parser')
   async parseSimple() {
-    const res = QueryLanguageParser.parseToQuery('A == 5 and B == 6 or C == 7 and d == 8 or e == 10');
+    const res = QueryLanguageParser.parseToQuery('A == 5 and B == 6 or C == -7 and d == 8 or e == 10');
     assert.deepStrictEqual(res, {
       $or: [
         {
@@ -62,7 +62,7 @@ export class QueryStringTest {
         },
         {
           $and: [
-            { C: { $eq: 7 } },
+            { C: { $eq: -7 } },
             { d: { $eq: 8 } }
           ]
         },
@@ -115,13 +115,13 @@ export class QueryStringTest {
 
   @Test('Parse Dotted Fields')
   async parseFields() {
-    const res2 = QueryLanguageParser.parseToQuery('A.b.c == 5 and (NOT B.z == 6.2 OR c == /a/)');
+    const res2 = QueryLanguageParser.parseToQuery('A.b.c == 5 and (NOT B.z == -6.2 OR c == /a/)');
     assert.deepStrictEqual(res2, {
       $and: [
         { A: { b: { c: { $eq: 5 } } } },
         {
           $or: [
-            { $not: { B: { z: { $eq: 6.2 } } } },
+            { $not: { B: { z: { $eq: -6.2 } } } },
             { c: { $eq: /a/ } }
           ]
         }
@@ -131,9 +131,9 @@ export class QueryStringTest {
 
   @Test('Parse Unique Outputs')
   async parseUnique() {
-    const res = QueryLanguageParser.parseToQuery('a.b.c in [1,2,3]');
+    const res = QueryLanguageParser.parseToQuery('a.b.c in [1,2,-3]');
     assert.deepStrictEqual(res, {
-      a: { b: { c: { $in: [1, 2, 3] } } }
+      a: { b: { c: { $in: [1, 2, -3] } } }
     } as WhereClause<unknown>);
 
     const res3 = QueryLanguageParser.parseToQuery('a.b.c not-in [1,2,3]');
@@ -171,33 +171,34 @@ export class QueryStringTest {
 
   @Test('Parse Regex')
   async parseRegex() {
-    const res = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /^admin/') as { user: { role: { $regex: RegExp } } };
+    const res = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>('user.role ~ /^admin/');
     assert(res === { user: { role: { $regex: /^admin/ } } });
-    assert(res.user.role.$regex instanceof RegExp);
-    assert(res.user.role.$regex.toString() === '/^admin/');
+    assert(res.user!.role!.$regex instanceof RegExp);
+    assert(res.user!.role!.$regex.toString() === '/^admin/');
 
-    const res2 = QueryLanguageParser.parseToQuery<UserType>("user.role ~ 'admin'") as { user: { role: { $regex: RegExp } } };
+    const res2 = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>("user.role ~ 'admin'");
     assert(res2 === { user: { role: { $regex: /^admin/ } } });
-    assert(res2.user.role.$regex instanceof RegExp);
-    assert(res2.user.role.$regex.toString() === '/^admin/');
+    assert(res2.user!.role!.$regex instanceof RegExp);
+    assert(res2.user!.role!.$regex.toString() === '/^admin/');
   }
 
   @Test('Parse Regex with flags')
   async parseRegexWithFlags() {
-    const res = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /^admin/i') as { user: { role: { $regex: RegExp } } };
-    assert(res === { user: { role: { $regex: /^admin/i } } });
-    assert(res.user.role.$regex instanceof RegExp);
-    assert(res.user.role.$regex.toString() === '/^admin/i');
-
-    assert.throws(() => {
-      QueryLanguageParser.parseToQuery('user.role ~ /^admin/gig');
-    }, /Invalid.*flags/);
+    const res = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>('user.role ~ /\badmin\b/i');
+    assert(res.user!.role!.$regex instanceof RegExp);
+    assert(res.user!.role!.$regex.toString() === '/\badmin\b/i');
   }
 
   @Test('Parse Regex with word boundaries')
   async parseRegexWithWordBoundaries() {
-    const res = QueryLanguageParser.parseToQuery<UserType>('user.role ~ /\badmin\b/i') as { user: { role: { $regex: RegExp } } };
-    assert(res.user.role.$regex instanceof RegExp);
-    assert(res.user.role.$regex.toString() === '/\badmin\b/i');
+    const res = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>('user.role ~ /\badmin\b/i');
+    assert(res.user!.role!.$regex instanceof RegExp);
+    assert(res.user!.role!.$regex.toString() === '/\badmin\b/i');
+  }
+
+  @Test('Relative date ranges')
+  async parseRelativeDateRanges() {
+    const res = QueryLanguageParser.parseToQuery<{ createdAt: { $gt: string }, deleteAt: { $gt: string } }>('createdAt > -7d AND deleteAt > 0d');
+    assert(res === { $and: [{ createdAt: { $gt: '-7d' } }, { deleteAt: { $gt: '0d' } }] });
   }
 }

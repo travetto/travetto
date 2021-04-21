@@ -4,6 +4,7 @@ import { Class, Util } from '@travetto/base';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
 import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { ModelRegistry } from '@travetto/model/src/registry/model';
 import { ModelType } from '@travetto/model/src/types/model';
 import { SchemaRegistry } from '@travetto/schema';
@@ -146,7 +147,7 @@ export class ElasticsearchQueryUtil {
             case '$lte': {
               const out: Record<string, unknown> = {};
               for (const k of Object.keys(top)) {
-                out[k.replace(/^[$]/, '')] = top[k];
+                out[k.replace(/^[$]/, '')] = ModelQueryUtil.resolveComparator(top[k]);
               }
               items.push({ range: { [sPath]: out } });
               break;
