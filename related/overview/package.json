@@ -20,7 +20,7 @@
     "directory": "related/overview"
   },
   "dependencies": {
-    "@travetto/boot": "^2.0.0-alpha.2"
+    "@travetto/boot": "^2.0.0-alpha.5"
   },
   "private": true
 }

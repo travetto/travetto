@@ -20,12 +20,12 @@ export class Modules {
 
     this.#initialized = true;
 
-    const byName = await Packages.yieldPublicPackages()
+    const byName = await Packages.yieldPackages()
       .$map(pkg => [pkg.name, pkg] as const)
       .then((all) => Object.fromEntries(all));
 
     this.#graphByFolder = {};
-    await Packages.yieldPublicPackages()
+    await Packages.yieldPackages()
       .$flatMap(pkg => this.#getDeps(pkg)
         .$filter(k => !!byName[k])
         .$map(dep =>
