@@ -61,15 +61,14 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
       }
     }
 
-    if (!resolvedType.isClass()) { // Real type
-      const source = DeclarationUtil.getPrimaryDeclarationNode(resolvedType).getSourceFile();
-      if (source && source.fileName.includes('typescript/lib')) { // Global Type
-        return { category: 'literal', type };
-      } else {
-        return { category: 'shape', type: resolvedType };
-      }
+    const source = DeclarationUtil.getPrimaryDeclarationNode(resolvedType).getSourceFile();
+    if (source?.fileName.includes('@types/node/globals') || source?.fileName.includes('typescript/lib')) {
+      return { category: 'literal', type };
+    } else if (!resolvedType.isClass()) { // Not a real type
+      return { category: 'shape', type: resolvedType };
+    } else {
+      return { category: 'external', type: resolvedType };
     }
-    return { category: 'external', type: resolvedType };
   } else if (flags & (
     ts.TypeFlags.Boolean | ts.TypeFlags.BooleanLiteral |
     ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral |

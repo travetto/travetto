@@ -1,11 +1,14 @@
 import * as assert from 'assert';
 import { Test, Suite } from '@travetto/test';
+import { StreamUtil } from '@travetto/boot';
 
 import { Controller } from '../src/decorator/controller';
 import { Get, Post, Put, Delete, Patch } from '../src/decorator/endpoint';
 import { Path, Query } from '../src/decorator/param';
 import { Request, Response } from '../src/types';
 import { BaseRestSuite } from './base';
+import { SetHeaders } from '../src/decorator/common';
+import { Renderable } from '../src/response/renderable';
 
 @Controller('/test')
 class TestController {
@@ -38,6 +41,31 @@ class TestController {
   @Patch('/regexp/super-:special-party')
   withRegexp(@Path() special: string) {
     return { path: special };
+  }
+
+  @Get('/stream')
+  @SetHeaders({ 'content-type': 'text/plain' })
+  getStream() {
+    return StreamUtil.bufferToStream(Buffer.from('hello'));
+  }
+
+  @Get('/buffer')
+  @SetHeaders({ 'content-type': 'text/plain' })
+  getBuffer() {
+    return Buffer.from('hello');
+  }
+
+  @Get('/renderable')
+  @SetHeaders({ 'content-type': 'text/plain' })
+  getRenderable(): Renderable {
+    return {
+      /**
+       * @returns {string}
+       */
+      render(res) {
+        return res.send('hello');
+      }
+    };
   }
 }
 
@@ -98,5 +126,23 @@ export abstract class RestServerSuite extends BaseRestSuite {
   async testRegex() {
     const { body: ret } = await this.request('patch', '/test/regexp/super-poodle-party');
     assert(ret === { path: 'poodle' });
+  }
+
+  @Test()
+  async testBuffer() {
+    const { body: ret } = await this.request('get', '/test/buffer');
+    assert(ret === 'hello');
+  }
+
+  @Test()
+  async testStream() {
+    const { body: ret } = await this.request('get', '/test/stream');
+    assert(ret === 'hello');
+  }
+
+  @Test()
+  async testRenderable() {
+    const { body: ret } = await this.request('get', '/test/renderable');
+    assert(ret === 'hello');
   }
 }

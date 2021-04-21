@@ -40,6 +40,11 @@ export class ImportManager {
   importFile(file: string, base?: string) {
     file = ModuleUtil.normalizePath(file);
 
+    // Allow for node classes to be imported directly
+    if (/@types\/node/.test(file)) {
+      file = require.resolve(file.replace(/.*@types\/node\//, '').replace(/[.]d([.]ts)?$/, ''));
+    }
+
     // Handle relative imports
     if (file.startsWith('.') && base &&
       !base.startsWith('@travetto') && !base.includes('node_modules')
@@ -52,7 +57,7 @@ export class ImportManager {
       }
     }
 
-    if (!file.endsWith('.d.ts') && !this.#newImports.has(file)) {
+    if (!/[.]d([.]ts)?$/.test(file) && !this.#newImports.has(file)) {
       const id = this.getId(file);
 
       if (this.#imports.has(id)) { // Already imported, be cool
