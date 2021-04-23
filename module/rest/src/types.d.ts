@@ -2,7 +2,9 @@ import { SetOption, GetOption } from 'cookies';
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'http';
 
 import { HeaderMap } from './types';
-import { HeadersAddedSym, NodeEntitySym, ProviderEntitySym } from './internal/symbol';
+import { HeadersAddedSym, NodeEntitySym, ProviderEntitySym, SendStreamFn } from './internal/symbol';
+import { Readable } from 'stream';
+
 
 declare global {
   /**
@@ -159,6 +161,11 @@ declare global {
      * @param value Value to send
      */
     send(value: any): any;
+    /**
+     * Optional internal method for sending streams
+     * @param stream 
+     */
+    [SendStreamFn]?(stream: Readable): Promise<void>;
     /**
      * Write content directly to the output stream
      * @param value The value to write

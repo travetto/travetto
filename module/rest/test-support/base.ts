@@ -116,8 +116,13 @@ export abstract class BaseRestSuite {
 
     if (resp.status >= 400) {
       if (cfg.throwOnError ?? true) {
-        const err = new AppError((out as unknown as Error).message ?? 'Error');
-        Object.assign(err, resp.body);
+        const err = new AppError('Error');
+        if (Buffer.isBuffer(resp.body)) {
+          err.message = resp.body.toString('utf8');
+        } else {
+          Object.assign(err, resp.body);
+        }
+        Object.assign(err, { status: resp.status });
         throw err;
       }
     }

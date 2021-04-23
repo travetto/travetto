@@ -8,7 +8,8 @@ import { LoggingInterceptor } from './logging';
 
 import { Response, Request } from '../types';
 import { Renderable } from '../response/renderable';
-import { HeadersAddedSym, NodeEntitySym } from '../internal/symbol';
+import { HeadersAddedSym, NodeEntitySym, SendStreamFn } from '../internal/symbol';
+import { StreamUtil } from '@travetto/boot/src';
 
 const isRenderable = (o: unknown): o is Renderable => !!o && !Util.isPrimitive(o) && 'render' in (o as object);
 const isStream = (o: unknown): o is Readable => !!o && 'pipe' in (o as object) && 'on' in (o as object);
@@ -54,7 +55,7 @@ export class SerializeInterceptor implements RestInterceptor {
           res.send(output);
         } else if (isStream(output)) {
           this.setContentTypeIfUndefined(res, 'application/octet-stream');
-          output.pipe(res[NodeEntitySym]);
+          await res[SendStreamFn] ? res[SendStreamFn]!(output) : StreamUtil.pipe(output, res[NodeEntitySym]);
         } else {
           const payload = Util.hasToJSON(output) ? output.toJSON() : output;
           this.setContentTypeIfUndefined(res, 'application/json');

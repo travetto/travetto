@@ -144,8 +144,13 @@ export abstract class RestServerSuite extends BaseRestSuite {
 
   @Test()
   async testStream() {
-    const { body: ret } = await this.request('get', '/test/stream');
-    assert(ret === 'hello');
+    try {
+      const { body: ret } = await this.request('get', '/test/stream');
+      assert(ret === 'hello');
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   }
 
   @Test()
