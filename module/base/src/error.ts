@@ -7,6 +7,7 @@ export { ErrorCategory } from './internal/error'; // Re-export
 export class AppError extends Error {
 
   type: string;
+  at = new Date();
 
   /**
    * Build an app error
@@ -36,6 +37,7 @@ export class AppError extends Error {
     return {
       ...extra,
       ...(this.payload ?? {}),
+      at: this.at,
       message: this.message,
       category: this.category,
       type: this.type

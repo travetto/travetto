@@ -294,11 +294,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const config = this.getOrCreatePending(pconfig.class!);
 
     config.class = cls;
-    config.qualifier = pconfig.qualifier ?? config.qualifier;
-    if (!config.qualifier) {
-      config.qualifier = Symbol.for(cls.ᚕid);
-      this.defaultSymbols.add(config.qualifier);
-    }
+    config.qualifier = pconfig.qualifier ?? config.qualifier ?? Symbol.for(cls.ᚕid);
     if (pconfig.interfaces) {
       config.interfaces?.push(...pconfig.interfaces);
     }
@@ -423,6 +419,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     if (!this.targetToClass.has(targetId)) {
       this.targetToClass.set(targetId, new Map());
+    }
+
+    if (config.qualifier === Symbol.for(cls.ᚕid)) {
+      this.defaultSymbols.add(config.qualifier);
     }
 
     this.targetToClass.get(targetId)!.set(config.qualifier, classId);
