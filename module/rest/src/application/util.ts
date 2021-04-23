@@ -84,7 +84,7 @@ export class RestServerUtil {
   static decorateRequest<T extends Request>(req: Partial<T> & Record<string, unknown>): T {
     delete req.redirect;
     Object.setPrototypeOf(req, RequestCore.prototype);
-    req.url = req.path;
+    req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
     // @ts-ignore
     req.connection = {};
     return req as T;

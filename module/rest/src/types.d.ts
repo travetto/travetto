@@ -31,10 +31,6 @@ declare global {
      */
     url: string;
     /**
-     * The request's base url
-     */
-    baseUrl?: string;
-    /**
      * The http protocol
      */
     protocol: 'http' | 'https';

@@ -6,18 +6,23 @@ import * as compression from 'compression';
 import { Inject, Injectable } from '@travetto/di';
 import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, ParamConfig, RouteConfig } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
-import { NodeEntitySym } from '@travetto/rest/src/internal/symbol';
+import { NodeEntitySym, TravettoEntitySym } from '@travetto/rest/src/internal/symbol';
+import { ServerHandle } from '@travetto/rest/src/types';
 
 import { RouteStack } from './internal/types';
+import { ExpressServerUtil } from './internal/util';
 
+// Support typings
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     // eslint-disable-next-line no-shadow
     interface Request {
+      [TravettoEntitySym]?: TravettoRequest;
       [NodeEntitySym]?: express.Request;
     }
     interface Response {
+      [TravettoEntitySym]?: TravettoResponse;
       [NodeEntitySym]?: express.Response;
     }
   }
@@ -45,12 +50,6 @@ export class ExpressRestServer implements RestServer<express.Application> {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.raw({ type: 'image/*' }));
-    app.use((req, res, next) => {
-      req[NodeEntitySym] ??= req; // Express objects match the framework structure
-      res[NodeEntitySym] ??= res;
-      next();
-    }
-    );
 
     if (this.config.trustProxy) {
       app.enable('trust proxy');
@@ -73,9 +72,12 @@ export class ExpressRestServer implements RestServer<express.Application> {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {
-      router[route.method as 'get'](route.path!,
-        // @ts-ignore
-        route.handlerFinalized!);
+      router[route.method as 'get'](route.path!, (req, res) => {
+        route.handlerFinalized!(
+          req[TravettoEntitySym] ??= ExpressServerUtil.getRequest(req),
+          res[TravettoEntitySym] ??= ExpressServerUtil.getResponse(res)
+        );
+      });
     }
 
     // Register options handler for each controller, working with a bug in express
@@ -98,13 +100,13 @@ export class ExpressRestServer implements RestServer<express.Application> {
     this.#raw.use(path, router);
   }
 
-  async listen() {
+  async listen(): Promise<ServerHandle> {
     let raw: express.Application | https.Server = this.#raw;
     if (this.config.ssl.active) {
       const keys = await this.config.getKeys();
       raw = (await import('https')).createServer(keys!, this.#raw);
     }
     this.listening = true;
-    return raw.listen(this.config.port, this.config.bindAddress!);
+    return raw.listen(this.config.port, this.config.bindAddress!) as ServerHandle;
   }
 }

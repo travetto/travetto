@@ -4,7 +4,7 @@ import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { Response } from '../types';
 
 declare global {
-  export interface Error {
+  interface Error {
     /**
      * Provides the render implementation for sending a response
      * @param res 

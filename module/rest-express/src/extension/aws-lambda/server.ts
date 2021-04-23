@@ -1,6 +1,5 @@
-// @file-if aws-serverless-express
-import * as http from 'http';
-import * as awsServerlessExpress from 'aws-serverless-express';
+// @file-if @vendia/serverless-express
+import * as serverless from '@vendia/serverless-express';
 import type * as lambda from 'aws-lambda';
 
 import { Injectable } from '@travetto/di';
@@ -9,31 +8,31 @@ import { ConfigManager } from '@travetto/config';
 import { AwsLambdaRestServer, AwsLambdaSym } from '@travetto/rest/src/extension/aws-lambda';
 
 import { ExpressRestServer } from '../../server';
-
+import { ServerHandle } from '@travetto/rest/src/types';
 /**
  * Aws Lambda Rest Server
  */
 @Injectable(AwsLambdaSym)
 export class AwsLambdaExpressRestServer extends ExpressRestServer implements AwsLambdaRestServer {
 
-  #server: http.Server;
+  #handler: lambda.Handler;
 
   /**
    * Handler method for the proxy
    */
   handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
-    return awsServerlessExpress.proxy(this.#server, event, context, 'PROMISE').promise;
+    return this.#handler(event, context, null as any) as Promise<lambda.APIGatewayProxyResult>
   }
 
   init() {
     const ret = super.init();
     const config = ConfigManager.get('rest.aws');
-    this.#server = awsServerlessExpress.createServer(ret, undefined, config.binaryMimeTypes as string[] ?? []);
+    this.#handler = serverless.configure({ app: ret, binaryMimeTypes: config.binaryMimeTypes as string[] ?? [] });
     return ret;
   }
 
   async listen() {
     this.listening = true;
-    return this.#server;
+    return {} as ServerHandle;
   }
 }

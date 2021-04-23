@@ -60,7 +60,7 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
       status: res.statusCode,
       body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
       headers: Object.fromEntries([
-        ...Object.entries(res.headers as Record<string, string>),
+        ...Object.entries(res.headers as Record<string, string> ?? {}),
         ...Object.entries((res.multiValueHeaders ?? {}) as Record<string, string[]>)
       ])
     };

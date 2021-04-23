@@ -26,12 +26,12 @@
     "eslint-plugin-unused-imports": "^1.1.1"
   },
   "devDependencies": {
-    "@aws-sdk/client-dynamodb": "^3.13.0",
-    "@aws-sdk/client-s3": "^3.13.0",
-    "@aws-sdk/client-ses": "^3.13.0",
-    "@aws-sdk/credential-provider-ini": "^3.13.0",
+    "@aws-sdk/client-dynamodb": "^3.13.1",
+    "@aws-sdk/client-s3": "^3.13.1",
+    "@aws-sdk/client-ses": "^3.13.1",
+    "@aws-sdk/credential-provider-ini": "^3.13.1",
     "@elastic/elasticsearch": "^7.12.0",
-    "@types/aws-serverless-express": "^3.3.3",
+    "@types/aws-lambda": "^8.10.72",
     "@types/body-parser": "^1.19.0",
     "@types/busboy": "^0.2.3",
     "@types/co-body": "^5.1.0",
@@ -63,8 +63,8 @@
     "@types/sass": "^1.16.0",
     "@types/source-map-support": "^0.5.3",
     "@types/vscode": "^1.55.0",
+    "@vendia/serverless-express": "^4.3.4",
     "aws-lambda-fastify": "^1.4.4",
-    "aws-serverless-express": "^3.4.0",
     "body-parser": "^1.19.0",
     "busboy": "^0.3.1",
     "co-body": "^6.1.0",
@@ -74,7 +74,7 @@
     "enquirer": "^2.3.6",
     "express": "^4.17.1",
     "faker": "^5.5.3",
-    "fastify": "^3.14.2",
+    "fastify": "^3.15.0",
     "fastify-compress": "^3.4.2",
     "fastify-formbody": "^5.0.0",
     "file-type": "^16.3.0",
@@ -105,7 +105,7 @@
     "sass": "^1.32.11",
     "source-map-support": "^0.5.19",
     "tslib": "^2.2.0",
-    "typescript": "^4.3.0-dev.20210420",
+    "typescript": "^4.3.0-dev.20210423",
     "vue": "^2.6.12"
   }
 }

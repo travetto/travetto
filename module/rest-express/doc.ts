@@ -16,5 +16,5 @@ When working with an ${lib.Express} applications, the module provides what is as
 ${d.Snippet('Configured Middleware', 'src/server.ts', /const app\s*=/, /bodyParser.raw/)}
 
 ${d.Section('Extension - AWS Lambda')}
-The ${lib.Express} module supports integration with ${lib.AwsServerlessExpress} when installed.  This produces an instance of ${RestApplication} that is able to integrate with AWS appropriately.
+The ${lib.Express} module supports integration with ${lib.ServerlessExpress} when installed.  This produces an instance of ${RestApplication} that is able to integrate with AWS appropriately.
 `;

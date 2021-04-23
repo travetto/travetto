@@ -7,7 +7,7 @@ import * as coBody from 'co-body';
 import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
 import { TravettoEntitySym } from '@travetto/rest/src/internal/symbol';
-import { Request, Response } from '@travetto/rest/src/types';
+import { Request, Response, ServerHandle } from '@travetto/rest/src/types';
 
 import { KoaServerUtil } from './internal/util';
 
@@ -100,7 +100,7 @@ export class KoaRestServer implements RestServer<koa> {
     this.raw.use(middleware);
   }
 
-  async listen() {
+  async listen(): Promise<ServerHandle> {
     let raw: https.Server | koa = this.raw;
     if (this.config.ssl.active) {
       raw = (await import('https'))
@@ -108,6 +108,6 @@ export class KoaRestServer implements RestServer<koa> {
         .listen(this.config.port, this.config.bindAddress);
     }
     this.listening = true;
-    return raw.listen(this.config.port, this.config.bindAddress);
+    return raw.listen(this.config.port, this.config.bindAddress) as ServerHandle;
   }
 }

@@ -87,7 +87,7 @@ export const lib = {
   Passport: Library('passport', 'http://passportjs.org'),
   Busboy: Library('busboy', 'https://github.com/mscdex/busboy'),
   Cookies: Library('cookies', 'https://www.npmjs.com/package/cookies'),
-  AwsServerlessExpress: Library('aws-serverless-express', 'https://github.com/awslabs/aws-serverless-express/blob/master/README.md'),
+  ServerlessExpress: Library('aws-serverless-express', 'https://github.com/awslabs/aws-serverless-express/blob/master/README.md'),
   AwsLambdaFastify: Library('aws-lambda-fastify', 'https://github.com/fastify/aws-lambda-fastify/blob/master/README.md'),
   Fastify: Library('fastify', 'https://www.fastify.io/'),
   Koa: Library('koa', 'https://koajs.com/'),

@@ -16,5 +16,5 @@ When working with an ${lib.Koa} applications, the module provides what is assume
 ${d.Snippet('Configured Middleware', 'src/server.ts', /const app\s*=/, /kCustomBody/i)}
 
 ${d.Section('Extension - AWS Lambda')}
-The ${lib.Koa} module supports integration with ${lib.AwsServerlessExpress} when installed.  This produces an instance of ${RestApplication} that is able to integrate with AWS appropriately.
+The ${lib.Koa} module supports integration with ${lib.ServerlessExpress} when installed.  This produces an instance of ${RestApplication} that is able to integrate with AWS appropriately.
 `;

@@ -139,7 +139,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     const p = srcConf.path;
     if (typeof p === 'string' && !p.startsWith('/')) {
       srcConf.path = `/${p}`;
-    } else if (p instanceof RegExp && !p.source.startsWith('/') && !p.source.startsWith('^')) {
+    } else if (p instanceof RegExp && !p.source.startsWith('\\/') && !p.source.startsWith('^') && !p.source.endsWith('$')) {
       srcConf.path = new RegExp(`/${p.source}`, p.flags);
     }
 

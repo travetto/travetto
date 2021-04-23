@@ -11,16 +11,12 @@ export class FastifyServerUtil {
    * Build a Travetto Request from a Fastify Request
    */
   static getRequest(reqs: FastifyRequest & { session?: TravettoRequest['session'] }) {
-    let [path] = (reqs.raw!.url ?? '').split(/[#?]/g);
-    if (!path.startsWith('/')) {
-      path = `/${path}`;
-    }
     return RestServerUtil.decorateRequest({
       [ProviderEntitySym]: reqs,
       [NodeEntitySym]: reqs.raw,
       protocol: (reqs.raw.socket && 'encrypted' in reqs.raw.socket) ? 'https' : 'http',
       method: reqs.raw.method as Request['method'],
-      path,
+      url: reqs.raw!.url,
       query: reqs.query as Record<string, string>,
       params: reqs.params as Record<string, string>,
       body: reqs.body,

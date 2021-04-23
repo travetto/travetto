@@ -67,6 +67,14 @@ class TestController {
       }
     };
   }
+
+  @Get('/fullUrl')
+  getFullUrl(req: Request) {
+    return {
+      url: req.url,
+      path: req.path
+    };
+  }
 }
 
 @Suite()
@@ -144,5 +152,11 @@ export abstract class RestServerSuite extends BaseRestSuite {
   async testRenderable() {
     const { body: ret } = await this.request('get', '/test/renderable');
     assert(ret === 'hello');
+  }
+
+  @Test()
+  async testFullUrl() {
+    const { body: ret } = await this.request('get', '/test/fullUrl');
+    assert(ret === { url: '/test/fullUrl', path: '/test/fullUrl' });
   }
 }
