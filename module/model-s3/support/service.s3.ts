@@ -8,9 +8,11 @@ try {
   fs.mkdirSync(temp);
 } catch { }
 
+const version = '0.12.10';
+
 export const service: Service = {
   name: 's3',
-  version: 'latest',
+  version,
   privileged: true,
   env: {
     TEST_AWS_ACCOUNT_ID: '000000000000',
@@ -22,5 +24,5 @@ export const service: Service = {
     [temp]: '/tmp/localstack'
   },
   ports: { 4566: 4566, 4571: 4571, 8080: 8080, 8081: 8081 },
-  image: 'localstack/localstack'
+  image: `localstack/localstack:${version}`
 };

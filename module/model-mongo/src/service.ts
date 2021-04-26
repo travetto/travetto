@@ -300,7 +300,7 @@ export class MongoModelService implements
     }
 
     const [{ _id: fileId }] = files;
-    await new Promise((res, rej) => this.#bucket.delete(fileId, (err, value) => err ? rej(err) : res(value)));
+    await this.#bucket.delete(fileId);
   }
 
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {

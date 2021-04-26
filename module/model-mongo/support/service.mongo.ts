@@ -1,6 +1,7 @@
+import { EnvUtil } from '@travetto/boot/src';
 import type { Service } from '@travetto/command/bin/lib/service';
 
-const version = '3.6';
+const version = EnvUtil.get('TRV_SERVICE_MONGO', '4.4');
 
 export const service: Service = {
   name: 'mongodb',

@@ -324,14 +324,17 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async deleteStorage() {
-    for await (const items of this.#iterateBucket('')) {
-      await this.client.deleteObjects({
-        Bucket: this.config.bucket,
-        Delete: {
-          Objects: items
-        }
-      });
+    if (this.config.namespace) {
+      for await (const items of this.#iterateBucket('')) {
+        await this.client.deleteObjects({
+          Bucket: this.config.bucket,
+          Delete: {
+            Objects: items
+          }
+        });
+      }
+    } else {
+      await this.client.deleteBucket({ Bucket: this.config.bucket });
     }
-    // await this.client.deleteBucket({ Bucket: this.config.bucket });
   }
 }
