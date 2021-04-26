@@ -78,7 +78,6 @@ export class S3ModelConfig {
     this.config = {
       ...(this.config ?? {}),
       endpoint: this.endpoint,
-      forcePathStyle: true,
       credentials: {
         accessKeyId: this.accessKeyId,
         secretAccessKey: this.secretAccessKey

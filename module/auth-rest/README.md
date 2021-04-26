@@ -18,7 +18,7 @@ The integration with the [RESTful API](https://github.com/travetto/travetto/tree
    *  Route declaration
 
 ## Security information management
-When working with framework's authentication, the user information is exposed via the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) 
+When working with framework's authentication, the user information is exposed via the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L14) 
 object.  The auth functionality is exposed on the request as the property `auth`.
 
 **Code: Structure of auth property on the request**
@@ -43,7 +43,7 @@ Every external framework integration relies upon the [Authenticator](https://git
 [Authenticator](https://github.com/travetto/travetto/tree/master/module/auth/src/types/authenticator.ts#L8)
 ```
 
-The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), and is responsible for:
+The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L14) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L86), and is responsible for:
 
    
    *  Returning an [Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7) if authentication was successful
@@ -132,7 +132,7 @@ export class SampleAuth {
 }
 ```
 
-[@Authenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L27) and [@Unauthenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L43) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7) is accessible via [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) directly, without wiring in a request object, but is also accessible on the request object as [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L12).auth.
+[@Authenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L27) and [@Unauthenticated](https://github.com/travetto/travetto/tree/master/module/auth-rest/src/decorator.ts#L43) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7) is accessible via [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) directly, without wiring in a request object, but is also accessible on the request object as [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L14).auth.
 
 ## Passport - Extension
 
