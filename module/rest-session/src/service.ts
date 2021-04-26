@@ -9,19 +9,19 @@ import { Request, Response } from '@travetto/rest';
 import { Session } from './session';
 import { SessionConfig } from './config';
 
-export const SessionModelSym = Symbol.for('@trv:rest-session/model');
+export const SessionModelⲐ = Symbol.for('@trv:rest-session/model');
 
 /**
  * Symbol for accessing the raw session
  */
-const SessionSym = Symbol.for('@trv:rest-session/data');
+const SessionⲐ = Symbol.for('@trv:rest-session/data');
 
 /**
  * Declare the session on the request
  */
 declare global {
   interface TravettoRequest {
-    [SessionSym]: Session;
+    [SessionⲐ]: Session;
   }
 }
 
@@ -48,7 +48,7 @@ export class SessionService {
 
   #modelService: ModelExpirySupport;
 
-  constructor(@Inject(SessionModelSym, { resolution: 'loose' }) service: ModelExpirySupport) {
+  constructor(@Inject(SessionModelⲐ, { resolution: 'loose' }) service: ModelExpirySupport) {
     this.#modelService = service;
   }
 
@@ -124,21 +124,21 @@ export class SessionService {
    * Get or recreate session
    */
   ensureCreated(req: Request) {
-    if (req[SessionSym]?.action === 'destroy') {
+    if (req[SessionⲐ]?.action === 'destroy') {
       // @ts-expect-error
-      req[SessionSym] = undefined;
+      req[SessionⲐ] = undefined;
     }
-    return req[SessionSym] ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
+    return req[SessionⲐ] ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
   }
 
   /**
    * Load from request
    */
   async readRequest(req: Request, id?: string) {
-    if (!req[SessionSym]) {
+    if (!req[SessionⲐ]) {
       id = this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.header(this.config.keyName) as string;
       if (id) {
-        req[SessionSym] = (await this.#load(id))!;
+        req[SessionⲐ] = (await this.#load(id))!;
       }
     }
   }
@@ -147,7 +147,7 @@ export class SessionService {
    * Store to response
    */
   async writeResponse(req: Request, res: Response) {
-    const value = await this.#store(req[SessionSym]);
+    const value = await this.#store(req[SessionⲐ]);
     if (value === undefined) {
       return;
     }

@@ -6,7 +6,7 @@ import { Request, Response, RestInterceptor } from '@travetto/rest';
 
 import { AuthInterceptor } from '../../interceptor';
 
-const PrincipalSym = Symbol.for('@trv:auth/principal');
+const PrincipalⲐ = Symbol.for('@trv:auth/principal');
 
 /**
  * Provides global context to accessing principal
@@ -20,14 +20,14 @@ export class AuthContextService {
    * Set principal
    * @param p The auth principal
    */
-  set = (p: Principal | undefined) => this.context.set(PrincipalSym, p);
+  set = (p: Principal | undefined) => this.context.set(PrincipalⲐ, p);
 
   /**
    * Get the principal from the context
    * @returns principal if authenticated
    * @returns undefined if not authenticated
    */
-  get = () => this.context.get<Principal>(PrincipalSym);
+  get = () => this.context.get<Principal>(PrincipalⲐ);
 }
 
 /**

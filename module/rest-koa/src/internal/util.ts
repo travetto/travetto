@@ -1,7 +1,7 @@
 import * as koa from 'koa';
 
 import { RestServerUtil } from '@travetto/rest';
-import { NodeEntitySym, ProviderEntitySym, SendStreamFn } from '@travetto/rest/src/internal/symbol';
+import { NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from '@travetto/rest/src/internal/symbol';
 import { Readable } from 'node:stream';
 import { StreamUtil } from '@travetto/boot/src';
 
@@ -14,8 +14,8 @@ export class KoaServerUtil {
    */
   static getRequest(ctx: koa.ParameterizedContext<unknown>) {
     return RestServerUtil.decorateRequest({
-      [ProviderEntitySym]: ctx,
-      [NodeEntitySym]: ctx.req,
+      [ProviderEntityⲐ]: ctx,
+      [NodeEntityⲐ]: ctx.req,
       protocol: ctx.protocol as 'http',
       method: ctx.request.method as 'GET',
       query: ctx.request.query,
@@ -37,8 +37,8 @@ export class KoaServerUtil {
    */
   static getResponse(ctx: koa.ParameterizedContext<unknown>) {
     return RestServerUtil.decorateResponse({
-      [ProviderEntitySym]: ctx,
-      [NodeEntitySym]: ctx.res,
+      [ProviderEntityⲐ]: ctx,
+      [NodeEntityⲐ]: ctx.res,
       get headersSent() {
         return ctx.headerSent;
       },
@@ -50,7 +50,7 @@ export class KoaServerUtil {
         }
       },
       send: b => ctx.body = b,
-      [SendStreamFn]: async (stream: Readable) => {
+      [SendStreamⲐ]: async (stream: Readable) => {
         ctx.respond = false;
         ctx.response.status = 200;
         await StreamUtil.pipe(stream, ctx.res);

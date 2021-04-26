@@ -6,7 +6,7 @@ import { Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 import { AppError } from '@travetto/base';
 import { FsUtil, PathUtil, StreamUtil } from '@travetto/boot';
-import { NodeEntitySym } from '@travetto/rest/src/internal/symbol';
+import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
 
 import { RestAssetConfig } from './config';
 
@@ -76,7 +76,7 @@ export class AssetRestUtil {
 
     if (!/multipart|urlencoded/i.test(req.header('content-type') ?? '')) {
       const filename = this.getFileName(req);
-      return this.toLocalAsset(req.body ?? req[NodeEntitySym], filename)
+      return this.toLocalAsset(req.body ?? req[NodeEntityⲐ], filename)
         .then(validator)
         .then(file => ({ file }));
     } else {
@@ -130,10 +130,10 @@ export class AssetRestUtil {
         res.setHeader('Content-Type', [asset.contentType]);
         res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
         await new Promise((resolve, reject) => {
-          stream.pipe(res[NodeEntitySym]);
-          res[NodeEntitySym].on('error', reject);
-          res[NodeEntitySym].on('drain', resolve);
-          res[NodeEntitySym].on('close', resolve);
+          stream.pipe(res[NodeEntityⲐ]);
+          res[NodeEntityⲐ].on('error', reject);
+          res[NodeEntityⲐ].on('drain', resolve);
+          res[NodeEntityⲐ].on('close', resolve);
         });
       }
     };

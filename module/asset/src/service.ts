@@ -4,7 +4,7 @@ import { ModelStreamSupport, ExistsError, NotFoundError } from '@travetto/model'
 import { Asset } from './types';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
 
-export const AssetModelSym = Symbol.for('@trv:asset/model');
+export const AssetModelⲐ = Symbol.for('@trv:asset/model');
 
 /**
  * Services asset CRUD operations.  Takes in a source is defined elsewhere.
@@ -17,7 +17,7 @@ export class AssetService {
   #store: ModelStreamSupport;
   #namingStrategy: AssetNamingStrategy;
 
-  constructor(@Inject(AssetModelSym, { resolution: 'loose' }) store: ModelStreamSupport,
+  constructor(@Inject(AssetModelⲐ, { resolution: 'loose' }) store: ModelStreamSupport,
     namingStrategy?: AssetNamingStrategy
   ) {
     this.#namingStrategy = namingStrategy ?? new SimpleNamingStrategy();

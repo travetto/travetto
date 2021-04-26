@@ -1,5 +1,5 @@
 // @file-if @travetto/asset-rest
-// @file-if aws-serverless-express
+// @file-if @vendia/serverless-express
 
 import { AssetRestServerSuite } from '@travetto/asset-rest/test-support/server';
 import { Suite } from '@travetto/test';

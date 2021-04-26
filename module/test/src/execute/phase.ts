@@ -5,7 +5,7 @@ import { TestConsumer } from '../consumer/types';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
 
-export const TestBreakoutSym = Symbol.for('@trv:test/breakout');
+export const TestBreakoutⲐ = Symbol.for('@trv:test/breakout');
 
 const TEST_PHASE_TIMEOUT = TimeUtil.getEnvAsMillis('TRV_TEST_PHASE_TIMEOUT', 15000);
 
@@ -59,7 +59,7 @@ export class TestPhaseManager {
       const res = await this.triggerSuiteError(`[[${phase}]]`, error);
       this.#result.tests.push(res);
       this.#result.failed++;
-      throw TestBreakoutSym;
+      throw TestBreakoutⲐ;
     }
   }
 
@@ -82,7 +82,7 @@ export class TestPhaseManager {
   /**
    * On error, handle stubbing out error for the phases in progress
    */
-  async onError(err: Error | typeof TestBreakoutSym) {
+  async onError(err: Error | typeof TestBreakoutⲐ) {
     for (const ph of this.#progress) {
       try {
         await this.runPhase(ph === 'all' ? 'afterAll' : 'afterEach');
@@ -91,7 +91,7 @@ export class TestPhaseManager {
 
     this.#progress = [];
 
-    if (err !== TestBreakoutSym) {
+    if (err !== TestBreakoutⲐ) {
       const res = await this.triggerSuiteError('all', err);
       this.#result.tests.push(res);
       this.#result.failed++;

@@ -5,12 +5,12 @@ import { Inject, InjectableFactory } from '@travetto/di';
 import { CacheService } from '@travetto/cache';
 import { ModelExpirySupport } from '@travetto/model';
 
-import { SessionCacheSym, SessionData, Session } from '..';
+import { SessionData, Session } from '..';
 
 @Application('e2e')
 export class App {
 
-  @InjectableFactory(SessionCacheSym)
+  @InjectableFactory()
   static getSessionSource(service: ModelExpirySupport): CacheService {
     return new CacheService(service);
   }

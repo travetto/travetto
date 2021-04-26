@@ -8,7 +8,7 @@ import { LoggingInterceptor } from './logging';
 
 import { Response, Request } from '../types';
 import { Renderable } from '../response/renderable';
-import { HeadersAddedSym, NodeEntitySym, SendStreamFn } from '../internal/symbol';
+import { HeadersAddedⲐ, NodeEntityⲐ, SendStreamⲐ } from '../internal/symbol';
 import { StreamUtil } from '@travetto/boot/src';
 
 const isRenderable = (o: unknown): o is Renderable => !!o && !Util.isPrimitive(o) && 'render' in (o as object);
@@ -40,8 +40,8 @@ export class SerializeInterceptor implements RestInterceptor {
   static async sendOutput(req: Request, res: Response, output: unknown) {
     if (!res.headersSent) {
       if (output) {
-        if (res[HeadersAddedSym]) {
-          for (const [k, v] of Object.entries(res[HeadersAddedSym]!)) {
+        if (res[HeadersAddedⲐ]) {
+          for (const [k, v] of Object.entries(res[HeadersAddedⲐ]!)) {
             res.setHeader(k, typeof v === 'string' ? v : v());
           }
         }
@@ -55,7 +55,7 @@ export class SerializeInterceptor implements RestInterceptor {
           res.send(output);
         } else if (isStream(output)) {
           this.setContentTypeIfUndefined(res, 'application/octet-stream');
-          await res[SendStreamFn] ? res[SendStreamFn]!(output) : StreamUtil.pipe(output, res[NodeEntitySym]);
+          await res[SendStreamⲐ] ? res[SendStreamⲐ]!(output) : StreamUtil.pipe(output, res[NodeEntityⲐ]);
         } else {
           const payload = Util.hasToJSON(output) ? output.toJSON() : output;
           this.setContentTypeIfUndefined(res, 'application/json');

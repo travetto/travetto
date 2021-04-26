@@ -6,12 +6,12 @@ import * as coBody from 'co-body';
 
 import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
-import { TravettoEntitySym } from '@travetto/rest/src/internal/symbol';
+import { TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { Request, Response, ServerHandle } from '@travetto/rest/src/types';
 
 import { KoaServerUtil } from './internal/util';
 
-type TrvCtx = { [TravettoEntitySym]: [Request, Response] };
+type TrvCtx = { [TravettoEntityⲐ]: [Request, Response] };
 type Keyed = { key?: symbol | string };
 type Router = kRouter<{}, TrvCtx>;
 type Routes = ReturnType<Router['routes']>;
@@ -86,7 +86,7 @@ export class KoaRestServer implements RestServer<koa> {
         route.path = /.*/;
       }
       router[route.method as 'get'](route.path!, async (ctx) => {
-        const [req, res] = ctx[TravettoEntitySym] ??= [
+        const [req, res] = ctx[TravettoEntityⲐ] ??= [
           KoaServerUtil.getRequest(ctx),
           KoaServerUtil.getResponse(ctx)
         ];

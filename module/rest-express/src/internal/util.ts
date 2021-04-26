@@ -1,7 +1,7 @@
 import * as express from 'express';
 
 import { RestServerUtil, Request } from '@travetto/rest';
-import { NodeEntitySym, ProviderEntitySym } from '@travetto/rest/src/internal/symbol';
+import { NodeEntityⲐ, ProviderEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { Response } from '@travetto/rest/src/types';
 
 /**
@@ -13,8 +13,8 @@ export class ExpressServerUtil {
    */
   static getRequest(req: express.Request & { session?: TravettoRequest['session'] }) {
     return RestServerUtil.decorateRequest<Request>({
-      [ProviderEntitySym]: req,
-      [NodeEntitySym]: req,
+      [ProviderEntityⲐ]: req,
+      [NodeEntityⲐ]: req,
       protocol: req.protocol as 'http',
       method: req.method as Request['method'],
       url: req.originalUrl,
@@ -35,8 +35,8 @@ export class ExpressServerUtil {
    */
   static getResponse(res: express.Response) {
     return RestServerUtil.decorateResponse<Response>({
-      [ProviderEntitySym]: res,
-      [NodeEntitySym]: res,
+      [ProviderEntityⲐ]: res,
+      [NodeEntityⲐ]: res,
       get headersSent() {
         return res.headersSent;
       },

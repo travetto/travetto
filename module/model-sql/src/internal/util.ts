@@ -5,10 +5,10 @@ import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/sc
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
 
-const TableSym = Symbol.for('@trv:model-sql/table');
+const TableⲐ = Symbol.for('@trv:model-sql/table');
 
 export type VisitStack = {
-  [TableSym]?: string;
+  [TableⲐ]?: string;
   array?: boolean;
   type: Class;
   name: string;
@@ -295,10 +295,10 @@ export class SQLUtil {
    */
   static buildTable(list: VisitStack[]) {
     const top = list[list.length - 1];
-    if (!top[TableSym]) {
-      top[TableSym] = list.map((el, i) => i === 0 ? ModelRegistry.getStore(el.type) : el.name).join('_');
+    if (!top[TableⲐ]) {
+      top[TableⲐ] = list.map((el, i) => i === 0 ? ModelRegistry.getStore(el.type) : el.name).join('_');
     }
-    return top[TableSym]!;
+    return top[TableⲐ]!;
   }
 
   /**

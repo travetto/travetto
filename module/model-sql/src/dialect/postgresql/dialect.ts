@@ -5,11 +5,11 @@ import { AsyncContext } from '@travetto/context';
 import { ModelType } from '@travetto/model';
 import { Class } from '@travetto/base';
 
-
 import { SQLModelConfig } from '../../config';
 import { SQLDialect } from '../base';
 import { SQLUtil, VisitStack } from '../../internal/util';
 import { PostgreSQLConnection } from './connection';
+
 /**
  * Postgresql Dialect for the SQL Model Source
  */

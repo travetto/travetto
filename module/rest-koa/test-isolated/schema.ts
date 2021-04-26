@@ -1,5 +1,5 @@
 // @file-if @travetto/schema
-// @file-if aws-serverless-express
+// @file-if @vendia/serverless-express
 
 import { SchemaRestServerSuite } from '@travetto/rest/test-support/schema';
 import { Suite } from '@travetto/test';

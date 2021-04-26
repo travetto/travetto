@@ -1,8 +1,7 @@
 // @file-if @travetto/cache
-
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { CacheModelSym } from '@travetto/cache';
+import { CacheModelⲐ } from '@travetto/cache';
 import { CacheServiceSuite } from '@travetto/cache/test-support/service';
 import { AsyncContext } from '@travetto/context';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
@@ -16,11 +15,11 @@ class Config {
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
     return new MySQLDialect(ctx, config);
   }
-  @InjectableFactory(CacheModelSym)
+  @InjectableFactory(CacheModelⲐ)
   static modelProvider(svc: SQLModelService) {
     return svc;
   }
-  @InjectableFactory(CacheModelSym)
+  @InjectableFactory(CacheModelⲐ)
   static modelProviderDeux(svc: SQLModelService): ModelExpirySupport {
     return svc;
   }

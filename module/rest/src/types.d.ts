@@ -2,7 +2,7 @@ import { SetOption, GetOption } from 'cookies';
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'http';
 
 import { HeaderMap } from './types';
-import { HeadersAddedSym, NodeEntitySym, ProviderEntitySym, SendStreamFn } from './internal/symbol';
+import { HeadersAddedⲐ, NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from './internal/symbol';
 import { Readable } from 'stream';
 
 
@@ -15,11 +15,11 @@ declare global {
     /**
      * The original request of the underlying framework
      */
-    [ProviderEntitySym]?: T;
+    [ProviderEntityⲐ]?: T;
     /**
      * The raw http Incoming Message object
      */
-    [NodeEntitySym]: IncomingMessage;
+    [NodeEntityⲐ]: IncomingMessage;
     /**
      * The http method
      */
@@ -87,15 +87,15 @@ declare global {
     /**
      * The underlying request object
      */
-    [ProviderEntitySym]?: T;
+    [ProviderEntityⲐ]?: T;
     /**
      * The raw http server response object
      */
-    [NodeEntitySym]: ServerResponse;
+    [NodeEntityⲐ]: ServerResponse;
     /**
      * The additional headers for this request, provided by controllers/route config
      */
-    [HeadersAddedSym]?: HeaderMap;
+    [HeadersAddedⲐ]?: HeaderMap;
     /**
      * Outbound status code
      */
@@ -165,7 +165,7 @@ declare global {
      * Optional internal method for sending streams
      * @param stream 
      */
-    [SendStreamFn]?(stream: Readable): Promise<void>;
+    [SendStreamⲐ]?(stream: Readable): Promise<void>;
     /**
      * Write content directly to the output stream
      * @param value The value to write

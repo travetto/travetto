@@ -3,7 +3,7 @@ import { FastifyInstance } from 'fastify';
 
 import { Injectable } from '@travetto/di';
 import { ConfigManager } from '@travetto/config';
-import { AwsLambdaRestServer, AwsLambdaSym } from '@travetto/rest/src/extension/aws-lambda';
+import { AwsLambdaRestServer, AwsLambdaⲐ } from '@travetto/rest/src/extension/aws-lambda';
 
 import { FastifyRestServer } from '../../server';
 
@@ -16,7 +16,7 @@ const awsLambdaFastify = require('aws-lambda-fastify') as (
 /**
  * Aws Lambda Rest Server
  */
-@Injectable(AwsLambdaSym)
+@Injectable(AwsLambdaⲐ)
 export class AwsLambdaFastifyRestServer extends FastifyRestServer implements AwsLambdaRestServer {
 
   /**

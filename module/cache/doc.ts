@@ -10,7 +10,7 @@ import { S3ModelService } from '@travetto/model-s3';
 import { Links } from '@travetto/model/support/doc-support';
 
 import { Cache, EvictCache } from './src/decorator';
-import { CacheModelSym, CacheService } from './src/service';
+import { CacheModelⲐ, CacheService } from './src/service';
 
 export const text = d`
 ${d.Header()}
@@ -66,7 +66,7 @@ ${d.Code('Using decorators to cache/evict user access', 'doc/evict.ts')}
 
 ${d.Section('Extending the Cache Service')}
 
-By design, the ${CacheService} relies solely on the ${mod.Model} module.  Specifically on the ${Links.Expiry}.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the model service to be registered using the ${CacheModelSym.description!}:
+By design, the ${CacheService} relies solely on the ${mod.Model} module.  Specifically on the ${Links.Expiry}.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the model service to be registered using the ${CacheModelⲐ.description!}:
 
 ${d.Code('Registering a Custom Model Source', 'doc/custom.ts')}
 `;

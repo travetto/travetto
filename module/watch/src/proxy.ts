@@ -1,6 +1,6 @@
 import { ConcreteClass, Util } from '@travetto/base';
 
-const IsProxiedSym = Symbol.for('@trv:watch/proxy');
+const IsProxiedⲐ = Symbol.for('@trv:watch/proxy');
 
 
 /**
@@ -52,7 +52,7 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   has(target: T, prop: PropertyKey) {
-    if (prop === IsProxiedSym) {
+    if (prop === IsProxiedⲐ) {
       return true;
     }
     return (this.target as Object).hasOwnProperty(prop);
@@ -88,7 +88,7 @@ interface Proxy<T> { }
  */
 export class RetargettingProxy<T> {
   static isProxied(o: unknown): o is RetargettingProxy<unknown> {
-    return !!o && IsProxiedSym in (o as object);
+    return !!o && IsProxiedⲐ in (o as object);
   }
 
   #handler: RetargettingHandler<T>;

@@ -1,7 +1,7 @@
 // @file-if @travetto/auth
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcSym } from '@travetto/auth/test-support/model';
+import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth/test-support/model';
 import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 import { AsyncContext } from '@travetto/context';
 
@@ -13,7 +13,7 @@ class Config {
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
     return new MySQLDialect(ctx, config);
   }
-  @InjectableFactory(TestModelSvcSym)
+  @InjectableFactory(TestModelSvcⲐ)
   static modelProvider(svc: SQLModelService) {
     return svc;
   }

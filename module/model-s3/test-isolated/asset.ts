@@ -2,13 +2,13 @@
 
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AssetModelSym } from '@travetto/asset';
+import { AssetModelⲐ } from '@travetto/asset';
 import { AssetServiceSuite } from '@travetto/asset/test-support/service';
 
 import { S3ModelConfig, S3ModelService } from '..';
 
 class Init {
-  @InjectableFactory(AssetModelSym)
+  @InjectableFactory(AssetModelⲐ)
   static modelProvider(config: S3ModelConfig) {
     return new S3ModelService(config);
   }

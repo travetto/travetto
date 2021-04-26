@@ -6,7 +6,7 @@ import * as compression from 'compression';
 import { Inject, Injectable } from '@travetto/di';
 import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, ParamConfig, RouteConfig } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
-import { NodeEntitySym, TravettoEntitySym } from '@travetto/rest/src/internal/symbol';
+import { NodeEntityⲐ, TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { ServerHandle } from '@travetto/rest/src/types';
 
 import { RouteStack } from './internal/types';
@@ -18,12 +18,12 @@ declare global {
   namespace Express {
     // eslint-disable-next-line no-shadow
     interface Request {
-      [TravettoEntitySym]?: TravettoRequest;
-      [NodeEntitySym]?: express.Request;
+      [TravettoEntityⲐ]?: TravettoRequest;
+      [NodeEntityⲐ]?: express.Request;
     }
     interface Response {
-      [TravettoEntitySym]?: TravettoResponse;
-      [NodeEntitySym]?: express.Response;
+      [TravettoEntityⲐ]?: TravettoResponse;
+      [NodeEntityⲐ]?: express.Response;
     }
   }
 }
@@ -74,8 +74,8 @@ export class ExpressRestServer implements RestServer<express.Application> {
     for (const route of routes) {
       router[route.method as 'get'](route.path!, (req, res) => {
         route.handlerFinalized!(
-          req[TravettoEntitySym] ??= ExpressServerUtil.getRequest(req),
-          res[TravettoEntitySym] ??= ExpressServerUtil.getResponse(res)
+          req[TravettoEntityⲐ] ??= ExpressServerUtil.getRequest(req),
+          res[TravettoEntityⲐ] ??= ExpressServerUtil.getResponse(res)
         );
       });
     }

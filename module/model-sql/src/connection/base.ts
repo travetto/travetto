@@ -1,8 +1,8 @@
 import { Util } from '@travetto/base';
 import { AsyncContext } from '@travetto/context';
 
-const ContextActiveSym: unique symbol = Symbol.for('@trv:model/sql-active');
-const TxActiveSym: unique symbol = Symbol.for('@trv:model/sql-transaction');
+const ContextActiveⲐ: unique symbol = Symbol.for('@trv:model/sql-active');
+const TxActiveⲐ: unique symbol = Symbol.for('@trv:model/sql-transaction');
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 
@@ -13,6 +13,9 @@ export type TransactionType = 'required' | 'isolated' | 'force';
  */
 export abstract class Connection<C = unknown> {
 
+  isolatedTransactions = true;
+  nestedTransactions = true;
+
   constructor(public readonly context: AsyncContext) {
 
   }
@@ -21,14 +24,14 @@ export abstract class Connection<C = unknown> {
    * Get active connection
    */
   get active(): C {
-    return this.context.get(ContextActiveSym) as C;
+    return this.context.get(ContextActiveⲐ) as C;
   }
 
   /**
    * Get active tx state
    */
   get activeTx() {
-    return !!this.context.get(TxActiveSym) as boolean;
+    return !!this.context.get(TxActiveⲐ) as boolean;
   }
 
   /**
@@ -66,7 +69,7 @@ export abstract class Connection<C = unknown> {
 
     return this.context.run(async () => {
       try {
-        this.context.set(ContextActiveSym, await this.acquire());
+        this.context.set(ContextActiveⲐ, await this.acquire());
         return await op();
       } finally {
         if (this.active) {
@@ -91,7 +94,7 @@ export abstract class Connection<C = unknown> {
     const self = this;
     yield* this.context.iterate(async function* () {
       try {
-        self.context.set(ContextActiveSym, await self.acquire());
+        self.context.set(ContextActiveⲐ, await self.acquire());
         yield* op();
       } finally {
         if (self.active) {
@@ -122,7 +125,7 @@ export abstract class Connection<C = unknown> {
       }
     } else {
       return this.runWithActive(() => {
-        this.context.set(TxActiveSym, true);
+        this.context.set(TxActiveⲐ, true);
         return this.runWithTransaction('force', op);
       });
     }
@@ -133,9 +136,13 @@ export abstract class Connection<C = unknown> {
    */
   async startTx(conn: C, transactionId?: string) {
     if (transactionId) {
-      return this.execute(conn, `SAVEPOINT ${transactionId};`);
+      if (this.nestedTransactions) {
+        await this.execute(conn, `SAVEPOINT ${transactionId};`);
+      }
     } else {
-      await this.execute(conn, 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED;');
+      if (this.isolatedTransactions) {
+        await this.execute(conn, 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED;');
+      }
       await this.execute(conn, 'BEGIN;');
     }
   }
@@ -143,22 +150,26 @@ export abstract class Connection<C = unknown> {
   /**
    * Commit active transaction
    */
-  commitTx(conn: C, transactionId?: string) {
+  async commitTx(conn: C, transactionId?: string) {
     if (transactionId) {
-      return this.execute(conn, `RELEASE SAVEPOINT ${transactionId};`);
+      if (this.nestedTransactions) {
+        await this.execute(conn, `RELEASE SAVEPOINT ${transactionId};`);
+      }
     } else {
-      return this.execute(conn, 'COMMIT;');
+      await this.execute(conn, 'COMMIT;');
     }
   }
 
   /**
    * Rollback active transaction
    */
-  rollbackTx(conn: C, transactionId?: string) {
+  async rollbackTx(conn: C, transactionId?: string) {
     if (transactionId) {
-      return this.execute(conn, `ROLLBACK TO ${transactionId};`);
+      if (this.isolatedTransactions) {
+        await this.execute(conn, `ROLLBACK TO ${transactionId};`);
+      }
     } else {
-      return this.execute(conn, 'ROLLBACK;');
+      await this.execute(conn, 'ROLLBACK;');
     }
   }
 }

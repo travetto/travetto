@@ -4,10 +4,10 @@ import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
 import { Suite } from '@travetto/test';
 
-import { AuthModelServiceSuite, TestModelSvcSym } from '../test-support/model';
+import { AuthModelServiceSuite, TestModelSvcⲐ } from '../test-support/model';
 
 class Init {
-  @InjectableFactory(TestModelSvcSym)
+  @InjectableFactory(TestModelSvcⲐ)
   static modelProvider(config: MemoryModelConfig) {
     return new MemoryModelService(config);
   }

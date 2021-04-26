@@ -4,7 +4,7 @@ import type * as lambda from 'aws-lambda';
 
 import { Injectable } from '@travetto/di';
 import { ConfigManager } from '@travetto/config';
-import { AwsLambdaRestServer, AwsLambdaSym } from '@travetto/rest/src/extension/aws-lambda';
+import { AwsLambdaRestServer, AwsLambdaⲐ } from '@travetto/rest/src/extension/aws-lambda';
 import { ServerHandle } from '@travetto/rest/src/types';
 
 import { KoaRestServer } from '../../server';
@@ -12,7 +12,7 @@ import { KoaRestServer } from '../../server';
 /**
  * Aws Lambda Rest Server
  */
-@Injectable(AwsLambdaSym)
+@Injectable(AwsLambdaⲐ)
 export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRestServer {
 
   #handler: ReturnType<(typeof serverless)['configure']>;

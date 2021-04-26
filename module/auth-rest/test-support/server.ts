@@ -11,7 +11,7 @@ import { Authenticate, Authenticated } from '../src/decorator';
 import { PrincipalEncoder } from '../src/encoder';
 import { AuthService } from '../src/service';
 
-const TestAuthSym = Symbol.for('TEST_AUTH');
+const TestAuthⲐ = Symbol.for('TEST_AUTH');
 
 @Injectable({ primary: true })
 class AuthorizationEncoder implements PrincipalEncoder {
@@ -34,7 +34,7 @@ class AuthorizationEncoder implements PrincipalEncoder {
 }
 
 class Config {
-  @InjectableFactory(TestAuthSym)
+  @InjectableFactory(TestAuthⲐ)
   static getAuthenticator(): Authenticator {
     return {
       async authenticate(body: { username?: string, password?: string }) {
@@ -59,7 +59,7 @@ class TestAuthController {
   svc: AuthService;
 
   @Post('/login')
-  @Authenticate(TestAuthSym)
+  @Authenticate(TestAuthⲐ)
   async simpleLogin() {
   }
 

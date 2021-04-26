@@ -3,7 +3,7 @@ import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { RestInterceptor } from '../interceptor/types';
 
 import { ParamUtil } from './param';
-import { HeadersAddedSym } from '../internal/symbol';
+import { HeadersAddedⲐ } from '../internal/symbol';
 
 /**
  * Route specific utilities
@@ -65,7 +65,7 @@ export class RouteUtil {
 
     if (headers && Object.keys(headers).length > 0) {
       filterChain.unshift((async (__: Request, res: Response, next: () => Promise<unknown | void>) => {
-        res[HeadersAddedSym] = { ...headers };
+        res[HeadersAddedⲐ] = { ...headers };
         return next();
       }));
     }

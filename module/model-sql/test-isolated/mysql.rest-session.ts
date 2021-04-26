@@ -1,10 +1,9 @@
 // @file-if @travetto/rest-session
 // @file-if @travetto/rest-express
-
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { RestSessionServerSuite } from '@travetto/rest-session/test-support/server';
-import { SessionModelSym } from '@travetto/rest-session';
+import { SessionModelⲐ } from '@travetto/rest-session';
 import { AsyncContext } from '@travetto/context';
 import { ModelSuite } from '@travetto/model/test-support/suite';
 
@@ -17,7 +16,7 @@ class Config {
   static getSqlService(ctx: AsyncContext, config: SQLModelConfig) {
     return new MySQLDialect(ctx, config);
   }
-  @InjectableFactory(SessionModelSym)
+  @InjectableFactory(SessionModelⲐ)
   static modelProvider(svc: SQLModelService) {
     return svc;
   }

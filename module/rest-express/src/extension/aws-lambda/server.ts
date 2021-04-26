@@ -5,14 +5,14 @@ import type * as lambda from 'aws-lambda';
 import { Injectable } from '@travetto/di';
 import { ConfigManager } from '@travetto/config';
 
-import { AwsLambdaRestServer, AwsLambdaSym } from '@travetto/rest/src/extension/aws-lambda';
+import { AwsLambdaRestServer, AwsLambdaⲐ } from '@travetto/rest/src/extension/aws-lambda';
 
 import { ExpressRestServer } from '../../server';
 import { ServerHandle } from '@travetto/rest/src/types';
 /**
  * Aws Lambda Rest Server
  */
-@Injectable(AwsLambdaSym)
+@Injectable(AwsLambdaⲐ)
 export class AwsLambdaExpressRestServer extends ExpressRestServer implements AwsLambdaRestServer {
 
   #handler: lambda.Handler;

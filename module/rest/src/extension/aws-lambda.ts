@@ -5,7 +5,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { RestApplication } from '../application/rest';
 import { RestServer } from '../application/server';
 
-export const AwsLambdaSym = Symbol.for('@trv:rest/aws-lambda');
+export const AwsLambdaⲐ = Symbol.for('@trv:rest/aws-lambda');
 
 /**
  * Main contract for lambda based applications
@@ -29,7 +29,7 @@ export interface AwsLambdaRestServer extends RestServer, AwsLambdaHandler { }
 export class AwsLambdaRestApplication extends RestApplication implements AwsLambdaHandler {
   #lambdaServer: AwsLambdaRestServer;
 
-  constructor(@Inject(AwsLambdaSym) lambdaServer: AwsLambdaRestServer) {
+  constructor(@Inject(AwsLambdaⲐ) lambdaServer: AwsLambdaRestServer) {
     super();
     this.server = lambdaServer;
     this.#lambdaServer = lambdaServer;

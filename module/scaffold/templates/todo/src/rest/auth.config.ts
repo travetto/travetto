@@ -1,8 +1,8 @@
-import { Authorizer, Authenticator, Principal } from '@travetto/auth';
+import { Authorizer, Authenticator } from '@travetto/auth';
 import { InjectableFactory } from '@travetto/di';
 import { AppError } from '@travetto/base';
 
-export const BasicAuthSym = Symbol.for('AUTH_BASIC');
+export const BasicAuthⲐ = Symbol.for('AUTH_BASIC');
 
 type User = { username: string; password: string };
 
@@ -12,7 +12,7 @@ class AuthConfig {
     return { authorize: p => p };
   }
 
-  @InjectableFactory(BasicAuthSym)
+  @InjectableFactory(BasicAuthⲐ)
   static getAuthenticator(): Authenticator<User> {
     return {
       authenticate: u => {

@@ -10,7 +10,7 @@ import { ModelSuite } from '@travetto/model/test-support/suite';
 
 import { ModelAuthService, RegisteredPrincipal } from '..';
 
-export const TestModelSvcSym = Symbol.for('@trv:auth/test-model-svc');
+export const TestModelSvcⲐ = Symbol.for('@trv:auth/test-model-svc');
 
 @Model({ autoCreate: false })
 class User extends BaseModel implements RegisteredPrincipal {
@@ -24,7 +24,7 @@ class User extends BaseModel implements RegisteredPrincipal {
 
 class TestConfig {
   @InjectableFactory()
-  static getauthService(@Inject(TestModelSvcSym) svc: ModelCrudSupport): ModelAuthService<User> {
+  static getauthService(@Inject(TestModelSvcⲐ) svc: ModelCrudSupport): ModelAuthService<User> {
     const src = new ModelAuthService<User>(
       svc,
       User,

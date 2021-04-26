@@ -1,9 +1,9 @@
 import { InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
-import { CacheModelSym } from '@travetto/cache';
+import { CacheModelⲐ } from '@travetto/cache';
 
 class Config {
-  @InjectableFactory(CacheModelSym)
+  @InjectableFactory(CacheModelⲐ)
   static getModel(): ModelExpirySupport {
     // @ts-expect-error
     return new CustomAwesomeModelService();
