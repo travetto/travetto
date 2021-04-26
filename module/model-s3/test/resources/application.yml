@@ -1,3 +1,4 @@
 model.s3:
   bucket: travetto-test
   endpoint: http://localhost:4566
+  config.forcePathStyle: true
