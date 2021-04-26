@@ -16,6 +16,9 @@ import { ExistsError } from '../error/exists';
 import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
+import { StreamModel, STREAMS } from '../internal/service/stream';
+
+const STREAM_META = `${STREAMS}_meta`;
 
 @Config('model.memory')
 export class MemoryModelConfig {
@@ -152,25 +155,25 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   // Stream Support
   async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
-    const streams = this.#getStore('_streams');
-    const metas = this.#getStore('_streams_meta');
+    const streams = this.#getStore(STREAMS);
+    const metas = this.#getStore(STREAM_META);
     metas.set(location, Buffer.from(JSON.stringify(meta)));
     streams.set(location, await StreamUtil.streamToBuffer(stream));
   }
 
   async getStream(location: string) {
-    const streams = this.#find('_streams', location, 'notfound');
+    const streams = this.#find(STREAMS, location, 'notfound');
     return StreamUtil.bufferToStream(streams.get(location)!);
   }
 
   async describeStream(location: string) {
-    const metas = this.#find('_streams_meta', location, 'notfound');
+    const metas = this.#find(STREAM_META, location, 'notfound');
     return JSON.parse(metas.get(location)!.toString('utf8')) as StreamMeta;
   }
 
   async deleteStream(location: string) {
-    const streams = this.#getStore('_streams');
-    const metas = this.#getStore('_streams_meta');
+    const streams = this.#getStore(STREAMS);
+    const metas = this.#getStore(STREAM_META);
     if (streams.has(location)) {
       streams.delete(location);
       metas.delete(location);
@@ -200,14 +203,19 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     this.#indexes.clear();
   }
 
-  async createModel(cls: Class<ModelType>) {
+  async createModel<T extends ModelType>(cls: Class<T>) {
     for (const idx of ModelRegistry.get(cls).indices ?? []) {
       this.#indexes.set(`${cls.ᚕid}:${idx.name}`, new Map());
     }
   }
 
-  async truncateModel(cls: Class<ModelType>) {
-    this.#getStore(cls).clear();
+  async truncateModel<T extends ModelType>(cls: Class<T>) {
+    if (cls === StreamModel) {
+      this.#getStore(STREAMS).clear();
+      this.#getStore(STREAM_META).clear();
+    } else {
+      this.#getStore(cls).clear();
+    }
   }
 
   // Indexed

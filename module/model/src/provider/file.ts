@@ -18,8 +18,12 @@ import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
 import { SubTypeNotSupportedError } from '../error/invalid-sub-type';
+import { StreamModel, STREAMS } from '../internal/service/stream';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
+
+const BIN = '.bin';
+const META = '.meta';
 
 @Config('model.file')
 export class FileModelConfig {
@@ -62,7 +66,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
    */
   constructor(public readonly config: FileModelConfig) { }
 
-  async #resolveName<T extends ModelType>(cls: Class<T> | string, suffix: Suffix, id?: string) {
+  async #resolveName<T extends ModelType>(cls: Class<T> | string, suffix?: Suffix, id?: string) {
     const name = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
     let resolved = PathUtil.resolveUnix(this.config.folder, this.config.namespace, name);
     if (id) {
@@ -178,31 +182,31 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   // Stream
   async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
-    const file = await this.#resolveName('_streams', '.bin', location);
+    const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
       StreamUtil.writeToFile(stream, file),
-      fs.promises.writeFile(file.replace('.bin', '.meta'), JSON.stringify(meta), 'utf8')
+      fs.promises.writeFile(file.replace(BIN, META), JSON.stringify(meta), 'utf8')
     ]);
   }
 
   async getStream(location: string) {
-    const file = await this.#find('_streams', '.bin', location);
+    const file = await this.#find(STREAMS, BIN, location);
     return fs.createReadStream(file);
   }
 
   async describeStream(location: string) {
-    const file = await this.#find('_streams', '.meta', location);
+    const file = await this.#find(STREAMS, META, location);
     const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
     const text = JSON.parse(content.toString('utf8'));
     return text as StreamMeta;
   }
 
   async deleteStream(location: string) {
-    const file = await this.#resolveName('_streams', '.bin', location);
+    const file = await this.#resolveName(STREAMS, BIN, location);
     if (await FsUtil.exists(file)) {
       await Promise.all([
         fs.promises.unlink(file),
-        fs.promises.unlink(file.replace('.bin', '.meta'))
+        fs.promises.unlink(file.replace('.bin', META))
       ]);
     } else {
       throw new NotFoundError('Stream', location);
@@ -230,6 +234,6 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   async truncateModel(cls: Class<ModelType>) {
-    await FsUtil.unlinkRecursive(await this.#resolveName(cls, '.json'), true);
+    await FsUtil.unlinkRecursive(await this.#resolveName(cls === StreamModel ? STREAMS : cls), true);
   }
 }

@@ -71,7 +71,7 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
     await service.deleteStream(meta.hash);
 
     await assert.rejects(async () => {
-      console.log(await service.getStream(meta.hash));
+      await service.getStream(meta.hash);
     });
   }
 }

@@ -32,11 +32,10 @@ import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
+import { StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
-
-const STREAMS_BUCKET = 'streams';
 
 /**
  * Mongo-based model source
@@ -56,11 +55,22 @@ export class MongoModelService implements
   constructor(public readonly config: MongoModelConfig) {
   }
 
+
+  async #describeStreamRaw(location: string) {
+    const files = (await this.#bucket.find({ filename: location }, { limit: 1 }).toArray()) as [{ _id: mongo.ObjectID, metadata: StreamMeta }];
+
+    if (!files?.length) {
+      throw new NotFoundError(STREAMS, location);
+    }
+
+    return files[0];
+  }
+
   async postConstruct() {
     this.client = await mongo.MongoClient.connect(this.config.url, this.config.clientOptions);
     this.#db = this.client.db(this.config.namespace);
     this.#bucket = new mongo.GridFSBucket(this.#db, {
-      bucketName: STREAMS_BUCKET,
+      bucketName: STREAMS,
       writeConcern: { w: 1 }
     });
     await ModelStorageUtil.registerModelChangeListener(this);
@@ -135,8 +145,14 @@ export class MongoModelService implements
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>) {
-    const col = await this.getStore(cls);
-    await col.deleteMany({});
+    if (cls === StreamModel) {
+      try {
+        await this.#bucket.drop();
+      } catch { }
+    } else {
+      const col = await this.getStore(cls);
+      await col.deleteMany({});
+    }
   }
 
   /**
@@ -276,33 +292,21 @@ export class MongoModelService implements
 
     const res = await this.#bucket.openDownloadStreamByName(location);
     if (!res) {
-      throw new NotFoundError(STREAMS_BUCKET, location);
+      throw new NotFoundError(STREAMS, location);
     }
     return res;
   }
 
   async describeStream(location: string) {
-    const files = await this.#bucket.find({ filename: location }, { limit: 1 }).toArray();
-
-    if (!files?.length) {
-      throw new NotFoundError(STREAMS_BUCKET, location);
-    }
-
-    const [{ metadata }] = files;
-    return metadata;
+    return (await this.#describeStreamRaw(location)).metadata;
   }
 
   async deleteStream(location: string) {
-    const files = await this.#bucket.find({ filename: location }, { limit: 1 }).toArray();
-
-    if (!files?.length) {
-      throw new NotFoundError(STREAMS_BUCKET, location);
-    }
-
-    const [{ _id: fileId }] = files;
+    const fileId = (await this.#describeStreamRaw(location))._id;
     await this.#bucket.delete(fileId);
   }
 
+  // Bulk
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {
     const store = await this.getStore(cls);
     const bulk = store.initializeUnorderedBulkOp({ w: 1 });
