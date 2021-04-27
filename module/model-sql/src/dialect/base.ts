@@ -56,8 +56,8 @@ export abstract class SQLDialect implements DialectState {
     $or: 'OR',
     $not: 'NOT',
     $all: '=ALL',
-    $regex: '<unknown>',
-    $iregex: '<unknown>',
+    $regex: undefined,
+    $iregex: undefined,
     $in: 'IN',
     $nin: 'NOT IN',
     $eq: '=',
@@ -447,10 +447,19 @@ export abstract class SQLDialect implements DialectState {
 
               if (/^[\^]\S+[.][*][$]?$/.test(src)) {
                 const inner = src.substring(1, src.length - 2);
-                items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(`${inner}%`)}`);
+                if (!ins || SQL_OPS.$ilike) {
+                  items.push(`${sPath} ${ins ? SQL_OPS.$ilike : SQL_OPS.$like} ${resolve(`${inner}%`)}`);
+                } else {
+                  items.push(`LOWER(${sPath}) ${SQL_OPS.$like} LOWER(${resolve(`${inner}%`)})`);
+                }
               } else {
-                const val = resolve(v);
-                items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${val}`);
+                if (!ins || SQL_OPS.$iregex) {
+                  const val = resolve(v);
+                  items.push(`${sPath} ${SQL_OPS[!ins ? subKey : '$iregex']} ${val}`);
+                } else {
+                  const val = resolve(new RegExp(src.toLowerCase(), re.flags));
+                  items.push(`LOWER(${sPath}) ${SQL_OPS[subKey]} ${val}`);
+                }
               }
               break;
             }

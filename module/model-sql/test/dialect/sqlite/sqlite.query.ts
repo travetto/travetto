@@ -9,19 +9,19 @@ import { ModelQueryFacetSuite } from '@travetto/model-query/test-support/facet';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/test-support/polymorphism';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/test-support/suggest';
 
-import { SQLModelConfig, SQLModelService } from '../..';
-import { PostgreSQLDialect } from '../../src/dialect/postgresql/dialect';
+import { SQLModelConfig, SQLModelService } from '../../..';
+import { SqliteDialect } from '../../../src/dialect/sqlite/dialect';
 
 class Config {
   @InjectableFactory({ primary: true })
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
-    return new PostgreSQLDialect(ctx, config);
+    return new SqliteDialect(ctx, config);
   }
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQuerySuite extends ModelQuerySuite {
+export class SqliteQuerySuite extends ModelQuerySuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
   supportsGeo = false;
@@ -29,28 +29,28 @@ export class PostgreSQLQuerySuite extends ModelQuerySuite {
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQueryCrudSuite extends ModelQueryCrudSuite {
+export class SqliteQueryCrudSuite extends ModelQueryCrudSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQueryFacetSuite extends ModelQueryFacetSuite {
+export class SqliteQueryFacetSuite extends ModelQueryFacetSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
+export class SqliteQueryPolymorphismSuite extends ModelQueryPolymorphismSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQuerySuggestSuite extends ModelQuerySuggestSuite {
+export class SqliteQuerySuggestSuite extends ModelQuerySuggestSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

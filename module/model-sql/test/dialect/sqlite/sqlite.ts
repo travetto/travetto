@@ -9,47 +9,47 @@ import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 import { ModelExpirySuite } from '@travetto/model/test-support/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
 
-import { SQLModelConfig, SQLModelService } from '../..';
-import { PostgreSQLDialect } from '../../src/dialect/postgresql/dialect';
+import { SQLModelConfig, SQLModelService } from '../../..';
+import { SqliteDialect } from '../../../src/dialect/sqlite/dialect';
 
 class Config {
   @InjectableFactory({ primary: true })
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
-    return new PostgreSQLDialect(ctx, config);
+    return new SqliteDialect(ctx, config);
   }
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgeSQLBasicSuite extends ModelBasicSuite {
+export class SqliteBasicSuite extends ModelBasicSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLCrudSuite extends ModelCrudSuite {
+export class SqliteCrudSuite extends ModelCrudSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLBulkSuite extends ModelBulkSuite {
+export class SqliteBulkSuite extends ModelBulkSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLExpirySuite extends ModelExpirySuite {
+export class SqliteExpirySuite extends ModelExpirySuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
 
 @WithSuiteContext()
 @Suite()
-export class PostgreSQLQueryPolymorphismSuite extends ModelPolymorphismSuite {
+export class SqliteQueryPolymorphismSuite extends ModelPolymorphismSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

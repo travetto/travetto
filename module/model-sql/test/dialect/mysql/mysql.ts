@@ -9,8 +9,8 @@ import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 import { ModelExpirySuite } from '@travetto/model/test-support/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
 
-import { SQLModelConfig, SQLModelService } from '../..';
-import { MySQLDialect } from '../../src/dialect/mysql/dialect';
+import { SQLModelConfig, SQLModelService } from '../../..';
+import { MySQLDialect } from '../../../src/dialect/mysql/dialect';
 
 class Config {
   @InjectableFactory({ primary: true })
