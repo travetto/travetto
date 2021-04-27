@@ -46,6 +46,10 @@ export const ImportOrder = {
           continue;
         }
 
+        if (from.endsWith('@travetto/boot/src')) {
+          context.report({ message: 'Do not import from @travetto/boot/src, but from @travetto/boot', node });
+        }
+
         const lineType: typeof groupType = /^@travetto/.test(from) ? 'travetto' : /^[^.]/.test(from) ? 'node' : 'local';
 
         if (/module\/[^/]+\/doc\//.test(context.getFilename()) && lineType === 'local' && from.startsWith('..')) {

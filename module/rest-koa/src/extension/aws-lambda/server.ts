@@ -4,7 +4,7 @@ import type * as lambda from 'aws-lambda';
 
 import { Injectable } from '@travetto/di';
 import { ConfigManager } from '@travetto/config';
-import { AwsLambdaRestServer, AwsLambdaⲐ } from '@travetto/rest/src/extension/aws-lambda';
+import { AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ } from '@travetto/rest/src/extension/aws-lambda';
 import { ServerHandle } from '@travetto/rest/src/types';
 
 import { KoaRestServer } from '../../server';
@@ -15,19 +15,19 @@ import { KoaRestServer } from '../../server';
 @Injectable(AwsLambdaⲐ)
 export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRestServer {
 
-  #handler: ReturnType<(typeof serverless)['configure']>;
+  #handler: AwsLambdaHandler['handle'];
 
   /**
    * Handler method for the proxy
    */
   handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
-    return this.#handler(event, context, null as any) as Promise<lambda.APIGatewayProxyResult>
+    return this.#handler(event, context);
   }
 
   init() {
     const ret = super.init();
     const config = ConfigManager.get('rest.aws');
-    this.#handler = serverless.configure({ app: ret.callback(), binaryMimeTypes: config.binaryMimeTypes as string[] ?? [] });
+    this.#handler = serverless.configure({ app: ret.callback(), binaryMimeTypes: config.binaryMimeTypes as string[] ?? [] }) as unknown as AwsLambdaHandler['handle'];
     return ret;
   }
 

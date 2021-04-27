@@ -98,8 +98,11 @@ export class RetargettingProxy<T> {
     this.#handler = new RetargettingHandler(initial);
     this.#instance = new Proxy({}, this.#handler);
   }
+
   setTarget(next: T) {
-    this.#handler.target = next;
+    if (next !== this.#handler.target) {
+      this.#handler.target = next;
+    }
   }
 
   getTarget(): T {

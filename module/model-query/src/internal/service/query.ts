@@ -15,8 +15,8 @@ export class ModelQueryUtil {
 
   /**
    * Resolve comparator
-   * @param val 
-   * @returns 
+   * @param val
+   * @returns
    */
   static resolveComparator(val: unknown) {
     if (typeof val === 'string') {

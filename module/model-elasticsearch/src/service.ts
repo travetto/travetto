@@ -405,7 +405,7 @@ export class ElasticsearchModelService implements
       ...this.manager.getIdentity(cls),
       refresh: true,
       body: {
-        query: (search.body as Record<string, any>).query,
+        query: (search.body as Record<string, unknown>).query,
         script
       }
     });
@@ -441,7 +441,7 @@ export class ElasticsearchModelService implements
 
     const search = {
       body: {
-        query: (q.body as Record<string, any>).query ?? { ['match_all']: {} },
+        query: (q.body as Record<string, unknown>).query ?? { ['match_all']: {} },
         aggs: { [field]: { terms: { field, size: 100 } } }
       },
       size: 0

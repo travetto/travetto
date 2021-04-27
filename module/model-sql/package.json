@@ -41,8 +41,7 @@
     "@types/pg": "^7.14.11",
     "mysql": "^2.18.1",
     "pg": "^8.6.0",
-    "sqlite": "^4.0.21",
-    "better-sqlite3": "^5.0.2",
+    "better-sqlite3": "^7.1.5",
     "@types/better-sqlite3": "^5.4.1"
   },
   "publishConfig": {

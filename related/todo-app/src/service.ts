@@ -1,13 +1,21 @@
-import { ElasticsearchModelService } from '@travetto/model-elasticsearch';
-import { Injectable, Inject } from '@travetto/di';
+import { SQLDialect, SQLModelService } from '@travetto/model-sql';
+import { SqliteDialect } from '@travetto/model-sql/src/dialect/sqlite/dialect';
+import { Injectable, Inject, InjectableFactory } from '@travetto/di';
 
 import { Todo, TodoSearch } from './model';
+
+class SQLConfig {
+  @InjectableFactory({ primary: true })
+  static getDialect(dialect: SqliteDialect): SQLDialect {
+    return dialect;
+  }
+}
 
 @Injectable()
 export class TodoService {
 
   @Inject()
-  private modelService: ElasticsearchModelService;
+  private modelService: SQLModelService;
 
   async add(todo: Todo) {
     todo.created = new Date();
@@ -20,7 +28,7 @@ export class TodoService {
   }
 
   async getAll(search: TodoSearch) {
-    return this.modelService.query(Todo, { ...search, sort: [{ created: -1 }] });
+    return this.modelService.query(Todo, { where: { text: { $regex: search.q ?? '.*' } }, ...search, sort: [{ created: -1 }] });
   }
 
   async complete(id: string, completed = true) {

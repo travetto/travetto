@@ -1,4 +1,4 @@
-// @file-if sqlite
+// @file-if better-sqlite3
 import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';

@@ -4,7 +4,7 @@ import { spawnSync } from 'child_process';
 
 import '@arcsine/nodesh';
 
-import { PathUtil } from '@travetto/boot/src';
+import { PathUtil } from '@travetto/boot';
 import { Packages } from './package/packages';
 
 const page = (f: string) =>

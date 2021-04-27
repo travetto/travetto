@@ -1,4 +1,4 @@
-import { EnvUtil, Package } from '@travetto/boot';
+import { AppCache, EnvUtil, Package } from '@travetto/boot';
 import { SourceConfig } from '@travetto/boot/src/internal/source';
 
 import { version as baseVersion } from '../package.json';
@@ -141,6 +141,7 @@ class $AppManifest {
         info: this.info,
         env: {
           ...this.env,
+          cache: AppCache.cacheDir,
           watch: EnvUtil.isWatch(),
           readonly: EnvUtil.isReadonly()
         },

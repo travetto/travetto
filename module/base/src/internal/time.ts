@@ -26,7 +26,7 @@ export class TimeUtil {
 
   /**
    * Test to see if a string is valid for relative time
-   * @param val 
+   * @param val
    */
   static isRelativeTime(val: string): val is RelativeTime {
     return TimeUtil.#pattern.test(val);

@@ -8,11 +8,9 @@ import { AssertCapture, CaptureAssert } from './capture';
 import { AssertUtil } from './util';
 import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types';
 
-const { AssertionError } = assert;
-
-declare module "assert" {
+declare module 'assert' {
   interface AssertionError {
-    toJSON(): Record<string, any>;
+    toJSON(): Record<string, unknown>;
   }
 }
 
@@ -105,7 +103,7 @@ export class AssertCheck {
       AssertCapture.add(assertion);
     } catch (e) {
       // On error, produce the appropriate error message
-      if (e instanceof AssertionError) {
+      if (e instanceof assert.AssertionError) {
         if (!assertion.message) {
           assertion.message = (OP_MAPPING[fn] ?? '{state} be {expected}');
         }
@@ -135,11 +133,11 @@ export class AssertCheck {
 
       // If a string, check if error exists, and then see if the string is included in the message
       if (typeof shouldThrow === 'string' && (!err || !(err instanceof Error ? err.message : err).includes(shouldThrow))) {
-        return new AssertionError({ message: `Expected error containing text '${shouldThrow}', but got ${actual}` });
+        return new assert.AssertionError({ message: `Expected error containing text '${shouldThrow}', but got ${actual}` });
       }
       // If a regexp, check if error exists, and then test the error message against the regex
       if (shouldThrow instanceof RegExp && (!err || !shouldThrow.test(typeof err === 'string' ? err : err.message))) {
-        return new AssertionError({ message: `Expected error with message matching '${shouldThrow.source}', but got ${actual} ` });
+        return new assert.AssertionError({ message: `Expected error with message matching '${shouldThrow.source}', but got ${actual} ` });
       }
       // If passing in a constructor
     } else if (shouldThrow === Error ||
@@ -147,7 +145,7 @@ export class AssertCheck {
       Object.getPrototypeOf(shouldThrow) !== Object.getPrototypeOf(Function)
     ) { // if not simple function, treat as class
       if (!err || !(err instanceof shouldThrow)) {
-        return new AssertionError({ message: `Expected to throw ${shouldThrow.name}, but got ${err ?? 'nothing'} ` });
+        return new assert.AssertionError({ message: `Expected to throw ${shouldThrow.name}, but got ${err ?? 'nothing'} ` });
       }
     } else {
       // Else treat as a simple function to build an error or not

@@ -1,9 +1,9 @@
 import { StacktraceUtil } from '../stacktrace';
 
 declare global {
-  interface Error { toJSON(sub?: any): any; }
-  interface Map<K, V> { toJSON(): any; }
-  interface Set<T> { toJSON(): any; }
+  interface Error { toJSON(sub?: unknown): unknown }
+  interface Map<K, V> { toJSON(): unknown }
+  interface Set<T> { toJSON(): unknown }
 }
 
 export type Primitive = number | boolean | string | Date | Error;

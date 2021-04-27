@@ -1,5 +1,5 @@
 // @file-if mysql
-import { EnvUtil } from '@travetto/boot/src';
+import { EnvUtil } from '@travetto/boot';
 import type { Service } from '@travetto/command/bin/lib/service';
 
 const version = EnvUtil.get('TRV_SERVICE_MYSQL', '5.6');

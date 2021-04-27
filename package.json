@@ -66,7 +66,7 @@
     "@types/vscode": "^1.55.0",
     "@vendia/serverless-express": "^4.3.4",
     "aws-lambda-fastify": "^1.4.4",
-    "better-sqlite3": "^5.0.2",
+    "better-sqlite3": "^7.1.5",
     "body-parser": "^1.19.0",
     "busboy": "^0.3.1",
     "co-body": "^6.1.0",
@@ -106,7 +106,6 @@
     "redis": "^3.1.2",
     "sass": "^1.32.11",
     "source-map-support": "^0.5.19",
-    "sqlite": "^4.0.21",
     "tslib": "^2.2.0",
     "typescript": "^4.3.0-dev.20210426",
     "vue": "^2.6.12"

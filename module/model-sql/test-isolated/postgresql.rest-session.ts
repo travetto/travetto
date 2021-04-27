@@ -10,7 +10,6 @@ import { ModelSuite } from '@travetto/model/test-support/suite';
 import { SQLModelConfig } from '../src/config';
 import { PostgreSQLDialect } from '../src/dialect/postgresql/dialect';
 import { SQLModelService } from '../src/service';
-import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 
 class Config {
   @InjectableFactory({ primary: true })

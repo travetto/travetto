@@ -14,6 +14,7 @@ export class Todo {
 
 @Schema()
 export class TodoSearch {
+  q?: string;
   offset?: number;
   limit?: number;
 }

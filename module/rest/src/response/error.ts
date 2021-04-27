@@ -7,7 +7,7 @@ declare global {
   interface Error {
     /**
      * Provides the render implementation for sending a response
-     * @param res 
+     * @param res
      */
     render?(res: Response): void;
   }

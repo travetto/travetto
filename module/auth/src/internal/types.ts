@@ -7,7 +7,7 @@ export class PrincipalTarget {
   issuedAt?: Date;
   maxAge?: number;
   issuer?: string;
-  details?: any;
+  details?: unknown;
   permissions?: string[];
 }
 export class AuthorizerTarget { }

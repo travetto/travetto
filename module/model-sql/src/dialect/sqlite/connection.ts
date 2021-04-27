@@ -1,4 +1,4 @@
-// @file-if sqlite
+// @file-if better-sqlite3
 import * as sqlite3 from 'better-sqlite3';
 import Db = require('better-sqlite3');
 import * as pool from 'generic-pool';
@@ -6,7 +6,7 @@ import * as pool from 'generic-pool';
 import { ShutdownManager } from '@travetto/base';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
-import { AppCache } from '@travetto/boot/src';
+import { AppCache } from '@travetto/boot';
 
 import { Connection } from '../../connection/base';
 import { SQLModelConfig } from '../../config';
@@ -30,7 +30,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
   }
 
   async #withRetries<T>(op: () => Promise<T>, retries = 10, delay = 250) {
-    while (true) {
+    for (; ;) {
       try {
         return await op();
       } catch (err) {
@@ -51,17 +51,15 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
   @WithAsyncContext()
   async init() {
     this.#pool = pool.createPool({
-      create: () => {
-        return this.#withRetries(async () => {
-          const db = Db(AppCache.toEntryName('sqlite_db'),
-            this.#config.options as sqlite3.Options
-          );
-          await db.pragma('foreign_keys = ON');
-          await db.pragma('journal_mode = WAL');
-          db.function('regexp', (a, b) => new RegExp(a).test(b) ? 1 : 0);
-          return db;
-        });
-      },
+      create: () => this.#withRetries(async () => {
+        const db = Db(AppCache.toEntryName('sqlite_db'),
+          this.#config.options as sqlite3.Options
+        );
+        await db.pragma('foreign_keys = ON');
+        await db.pragma('journal_mode = WAL');
+        db.function('regexp', (a, b) => new RegExp(a).test(b) ? 1 : 0);
+        return db;
+      }),
       destroy: async db => { db.close(); }
     }, { max: 1 });
 
