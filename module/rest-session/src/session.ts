@@ -85,7 +85,7 @@ export class Session<T extends SessionData = SessionData>  {
    * Set session value
    */
   setValue<V>(key: string, value: V): void {
-    this.data = this.data || {} as T;
+    this.data ??= {} as T;
     (this.data as Record<string, unknown>)[key] = value;
   }
 

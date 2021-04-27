@@ -161,7 +161,7 @@ export class DocumentResultsManager {
           const { bodyFirst } = Decorations.buildErrorHover(as.src as unknown as ErrorHoverAssertion);
           const rng = as.decoration!.range;
 
-          document = document || this.findDocument(this.#file);
+          document ??= this.findDocument(this.#file);
 
           const diagRng = new vscode.Range(
             new vscode.Position(rng.start.line,
@@ -174,7 +174,7 @@ export class DocumentResultsManager {
           acc.push(diag);
         }
         if (ts.status === 'failed' && ts.assertions.length === 0) {
-          document = document || this.findDocument(this.#file);
+          document ??= this.findDocument(this.#file);
           const rng = ts.decoration!.range!;
           const diagRng = new vscode.Range(
             new vscode.Position(rng.start?.line,

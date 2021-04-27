@@ -54,9 +54,9 @@ export class ElasticsearchModelService implements
   async execSearch<T extends ModelType>(cls: Class<T>, search: Search<unknown>): Promise<SearchResponse<T>> {
     const res = await this.client.search({
       ...this.manager.getIdentity(cls),
-      ...search
+      ...search as Search<T>
     });
-    return res as SearchResponse<T>;
+    return res as unknown as SearchResponse<T>;
   }
 
   /**
@@ -126,7 +126,7 @@ export class ElasticsearchModelService implements
       const { body: res } = await this.client.delete({
         ...this.manager.getIdentity(cls) as Required<EsIdentity>,
         id,
-        refresh: 'true'
+        refresh: true
       });
       if (res.result === 'not_found') {
         throw new NotFoundError(cls, id);
@@ -140,17 +140,22 @@ export class ElasticsearchModelService implements
   }
 
   async create<T extends ModelType>(cls: Class<T>, o: Partial<T>): Promise<T> {
-    const clean = await ModelCrudUtil.preStore(cls, o, this);
-    const id = clean.id;
+    try {
+      const clean = await ModelCrudUtil.preStore(cls, o, this);
+      const id = clean.id;
 
-    await this.client.index({
-      ...this.manager.getIdentity(cls) as Required<EsIdentity>,
-      id,
-      refresh: 'true',
-      body: clean
-    });
+      await this.client.index({
+        ...this.manager.getIdentity(cls) as Required<EsIdentity>,
+        id,
+        refresh: true,
+        body: clean
+      });
 
-    return clean;
+      return clean;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   }
 
   async update<T extends ModelType>(cls: Class<T>, o: T): Promise<T> {
@@ -170,7 +175,7 @@ export class ElasticsearchModelService implements
       ...this.manager.getIdentity(cls),
       id,
       opType: 'index',
-      refresh: 'true',
+      refresh: true,
       body: o
     } as Index);
 
@@ -188,7 +193,7 @@ export class ElasticsearchModelService implements
     await this.client.update({
       ...this.manager.getIdentity(cls),
       id: item.id,
-      refresh: 'true',
+      refresh: true,
       body: {
         doc: item,
         doc_as_upsert: true
@@ -211,7 +216,7 @@ export class ElasticsearchModelService implements
     await this.client.update({
       ...this.manager.getIdentity(cls),
       id,
-      refresh: 'true',
+      refresh: true,
       body: {
         script
       }
@@ -281,7 +286,7 @@ export class ElasticsearchModelService implements
 
     const { body: res } = await this.client.bulk({
       body,
-      refresh: 'true'
+      refresh: true
     });
 
     const out: BulkResponse = {
@@ -395,11 +400,12 @@ export class ElasticsearchModelService implements
 
     const script = ElasticsearchSchemaUtil.generateUpdateScript(data);
 
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
     const { body: res } = await this.client.updateByQuery({
       ...this.manager.getIdentity(cls),
       refresh: true,
       body: {
-        query: ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig).body.query,
+        query: (search.body as Record<string, any>).query,
         script
       }
     });
@@ -435,7 +441,7 @@ export class ElasticsearchModelService implements
 
     const search = {
       body: {
-        query: q.body.query ?? { ['match_all']: {} },
+        query: (q.body as Record<string, any>).query ?? { ['match_all']: {} },
         aggs: { [field]: { terms: { field, size: 100 } } }
       },
       size: 0

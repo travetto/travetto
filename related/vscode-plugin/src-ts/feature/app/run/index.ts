@@ -32,7 +32,7 @@ export class AppRunFeature extends BaseFeature {
     await Workspace.buildCode();
     const choices = await Workspace.runMain<AppChoice[]>(Workspace.binPath(this.module, 'list-get'), [], { format: 'json' });
     return choices.map(x => {
-      x.inputs = x.inputs || [];
+      x.inputs ??= [];
       return x;
     });
   }

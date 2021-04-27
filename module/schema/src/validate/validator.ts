@@ -44,7 +44,7 @@ export class SchemaValidator {
 
       if (!hasValue) {
         if (fieldSchema.required && fieldSchema.required.active) {
-          errors.push(...this.prepareErrors(path, [{ kind: 'required', ...fieldSchema.required }]));
+          errors.push(...this.#prepareErrors(path, [{ kind: 'required', ...fieldSchema.required }]));
         }
         continue;
       }
@@ -56,7 +56,7 @@ export class SchemaValidator {
         continue; // Free form, no validation
       } else if (array) {
         if (!Array.isArray(val)) {
-          errors = errors.concat(this.prepareErrors(path, [{ kind: 'type', type: Array, value: val }]));
+          errors = errors.concat(this.#prepareErrors(path, [{ kind: 'type', type: Array, value: val }]));
           continue;
         }
         if (complex) {
@@ -66,16 +66,16 @@ export class SchemaValidator {
           }
         } else {
           for (let i = 0; i < val.length; i++) {
-            const subErrors = this.validateField(fieldSchema, val[i]);
-            errors.push(...this.prepareErrors(`${path}[${i}]`, subErrors));
+            const subErrors = this.#validateField(fieldSchema, val[i]);
+            errors.push(...this.#prepareErrors(`${path}[${i}]`, subErrors));
           }
         }
       } else if (complex) {
         const subErrors = this.#validateSchema(resolveSchema(type, val), val, path);
         errors.push(...subErrors);
       } else {
-        const fieldErrors = this.validateField(fieldSchema, val);
-        errors.push(...this.prepareErrors(path, fieldErrors));
+        const fieldErrors = this.#validateField(fieldSchema, val);
+        errors.push(...this.#prepareErrors(path, fieldErrors));
       }
     }
 
@@ -88,7 +88,7 @@ export class SchemaValidator {
    * @param key The bounds to check
    * @param value The value to validate
    */
-  static validateRange(field: FieldConfig, key: 'min' | 'max', value: string | number | Date) {
+  static #validateRange(field: FieldConfig, key: 'min' | 'max', value: string | number | Date) {
     const f = field[key]!;
     if (typeof f.n === 'number') {
       if (typeof value !== 'number') {
@@ -118,7 +118,7 @@ export class SchemaValidator {
    * @param field The config of the field to validate
    * @param value The actual value
    */
-  static validateField(field: FieldConfig, value: unknown): ValidationResult[] {
+  static #validateField(field: FieldConfig, value: unknown): ValidationResult[] {
     const criteria: ValidationKind[] = [];
 
     if (
@@ -157,11 +157,11 @@ export class SchemaValidator {
       criteria.push('enum');
     }
 
-    if (field.min && this.validateRange(field, 'min', value as number)) {
+    if (field.min && this.#validateRange(field, 'min', value as number)) {
       criteria.push('min');
     }
 
-    if (field.max && this.validateRange(field, 'max', value as number)) {
+    if (field.max && this.#validateRange(field, 'max', value as number)) {
       criteria.push('max');
     }
 
@@ -180,7 +180,7 @@ export class SchemaValidator {
    * @param path The object path
    * @param results The list of results for that specific path
    */
-  static prepareErrors(path: string, results: ValidationResult[]): ValidationError[] {
+  static #prepareErrors(path: string, results: ValidationResult[]): ValidationError[] {
     const out: ValidationError[] = [];
     for (const res of results) {
       const err: Partial<ValidationError> = {

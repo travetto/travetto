@@ -62,7 +62,7 @@ export class AppSelectorUtil {
   static async resolveApp(title: string, choices: AppChoice[]) {
     const items = choices
       .map(x => {
-        x.params = x.params || [];
+        x.params ??= [];
         return x;
       })
       .map(x => this.buildQuickPickItem(x))
@@ -80,7 +80,7 @@ export class AppSelectorUtil {
     const all = choice.params;
     const selected = [];
 
-    choice.inputs = choice.inputs || [];
+    choice.inputs ??= [];
 
     for (let i = 0; i < all.length; i++) {
       const param = all[i];

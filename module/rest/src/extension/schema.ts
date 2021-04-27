@@ -32,8 +32,7 @@ export async function getSchemaInstance<T>(obj: T | object, cls: Class<T>, view?
 
   let bound: T;
   try {
-    const resolved = SchemaRegistry.get(cls).class; // Get actual class separate from decorator value
-    bound = BindUtil.bindSchema(resolved, obj, view);
+    bound = BindUtil.bindSchema(cls, obj, view);
   } catch (e) {
     throw new AppError(`Supplied data is incompatible with ${cls.ᚕid}: ${e.message}`, 'data');
   }
@@ -55,7 +54,7 @@ export function schemaParamConfig(location: 'body' | 'query', config: Partial<Pa
     throw new AppError('A schema type is required for binding');
   }
 
-  config.name = config.name || location;
+  config.name ??= location;
 
   return {
     ...config as ParamConfig,
@@ -63,9 +62,9 @@ export function schemaParamConfig(location: 'body' | 'query', config: Partial<Pa
     resolve: location === 'query' ?
       async (req: Request) => {
         const cls = SchemaRegistry.get(config.type!).class;
-        req[QuerySchemaⲐ] = req[QuerySchemaⲐ] || {};
+        req[QuerySchemaⲐ] ??= {};
         const exploded = BindUtil.expandPaths(req.query);
-        req[QuerySchemaⲐ][config.name!] = await getSchemaInstance(config.key ? exploded[config.key] : exploded, cls!, config.view!);
+        req[QuerySchemaⲐ][config.name!] = await getSchemaInstance(config.key ? exploded[config.key] : exploded, cls, config.view!);
       } :
       async (req: Request) => {
         const cls = SchemaRegistry.get(config.type!).class;

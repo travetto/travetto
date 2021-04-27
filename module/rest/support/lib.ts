@@ -100,7 +100,7 @@ export class RestTransformUtil {
   static resolveReturnType(state: TransformerState, node: ts.MethodDeclaration, retType?: AnyType): Record<string, unknown> {
 
     // Process returnType
-    retType = retType || state.resolveReturnType(node);
+    retType ??= state.resolveReturnType(node);
 
     // IF we have a winner, declare response type
     const type: Record<string, unknown> = {};

@@ -163,7 +163,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
 
     return Object.entries(opts as ParamMap).map(([k, cfg]) => {
       cfg.key = k;
-      cfg.name = cfg.name || k.replace(/([a-z])([A-Z])/g, (_, l, r: string) => `${l}-${r.toLowerCase()}`);
+      cfg.name ??= k.replace(/([a-z])([A-Z])/g, (_, l, r: string) => `${l}-${r.toLowerCase()}`);
       if (cfg.short === undefined) {
         cfg.short = cfg.name.charAt(0);
         if (used.has(cfg.short)) {

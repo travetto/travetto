@@ -36,7 +36,7 @@ export class TodoController {
    */
   @Get('/')
   async getAll(@SchemaQuery() query: Query): Promise<Todo[]> {
-    query.q = query.q || {};
+    query.q ??= {};
     // {{#modules.auth-rest}} // @doc-exclude
     query.q.userId = this.auth.get()?.id; // @doc-exclude
     // {{/modules.auth-rest}} // @doc-exclude

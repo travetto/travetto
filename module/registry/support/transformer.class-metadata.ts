@@ -42,7 +42,7 @@ export class RegisterTransformer {
     if (ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
       const hash = SystemUtil.naiveHash(node.getText());
       const conf = { hash };
-      state[methods] = state[methods] || {};
+      state[methods] ??= {};
       state[methods]![node.name.escapedText.toString()] = conf;
     }
     return node;
