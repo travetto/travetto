@@ -24,6 +24,15 @@ export class TodoController {
   }
 
   /**
+   * Delete all todos
+   */
+  @Delete('/')
+  async deleteAllCompleted() {
+    await this.svc.deleteAllCompleted();
+  }
+
+
+  /**
    * Get Todo by id
    * @param id Todo id
    */
@@ -39,6 +48,17 @@ export class TodoController {
   async create(@SchemaBody() todo: Todo) {
     return await this.svc.add(todo);
   }
+
+  /**
+   * Complete a todo
+   * @param id Todo id
+   */
+  @Put('/:id')
+  async update(@Path() id: string, @SchemaBody() todo: Todo) {
+    todo.id = id;
+    return await this.svc.update(todo);
+  }
+
 
   /**
    * Complete a todo

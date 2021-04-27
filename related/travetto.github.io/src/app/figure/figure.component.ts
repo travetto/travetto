@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ElementRef, HostBinding } from '@angular/core';
+import { Component, OnInit, ElementRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({

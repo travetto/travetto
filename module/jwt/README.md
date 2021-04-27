@@ -118,3 +118,7 @@ export class JWTUtil {
   static async verify<T>(jwt: string, options: VerifyOptions = {}): Promise<Payload & T> ;
 }
 ```
+
+## Extension - Auth Rest
+
+The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/master/module/jwt/src/extension/auth-rest.ts#L19) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.  This token does not own a session, but allows for encoding the auth state into JWT constructs.

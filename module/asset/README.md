@@ -17,7 +17,7 @@ npm install @travetto/model-{provider}
 
 Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1) support:
    
-   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L42), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)
+   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L46), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L34)
    *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-mongo#readme "Mongo backing for the travetto model module.")
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.")
 
@@ -27,10 +27,10 @@ If you are using more than one [Streaming](https://github.com/travetto/travetto/
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 import { S3ModelService } from '@travetto/model-s3';
-import { AssetModelSym, AssetService } from '@travetto/asset';
+import { AssetModelⲐ, AssetService } from '@travetto/asset';
 
 class SymoblBasedConfiguration {
-  @InjectableFactory(AssetModelSym)
+  @InjectableFactory(AssetModelⲐ)
   static getAssetModelService(service: S3ModelService) {
     return service;
   }

@@ -65,6 +65,7 @@ export class Todo {
 
 @Schema()
 export class TodoSearch {
+  q?: string;
   offset?: number;
   limit?: number;
 }
@@ -85,16 +86,24 @@ Now we need to create `src/service.ts`
 
 **Code: Service Definition**
 ```typescript
-import { ElasticsearchModelService } from '@travetto/model-elasticsearch';
-import { Injectable, Inject } from '@travetto/di';
+import { SQLDialect, SQLModelService } from '@travetto/model-sql';
+import { SqliteDialect } from '@travetto/model-sql/src/dialect/sqlite/dialect';
+import { Injectable, Inject, InjectableFactory } from '@travetto/di';
 
 import { Todo, TodoSearch } from './model';
+
+class SQLConfig {
+  @InjectableFactory({ primary: true })
+  static getDialect(dialect: SqliteDialect): SQLDialect {
+    return dialect;
+  }
+}
 
 @Injectable()
 export class TodoService {
 
   @Inject()
-  private modelService: ElasticsearchModelService;
+  private modelService: SQLModelService;
 
   async add(todo: Todo) {
     todo.created = new Date();
@@ -107,7 +116,7 @@ export class TodoService {
   }
 
   async getAll(search: TodoSearch) {
-    return this.modelService.query(Todo, { ...search, sort: [{ created: -1 }] });
+    return this.modelService.query(Todo, { where: { text: { $regex: search.q ?? '.*' } }, ...search, sort: [{ created: -1 }] });
   }
 
   async complete(id: string, completed = true) {
@@ -296,6 +305,7 @@ First we must start the application:
     debug: { status: false, value: undefined },
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
+    cache: '.trv_cache_1467598133',
     watch: true,
     readonly: false
   },
@@ -317,8 +327,8 @@ First we must start the application:
       '@travetto/doc': '@trv:doc',
       '@travetto/log': '@trv:log',
       '@travetto/model': '@trv:model',
-      '@travetto/model-elasticsearch': '@trv:model-elasticsearch',
       '@travetto/model-query': '@trv:model-query',
+      '@travetto/model-sql': '@trv:model-sql',
       '@travetto/openapi': '@trv:openapi',
       '@travetto/pack': '@trv:pack',
       '@travetto/registry': '@trv:registry',
@@ -368,7 +378,7 @@ $ node @travetto/boot/bin/main ./doc/create-todo.ts
 {
   text: 'New Todo',
   created: '2021-03-14T05:00:02.450Z',
-  id: '422e793aed76ee063d13feec2e5e95b4'
+  id: '6e3a9d78e1dc44688a94f6358115714eabfeb270df73d3fc7f506dd4c3918b09'
 }
 ```
 
@@ -388,9 +398,9 @@ $ node @travetto/boot/bin/main ./doc/list-todo.ts
 
 [
   {
-    id: '422e793aed76ee063d13feec2e5e95b4',
+    id: '6e3a9d78e1dc44688a94f6358115714eabfeb270df73d3fc7f506dd4c3918b09',
     text: 'New Todo',
-    created: '2021-03-14T05:00:02.819Z'
+    created: '2021-03-14T05:00:02.762Z'
   }
 ]
 ```

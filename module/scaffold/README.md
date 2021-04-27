@@ -106,7 +106,7 @@ export class TodoController {
    */
   @Get('/')
   async getAll(@SchemaQuery() query: Query): Promise<Todo[]> {
-    query.q = query.q || {};
+    query.q ??= {};
     return this.source.query(Todo, { where: query.q });
   }
 

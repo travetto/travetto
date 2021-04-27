@@ -442,7 +442,7 @@ npm i --save-dev @travetto/pack
 
 The module provides high level access for [Schema](https://github.com/travetto/travetto/tree/master/module/schema#readme "Data type registry for runtime validation, reflection and binding. ") support, via decorators, for validating and typing request bodies.
 
-[@SchemaBody](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L83) provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+[@SchemaBody](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L82) provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
 
 **Code: Using SchemaBody for POST requests**
 ```typescript
@@ -470,7 +470,7 @@ class UserController {
 }
 ```
 
-[@SchemaQuery](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L95) provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+[@SchemaQuery](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L94) provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
 **Code: Using SchemaQuery for GET requests**
 ```typescript
@@ -497,7 +497,7 @@ class UserController {
 }
 ```
 
-Addtionally, [@SchemaQuery](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L95) and [@SchemaBody](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L83) can also be used with `interface`s and `type` literals in lieu of classes. This is best suited for simple types:
+Addtionally, [@SchemaQuery](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L94) and [@SchemaBody](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L82) can also be used with `interface`s and `type` literals in lieu of classes. This is best suited for simple types:
 
 **Code: Using SchemaQuery with a type literal**
 ```typescript
@@ -593,8 +593,7 @@ Additionally, [Data Model Querying](https://github.com/travetto/travetto/tree/ma
 ```typescript
 import { Inject } from '@travetto/di';
 import { ModelQuerySupport } from '@travetto/model-query';
-import { Controller } from '@travetto/rest';
-import { ModelQueryRoutes } from '../src/extension/model-query';
+import { Controller, ModelQueryRoutes } from '@travetto/rest';
 
 import { User } from './user';
 
@@ -613,11 +612,8 @@ is a shorthand that is equal to:
 import { Inject } from '@travetto/di';
 import { ModelQuerySupport, SortClause, ValidStringFields } from '@travetto/model-query';
 import { isQuerySuggestSupported } from '@travetto/model-query/src/internal/service/common';
-import { Controller, Get } from '@travetto/rest';
-
-import { Path } from '../src/decorator/param';
-import { RestModelQuery, RestModelSuggestQuery } from '../src/extension/model-query';
-import { SchemaQuery } from '../src/extension/schema';
+import { Controller, Get, Path, SchemaQuery } from '@travetto/rest';
+import { RestModelQuery, RestModelSuggestQuery } from '@travetto/rest/src/extension/model-query';
 
 import { User } from './user';
 

@@ -158,6 +158,7 @@ Configured {
     debug: { status: false, value: undefined },
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
+    cache: '.trv_cache',
     watch: false,
     readonly: false
   },

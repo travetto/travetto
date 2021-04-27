@@ -219,8 +219,8 @@ All fields are optional, but the `id` and `type` are important as those field ty
 |[Redis Model Support](https://github.com/travetto/travetto/tree/master/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
 |[S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/master/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
-|[MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L42)|X|X| |X|X|X|
+|[MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L34)|X|X|X|X|X|X|
+|[FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L46)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
@@ -245,6 +245,8 @@ import { ExistsError } from '../error/exists';
 import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
+import { StreamModel, STREAMS } from '../internal/service/stream';
+const STREAM_META = `${STREAMS}_meta`;
 @Config('model.memory')
 export class MemoryModelConfig {
   autoCreate?: boolean;
@@ -277,8 +279,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   // Storage Support
   async createStorage() ;
   async deleteStorage() ;
-  async createModel(cls: Class<ModelType>) ;
-  async truncateModel(cls: Class<ModelType>) ;
+  async createModel<T extends ModelType>(cls: Class<T>) ;
+  async truncateModel<T extends ModelType>(cls: Class<T>) ;
   // Indexed
   getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> ;
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) ;

@@ -465,7 +465,7 @@ To use pack please run:
 
 The module provides high level access for <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a> support, via decorators, for validating and typing request bodies.
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L83">@SchemaBody</a> provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L82">@SchemaBody</a> provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
 
       <figure class="code">
       <figcaption class="code">Using SchemaBody for POST requests
@@ -495,7 +495,7 @@ The module provides high level access for <a class="module-link" routerLink="/do
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L95">@SchemaQuery</a> provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L94">@SchemaQuery</a> provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
       <figure class="code">
       <figcaption class="code">Using SchemaQuery for GET requests
@@ -524,7 +524,7 @@ The module provides high level access for <a class="module-link" routerLink="/do
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-Addtionally, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L95">@SchemaQuery</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L83">@SchemaBody</a> can also be used with <code class="item input">interface</code>s and <code class="item input">type</code> literals in lieu of classes. This is best suited for simple types:
+Addtionally, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L94">@SchemaQuery</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L82">@SchemaBody</a> can also be used with <code class="item input">interface</code>s and <code class="item input">type</code> literals in lieu of classes. This is best suited for simple types:
 
       <figure class="code">
       <figcaption class="code">Using SchemaQuery with a type literal
@@ -628,8 +628,7 @@ Additionally, <a class="module-link" routerLink="/docs/model-query" title="Datas
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQuerySupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQueryRoutes <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/extension/model-query'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> ModelQueryRoutes <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
 
@@ -650,11 +649,8 @@ is a shorthand that is equal to:
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQuerySupport<span class="token punctuation">,</span> SortClause<span class="token punctuation">,</span> ValidStringFields <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> isQuerySuggestSupported <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query/src/internal/service/common'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Path <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/decorator/param'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestModelQuery<span class="token punctuation">,</span> RestModelSuggestQuery <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/extension/model-query'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SchemaQuery <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/extension/schema'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Path<span class="token punctuation">,</span> SchemaQuery <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestModelQuery<span class="token punctuation">,</span> RestModelSuggestQuery <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/extension/model-query'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
 

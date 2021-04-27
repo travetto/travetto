@@ -23,7 +23,7 @@
     "@travetto/log": "^2.0.0-alpha.5",
     "@travetto/cli": "^2.0.0-alpha.5",
     "@travetto/app": "^2.0.0-alpha.6",
-    "@travetto/model-elasticsearch": "^2.0.0-alpha.6",
+    "@travetto/model-mongo": "^2.0.0-alpha.6",
     "@travetto/rest-express": "^2.0.0-alpha.7",
     "@travetto/auth-rest": "^2.0.0-alpha.7",
     "@travetto/rest-session": "^2.0.0-alpha.7",

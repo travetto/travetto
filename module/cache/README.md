@@ -19,10 +19,10 @@ npm install @travetto/model-{provider}
 
 Currently, the following are packages that provide [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11):
    
-   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L42), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L31)
+   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L46), [MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L34)
    *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - [DynamoDBModelService](https://github.com/travetto/travetto/tree/master/module/model-dynamodb/src/service.ts#L55)
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/master/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.") - [ElasticsearchModelService](https://github.com/travetto/travetto/tree/master/module/model-elasticsearch/src/service.ts#L39)
-   *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-mongo#readme "Mongo backing for the travetto model module.") - [MongoModelService](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L45)
+   *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/master/module/model-mongo#readme "Mongo backing for the travetto model module.") - [MongoModelService](https://github.com/travetto/travetto/tree/master/module/model-mongo/src/service.ts#L44)
    *  [Redis Model Support](https://github.com/travetto/travetto/tree/master/module/model-redis#readme "Redis backing for the travetto model module.") - [RedisModelService](https://github.com/travetto/travetto/tree/master/module/model-redis/src/service.ts#L22)
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.") - [S3ModelService](https://github.com/travetto/travetto/tree/master/module/model-s3/src/service.ts#L30)
    *  [SQL Model Service](https://github.com/travetto/travetto/tree/master/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - [SQLModelService](https://github.com/travetto/travetto/tree/master/module/model-sql/src/service.ts#L35)
@@ -119,10 +119,10 @@ By design, the [CacheService](https://github.com/travetto/travetto/tree/master/m
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
-import { CacheModelSym } from '@travetto/cache';
+import { CacheModelⲐ } from '@travetto/cache';
 
 class Config {
-  @InjectableFactory(CacheModelSym)
+  @InjectableFactory(CacheModelⲐ)
   static getModel(): ModelExpirySupport {
     // @ts-expect-error
     return new CustomAwesomeModelService();

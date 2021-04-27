@@ -28,6 +28,9 @@
     "@types/jws": "^3.2.3",
     "jws": "^4.0.0"
   },
+  "docDependencies": {
+    "@travetto/auth-rest": 1
+  },
   "publishConfig": {
     "access": "public"
   },

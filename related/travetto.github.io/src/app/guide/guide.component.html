@@ -68,6 +68,7 @@ Create the file <code class="item path">src/model.ts</code>
 
 @<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TodoSearch</span> <span class="token punctuation">{{'{'}}</span>
+  q<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   offset<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
   limit<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
@@ -89,16 +90,24 @@ Now we need to create <code class="item path">src/service.ts</code>
       <figcaption class="code">Service Definition
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/master/src/service.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ElasticsearchModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-elasticsearch'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SQLDialect<span class="token punctuation">,</span> SQLModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-sql'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SqliteDialect <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-sql/src/dialect/sqlite/dialect'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject<span class="token punctuation">,</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Todo<span class="token punctuation">,</span> TodoSearch <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">SQLConfig</span> <span class="token punctuation">{{'{'}}</span>
+  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> primary<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">getDialect</span><span class="token punctuation">(</span>dialect<span class="token operator">:</span> SqliteDialect<span class="token punctuation">)</span><span class="token operator">:</span> SQLDialect <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> dialect<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
 
 @<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TodoService</span> <span class="token punctuation">{{'{'}}</span>
 
   @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">private</span> modelService<span class="token operator">:</span> ElasticsearchModelService<span class="token punctuation">;</span>
+  <span class="token keyword">private</span> modelService<span class="token operator">:</span> SQLModelService<span class="token punctuation">;</span>
 
   <span class="token keyword">async</span> <span class="token function">add</span><span class="token punctuation">(</span>todo<span class="token operator">:</span> Todo<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     todo<span class="token punctuation">.</span>created <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -111,7 +120,7 @@ Now we need to create <code class="item path">src/service.ts</code>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token operator">:</span> TodoSearch<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>modelService<span class="token punctuation">.</span><span class="token function">query</span><span class="token punctuation">(</span>Todo<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token operator">...</span>search<span class="token punctuation">,</span> sort<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{{'{'}}</span> created<span class="token operator">:</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>modelService<span class="token punctuation">.</span><span class="token function">query</span><span class="token punctuation">(</span>Todo<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> where<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> text<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> $regex<span class="token operator">:</span> search<span class="token punctuation">.</span>q <span class="token operator">??</span> <span class="token string">'.*'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> <span class="token operator">...</span>search<span class="token punctuation">,</span> sort<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{{'{'}}</span> created<span class="token operator">:</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">complete</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> completed <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -308,6 +317,7 @@ First we must start the application:
     debug: <span class="token punctuation">{{'{'}}</span> status: false, value: undefined <span class="token punctuation">{{'}'}}</span>,
     resources: <span class="token punctuation">[</span> <span class="token string">'resources'</span>, <span class="token string">'doc/resources'</span> <span class="token punctuation">]</span>,
     shutdownWait: <span class="token number">2000</span>,
+    cache: <span class="token string">'.trv_cache_1467598133'</span>,
     watch: true,
     readonly: <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span>,
@@ -329,8 +339,8 @@ First we must start the application:
       <span class="token string">'@travetto/doc'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:doc'</span>,
       <span class="token string">'@travetto/log'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:log'</span>,
       <span class="token string">'@travetto/model'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:model'</span>,
-      <span class="token string">'@travetto/model-elasticsearch'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:model-elasticsearch'</span>,
       <span class="token string">'@travetto/model-query'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:model-query'</span>,
+      <span class="token string">'@travetto/model-sql'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:model-sql'</span>,
       <span class="token string">'@travetto/openapi'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:openapi'</span>,
       <span class="token string">'@travetto/pack'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:pack'</span>,
       <span class="token string">'@travetto/registry'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:registry'</span>,
@@ -384,7 +394,7 @@ next, let's execute <a target="_blank" class="external-link" href="https://www.n
 <span class="token punctuation">{{'{'}}</span>
   text: <span class="token string">'New Todo'</span>,
   created: <span class="token string">'2021-03-14T05:00:02.450Z'</span>,
-  id: <span class="token string">'422e793aed76ee063d13feec2e5e95b4'</span>
+  id: <span class="token string">'6e3a9d78e1dc44688a94f6358115714eabfeb270df73d3fc7f506dd4c3918b09'</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -408,9 +418,9 @@ next, let's execute <a target="_blank" class="external-link" href="https://www.n
 
 <span class="token punctuation">[</span>
   <span class="token punctuation">{{'{'}}</span>
-    id: <span class="token string">'422e793aed76ee063d13feec2e5e95b4'</span>,
+    id: <span class="token string">'6e3a9d78e1dc44688a94f6358115714eabfeb270df73d3fc7f506dd4c3918b09'</span>,
     text: <span class="token string">'New Todo'</span>,
-    created: <span class="token string">'2021-03-14T05:00:02.819Z'</span>
+    created: <span class="token string">'2021-03-14T05:00:02.762Z'</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">]</span></code></pre>     
       </figure>
