@@ -1,8 +1,9 @@
-import { Class } from '@travetto/base';
+import { Class, ClassInstance } from '@travetto/base';
 
 import { SchemaRegistry } from '../service/registry';
 import { ViewFieldsConfig } from '../service/types';
 import { ValidatorFn } from '../validate/types';
+import { SchemaValidator } from '../validate/validator';
 
 /**
  * Register a class as a Schema
@@ -35,5 +36,21 @@ export function Validator<T>(fn: ValidatorFn<T, string>) {
 export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
   return (target: Class<Partial<T>>) => {
     SchemaRegistry.registerPendingView(target, name, fields);
+  };
+}
+
+/**
+ * Validates the method is called with the appropriate parameters
+ *
+ * @augments `@trv:schema/Validate`
+ */
+export function Validate<T>() {
+  return (target: T, prop: string, desc: TypedPropertyDescriptor<(...args: any[]) => any>) => {
+    const og = desc.value;
+    desc.value = function (this: unknown, ...args: unknown[]) {
+      SchemaValidator.validateMethod((target as unknown as ClassInstance).constructor, prop, args);
+      return og!.call(this, ...args);
+    };
+    return desc;
   };
 }

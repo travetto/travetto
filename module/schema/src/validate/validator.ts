@@ -36,50 +36,59 @@ export class SchemaValidator {
     let errors: ValidationError[] = [];
 
     for (const field of Object.keys(schema)) {
-      const fieldSchema = schema[field];
-      const val = o[field as keyof T];
-      const path = `${relative}${relative && '.'}${field}`;
-
-      const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
-
-      if (!hasValue) {
-        if (fieldSchema.required && fieldSchema.required.active) {
-          errors.push(...this.#prepareErrors(path, [{ kind: 'required', ...fieldSchema.required }]));
-        }
-        continue;
-      }
-
-      const { type, array } = fieldSchema;
-      const complex = SchemaRegistry.has(type);
-
-      if (type === Object) {
-        continue; // Free form, no validation
-      } else if (array) {
-        if (!Array.isArray(val)) {
-          errors = errors.concat(this.#prepareErrors(path, [{ kind: 'type', type: Array, value: val }]));
-          continue;
-        }
-        if (complex) {
-          for (let i = 0; i < val.length; i++) {
-            const subErrors = this.#validateSchema(resolveSchema(type, val[i]), val[i], `${path}[${i}]`);
-            errors = errors.concat(subErrors);
-          }
-        } else {
-          for (let i = 0; i < val.length; i++) {
-            const subErrors = this.#validateField(fieldSchema, val[i]);
-            errors.push(...this.#prepareErrors(`${path}[${i}]`, subErrors));
-          }
-        }
-      } else if (complex) {
-        const subErrors = this.#validateSchema(resolveSchema(type, val), val, path);
-        errors.push(...subErrors);
-      } else {
-        const fieldErrors = this.#validateField(fieldSchema, val);
-        errors.push(...this.#prepareErrors(path, fieldErrors));
-      }
+      errors = errors.concat(this.#validateFieldSchema(schema[field], o[field as keyof T], relative));
     }
 
     return errors;
+  }
+
+  /**
+   * Validate a single field config against a passed in value
+   * @param fieldSchema The field schema configuration
+   * @param val The raw value, could be an array or not
+   * @param relative The relative path of object traversal
+   */
+  static #validateFieldSchema(fieldSchema: FieldConfig, val: unknown, relative: string = '') {
+    const path = `${relative}${relative && '.'}${fieldSchema.name}`;
+
+    const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
+
+    if (!hasValue) {
+      if (fieldSchema.required && fieldSchema.required.active) {
+        return this.#prepareErrors(path, [{ kind: 'required', ...fieldSchema.required }]);
+      } else {
+        return [];
+      }
+    }
+
+    const { type, array } = fieldSchema;
+    const complex = SchemaRegistry.has(type);
+
+    if (type === Object) {
+      return [];
+    } else if (array) {
+      if (!Array.isArray(val)) {
+        return this.#prepareErrors(path, [{ kind: 'type', type: Array, value: val }]);
+      }
+      let errors: ValidationError[] = [];
+      if (complex) {
+        for (let i = 0; i < val.length; i++) {
+          const subErrors = this.#validateSchema(resolveSchema(type, val[i]), val[i], `${path}[${i}]`);
+          errors = errors.concat(subErrors);
+        }
+      } else {
+        for (let i = 0; i < val.length; i++) {
+          const subErrors = this.#validateField(fieldSchema, val[i]);
+          errors.push(...this.#prepareErrors(`${path}[${i}]`, subErrors));
+        }
+      }
+      return errors;
+    } else if (complex) {
+      return this.#validateSchema(resolveSchema(type, val), val, path);
+    } else {
+      const fieldErrors = this.#validateField(fieldSchema, val);
+      return this.#prepareErrors(path, fieldErrors);
+    }
   }
 
   /**
@@ -273,5 +282,26 @@ export class SchemaValidator {
       }
     }
     return o;
+  }
+
+  /**
+   * Validate method invocation
+   *
+   * @param cls The class to validate against
+   * @param method The method being invoked
+   * @param params The params to validate
+   */
+  static validateMethod<T>(cls: Class<T>, method: string, params: unknown[]) {
+    const errors: ValidationError[] = [];
+    const { fields, schema } = SchemaRegistry.getViewSchema(cls);
+    for (const el of fields) {
+      if (el.startsWith(`${method}.`)) {
+        const idx = schema[el].index!;
+        errors.push(...this.#validateFieldSchema(schema[el], params[idx]));
+      }
+    }
+    if (errors.length) {
+      throw new ValidationResultError(errors);
+    }
   }
 }

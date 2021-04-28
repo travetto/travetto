@@ -89,6 +89,10 @@ export interface FieldConfig extends DescribableConfig {
     validateSchema?(input: unknown): string | undefined;
   };
   /**
+   * The position of the field if ordered
+   */
+  index?: number;
+  /**
    * Is the field an array
    */
   array: boolean;

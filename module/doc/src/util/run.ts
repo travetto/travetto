@@ -70,6 +70,7 @@ export class DocRunUtil {
       .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@trv:')
       .replace(new RegExp(PathUtil.cwd, 'g'), '.')
+      .replace(/([.]trv_cache)[_A-Za-z0-9]+/g, (_, b) => b)
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
       .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))
       .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);

@@ -1,14 +1,16 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, TransformerId
+  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, TransformerId, OnMethod, OnParameter, AfterMethod
 } from '@travetto/transformer';
 import { SchemaTransformUtil } from './lib';
 
-const inSchema = Symbol.for('@trv:schema/valid');
+const inSchema = Symbol.for('@trv:schema/schema');
+const inValidation = Symbol.for('@trv:schema/validate');
 
 interface AutoState {
   [inSchema]?: boolean;
+  [inValidation]?: boolean;
 }
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
@@ -69,6 +71,49 @@ export class SchemaTransformer {
   static processSchemaField(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
     const ignore = state.findDecorator(this, node, 'Ignore');
     return state[inSchema] && !ignore && DeclarationUtil.isPublic(node) ?
-      SchemaTransformUtil.computeProperty(state, node) : node;
+      SchemaTransformUtil.computeField(state, node) : node;
+  }
+
+  /**
+   * Track method validation start
+   */
+  @OnMethod('Validate')
+  static startMethodValidation(state: AutoState & TransformerState, node: ts.MethodDeclaration, dec?: DecoratorMeta) {
+    state[inValidation] = true;
+    return node;
+  }
+
+
+  /**
+   * Mark the end of the validation, document
+   */
+  @AfterMethod('Validate')
+  static finalizeValidate(state: AutoState & TransformerState, node: ts.MethodDeclaration) {
+    const decls = [...(node.decorators ?? [])];
+    if (!state.findDecorator(this, node, 'Validate', SCHEMA_MOD)) {
+      decls.unshift(state.createDecorator(SCHEMA_MOD, 'Validate'));
+    }
+
+    delete state[inSchema];
+    return state.factory.updateMethodDeclaration(
+      node,
+      decls,
+      node.modifiers,
+      node.asteriskToken,
+      node.name,
+      node.questionToken,
+      node.typeParameters,
+      node.parameters,
+      node.type,
+      node.body
+    );
+  }
+
+  /**
+   * Handle all parameters, while in validation
+   */
+  @OnParameter()
+  static processParameter(state: TransformerState & AutoState, node: ts.ParameterDeclaration) {
+    return state[inValidation] ? SchemaTransformUtil.computeField(state, node) : node;
   }
 }

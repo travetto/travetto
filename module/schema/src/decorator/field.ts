@@ -5,25 +5,29 @@ import { CommonRegExp } from '../validate/regexp';
 import { ClassList, FieldConfig } from '../service/types';
 
 function prop(obj: Record<string, unknown>) {
-  return (t: ClassInstance, k: string) => {
+  return (t: ClassInstance, k: string, idx?: number) => {
+    if (idx !== undefined && typeof idx === 'number') {
+      k = `${k}.${idx}`;
+      obj.index = idx;
+    }
     SchemaRegistry.registerPendingFieldFacet(t.constructor, k, obj);
   };
 }
 
 const stringArrProp = prop as
-  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | unknown[]>>, K extends string>(t: T, k: K) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | unknown[]>>, K extends string>(t: T, k: K, idx?: number) => void;
 
 const stringArrStringProp = prop as
-  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | string[]>>, K extends string>(t: T, k: K) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | string[]>>, K extends string>(t: T, k: K, idx?: number) => void;
 
 const numberProp = prop as
-  (obj: Record<string, unknown>) => <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K, idx?: number) => void;
 
 const stringNumberProp = prop as
-  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | number>>, K extends string>(t: T, k: K) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | number>>, K extends string>(t: T, k: K, idx?: number) => void;
 
 const dateNumberProp = prop as
-  (obj: Record<string, unknown>) => <T extends Partial<Record<K, Date | number>>, K extends string>(t: T, k: K) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, Date | number>>, K extends string>(t: T, k: K, idx?: number) => void;
 
 /**
  * Registering a field
@@ -32,10 +36,15 @@ const dateNumberProp = prop as
  * @augments `@trv:schema/Field`
  */
 export function Field(type: ClassList, config?: Partial<FieldConfig>) {
-  return (f: ClassInstance, p: string) => {
-    SchemaRegistry.registerPendingFieldConfig(f.constructor, p, type);
+  return (f: ClassInstance, k: string, idx?: number) => {
+    if (idx !== undefined && typeof idx === 'number') {
+      k = `${k}.${idx}`;
+      config ??= {};
+      config.index = idx;
+    }
+    SchemaRegistry.registerPendingFieldConfig(f.constructor, k, type);
     if (config) {
-      SchemaRegistry.registerPendingFieldFacet(f.constructor, p, config);
+      SchemaRegistry.registerPendingFieldFacet(f.constructor, k, config);
     }
   };
 }

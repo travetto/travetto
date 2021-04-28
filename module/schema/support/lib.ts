@@ -41,7 +41,7 @@ export class SchemaTransformUtil {
             ],
             [], id, [], [],
             Object.entries(type.fieldTypes).map(([k, v]) =>
-              this.computeProperty(state, state.factory.createPropertyDeclaration(
+              this.computeField(state, state.factory.createPropertyDeclaration(
                 [], [], k,
                 v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
                 undefined, undefined
@@ -65,13 +65,17 @@ export class SchemaTransformUtil {
   /**
    * Compute property information from declaration
    */
-  static computeProperty<T extends ts.PropertyDeclaration>(state: TransformerState, node: T, type?: AnyType, root: ts.Node = node): T {
+  static computeField<T extends ts.PropertyDeclaration | ts.ParameterDeclaration>(state: TransformerState, node: T, type?: AnyType, root: ts.Node = node): T {
 
     const typeExpr = type || state.resolveType(node);
-    const properties = [];
+    const attrs: ts.PropertyAssignment[] = [];
 
     if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
-      properties.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
+      attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
+    }
+
+    if (ts.isParameter(node)) {
+      attrs.push(state.factory.createPropertyAssignment('name', state.factory.createStringLiteral(node.name.getText())));
     }
 
     // If we have a union type
@@ -80,7 +84,7 @@ export class SchemaTransformUtil {
         .filter(x => x !== undefined && x !== null);
 
       if (values.length === typeExpr.subTypes.length) {
-        properties.push(state.factory.createPropertyAssignment('enum', state.fromLiteral({
+        attrs.push(state.factory.createPropertyAssignment('enum', state.fromLiteral({
           values,
           message: `{path} is only allowed to be "${values.join('" or "')}"`
         })));
@@ -90,8 +94,8 @@ export class SchemaTransformUtil {
     const resolved = this.toConcreteType(state, typeExpr, node, root);
     const params: ts.Expression[] = resolved ? [resolved] : [];
 
-    if (properties.length) {
-      params.push(state.factory.createObjectLiteralExpression(properties));
+    if (attrs.length) {
+      params.push(state.factory.createObjectLiteralExpression(attrs));
     }
 
     const dec = state.createDecorator(FIELD_MOD, 'Field', ...params);
@@ -104,13 +108,25 @@ export class SchemaTransformUtil {
       })));
     }
 
-    return state.factory.updatePropertyDeclaration(node as Exclude<typeof node, T>,
-      newDecs,
-      node.modifiers,
-      node.name,
-      node.questionToken,
-      node.type,
-      node.initializer
-    ) as T;
+    if (ts.isPropertyDeclaration(node)) {
+      return state.factory.updatePropertyDeclaration(node as Exclude<typeof node, T>,
+        newDecs,
+        node.modifiers,
+        node.name,
+        node.questionToken,
+        node.type,
+        node.initializer
+      ) as T;
+    } else {
+      return state.factory.updateParameterDeclaration(node as Exclude<typeof node, T>,
+        newDecs,
+        node.modifiers,
+        node.dotDotDotToken,
+        node.name,
+        node.questionToken,
+        node.type,
+        node.initializer
+      ) as T;
+    }
   }
 }

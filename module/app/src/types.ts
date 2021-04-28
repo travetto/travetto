@@ -39,4 +39,3 @@ export interface ApplicationConfig<T extends AppClass = AppClass> {
   generatedTime?: number;
   watch?: boolean; // Should the application be watched by default
 }
-
