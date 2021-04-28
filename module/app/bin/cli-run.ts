@@ -54,7 +54,8 @@ export class AppRunPlugin extends BasePlugin {
         return await this.showHelp(app ? `${app} is an unknown application` : '');
       } else {
         EnvInit.init({
-          env: this.cmd.env, watch: selected.watch,
+          env: this.cmd.env,
+          watch: true,
           append: {
             TRV_PROFILES: this.cmd.profile,
             TRV_RESOURCES: this.cmd.resource
@@ -67,12 +68,16 @@ export class AppRunPlugin extends BasePlugin {
           process.exit(0);
         } catch (err) {
           const { StacktraceUtil } = await import('@travetto/base');
-          console.error(color`${{ failure: 'Failed application run' }}`);
-          const stack = StacktraceUtil.simplifyStack(err);
-          if (!stack.includes(err.message)) {
-            console.error(err.message);
+          console.error(color`${{ failure: 'Failed to run' }} ${{ title: selected.name }}`);
+          if ('errors' in err) {
+            console.error(err.errors.map((x: { message: string }) => color`● ${{ output: x.message }}`).join('\n'));
+          } else {
+            const stack = StacktraceUtil.simplifyStack(err);
+            if (!stack.includes(err.message)) {
+              console.error(err.message);
+            }
+            console.error(stack);
           }
-          console.error(stack);
           process.exit(1);
         }
       }

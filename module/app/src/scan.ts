@@ -2,6 +2,7 @@ import * as fs from 'fs';
 
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { AppManifest } from '@travetto/base/src/manifest';
+import { SchemaRegistry } from '@travetto/schema';
 
 import { ApplicationConfig } from './types';
 import { ApplicationRegistry } from './registry';
@@ -15,14 +16,14 @@ export class AppScanUtil {
    * Sort list of cached items
    * @param items
    */
-  static async sortList(items: ApplicationConfig[]) {
+  static sortList(items: ApplicationConfig[]) {
     return items.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /**
    * Scan source code for apps
    */
-  static async scanList() {
+  static async scanList(): Promise<ApplicationConfig[]> {
 
     await Promise.all(
       SourceIndex.findByFolders(AppManifest.source)
@@ -32,6 +33,12 @@ export class AppScanUtil {
 
     // Get applications
     const res = await ApplicationRegistry.getAll();
-    return this.sortList(res);
+    await SchemaRegistry.init();
+    const resolved = this.sortList(res);
+    return resolved.map(({ target, ...app }) => ({
+      ...app,
+      params: SchemaRegistry.getMethodSchema(target!, 'run')
+        .map(({ owner, type, match, ...x }) => ({ ...x, ...(match ? { match: { re: match.re.source } } : {}), type: type.name }))
+    }) as unknown as ApplicationConfig);
   }
 }

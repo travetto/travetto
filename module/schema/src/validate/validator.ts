@@ -20,6 +20,12 @@ function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
   }
 }
 
+declare global {
+  interface RegExp {
+    name?: string;
+  }
+}
+
 /**
  * The schema validator applies the schema constraints to a given object and looks
  * for errors
@@ -198,12 +204,12 @@ export class SchemaValidator {
       };
 
       const msg = res.message ??
-        Messages.get(res.re?.source ?? '') ??
+        Messages.get(res.re?.name ?? res.re?.source ?? '') ??
         Messages.get(res.kind) ??
         Messages.get('default')!;
 
       if (res.re) {
-        err.re = res.re.source;
+        err.re = res.re?.name ?? res.re?.source ?? '';
       }
 
       err.message = msg
@@ -293,12 +299,8 @@ export class SchemaValidator {
    */
   static validateMethod<T>(cls: Class<T>, method: string, params: unknown[]) {
     const errors: ValidationError[] = [];
-    const { fields, schema } = SchemaRegistry.getViewSchema(cls);
-    for (const el of fields) {
-      if (el.startsWith(`${method}.`)) {
-        const idx = schema[el].index!;
-        errors.push(...this.#validateFieldSchema(schema[el], params[idx]));
-      }
+    for (const field of SchemaRegistry.getMethodSchema(cls, method)) {
+      errors.push(...this.#validateFieldSchema(field, params[field.index!]));
     }
     if (errors.length) {
       throw new ValidationResultError(errors);

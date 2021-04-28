@@ -139,7 +139,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Register a pending class, with partial config to overlay
    */
-  register(cls: Class, pconfig: Partial<C>) {
+  register(cls: Class, pconfig: Partial<C> = {}) {
     const conf = this.getOrCreatePending(cls);
     Util.deepAssign(conf, pconfig);
   }

@@ -20,14 +20,14 @@ class TestApp {
 class CloseableApp {
   running = false;
 
+  close() {
+    this.running = false;
+  }
+
   async wait() {
     while (this.running) {
       await wait(50);
     }
-  }
-
-  async close() {
-    this.running = false;
   }
 
   run(age: number, optional?: 'a' | 'b') {

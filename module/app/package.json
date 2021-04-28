@@ -31,6 +31,7 @@
     "@travetto/config": "^2.0.0-alpha.5",
     "@travetto/transformer": "^2.0.0-alpha.5",
     "@travetto/registry": "^2.0.0-alpha.6",
+    "@travetto/schema": "^2.0.0-alpha.6",
     "@travetto/di": "^2.0.0-alpha.6"
   },
   "optionalPeerDependencies": {

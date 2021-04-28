@@ -32,7 +32,7 @@ class Employee implements ModelType {
 @Application('multi')
 export class Service {
 
-  @Inject()
+  @Inject({ resolution: 'any' })
   src: ModelCrudSupport;
 
   @Inject()

@@ -13,9 +13,10 @@ function hasType<T>(o: unknown): o is { type: Class<T> | string } {
  */
 class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
-  subTypes = new Map<Class, Map<string, Class>>();
-  typeKeys = new Map<Class, string>();
-  pendingViews = new Map<Class, Map<string, ViewFieldsConfig<unknown>>>();
+  #subTypes = new Map<Class, Map<string, Class>>();
+  #typeKeys = new Map<Class, string>();
+  #pendingViews = new Map<Class, Map<string, ViewFieldsConfig<unknown>>>();
+  #methodSchemas = new Map<Class, Map<string, FieldConfig[]>>();
 
   constructor() {
     super(RootRegistry);
@@ -36,13 +37,13 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param type The sub tye value
    */
   resolveSubType(cls: Class, type: Class | string): Class {
-    if (this.subTypes.has(cls)) {
+    if (this.#subTypes.has(cls)) {
       const typeId = type && (typeof type === 'string' ? type : type.ᚕid);
       if (type) {
-        return this.subTypes.get(cls)!.get(typeId) ?? cls;
+        return this.#subTypes.get(cls)!.get(typeId) ?? cls;
       }
     } else {
-      const expectedType = this.typeKeys.get(cls);
+      const expectedType = this.#typeKeys.get(cls);
       if (expectedType && typeof type === 'string' && expectedType !== type) {
         throw new AppError(`Data of type ${type} does not match expected class type ${expectedType}`, 'data');
       }
@@ -71,12 +72,12 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     let parentConfig = this.get(parent);
 
     while (parentConfig) {
-      if (!this.subTypes.has(parent)) {
-        this.subTypes.set(parent, new Map());
+      if (!this.#subTypes.has(parent)) {
+        this.#subTypes.set(parent, new Map());
       }
-      this.typeKeys.set(cls, type);
-      this.subTypes.get(parent)!.set(type, cls);
-      this.subTypes.get(parent)!.set(cls.ᚕid, cls);
+      this.#typeKeys.set(cls, type);
+      this.#subTypes.get(parent)!.set(type, cls);
+      this.#subTypes.get(parent)!.set(cls.ᚕid, cls);
       parent = this.getParentClass(parent!)!;
       parentConfig = this.get(parent);
     }
@@ -135,16 +136,40 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   }
 
   /**
+   * Get schema for a method invocation
+   * @param cls
+   * @param method
+   */
+  getMethodSchema<T>(cls: Class<T>, method: string): FieldConfig[] {
+    if (!this.#methodSchemas.has(cls)) {
+      this.#methodSchemas.set(cls, new Map());
+    }
+    const cache = this.#methodSchemas.get(cls)!;
+    if (!cache.has(method)) {
+      const { fields, schema } = this.getViewSchema(cls);
+      const out = [];
+      for (const el of fields) {
+        if (el.startsWith(`${method}.`)) {
+          out.push(schema[el]);
+        }
+      }
+      out.sort((a, b) => a.index! - b.index!);
+      cache.set(method, out);
+    }
+    return cache.get(method)!;
+  }
+
+  /**
    * Register a view
    * @param target The target class
    * @param view View name
    * @param fields Fields to register
    */
   registerPendingView<T>(target: Class<T>, view: string, fields: ViewFieldsConfig<T>) {
-    if (!this.pendingViews.has(target)) {
-      this.pendingViews.set(target, new Map());
+    if (!this.#pendingViews.has(target)) {
+      this.#pendingViews.set(target, new Map());
     }
-    this.pendingViews.get(target)!.set(view, fields as ViewFieldsConfig<unknown>);
+    this.#pendingViews.get(target)!.set(view, fields as ViewFieldsConfig<unknown>);
   }
 
   /**
@@ -207,8 +232,8 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    */
   finalizeViews<T>(target: Class<T>, conf: ClassConfig) {
     const allViewConf = conf.views![ALL_VIEW];
-    const pending = this.pendingViews.get(target) ?? new Map<string, ViewFieldsConfig<unknown>>();
-    this.pendingViews.delete(target);
+    const pending = this.#pendingViews.get(target) ?? new Map<string, ViewFieldsConfig<unknown>>();
+    this.#pendingViews.delete(target);
 
     for (const [view, fields] of pending.entries()) {
       const withoutSet = 'without' in fields ? new Set(fields.without as string[]) : undefined;
@@ -267,7 +292,8 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     super.onUninstall(cls, e);
     if (e.type === 'removing' && this.hasExpired(cls)) {
       // Recompute subtypes
-      this.subTypes.clear();
+      this.#subTypes.clear();
+      this.#methodSchemas.delete(cls);
       for (const el of this.entries.keys()) {
         const clz = this.entries.get(el)!.class;
         this.registerSubTypes(clz, this.getSubTypeName(clz));

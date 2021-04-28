@@ -13,14 +13,22 @@ export interface ActivationTarget {
 /**
  * Parameter configuration
  */
-export interface ParamConfig {
-  name: string;
+export interface FieldConfig {
   title?: string;
-  type?: string;
-  subtype?: string;
-  def?: string | boolean | number;
-  optional?: boolean;
-  meta?: {
-    choices?: string[];
-  };
+  description?: string;
+  name: string;
+  aliases?: string[];
+  type: string;
+  index?: number;
+  array: boolean;
+  specifier?: string;
+  precision?: [number, number] | [number, undefined];
+  required?: { active: boolean, message?: string };
+  match?: { re: RegExp, message?: string };
+  min?: { n: number | Date, message?: string };
+  max?: { n: number | Date, message?: string };
+  minlength?: { n: number, message?: string };
+  maxlength?: { n: number, message?: string };
+  enum?: { values: (string | number | boolean)[], message: string };
+  default?: number | string | boolean | null;
 }

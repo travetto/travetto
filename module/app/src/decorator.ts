@@ -3,15 +3,11 @@ import * as fs from 'fs';
 import { Class } from '@travetto/base';
 import { FsUtil } from '@travetto/boot';
 
-import { ApplicationConfig, ApplicationParameter, AppClass } from './types';
+import { ApplicationConfig, AppClass } from './types';
 import { ApplicationRegistry } from './registry';
+import { SchemaRegistry } from '@travetto/schema';
 
-export type AppDecorator = Partial<ApplicationConfig> & {
-  paramMap?: {
-    [key: string]: Partial<ApplicationParameter> & { name?: never };
-  };
-  params?: never;
-};
+export type AppDecorator = { description?: string };
 
 /**
  * Marks a class as a candidate for application execution. The application
@@ -22,26 +18,17 @@ export type AppDecorator = Partial<ApplicationConfig> & {
  * @augments `@trv:app/Application`
  * @augments `@trv:di/Injectable`
  */
-export function Application(
-  name: string,
-  config?: AppDecorator,
-  params?: (Partial<ApplicationParameter> & { name: string })[]
-) {
+export function Application(name: string, config?: AppDecorator) {
   return <T extends Class<AppClass>>(target: T) => {
-    const out: Partial<ApplicationConfig> = config ?? {};
-    const paramMap = config?.paramMap ?? {};
-
-    out.target = target;
-    out.filename = target.ᚕfile;
-    out.targetId = target.ᚕid;
-    out.name = name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-');
-    out.generatedTime = FsUtil.maxTime(fs.lstatSync(target.ᚕfile));
-
-    if (params) {
-      out.params = params.map(x => ({ ...x, ...(paramMap[x.name!] ?? {}), name: x.name! }) as ApplicationParameter);
-    }
-
-    ApplicationRegistry.register(out.name, out as ApplicationConfig);
-    return target;
+    const out: Partial<ApplicationConfig> = {
+      ...config ?? {},
+      target,
+      filename: target.ᚕfile,
+      targetId: target.ᚕid,
+      name: name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-').replace(/([a-z])([A-Z])/g, (_, l, u) => `${l}-${u.toLowerCase()}`),
+      generatedTime: FsUtil.maxTime(fs.lstatSync(target.ᚕfile))
+    };
+    SchemaRegistry.register(target);
+    ApplicationRegistry.register(out.name!, out as ApplicationConfig);
   };
 }

@@ -17,8 +17,7 @@ import { RestServer } from './server';
  * The rest application
  */
 @Application('rest', {
-  description: 'Default rest application entrypoint',
-  watch: true
+  description: 'Default rest application entrypoint'
 })
 export class RestApplication<T extends unknown = unknown>  {
 

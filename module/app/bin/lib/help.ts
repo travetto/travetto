@@ -1,7 +1,6 @@
 import { PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
-import { AppRunUtil } from './run';
 import { ApplicationConfig } from '../../src/types';
 
 export class HelpUtil {
@@ -14,11 +13,13 @@ export class HelpUtil {
 
     if (app.params) {
       usage = color`${{ identifier: usage }} ${app.params.map(p => {
-        const type = AppRunUtil.getParamType(p);
-
-        return p.optional ?
-          (p.def !== undefined ?
-            color`[${{ param: p.name }}:${{ type }}=${{ input: p.def }}]` :
+        let type = p.type.toLowerCase();
+        if (p.enum) {
+          type = p.enum.values.map(x => `${x}`).join('|');
+        }
+        return !p.required ?
+          (p.default !== undefined ?
+            color`[${{ param: p.name }}:${{ type }}=${{ input: p.default as string }}]` :
             color`[${{ param: p.name }}:${{ type }}]`
           ) : color`${{ param: p.name }}:${{ type }}`;
       }).join(' ')}`;

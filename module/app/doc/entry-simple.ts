@@ -10,7 +10,7 @@ class Server {
   }
 }
 
-@Application('simple')
+@Application('simple-app')
 class SimpleApp {
 
   @Inject()

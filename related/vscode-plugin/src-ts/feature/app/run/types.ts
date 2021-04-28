@@ -1,4 +1,4 @@
-import { ParamConfig } from '../../../core/types';
+import { FieldConfig } from '../../../core/types';
 
 /**
  * Application config
@@ -10,7 +10,7 @@ export interface Application {
   description?: string;
   start: number;
   codeStart: number;
-  params: ParamConfig[];
+  params: FieldConfig[];
   targetId: string;
   generatedTime?: number;
 }

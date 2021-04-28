@@ -1,20 +1,8 @@
 import { Application } from '@travetto/app';
 
-@Application('complex', {
-  paramMap: {
-    domain: {
-      title: 'Domain Name',
-      type: 'string',
-      subtype: 'url'
-    },
-    port: {
-      title: 'Server Port',
-      def: '3000'
-    }
-  }
-})
+@Application('complex')
 class Complex {
-  async run(domain: string, port: number) {
+  async run(domain: string, port: number = 3000) {
     console.log('Launching', { domain, port });
   }
 }

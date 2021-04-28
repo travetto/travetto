@@ -28,8 +28,8 @@ export class AppSelectorUtil {
   static buildAppParams(choice: AppChoice) {
     const out = choice.params
       .map((x, i) => {
-        let val = choice.inputs[i] !== undefined ? choice.inputs[i] : (x.meta?.choices?.join(',') ?? x.def);
-        if (x.subtype === 'file' && val) {
+        let val = choice.inputs[i] !== undefined ? choice.inputs[i] : (x.enum?.values?.join(',') ?? x.default);
+        if (x.specifier === 'file' && val) {
           val = `${val}`.replace(Workspace.path, '.');
         }
         return `${x.title || x.name}${val !== undefined ? `=${val}` : ''}`;
@@ -92,7 +92,7 @@ export class AppSelectorUtil {
       });
 
       if (res === undefined) {
-        if (param.optional) {
+        if (!param.required) {
           selected.push('');
         } else {
           return undefined;

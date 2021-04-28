@@ -1,10 +1,10 @@
 import { PathUtil } from '@travetto/boot';
-import { Class, AppManifest, ShutdownManager } from '@travetto/base';
+import { Class, AppManifest, ShutdownManager, ConcreteClass, Util } from '@travetto/base';
 import { ConfigManager } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
+import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
-import { ApplicationConfig } from './types';
-import { AppUtil } from './util';
+import { AppClass, ApplicationConfig } from './types';
 
 /**
  * Registration point for all applications.  Generally invoked by using
@@ -48,16 +48,20 @@ class $ApplicationRegistry {
   }
 
   /**
-   * Resolve parameters against the config
+   * Prepare parameters for usage
    */
-  resolveParameters(config: ApplicationConfig, args: string[]) {
-    const appParams = config.params ?? [];
-    const typed = args.map((x, i) => appParams[i] === undefined ? x : AppUtil.enforceParamType(appParams[i], x));
-    const reqCount = appParams.filter(x => !x.optional).length;
-    if (typed.length < reqCount) {
-      throw new Error(`Invalid parameter count: received ${typed.length} but needed ${reqCount}`);
+  prepareParams(name: string, args: string[]) {
+    const config = this.#applications.get(name)!;
+
+    // Coerce types
+    for (const el of SchemaRegistry.getMethodSchema(config.target! as Class, 'run')) {
+      args[el.index!] = Util.coerceType(args[el.index!], el.type, false);
     }
-    return typed;
+
+    // Validate
+    SchemaValidator.validateMethod(config.target!, 'run'!, args);
+
+    return args;
   }
 
   /**
@@ -69,14 +73,17 @@ class $ApplicationRegistry {
       throw new InjectionError('Application not found', { ᚕid: name } as Class);
     }
 
-    const typed = this.resolveParameters(config, args);
+    args = this.prepareParams(name, args);
 
-    // Fetch instance of app class
-    const inst = await DependencyRegistry.getInstance(config.target!);
+    // Get instance of app class
+    const inst = DependencyRegistry.get(config.target!) ?
+      await DependencyRegistry.getInstance(config.target!) :
+      new (config.target! as ConcreteClass<AppClass>)();
 
     this.logInit(config);
 
-    const ret = await inst.run(...typed);
+    const ret = await inst.run(...args);
+
     const target = ret ?? inst;
 
     if (target) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 import { Application } from '@travetto/app';
 
 import { RestApplication, ServerHandle, RouteConfig, RestServer, RestInterceptor } from '..';
@@ -42,5 +42,12 @@ class DummyServer implements RestServer<Inner> {
 }
 
 @Application('sample')
-export class SampleApp extends RestApplication {
+export class SampleApp {
+
+  @Inject()
+  app: RestApplication;
+
+  run() {
+    return this.app.run();
+  }
 }

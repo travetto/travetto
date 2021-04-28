@@ -78,6 +78,10 @@ export class SchemaTransformUtil {
       attrs.push(state.factory.createPropertyAssignment('name', state.factory.createStringLiteral(node.name.getText())));
     }
 
+    if (node.initializer && ts.isLiteralExpression(node.initializer)) {
+      attrs.push(state.factory.createPropertyAssignment('default', node.initializer));
+    }
+
     // If we have a union type
     if (typeExpr.key === 'union') {
       const values = typeExpr.subTypes.map(x => x.key === 'literal' ? x.value : undefined)

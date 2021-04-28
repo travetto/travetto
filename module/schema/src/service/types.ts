@@ -1,4 +1,6 @@
 import { Class } from '@travetto/base';
+import { Primitive } from '@travetto/base/src/internal/global-types';
+
 import { ValidatorFn } from '../validate/types';
 
 export const ALL_VIEW = '__all';
@@ -132,6 +134,10 @@ export interface FieldConfig extends DescribableConfig {
    * Enumerated values
    */
   enum?: { values: (string | number | boolean)[], message: string };
+  /**
+   * Default value
+   */
+  default?: Primitive;
 }
 
 export type ViewFieldsConfig<T> = { with: (keyof T)[] } | { without: (keyof T)[] };

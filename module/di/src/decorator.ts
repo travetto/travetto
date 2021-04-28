@@ -2,7 +2,7 @@ import { Class, ClassInstance } from '@travetto/base';
 import { MethodDescriptor } from '@travetto/base/src/internal/types';
 
 import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
-import { DependencyRegistry } from './registry';
+import { DependencyRegistry, ResolutionType } from './registry';
 
 function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Partial<InjectConfig> | undefined)[]) {
   let out = {} as T;
@@ -37,7 +37,7 @@ export function Injectable(first?: Partial<InjectableConfig> | symbol, ...args: 
   };
 }
 
-export type InjectConfig = { qualifier?: symbol, optional?: boolean, resolution?: 'loose' | 'strict' };
+export type InjectConfig = { qualifier?: symbol, optional?: boolean, resolution?: ResolutionType };
 
 export function InjectArgs(configs?: InjectConfig[][]) {
   return <T extends Class>(target: T) => {

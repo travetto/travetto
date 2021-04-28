@@ -7,8 +7,9 @@ import { InjectionError } from './error';
 
 type TargetId = string;
 type ClassId = string;
-type Resolution = 'strict' | 'loose';
 type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: string };
+
+export type ResolutionType = 'strict' | 'loose' | 'any';
 
 const PrimaryCandidateⲐ = Symbol.for('@trv:di/primary');
 
@@ -47,7 +48,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * @param target
    * @param qualifier
    */
-  protected resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: Resolution): Resolved<T> {
+  protected resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
     const qualifiers = this.targetToClass.get(target.ᚕid) ?? new Map<symbol, string>();
 
     let cls: string | undefined;
@@ -71,7 +72,11 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
             if (exact.length === 1) {
               qualifier = exact[0].qualifier;
             } else {
-              throw new InjectionError('Dependency has multiple candidates', target, filtered);
+              if (resolution === 'any') {
+                qualifier = filtered[0];
+              } else {
+                throw new InjectionError('Dependency has multiple candidates', target, filtered);
+              }
             }
           }
         }
@@ -251,7 +256,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Get an instance by type and qualifier
    */
-  async getInstance<T>(target: ClassTarget<T>, qual?: symbol, resolution?: Resolution): Promise<T> {
+  async getInstance<T>(target: ClassTarget<T>, qual?: symbol, resolution?: ResolutionType): Promise<T> {
     this.verifyInitialized();
 
     const { id: classId, qualifier } = this.resolveTarget(target, qual, resolution);
@@ -290,8 +295,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Register a class
    */
-  registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>>) {
-    const config = this.getOrCreatePending(pconfig.class!);
+  registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>> = {}) {
+    const config = this.getOrCreatePending(pconfig.class ?? cls);
 
     config.class = cls;
     config.qualifier = pconfig.qualifier ?? config.qualifier ?? Symbol.for(cls.ᚕid);

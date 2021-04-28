@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 
 import { Workspace } from './workspace';
-import { ParamConfig } from './types';
+import { FieldConfig } from './types';
 
 /**
  * Input parameter with metadata
  */
 interface ParamWithMeta {
-  param: ParamConfig;
+  param: FieldConfig;
   total?: number;
   step?: number;
   input?: string;
@@ -29,7 +29,7 @@ export class ParameterSelector {
     qp.ignoreFocusOut = true;
     qp.step = config.step;
     qp.totalSteps = config.total;
-    qp.value = (config.input || (config.param.def !== undefined ? `${config.param.def}` : undefined))!;
+    qp.value = (config.input || (config.param.default !== undefined ? `${config.param.default}` : undefined))!;
     qp.placeholder = qp.title;
     qp.title = `Enter value for ${config.param.title || config.param.name}`;
     return qp;
@@ -146,13 +146,14 @@ export class ParameterSelector {
     switch (conf.param.type) {
       case 'number': return this.getQuickInput(conf);
       case 'boolean': return this.getQuickPickList(conf, ['yes', 'no']).then(x => `${x === 'yes'}`);
-
       case 'string':
       default: {
-        switch (conf.param.subtype) {
-          case 'choice': return this.getQuickPickList(conf, conf.param.meta?.choices ?? []);
-          case 'file': return this.getFile(conf);
-          default: return this.getQuickInput(conf);
+        if (conf.param.enum) {
+          return this.getQuickPickList(conf, conf.param.enum?.values as string[] ?? []);
+        } else if (conf.param.specifier === 'file') {
+          return this.getFile(conf);
+        } else {
+          return this.getQuickInput(conf);
         }
       }
     }
