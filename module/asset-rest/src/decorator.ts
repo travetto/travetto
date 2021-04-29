@@ -1,5 +1,5 @@
 import { Class, AppError, ClassInstance } from '@travetto/base';
-import { ControllerRegistry, Request, ParamConfig } from '@travetto/rest';
+import { ControllerRegistry, Request, ParamConfig, Param } from '@travetto/rest';
 import { AssetImpl } from '@travetto/asset/src/internal/types';
 import { DependencyRegistry } from '@travetto/di';
 
@@ -17,7 +17,7 @@ const doUpload = (config: Partial<RestAssetConfig>) =>
 /**
  * Allows for supporting uploads
  *
- * @augments `@trv:asset-rest/AssetUpload`
+ * @augments `@trv:asset-rest/Upload`
  * @augments `@trv:rest/Param`
  */
 export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetConfig> = {}) {
@@ -28,25 +28,23 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
 
   const finalConf = { ...param };
 
-  if (finalConf.type !== AssetImpl) {
+  if (finalConf.contextType !== AssetImpl) {
     throw new AppError('Cannot use upload decorator with anything but an Asset', 'general');
   }
 
-  return function (target: ClassInstance, propertyKey: string, index: number) {
-    const handler = target[propertyKey];
-    ControllerRegistry.registerEndpointParameter(target.constructor as Class, handler, {
-      ...param as ParamConfig,
-      location: 'files' as 'body',
-      resolve: doUpload(finalConf),
-      extract: (config, req) => req?.files[config.name!]
-    }, index);
-  };
+  return Param('files' as 'body', {
+    ...finalConf,
+    resolve: doUpload(finalConf),
+    extract: (config, req) => {
+      return req?.files[config.name!];
+    }
+  });
 }
 
 /**
  * Allows for supporting uploads
  *
- * @augments `@trv:asset-rest/AssetUpload`
+ * @augments `@trv:asset-rest/Upload`
  * @augments `@trv:rest/Endpoint`
  */
 export function UploadAll(config: Partial<ParamConfig> & Partial<RestAssetConfig> = {}) {

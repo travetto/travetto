@@ -73,13 +73,17 @@ export class Serializer {
     const cfg = { indent: 2, wordwrap: 120, ...config };
     let out = '';
     const prefix = ' '.repeat(indentLevel);
-    if (o instanceof Error) {
+    if (o instanceof Date) {
+      out = this.serialize(o.toISOString(), cfg, indentLevel);
+    } else if (o instanceof Error) {
       out = `${this.serialize(o.stack, cfg, indentLevel + cfg.indent)}\n`;
     } else if (typeof o === 'function' || o instanceof RegExp || o instanceof Set || o instanceof Map) {
       if (Util.hasToJSON(o)) {
-        out = this.serialize(o.toJSON(), cfg, indentLevel);
+        out = this.serialize(o.toJSON() as object, cfg, indentLevel);
+      } else if (o instanceof Function) {
+        out = this.serialize(o.ᚕid ?? o.name, cfg, indentLevel);
       } else {
-        throw new Error('Types are not supported');
+        throw new Error(`Types are not supported: ${typeof o}`);
       }
     } else if (Array.isArray(o)) {
       if (o.length) {

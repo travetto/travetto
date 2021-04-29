@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-alpha.5",
+    "@travetto/rest": "^2.0.0-alpha.6",
     "@travetto/app": "^2.0.0-alpha.6",
     "@travetto/di": "^2.0.0-alpha.6",
     "@travetto/registry": "^2.0.0-alpha.6",

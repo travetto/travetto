@@ -25,33 +25,17 @@ export interface ParamConfig {
    */
   name?: string;
   /**
-   * The description
-   */
-  description?: string;
-  /**
-   * Is the parameter required
-   */
-  required?: boolean;
-  /**
    * Location of the parameter
    */
   location: 'path' | 'query' | 'body' | 'header' | 'context';
   /**
-   * The type of the parameter
+   * Context type
    */
-  type: Class;
-  /**
-   * Is the parameter an array
-   */
-  array?: boolean;
+  contextType?: Class;
   /**
    * Resolves the value by executing with req/res as input
    */
   resolve?: Filter;
-  /**
-   * Default value for the field
-   */
-  defaultValue?: unknown;
   /**
    * Extract the value from request
    * @param config Param configuration

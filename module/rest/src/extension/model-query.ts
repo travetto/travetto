@@ -1,18 +1,16 @@
 // @file-if @travetto/model-query
-// @file-if @travetto/schema
 
 import { AppError, Class } from '@travetto/base';
 import { ModelType, ModelRegistry } from '@travetto/model';
-import { Schema } from '@travetto/schema';
+import { Field, Schema } from '@travetto/schema';
 import {
   ModelQueryFacetSupport, ModelQuerySupport, ModelQuerySuggestSupport,
   SortClause, ValidStringFields
 } from '@travetto/model-query';
 import { isQuerySuggestSupported, isQuerySupported } from '@travetto/model-query/src/internal/service/common';
 
-import { schemaParamConfig } from './schema';
 import { ControllerRegistry } from '../registry/controller';
-import { paramConfig } from '../decorator/param';
+import { Path, SchemaQuery } from '../decorator/param';
 
 type Svc = { source: Partial<ModelQuerySupport & ModelQuerySuggestSupport & ModelQueryFacetSupport> };
 
@@ -66,10 +64,13 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
         },
-        params: [schemaParamConfig('query', { type: RestModelQuery, name: 'full', required: false })],
+        params: [SchemaQuery()],
         responseType: { type: cls, array: true, description: `List of ${cls.name}` }
       }
     );
+
+    // Register field
+    Field(RestModelQuery)({ constructor: target }, 'getAll', 0);
 
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
@@ -87,11 +88,15 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
           'Cache-Control': 'max-age=0, no-cache'
         },
         params: [
-          paramConfig('path', { name: 'field', required: true }),
-          schemaParamConfig('query', { type: RestModelSuggestQuery, required: false })
+          Path({ name: 'field ' }),
+          SchemaQuery()
         ],
         responseType: { type: cls, description: cls.name }
       }
     );
+
+    // Register fields
+    Field(String, { required: { active: true } })({ constructor: target }, 'suggestField', 0);
+    Field(RestModelSuggestQuery)({ constructor: target }, 'suggestField', 1);
   };
 }

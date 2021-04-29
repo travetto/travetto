@@ -1,4 +1,4 @@
-import { SchemaQuery, SchemaBody, Controller, Get, Post, Put, Delete, Path } from '@travetto/rest';
+import { SchemaQuery, Body, Controller, Get, Post, Put, Delete, Path } from '@travetto/rest';
 
 import { User, UserSearch } from './model';
 
@@ -28,7 +28,7 @@ export class RelationshipController {
   }
 
   @Post('/')
-  async createUser(@SchemaBody() user: User): Promise<User> {
+  async createUser(@Body() user: User): Promise<User> {
     return new User();
   }
 
@@ -37,7 +37,7 @@ export class RelationshipController {
    * @param id User id
    */
   @Put('/:id')
-  async updateUser(@Path() id: number, @SchemaBody() user: User): Promise<void> {
+  async updateUser(@Path() id: number, @Body() user: User): Promise<void> {
 
   }
   /**

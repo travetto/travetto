@@ -4,16 +4,16 @@ import type * as lambda from 'aws-lambda';
 
 import { Injectable } from '@travetto/di';
 import { ConfigManager } from '@travetto/config';
-import { ServerHandle } from '@travetto/rest/src/types';
 import { AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ } from '@travetto/rest/src/extension/aws-lambda';
+import { ServerHandle } from '@travetto/rest/src/types';
 
-import { ExpressRestServer } from '../../server';
+import { KoaRestServer } from '../server';
 
 /**
  * Aws Lambda Rest Server
  */
 @Injectable(AwsLambdaⲐ)
-export class AwsLambdaExpressRestServer extends ExpressRestServer implements AwsLambdaRestServer {
+export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRestServer {
 
   #handler: AwsLambdaHandler['handle'];
 
@@ -27,7 +27,10 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
   init() {
     const ret = super.init();
     const config = ConfigManager.get('rest.aws');
-    this.#handler = serverless.configure({ app: ret, binaryMimeTypes: config.binaryMimeTypes as string[] ?? [] }) as unknown as AwsLambdaHandler['handle'];
+    this.#handler = serverless.configure({
+      app: ret.callback(),
+      ...(config.binaryMimeTypes ? { binaryMimeTypes: config.binaryMimeTypes as string[] } : {})
+    }) as unknown as AwsLambdaHandler['handle'];
     return ret;
   }
 

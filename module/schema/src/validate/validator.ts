@@ -11,13 +11,9 @@ import { TypeMismatchError, ValidationResultError } from './error';
  * @param base The starting type or config
  * @param o The value to use for the polymorphic check
  */
-function resolveSchema<T>(base: Class<T> | SchemaConfig, o: T) {
-  if (Util.isFunction(base)) {
-    return SchemaRegistry.getViewSchema(
-      SchemaRegistry.resolveSubTypeForInstance(base, o), undefined).schema;
-  } else {
-    return base as SchemaConfig;
-  }
+function resolveSchema<T>(base: Class<T>, o: T, view?: string) {
+  return SchemaRegistry.getViewSchema(
+    SchemaRegistry.resolveSubTypeForInstance(base, o), view).schema;
 }
 
 declare global {
@@ -67,7 +63,7 @@ export class SchemaValidator {
       }
     }
 
-    const { type, array } = fieldSchema;
+    const { type, array, view } = fieldSchema;
     const complex = SchemaRegistry.has(type);
 
     if (type === Object) {
@@ -79,7 +75,7 @@ export class SchemaValidator {
       let errors: ValidationError[] = [];
       if (complex) {
         for (let i = 0; i < val.length; i++) {
-          const subErrors = this.#validateSchema(resolveSchema(type, val[i]), val[i], `${path}[${i}]`);
+          const subErrors = this.#validateSchema(resolveSchema(type, val[i], view), val[i], `${path}[${i}]`);
           errors = errors.concat(subErrors);
         }
       } else {
@@ -90,7 +86,7 @@ export class SchemaValidator {
       }
       return errors;
     } else if (complex) {
-      return this.#validateSchema(resolveSchema(type, val), val, path);
+      return this.#validateSchema(resolveSchema(type, val, view), val, path);
     } else {
       const fieldErrors = this.#validateField(fieldSchema, val);
       return this.#prepareErrors(path, fieldErrors);

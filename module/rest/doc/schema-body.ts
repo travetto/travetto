@@ -1,6 +1,6 @@
 // @file-if @travetto/schema
 import { Schema } from '@travetto/schema';
-import { Controller, Post, SchemaBody } from '@travetto/rest';
+import { Controller, Post, Body } from '@travetto/rest';
 
 @Schema()
 class User {
@@ -16,7 +16,7 @@ class UserController {
   };
 
   @Post('/saveUser')
-  async save(@SchemaBody() user: User) {
+  async save(@Body() user: User) {
     user = await this.service.update(user);
     return { success: true };
   }

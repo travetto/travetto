@@ -1,8 +1,10 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnClass, OnMethod, DeclDocumentation, DocUtil, DecoratorUtil, TransformerId
+  TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, TransformerId
 } from '@travetto/transformer';
+import { SchemaTransformUtil } from '@travetto/schema/support/lib';
+
 import { RestTransformUtil } from './lib';
 
 const PARAM_DEC_FILE = '@travetto/rest/src/decorator/param';
@@ -19,30 +21,28 @@ export class RestTransformer {
   /**
    * Handle endpoint parameter
    */
-  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, comments: DeclDocumentation) {
+  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration) {
     const pDec = state.findDecorator(this, node, 'Param');
     let pDecArg = DecoratorUtil.getPrimaryArgument(pDec)!;
     if (pDecArg && ts.isStringLiteral(pDecArg)) {
       pDecArg = state.fromLiteral({ name: pDecArg });
     }
 
+    const paramType = state.resolveType(node);
+
     const dm = pDec ? state.getDecoratorMeta(pDec) : undefined;
-    const { type, array, defaultType } = RestTransformUtil.getParameterType(state, node);
-    const common = {
-      ...RestTransformUtil.getParameterConfig(state, node, comments),
-      type,
-      ...(array ? { array: true } : {})
-    };
+    const defaultType = paramType.key === 'external' ? 'Context' : 'Query';
+    const common = { name: node.name.getText() };
 
     let conf = state.extendObjectLiteral(common, pDecArg);
 
-    // Support SchemaQuery/SchemaBody wih interfaces
-    if (dm && /Schema(Query|Body)/.test(dm.name ?? '')) { // If Interfaces are already loaded
-      const resolved = state.resolveType(node.type!);
-      if (resolved.key === 'shape') { // If dealing with an interface or a shape
-        const id = RestTransformUtil.toConcreteType(state, resolved, node) as ts.Identifier;
-        conf = state.extendObjectLiteral(conf, { type: id });
-      }
+    if (paramType.key === 'external' && !/^(Body|SchemaQuery)$/.test(dm?.name!)) { // contextual
+      conf = state.extendObjectLiteral(conf, {
+        contextType: state.getOrImport(paramType)
+      });
+    }
+    if (paramType.key !== 'external' || /^(Body|SchemaQuery)$/.test(dm?.name!)) { // Not contextual) {
+      node = SchemaTransformUtil.computeField(state, node, /^(Body|SchemaQuery)$/.test(dm?.name!) ? { name: '', type: paramType } : { type: paramType });
     }
 
     const decs = (node.decorators ?? []).filter(x => x !== pDec);
@@ -96,7 +96,7 @@ export class RestTransformer {
       const params: ts.ParameterDeclaration[] = [];
       // If there are parameters to process
       for (const p of node.parameters) {
-        params.push(this.handleEndpointParameter(state, p, comments));
+        params.push(this.handleEndpointParameter(state, p));
       }
 
       nParams = state.factory.createNodeArray(params);

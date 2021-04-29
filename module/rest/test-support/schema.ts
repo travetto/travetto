@@ -3,7 +3,7 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry } from '@travetto/schema';
-import { Controller, Redirect, Post, Get, SchemaBody, SchemaQuery, MethodOrAll, ControllerRegistry } from '@travetto/rest';
+import { Controller, Redirect, Post, Get, Body, SchemaQuery, MethodOrAll, ControllerRegistry } from '@travetto/rest';
 
 import { BaseRestSuite } from './base';
 
@@ -39,7 +39,7 @@ async function getUser(x: number) {
 @Controller('/test/schema')
 class SchemaAPI {
   @Post('/user')
-  async saveUser(@SchemaBody() user: User) {
+  async saveUser(@Body() user: User) {
     return user;
   }
 
@@ -153,6 +153,7 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
     const res1 = await this.request<UserShape>('get', '/test/schema/interface', { query: user });
 
     assert(res1.body.name === user.name);
+    assert(res1.body.age === 20);
 
     const res2 = await this.request<Errors>('get', '/test/schema/interface', { query: { id: 'orange' }, throwOnError: false });
 

@@ -12,7 +12,7 @@ export async function handler(event: lambda.APIGatewayProxyEvent, context: lambd
     const { DependencyRegistry } = await import('@travetto/di');
     await DependencyRegistry.init();
 
-    const { AwsLambdaRestApplication: App } = await import('@travetto/rest/src/extension/aws-lambda');
+    const { AwsLambdaRestApplication: App } = await import('../src/extension/aws-lambda');
 
     inst = await DependencyRegistry.getInstance(App);
     await inst.run();

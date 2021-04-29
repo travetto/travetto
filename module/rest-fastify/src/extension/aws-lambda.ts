@@ -5,7 +5,7 @@ import { Injectable } from '@travetto/di';
 import { ConfigManager } from '@travetto/config';
 import { AwsLambdaRestServer, AwsLambdaⲐ } from '@travetto/rest/src/extension/aws-lambda';
 
-import { FastifyRestServer } from '../../server';
+import { FastifyRestServer } from '../server';
 
 // TODO: Get proper typings
 // eslint-disable-next-line travetto/import-order

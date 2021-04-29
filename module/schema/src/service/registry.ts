@@ -3,6 +3,7 @@ import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry'
 
 import { ClassList, FieldConfig, ClassConfig, ALL_VIEW, SchemaConfig, ViewFieldsConfig } from './types';
 import { SchemaChangeListener } from './changes';
+import { BindUtil } from '../bind-util';
 
 function hasType<T>(o: unknown): o is { type: Class<T> | string } {
   return !!o && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
@@ -145,7 +146,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       this.#methodSchemas.set(cls, new Map());
     }
     const cache = this.#methodSchemas.get(cls)!;
-    if (!cache.has(method)) {
+    if (!cache.has(method) && this.has(cls)) {
       const { fields, schema } = this.getViewSchema(cls);
       const out = [];
       for (const el of fields) {
@@ -156,7 +157,18 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       out.sort((a, b) => a.index! - b.index!);
       cache.set(method, out);
     }
-    return cache.get(method)!;
+    return cache.get(method)! ?? [];
+  }
+
+  /**
+   * Coerce method parameters when possible
+   * @param cls 
+   * @param method 
+   * @param params 
+   * @returns 
+   */
+  coereceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = false): unknown[] {
+    return BindUtil.coereceFields(this.getMethodSchema(cls, method), params, applyDefaults);
   }
 
   /**

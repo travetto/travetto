@@ -4,6 +4,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
 import { Controller, ControllerRegistry, Get, Path } from '../';
+import { SchemaRegistry } from '@travetto/schema';
 
 /**
  * Test Controller For Fun
@@ -41,6 +42,7 @@ export class ConfigureTest {
     assert(config.endpoints.length === 1);
 
     const ep = config.endpoints[0];
+    const params = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
     assert(ep.method === 'get');
     assert(ep.handlerName === 'getUser');
     assert(ep.handler === TestController.prototype.getUser);
@@ -49,7 +51,6 @@ export class ConfigureTest {
     assert(ep.params.length === 1);
 
     assert(ep.params[0].name === 'name');
-    assert(ep.params[0].type === Number);
-    assert(ep.params[0].description === 'User name as a number');
+    assert(params[0].description === 'User name as a number');
   }
 }

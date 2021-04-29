@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Path, Query, SchemaBody, SchemaQuery } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete, Path, Query, Body, SchemaQuery } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 
 import { TodoService } from './service';
@@ -45,7 +45,7 @@ export class TodoController {
    * Create a todo
    */
   @Post('/')
-  async create(@SchemaBody() todo: Todo) {
+  async create(@Body() todo: Todo) {
     return await this.svc.add(todo);
   }
 
@@ -54,7 +54,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Put('/:id')
-  async update(@Path() id: string, @SchemaBody() todo: Todo) {
+  async update(@Path() id: string, @Body() todo: Todo) {
     todo.id = id;
     return await this.svc.update(todo);
   }

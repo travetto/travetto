@@ -77,7 +77,7 @@ export class BindUtil {
    * @param conf The field config to coerce to
    * @param val The provided value
    */
-  static coerceType<T>(conf: FieldConfig, val: unknown): T | null | undefined {
+  static #coerceType<T>(conf: FieldConfig, val: unknown): T | null | undefined {
     if (conf.type?.bindSchema) {
       val = conf.type.bindSchema(val);
     } else {
@@ -181,9 +181,9 @@ export class BindUtil {
                 v = this.bindSchema(config.type, v);
               }
             } else if (config.array && Array.isArray(v)) {
-              v = v.map(el => this.coerceType(config, el));
+              v = v.map(el => this.#coerceType(config, el));
             } else {
-              v = this.coerceType(config, v);
+              v = this.#coerceType(config, v);
             }
           }
 
@@ -193,5 +193,51 @@ export class BindUtil {
     }
 
     return obj;
+  }
+
+  /**
+   * Coerce field to type
+   * @param field 
+   * @param val 
+   * @param applyDefaults 
+   * @returns 
+   */
+  static coerceField(field: FieldConfig, val: unknown, applyDefaults = false) {
+    if ((val === undefined || val === null) && applyDefaults) {
+      val = field.default;
+    }
+    const complex = SchemaRegistry.has(field.type);
+    if (field.array) {
+      if (!Array.isArray(val)) {
+        val = [val];
+      }
+      if (complex) {
+        val = (val as unknown[]).map(x => this.bindSchema(field.type, x as object, field.view));
+      } else {
+        val = (val as unknown[]).map(x => Util.coerceType(x, field.type, false));
+      }
+    } else {
+      if (complex) {
+        val = this.bindSchema(field.type, val as object, field.view);
+      } else {
+        val = Util.coerceType(val, field.type, false);
+      }
+    }
+    return val;
+  }
+
+  /**
+   * Coerce multiple params at once 
+   * @param fields
+   * @param params 
+   * @returns 
+   */
+  static coereceFields(fields: FieldConfig[], params: unknown[], applyDefaults = false): unknown[] {
+    params = [...params];
+    // Coerce types
+    for (const el of fields) {
+      params[el.index!] = this.coerceField(el, params[el.index!], applyDefaults);
+    }
+    return params;
   }
 }

@@ -6,13 +6,15 @@ import { SchemaRegistry } from '../service/registry';
 /**
  * Describe a model or a field
  * @param config The describe configuration
- * @augments `@trv:schema/describe`
+ * @augments `@trv:schema/Describe`
  */
 export function Describe(config: Partial<DescribableConfig>) {
-  return (target: Class | ClassInstance, property?: string, descriptor?: PropertyDescriptor) => {
+  return (target: Class | ClassInstance, property?: string, descOrIdx?: PropertyDescriptor | number) => {
     if (property) {
+      if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
+        property = `${property}.${descOrIdx}`;
+      }
       SchemaRegistry.registerPendingFieldFacet((target as ClassInstance).constructor, property!, config);
-      return descriptor;
     } else {
       SchemaRegistry.register(target as Class, config);
     }

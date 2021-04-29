@@ -40,8 +40,12 @@ export class RouteUtil {
     router: Partial<ControllerConfig> = {}): Filter {
 
     const handlerBound = async (req: Request, res: Response) => {
-      const params = ParamUtil.extractParams(route.params, req, res);
-      return route.handler.apply(route.instance, params);
+      if ('class' in route) {
+        const params = ParamUtil.extractParams(route, req, res);
+        return route.handler.apply(route.instance, params);
+      } else {
+        return route.handler.call(route.instance, req, res);
+      }
     };
 
     const filters: Filter[] = [

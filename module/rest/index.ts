@@ -27,5 +27,3 @@ export * from './src/util/route';
 export { ModelRoutes } from './src/extension/model';
 // Named export needed for proxying
 export { ModelQueryRoutes } from './src/extension/model-query';
-// Named export needed for proxying
-export { SchemaBody, SchemaQuery } from './src/extension/schema';

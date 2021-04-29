@@ -1,15 +1,24 @@
 import { ClassInstance } from '@travetto/base';
+import { BindUtil } from '@travetto/schema';
 
 import { ParamConfig } from '../types';
 import { ControllerRegistry } from '../registry/controller';
 import { ParamUtil, ExtractFn } from '../util/param';
 
+const QuerySchemaⲐ: unique symbol = Symbol.for('@trv:rest/schema-query');
+
+declare global {
+  interface TravettoRequest {
+    [QuerySchemaⲐ]: Record<string, unknown>;
+  }
+}
+
 const EXTRACTORS: Record<ParamConfig['location'], ExtractFn> = {
-  path: (c, r) => ParamUtil.convertValue(c, r.params[c.name!]),
-  query: (c, r) => ParamUtil.convertValue(c, r.query[c.name!]),
-  header: (c, r) => ParamUtil.convertValue(c, r.header(c.name!)),
+  path: (c, r) => r.params[c.name!],
+  query: (c, r) => r.query[c.name!],
+  header: (c, r) => r.header(c.name!),
   body: (__, r) => r.body,
-  context: ParamUtil.extractContext.bind(ParamUtil)
+  context: (c, req, res) => ParamUtil.getExtractor(c.contextType!)(c, req, res)
 };
 
 /**
@@ -18,7 +27,6 @@ const EXTRACTORS: Record<ParamConfig['location'], ExtractFn> = {
  * @param extra Any additional configuration for the param config
  */
 export const paramConfig = (location: ParamConfig['location'], extra: string | Partial<ParamConfig>) => ({
-  type: String,
   location, extract: EXTRACTORS[location]!, ...(
     (typeof extra === 'string' ? { name: extra } : extra)
   )
@@ -68,6 +76,23 @@ export function Header(param: string | Partial<ParamConfig> = {}) { return Param
  * @augments `@trv:rest/Param`
  */
 export function Body(param: Partial<ParamConfig> = {}) { return Param('body', param); }
+
+/**
+ * Define the query parameters as a schema class
+ * @param config The schema configuration
+ * @augments `@trv:rest/Param`
+ */
+export function SchemaQuery(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
+  return Param('query', {
+    ...config,
+    resolve: req => {
+      const val = BindUtil.expandPaths(req.query);
+      req[QuerySchemaⲐ] ??= {};
+      req[QuerySchemaⲐ][config.name!] = config.key ? val[config.key] : val;
+    },
+    extract: (c, req) => req![QuerySchemaⲐ][c.name!]
+  });
+}
 
 /**
  * Create context provider as a decorator, to allow for adding additional context parameter values

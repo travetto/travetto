@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { AnyType, DocUtil, TransformerState } from '@travetto/transformer';
+import { AnyType, DocUtil, ParamDocumentation, TransformerState } from '@travetto/transformer';
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
 const FIELD_MOD = '@travetto/schema/src/decorator/field';
@@ -45,7 +45,7 @@ export class SchemaTransformUtil {
                 [], [], k,
                 v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
                 undefined, undefined
-              ), v, root)
+              ), { type: v, root })
             )
           );
           cls.getText = () => '';
@@ -65,17 +65,21 @@ export class SchemaTransformUtil {
   /**
    * Compute property information from declaration
    */
-  static computeField<T extends ts.PropertyDeclaration | ts.ParameterDeclaration>(state: TransformerState, node: T, type?: AnyType, root: ts.Node = node): T {
+  static computeField<T extends ts.PropertyDeclaration | ts.ParameterDeclaration>(
+    state: TransformerState, node: T, config: { type?: AnyType, root?: ts.Node, name?: string } = { root: node }
+  ): T {
 
-    const typeExpr = type || state.resolveType(node);
+    const typeExpr = config.type ?? state.resolveType(node);
     const attrs: ts.PropertyAssignment[] = [];
 
     if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
       attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
     }
 
-    if (ts.isParameter(node)) {
-      attrs.push(state.factory.createPropertyAssignment('name', state.factory.createStringLiteral(node.name.getText())));
+    if (ts.isParameter(node) || config.name !== undefined) {
+      attrs.push(state.factory.createPropertyAssignment('name', state.factory.createStringLiteral(
+        config.name !== undefined ? config.name : node.name.getText())
+      ));
     }
 
     if (node.initializer && ts.isLiteralExpression(node.initializer)) {
@@ -95,24 +99,31 @@ export class SchemaTransformUtil {
       }
     }
 
-    const resolved = this.toConcreteType(state, typeExpr, node, root);
+    const resolved = this.toConcreteType(state, typeExpr, node, config.root);
     const params: ts.Expression[] = resolved ? [resolved] : [];
 
-    if (attrs.length) {
-      params.push(state.factory.createObjectLiteralExpression(attrs));
+    if (ts.isParameter(node)) {
+      const comments = DocUtil.describeDocs(node.parent);
+      const commentConfig = (comments.params ?? []).find(x => x.name === node.name.getText()) || {} as Partial<ParamDocumentation>;
+      if (commentConfig.description) {
+        attrs.push(state.factory.createPropertyAssignment('description', state.fromLiteral(commentConfig.description)));
+      }
+      if (attrs.length) {
+        params.push(state.factory.createObjectLiteralExpression(attrs));
+      }
     }
 
     const dec = state.createDecorator(FIELD_MOD, 'Field', ...params);
     const newDecs = [...(node.decorators ?? []), dec];
 
-    const comments = DocUtil.describeDocs(node);
-    if (comments.description) {
-      newDecs.push(state.createDecorator(COMMON_MOD, 'Describe', state.fromLiteral({
-        description: comments.description
-      })));
-    }
-
     if (ts.isPropertyDeclaration(node)) {
+      const comments = DocUtil.describeDocs(node);
+      if (comments.description) {
+        newDecs.push(state.createDecorator(COMMON_MOD, 'Describe', state.fromLiteral({
+          description: comments.description
+        })));
+      }
+
       return state.factory.updatePropertyDeclaration(node as Exclude<typeof node, T>,
         newDecs,
         node.modifiers,

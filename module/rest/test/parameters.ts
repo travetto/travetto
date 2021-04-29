@@ -2,6 +2,7 @@ import * as assert from 'assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { Describe, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
 
 import { Query, Header, Path, Context } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
@@ -39,16 +40,16 @@ class ParamController {
   async array2(...values: boolean[]) { }
 
   @Get('/job/output/:jobId')
-  async jobOutput(@Path() jobId: string, @Query({ required: false }) time: Date) { }
+  async jobOutput(@Path() jobId: string, @Required(false) @Query() time: Date) { }
 
   @Get('/job/output2')
-  async jobOutput2(@Query({ ...OPTIONAL, name: 'optional' }) time: Date) { }
+  async jobOutput2(@Query({ name: 'optional' }) time?: Date) { }
 
   /**
-   * @param name User's name
+   * @param name User name
    */
   @Post('/alias')
-  async alias(@Query({ name: 'name', description: 'User name' }) nm: string = 'green') { }
+  async alias(@Describe({ description: 'User name' }) @Query({ name: 'name' }) nm: string = 'green') { }
 
   /**
    * @param nm User's name
@@ -83,7 +84,7 @@ export class ParameterTest {
   async simpleParameters() {
     const ep = ParameterTest.getEndpoint('/:name', 'post');
     assert.doesNotThrow(() =>
-      ParamUtil.extractParams(ep.params, {
+      ParamUtil.extractParams(ep, {
         params: { name: 'bob' },
         query: {
           age: '20'
@@ -92,7 +93,7 @@ export class ParameterTest {
     );
 
     assert.throws(() => {
-      ParamUtil.extractParams(ep.params, {
+      ParamUtil.extractParams(ep, {
         params: { name: 'bob' },
         query: {
           age: 'blue'
@@ -106,13 +107,13 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/login', 'post');
 
     assert.doesNotThrow(() =>
-      ParamUtil.extractParams(ep.params, {
+      ParamUtil.extractParams(ep, {
         header: (key: string) => key
       } as unknown as Request, {} as Response)
     );
 
     assert.throws(() => {
-      ParamUtil.extractParams(ep.params, {
+      ParamUtil.extractParams(ep, {
         header: (key: string) => { }
       } as unknown as Request, {} as Response);
     });
@@ -124,23 +125,23 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/user/:id', 'post');
 
     assert.doesNotThrow(() =>
-      ParamUtil.extractParams(ep.params, {
+      ParamUtil.extractParams(ep, {
         query: {},
         params: { id: '5' }
       } as unknown as Request, {} as Response)
     );
 
     assert.throws(() =>
-      ParamUtil.extractParams(ep.params, {
+      ParamUtil.extractParams(ep, {
         query: { age: 'blue' },
         params: { id: '5' }
-      } as unknown as Request, {} as Response), 'Incorrect type'
+      } as unknown as Request, {} as Response), ValidationResultError
     );
 
     assert.throws(() =>
-      ParamUtil.extractParams(ep.params, {
+      ParamUtil.extractParams(ep, {
         params: {}, query: {}
-      } as unknown as Request, {} as Response), /Missing.*\bid/i
+      } as unknown as Request, {} as Response), ValidationResultError
     );
   }
 
@@ -149,7 +150,7 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/req/res', 'post');
     const req = { path: '/path' };
     const res = { status: 200 };
-    const items = ParamUtil.extractParams(ep.params, req as unknown as Request, res as unknown as Response);
+    const items = ParamUtil.extractParams(ep, req as unknown as Request, res as unknown as Response);
 
     assert(req === items[0]);
     assert(res === items[1]);
@@ -159,19 +160,20 @@ export class ParameterTest {
   @Test()
   async testAliasing() {
     const ep = ParameterTest.getEndpoint('/alias', 'post');
-    assert(ep.params[0].description === 'User name');
-    assert(ParamUtil.extractParams(ep.params, { query: { nm: 'blue' } } as unknown as Request, {} as Response) === ['green']);
-    assert(ParamUtil.extractParams(ep.params, { query: { name: 'blue' } } as unknown as Request, {} as Response) === ['blue']);
+    const params = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
+    assert(params[0].description === 'User name');
+    assert(ParamUtil.extractParams(ep, { query: { nm: 'blue' } } as unknown as Request, {} as Response) === ['green']);
+    assert(ParamUtil.extractParams(ep, { query: { name: 'blue' } } as unknown as Request, {} as Response) === ['blue']);
 
     const ep2 = ParameterTest.getEndpoint('/alias2', 'post');
-    assert(ep2.params[0].description === 'User\'s name');
+    const params2 = SchemaRegistry.getMethodSchema(ep2.class, ep2.handlerName);
+    assert(params2[0].description === 'User\'s name');
     assert(ep2.params[0].name === 'nm');
-    assert(ep2.params[0].type === String);
 
     const ep3 = ParameterTest.getEndpoint('/alias3', 'post');
-    assert(ep3.params[0].description === 'User\'s name');
+    const params3 = SchemaRegistry.getMethodSchema(ep3.class, ep3.handlerName);
+    assert(params3[0].description === 'User\'s name');
     assert(ep3.params[0].name === 'nm');
-    assert(ep3.params[0].type === Object);
   }
 
   @Test()
@@ -179,18 +181,18 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/array', 'post');
     const ep2 = ParameterTest.getEndpoint('/array2', 'post');
 
-    assert(ParamUtil.extractParams(ep2.params, { query: { values: 'no' } } as unknown as Request, {} as Response) === [[false]]);
-    assert(ParamUtil.extractParams(ep2.params, { query: { values: ['no', 'yes'] } } as unknown as Request, {} as Response) === [[false, true]]);
+    assert(ParamUtil.extractParams(ep2, { query: { values: 'no' } } as unknown as Request, {} as Response) === [[false]]);
+    assert(ParamUtil.extractParams(ep2, { query: { values: ['no', 'yes'] } } as unknown as Request, {} as Response) === [[false, true]]);
 
-    assert(ParamUtil.extractParams(ep.params, { query: { values: '0' } } as unknown as Request, {} as Response) === [[0]]);
-    assert(ParamUtil.extractParams(ep.params, { query: { values: ['5', '3'] } } as unknown as Request, {} as Response) === [[5, 3]]);
+    assert(ParamUtil.extractParams(ep, { query: { values: '0' } } as unknown as Request, {} as Response) === [[0]]);
+    assert(ParamUtil.extractParams(ep, { query: { values: ['5', '3'] } } as unknown as Request, {} as Response) === [[5, 3]]);
   }
 
   @Test()
   async realWorld() {
     const ep = ParameterTest.getEndpoint('/job/output/:jobId', 'get');
-    assert.doesNotThrow(() => ParamUtil.extractParams(ep.params, { params: { jobId: '5' }, query: {} } as unknown as Request, {} as Response));
-    assert.throws(() => ParamUtil.extractParams(ep.params, { params: {}, query: {} } as unknown as Request, {} as Response), /missing path/i);
-    assert.throws(() => ParamUtil.extractParams(ep.params, { params: { jobId: '5' }, query: { time: 'blue' } } as unknown as Request, {} as Response), 'Incorrect type');
+    assert.doesNotThrow(() => ParamUtil.extractParams(ep, { params: { jobId: '5' }, query: {} } as unknown as Request, {} as Response));
+    assert.throws(() => ParamUtil.extractParams(ep, { params: {}, query: {} } as unknown as Request, {} as Response), ValidationResultError);
+    assert.throws(() => ParamUtil.extractParams(ep, { params: { jobId: '5' }, query: { time: 'blue' } } as unknown as Request, {} as Response), ValidationResultError);
   }
 }

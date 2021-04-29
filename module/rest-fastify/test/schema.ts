@@ -1,4 +1,3 @@
-// @file-if @travetto/schema
 // @file-if aws-lambda-fastify
 
 import { SchemaRestServerSuite } from '@travetto/rest/test-support/schema';

@@ -1,12 +1,11 @@
 // @file-if @travetto/model
-// @file-if @travetto/schema
 
 import { Class } from '@travetto/base';
 import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model';
 
-import { schemaParamConfig } from './schema';
 import { ControllerRegistry } from '../registry/controller';
-import { paramConfig } from '../decorator/param';
+import { Body, paramConfig } from '../decorator/param';
+import { Field, SchemaRegistry } from '@travetto/schema';
 
 type Svc = { source: ModelCrudSupport };
 
@@ -24,6 +23,8 @@ export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
   }
 
   return (target: Class<Svc>) => {
+    SchemaRegistry.register(target);
+
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
         target, function get(this: Svc, id: string) {
@@ -35,7 +36,7 @@ export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
         },
-        params: [paramConfig('path', { name: 'id', required: true })],
+        params: [paramConfig('path', { name: 'id' })],
         responseType: { type: cls, description: cls.name }
       }
     );
@@ -48,11 +49,14 @@ export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
       {
         description: `Update ${cls.name}`,
         priority: 103, method: 'put', path: '/',
-        params: [schemaParamConfig('body', { type: cls })],
+        params: [Body()],
         requestType: { type: cls, description: cls.name },
         responseType: { type: cls, description: cls.name }
       }
     );
+
+    // Register field
+    Field(cls)({ constructor: target }, 'update', 0);
 
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
@@ -62,11 +66,15 @@ export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
       {
         description: `Create ${cls.name}`,
         priority: 104, method: 'post', path: '/',
-        params: [schemaParamConfig('body', { type: cls })],
+        params: [Body()],
         requestType: { type: cls, description: cls.name },
         responseType: { type: cls, description: cls.name }
       }
     );
+
+    // Register field
+    Field(cls)({ constructor: target }, 'create', 0);
+
 
     Object.assign(
       ControllerRegistry.getOrCreateEndpointConfig(
@@ -74,7 +82,7 @@ export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
           return this.source.delete(getCls(), id);
         }),
       {
-        params: [paramConfig('path', { name: 'id', required: true })],
+        params: [paramConfig('path', { name: 'id' })],
         description: `Delete ${cls.name} by id`,
         priority: 105, method: 'delete', path: '/:id'
       });

@@ -1,7 +1,7 @@
 // @file-if @travetto/model
 import { Inject } from '@travetto/di';
 import { ModelCrudSupport } from '@travetto/model';
-import { Path, Controller, SchemaBody, Get, Request, Delete, Post, Put } from '@travetto/rest';
+import { Path, Controller, Body, Get, Request, Delete, Post, Put } from '@travetto/rest';
 
 import { User } from './user';
 
@@ -27,12 +27,12 @@ class UserController {
   }
 
   @Post('')
-  async saveUser(@SchemaBody() user: User) {
+  async saveUser(@Body() user: User) {
     return await this.service.create(User, user);
   }
 
   @Put('')
-  async updateUser(@SchemaBody() user: User) {
+  async updateUser(@Body() user: User) {
     return await this.service.update(User, user);
   }
 }

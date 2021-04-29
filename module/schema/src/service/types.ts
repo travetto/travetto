@@ -91,6 +91,10 @@ export interface FieldConfig extends DescribableConfig {
     validateSchema?(input: unknown): string | undefined;
   };
   /**
+   * View name for validation when dealing with complex types
+   */
+  view?: string;
+  /**
    * The position of the field if ordered
    */
   index?: number;

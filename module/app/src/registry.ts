@@ -52,16 +52,9 @@ class $ApplicationRegistry {
    */
   prepareParams(name: string, args: string[]) {
     const config = this.#applications.get(name)!;
-
-    // Coerce types
-    for (const el of SchemaRegistry.getMethodSchema(config.target! as Class, 'run')) {
-      args[el.index!] = Util.coerceType(args[el.index!], el.type, false);
-    }
-
-    // Validate
-    SchemaValidator.validateMethod(config.target!, 'run'!, args);
-
-    return args;
+    const cleaned = SchemaRegistry.coereceMethodParams(config.target! as Class, 'run', args);
+    SchemaValidator.validateMethod(config.target!, 'run'!, cleaned);
+    return cleaned;
   }
 
   /**
@@ -73,7 +66,7 @@ class $ApplicationRegistry {
       throw new InjectionError('Application not found', { ᚕid: name } as Class);
     }
 
-    args = this.prepareParams(name, args);
+    const cleaned = this.prepareParams(name, args);
 
     // Get instance of app class
     const inst = DependencyRegistry.get(config.target!) ?
@@ -82,7 +75,7 @@ class $ApplicationRegistry {
 
     this.logInit(config);
 
-    const ret = await inst.run(...args);
+    const ret = await inst.run(...cleaned);
 
     const target = ret ?? inst;
 

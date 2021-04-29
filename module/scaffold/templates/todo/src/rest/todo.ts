@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Delete, Path, SchemaBody, SchemaQuery } from '@travetto/rest';
+import { Controller, Get, Put, Post, Delete, Path, Body, SchemaQuery } from '@travetto/rest';
 import { ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
@@ -61,7 +61,7 @@ export class TodoController {
    * Create a Todo
    */
   @Post('/')
-  async save(@SchemaBody() todo: Todo): Promise<Todo> {
+  async save(@Body() todo: Todo): Promise<Todo> {
     // {{#modules.auth-rest}} // @doc-exclude
     todo.userId = this.auth.get()?.id; // @doc-exclude
     // {{/modules.auth-rest}} // @doc-exclude
@@ -72,7 +72,7 @@ export class TodoController {
    * Update a Todo
    */
   @Put('/:id')
-  async update(@SchemaBody() todo: Todo): Promise<Todo> {
+  async update(@Body() todo: Todo): Promise<Todo> {
     // {{#modules.auth-rest}} // @doc-exclude
     todo.userId = this.auth.get()?.id; // @doc-exclude
     // {{/modules.auth-rest}} // @doc-exclude
