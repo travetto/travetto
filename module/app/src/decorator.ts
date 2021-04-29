@@ -2,10 +2,10 @@ import * as fs from 'fs';
 
 import { Class } from '@travetto/base';
 import { FsUtil } from '@travetto/boot';
+import { SchemaRegistry } from '@travetto/schema';
 
 import { ApplicationConfig, AppClass } from './types';
 import { ApplicationRegistry } from './registry';
-import { SchemaRegistry } from '@travetto/schema';
 
 export type AppDecorator = { description?: string };
 

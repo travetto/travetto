@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, CoreUtil, DecoratorUtil, TransformerId, OnClass, AfterClass
+  TransformerState, DecoratorMeta, CoreUtil, DecoratorUtil, TransformerId, AfterClass
 } from '@travetto/transformer';
 import { SchemaTransformUtil } from '@travetto/schema/support/lib';
 
@@ -67,7 +67,7 @@ export class ApplicationTransformer {
         x.parameters.map(y => SchemaTransformUtil.computeField(state, y)),
         x.type,
         x.body
-      ) : x)
+      ) : x);
 
     return state.factory.updateClassDeclaration(node,
       DecoratorUtil.spliceDecorators(node, dec, [newDec]),

@@ -35,9 +35,7 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
   return Param('files' as 'body', {
     ...finalConf,
     resolve: doUpload(finalConf),
-    extract: (config, req) => {
-      return req?.files[config.name!];
-    }
+    extract: (config, req) => req?.files[config.name!]
   });
 }
 

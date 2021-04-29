@@ -162,10 +162,10 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
   /**
    * Coerce method parameters when possible
-   * @param cls 
-   * @param method 
-   * @param params 
-   * @returns 
+   * @param cls
+   * @param method
+   * @param params
+   * @returns
    */
   coereceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = false): unknown[] {
     return BindUtil.coereceFields(this.getMethodSchema(cls, method), params, applyDefaults);

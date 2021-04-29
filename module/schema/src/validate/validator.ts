@@ -1,4 +1,4 @@
-import { Util, Class, ClassInstance } from '@travetto/base';
+import { Class, ClassInstance } from '@travetto/base';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';

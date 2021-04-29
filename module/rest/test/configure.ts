@@ -2,9 +2,9 @@ import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
+import { SchemaRegistry } from '@travetto/schema';
 
 import { Controller, ControllerRegistry, Get, Path } from '../';
-import { SchemaRegistry } from '@travetto/schema';
 
 /**
  * Test Controller For Fun

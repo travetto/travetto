@@ -124,7 +124,7 @@ export class TapEmitter implements TestConsumer {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.#enhancer.failure(err instanceof Error ? err.toJSON() as any : `${err}`) as string);
+        this.log(this.#enhancer.failure(err instanceof Error ? err.toJSON() as string : `${err}`) as string);
       }
     }
 

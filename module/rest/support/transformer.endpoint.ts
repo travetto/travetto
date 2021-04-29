@@ -36,13 +36,13 @@ export class RestTransformer {
 
     let conf = state.extendObjectLiteral(common, pDecArg);
 
-    if (paramType.key === 'external' && !/^(Body|SchemaQuery)$/.test(dm?.name!)) { // contextual
+    if (paramType.key === 'external' && !/^(Body|SchemaQuery)$/.test(dm?.name ?? '')) { // contextual
       conf = state.extendObjectLiteral(conf, {
         contextType: state.getOrImport(paramType)
       });
     }
-    if (paramType.key !== 'external' || /^(Body|SchemaQuery)$/.test(dm?.name!)) { // Not contextual) {
-      node = SchemaTransformUtil.computeField(state, node, /^(Body|SchemaQuery)$/.test(dm?.name!) ? { name: '', type: paramType } : { type: paramType });
+    if (paramType.key !== 'external' || /^(Body|SchemaQuery)$/.test(dm?.name ?? '')) { // Not contextual) {
+      node = SchemaTransformUtil.computeField(state, node, /^(Body|SchemaQuery)$/.test(dm?.name ?? '') ? { name: '', type: paramType } : { type: paramType });
     }
 
     const decs = (node.decorators ?? []).filter(x => x !== pDec);

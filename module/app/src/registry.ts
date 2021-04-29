@@ -1,5 +1,5 @@
 import { PathUtil } from '@travetto/boot';
-import { Class, AppManifest, ShutdownManager, ConcreteClass, Util } from '@travetto/base';
+import { Class, AppManifest, ShutdownManager, ConcreteClass } from '@travetto/base';
 import { ConfigManager } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';

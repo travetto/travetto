@@ -1,11 +1,10 @@
 // @file-if @travetto/model
-
 import { Class } from '@travetto/base';
 import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model';
+import { Field, SchemaRegistry } from '@travetto/schema';
 
 import { ControllerRegistry } from '../registry/controller';
 import { Body, paramConfig } from '../decorator/param';
-import { Field, SchemaRegistry } from '@travetto/schema';
 
 type Svc = { source: ModelCrudSupport };
 

@@ -40,7 +40,7 @@ export class ParamUtil {
 
   /**
    * Get extractor for type
-   * @param cls 
+   * @param cls
    */
   static getExtractor(cls: Class) {
     const fn = this.#typeExtractors.get(cls);

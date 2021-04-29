@@ -197,10 +197,10 @@ export class BindUtil {
 
   /**
    * Coerce field to type
-   * @param field 
-   * @param val 
-   * @param applyDefaults 
-   * @returns 
+   * @param field
+   * @param val
+   * @param applyDefaults
+   * @returns
    */
   static coerceField(field: FieldConfig, val: unknown, applyDefaults = false) {
     if ((val === undefined || val === null) && applyDefaults) {
@@ -227,10 +227,10 @@ export class BindUtil {
   }
 
   /**
-   * Coerce multiple params at once 
+   * Coerce multiple params at once
    * @param fields
-   * @param params 
-   * @returns 
+   * @param params
+   * @returns
    */
   static coereceFields(fields: FieldConfig[], params: unknown[], applyDefaults = false): unknown[] {
     params = [...params];

@@ -65,12 +65,12 @@ declare global {
     body: any;
     /**
      * The stream to pipe the request to.  Useful for file uploads.
-     * @param stream 
+     * @param stream
      */
     pipe(stream: NodeJS.WritableStream): any;
     /**
      * Get a header as a string or array of strings depending on what was passed
-     * @param key 
+     * @param key
      */
     header<K extends keyof IncomingHttpHeaders>(key: K): IncomingHttpHeaders[K] | undefined;
     /**
@@ -163,7 +163,7 @@ declare global {
     send(value: any): any;
     /**
      * Optional internal method for sending streams
-     * @param stream 
+     * @param stream
      */
     [SendStreamⲐ]?(stream: Readable): Promise<void>;
     /**
@@ -173,7 +173,7 @@ declare global {
     write(value: any): any;
     /**
      * End the response, with a final optional value
-     * @param val 
+     * @param val
      */
     end(val?: any): any;
     /**
