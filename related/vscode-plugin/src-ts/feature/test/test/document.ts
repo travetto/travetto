@@ -13,10 +13,6 @@ import {
 
 const diagColl = vscode.languages.createDiagnosticCollection('Travetto');
 
-function isDisposable(o: unknown): o is { _disposed: boolean } {
-  return !!o && '_disposed' in (o as object);
-}
-
 /**
  * Test results manager
  */
@@ -56,14 +52,23 @@ export class DocumentResultsManager {
    */
   addEditor(e: vscode.TextEditor) {
     if (!this.#editors.has(e)) {
-      const elements = [...this.#editors].filter(x => isDisposable(x) && x._disposed);
-      this.#editors = new Set([...elements, e]);
+      this.#editors.add(e);
       this.#document = e.document;
       try {
         this.refresh();
       } catch (err) {
         console.error(err);
       }
+    }
+  }
+
+  /**
+   * Remove an editor
+   * @param e
+   */
+  removeEditor(e: vscode.TextEditor) {
+    if (!this.#editors.has(e)) {
+      this.#editors.delete(e);
     }
   }
 
@@ -75,9 +80,7 @@ export class DocumentResultsManager {
   setStyle(type: vscode.TextEditorDecorationType, decs: vscode.DecorationOptions[]) {
     if (type) {
       for (const ed of this.#editors) {
-        if (isDisposable(ed) && !ed._disposed) {
-          ed.setDecorations(type, decs);
-        }
+        ed.setDecorations(type, decs);
       }
     }
   }

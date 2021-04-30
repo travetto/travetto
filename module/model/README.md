@@ -12,7 +12,7 @@ This module provides a set of contracts/interfaces to data model persistence, mo
 
 ## Contracts
 
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11), [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1) and [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11), [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L3) and [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19).
 
 ### [Basic](https://github.com/travetto/travetto/tree/master/module/model/src/service/basic.ts#L9)
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -132,7 +132,7 @@ export interface ModelExpirySupport extends ModelCrudSupport {
 }
 ```
 
-### [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1)
+### [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L3)
 
 Some implementations also allow for the ability to read/write binary data as a stream.  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.  This pattern is currently used by [Asset](https://github.com/travetto/travetto/tree/master/module/asset#readme "Modular library for storing and retrieving binary assets") for reading and writing asset data.
 
@@ -146,13 +146,13 @@ export interface ModelStreamSupport {
    * @param stream The actual stream to write
    * @param meta The stream metadata
    */
-  upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta): Promise<void>;
+  upsertStream(location: string, stream: stream.Readable, meta: StreamMeta): Promise<void>;
 
   /**
    * Get stream from asset store
    * @param location The location of the stream
    */
-  getStream(location: string): Promise<NodeJS.ReadableStream>;
+  getStream(location: string): Promise<stream.Readable>;
 
   /**
    * Get metadata for stream
@@ -219,8 +219,8 @@ All fields are optional, but the `id` and `type` are important as those field ty
 |[Redis Model Support](https://github.com/travetto/travetto/tree/master/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
 |[S3 Model Support](https://github.com/travetto/travetto/tree/master/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/master/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
-|[MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L34)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L46)|X|X| |X|X|X|
+|[MemoryModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/memory.ts#L36)|X|X|X|X|X|X|
+|[FileModelService](https://github.com/travetto/travetto/tree/master/module/model/src/provider/file.ts#L47)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
@@ -228,6 +228,7 @@ repetitive functionality, that is unable to be shared due to not relying upon in
 
 **Code: Memory Service**
 ```typescript
+import * as stream from 'stream';
 import { StreamUtil } from '@travetto/boot';
 import { Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
@@ -270,7 +271,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async delete<T extends ModelType>(cls: Class<T>, id: string) ;
   async * list<T extends ModelType>(cls: Class<T>) ;
   // Stream Support
-  async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) ;
+  async upsertStream(location: string, stream: stream.Readable, meta: StreamMeta) ;
   async getStream(location: string) ;
   async describeStream(location: string) ;
   async deleteStream(location: string) ;

@@ -139,7 +139,7 @@ export class SpecGenerateUtil {
       return undefined;
     }
 
-    const typeId = type.name.replace(`ᚕsyn`, '');
+    const typeId = type.name?.replace('ᚕsyn', '');
 
     if (!state.components.schemas[typeId]) {
       const config = SchemaRegistry.get(type);

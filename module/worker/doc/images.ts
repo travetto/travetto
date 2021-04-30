@@ -1,5 +1,5 @@
 import { ExecUtil, ExecutionState } from '@travetto/boot';
-import { Worker, WorkPool, IterableWorkSet, DynamicAsyncIterator } from '@travetto/worker';
+import { Worker, WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
 
 class ImageProcessor implements Worker<string> {
   active = false;
@@ -27,7 +27,7 @@ class ImageProcessor implements Worker<string> {
 
 export class ImageCompressor extends WorkPool<string, ImageProcessor> {
 
-  pendingImages = new DynamicAsyncIterator<string>();
+  pendingImages = new ManualAsyncIterator<string>();
 
   constructor() {
     super(async () => new ImageProcessor());

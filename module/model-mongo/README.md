@@ -13,7 +13,7 @@ This module provides an [mongodb](https://mongodb.com)-based implementation for 
 Supported featrues:
    
    *  [CRUD](https://github.com/travetto/travetto/tree/master/module/model/src/service/crud.ts#L11)
-   *  [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L1)
+   *  [Streaming](https://github.com/travetto/travetto/tree/master/module/model/src/service/stream.ts#L3)
    *  [Bulk](https://github.com/travetto/travetto/tree/master/module/model/src/service/bulk.ts#L19)
    *  [Indexed](https://github.com/travetto/travetto/tree/master/module/model/src/service/indexed.ts#L11)
    *  [Expiry](https://github.com/travetto/travetto/tree/master/module/model/src/service/expiry.ts#L11)
@@ -155,4 +155,4 @@ export class MongoModelConfig {
   standard [Configuration](https://github.com/travetto/travetto/tree/master/module/config#readme "Environment-aware config management using yaml files")resolution paths. 
   
 
-The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts#L14) path or just a standard file path.
+The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/master/module/base/src/resource.ts#L15) path or just a standard file path.

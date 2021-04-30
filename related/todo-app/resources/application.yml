@@ -1,10 +1,5 @@
 api.spec:
   output: ./openapi.yml
 
-sql.model:
-  namespace: todo
-  user: root
-  password: password
-
 rest:
   cors: { active : true }

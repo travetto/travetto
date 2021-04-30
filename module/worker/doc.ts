@@ -2,7 +2,7 @@ import { d } from '@travetto/doc';
 
 import { WorkPool } from './src/pool';
 import { IterableWorkSet } from './src/input/iterable';
-import { DynamicAsyncIterator } from './src/input/async-iterator';
+import { ManualAsyncIterator } from './src/input/async-iterator';
 import { ChildCommChannel } from './src/comm/child';
 import { ParentCommChannel } from './src/comm/parent';
 import { WorkUtil } from './src/util';
@@ -17,7 +17,7 @@ This module provides the necessary primitives for handling dependent workers.  A
 ${d.Section('Execution Pools')}
 With respect to managing multiple executions, ${WorkPool} is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various ${WorkSet} implementation that allow for a wide range of use cases.
 
-The only provided ${WorkSet} is the ${IterableWorkSet} which supports all ${d.Input('Iterable')} and ${d.Input('Iterator')} sources.  Additionally, the module provides ${DynamicAsyncIterator} which allows for manual control of iteration, which is useful for event driven work loads.
+The only provided ${WorkSet} is the ${IterableWorkSet} which supports all ${d.Input('Iterable')} and ${d.Input('Iterator')} sources.  Additionally, the module provides ${ManualAsyncIterator} which allows for manual control of iteration, which is useful for event driven work loads.
 
 Below is a pool that will convert images on demand, while queuing as needed.
 

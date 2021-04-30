@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 import { CliUtil } from '@travetto/cli/src/util';
 import { AppCache, FileCache, ExecUtil, EnvUtil } from '@travetto/boot';
-import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { SimpleEntry, SourceIndex } from '@travetto/boot/src/internal/source';
 
 /**
  * Utilities for running compilation
@@ -22,9 +22,8 @@ export class BuildUtil {
 
     const { AppManifest } = await import('@travetto/base/src/manifest');
 
-    // @ts-ignore
-    let expired;
-    let missing;
+    let expired: SimpleEntry | undefined;
+    let missing: SimpleEntry | undefined;
     for (const entry of SourceIndex.findByFolders(AppManifest.source)) {
       try {
         if (FileCache.isOlder(AppCache.statEntry(entry.file), fs.statSync(entry.file))) {
@@ -46,7 +45,6 @@ export class BuildUtil {
       ExecUtil.workerMain(require.resolve('../build'), [], { // target self
         env: {
           ...(output ? { TRV_CACHE: output } : {}),
-          TRV_DYNAMIC: '0', // Ensure no updates at runtime
           ...(env ?? {})
         },
         stderr: false

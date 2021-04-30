@@ -89,6 +89,7 @@ export class ExecUtil {
       shell: false,
       ...opts,
       env: {
+        TRV_DYNAMIC: '0', // Force dynamic to not cascade
         ...(opts.isolatedEnv ? {} : process.env),
         ...(opts.env ?? {})
       }
@@ -219,6 +220,7 @@ export class ExecUtil {
       stdin: false,
       ...options,
       env: {
+        TRV_DYNAMIC: '0', // Force dynamic to not cascade
         ...process.env,
         ...((options.env !== SHARE_ENV ? options.env : {}) || {}),
       },

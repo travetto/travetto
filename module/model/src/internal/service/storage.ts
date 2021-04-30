@@ -14,7 +14,7 @@ export class ModelStorageUtil {
    * Register change listener on startup
    */
   static async registerModelChangeListener(storage: ModelStorageSupport, target?: Class) {
-    if (EnvUtil.isReadonly() || !(storage?.config?.autoCreate ?? !AppManifest.prod)) {
+    if (!EnvUtil.isDynamic() || !(storage?.config?.autoCreate ?? !AppManifest.prod)) {
       return;
     }
 

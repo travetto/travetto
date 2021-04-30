@@ -29,7 +29,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   set defaultAge(a: number) { this.#defaultAge = a; }
 
   postConstruct() {
-    if (EnvUtil.isReadonly() && this.#signingKey === 'dummy') {
+    if (EnvUtil.isProd() && this.#signingKey === 'dummy') {
       throw new AppError('The default signing key is not valid for production use, please specify a config value at jwt.signingKey');
     }
   }

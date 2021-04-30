@@ -54,7 +54,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:travetto.activate",
+    "workspaceContains:.trv_cache",
     "workspaceContains:node_modules/@travetto",
     "onView:travetto.email-template.content",
     "onView:travetto.email-template.context"
@@ -66,11 +66,6 @@
   },
   "contributes": {
     "commands": [
-      {
-        "command": "travetto.activate",
-        "title": "Activate",
-        "category": "Travetto"
-      },
       {
         "command": "travetto.boot.clean:run",
         "title": "Clean",
@@ -190,9 +185,6 @@
         }
       ],
       "commandPalette": [
-        {
-          "command": "travetto.activate"
-        },
         {
           "command": "travetto.boot.clean:run",
           "when": "travetto.boot"

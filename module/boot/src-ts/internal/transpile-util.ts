@@ -19,9 +19,10 @@ const TS_TARGET = ({
   12: 'ES2019',
   13: 'ES2019',
   14: 'ES2020',
-  15: 'ESNext',
-  16: 'ESNext'
-} as const)[NODE_VERSION] ?? 'ES2019'; // Default if not found
+  15: 'ES2021',
+  16: 'ES2021'
+} as const)[NODE_VERSION] ?? 'ES2021'; // Default if not found
+
 
 /**
  * Standard transpilation support

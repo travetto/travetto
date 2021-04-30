@@ -18,7 +18,7 @@ export abstract class BaseModelPlugin extends BasePlugin {
   resolve = ModelCandidateUtil.resolve.bind(ModelCandidateUtil);
 
   envInit() {
-    EnvInit.init({ dynamic: false });
+    EnvInit.init();
   }
 
   async build() {

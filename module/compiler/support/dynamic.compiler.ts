@@ -1,9 +1,10 @@
 import { AppManifest, Class, ShutdownManager } from '@travetto/base';
 import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
-import { FilePresenceManager } from '@travetto/watch';
 import { FsUtil, PathUtil } from '@travetto/boot';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
+
+import { FilePresenceManager } from '@travetto/watch';
 
 import { Compiler } from '../src/compiler';
 
@@ -15,8 +16,7 @@ export function init($Compiler: Class<typeof Compiler>) {
    * Extending the $Compiler class to add some functionality
    */
   const Cls = class extends $Compiler {
-    presence: FilePresenceManager;
-    modules = new Map<string, RetargettingProxy<unknown>>();
+    #modules = new Map<string, RetargettingProxy<unknown>>();
 
     constructor(...args: unknown[]) {
       super(...args);
@@ -31,21 +31,21 @@ export function init($Compiler: Class<typeof Compiler>) {
       // Proxy all file loads
       ModuleUtil.addHandler((name, mod) => {
         if (name.includes(PathUtil.cwd) && !name.includes('node_modules') && /src\//.test(name)) {
-          if (!this.modules.has(name)) {
-            this.modules.set(name, new RetargettingProxy(mod));
+          if (!this.#modules.has(name)) {
+            this.#modules.set(name, new RetargettingProxy(mod));
           } else {
-            this.modules.get(name)!.setTarget(mod);
+            this.#modules.get(name)!.setTarget(mod);
           }
-          return this.modules.get(name)!.get();
+          return this.#modules.get(name)!.get();
         } else {
           return mod;
         }
       });
 
       // Clear target on unload
-      ModuleManager.onUnload(f => this.modules.get(f)?.setTarget(null));
+      ModuleManager.onUnload(f => this.#modules.get(f)?.setTarget(null));
 
-      this.presence = new FilePresenceManager(
+      new FilePresenceManager(
         [...AppManifest.source.local, ...AppManifest.source.common]
           .map(x => `./${x}`)
           .filter(x => FsUtil.existsSync(x)),
@@ -64,11 +64,9 @@ export function init($Compiler: Class<typeof Compiler>) {
 
     reset() {
       super.reset();
-      this.modules.clear();
+      this.#modules.clear();
     }
   };
-
-  Object.defineProperty(Cls, 'name', { value: $Compiler.name });
 
   return Cls;
 }

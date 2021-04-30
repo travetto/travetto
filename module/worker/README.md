@@ -13,14 +13,14 @@ This module provides the necessary primitives for handling dependent workers.  A
 ## Execution Pools
 With respect to managing multiple executions, [WorkPool](https://github.com/travetto/travetto/tree/master/module/worker/src/pool.ts#L23) is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various [WorkSet](https://github.com/travetto/travetto/tree/master/module/worker/src/input/types.ts#L4) implementation that allow for a wide range of use cases.
 
-The only provided [WorkSet](https://github.com/travetto/travetto/tree/master/module/worker/src/input/types.ts#L4) is the [IterableWorkSet](https://github.com/travetto/travetto/tree/master/module/worker/src/input/iterable.ts#L11) which supports all `Iterable` and `Iterator` sources.  Additionally, the module provides [DynamicAsyncIterator](https://github.com/travetto/travetto/tree/master/module/worker/src/input/async-iterator.ts#L6) which allows for manual control of iteration, which is useful for event driven work loads.
+The only provided [WorkSet](https://github.com/travetto/travetto/tree/master/module/worker/src/input/types.ts#L4) is the [IterableWorkSet](https://github.com/travetto/travetto/tree/master/module/worker/src/input/iterable.ts#L11) which supports all `Iterable` and `Iterator` sources.  Additionally, the module provides [ManualAsyncIterator](https://github.com/travetto/travetto/tree/master/module/worker/src/input/async-iterator.ts#L6) which allows for manual control of iteration, which is useful for event driven work loads.
 
 Below is a pool that will convert images on demand, while queuing as needed.
 
 **Code: Image processing queue, with a fixed batch/pool size**
 ```typescript
 import { ExecUtil, ExecutionState } from '@travetto/boot';
-import { Worker, WorkPool, IterableWorkSet, DynamicAsyncIterator } from '@travetto/worker';
+import { Worker, WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
 
 class ImageProcessor implements Worker<string> {
   active = false;
@@ -48,7 +48,7 @@ class ImageProcessor implements Worker<string> {
 
 export class ImageCompressor extends WorkPool<string, ImageProcessor> {
 
-  pendingImages = new DynamicAsyncIterator<string>();
+  pendingImages = new ManualAsyncIterator<string>();
 
   constructor() {
     super(async () => new ImageProcessor());

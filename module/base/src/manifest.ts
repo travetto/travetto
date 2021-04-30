@@ -1,4 +1,4 @@
-import { AppCache, EnvUtil, Package } from '@travetto/boot';
+import { AppCache, EnvUtil, Package, PathUtil } from '@travetto/boot';
 import { SourceConfig } from '@travetto/boot/src/internal/source';
 
 import { version as baseVersion } from '../package.json';
@@ -92,14 +92,15 @@ class $AppManifest {
   readonly source: SourceConfig;
 
   constructor(pkg: Record<string, unknown> = {}) {
-    this.info = {
+    const def = {
+      baseVersion,
       name: 'untitled',
       description: 'A Travetto application',
-      baseVersion,
-      version: '0.0.0.0'
+      version: '0.0.0'
     };
+    this.info = { ...def };
     try {
-      const { version, name, license, author, description } = pkg;
+      const { version = def.version, name = def.name, license, author, description = def.description } = pkg;
       Object.assign(this.info, { version, name, license, author, description });
     } catch { }
 
@@ -142,7 +143,8 @@ class $AppManifest {
         info: this.info,
         env: {
           ...this.env,
-          cache: AppCache.cacheDir,
+          cache: AppCache.cacheDir.replace(`${PathUtil.cwd}/`, ''),
+          node: process.version,
           dynamic: EnvUtil.isDynamic(),
           readonly: EnvUtil.isReadonly()
         },

@@ -97,3 +97,8 @@ export type RemoveEvent = {
   file: string;
   classId: string;
 };
+
+export type CompleteEvent = {
+  type: 'runComplete';
+  error?: Error;
+};

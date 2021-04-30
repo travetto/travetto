@@ -3,7 +3,8 @@ import { EnvInit } from '@travetto/base/bin/init';
 export async function main(format: string = 'tap') {
   EnvInit.init({
     debug: '0',
-    set: { TRV_LOG_TIME: '0', TRV_DYNAMIC: '1' },
+    set: { TRV_LOG_TIME: '0' },
+    dynamic: true,
     append: {
       TRV_RESOURCES: 'test/resources',
       TRV_PROFILES: 'test',

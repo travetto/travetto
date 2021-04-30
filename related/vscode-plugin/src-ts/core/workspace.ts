@@ -8,9 +8,8 @@ type ForkResult = ReturnType<(typeof ExecUtil)['forkMain']>;
  */
 export class Workspace {
 
-  static _module: string;
-  static context: vscode.ExtensionContext;
-  static folder: vscode.WorkspaceFolder;
+  static readonly context: vscode.ExtensionContext;
+  static readonly folder: vscode.WorkspaceFolder;
 
   /**
    * Get workspace path
@@ -35,7 +34,9 @@ export class Workspace {
    * @param context
    */
   static init(context: vscode.ExtensionContext) {
+    // @ts-expect-error
     this.context = context;
+    // @ts-expect-error
     [this.folder] = vscode.workspace.workspaceFolders!;
     Object.defineProperty(PathUtil, 'cwd', { value: Workspace.path });
   }
@@ -149,7 +150,7 @@ export class Workspace {
       args: [main.replace(this.path, '${workspaceFolder}'), ...args].map(x => `${x}`),
       env: {
         FORCE_COLOR: 'true'
-      }
+      } as Record<string, string>
     };
   }
 

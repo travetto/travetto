@@ -120,17 +120,24 @@ export class EnvUtil {
   }
 
   /**
-   * Is the app in dynamic mode?
+   * Can use compile
    */
-  static isDynamic() {
-    return !this.isReadonly() && this.isTrue('TRV_DYNAMIC');
+  static isProd() {
+    return /^prod(uction)$/i.test(EnvUtil.get('TRV_ENV', ''));
   }
 
   /**
    * Can use compile
    */
   static isReadonly() {
-    return /^prod(uction)$/i.test(EnvUtil.get('TRV_ENV', '')) || this.isTrue('TRV_READONLY');
+    return this.isProd() || this.isTrue('TRV_READONLY');
+  }
+
+  /**
+   * Is the app in dynamic mode?
+   */
+  static isDynamic() {
+    return !this.isProd() && this.isTrue('TRV_DYNAMIC');
   }
 
   /**

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
-import { PathUtil } from '@travetto/boot';
+import { EnvUtil, PathUtil } from '@travetto/boot';
 
 import { AppListUtil } from './lib/list';
 import { AppRunUtil } from './lib/run';
@@ -55,7 +55,7 @@ export class AppRunPlugin extends BasePlugin {
       } else {
         EnvInit.init({
           env: this.cmd.env,
-          dynamic: true,
+          dynamic: !EnvUtil.isFalse('TRV_DYNAMIC'),
           append: {
             TRV_PROFILES: this.cmd.profile,
             TRV_RESOURCES: this.cmd.resource

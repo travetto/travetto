@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
 import { IterableWorkSet } from '../src/input/iterable';
-import { DynamicAsyncIterator } from '../src/input/async-iterator';
+import { ManualAsyncIterator } from '../src/input/async-iterator';
 
 @Suite()
 export class WorkSetTest {
@@ -64,7 +64,7 @@ export class WorkSetTest {
   async eventSource() {
     const items = [1, 2, 3];
     const comp = items.slice(0);
-    const itr = new DynamicAsyncIterator();
+    const itr = new ManualAsyncIterator();
     const src = new IterableWorkSet(itr);
 
     for (let i = 0; i < items.length; i++) {

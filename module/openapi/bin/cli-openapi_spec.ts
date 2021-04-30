@@ -14,7 +14,7 @@ export class OpenApiSpecPlugin extends BasePlugin {
 
   envInit() {
     EnvInit.init({
-      dynamic: false, debug: '0',
+      debug: '0',
       set: { API_SPEC_OUTPUT: this.cmd.output }
     });
   }
