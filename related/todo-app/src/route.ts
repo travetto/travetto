@@ -15,12 +15,7 @@ export class TodoController {
    */
   @Get('/')
   async getAll(search: TodoSearch) {
-    const itr = await this.svc.getAll(search);
-    const out = [];
-    for await (const item of itr) {
-      out.push(item);
-    }
-    return out;
+    return await this.svc.getAll(search);
   }
 
   /**
@@ -50,8 +45,9 @@ export class TodoController {
   }
 
   /**
-   * Complete a todo
+   * Update a todo
    * @param id Todo id
+   * @param todo Todo to update
    */
   @Put('/:id')
   async update(id: string, todo: Todo) {

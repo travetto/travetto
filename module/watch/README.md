@@ -29,28 +29,3 @@ export function main() {
   setTimeout(() => watcher.close(), 1000);
 }
 ```
-
-## Retargetting Proxy
-
-In addition to file watching, the module also provides a core utiltity for hot reloading at runtime.  The framework makes use of `ES2015` `Proxy`s.  Specifically the the module provides [RetargettingProxy](https://github.com/travetto/travetto/tree/master/module/watch/src/proxy.ts#L89), as a means to provide a reference that can have it's underlying target changed at runtime. 
-
-**Code: Example of using the RetargettingProxy**
-```typescript
-import { RetargettingProxy } from '@travetto/watch';
-
-class User { }
-
-export class CoolService {
-  async tricky() {
-    const target = new User();
-    const proxy = new RetargettingProxy(target);
-
-    // Update target a second later
-    setTimeout(() => {
-      proxy.setTarget(new User());
-    }, 1000);
-
-    return proxy;
-  }
-}
-```

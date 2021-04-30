@@ -117,8 +117,8 @@ export class RestApplication<T extends unknown = unknown>  {
    * @param c The class to register
    */
   async registerController(c: Class) {
-    if (this.server.listening && EnvUtil.isReadonly()) {
-      console.warn('Reloading not supported in readonly mode');
+    if (this.server.listening && !EnvUtil.isDynamic()) {
+      console.warn('Reloading only supported in dynamic mode');
       return;
     }
 
@@ -145,8 +145,8 @@ export class RestApplication<T extends unknown = unknown>  {
    * @param c The class to unregister
    */
   async unregisterController(c: Class) {
-    if (this.server.listening && EnvUtil.isReadonly()) {
-      console.warn('Unloading not supported in readonly mode');
+    if (this.server.listening && !EnvUtil.isDynamic()) {
+      console.warn('Unloading only supported in dynamic mode');
       return;
     }
 
@@ -157,8 +157,8 @@ export class RestApplication<T extends unknown = unknown>  {
    * Register the global listener as a hardcoded path
    */
   async registerGlobal() {
-    if (EnvUtil.isReadonly()) {
-      console.warn('Reloading not supported in readonly mode');
+    if (!EnvUtil.isDynamic()) {
+      console.warn('Reloading only supported in dynamic mode');
       return;
     }
 
@@ -176,8 +176,8 @@ export class RestApplication<T extends unknown = unknown>  {
    * Remove the global listener
    */
   async unregisterGlobal() {
-    if (EnvUtil.isReadonly()) {
-      console.warn('Unloading not supported in readonly mode');
+    if (!EnvUtil.isDynamic()) {
+      console.warn('Unloading only supported in dynamic mode');
       return;
     }
 

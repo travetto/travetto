@@ -1,4 +1,4 @@
-// @line-if @travetto/context
+// @file-if @travetto/context
 import { Inject, Injectable } from '@travetto/di';
 import { AsyncContext, AsyncContextInterceptor } from '@travetto/context';
 import { Principal } from '@travetto/auth';

@@ -16,26 +16,29 @@ export function buildStandardTestManager(consumer: TestConsumer) {
    */
   return () => WorkUtil.spawnedWorker(
     () => ExecUtil.forkMain('@travetto/test/bin/test-child', [], {
-      env: {
-        TRV_DYNAMIC: '0',
-        TRV_CACHE: AppCache.cacheDir
-      }
+      env: { TRV_CACHE: AppCache.cacheDir }
     }),
     /**
      * Child initialization
      */
     async (channel: ParentCommChannel<TestEvent>) => {
-      await channel.listenOnce(Events.READY); // Wait for the child to be ready
+      await channel.once(Events.READY); // Wait for the child to be ready
       await channel.send(Events.INIT); // Initialize
-      await channel.listenOnce(Events.INIT_COMPLETE); // Wait for complete
-      channel.listen(consumer.onEvent.bind(consumer)); // Connect the consumer with the event stream from the child
+      await channel.once(Events.INIT_COMPLETE); // Wait for complete
+      channel.on('*', async ev => {
+        try {
+          await consumer.onEvent(ev);  // Connect the consumer with the event stream from the child
+        } catch {
+          // Do nothing
+        }
+      });
     },
     /**
      * Send child command to run tests
      */
     async (channel: ParentCommChannel<TestEvent>, event: string | RunEvent) => {
       // Listen for child to complete
-      const complete = channel.listenOnce(Events.RUN_COMPLETE);
+      const complete = channel.once(Events.RUN_COMPLETE);
       // Start test
       event = typeof event === 'string' ? { file: event } : event;
       channel.send(Events.RUN, event);

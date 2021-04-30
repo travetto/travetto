@@ -9,7 +9,7 @@ import { ModelCandidateUtil } from './lib/candidate';
  */
 export async function main(op: keyof ModelStorageSupport) {
   try {
-    EnvInit.init({ dynamic: false });
+    EnvInit.init();
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
 

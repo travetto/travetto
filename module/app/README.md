@@ -156,10 +156,10 @@ Configured {
   info: {
     name: '@travetto/app',
     description: 'Application registration/management and run support.',
+    baseVersion: '2.0.0',
     version: '2.0.0',
     license: 'MIT',
-    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
-    baseVersion: '2.0.0'
+    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' }
   },
   env: {
     name: 'dev',
@@ -169,7 +169,7 @@ Configured {
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
-    watch: true,
+    dynamic: false,
     readonly: false
   },
   source: {

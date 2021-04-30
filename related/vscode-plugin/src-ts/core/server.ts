@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { ExecutionOptions, ExecutionState } from '@travetto/boot';
+import type { ExecutionOptions, ExecutionState } from '@travetto/boot';
 import { Workspace } from './workspace';
 
 type EventType = 'start' | 'stop' | 'pre-start' | 'pre-stop' | 'restart';

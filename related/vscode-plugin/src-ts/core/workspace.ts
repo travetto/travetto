@@ -8,9 +8,8 @@ type ForkResult = ReturnType<(typeof ExecUtil)['forkMain']>;
  */
 export class Workspace {
 
-  static _module: string;
-  static context: vscode.ExtensionContext;
-  static folder: vscode.WorkspaceFolder;
+  static readonly context: vscode.ExtensionContext;
+  static readonly folder: vscode.WorkspaceFolder;
 
   /**
    * Get workspace path
@@ -35,7 +34,9 @@ export class Workspace {
    * @param context
    */
   static init(context: vscode.ExtensionContext) {
+    // @ts-expect-error
     this.context = context;
+    // @ts-expect-error
     [this.folder] = vscode.workspace.workspaceFolders!;
     Object.defineProperty(PathUtil, 'cwd', { value: Workspace.path });
   }
@@ -64,7 +65,8 @@ export class Workspace {
   static runMain(main: string, args: string[], opts: ExecutionOptions & { format: 'text' }): Promise<string>;
   static runMain(main: string, args: string[] = [], opts: ExecutionOptions & { format?: string } = {}): Promise<string | object> | ForkResult {
     const boot = this.resolve(`node_modules/${this.binPath('boot', 'main')}`);
-    const exec = ExecUtil.fork(boot, [main, ...args], {
+    // Do not run inside of electron
+    const exec = ExecUtil.spawn('node', [boot, main, ...args], {
       cwd: Workspace.path,
       ...opts,
       env: {
@@ -149,7 +151,7 @@ export class Workspace {
       args: [main.replace(this.path, '${workspaceFolder}'), ...args].map(x => `${x}`),
       env: {
         FORCE_COLOR: 'true'
-      }
+      } as Record<string, string>
     };
   }
 

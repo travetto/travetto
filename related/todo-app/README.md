@@ -147,7 +147,7 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { ElasticsearchModelConfig, ElasticsearchModelService } from '@travetto/model-elasticsearch';
+import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
 import { ModelSuite } from '@travetto/model/test-support/suite';
 
@@ -159,8 +159,8 @@ import { Todo } from '../src/model';
 @InjectableSuite()
 export class TodoTest {
 
-  serviceClass = ElasticsearchModelService;
-  configClass = ElasticsearchModelConfig;
+  serviceClass = MongoModelService;
+  configClass = MongoModelConfig;
 
   @Inject()
   svc: TodoService;
@@ -271,8 +271,9 @@ export class TodoController {
   }
 
   /**
-   * Complete a todo
+   * Update a todo
    * @param id Todo id
+   * @param todo Todo to update
    */
   @Put('/:id')
   async update(id: string, todo: Todo) {
@@ -282,7 +283,7 @@ export class TodoController {
 
   /**
    * Complete a todo
-   * @param id Todo id
+   * @param id Todo id 
    */
   @Put('/:id/complete')
   async complete(id: string, completed: boolean = true) {
@@ -311,10 +312,10 @@ First we must start the application:
   info: {
     name: '@travetto/todo-app',
     description: '',
+    baseVersion: '2.0.0',
     version: undefined,
     license: 'ISC',
-    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
-    baseVersion: '2.0.0'
+    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' }
   },
   env: {
     name: 'dev',
@@ -324,7 +325,7 @@ First we must start the application:
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
-    watch: true,
+    dynamic: false,
     readonly: false
   },
   source: {
@@ -361,13 +362,9 @@ First we must start the application:
       '@travetto/yaml': '@trv:yaml'
     }
   },
-  config: {
-    rest: { cors: { active: true } },
-    api: { spec: { output: './openapi.yml' } },
-    sql: { model: { namespace: 'todo', user: 'root', password: 'password' } }
-  }
+  config: { rest: { cors: { active: true } }, api: { spec: { output: './openapi.yml' } } }
 }
-2021-03-14T05:00:01.510Z info  [@trv:rest/application/rest:191] Listening { port: 3000 }
+2021-03-14T05:00:01.510Z info  [@trv:rest/application/rest:192] Listening { port: 3000 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:

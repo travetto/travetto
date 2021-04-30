@@ -90,6 +90,7 @@ export class ExecUtil {
       ...opts,
       env: {
         ...(opts.isolatedEnv ? {} : process.env),
+        TRV_DYNAMIC: '0', // Force dynamic to not cascade
         ...(opts.env ?? {})
       }
     } as ExecutionOptions;
@@ -220,6 +221,7 @@ export class ExecUtil {
       ...options,
       env: {
         ...process.env,
+        TRV_DYNAMIC: '0', // Force dynamic to not cascade
         ...((options.env !== SHARE_ENV ? options.env : {}) || {}),
       },
       argv: args

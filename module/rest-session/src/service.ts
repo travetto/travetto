@@ -56,7 +56,7 @@ export class SessionService {
    * Initialize service if none defined
    */
   async postConstruct() {
-    if (isStorageSupported(this.#modelService) && !EnvUtil.isReadonly()) {
+    if (isStorageSupported(this.#modelService) && EnvUtil.isDynamic()) {
       await this.#modelService.createModel?.(SessionEntry);
     }
   }

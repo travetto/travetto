@@ -25,6 +25,16 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
   #runs = 0;
 
+  async #exec(op: () => Promise<unknown>, type: string) {
+    try {
+      await op();
+      this.send(type); // Respond
+    } catch (e) {
+      // Mark as errored out
+      this.send(type, { error: ErrorUtil.serializeError(e) });
+    }
+  }
+
   /**
    * Start the worker
    */
@@ -33,7 +43,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     RunnerUtil.registerCleanup('worker');
 
     // Listen for inbound requests
-    this.listen(this.onCommand.bind(this));
+    this.on('*', ev => this.onCommand(ev));
 
     // Let parent know the child is ready for handling commands
     this.send(Events.READY);
@@ -46,16 +56,9 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     console.debug('on message', { ...event });
 
     if (event.type === Events.INIT) { // On request to init, start initialization
-      await this.onInitCommand();
-      this.send(Events.INIT_COMPLETE); // Respond
+      await this.#exec(() => this.onInitCommand(), Events.INIT_COMPLETE);
     } else if (event.type === Events.RUN) { // On request to run, start running
-      try {
-        await this.onRunCommand(event); // Run the test
-        this.send(Events.RUN_COMPLETE); // Mark complete
-      } catch (e) {
-        // Mark as errored out
-        this.send(Events.RUN_COMPLETE, { error: ErrorUtil.serializeError(e) });
-      }
+      await this.#exec(() => this.onRunCommand(event), Events.RUN_COMPLETE);
     }
 
     return false;

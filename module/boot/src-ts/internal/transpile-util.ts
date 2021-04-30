@@ -14,14 +14,15 @@ type Diag = {
   };
 };
 
-const NODE_VERSION = EnvUtil.get('TRV_NODE_MAJOR', process.version.split(/[v.]/)[1]) as '12';
+const NODE_VERSION = EnvUtil.get('TRV_NODE_VERSION', process.version).replace(/^.*?(\d+).*?$/, (_, v) => v) as '12';
 const TS_TARGET = ({
   12: 'ES2019',
   13: 'ES2019',
   14: 'ES2020',
   15: 'ESNext',
   16: 'ESNext'
-} as const)[NODE_VERSION] ?? 'ES2019'; // Default if not found
+} as const)[NODE_VERSION] ?? 'ESNext'; // Default if not found
+
 
 /**
  * Standard transpilation support

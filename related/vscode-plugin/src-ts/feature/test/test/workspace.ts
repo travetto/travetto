@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { Workspace } from '../../../core/workspace';
 
 import { DocumentResultsManager } from './document';
-import { TestEvent, StatusUnknown, RemoveEvent } from './types';
+import { TestEvent, StatusUnknown, RemoveEvent, CompleteEvent } from './types';
 
 /**
  * Manages results for the entire workspace, including the statusbar
@@ -97,15 +97,21 @@ export class WorkspaceResultsManager {
    * On test event
    * @param ev
    */
-  onEvent(ev: TestEvent | RemoveEvent) {
-    this.getResults(ev)?.onEvent(ev);
-    const totals = this.getTotals();
-    this.setStatus(
-      totals.failed === 0 ?
-        `Passed ${totals.passed}` :
-        `Failed ${totals.failed}/${totals.failed + totals.passed}`,
-      totals.failed ? '#f33' : '#8f8'
-    );
+  onEvent(ev: TestEvent | RemoveEvent | CompleteEvent) {
+    if (ev.type === 'runComplete') {
+      if (ev.error) {
+        console.error(ev.error.name, ev.error.stack);
+      }
+    } else {
+      this.getResults(ev)?.onEvent(ev);
+      const totals = this.getTotals();
+      this.setStatus(
+        totals.failed === 0 ?
+          `Passed ${totals.passed}` :
+          `Failed ${totals.failed}/${totals.failed + totals.passed}`,
+        totals.failed ? '#f33' : '#8f8'
+      );
+    }
   }
 
   /**

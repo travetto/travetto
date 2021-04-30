@@ -127,7 +127,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Pre-compile on every cli execution
    */
-  async build?() {
+  async build() {
     await (await import('@travetto/base/bin/lib/'))
       .BuildUtil.build();
   }
@@ -206,7 +206,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
    */
   async runAction(...args: unknown[]) {
     await this.envInit?.();
-    await this.build?.();
+    await this.build();
     return await this.action(...args);
   }
 

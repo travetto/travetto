@@ -215,6 +215,12 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 
 ### Major and Breaking Changes 
 
+#### Schema Overhaul
+
+Now `application` and `rest` utilize the schema transformations and validations for entrypoints.  This enables consistent
+use of schema type information, validators, in both of these modules.  This also means the error messaging is consistent
+and behaves the same way across all of these modules.
+
 #### Model Overhaul
 * Asset now relies on Models with Streaming support
 * Cache now relies on Models with Expiry support
@@ -227,7 +233,7 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 * `model-core` is a series of interfaces/contracts, and some minor utility functions. All ownership has been pushed to the various providers.
 * Method names have been standardized as `verbNoun` e.g. `getStream` or `deleteExpired`
 
-### Auth Overhaul
+#### Auth Overhaul
 * Greatly simplified number of interfaces/classes to understand
 * Identity has been folded into principal, and is now the standard bearer for a known user
 * Request object has been reduced in complexity, and AuthContext is gone.

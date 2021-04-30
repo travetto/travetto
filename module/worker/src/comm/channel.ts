@@ -1,40 +1,52 @@
 import { ChildProcess } from 'child_process';
+import { EventEmitter } from 'events';
 
-function isPromise(o: unknown): o is Promise<unknown> {
-  return !!o && 'catch' in (o as object);
-}
+import { ExecUtil } from '@travetto/boot';
 
 /**
  * Channel that represents communication between parent/child
  */
 export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unknown, U extends { type: string } = V & { type: string }> {
 
-  proc: T | undefined;
+  #proc: T | undefined;
+  #emitter = new EventEmitter();
 
   constructor(proc: T) {
-    this.proc = proc;
+    this.#proc = proc;
     console.debug('Constructed Execution', { pid: this.id });
-    this.listen((e) => { // Log in one place
-      console.debug('Received', { pid: this.#parentId, id: this.id, type: e.type });
-    });
+    this.#proc.on('message', this.#handleMessage.bind(this));
   }
 
   get #parentId() {
     return process.pid;
   }
 
+  #handleMessage(ev: { type: string }) {
+    console.debug('Received', { pid: this.#parentId, id: this.id, type: ev.type });
+    this.#emitter.emit(ev.type, ev);
+    this.#emitter.emit('*', ev);
+  }
+
+  get proc() {
+    return this.#proc;
+  }
+
+  set proc(proc: T | undefined) {
+    this.#proc = proc;
+  }
+
   /**
    * Gets channel unique identifier
    */
   get id() {
-    return this.proc && this.proc.pid;
+    return this.#proc && this.#proc.pid;
   }
 
   /**
    * Determines if channel is active
    */
   get active() {
-    return !!this.proc;
+    return !!this.#proc;
   }
 
   /**
@@ -42,106 +54,56 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unk
    */
   send(eventType: string, data?: Record<string, unknown>) {
     console.debug('Sending', { pid: this.#parentId, id: this.id, eventType });
-    if (!this.proc) {
+    if (!this.#proc) {
       throw new Error('this.proc was not defined');
-    } else if (this.proc.send) {
-      this.proc.send({ type: eventType, ...(data ?? {}) });
+    } else if (this.#proc.send) {
+      this.#proc.send({ ...(data ?? {}), type: eventType });
     } else {
       throw new Error('this.proc.send was not defined');
     }
   }
 
   /**
-   * Listen for an event, once
-   */
-  listenOnce(eventType: string): Promise<U>;
-  listenOnce(eventType: string, callback: (e: U) => unknown | void): void;
-  listenOnce(eventType: string, callback?: (e: U) => unknown | void) {
-    if (callback) {
-      return this.listenFor(eventType, (d, kill) => {
-        kill!();
-        callback(d);
-      });
-    } else {
-      return new Promise(resolve => {
-        this.listenFor(eventType, (d, kill) => {
-          kill!();
-          resolve(d);
-        });
-      });
-    }
-  }
-
-  /**
-   * Remove a specific listener
-   */
-  removeListener(fn: (e: U) => unknown | void) {
-    if (this.proc) {
-      this.proc.removeListener('message', fn);
-    }
-  }
-
-  /**
    * Listen for a specific message type
    */
-  listenFor(eventType: string, callback: (e: U, complete: Function) => unknown | void) {
-    const fn = (event: U, kill: Function) => {
-      if (event.type === eventType) {
-        callback(event, kill);
-      }
-    };
-    this.listen(fn);
+  on(eventType: string, callback: (e: U) => unknown | void) {
+    this.#emitter.on(eventType, callback);
+    return () => this.off(eventType, callback);
   }
 
   /**
-   * Listen, and return a handle to remove listener when desired
+   * Remove event listener
    */
-  listen(handler: (e: U, complete: Function) => unknown | void) {
-    if (!this.proc) {
-      return;
-    }
+  off(eventType: string, callback: (e: U) => unknown | void) {
+    this.#emitter.off(eventType, callback);
+  }
 
-    const holder: { fn?(e: U): void } = {};
-
-    const kill = (e?: unknown) => {
-      this.removeListener(holder.fn!);
-    };
-
-    holder.fn = (e: U) => {
-      let res;
-      try {
-        res = handler(e, kill);
-        if (isPromise(res)) {
-          res.catch(kill);
-        }
-      } catch (err) {
-        kill(err);
-      }
-    };
-
-    this.proc.on('message', holder.fn);
-
-    return kill;
+  /**
+   * Listen for a specific message type, once
+   */
+  once(eventType: string) {
+    return new Promise<U>(res => this.#emitter.once(eventType, res));
   }
 
   /**
    * Destroy self
    */
   async destroy() {
-    if (this.proc) {
+    if (this.#proc) {
       console.debug('Killing', { pid: this.#parentId, id: this.id });
+      if (this.#proc !== process) {
+        ExecUtil.kill(this.#proc);
+      }
+      this.#proc = undefined;
     }
     this.release();
-    delete this.proc;
   }
 
   /**
    * Remove all listeners, but do not destroy
    */
   release() {
-    if (this.proc) {
-      console.debug('Released', { pid: this.#parentId, id: this.id });
-      this.proc.removeAllListeners('message');
-    }
+    console.debug('Released', { pid: this.#parentId, id: this.id });
+    this.#emitter.removeAllListeners();
   }
 }

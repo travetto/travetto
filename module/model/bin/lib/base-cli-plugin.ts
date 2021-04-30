@@ -1,7 +1,6 @@
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
-import { BuildUtil } from '@travetto/base/bin/lib';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 
 import { ModelCandidateUtil } from './candidate';
@@ -18,11 +17,11 @@ export abstract class BaseModelPlugin extends BasePlugin {
   resolve = ModelCandidateUtil.resolve.bind(ModelCandidateUtil);
 
   envInit() {
-    EnvInit.init({ dynamic: false });
+    EnvInit.init();
   }
 
   async build() {
-    await BuildUtil.build();
+    await super.build();
     const { ConsoleManager, PhaseManager } = await import('@travetto/base');
     ConsoleManager.exclude('debug');
     // Init

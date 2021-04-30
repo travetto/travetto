@@ -1,9 +1,9 @@
 import { Util } from '@travetto/base';
 
 /**
- * Dynamic async iterator.  Supports ability to add new items dynamically
+ * Manual async iterator.  Items are added manually, and consumed asynchronously
  */
-export class DynamicAsyncIterator<X> implements AsyncIterator<X> {
+export class ManualAsyncIterator<X> implements AsyncIterator<X> {
 
   #queue: X[] = [];
   #done = false;

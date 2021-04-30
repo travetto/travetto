@@ -72,11 +72,15 @@ export class AppRunFeature extends BaseFeature {
   getLaunchConfig(choice: AppChoice) {
     const args = choice.inputs.map(x => `${x}`.replace(Workspace.path, '.')).join(', ');
 
-    return Workspace.generateLaunchConfig(
+    const config = Workspace.generateLaunchConfig(
       `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
       Workspace.binPath(this.module, 'run'),
       [choice.name, ...choice.inputs]
     );
+
+    config.env.TRV_DYNAMIC = '1';
+
+    return config;
   }
 
   /**

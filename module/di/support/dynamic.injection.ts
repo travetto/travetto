@@ -84,11 +84,10 @@ export function init($DependencyRegistry: Class<typeof DependencyRegistry>) {
     }
 
     onReset() {
-      super.reset();
+      super.onReset();
       this.#proxies.clear();
     }
   };
 
-  Object.defineProperty(Cls, 'name', { value: $DependencyRegistry.name });
   return Cls;
 }

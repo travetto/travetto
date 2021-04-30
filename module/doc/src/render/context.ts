@@ -23,11 +23,11 @@ export class RenderContext implements RenderContextShape {
   }
 
   get gitBaseUrl() {
-    return `${this.#repoUrl}/tree/${EnvUtil.get('TRV_DOC_BRANCH', 'master')}`;
+    return `${this.#repoUrl}/tree/${EnvUtil.get('TRV_DOC_BRANCH', 'main')}`;
   }
 
   get travettoGitBaseUrl() {
-    return this.#repoUrl.includes('travetto/travetto') ? this.gitBaseUrl : 'https://github.com/travetto/travetto/master';
+    return this.#repoUrl.includes('travetto/travetto') ? this.gitBaseUrl : 'https://github.com/travetto/travetto/main';
   }
 
   get gitFolder() {

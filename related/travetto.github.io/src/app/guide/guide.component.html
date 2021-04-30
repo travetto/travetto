@@ -155,7 +155,7 @@ Now the tests should be defined at <code class="item path">test/service.ts</code
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Suite<span class="token punctuation">,</span> Test <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/test'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ElasticsearchModelConfig<span class="token punctuation">,</span> ElasticsearchModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-elasticsearch'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MongoModelConfig<span class="token punctuation">,</span> MongoModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-mongo'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di/test-support/suite'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model/test-support/suite'</span><span class="token punctuation">;</span>
 
@@ -167,8 +167,8 @@ Now the tests should be defined at <code class="item path">test/service.ts</code
 @<span class="token meta">InjectableSuite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TodoTest</span> <span class="token punctuation">{{'{'}}</span>
 
-  serviceClass <span class="token operator">=</span> ElasticsearchModelService<span class="token punctuation">;</span>
-  configClass <span class="token operator">=</span> ElasticsearchModelConfig<span class="token punctuation">;</span>
+  serviceClass <span class="token operator">=</span> MongoModelService<span class="token punctuation">;</span>
+  configClass <span class="token operator">=</span> MongoModelConfig<span class="token punctuation">;</span>
 
   @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   svc<span class="token operator">:</span> TodoService<span class="token punctuation">;</span>
@@ -281,8 +281,9 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
-   * Complete a todo
+   * Update a todo
    * @param id Todo id
+   * @param todo Todo to update
    */</span>
   @<span class="token meta">Put</span><span class="token punctuation">(</span><span class="token string">'/:id'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">update</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> todo<span class="token operator">:</span> Todo<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -323,10 +324,10 @@ First we must start the application:
   info: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'@travetto/todo-app'</span>,
     description: <span class="token string">''</span>,
+    baseVersion: <span class="token string">'2.0.0'</span>,
     version: undefined,
     license: <span class="token string">'ISC'</span>,
-    author: <span class="token punctuation">{{'{'}}</span> email: <span class="token string">'travetto.framework@gmail.com'</span>, name: <span class="token string">'Travetto Framework'</span> <span class="token punctuation">{{'}'}}</span>,
-    baseVersion: <span class="token string">'2.0.0'</span>
+    author: <span class="token punctuation">{{'{'}}</span> email: <span class="token string">'travetto.framework@gmail.com'</span>, name: <span class="token string">'Travetto Framework'</span> <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'dev'</span>,
@@ -336,7 +337,7 @@ First we must start the application:
     resources: <span class="token punctuation">[</span> <span class="token string">'resources'</span>, <span class="token string">'doc/resources'</span> <span class="token punctuation">]</span>,
     shutdownWait: <span class="token number">2000</span>,
     cache: <span class="token string">'.trv_cache'</span>,
-    watch: true,
+    dynamic: false,
     readonly: <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span>,
   source: <span class="token punctuation">{{'{'}}</span>
@@ -373,13 +374,9 @@ First we must start the application:
       <span class="token string">'@travetto/yaml'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:yaml'</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
-  config: <span class="token punctuation">{{'{'}}</span>
-    rest: <span class="token punctuation">{{'{'}}</span> cors: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-    api: <span class="token punctuation">{{'{'}}</span> spec: <span class="token punctuation">{{'{'}}</span> output: <span class="token string">'./openapi.yml'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-    sql: <span class="token punctuation">{{'{'}}</span> model: <span class="token punctuation">{{'{'}}</span> namespace: <span class="token string">'todo'</span>, user: <span class="token string">'root'</span>, password: <span class="token string">'password'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">{{'}'}}</span>
+  config: <span class="token punctuation">{{'{'}}</span> rest: <span class="token punctuation">{{'{'}}</span> cors: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>, api: <span class="token punctuation">{{'{'}}</span> spec: <span class="token punctuation">{{'{'}}</span> output: <span class="token string">'./openapi.yml'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2021</span>-03-14T05:00:01.510Z info  <span class="token punctuation">[</span>@trv:rest/application/rest:191<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
+<span class="token number">2021</span>-03-14T05:00:01.510Z info  <span class="token punctuation">[</span>@trv:rest/application/rest:192<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-fetch">fetch</a> requests to interact with the new api:
