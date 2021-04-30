@@ -1,9 +1,8 @@
 import { Class } from '@travetto/base';
 import { Primitive } from '@travetto/base/src/internal/global-types';
 
+import { AllViewⲐ } from '../internal/types';
 import { ValidatorFn } from '../validate/types';
-
-export const ALL_VIEW = '__all';
 
 export type ClassList = Class | [Class];
 
@@ -60,7 +59,7 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * List of all views
    */
-  views: Record<string, ViewConfig>;
+  views: Record<string, ViewConfig> & { [AllViewⲐ]: ViewConfig };
   /**
    * Global validators
    */

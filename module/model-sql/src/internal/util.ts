@@ -1,7 +1,8 @@
 import { Class, Util } from '@travetto/base';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType } from '@travetto/model';
-import { SchemaRegistry, ClassConfig, ALL_VIEW, FieldConfig } from '@travetto/schema';
+import { SchemaRegistry, ClassConfig, FieldConfig } from '@travetto/schema';
+import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
 
@@ -76,14 +77,14 @@ export class SQLUtil {
     }
 
     const model = ModelRegistry.get(cls.class)!;
-    const conf = cls.views[ALL_VIEW];
+    const conf = cls.views[AllViewⲐ];
     const fields = conf.fields.map(x => ({ ...conf.schema[x] }));
 
     // Polymorphic
     if (model && (model.baseType ?? model.subType)) {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of ModelRegistry.getClassesByBaseType(ModelRegistry.getBaseModel(cls.class))) {
-        const typeConf = SchemaRegistry.get(type).views[ALL_VIEW];
+        const typeConf = SchemaRegistry.get(type).views[AllViewⲐ];
         for (const f of typeConf.fields) {
           if (!fieldMap.has(f)) {
             fieldMap.add(f);
@@ -224,7 +225,7 @@ export class SQLUtil {
       if (!Util.isPlainObject(select[k as keyof typeof select]) && localMap[k]) {
         if (!v) {
           if (toGet.size === 0) {
-            toGet = new Set(SchemaRegistry.get(cls).views[ALL_VIEW].fields);
+            toGet = new Set(SchemaRegistry.get(cls).views[AllViewⲐ].fields);
           }
           toGet.delete(k);
         } else {
@@ -246,7 +247,7 @@ export class SQLUtil {
       while (!found) {
         const key = Object.keys(cl)[0];
         const val = cl[key];
-        const field = { ...schema.views[ALL_VIEW].schema[key] };
+        const field = { ...schema.views[AllViewⲐ].schema[key] };
         if (Util.isPrimitive(val)) {
           stack.push(field);
           found = { stack, asc: val === 1 || val === true };

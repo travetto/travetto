@@ -6,18 +6,17 @@ import { CompletionConfig } from './types';
  */
 export class CliUtil {
 
-  static WAIT_STATE = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
+  static #waitState = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
   static isBoolean(x: string) {
     return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);
   }
 
-  static isTrue(x?: string | boolean) {
-    return x === undefined ? false : (typeof x === 'boolean' ? x : /^(1|yes|on|true)$/i.test(x));
-  }
-
-  static toBool(x: string, def: boolean) {
-    return x === undefined ? true : (this.isBoolean(x) ? this.isTrue(x) : def);
+  static toBool(x: string | boolean, def: boolean) {
+    return x === undefined ? true :
+      (typeof x === 'boolean' ? x :
+        (this.isBoolean(x) ? /^(1|yes|on|true)$/i.test(x) :
+          def));
   }
 
   static toInt(l: number | undefined, u: number | undefined, v: string, d: number) {
@@ -127,7 +126,7 @@ export class CliUtil {
     }
 
     while (!done) {
-      await writeLine(`${this.WAIT_STATE[i = (i + 1) % this.WAIT_STATE.length]} ${message}`);
+      await writeLine(`${this.#waitState[i = (i + 1) % this.#waitState.length]} ${message}`);
       await sleep(50);
     }
 

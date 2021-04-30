@@ -3,7 +3,8 @@ import { EventEmitter } from 'events';
 import { Class } from '@travetto/base';
 import { ChangeEvent } from '@travetto/registry';
 
-import { FieldConfig, ALL_VIEW, ClassConfig } from './types';
+import { FieldConfig, ClassConfig } from './types';
+import { AllViewⲐ } from '../internal/types';
 
 const id = (c: Class | string) => typeof c === 'string' ? c : c.ᚕid;
 
@@ -117,8 +118,8 @@ class $SchemaChangeListener {
    */
   emitFieldChanges({ prev, curr }: ChangeEvent<ClassConfig>) {
 
-    const prevView = prev?.views[ALL_VIEW] || { fields: [], schema: {} };
-    const currView = curr!.views[ALL_VIEW];
+    const prevView = prev?.views[AllViewⲐ] || { fields: [], schema: {} };
+    const currView = curr!.views[AllViewⲐ];
 
     const prevFields = new Set(prevView.fields);
     const currFields = new Set(currView.fields);

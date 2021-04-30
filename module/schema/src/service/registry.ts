@@ -1,9 +1,10 @@
 import { Class, AppError } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { ClassList, FieldConfig, ClassConfig, ALL_VIEW, SchemaConfig, ViewFieldsConfig } from './types';
+import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig } from './types';
 import { SchemaChangeListener } from './changes';
 import { BindUtil } from '../bind-util';
+import { AllViewⲐ } from '../internal/types';
 
 function hasType<T>(o: unknown): o is { type: Class<T> | string } {
   return !!o && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
@@ -96,7 +97,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.get(cls));
 
     // Read children
-    const view = config.views[ALL_VIEW];
+    const view = config.views[AllViewⲐ];
     for (const k of view.fields) {
       if (this.has(view.schema[k].type) && view.schema[k].type !== cls) {
         this.trackSchemaDependencies(cls, view.schema[k].type, [...path, view.schema[k]]);
@@ -109,7 +110,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       class: cls,
       validators: [],
       views: {
-        [ALL_VIEW]: {
+        [AllViewⲐ]: {
           schema: {},
           fields: []
         }
@@ -122,8 +123,8 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param cls The class to retrieve the schema for
    * @param view Thee view name
    */
-  getViewSchema<T>(cls: Class<T>, view?: string) {
-    view = view ?? ALL_VIEW;
+  getViewSchema<T>(cls: Class<T>, view?: string | typeof AllViewⲐ) {
+    view = view ?? AllViewⲐ;
 
     const schm = this.get(cls)!;
     if (!schm) {
@@ -131,7 +132,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     }
     const res = schm.views[view];
     if (!res) {
-      throw new Error(`Unknown view ${view} for ${cls.name}`);
+      throw new Error(`Unknown view ${view.toString()} for ${cls.name}`);
     }
     return res;
   }
@@ -185,13 +186,25 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   }
 
   /**
+   * Register a partial config for a pending method param
+   * @param target The class to target
+   * @param prop The method name
+   * @param idx The param index
+   * @param config The config to register
+   */
+  registerPendingParamFacet(target: Class, prop: string, idx: number, config: Partial<FieldConfig>) {
+    config.index = idx;
+    return this.registerPendingFieldFacet(target, `${prop}.${idx}`, config);
+  }
+
+  /**
    * Register a partial config for a pending field
    * @param target The class to target
    * @param prop The property name
    * @param config The config to register
    */
   registerPendingFieldFacet(target: Class, prop: string, config: Partial<FieldConfig>) {
-    const allViewConf = this.getOrCreatePending(target).views![ALL_VIEW];
+    const allViewConf = this.getOrCreatePending(target).views![AllViewⲐ];
 
     if (!allViewConf.schema[prop]) {
       allViewConf.fields.push(prop);
@@ -206,17 +219,31 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   /**
    * Register pending field configuration
    * @param target Target class
+   * @param method Method name
+   * @param idx Param index
+   * @param type List of types
+   * @param conf Extra config
+   */
+  registerPendingParamConfig(target: Class, method: string, idx: number, type: ClassList, conf?: Partial<FieldConfig>) {
+    conf ??= {};
+    conf.index = idx;
+    return this.registerPendingFieldConfig(target, `${method}.${idx}`, type, conf);
+  }
+
+  /**
+   * Register pending field configuration
+   * @param target Target class
    * @param prop Property name
    * @param type List of types
-   * @param specifier Specifier
+   * @param conf Extra config
    */
-  registerPendingFieldConfig(target: Class, prop: string, type: ClassList, specifier?: string) {
+  registerPendingFieldConfig(target: Class, prop: string, type: ClassList, conf?: Partial<FieldConfig>) {
     const fieldConf: FieldConfig = {
       owner: target,
       name: prop,
       array: Array.isArray(type),
       type: Array.isArray(type) ? type[0] : type,
-      specifier
+      ...(conf ?? {})
     };
 
     return this.registerPendingFieldFacet(target, prop, fieldConf);
@@ -228,9 +255,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param src Source config
    */
   mergeConfigs(dest: ClassConfig, src: ClassConfig) {
-    dest.views[ALL_VIEW] = {
-      schema: { ...dest.views[ALL_VIEW].schema, ...src.views[ALL_VIEW].schema },
-      fields: [...dest.views[ALL_VIEW].fields, ...src.views[ALL_VIEW].fields]
+    dest.views[AllViewⲐ] = {
+      schema: { ...dest.views[AllViewⲐ].schema, ...src.views[AllViewⲐ].schema },
+      fields: [...dest.views[AllViewⲐ].fields, ...src.views[AllViewⲐ].fields]
     };
     dest.title = src.title || dest.title;
     dest.validators = [...src.validators, ...dest.validators];
@@ -243,7 +270,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param conf The class config
    */
   finalizeViews<T>(target: Class<T>, conf: ClassConfig) {
-    const allViewConf = conf.views![ALL_VIEW];
+    const allViewConf = conf.views![AllViewⲐ];
     const pending = this.#pendingViews.get(target) ?? new Map<string, ViewFieldsConfig<unknown>>();
     this.#pendingViews.delete(target);
 

@@ -187,6 +187,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * Clear all caches
    */
   onReset() {
+    super.onReset();
     this.entries.clear();
     this.pending.clear();
     this.pendingFields.clear();

@@ -5,10 +5,10 @@ import { RootRegistry } from '@travetto/registry';
 
 import { Schema } from '../src/decorator/schema';
 import { SchemaRegistry } from '../src/service/registry';
-import { ALL_VIEW } from '../src/service/types';
 import { SchemaValidator } from '../src/validate/validator';
 import { ValidationError } from '../src/validate/types';
 import { Address2 } from './models/address';
+import { AllViewⲐ } from '../src/internal/types';
 
 function findError(errors: ValidationError[], path: string, message: string) {
   return errors.find(x => x.path === path && x.message.includes(message));
@@ -35,7 +35,7 @@ class ViewsTest {
 
   @Test()
   async testRegister() {
-    assert(SchemaRegistry.get(User).views[ALL_VIEW].schema.address.type);
+    assert(SchemaRegistry.get(User).views[AllViewⲐ].schema.address.type);
   }
 
   @Test('Url and message')

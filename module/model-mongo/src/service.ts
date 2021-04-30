@@ -20,7 +20,7 @@ import {
 
 import { ShutdownManager, Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { ALL_VIEW, FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
+import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
@@ -33,6 +33,7 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
+import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
@@ -98,7 +99,7 @@ export class MongoModelService implements
 
   getGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls): Record<string, '2d'>[] {
     const fields = SchemaRegistry.has(cls) ?
-      Object.values(SchemaRegistry.get(cls).views[ALL_VIEW].schema) :
+      Object.values(SchemaRegistry.get(cls).views[AllViewⲐ].schema) :
       [];
     const out: Record<string, '2d'>[] = [];
     for (const field of fields) {
