@@ -227,19 +227,19 @@ export class SpecGenerateUtil {
   /**
    * Process endpoint parameter
    */
-  static processEndpointParam(op: OperationObject, param: ParamConfig, state: PartialSpec) {
+  static processEndpointParam(op: OperationObject, param: ParamConfig, field: FieldConfig, state: PartialSpec) {
     if (param.location) {
       if (param.location === 'body') {
-        op.requestBody = this.buildRequestBody(state, param);
-      } else if (param.type && SchemaRegistry.has(param.type) && (param.location === 'query' || param.location === 'header')) {
-        op.parameters!.push(...this.schemaToDotParams(state, param.location, param.type));
+        op.requestBody = this.buildRequestBody(state, field);
+      } else if (field && field.type && SchemaRegistry.has(field.type) && (param.location === 'query' || param.location === 'header')) {
+        op.parameters!.push(...this.schemaToDotParams(state, param.location, field.type));
       } else if (param.location !== 'context') {
         const epParam: ParameterObject = {
           in: param.location as 'path',
           name: param.name || param.location,
-          description: param.description,
-          required: !!param.required || false,
-          schema: this.getType(param.type, state)
+          description: field?.description,
+          required: !!field?.required?.active || false,
+          schema: this.getType(field.type, state)
         };
         op.parameters!.push(epParam);
       }
@@ -263,7 +263,8 @@ export class SpecGenerateUtil {
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses[code] = pConf;
 
-    ep.params.forEach(param => this.processEndpointParam(op, param, state));
+    const schema = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
+    ep.params.forEach((param, i) => this.processEndpointParam(op, param, schema[i], state));
 
     const epPath = (
       !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source

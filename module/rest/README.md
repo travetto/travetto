@@ -8,7 +8,7 @@
 npm install @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L14) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L86) objects). 
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L15) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) objects). 
 
 ## Routes: Controller
 
@@ -38,13 +38,13 @@ Once the controller is declared, each method of the controller is a candidate fo
 
 The HTTP methods that are supported via:
    
-   *  [@Get](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L30)
-   *  [@Post](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L36)
-   *  [@Put](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L42)
-   *  [@Delete](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L54)
-   *  [@Patch](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L48)
-   *  [@Head](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L60)
-   *  [@Options](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L66)
+   *  [@Get](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L31)
+   *  [@Post](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L38)
+   *  [@Put](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L45)
+   *  [@Delete](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L58)
+   *  [@Patch](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L52)
+   *  [@Head](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L64)
+   *  [@Options](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/endpoint.ts#L70)
 
 Each endpoint decorator handles the following config:
    
@@ -84,13 +84,14 @@ class SimpleController {
 
 Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
    
-   *  [@Path](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L52) - Path params
-   *  [@Query](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L58) - Query params
-   *  [@Body](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L70) - Request body (in it's entirety)
-   *  [@Header](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L64) - Header values
-   *  [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L14), [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L86), etc.)
+   *  [@Path](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L60) - Path params
+   *  [@Query](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L66) - Query params
+   *  [@Body](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L78) - Request body (in it's entirety), with support for validation
+   *   - Allows for mapping the query parameters to a full object
+   *  [@Header](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L72) - Header values
+   *  [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L54) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L15), [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88), etc.)
 
-Each [@Param](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L33) can be configured to indicate:
+Each [@Param](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L41) can be configured to indicate:
    
    *  `name` - Name of param, field name, defaults to handler parameter name if necessary
    *  `description` - Description of param, pulled from [JSDoc](http://usejsdoc.org/about-getting-started.html), or defaults to name if empty
@@ -101,7 +102,7 @@ Each [@Param](https://github.com/travetto/travetto/tree/master/module/rest/src/d
 
 **Code: Full-fledged Controller with Routes**
 ```typescript
-import { Get, Controller, Post, Path, Body, Context, Query, Request } from '@travetto/rest';
+import { Get, Controller, Post, Path, Body, Query, Request } from '@travetto/rest';
 import { MockService } from './mock';
 
 @Controller('/simple')
@@ -134,9 +135,93 @@ export class Simple {
   }
 
   @Get(/\/img(.*)[.](jpg|png|gif)/)
-  async getImage(@Context() req: Request, @Query('w') width?: number, @Query('h') height?: number) {
+  async getImage(req: Request, @Query('w') width?: number, @Query('h') height?: number) {
     const img = await this.service.fetchImage(req.path, { width, height });
     return img;
+  }
+}
+```
+
+### Body and QuerySchema
+
+The module provides high level access for [Schema](https://github.com/travetto/travetto/tree/master/module/schema#readme "Data type registry for runtime validation, reflection and binding. ") support, via decorators, for validating and typing request bodies.
+
+[@Body](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L78) provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+
+**Code: Using Body for POST requests**
+```typescript
+import { Schema } from '@travetto/schema';
+import { Controller, Post, Body } from '@travetto/rest';
+
+@Schema()
+class User {
+  name: string;
+  age: number;
+}
+
+@Controller('/user')
+class UserController {
+
+  private service: {
+    update(user: User): Promise<User>;
+  };
+
+  @Post('/saveUser')
+  async save(@Body() user: User) {
+    user = await this.service.update(user);
+    return { success: true };
+  }
+}
+```
+
+[@QuerySchema](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L85) provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+
+**Code: Using QuerySchema for GET requests**
+```typescript
+import { Schema } from '@travetto/schema';
+import { Controller, Get, QuerySchema } from '@travetto/rest';
+
+@Schema()
+class SearchParams {
+  page: number = 0;
+  pageSize: number = 100;
+}
+
+@Controller('/user')
+class UserController {
+
+  private service: {
+    search(query: SearchParams): Promise<number[]>;
+  };
+
+  @Get('/search')
+  async search(@QuerySchema() query: SearchParams) {
+    return await this.service.search(query);
+  }
+}
+```
+
+Addtionally, [@QuerySchema](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L85) and [@Body](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L78) can also be used with `interface`s and `type` literals in lieu of classes. This is best suited for simple types:
+
+**Code: Using QuerySchema with a type literal**
+```typescript
+import { Controller, Get, QuerySchema } from '@travetto/rest';
+
+type Paging = {
+  page?: number;
+  pageSize?: number;
+};
+
+@Controller('/user')
+class UserController {
+
+  private service: {
+    search(query: Paging): Promise<number>;
+  };
+
+  @Get('/search')
+  async search(@QuerySchema() query: Paging = { page: 0, pageSize: 100 }) {
+    return await this.service.search(query);
   }
 }
 ```
@@ -160,7 +245,7 @@ Additionally, the [Schema](https://github.com/travetto/travetto/tree/master/modu
 
 ## Running an App
 
-By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) at [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to execute.  
+By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L21) at [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L22) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/master/module/app#readme "Application registration/management and run support.") module to execute.  
 
 **Install: Installing app support**
 ```bash
@@ -188,7 +273,7 @@ Available Applications:
 ```
 
 ### Creating a Custom App
-To customize a REST server, you may need to construct an entry point using the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) decorator. This could look like:
+To customize a REST server, you may need to construct an entry point using the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L21) decorator. This could look like:
 
 **Code: Application entry point for Rest Applications**
 ```typescript
@@ -336,7 +421,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
    
 
 ### Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") by extending the [RestInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/types.ts#L11) class.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L14) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L86) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support.") by extending the [RestInterceptor](https://github.com/travetto/travetto/tree/master/module/rest/src/interceptor/types.ts#L11) class.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L15) and [TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
@@ -382,7 +467,7 @@ export class LoggingInterceptor implements RestInterceptor {
 Currently [Asset Rest Support](https://github.com/travetto/travetto/tree/master/module/asset-rest#readme "Provides integration between the travetto asset and rest module.") is implemented in this fashion, as well as [Rest Auth](https://github.com/travetto/travetto/tree/master/module/auth-rest#readme "Rest authentication integration support for the travetto framework").
 
 ## Cookie Support
-[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L14)/[TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L86) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L15)/[TravettoResponse](https://github.com/travetto/travetto/tree/master/module/rest/src/types.d.ts#L88) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 **Code: Sample Cookie Usage**
 ```typescript
@@ -438,93 +523,9 @@ To use pack please run:
 npm i --save-dev @travetto/pack
 ```
 
-## Extension - Schema
-
-The module provides high level access for [Schema](https://github.com/travetto/travetto/tree/master/module/schema#readme "Data type registry for runtime validation, reflection and binding. ") support, via decorators, for validating and typing request bodies.
-
-[@SchemaBody](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L82) provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
-
-**Code: Using SchemaBody for POST requests**
-```typescript
-import { Schema } from '@travetto/schema';
-import { Controller, Post, SchemaBody } from '@travetto/rest';
-
-@Schema()
-class User {
-  name: string;
-  age: number;
-}
-
-@Controller('/user')
-class UserController {
-
-  private service: {
-    update(user: User): Promise<User>;
-  };
-
-  @Post('/saveUser')
-  async save(@SchemaBody() user: User) {
-    user = await this.service.update(user);
-    return { success: true };
-  }
-}
-```
-
-[@SchemaQuery](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L94) provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
-
-**Code: Using SchemaQuery for GET requests**
-```typescript
-import { Schema } from '@travetto/schema';
-import { Controller, Get, SchemaQuery } from '@travetto/rest';
-
-@Schema()
-class SearchParams {
-  page: number = 0;
-  pageSize: number = 100;
-}
-
-@Controller('/user')
-class UserController {
-
-  private service: {
-    search(query: SearchParams): Promise<number[]>;
-  };
-
-  @Get('/search')
-  async search(@SchemaQuery() query: SearchParams) {
-    return await this.service.search(query);
-  }
-}
-```
-
-Addtionally, [@SchemaQuery](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L94) and [@SchemaBody](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/schema.ts#L82) can also be used with `interface`s and `type` literals in lieu of classes. This is best suited for simple types:
-
-**Code: Using SchemaQuery with a type literal**
-```typescript
-import { Controller, Get, SchemaQuery } from '@travetto/rest';
-
-type Paging = {
-  page?: number;
-  pageSize?: number;
-};
-
-@Controller('/user')
-class UserController {
-
-  private service: {
-    search(query: Paging): Promise<number>;
-  };
-
-  @Get('/search')
-  async search(@SchemaQuery() query: Paging = { page: 0, pageSize: 100 }) {
-    return await this.service.search(query);
-  }
-}
-```
-
 ## Extension - Model
 
-To facilitate common RESTful patterns, the module exposes  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") support in the form of [ModelRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model.ts#L21).
+To facilitate common RESTful patterns, the module exposes  [Data Modeling Support](https://github.com/travetto/travetto/tree/master/module/model#readme "Datastore abstraction for core operations.") support in the form of [ModelRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model.ts#L19).
 
 **Code: ModelRoutes example**
 ```typescript
@@ -548,7 +549,7 @@ is a shorthand that is equal to:
 ```typescript
 import { Inject } from '@travetto/di';
 import { ModelCrudSupport } from '@travetto/model';
-import { Path, Controller, SchemaBody, Get, Request, Delete, Post, Put } from '@travetto/rest';
+import { Path, Controller, Body, Get, Request, Delete, Post, Put } from '@travetto/rest';
 
 import { User } from './user';
 
@@ -574,12 +575,12 @@ class UserController {
   }
 
   @Post('')
-  async saveUser(@SchemaBody() user: User) {
+  async saveUser(@Body() user: User) {
     return await this.service.create(User, user);
   }
 
   @Put('')
-  async updateUser(@SchemaBody() user: User) {
+  async updateUser(@Body() user: User) {
     return await this.service.update(User, user);
   }
 }
@@ -587,7 +588,7 @@ class UserController {
 
 ## Extension - Model Query
 
-Additionally, [Data Model Querying](https://github.com/travetto/travetto/tree/master/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L42). This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
+Additionally, [Data Model Querying](https://github.com/travetto/travetto/tree/master/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/master/module/rest/src/extension/model-query.ts#L40). This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
 
 **Code: ModelQueryRoutes example**
 ```typescript
@@ -612,7 +613,7 @@ is a shorthand that is equal to:
 import { Inject } from '@travetto/di';
 import { ModelQuerySupport, SortClause, ValidStringFields } from '@travetto/model-query';
 import { isQuerySuggestSupported } from '@travetto/model-query/src/internal/service/common';
-import { Controller, Get, Path, SchemaQuery } from '@travetto/rest';
+import { Controller, Get, Path, QuerySchema } from '@travetto/rest';
 import { RestModelQuery, RestModelSuggestQuery } from '@travetto/rest/src/extension/model-query';
 
 import { User } from './user';
@@ -626,7 +627,7 @@ class UserQueryController {
   service: ModelQuerySupport;
 
   @Get('')
-  async getAllUser(@SchemaQuery() query: RestModelQuery) {
+  async getAllUser(@QuerySchema() query: RestModelQuery) {
     return this.service.query(User, {
       limit: query.limit,
       offset: query.offset,
@@ -636,7 +637,7 @@ class UserQueryController {
   }
 
   @Get('/suggest/:field')
-  async suggest(@Path() field: ValidStringFields<User>, @SchemaQuery() suggest: RestModelSuggestQuery) {
+  async suggest(@Path() field: ValidStringFields<User>, @QuerySchema() suggest: RestModelSuggestQuery) {
     if (isQuerySuggestSupported(this.service)) {
       return this.service.suggest(User, field, suggest.q, suggest);
     }

@@ -1,5 +1,11 @@
 import { Messages } from './messages';
 
+declare global {
+  interface RegExp {
+    name?: string;
+  }
+}
+
 /**
  * List of common regular expressions for fields
  */
@@ -13,6 +19,6 @@ export const CommonRegExp = {
 
 // Rebind regexes
 for (const k of Object.keys(CommonRegExp) as (keyof typeof CommonRegExp)[]) {
-  Object.defineProperty(CommonRegExp[k], 'name', { value: `[[:${k}:]]` });
-  Messages.set(CommonRegExp[k].source, Messages.get(k)!);
+  CommonRegExp[k].name = `[[:${k}:]]`;
+  Messages.set(CommonRegExp[k].name!, Messages.get(k)!);
 }

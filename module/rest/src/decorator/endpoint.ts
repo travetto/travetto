@@ -19,6 +19,7 @@ function Endpoint(method: MethodOrAll, path: PathType = '/', extra: Partial<Endp
 /**
  * Registers for ALL HTTP verbs
  * @param path The path to route the request to
+ * @augments `@trv:http/Body`
  * @augments `@trv:rest/Endpoint`
  */
 export function All(path?: PathType) { return Endpoint('all', path); }
@@ -31,18 +32,21 @@ export function Get(path?: PathType) { return Endpoint('get', path); }
 /**
  * Registers POST requests
  * @param path The path to route the request to
+ * @augments `@trv:http/Body`
  * @augments `@trv:rest/Endpoint`
  */
 export function Post(path?: PathType) { return Endpoint('post', path); }
 /**
  * Registers PUT requests
  * @param path The path to route the request to
+ * @augments `@trv:http/Body`
  * @augments `@trv:rest/Endpoint`
  */
 export function Put(path?: PathType) { return Endpoint('put', path); }
 /**
  * Registers PATCH requests
  * @param path The path to route the request to
+ * @augments `@trv:http/Body`
  * @augments `@trv:rest/Endpoint`
  */
 export function Patch(path?: PathType) { return Endpoint('patch', path); }

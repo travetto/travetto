@@ -86,29 +86,25 @@ Now we need to create `src/service.ts`
 
 **Code: Service Definition**
 ```typescript
-import { SQLDialect, SQLModelService } from '@travetto/model-sql';
-import { SqliteDialect } from '@travetto/model-sql/src/dialect/sqlite/dialect';
-import { Injectable, Inject, InjectableFactory } from '@travetto/di';
+import { MongoModelService } from '@travetto/model-mongo';
+import { Injectable, Inject } from '@travetto/di';
 
 import { Todo, TodoSearch } from './model';
-
-class SQLConfig {
-  @InjectableFactory({ primary: true })
-  static getDialect(dialect: SqliteDialect): SQLDialect {
-    return dialect;
-  }
-}
 
 @Injectable()
 export class TodoService {
 
   @Inject()
-  private modelService: SQLModelService;
+  private modelService: MongoModelService;
 
   async add(todo: Todo) {
     todo.created = new Date();
     const saved = await this.modelService.create(Todo, todo);
     return saved;
+  }
+
+  async update(todo: Todo) {
+    return await this.modelService.updatePartial(Todo, todo);
   }
 
   async get(id: string) {
@@ -117,6 +113,10 @@ export class TodoService {
 
   async getAll(search: TodoSearch) {
     return this.modelService.query(Todo, { where: { text: { $regex: search.q ?? '.*' } }, ...search, sort: [{ created: -1 }] });
+  }
+
+  async deleteAllCompleted() {
+    return this.modelService.deleteByQuery(Todo, { where: { completed: true } });
   }
 
   async complete(id: string, completed = true) {
@@ -220,7 +220,7 @@ Finally, we establish the controller at `src/route.ts`
 
 **Code: Controller contents**
 ```typescript
-import { Controller, Get, Post, Put, Delete, Path, Query, SchemaBody, SchemaQuery } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 
 import { TodoService } from './service';
@@ -236,7 +236,7 @@ export class TodoController {
    * Get all todos
    */
   @Get('/')
-  async getAll(@SchemaQuery() search: TodoSearch) {
+  async getAll(search: TodoSearch) {
     const itr = await this.svc.getAll(search);
     const out = [];
     for await (const item of itr) {
@@ -246,11 +246,19 @@ export class TodoController {
   }
 
   /**
+   * Delete all todos
+   */
+  @Delete('/')
+  async deleteAllCompleted() {
+    await this.svc.deleteAllCompleted();
+  }
+
+  /**
    * Get Todo by id
    * @param id Todo id
    */
   @Get('/:id')
-  async getById(@Path() id: string) {
+  async getById(id: string) {
     return this.svc.get(id);
   }
 
@@ -258,7 +266,7 @@ export class TodoController {
    * Create a todo
    */
   @Post('/')
-  async create(@SchemaBody() todo: Todo) {
+  async create(todo: Todo) {
     return await this.svc.add(todo);
   }
 
@@ -266,8 +274,18 @@ export class TodoController {
    * Complete a todo
    * @param id Todo id
    */
+  @Put('/:id')
+  async update(id: string, todo: Todo) {
+    todo.id = id;
+    return await this.svc.update(todo);
+  }
+
+  /**
+   * Complete a todo
+   * @param id Todo id
+   */
   @Put('/:id/complete')
-  async complete(@Path() id: string, @Query() completed: boolean = true) {
+  async complete(id: string, completed: boolean = true) {
     return await this.svc.complete(id, completed);
   }
 
@@ -276,7 +294,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Delete('/:id')
-  async remove(@Path() id: string) {
+  async remove(id: string) {
     await this.svc.remove(id);
   }
 }
@@ -305,7 +323,7 @@ First we must start the application:
     debug: { status: false, value: undefined },
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
-    cache: '.trv_cache_1467598133',
+    cache: '.trv_cache',
     watch: true,
     readonly: false
   },
@@ -327,8 +345,8 @@ First we must start the application:
       '@travetto/doc': '@trv:doc',
       '@travetto/log': '@trv:log',
       '@travetto/model': '@trv:model',
+      '@travetto/model-mongo': '@trv:model-mongo',
       '@travetto/model-query': '@trv:model-query',
-      '@travetto/model-sql': '@trv:model-sql',
       '@travetto/openapi': '@trv:openapi',
       '@travetto/pack': '@trv:pack',
       '@travetto/registry': '@trv:registry',
@@ -349,7 +367,7 @@ First we must start the application:
     sql: { model: { namespace: 'todo', user: 'root', password: 'password' } }
   }
 }
-2021-03-14T05:00:01.510Z info  [@trv:rest/application/rest:192] Listening { port: 3000 }
+2021-03-14T05:00:01.510Z info  [@trv:rest/application/rest:191] Listening { port: 3000 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:
@@ -378,7 +396,7 @@ $ node @travetto/boot/bin/main ./doc/create-todo.ts
 {
   text: 'New Todo',
   created: '2021-03-14T05:00:02.450Z',
-  id: '6e3a9d78e1dc44688a94f6358115714eabfeb270df73d3fc7f506dd4c3918b09'
+  id: '422e793aed76ee063d13feec2e5e95b4'
 }
 ```
 
@@ -398,9 +416,9 @@ $ node @travetto/boot/bin/main ./doc/list-todo.ts
 
 [
   {
-    id: '6e3a9d78e1dc44688a94f6358115714eabfeb270df73d3fc7f506dd4c3918b09',
+    id: '422e793aed76ee063d13feec2e5e95b4',
     text: 'New Todo',
-    created: '2021-03-14T05:00:02.762Z'
+    created: '2021-03-14T05:00:02.819Z'
   }
 ]
 ```

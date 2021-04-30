@@ -2,6 +2,7 @@
  * A user principal, including permissions and details
  *
  * @concrete ../internal/types:PrincipalTarget
+ * @augments `@trv:rest/Context` // @line-if @travetto/rest
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Principal<D = any> {

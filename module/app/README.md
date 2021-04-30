@@ -8,9 +8,9 @@
 npm install @travetto/app
 ```
 
-The [Base](https://github.com/travetto/travetto/tree/master/module/base#readme "Application phase management, environment config and common utilities for travetto applications.") module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) who's job is to register entry points into the application, along with the associated  metadata. 
+The [Base](https://github.com/travetto/travetto/tree/master/module/base#readme "Application phase management, environment config and common utilities for travetto applications.") module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L21) who's job is to register entry points into the application, along with the associated  metadata. 
 
-With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support."), the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) is a synonym for [@Injectable](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L30), and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
+With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [Dependency Injection](https://github.com/travetto/travetto/tree/master/module/di#readme "Dependency registration/management and injection support."), the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L21) is a synonym for [@Injectable](https://github.com/travetto/travetto/tree/master/module/di/src/decorator.ts#L30), and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
 
 For example:
 
@@ -28,7 +28,7 @@ class Server {
   }
 }
 
-@Application('simple')
+@Application('simple-app')
 class SimpleApp {
 
   @Inject()
@@ -40,7 +40,7 @@ class SimpleApp {
 }
 ```
 
-Additionally, the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) decorator exposes some additional functionality, which can be used to launch the application.
+Additionally, the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L21) decorator exposes some additional functionality, which can be used to launch the application.
 
 ## `.run()` Arguments
 The arguments specified in the `run` method are extracted via code transformation, and are able to be bound when invoking the application.  Whether from the command line or a plugin, the parameters will be mapped to the inputs of `run`.  For instance:
@@ -60,7 +60,7 @@ class SimpleApp {
 
 ## CLI - run
 
-The run command allows for invocation of applications as defined by the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) decorator.  Additionally, the environment can manually be specified (dev, test, prod).
+The run command allows for invocation of applications as defined by the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L21) decorator.  Additionally, the environment can manually be specified (dev, test, prod).
 
 **Terminal: CLI Run Help**
 ```bash
@@ -77,14 +77,19 @@ Options:
 Available Applications:
 
    ● complex 
-     ----------------------------------------
-     usage: complex domain:string port:number
+     -----------------------------------------------
+     usage: complex domain:string [port:number=3000]
      file:  doc/complex.ts
 
    ● simple 
      ----------------------------------------------
      usage: simple domain:string [port:number=3000]
      file:  doc/simple.ts
+
+   ● simple-app 
+     --------------------------
+     usage: simple-app 
+     file:  doc/entry-simple.ts
 
    ● simple-domain 
      -----------------------------------------------------
@@ -114,14 +119,19 @@ Options:
 Available Applications:
 
    ● complex 
-     ----------------------------------------
-     usage: complex domain:string port:number
+     -----------------------------------------------
+     usage: complex domain:string [port:number=3000]
      file:  doc/complex.ts
 
    ● simple 
      ----------------------------------------------
      usage: simple domain:string [port:number=3000]
      file:  doc/simple.ts
+
+   ● simple-app 
+     --------------------------
+     usage: simple-app 
+     file:  doc/entry-simple.ts
 
    ● simple-domain 
      -----------------------------------------------------
@@ -159,7 +169,7 @@ Configured {
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
-    watch: false,
+    watch: true,
     readonly: false
   },
   source: {
@@ -176,6 +186,7 @@ Configured {
       '@travetto/doc': '@trv:doc',
       '@travetto/log': '@trv:log',
       '@travetto/registry': '@trv:registry',
+      '@travetto/schema': '@trv:schema',
       '@travetto/test': '@trv:test',
       '@travetto/transformer': '@trv:transformer',
       '@travetto/watch': '@trv:watch',
@@ -196,17 +207,11 @@ The parameters to `run` will be type checked, to ensure proper evaluation.
 ```bash
 $ trv run simple-domain mydomain.biz orange
 
-Failed application run
-Error: Invalid parameter port: Received orange, but exepcted number  
-    at Function.enforceParamType (./src/util.ts:19:13)  
-    at ./src/registry.ts:55:79  
-    at $ApplicationRegistry.resolveParameters (./src/registry.ts:55:24)  
-    at Function.run (./bin/lib/run.ts:36:31)  
-    at AppRunPlugin.action (./bin/cli-run.ts:66:11)  
-    at AppRunPlugin.runAction (@trv:cli/src/plugin-base.ts:210:12)
+Failed to run simple-domain
+● port is not a valid number
 ```
 
-The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L25) 
+The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/master/module/app/src/decorator.ts#L21) 
 annotation to support customization. Only primitive types are supported:
 
    
@@ -221,21 +226,9 @@ Customizing the types is done by name, and allows for greater control:
 ```typescript
 import { Application } from '@travetto/app';
 
-@Application('complex', {
-  paramMap: {
-    domain: {
-      title: 'Domain Name',
-      type: 'string',
-      subtype: 'url'
-    },
-    port: {
-      title: 'Server Port',
-      def: '3000'
-    }
-  }
-})
+@Application('complex')
 class Complex {
-  async run(domain: string, port: number) {
+  async run(domain: string, port: number = 3000) {
     console.log('Launching', { domain, port });
   }
 }

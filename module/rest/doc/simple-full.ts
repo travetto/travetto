@@ -1,4 +1,4 @@
-import { Get, Controller, Post, Path, Body, Context, Query, Request } from '@travetto/rest';
+import { Get, Controller, Post, Path, Body, Query, Request } from '@travetto/rest';
 import { MockService } from './mock';
 
 @Controller('/simple')
@@ -31,7 +31,7 @@ export class Simple {
   }
 
   @Get(/\/img(.*)[.](jpg|png|gif)/)
-  async getImage(@Context() req: Request, @Query('w') width?: number, @Query('h') height?: number) {
+  async getImage(req: Request, @Query('w') width?: number, @Query('h') height?: number) {
     const img = await this.service.fetchImage(req.path, { width, height });
     return img;
   }

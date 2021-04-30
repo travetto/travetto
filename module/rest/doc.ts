@@ -11,7 +11,7 @@ import { ModelQueryRoutes } from './src/extension/model-query';
 import { RestApplication } from './src/application/rest';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
-import { Path, Query, SchemaQuery, Body, Context, Param, Header } from './src/decorator/param';
+import { Path, Query, QuerySchema, Body, Context, Param, Header } from './src/decorator/param';
 import { CorsInterceptor, RestCorsConfig } from './src/interceptor/cors';
 import { GetCacheInterceptor } from './src/interceptor/get-cache';
 import { LoggingInterceptor } from './src/interceptor/logging';
@@ -84,7 +84,7 @@ ${d.List(
   d`${Path} - Path params`,
   d`${Query} - Query params`,
   d`${Body} - Request body (in it's entirety), with support for validation`,
-  d`${SchemaQuery()} - Allows for mapping the query parameters to a full object`,
+  d`${QuerySchema()} - Allows for mapping the query parameters to a full object`,
   d`${Header} - Header values`,
   d`${Context} - Special values exposed (e.g. ${Request}, ${Response}, etc.)`,
 )}
@@ -103,7 +103,7 @@ ${d.Code('Full-fledged Controller with Routes', 'doc/simple-full.ts')}
 
 
 
-${d.SubSection('Body and SchemaQuery')}
+${d.SubSection('Body and QuerySchema')}
 
 The module provides high level access for ${mod.Schema} support, via decorators, for validating and typing request bodies.
 
@@ -111,13 +111,13 @@ ${Body} provides the ability to convert the inbound request body into a schema b
 
 ${d.Code(d`Using ${Body.name} for POST requests`, 'doc/schema-body.ts')}
 
-${SchemaQuery} provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+${QuerySchema} provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
-${d.Code(d`Using ${SchemaQuery.name} for GET requests`, 'doc/schema-query.ts')}
+${d.Code(d`Using ${QuerySchema.name} for GET requests`, 'doc/schema-query.ts')}
 
-Addtionally, ${SchemaQuery} and ${Body} can also be used with ${d.Input('interface')}s and ${d.Input('type')} literals in lieu of classes. This is best suited for simple types:
+Addtionally, ${QuerySchema} and ${Body} can also be used with ${d.Input('interface')}s and ${d.Input('type')} literals in lieu of classes. This is best suited for simple types:
 
-${d.Code(d`Using ${SchemaQuery.name} with a type literal`, 'doc/schema-query-type.ts')}
+${d.Code(d`Using ${QuerySchema.name} with a type literal`, 'doc/schema-query-type.ts')}
 
 ${d.Section('Input/Output')}
 

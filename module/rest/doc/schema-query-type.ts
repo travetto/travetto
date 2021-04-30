@@ -1,5 +1,5 @@
 // @file-if @travetto/schema
-import { Controller, Get, SchemaQuery } from '@travetto/rest';
+import { Controller, Get, QuerySchema } from '@travetto/rest';
 
 type Paging = {
   page?: number;
@@ -14,7 +14,7 @@ class UserController {
   };
 
   @Get('/search')
-  async search(@SchemaQuery() query: Paging = { page: 0, pageSize: 100 }) {
+  async search(@QuerySchema() query: Paging = { page: 0, pageSize: 100 }) {
     return await this.service.search(query);
   }
 }

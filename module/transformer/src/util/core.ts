@@ -58,7 +58,7 @@ export class CoreUtil {
    * Get `ts.Symbol` from a `ts.Type`
    */
   static getSymbol(type: ts.Type | ts.Symbol) {
-    if ('valueDeclaration' in type) {
+    if ('valueDeclaration' in type || 'escapedName' in type) {
       return type;
     } else {
       return (type as ts.TypeReference).aliasSymbol ?? (type as ts.Type).symbol;

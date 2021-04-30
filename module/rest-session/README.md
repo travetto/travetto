@@ -90,29 +90,29 @@ export class Session<T extends SessionData = SessionData>  {
 }
 ```
 
-A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L46) parameter as [Session](https://github.com/travetto/travetto/tree/master/module/rest-session/src/session.ts#L16) and [SessionData](https://github.com/travetto/travetto/tree/master/module/rest-session/src/session.ts#L7) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.d.ts#L7) as a session property.
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/master/module/rest/src/decorator/param.ts#L54) parameter as [Session](https://github.com/travetto/travetto/tree/master/module/rest-session/src/session.ts#L18) and [SessionData](https://github.com/travetto/travetto/tree/master/module/rest-session/src/session.ts#L8) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/master/module/rest-session/src/types.d.ts#L7) as a session property.
 
 **Code: Sample Session Usage**
 ```typescript
-import { Controller, Put, Get, Context } from '@travetto/rest';
+import { Controller, Put, Get } from '@travetto/rest';
 import { SessionData, Session } from '@travetto/rest-session';
 
 @Controller('/session')
 export class SessionRoutes {
 
   @Put('/info')
-  async storeInfo(@Context() data: SessionData) {
+  async storeInfo(data: SessionData) {
     data.age = 20;
     data.name = 'Roger'; // Setting data
   }
 
   @Get('/logout')
-  async logout(@Context() session: Session) {
+  async logout(session: Session) {
     await session.destroy();
   }
 
   @Get('/info/age')
-  async getInfo(@Context() data: SessionData) {
+  async getInfo(data: SessionData) {
     return data.age;
   }
 }

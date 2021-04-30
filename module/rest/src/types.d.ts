@@ -10,6 +10,7 @@ declare global {
   /**
    * Travetto request
    * @concrete ./internal/types:RequestTarget
+   * @augments `@trv:rest/Context`
    */
   interface TravettoRequest<T = unknown> {
     /**
@@ -82,6 +83,7 @@ declare global {
   /**
    * Travetto response
    * @concrete ./internal/types:ResponseTarget
+   * @augments `@trv:rest/Context`
    */
   interface TravettoResponse<T = unknown> {
     /**

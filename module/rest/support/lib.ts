@@ -33,7 +33,6 @@ export class RestTransformUtil {
     if (render && ts.isMethodDeclaration(render)) {
       const typeNode = ts.getJSDocReturnType(render);
       if (typeNode) {
-        // TODO: fix direct access to tsChecker
         const resolved = state.getResolver().getChecker().getTypeFromTypeNode(typeNode);
         return state.resolveType(resolved);
       } else {

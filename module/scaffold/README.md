@@ -79,7 +79,7 @@ In the case both `rest` and `model` features are enabled, the code will produce 
 
 **Code: Todo controller**
 ```typescript
-import { Controller, Get, Put, Post, Delete, Path, SchemaBody, SchemaQuery } from '@travetto/rest';
+import { Controller, Get, Put, Post, Delete, Path, Body, QuerySchema } from '@travetto/rest';
 import { ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
@@ -105,7 +105,7 @@ export class TodoController {
    * Get all Todos
    */
   @Get('/')
-  async getAll(@SchemaQuery() query: Query): Promise<Todo[]> {
+  async getAll(@QuerySchema() query: Query): Promise<Todo[]> {
     query.q ??= {};
     return this.source.query(Todo, { where: query.q });
   }
@@ -125,7 +125,7 @@ export class TodoController {
    * Create a Todo
    */
   @Post('/')
-  async save(@SchemaBody() todo: Todo): Promise<Todo> {
+  async save(@Body() todo: Todo): Promise<Todo> {
     return this.source.create(Todo, todo);
   }
 
@@ -133,7 +133,7 @@ export class TodoController {
    * Update a Todo
    */
   @Put('/:id')
-  async update(@SchemaBody() todo: Todo): Promise<Todo> {
+  async update(@Body() todo: Todo): Promise<Todo> {
     return this.source.update(Todo, todo);
   }
 

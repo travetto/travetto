@@ -1,9 +1,12 @@
-import { RestInterceptor, Request, Response, ContextProvider } from '@travetto/rest';
+import { RestInterceptor, Request, Response, ParamUtil } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Principal } from '@travetto/auth';
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
 import { PrincipalEncoder } from './encoder';
+
+// Register encoder
+ParamUtil.registerContext(PrincipalTarget, (_, r) => r.auth);
 
 /**
  * Authentication interceptor
@@ -12,7 +15,6 @@ import { PrincipalEncoder } from './encoder';
  * - Connects the principal to the request
  */
 @Injectable()
-@ContextProvider(PrincipalTarget, (c, req) => req.auth)
 export class AuthInterceptor implements RestInterceptor {
 
   @Inject()

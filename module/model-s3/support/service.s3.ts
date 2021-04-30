@@ -8,7 +8,7 @@ try {
   fs.mkdirSync(temp);
 } catch { }
 
-const version = '0.12.10';
+const version = 'latest';
 
 export const service: Service = {
   name: 's3',

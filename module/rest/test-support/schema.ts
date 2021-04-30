@@ -3,9 +3,10 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry } from '@travetto/schema';
-import { Controller, Redirect, Post, Get, Body, SchemaQuery, MethodOrAll, ControllerRegistry } from '@travetto/rest';
+import { Controller, Redirect, Post, Get, QuerySchema, MethodOrAll, ControllerRegistry } from '@travetto/rest';
 
 import { BaseRestSuite } from './base';
+import { Path } from '../src/decorator/param';
 
 type Errors = { errors: { path: string }[], message: string };
 
@@ -39,17 +40,17 @@ async function getUser(x: number) {
 @Controller('/test/schema')
 class SchemaAPI {
   @Post('/user')
-  async saveUser(@Body() user: User) {
+  async saveUser(user: User) {
     return user;
   }
 
   @Get('/user')
-  async queryUser(@SchemaQuery() user: User) {
+  async queryUser(user: User) {
     return user;
   }
 
   @Get('/interface')
-  async ifUser(@SchemaQuery() user: UserShape) {
+  async ifUser(@QuerySchema() user: UserShape) {
     return user;
   }
 
@@ -73,13 +74,13 @@ class SchemaAPI {
     return Promise.all([1, 2, 3,].map(async x => ({ key: x, count: 5 })));
   }
 
-  @Get('/classShape')
-  async classShape() {
+  @Get('/classShape/:shape')
+  async classShape(@Path('shape') sh: string) {
     return new SimpleUser();
   }
 
-  @Get('/renderable')
-  async renderable() {
+  @Get('/renderable/:age')
+  async renderable(age: number) {
     return new Redirect('google.com');
   }
 
@@ -194,14 +195,14 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
 
   @Test()
   async verifyShapeClass() {
-    const ep = getEndpoint('/classShape', 'get');
+    const ep = getEndpoint('/classShape/:shape', 'get');
     assert(ep.responseType);
     assert(SchemaRegistry.has(ep.responseType!.type));
   }
 
   @Test()
   async verifyRenderable() {
-    const ep = getEndpoint('/renderable', 'get');
+    const ep = getEndpoint('/renderable/:age', 'get');
     assert(ep.responseType?.type === undefined);
   }
 

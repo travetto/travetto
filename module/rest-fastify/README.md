@@ -8,7 +8,7 @@
 npm install @travetto/rest-fastify
 ```
 
-The module is an [fastify](https://www.fastify.io/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/master/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) for automatic injection in the default Rest server.
+The module is an [fastify](https://www.fastify.io/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/master/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L22) for automatic injection in the default Rest server.
 
 ## Customizing Rest App
 
@@ -53,4 +53,4 @@ const app = fastify(fastConf);
 ```
 
 ## Extension - AWS Lambda
-The [fastify](https://www.fastify.io/) module supports integration with [aws-lambda-fastify](https://github.com/fastify/aws-lambda-fastify/blob/master/README.md) when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L23) that is able to integrate with AWS appropriately.
+The [fastify](https://www.fastify.io/) module supports integration with [aws-lambda-fastify](https://github.com/fastify/aws-lambda-fastify/blob/master/README.md) when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/master/module/rest/src/application/rest.ts#L22) that is able to integrate with AWS appropriately.

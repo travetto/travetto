@@ -67,24 +67,24 @@ From this schema, the registry would have the following information:
 <h3 id="fields">Fields</h3>
 This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
 
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L34">@Field</a> defines a field that will be serialized.</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L55">@Required</a> defines a that field should be required</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L62">@Enum</a> defines the allowable values that a field can have</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L71">@Trimmed</a> augments binding to remove leading and trailing whitespace from string values</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L89">@Match</a> defines a regular expression that the field value should match</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L97">@MinLength</a> enforces min length of a string</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L105">@MaxLength</a> enforces max length of a string</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L97">@Min</a> enforces min value for a date or a number</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L105">@Max</a> enforces max value for a date or a number</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L128">@Email</a> ensures string field matches basic email regex</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L135">@Telephone</a> ensures string field matches basic telephone regex</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L142">@Url</a> ensures string field matches basic url regex</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L181">@Ignore</a> exclude from auto schema registration</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L156">@Integer</a> ensures number passed in is only a whole number</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L162">@Float</a> ensures number passed in allows fractional values</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L174">@Currency</a> provides support for standard currency</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L76">@Text</a> indicates that a field is expecting natural language input, not just discrete values</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L81">@LongText</a> same as text, but expects longer form content</li></ul>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L38">@Field</a> defines a field that will be serialized.</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L64">@Required</a> defines a that field should be required</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L71">@Enum</a> defines the allowable values that a field can have</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L80">@Trimmed</a> augments binding to remove leading and trailing whitespace from string values</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L98">@Match</a> defines a regular expression that the field value should match</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L106">@MinLength</a> enforces min length of a string</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L114">@MaxLength</a> enforces max length of a string</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L106">@Min</a> enforces min value for a date or a number</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L114">@Max</a> enforces max value for a date or a number</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L137">@Email</a> ensures string field matches basic email regex</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L144">@Telephone</a> ensures string field matches basic telephone regex</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L151">@Url</a> ensures string field matches basic url regex</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L190">@Ignore</a> exclude from auto schema registration</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L165">@Integer</a> ensures number passed in is only a whole number</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L171">@Float</a> ensures number passed in allows fractional values</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L183">@Currency</a> provides support for standard currency</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L85">@Text</a> indicates that a field is expecting natural language input, not just discrete values</li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/master/module/schema/src/decorator/field.ts#L90">@LongText</a> same as text, but expects longer form content</li></ul>
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated.
 

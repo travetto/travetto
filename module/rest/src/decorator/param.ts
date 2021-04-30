@@ -82,7 +82,7 @@ export function Body(param: Partial<ParamConfig> = {}) { return Param('body', pa
  * @param config The schema configuration
  * @augments `@trv:rest/Param`
  */
-export function SchemaQuery(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
+export function QuerySchema(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
   return Param('query', {
     ...config,
     resolve: req => {

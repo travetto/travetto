@@ -6,7 +6,6 @@ import { Util } from '@travetto/base';
 
 import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, TransformerId } from './types/visitor';
-
 import { TypeResolver } from './resolver/service';
 import { ImportManager } from './importer';
 import { DocUtil } from './util/doc';

@@ -1,6 +1,6 @@
 // @file-if @travetto/schema
 import { Schema } from '@travetto/schema';
-import { Controller, Get, SchemaQuery } from '@travetto/rest';
+import { Controller, Get, QuerySchema } from '@travetto/rest';
 
 @Schema()
 class SearchParams {
@@ -16,7 +16,7 @@ class UserController {
   };
 
   @Get('/search')
-  async search(@SchemaQuery() query: SearchParams) {
+  async search(@QuerySchema() query: SearchParams) {
     return await this.service.search(query);
   }
 }

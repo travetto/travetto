@@ -10,7 +10,7 @@ import {
 import { isQuerySuggestSupported, isQuerySupported } from '@travetto/model-query/src/internal/service/common';
 
 import { ControllerRegistry } from '../registry/controller';
-import { Path, SchemaQuery } from '../decorator/param';
+import { Path, QuerySchema } from '../decorator/param';
 
 type Svc = { source: Partial<ModelQuerySupport & ModelQuerySuggestSupport & ModelQueryFacetSupport> };
 
@@ -64,7 +64,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
         },
-        params: [SchemaQuery()],
+        params: [QuerySchema()],
         responseType: { type: cls, array: true, description: `List of ${cls.name}` }
       }
     );
@@ -89,7 +89,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
         },
         params: [
           Path({ name: 'field ' }),
-          SchemaQuery()
+          QuerySchema()
         ],
         responseType: { type: cls, description: cls.name }
       }

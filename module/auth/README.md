@@ -19,7 +19,7 @@ This module provides the high-level backdrop for managing security principals.  
       *  Generating passwords
 
 ## Standard Types
-The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [Principal Structure](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7).
+The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [Principal Structure](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L8).
 
 **Code: Principal Structure**
 ```typescript
@@ -55,7 +55,7 @@ export interface Principal<D = any> {
 }
 ```
 
-As referenced above, a [Principal Structure](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L7) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authenticatino).
+As referenced above, a [Principal Structure](https://github.com/travetto/travetto/tree/master/module/auth/src/types/principal.ts#L8) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authenticatino).
 
 ## Authentication
 

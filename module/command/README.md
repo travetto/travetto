@@ -103,7 +103,7 @@ Service          Version    Status
  * mysql                5.6    Running 307bc66d442a
  * postgresql          12.2    Running e78291e71040
  * redis                  5    Running 77ba279b4e30
- * s3               0.12.10    Running fdacfc55b9e3
+ * s3                latest    Running fdacfc55b9e3
 ```
 
 ### Defining new Services

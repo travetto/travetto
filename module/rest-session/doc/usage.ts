@@ -1,22 +1,22 @@
-import { Controller, Put, Get, Context } from '@travetto/rest';
+import { Controller, Put, Get } from '@travetto/rest';
 import { SessionData, Session } from '@travetto/rest-session';
 
 @Controller('/session')
 export class SessionRoutes {
 
   @Put('/info')
-  async storeInfo(@Context() data: SessionData) {
+  async storeInfo(data: SessionData) {
     data.age = 20;
     data.name = 'Roger'; // Setting data
   }
 
   @Get('/logout')
-  async logout(@Context() session: Session) {
+  async logout(session: Session) {
     await session.destroy();
   }
 
   @Get('/info/age')
-  async getInfo(@Context() data: SessionData) {
+  async getInfo(data: SessionData) {
     return data.age;
   }
 }

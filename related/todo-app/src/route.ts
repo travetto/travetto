@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Path, Query, Body, SchemaQuery } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 
 import { TodoService } from './service';
@@ -14,7 +14,7 @@ export class TodoController {
    * Get all todos
    */
   @Get('/')
-  async getAll(@SchemaQuery() search: TodoSearch) {
+  async getAll(search: TodoSearch) {
     const itr = await this.svc.getAll(search);
     const out = [];
     for await (const item of itr) {
@@ -37,7 +37,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Get('/:id')
-  async getById(@Path() id: string) {
+  async getById(id: string) {
     return this.svc.get(id);
   }
 
@@ -45,7 +45,7 @@ export class TodoController {
    * Create a todo
    */
   @Post('/')
-  async create(@Body() todo: Todo) {
+  async create(todo: Todo) {
     return await this.svc.add(todo);
   }
 
@@ -54,7 +54,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Put('/:id')
-  async update(@Path() id: string, @Body() todo: Todo) {
+  async update(id: string, todo: Todo) {
     todo.id = id;
     return await this.svc.update(todo);
   }
@@ -65,7 +65,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Put('/:id/complete')
-  async complete(@Path() id: string, @Query() completed: boolean = true) {
+  async complete(id: string, completed: boolean = true) {
     return await this.svc.complete(id, completed);
   }
 
@@ -74,7 +74,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Delete('/:id')
-  async remove(@Path() id: string) {
+  async remove(id: string) {
     await this.svc.remove(id);
   }
 }

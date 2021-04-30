@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Delete, Path, Body, SchemaQuery } from '@travetto/rest';
+import { Controller, Get, Put, Post, Delete, Path, Body, QuerySchema } from '@travetto/rest';
 import { ModelCrudSupport, NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
@@ -35,7 +35,7 @@ export class TodoController {
    * Get all Todos
    */
   @Get('/')
-  async getAll(@SchemaQuery() query: Query): Promise<Todo[]> {
+  async getAll(@QuerySchema() query: Query): Promise<Todo[]> {
     query.q ??= {};
     // {{#modules.auth-rest}} // @doc-exclude
     query.q.userId = this.auth.get()?.id; // @doc-exclude

@@ -1,9 +1,10 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, TransformerId
+  TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, TransformerId, DecoratorMeta, LiteralUtil
 } from '@travetto/transformer';
 import { SchemaTransformUtil } from '@travetto/schema/support/lib';
+import { AnyType, ExternalType } from '@travetto/transformer/src/resolver/types';
 
 import { RestTransformUtil } from './lib';
 
@@ -21,7 +22,7 @@ export class RestTransformer {
   /**
    * Handle endpoint parameter
    */
-  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration) {
+  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, epDec: DecoratorMeta) {
     const pDec = state.findDecorator(this, node, 'Param');
     let pDecArg = DecoratorUtil.getPrimaryArgument(pDec)!;
     if (pDecArg && ts.isStringLiteral(pDecArg)) {
@@ -29,26 +30,50 @@ export class RestTransformer {
     }
 
     const paramType = state.resolveType(node);
+    const name = node.name.getText();
 
-    const dm = pDec ? state.getDecoratorMeta(pDec) : undefined;
-    const defaultType = paramType.key === 'external' ? 'Context' : 'Query';
-    const common = { name: node.name.getText() };
+    let conf = state.extendObjectLiteral({ name }, pDecArg);
+    let detectedParamType: string | undefined;
 
-    let conf = state.extendObjectLiteral(common, pDecArg);
+    const isContext =
+      (paramType.key === 'external' &&
+        DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@trv:rest/Context')
+      ) ||
+      (pDec && !/(Path|Header|Query|Body|SchemaQuery)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
 
-    if (paramType.key === 'external' && !/^(Body|SchemaQuery)$/.test(dm?.name ?? '')) { // contextual
-      conf = state.extendObjectLiteral(conf, {
-        contextType: state.getOrImport(paramType)
-      });
-    }
-    if (paramType.key !== 'external' || /^(Body|SchemaQuery)$/.test(dm?.name ?? '')) { // Not contextual) {
-      node = SchemaTransformUtil.computeField(state, node, /^(Body|SchemaQuery)$/.test(dm?.name ?? '') ? { name: '', type: paramType } : { type: paramType });
+    // Detect default behavior
+    if (isContext) {
+      detectedParamType = 'Context';
+      conf = state.extendObjectLiteral(conf, { contextType: state.getOrImport(paramType as ExternalType) });
+    } else {
+      // If not contextual
+      const config: { type: AnyType, name?: string } = { type: paramType };
+
+      // If primitive
+      if (paramType.key !== 'external' && paramType.key !== 'shape') {
+        // Get path of endpoint
+        const arg = DecoratorUtil.getPrimaryArgument(epDec.dec);
+        // If non-regex
+        if (arg && ts.isStringLiteral(arg)) {
+          const path = LiteralUtil.toLiteral(arg) as string;
+          // If param name matches path param, default to @Path
+          detectedParamType = new RegExp(`:${name}\\b`).test(path) ? 'Path' : 'Query';
+        } else {
+          // Default to query for empty or regex endpoints
+          detectedParamType = 'Query';
+        }
+      } else {
+        // Treat as schema, and see if endpoint supports a body for default behavior on untyped
+        detectedParamType = epDec.targets?.includes('@trv:http/Body') ? 'Body' : 'QuerySchema';
+        config.name = '';
+      }
+      node = SchemaTransformUtil.computeField(state, node, config);
     }
 
     const decs = (node.decorators ?? []).filter(x => x !== pDec);
 
     if (!pDec) { // Handle default, missing
-      decs.push(state.createDecorator(PARAM_DEC_FILE, defaultType, conf));
+      decs.push(state.createDecorator(PARAM_DEC_FILE, detectedParamType ?? 'Context', conf));
     } else if (ts.isCallExpression(pDec.expression)) { // if it does exist, update
       decs.push(state.factory.createDecorator(
         state.factory.createCallExpression(
@@ -75,7 +100,7 @@ export class RestTransformer {
    * On @Endpoint method
    */
   @OnMethod('Endpoint')
-  static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration) {
+  static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration, dec?: DecoratorMeta) {
 
     const decls = node.decorators ?? [];
     const newDecls = [];
@@ -96,7 +121,7 @@ export class RestTransformer {
       const params: ts.ParameterDeclaration[] = [];
       // If there are parameters to process
       for (const p of node.parameters) {
-        params.push(this.handleEndpointParameter(state, p));
+        params.push(this.handleEndpointParameter(state, p, dec!));
       }
 
       nParams = state.factory.createNodeArray(params);

@@ -1,6 +1,6 @@
 // @file-if @travetto/model
 import { Application } from '@travetto/app';
-import { RestApplication, Controller, Get, Context } from '@travetto/rest';
+import { RestApplication, Controller, Get } from '@travetto/rest';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { CacheService } from '@travetto/cache';
 import { ModelExpirySupport } from '@travetto/model';
@@ -26,7 +26,7 @@ export class App {
 @Controller('/auth')
 class Test {
   @Get('/login')
-  async login(@Context() data: SessionData) {
+  async login(data: SessionData) {
     if (!data.age) {
       data.age = 10;
     } else {

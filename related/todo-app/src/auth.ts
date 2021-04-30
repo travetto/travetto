@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Redirect, Context, Request } from '@travetto/rest';
+import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
 import { Authenticate, Authenticated, AuthService, Unauthenticated } from '@travetto/auth-rest';
 import { Principal } from '@travetto/auth';
 import { Inject } from '@travetto/di';
@@ -22,13 +22,13 @@ export class ApiController {
 
   @Get('/self')
   @Authenticated()
-  async getSelf(@Context() user: Principal) {
+  async getSelf(user: Principal) {
     return user;
   }
 
   @Get('/logout')
   @Unauthenticated()
-  async logout(@Context() req: Request) {
+  async logout(req: Request) {
     await this.svc.logout(req);
     return new Redirect('/auth/self', 301);
   }

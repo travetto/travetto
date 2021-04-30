@@ -108,9 +108,10 @@ export class SchemaTransformUtil {
       if (commentConfig.description) {
         attrs.push(state.factory.createPropertyAssignment('description', state.fromLiteral(commentConfig.description)));
       }
-      if (attrs.length) {
-        params.push(state.factory.createObjectLiteralExpression(attrs));
-      }
+    }
+
+    if (attrs.length) {
+      params.push(state.factory.createObjectLiteralExpression(attrs));
     }
 
     const dec = state.createDecorator(FIELD_MOD, 'Field', ...params);
