@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as os from 'os';
 import * as busboy from 'busboy';
+import * as stream from 'stream';
 
 import { Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
@@ -44,7 +45,7 @@ export class AssetRestUtil {
   /**
    * Stream file to disk, and verify types in the process.  Produce an asset as the output
    */
-  static async toLocalAsset(data: NodeJS.ReadableStream | Buffer, filename: string) {
+  static async toLocalAsset(data: stream.Readable | Buffer, filename: string) {
     const uniqueDir = PathUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
     await FsUtil.mkdirp(uniqueDir); // TODO: Unique dir for each file? Use random file, and override metadata
     const uniqueLocal = PathUtil.resolveUnix(uniqueDir, path.basename(filename));
@@ -93,7 +94,7 @@ export class AssetRestUtil {
         uploader.on('file', async (fieldName, stream, filename, encoding, mimeType) => {
           console.debug('Uploading file', { fieldName, filename, encoding, mimeType });
           uploads.push(
-            this.toLocalAsset(stream, filename)
+            this.toLocalAsset(stream as stream.Readable, filename)
               .then(validator)
               .then(res => mapping[fieldName] = res)
           );
@@ -121,9 +122,6 @@ export class AssetRestUtil {
    */
   static downloadable(asset: Asset) {
     return {
-      /**
-       * @returns {Asset}
-       */
       render(res: Response) {
         res.status(200);
         res.setHeader('Content-Type', asset.contentType);

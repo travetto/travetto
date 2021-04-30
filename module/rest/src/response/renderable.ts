@@ -5,8 +5,8 @@ import { Response } from '../types';
  */
 export interface Renderable {
   /**
-   * Render the output given a response
+   * Render the output given a response.  If it returns a value, that is sent to the client
    * @param res
    */
-  render(res: Response): void;
+  render(res: Response): unknown;
 }

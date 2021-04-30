@@ -1,3 +1,5 @@
+import * as stream from 'stream';
+
 export interface StreamMeta {
   /**
    * File size
@@ -18,7 +20,7 @@ export interface StreamMeta {
 }
 
 /**
- * Support for NodeJS Streams CRD.  Stream update is not supported.
+ * Support for Streams CRD.  Stream update is not supported.
  *
  * @concrete ../internal/service/common:ModelStreamSupportTarget
  */
@@ -30,13 +32,13 @@ export interface ModelStreamSupport {
    * @param stream The actual stream to write
    * @param meta The stream metadata
    */
-  upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta): Promise<void>;
+  upsertStream(location: string, stream: stream.Readable, meta: StreamMeta): Promise<void>;
 
   /**
    * Get stream from asset store
    * @param location The location of the stream
    */
-  getStream(location: string): Promise<NodeJS.ReadableStream>;
+  getStream(location: string): Promise<stream.Readable>;
 
   /**
    * Get metadata for stream

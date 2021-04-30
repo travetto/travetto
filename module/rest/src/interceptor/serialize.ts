@@ -46,8 +46,13 @@ export class SerializeInterceptor implements RestInterceptor {
           }
         }
         if (isRenderable(output)) {
-          await output.render(res);
-        } else if (typeof output === 'string') {
+          output = await output.render(res);
+          if (output === undefined) { // If render didn't return a result, consider us done
+            return;
+          }
+        }
+
+        if (typeof output === 'string') {
           this.setContentTypeIfUndefined(res, 'text/plain');
           res.send(output);
         } else if (Buffer.isBuffer(output)) {

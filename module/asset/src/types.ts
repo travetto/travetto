@@ -1,3 +1,4 @@
+import * as stream from 'stream';
 import { StreamMeta } from '@travetto/model';
 
 /**
@@ -6,5 +7,5 @@ import { StreamMeta } from '@travetto/model';
  * @concrete ./internal/types:AssetImpl
  */
 export interface Asset extends StreamMeta {
-  stream?: NodeJS.ReadableStream;
+  stream?: stream.Readable;
 }

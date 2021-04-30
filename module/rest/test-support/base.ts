@@ -1,3 +1,5 @@
+import * as stream from 'stream';
+
 import { RootRegistry } from '@travetto/registry';
 import { AppError, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
@@ -87,7 +89,7 @@ export abstract class BaseRestSuite {
   async request<T>(
     method: Request['method'] | Exclude<MethodOrAll, 'all'>,
     path: string,
-    cfg: MakeRequestConfig<Buffer | string | { stream: NodeJS.ReadableStream } | Record<string, unknown>> & { throwOnError?: boolean } = {}
+    cfg: MakeRequestConfig<Buffer | string | { stream: stream.Readable } | Record<string, unknown>> & { throwOnError?: boolean } = {}
   ): Promise<MakeRequestResponse<T>> {
 
     method = method.toUpperCase() as Request['method'];
@@ -102,7 +104,7 @@ export abstract class BaseRestSuite {
       } else if (typeof body === 'string') {
         buffer = Buffer.from(body);
       } else if ('stream' in body) {
-        buffer = await StreamUtil.toBuffer(body.stream as NodeJS.ReadableStream);
+        buffer = await StreamUtil.toBuffer(body.stream as stream.Readable);
       } else {
         buffer = Buffer.from(JSON.stringify(body));
         cfg.headers['Content-Type'] = cfg.headers['Content-Type'] ?? 'application/json';

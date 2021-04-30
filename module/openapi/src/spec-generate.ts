@@ -1,11 +1,12 @@
 import { SchemaObject, OpenAPIObject, SchemasObject, ParameterObject, OperationObject, RequestBodyObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { ControllerRegistry, EndpointClassType, EndpointIOType, EndpointConfig, ControllerConfig, ParamConfig } from '@travetto/rest';
-import { Class } from '@travetto/base';
+import { Class, Util } from '@travetto/base';
 import { SchemaRegistry, FieldConfig } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { ApiSpecConfig } from './config';
+import { Readable } from 'stream';
 
 export function isEndpointClassType(o: EndpointIOType): o is EndpointClassType {
   return !!o && !('mime' in o);
@@ -29,13 +30,13 @@ export class SpecGenerateUtil {
     if (!schemaConf) {
       throw new Error(`Unknown class, not registered as a schema: ${cls.ᚕid}`);
     }
-    const params = Object.keys(schemaConf).reduce((acc, x) => {
-      const field = schemaConf[x];
+    const params: ParameterObject[] = [];
+    for (const field of Object.values(schemaConf)) {
       if (SchemaRegistry.has(field.type) || SchemaRegistry.hasPending(field.type)) {
         const suffix = (field.array) ? '[]' : '';
-        acc = [...acc, ...this.#schemaToDotParams(state, location, field.type, undefined, prefix ? `${prefix}.${field.name}${suffix}` : `${field.name}${suffix}.`)];
+        params.push(...this.#schemaToDotParams(state, location, field.type, undefined, prefix ? `${prefix}.${field.name}${suffix}` : `${field.name}${suffix}.`));
       } else {
-        acc.push({
+        params.push({
           name: `${prefix}${field.name}`,
           description: field.description,
           schema: field.array ? {
@@ -47,8 +48,7 @@ export class SpecGenerateUtil {
           extract: undefined
         });
       }
-      return acc;
-    }, [] as ParameterObject[]);
+    }
     return params;
   }
 
@@ -56,14 +56,16 @@ export class SpecGenerateUtil {
    * Get the type for a given class
    */
   static #getType(field: FieldConfig | Class, state: PartialSpec) {
-    if ('constructor' in field) {
+    if (!Util.isPlainObject(field)) {
       field = { type: field } as FieldConfig;
     }
+    field = field as FieldConfig;
     const out: Record<string, unknown> = {};
     // Handle nested types
     if (SchemaRegistry.has(field.type)) {
-      out.$ref = `${DEFINITION}/${this.processSchema(field.type, state)}`;
+      out.$ref = `${DEFINITION}/${this.#processSchema(field.type, state)}`;
     } else {
+      console.log('Getting', field.name, field.type);
       switch (field.type) {
         case String: out.type = 'string'; break;
         case Number: {
@@ -133,12 +135,12 @@ export class SpecGenerateUtil {
   /**
    * Process schema class
    */
-  static processSchema(type: string | Class | undefined, state: PartialSpec) {
+  static #processSchema(type: string | Class | undefined, state: PartialSpec) {
     if (type === undefined || typeof type === 'string') {
       return undefined;
     }
 
-    const typeId = type.name;
+    const typeId = type.name.replace(`ᚕsyn`, '');
 
     if (!state.components.schemas[typeId]) {
       const config = SchemaRegistry.get(type);
@@ -168,8 +170,11 @@ export class SpecGenerateUtil {
     return typeId;
   }
 
+  /**
+   * Standard JSON body structure
+   */
   static #getJsonBody(state: PartialSpec, body: EndpointClassType): RequestBodyObject {
-    const schemaName = this.processSchema(body.type, state);
+    const schemaName = this.#processSchema(body.type, state);
     if (schemaName && schemaName !== 'void' && schemaName !== 'undefined') {
       const ref: SchemaObject = this.#getType(body.type, state);
       return {
@@ -187,7 +192,12 @@ export class SpecGenerateUtil {
     if (!eType) {
       return { description: '', content: {} };
     }
-    if (isEndpointClassType(eType)) {
+    if (eType.type === Readable || eType.type === Buffer) {
+      return {
+        description: '',
+        content: { ['mime' in eType ? eType.mime : 'application/octect-stream']: { type: 'string', format: 'binary' } }
+      };
+    } else if (isEndpointClassType(eType)) {
       return this.#getJsonBody(state, eType);
     } else {
       return {
@@ -197,6 +207,9 @@ export class SpecGenerateUtil {
     }
   }
 
+  /**
+   * Get upload body
+   */
   static #buildUploadBody(): RequestBodyObject {
     return {
       description: 'Uploaded files',
@@ -215,14 +228,14 @@ export class SpecGenerateUtil {
     if (param.location) {
       if (param.location === 'body') {
         op.requestBody = field.specifier === 'file' ? this.#buildUploadBody() : this.#getJsonBody(state, field);
-      } else if (field && field.type && SchemaRegistry.has(field.type) && (param.location === 'query' || param.location === 'header')) {
+      } else if (field.type && SchemaRegistry.has(field.type) && (param.location === 'query' || param.location === 'header')) {
         op.parameters!.push(...this.#schemaToDotParams(state, param.location, field.type));
       } else if (param.location !== 'context') {
         const epParam: ParameterObject = {
           in: param.location as 'path',
           name: param.name || param.location,
-          description: field?.description,
-          required: !!field?.required?.active || false,
+          description: field.description,
+          required: !!field.required?.active || false,
           schema: this.#getType(field, state)
         };
         op.parameters!.push(epParam);
@@ -303,7 +316,7 @@ export class SpecGenerateUtil {
     // Prime all schemas
     if (config.exposeAllSchemas) {
       for (const cls of SchemaRegistry.getClasses()) {
-        this.processSchema(cls, state);
+        this.#processSchema(cls, state);
       }
     }
 

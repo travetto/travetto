@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as util from 'util';
 import * as path from 'path';
+import * as stream from 'stream';
 import * as fileType from 'file-type';
 import * as crypto from 'crypto';
 import * as mime from 'mime';
@@ -85,7 +86,7 @@ export class AssetUtil {
   /**
    * Convert local file to asset structure
    */
-  static async fileToAsset(file: string, remote: string = file, metadata: Partial<Asset> = {}): Promise<Asset & { stream: NodeJS.ReadableStream }> {
+  static async fileToAsset(file: string, remote: string = file, metadata: Partial<Asset> = {}): Promise<Asset & { stream: stream.Readable }> {
     const hash = metadata.hash ?? await this.hashFile(file);
     const size = metadata.size ?? (await fsStat(file)).size;
     const contentType = metadata.contentType ?? await this.resolveFileType(file);
