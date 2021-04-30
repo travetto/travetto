@@ -39,7 +39,7 @@ export class ModuleUtil {
       err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${filename}]` : `from ${filename}`}`);
     }
 
-    if (EnvUtil.isWatch() && !filename.startsWith('test/')) {
+    if (EnvUtil.isDynamic() && !filename.startsWith('test/')) {
       console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
       return SourceUtil.getErrorModule(err.message);
     }

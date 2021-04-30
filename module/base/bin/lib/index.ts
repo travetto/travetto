@@ -46,7 +46,7 @@ export class BuildUtil {
       ExecUtil.workerMain(require.resolve('../build'), [], { // target self
         env: {
           ...(output ? { TRV_CACHE: output } : {}),
-          TRV_WATCH: '0', // Ensure no watching
+          TRV_DYNAMIC: '0', // Ensure no updates at runtime
           ...(env ?? {})
         },
         stderr: false

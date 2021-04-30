@@ -120,10 +120,10 @@ export class EnvUtil {
   }
 
   /**
-   * Is the app in watch mode?
+   * Is the app in dynamic mode?
    */
-  static isWatch() {
-    return !this.isReadonly() && this.isTrue('TRV_WATCH');
+  static isDynamic() {
+    return !this.isReadonly() && this.isTrue('TRV_DYNAMIC');
   }
 
   /**

@@ -1,6 +1,6 @@
 import { Class, ClassInstance, ConcreteClass } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
-import { Watchable } from '@travetto/base/src/internal/watchable';
+import { Dynamic } from '@travetto/base/src/internal/dynamic';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
@@ -25,7 +25,7 @@ function hasPreDestroy(o: unknown): o is { preDestroy: () => unknown } {
 /**
  * Dependency registry
  */
-@Watchable('@travetto/di/support/watch.injection')
+@Dynamic('@travetto/di/support/dynamic.injection')
 class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   protected pendingFinalize: Class[] = [];
 

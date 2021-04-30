@@ -1,7 +1,7 @@
-import { ConcreteClass, Util } from '@travetto/base';
+import { ConcreteClass } from '../types';
+import { Util } from '../util';
 
-const IsProxiedⲐ = Symbol.for('@trv:watch/proxy');
-
+const IsProxiedⲐ = Symbol.for('@trv:base/proxy');
 
 /**
  * Handler for for proxying modules while watching

@@ -140,7 +140,7 @@ export class ModuleManager {
 
     // Register source maps for cached files
     sourceMapSupport.install({
-      emptyCacheBetweenOperations: EnvUtil.isWatch(),
+      emptyCacheBetweenOperations: EnvUtil.isDynamic(),
       retrieveFile: p => AppCache.readOptionalEntry(PathUtil.toUnixTs(p))!
     });
 

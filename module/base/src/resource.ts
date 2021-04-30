@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as stream from 'stream';
 
 import { PathUtil, ScanFs, ScanEntry, FsUtil } from '@travetto/boot';
 
@@ -124,7 +125,7 @@ class $ResourceManager {
    * @param pth The path to read
    * @param options The options to determine the read behavior
    */
-  async readStream(pth: string, options?: Parameters<typeof fs.createReadStream>[1]) {
+  async readStream(pth: string, options?: Parameters<typeof fs.createReadStream>[1]): Promise<stream.Readable> {
     pth = await this.find(pth);
     return fs.createReadStream(pth, options);
   }

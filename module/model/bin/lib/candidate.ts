@@ -67,7 +67,7 @@ export class ModelCandidateUtil {
   static async getCandidates(op: keyof ModelStorageSupport) {
     return CliUtil.waiting('Resolving', () =>
       ExecUtil.workerMain<{ providers: string[], models: string[] }>(require.resolve('../candidate'), [op], {
-        env: { TRV_WATCH: '0' }
+        env: { TRV_DYNAMIC: '0' }
       }).message
     );
   }

@@ -2,7 +2,7 @@ import { EnvUtil } from '@travetto/boot/src/env';
 
 interface InitConfig {
   env?: string;
-  watch?: boolean;
+  dynamic?: boolean;
   debug?: string;
   set?: Record<string, string>;
   append?: Record<string, (string[] | string)>;
@@ -22,14 +22,14 @@ export class EnvInit {
   /**
    * Initialize the app environment
    */
-  static init({ env, watch, debug, set, append }: InitConfig) {
+  static init({ env, dynamic, debug, set, append }: InitConfig = {}) {
     process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
     const prod = /^prod(uction)$/i.test(process.env.TRV_ENV);
-    watch ??= EnvUtil.getBoolean('TRV_WATCH');
+    dynamic ??= EnvUtil.isTrue('TRV_DYNAMIC');
 
     Object.assign(process.env, {
       NODE_ENV: prod ? 'production' : 'development',
-      ...(watch !== undefined ? { TRV_WATCH: `${watch}` } : {}),
+      ...(dynamic !== undefined ? { TRV_DYNAMIC: `${dynamic}` } : {}),
       TRV_DEBUG: EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', debug ?? (prod ? '0' : '')))
     }, set ?? {});
 
