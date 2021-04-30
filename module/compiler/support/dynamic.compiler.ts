@@ -1,5 +1,6 @@
 import { AppManifest, Class, ShutdownManager } from '@travetto/base';
-import { FilePresenceManager, RetargettingProxy } from '@travetto/watch';
+import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
+import { FilePresenceManager } from '@travetto/watch';
 import { FsUtil, PathUtil } from '@travetto/boot';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
@@ -9,7 +10,7 @@ import { Compiler } from '../src/compiler';
 /**
  * Wraps the compiler supporting real-time changes to files
  */
-export function watch($Compiler: Class<typeof Compiler>) {
+export function init($Compiler: Class<typeof Compiler>) {
   /**
    * Extending the $Compiler class to add some functionality
    */

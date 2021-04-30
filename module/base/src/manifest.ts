@@ -95,12 +95,13 @@ class $AppManifest {
     this.info = {
       name: 'untitled',
       description: 'A Travetto application',
+      baseVersion,
+      version: '0.0.0.0'
     };
     try {
       const { version, name, license, author, description } = pkg;
       Object.assign(this.info, { version, name, license, author, description });
     } catch { }
-    this.info.baseVersion = baseVersion; // Travetto version
 
     const env = EnvUtil.get('TRV_ENV', EnvUtil.get('NODE_ENV', 'dev'))
       .replace(/^production$/i, 'prod')
@@ -142,7 +143,7 @@ class $AppManifest {
         env: {
           ...this.env,
           cache: AppCache.cacheDir,
-          watch: EnvUtil.isWatch(),
+          dynamic: EnvUtil.isDynamic(),
           readonly: EnvUtil.isReadonly()
         },
         source: {

@@ -1,4 +1,4 @@
-import { RetargettingProxy } from '@travetto/watch';
+import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
 import { Class, ClassInstance } from '@travetto/base';
 
 import type { DependencyRegistry } from '../src/registry';
@@ -7,7 +7,7 @@ import type { ClassTarget } from '../src/types';
 /**
  * Wraps the Dependency Registry to support proxying instances
  */
-export function watch($DependencyRegistry: Class<typeof DependencyRegistry>) {
+export function init($DependencyRegistry: Class<typeof DependencyRegistry>) {
 
   /**
    * Extending the $DependencyRegistry class to add some functionality for watching

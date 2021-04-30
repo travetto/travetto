@@ -104,7 +104,7 @@ export class TranspileUtil {
    * Handle transpilation errors
    */
   static transpileError(tsf: string, err: Error) {
-    if (EnvUtil.isWatch() && !tsf.startsWith('test')) {
+    if (EnvUtil.isDynamic() && !tsf.startsWith('test')) {
       console.trace(`Unable to transpile ${tsf}: stubbing out with error proxy.`, err.message);
       return SourceUtil.getErrorModule(err.message);
     } else {

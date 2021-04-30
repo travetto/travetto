@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 import { PathUtil, EnvUtil, AppCache } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
-import { Watchable } from '@travetto/base/src/internal/watchable';
+import { Dynamic } from '@travetto/base/src/internal/dynamic';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 
 import { SourceHost } from './host';
@@ -17,7 +17,7 @@ type EventType = 'added' | 'removed' | 'changed';
 /**
  * Compilation orchestrator, interfaces with watching, unloading, emitting and delegates appropriately
  */
-@Watchable('@travetto/compiler/support/watch.compiler')
+@Dynamic('@travetto/compiler/support/dynamic.compiler')
 class $Compiler {
 
   #program: ts.Program | undefined;

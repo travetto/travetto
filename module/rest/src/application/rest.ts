@@ -35,14 +35,15 @@ export class RestApplication<T extends unknown = unknown>  {
   /**
    * Provide the base information for the app
    */
-  info = {
-    restProvider: this.constructor.name,
-    ...AppManifest.toJSON()
-  };
+  info = AppManifest.toJSON();
 
   constructor() {
     this.onControllerChange = this.onControllerChange.bind(this);
     this.globalHandler = this.globalHandler.bind(this);
+  }
+
+  postConstruct() {
+    this.info.restProvider = this.server.constructor.name;
   }
 
   /**

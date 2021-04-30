@@ -55,7 +55,7 @@ export class AppRunPlugin extends BasePlugin {
       } else {
         EnvInit.init({
           env: this.cmd.env,
-          watch: true,
+          dynamic: true,
           append: {
             TRV_PROFILES: this.cmd.profile,
             TRV_RESOURCES: this.cmd.resource

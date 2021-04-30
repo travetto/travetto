@@ -65,7 +65,6 @@ export class SpecGenerateUtil {
     if (SchemaRegistry.has(field.type)) {
       out.$ref = `${DEFINITION}/${this.#processSchema(field.type, state)}`;
     } else {
-      console.log('Getting', field.name, field.type);
       switch (field.type) {
         case String: out.type = 'string'; break;
         case Number: {
@@ -188,21 +187,27 @@ export class SpecGenerateUtil {
   /**
    * Build response object
    */
-  static #buildResponseObject(state: PartialSpec, eType?: EndpointIOType): RequestBodyObject {
-    if (!eType) {
+  static #buildResponseObject(state: PartialSpec, ep: EndpointConfig): RequestBodyObject {
+    const resType = ep.responseType;
+    if (!resType) {
       return { description: '', content: {} };
     }
-    if (eType.type === Readable || eType.type === Buffer) {
+    let cType = ep.headers?.['content-type'];
+    if (cType && typeof cType !== 'string') {
+      cType = cType();
+    }
+    const mime = cType ?? ('mime' in resType ? resType.mime : '');
+    if (resType.type === Readable || resType.type === Buffer) {
       return {
         description: '',
-        content: { ['mime' in eType ? eType.mime : 'application/octect-stream']: { type: 'string', format: 'binary' } }
+        content: mime ? { [mime]: {} } : { 'application/octect-stream': { type: 'string', format: 'binary' } }
       };
-    } else if (isEndpointClassType(eType)) {
-      return this.#getJsonBody(state, eType);
+    } else if (isEndpointClassType(resType)) {
+      return this.#getJsonBody(state, resType);
     } else {
       return {
         description: '',
-        content: { [eType.mime]: { schema: { type: eType.type as 'string' } } }
+        content: { [mime]: { schema: { type: resType.type as 'string' } } }
       };
     }
   }
@@ -258,12 +263,12 @@ export class SpecGenerateUtil {
       parameters: []
     };
 
-    const pConf = this.#buildResponseObject(state, ep.responseType);
+    const pConf = this.#buildResponseObject(state, ep);
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses[code] = pConf;
 
     const schema = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
-    ep.params.forEach((param, i) => this.#processEndpointParam(op, param, schema[i], state));
+    ep.params.forEach((param, i) => schema[i] ? this.#processEndpointParam(op, param, schema[i], state) : undefined);
 
     const epPath = (
       !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source
