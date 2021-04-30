@@ -7,10 +7,10 @@ import { ClassList, FieldConfig } from '../service/types';
 function prop(obj: Record<string, unknown>) {
   return (t: ClassInstance, k: string, idx?: number) => {
     if (idx !== undefined && typeof idx === 'number') {
-      k = `${k}.${idx}`;
-      obj.index = idx;
+      SchemaRegistry.registerPendingParamFacet(t.constructor, k, idx, obj);
+    } else {
+      SchemaRegistry.registerPendingFieldFacet(t.constructor, k, obj);
     }
-    SchemaRegistry.registerPendingFieldFacet(t.constructor, k, obj);
   };
 }
 
@@ -38,13 +38,9 @@ const dateNumberProp = prop as
 export function Field(type: ClassList, config?: Partial<FieldConfig>) {
   return (f: ClassInstance, k: string, idx?: number) => {
     if (idx !== undefined && typeof idx === 'number') {
-      k = `${k}.${idx}`;
-      config ??= {};
-      config.index = idx;
-    }
-    SchemaRegistry.registerPendingFieldConfig(f.constructor, k, type);
-    if (config) {
-      SchemaRegistry.registerPendingFieldFacet(f.constructor, k, config);
+      SchemaRegistry.registerPendingParamConfig(f.constructor, k, idx, type, config);
+    } else {
+      SchemaRegistry.registerPendingFieldConfig(f.constructor, k, type, config);
     }
   };
 }

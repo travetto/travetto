@@ -20,8 +20,8 @@ type DevConfig = {
 
 class DevRegister {
 
-  static TRV_MOD = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
-  static DEFAULT_MODS = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc']);
+  static #trvMod = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
+  static #defaultMods = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc']);
 
   /**
    * Resolve filename for dev mode
@@ -75,8 +75,8 @@ class DevRegister {
   }
 
   static getMods(envMods: string) {
-    const mods = new Set(this.DEFAULT_MODS);
-    envMods.replace(this.TRV_MOD, (_, m) => mods.add(m) && '');
+    const mods = new Set(this.#defaultMods);
+    envMods.replace(this.#trvMod, (_, m) => mods.add(m) && '');
     return mods;
   }
 
@@ -95,7 +95,7 @@ class DevRegister {
 
     AppCache.init(true);
     const { entries } = JSON.parse(this.getContent(envMods)) as DevConfig;
-    process.env.TRV_MODULES = `${envMods.replace(this.TRV_MOD, '')},${Object.entries(entries).map(([k, v]) => `${k}=${v ?? ''}`).join(',')}`
+    process.env.TRV_MODULES = `${envMods.replace(this.#trvMod, '')},${Object.entries(entries).map(([k, v]) => `${k}=${v ?? ''}`).join(',')}`
       .replace(/,=/g, '');
 
     // Override compiler options

@@ -22,14 +22,14 @@ interface ConfigType {
  */
 export class ConfigUtil {
 
-  static CONFIG_FILE = PathUtil.resolveUnix('resources/email/dev.yml');
-  static DEFAULT_CONFIG = fs.readFileSync(PathUtil.resolveUnix(__dirname, 'default-dev.yml'));
+  static #configFile = PathUtil.resolveUnix('resources/email/dev.yml');
+  static #defaultConfig = fs.readFileSync(PathUtil.resolveUnix(__dirname, 'default-dev.yml'));
 
   /**
    *
    */
   static async get(): Promise<ConfigType> {
-    return fs.promises.readFile(this.CONFIG_FILE, 'utf8')
+    return fs.promises.readFile(this.#configFile, 'utf8')
       .then(f => YamlUtil.parse(f) as ConfigType)
       .catch(err => ({} as ConfigType));
   }
@@ -45,14 +45,14 @@ export class ConfigUtil {
   }
 
   static getDefaultConfig() {
-    return this.DEFAULT_CONFIG;
+    return this.#defaultConfig;
   }
 
   static async ensureConfig() {
-    const file = this.CONFIG_FILE;
+    const file = this.#configFile;
     if (!(await FsUtil.exists(file))) {
       await FsUtil.mkdirpSync(path.dirname(file));
-      await fs.promises.writeFile(file, this.DEFAULT_CONFIG, { encoding: 'utf8' });
+      await fs.promises.writeFile(file, this.#defaultConfig, { encoding: 'utf8' });
     }
     return file;
   }

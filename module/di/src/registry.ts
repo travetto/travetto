@@ -502,7 +502,6 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    */
   onReset() {
     super.onReset();
-    this.resolved = false;
     this.pendingFinalize = [];
     this.instances.clear();
     this.instancePromises.clear();

@@ -1,7 +1,8 @@
 import { Class, ClassInstance, ConcreteClass, Util } from '@travetto/base';
 
+import { AllViewⲐ } from './internal/types';
 import { SchemaRegistry } from './service/registry';
-import { FieldConfig, ALL_VIEW } from './service/types';
+import { FieldConfig } from './service/types';
 
 /**
  * Utilities for binding objects to schemas
@@ -128,8 +129,8 @@ export class BindUtil {
    * @param data The data to bind
    * @param view The desired view
    */
-  static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: object, view?: string): T {
-    view = view ?? ALL_VIEW;
+  static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: object, view?: string | typeof AllViewⲐ): T {
+    view = view ?? AllViewⲐ;
 
     if (!!data) {
       const conf = SchemaRegistry.get(cons);
@@ -141,9 +142,9 @@ export class BindUtil {
         }
       } else {
 
-        const viewConf = conf && conf.views[view];
+        const viewConf = conf.views[view];
         if (!viewConf) {
-          throw new Error(`View not found: ${view}`);
+          throw new Error(`View not found: ${view.toString()}`);
         }
 
         for (const schemaFieldName of viewConf.fields) {

@@ -10,56 +10,65 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Has the registry been resolved
    */
-  protected resolved: boolean;
+  #resolved: boolean;
   /**
    * Initializing promises
    */
-  protected initialized?: Promise<unknown>;
+  #initialized?: Promise<unknown>;
   /**
    * Event emitter, to broadcast event changes
    */
-  protected emitter = new EventEmitter();
+  #emitter = new EventEmitter();
   /**
    * Dependent registries
    */
-  protected dependents: Registry[] = [];
+  #dependents: Registry[] = [];
   /**
    * Parent registries
    */
-  protected parents: ChangeSource<Class>[] = [];
+  #parents: ChangeSource<Class>[] = [];
   /**
    * Unique identifier
    */
-  protected _uid: string;
+  #uid: string;
 
   /**
    * Creates a new registry, with it's parents specified
    */
   constructor(...parents: ChangeSource<Class>[]) {
-    this._uid = `${this.constructor.name}_${Date.now()}`;
-    this.parents = parents;
+    this.#uid = `${this.constructor.name}_${Date.now()}`;
+    this.#parents = parents;
 
-    if (this.parents.length) {
+    if (this.#parents.length) {
       // Have the child listen to the parents
-      for (const parent of this.parents) {
+      for (const parent of this.#parents) {
         this.listen(parent);
         if (parent instanceof Registry) {
-          parent.dependents.push(this);
+          parent.#dependents.push(this);
         }
       }
     }
   }
 
   /**
+   * Reset parents
+   */
+  protected resetParents() {
+    for (const parent of this.#parents) {
+      parent.reset();
+    }
+  }
+
+  /**
    * Run initialization
    */
-  protected async runInit(): Promise<void> {
+  async #runInit(): Promise<void> {
     try {
-      this.resolved = false;
-      console.debug('Initializing', { id: this.constructor.ᚕid, uid: this._uid });
+      this.#resolved = false;
+      console.debug('Initializing', { id: this.constructor.ᚕid, uid: this.#uid });
 
       // Handle top level when dealing with non-registry
-      const waitFor = this.parents.filter(x => !(x instanceof Registry));
+      const waitFor = this.#parents.filter(x => !(x instanceof Registry));
       await Promise.all(waitFor.map(x => x.init()));
 
       const classes = await this.initialInstall();
@@ -69,12 +78,16 @@ export abstract class Registry implements ChangeSource<Class> {
         }
       }
 
-      await Promise.all(this.dependents.map(x => x.init()));
+      await Promise.all(this.#dependents.map(x => x.init()));
 
-      console.debug('Initialized', { id: this.constructor.ᚕid, uid: this._uid });
+      console.debug('Initialized', { id: this.constructor.ᚕid, uid: this.#uid });
     } finally {
-      this.resolved = true;
+      this.#resolved = true;
     }
+  }
+
+  get resolved() {
+    return this.#resolved;
   }
 
   /**
@@ -88,7 +101,7 @@ export abstract class Registry implements ChangeSource<Class> {
    * Verify initialized state
    */
   verifyInitialized() {
-    if (!this.resolved) {
+    if (!this.#resolved) {
       throw new Error(`${this.constructor.name} has not been initialized, you probably need to call RootRegistry.init()`);
     }
   }
@@ -97,12 +110,12 @@ export abstract class Registry implements ChangeSource<Class> {
    * Initialize, with a built-in latch to prevent concurrent initializations
    */
   async init(): Promise<unknown> {
-    console.debug('Trying to initialize', { id: this.constructor.ᚕid, uid: this._uid, initialized: !!this.initialized });
+    console.debug('Trying to initialize', { id: this.constructor.ᚕid, uid: this.#uid, initialized: !!this.#initialized });
 
-    if (!this.initialized) {
-      this.initialized = this.runInit();
+    if (!this.#initialized) {
+      this.#initialized = this.#runInit();
     }
-    return this.initialized;
+    return this.#initialized;
   }
 
   /**
@@ -169,21 +182,21 @@ export abstract class Registry implements ChangeSource<Class> {
    * Emit a new event
    */
   emit(e: ChangeEvent<Class>) {
-    this.emitter.emit('change', e);
+    this.#emitter.emit('change', e);
   }
 
   /**
    * Register additional listeners
    */
   on<T>(callback: ChangeHandler<Class<T>>): void {
-    this.emitter.on('change', callback);
+    this.#emitter.on('change', callback);
   }
 
   /**
    * Remove listeners
    */
   off<T>(callback: ChangeHandler<Class<T>>) {
-    this.emitter.off('change', callback);
+    this.#emitter.off('change', callback);
   }
 
   /**
@@ -196,16 +209,18 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * On registry reset
    */
-  onReset() { }
+  onReset() {
+    this.#resolved = false;
+  }
 
   /**
    * Reset entire registry
    */
   reset() {
     this.onReset();
-    for (const des of this.dependents) {
+    for (const des of this.#dependents) {
       des.reset();
     }
-    delete this.initialized;
+    this.#initialized = undefined;
   }
 }

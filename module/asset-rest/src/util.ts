@@ -124,17 +124,11 @@ export class AssetRestUtil {
       /**
        * @returns {Asset}
        */
-      async render(res: Response) {
-        const stream = asset.stream!;
+      render(res: Response) {
         res.status(200);
-        res.setHeader('Content-Type', [asset.contentType]);
+        res.setHeader('Content-Type', asset.contentType);
         res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
-        await new Promise((resolve, reject) => {
-          stream.pipe(res[NodeEntityⲐ]);
-          res[NodeEntityⲐ].on('error', reject);
-          res[NodeEntityⲐ].on('drain', resolve);
-          res[NodeEntityⲐ].on('close', resolve);
-        });
+        return asset.stream!;
       }
     };
   }

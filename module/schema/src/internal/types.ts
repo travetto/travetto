@@ -1,0 +1,1 @@
+export const AllViewⲐ: unique symbol = Symbol.for('@trv:schema/all');
