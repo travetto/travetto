@@ -1,7 +1,7 @@
 import * as fs from 'fs';
-import { PassThrough } from 'stream';
+import { PassThrough, Readable } from 'stream';
 
-type All = Buffer | string | NodeJS.ReadableStream | Uint8Array;
+type All = Buffer | string | Readable | Uint8Array;
 
 /**
  * Utilities for managing streams/buffers/etc
@@ -12,7 +12,7 @@ export class StreamUtil {
    * Convert buffer to a stream
    * @param src The buffer to stream
    */
-  static async bufferToStream(src: Buffer): Promise<NodeJS.ReadableStream> {
+  static async bufferToStream(src: Buffer): Promise<Readable> {
     const readable = new PassThrough();
     readable.end(src);
     return readable;
@@ -22,8 +22,8 @@ export class StreamUtil {
    * Read stream to buffer
    * @param src The stream to convert to a buffer
    */
-  static async streamToBuffer(src: NodeJS.ReadableStream): Promise<Buffer> {
-    const stream = src as NodeJS.ReadableStream;
+  static async streamToBuffer(src: Readable): Promise<Buffer> {
+    const stream = src as Readable;
     return new Promise<Buffer>((res, rej) => {
       const data: Buffer[] = [];
       stream.on('data', d => data.push(d));
@@ -54,7 +54,7 @@ export class StreamUtil {
    * Convert input source to a stream
    * @param src The input to convert to a stram
    */
-  static async toStream(src: All): Promise<NodeJS.ReadableStream> {
+  static async toStream(src: All): Promise<Readable> {
     if (typeof src !== 'string' && 'pipe' in src) {
       return src;
     } else {
@@ -81,11 +81,11 @@ export class StreamUtil {
    * @param stream The stream to wait for
    * @param waitUntil The function to track completion before the stream is done
    */
-  static async waitForCompletion(stream: NodeJS.ReadableStream, waitUntil: () => Promise<unknown>) {
+  static async waitForCompletion(stream: Readable, waitUntil: () => Promise<unknown>) {
     const ogListen = stream.addListener;
 
     // Allow for process to end before calling end handler
-    stream.on = stream.addListener = function (this: NodeJS.ReadableStream, type: string, handler: (...params: unknown[]) => void) {
+    stream.on = stream.addListener = function (this: Readable, type: string, handler: (...params: any[]) => void) {
       let outHandler = handler;
       if (type === 'end') {
         outHandler = async (...params: unknown[]) => {
@@ -101,7 +101,7 @@ export class StreamUtil {
   /**
    * Pipe a stream and wait for completion
    */
-  static async pipe(src: NodeJS.ReadableStream, dest: NodeJS.WritableStream, opts?: { end?: boolean }) {
+  static async pipe(src: Readable, dest: NodeJS.WritableStream, opts?: { end?: boolean }) {
     await new Promise((succ, rej) => {
       src.on('end', succ)
         .on('drain', succ)

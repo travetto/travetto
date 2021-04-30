@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
+import * as stream from 'stream';
 
 import { PathUtil } from '@travetto/boot';
 import { BeforeAll, Suite, Test } from '@travetto/test';
@@ -12,7 +13,7 @@ import { ModelStreamSupport } from '../src/service/stream';
 @Suite()
 export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {
 
-  async getHash(stream: NodeJS.ReadableStream) {
+  async getHash(stream: stream.Readable) {
     const hash = crypto.createHash('sha1');
     hash.setEncoding('hex');
     await new Promise((res, rej) => {

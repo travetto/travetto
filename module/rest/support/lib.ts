@@ -20,7 +20,6 @@ export class RestTransformUtil {
         m => ts.isMethodDeclaration(m) && ts.isIdentifier(m.name) && m.name.escapedText === 'render'
       );
     } else {
-      // TODO: fix direct access to resolver
       const props = state.getResolver().getPropertiesOfType(cls);
       for (const prop of props) {
         const decl = prop.declarations?.[0];
@@ -36,7 +35,7 @@ export class RestTransformUtil {
         const resolved = state.getResolver().getChecker().getTypeFromTypeNode(typeNode);
         return state.resolveType(resolved);
       } else {
-        throw new Error('All Renderable outputs must declare a @returns type on the render method');
+        return state.resolveReturnType(render);
       }
     }
   }

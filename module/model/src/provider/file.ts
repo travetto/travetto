@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as stream from 'stream';
 
 import { FsUtil, PathUtil, StreamUtil } from '@travetto/boot';
 import { Class, Util } from '@travetto/base';
@@ -181,7 +182,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   // Stream
-  async upsertStream(location: string, stream: NodeJS.ReadableStream, meta: StreamMeta) {
+  async upsertStream(location: string, stream: stream.Readable, meta: StreamMeta) {
     const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
       StreamUtil.writeToFile(stream, file),
