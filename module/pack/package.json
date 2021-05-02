@@ -1,7 +1,7 @@
 {
   "name": "@travetto/pack",
   "displayName": "Pack",
-  "version": "2.0.0-alpha.6",
+  "version": "2.0.0-alpha.7",
   "description": "Code packing utilities",
   "keywords": [
     "travetto",
@@ -24,12 +24,12 @@
     "directory": "module/pack"
   },
   "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.6",
+    "@travetto/base": "^2.0.0-alpha.7",
     "@types/picomatch": "^2.2.2",
     "picomatch": "^2.2.3"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "^2.0.0-alpha.6"
+    "@travetto/cli": "^2.0.0-alpha.7"
   },
   "docDependencies": {
     "@travetto/rest": true
