@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model-s3",
   "displayName": "S3 Model Support",
-  "version": "2.0.0-alpha.9",
+  "version": "2.0.0-alpha.10",
   "description": "S3 backing for the travetto model module.",
   "keywords": [
     "s3",

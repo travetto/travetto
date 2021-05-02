@@ -31,8 +31,11 @@ export class Git {
     if (!hash) {
       hash = await this.findLastRelease().$value;
     }
+
     yield* this.findFoldersChanged(hash)
-      .$flatMap(f => Modules.getDependentModules(f))
+      .$flatMap(f => Modules.getDependentModules(f).$concat(
+        Packages.yieldByFolder(f)
+      ))
       .$sort((a, b) => a.name.localeCompare(b.name))
       .$unique();
   }
