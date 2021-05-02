@@ -182,10 +182,10 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   // Stream
-  async upsertStream(location: string, stream: stream.Readable, meta: StreamMeta) {
+  async upsertStream(location: string, input: stream.Readable, meta: StreamMeta) {
     const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
-      StreamUtil.writeToFile(stream, file),
+      StreamUtil.writeToFile(input, file),
       fs.promises.writeFile(file.replace(BIN, META), JSON.stringify(meta), 'utf8')
     ]);
   }

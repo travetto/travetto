@@ -276,15 +276,15 @@ export class MongoModelService implements
   }
 
   // Stream
-  async upsertStream(location: string, stream: stream.Readable, meta: StreamMeta) {
+  async upsertStream(location: string, input: stream.Readable, meta: StreamMeta) {
     const writeStream = this.#bucket.openUploadStream(location, {
       contentType: meta.contentType,
       metadata: meta
     });
 
     await new Promise<unknown>((resolve, reject) => {
-      stream.pipe(writeStream);
-      stream.on('error', reject);
+      input.pipe(writeStream);
+      input.on('error', reject);
       writeStream.once('finish', resolve);
     });
   }

@@ -156,11 +156,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   // Stream Support
-  async upsertStream(location: string, stream: stream.Readable, meta: StreamMeta) {
+  async upsertStream(location: string, input: stream.Readable, meta: StreamMeta) {
     const streams = this.#getStore(STREAMS);
     const metas = this.#getStore(STREAM_META);
     metas.set(location, Buffer.from(JSON.stringify(meta)));
-    streams.set(location, await StreamUtil.streamToBuffer(stream));
+    streams.set(location, await StreamUtil.streamToBuffer(input));
   }
 
   async getStream(location: string) {

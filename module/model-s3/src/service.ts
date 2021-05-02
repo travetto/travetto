@@ -78,7 +78,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   /**
    * Write multipart file upload, in chunks
    */
-  async #writeMultipart(id: string, stream: stream.Readable, meta: StreamMeta): Promise<void> {
+  async #writeMultipart(id: string, input: stream.Readable, meta: StreamMeta): Promise<void> {
     const { UploadId } = await this.client.createMultipartUpload(this.#q('_stream', id, {
       ContentType: meta.contentType,
       ContentLength: meta.size,
@@ -101,7 +101,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       total = 0;
     };
     try {
-      for await (const chunk of stream) {
+      for await (const chunk of input) {
         buffers.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
         total += chunk.length;
         if (total > this.config.chunkSize) {
@@ -251,11 +251,11 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return -1;
   }
 
-  async upsertStream(location: string, stream: stream.Readable, meta: StreamMeta) {
+  async upsertStream(location: string, input: stream.Readable, meta: StreamMeta) {
     if (meta.size < this.config.chunkSize) { // If bigger than 5 mb
       // Upload to s3
       await this.client.putObject(this.#q('_stream', location, {
-        Body: await StreamUtil.toBuffer(stream),
+        Body: await StreamUtil.toBuffer(input),
         ContentType: meta.contentType,
         ContentLength: meta.size,
         Metadata: {
@@ -264,7 +264,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         }
       }));
     } else {
-      await this.#writeMultipart(location, stream, meta);
+      await this.#writeMultipart(location, input, meta);
     }
   }
 

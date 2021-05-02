@@ -29,10 +29,10 @@ export interface ModelStreamSupport {
   /**
    * Upsert stream to storage
    * @param location The location of the stream
-   * @param stream The actual stream to write
+   * @param input The actual stream to write
    * @param meta The stream metadata
    */
-  upsertStream(location: string, stream: stream.Readable, meta: StreamMeta): Promise<void>;
+  upsertStream(location: string, input: stream.Readable, meta: StreamMeta): Promise<void>;
 
   /**
    * Get stream from asset store
