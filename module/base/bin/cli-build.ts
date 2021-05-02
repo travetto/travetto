@@ -10,7 +10,8 @@ import { BuildUtil } from './lib';
 export class BaseBuildPlugin extends BasePlugin {
 
   name = 'build';
-  build = undefined;
+
+  async build() { }
 
   getOptions() {
     return {

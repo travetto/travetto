@@ -10,8 +10,10 @@ import { FileCache, PathUtil } from '@travetto/boot';
  * Allows for cleaning of the cache dire
  */
 export class BaseCleanPlugin extends BasePlugin {
+
   name = 'clean';
-  build = undefined;
+
+  async build() { }
 
   getOptions() {
     return { quiet: this.boolOption({ desc: 'Quiet operation' }) };
