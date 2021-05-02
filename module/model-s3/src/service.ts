@@ -312,6 +312,17 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
+  async truncateModel<T extends ModelType>(model: Class<T>) {
+    for await (const items of this.#iterateBucket(model)) {
+      await this.client.deleteObjects({
+        Bucket: this.config.bucket,
+        Delete: {
+          Objects: items
+        }
+      });
+    }
+  }
+
   async deleteStream(location: string) {
     await this.client.deleteObject(this.#q('_stream', location));
   }

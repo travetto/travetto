@@ -40,6 +40,11 @@ export class CacheService {
     }
   }
 
+  /**
+   * Get an item thowing an error if missing or expired.  Allows for extending expiry based on access
+   * @param id Record identifier
+   * @param extendOnAccess should the expiry be extended on acces
+   */
   async get(id: string, extendOnAccess = true) {
     const { expiresAt, issuedAt } = await this.#modelService.get(CacheRecord, id);
 
@@ -87,10 +92,30 @@ export class CacheService {
     return CacheUtil.fromSafeJSON(store.entry);
   }
 
+  /**
+   * Remove an item by id
+   * @param id
+   */
   async delete(id: string) {
     await this.#modelService.delete(CacheRecord, id);
   }
 
+  /**
+   * Purge the cache store of all data, if supported
+   */
+  async purge() {
+    if (isStorageSupported(this.#modelService) && this.#modelService.truncateModel) {
+      await this.#modelService.truncateModel(CacheRecord);
+    } else {
+      console.warn(`${this.#modelService.constructor.name} does not support truncating the data set`);
+    }
+  }
+
+  /**
+   * Get an item optionally, returning undefined if missing.  Allows for extending expiry based on access
+   * @param id Record identifier
+   * @param extendOnAccess should the expiry be extended on acces
+   */
   async getOptional(id: string, extendOnAccess = true) {
     let res: unknown;
 
