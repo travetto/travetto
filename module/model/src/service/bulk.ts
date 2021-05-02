@@ -4,6 +4,10 @@ import { ValidationResultError } from '@travetto/schema';
 import { ModelCrudSupport } from './crud';
 import { ModelType } from '../types/model';
 
+declare global {
+  interface Error { toJSON(sub?: unknown): unknown }
+}
+
 /**
  * Bulk operation. Each operation has a single action and payload
  */
@@ -51,6 +55,7 @@ export class BulkProcessError extends AppError {
   toJSON(extra: Record<string, unknown> = {}) {
     return {
       ...extra,
+      at: new Date(),
       message: this.message,
       category: this.category,
       type: this.type,
