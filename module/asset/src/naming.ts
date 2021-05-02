@@ -1,6 +1,6 @@
 import * as mime from 'mime';
 
-import { Asset } from './types';
+import { StreamMeta } from '@travetto/model';
 
 /**
  * Standard class for an asset naming strategy
@@ -13,7 +13,7 @@ export interface AssetNamingStrategy {
    * Produce a path for a given asset
    * @param asset Get path from an asset
    */
-  resolve(asset: Asset): string;
+  resolve(asset: StreamMeta): string;
 }
 
 /**
@@ -22,7 +22,7 @@ export interface AssetNamingStrategy {
 export class SimpleNamingStrategy implements AssetNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 
-  resolve(asset: Asset) {
+  resolve(asset: StreamMeta) {
     return `${this.prefix}${asset.filename}`;
   }
 }
@@ -34,7 +34,7 @@ export class SimpleNamingStrategy implements AssetNamingStrategy {
 export class HashNamingStrategy implements AssetNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 
-  resolve(asset: Asset) {
+  resolve(asset: StreamMeta) {
     let ext = '';
 
     if (asset.contentType) {

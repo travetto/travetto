@@ -1,4 +1,4 @@
-import * as stream from 'stream';
+import { Readable } from 'stream';
 
 import { StreamUtil } from '@travetto/boot';
 import { Util, Class } from '@travetto/base';
@@ -156,7 +156,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   // Stream Support
-  async upsertStream(location: string, input: stream.Readable, meta: StreamMeta) {
+  async upsertStream(location: string, input: Readable, meta: StreamMeta) {
     const streams = this.#getStore(STREAMS);
     const metas = this.#getStore(STREAM_META);
     metas.set(location, Buffer.from(JSON.stringify(meta)));

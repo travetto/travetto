@@ -1,6 +1,6 @@
 import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 import { SHARE_ENV, Worker, WorkerOptions, parentPort } from 'worker_threads';
-import * as stream from 'stream';
+import { Readable } from 'stream';
 
 import { PathUtil } from './path';
 import { StreamUtil } from './stream';
@@ -71,7 +71,7 @@ export interface ExecutionOptions extends SpawnOptions {
   /**
    * The stdin source for the execution
    */
-  stdin?: string | Buffer | stream.Readable;
+  stdin?: string | Buffer | Readable;
 }
 
 /**
@@ -294,8 +294,8 @@ export class ExecUtil {
    * @param input The data to input into the process
    */
   static pipe(state: ExecutionState, input: Buffer): Promise<Buffer>;
-  static pipe(state: ExecutionState, input: string | stream.Readable): Promise<stream.Readable>;
-  static async pipe(state: ExecutionState, input: Buffer | stream.Readable | string): Promise<Buffer | stream.Readable> {
+  static pipe(state: ExecutionState, input: string | Readable): Promise<Readable>;
+  static async pipe(state: ExecutionState, input: Buffer | Readable | string): Promise<Buffer | Readable> {
     const { process: proc, result: prom } = state;
 
     (await StreamUtil.toStream(input)).pipe(proc.stdin!);

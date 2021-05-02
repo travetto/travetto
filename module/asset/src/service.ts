@@ -1,5 +1,3 @@
-import * as stream from 'stream';
-
 import { Inject, Injectable } from '@travetto/di';
 import { ModelStreamSupport, ExistsError, NotFoundError } from '@travetto/model';
 
@@ -50,7 +48,7 @@ export class AssetService {
    * @param overwriteIfFound Overwite the asset if found
    * @param strategy The naming strategy to use, defaults to the service's strategy if not provided
    */
-  async upsert({ stream, ...asset }: Asset & { stream: stream.Readable }, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
+  async upsert({ stream, ...asset }: Asset, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
     // Apply strategy on save
     const location = (strategy ?? this.#namingStrategy!).resolve(asset);
 

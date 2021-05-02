@@ -1,5 +1,5 @@
 import * as mongo from 'mongodb';
-import * as stream from 'stream';
+import { Readable } from 'stream';
 
 import {
   ModelRegistry, ModelType,
@@ -276,7 +276,7 @@ export class MongoModelService implements
   }
 
   // Stream
-  async upsertStream(location: string, input: stream.Readable, meta: StreamMeta) {
+  async upsertStream(location: string, input: Readable, meta: StreamMeta) {
     const writeStream = this.#bucket.openUploadStream(location, {
       contentType: meta.contentType,
       metadata: meta

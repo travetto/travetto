@@ -1,4 +1,4 @@
-import * as stream from 'stream';
+import { Readable } from 'stream';
 
 export interface StreamMeta {
   /**
@@ -32,13 +32,13 @@ export interface ModelStreamSupport {
    * @param input The actual stream to write
    * @param meta The stream metadata
    */
-  upsertStream(location: string, input: stream.Readable, meta: StreamMeta): Promise<void>;
+  upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void>;
 
   /**
    * Get stream from asset store
    * @param location The location of the stream
    */
-  getStream(location: string): Promise<stream.Readable>;
+  getStream(location: string): Promise<Readable>;
 
   /**
    * Get metadata for stream

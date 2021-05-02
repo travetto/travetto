@@ -1,6 +1,4 @@
 // @file-if @travetto/model
-import * as fs from 'fs';
-
 import { ModelCrudSupport } from '@travetto/model';
 import { AssetService, Asset } from '@travetto/asset';
 
@@ -14,7 +12,7 @@ export class UserProfileService {
   ) { }
 
   async saveProfileImage(userId: string, image: Asset) {
-    const path = await this.asset.upsert({ ...image, stream: fs.createReadStream(image.filename) });
+    const path = await this.asset.upsert(image);
     const user = await this.model.get(User, userId);
     user.profileImage = path;
     await this.model.update(User, user);
