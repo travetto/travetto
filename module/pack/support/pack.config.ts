@@ -12,7 +12,8 @@ export const config: AllConfigPartial = {
       { 'node_modules/lodash/lodash.min.js': 'node_modules/lodash/lodash.js' },
     ],
     excludeCompile: [
-      'node_modules/@travetto/*/alt/',
+      'node_modules/@travetto/*/doc/',
+      'node_modules/@travetto/*/e2e/',
       'node_modules/@travetto/*/test/',
     ],
     exclude: [
@@ -24,7 +25,7 @@ export const config: AllConfigPartial = {
       '*.lock',
       '*.html',
       '*.mjs',
-      '*.ts',
+      'node_modules/**/*.ts',
       '*.d.ts',
       '*.tsbuildinfo',
       '*.java',

@@ -6,7 +6,7 @@ export class PackZipPlugin extends BasePackPlugin<ZipConfig> {
 
   getOptions() {
     return {
-      workspace: this.option({ desc: 'Workspace directory' }),
+      ...this.defaultOptions(),
       output: this.option({ desc: 'Output File' })
     };
   }

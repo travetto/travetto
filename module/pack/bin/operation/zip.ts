@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as fs from 'fs';
 
 import { ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
@@ -31,7 +32,7 @@ export const Zip: PackOperation<ZipConfig> = {
 
     yield 'Preparing Target';
     await FsUtil.mkdirp(path.dirname(zipFile));
-    await FsUtil.unlinkRecursive(zipFile, true);
+    await new Promise(res => fs.unlink(zipFile, res)); // Unlink
 
     yield 'Compressing';
     if (/win/i.test(process.platform)) {

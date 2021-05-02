@@ -64,23 +64,23 @@ export class PackUtil {
       const negate = x.startsWith('!') || x.startsWith('^');
       x = negate ? x.substring(1) : x;
       x = x.replace(/^[.][/]/g, `${base}/`);
-      const re = glob(x, { nocase: true, dot: true, basename: base, contains: true });
-      Object.defineProperty(re, 'source', { value: x });
-      return [re, negate] as const;
+      const match: (f: string) => boolean = glob(x, { nocase: true, dot: true, basename: base, contains: true });
+      Object.defineProperty(match, 'source', { value: x });
+      return [match, negate] as const;
     });
 
     return (f: string) => {
       let exclude = undefined;
       f = PathUtil.resolveUnix(base, f);
-      for (const [p, n] of all) {
-        if ((n || exclude === undefined) && p(f)) {
+      for (const [match, n] of all) {
+        if ((n || exclude === undefined) && match(f)) {
           if (n) { // Fast exit if negating
             return false;
           }
-          exclude = p;
+          exclude = match;
         }
       }
-      return exclude;
+      return !!exclude;
     };
   }
 
@@ -118,7 +118,7 @@ export class PackUtil {
     const spacer = ' '.repeat(indent);
     const ctx = await op.context(cfg);
     const title = color`${{ title: op.title }} ${ctx}`;
-    const width = title.replace(/\x1b\[\d+m/g, '').length; // eslint-disable-line
+    const width = Math.max(title.replace(/\x1b\[\d+m/g, '').length, 50); // eslint-disable-line
 
     let i = 0;
     function stdout(msg?: string) {

@@ -22,7 +22,7 @@ export const Assemble: PackOperation<AssembleConfig> = {
   key: 'assemble',
   title: 'Assembling',
   context(cfg: AssembleConfig) {
-    return `[readonly=${cfg.readonly}]`;
+    return `[readonly=${cfg.readonly},cache=${cfg.cacheDir}]`;
   },
   extend(a: AssembleConfig, b: Partial<AssembleConfig>) {
     return {

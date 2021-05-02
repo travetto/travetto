@@ -26,7 +26,7 @@ export class AssembleUtil {
   }
 
   /**
-   * Truncate all app source files, and framework sourc files
+   * Truncate all app source files, and framework source files
    */
   static async purgeSource(folders: string[]) {
     for (const sub of folders) {

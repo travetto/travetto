@@ -5,6 +5,6 @@ export class PackPlugin extends BasePackPlugin<AllConfig> {
   operation = Pack;
 
   getOptions() {
-    return { workspace: this.option({ desc: 'Workspace directory' }) };
+    return this.defaultOptions();
   }
 }

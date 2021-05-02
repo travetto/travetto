@@ -6,7 +6,7 @@ export class PackDockerPlugin extends BasePackPlugin<DockerConfig> {
 
   getOptions() {
     return {
-      workspace: this.option({ desc: 'Workspace directory' }),
+      ...this.defaultOptions(),
       image: this.option({ desc: 'Docker Image to extend' }),
       tag: this.option({ desc: 'Image Tag' }),
       port: this.intOption({ desc: 'Image Port' })
