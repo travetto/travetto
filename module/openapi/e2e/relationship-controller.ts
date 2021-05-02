@@ -1,4 +1,4 @@
-import { QuerySchema, Body, Controller, Get, Post, Put, Delete, Path } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete } from '@travetto/rest';
 
 import { User, UserSearch } from './model';
 
@@ -14,7 +14,7 @@ export class RelationshipController {
    * @returns A user by name
    */
   @Get('/:name')
-  async getByName(@Path() name: string): Promise<User> {
+  async getByName(name: string): Promise<User> {
     return new User();
   }
 
@@ -23,12 +23,12 @@ export class RelationshipController {
    * @returns A list of users
    */
   @Get('/')
-  async getAll(@QuerySchema() search: UserSearch): Promise<User[]> {
+  async getAll(search: UserSearch): Promise<User[]> {
     return [];
   }
 
   @Post('/')
-  async createUser(@Body() user: User): Promise<User> {
+  async createUser(user: User): Promise<User> {
     return new User();
   }
 
@@ -37,7 +37,7 @@ export class RelationshipController {
    * @param id User id
    */
   @Put('/:id')
-  async updateUser(@Path() id: number, @Body() user: User): Promise<void> {
+  async updateUser(id: number, user: User): Promise<void> {
 
   }
   /**
@@ -45,7 +45,7 @@ export class RelationshipController {
    * @param id User id
    */
   @Delete('/:id')
-  async removeUser(@Path() id: number): Promise<void> {
+  async removeUser(id: number): Promise<void> {
 
   }
 }

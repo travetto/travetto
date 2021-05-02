@@ -1,4 +1,4 @@
-import { Get, Controller, Post, Path, Body, Query, Request } from '@travetto/rest';
+import { Get, Controller, Post, Query, Request } from '@travetto/rest';
 import { MockService } from './mock';
 
 @Controller('/simple')
@@ -19,13 +19,13 @@ export class Simple {
    * Get a user by id
    */
   @Get('/:id')
-  async getById(@Path() id: number) {
+  async getById(id: number) {
     const user = await this.service.fetch(id);
     return `/simple/id => ${user.first.toLowerCase()}`;
   }
 
   @Post('/name')
-  async createName(@Body() person: { name: string }) {
+  async createName(person: { name: string }) {
     await this.service.update({ name: person.name });
     return { success: true };
   }

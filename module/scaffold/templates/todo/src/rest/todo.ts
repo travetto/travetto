@@ -1,5 +1,5 @@
-import { Controller, Get, Put, Post, Delete, Path, Body, QuerySchema } from '@travetto/rest';
-import { ModelCrudSupport, NotFoundError } from '@travetto/model';
+import { Controller, Get, Put, Post, Delete } from '@travetto/rest';
+import { NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
@@ -35,7 +35,7 @@ export class TodoController {
    * Get all Todos
    */
   @Get('/')
-  async getAll(@QuerySchema() query: Query): Promise<Todo[]> {
+  async getAll(query: Query): Promise<Todo[]> {
     query.q ??= {};
     // {{#modules.auth-rest}} // @doc-exclude
     query.q.userId = this.auth.get()?.id; // @doc-exclude
@@ -47,7 +47,7 @@ export class TodoController {
    * Get Todo by id
    */
   @Get('/:id')
-  async getOne(@Path() id: string): Promise<Todo> {
+  async getOne(id: string): Promise<Todo> {
     const q: ModelQuery<Todo> = { where: { id } };
     // {{#modules.auth-rest}} // @doc-exclude
     if (typeof q.where !== 'string') {
@@ -61,7 +61,7 @@ export class TodoController {
    * Create a Todo
    */
   @Post('/')
-  async save(@Body() todo: Todo): Promise<Todo> {
+  async save(todo: Todo): Promise<Todo> {
     // {{#modules.auth-rest}} // @doc-exclude
     todo.userId = this.auth.get()?.id; // @doc-exclude
     // {{/modules.auth-rest}} // @doc-exclude
@@ -72,7 +72,7 @@ export class TodoController {
    * Update a Todo
    */
   @Put('/:id')
-  async update(@Body() todo: Todo): Promise<Todo> {
+  async update(todo: Todo): Promise<Todo> {
     // {{#modules.auth-rest}} // @doc-exclude
     todo.userId = this.auth.get()?.id; // @doc-exclude
     // {{/modules.auth-rest}} // @doc-exclude
@@ -83,7 +83,7 @@ export class TodoController {
    * Delete a Todo
    */
   @Delete('/:id')
-  async remove(@Path() id: string): Promise<void> {
+  async remove(id: string): Promise<void> {
     const q: ModelQuery<Todo> = { where: { id } };
     // {{#modules.auth-rest}} // @doc-exclude    
     if (typeof q.where !== 'string') {

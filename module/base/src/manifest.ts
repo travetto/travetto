@@ -1,7 +1,7 @@
 import { AppCache, EnvUtil, Package, PathUtil } from '@travetto/boot';
 import { SourceConfig } from '@travetto/boot/src/internal/source';
 
-import { version as baseVersion } from '../package.json';
+import { version as framework } from '../package.json';
 import { TimeUtil } from './internal/time';
 
 /**
@@ -31,7 +31,7 @@ interface AppInfo {
   /**
    * Travetto Version
    */
-  baseVersion?: string;
+  framework?: string;
 }
 
 /**
@@ -93,7 +93,7 @@ class $AppManifest {
 
   constructor(pkg: Record<string, unknown> = {}) {
     const def = {
-      baseVersion,
+      framework,
       name: 'untitled',
       description: 'A Travetto application',
       version: '0.0.0'

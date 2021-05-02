@@ -1,4 +1,4 @@
-import { Controller, Post, Get, CacheControl, Path, Query, Body } from '@travetto/rest';
+import { Controller, Post, Get, CacheControl, Body } from '@travetto/rest';
 import { MockService } from './mock';
 
 @Controller('/simple')
@@ -11,7 +11,7 @@ export class Simple {
   }
 
   @Get('/name/:age')
-  async doIt(@Path() age: number, @Query() page: number = 5): Promise<string> {
+  async doIt(age: number, page: number = 5): Promise<string> {
     const user = await this.#service.fetch();
     return `/simple/names => ${user.first.toLowerCase()} ${age + page}`;
   }

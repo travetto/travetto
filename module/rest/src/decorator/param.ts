@@ -3,7 +3,7 @@ import { BindUtil } from '@travetto/schema';
 
 import { ParamConfig } from '../types';
 import { ControllerRegistry } from '../registry/controller';
-import { ParamUtil, ExtractFn } from '../util/param';
+import { ParamUtil } from '../util/param';
 
 const QuerySchemaⲐ: unique symbol = Symbol.for('@trv:rest/schema-query');
 
@@ -13,21 +13,13 @@ declare global {
   }
 }
 
-const EXTRACTORS: Record<ParamConfig['location'], ExtractFn> = {
-  path: (c, r) => r.params[c.name!],
-  query: (c, r) => r.query[c.name!],
-  header: (c, r) => r.header(c.name!),
-  body: (__, r) => r.body,
-  context: (c, req, res) => ParamUtil.getExtractor(c.contextType!)(c, req, res)
-};
-
 /**
  * Get the param configuration
  * @param location The location of the parameter
  * @param extra Any additional configuration for the param config
  */
 export const paramConfig = (location: ParamConfig['location'], extra: string | Partial<ParamConfig>) => ({
-  location, extract: EXTRACTORS[location]!, ...(
+  location, ...(
     (typeof extra === 'string' ? { name: extra } : extra)
   )
 }) as ParamConfig;

@@ -42,7 +42,7 @@ export interface ParamConfig {
    * @param req The request
    * @param res The response
    */
-  extract(config: ParamConfig, req?: Request, res?: Response): unknown;
+  extract?(config: ParamConfig, req?: Request, res?: Response): unknown;
 }
 
 /**

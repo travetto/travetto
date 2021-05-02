@@ -13,6 +13,17 @@ export class ParamUtil {
   static #typeExtractors = new Map<Class, ExtractFn>();
 
   /**
+   * Default extractors
+   */
+  static defaultExtractors: Record<ParamConfig['location'], ExtractFn> = {
+    path: (c, r) => r.params[c.name!],
+    query: (c, r) => r.query[c.name!],
+    header: (c, r) => r.header(c.name!),
+    body: (__, r) => r.body,
+    context: (c, req, res) => ParamUtil.getExtractor(c.contextType!)(c, req, res)
+  };
+
+  /**
    * Get the provider for a given input
    * @param type Class to check for
    * @param fn Extraction function
@@ -59,7 +70,7 @@ export class ParamUtil {
   static extractParams(route: EndpointConfig, req: Request, res: Response) {
     const cls = route.class;
     const method = route.handlerName;
-    const routed = route.params.map(c => c.extract(c, req, res));
+    const routed = route.params.map(c => (c.extract ?? this.defaultExtractors[c.location])(c, req, res));
 
     const params = SchemaRegistry.coereceMethodParams(cls, method, routed, true);
 

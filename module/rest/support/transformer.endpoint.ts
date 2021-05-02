@@ -62,7 +62,7 @@ export class RestTransformer {
           // Default to query for empty or regex endpoints
           detectedParamType = 'Query';
         }
-      } else {
+      } else if (epDec.ident.getText() !== 'All') { // Treat all separate
         // Treat as schema, and see if endpoint supports a body for default behavior on untyped
         detectedParamType = epDec.targets?.includes('@trv:http/Body') ? 'Body' : 'QuerySchema';
         config.name = '';

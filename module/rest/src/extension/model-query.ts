@@ -1,5 +1,4 @@
 // @file-if @travetto/model-query
-
 import { AppError, Class } from '@travetto/base';
 import { ModelType, ModelRegistry } from '@travetto/model';
 import { Field, Schema } from '@travetto/schema';
@@ -10,7 +9,6 @@ import {
 import { isQuerySuggestSupported, isQuerySupported } from '@travetto/model-query/src/internal/service/common';
 
 import { ControllerRegistry } from '../registry/controller';
-import { Path, QuerySchema } from '../decorator/param';
 
 type Svc = { source: Partial<ModelQuerySupport & ModelQuerySuggestSupport & ModelQueryFacetSupport> };
 
@@ -43,60 +41,62 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
   }
 
   return (target: Class<Svc>) => {
+    const inst = { constructor: target };
+
+    function getAll(this: Svc, full: RestModelQuery) {
+      if (isQuerySupported(this.source)) {
+        return this.source.query(getCls(), {
+          limit: full.limit,
+          offset: full.offset,
+          sort: convert(full.sort) as SortClause<T>[],
+          where: convert(full.where)
+        });
+      } else {
+        throw new AppError(`${this.source.constructor.ᚕid} does not support querying`);
+      }
+    }
+
     Object.assign(
-      ControllerRegistry.getOrCreateEndpointConfig(target,
-        function getAll(this: Svc, full: RestModelQuery) {
-          if (isQuerySupported(this.source)) {
-            return this.source.query(getCls(), {
-              limit: full.limit,
-              offset: full.offset,
-              sort: convert(full.sort) as SortClause<T>[],
-              where: convert(full.where)
-            });
-          } else {
-            throw new AppError(`${this.source.constructor.ᚕid} does not support querying`);
-          }
-        }
-      ),
+      ControllerRegistry.getOrCreateEndpointConfig(target, getAll),
       {
         description: `Get all ${cls.name}`,
         priority: 101, method: 'get', path: '/', headers: {
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
         },
-        params: [QuerySchema()],
         responseType: { type: cls, array: true, description: `List of ${cls.name}` }
       }
     );
 
     // Register field
-    Field(RestModelQuery)({ constructor: target }, 'getAll', 0);
+    ControllerRegistry.registerEndpointParameter(target, getAll, { location: 'query', name: '' }, 0);
+    Field(RestModelQuery)(inst, 'getAll', 0);
+
+    function suggestField(this: Svc, field: ValidStringFields<T>, suggest: RestModelSuggestQuery) {
+      if (isQuerySuggestSupported(this.source)) {
+        return this.source.suggest<T>(getCls(), field, suggest.q, suggest);
+      } else {
+        throw new AppError(`${this.source.constructor.ᚕid} does not support suggesting by query`);
+      }
+    }
 
     Object.assign(
-      ControllerRegistry.getOrCreateEndpointConfig(
-        target, function suggestField(this: Svc, field: ValidStringFields<T>, suggest: RestModelSuggestQuery) {
-          if (isQuerySuggestSupported(this.source)) {
-            return this.source.suggest<T>(getCls(), field, suggest.q, suggest);
-          } else {
-            throw new AppError(`${this.source.constructor.ᚕid} does not support suggesting by query`);
-          }
-        }),
+      ControllerRegistry.getOrCreateEndpointConfig(target, suggestField),
       {
         description: `Suggest ${cls.name} by specific field`,
         priority: 101, method: 'get', path: '/suggest/:field', headers: {
           Expires: '-1',
           'Cache-Control': 'max-age=0, no-cache'
         },
-        params: [
-          Path({ name: 'field ' }),
-          QuerySchema()
-        ],
         responseType: { type: cls, description: cls.name }
       }
     );
 
     // Register fields
-    Field(String, { required: { active: true } })({ constructor: target }, 'suggestField', 0);
-    Field(RestModelSuggestQuery)({ constructor: target }, 'suggestField', 1);
+    ControllerRegistry.registerEndpointParameter(target, suggestField, { location: 'path', name: 'field' }, 0);
+    Field(String, { required: { active: true } })(inst, 'suggestField', 0);
+
+    ControllerRegistry.registerEndpointParameter(target, suggestField, { location: 'query', name: '' }, 1);
+    Field(RestModelSuggestQuery)(inst, 'suggestField', 1);
   };
 }
