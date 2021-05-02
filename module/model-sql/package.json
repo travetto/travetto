@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model-sql",
   "displayName": "SQL Model Service",
-  "version": "2.0.0-alpha.8",
+  "version": "2.0.0-alpha.9",
   "description": "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "keywords": [
     "sql",
@@ -28,13 +28,13 @@
     "directory": "module/model-sql"
   },
   "dependencies": {
-    "@travetto/config": "^2.0.0-alpha.7",
-    "@travetto/context": "^2.0.0-alpha.8",
-    "@travetto/model": "^2.0.0-alpha.8",
-    "@travetto/model-query": "2.0.0-alpha.8"
+    "@travetto/config": "^2.0.0-alpha.8",
+    "@travetto/context": "^2.0.0-alpha.9",
+    "@travetto/model": "^2.0.0-alpha.9",
+    "@travetto/model-query": "2.0.0-alpha.9"
   },
   "devDependencies": {
-    "@travetto/app": "^2.0.0-alpha.8"
+    "@travetto/app": "^2.0.0-alpha.9"
   },
   "optionalPeerDependencies": {
     "@types/mysql": "^2.15.18",
