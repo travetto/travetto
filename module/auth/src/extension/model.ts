@@ -87,8 +87,7 @@ export class ModelAuthService<T extends ModelType> implements
    * @param password The password to authenticate against
    */
   async #authenticate(userId: string, password: string) {
-    const user = await this.#retrieve(userId);
-    const ident = await this.toPrincipal(user);
+    const ident = await this.#resolvePrincipal({ id: userId });
 
     const hash = await AuthUtil.generateHash(password, ident.salt!);
     if (hash !== ident.hash) {
