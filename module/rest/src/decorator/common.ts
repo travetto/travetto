@@ -37,9 +37,9 @@ type HeaderSet = ReturnType<typeof SetHeaders>;
 export function CacheControl(value: RelativeTime): HeaderSet;
 export function CacheControl(value: number, unit?: TimeUnit): HeaderSet;
 export function CacheControl(value: number | RelativeTime, unit: TimeUnit = 's'): HeaderSet {
-  const delta = TimeUtil.toMillis(value as number, unit);
+  const delta = Math.trunc(TimeUtil.toMillis(value as number, unit) / 1000);
   return SetHeaders({
-    Expires: delta === 0 ? '-1' : () => `${new Date(delta + Date.now()).toUTCString()}`,
+    Expires: delta === 0 ? '-1' : () => new Date(delta * 1000 + Date.now()).toUTCString(),
     'Cache-Control': () => delta === 0 ? 'max-age=0,no-cache' : `max-age=${delta}`
   });
 }
