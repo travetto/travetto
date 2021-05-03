@@ -1,12 +1,8 @@
-import { RestInterceptor, Request, Response, ParamUtil } from '@travetto/rest';
+import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Principal } from '@travetto/auth';
-import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
 import { PrincipalEncoder } from './encoder';
-
-// Register encoder
-ParamUtil.registerContext(PrincipalTarget, (_, r) => r.auth);
 
 /**
  * Authentication interceptor

@@ -5,6 +5,7 @@ import { Authenticator, Principal } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
 
 import { PassportAuthOptions, PassportUtil } from './util';
+import { LoginContextⲐ } from '../../internal/types';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
 
@@ -71,6 +72,10 @@ export class PassportAuthenticator<U> implements Authenticator<U, Principal, { r
    */
   authenticate(user: U, { req, res }: { req: Request, res: Response }) {
     return new Promise<Principal | undefined>((resolve, reject) => {
+
+      // Get the login context
+      req[LoginContextⲐ] = PassportUtil.getLoginContext(req);
+
       const filter = passport.authenticate(this.#strategyName,
         {
           session: this.session,
