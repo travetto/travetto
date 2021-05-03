@@ -3,6 +3,9 @@ import { ContextProvider, ParamUtil } from '@travetto/rest';
 
 export const LoginContextⲐ = Symbol.for('@trv:auth-rest/login');
 
+/**
+ * @augments `@trv:rest/Context`
+ */
 @ContextProvider((_, req) => req[LoginContextⲐ])
 export class LoginContextTarget { }
 
