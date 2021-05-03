@@ -4,9 +4,9 @@ import { Inject, Injectable } from '@travetto/di';
 import { EnvUtil } from '@travetto/boot';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 
-import { CacheConfig } from './types';
 import { CacheError } from './error';
 import { CacheUtil } from './util';
+import { CacheAware, CacheConfigⲐ, EvictConfigⲐ } from './internal/types';
 
 export const CacheModelⲐ = Symbol.for('@trv:cache/model');
 
@@ -137,9 +137,8 @@ export class CacheService {
    * @param fn Function to execute
    * @param params input parameters
    */
-  async cache(target: unknown, method: string, fn: Function, params: unknown[]) {
-    // @ts-expect-error
-    const config = target[`ᚕ${method}_cache`];
+  async cache(target: CacheAware, method: string, fn: Function, params: unknown[]) {
+    const config = target[CacheConfigⲐ]![method];
 
     const id = CacheUtil.generateKey(config, params);
 
@@ -165,10 +164,8 @@ export class CacheService {
    * @param fn Function to execute
    * @param params Input params to the function
    */
-  async evict(target: unknown, method: string, fn: Function, params: unknown[]) {
-    // @ts-expect-error
-    const config = target[`ᚕ${method}_evict`];
-
+  async evict(target: CacheAware, method: string, fn: Function, params: unknown[]) {
+    const config = target[EvictConfigⲐ]![method];
     const id = CacheUtil.generateKey(config, params);
     const val = await fn.apply(target, params);
     await this.delete(id);

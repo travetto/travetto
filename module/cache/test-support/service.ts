@@ -37,7 +37,7 @@ class SampleService {
     return num * 3;
   }
 
-  @Cache('source', { maxAge: 200, extendOnAccess: true })
+  @Cache('source', 200, { extendOnAccess: true })
   async ageExtension(num: number) {
     await TimeUtil.wait(100);
     return num * 3;
