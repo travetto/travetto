@@ -10,11 +10,15 @@ import { CoreCacheConfig, CacheConfig } from './types';
  * @param config The additional cache configuration
  * @augments `@trv:cache/Cache`
  */
-export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, config: CacheConfig | { maxAge?: number | RelativeTime } = {}) {
-  if (typeof config.maxAge === 'string') {
-    config.maxAge = TimeUtil.toMillis(config.maxAge);
+export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, config: number | RelativeTime | (CacheConfig & { maxAge?: number | RelativeTime }) = {}) {
+  const final = typeof config === 'number' || typeof config === 'string' ? { maxAge: config as number } : config;
+  if (typeof final.maxAge === 'string') {
+    final.maxAge = TimeUtil.toMillis(final.maxAge);
   }
-  return function <R extends Promise<unknown>>(target: U, propertyKey: string, descriptor: MethodDescriptor<R>) { };
+  return function <R extends Promise<unknown>>(target: U, propertyKey: string, descriptor: MethodDescriptor<R>) {
+    final.keySpace ??= `${target.constructor.name}.${propertyKey}`;
+    Object.defineProperty(target, `ᚕ${propertyKey}_cache`, { value: final, writable: false, enumerable: false });
+  };
 }
 
 /**
@@ -25,5 +29,8 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(field
  * @augments `@trv:cache/Evict`
  */
 export function EvictCache<F extends string, U extends Record<F, CacheService>>(field: F, config: CoreCacheConfig = {}) {
-  return function <R extends Promise<unknown>>(target: U, propertyKey: string, descriptor: MethodDescriptor<R>) { };
+  return function <R extends Promise<unknown>>(target: U, propertyKey: string, descriptor: MethodDescriptor<R>) {
+    config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
+    Object.defineProperty(target, `ᚕ${propertyKey}_evict`, { value: config, writable: false, enumerable: false });
+  };
 }

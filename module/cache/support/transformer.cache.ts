@@ -22,12 +22,8 @@ export class CacheTransformer {
     if (dec && ts.isCallExpression(dec.expression)) {
       const params = dec.expression.arguments;
       const id = params[0] as ts.Identifier;
-      let config = params.length > 1 ? params[1] : state.fromLiteral({});
 
-      // Read literal, and extend config onto it
-      const parent = ((node.parent as ts.ClassExpression) || { name: { getText: () => 'unknown' } }).name!;
-      const keySpace = `${parent.getText()}.${node.name.getText()}`;
-      config = state.extendObjectLiteral({ keySpace }, config);
+      const op = isCache ? 'cache' : 'evict';
 
       // Create an arrow function to retain the `this` value.
       const fn = state.factory.createArrowFunction(
@@ -38,8 +34,6 @@ export class CacheTransformer {
         undefined,
         node.body!
       );
-
-      const target = state.factory.createElementAccessExpression(state.factory.createThis(), id);
 
       // Return new method calling evict or cache depending on decorator.
       return state.factory.updateMethodDeclaration(
@@ -55,11 +49,13 @@ export class CacheTransformer {
         state.factory.createBlock([
           state.factory.createReturnStatement(
             state.factory.createCallExpression(
-              state.factory.createPropertyAccessExpression(target, isCache ? 'cache' : 'evict'),
+              state.factory.createPropertyAccessExpression(
+                state.factory.createElementAccessExpression(state.factory.createThis(), id), op
+              ),
               undefined,
               [
-                config,
                 state.factory.createThis(),
+                state.factory.createStringLiteral(node.name.getText()),
                 fn,
                 state.factory.createArrayLiteralExpression([
                   state.factory.createSpreadElement(state.createIdentifier('arguments'))

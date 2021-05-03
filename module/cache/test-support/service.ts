@@ -31,7 +31,7 @@ class SampleService {
     return num * 2;
   }
 
-  @Cache('source', { maxAge: 500 })
+  @Cache('source', '.5s')
   async agesQuickly(num: number) {
     await TimeUtil.wait(100);
     return num * 3;

@@ -132,12 +132,15 @@ export class CacheService {
   /**
    * Cache the function output
    *
-   * @param config Cache configuration
    * @param target Object to run as context
+   * @param method Name of method to run
    * @param fn Function to execute
    * @param params input parameters
    */
-  async cache(config: CacheConfig, target: unknown, fn: Function, params: unknown[]) {
+  async cache(target: unknown, method: string, fn: Function, params: unknown[]) {
+    // @ts-expect-error
+    const config = target[`ᚕ${method}_cache`];
+
     const id = CacheUtil.generateKey(config, params);
 
     let res = await this.getOptional(id, config.extendOnAccess);
@@ -157,12 +160,15 @@ export class CacheService {
   /**
    * Evict value from cache
    *
-   * @param config Cache config
    * @param target Object to run as context
+   * @param method Name of method to run
    * @param fn Function to execute
    * @param params Input params to the function
    */
-  async evict(config: CacheConfig, target: unknown, fn: Function, params: unknown[]) {
+  async evict(target: unknown, method: string, fn: Function, params: unknown[]) {
+    // @ts-expect-error
+    const config = target[`ᚕ${method}_evict`];
+
     const id = CacheUtil.generateKey(config, params);
     const val = await fn.apply(target, params);
     await this.delete(id);
