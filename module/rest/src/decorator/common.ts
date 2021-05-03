@@ -1,5 +1,5 @@
 import { Class, ClassInstance, AppError } from '@travetto/base';
-import { TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';
+import { RelativeTime, TimeUnit, TimeUtil } from '@travetto/base/src/internal/time';
 
 import { HeaderMap, Request, RouteHandler } from '../types';
 import { ControllerRegistry } from '../registry/controller';
@@ -27,24 +27,27 @@ export function Describe(desc: DescribableConfig) { return register(desc); }
  */
 export function SetHeaders(headers: HeaderMap) { return register({ headers }); }
 
+type HeaderSet = ReturnType<typeof SetHeaders>;
+
 /**
  * Set the max-age of a response based on the config
  * @param value The value for the duration
  * @param unit The unit of measurement
  */
-export function CacheControl(value: number, unit: TimeUnit = 's') {
-  const date = TimeUtil.withAge(value, unit);
-  const delta = date.getTime() - Date.now();
+export function CacheControl(value: RelativeTime): HeaderSet;
+export function CacheControl(value: number, unit?: TimeUnit): HeaderSet;
+export function CacheControl(value: number | RelativeTime, unit: TimeUnit = 's'): HeaderSet {
+  const delta = TimeUtil.toMillis(value as number, unit);
   return SetHeaders({
-    Expires: value === 0 ? '-1' : () => `${date.toUTCString()}`,
-    'Cache-Control': () => `max-age=${delta}${value === 0 ? ',no-cache' : ''}`
+    Expires: delta === 0 ? '-1' : () => `${new Date(delta + Date.now()).toUTCString()}`,
+    'Cache-Control': () => delta === 0 ? 'max-age=0,no-cache' : `max-age=${delta}`
   });
 }
 
 /**
  * Disable cache control, ensuring endpoint will not cache
  */
-export const DisableCacheControl = CacheControl.bind(null, 0, 's');
+export const DisableCacheControl = () => CacheControl('0s');
 
 /**
  * Define an endpoint to support specific input types

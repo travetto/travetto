@@ -1,4 +1,5 @@
 import { MethodDescriptor } from '@travetto/base/src/internal/types';
+import { RelativeTime, TimeUtil } from '@travetto/base/src/internal/time';
 
 import { CacheService } from './service';
 import { CoreCacheConfig, CacheConfig } from './types';
@@ -9,7 +10,10 @@ import { CoreCacheConfig, CacheConfig } from './types';
  * @param config The additional cache configuration
  * @augments `@trv:cache/Cache`
  */
-export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, config: CacheConfig = {}) {
+export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, config: CacheConfig | { maxAge?: number | RelativeTime } = {}) {
+  if (typeof config.maxAge === 'string') {
+    config.maxAge = TimeUtil.toMillis(config.maxAge);
+  }
   return function <R extends Promise<unknown>>(target: U, propertyKey: string, descriptor: MethodDescriptor<R>) { };
 }
 
