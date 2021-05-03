@@ -1,7 +1,7 @@
 {
   "name": "@travetto/context",
   "displayName": "Async Context",
-  "version": "2.0.0-alpha.10",
+  "version": "2.0.0-alpha.11",
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "keywords": [
     "async-hooks",
@@ -30,7 +30,7 @@
     "@travetto/di": "^2.0.0-alpha.9"
   },
   "optionalPeerDependencies": {
-    "@travetto/rest": "^2.0.0-alpha.12"
+    "@travetto/rest": "^2.0.0-alpha.13"
   },
   "publishConfig": {
     "access": "public"
