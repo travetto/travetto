@@ -1,7 +1,7 @@
 {
   "name": "travetto-plugin",
   "displayName": "Travetto Plugin",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "VS Code plugin for interacting with the Travetto framework ",
   "keywords": [
     "vscode",
@@ -34,17 +34,18 @@
     "watch": "npx tsc -watch -p ./"
   },
   "dependencies": {
-    "@travetto/boot": "^file://../../module/boot",
+    "@travetto/boot": "^2.0.0-alpha.7",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
+    "@types/node": "^15.0.0",
     "@types/vscode": "^1.55.0"
   },
   "docDependencies": {
     "@travetto/app": true
   },
   "engines": {
-    "vscode": "^1.50.0"
+    "vscode": "^1.55.0"
   },
   "publishConfig": {
     "access": "restricted"
