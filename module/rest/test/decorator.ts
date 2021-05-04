@@ -11,8 +11,12 @@ import { Patch } from '../src/decorator/endpoint';
 @Controller('/test')
 class TestController {
   @CacheControl('1s')
-  @Patch()
+  @Patch('/a')
   async patch() { }
+
+  @CacheControl('500ms')
+  @Patch('/b')
+  async patchSmaller() { }
 }
 
 @Suite()
@@ -32,5 +36,16 @@ export class ConfigureTest {
     const expires = ControllerRegistry.get(TestController).endpoints[0].headers['Expires'];
     assert(Util.isFunction(expires));
     assert(expires() === new Date(1000 + Date.now()).toUTCString());
+  }
+
+  @Test()
+  async verifyBadMaxAge() {
+    const cacher = ControllerRegistry.get(TestController).endpoints[1].headers['Cache-Control'];
+    assert(Util.isFunction(cacher));
+    assert(cacher() === 'max-age=0,no-cache');
+
+    const expires = ControllerRegistry.get(TestController).endpoints[1].headers['Expires'];
+    assert(!Util.isFunction(expires));
+    assert(expires === '-1');
   }
 }
