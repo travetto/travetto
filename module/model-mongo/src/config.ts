@@ -40,10 +40,10 @@ export class MongoModelConfig {
   /**
    * Mongo client options
    */
-  clientOptions = {
+  options: mongo.MongoClientOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true
-  } as mongo.MongoClientOptions;
+  };
 
   /**
    * Should we autocreate the db
@@ -68,7 +68,7 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct() {
-    const opts = this.clientOptions;
+    const opts = this.options;
     if (opts.ssl) {
       if (opts.sslCert) {
         opts.sslCert = await this.fetch(opts.sslCert as string);
@@ -92,7 +92,7 @@ export class MongoModelConfig {
     const hosts = this.hosts
       .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port}`)
       .join(',');
-    const opts = Object.entries(this.connectionOptions).map(([k, v]) => `${k}=${v}`).join('&');
+    const opts = Object.entries(this.options).map(([k, v]) => `${k}=${v}`).join('&');
     let creds = '';
     if (this.username) {
       creds = `${[this.username, this.password].filter(x => !!x).join(':')}@`;

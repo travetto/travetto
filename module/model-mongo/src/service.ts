@@ -69,7 +69,7 @@ export class MongoModelService implements
   }
 
   async postConstruct() {
-    this.client = await mongo.MongoClient.connect(this.config.url, this.config.clientOptions);
+    this.client = await mongo.MongoClient.connect(this.config.url, this.config.options);
     this.#db = this.client.db(this.config.namespace);
     this.#bucket = new mongo.GridFSBucket(this.#db, {
       bucketName: STREAMS,
