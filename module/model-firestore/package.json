@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model-firestore",
   "displayName": "Firestore Model Support",
-  "version": "2.0.0-alpha.9",
+  "version": "2.0.0-alpha.10",
   "description": "Firestore backing for the travetto model module.",
   "keywords": [
     "typescript",
@@ -26,8 +26,8 @@
     "directory": "module/model-firestore"
   },
   "dependencies": {
-    "@travetto/config": "^2.0.0-alpha.8",
-    "@travetto/model": "^2.0.0-alpha.9",
+    "@travetto/config": "^2.0.0-alpha.9",
+    "@travetto/model": "^2.0.0-alpha.10",
     "firebase-admin": "^9.7.0"
   },
   "private": false,
