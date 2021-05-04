@@ -9,6 +9,7 @@ import {
 import { isQuerySuggestSupported, isQuerySupported } from '@travetto/model-query/src/internal/service/common';
 
 import { ControllerRegistry } from '../registry/controller';
+import { querySchemaParamConfig } from '../internal/param';
 
 type Svc = { source: Partial<ModelQuerySupport & ModelQuerySuggestSupport & ModelQueryFacetSupport> };
 
@@ -69,7 +70,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
     );
 
     // Register field
-    ControllerRegistry.registerEndpointParameter(target, getAll, { location: 'query', name: '' }, 0);
+    ControllerRegistry.registerEndpointParameter(target, getAll, querySchemaParamConfig(), 0);
     Field(RestModelQuery)(inst, 'getAll', 0);
 
     function suggestField(this: Svc, field: ValidStringFields<T>, suggest: RestModelSuggestQuery) {
@@ -96,7 +97,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
     ControllerRegistry.registerEndpointParameter(target, suggestField, { location: 'path', name: 'field' }, 0);
     Field(String, { required: { active: true } })(inst, 'suggestField', 0);
 
-    ControllerRegistry.registerEndpointParameter(target, suggestField, { location: 'query', name: '' }, 1);
+    ControllerRegistry.registerEndpointParameter(target, suggestField, querySchemaParamConfig(), 1);
     Field(RestModelSuggestQuery)(inst, 'suggestField', 1);
   };
 }

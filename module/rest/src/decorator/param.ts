@@ -1,17 +1,9 @@
 import { ClassInstance } from '@travetto/base';
-import { BindUtil } from '@travetto/schema';
 
 import { ParamConfig } from '../types';
 import { ControllerRegistry } from '../registry/controller';
 import { ParamUtil } from '../util/param';
-
-const QuerySchemaⲐ: unique symbol = Symbol.for('@trv:rest/schema-query');
-
-declare global {
-  interface TravettoRequest {
-    [QuerySchemaⲐ]: Record<string, unknown>;
-  }
-}
+import { querySchemaParamConfig } from '../internal/param';
 
 /**
  * Get the param configuration
@@ -75,15 +67,7 @@ export function Body(param: Partial<ParamConfig> = {}) { return Param('body', pa
  * @augments `@trv:rest/Param`
  */
 export function QuerySchema(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
-  return Param('query', {
-    ...config,
-    resolve: req => {
-      const val = BindUtil.expandPaths(req.query);
-      req[QuerySchemaⲐ] ??= {};
-      req[QuerySchemaⲐ][config.name!] = config.key ? val[config.key] : val;
-    },
-    extract: (c, req) => req![QuerySchemaⲐ][c.name!]
-  });
+  return Param('query', querySchemaParamConfig(config));
 }
 
 /**
