@@ -7,7 +7,7 @@ import { SchemaRegistry } from '@travetto/schema';
 import { YamlUtil } from '@travetto/yaml';
 
 import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config';
-import { SpecGenerateUtil } from './spec-generate';
+import { SpecGenerator } from './spec-generate';
 
 /**
  * Open API generation service
@@ -61,7 +61,7 @@ export class OpenApiService {
       this._spec = {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
-        ...SpecGenerateUtil.generate(this.apiSpecConfig) as Partial<OpenAPIObject>,
+        ...new SpecGenerator().generate(this.apiSpecConfig)
       } as OpenAPIObject;
     }
     return this._spec;

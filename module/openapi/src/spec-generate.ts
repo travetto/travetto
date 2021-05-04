@@ -1,4 +1,9 @@
-import { SchemaObject, OpenAPIObject, SchemasObject, ParameterObject, OperationObject, RequestBodyObject } from 'openapi3-ts/src/model/OpenApi';
+import { Readable } from 'stream';
+
+import {
+  SchemaObject, SchemasObject, ParameterObject, OperationObject,
+  RequestBodyObject, TagObject, PathItemObject
+} from 'openapi3-ts/src/model/OpenApi';
 
 import { ControllerRegistry, EndpointClassType, EndpointIOType, EndpointConfig, ControllerConfig, ParamConfig } from '@travetto/rest';
 import { Class, Util } from '@travetto/base';
@@ -6,7 +11,7 @@ import { SchemaRegistry, FieldConfig } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { ApiSpecConfig } from './config';
-import { Readable } from 'stream';
+import { OpenApiController } from './controller';
 
 export function isEndpointClassType(o: EndpointIOType): o is EndpointClassType {
   return !!o && !('mime' in o);
@@ -14,36 +19,54 @@ export function isEndpointClassType(o: EndpointIOType): o is EndpointClassType {
 
 const DEFINITION = '#/components/schemas';
 
-type PartialSpec = Required<Pick<OpenAPIObject, 'tags' | 'components' | 'paths'>> & { components: { schemas: SchemasObject } };
-
 /**
  * Spec generation utilities
  */
-export class SpecGenerateUtil {
+export class SpecGenerator {
+  #tags: TagObject[] = [];
+  #allSchemas: SchemasObject = {};
+  #schemas: SchemasObject = {};
+  #paths: { [key: string]: PathItemObject } = {};
+
+  /**
+   * Get type id
+   * @param cls 
+   */
+  #getTypeId(cls: Class) {
+    return cls.name?.replace('ᚕsyn', '');
+  }
+
+  /**
+   * Get tag name
+   * @param cls 
+   */
+  #getTypeTag(cls: Class) {
+    return cls.name.replace(/(Rest|Controller)$/, '');
+  }
 
   /**
    * Convert schema to a set of dotted parameters
    */
-  static #schemaToDotParams(state: PartialSpec, location: 'query' | 'header', cls: Class, view?: string, prefix: string = ''): ParameterObject[] {
-    const viewConf = SchemaRegistry.has(cls) && SchemaRegistry.getViewSchema(cls, view);
+  #schemaToDotParams(location: 'query' | 'header', field: FieldConfig, prefix: string = '', rootField: FieldConfig = field): ParameterObject[] {
+    const viewConf = SchemaRegistry.has(field.type) && SchemaRegistry.getViewSchema(field.type, field.view);
     const schemaConf = viewConf && viewConf.schema;
     if (!schemaConf) {
-      throw new Error(`Unknown class, not registered as a schema: ${cls.ᚕid}`);
+      throw new Error(`Unknown class, not registered as a schema: ${field.type.ᚕid}`);
     }
     const params: ParameterObject[] = [];
-    for (const field of Object.values(schemaConf)) {
-      if (SchemaRegistry.has(field.type) || SchemaRegistry.hasPending(field.type)) {
-        const suffix = (field.array) ? '[]' : '';
-        params.push(...this.#schemaToDotParams(state, location, field.type, undefined, prefix ? `${prefix}.${field.name}${suffix}` : `${field.name}${suffix}.`));
+    for (const sub of Object.values(schemaConf)) {
+      if (SchemaRegistry.has(sub.type) || SchemaRegistry.hasPending(sub.type)) {
+        const suffix = (sub.array) ? '[]' : '';
+        params.push(...this.#schemaToDotParams(location, sub, prefix ? `${prefix}.${sub.name}${suffix}` : `${sub.name}${suffix}.`, rootField));
       } else {
         params.push({
-          name: `${prefix}${field.name}`,
-          description: field.description,
-          schema: field.array ? {
+          name: `${prefix}${sub.name}`,
+          description: sub.description,
+          schema: sub.array ? {
             type: 'array',
-            ...this.#getType(field, state)
-          } : this.#getType(field, state),
-          required: field.required && !!field.required.active,
+            ...this.#getType(sub)
+          } : this.#getType(sub),
+          required: !!(rootField?.required?.active && sub.required?.active),
           in: location,
           extract: undefined
         });
@@ -55,7 +78,7 @@ export class SpecGenerateUtil {
   /**
    * Get the type for a given class
    */
-  static #getType(field: FieldConfig | Class, state: PartialSpec) {
+  #getType(field: FieldConfig | Class) {
     if (!Util.isPlainObject(field)) {
       field = { type: field } as FieldConfig;
     }
@@ -63,7 +86,10 @@ export class SpecGenerateUtil {
     const out: Record<string, unknown> = {};
     // Handle nested types
     if (SchemaRegistry.has(field.type)) {
-      out.$ref = `${DEFINITION}/${this.#processSchema(field.type, state)}`;
+      const id = this.#getTypeId(field.type);
+      // Exposing
+      this.#schemas[id] = this.#allSchemas[id];
+      out.$ref = `${DEFINITION}/${id}`;
     } else {
       switch (field.type) {
         case String: out.type = 'string'; break;
@@ -90,10 +116,24 @@ export class SpecGenerateUtil {
   }
 
   /**
+   * Get upload body
+   */
+  #buildUploadBody(): RequestBodyObject {
+    return {
+      description: 'Uploaded files',
+      content: {
+        'multipart/form-data': {
+          schema: { properties: { file: { type: 'array', items: { type: 'string', format: 'binary' } } } }
+        }
+      }
+    };
+  }
+
+  /**
    * Process schema field
    */
-  static #processSchemaField(field: FieldConfig, required: string[], state: PartialSpec) {
-    let prop: SchemaObject = this.#getType(field, state);
+  #processSchemaField(field: FieldConfig, required: string[]) {
+    let prop: SchemaObject = this.#getType(field);
 
     if (field.examples) {
       prop.example = field.examples;
@@ -134,17 +174,17 @@ export class SpecGenerateUtil {
   /**
    * Process schema class
    */
-  static #processSchema(type: string | Class | undefined, state: PartialSpec) {
+  #processSchema(type?: string | Class) {
     if (type === undefined || typeof type === 'string') {
       return undefined;
     }
 
-    const typeId = type.name?.replace('ᚕsyn', '');
+    const typeId = this.#getTypeId(type);
 
-    if (!state.components.schemas[typeId]) {
+    if (!this.#allSchemas[typeId]) {
       const config = SchemaRegistry.get(type);
       if (config) {
-        state.components.schemas[typeId] = {
+        this.#allSchemas[typeId] = {
           title: config.title || config.description,
           description: config.description || config.title,
           example: config.examples
@@ -155,15 +195,15 @@ export class SpecGenerateUtil {
         const required: string[] = [];
 
         for (const fieldName of def.fields) {
-          properties[fieldName] = this.#processSchemaField(def.schema[fieldName], required, state);
+          properties[fieldName] = this.#processSchemaField(def.schema[fieldName], required);
         }
 
-        Object.assign(state.components.schemas[typeId], {
+        Object.assign(this.#allSchemas[typeId], {
           properties,
           ...(required.length ? { required } : {})
         });
       } else {
-        state.components.schemas[typeId] = { title: typeId };
+        this.#allSchemas[typeId] = { title: typeId };
       }
     }
     return typeId;
@@ -172,13 +212,23 @@ export class SpecGenerateUtil {
   /**
    * Standard JSON body structure
    */
-  static #getJsonBody(state: PartialSpec, body: EndpointClassType): RequestBodyObject {
-    const schemaName = this.#processSchema(body.type, state);
-    if (schemaName && schemaName !== 'void' && schemaName !== 'undefined') {
-      const ref: SchemaObject = this.#getType(body.type, state);
+  #getJsonBody(body: EndpointClassType): RequestBodyObject {
+    const typeId = this.#getTypeId(body.type);
+    if (this.#allSchemas[typeId]) {
+      const ref: SchemaObject = this.#getType(body.type);
       return {
         content: { 'application/json': { schema: !body!.array ? ref : { type: 'array', items: ref } } },
-        description: state.components.schemas[schemaName!].description ?? '',
+        description: this.#allSchemas[typeId!].description ?? '',
+      };
+    } else if (body.type?.name && body.type?.name in globalThis) { // If a known primitive
+      return {
+        content: {
+          'application/json': {
+            schema: !body!.array ?
+              { type: body.type.name.toLowerCase() as 'string' } :
+              { type: 'array', items: { type: body.type.name.toLowerCase() as 'string' } }
+          }
+        }
       };
     }
     return { description: '', content: {} };
@@ -187,7 +237,7 @@ export class SpecGenerateUtil {
   /**
    * Build response object
    */
-  static #buildResponseObject(state: PartialSpec, ep: EndpointConfig): RequestBodyObject {
+  #buildResponseObject(ep: EndpointConfig): RequestBodyObject {
     const resType = ep.responseType;
     if (!resType) {
       return { description: '', content: {} };
@@ -203,7 +253,7 @@ export class SpecGenerateUtil {
         content: mime ? { [mime]: {} } : { 'application/octect-stream': { type: 'string', format: 'binary' } }
       };
     } else if (isEndpointClassType(resType)) {
-      return this.#getJsonBody(state, resType);
+      return this.#getJsonBody(resType);
     } else {
       return {
         description: '',
@@ -213,35 +263,21 @@ export class SpecGenerateUtil {
   }
 
   /**
-   * Get upload body
-   */
-  static #buildUploadBody(): RequestBodyObject {
-    return {
-      description: 'Uploaded files',
-      content: {
-        'multipart/form-data': {
-          schema: { properties: { file: { type: 'array', items: { type: 'string', format: 'binary' } } } }
-        }
-      }
-    };
-  }
-
-  /**
    * Process endpoint parameter
    */
-  static #processEndpointParam(op: OperationObject, param: ParamConfig, field: FieldConfig, state: PartialSpec) {
+  #processEndpointParam(op: OperationObject, param: ParamConfig, field: FieldConfig) {
     if (param.location) {
       if (param.location === 'body') {
-        op.requestBody = field.specifier === 'file' ? this.#buildUploadBody() : this.#getJsonBody(state, field);
+        op.requestBody = field.specifier === 'file' ? this.#buildUploadBody() : this.#getJsonBody(field);
       } else if (field.type && SchemaRegistry.has(field.type) && (param.location === 'query' || param.location === 'header')) {
-        op.parameters!.push(...this.#schemaToDotParams(state, param.location, field.type));
+        op.parameters!.push(...this.#schemaToDotParams(param.location, field));
       } else if (param.location !== 'context') {
         const epParam: ParameterObject = {
           in: param.location as 'path',
           name: param.name || param.location,
           description: field.description,
           required: !!field.required?.active || false,
-          schema: this.#getType(field, state)
+          schema: field.array ? { type: 'array', items: this.#getType(field) } : this.#getType(field)
         };
         op.parameters!.push(epParam);
       } else if (field.specifier === 'file') {
@@ -253,7 +289,10 @@ export class SpecGenerateUtil {
   /**
    * Process controller endpoint
    */
-  static processEndpoint(tagName: string, ctrl: ControllerConfig, ep: EndpointConfig, state: PartialSpec) {
+  processEndpoint(ctrl: ControllerConfig, ep: EndpointConfig) {
+
+    const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '')
+
     const op: OperationObject = {
       tags: [tagName],
       responses: {},
@@ -263,12 +302,12 @@ export class SpecGenerateUtil {
       parameters: []
     };
 
-    const pConf = this.#buildResponseObject(state, ep);
+    const pConf = this.#buildResponseObject(ep);
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses[code] = pConf;
 
     const schema = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
-    ep.params.forEach((param, i) => schema[i] ? this.#processEndpointParam(op, param, schema[i], state) : undefined);
+    ep.params.forEach((param, i) => schema[i] ? this.#processEndpointParam(op, param, schema[i]) : undefined);
 
     const epPath = (
       !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source
@@ -281,8 +320,8 @@ export class SpecGenerateUtil {
         ({ ...acc, [v]: { ...op, operationId: `${op.operationId}_${v}` } }), {}) :
       { [ep.method]: op };
 
-    state.paths[key] = {
-      ...(state.paths[key] ?? {}),
+    this.#paths[key] = {
+      ...(this.#paths[key] ?? {}),
       ...toAdd
     };
   }
@@ -290,47 +329,46 @@ export class SpecGenerateUtil {
   /**
    * Process each controller
    */
-  static processController(cls: Class, state: PartialSpec) {
+  processController(cls: Class) {
     const ctrl = ControllerRegistry.get(cls);
-    const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '');
 
-    if (tagName === 'OpenApi') {
-      return;
-    }
-
-    state.tags.push({
-      name: tagName,
+    this.#tags.push({
+      name: this.#getTypeTag(ctrl.class),
       description: ctrl.description || ctrl.title
     });
 
     for (const ep of ctrl.endpoints) {
-      this.processEndpoint(tagName, ctrl, ep, state);
+      this.processEndpoint(ctrl, ep);
     }
   }
 
   /**
    * Generate full specification
    */
-  static generate(config: ApiSpecConfig): OpenAPIObject {
-    const state: PartialSpec = {
-      paths: {},
-      components: { schemas: {} },
-      tags: []
-    };
+  generate(config: Partial<ApiSpecConfig> = {}) {
 
-    // Prime all schemas
-    if (config.exposeAllSchemas) {
-      for (const cls of SchemaRegistry.getClasses()) {
-        this.#processSchema(cls, state);
-      }
+    for (const cls of SchemaRegistry.getClasses()) {
+      this.#processSchema(cls);
     }
 
     if (!config.skipRoutes) {
       for (const cls of ControllerRegistry.getClasses()) {
-        this.processController(cls, state);
+        if (cls.ᚕid !== OpenApiController.ᚕid) {
+          this.processController(cls);
+        }
       }
     }
 
-    return state as OpenAPIObject;
+    if (config.exposeAllSchemas) {
+      this.#schemas = this.#allSchemas;
+    }
+
+    return {
+      tags: this.#tags,
+      paths: this.#paths,
+      components: {
+        schemas: this.#schemas
+      }
+    };
   }
 }
