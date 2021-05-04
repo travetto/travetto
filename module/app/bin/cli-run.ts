@@ -41,6 +41,17 @@ export class AppRunPlugin extends BasePlugin {
     return '[application] [args...]';
   }
 
+  envInit() {
+    EnvInit.init({
+      env: this.cmd.env,
+      dynamic: !EnvUtil.isFalse('TRV_DYNAMIC'),
+      append: {
+        TRV_PROFILES: this.cmd.profile,
+        TRV_RESOURCES: this.cmd.resource
+      }
+    });
+  }
+
   /**
    * Main action
    */
@@ -53,14 +64,6 @@ export class AppRunPlugin extends BasePlugin {
       if (!selected) {
         return await this.showHelp(app ? `${app} is an unknown application` : '');
       } else {
-        EnvInit.init({
-          env: this.cmd.env,
-          dynamic: !EnvUtil.isFalse('TRV_DYNAMIC'),
-          append: {
-            TRV_PROFILES: this.cmd.profile,
-            TRV_RESOURCES: this.cmd.resource
-          }
-        });
 
         // Run otherwise
         try {
