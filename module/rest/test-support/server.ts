@@ -8,7 +8,7 @@ import { Get, Post, Put, Delete, Patch } from '../src/decorator/endpoint';
 import { Path, Query } from '../src/decorator/param';
 import { Request, Response } from '../src/types';
 import { BaseRestSuite } from './base';
-import { SetHeaders } from '../src/decorator/common';
+import { Produces, SetHeaders } from '../src/decorator/common';
 import { Renderable } from '../src/response/renderable';
 
 @Controller('/test')
@@ -45,19 +45,19 @@ class TestController {
   }
 
   @Get('/stream')
-  @SetHeaders({ 'content-type': 'text/plain' })
+  @SetHeaders({ 'Content-Type': 'text/plain' })
   getStream() {
     return StreamUtil.bufferToStream(Buffer.from('hello'));
   }
 
   @Get('/buffer')
-  @SetHeaders({ 'content-type': 'text/plain' })
+  @Produces('text/plain')
   getBuffer() {
     return Buffer.from('hello');
   }
 
   @Get('/renderable')
-  @SetHeaders({ 'content-type': 'text/plain' })
+  @Produces('text/plain')
   getRenderable(): Renderable {
     return {
       /**

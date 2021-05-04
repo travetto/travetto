@@ -29,22 +29,22 @@ export class ConfigureTest {
 
   @Test()
   async verifyMaxAge() {
-    const cacher = ControllerRegistry.get(TestController).endpoints[0].headers['Cache-Control'];
+    const cacher = ControllerRegistry.get(TestController).endpoints[0].headers['cache-control'];
     assert(Util.isFunction(cacher));
     assert(cacher() === 'max-age=1');
 
-    const expires = ControllerRegistry.get(TestController).endpoints[0].headers['Expires'];
+    const expires = ControllerRegistry.get(TestController).endpoints[0].headers['expires'];
     assert(Util.isFunction(expires));
     assert(expires() === new Date(1000 + Date.now()).toUTCString());
   }
 
   @Test()
   async verifyBadMaxAge() {
-    const cacher = ControllerRegistry.get(TestController).endpoints[1].headers['Cache-Control'];
+    const cacher = ControllerRegistry.get(TestController).endpoints[1].headers['cache-control'];
     assert(Util.isFunction(cacher));
     assert(cacher() === 'max-age=0,no-cache');
 
-    const expires = ControllerRegistry.get(TestController).endpoints[1].headers['Expires'];
+    const expires = ControllerRegistry.get(TestController).endpoints[1].headers['expires'];
     assert(!Util.isFunction(expires));
     assert(expires === '-1');
   }

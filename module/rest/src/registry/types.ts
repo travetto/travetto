@@ -1,18 +1,14 @@
 import { Class } from '@travetto/base';
 import { Filter, HeaderMap, RouteConfig } from '../types';
 
-export interface EndpointClassType {
+/**
+ * Endpoint type
+ */
+export type EndpointIOType = {
   type: Class;
   array?: boolean;
   description?: string;
-}
-
-export interface EndpointSimpleType {
-  mime: string;
-  type: string;
-}
-
-export type EndpointIOType = EndpointClassType | EndpointSimpleType;
+};
 
 /**
  * Describable elements

@@ -27,6 +27,12 @@ export function Describe(desc: DescribableConfig) { return register(desc); }
  */
 export function SetHeaders(headers: HeaderMap) { return register({ headers }); }
 
+/**
+ * Specifies content type for response
+ */
+export function Produces(mime: string) { return register({ headers: { 'content-type': mime } }); }
+
+
 type HeaderSet = ReturnType<typeof SetHeaders>;
 
 /**

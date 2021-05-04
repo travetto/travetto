@@ -5,17 +5,13 @@ import {
   RequestBodyObject, TagObject, PathItemObject
 } from 'openapi3-ts/src/model/OpenApi';
 
-import { ControllerRegistry, EndpointClassType, EndpointIOType, EndpointConfig, ControllerConfig, ParamConfig } from '@travetto/rest';
+import { ControllerRegistry, EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType } from '@travetto/rest';
 import { Class, Util } from '@travetto/base';
 import { SchemaRegistry, FieldConfig } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { ApiSpecConfig } from './config';
 import { OpenApiController } from './controller';
-
-export function isEndpointClassType(o: EndpointIOType): o is EndpointClassType {
-  return !!o && !('mime' in o);
-}
 
 const DEFINITION = '#/components/schemas';
 
@@ -42,6 +38,17 @@ export class SpecGenerator {
    */
   #getTypeTag(cls: Class) {
     return cls.name.replace(/(Rest|Controller)$/, '');
+  }
+
+  /**
+   * Build response object
+   */
+  #getHeaderValue(ep: EndpointConfig, header: string): string | undefined {
+    let cType = ep.headers?.[header];
+    if (cType && typeof cType !== 'string') {
+      cType = cType();
+    }
+    return cType;
   }
 
   /**
@@ -210,54 +217,28 @@ export class SpecGenerator {
   }
 
   /**
-   * Standard JSON body structure
+   * Standard payload structure
    */
-  #getJsonBody(body: EndpointClassType): RequestBodyObject {
-    const typeId = this.#getTypeId(body.type);
-    if (this.#allSchemas[typeId]) {
-      const ref: SchemaObject = this.#getType(body.type);
-      return {
-        content: { 'application/json': { schema: !body!.array ? ref : { type: 'array', items: ref } } },
-        description: this.#allSchemas[typeId!].description ?? '',
-      };
-    } else if (body.type?.name && body.type?.name in globalThis) { // If a known primitive
+  #getEndpointBody(body?: EndpointIOType, mime?: string): RequestBodyObject {
+    if (!body) {
+      return { content: {}, description: '' };
+    } else if (body.type === Readable || body.type === Buffer) {
       return {
         content: {
-          'application/json': {
-            schema: !body!.array ?
-              { type: body.type.name.toLowerCase() as 'string' } :
-              { type: 'array', items: { type: body.type.name.toLowerCase() as 'string' } }
-          }
-        }
+          [mime ?? 'application/octect-stream']: { type: 'string', format: 'binary' }
+        },
+        description: ''
       };
-    }
-    return { description: '', content: {} };
-  }
-
-  /**
-   * Build response object
-   */
-  #buildResponseObject(ep: EndpointConfig): RequestBodyObject {
-    const resType = ep.responseType;
-    if (!resType) {
-      return { description: '', content: {} };
-    }
-    let cType = ep.headers?.['content-type'];
-    if (cType && typeof cType !== 'string') {
-      cType = cType();
-    }
-    const mime = cType ?? ('mime' in resType ? resType.mime : '');
-    if (resType.type === Readable || resType.type === Buffer) {
-      return {
-        description: '',
-        content: mime ? { [mime]: {} } : { 'application/octect-stream': { type: 'string', format: 'binary' } }
-      };
-    } else if (isEndpointClassType(resType)) {
-      return this.#getJsonBody(resType);
     } else {
+      const typeId = this.#getTypeId(body.type);
+      const typeRef = SchemaRegistry.has(body.type) ? this.#getType(body.type) : { type: body.type.name.toLowerCase() as 'string' };
       return {
-        description: '',
-        content: { [mime]: { schema: { type: resType.type as 'string' } } }
+        content: {
+          [mime ?? 'application/json']: {
+            schema: !body!.array ? typeRef : { type: 'array', items: typeRef }
+          }
+        },
+        description: this.#allSchemas[typeId!]?.description ?? ''
       };
     }
   }
@@ -265,12 +246,14 @@ export class SpecGenerator {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(op: OperationObject, param: ParamConfig, field: FieldConfig) {
+  #processEndpointParam(ep: EndpointConfig, param: ParamConfig, field: FieldConfig) {
     if (param.location) {
       if (param.location === 'body') {
-        op.requestBody = field.specifier === 'file' ? this.#buildUploadBody() : this.#getJsonBody(field);
+        return {
+          requestBody: field.specifier === 'file' ? this.#buildUploadBody() : this.#getEndpointBody(field, this.#getHeaderValue(ep, 'accepts'))
+        };
       } else if (field.type && SchemaRegistry.has(field.type) && (param.location === 'query' || param.location === 'header')) {
-        op.parameters!.push(...this.#schemaToDotParams(param.location, field));
+        return { parameters: this.#schemaToDotParams(param.location, field) };
       } else if (param.location !== 'context') {
         const epParam: ParameterObject = {
           in: param.location as 'path',
@@ -279,9 +262,9 @@ export class SpecGenerator {
           required: !!field.required?.active || false,
           schema: field.array ? { type: 'array', items: this.#getType(field) } : this.#getType(field)
         };
-        op.parameters!.push(epParam);
+        return { parameters: [epParam] };
       } else if (field.specifier === 'file') {
-        op.requestBody = this.#buildUploadBody();
+        return { requestBody: this.#buildUploadBody() };
       }
     }
   }
@@ -302,12 +285,20 @@ export class SpecGenerator {
       parameters: []
     };
 
-    const pConf = this.#buildResponseObject(ep);
+    const pConf = this.#getEndpointBody(ep.responseType, this.#getHeaderValue(ep, 'content-type'));
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses[code] = pConf;
 
     const schema = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
-    ep.params.forEach((param, i) => schema[i] ? this.#processEndpointParam(op, param, schema[i]) : undefined);
+    for (let i = 0; i < ep.params.length; i++) {
+      if (schema[i]) {
+        const res = this.#processEndpointParam(ep, ep.params[i], schema[i]);
+        if (res?.parameters) {
+          (op.parameters ??= []).push(...res.parameters);
+        }
+        op.requestBody ??= res?.requestBody;
+      }
+    }
 
     const epPath = (
       !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source

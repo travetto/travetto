@@ -115,7 +115,9 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param dest Target (controller, endpoint)
    */
   mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>) {
-    dest.headers = { ...(dest.headers ?? {}), ...(src.headers ?? {}) };
+    // Coerce to lower case
+    const headers = Object.fromEntries(Object.entries(src.headers ?? {}).map(([k, v]) => [k.toLowerCase(), v]));
+    dest.headers = { ...(dest.headers ?? {}), ...headers };
     dest.filters = [...(dest.filters ?? []), ...(src.filters ?? [])];
     dest.title = src.title || dest.title;
     dest.description = src.description || dest.description;
@@ -129,11 +131,11 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<RouteHandler>, config: Partial<EndpointConfig>) {
     const srcConf = this.getOrCreateEndpointConfig(target, descriptor.value!);
-    srcConf.method = config.method || srcConf.method;
+    srcConf.method = config.method ?? srcConf.method;
     srcConf.path = config.path || srcConf.path;
-    srcConf.responseType = config.responseType || srcConf.responseType;
-    srcConf.requestType = config.requestType || srcConf.requestType;
-    srcConf.params = (config.params || srcConf.params).map(x => ({ ...x }));
+    srcConf.responseType = config.responseType ?? srcConf.responseType;
+    srcConf.requestType = config.requestType ?? srcConf.requestType;
+    srcConf.params = (config.params ?? srcConf.params).map(x => ({ ...x }));
 
     // Ensure path starts with '/'
     const p = srcConf.path;

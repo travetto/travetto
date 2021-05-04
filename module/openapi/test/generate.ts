@@ -118,7 +118,8 @@ export class GenerateSuite {
         'application/json': {
           schema: { type: 'array', items: { type: 'string' } }
         }
-      }
+      },
+      description: ''
     });
 
     const param = (config.paths['/test/names'].put.parameters?.[0] as ParameterObject);
@@ -139,7 +140,8 @@ export class GenerateSuite {
         'application/json': {
           schema: { type: 'array', items: { type: 'string' } }
         }
-      }
+      },
+      description: ''
     });
 
     assert(config.paths['/test/who'].patch.parameters?.length === 0);
