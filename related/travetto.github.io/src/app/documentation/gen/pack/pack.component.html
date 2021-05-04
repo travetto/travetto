@@ -24,7 +24,7 @@
 Usage:  pack <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
+  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
   -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Pack Modes:
@@ -69,7 +69,8 @@ Assemble is the operation that stages the project's code for deployment.  The as
     <span class="token punctuation">{{'{'}}</span> <span class="token string">'node_modules/lodash/lodash.min.js'</span><span class="token operator">:</span> <span class="token string">'node_modules/lodash/lodash.js'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
   <span class="token punctuation">]</span><span class="token punctuation">,</span>
   excludeCompile<span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token string">'node_modules/@travetto/*/alt/'</span><span class="token punctuation">,</span>
+    <span class="token string">'node_modules/@travetto/*/doc/'</span><span class="token punctuation">,</span>
+    <span class="token string">'node_modules/@travetto/*/e2e/'</span><span class="token punctuation">,</span>
     <span class="token string">'node_modules/@travetto/*/test/'</span><span class="token punctuation">,</span>
   <span class="token punctuation">]</span><span class="token punctuation">,</span>
   exclude<span class="token operator">:</span> <span class="token punctuation">[</span>
@@ -81,7 +82,7 @@ Assemble is the operation that stages the project's code for deployment.  The as
     <span class="token string">'*.lock'</span><span class="token punctuation">,</span>
     <span class="token string">'*.html'</span><span class="token punctuation">,</span>
     <span class="token string">'*.mjs'</span><span class="token punctuation">,</span>
-    <span class="token string">'*.ts'</span><span class="token punctuation">,</span>
+    <span class="token string">'node_modules/**/*.ts'</span><span class="token punctuation">,</span>
     <span class="token string">'*.d.ts'</span><span class="token punctuation">,</span></code></pre>     
       </figure>
 
@@ -94,7 +95,7 @@ Assemble is the operation that stages the project's code for deployment.  The as
 Usage:  pack:assemble <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>      Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
+  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>      Working directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
   -k, --keep-source <span class="token operator">&lt;</span>keep-source<span class="token operator">></span>  Should <span class="token builtin class-name">source</span> be preserved <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -r, --readonly <span class="token operator">&lt;</span>readonly<span class="token operator">></span>        Build a <span class="token builtin class-name">readonly</span> deployable <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -h, --help                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
@@ -111,7 +112,7 @@ Zip is an optional step, that can run post assembly.  The only configuration it 
 
       <figure class="code">
       <figcaption class="code">Zip Default Config
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L51">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L52">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript">zip<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
   active<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
@@ -128,7 +129,7 @@ Zip is an optional step, that can run post assembly.  The only configuration it 
 Usage:  pack:zip <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
+  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
   -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>        Output File <span class="token punctuation">(</span>default: <span class="token string">"output.zip"</span><span class="token punctuation">)</span>
   -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
@@ -144,7 +145,7 @@ Docker support is an optional step, that can run post assembly.  This allows for
 
       <figure class="code">
       <figcaption class="code">Docker Default Config
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L55">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L56">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript">docker<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
   active<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
@@ -161,7 +162,7 @@ Docker support is an optional step, that can run post assembly.  This allows for
 Usage:  pack:docker <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Workspace directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
+  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory <span class="token punctuation">(</span>default: <span class="token string">"/tmp/pack_travetto_pack"</span><span class="token punctuation">)</span>
   -i, --image <span class="token operator">&lt;</span>image<span class="token operator">></span>          Docker Image to extend <span class="token punctuation">(</span>default: <span class="token string">"node:15.12.0-alpine3.11"</span><span class="token punctuation">)</span>
   -t, --tag <span class="token operator">&lt;</span>tag<span class="token operator">></span>              Image Tag <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token string">"app"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -p, --port <span class="token operator">&lt;</span>port<span class="token operator">></span>            Image Port

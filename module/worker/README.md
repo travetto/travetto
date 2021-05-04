@@ -68,7 +68,7 @@ Once a pool is constructed, it can be shutdown by calling the `.shutdown()` meth
 
 ## IPC Support
 
-Within the `comm` package, there is support for two primary communication elements: [ChildCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/child.ts#L6) and [ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L10).  Usually [ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L10) indicates it is the owner of the sub process.  [ChildCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/child.ts#L6) indicates that it has been created/spawned/forked by the parent and will communicate back to it's parent.  This generally means that a [ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L10) can be destroyed (i.e. killing the subprocess) where a [ChildCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/child.ts#L6) can only exit the process, but the channel cannot be destroyed.
+Within the `comm` package, there is support for two primary communication elements: [ChildCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/child.ts#L6) and [ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L11).  Usually [ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L11) indicates it is the owner of the sub process.  [ChildCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/child.ts#L6) indicates that it has been created/spawned/forked by the parent and will communicate back to it's parent.  This generally means that a [ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L11) can be destroyed (i.e. killing the subprocess) where a [ChildCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/child.ts#L6) can only exit the process, but the channel cannot be destroyed.
 
 ### IPC as a Worker
 A common pattern is to want to model a sub process as a worker, to be a valid candidate in a [WorkPool](https://github.com/travetto/travetto/tree/main/module/worker/src/pool.ts#L23).  The [WorkUtil](https://github.com/travetto/travetto/tree/main/module/worker/src/util.ts#L14) class provides a utility to facilitate this desire.
@@ -112,7 +112,7 @@ export class WorkUtil {
 }
 ```
 
-When creating your work, via process spawning, you will need to provide the script (and any other features you would like in `SpawnConfig`).   Additionally you must, at a minimum, provide functionality to run whenever an input element is up for grabs in the input source.  This method will be provided the communication channel ([ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L10)) and the input value.  A simple example could look like:
+When creating your work, via process spawning, you will need to provide the script (and any other features you would like in `SpawnConfig`).   Additionally you must, at a minimum, provide functionality to run whenever an input element is up for grabs in the input source.  This method will be provided the communication channel ([ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L11)) and the input value.  A simple example could look like:
 
 **Code: Spawning Pool**
 ```typescript

@@ -17,7 +17,7 @@ export class Git {
     const byFolder = await Packages.yieldPublicPackages()
       .$map(p => p._.folderRelative);
     const patt = new RegExp(`(${byFolder.join('|')})\/`);
-    const testPatt = new RegExp(`(${byFolder.join('|')})\/test\/`); // Exclude tests
+    const testPatt = new RegExp(`(${byFolder.join('|')})\/(test|doc)\/`); // Exclude tests
 
     yield* $exec('git', ['diff', '--name-only', `HEAD..${hash}`])
       .$filter(x => !testPatt.test(x))

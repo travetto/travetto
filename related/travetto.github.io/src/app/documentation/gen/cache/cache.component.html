@@ -25,12 +25,12 @@ The cache module requires an <a target="_blank" class="source-link" href="https:
       </figure>
 
 Currently, the following are packages that provide <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Expiry</a>:
-<ul> <li><a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L47">FileModelService</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L36">MemoryModelService</a></li>
+<ul> <li><a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L46">FileModelService</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L34">MemoryModelService</a></li>
  <li><a class="module-link" routerLink="/docs/model-dynamodb" title="DynamoDB backing for the travetto model module.">DynamoDB Model Support</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/service.ts#L55">DynamoDBModelService</a></li>
  <li><a class="module-link" routerLink="/docs/model-elasticsearch" title="Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.">Elasticsearch Model Source</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/service.ts#L39">ElasticsearchModelService</a></li>
- <li><a class="module-link" routerLink="/docs/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-mongo/src/service.ts#L46">MongoModelService</a></li>
+ <li><a class="module-link" routerLink="/docs/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-mongo/src/service.ts#L45">MongoModelService</a></li>
  <li><a class="module-link" routerLink="/docs/model-redis" title="Redis backing for the travetto model module.">Redis Model Support</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-redis/src/service.ts#L22">RedisModelService</a></li>
- <li><a class="module-link" routerLink="/docs/model-s3" title="S3 backing for the travetto model module.">S3 Model Support</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-s3/src/service.ts#L31">S3ModelService</a></li>
+ <li><a class="module-link" routerLink="/docs/model-s3" title="S3 backing for the travetto model module.">S3 Model Support</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-s3/src/service.ts#L30">S3ModelService</a></li>
  <li><a class="module-link" routerLink="/docs/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L35">SQLModelService</a></li></ul>
 
 <h2 id="decorators">Decorators</h2>
@@ -38,7 +38,7 @@ The caching framework provides method decorators that enables simple use cases. 
 
 Additionally, to use the decorators you will need to have a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L29">CacheService</a> object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L12">@Cache</a> is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. <a target="_blank" class="external-link" href="https://redis.io">redis</a>, <a target="_blank" class="external-link" href="https://memcached.org">memcached</a>), only asynchronous methods are supported.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L14">@Cache</a> is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. <a target="_blank" class="external-link" href="https://redis.io">redis</a>, <a target="_blank" class="external-link" href="https://memcached.org">memcached</a>), only asynchronous methods are supported.
 
       <figure class="code">
       <figcaption class="code">Using decorators to cache expensive async call
@@ -59,7 +59,7 @@ Additionally, to use the decorators you will need to have a <a target="_blank" c
     <span class="token keyword">new</span> <span class="token class-name">MemoryModelService</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> <span class="token keyword">namespace</span><span class="token operator">:</span> <span class="token string">''</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
   <span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-  @<span class="token meta">Cache</span><span class="token punctuation">(</span><span class="token string">'myCache'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> maxAge<span class="token operator">:</span> <span class="token number">1000</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+  @<span class="token meta">Cache</span><span class="token punctuation">(</span><span class="token string">'myCache'</span><span class="token punctuation">,</span> <span class="token string">'1s'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">calculateExpensiveResult</span><span class="token punctuation">(</span>expression<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">request</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">https://google.com?q=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>expression<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> value<span class="token punctuation">;</span>
@@ -67,9 +67,9 @@ Additionally, to use the decorators you will need to have a <a target="_blank" c
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h3 id="cache"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L12">@Cache</a></h3>
+<h3 id="cache"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L14">@Cache</a></h3>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L12">@Cache</a> decorator supports configurations on:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L14">@Cache</a> decorator supports configurations on:
 
 <ul> <li><code class="item input">name</code> the field name of the current class which points to the desired cache source.</li>
  <li><code class="item input">config</code> the additional/optional config options, on a per invocation basis <ul> <li><code class="item input">keySpace</code> the key space within the cache.  Defaults to class name plus method name.</li>
@@ -80,9 +80,9 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
  <li><code class="item input">serialize</code> the function to execute before storing a cacheable value.  This allows for any custom data modification needed to persist as a string properly.</li>
  <li><code class="item input">reinstate</code> the function to execute on return of a cached value.  This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.).  This method should not be used often, as the return values of the methods should naturally serialize to/from <code class="item input">JSON</code> and the values should be usable either way.</li></ul></li></ul>
 
-<h3 id="evictcache"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L23">@EvictCache</a></h3>
+<h3 id="evictcache"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L39">@EvictCache</a></h3>
 
-Additionally, there is support for planned eviction via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L23">@EvictCache</a> decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same <code class="item input">keySpace</code> and <code class="item input">key</code> to compute the expected key.
+Additionally, there is support for planned eviction via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L39">@EvictCache</a> decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same <code class="item input">keySpace</code> and <code class="item input">key</code> to compute the expected key.
 
       <figure class="code">
       <figcaption class="code">Using decorators to cache/evict user access
@@ -102,7 +102,7 @@ Additionally, there is support for planned eviction via the <a target="_blank" c
     <span class="token function">updateUser</span><span class="token punctuation">(</span>user<span class="token operator">:</span> User<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>User<span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
-  @<span class="token meta">Cache</span><span class="token punctuation">(</span><span class="token string">'myCache'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> keySpace<span class="token operator">:</span> <span class="token string">'user.id'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+  @<span class="token meta">Cache</span><span class="token punctuation">(</span><span class="token string">'myCache'</span><span class="token punctuation">,</span> <span class="token string">'5m'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> keySpace<span class="token operator">:</span> <span class="token string">'user.id'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">getUser</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>database<span class="token punctuation">.</span><span class="token function">lookupUser</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>

@@ -305,7 +305,7 @@ First we must start the application:
 2021-03-14T05:00:00.618Z info  [@trv:app/registry:40] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
 2021-03-14T05:00:00.837Z info  [@trv:app/registry:44] Configured {
   info: {
-    baseVersion: '2.0.0',
+    framework: '2.0.0',
     name: '@travetto/todo-app',
     description: '',
     version: '0.0.0',

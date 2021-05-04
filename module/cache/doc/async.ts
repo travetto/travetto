@@ -13,7 +13,7 @@ export class Worker {
     new MemoryModelService({ namespace: '' })
   );
 
-  @Cache('myCache', { maxAge: 1000 })
+  @Cache('myCache', '1s')
   async calculateExpensiveResult(expression: string) {
     const value = await request(`https://google.com?q=${expression}`);
     return value;

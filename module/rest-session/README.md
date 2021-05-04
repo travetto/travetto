@@ -90,7 +90,7 @@ export class Session<T extends SessionData = SessionData>  {
 }
 ```
 
-A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L46) parameter as [Session](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L18) and [SessionData](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L8) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest-session/src/types.d.ts#L7) as a session property.
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) parameter as [Session](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L18) and [SessionData](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L8) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest-session/src/types.d.ts#L7) as a session property.
 
 **Code: Sample Session Usage**
 ```typescript

@@ -18,7 +18,7 @@ The integration with the [RESTful API](https://github.com/travetto/travetto/tree
    *  Route declaration
 
 ## Security information management
-When working with framework's authentication, the user information is exposed via the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L15) 
+When working with framework's authentication, the user information is exposed via the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L13) 
 object.  The auth functionality is exposed on the request as the property `auth`.
 
 **Code: Structure of auth property on the request**
@@ -28,6 +28,10 @@ export interface TravettoRequest {
      * The authenticated principal
      */
     auth?: Principal;
+    /**
+     * Any additional context for login
+     */
+    [LoginContextⲐ]?: LoginContext;
   }
 ```
 
@@ -43,7 +47,7 @@ Every external framework integration relies upon the [Authenticator](https://git
 [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8)
 ```
 
-The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L15) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L88), and is responsible for:
+The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L13) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L86), and is responsible for:
 
    
    *  Returning an [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) if authentication was successful
@@ -132,7 +136,7 @@ export class SampleAuth {
 }
 ```
 
-[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L27) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L43) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is accessible via [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L46) directly, without wiring in a request object, but is also accessible on the request object as [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L15).auth.
+[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L27) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L43) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is accessible via [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) directly, without wiring in a request object, but is also accessible on the request object as [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L13).auth.
 
 ## Passport - Extension
 
@@ -186,7 +190,7 @@ export class AppConfig {
 }
 ```
 
-As you can see, [PassportAuthenticator](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/extension/passport/authenticator.ts#L14) will take care of the majority of the work, and all that is required is:
+As you can see, [PassportAuthenticator](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/extension/passport/authenticator.ts#L15) will take care of the majority of the work, and all that is required is:
    
    *  Provide the name of the strategy (should be unique)
    *  Provide the strategy instance. **Note**: you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework

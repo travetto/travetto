@@ -12,7 +12,7 @@ export class UserService {
     updateUser(user: User): Promise<User>;
   };
 
-  @Cache('myCache', { keySpace: 'user.id' })
+  @Cache('myCache', '5m', { keySpace: 'user.id' })
   async getUser(id: string) {
     return this.database.lookupUser(id);
   }

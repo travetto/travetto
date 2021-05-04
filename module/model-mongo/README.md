@@ -13,7 +13,7 @@ This module provides an [mongodb](https://mongodb.com)-based implementation for 
 Supported featrues:
    
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
-   *  [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3)
+   *  [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1)
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L23)
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11)
@@ -88,10 +88,10 @@ export class MongoModelConfig {
   /**
    * Mongo client options
    */
-  clientOptions = {
+  options: mongo.MongoClientOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true
-  } as mongo.MongoClientOptions;
+  };
 
   /**
    * Should we autocreate the db
@@ -116,7 +116,7 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct() {
-    const opts = this.clientOptions;
+    const opts = this.options;
     if (opts.ssl) {
       if (opts.sslCert) {
         opts.sslCert = await this.fetch(opts.sslCert as string);
@@ -140,7 +140,7 @@ export class MongoModelConfig {
     const hosts = this.hosts
       .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port}`)
       .join(',');
-    const opts = Object.entries(this.connectionOptions).map(([k, v]) => `${k}=${v}`).join('&');
+    const opts = Object.entries(this.options).map(([k, v]) => `${k}=${v}`).join('&');
     let creds = '';
     if (this.username) {
       creds = `${[this.username, this.password].filter(x => !!x).join(':')}@`;
@@ -155,4 +155,4 @@ export class MongoModelConfig {
   standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Environment-aware config management using yaml files")resolution paths. 
   
 
-The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L15) path or just a standard file path.
+The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L14) path or just a standard file path.

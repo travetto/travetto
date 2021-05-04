@@ -17,7 +17,7 @@ $ trv pack --help
 Usage:  pack [options] [mode]
 
 Options:
-  -w, --workspace <workspace>  Workspace directory (default: "/tmp/pack_travetto_pack")
+  -w, --workspace <workspace>  Working directory (default: "/tmp/pack_travetto_pack")
   -h, --help                   display help for command
 
 Available Pack Modes:
@@ -62,7 +62,8 @@ assemble: {
       { 'node_modules/lodash/lodash.min.js': 'node_modules/lodash/lodash.js' },
     ],
     excludeCompile: [
-      'node_modules/@travetto/*/alt/',
+      'node_modules/@travetto/*/doc/',
+      'node_modules/@travetto/*/e2e/',
       'node_modules/@travetto/*/test/',
     ],
     exclude: [
@@ -74,7 +75,7 @@ assemble: {
       '*.lock',
       '*.html',
       '*.mjs',
-      '*.ts',
+      'node_modules/**/*.ts',
       '*.d.ts',
 ```
 
@@ -85,7 +86,7 @@ $ trv pack:assemble --help
 Usage:  pack:assemble [options] [mode]
 
 Options:
-  -w, --workspace <workspace>      Workspace directory (default: "/tmp/pack_travetto_pack")
+  -w, --workspace <workspace>      Working directory (default: "/tmp/pack_travetto_pack")
   -k, --keep-source <keep-source>  Should source be preserved (default: true)
   -r, --readonly <readonly>        Build a readonly deployable (default: true)
   -h, --help                       display help for command
@@ -115,7 +116,7 @@ $ trv pack:zip --help
 Usage:  pack:zip [options] [mode]
 
 Options:
-  -w, --workspace <workspace>  Workspace directory (default: "/tmp/pack_travetto_pack")
+  -w, --workspace <workspace>  Working directory (default: "/tmp/pack_travetto_pack")
   -o, --output <output>        Output File (default: "output.zip")
   -h, --help                   display help for command
 
@@ -144,7 +145,7 @@ $ trv pack:docker --help
 Usage:  pack:docker [options] [mode]
 
 Options:
-  -w, --workspace <workspace>  Workspace directory (default: "/tmp/pack_travetto_pack")
+  -w, --workspace <workspace>  Working directory (default: "/tmp/pack_travetto_pack")
   -i, --image <image>          Docker Image to extend (default: "node:15.12.0-alpine3.11")
   -t, --tag <tag>              Image Tag (default: ["app"])
   -p, --port <port>            Image Port

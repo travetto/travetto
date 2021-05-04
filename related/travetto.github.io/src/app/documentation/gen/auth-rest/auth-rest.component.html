@@ -22,18 +22,22 @@ The integration with the <a class="module-link" routerLink="/docs/rest" title="D
  <li>Route declaration</li></ul>
 
 <h2 id="security-information-management">Security information management</h2>
-When working with framework's authentication, the user information is exposed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L15">TravettoRequest</a> 
+When working with framework's authentication, the user information is exposed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L13">TravettoRequest</a> 
 object.  The auth functionality is exposed on the request as the property <code class="item input">auth</code>.
 
       <figure class="code">
       <figcaption class="code">Structure of auth property on the request
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/typings.d.ts#L4">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/typings.d.ts#L7">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">TravettoRequest</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * The authenticated principal
    */</span>
   auth<span class="token operator">?</span><span class="token operator">:</span> Principal<span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Any additional context for login
+   */</span>
+  <span class="token punctuation">[</span>LoginContextⲐ<span class="token punctuation">]</span><span class="token operator">?</span><span class="token operator">:</span> LoginContext<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -51,7 +55,7 @@ Every external framework integration relies upon the <a target="_blank" class="s
       <pre><code class="language-typescript"><span class="token operator">&lt;</span>a target<span class="token operator">=</span><span class="token string">"_blank"</span> <span class="token keyword">class</span><span class="token operator">=</span><span class="token string">"source-link"</span> href<span class="token operator">=</span><span class="token string">"https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8"</span><span class="token operator">></span>Authenticator<span class="token operator">&lt;</span><span class="token operator">/</span>a<span class="token operator">></span></code></pre>     
       </figure>
 
-The only required method to be defined is the <code class="item method">authenticate</code> method.  This takes in a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L15">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L88">TravettoResponse</a>, and is responsible for:
+The only required method to be defined is the <code class="item method">authenticate</code> method.  This takes in a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L13">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L86">TravettoResponse</a>, and is responsible for:
 
 <ul> <li>Returning an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal</a> if authentication was successful</li>
  <li>Throwing an error if it failed</li>
@@ -145,7 +149,7 @@ Like the <a target="_blank" class="source-link" href="https://github.com/travett
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L27">@Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L43">@Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal</a> is accessible via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L46">@Context</a> directly, without wiring in a request object, but is also accessible on the request object as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L15">TravettoRequest</a>.auth.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L27">@Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L43">@Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal</a> is accessible via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38">@Context</a> directly, without wiring in a request object, but is also accessible on the request object as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L13">TravettoRequest</a>.auth.
 
 <h2 id="passport-extension">Passport - Extension</h2>
 
@@ -201,7 +205,7 @@ Within the node ecosystem, the most prevalent auth framework is <a target="_blan
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-As you can see, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/extension/passport/authenticator.ts#L14">PassportAuthenticator</a> will take care of the majority of the work, and all that is required is:
+As you can see, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/extension/passport/authenticator.ts#L15">PassportAuthenticator</a> will take care of the majority of the work, and all that is required is:
 <ul> <li>Provide the name of the strategy (should be unique)</li>
  <li>Provide the strategy instance. <p class="note"><strong>Note</strong> you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework</p></li>
  <li>The conversion functions which defines the mapping between external and local identities.</li></ul>
