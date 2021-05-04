@@ -201,5 +201,10 @@ export abstract class CacheServiceSuite {
     const start2 = Date.now();
     await service.getUser('200');
     assert((Date.now() - start2) >= 100);
+
+    // First time is free
+    await service.deleteUser('200');
+
+    await assert.doesNotReject(() => service.deleteUser('200'));
   }
 }
