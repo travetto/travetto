@@ -1,5 +1,4 @@
 import { Readable } from 'stream';
-
 import {
   SchemaObject, SchemasObject, ParameterObject, OperationObject,
   RequestBodyObject, TagObject, PathItemObject
@@ -26,7 +25,7 @@ export class SpecGenerator {
 
   /**
    * Get type id
-   * @param cls 
+   * @param cls
    */
   #getTypeId(cls: Class) {
     return cls.name?.replace('ᚕsyn', '');
@@ -34,7 +33,7 @@ export class SpecGenerator {
 
   /**
    * Get tag name
-   * @param cls 
+   * @param cls
    */
   #getTypeTag(cls: Class) {
     return cls.name.replace(/(Rest|Controller)$/, '');
@@ -274,7 +273,7 @@ export class SpecGenerator {
    */
   processEndpoint(ctrl: ControllerConfig, ep: EndpointConfig) {
 
-    const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '')
+    const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '');
 
     const op: OperationObject = {
       tags: [tagName],

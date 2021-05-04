@@ -199,6 +199,7 @@ export const TypeBuilder: {
     build: (checker, type) => {
       const [tag] = DocUtil.readDocTag(type, 'concrete');
       if (tag) {
+        // eslint-disable-next-line prefer-const
         let [source, name, ext] = tag.split(':');
         if (!name) {
           name = source;

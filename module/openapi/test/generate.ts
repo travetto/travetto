@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { ParameterObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { RootRegistry } from '@travetto/registry';
 import { Controller, Delete, Get, Head, Patch, Put } from '@travetto/rest';
@@ -6,7 +7,6 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { SpecGenerator } from '../src/spec-generate';
 import { TestUser } from './model';
-import { ParameterObject } from 'openapi3-ts/src/model/OpenApi';
 
 @Controller('/test')
 class TestCont {
@@ -77,7 +77,7 @@ export class GenerateSuite {
     assert(config.paths['/test/user'].get.responses['200'] === {
       content: {
         'application/json': {
-          schema: { '$ref': '#/components/schemas/TestUser' }
+          schema: { $ref: '#/components/schemas/TestUser' }
         }
       },
       description: ''
@@ -99,7 +99,7 @@ export class GenerateSuite {
     assert(config.paths['/test/users'].get.responses['200'] === {
       content: {
         'application/json': {
-          schema: { type: 'array', items: { '$ref': '#/components/schemas/TestUser' } }
+          schema: { type: 'array', items: { $ref: '#/components/schemas/TestUser' } }
         }
       },
       description: ''

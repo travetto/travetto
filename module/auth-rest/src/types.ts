@@ -5,5 +5,6 @@
  * @augments `@trv:rest/Context`
  */
 export interface LoginContext {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
