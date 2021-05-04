@@ -128,7 +128,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
       }
 
 
-      const name = config.store ?? cls.name;
+      const name = config.store ?? cls.name.toLowerCase();
 
       const candidates = this.getInitialNameMapping().get(name) || [];
 
