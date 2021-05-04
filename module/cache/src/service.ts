@@ -168,7 +168,13 @@ export class CacheService {
     const config = target[EvictConfigⲐ]![method];
     const id = CacheUtil.generateKey(config, params);
     const val = await fn.apply(target, params);
-    await this.delete(id);
+    try {
+      await this.delete(id); // Ignore failure on delete
+    } catch (err) {
+      if (!(err instanceof NotFoundError)) {
+        throw err;
+      }
+    }
     return val;
   }
 }
