@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import { Readable } from 'stream';
 
 import { CommandService } from '@travetto/command';
 import { ExecUtil, StreamUtil, AppCache, FsUtil } from '@travetto/boot';
@@ -22,7 +21,7 @@ export interface ImageOptions {
   optimize?: boolean;
 }
 
-type ImageType = Readable | Buffer;
+type ImageType = NodeJS.ReadableStream | Buffer;
 
 /**
  * Simple support for image manipulation.  Built upon @travetto/command, it can
@@ -57,9 +56,9 @@ export class ImageUtil {
   /**
    * Resize image using image magick
    */
-  static resize(image: Readable, options: ImageOptions): Promise<Readable>;
+  static resize(image: NodeJS.ReadableStream, options: ImageOptions): Promise<NodeJS.ReadableStream>;
   static resize(image: Buffer, options: ImageOptions): Promise<Buffer>;
-  static async resize(image: ImageType, options: ImageOptions): Promise<Readable | Buffer> {
+  static async resize(image: ImageType, options: ImageOptions): Promise<NodeJS.ReadableStream | Buffer> {
     const state = await this.CONVERTER.exec(
       'convert', '-resize', `${options.w ?? ''}x${options.h ?? ''}`,
       '-auto-orient',
@@ -72,9 +71,9 @@ export class ImageUtil {
   /**
    * Optimize png usng pngquant
    */
-  static optimize(format: 'png' | 'jpeg', image: Readable): Promise<Readable>;
+  static optimize(format: 'png' | 'jpeg', image: NodeJS.ReadableStream): Promise<NodeJS.ReadableStream>;
   static optimize(format: 'png' | 'jpeg', image: Buffer): Promise<Buffer>;
-  static async optimize(format: 'png' | 'jpeg', image: ImageType): Promise<Readable | Buffer> {
+  static async optimize(format: 'png' | 'jpeg', image: ImageType): Promise<NodeJS.ReadableStream | Buffer> {
     let stream;
     switch (format) {
       case 'png': {
@@ -100,7 +99,7 @@ export class ImageUtil {
     const out = AppCache.toEntryName(pth);
 
     if (!(await FsUtil.exists(out))) {
-      let stream: Buffer | Readable = await ResourceManager.readStream(rel);
+      let stream: Buffer | NodeJS.ReadableStream = await ResourceManager.readStream(rel);
       if (/[.]png$/.test(pth)) {
         stream = await this.optimize('png', stream);
       } else if (/[.]jpe?g$/i.test(pth)) {

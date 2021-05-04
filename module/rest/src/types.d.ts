@@ -3,8 +3,6 @@ import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'http'
 
 import { HeaderMap } from './types';
 import { HeadersAddedⲐ, NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from './internal/symbol';
-import { Readable } from 'stream';
-
 
 declare global {
   /**
@@ -167,7 +165,7 @@ declare global {
      * Optional internal method for sending streams
      * @param stream
      */
-    [SendStreamⲐ]?(stream: Readable): Promise<void>;
+    [SendStreamⲐ]?(stream: NodeJS.ReadableStream): Promise<void>;
     /**
      * Write content directly to the output stream
      * @param value The value to write

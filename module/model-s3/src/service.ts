@@ -1,4 +1,3 @@
-import { Readable } from 'stream';
 import * as s3 from '@aws-sdk/client-s3';
 import type { MetadataBearer } from '@aws-sdk/types';
 
@@ -78,7 +77,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   /**
    * Write multipart file upload, in chunks
    */
-  async #writeMultipart(id: string, input: Readable, meta: StreamMeta): Promise<void> {
+  async #writeMultipart(id: string, input: NodeJS.ReadableStream, meta: StreamMeta): Promise<void> {
     const { UploadId } = await this.client.createMultipartUpload(this.#q('_stream', id, {
       ContentType: meta.contentType,
       ContentLength: meta.size,
@@ -251,7 +250,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return -1;
   }
 
-  async upsertStream(location: string, input: Readable, meta: StreamMeta) {
+  async upsertStream(location: string, input: NodeJS.ReadableStream, meta: StreamMeta) {
     if (meta.size < this.config.chunkSize) { // If bigger than 5 mb
       // Upload to s3
       await this.client.putObject(this.#q('_stream', location, {

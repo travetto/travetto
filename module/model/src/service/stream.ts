@@ -1,5 +1,3 @@
-import { Readable } from 'stream';
-
 export interface StreamMeta {
   /**
    * File size
@@ -32,13 +30,13 @@ export interface ModelStreamSupport {
    * @param input The actual stream to write
    * @param meta The stream metadata
    */
-  upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void>;
+  upsertStream(location: string, input: NodeJS.ReadableStream, meta: StreamMeta): Promise<void>;
 
   /**
    * Get stream from asset store
    * @param location The location of the stream
    */
-  getStream(location: string): Promise<Readable>;
+  getStream(location: string): Promise<NodeJS.ReadableStream>;
 
   /**
    * Get metadata for stream

@@ -10,4 +10,11 @@ declare global {
      */
     from<T>(this: Class<T>, data: DeepPartial<T>, view?: string): T;
   }
+
+  namespace NodeJS {
+    /**
+     * @concrete stream:Readable:node
+     */
+    interface ReadableStream { }
+  }
 }

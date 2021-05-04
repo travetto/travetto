@@ -1,6 +1,5 @@
 import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 import { SHARE_ENV, Worker, WorkerOptions, parentPort } from 'worker_threads';
-import { Readable } from 'stream';
 
 import { PathUtil } from './path';
 import { StreamUtil } from './stream';
@@ -71,7 +70,7 @@ export interface ExecutionOptions extends SpawnOptions {
   /**
    * The stdin source for the execution
    */
-  stdin?: string | Buffer | Readable;
+  stdin?: string | Buffer | NodeJS.ReadableStream;
 }
 
 /**
@@ -294,8 +293,8 @@ export class ExecUtil {
    * @param input The data to input into the process
    */
   static pipe(state: ExecutionState, input: Buffer): Promise<Buffer>;
-  static pipe(state: ExecutionState, input: string | Readable): Promise<Readable>;
-  static async pipe(state: ExecutionState, input: Buffer | Readable | string): Promise<Buffer | Readable> {
+  static pipe(state: ExecutionState, input: string | NodeJS.ReadableStream): Promise<NodeJS.ReadableStream>;
+  static async pipe(state: ExecutionState, input: Buffer | NodeJS.ReadableStream | string): Promise<Buffer | NodeJS.ReadableStream> {
     const { process: proc, result: prom } = state;
 
     (await StreamUtil.toStream(input)).pipe(proc.stdin!);

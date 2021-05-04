@@ -199,7 +199,7 @@ export const TypeBuilder: {
     build: (checker, type) => {
       const [tag] = DocUtil.readDocTag(type, 'concrete');
       if (tag) {
-        let [source, name] = tag.split(':');
+        let [source, name, ext] = tag.split(':');
         if (!name) {
           name = source;
           source = '.';
@@ -215,7 +215,7 @@ export const TypeBuilder: {
           source = PathUtil.resolveUnix(dirname(sourceFile), source);
         }
 
-        return { key: 'external', name, source: PathUtil.resolveUnix(sourceFile, source) };
+        return { key: 'external', name, source: ext === 'node' ? source : PathUtil.resolveUnix(sourceFile, source) };
       }
     }
   }

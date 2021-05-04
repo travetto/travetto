@@ -40,6 +40,11 @@ class TestCont {
   @Head('/all/:id')
   async headAll(id: string, match?: TestUser) {
   }
+
+  @Get('/download')
+  async download(size?: number) {
+    return (undefined as unknown as NodeJS.ReadableStream);
+  }
 }
 
 @Suite()
@@ -53,7 +58,7 @@ export class GenerateSuite {
   async verifyGeneral() {
     const config = new SpecGenerator().generate({});
     assert(config);
-    assert(Object.keys(config.paths).length === 6);
+    assert(Object.keys(config.paths).length === 7);
     assert(Object.keys(config.components.schemas).length === 2);
   }
 
@@ -149,6 +154,25 @@ export class GenerateSuite {
         }
       },
       description: '__type'
+    });
+    assert(config.components.schemas['who_27_31'] === {
+      description: '__type',
+      example: undefined,
+      properties: {
+        color: {
+          description: undefined,
+          type: 'string'
+        },
+        name: {
+          description: undefined,
+          type: 'string'
+        }
+      },
+      required: [
+        'name',
+        'color'
+      ],
+      title: '__type'
     });
   }
 
@@ -247,5 +271,24 @@ export class GenerateSuite {
     assert(param4.in === 'query');
     assert(param4.name === 'salary');
     assert(param4.schema === { type: 'number' });
+  }
+
+  @Test()
+  verifyDownload() {
+    const config = new SpecGenerator().generate({});
+    assert(config.paths['/test/download'].get);
+    assert(config.paths['/test/download'].get.responses['200']);
+    assert(config.paths['/test/download'].get.responses['200'] === {
+      content: {
+        'application/octect-stream': { type: 'string', format: 'binary' }
+      },
+      description: ''
+    });
+
+    const param = (config.paths['/test/download'].get.parameters?.[0] as ParameterObject);
+    assert(!param.required);
+    assert(param.in === 'query');
+    assert(param.name === 'size');
+    assert(param.schema === { type: 'number' });
   }
 }
