@@ -250,7 +250,7 @@ export class SQLUtil {
         const field = { ...schema.views[AllViewⲐ].schema[key] };
         if (Util.isPrimitive(val)) {
           stack.push(field);
-          found = { stack, asc: val === 1 || val === true };
+          found = { stack, asc: val === 1 };
         } else {
           stack.push(field);
           schema = SchemaRegistry.get(field.type);

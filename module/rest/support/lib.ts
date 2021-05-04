@@ -86,7 +86,7 @@ export class RestTransformUtil {
       case 'literal': {
         if (retType.ctor) {
           if (type.array) {
-            type.type = state.factory.createArrayLiteralExpression([SchemaTransformUtil.toConcreteType(state, retType, node)]);
+            type.type = SchemaTransformUtil.toConcreteType(state, retType, node);
           } else {
             type.type = state.factory.createIdentifier(retType.ctor.name);
           }

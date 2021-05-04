@@ -11,7 +11,7 @@ type GroupClauseRaw<T> = {
 
 type SortClauseRaw<T> = {
   [P in keyof T]?:
-  T[P] extends object ? SortClauseRaw<RetainFields<T[P]>> : (1 | -1 | boolean);
+  T[P] extends object ? SortClauseRaw<RetainFields<T[P]>> : 1 | -1;
 };
 
 type QueryOptionsRaw<T> = {
