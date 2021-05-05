@@ -95,7 +95,8 @@ export class SessionService {
    * @returns undefined if nothing should happen
    */
   async #store(session: Session | undefined): Promise<Session | undefined | null> {
-    if (!session) {
+    // If missing or new and no data
+    if (!session || (session.action === 'create' && session.isEmpty())) {
       return;
     }
 
@@ -148,6 +149,7 @@ export class SessionService {
    */
   async writeResponse(req: Request, res: Response) {
     const value = await this.#store(req[SessionⲐ]);
+
     if (value === undefined) {
       return;
     }

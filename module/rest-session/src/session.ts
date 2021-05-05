@@ -120,6 +120,13 @@ export class Session<T extends SessionData = SessionData>  {
   }
 
   /**
+   * See if session is empty, has any data been written
+   */
+  isEmpty() {
+    return !Object.keys(this.data ?? {}).length;
+  }
+
+  /**
    * Refresh the session expiration time
    */
   refresh() {

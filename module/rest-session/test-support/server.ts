@@ -25,11 +25,6 @@ class TestController {
     data.payload = payload;
   }
 
-  @Put('/query')
-  withQuery(@Query() age: number) {
-    return { query: age };
-  }
-
   @Put('/body')
   withBody(req: Request) {
     return { body: req.body.age };
@@ -86,6 +81,19 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
   }
 
   @Test()
+  async cookieNoSession() {
+    this.initConifg({
+      transport: 'cookie',
+      maxAge: 3000
+    });
+
+    const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
+    let res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
+    const cookie = res.headers['set-cookie'];
+    assert(cookie === undefined);
+  }
+
+  @Test()
   async headerPersistence() {
     const { keyName: key } = this.initConifg({
       transport: 'header',
@@ -129,6 +137,20 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
+  }
+
+  @Test()
+  async headerNoSession() {
+    const { keyName: key } = this.initConifg({
+      transport: 'header',
+      maxAge: 100
+    });
+
+
+    const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
+    let res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
+    const cookie = res.headers[key];
+    assert(cookie === undefined);
   }
 
   @Test()

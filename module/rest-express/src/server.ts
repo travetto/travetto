@@ -46,6 +46,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
   init(): express.Application {
     const app = express();
     app.set('query parser', 'simple');
+    app.disable('x-powered-by');
     app.use(compression());
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));
