@@ -88,7 +88,8 @@ export class ExecUtil {
       shell: false,
       ...opts,
       env: {
-        ...(opts.isolatedEnv ? {} : process.env),
+        // Preserve path when isolating
+        ...(opts.isolatedEnv ? { PATH: process.env.PATH } : process.env),
         TRV_DYNAMIC: '0', // Force dynamic to not cascade
         ...(opts.env ?? {})
       }
