@@ -1,7 +1,7 @@
 {
   "name": "@travetto/transformer",
   "displayName": "Transformation",
-  "version": "2.0.0-alpha.11",
+  "version": "2.0.0-rc.0",
   "description": "Functionality for AST transformations, with transformer registration, and general utils",
   "keywords": [
     "typescript",
@@ -26,7 +26,7 @@
     "directory": "module/transformer"
   },
   "dependencies": {
-    "@travetto/base": "^2.0.0-alpha.11"
+    "@travetto/base": "^2.0.0-rc.0"
   },
   "publishConfig": {
     "access": "public"
