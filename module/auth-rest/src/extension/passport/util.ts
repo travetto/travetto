@@ -20,7 +20,7 @@ export class PassportUtil {
    */
   static createLoginContext(req: Request, { state }: PassportAuthOptions): Partial<passport.AuthenticateOptions> {
     const stateRec = Util.isFunction(state) ? state.call(null, req) : (state ?? {});
-    const json = JSON.stringify({ referrer: req.header('referrer'), ...stateRec });
+    const json = JSON.stringify({ referer: req.header('referer'), ...stateRec });
 
     return {
       state: Buffer.from(json).toString('base64')
