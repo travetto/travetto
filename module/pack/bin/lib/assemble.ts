@@ -107,7 +107,11 @@ export class AssembleUtil {
    */
   static async buildWorkspace(root: string, cacheDir: string) {
     await ExecUtil.spawn('node', ['./node_modules/@travetto/cli/bin/trv.js', 'build'],
-      { cwd: root, isolatedEnv: true, env: { TRV_ENV: 'prod', TRV_CACHE: cacheDir }, stdio: ['pipe', 'pipe', 2] }).result;
+      {
+        cwd: root, isolatedEnv: true,
+        env: { PATH: process.env.PATH, TRV_ENV: 'prod', TRV_CACHE: cacheDir },
+        stdio: ['pipe', 'pipe', 2]
+      }).result;
   }
 
   /**
