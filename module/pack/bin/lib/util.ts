@@ -93,7 +93,7 @@ export class PackUtil {
     if (!!(await FsUtil.exists(out))) {
       src = await fs.readFile(out, 'utf8');
     }
-    const lines = Object.entries(env).filter(([, v]) => !!v).map(([k, v]) => `process.env['${k}'] = ${v};`);
+    const lines = Object.entries(env).filter(([, v]) => v !== undefined).map(([k, v]) => `process.env['${k}'] = ${v};`);
     const content = `${src}\n${lines.join('\n')}`;
     await fs.writeFile(PathUtil.resolveUnix(workspace, '.env.js'), content, { encoding: 'utf8' });
   }

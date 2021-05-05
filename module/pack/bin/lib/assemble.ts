@@ -18,7 +18,7 @@ export class AssembleUtil {
    */
   static async cleanCache(cache: string) {
     for (const el of await fs.readdir(cache)) {
-      if (el.endsWith('.js')) {
+      if (el.endsWith('.ts')) {
         const content = (await fs.readFile(`${cache}/${el}`, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
         await fs.writeFile(`${cache}/${el}`, content);
       }
@@ -32,7 +32,9 @@ export class AssembleUtil {
     for (const sub of folders) {
       for (const f of await ScanFs.scanDir({ testFile: x => x.endsWith('.ts'), testDir: x => true }, sub)) {
         if (f.stats.isFile() && !f.module.startsWith('cli/')) {
-          await fs.writeFile(f.file, '');
+          // Retain flag for app scanning
+          const content = (await fs.readFile(f.file, 'utf8')).includes('@Application') ? '@Application' : ''
+          await fs.writeFile(f.file, content);
         }
       }
     }

@@ -9,6 +9,7 @@ import { PackUtil } from '../lib/util';
 export interface DockerConfig extends CommonConfig {
   image: string;
   tag: string[];
+  app?: string;
   port?: (string | number)[];
   env: Record<string, string | number | boolean>;
 }
@@ -23,15 +24,16 @@ export const Docker: PackOperation<DockerConfig> = {
     return {
       ...PackUtil.commonExtend(a, b),
       image: b.image ?? a.image,
+      app: b.app ?? a.app,
       tag: b.tag ?? a.tag ?? ['app'],
       port: b.port ?? a.port,
       env: { ...(b.env ?? {}), ...a.env }
     };
   },
   /**
-  * Zip workspace with flags
+  * Dockerize workspace with flags
   */
-  async* exec({ workspace, image, port, tag, env }: DockerConfig) {
+  async* exec({ workspace, image, port, tag, env, app = 'rest' }: DockerConfig) {
     const ws = PathUtil.resolveUnix(workspace);
 
     yield 'Building Dockerfile';
@@ -41,7 +43,7 @@ export const Docker: PackOperation<DockerConfig> = {
   COPY . .
   ${Object.entries(env).map(([k, v]) => `ENV ${k} "${v}"`).join('\n')}
   ${(port ?? []).map(x => `EXPOSE ${x}`).join('\n')}
-  CMD ["node", "./node_modules/.bin/trv", "run", "rest"]
+  CMD ["node", "./node_modules/@travetto/cli/bin/trv", "run", "${app}"]
     `, { encoding: 'utf8' });
 
     yield 'Pulling Base Image';

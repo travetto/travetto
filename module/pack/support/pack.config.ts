@@ -7,8 +7,10 @@ export const config: AllConfigPartial = {
     cacheDir: 'cache',
     keepSource: true,
     readonly: true,
+    env: {
+      TRV_DYNAMIC: 0
+    },
     add: [
-      { 'node_modules/@travetto/cli/bin/trv.js': 'node_modules/.bin/trv' },
       { 'node_modules/lodash/lodash.min.js': 'node_modules/lodash/lodash.js' },
     ],
     excludeCompile: [
