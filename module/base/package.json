@@ -1,7 +1,7 @@
 {
   "name": "@travetto/base",
   "displayName": "Base",
-  "version": "2.0.0-alpha.10",
+  "version": "2.0.0-alpha.11",
   "description": "Application phase management, environment config and common utilities for travetto applications.",
   "keywords": [
     "shutdown-helper",
@@ -31,7 +31,7 @@
     "@travetto/boot": "^2.0.0-alpha.10"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "^2.0.0-alpha.10"
+    "@travetto/cli": "^2.0.0-alpha.11"
   },
   "docDependencies": {
     "@travetto/config": true
