@@ -25,7 +25,8 @@ export class Semver {
         break;
       }
       case 'prerelease': {
-        ver.prerelease = [ver.prerelease?.[0] ?? prefix!, (ver.prerelease?.[1] ?? -1) + 1];
+        const computed = prefix ?? ver.prerelease?.[0] ?? 'alpha';
+        ver.prerelease = [computed, ((computed === ver.prerelease?.[0] ? ver.prerelease?.[1] : undefined) ?? -1) + 1];
         break;
       }
     }
