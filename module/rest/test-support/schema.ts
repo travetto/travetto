@@ -7,6 +7,7 @@ import { Controller, Redirect, Post, Get, QuerySchema, MethodOrAll, ControllerRe
 
 import { BaseRestSuite } from './base';
 import { Path } from '../src/decorator/param';
+import { Response } from '../src/types';
 
 type Errors = { errors: { path: string }[], message: string };
 
@@ -94,6 +95,13 @@ class SchemaAPI {
 
       }
     };
+  }
+
+  /**
+   * @returns {Promise<User>}
+   */
+  @Get('/customRender2')
+  async customRender2(res: Response) {
   }
 }
 
@@ -209,6 +217,12 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
   @Test()
   async verifyCustomRenderable() {
     const ep = getEndpoint('/customRender', 'get');
+    assert(ep.responseType?.type === User);
+  }
+
+  @Test()
+  async verifyCustomRenderable2() {
+    const ep = getEndpoint('/customRender2', 'get');
     assert(ep.responseType?.type === User);
   }
 }
