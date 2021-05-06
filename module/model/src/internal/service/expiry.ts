@@ -1,4 +1,5 @@
 import { Class, ShutdownManager } from '@travetto/base';
+import { TimeUtil } from '@travetto/base/src/internal/time';
 
 import { ModelRegistry } from '../../registry/model';
 import { ModelExpirySupport } from '../../service/expiry';
@@ -29,9 +30,9 @@ export class ModelExpiryUtil {
   static registerCull(svc: ModelExpirySupport & { readonly config?: { cullRate?: number } }) {
     const expirable = ModelRegistry.getClasses().filter(cls => !!ModelRegistry.get(cls).expiresAt);
     if (svc.deleteExpired && expirable.length) {
-      let running = false;
+      let running = true;
       const culler = async () => {
-        const cullInterval = svc.config?.cullRate ?? 60 * 10 * 1000 /* 10 minutes */;
+        const cullInterval = svc.config?.cullRate ?? TimeUtil.toMillis('10m');
         while (running) {
           await new Promise(r => setTimeout(r, cullInterval));
           await Promise.all(expirable.map(cls => svc.deleteExpired?.(cls)));

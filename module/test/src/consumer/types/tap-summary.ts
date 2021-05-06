@@ -42,7 +42,7 @@ export class SummaryEmitter implements TestConsumer {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.#enhancer.failure(err instanceof Error ? err.toJSON() : `${err}`) as string);
+        this.log(this.#enhancer.failure(err instanceof Error ? `${err.toJSON()}` : `${err}`));
       }
     }
 
