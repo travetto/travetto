@@ -143,7 +143,7 @@ export class PackUtil {
     process.stdout.write(`${spacer}${title}\n`);
     process.stdout.write(`${spacer}${'-'.repeat(width)}\n`);
 
-    runPhase('preProcess');
+    await runPhase('preProcess');
 
     for await (const msg of op.exec(cfg)) {
       if (msg.includes('Success')) { // We are done
@@ -154,7 +154,7 @@ export class PackUtil {
       }
     }
 
-    runPhase('postProcess');
+    await runPhase('postProcess');
 
     // Wrap up
     stdout();

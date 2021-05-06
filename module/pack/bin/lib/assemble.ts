@@ -33,7 +33,7 @@ export class AssembleUtil {
       for (const f of await ScanFs.scanDir({ testFile: x => x.endsWith('.ts'), testDir: x => true }, sub)) {
         if (f.stats.isFile() && !f.module.startsWith('cli/')) {
           // Retain flag for app scanning
-          const content = (await fs.readFile(f.file, 'utf8')).includes('@Application') ? '@Application' : ''
+          const content = (await fs.readFile(f.file, 'utf8')).includes('@Application') ? '@Application' : '';
           await fs.writeFile(f.file, content);
         }
       }
@@ -109,7 +109,7 @@ export class AssembleUtil {
     await ExecUtil.spawn('node', ['./node_modules/@travetto/cli/bin/trv.js', 'build'],
       {
         cwd: root, isolatedEnv: true,
-        env: { TRV_ENV: 'prod', TRV_CACHE: cacheDir },
+        env: { TRV_ENV: 'prod', TRV_CACHE: cacheDir, TRV_NODE_VERSION: process.env.TRV_NODE_VERSION },
         stdio: ['pipe', 'pipe', 2]
       }).result;
   }

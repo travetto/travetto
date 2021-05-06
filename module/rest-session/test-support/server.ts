@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Controller, Get, Body, Post, Put, Query, Request } from '@travetto/rest';
+import { Controller, Get, Body, Post, Put, Request } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
@@ -88,7 +88,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
+    const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
     const cookie = res.headers['set-cookie'];
     assert(cookie === undefined);
   }
@@ -148,7 +148,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
+    const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
     const cookie = res.headers[key];
     assert(cookie === undefined);
   }

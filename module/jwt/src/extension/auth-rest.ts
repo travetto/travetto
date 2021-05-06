@@ -34,14 +34,6 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
     }
   }
 
-  send(res: Response, value: string) {
-    res.setHeader(this.#header, `${this.headerPrefix}${value}`);
-  }
-
-  receive(req: Request) {
-    return (req.header(this.#header) as string)?.replace(this.#headerPrefix, '');
-  }
-
   toJwtPayload(p: Principal) {
     const exp = Math.trunc((p.expiresAt?.getTime() ?? (Date.now() + this.#defaultAge)) / 1000);
     const iat = Math.trunc((p.issuedAt?.getTime() ?? Date.now()) / 1000);
@@ -55,12 +47,26 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   }
 
   /**
+   * Get token for principal
+   */
+  async getToken(p: Principal) {
+    return await JWTUtil.create(this.toJwtPayload(p), { key: this.#signingKey });
+  }
+
+  /**
+   * Verify token to principal
+   * @param token
+   */
+  async verifyToken(token: string) {
+    return (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.#signingKey })).auth;
+  }
+
+  /**
    * Write context
    */
   async encode(req: Request, res: Response, p: Principal | undefined) {
     if (p) {
-      const token = await JWTUtil.create(this.toJwtPayload(p), { key: this.#signingKey });
-      this.send(res, token);
+      res.setHeader(this.#header, `${this.#headerPrefix}${await this.getToken(p)}`);
     }
   }
 
@@ -68,9 +74,9 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
    * Read JWT from request
    */
   async decode(req: Request) {
-    const token = this.receive(req);
+    const token = (req.header(this.#header) as string)?.replace(this.#headerPrefix, '');
     if (token) {
-      return (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.#signingKey })).auth;
+      return this.verifyToken(token);
     }
   }
 }
