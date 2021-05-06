@@ -43,6 +43,7 @@ When working with an [express](https://expressjs.com) applications, the module p
 ```typescript
 const app = express();
     app.set('query parser', 'simple');
+    app.disable('x-powered-by');
     app.use(compression());
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));

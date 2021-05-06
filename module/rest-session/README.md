@@ -76,6 +76,10 @@ export class Session<T extends SessionData = SessionData>  {
    */
   isExpired() ;
   /**
+   * See if session is empty, has any data been written
+   */
+  isEmpty() ;
+  /**
    * Refresh the session expiration time
    */
   refresh() ;

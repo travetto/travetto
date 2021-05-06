@@ -64,6 +64,9 @@ Assemble is the operation that stages the project's code for deployment.  The as
   cacheDir<span class="token operator">:</span> <span class="token string">'cache'</span><span class="token punctuation">,</span>
   keepSource<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
   <span class="token keyword">readonly</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  env<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token constant">TRV_DYNAMIC</span><span class="token operator">:</span> <span class="token string">'0'</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
   add<span class="token operator">:</span> <span class="token punctuation">[</span>
     <span class="token punctuation">{{'{'}}</span> <span class="token string">'node_modules/@travetto/cli/bin/trv.js'</span><span class="token operator">:</span> <span class="token string">'node_modules/.bin/trv'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
     <span class="token punctuation">{{'{'}}</span> <span class="token string">'node_modules/lodash/lodash.min.js'</span><span class="token operator">:</span> <span class="token string">'node_modules/lodash/lodash.js'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
@@ -112,7 +115,7 @@ Zip is an optional step, that can run post assembly.  The only configuration it 
 
       <figure class="code">
       <figcaption class="code">Zip Default Config
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L52">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L55">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript">zip<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
   active<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
@@ -145,7 +148,7 @@ Docker support is an optional step, that can run post assembly.  This allows for
 
       <figure class="code">
       <figcaption class="code">Docker Default Config
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L56">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L59">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript">docker<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
   active<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
@@ -183,8 +186,8 @@ Various modules may provide customizations to the default <code class="item path
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppCache<span class="token punctuation">,</span> PathUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> AllConfigPartial <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/pack/bin/operation/pack'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PathUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> AllConfigPartial<span class="token punctuation">,</span> AssembleConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/pack'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> config<span class="token operator">:</span> AllConfigPartial <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   name<span class="token operator">:</span> <span class="token string">'rest/aws-lambda'</span><span class="token punctuation">,</span>
@@ -198,11 +201,11 @@ Various modules may provide customizations to the default <code class="item path
       <span class="token constant">NO_COLOR</span><span class="token operator">:</span> <span class="token number">1</span>
     <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
     postProcess<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{{'{'}}</span>
-      <span class="token punctuation">[</span><span class="token string">'Install Entrypoint'</span><span class="token punctuation">]</span><span class="token operator">:</span> <span class="token keyword">async</span> <span class="token punctuation">(</span>cfg<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> cacheDir<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> workspace<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
-        <span class="token keyword">const</span> Entrypoint <span class="token operator">=</span> AppCache<span class="token punctuation">.</span><span class="token function">toEntryName</span><span class="token punctuation">(</span><span class="token keyword">require</span><span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token string">'@travetto/rest/support/entry.aws-lambda.ts'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-          <span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span>AppCache<span class="token punctuation">.</span>cacheDir<span class="token punctuation">,</span> PathUtil<span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>cfg<span class="token punctuation">.</span>workspace<span class="token punctuation">,</span> cfg<span class="token punctuation">.</span>cacheDir<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">await</span> fs<span class="token punctuation">.</span>promises<span class="token punctuation">.</span><span class="token function">copyFile</span><span class="token punctuation">(</span>Entrypoint<span class="token punctuation">,</span> PathUtil<span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>cfg<span class="token punctuation">.</span>workspace<span class="token punctuation">,</span> <span class="token string">'index.js'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token punctuation">{{'}'}}</span>
+      <span class="token string">'Lambda Entrypoint'</span><span class="token operator">:</span> <span class="token punctuation">(</span>cfg<span class="token operator">:</span> AssembleConfig<span class="token punctuation">)</span> <span class="token operator">=></span>
+        fs<span class="token punctuation">.</span>promises<span class="token punctuation">.</span><span class="token function">copyFile</span><span class="token punctuation">(</span>
+          PathUtil<span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>__dirname<span class="token punctuation">,</span> <span class="token string">'aws-lambda.handler.js'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+          PathUtil<span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>cfg<span class="token punctuation">.</span>workspace<span class="token punctuation">,</span> <span class="token string">'index.js'</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
     <span class="token punctuation">{{'}'}}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
   zip<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
@@ -231,7 +234,7 @@ These two configurations will be loaded and layered, with the selected config ta
       <figcaption class="code">Example pack.config.ts
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/doc/support/pack.config.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> AllConfigPartial <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/pack/bin/operation/pack'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> AllConfigPartial <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/pack'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> config<span class="token operator">:</span> AllConfigPartial <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   workspace<span class="token operator">:</span> <span class="token string">'dist/alt'</span><span class="token punctuation">,</span>
