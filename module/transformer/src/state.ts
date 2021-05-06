@@ -99,7 +99,13 @@ export class TransformerState implements State {
    * Resolve the return type
    */
   resolveReturnType(node: ts.MethodDeclaration) {
-    return this.resolveType(this.#resolver.getReturnType(node));
+    const typeNode = ts.getJSDocReturnType(node);
+    if (typeNode) {
+      const resolved = this.#resolver.getChecker().getTypeFromTypeNode(typeNode);
+      return this.resolveType(resolved);
+    } else {
+      return this.resolveType(this.#resolver.getReturnType(node));
+    }
   }
 
   /**
@@ -299,5 +305,26 @@ export class TransformerState implements State {
       exists = false;
     }
     return [this.#syntheticIdentifiers.get(id), exists] as [id: ts.Identifier, exists: boolean];
+  }
+
+  /**
+   * Find a method declaration, by name
+   * @param cls
+   * @param method
+   */
+  findMethodByName(cls: ts.ClassLikeDeclaration | ts.Type, method: string): ts.MethodDeclaration | undefined {
+    if ('getSourceFile' in cls) {
+      return cls.members.find(
+        m => ts.isMethodDeclaration(m) && ts.isIdentifier(m.name) && m.name.escapedText === method
+      ) as ts.MethodDeclaration;
+    } else {
+      const props = this.getResolver().getPropertiesOfType(cls);
+      for (const prop of props) {
+        const decl = prop.declarations?.[0];
+        if (decl && prop.escapedName === method && ts.isMethodDeclaration(decl)) {
+          return decl;
+        }
+      }
+    }
   }
 }

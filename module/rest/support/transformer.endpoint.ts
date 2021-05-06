@@ -3,10 +3,8 @@ import * as ts from 'typescript';
 import {
   TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, TransformerId, DecoratorMeta, LiteralUtil
 } from '@travetto/transformer';
-import { SchemaTransformUtil } from '@travetto/schema/support/lib';
+import { SchemaTransformUtil } from '@travetto/schema/support/transform-util';
 import { AnyType, ExternalType } from '@travetto/transformer/src/resolver/types';
-
-import { RestTransformUtil } from './lib';
 
 const PARAM_DEC_FILE = '@travetto/rest/src/decorator/param';
 const COMMON_DEC_FILE = '@travetto/rest/src/decorator/common';
@@ -39,7 +37,7 @@ export class RestTransformer {
       (paramType.key === 'external' &&
         DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@trv:rest/Context')
       ) ||
-      (pDec && !/(Path|Header|Query|Body|SchemaQuery)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
+      (pDec && !/(Path|Header|Query|Body|Param|SchemaQuery)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
 
     // Detect default behavior
     if (isContext) {
@@ -128,7 +126,8 @@ export class RestTransformer {
     }
 
     // If we have a valid response type, declare it
-    const returnType = RestTransformUtil.resolveReturnType(state, node);
+    const inner = SchemaTransformUtil.findInnerReturnMethod(state, node, 'render');
+    const returnType = SchemaTransformUtil.ensureType(state, state.resolveReturnType(inner ?? node), node);
     if (returnType.type) {
       newDecls.push(state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', state.fromLiteral({
         ...returnType,

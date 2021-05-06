@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 import {
   TransformerState, DecoratorMeta, CoreUtil, DecoratorUtil, TransformerId, AfterClass
 } from '@travetto/transformer';
-import { SchemaTransformUtil } from '@travetto/schema/support/lib';
+import { SchemaTransformUtil } from '@travetto/schema/support/transform-util';
 
 /**
  * Converts classes with `@Application` to auto register with the `ApplicationRegistry`

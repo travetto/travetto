@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { AnyType, DocUtil, ParamDocumentation, TransformerState } from '@travetto/transformer';
+import { AnyType, DeclarationUtil, DocUtil, ParamDocumentation, TransformerState } from '@travetto/transformer';
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
 const FIELD_MOD = '@travetto/schema/src/decorator/field';
@@ -143,6 +143,66 @@ export class SchemaTransformUtil {
         node.type,
         node.initializer
       ) as T;
+    }
+  }
+
+  /**
+   * Unwrap type
+   */
+  static unwrapType(type: AnyType) {
+    const out: Record<string, unknown> = {};
+
+    while (type?.key === 'literal' && type.typeArguments?.length) {
+      if (type.ctor === Array || type.ctor === Set) {
+        out.array = true;
+      }
+      type = type.typeArguments?.[0] ?? { key: 'literal', ctor: Object }; // We have a promise nested
+    }
+    return { out, type };
+  }
+
+  /**
+   * Ensure type
+   * @param state
+   * @param node
+   */
+  static ensureType(state: TransformerState, anyType: AnyType, target: ts.Node): Record<string, unknown> {
+    const { out, type } = this.unwrapType(anyType);
+    switch (type?.key) {
+      case 'external': out.type = state.typeToIdentifier(type); break;
+      case 'shape': out.type = SchemaTransformUtil.toConcreteType(state, type, target); break;
+      case 'literal': {
+        if (type.ctor) {
+          out.type = out.array ?
+            SchemaTransformUtil.toConcreteType(state, type, target) :
+            state.factory.createIdentifier(type.ctor.name);
+        }
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Find inner return method
+   * @param state
+   * @param node
+   * @param methodName
+   * @returns
+   */
+  static findInnerReturnMethod(state: TransformerState, node: ts.MethodDeclaration, methodName: string) {
+    // Process returnType
+    const { type } = this.unwrapType(state.resolveReturnType(node));
+    let cls;
+    switch (type?.key) {
+      case 'external': {
+        const [dec] = DeclarationUtil.getDeclarations(type.original!);
+        cls = dec && ts.isClassDeclaration(dec) ? dec : undefined;
+        break;
+      }
+      case 'shape': cls = type.original; break;
+    }
+    if (cls) {
+      return state.findMethodByName(cls, methodName);
     }
   }
 }

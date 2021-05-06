@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 import { PathUtil } from '@travetto/boot';
-import type { AllConfigPartial } from '@travetto/pack';
+import type { AllConfigPartial, AssembleConfig } from '@travetto/pack';
 
 export const config: AllConfigPartial = {
   name: 'rest/aws-lambda',
@@ -15,13 +15,11 @@ export const config: AllConfigPartial = {
       NO_COLOR: 1
     },
     postProcess: [{
-      ['Lambda Entrypoint']: async (cfg: { workspace: string }) => {
-        await fs.promises.writeFile(
-          PathUtil.resolveUnix(cfg.workspace, 'index.js'), `
-require('@travetto/boot/bin/register');
-module.exports = require('@travetto/rest/support/entry.aws-lambda');`,
-          { encoding: 'utf8' });
-      }
+      'Lambda Entrypoint': (cfg: AssembleConfig) =>
+        fs.promises.copyFile(
+          PathUtil.resolveUnix(__dirname, 'aws-lambda.handler.js'),
+          PathUtil.resolveUnix(cfg.workspace, 'index.js')
+        )
     }],
   },
   zip: {

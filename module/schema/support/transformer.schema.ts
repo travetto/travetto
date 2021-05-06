@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 import {
   TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, TransformerId
 } from '@travetto/transformer';
-import { SchemaTransformUtil } from './lib';
+import { SchemaTransformUtil } from './transform-util';
 
 const inSchema = Symbol.for('@trv:schema/schema');
 
