@@ -30,8 +30,12 @@ export class SqliteDialect extends SQLDialect {
     // Special types
     Object.assign(this.COLUMN_TYPES, {
       JSON: 'TEXT',
-      TIMESTAMP: 'TEXT'
+      TIMESTAMP: 'INTEGER'
     });
+  }
+
+  resolveDateValue(value: Date) {
+    return `${value.getTime()}`;
   }
 
   /**

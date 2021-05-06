@@ -6,18 +6,20 @@ import { RestSessionServerSuite } from '@travetto/rest-session/test-support/serv
 import { SessionModelⲐ } from '@travetto/rest-session';
 import { AsyncContext } from '@travetto/context';
 import { ModelSuite } from '@travetto/model/test-support/suite';
+import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 
 import { SQLModelConfig } from '../src/config';
 import { MySQLDialect } from '../src/dialect/mysql/dialect';
 import { SQLModelService } from '../src/service';
+import { SQLDialect } from '../src/dialect/base';
 
 class Config {
   @InjectableFactory({ primary: true })
-  static getSqlService(ctx: AsyncContext, config: SQLModelConfig) {
+  static getSqlService(ctx: AsyncContext, config: SQLModelConfig): SQLDialect {
     return new MySQLDialect(ctx, config);
   }
   @InjectableFactory(SessionModelⲐ)
-  static modelProvider(svc: SQLModelService) {
+  static modelProvider(svc: SQLModelService): ModelExpirySupport {
     return svc;
   }
 }

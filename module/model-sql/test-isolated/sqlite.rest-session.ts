@@ -6,6 +6,7 @@ import { RestSessionServerSuite } from '@travetto/rest-session/test-support/serv
 import { SessionModelⲐ } from '@travetto/rest-session';
 import { AsyncContext } from '@travetto/context';
 import { ModelSuite } from '@travetto/model/test-support/suite';
+import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 
 import { SQLModelConfig } from '../src/config';
 import { SqliteDialect } from '../src/dialect/sqlite/dialect';
@@ -17,7 +18,7 @@ class Config {
     return new SqliteDialect(ctx, config);
   }
   @InjectableFactory(SessionModelⲐ)
-  static modelProvider(svc: SQLModelService) {
+  static modelProvider(svc: SQLModelService): ModelExpirySupport {
     return svc;
   }
 }

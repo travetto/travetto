@@ -16,11 +16,11 @@ class Config {
     return new SqliteDialect(ctx, config);
   }
   @InjectableFactory(CacheModelⲐ)
-  static modelProvider(svc: SQLModelService) {
+  static modelProviderExpiry(svc: SQLModelService): ModelExpirySupport {
     return svc;
   }
   @InjectableFactory(CacheModelⲐ)
-  static modelProviderDeux(svc: SQLModelService): ModelExpirySupport {
+  static modelProviderService(svc: SQLModelService) {
     return svc;
   }
 }

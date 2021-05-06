@@ -167,6 +167,16 @@ export abstract class SQLDialect implements DialectState {
   }
 
   /**
+   * Resolve date value
+   * @param value
+   * @returns
+   */
+  resolveDateValue(value: Date) {
+    const [day, time] = (value as Date).toISOString().split(/[TZ]/);
+    return this.quote(`${day} ${time}`);
+  }
+
+  /**
    * Convert value to SQL valid representation
    */
   resolveValue(conf: FieldConfig, value: unknown) {
@@ -184,9 +194,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Number) {
       return `${value}`;
     } else if (conf.type === Date) {
-      value = ModelQueryUtil.resolveComparator(value);
-      const [day, time] = (value as Date).toISOString().split(/[TZ]/);
-      return this.quote(`${day} ${time}`);
+      return this.resolveDateValue(ModelQueryUtil.resolveComparator(value) as Date);
     } else if (conf.type === PointImpl && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;
     } else if (conf.type === Object) {
