@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model-query",
   "displayName": "Data Model Querying",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0-rc.2",
   "description": "Datastore abstraction for advanced query support.",
   "keywords": [
     "datastore",
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@travetto/di": "^2.0.0-rc.1",
-    "@travetto/model": "^2.0.0-rc.1",
+    "@travetto/model": "^2.0.0-rc.2",
     "@travetto/schema": "^2.0.0-rc.1"
   },
   "docDependencies": {
