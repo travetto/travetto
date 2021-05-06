@@ -419,7 +419,6 @@ export class MongoModelService implements
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
     const col = await this.getStore(cls);
     const { filter } = MongoUtil.prepareQuery(cls, query);
-    console.info('Query', { query: JSON.stringify(query, null, 2) });
     let cursor = col.find<T>(filter, {});
     if (query.select) {
       const select = Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select);
