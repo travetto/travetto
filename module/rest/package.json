@@ -1,7 +1,7 @@
 {
   "name": "@travetto/rest",
   "displayName": "RESTful API",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0-rc.2",
   "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
   "keywords": [
     "rest",
@@ -28,12 +28,12 @@
     "directory": "module/rest"
   },
   "dependencies": {
-    "@travetto/config": "^2.0.0-rc.0",
-    "@travetto/rest": "^2.0.0-rc.1",
-    "@travetto/app": "^2.0.0-rc.0",
-    "@travetto/di": "^2.0.0-rc.0",
-    "@travetto/registry": "^2.0.0-rc.0",
-    "@travetto/transformer": "^2.0.0-rc.0",
+    "@travetto/config": "^2.0.0-rc.1",
+    "@travetto/rest": "^2.0.0-rc.2",
+    "@travetto/app": "^2.0.0-rc.1",
+    "@travetto/di": "^2.0.0-rc.1",
+    "@travetto/registry": "^2.0.0-rc.1",
+    "@travetto/transformer": "^2.0.0-rc.1",
     "@types/cookies": "^0.7.6",
     "@types/express-serve-static-core": "^4.17.19",
     "cookies": "^0.8.0"
@@ -42,9 +42,9 @@
     "node-fetch": "^3.0.0-beta.9"
   },
   "optionalPeerDependencies": {
-    "@travetto/schema": "^2.0.0-rc.0",
-    "@travetto/model": "^2.0.0-rc.0",
-    "@travetto/model-query": "2.0.0-rc.0",
+    "@travetto/schema": "^2.0.0-rc.1",
+    "@travetto/model": "^2.0.0-rc.1",
+    "@travetto/model-query": "2.0.0-rc.1",
     "@travetto/cli": "^2.0.0-rc.0",
     "node-forge": "^0.10.0",
     "@types/node-forge": "^0.9.7"
