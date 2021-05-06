@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { FsUtil, PathUtil, StreamUtil } from '@travetto/boot';
-import { Class, Util } from '@travetto/base';
+import { Class, Util, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
@@ -30,7 +30,7 @@ export class FileModelConfig {
   folder: string;
   namespace: string = '.';
   autoCreate?: boolean;
-  cullRate?: number;
+  cullRate?: number | TimeSpan;
 
   async postConstruct() {
     if (!this.folder) {

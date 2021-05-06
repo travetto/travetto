@@ -2,6 +2,7 @@ import * as https from 'https';
 import * as http from 'http';
 import * as net from 'net';
 
+import { Util } from '@travetto/base';
 import { ExecUtil } from '@travetto/boot';
 
 /**
@@ -40,7 +41,7 @@ export class CommandUtil {
       if (status >= 200 && status <= 299) {
         return body; // We good
       }
-      await new Promise(res => setTimeout(res, 100));
+      await Util.wait(100);
     }
     throw new Error('Could not make http connection to url');
   }
@@ -65,7 +66,7 @@ export class CommandUtil {
         });
         return;
       } catch (e) {
-        await new Promise(res => setTimeout(res, 50));
+        await Util.wait(50);
       }
     }
     throw new Error('Could not acquire port');

@@ -1,7 +1,7 @@
 import * as mongo from 'mongodb';
 import { promises as fs } from 'fs';
 
-import { ResourceManager } from '@travetto/base';
+import { TimeSpan, ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 /**
@@ -53,7 +53,7 @@ export class MongoModelConfig {
   /**
    * Frequency of culling for expirable content
    */
-  cullRate?: number;
+  cullRate?: number | TimeSpan;
 
   /**
    * Load a resource

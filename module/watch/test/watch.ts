@@ -2,6 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 import { ScanFs } from '@travetto/boot';
+import { Util } from '@travetto/base';
 
 import { Watcher } from '../src/watcher';
 
@@ -18,7 +19,7 @@ export class WatchTest {
         found.push([event, entry.file]);
       });
 
-    await new Promise(res => setTimeout(res, 100));
+    await Util.wait(100);
 
     w.close();
 

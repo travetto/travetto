@@ -139,7 +139,7 @@ export class TemplateUtil {
    * Watch compilation
    */
   static async watchCompile(cb?: (file: string) => void) {
-    const { ResourceManager } = await import('@travetto/base');
+    const { ResourceManager, Util } = await import('@travetto/base');
     const { FilePresenceManager } = await import('@travetto/watch');
 
     new FilePresenceManager(ResourceManager.getRelativePaths().map(x => `${x}/email`), {
@@ -164,6 +164,6 @@ export class TemplateUtil {
         }
       }
     });
-    await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24 * 1));
+    await Util.wait('1d');
   }
 }

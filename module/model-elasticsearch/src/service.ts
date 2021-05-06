@@ -391,7 +391,7 @@ export class ElasticsearchModelService implements
     const { body: res } = await this.client.deleteByQuery({
       ...this.manager.getIdentity(cls),
       refresh: true,
-      ...ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig)
+      ...ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, false)
     } as DeleteByQuery);
     return res.deleted ?? 0;
   }

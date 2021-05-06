@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import * as fs from 'fs';
 
 import { FsUtil, ScanFs } from '@travetto/boot';
+import { Util } from '@travetto/base';
 
 import { VisitorFactory, TransformerState, getAllTransformers } from '..';
 
@@ -44,7 +45,7 @@ export class TranformerTestUtil {
       );
     });
 
-    await new Promise((res) => setTimeout(res, 1000)); // Wait for file buffer to sync
+    await Util.wait('1s'); // Wait for file buffer to sync
     try {
       console.info(fs.readFileSync(log, 'utf8'));
     } catch { }

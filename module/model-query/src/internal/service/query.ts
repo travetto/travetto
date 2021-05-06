@@ -1,5 +1,4 @@
-import { Class, AppError } from '@travetto/base';
-import { TimeUtil } from '@travetto/base/src/internal/time';
+import { Class, AppError, Util } from '@travetto/base';
 import { ModelRegistry, NotFoundError } from '@travetto/model';
 import { ModelType } from '@travetto/model/src/types/model';
 
@@ -20,7 +19,7 @@ export class ModelQueryUtil {
    */
   static resolveComparator(val: unknown) {
     if (typeof val === 'string') {
-      return TimeUtil.withAge(val as '1m');
+      return Util.timeFromNow(val as '1m');
     } else {
       return val;
     }

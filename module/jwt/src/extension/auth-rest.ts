@@ -1,8 +1,7 @@
 // @file-if @travetto/auth-rest
 import { Principal } from '@travetto/auth';
 import { PrincipalEncoder } from '@travetto/auth-rest';
-import { AppError } from '@travetto/base';
-import { TimeUtil } from '@travetto/base/src/internal/time';
+import { AppError, Util } from '@travetto/base';
 import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 import { Injectable } from '@travetto/di';
@@ -21,7 +20,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   #header = 'Authorization';
   #signingKey = 'dummy';
   #headerPrefix = 'Bearer ';
-  #defaultAge = TimeUtil.toMillis('1y');
+  #defaultAge = Util.timeToMs('1y');
 
   set signingKey(v: string) { this.#signingKey = v; }
   set header(n: string) { this.#header = n; }

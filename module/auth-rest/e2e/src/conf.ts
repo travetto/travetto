@@ -1,5 +1,5 @@
 import { Authenticator, Authorizer, Principal } from '@travetto/auth';
-import { TimeUtil } from '@travetto/base/src/internal/time';
+import { Util } from '@travetto/base';
 import { InjectableFactory } from '@travetto/di';
 
 export class FbUser {
@@ -24,7 +24,7 @@ export class AppConfig {
       async authenticate(user) {
         return {
           id: '5',
-          expires: TimeUtil.withAge(1, 'm'),
+          expires: Util.timeFromNow('1m'),
           details: { woah: 'fun' },
           source: 'simple',
           permissions: []

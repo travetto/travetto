@@ -1,9 +1,9 @@
 import { Model, ModelType, ModelCrudSupport } from '@travetto/model';
 import { Schema } from '@travetto/schema';
-import { Application, AppUtil } from '@travetto/app';
+import { Application } from '@travetto/app';
 import { Inject } from '@travetto/di';
-
 import { WithAsyncContext, AsyncContext } from '@travetto/context';
+import { Util } from '@travetto/base';
 
 @Schema()
 class Address {
@@ -42,6 +42,6 @@ export class Service {
   async run() {
     await this.src.create(Person, Person.from({ name: 'bob', age: 10, gender: 'm', }));
     await this.src.create(Employee, Employee.from({ name: 'bob2' }));
-    return AppUtil.waitHandle();
+    await Util.wait('1d');
   }
 }

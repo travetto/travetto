@@ -1,5 +1,4 @@
-import { Class, ShutdownManager } from '@travetto/base';
-import { TimeUtil } from '@travetto/base/src/internal/time';
+import { Class, ShutdownManager, Util, TimeSpan } from '@travetto/base';
 
 import { ModelRegistry } from '../../registry/model';
 import { ModelExpirySupport } from '../../service/expiry';
@@ -27,18 +26,12 @@ export class ModelExpiryUtil {
    * Delete all expired on a fixed interval, if supported and needed
    * @param svc
    */
-  static registerCull(svc: ModelExpirySupport & { readonly config?: { cullRate?: number } }) {
+  static registerCull(svc: ModelExpirySupport & { readonly config?: { cullRate?: number | TimeSpan } }) {
     const expirable = ModelRegistry.getClasses().filter(cls => !!ModelRegistry.get(cls).expiresAt);
     if (svc.deleteExpired && expirable.length) {
       let running = true;
-      const culler = async () => {
-        const cullInterval = svc.config?.cullRate ?? TimeUtil.toMillis('10m');
-        while (running) {
-          await new Promise(r => setTimeout(r, cullInterval));
-          await Promise.all(expirable.map(cls => svc.deleteExpired?.(cls)));
-        }
-      };
-      setTimeout(culler, 1000); // Wait a second to start culling
+      const cullInterval = Util.timeToMs(svc.config?.cullRate ?? '10m');
+
       ShutdownManager.onShutdown({
         close(cb) {
           running = false;
@@ -46,6 +39,13 @@ export class ModelExpiryUtil {
         },
         name: 'expiry-culling'
       });
+      (async () => {
+        await Util.wait('1s');  // Wait a second to start culling
+        while (running) {
+          await Util.wait(cullInterval);
+          await Promise.all(expirable.map(cls => svc.deleteExpired(cls)));
+        }
+      })();
     }
   }
 }

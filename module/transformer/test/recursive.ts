@@ -8,7 +8,7 @@ import { TranformerTestUtil } from '../test-support/util';
 @Suite()
 export class RecursiveTransformSuite {
 
-  @Test({ timeout: 10000 })
+  @Test({ timeout: '10s' })
   async transformTree() {
     const output = await TranformerTestUtil.compile(
       PathUtil.resolveUnix(__dirname, '../e2e'),
@@ -18,7 +18,7 @@ export class RecursiveTransformSuite {
     assert(output.includes('TreeNode'));
   }
 
-  @Test({ timeout: 10000 })
+  @Test({ timeout: '10s' })
   async transformTree2() {
     const output = await TranformerTestUtil.compile(
       PathUtil.resolveUnix(__dirname, '../e2e'),
@@ -28,7 +28,7 @@ export class RecursiveTransformSuite {
     assert(output.includes('TreeNode2'));
   }
 
-  @Test({ timeout: 10000 })
+  @Test({ timeout: '10s' })
   async transformTree3() {
     const output = await TranformerTestUtil.compile(
       PathUtil.resolveUnix(__dirname, '../e2e'),

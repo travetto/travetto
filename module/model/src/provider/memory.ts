@@ -1,5 +1,5 @@
 import { StreamUtil } from '@travetto/boot';
-import { Util, Class } from '@travetto/base';
+import { Util, Class, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
@@ -24,7 +24,7 @@ const STREAM_META = `${STREAMS}_meta`;
 export class MemoryModelConfig {
   autoCreate?: boolean;
   namespace: string;
-  cullRate?: number;
+  cullRate?: number | TimeSpan;
 }
 
 /**

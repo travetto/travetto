@@ -5,7 +5,6 @@ import { Util } from '@travetto/base';
 import { ExecUtil, PathUtil } from '@travetto/boot';
 import { Barrier, ExecutionError } from '@travetto/worker';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
-import { TimeUtil } from '@travetto/base/src/internal/time';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -19,7 +18,7 @@ import { TestPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { AssertUtil } from '../assert/util';
 
-const TEST_TIMEOUT = TimeUtil.getEnvAsMillis('TRV_TEST_TIMEOUT', 5000);
+const TEST_TIMEOUT = Util.getEnvTime('TRV_TEST_TIMEOUT', '5s');
 
 /**
  * Support execution of the tests

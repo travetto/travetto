@@ -228,13 +228,13 @@ export class ElasticsearchQueryUtil {
    * @param cls
    * @param search
    */
-  static getSearchBody<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>) {
+  static getSearchBody<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true) {
     const clauses = [];
     if (search && Object.keys(search).length) {
       clauses.push(search);
     }
     const { expiresAt, subType } = ModelRegistry.get(cls);
-    if (expiresAt) {
+    if (checkExpiry && expiresAt) {
       clauses.push({
         bool: {
           should: [
@@ -258,12 +258,12 @@ export class ElasticsearchQueryUtil {
   /**
    * Build a base search object from a class and a query
    */
-  static getSearchObject<T extends ModelType>(cls: Class<T>, query: Query<T>, config?: EsSchemaConfig): Search {
+  static getSearchObject<T extends ModelType>(cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, checkExpiry = true): Search {
     query.where = query.where ? (typeof query.where === 'string' ? QueryLanguageParser.parseToQuery(query.where) : query.where) : {};
     QueryVerifier.verify(cls, query); // Verify
 
     const search: Search = {
-      body: this.getSearchBody(cls, this.extractWhereQuery(cls, query.where as WhereClause<T>, config))
+      body: this.getSearchBody(cls, this.extractWhereQuery(cls, query.where as WhereClause<T>, config), checkExpiry)
     };
 
     const sort = query.sort;

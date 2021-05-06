@@ -21,7 +21,6 @@ function hasPreDestroy(o: unknown): o is { preDestroy: () => unknown } {
   return !!o && !!(o as Record<string, unknown>)['preDestroy'];
 }
 
-
 /**
  * Dependency registry
  */
@@ -169,8 +168,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
-    // Run post construct
-    if (hasPostConstruct(inst)) {
+    // Run post construct, if it wasn't passed in, otherwise it was already created
+    if (hasPostConstruct(inst) && !consValues.includes(inst)) {
       await inst.postConstruct();
     }
 

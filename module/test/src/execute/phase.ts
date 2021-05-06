@@ -1,5 +1,5 @@
 import { Barrier } from '@travetto/worker';
-import { TimeUtil } from '@travetto/base/src/internal/time';
+import { Util } from '@travetto/base';
 
 import { TestConsumer } from '../consumer/types';
 import { SuiteConfig, SuiteResult } from '../model/suite';
@@ -7,7 +7,7 @@ import { AssertUtil } from '../assert/util';
 
 export const TestBreakoutⲐ = Symbol.for('@trv:test/breakout');
 
-const TEST_PHASE_TIMEOUT = TimeUtil.getEnvAsMillis('TRV_TEST_PHASE_TIMEOUT', 15000);
+const TEST_PHASE_TIMEOUT = Util.getEnvTime('TRV_TEST_PHASE_TIMEOUT', '15s');
 
 /**
  * Test Phase Execution Manager.

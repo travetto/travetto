@@ -124,7 +124,7 @@ export class AppRunFeature extends BaseFeature {
         const editor = vscode.window.visibleTextEditors.find(x => x.document.fileName === choice.filename);
         if (editor) {
           Workspace.addBreakpoint(editor, line);
-          await new Promise(r => setTimeout(r, 100));
+          await Workspace.sleep(100);
         }
       }
 

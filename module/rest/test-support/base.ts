@@ -34,10 +34,6 @@ export abstract class BaseRestSuite {
     this.#handle = await this.#support.init();
   }
 
-  async wait(n: number) {
-    return new Promise(r => setTimeout(r, n));
-  }
-
   async getOutput<T>(t: Buffer): Promise<T | string> {
     try {
       return JSON.parse(t.toString('utf8')) as T;

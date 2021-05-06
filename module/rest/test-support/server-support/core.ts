@@ -2,6 +2,7 @@ import * as qs from 'querystring';
 import * as fetch from 'node-fetch';
 
 import { DependencyRegistry } from '@travetto/di';
+import { Util } from '@travetto/base';
 
 import type { RestApplication } from '../../src/application/rest';
 import type { Request } from '../../src/types';
@@ -41,7 +42,7 @@ export class CoreRestServerSupport implements RestServerSupport {
         await fetch(this.url);
         break; // We good
       } catch {
-        await new Promise(res => setTimeout(res, 100));
+        await Util.wait(100);
       }
     }
 

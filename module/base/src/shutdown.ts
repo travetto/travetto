@@ -88,7 +88,7 @@ class $ShutdownManager {
       if (promises.length) {
         const finalRun = Promise.race([
           ...promises,
-          new Promise((r, rej) => setTimeout(() => rej(new Error('Timeout on shutdown')), AppManifest.env.shutdownWait))
+          Util.wait(AppManifest.env.shutdownWait).then(() => { throw new Error('Timeout on shutdown'); })
         ]);
         await finalRun;
       }

@@ -42,6 +42,14 @@ export class Workspace {
   }
 
   /**
+   * Sleep
+   * @param ms
+   */
+  static sleep(ms: number) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  /**
    * Find full path for a resource
    * @param rel
    */
@@ -95,7 +103,7 @@ export class Workspace {
     const { result } = await this.runMain(this.binPath('base', 'build'));
 
     try {
-      return await Promise.race([result, new Promise((res, rej) => setTimeout(rej, 500))]);
+      return await Promise.race([result, this.sleep(500).then(() => { throw new Error(); })]);
     } catch (err) { // Handle timeout
       await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,

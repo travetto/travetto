@@ -1,5 +1,5 @@
 import { Primitive as Prim } from '@travetto/base/src/internal/global-types';
-import { RelativeTime } from '@travetto/base/src/internal/time';
+import { TimeSpan } from '@travetto/base/src/util';
 
 /**
  * Point as [number,number] with validation and binding support
@@ -62,7 +62,7 @@ export type PropWhereClause<T> = {
   (T[P] extends (number | undefined) ? (General<number> | ScalarField<number> | ComparableField<number> | number) :
     (T[P] extends (string | undefined) ? (General<string> | ScalarField<string> | StringField | string) :
       (T[P] extends (boolean | undefined) ? (General<boolean> | boolean) :
-        (T[P] extends (Date | undefined) ? (General<Date> | ScalarField<Date> | ComparableField<Date | RelativeTime> | Date) :
+        (T[P] extends (Date | undefined) ? (General<Date> | ScalarField<Date> | ComparableField<Date | TimeSpan> | Date) :
           (T[P] extends (Point | undefined) ? (General<Point> | ScalarField<Point> | GeoField | Point) :
             (T[P] extends ((infer U)[] | undefined) ? ArrayField<U> :
               (T[P] extends (object | undefined) ? PropWhereClause<RetainFields<T[P]>> : never)))))));

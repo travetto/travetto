@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as gp from 'generic-pool';
 
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager, Util } from '@travetto/base';
 
 import { WorkSet } from './input/types';
 
@@ -150,7 +150,7 @@ export class WorkPool<X, T extends Worker<X>> {
    */
   async shutdown() {
     while (this.#pendingAcquires) {
-      await new Promise(r => setTimeout(r, 10));
+      await Util.wait(10);
     }
     await this.#pool.drain();
     await this.#pool.clear();

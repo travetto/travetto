@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { TimeSpan, Util } from '@travetto/base';
 import { ExecutionError } from './error';
 
 /**
@@ -10,9 +10,9 @@ export class Timeout extends ExecutionError {
   #promise = Util.resolvablePromise();
   #duration: number;
 
-  constructor(duration: number, op: string = 'Operation') {
-    super(`${op} timed out after ${duration}ms`);
-    this.#duration = duration;
+  constructor(duration: number | TimeSpan, op: string = 'Operation') {
+    super(`${op} timed out after ${duration}${typeof duration === 'number' ? 'ms' : ''}`);
+    this.#duration = Util.timeToMs(duration);
   }
 
   /**

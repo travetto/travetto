@@ -1,4 +1,6 @@
+import { TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
+
 import { EsSchemaConfig } from './internal/types';
 
 /**
@@ -44,7 +46,7 @@ export class ElasticsearchModelConfig {
   /**
    * Frequency of culling for expirable content
    */
-  cullRate?: number;
+  cullRate?: number | TimeSpan;
 
   /**
    * Build final hosts

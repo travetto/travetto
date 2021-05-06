@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
 import { ModelCrudSupport } from '@travetto/model/src/service/crud';
-import { TimeUtil } from '@travetto/base/src/internal/time';
+import { Util } from '@travetto/base';
 
 import { ModelQuerySupport } from '../src/service/query';
 import { Aged, Location, Names, Note, Person, SimpleList } from './types';
@@ -251,7 +251,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async verifyDateRange() {
     const service = await this.service;
     await this.saveAll(Aged, (['-5d', '-4d', '-3d', '-2d', '-1d', '0d', '1d', '2d', '3d', '4d', '5d'] as const).map(delta =>
-      Aged.from({ createdAt: TimeUtil.withAge(delta) })
+      Aged.from({ createdAt: Util.timeFromNow(delta) })
     ));
 
     const simple = await service.queryCount(Aged, {
@@ -288,7 +288,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       where: {
         createdAt: {
           $gt: new Date(),
-          $lt: TimeUtil.withAge('3d')
+          $lt: Util.timeFromNow('3d')
         }
       }
     });

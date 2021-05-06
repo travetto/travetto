@@ -1,5 +1,7 @@
 import * as assert from 'assert';
 
+import { Util } from '@travetto/base';
+
 import { Suite, Test, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../';
 
 let a: unknown = 0; a = 1;
@@ -57,7 +59,7 @@ class Simple {
 
   @Test()
   async test1d() {
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await Util.wait(100);
     assert(1 === a);
   }
 

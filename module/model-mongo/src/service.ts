@@ -255,7 +255,7 @@ export class MongoModelService implements
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
     const store = await this.getStore(cls);
-    const result = await store.deleteOne(this.getWhere<ModelType>(cls, { id }));
+    const result = await store.deleteOne(this.getWhere<ModelType>(cls, { id }, false));
     if (result.deletedCount === 0) {
       throw new NotFoundError(cls, id);
     }
@@ -460,7 +460,7 @@ export class MongoModelService implements
   // Query Crud
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     const col = await this.getStore(cls);
-    const { filter } = MongoUtil.prepareQuery(cls, query);
+    const { filter } = MongoUtil.prepareQuery(cls, query, false);
     const res = await col.deleteMany(filter);
     return res.deletedCount ?? 0;
   }

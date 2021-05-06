@@ -1,4 +1,4 @@
-import { Util, ShutdownManager } from '@travetto/base';
+import { Util, ShutdownManager, TimeSpan } from '@travetto/base';
 import { Timeout } from './timeout';
 
 function canCancel(o: unknown): o is { cancel(): unknown } {
@@ -13,7 +13,7 @@ export class Barrier {
   #barriers = new Map<string, Promise<unknown>>([]);
 
   constructor(
-    timeout?: number,
+    timeout?: number | TimeSpan,
     unhandled?: boolean
   ) {
     if (timeout !== undefined) {

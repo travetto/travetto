@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager, Util } from '@travetto/base';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 
 /**
@@ -12,8 +12,7 @@ export class RunnerUtil {
    * Add 50 ms to the shutdown to allow for buffers to output properly
    */
   static registerCleanup(scope: string) {
-    ShutdownManager.onShutdown(`test.${scope}.bufferOutput`,
-      () => new Promise(res => setTimeout(res, 50)));
+    ShutdownManager.onShutdown(`test.${scope}.bufferOutput`, () => Util.wait(50));
   }
 
   /**

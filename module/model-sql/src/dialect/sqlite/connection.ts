@@ -3,7 +3,7 @@ import * as sqlite3 from 'better-sqlite3';
 import Db = require('better-sqlite3');
 import * as pool from 'generic-pool';
 
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager, Util } from '@travetto/base';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { AppCache } from '@travetto/boot';
@@ -36,7 +36,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
       } catch (err) {
         if (retries > 1 && err.message.includes('database is locked')) {
           console.error('Failed, and waiting', retries);
-          await new Promise(r => setTimeout(r, delay));
+          await Util.wait(delay);
           retries -= 1;
         } else {
           throw err;

@@ -2,6 +2,7 @@ import * as rl from 'readline';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
+import { CliUtil } from '@travetto/cli/src/util';
 
 import { ServiceUtil } from './lib/service';
 
@@ -59,7 +60,7 @@ export class CliServicePlugin extends BasePlugin {
         for await (const line of (await message)) {
           if (process.stdout.isTTY) {
             if (c > 0) {
-              await new Promise(r => setTimeout(r, 500));
+              await CliUtil.sleep(500);
             }
             c += 1;
             rl.moveCursor(process.stdout, 0, i - y);

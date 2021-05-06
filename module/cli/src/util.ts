@@ -90,6 +90,10 @@ export class CliUtil {
     }));
   }
 
+  static sleep(ms: number) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
   /**
    * Waiting message with a callback to end
    *
@@ -102,7 +106,6 @@ export class CliUtil {
     const { stream, delay, completion } = { delay: 1000, stream: process.stderr, ...config };
 
     const writeLine = this.rewriteLine.bind(this, stream);
-    const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
     if (!('then' in work)) {
       work = work();
@@ -122,12 +125,12 @@ export class CliUtil {
       .finally(() => done = true);
 
     if (delay) {
-      await Promise.race([sleep(delay), final]);
+      await Promise.race([this.sleep(delay), final]);
     }
 
     while (!done) {
       await writeLine(`${this.#waitState[i = (i + 1) % this.#waitState.length]} ${message}`);
-      await sleep(50);
+      await this.sleep(50);
     }
 
     if (i >= 0) {

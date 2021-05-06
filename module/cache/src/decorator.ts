@@ -1,5 +1,5 @@
 import { MethodDescriptor } from '@travetto/base/src/internal/types';
-import { RelativeTime, TimeUtil } from '@travetto/base/src/internal/time';
+import { TimeSpan, Util } from '@travetto/base';
 
 import { CacheService } from './service';
 import { CoreCacheConfig, CacheConfig } from './types';
@@ -11,14 +11,12 @@ import { CacheAware, CacheConfigⲐ, EvictConfigⲐ } from './internal/types';
  * @param config The additional cache configuration
  * @augments `@trv:cache/Cache`
  */
-export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, maxAge: number | RelativeTime, config?: Omit<CacheConfig, 'maxAge'>): MethodDecorator;
+export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, maxAge: number | TimeSpan, config?: Omit<CacheConfig, 'maxAge'>): MethodDecorator;
 export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, cfg?: CacheConfig): MethodDecorator;
-export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, cfg?: number | RelativeTime | CacheConfig, config: Exclude<CacheConfig, 'maxAge'> = {}) {
+export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, cfg?: number | TimeSpan | CacheConfig, config: Exclude<CacheConfig, 'maxAge'> = {}) {
   if (cfg !== undefined) {
-    if (typeof cfg === 'string') {
-      config.maxAge = TimeUtil.toMillis(cfg);
-    } else if (typeof cfg === 'number') {
-      config.maxAge = cfg;
+    if (typeof cfg === 'string' || typeof cfg === 'number') {
+      config.maxAge = Util.timeToMs(cfg);
     } else {
       config = cfg;
     }

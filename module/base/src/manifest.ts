@@ -2,7 +2,7 @@ import { AppCache, EnvUtil, Package, PathUtil } from '@travetto/boot';
 import { SourceConfig } from '@travetto/boot/src/internal/source';
 
 import { version as framework } from '../package.json';
-import { TimeUtil } from './internal/time';
+import { TimeSpan, Util } from './util';
 
 /**
  * Application info
@@ -66,7 +66,7 @@ interface EnvConfig {
   /**
    * Amount of time to wait at shutdown
    */
-  shutdownWait: number;
+  shutdownWait: number | TimeSpan;
   /**
    * List of folders for resources
    */
@@ -121,7 +121,7 @@ class $AppManifest {
         value: (status ? EnvUtil.get('TRV_DEBUG') : '') || undefined
       },
       resources: ['resources', ...EnvUtil.getList('TRV_RESOURCES')],
-      shutdownWait: TimeUtil.getEnvAsMillis('TRV_SHUTDOWN_WAIT', 2000)
+      shutdownWait: Util.getEnvTime('TRV_SHUTDOWN_WAIT', '2s')
     };
 
     this.#profileSet = new Set(this.env.profiles);

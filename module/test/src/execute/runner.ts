@@ -1,5 +1,5 @@
 import { PathUtil } from '@travetto/boot';
-import { PhaseManager } from '@travetto/base';
+import { PhaseManager, Util } from '@travetto/base';
 import { WorkPool, IterableWorkSet } from '@travetto/worker';
 
 import { TestExecutor } from './executor';
@@ -42,7 +42,7 @@ export class Runner {
       buildStandardTestManager;
 
     const pool = new WorkPool(manager(consumer), {
-      idleTimeoutMillis: 10000,
+      idleTimeoutMillis: Util.timeToMs('10s'),
       min: 1,
       max: this.#state.concurrency
     });

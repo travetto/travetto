@@ -2,6 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
+import { Util } from '@travetto/base';
 
 import { Schema } from '..';
 import { Validator } from '../src/decorator/schema';
@@ -32,7 +33,7 @@ class User {
   const hasNum = /\d/.test(p);
   const hasSpecial = /[!@#$%%^&*()<>?/,.;':"']/.test(p);
   const noRepeat = !/(.)(\1)/.test(p);
-  await new Promise(r => setTimeout(r, 10));
+  await Util.wait(10);
   if (!hasNum || !hasSpecial || !noRepeat) {
     return {
       kind: 'password-rules',

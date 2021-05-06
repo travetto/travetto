@@ -1,4 +1,4 @@
-import { TimeUtil } from '@travetto/base/src/internal/time';
+import { Util } from '@travetto/base';
 import { PathUtil } from '@travetto/boot';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 
@@ -21,6 +21,6 @@ export class WatchUtil {
         }
         cb(e);
       });
-    await new Promise(r => setTimeout(r, TimeUtil.toMillis('1d')));
+    await Util.wait('1d');
   }
 }

@@ -4,6 +4,7 @@ import * as asyncHooks from 'async_hooks';
 import { Inject } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
+import { Util } from '@travetto/base';
 
 import { AsyncContext, WithAsyncContext } from '../';
 
@@ -19,7 +20,7 @@ class VerifyContext {
   async loadContext() {
     assert(this.context !== null);
     this.context.set({ user: 'bob' });
-    await new Promise(resolve => setTimeout(resolve, 1));
+    await Util.wait(1);
     assert(this.context.get().user === 'bob');
   }
 
@@ -35,7 +36,7 @@ class VerifyContext {
       async () => {
         const start = asyncHooks.executionAsyncId();
         this.context.set({ name: `test-${i}` });
-        await new Promise(resolve => setTimeout(resolve, 1));
+        await Util.wait(1);
         const end = asyncHooks.executionAsyncId();
 
         if (this.context.get().name !== `test-${i}`) {
@@ -60,7 +61,7 @@ class VerifyContext {
         if (i === 1) {
           this.context.get().age = 30;
         }
-        await new Promise(r => setTimeout(r, 20));
+        await Util.wait(20);
         await this.context.run(async () => {
           contexts.push(JSON.parse(JSON.stringify(this.context.get())));
         }, { color: 'green' });
