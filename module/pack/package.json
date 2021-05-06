@@ -16,6 +16,7 @@
     "name": "Travetto Framework"
   },
   "files": [
+    "index.d.ts",
     "bin",
     "support"
   ],

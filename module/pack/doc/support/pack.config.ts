@@ -1,4 +1,4 @@
-import type { AllConfigPartial } from '@travetto/pack/bin/operation/pack';
+import type { AllConfigPartial } from '@travetto/pack';
 
 export const config: AllConfigPartial = {
   workspace: 'dist/alt',

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 import { PathUtil } from '@travetto/boot';
-import type { AllConfigPartial } from '@travetto/pack/bin/operation/pack';
+import type { AllConfigPartial } from '@travetto/pack';
 
 export const config: AllConfigPartial = {
   name: 'rest/aws-lambda',
