@@ -32,9 +32,7 @@ export class AssembleUtil {
     for (const sub of folders) {
       for (const f of await ScanFs.scanDir({ testFile: x => x.endsWith('.ts'), testDir: x => true }, sub)) {
         if (f.stats.isFile() && !f.module.startsWith('cli/')) {
-          // Retain flag for app scanning
-          const content = (await fs.readFile(f.file, 'utf8')).includes('@Application') ? '@Application' : '';
-          await fs.writeFile(f.file, content);
+          await fs.writeFile(f.file, '');
         }
       }
     }

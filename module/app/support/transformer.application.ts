@@ -42,8 +42,9 @@ export class ApplicationTransformer {
 
     // Track start point
     declArgs[1] = state.extendObjectLiteral(declArgs[1], {
+      ident: '@Application', // Brand for searching
       start: CoreUtil.getRangeOf(state.source, node)?.start,
-      codeStart: CoreUtil.getRangeOf(state.source, runMethod.body?.statements[0])?.start
+      codeStart: CoreUtil.getRangeOf(state.source, runMethod.body?.statements[0])?.start,
     });
 
     // Compute new declaration
