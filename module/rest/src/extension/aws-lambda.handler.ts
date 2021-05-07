@@ -17,5 +17,6 @@ async function buildApp() {
 
 let inst: AwsLambdaHandler;
 export async function handler(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
+  context.callbackWaitsForEmptyEventLoop = false;
   return (inst ??= await buildApp()).handle(event, context);
 }
