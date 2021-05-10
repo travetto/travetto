@@ -1,5 +1,6 @@
 import * as enquirer from 'enquirer';
 
+import { PathUtil, EnvUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 import { Context } from './lib/context';
@@ -87,7 +88,7 @@ export class ScaffoldPlugin extends BasePlugin {
     }
 
     const ctx = new Context(
-      name, this.cmd.template, this.cmd.dir ?? name
+      name, this.cmd.template, PathUtil.resolveUnix(EnvUtil.get('INIT_CWD', process.cwd()), this.cmd.dir ?? name)
     );
 
     if (!this.cmd.force) {
