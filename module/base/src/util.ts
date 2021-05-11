@@ -20,6 +20,9 @@ const TIME_UNITS = {
 export type TimeSpan = `${number}${keyof typeof TIME_UNITS}`;
 export type TimeUnit = keyof typeof TIME_UNITS;
 
+const AsyncGeneratorFunction = Object.getPrototypeOf(async function* () { });
+const GeneratorFunction = Object.getPrototypeOf(function* () { });
+const AsyncFunction = Object.getPrototypeOf(async function () { });
 
 /**
  * Common utilities for object detection/manipulation
@@ -215,7 +218,7 @@ export class Util {
    */
   static isFunction(o: unknown): o is Function {
     const proto = o && Object.getPrototypeOf(o);
-    return proto && (proto === Function.prototype || proto.constructor.name === 'AsyncFunction');
+    return proto && (proto === Function.prototype || proto === AsyncFunction || proto === AsyncGeneratorFunction || proto === GeneratorFunction);
   }
 
   /**

@@ -2,6 +2,9 @@
   "package.json.txt": {
     "rename": "package.json"
   },
+  "tsconfig.json.txt": {
+    "rename": "tsconfig.json"
+  },
   "README.md": {},
   "gitignore.txt": {
     "rename": ".gitignore"
