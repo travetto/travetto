@@ -1,4 +1,5 @@
 import { Class } from '@travetto/base';
+import { IndexNotSupported } from '../../error/invalid-index';
 
 import { ModelRegistry } from '../../registry/model';
 import { IndexConfig, SortClauseRaw } from '../../registry/types';
@@ -19,18 +20,28 @@ export class ModelIndexedUtil {
    * @param cls Type to get index for
    * @param idx Index config
    */
-  static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, emptyValue = null) {
+  static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item?: Partial<T>, emptyValue: unknown = null, emptySortValue: unknown = null) {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
     const res = {} as Record<string, unknown>;
+    const sortField = cfg.type === 'sorted' ? cfg.fields[cfg.fields.length - 1] : undefined;
     for (let f of cfg.fields as Record<string, unknown>[]) {
       let o: Record<string, unknown> | undefined = item;
       let sub: Record<string, unknown> = res;
+      let path: string[] = [];
 
       while (sub !== undefined) {
         const k = Object.keys(f)[0];
+        path.push(k);
         o = (o !== undefined ? o[k] : o) as Record<string, unknown> | undefined;
         if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
-          sub[k] = o ?? emptyValue;
+          if (o === undefined || o === null) {
+            const empty = f === sortField ? emptySortValue : emptyValue;
+            if (empty === Error) {
+              throw new IndexNotSupported(cls, cfg, `Missing field value for ${path.join('.')}`);
+            }
+            o = empty as Record<string, unknown>;
+          }
+          sub[k] = o;
           break; // At the bottom
         } else {
           sub = (sub[k] ?? {}) as Record<string, unknown>;
@@ -65,7 +76,7 @@ export class ModelIndexedUtil {
           }
         }
       }
-      this.#cache.set(key, { unique: cfg.unique, name: cfg.name, fields });
+      this.#cache.set(key, { type: cfg.type, name: cfg.name, fields });
     }
     return this.#cache.get(key)!;
   }
@@ -102,21 +113,50 @@ export class ModelIndexedUtil {
    * @param idx Index config
    * @param item item to process
    */
-  static computeIndexKey<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, separator = 'ᚕ') {
+  static computeIndexParts<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>) {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
-    return cfg.fields.map((f: SortClauseRaw<unknown>) => {
+    const parts: (string | boolean | Date | number)[] = [];
+    const sortField = cfg.type === 'sorted' ? cfg.fields[cfg.fields.length - 1] : undefined;
+    for (const f of cfg.fields) {
+      let field: Record<string, unknown> = f;
       let o = item as Record<string, unknown>;
-      while (o !== undefined) {
+      const path = [];
+      while (o !== undefined && o !== null) {
         const k = Object.keys(f)[0];
+        path.push(k);
         o = o[k] as Record<string, unknown>;
-        const fk = k as keyof typeof f;
-        if (typeof f[fk] === 'boolean' || typeof f[fk] === 'number') {
+        const fk = k as keyof typeof field;
+        if (typeof field[fk] === 'boolean' || typeof field[fk] === 'number') {
           break; // At the bottom
         } else {
-          f = f[fk];
+          field = field[fk] as Record<string, unknown>;
         }
       }
-      return `${o}`;
-    }).join(separator);
+      if ((o === undefined || o === null) && f !== sortField) {
+        throw new IndexNotSupported(cls, cfg, `Missing field value for ${path.join('.')}`)
+      }
+      parts.push(o as unknown as string | boolean | Date | number);
+    }
+    return parts;
+  }
+
+  /**
+   * Compute index key as a single value
+   * @param cls Class to get index for
+   * @param idx Index config
+   * @param item item to process
+   */
+  static computeIndexKey<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, separator = 'ᚕ') {
+    const parts = this.computeIndexParts(cls, idx, item);
+    const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
+    let sort: number | undefined;
+    if (cfg.type === 'sorted') {
+      const last = parts.pop();
+      if (last) {
+        sort = +last;
+      }
+    }
+    const key = parts.map(x => `${x}`).join(separator);
+    return cfg.type !== 'sorted' ? { type: cfg.type, key } : { type: cfg.type, key, sort };
   }
 }

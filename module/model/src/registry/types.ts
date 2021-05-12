@@ -14,10 +14,13 @@ type RetainFields<T> = Pick<T, ValidFieldNames<T>>;
 
 export type SortClauseRaw<T> = {
   [P in keyof T]?:
-  T[P] extends object ? SortClauseRaw<RetainFields<T[P]>> : (1 | -1 | boolean);
+  T[P] extends object ? SortClauseRaw<RetainFields<T[P]>> : 1 | -1;
 };
 
-type SortClause<T> = SortClauseRaw<RetainFields<T>>;
+type IndexClauseRaw<T> = {
+  [P in keyof T]?:
+  T[P] extends object ? IndexClauseRaw<RetainFields<T[P]>> : 1 | -1 | true;
+};
 
 /**
  * Model options
@@ -58,9 +61,14 @@ export class ModelOptions<T extends ModelType = ModelType> {
 }
 
 /**
+ * Supported index types
+ */
+export type IndexType = 'unique' | 'unsorted' | 'sorted';
+
+/**
  * Index options
  */
-export interface IndexConfig<T extends ModelType> {
+export type IndexConfig<T extends ModelType> = {
   /**
    * Index name
    */
@@ -68,9 +76,11 @@ export interface IndexConfig<T extends ModelType> {
   /**
    * Fields and sort order
    */
-  fields: SortClause<T>[];
+  fields: IndexClauseRaw<RetainFields<T>>[];
   /**
-   * Is the index unique?
+   * Type
    */
-  unique?: boolean;
-}
+  type: IndexType;
+};
+
+export type IndexField<T extends ModelType> = IndexClauseRaw<RetainFields<T>>;

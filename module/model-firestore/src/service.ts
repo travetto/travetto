@@ -155,10 +155,11 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
+
     const res = ModelIndexedUtil.flattenIndexItem(cls, idx, body);
     const query = res.reduce((q, [k, v]) =>
       q.where(k, '==', v), this.#getCollection(cls) as firebase.firestore.Query);
@@ -166,26 +167,20 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     const item = await query.get();
 
     if (item && !item.empty) {
-      return this.get(cls, item.docs[0].id);
+      return item.docs[0].id;
     }
+    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; ').key);
+  }
 
-    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
-    const res = ModelIndexedUtil.flattenIndexItem(cls, idx, body);
-    const query = res.reduce((q, [k, v]) =>
-      q.where(k, '==', v), this.#getCollection(cls) as firebase.firestore.Query);
+    return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
+  }
 
-    const item = await query.get();
-
-    if (item && !item.empty) {
-      return this.delete(cls, item.docs[0].id);
-    }
-
-    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    throw new Error('Listing by index is not currently supported for firestore');
   }
 }

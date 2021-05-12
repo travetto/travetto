@@ -6,6 +6,7 @@ import { ModelExpirySuite } from '../test-support/expiry';
 import { ModelStreamSuite } from '../test-support/stream';
 import { ModelIndexedSuite } from '../test-support/indexed';
 import { ModelBasicSuite } from '../test-support/basic';
+import { ModelPolymorphismSuite } from '../test-support/polymorphism';
 
 @Suite()
 export class MemoryBasicSuite extends ModelBasicSuite {
@@ -33,6 +34,12 @@ export class MemoryExpirySuite extends ModelExpirySuite {
 
 @Suite()
 export class MemoryIndexedSuite extends ModelIndexedSuite {
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
+}
+
+@Suite()
+export class MemoryPolymorphicSuite extends ModelPolymorphismSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }

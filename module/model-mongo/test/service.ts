@@ -46,8 +46,8 @@ export class MongoBulkSuite extends ModelBulkSuite {
 @Model()
 @Index({
   name: 'uniqueUser',
-  fields: [{ name: 1 }],
-  unique: true
+  fields: [{ name: true }],
+  type: 'unique'
 })
 class UniqueUser {
   id: string;

@@ -4,7 +4,8 @@ import { Class, ShutdownManager, Util } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
-  ModelIndexedSupport, ModelType, NotFoundError, ExistsError, SubTypeNotSupportedError
+  ModelIndexedSupport, ModelType, NotFoundError, ExistsError, SubTypeNotSupportedError,
+  IndexNotSupported
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -79,6 +80,15 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
     try {
       if (mode === 'create') {
+        const indices: Record<string, unknown> = {};
+        for (const idx of config.indices ?? []) {
+          const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+          const prop = simpleName(idx.name);
+          indices[`${prop}__`] = toValue(key);
+          if (sort) {
+            indices[`${prop}_sort__`] = toValue(sort);
+          }
+        }
         const query = {
           TableName: this.#resolveTable(cls),
           ConditionExpression: 'attribute_not_exists(body)',
@@ -86,13 +96,26 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
             id: toValue(item.id),
             body: toValue(JSON.stringify(item)),
             ...(expiry !== undefined ? { [EXP_ATTR]: toValue(expiry) } : {}),
-            ...Object.fromEntries(config.indices?.map(idx => [`${simpleName(idx.name)}__`, toValue(ModelIndexedUtil.computeIndexKey(cls, idx, item))]) ?? [])
+            ...indices
           },
           ReturnValues: 'NONE'
         };
         console.debug('Querying', { query } as unknown as Record<string, string>);
         return await this.client.putItem(query);
       } else {
+        const indices: Record<string, unknown> = {};
+        const expr: string[] = [];
+        for (const idx of config.indices ?? []) {
+          const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+          const prop = simpleName(idx.name);
+          indices[`:${prop}`] = toValue(key);
+          expr.push(`${prop}__ = :${prop}`)
+          if (sort) {
+            indices[`:${prop}_sort`] = toValue(sort);
+            expr.push(`${prop}_sort__ = :${prop}_sort`)
+          }
+        }
+
         return await this.client.updateItem({
           TableName: this.#resolveTable(cls),
           ConditionExpression: mode === 'update' ? 'attribute_exists(body)' : undefined,
@@ -100,12 +123,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           UpdateExpression: `SET ${[
             'body=:body',
             expiry !== undefined ? `${EXP_ATTR}=:expr` : undefined,
-            ...(config.indices?.map(idx => `${simpleName(idx.name)}__ = :${simpleName(idx.name)}`) ?? [])
+            ...expr
           ].filter(x => !!x).join(', ')}`,
           ExpressionAttributeValues: {
             ':body': toValue(JSON.stringify(item)),
             ...(expiry !== undefined ? { ':expr': toValue(expiry) } : {}),
-            ...Object.fromEntries(config.indices?.map(idx => [`:${simpleName(idx.name)}`, toValue(ModelIndexedUtil.computeIndexKey(cls, idx, item))]) ?? [])
+            ...indices
           },
           ReturnValues: 'ALL_NEW'
         });
@@ -124,21 +147,38 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   #computeIndexConfig<T extends ModelType>(cls: Class<T>) {
     const config = ModelRegistry.get(cls);
-    const attributes = config.indices?.flatMap(idx => ({ AttributeName: `${simpleName(idx.name)}__`, AttributeType: 'S' })) ?? [];
+    const attributes: dynamodb.AttributeDefinition[] = [];
+    const indices: dynamodb.GlobalSecondaryIndex[] = [];
 
-    const indices: dynamodb.GlobalSecondaryIndex[] | undefined = config.indices?.map(idx => ({
-      IndexName: simpleName(idx.name),
-      Projection: {
-        ProjectionType: 'INCLUDE',
-        NonKeyAttributes: ['id']
-      },
-      KeySchema: [{
-        AttributeName: `${simpleName(idx.name)}__`,
+    for (const idx of config.indices ?? []) {
+      const idxName = simpleName(idx.name);
+      attributes.push({ AttributeName: `${idxName}__`, AttributeType: 'S' })
+
+      const keys = [{
+        AttributeName: `${idxName}__`,
         KeyType: 'HASH'
-      }]
-    }));
+      }];
 
-    return { indices, attributes };
+      if (idx.type === 'sorted') {
+        keys.push({
+          AttributeName: `${idxName}_sort__`,
+          KeyType: 'RANGE'
+        });
+        attributes.push({ AttributeName: `${idxName}_sort__`, AttributeType: 'N' });
+      }
+
+      indices.push({
+        IndexName: idxName,
+        // ProvisionedThroughput: '',
+        Projection: {
+          ProjectionType: 'INCLUDE',
+          NonKeyAttributes: ['body', 'id']
+        },
+        KeySchema: keys
+      });
+    }
+
+    return { indices: indices.length ? indices : undefined, attributes };
   }
 
   async postConstruct() {
@@ -171,7 +211,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
         { AttributeName: 'id', AttributeType: 'S' },
         ...idx.attributes
       ],
-      GlobalSecondaryIndexes: idx.indices?.length ? idx.indices : undefined
+      GlobalSecondaryIndexes: idx.indices
     });
 
     if (ModelRegistry.get(cls).expiresAt) {
@@ -328,50 +368,90 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
 
+    const idxCfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+
+    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body);
+
+    if (idxCfg.type === 'sorted' && sort === undefined) {
+      throw new IndexNotSupported(cls, idxCfg, 'Sorted indices require the sort field');
+    }
+
+    const idxName = simpleName(idx);
+
     const query = {
       TableName: this.#resolveTable(cls),
-      IndexName: simpleName(idx),
+      IndexName: idxName,
       ProjectionExpression: 'id',
-      KeyConditionExpression: `${simpleName(idx)}__ = :${simpleName(idx)}`,
+      KeyConditionExpression: [sort ? `${idxName}_sort__ = :${idxName}_sort` : '', `${idxName}__ = :${idxName}`].filter(x => !!x).join(' and '),
       ExpressionAttributeValues: {
-        [`:${simpleName(idx)}`]: toValue(ModelIndexedUtil.computeIndexKey(cls, idx, body))
+        [`:${idxName}`]: toValue(key),
+        ...(sort ? { [`:${idxName}_sort`]: toValue(sort) } : {})
       }
     };
 
     const result = await this.client.query(query);
 
     if (result.Count && result.Items && result.Items[0]) {
-      return this.get(cls, result.Items[0].id.S!);
+      return result.Items[0].id.S!
     }
-    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
+    throw new NotFoundError(`${cls.name} Index=${idx}`, key);
+  }
+
+  // Indexed
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
+  }
+
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
 
-    const query = {
-      TableName: this.#resolveTable(cls),
-      IndexName: simpleName(idx),
-      ProjectionExpression: 'id',
-      KeyConditionExpression: `${simpleName(idx)}__ = :${simpleName(idx)}`,
-      ExpressionAttributeValues: {
-        [`:${simpleName(idx)}`]: toValue(ModelIndexedUtil.computeIndexKey(cls, idx, body))
+    const cfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, cfg, body ?? {});
+
+    const idxName = simpleName(idx);
+
+    let done = false;
+    let token: Record<string, dynamodb.AttributeValue> | undefined;
+    while (!done) {
+      const batch = await this.client.query({
+        TableName: this.#resolveTable(cls),
+        IndexName: idxName,
+        ProjectionExpression: `body`,
+        KeyConditionExpression: `${idxName}__ = :${idxName}`,
+        ExpressionAttributeValues: {
+          [`:${idxName}`]: toValue(key)
+        },
+        ExclusiveStartKey: token
+      });
+
+      if (batch.Count && batch.Items) {
+        for (const el of batch.Items) {
+          try {
+            yield await loadAndCheckExpiry(cls, el.body.S!);
+          } catch (e) {
+            if (!(e instanceof NotFoundError)) {
+              throw e;
+            }
+          }
+        }
       }
-    };
 
-    const result = await this.client.query(query);
-
-    if (result.Count && result.Items && result.Items[0]) {
-      await this.delete(cls, result.Items[0].id.S!);
-      return;
+      if (!batch.Count || !batch.LastEvaluatedKey) {
+        done = true;
+      } else {
+        token = batch.LastEvaluatedKey;
+      }
     }
-    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; '));
   }
 }

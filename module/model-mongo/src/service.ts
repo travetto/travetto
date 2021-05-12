@@ -6,6 +6,7 @@ import {
   ModelStorageSupport,
   ModelStreamSupport,
   StreamMeta,
+  IndexField,
   BulkOp,
   BulkResponse,
   ModelBulkSupport,
@@ -18,7 +19,7 @@ import {
   PageableModelQuery, ValidStringFields, WhereClause
 } from '@travetto/model-query';
 
-import { ShutdownManager, Util, Class } from '@travetto/base';
+import { ShutdownManager, Util, Class, AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
@@ -34,9 +35,14 @@ import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/sugg
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
+import { IndexConfig } from '@travetto/model/src/registry/types';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
+
+const IdxFieldsⲐ = Symbol.for('@trv:model-mongo/idx');
+
+const asFielded = <T extends ModelType>(cfg: IndexConfig<T>) => (cfg as unknown as { [IdxFieldsⲐ]: mongo.SortOptionObject<T> });
 
 /**
  * Mongo-based model source
@@ -53,9 +59,7 @@ export class MongoModelService implements
   #db: mongo.Db;
   #bucket: mongo.GridFSBucket;
 
-  constructor(public readonly config: MongoModelConfig) {
-  }
-
+  constructor(public readonly config: MongoModelConfig) { }
 
   async #describeStreamRaw(location: string) {
     const files = (await this.#bucket.find({ filename: location }, { limit: 1 }).toArray()) as [{ _id: mongo.ObjectID, metadata: StreamMeta }];
@@ -119,8 +123,8 @@ export class MongoModelService implements
     const indices = ModelRegistry.get(cls).indices ?? [];
     return [
       ...indices.map(idx => {
-        const combined = Object.assign({}, ...idx.fields) as Record<string, number>;
-        return [combined, { unique: idx.unique } as mongo.IndexOptions] as const;
+        const combined = asFielded(idx)[IdxFieldsⲐ] ??= Object.assign({}, ...idx.fields.map(x => MongoUtil.toIndex(x as IndexField<T>)));
+        return [combined, (idx.type === 'unique' ? { unique: true } : {}) as mongo.IndexOptions] as const;
       }),
       ...this.getGeoIndices(cls).map(x => [x] as const)
     ];
@@ -263,7 +267,9 @@ export class MongoModelService implements
 
   async * list<T extends ModelType>(cls: Class<T>) {
     const store = await this.getStore(cls);
-    for await (const el of store.find(this.getWhere(cls, {}))) {
+    const cursor = store.find(this.getWhere(cls, {})).batchSize(100);
+    cursor.timeout = true;
+    for await (const el of cursor) {
       try {
         yield MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el));
       } catch (e) {
@@ -388,31 +394,54 @@ export class MongoModelService implements
 
   // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const store = await this.getStore(cls);
     const result = await store.findOne(
       this.getWhere(
         cls,
-        ModelIndexedUtil.projectIndex(cls, idx, body, null) as WhereClause<T>
+        ModelIndexedUtil.projectIndex(cls, idx, body, Error) as WhereClause<T>
       )
     );
     if (!result) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
+      throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
     return await ModelCrudUtil.load(cls, result);
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const store = await this.getStore(cls);
     const result = await store.deleteOne(
       this.getWhere(
         cls,
-        ModelIndexedUtil.projectIndex(cls, idx, body, null) as WhereClause<T>
+        ModelIndexedUtil.projectIndex(cls, idx, body, Error) as WhereClause<T>
       )
     );
     if (result.deletedCount) {
       return;
     }
-    throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
+    throw new NotFoundError(`${cls.name}: ${idx}`, key);
+  }
+
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>) {
+    const store = await this.getStore(cls);
+    const idxCfg = ModelRegistry.getIndex(cls, idx);
+
+    if (idxCfg.type === 'unique') {
+      throw new AppError('Cannot list on unique indices', 'data');
+    }
+
+    const where = this.getWhere(
+      cls,
+      ModelIndexedUtil.projectIndex(cls, idx, body, Error, { $exists: true }) as WhereClause<T>
+    ) as mongo.FilterQuery<T>;
+
+    const cursor = store.find(where).batchSize(100).sort(asFielded(idxCfg)[IdxFieldsⲐ]);
+    cursor.timeout = true;
+
+    for await (const el of cursor) {
+      yield (await MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el))) as T;
+    }
   }
 
   // Query

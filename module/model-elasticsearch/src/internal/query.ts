@@ -6,6 +6,7 @@ import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/pa
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { ModelRegistry } from '@travetto/model/src/registry/model';
+import { IndexConfig } from '@travetto/model/src/registry/types';
 import { ModelType } from '@travetto/model/src/types/model';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -61,7 +62,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Build sort mechanism
    */
-  static getSort<T>(sort: SortClause<T>[]) {
+  static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']) {
     return sort.map(x => {
       const o = this.extractSimple(x);
       const k = Object.keys(o)[0];

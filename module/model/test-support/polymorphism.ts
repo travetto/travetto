@@ -36,6 +36,7 @@ export class Engineer extends Worker {
 @Model({ baseType: true })
 @Index({
   name: 'worker-name',
+  type: 'sorted',
   fields: [{ name: 1 }, { age: 1 }]
 })
 export class IndexedWorker extends BaseModel {

@@ -4,9 +4,10 @@ import { DependencyRegistry } from '@travetto/di';
 import { AppError, Class } from '@travetto/base';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
-import { ModelOptions } from './types';
+import { IndexConfig, IndexType, ModelOptions } from './types';
 import { NotFoundError } from '../error/not-found';
 import { ModelType } from '../types/model';
+import { IndexNotSupported } from '../error/invalid-index';
 
 /**
  * Registry for all models, built on the Metadata registry
@@ -153,12 +154,22 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   /**
    * Get Index
    */
-  getIndex(cls: Class, name: string) {
-    const cfg = this.get(cls).indices?.find(x => x.name === name);
+  getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexConfig<T> & { type: K[number] } {
+    const cfg = this.get(cls).indices?.find(x => x.name === name) as IndexConfig<T>;
     if (!cfg) {
       throw new NotFoundError(`${cls.name} Index`, `${name}`);
     }
+    if (supportedTypes && !supportedTypes.includes(cfg.type)) {
+      throw new IndexNotSupported(cls, cfg, `${cfg.type} indices are not supported.`);
+    }
     return cfg;
+  }
+
+  /**
+   * Get Indices
+   */
+  getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): (IndexConfig<T> & { type: K[number] })[] {
+    return (this.get(cls).indices ?? []).filter(x => !supportedTypes || supportedTypes.includes(x.type)) as IndexConfig<T>[];
   }
 
   /**

@@ -16,4 +16,5 @@ export * from './src/provider/memory';
 
 export * from './src/error/exists';
 export * from './src/error/not-found';
+export * from './src/error/invalid-index';
 export * from './src/error/invalid-sub-type';

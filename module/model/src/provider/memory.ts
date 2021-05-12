@@ -17,6 +17,7 @@ import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
 import { StreamModel, STREAMS } from '../internal/service/stream';
+import { IndexConfig } from '../registry/types';
 
 const STREAM_META = `${STREAMS}_meta`;
 
@@ -27,6 +28,20 @@ export class MemoryModelConfig {
   cullRate?: number | TimeSpan;
 }
 
+function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, suffix?: string) {
+  return [cls.ᚕid, typeof idx === 'string' ? idx : idx.name, suffix].filter(x => !!x).join(':');
+}
+
+function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | number) {
+  let id: string;
+  if (data instanceof Set) {
+    id = data.values().next().value as string;
+  } else {
+    id = [...data.entries()].find(([k, v]) => v === value)![0];
+  }
+  return id;
+}
+
 /**
  * Standard in-memory support
  */
@@ -34,8 +49,10 @@ export class MemoryModelConfig {
 export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
   #store = new Map<string, Map<string, Buffer>>();
-  #indexes = new Map<string, Map<string, string>>();
-
+  #indices = {
+    sorted: new Map<string, Map<string, Map<string, number>>>(),
+    unsorted: new Map<string, Map<string, Set<string>>>()
+  };
   get client() { return this.#store; }
 
   constructor(public readonly config: MemoryModelConfig) { }
@@ -61,8 +78,10 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async #removeIndices<T extends ModelType>(cls: Class<T>, id: string) {
     try {
       const item = await this.get(cls, id);
-      for (const idx of ModelRegistry.get(cls).indices ?? []) {
-        this.#indexes.get(`${cls.ᚕid}:${idx.name}`)?.delete(ModelIndexedUtil.computeIndexKey(cls, idx, item));
+      for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
+        const idxName = indexName(cls, idx);
+        const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+        this.#indices[idx.type].get(idxName)?.get(key)?.delete(id);
       }
     } catch (e) {
       if (!(e instanceof NotFoundError)) {
@@ -72,22 +91,73 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async #writeIndices<T extends ModelType>(cls: Class<T>, item: T) {
-    for (const idx of ModelRegistry.get(cls).indices ?? []) {
-      this.#indexes.get(`${cls.ᚕid}:${idx.name}`)?.set(ModelIndexedUtil.computeIndexKey(cls, idx, item), item.id);
+    for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
+      const idxName = indexName(cls, idx);
+      const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+      let index = this.#indices[idx.type].get(idxName)?.get(key);
+
+      if (!index) {
+        if (idx.type === 'sorted') {
+          this.#indices[idx.type].get(idxName)!.set(key, index = new Map());
+        } else {
+          this.#indices[idx.type].get(idxName)!.set(key, index = new Set());
+        }
+      }
+
+      if (index instanceof Map) {
+        index?.set(item.id, sort!);
+      } else {
+        index?.add(item.id);
+      }
     }
   }
 
-  async #write<T extends ModelType>(cls: Class<T>, item: T) {
+  async #write<T extends ModelType>(cls: Class<T>, item: T, action: 'remove'): Promise<void>;
+  async #write<T extends ModelType>(cls: Class<T>, item: T, action: 'write'): Promise<T>;
+  async #write<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'remove') {
     const store = this.#getStore(cls);
     await this.#removeIndices(cls, item.id);
-    store.set(item.id, Buffer.from(JSON.stringify(item)));
-    await this.#writeIndices(cls, item);
-    return item;
+    if (action === 'write') {
+      store.set(item.id, Buffer.from(JSON.stringify(item)));
+      await this.#writeIndices(cls, item);
+      return item;
+    } else {
+      store.delete(item.id);
+    }
+  }
+
+  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<string> {
+    const config = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, config, body);
+    const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
+    let id: string | undefined;
+    if (index) {
+      if (index instanceof Map) {
+        id = getFirstId(index, sort); // Grab first id
+      } else {
+        id = getFirstId(index); // Grab first id
+      }
+    }
+    if (id) {
+      return id;
+    }
+    throw new NotFoundError(cls, key);
   }
 
   async postConstruct() {
     await ModelStorageUtil.registerModelChangeListener(this);
     ModelExpiryUtil.registerCull(this);
+
+    for (const el of ModelRegistry.getClasses()) {
+      for (const idx of ModelRegistry.get(el).indices ?? []) {
+        switch (idx.type) {
+          case 'unique': {
+            console.error('Unique inidices are not supported for', { cls: el.ᚕid, idx: idx.name });
+            break;
+          }
+        }
+      }
+    }
   }
 
   // CRUD Support
@@ -126,19 +196,27 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+    const store = this.#getStore(cls);
+    if (item.id && store.has(item.id)) {
+      await ModelCrudUtil.load(cls, store.get(item.id)!, 'exists');
+    }
     item = await ModelCrudUtil.preStore(cls, item, this);
-    return await this.#write(cls, item);
+    return await this.#write(cls, item, 'write');
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
     const id = item.id;
     const clean = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
-    return await this.#write(cls, clean);
+    return await this.#write(cls, clean, 'write');
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    const store = this.#find(cls, id, 'notfound');
-    store.delete(id);
+    const store = this.#getStore(cls);
+    if (!store.has(id)) {
+      throw new NotFoundError(cls, id);
+    }
+    await ModelCrudUtil.load(cls, store.get(id)!);
+    await this.#write(cls, { id } as T, 'remove');
   }
 
   async * list<T extends ModelType>(cls: Class<T>) {
@@ -200,12 +278,16 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async deleteStorage() {
     this.#store.clear();
-    this.#indexes.clear();
+    this.#indices.sorted.clear();
+    this.#indices.unsorted.clear();
   }
+
 
   async createModel<T extends ModelType>(cls: Class<T>) {
     for (const idx of ModelRegistry.get(cls).indices ?? []) {
-      this.#indexes.set(`${cls.ᚕid}:${idx.name}`, new Map());
+      if (idx.type === 'sorted' || idx.type === 'unsorted') {
+        this.#indices[idx.type].set(indexName(cls, idx), new Map());
+      }
     }
   }
 
@@ -219,30 +301,29 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   // Indexed
-  getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> {
-    const config = ModelRegistry.get(cls).indices!.find(i => i.name === idx);
-    if (!config) {
-      throw new NotFoundError(cls, `Index ${idx}`);
-    }
-    const id = ModelIndexedUtil.computeIndexKey(cls, config, body);
-    const index = this.#indexes.get(`${cls.ᚕid}:${idx}`);
-    if (index && index.has(id)) {
-      return this.get(cls, index.get(id)!);
-
-    }
-    throw new NotFoundError(cls, id);
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> {
+    return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
-    const config = ModelRegistry.get(cls).indices!.find(i => i.name === idx);
-    if (!config) {
-      throw new NotFoundError(cls, `Index ${idx}`);
+    await this.delete(cls, await this.#getIdByIndex(cls, idx, body));
+  }
+
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>): AsyncGenerator<T> {
+    const config = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body ?? {});
+    const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
+
+    if (index) {
+      if (index instanceof Set) {
+        for (const id of index) {
+          yield this.get(cls, id);
+        }
+      } else {
+        for (const id of [...index.entries()].sort((a, b) => +a[1] - +b[1]).map(([a, b]) => a)) {
+          yield this.get(cls, id);
+        }
+      }
     }
-    const id = ModelIndexedUtil.computeIndexKey(cls, config, body);
-    const index = this.#indexes.get(`${cls.ᚕid}:${idx}`);
-    if (index && index.has(id)) {
-      index.delete(id);
-    }
-    throw new NotFoundError(cls, id);
   }
 }

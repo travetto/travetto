@@ -6,6 +6,7 @@ import { SchemaValidator } from '@travetto/schema';
 import { ModelRegistry } from '../../registry/model';
 import { ModelType } from '../../types/model';
 import { NotFoundError } from '../../error/not-found';
+import { ExistsError } from '../../error/exists';
 
 /**
  * Crud utilities
@@ -29,7 +30,7 @@ export class ModelCrudUtil {
    * @param cls Class to load model for
    * @param input Input as string or plain object
    */
-  static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object): Promise<T> {
+  static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
     if (typeof input === 'string') {
       input = JSON.parse(input);
     } else if (input instanceof Buffer) {
@@ -39,7 +40,11 @@ export class ModelCrudUtil {
     const result = ModelRegistry.getBaseModel(cls).from(input as object) as T;
 
     if (!(result instanceof cls)) {
-      throw new NotFoundError(cls, result.id);
+      if (onTypeMismatch === 'notfound') {
+        throw new NotFoundError(cls, result.id);
+      } else {
+        throw new ExistsError(cls, result.id);
+      }
     }
 
     if (result.postLoad) {

@@ -4,6 +4,7 @@ import { Class, Util } from '@travetto/base';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
 import { ModelType } from '@travetto/model';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
+import { IndexField } from '@travetto/model/src/registry/types';
 
 /**
  * Converting units to various radians
@@ -23,6 +24,15 @@ export type WithId<T> = T & { _id: mongo.Binary };
  */
 export class MongoUtil {
 
+  static toIndex<T extends ModelType>(f: IndexField<T>) {
+    const keys = [];
+    while (typeof f !== 'number' && typeof f !== 'boolean' && Object.keys(f)) {
+      const key = Object.keys(f)[0];
+      f = f[key as keyof typeof f] as IndexField<T>;
+      keys.push(key);
+    }
+    return { [keys.join('.')]: (f as boolean) === true ? 1 : f as number } as Record<string, number>;
+  }
 
   static uuid(val: string) {
     return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);

@@ -7,10 +7,12 @@ import { BaseModel } from '../src/types/base';
 import { ModelIndexedSupport } from '../src/service/indexed';
 import { BaseModelSuite } from './base';
 import { NotFoundError } from '../src/error/not-found';
+import { IndexNotSupported } from '../src/error/invalid-index';
 
 @Model('index_user')
 @Index({
   name: 'userName',
+  type: 'unsorted',
   fields: [{ name: 1 }]
 })
 class User extends BaseModel {
@@ -23,7 +25,7 @@ class User2 extends BaseModel {
 }
 
 @Model()
-@Index({ name: 'userAge', fields: [{ name: 1 }, { age: 1 }] })
+@Index({ type: 'sorted', name: 'userAge', fields: [{ name: 1 }, { age: 1 }] })
 class User3 extends BaseModel {
   name: string;
   age: number;
@@ -86,5 +88,28 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     assert(!found2.color);
 
     await assert.rejects(() => service.getByIndex(User3, 'userAge', { name: 'bob' }));
+  }
+
+
+  @Test()
+  async queryList() {
+    const service = await this.service;
+
+    await service.create(User3, User3.from({ name: 'bob', age: 40, color: 'blue' }));
+    await service.create(User3, User3.from({ name: 'bob', age: 30, color: 'red' }));
+    await service.create(User3, User3.from({ name: 'bob', age: 50, color: 'green' }));
+
+    const items = service.listByIndex(User3, 'userAge', { name: 'bob' });
+    const arr = [];
+    for await (const el of items) {
+      arr.push(el);
+    }
+    assert(arr[0].color === 'red' && arr[0].name == 'bob');
+    assert(arr[1].color === 'blue' && arr[0].name == 'bob');
+    assert(arr[2].color === 'green' && arr[0].name == 'bob');
+
+    await assert.rejects(async () => {
+      for await (const el of service.listByIndex(User3, 'userAge', {})) { }
+    }, IndexNotSupported);
   }
 }

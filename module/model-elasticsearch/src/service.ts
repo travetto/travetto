@@ -6,7 +6,7 @@ import {
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
   SubTypeNotSupportedError
 } from '@travetto/model';
-import { Class, Util, ShutdownManager } from '@travetto/base';
+import { Class, Util, ShutdownManager, AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { SchemaChange } from '@travetto/schema';
 import {
@@ -338,34 +338,66 @@ export class ElasticsearchModelService implements
   }
 
   // Indexed
-  getIndexQuery<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
-    return ElasticsearchQueryUtil.getSearchBody(
-      cls, ElasticsearchQueryUtil.extractWhereTermQuery(
-        cls, ModelIndexedUtil.projectIndex(
-          cls, idx, body, null
-        )
-      )
-    );
-  }
-
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
-    const res: SearchResponse<T> = await this.execSearch(cls, { body: this.getIndexQuery(cls, idx, body) });
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
+    const res: SearchResponse<T> = await this.execSearch(cls, {
+      body: ElasticsearchQueryUtil.getSearchBody(cls,
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls,
+          ModelIndexedUtil.projectIndex(cls, idx, body, Error))
+      )
+    });
     if (!res.body.hits.hits.length) {
-      throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
+      throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
     return this.postLoad(cls, res.body.hits.hits[0]._source);
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const res = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
-      body: this.getIndexQuery(cls, idx, body),
+      body: ElasticsearchQueryUtil.getSearchBody(cls,
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls,
+          ModelIndexedUtil.projectIndex(cls, idx, body, Error))
+      ),
       refresh: true
     });
     if (res.body.deleted) {
       return;
     }
-    throw new NotFoundError(`${cls.name}: ${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body));
+    throw new NotFoundError(`${cls.name}: ${idx}`, key);
+  }
+
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>) {
+    const cfg = ModelRegistry.getIndex(cls, idx);
+    if (cfg.type === 'unique') {
+      throw new AppError('Cannot list on unique indices', 'data');
+    }
+    let search: SearchResponse<T> = await this.execSearch(cls, {
+      scroll: '2m',
+      size: 100,
+      body: ElasticsearchQueryUtil.getSearchBody(cls,
+        ElasticsearchQueryUtil.extractWhereTermQuery(cls,
+          ModelIndexedUtil.projectIndex(cls, idx, body, Error, { $exists: true }))
+      ),
+      sort: ElasticsearchQueryUtil.getSort(cfg.fields)
+    });
+
+    while (search.body.hits.hits.length > 0) {
+      for (const el of search.body.hits.hits) {
+        try {
+          yield this.postLoad(cls, el._source);
+        } catch (err) {
+          if (!(err instanceof NotFoundError)) {
+            throw err;
+          }
+        }
+        search = await this.client.scroll({
+          scroll_id: search.body._scroll_id,
+          scroll: '2m'
+        });
+      }
+    }
   }
 
   // Query
