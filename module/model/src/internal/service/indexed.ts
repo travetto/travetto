@@ -88,24 +88,44 @@ export class ModelIndexedUtil {
    * @param idx Index config
    * @param item Item to read values from
    */
-  static flattenIndexItem<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, separator = '.') {
+  static flattenIndexItem<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, allowMissingSort = true) {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
-    return cfg.fields.map((f: SortClauseRaw<unknown>) => {
+    const sortField = cfg.type === 'sorted' ? cfg.fields[cfg.fields.length - 1] : undefined;
+    const fields = [];
+    let sortDir: number = 0;
+    let sorted: [string, number] | undefined;
+
+    for (const field of cfg.fields) {
+      let f = field as Record<string, unknown>;
       let o = item as Record<string, unknown>;
       const parts = [];
-      while (o !== undefined) {
+      while (o !== undefined && o !== null) {
         const k = Object.keys(f)[0];
         o = (o[k] as Record<string, unknown>);
         parts.push(k);
         const fk = k as (keyof typeof f);
         if (typeof f[fk] === 'boolean' || typeof f[fk] === 'number') {
+          if (cfg.type === 'sorted') {
+            sortDir = f[fk] === true ? 1 : f[fk] as number;
+          }
           break; // At the bottom
         } else {
-          f = f[fk];
+          f = f[fk] as Record<string, unknown>;
         }
       }
-      return [parts.join(separator), o] as [key: string, value: unknown];
-    });
+      if (field === sortField) {
+        sorted = [parts.join('.'), sortDir];
+      }
+      if (o === undefined || o === null) {
+        if (field !== sortField || !allowMissingSort) {
+          throw new IndexNotSupported(cls, cfg, `Missing field value for ${parts.join('.')}`);
+        }
+      } else {
+        fields.push([parts.join('.'), o] as [key: string, value: unknown]);
+      }
+    }
+
+    return { fields, sorted };
   }
 
   /**

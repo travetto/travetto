@@ -12,26 +12,10 @@ import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 
 import { FirestoreModelConfig } from './config';
 
-const toSimple = (inp: unknown, missingValue: unknown = null): unknown => {
-  if (inp === undefined || inp === null) {
-    return missingValue;
-  } else if (Array.isArray(inp)) {
-    return inp.map(v => toSimple(v, missingValue));
-  } else if (inp instanceof Set) {
-    return [...inp].map(v => toSimple(v, missingValue));
-  } else if (Util.isPrimitive(inp)) {
-    return inp;
-  } else if (inp instanceof Map) {
-    return Object.fromEntries([...inp.entries()].map(([k, v]) => [k, toSimple(v, missingValue)]));
-  } else {
-    return Object.fromEntries(Object.entries(inp as object)
-      .filter(([k, v]) => !Util.isFunction(v))
-      .map(([k, v]) => [k, toSimple(v, missingValue)]));
-  }
-};
+const clone = <T>(inp: T) => JSON.parse(JSON.stringify(inp));
 
 const toSimpleObj = <T>(inp: T, missingValue: unknown = null) =>
-  toSimple(inp, missingValue) as Record<string, unknown>;
+  JSON.parse(JSON.stringify(inp, (_, v) => v ?? null), (_, v) => v ?? missingValue);
 
 /**
  * A model service backed by Firestore
@@ -95,7 +79,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async create<T extends ModelType>(cls: Class<T>, item: T) {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).create(toSimpleObj(item));
+    await this.#getCollection(cls).doc(item.id).create(clone(item));
     return item;
   }
 
@@ -104,7 +88,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       throw new SubTypeNotSupportedError(cls);
     }
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).update(toSimpleObj(item));
+    await this.#getCollection(cls).doc(item.id).update(clone(item));
     return item;
   }
 
@@ -113,7 +97,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       throw new SubTypeNotSupportedError(cls);
     }
     item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).set(toSimpleObj(item));
+    await this.#getCollection(cls).doc(item.id).set(clone(item));
     return item;
   }
 
@@ -123,7 +107,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
-    await this.#getCollection(cls).doc(id).set(toSimpleObj(item, firebase.firestore.FieldValue.delete()), { merge: true });
+    const cleaned = toSimpleObj(item, firebase.firestore.FieldValue.delete());
+    console.log(item, cleaned);
+    await this.#getCollection(cls).doc(id).set(cleaned, { merge: true });
     return this.get(cls, id);
   }
 
@@ -160,8 +146,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       throw new SubTypeNotSupportedError(cls);
     }
 
-    const res = ModelIndexedUtil.flattenIndexItem(cls, idx, body);
-    const query = res.reduce((q, [k, v]) =>
+    const { fields } = ModelIndexedUtil.flattenIndexItem(cls, idx, body, false);
+    const query = fields.reduce((q, [k, v]) =>
       q.where(k, '==', v), this.#getCollection(cls) as firebase.firestore.Query);
 
     const item = await query.get();
@@ -181,6 +167,20 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
-    throw new Error('Listing by index is not currently supported for firestore');
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
+
+    const { fields, sorted } = ModelIndexedUtil.flattenIndexItem(cls, idx, body, true);
+    let query = fields.reduce((q, [k, v]) =>
+      q.where(k, '==', v), this.#getCollection(cls) as firebase.firestore.Query);
+
+    if (sorted) {
+      query = query.orderBy(sorted[0], sorted[1] === 1 ? 'asc' : 'desc');
+    }
+
+    for (const el of (await query.get()).docs) {
+      yield await ModelCrudUtil.load(cls, el.data()!);
+    }
   }
 }
