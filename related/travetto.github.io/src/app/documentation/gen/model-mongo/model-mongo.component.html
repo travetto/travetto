@@ -57,7 +57,7 @@ Supported featrues:
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> mongo <span class="token keyword">from</span> <span class="token string">'mongodb'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> promises <span class="token keyword">as</span> fs <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ResourceManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> TimeSpan<span class="token punctuation">,</span> ResourceManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
@@ -109,7 +109,7 @@ Supported featrues:
   <span class="token comment">/**
    * Frequency of culling for expirable content
    */</span>
-  cullRate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  cullRate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Load a resource

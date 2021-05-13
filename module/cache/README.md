@@ -19,11 +19,11 @@ npm install @travetto/model-{provider}
 
 Currently, the following are packages that provide [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11):
    
-   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L46), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L34)
-   *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - [DynamoDBModelService](https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/service.ts#L55)
+   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L46), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L49)
+   *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - [DynamoDBModelService](https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/service.ts#L56)
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.") - [ElasticsearchModelService](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/service.ts#L39)
-   *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.") - [MongoModelService](https://github.com/travetto/travetto/tree/main/module/model-mongo/src/service.ts#L45)
-   *  [Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.") - [RedisModelService](https://github.com/travetto/travetto/tree/main/module/model-redis/src/service.ts#L22)
+   *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.") - [MongoModelService](https://github.com/travetto/travetto/tree/main/module/model-mongo/src/service.ts#L51)
+   *  [Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.") - [RedisModelService](https://github.com/travetto/travetto/tree/main/module/model-redis/src/service.ts#L25)
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.") - [S3ModelService](https://github.com/travetto/travetto/tree/main/module/model-s3/src/service.ts#L30)
    *  [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L35)
 
@@ -74,9 +74,9 @@ The [@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/dec
       *  `serialize` the function to execute before storing a cacheable value.  This allows for any custom data modification needed to persist as a string properly.
       *  `reinstate` the function to execute on return of a cached value.  This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.).  This method should not be used often, as the return values of the methods should naturally serialize to/from `JSON` and the values should be usable either way.
 
-### [@EvictCache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L39)
+### [@EvictCache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L37)
 
-Additionally, there is support for planned eviction via the [@EvictCache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L39) decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same `keySpace` and `key` to compute the expected key.
+Additionally, there is support for planned eviction via the [@EvictCache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L37) decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same `keySpace` and `key` to compute the expected key.
 
 **Code: Using decorators to cache/evict user access**
 ```typescript

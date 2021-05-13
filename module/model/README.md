@@ -113,6 +113,14 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param body The payload of fields needed to search
    */
   deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<void>;
+
+  /**
+   * List entity by rangeable index as defined by fields of idx and the body fields
+   * @param cls The type to search by
+   * @param idx The index name to search against
+   * @param body The payload of fields needed to search
+   */
+  listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>): AsyncIterable<T>;
 }
 ```
 
@@ -219,7 +227,7 @@ All fields are optional, but the `id` and `type` are important as those field ty
 |[Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
 |[S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
-|[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L34)|X|X|X|X|X|X|
+|[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L49)|X|X|X|X|X|X|
 |[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L46)|X|X| |X|X|X|
 
 ## Custom Model Service
@@ -229,7 +237,7 @@ repetitive functionality, that is unable to be shared due to not relying upon in
 **Code: Memory Service**
 ```typescript
 import { StreamUtil } from '@travetto/boot';
-import { Util, Class } from '@travetto/base';
+import { Util, Class, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { ModelCrudSupport } from '../service/crud';
@@ -246,18 +254,34 @@ import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
 import { StreamModel, STREAMS } from '../internal/service/stream';
+import { IndexConfig } from '../registry/types';
 const STREAM_META = `${STREAMS}_meta`;
 @Config('model.memory')
 export class MemoryModelConfig {
   autoCreate?: boolean;
   namespace: string;
-  cullRate?: number;
+  cullRate?: number | TimeSpan;
+}
+function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, suffix?: string) {
+  return [cls.ᚕid, typeof idx === 'string' ? idx : idx.name, suffix].filter(x => !!x).join(':');
+}
+function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | number) {
+  let id: string;
+  if (data instanceof Set) {
+    id = data.values().next().value as string;
+  } else {
+    id = [...data.entries()].find(([k, v]) => v === value)![0];
+  }
+  return id;
 }
 /**
  * Standard in-memory support
  */
 @Injectable()
 export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
+    sorted: new Map<string, Map<string, Map<string, number>>>(),
+    unsorted: new Map<string, Map<string, Set<string>>>()
+  };
   get client() { return this.#store; }
   async postConstruct() ;
   // CRUD Support
@@ -282,8 +306,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async createModel<T extends ModelType>(cls: Class<T>) ;
   async truncateModel<T extends ModelType>(cls: Class<T>) ;
   // Indexed
-  getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> ;
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> ;
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) ;
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>): AsyncGenerator<T> ;
 }
 ```
 
@@ -299,6 +324,7 @@ import { ModelExpirySuite } from '../test-support/expiry';
 import { ModelStreamSuite } from '../test-support/stream';
 import { ModelIndexedSuite } from '../test-support/indexed';
 import { ModelBasicSuite } from '../test-support/basic';
+import { ModelPolymorphismSuite } from '../test-support/polymorphism';
 
 @Suite()
 export class MemoryBasicSuite extends ModelBasicSuite {
@@ -326,6 +352,12 @@ export class MemoryExpirySuite extends ModelExpirySuite {
 
 @Suite()
 export class MemoryIndexedSuite extends ModelIndexedSuite {
+  serviceClass = MemoryModelService;
+  configClass = MemoryModelConfig;
+}
+
+@Suite()
+export class MemoryPolymorphicSuite extends ModelPolymorphismSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }

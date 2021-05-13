@@ -46,14 +46,16 @@ Supported featrues:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L8">ElasticsearchModelConfig</a> is defined by:
+  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L10">ElasticsearchModelConfig</a> is defined by:
 
   
       <figure class="code">
       <figcaption class="code">Structure of ElasticsearchModelConfig
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> TimeSpan <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
+
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> EsSchemaConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./internal/types'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
@@ -99,7 +101,7 @@ Supported featrues:
   <span class="token comment">/**
    * Frequency of culling for expirable content
    */</span>
-  cullRate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  cullRate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Build final hosts

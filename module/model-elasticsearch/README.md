@@ -40,12 +40,14 @@ export class Init {
 }
 ```
 
-  where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L8) is defined by:
+  where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L10) is defined by:
 
   
 **Code: Structure of ElasticsearchModelConfig**
 ```typescript
+import { TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
+
 import { EsSchemaConfig } from './internal/types';
 
 /**
@@ -91,7 +93,7 @@ export class ElasticsearchModelConfig {
   /**
    * Frequency of culling for expirable content
    */
-  cullRate?: number;
+  cullRate?: number | TimeSpan;
 
   /**
    * Build final hosts

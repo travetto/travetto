@@ -190,7 +190,7 @@ Error: Uh oh
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
 
 ## General Utilities
-Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L9) includes:
+Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L30) includes:
 
    
    *  `isPrimitive(el)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`

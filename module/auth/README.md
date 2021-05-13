@@ -197,7 +197,7 @@ Currently, the following are packages that provide [CRUD](https://github.com/tra
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.") @travetto/model-s3
    *  [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") @travetto/model-sql
 
-The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a [Registered Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/extension/model.ts#L16)
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a [Registered Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/extension/model.ts#L15)
 
 A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 

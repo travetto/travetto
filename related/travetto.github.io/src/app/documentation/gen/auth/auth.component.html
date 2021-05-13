@@ -203,13 +203,13 @@ Currently, the following are packages that provide <a target="_blank" class="sou
  <li><a class="module-link" routerLink="/docs/model-s3" title="S3 backing for the travetto model module.">S3 Model Support</a> @travetto/model-s3</li>
  <li><a class="module-link" routerLink="/docs/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a> @travetto/model-sql</li></ul>
 
-The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/extension/model.ts#L16">Registered Principal</a>
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/extension/model.ts#L15">Registered Principal</a>
 
 A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 
       <figure class="code">
       <figcaption class="code">Registered Principal
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/extension/model.ts#L16">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/extension/model.ts#L15">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">RegisteredPrincipal</span> <span class="token keyword">extends</span> <span class="token class-name">Principal</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**

@@ -119,6 +119,22 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
+  async #deleteKeys(items: { Key: string }[]) {
+    if (this.config.endpoint.includes('localhost')) {
+      await Promise.all(items.map(item => this.client.deleteObject({
+        Bucket: this.config.bucket,
+        Key: item.Key
+      })));
+    } else {
+      await this.client.deleteObjects({
+        Bucket: this.config.bucket,
+        Delete: {
+          Objects: items
+        }
+      });
+    }
+  }
+
   uuid() {
     return Util.uuid(32);
   }
@@ -313,12 +329,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async truncateModel<T extends ModelType>(model: Class<T>) {
     for await (const items of this.#iterateBucket(model)) {
-      await this.client.deleteObjects({
-        Bucket: this.config.bucket,
-        Delete: {
-          Objects: items
-        }
-      });
+      await this.#deleteKeys(items);
     }
   }
 
@@ -337,12 +348,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   async deleteStorage() {
     if (this.config.namespace) {
       for await (const items of this.#iterateBucket('')) {
-        await this.client.deleteObjects({
-          Bucket: this.config.bucket,
-          Delete: {
-            Objects: items
-          }
-        });
+        await this.#deleteKeys(items);
       }
     } else {
       await this.client.deleteBucket({ Bucket: this.config.bucket });
