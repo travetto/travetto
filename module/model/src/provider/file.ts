@@ -78,7 +78,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       dir = path.dirname(resolved);
     }
     if (!await FsUtil.exists(dir)) {
-      await FsUtil.mkdirp(dir);
+      await fs.promises.mkdir(dir, { recursive: true });
     }
     return resolved;
   }
@@ -226,14 +226,15 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   // Storage mgmt
   async createStorage() {
-    await FsUtil.mkdirp(PathUtil.resolveUnix(this.config.folder, this.config.namespace));
+    const dir = PathUtil.resolveUnix(this.config.folder, this.config.namespace);
+    await fs.promises.mkdir(dir, { recursive: true });
   }
 
   async deleteStorage() {
-    await FsUtil.unlinkRecursive(PathUtil.resolveUnix(this.config.folder, this.config.namespace), true);
+    await FsUtil.unlinkRecursive(PathUtil.resolveUnix(this.config.folder, this.config.namespace));
   }
 
   async truncateModel(cls: Class<ModelType>) {
-    await FsUtil.unlinkRecursive(await this.#resolveName(cls === StreamModel ? STREAMS : cls), true);
+    await FsUtil.unlinkRecursive(await this.#resolveName(cls === StreamModel ? STREAMS : cls));
   }
 }

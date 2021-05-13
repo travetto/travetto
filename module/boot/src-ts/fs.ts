@@ -1,10 +1,15 @@
 import * as fss from 'fs';
-import * as path from 'path';
 
 import { ExecUtil } from './exec';
 import { PathUtil } from './path';
 
 const fs = fss.promises;
+
+const checkPath = (pth: string) => {
+  if (!pth || pth === '/') {
+    throw new Error('Path has not been defined');
+  }
+};
 
 /**
  * Standard utils for interacting with the file system
@@ -16,9 +21,6 @@ export class FsUtil {
    * @param pth Thefolder to delete
    */
   static #unlinkCommand(pth: string): [string, string[]] {
-    if (!pth || pth === '/') {
-      throw new Error('Path has not been defined');
-    }
     if (process.platform === 'win32') {
       return ['rmdir', ['/Q', '/S', PathUtil.toNative(pth)]];
     } else {
@@ -59,38 +61,6 @@ export class FsUtil {
   }
 
   /**
-   * Make directory and all intermediate ones as well
-   * @param pth The folder to make
-   */
-  static async mkdirp(pth: string) {
-    try {
-      await fs.stat(pth);
-    } catch (e) {
-      await this.mkdirp(path.dirname(pth));
-      try {
-        await fs.mkdir(pth);
-      } catch (err) {
-        if (!/already exists/.test(err)) {
-          throw err;
-        }
-      }
-    }
-  }
-
-  /**
-   * Make directory and all intermediate ones as well, synchronously
-   * @param pth The folder to make
-   */
-  static mkdirpSync(pth: string) {
-    try {
-      fss.statSync(pth);
-    } catch (e) {
-      this.mkdirpSync(path.dirname(pth));
-      fss.mkdirSync(pth);
-    }
-  }
-
-  /**
    * Find latest timestamp between creation and modification
    */
   static maxTime(stat: fss.Stats) {
@@ -102,14 +72,14 @@ export class FsUtil {
    * @param pth The folder to delete
    * @param ignore Should errors be ignored
    */
-  static unlinkRecursiveSync(pth: string, ignore = false) {
-    const cmd = this.#unlinkCommand(pth);
-    try {
-      return ExecUtil.execSync(...cmd);
-    } catch (err) {
-      if (!ignore) {
-        throw err;
-      }
+  static unlinkRecursiveSync(pth: string) {
+    checkPath(pth);
+    if ('rmSync' in fss) {
+      fss.rmSync(pth, { recursive: true, force: true });
+    } else {
+      try {
+        return ExecUtil.execSync(...this.#unlinkCommand(pth));
+      } catch { }
     }
   }
 
@@ -118,20 +88,26 @@ export class FsUtil {
    * @param pth The folder to delete
    * @param ignore Should errors be ignored
    */
-  static unlinkRecursive(pth: string, ignore = false) {
-    const prom = ExecUtil.spawn(...this.#unlinkCommand(pth)).result;
-    return ignore ? prom.catchAsResult() : prom;
+  static async unlinkRecursive(pth: string) {
+    checkPath(pth);
+    if ('rm' in fs) {
+      await fs.rm(pth, { recursive: true, force: true })
+    } else {
+      try {
+        await ExecUtil.spawn(...this.#unlinkCommand(pth)).result;
+      } catch { }
+    }
   }
 
   /**
-   * Remove directory, determine if errors should be ignored, synchronously
+   * Remove directory, determine if errors should be ignored
    * @param src The folder to copy
    * @param dest The folder to copy to
    * @param ignore Should errors be ignored
    */
-  static copyRecursiveSync(src: string, dest: string, ignore = false) {
+  static async copyRecursive(src: string, dest: string, ignore = false) {
     try {
-      return ExecUtil.execSync(...this.#copyCommand(src, dest));
+      await ExecUtil.spawn(...this.#copyCommand(src, dest)).result;
     } catch (err) {
       if (!ignore) {
         throw err;
@@ -148,31 +124,5 @@ export class FsUtil {
         ['xdg-open', pth];
 
     ExecUtil.spawn(op[0], op.slice(1));
-  }
-
-  /**
-   * Symlink, with some platform specific support
-   */
-  static async symlink(actual: string, linkPath: string) {
-    try {
-      await fs.lstat(linkPath);
-    } catch (e) {
-      const file = (await fs.stat(actual)).isFile();
-      await fs.symlink(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
-      await fs.lstat(linkPath); // Ensure created
-    }
-  }
-
-  /**
-   * Symlink, with some platform specific support, synchronously
-   */
-  static symlinkSync(actual: string, linkPath: string) {
-    try {
-      fss.lstatSync(linkPath);
-    } catch (e) {
-      const file = fss.statSync(actual).isFile();
-      fss.symlinkSync(actual, linkPath, process.platform === 'win32' ? (file ? 'file' : 'junction') : undefined);
-      fss.lstatSync(linkPath); // Ensure created
-    }
   }
 }

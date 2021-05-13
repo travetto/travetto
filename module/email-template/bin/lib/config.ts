@@ -30,8 +30,8 @@ export class ConfigUtil {
    */
   static async get(): Promise<ConfigType> {
     return fs.promises.readFile(this.#configFile, 'utf8')
-      .then(f => YamlUtil.parse(f) as ConfigType)
-      .catch(err => ({} as ConfigType));
+      .then((f: string) => YamlUtil.parse(f) as ConfigType)
+      .catch(() => ({} as ConfigType));
   }
 
   static async getContext() {
@@ -51,7 +51,7 @@ export class ConfigUtil {
   static async ensureConfig() {
     const file = this.#configFile;
     if (!(await FsUtil.exists(file))) {
-      await FsUtil.mkdirpSync(path.dirname(file));
+      await fs.promises.mkdir(path.dirname(file), { recursive: true });
       await fs.promises.writeFile(file, this.#defaultConfig, { encoding: 'utf8' });
     }
     return file;

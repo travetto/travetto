@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
+import { Schema } from '@travetto/schema';
 
 import { Index, Model } from '../src/registry/decorator';
 import { BaseModel } from '../src/types/base';
@@ -31,6 +32,20 @@ class User3 extends BaseModel {
   age: number;
   color?: string;
 }
+
+@Schema()
+class Child {
+  name: string;
+  age: number;
+}
+
+@Model()
+@Index({ type: 'sorted', name: 'childAge', fields: [{ child: { name: 1 } }, { child: { age: 1 } }] })
+class User4 extends BaseModel {
+  color: string;
+  child: Child;
+}
+
 
 @Suite()
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {
@@ -105,11 +120,34 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
       arr.push(el);
     }
     assert(arr[0].color === 'red' && arr[0].name === 'bob');
-    assert(arr[1].color === 'blue' && arr[0].name === 'bob');
-    assert(arr[2].color === 'green' && arr[0].name === 'bob');
+    assert(arr[1].color === 'blue' && arr[1].name === 'bob');
+    assert(arr[2].color === 'green' && arr[2].name === 'bob');
 
     await assert.rejects(async () => {
       for await (const _el of service.listByIndex(User3, 'userAge', {})) { }
+    }, IndexNotSupported);
+  }
+
+  @Test()
+  async queryDeepList() {
+    const service = await this.service;
+
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 40 }, color: 'blue' }));
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, color: 'red' }));
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, color: 'green' }));
+
+    const items = service.listByIndex(User4, 'childAge', User4.from({ child: { name: 'bob' } }));
+    const arr = [];
+    for await (const el of items) {
+      arr.push(el);
+    }
+    console.log(arr);
+    assert(arr[0].color === 'red' && arr[0].child.name === 'bob' && arr[0].child.age === 30);
+    assert(arr[1].color === 'blue' && arr[1].child.name === 'bob' && arr[1].child.age === 40);
+    assert(arr[2].color === 'green' && arr[2].child.name === 'bob' && arr[2].child.age === 50);
+
+    await assert.rejects(async () => {
+      for await (const _el of service.listByIndex(User4, 'childAge', {})) { }
     }, IndexNotSupported);
   }
 }

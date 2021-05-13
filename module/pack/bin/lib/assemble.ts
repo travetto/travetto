@@ -50,8 +50,8 @@ export class AssembleUtil {
         if (found.isFile()) {
           await fs.copyFile(stgt, ftgt);
         } else {
-          await FsUtil.mkdirp(ftgt);
-          await FsUtil.copyRecursiveSync(`${stgt}/*`, ftgt);
+          await fs.mkdir(ftgt, { recursive: true });
+          await FsUtil.copyRecursive(`${stgt}/*`, ftgt);
         }
       }
     }
@@ -80,21 +80,21 @@ export class AssembleUtil {
         .replace(/.*?node_modules/, 'node_modules');
 
       const tgt = PathUtil.resolveUnix(workspace, sub);
-      await FsUtil.mkdirp(path.dirname(tgt));
+      await fs.mkdir(path.dirname(tgt), { recursive: true });
 
       if (el.dep.startsWith('@travetto')) {
         await this.copyModule(el.file, tgt);
       } else {
         if (!(await FsUtil.exists(tgt))) {
-          await FsUtil.copyRecursiveSync(el.file, tgt);
+          await FsUtil.copyRecursive(el.file, tgt);
         }
       }
     }
-    await FsUtil.copyRecursiveSync(
+    await FsUtil.copyRecursive(
       PathUtil.resolveUnix(path.dirname(require.resolve('@travetto/boot/bin/main.js'))),
       PathUtil.resolveUnix(workspace, 'node_modules/@travetto/boot/bin')
     );
-    await FsUtil.copyRecursiveSync(
+    await FsUtil.copyRecursive(
       PathUtil.resolveUnix(path.dirname(require.resolve('@travetto/base/bin/main.js'))),
       PathUtil.resolveUnix(workspace, 'node_modules/@travetto/base/bin')
     );
@@ -122,11 +122,11 @@ export class AssembleUtil {
       const stat = await FsUtil.exists(src);
       if (stat) {
         if (stat.isFile()) {
-          await FsUtil.mkdirp(path.dirname(dest));
+          await fs.mkdir(path.dirname(dest), { recursive: true });
           await fs.copyFile(src, dest);
         } else {
-          await FsUtil.mkdirp(path.dirname(dest));
-          await FsUtil.copyRecursiveSync(src, dest);
+          await fs.mkdir(path.dirname(dest), { recursive: true });
+          await FsUtil.copyRecursive(src, dest);
         }
       }
     }

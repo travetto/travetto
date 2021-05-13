@@ -47,7 +47,7 @@ export class FileCache {
    */
   init(purgeExpired = false) {
     if (!EnvUtil.isReadonly()) {
-      FsUtil.mkdirpSync(this.cacheDir);
+      fs.mkdirSync(this.cacheDir, { recursive: true });
 
       try {
         // Ensure we have access before trying to delete

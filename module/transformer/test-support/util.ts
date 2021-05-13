@@ -26,7 +26,7 @@ export class TranformerTestUtil {
     });
     const log = `${folder}/.trv_compiler.log`;
 
-    await FsUtil.unlinkRecursive(log, true);
+    await FsUtil.unlinkRecursive(log);
 
     const transformers =
       (await ScanFs.scanDir({ testFile: f => f.startsWith('support/transformer') }, folder))
@@ -50,7 +50,7 @@ export class TranformerTestUtil {
       console.info(fs.readFileSync(log, 'utf8'));
     } catch { }
 
-    await FsUtil.unlinkRecursive(log, true);
+    await FsUtil.unlinkRecursive(log);
 
     return out;
   }

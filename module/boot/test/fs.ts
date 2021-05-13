@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import * as fs from 'fs';
 import * as os from 'os';
 
 import { Test, Suite } from '@travetto/test';
@@ -21,10 +22,7 @@ export class FsUtilTest {
    */
   @Test()
   async unlink() {
-    assert.throws(() => FsUtil.unlinkRecursiveSync('/'));
-    assert.throws(() => FsUtil.unlinkRecursiveSync('/', true));
-    assert.throws(() => FsUtil.unlinkRecursiveSync('/woahwoah'));
-    assert.doesNotThrow(() => FsUtil.unlinkRecursiveSync('/woahwoah', true));
+    assert.doesNotThrow(() => FsUtil.unlinkRecursiveSync('/woahwoah'));
   }
 
   /**
@@ -37,7 +35,7 @@ export class FsUtilTest {
     // Default
     const special = PathUtil.resolveUnix(base, 'a', 'b', 'c');
     assert(!(await FsUtil.exists(special)));
-    await FsUtil.mkdirp(special);
+    await fs.promises.mkdir(special, { recursive: true });
     assert(await FsUtil.exists(special));
 
     await FsUtil.unlinkRecursive(base);
@@ -51,7 +49,7 @@ export class FsUtilTest {
     // Default
     const special = PathUtil.resolveUnix(base, 'a', 'b', 'c');
     assert(!FsUtil.existsSync(special));
-    FsUtil.mkdirpSync(special);
+    fs.mkdirSync(special, { recursive: true });
     assert(FsUtil.existsSync(special));
 
     FsUtil.unlinkRecursiveSync(base);
@@ -63,16 +61,16 @@ export class FsUtilTest {
    * Remove directory, determine if errors should be ignored, synchronously
    */
   @Test()
-  async copyRecursiveSync() {
+  async copyRecursive() {
     const base = PathUtil.resolveUnix(os.tmpdir(), `${Date.now()}`, `${Math.random()}`);
     const target = AppCache.cacheDir;
 
     // Default
     assert(!FsUtil.existsSync(base));
-    FsUtil.mkdirpSync(base);
+    fs.mkdirSync(base, { recursive: true });
     assert(FsUtil.existsSync(base));
 
-    FsUtil.copyRecursiveSync(base, target);
+    await FsUtil.copyRecursive(base, target);
 
     const results = ExecUtil.execSync(`ls -lsa ${target}`).split(/\n/g);
 

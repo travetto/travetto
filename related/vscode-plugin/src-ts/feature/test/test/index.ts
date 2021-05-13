@@ -45,11 +45,11 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   /** Clean up */
-  clean(recopy = false) {
+  async clean(recopy = false) {
     this.#consumer.dispose();
-    FsUtil.unlinkRecursiveSync(this.#cacheDir, true);
+    await FsUtil.unlinkRecursive(this.#cacheDir);
     if (recopy) {
-      FsUtil.copyRecursiveSync(`${Workspace.path}/.trv_cache`, this.#cacheDir, true);
+      await FsUtil.copyRecursive(`${Workspace.path}/.trv_cache`, this.#cacheDir, true);
     }
   }
 

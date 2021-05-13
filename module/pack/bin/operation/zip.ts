@@ -31,7 +31,7 @@ export const Zip: PackOperation<ZipConfig> = {
     const zipFile = PathUtil.resolveUnix(output);
 
     yield 'Preparing Target';
-    await FsUtil.mkdirp(path.dirname(zipFile));
+    await fs.promises.mkdir(path.dirname(zipFile), { recursive: true });
     await new Promise(res => fs.unlink(zipFile, res)); // Unlink
 
     yield 'Compressing';

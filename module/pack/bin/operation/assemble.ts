@@ -43,7 +43,7 @@ export const Assemble: PackOperation<AssembleConfig> = {
     const fullCacheDir = PathUtil.resolveUnix(workspace!, cacheDir);
     const ws = PathUtil.resolveUnix(workspace!);
 
-    yield 'Cleaning Workspace'; await FsUtil.unlinkRecursive(ws, true).then(() => { });
+    yield 'Cleaning Workspace'; await FsUtil.unlinkRecursive(ws).then(() => { });
     yield 'Copying Dependencies'; await AssembleUtil.copyDependencies(ws);
     yield 'Copying App Content'; await AssembleUtil.copyModule(PathUtil.cwd, ws);
     yield 'Excluding Pre-Compile Files'; await AssembleUtil.excludeFiles(ws, excludeCompile);

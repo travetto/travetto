@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as util from 'util';
 
-import { PathUtil, FsUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 
 const writeProm = util.promisify(fs.writeFile);
 const readProm = util.promisify(fs.readFile);
@@ -34,7 +34,7 @@ export class ActionStorage<T> {
    */
   async init(): Promise<void> {
     try {
-      FsUtil.mkdirpSync(this.root);
+      await fs.promises.mkdir(this.root, { recursive: true });
 
       this.#storage = JSON.parse(await readProm(this.resolved, 'utf8'));
     } catch {

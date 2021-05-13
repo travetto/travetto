@@ -291,7 +291,7 @@ export class DockerContainer {
    */
   async initTemp() {
     await Promise.all( // Make temp dirs
-      Object.keys(this.#tempVolumes).map(x => FsUtil.mkdirp(x)));
+      Object.keys(this.#tempVolumes).map(x => fs.promises.mkdir(x, { recursive: true })));
   }
 
   /**
@@ -438,7 +438,7 @@ export class DockerContainer {
 
     await Promise.all(
       Object.keys(this.#tempVolumes)
-        .map(x => FsUtil.unlinkRecursive(x, true))
+        .map(x => FsUtil.unlinkRecursive(x))
     );
   }
 
@@ -449,7 +449,7 @@ export class DockerContainer {
     console.debug('Cleaning', { image: this.#image, container: this.#container });
 
     for (const vol of Object.keys(this.#tempVolumes)) {
-      FsUtil.unlinkRecursiveSync(vol, true);
+      FsUtil.unlinkRecursiveSync(vol);
     }
   }
 

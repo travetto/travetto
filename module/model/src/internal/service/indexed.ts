@@ -24,10 +24,11 @@ export class ModelIndexedUtil {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
     const res = {} as Record<string, unknown>;
     const sortField = cfg.type === 'sorted' ? cfg.fields[cfg.fields.length - 1] : undefined;
-    for (let f of cfg.fields as Record<string, unknown>[]) {
+    for (const field of cfg.fields as Record<string, unknown>[]) {
       let o: Record<string, unknown> | undefined = item;
       let sub: Record<string, unknown> = res;
       const path: string[] = [];
+      let f = field;
 
       while (sub !== undefined) {
         const k = Object.keys(f)[0];
@@ -35,7 +36,7 @@ export class ModelIndexedUtil {
         o = (o !== undefined ? o[k] : o) as Record<string, unknown> | undefined;
         if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
           if (o === undefined || o === null) {
-            const empty = f === sortField ? emptySortValue : emptyValue;
+            const empty = field === sortField ? emptySortValue : emptyValue;
             if (empty === Error) {
               throw new IndexNotSupported(cls, cfg, `Missing field value for ${path.join('.')}`);
             }
@@ -122,7 +123,7 @@ export class ModelIndexedUtil {
       let o = item as Record<string, unknown>;
       const path = [];
       while (o !== undefined && o !== null) {
-        const k = Object.keys(f)[0];
+        const k = Object.keys(field)[0];
         path.push(k);
         o = o[k] as Record<string, unknown>;
         const fk = k as keyof typeof field;

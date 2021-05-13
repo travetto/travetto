@@ -1,7 +1,8 @@
 import * as path from 'path';
+import * as fs from 'fs';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
-import { ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
+import { ExecUtil, PathUtil } from '@travetto/boot';
 
 /**
  * CLI for generating the cli client
@@ -24,7 +25,7 @@ export class OpenApiClientPlugin extends BasePlugin {
 
   async action(format: string, props?: string) {
     // Ensure its there
-    await FsUtil.mkdirp(this.cmd.output);
+    await fs.promises.mkdir(this.cmd.output, { recursive: true });
 
     const args = [
       'run',

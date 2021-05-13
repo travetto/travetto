@@ -100,7 +100,7 @@ export class Context {
     const contents = await fs.promises.readFile(this.source(file), 'utf-8');
     const out = this.destination(rename ?? file);
     const rendered = mustache.render(contents, this).replace(/^\s*(\/\/|#)\s*\n/gsm, '');
-    await FsUtil.mkdirp(path.dirname(out));
+    await fs.promises.mkdir(path.dirname(out), { recursive: true });
     await fs.promises.writeFile(out, rendered, 'utf8');
   }
 
