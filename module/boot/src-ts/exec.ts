@@ -4,13 +4,6 @@ import { SHARE_ENV, Worker, WorkerOptions, parentPort } from 'worker_threads';
 import { PathUtil } from './path';
 import { StreamUtil } from './stream';
 
-declare module 'worker_threads' {
-  // eslint-disable-next-line no-shadow
-  interface WorkerOptions {
-    argv?: string[];
-  }
-}
-
 /**
  * Result of an execution
  */

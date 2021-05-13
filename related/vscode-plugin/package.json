@@ -38,8 +38,8 @@
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
-    "@types/node": "^15.0.0",
-    "@types/vscode": "^1.55.0"
+    "@types/node": "^15.0.3",
+    "@types/vscode": "^1.56.0"
   },
   "docDependencies": {
     "@travetto/app": true

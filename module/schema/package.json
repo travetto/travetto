@@ -33,7 +33,7 @@
     "@travetto/transformer": "^2.0.0-rc.2"
   },
   "optionalPeerDependencies": {
-    "@types/faker": "^5.5.3",
+    "@types/faker": "^5.5.5",
     "faker": "^5.5.3"
   },
   "publishConfig": {
