@@ -1,7 +1,7 @@
 {
   "name": "@travetto/app",
   "displayName": "Application",
-  "version": "2.0.0-rc.2",
+  "version": "2.0.0-rc.3",
   "description": "Application registration/management and run support.",
   "keywords": [
     "ast-transformations",
@@ -28,14 +28,14 @@
     "directory": "module/app"
   },
   "dependencies": {
-    "@travetto/config": "^2.0.0-rc.2",
-    "@travetto/transformer": "^2.0.0-rc.2",
-    "@travetto/registry": "^2.0.0-rc.2",
-    "@travetto/schema": "^2.0.0-rc.2",
-    "@travetto/di": "^2.0.0-rc.2"
+    "@travetto/config": "^2.0.0-rc.3",
+    "@travetto/transformer": "^2.0.0-rc.3",
+    "@travetto/registry": "^2.0.0-rc.3",
+    "@travetto/schema": "^2.0.0-rc.3",
+    "@travetto/di": "^2.0.0-rc.3"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "^2.0.0-rc.1"
+    "@travetto/cli": "^2.0.0-rc.2"
   },
   "docDependencies": {
     "@travetto/log": true
