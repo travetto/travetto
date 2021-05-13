@@ -1,4 +1,5 @@
-// @ts-expect-error
+/// <reference path="./module.d.ts" />
+
 import * as Mod from 'module';
 
 import { EnvUtil } from '../env';
@@ -7,14 +8,7 @@ import { SourceUtil } from './source-util';
 
 type ModuleHandler<T = unknown> = (name: string, o: T) => T;
 
-export type ModType = {
-  loaded?: boolean;
-  _load?(req: string, parent: ModType): unknown;
-  _resolveFilename?(req: string, parent: ModType): string;
-  _compile?(contents: string, file: string): unknown;
-} & NodeJS.Module;
-
-const Module = Mod as unknown as ModType;
+export const Module = Mod as unknown as NodeModule;
 
 /**
  * Module utils
@@ -59,7 +53,7 @@ export class ModuleUtil {
   /**
    * Check for module cycles
    */
-  static checkForCycles(mod: unknown, request: string, parent: ModType) {
+  static checkForCycles(mod: unknown, request: string, parent: NodeJS.Module) {
     if (parent && !parent.loaded) { // Standard ts compiler output
       const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
       if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
@@ -78,7 +72,7 @@ export class ModuleUtil {
   /**
    * Handle module post processing
    */
-  static handleModule(mod: unknown, request: string, parent: ModType) {
+  static handleModule(mod: unknown, request: string, parent: NodeJS.Module) {
     if (this.#handlers) {
       const name = Module._resolveFilename!(request, parent);
       for (const handler of this.#handlers) {

@@ -104,12 +104,12 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     for await (const el of items) {
       arr.push(el);
     }
-    assert(arr[0].color === 'red' && arr[0].name == 'bob');
-    assert(arr[1].color === 'blue' && arr[0].name == 'bob');
-    assert(arr[2].color === 'green' && arr[0].name == 'bob');
+    assert(arr[0].color === 'red' && arr[0].name === 'bob');
+    assert(arr[1].color === 'blue' && arr[0].name === 'bob');
+    assert(arr[2].color === 'green' && arr[0].name === 'bob');
 
     await assert.rejects(async () => {
-      for await (const el of service.listByIndex(User3, 'userAge', {})) { }
+      for await (const _el of service.listByIndex(User3, 'userAge', {})) { }
     }, IndexNotSupported);
   }
 }

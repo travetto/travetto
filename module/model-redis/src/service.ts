@@ -4,7 +4,8 @@ import * as util from 'util';
 import { Class, ShutdownManager, Util } from '@travetto/base';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
-  NotFoundError, ExistsError, ModelIndexedSupport, SubTypeNotSupportedError
+  NotFoundError, ExistsError, ModelIndexedSupport, SubTypeNotSupportedError,
+  IndexConfig
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 
@@ -14,7 +15,6 @@ import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { RedisModelConfig } from './config';
-import { IndexConfig } from '@travetto/model/src/registry/types';
 
 type RedisScan = { key: string } | { match: string };
 
@@ -50,10 +50,6 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
     const flags = 'match' in search ? ['MATCH', search.match] : [];
     const key = 'key' in search ? [search.key] : [];
-
-    if (op !== 'scan') {
-      console.log('Calling', op, ...key, prevCursor ?? '0', ...flags, 'COUNT', `${count}`)
-    }
 
     while (!done) {
       const [cursor, results] = await this.#wrap(util.promisify(this.client[op]) as ((...rest: string[]) => Promise<[string, string[]]>))(
@@ -331,7 +327,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     const fullKey = this.#resolveKey(cls, idx, key);
 
     if (idxCfg.type === 'unsorted') {
-      stream = this.#streamValues('sscan', { key: fullKey })
+      stream = this.#streamValues('sscan', { key: fullKey });
     } else {
       stream = this.#streamValues('zscan', { key: fullKey });
     }

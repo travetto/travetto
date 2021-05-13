@@ -109,10 +109,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
           const prop = simpleName(idx.name);
           indices[`:${prop}`] = toValue(key);
-          expr.push(`${prop}__ = :${prop}`)
+          expr.push(`${prop}__ = :${prop}`);
           if (sort) {
             indices[`:${prop}_sort`] = toValue(sort);
-            expr.push(`${prop}_sort__ = :${prop}_sort`)
+            expr.push(`${prop}_sort__ = :${prop}_sort`);
           }
         }
 
@@ -152,7 +152,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
     for (const idx of config.indices ?? []) {
       const idxName = simpleName(idx.name);
-      attributes.push({ AttributeName: `${idxName}__`, AttributeType: 'S' })
+      attributes.push({ AttributeName: `${idxName}__`, AttributeType: 'S' });
 
       const keys = [{
         AttributeName: `${idxName}__`,
@@ -397,7 +397,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const result = await this.client.query(query);
 
     if (result.Count && result.Items && result.Items[0]) {
-      return result.Items[0].id.S!
+      return result.Items[0].id.S!;
     }
     throw new NotFoundError(`${cls.name} Index=${idx}`, key);
   }
@@ -427,7 +427,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       const batch = await this.client.query({
         TableName: this.#resolveTable(cls),
         IndexName: idxName,
-        ProjectionExpression: `body`,
+        ProjectionExpression: 'body',
         KeyConditionExpression: `${idxName}__ = :${idxName}`,
         ExpressionAttributeValues: {
           [`:${idxName}`]: toValue(key)

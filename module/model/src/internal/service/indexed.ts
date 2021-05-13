@@ -1,6 +1,6 @@
 import { Class } from '@travetto/base';
-import { IndexNotSupported } from '../../error/invalid-index';
 
+import { IndexNotSupported } from '../../error/invalid-index';
 import { ModelRegistry } from '../../registry/model';
 import { IndexConfig, SortClauseRaw } from '../../registry/types';
 import { ModelType } from '../../types/model';
@@ -27,7 +27,7 @@ export class ModelIndexedUtil {
     for (let f of cfg.fields as Record<string, unknown>[]) {
       let o: Record<string, unknown> | undefined = item;
       let sub: Record<string, unknown> = res;
-      let path: string[] = [];
+      const path: string[] = [];
 
       while (sub !== undefined) {
         const k = Object.keys(f)[0];
@@ -133,7 +133,7 @@ export class ModelIndexedUtil {
         }
       }
       if ((o === undefined || o === null) && f !== sortField) {
-        throw new IndexNotSupported(cls, cfg, `Missing field value for ${path.join('.')}`)
+        throw new IndexNotSupported(cls, cfg, `Missing field value for ${path.join('.')}`);
       }
       parts.push(o as unknown as string | boolean | Date | number);
     }

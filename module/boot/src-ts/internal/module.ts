@@ -1,18 +1,14 @@
-// @ts-ignore
-import * as Mod from 'module';
 import type * as tsi from 'typescript';
 import * as sourceMapSupport from 'source-map-support';
 
 import { TranspileUtil } from './transpile-util';
-import { ModuleUtil, ModType } from './module-util';
+import { ModuleUtil, Module } from './module-util';
 import { SourceUtil } from './source-util';
 
 import { EnvUtil } from '../env';
 import { SimpleEntry, SourceIndex } from './source';
 import { AppCache } from '../cache';
 import { PathUtil } from '../path';
-
-export const Module = Mod as unknown as ModType;
 
 type UnloadHandler = (file: string, unlink?: boolean) => void;
 
@@ -27,8 +23,8 @@ export class ModuleManager {
   // @ts-expect-error
   static #objectProto = Object.prototype.__proto__; // Remove to prevent __proto__ pollution in JSON
 
-  static #moduleResolveFilename = Module._resolveFilename!.bind(Module);
-  static #moduleLoad = Module._load!.bind(Module);
+  static #moduleResolveFilename = Module._resolveFilename.bind(Module);
+  static #moduleLoad = Module._load.bind(Module);
   static #resolveFilename?: (filename: string) => string;
   static #initialized = false;
   static #unloadHandlers: UnloadHandler[] = [];
@@ -40,7 +36,7 @@ export class ModuleManager {
    * @param request path to file
    * @param parent parent Module
    */
-  static #onModuleLoad(request: string, parent: ModType): unknown {
+  static #onModuleLoad(request: string, parent: NodeJS.Module): unknown {
     let mod: unknown;
     try {
       mod = this.#moduleLoad.apply(null, [request, parent]);
@@ -93,14 +89,14 @@ export class ModuleManager {
    * @param m node module
    * @param tsf filename
    */
-  static compile(m: ModType, tsf: string) {
+  static compile(m: NodeJS.Module, tsf: string) {
     let content = this.transpile(tsf);
     const jsf = tsf.replace(/[.]ts$/, '.js');
     try {
-      return m._compile!(content, jsf);
+      return m._compile(content, jsf);
     } catch (e) {
       content = ModuleUtil.handlePhaseError('compile', tsf, e);
-      return m._compile!(content, jsf);
+      return m._compile(content, jsf);
     }
   }
 
