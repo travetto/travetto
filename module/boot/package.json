@@ -1,7 +1,7 @@
 {
   "name": "@travetto/boot",
   "displayName": "Boot",
-  "version": "2.0.0-rc.3",
+  "version": "2.0.0-rc.4",
   "description": "Bootstrapping and common utilities for travetto applications.",
   "keywords": [
     "bootstrapping",
@@ -29,7 +29,7 @@
   "scripts": {
     "build": "tsc -p src-ts",
     "build:watch": "tsc -w -p src-ts",
-    "prepack": "trv-compress-js -- 'src/**/*.js'"
+    "prepack": "npm run build; trv-compress-js -- 'src/**/*.js'"
   },
   "dependencies": {
     "@types/node": "^12.20.13",
