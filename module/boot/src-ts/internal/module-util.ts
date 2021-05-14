@@ -1,5 +1,3 @@
-/// <reference path="./module.d.ts" />
-
 import * as Mod from 'module';
 
 import { EnvUtil } from '../env';
@@ -7,6 +5,24 @@ import { PathUtil } from '../path';
 import { SourceUtil } from './source-util';
 
 type ModuleHandler<T = unknown> = (name: string, o: T) => T;
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace NodeJS {
+    // eslint-disable-next-line no-shadow
+    interface Module {
+      _load(req: string, parent: Module): unknown;
+      _resolveFilename(req: string, parent: Module): string;
+      _compile(contents: string, file: string): unknown;
+    }
+  }
+  interface NodeModule {
+    _load(req: string, parent: NodeModule): unknown;
+    _resolveFilename(req: string, parent: NodeModule): string;
+    _compile(contents: string, file: string): unknown;
+  }
+}
+
 
 export const Module = Mod as unknown as NodeModule;
 
