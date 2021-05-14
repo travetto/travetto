@@ -4,6 +4,7 @@ declare global {
   interface Error { toJSON(sub?: unknown): unknown }
   interface Map<K, V> { toJSON(): unknown }
   interface Set<T> { toJSON(): unknown }
+  interface AsyncGenerator<T> { toArray(): Promise<T[]> }
 }
 
 export type Primitive = number | boolean | string | Date | Error;
@@ -31,3 +32,17 @@ Error.prototype.toJSON = function (extra?: Record<string, unknown>) {
     stack: stack.substring(stack.indexOf('\n') + 1)
   };
 };
+
+const proto = Object.getPrototypeOf(Object.getPrototypeOf((async function* () { })()));
+Object.defineProperty(proto, 'toArray', {
+  configurable: false,
+  writable: false,
+  enumerable: false,
+  async value() {
+    const out = [];
+    for await (const item of this) {
+      out.push(item);
+    }
+    return out;
+  }
+});
