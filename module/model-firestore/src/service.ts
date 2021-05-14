@@ -146,16 +146,17 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       throw new SubTypeNotSupportedError(cls);
     }
 
-    const { fields } = ModelIndexedUtil.flattenIndexItem(cls, idx, body, false);
-    const query = fields.reduce((q, [k, v]) =>
-      q.where(k, '==', v), this.#getCollection(cls) as firebase.firestore.Query);
+    const { fields } = ModelIndexedUtil.computeIndexParts(cls, idx, body);
+    const query = fields.reduce((q, { path, value }) => q.where(path.join('.'), '==', value),
+      this.#getCollection(cls) as firebase.firestore.Query
+    );
 
     const item = await query.get();
 
     if (item && !item.empty) {
       return item.docs[0].id;
     }
-    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, '; ').key);
+    throw new NotFoundError(`${cls.name} Index=${idx}`, ModelIndexedUtil.computeIndexKey(cls, idx, body, { sep: '; ' })?.key);
   }
 
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
@@ -171,12 +172,12 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       throw new SubTypeNotSupportedError(cls);
     }
 
-    const { fields, sorted } = ModelIndexedUtil.flattenIndexItem(cls, idx, body, true);
-    let query = fields.reduce((q, [k, v]) =>
-      q.where(k, '==', v), this.#getCollection(cls) as firebase.firestore.Query);
+    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: null });
+    let query = fields.reduce((q, { path, value }) =>
+      q.where(path.join('.'), '==', value), this.#getCollection(cls) as firebase.firestore.Query);
 
     if (sorted) {
-      query = query.orderBy(sorted[0], sorted[1] === 1 ? 'asc' : 'desc');
+      query = query.orderBy(sorted.path.join('.'), sorted.dir === 1 ? 'asc' : 'desc');
     }
 
     for (const el of (await query.get()).docs) {

@@ -399,7 +399,7 @@ export class MongoModelService implements
     const result = await store.findOne(
       this.getWhere(
         cls,
-        ModelIndexedUtil.projectIndex(cls, idx, body, Error) as WhereClause<T>
+        ModelIndexedUtil.projectIndex(cls, idx, body) as WhereClause<T>
       )
     );
     if (!result) {
@@ -414,7 +414,7 @@ export class MongoModelService implements
     const result = await store.deleteOne(
       this.getWhere(
         cls,
-        ModelIndexedUtil.projectIndex(cls, idx, body, Error) as WhereClause<T>
+        ModelIndexedUtil.projectIndex(cls, idx, body) as WhereClause<T>
       )
     );
     if (result.deletedCount) {
@@ -433,7 +433,7 @@ export class MongoModelService implements
 
     const where = this.getWhere(
       cls,
-      ModelIndexedUtil.projectIndex(cls, idx, body, Error, { $exists: true }) as WhereClause<T>
+      ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }) as WhereClause<T>
     ) as mongo.FilterQuery<T>;
 
     const cursor = store.find(where).batchSize(100).sort(asFielded(idxCfg)[IdxFieldsⲐ]);

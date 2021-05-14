@@ -27,9 +27,7 @@ export abstract class BaseModel implements ModelType {
    * Update timestamps on save
    */
   prePersist() {
-    if (!this.createdDate) {
-      this.createdDate = new Date();
-    }
+    this.createdDate ??= new Date();
     this.updatedDate = new Date();
   }
 

@@ -343,7 +343,7 @@ export class ElasticsearchModelService implements
     const res: SearchResponse<T> = await this.execSearch(cls, {
       body: ElasticsearchQueryUtil.getSearchBody(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, body, Error))
+          ModelIndexedUtil.projectIndex(cls, idx, body))
       )
     });
     if (!res.body.hits.hits.length) {
@@ -358,7 +358,7 @@ export class ElasticsearchModelService implements
       index: this.manager.getIdentity(cls).index,
       body: ElasticsearchQueryUtil.getSearchBody(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, body, Error))
+          ModelIndexedUtil.projectIndex(cls, idx, body))
       ),
       refresh: true
     });
@@ -378,7 +378,7 @@ export class ElasticsearchModelService implements
       size: 100,
       body: ElasticsearchQueryUtil.getSearchBody(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
-          ModelIndexedUtil.projectIndex(cls, idx, body, Error, { $exists: true }))
+          ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
       ),
       sort: ElasticsearchQueryUtil.getSort(cfg.fields)
     });

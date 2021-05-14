@@ -5,6 +5,7 @@ declare global {
   interface Map<K, V> { toJSON(): unknown }
   interface Set<T> { toJSON(): unknown }
   interface AsyncGenerator<T> { toArray(): Promise<T[]> }
+  interface AsyncIterable<T> { toArray(): Promise<T[]> }
 }
 
 export type Primitive = number | boolean | string | Date | Error;
@@ -33,6 +34,7 @@ Error.prototype.toJSON = function (extra?: Record<string, unknown>) {
   };
 };
 
+// Add .toArray to async iterables
 const proto = Object.getPrototypeOf(Object.getPrototypeOf((async function* () { })()));
 Object.defineProperty(proto, 'toArray', {
   configurable: false,

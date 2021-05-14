@@ -2,6 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
+import { Util } from '@travetto/base';
 
 import { Index, Model } from '../src/registry/decorator';
 import { BaseModel } from '../src/types/base';
@@ -41,11 +42,11 @@ class Child {
 
 @Model()
 @Index({ type: 'sorted', name: 'childAge', fields: [{ child: { name: 1 } }, { child: { age: 1 } }] })
+@Index({ type: 'sorted', name: 'nameCreated', fields: [{ child: { name: 1 } }, { createdDate: 1 }] })
 class User4 extends BaseModel {
   color: string;
   child: Child;
 }
-
 
 @Suite()
 export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSupport> {
@@ -114,18 +115,13 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User3, User3.from({ name: 'bob', age: 30, color: 'red' }));
     await service.create(User3, User3.from({ name: 'bob', age: 50, color: 'green' }));
 
-    const items = service.listByIndex(User3, 'userAge', { name: 'bob' });
-    const arr = [];
-    for await (const el of items) {
-      arr.push(el);
-    }
+    const arr = await service.listByIndex(User3, 'userAge', { name: 'bob' }).toArray();
+
     assert(arr[0].color === 'red' && arr[0].name === 'bob');
     assert(arr[1].color === 'blue' && arr[1].name === 'bob');
     assert(arr[2].color === 'green' && arr[2].name === 'bob');
 
-    await assert.rejects(async () => {
-      for await (const _el of service.listByIndex(User3, 'userAge', {})) { }
-    }, IndexNotSupported);
+    await assert.rejects(() => service.listByIndex(User3, 'userAge', {}).toArray(), IndexNotSupported);
   }
 
   @Test()
@@ -136,18 +132,29 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, color: 'red' }));
     await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, color: 'green' }));
 
-    const items = service.listByIndex(User4, 'childAge', User4.from({ child: { name: 'bob' } }));
-    const arr = [];
-    for await (const el of items) {
-      arr.push(el);
-    }
-    console.log(arr);
+    const arr = await service.listByIndex(User4, 'childAge', User4.from({ child: { name: 'bob' } })).toArray();
     assert(arr[0].color === 'red' && arr[0].child.name === 'bob' && arr[0].child.age === 30);
     assert(arr[1].color === 'blue' && arr[1].child.name === 'bob' && arr[1].child.age === 40);
     assert(arr[2].color === 'green' && arr[2].child.name === 'bob' && arr[2].child.age === 50);
 
-    await assert.rejects(async () => {
-      for await (const _el of service.listByIndex(User4, 'childAge', {})) { }
-    }, IndexNotSupported);
+    await assert.rejects(() => service.listByIndex(User4, 'childAge', {}).toArray(), IndexNotSupported);
+  }
+
+  @Test()
+  async queryComplexDateList() {
+    const service = await this.service;
+
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 40 }, createdDate: Util.timeFromNow('3d'), color: 'blue' }));
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, createdDate: Util.timeFromNow('2d'), color: 'red' }));
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, createdDate: Util.timeFromNow('-1d'), color: 'green' }));
+
+    const arr = await service.listByIndex(User4, 'nameCreated', User4.from({ child: { name: 'bob' } })).toArray();
+    console.log(arr);
+
+    assert(arr[0].color === 'green' && arr[0].child.name === 'bob' && arr[0].child.age === 50);
+    assert(arr[1].color === 'red' && arr[1].child.name === 'bob' && arr[1].child.age === 30);
+    assert(arr[2].color === 'blue' && arr[2].child.name === 'bob' && arr[2].child.age === 40);
+
+    await assert.rejects(() => service.listByIndex(User4, 'nameCreated', {}).toArray(), IndexNotSupported);
   }
 }

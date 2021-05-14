@@ -196,4 +196,30 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     assert(res.time instanceof Date);
   }
+
+  @Test('verify list')
+  async list() {
+    const service = await this.service;
+
+    const people = [1, 2, 3].map(x => Person.from({
+      id: service.uuid(),
+      name: 'Bob',
+      age: 20 + x,
+      gender: 'm',
+      address: {
+        street1: 'a',
+        ...(x === 1 ? { street2: 'b' } : {})
+      }
+    }));
+
+    await Promise.all(
+      people.map(el => service.upsert(Person, el))
+    );
+
+    const found = (await service.list(Person).toArray()).sort((a, b) => a.age - b.age);
+
+    assert(found[0].age === people[0].age);
+    assert(found[1].age === people[1].age);
+    assert(found[2].age === people[2].age);
+  }
 }

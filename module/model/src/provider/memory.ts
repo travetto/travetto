@@ -105,7 +105,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       }
 
       if (index instanceof Map) {
-        index?.set(item.id, sort!);
+        index?.set(item.id, +sort!);
       } else {
         index?.add(item.id);
       }
@@ -133,7 +133,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     let id: string | undefined;
     if (index) {
       if (index instanceof Map) {
-        id = getFirstId(index, sort); // Grab first id
+        id = getFirstId(index, +sort!); // Grab first id
       } else {
         id = getFirstId(index); // Grab first id
       }
@@ -264,7 +264,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async deleteExpired<T extends ModelType>(cls: Class<T>) {
     const deleting = [];
     const store = this.#getStore(cls);
-    for await (const id of [...store.keys()]) {
+    for (const id of [...store.keys()]) {
       if ((ModelExpiryUtil.getExpiryState(cls, await this.get(cls, id))).expired) {
         deleting.push(this.delete(cls, id));
       }
@@ -311,7 +311,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>): AsyncGenerator<T> {
     const config = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body ?? {});
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
     const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
 
     if (index) {

@@ -91,7 +91,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       const fullKey = this.#resolveKey(cls, idx.name, key);
       switch (idx.type) {
         case 'unsorted': multi.sadd(fullKey, item.id); break;
-        case 'sorted': multi.zadd(fullKey, sort!, item.id); break;
+        case 'sorted': multi.zadd(fullKey, +sort!, item.id); break;
       }
     }
   }
@@ -162,7 +162,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       id = await this.#wrap(util.promisify(this.client.srandmember) as (k: string) => Promise<string>)(fullKey);
     } else {
       const res = (await this.#wrap(util.promisify(this.client.zrangebyscore) as (k: string, start: string | number, end: string | number, type?: string) => Promise<string[]>)(
-        fullKey, sort!, '+inf'
+        fullKey, +sort!, '+inf'
       ));
       id = res[0];
     }
@@ -323,7 +323,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
     let stream: AsyncIterable<string[]>;
 
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxCfg as IndexConfig<T>, body ?? {});
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxCfg as IndexConfig<T>, body, { emptySortValue: null });
     const fullKey = this.#resolveKey(cls, idx, key);
 
     if (idxCfg.type === 'unsorted') {

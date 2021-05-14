@@ -86,7 +86,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           const prop = simpleName(idx.name);
           indices[`${prop}__`] = toValue(key);
           if (sort) {
-            indices[`${prop}_sort__`] = toValue(sort);
+            indices[`${prop}_sort__`] = toValue(+sort);
           }
         }
         const query = {
@@ -111,7 +111,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
           indices[`:${prop}`] = toValue(key);
           expr.push(`${prop}__ = :${prop}`);
           if (sort) {
-            indices[`:${prop}_sort`] = toValue(sort);
+            indices[`:${prop}_sort`] = toValue(+sort);
             expr.push(`${prop}_sort__ = :${prop}_sort`);
           }
         }
@@ -390,7 +390,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       KeyConditionExpression: [sort ? `${idxName}_sort__ = :${idxName}_sort` : '', `${idxName}__ = :${idxName}`].filter(x => !!x).join(' and '),
       ExpressionAttributeValues: {
         [`:${idxName}`]: toValue(key),
-        ...(sort ? { [`:${idxName}_sort`]: toValue(sort) } : {})
+        ...(sort ? { [`:${idxName}_sort`]: toValue(+sort) } : {})
       }
     };
 
@@ -417,7 +417,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
 
     const cfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, cfg, body ?? {});
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, cfg, body, { emptySortValue: null });
 
     const idxName = simpleName(idx);
 
