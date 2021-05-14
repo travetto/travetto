@@ -1,7 +1,7 @@
 {
   "name": "@travetto/image",
   "displayName": "Image",
-  "version": "2.0.0-rc.2",
+  "version": "2.0.0-rc.3",
   "description": "Image support, resizing, and optimization",
   "keywords": [
     "images",
@@ -24,7 +24,7 @@
     "directory": "module/image"
   },
   "dependencies": {
-    "@travetto/command": "^2.0.0-rc.2"
+    "@travetto/command": "^2.0.0-rc.3"
   },
   "publishConfig": {
     "access": "public"

@@ -1,7 +1,7 @@
 {
   "name": "@travetto/yaml",
   "displayName": "YAML",
-  "version": "2.0.0-rc.2",
+  "version": "2.0.0-rc.3",
   "description": "Simple YAML support, provides only clean subset of yaml",
   "keywords": [
     "yaml",
@@ -25,7 +25,7 @@
     "directory": "module/yaml"
   },
   "dependencies": {
-    "@travetto/base": "^2.0.0-rc.2"
+    "@travetto/base": "^2.0.0-rc.4"
   },
   "publishConfig": {
     "access": "public"
