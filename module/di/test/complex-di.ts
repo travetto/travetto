@@ -51,11 +51,31 @@ class SubPrimaryWithFactoryA extends PrimaryWithFactory { }
 class PrimaryFactory {
   @InjectableFactory({ primary: true })
   static getPrimaryFactory(): PrimaryWithFactory {
-    return new class extends PrimaryWithFactory {
-
-    }();
+    return {} as PrimaryWithFactory;
   }
 }
+
+class PrimaryTargetClass { }
+
+/**
+ * @concrete .:PrimaryTargetClass
+ */
+interface PrimaryTargetInterface {
+  name: string;
+}
+
+class PrimaryTargetFactory {
+  @InjectableFactory({ primary: true })
+  static getPrimaryFactory(): PrimaryTargetInterface {
+    return { name: 'primary' };
+  }
+
+  @InjectableFactory()
+  static getPrimaryFactoryAlt(): PrimaryTargetInterface {
+    return { name: 'alt' };
+  }
+}
+
 
 @Suite('complex-di')
 class ComplexDiTest {
@@ -93,5 +113,10 @@ class ComplexDiTest {
   @Test()
   async primaryWithFactory() {
     assert(!(await DependencyRegistry.getInstance(PrimaryWithFactory) instanceof SubPrimaryWithFactoryA));
+  }
+
+  @Test()
+  async primaryTargetFactory() {
+    assert(!!(await DependencyRegistry.getInstance(PrimaryTargetClass)));
   }
 }
