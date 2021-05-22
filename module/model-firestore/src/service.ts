@@ -1,6 +1,6 @@
-import * as firebase from 'firebase-admin';
+import { FieldValue, Firestore, Precondition, Query } from '@google-cloud/firestore';
 
-import { ResourceManager, ShutdownManager, Util, Class } from '@travetto/base';
+import { ShutdownManager, Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelRegistry, ModelStorageSupport,
@@ -24,9 +24,7 @@ const toSimpleObj = <T>(inp: T, missingValue: unknown = null) =>
 @Injectable()
 export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupport, ModelIndexedSupport {
 
-  static app: firebase.app.App;
-
-  client: firebase.firestore.Firestore;
+  client: Firestore;
 
   constructor(public readonly config: FirestoreModelConfig) { }
 
@@ -43,14 +41,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async postConstruct() {
-    if (!FirestoreModelService.app) {
-      FirestoreModelService.app = firebase.initializeApp({
-        ...(this.config.credential ? { credential: firebase.credential.cert(await ResourceManager.findAbsolute(this.config.credential)) } : undefined),
-        projectId: this.config.projectId,
-        databaseURL: this.config.databaseURL
-      });
-    }
-    this.client = FirestoreModelService.app.firestore();
+    this.client = new Firestore(this.config);
     ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.terminate());
   }
 
@@ -108,7 +99,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     }
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
-    const cleaned = toSimpleObj(item, firebase.firestore.FieldValue.delete());
+    const cleaned = toSimpleObj(item, FieldValue.delete());
     console.log(item, cleaned);
     await this.#getCollection(cls).doc(id).set(cleaned, { merge: true });
     return this.get(cls, id);
@@ -119,7 +110,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
       throw new SubTypeNotSupportedError(cls);
     }
     try {
-      await this.#getCollection(cls).doc(id).delete({ exists: true } as unknown as firebase.firestore.Precondition);
+      await this.#getCollection(cls).doc(id).delete({ exists: true } as unknown as Precondition);
     } catch (err) {
       if (`${err.message}`.includes('NOT_FOUND')) {
         throw new NotFoundError(cls, id);
@@ -149,7 +140,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
     const { fields } = ModelIndexedUtil.computeIndexParts(cls, idx, body);
     const query = fields.reduce((q, { path, value }) => q.where(path.join('.'), '==', value),
-      this.#getCollection(cls) as firebase.firestore.Query
+      this.#getCollection(cls) as Query
     );
 
     const item = await query.get();
@@ -175,7 +166,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
     const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: null });
     let query = fields.reduce((q, { path, value }) =>
-      q.where(path.join('.'), '==', value), this.#getCollection(cls) as firebase.firestore.Query);
+      q.where(path.join('.'), '==', value), this.#getCollection(cls) as Query);
 
     if (sorted) {
       query = query.orderBy(sorted.path.join('.'), sorted.dir === 1 ? 'asc' : 'desc');

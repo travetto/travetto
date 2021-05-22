@@ -37,6 +37,6 @@
     "access": "public"
   },
   "docDependencies": {
-    "@aws-sdk/client-ses": "^3.15.0"
+    "@aws-sdk/client-ses": "^3.16.0"
   }
 }

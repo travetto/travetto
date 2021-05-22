@@ -1,17 +1,11 @@
-// @ts-ignore
-import * as Mod from 'module';
-
 import { AppCache } from '../module/boot/src/cache';
 import { EnvUtil } from '../module/boot/src/env';
 import { readPackage } from '../module/boot/src/internal/package';
 import { Package } from '../module/boot/src/main-package';
 import { PathUtil } from '../module/boot/src/path';
 import { ModuleManager } from '../module/boot/src/internal/module';
-import { ModType } from '../module/boot/src/internal/module-util';
 import { TranspileUtil } from '../module/boot/src/internal/transpile-util';
 import { SystemUtil } from '../module/boot/src/internal/system';
-
-export const Module = Mod as unknown as ModType;
 
 type DevConfig = {
   entries: Record<string, string>;

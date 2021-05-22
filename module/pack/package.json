@@ -27,7 +27,7 @@
   "dependencies": {
     "@travetto/base": "^2.0.0-rc.4",
     "@types/picomatch": "^2.2.4",
-    "picomatch": "^2.2.3"
+    "picomatch": "^2.3.0"
   },
   "optionalPeerDependencies": {
     "@travetto/cli": "^2.0.0-rc.3"
