@@ -15,7 +15,7 @@ export class FirestoreModelConfig {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }
     if (this.credential) {
-      this.credential = firebase.credential.cert(await ResourceManager.findAbsolute(this.credential));
+      this.credential = await ResourceManager.findAbsolute(this.credential);
     }
   }
 }
