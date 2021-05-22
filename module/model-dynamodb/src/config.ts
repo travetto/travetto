@@ -3,7 +3,7 @@ import { Config } from '@travetto/config';
 
 @Config('model.dynamodb')
 export class DynamoDBModelConfig {
-  config: dynamodb.DynamoDBClientConfig = {
+  client: dynamodb.DynamoDBClientConfig = {
     endpoint: undefined
   };
   autoCreate?: boolean;

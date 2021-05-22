@@ -1,10 +1,10 @@
 import * as crypto from 'crypto';
 
-import { Class } from '@travetto/base';
+import { Class, Util } from '@travetto/base';
 import { SchemaValidator } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
-import { ModelType } from '../../types/model';
+import { ModelType, OptionalId } from '../../types/model';
 import { NotFoundError } from '../../error/not-found';
 import { ExistsError } from '../../error/exists';
 
@@ -59,9 +59,18 @@ export class ModelCrudUtil {
    * @param cls Type to store for
    * @param item Item to store
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<T>, idSource: { uuid(): string }): Promise<T> {
+  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<OptionalId<T>>, idSource: { uuid(): string }): Promise<T> {
     if (!item.id) {
       item.id = idSource.uuid();
+    }
+
+    if (Util.isPlainObject(item)) {
+      item = cls.from(item as {});
+    }
+
+    const config = ModelRegistry.get(item.constructor as Class<T>);
+    if (config.subType) { // Subtyping, assign type
+      item.type = config.subType;
     }
 
     await SchemaValidator.validate(cls, item);
@@ -81,6 +90,15 @@ export class ModelCrudUtil {
    * @param getExisting How to fetch an existing item
    */
   static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, view: undefined | string, getExisting: () => Promise<T>): Promise<T> {
+    if (Util.isPlainObject(item)) {
+      item = cls.from(item as {});
+    }
+
+    const config = ModelRegistry.get(item.constructor as Class<T>);
+    if (config.subType) { // Subtyping, assign type
+      item.type = config.subType;
+    }
+
     if (view) {
       await SchemaValidator.validate(cls, item, view);
     }

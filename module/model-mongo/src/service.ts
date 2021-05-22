@@ -1,7 +1,7 @@
 import * as mongo from 'mongodb';
 
 import {
-  ModelRegistry, ModelType,
+  ModelRegistry, ModelType, OptionalId,
   ModelCrudSupport,
   ModelStorageSupport,
   ModelStreamSupport,
@@ -180,17 +180,17 @@ export class MongoModelService implements
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: T) {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     const cleaned = await ModelCrudUtil.preStore(cls, item, this);
-    (item as WithId<T>)._id = MongoUtil.uuid(item.id);
+    (cleaned as WithId<T>)._id = MongoUtil.uuid(cleaned.id);
 
     const store = await this.getStore(cls);
     const result = await store.insertOne(cleaned);
     if (result.insertedCount === 0) {
-      throw new ExistsError(cls, item.id);
+      throw new ExistsError(cls, cleaned.id);
     }
-    delete (item as { _id?: unknown })._id;
-    return item;
+    delete (cleaned as { _id?: unknown })._id;
+    return cleaned;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
@@ -203,23 +203,23 @@ export class MongoModelService implements
     return item;
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: T) {
-    item = await ModelCrudUtil.preStore(cls, item, this);
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+    const cleaned = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
     try {
       await store.updateOne(
-        this.getWhere<ModelType>(cls, { id: item.id }, false),
-        { $set: item },
+        this.getWhere<ModelType>(cls, { id: cleaned.id }, false),
+        { $set: cleaned },
         { upsert: true }
       );
     } catch (err) {
       if (err.message.includes('duplicate key error')) {
-        throw new ExistsError(cls, item.id);
+        throw new ExistsError(cls, cleaned.id);
       } else {
         throw err;
       }
     }
-    return item;
+    return cleaned;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
@@ -332,19 +332,19 @@ export class MongoModelService implements
     for (let i = 0; i < operations.length; i++) {
       const op = operations[i];
       if (op.insert) {
-        op.insert = await ModelCrudUtil.preStore(cls, op.insert, this);
-        out.insertedIds.set(i, op.insert.id);
-        bulk.insert(MongoUtil.preInsertId(op.insert));
+        const cleaned = await ModelCrudUtil.preStore(cls, op.insert, this);
+        out.insertedIds.set(i, cleaned.id);
+        bulk.insert(MongoUtil.preInsertId(cleaned));
       } else if (op.upsert) {
         const newId = !op.upsert.id;
-        op.upsert = await ModelCrudUtil.preStore(cls, op.upsert, this);
-        const id = MongoUtil.uuid(op.upsert.id);
+        const cleaned = await ModelCrudUtil.preStore(cls, op.upsert, this);
+        const id = MongoUtil.uuid(cleaned.id);
         bulk.find({ _id: id })
           .upsert()
-          .updateOne({ $set: op.upsert });
+          .updateOne({ $set: cleaned });
 
         if (newId) {
-          out.insertedIds.set(i, op.upsert.id);
+          out.insertedIds.set(i, cleaned.id);
         }
       } else if (op.update) {
         op.update = await ModelCrudUtil.preStore(cls, op.update, this);
@@ -359,7 +359,7 @@ export class MongoModelService implements
 
       for (const el of operations) {
         if (el.insert) {
-          MongoUtil.postLoadId(el.insert);
+          MongoUtil.postLoadId(el.insert as T);
         }
       }
       for (const { index, _id } of res.getUpsertedIds() as { index: number, _id: mongo.ObjectID }[]) {

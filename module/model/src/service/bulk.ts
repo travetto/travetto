@@ -2,7 +2,7 @@ import { Class, AppError } from '@travetto/base';
 import { ValidationResultError } from '@travetto/schema';
 
 import { ModelCrudSupport } from './crud';
-import { ModelType } from '../types/model';
+import { ModelType, OptionalId } from '../types/model';
 
 declare global {
   interface Error { toJSON(sub?: unknown): unknown }
@@ -13,9 +13,9 @@ declare global {
  */
 export type BulkOp<T extends ModelType> =
   { delete?: T } &
-  { insert?: T } &
+  { insert?: OptionalId<T> } &
   { update?: T } &
-  { upsert?: T };
+  { upsert?: OptionalId<T> };
 
 /**
  * Bulk response provides a summary of all the operations

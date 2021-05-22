@@ -5,7 +5,7 @@ import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
   ModelIndexedSupport, ModelType, NotFoundError, ExistsError, SubTypeNotSupportedError,
-  IndexNotSupported
+  IndexNotSupported, OptionalId
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -182,7 +182,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async postConstruct() {
-    this.client = new dynamodb.DynamoDB({ ...this.config.config });
+    this.client = new dynamodb.DynamoDB({ ...this.config.client });
     await ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.destroy());
   }
@@ -282,10 +282,10 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: T) {
-    item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#putItem(cls, item.id, item, 'create');
-    return item;
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    await this.#putItem(cls, prepped.id, prepped, 'create');
+    return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
@@ -300,13 +300,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return item;
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
-    item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#putItem(cls, item.id, item, 'upsert');
-    return item;
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    await this.#putItem(cls, prepped.id, prepped, 'upsert');
+    return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {

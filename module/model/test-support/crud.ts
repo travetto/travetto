@@ -4,7 +4,7 @@ import { Suite, Test } from '@travetto/test';
 import { Schema, Text, Precision, } from '@travetto/schema';
 
 import { BaseModelSuite } from './base';
-import { ModelCrudSupport, Model, BaseModel, NotFoundError } from '..';
+import { ModelCrudSupport, Model, NotFoundError } from '..';
 
 @Schema()
 class Address {
@@ -13,7 +13,8 @@ class Address {
 }
 
 @Model('crud-person')
-class Person extends BaseModel {
+class Person {
+  id: string;
   @Text() name: string;
   @Precision(3, 0)
   age: number;
@@ -221,5 +222,64 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(found[0].age === people[0].age);
     assert(found[1].age === people[1].age);
     assert(found[2].age === people[2].age);
+  }
+
+  @Test('save it')
+  async verifyRaw() {
+    const service = await this.service;
+
+    const people = await Promise.all(
+      [1, 2, 3, 8].map((x, i) => service[i % 2 === 0 ? 'upsert' : 'create'](Person, {
+        name: 'Bob',
+        age: 20 + x,
+        gender: 'm',
+        address: {
+          street1: 'a',
+          ...(x === 1 ? { street2: 'b' } : {})
+        }
+      }))
+    );
+
+    const single = await service.get(Person, people[2].id);
+    assert(single !== undefined);
+    assert(single.age === 23);
+  }
+
+
+  @Test('Verify update')
+  async testRawUpdate() {
+    const service = await this.service;
+    const o = await service.create(Simple, { name: 'bob' });
+    const b = await service.update(Simple, { id: o.id, name: 'roger' });
+    const id = b.id;
+
+    const z = await service.get(Simple, id);
+
+    assert(z.name === 'roger');
+  }
+
+  @Test('Verify partial update with field removal')
+  async testRawPartialUpdate() {
+    const service = await this.service;
+    const o = await service.create(Person, {
+      name: 'bob',
+      age: 20,
+      gender: 'm',
+      address: {
+        street1: 'road',
+        street2: 'roader'
+      }
+    });
+    assert(o.id);
+    assert(o.name === 'bob');
+
+    const o2 = await service.updatePartial(Person, {
+      id: o.id,
+      name: 'oscar'
+    });
+
+    assert(o2.name === 'oscar');
+    assert(o2.age === 20);
+    assert(o2.address.street2 === 'roader');
   }
 }

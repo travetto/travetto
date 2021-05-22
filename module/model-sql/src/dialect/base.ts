@@ -3,7 +3,7 @@ import { Class, Util, AppError } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
-import { ModelType } from '@travetto/model/src/types/model';
+import { ModelType, OptionalId } from '@travetto/model/src/types/model';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 
 import { SQLUtil, VisitStack } from '../internal/util';
@@ -705,7 +705,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       return [key as string, typeof val === 'number' ? val === 1 : (!!val)];
     });
     const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
-    return `CREATE ${idx.unique ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.ident(table)} (${fields
+    return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.ident(table)} (${fields
       .map(([name, sel]) => `${this.ident(name)} ${sel ? 'ASC' : 'DESC'}`)
       .join(', ')});`;
   }

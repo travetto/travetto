@@ -21,3 +21,5 @@ export interface ModelType {
    */
   postLoad?(): void | Promise<void>;
 }
+
+export type OptionalId<T extends { id: string }> = Omit<T, 'id'> & { id?: string };

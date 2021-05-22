@@ -3,10 +3,11 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
 import { BaseModelSuite } from './base';
-import { ModelCrudSupport, Model, BaseModel, NotFoundError } from '..';
+import { ModelCrudSupport, Model, NotFoundError } from '..';
 
 @Model('basic_person')
-class Person extends BaseModel {
+class Person {
+  id: string;
   name: string;
   age: number;
   gender: 'm' | 'f';
@@ -41,5 +42,22 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     await assert.rejects(async () => {
       await service.get(Person, person.id);
     }, NotFoundError);
+  }
+
+
+  @Test('create, read, delete')
+  async createRaw() {
+    const service = await this.service;
+
+    const { id } = await service.create(Person, {
+      id: service.uuid(),
+      name: 'Bob',
+      age: 25,
+      gender: 'm'
+    });
+
+    const single = await service.get(Person, id);
+    assert(single !== undefined);
+    assert(single.age === 25);
   }
 }

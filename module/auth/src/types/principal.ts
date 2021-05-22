@@ -5,7 +5,7 @@
  * @augments `@trv:rest/Context` // @line-if @travetto/rest
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Principal<D = any> {
+export interface Principal<D = { [key: string]: any }> {
   /**
    * Primary identifier for a user
    */
@@ -19,7 +19,7 @@ export interface Principal<D = any> {
    */
   issuedAt?: Date;
   /**
-   * Max age in seconds a principal is valid
+   * Max age in seconds a princi`pal is valid
    */
   maxAge?: number;
   /**
@@ -29,7 +29,7 @@ export interface Principal<D = any> {
   /**
    * Supplemental details
    */
-  details?: D;
+  details: D;
   /**
    * List of all provided permissions
    */

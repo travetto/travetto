@@ -5,7 +5,6 @@ import { Schema } from '@travetto/schema';
 import { Util } from '@travetto/base';
 
 import { Index, Model } from '../src/registry/decorator';
-import { BaseModel } from '../src/types/base';
 import { ModelIndexedSupport } from '../src/service/indexed';
 import { BaseModelSuite } from './base';
 import { NotFoundError } from '../src/error/not-found';
@@ -17,18 +16,21 @@ import { IndexNotSupported } from '../src/error/invalid-index';
   type: 'unsorted',
   fields: [{ name: 1 }]
 })
-class User extends BaseModel {
+class User {
+  id: string;
   name: string;
 }
 
 @Model('index_user_2')
-class User2 extends BaseModel {
+class User2 {
+  id: string;
   name: string;
 }
 
 @Model()
 @Index({ type: 'sorted', name: 'userAge', fields: [{ name: 1 }, { age: 1 }] })
-class User3 extends BaseModel {
+class User3 {
+  id: string;
   name: string;
   age: number;
   color?: string;
@@ -43,9 +45,15 @@ class Child {
 @Model()
 @Index({ type: 'sorted', name: 'childAge', fields: [{ child: { name: 1 } }, { child: { age: 1 } }] })
 @Index({ type: 'sorted', name: 'nameCreated', fields: [{ child: { name: 1 } }, { createdDate: 1 }] })
-class User4 extends BaseModel {
+class User4 {
+  id: string;
+  createdDate?: Date;
   color: string;
   child: Child;
+
+  prePersist() {
+    this.createdDate ??= new Date();
+  }
 }
 
 @Suite()

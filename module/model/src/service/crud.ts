@@ -1,6 +1,6 @@
 import { Class } from '@travetto/base';
 
-import { ModelType } from '../types/model';
+import { ModelType, OptionalId } from '../types/model';
 import { ModelBasicSupport } from './basic';
 
 /**
@@ -28,7 +28,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
    * @param item The document to upsert
    * @param view The schema view to validate against
    */
-  upsert<T extends ModelType>(cls: Class<T>, item: T): Promise<T>;
+  upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
 
   /**
    * Update Partial

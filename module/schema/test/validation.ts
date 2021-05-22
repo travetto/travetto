@@ -250,9 +250,7 @@ class Validation {
     assert(item.all[1] instanceof Ccccz);
     assert(item.all[2] instanceof Aaaz);
 
-    assert.rejects(async () => {
-      await SchemaValidator.validate(AllAs, item);
-    });
+    await assert.rejects(() => SchemaValidator.validate(AllAs, item));
 
     try {
       await SchemaValidator.validate(AllAs, item);
@@ -336,5 +334,36 @@ class Validation {
     });
 
     await SchemaValidator.validate(Opaque, child);
+  }
+
+  @Test()
+  async verifyRawNestedPolymorphic() {
+    const item = {
+      all: [{
+        type: 'bbbbz',
+        a: true
+      }, {
+        type: 'ccccz',
+        a: false
+      }, {
+        type: 'aaaz',
+        a: false
+      }]
+    };
+
+    try {
+      await SchemaValidator.validate(AllAs, item);
+    } catch (err) {
+      if (err instanceof ValidationResultError) {
+        assert(err.errors[0].path === 'all[0].b');
+        assert(err.errors[0].message === 'all[0].b is required');
+        assert(err.errors[1].path === 'all[1].b');
+        assert(err.errors[1].message === 'all[1].b is required');
+        assert(err.errors[2].path === 'all[1].c');
+        assert(err.errors[2].message === 'all[1].c is required');
+      } else {
+        throw err;
+      }
+    }
   }
 }

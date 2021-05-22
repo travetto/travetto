@@ -4,7 +4,8 @@ import { ResourceManager, ShutdownManager, Util, Class } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelRegistry, ModelStorageSupport,
-  ModelIndexedSupport, ModelType, NotFoundError, SubTypeNotSupportedError
+  ModelIndexedSupport, ModelType, NotFoundError, SubTypeNotSupportedError,
+  OptionalId
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -77,10 +78,10 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: T) {
-    item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).create(clone(item));
-    return item;
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    await this.#getCollection(cls).doc(prepped.id).create(clone(prepped));
+    return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
@@ -92,13 +93,13 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     return item;
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
-    item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#getCollection(cls).doc(item.id).set(clone(item));
-    return item;
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    await this.#getCollection(cls).doc(prepped.id).set(clone(prepped));
+    return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {

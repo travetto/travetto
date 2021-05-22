@@ -4,7 +4,7 @@ import type { MetadataBearer } from '@aws-sdk/types';
 import { StreamUtil } from '@travetto/boot';
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
-  ModelType, ModelRegistry, ExistsError, NotFoundError, SubTypeNotSupportedError
+  ModelType, ModelRegistry, ExistsError, NotFoundError, SubTypeNotSupportedError, OptionalId
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, Util } from '@travetto/base';
@@ -190,19 +190,20 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async store<T extends ModelType>(cls: Class<T>, item: T, preStore = true) {
+  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore = true) {
+    let prepped: T = item as T;
     if (preStore) {
-      item = await ModelCrudUtil.preStore(cls, item, this);
+      prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
-    await this.client.putObject(this.#q(cls, item.id, {
-      Body: JSON.stringify(item),
+    await this.client.putObject(this.#q(cls, prepped.id, {
+      Body: JSON.stringify(prepped),
       ContentType: 'application/json',
-      ...this.#getExpiryConfig(cls, item)
+      ...this.#getExpiryConfig(cls, prepped)
     }));
-    return item;
+    return prepped;
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: T) {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     if (item.id) {
       if (await this.head(cls, item.id)) {
         throw new ExistsError(cls, item.id);
@@ -221,7 +222,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return this.store(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }

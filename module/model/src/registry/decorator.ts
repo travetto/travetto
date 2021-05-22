@@ -32,6 +32,22 @@ export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
   };
 }
 
+
+/**
+ * Base Model decorator, extends `@Schema`
+ *
+ * @augments `@trv:schema/Schema`
+ */
+export function BaseModel(conf: Partial<ModelOptions<ModelType>> | string = {}) {
+  return function <T extends ModelType & { type: string }, U extends Class<T>>(target: U): U {
+    ModelRegistry.register(target, {
+      baseType: true,
+      ...(typeof conf === 'string' ? { store: conf } : conf)
+    });
+    return target;
+  };
+}
+
 /**
  * Defines an index on a model
  */

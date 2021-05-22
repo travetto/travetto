@@ -6,16 +6,24 @@ import { Text, TypeMismatchError } from '@travetto/schema';
 import { BaseModelSuite } from './base';
 import {
   ModelIndexedSupport, Index, ModelCrudSupport, Model,
-  BaseModel, NotFoundError, SubTypeNotSupportedError
+  NotFoundError, SubTypeNotSupportedError
 } from '..';
 import { isIndexedSupported } from '../src/internal/service/common';
 import { ExistsError } from '../src/error/exists';
+import { BaseModel } from '../src/registry/decorator';
 
-@Model({ baseType: true })
-export class Worker extends BaseModel {
+@BaseModel()
+export class Worker {
+  id: string;
+  type: string;
   @Text()
   name: string;
   age?: number;
+  updatedDate?: Date;
+
+  prePersist() {
+    this.updatedDate = new Date();
+  }
 }
 
 @Model()
@@ -33,13 +41,15 @@ export class Engineer extends Worker {
   major: string;
 }
 
-@Model({ baseType: true })
+@BaseModel()
 @Index({
   name: 'worker-name',
   type: 'sorted',
   fields: [{ name: 1 }, { age: 1 }]
 })
-export class IndexedWorker extends BaseModel {
+export class IndexedWorker {
+  id: string;
+  type: string;
   name: string;
   age?: number;
 }

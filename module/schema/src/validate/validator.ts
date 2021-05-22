@@ -1,4 +1,4 @@
-import { Class, ClassInstance } from '@travetto/base';
+import { Class, ClassInstance, Util } from '@travetto/base';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
@@ -223,7 +223,7 @@ export class SchemaValidator {
    * @param view The optional view to limit the scope to
    */
   static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
-    if (!(o instanceof cls)) {
+    if (!Util.isPlainObject(o) && !(o instanceof cls)) {
       throw new TypeMismatchError(cls.name, (o as unknown as ClassInstance).constructor.name);
     }
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);

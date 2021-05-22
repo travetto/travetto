@@ -4,7 +4,7 @@ import { Index, Update, Search, DeleteByQuery } from '@elastic/elasticsearch/api
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
-  SubTypeNotSupportedError
+  SubTypeNotSupportedError, OptionalId
 } from '@travetto/model';
 import { Class, Util, ShutdownManager, AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
@@ -139,7 +139,7 @@ export class ElasticsearchModelService implements
     }
   }
 
-  async create<T extends ModelType>(cls: Class<T>, o: Partial<T>): Promise<T> {
+  async create<T extends ModelType>(cls: Class<T>, o: OptionalId<T>): Promise<T> {
     try {
       const clean = await ModelCrudUtil.preStore(cls, o, this);
       const id = clean.id;
@@ -183,7 +183,7 @@ export class ElasticsearchModelService implements
     return o;
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, o: Partial<T>) {
+  async upsert<T extends ModelType>(cls: Class<T>, o: OptionalId<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
@@ -272,10 +272,10 @@ export class ElasticsearchModelService implements
       if (op.delete) {
         acc.push({ delete: { ...ident, _id: op.delete.id } });
       } else if (op.insert) {
-        acc.push({ create: { ...ident, _id: op.insert.id } }, op.insert);
+        acc.push({ create: { ...ident, _id: op.insert.id } }, op.insert as T);
         delete (op.insert as { id?: unknown }).id;
       } else if (op.upsert) {
-        acc.push({ index: { ...ident, _id: op.upsert.id } }, op.upsert);
+        acc.push({ index: { ...ident, _id: op.upsert.id } }, op.upsert as T);
         delete (op.upsert as { id?: unknown }).id;
       } else if (op.update) {
         acc.push({ update: { ...ident, _id: op.update.id } }, { doc: op.update });

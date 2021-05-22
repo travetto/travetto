@@ -9,7 +9,7 @@ import { Config } from '@travetto/config';
 
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
-import { ModelType } from '../types/model';
+import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
 import { ModelStorageSupport } from '../service/storage';
@@ -120,7 +120,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: T) {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     if (!item.id) {
       item.id = this.uuid();
     }
@@ -139,16 +139,16 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     return await this.upsert(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
-    item = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
 
     const file = await this.#resolveName(cls, '.json', item.id);
     await fs.promises.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
 
-    return item;
+    return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {

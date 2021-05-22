@@ -3,12 +3,12 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
 import { Model } from '../src/registry/decorator';
-import { BaseModel } from '../src/types/base';
 import { ModelBulkSupport } from '../src/service/bulk';
 import { BaseModelSuite } from './base';
 
 @Model('bulk-user')
-class User extends BaseModel {
+class User {
+  id: string;
   name?: string;
 }
 

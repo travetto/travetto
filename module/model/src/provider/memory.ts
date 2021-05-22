@@ -5,7 +5,7 @@ import { Config } from '@travetto/config';
 
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
-import { ModelType } from '../types/model';
+import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
 import { ModelStorageSupport } from '../service/storage';
@@ -182,7 +182,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: T) {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     if (!item.id) {
       item.id = this.uuid();
     }
@@ -195,13 +195,13 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     return await this.upsert(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     const store = this.#getStore(cls);
     if (item.id && store.has(item.id)) {
       await ModelCrudUtil.load(cls, store.get(item.id)!, 'exists');
     }
-    item = await ModelCrudUtil.preStore(cls, item, this);
-    return await this.#write(cls, item, 'write');
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    return await this.#write(cls, prepped, 'write');
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {

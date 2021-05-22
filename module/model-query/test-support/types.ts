@@ -1,5 +1,5 @@
 import { Precision, Schema, Text } from '@travetto/schema';
-import { Model, BaseModel, ModelType } from '@travetto/model';
+import { Model, ModelType } from '@travetto/model';
 
 import { Point } from '../src/model/where-clause';
 
@@ -10,7 +10,8 @@ export class Address {
 }
 
 @Model('query-person')
-export class Person extends BaseModel {
+export class Person {
+  id: string;
   @Text() name: string;
   @Precision(3, 0)
   age: number;

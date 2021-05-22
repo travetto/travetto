@@ -5,7 +5,7 @@ import { Class, ShutdownManager, Util } from '@travetto/base';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
   NotFoundError, ExistsError, ModelIndexedSupport, SubTypeNotSupportedError,
-  IndexConfig
+  IndexConfig, OptionalId
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 
@@ -212,13 +212,13 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: T) {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     if (item.id) {
       await this.has(cls, item.id, 'data');
     }
-    item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#store(cls, item, 'write');
-    return item;
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    await this.#store(cls, prepped, 'write');
+    return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
@@ -229,13 +229,13 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return this.upsert(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: T) {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
-    item = await ModelCrudUtil.preStore(cls, item, this);
-    await this.#store(cls, item, 'write');
-    return item;
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    await this.#store(cls, prepped, 'write');
+    return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {

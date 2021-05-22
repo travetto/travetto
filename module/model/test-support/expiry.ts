@@ -5,13 +5,13 @@ import { Util, TimeSpan, TimeUnit } from '@travetto/base';
 
 import { ExpiresAt, Model } from '../src/registry/decorator';
 import { ModelExpirySupport } from '../src/service/expiry';
-import { BaseModel } from '../src/types/base';
 import { ModelExpiryUtil } from '../src/internal/service/expiry';
 import { NotFoundError } from '../src/error/not-found';
 import { BaseModelSuite } from './base';
 
 @Model('expiry-user')
-class User extends BaseModel {
+class User {
+  id: string;
   @ExpiresAt()
   expiresAt?: Date;
 }

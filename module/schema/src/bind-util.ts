@@ -130,7 +130,7 @@ export class BindUtil {
    * @param view The desired view
    */
   static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: object, view?: string | typeof AllViewⲐ): T {
-    view = view ?? AllViewⲐ;
+    view ??= AllViewⲐ;
 
     if (!!data) {
       const conf = SchemaRegistry.get(cons);
