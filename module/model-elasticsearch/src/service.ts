@@ -7,8 +7,8 @@ import {
   SubTypeNotSupportedError, OptionalId
 } from '@travetto/model';
 import { Class, Util, ShutdownManager, AppError } from '@travetto/base';
+import { SchemaChange, DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-import { SchemaChange } from '@travetto/schema';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySupport, PageableModelQuery, Query, ValidStringFields
@@ -338,7 +338,7 @@ export class ElasticsearchModelService implements
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const res: SearchResponse<T> = await this.execSearch(cls, {
       body: ElasticsearchQueryUtil.getSearchBody(cls,
@@ -352,7 +352,7 @@ export class ElasticsearchModelService implements
     return this.postLoad(cls, res.body.hits.hits[0]._source);
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const res = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
@@ -368,7 +368,11 @@ export class ElasticsearchModelService implements
     throw new NotFoundError(`${cls.name}: ${idx}`, key);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>) {
+  async upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+    return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
+  }
+
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>) {
     const cfg = ModelRegistry.getIndex(cls, idx);
     if (cfg.type === 'unique') {
       throw new AppError('Cannot list on unique indices', 'data');
@@ -428,7 +432,7 @@ export class ElasticsearchModelService implements
     return res.deleted ?? 0;
   }
 
-  async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>) {
+  async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
 
     const script = ElasticsearchSchemaUtil.generateUpdateScript(data);
 

@@ -1,9 +1,13 @@
 import { Class } from '@travetto/base';
+import { DeepPartial } from '@travetto/schema';
 
 import { IndexNotSupported } from '../../error/invalid-index';
+import { NotFoundError } from '../../error/not-found';
 import { ModelRegistry } from '../../registry/model';
 import { IndexConfig } from '../../registry/types';
-import { ModelType } from '../../types/model';
+import { ModelCrudSupport } from '../../service/crud';
+import { ModelIndexedSupport } from '../../service/indexed';
+import { ModelType, OptionalId } from '../../types/model';
 
 type ComputeConfig = {
   includeSortInFields?: boolean;
@@ -22,7 +26,7 @@ export class ModelIndexedUtil {
    * @param idx Index config
    * @param item Item to read values from
    */
-  static computeIndexParts<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T>, opts: ComputeConfig = {}) {
+  static computeIndexParts<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: DeepPartial<T>, opts: ComputeConfig = {}) {
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
     const sortField = cfg.type === 'sorted' ? cfg.fields[cfg.fields.length - 1] : undefined;
 
@@ -74,7 +78,7 @@ export class ModelIndexedUtil {
    * @param cls Type to get index for
    * @param idx Index config
    */
-  static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item?: Partial<T>, cfg?: ComputeConfig) {
+  static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item?: DeepPartial<T>, cfg?: ComputeConfig) {
     const res = {} as Record<string, unknown>;
     for (const { path, value } of this.computeIndexParts(cls, idx, item ?? {}, cfg).fields) {
       let sub = res;
@@ -94,10 +98,34 @@ export class ModelIndexedUtil {
    * @param idx Index config
    * @param item item to process
    */
-  static computeIndexKey<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: Partial<T> = {}, opts?: ComputeConfig & { sep?: string }) {
+  static computeIndexKey<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item: DeepPartial<T> = {}, opts?: ComputeConfig & { sep?: string }) {
     const { fields, sorted } = this.computeIndexParts(cls, idx, item, { ...(opts ?? {}), includeSortInFields: false });
     const key = fields.map(({ value }) => value).map(x => `${x}`).join(opts?.sep ?? 'ᚕ');
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
     return !sorted ? { type: cfg.type, key } : { type: cfg.type, key, sort: sorted.value };
+  }
+
+  /**
+   * Naive upsert by index
+   * @param service
+   * @param cls
+   * @param idx
+   * @param body
+   */
+  static async naiveUpsert<T extends ModelType>(
+    service: ModelIndexedSupport & ModelCrudSupport,
+    cls: Class<T>, idx: string, body: OptionalId<T>
+  ): Promise<T> {
+    try {
+      const { id } = await service.getByIndex(cls, idx, body as DeepPartial<T>);
+      body.id = id;
+      return await service.update(cls, body as T);
+    } catch (err) {
+      if (err instanceof NotFoundError) {
+        return await service.create(cls, body);
+      } else {
+        throw err;
+      }
+    }
   }
 }

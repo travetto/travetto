@@ -1,5 +1,5 @@
 import type { Class } from '@travetto/base';
-import type { DeepPartial } from '@travetto/base/src/internal/types';
+import type { DeepPartial } from './types';
 
 declare global {
   interface Function {

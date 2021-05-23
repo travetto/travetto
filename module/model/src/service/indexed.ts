@@ -1,6 +1,7 @@
 import { Class } from '@travetto/base';
+import { DeepPartial } from '@travetto/schema';
 
-import { ModelType } from '../types/model';
+import { ModelType, OptionalId } from '../types/model';
 import { ModelBasicSupport } from './basic';
 
 /**
@@ -15,7 +16,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index name to search against
    * @param body The payload of fields needed to search
    */
-  getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T>;
+  getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T>;
 
   /**
    * Delete entity by index as defined by fields of idx and the body fields
@@ -23,7 +24,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index name to search against
    * @param body The payload of fields needed to search
    */
-  deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<void>;
+  deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void>;
 
   /**
    * List entity by rangeable index as defined by fields of idx and the body fields
@@ -31,5 +32,13 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index name to search against
    * @param body The payload of fields needed to search
    */
-  listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>): AsyncIterable<T>;
+  listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T>;
+
+  /**
+   * Upsert by index, allowing the index to act as a primary key
+   * @param cls The type to create for
+   * @param idx The index name to use
+   * @param body The document to potentially store
+   */
+  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T>;
 }

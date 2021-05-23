@@ -1,11 +1,14 @@
 import { color } from '@travetto/cli/src/color';
-import type { DeepPartial } from '@travetto/base/src/internal/types';
 
 import { CommonConfig, PackOperation } from '../lib/types';
 import { PackUtil } from '../lib/util';
 import { Assemble, AssembleConfig } from './assemble';
 import { Docker, DockerConfig } from './docker';
 import { Zip, ZipConfig } from './zip';
+
+type DeepPartial<T> = {
+  [P in keyof T]?: (T[P] extends (number | string | boolean | undefined | any[]) ? (T[P] | undefined) : DeepPartial<T[P]>);
+};
 
 const ops = {
   [Assemble.key]: Assemble,

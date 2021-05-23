@@ -1,6 +1,7 @@
 import * as dynamodb from '@aws-sdk/client-dynamodb';
 
 import { Class, ShutdownManager, Util } from '@travetto/base';
+import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
@@ -368,7 +369,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Indexed
-  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
@@ -403,15 +404,19 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
     return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>) {
+  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+    return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
+  }
+
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>) {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }

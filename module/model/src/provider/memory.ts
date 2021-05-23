@@ -1,5 +1,6 @@
 import { StreamUtil } from '@travetto/boot';
 import { Util, Class, TimeSpan } from '@travetto/base';
+import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
@@ -80,7 +81,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       const item = await this.get(cls, id);
       for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
         const idxName = indexName(cls, idx);
-        const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+        const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item as DeepPartial<T>);
         this.#indices[idx.type].get(idxName)?.get(key)?.delete(id);
       }
     } catch (e) {
@@ -93,7 +94,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async #writeIndices<T extends ModelType>(cls: Class<T>, item: T) {
     for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
       const idxName = indexName(cls, idx);
-      const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
+      const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item as DeepPartial<T>);
       let index = this.#indices[idx.type].get(idxName)?.get(key);
 
       if (!index) {
@@ -126,7 +127,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     }
   }
 
-  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<string> {
+  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
     const config = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, config, body);
     const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);
@@ -301,15 +302,19 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> {
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
     await this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>): AsyncGenerator<T> {
+  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+    return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
+  }
+
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncGenerator<T> {
     const config = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body, { emptySortValue: null });
     const index = this.#indices[config.type].get(indexName(cls, idx))?.get(key);

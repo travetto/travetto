@@ -21,7 +21,7 @@ import {
 
 import { ShutdownManager, Util, Class, AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
+import { DeepPartial, FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
@@ -393,7 +393,7 @@ export class MongoModelService implements
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const store = await this.getStore(cls);
     const result = await store.findOne(
@@ -408,7 +408,7 @@ export class MongoModelService implements
     return await ModelCrudUtil.load(cls, result);
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) {
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const store = await this.getStore(cls);
     const result = await store.deleteOne(
@@ -423,7 +423,21 @@ export class MongoModelService implements
     throw new NotFoundError(`${cls.name}: ${idx}`, key);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>) {
+  async upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
+    const cleaned = await ModelCrudUtil.preStore(cls, body, this);
+    const store = await this.getStore(cls);
+
+    await store.updateOne(
+      this.getWhere<ModelType>(cls, ModelIndexedUtil.projectIndex(cls, idx, body as DeepPartial<T>), false),
+      { $set: cleaned },
+      { upsert: true }
+    );
+
+    return cleaned;
+  }
+
+
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>) {
     const store = await this.getStore(cls);
     const idxCfg = ModelRegistry.getIndex(cls, idx);
 

@@ -51,7 +51,7 @@ class User4 {
   color: string;
   child: Child;
 
-  prePersist() {
+  prePersist?() {
     this.createdDate ??= new Date();
   }
 }
@@ -157,12 +157,38 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, createdDate: Util.timeFromNow('-1d'), color: 'green' }));
 
     const arr = await service.listByIndex(User4, 'nameCreated', User4.from({ child: { name: 'bob' } })).toArray();
-    console.log(arr);
 
     assert(arr[0].color === 'green' && arr[0].child.name === 'bob' && arr[0].child.age === 50);
     assert(arr[1].color === 'red' && arr[1].child.name === 'bob' && arr[1].child.age === 30);
     assert(arr[2].color === 'blue' && arr[2].child.name === 'bob' && arr[2].child.age === 40);
 
     await assert.rejects(() => service.listByIndex(User4, 'nameCreated', {}).toArray(), IndexNotSupported);
+  }
+
+  @Test()
+  async upsertByIndex() {
+    const service = await this.service;
+
+    const user1 = await service.upsertByIndex(User4, 'childAge', { child: { name: 'bob', age: 40 }, color: 'blue' });
+    const user2 = await service.upsertByIndex(User4, 'childAge', { child: { name: 'bob', age: 40 }, color: 'green' });
+    const user3 = await service.upsertByIndex(User4, 'childAge', { child: { name: 'bob', age: 40 }, color: 'red' });
+
+    const arr = await service.listByIndex(User4, 'childAge', { child: { name: 'bob' } }).toArray();
+    assert(arr.length === 1);
+
+    assert(user1.id === user2.id);
+    assert(user2.id === user3.id);
+    assert(user1.color === 'blue');
+    assert(user3.color === 'red');
+
+    const user4 = await service.upsertByIndex(User4, 'childAge', { child: { name: 'bob', age: 30 }, color: 'red' });
+    const arr2 = await service.listByIndex(User4, 'childAge', { child: { name: 'bob' } }).toArray();
+    assert(arr2.length === 2);
+
+    await service.deleteByIndex(User4, 'childAge', user1);
+
+    const arr3 = await service.listByIndex(User4, 'childAge', { child: { name: 'bob' } }).toArray();
+    assert(arr3.length === 1);
+    assert(arr3[0].id === user4.id);
   }
 }
