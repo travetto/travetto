@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model-mongo",
   "displayName": "MongoDB Model Support",
-  "version": "2.0.0-rc.8",
+  "version": "2.0.0-rc.9",
   "description": "Mongo backing for the travetto model module.",
   "keywords": [
     "mongo",
@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@travetto/config": "^2.0.0-rc.4",
-    "@travetto/model": "^2.0.0-rc.6",
-    "@travetto/model-query": "2.0.0-rc.6",
+    "@travetto/model": "^2.0.0-rc.7",
+    "@travetto/model-query": "2.0.0-rc.7",
     "@types/mongodb": "^3.6.16",
     "mongodb": "^3.6.8"
   },

@@ -1,7 +1,7 @@
 {
   "name": "@travetto/rest-fastify",
   "displayName": "Fastify REST Source",
-  "version": "2.0.0-rc.9",
+  "version": "2.0.0-rc.10",
   "description": "Fastify provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -25,7 +25,7 @@
     "directory": "module/rest-fastify"
   },
   "dependencies": {
-    "@travetto/rest": "^2.0.0-rc.9",
+    "@travetto/rest": "^2.0.0-rc.10",
     "fastify": "^3.15.1",
     "fastify-compress": "^3.5.0",
     "fastify-formbody": "^5.0.0"
