@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Model, BaseModel } from '@travetto/model';
+import { Model } from '@travetto/model';
 import { Currency, Integer, Precision, Float, Text, Schema } from '@travetto/schema';
 
 import { ElasticsearchSchemaUtil } from '../src/internal/schema';
@@ -14,7 +14,11 @@ class Address {
 }
 
 @Model()
-class Person extends BaseModel {
+class Person {
+  id: string;
+  type?: string;
+  createdDate?: Date;
+  updatedDate?: Date;
   @Text() name: string;
   age: number;
   gender: 'm' | 'f';
@@ -59,7 +63,6 @@ class SchemaSuite {
     assert(schema === {
       properties: {
         id: { type: 'keyword' },
-        version: { type: 'keyword' },
         type: { type: 'keyword' },
         createdDate: { type: 'date', format: 'date_optional_time' },
         updatedDate: { type: 'date', format: 'date_optional_time' },

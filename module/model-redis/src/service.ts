@@ -59,7 +59,6 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       prevCursor = cursor;
       if (results.length) {
         if (op === 'zscan') {
-          console.log('Got Results', results);
           yield results.filter((x, i) => i % 2 === 0); // Drop scores
         } else {
           yield results;
@@ -90,6 +89,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
       const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
       const fullKey = this.#resolveKey(cls, idx.name, key);
+
       switch (idx.type) {
         case 'unsorted': multi.sadd(fullKey, item.id); break;
         case 'sorted': multi.zadd(fullKey, +sort!, item.id); break;
@@ -163,7 +163,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       id = await this.#wrap(util.promisify(this.client.srandmember) as (k: string) => Promise<string>)(fullKey);
     } else {
       const res = (await this.#wrap(util.promisify(this.client.zrangebyscore) as (k: string, start: string | number, end: string | number, type?: string) => Promise<string[]>)(
-        fullKey, +sort!, '+inf'
+        fullKey, +sort!, +sort!
       ));
       id = res[0];
     }

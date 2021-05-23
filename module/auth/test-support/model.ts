@@ -4,7 +4,7 @@ import * as assert from 'assert';
 import { AppError, Class } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { ModelCrudSupport, BaseModel, Model } from '@travetto/model';
+import { ModelCrudSupport, Model } from '@travetto/model';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
 import { ModelSuite } from '@travetto/model/test-support/suite';
 
@@ -13,13 +13,15 @@ import { ModelAuthService, RegisteredPrincipal } from '..';
 export const TestModelSvcⲐ = Symbol.for('@trv:auth/test-model-svc');
 
 @Model({ autoCreate: false })
-class User extends BaseModel implements RegisteredPrincipal {
+class User implements RegisteredPrincipal {
+  id: string;
   password?: string;
   salt?: string;
   hash?: string;
   resetToken?: string;
   resetExpires?: Date;
   permissions?: string[];
+  details: Record<string, unknown>;
 }
 
 class TestConfig {

@@ -1,7 +1,8 @@
-import { Model, BaseModel } from '@travetto/model';
+import { Model } from '@travetto/model';
 
 @Model()
-export class User extends BaseModel {
+export class User {
+  id: string;
   name: string;
   age: number;
   contact?: boolean;

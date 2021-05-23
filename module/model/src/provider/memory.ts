@@ -34,11 +34,11 @@ function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | str
 }
 
 function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | number) {
-  let id: string;
+  let id: string | undefined;
   if (data instanceof Set) {
     id = data.values().next().value as string;
   } else {
-    id = [...data.entries()].find(([k, v]) => v === value)![0];
+    id = [...data.entries()].find(([k, v]) => value === undefined || v === value)?.[0];
   }
   return id;
 }

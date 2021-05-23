@@ -4,7 +4,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Class } from '@travetto/base';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Schema } from '@travetto/schema';
-import { Model, ModelType, BaseModel } from '@travetto/model';
+import { Model, ModelType } from '@travetto/model';
 
 import { ModelQuery, Query } from '..';
 import { QueryLanguageParser } from '../src/internal/query/parser';
@@ -24,7 +24,8 @@ class User {
 }
 
 @Model()
-class ModelUser extends BaseModel {
+class ModelUser {
+  id: string;
   email: string;
 }
 
