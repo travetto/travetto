@@ -13,7 +13,7 @@ This module provides an [Firestore](https://firebase.google.com/docs/firestore)-
 Supported featrues:
    
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
-   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11)
+   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12)
 
     Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source 
     or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module.
@@ -34,11 +34,12 @@ export class Init {
 }
 ```
 
-  where the [FirestoreModelConfig](https://github.com/travetto/travetto/tree/main/module/model-firestore/src/config.ts#L4) is defined by:
+  where the [FirestoreModelConfig](https://github.com/travetto/travetto/tree/main/module/model-firestore/src/config.ts#L5) is defined by:
 
   
 **Code: Structure of FirestoreModelConfig**
 ```typescript
+import { ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('model.firestore')
@@ -50,9 +51,12 @@ export class FirestoreModelConfig {
   namespace: string;
   autoCreate?: boolean;
 
-  postConstruct() {
+  async postConstruct() {
     if (this.emulator) {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
+    }
+    if (this.credential) {
+      this.credential = await ResourceManager.findAbsolute(this.credential);
     }
   }
 }

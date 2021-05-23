@@ -19,6 +19,7 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
+import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
 import { SQLModelConfig } from './config';
 import { Connected, ConnectedIterator, Transactional } from './connection/decorator';
@@ -59,28 +60,13 @@ export class SQLModelService implements
   }
 
   /**
-   * Compute new ids for bulk operations
+   * Verify upserted ids for bulk operations
    */
-  async #computeInsertedIds<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {
-    const addedIds = new Map<number, string>();
-    const toCheck = new Map<string, number>();
-
-    // Compute ids
-    for (let i = 0; i < operations.length; i++) {
-      const op = operations[i];
-      const target = op.insert || op.upsert;
-      if (target) {
-        if (!target.id) {
-          target.id = this.uuid();
-          addedIds.set(i, target.id);
-        } else if (op.upsert) {
-          toCheck.set(target.id, i);
-        } else if (op.insert) {
-          addedIds.set(i, target.id);
-        }
-      }
-    }
-
+  async #checkUpsertedIds<T extends ModelType>(
+    cls: Class<T>,
+    addedIds: Map<number, string>,
+    toCheck: Map<string, number>
+  ) {
     // Get all upsert ids
     const all = toCheck.size ?
       (await this.#exec<ModelType>(
@@ -89,12 +75,12 @@ export class SQLModelService implements
         )
       )).records : [];
 
-    for (const el of all) {
-      toCheck.delete(el.id);
-    }
+    const allIds = new Set(all.map(el => el.id));
 
     for (const [el, idx] of toCheck.entries()) {
-      addedIds.set(idx, el);
+      if (!allIds.has(el)) { // If not found
+        addedIds.set(idx, el);
+      }
     }
 
     return addedIds;
@@ -218,20 +204,29 @@ export class SQLModelService implements
 
   @Transactional()
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse> {
-    const deleteOps = operations.map(x => x.delete).filter(x => !!x) as T[];
-    const insertOps = operations.map(x => x.insert).filter(x => !!x) as T[];
-    const upsertOps = operations.map(x => x.upsert).filter(x => !!x) as T[];
-    const updateOps = operations.map(x => x.update).filter(x => !!x) as T[];
 
-    const insertedIds = await this.#computeInsertedIds(cls, operations);
+    const { insertedIds, upsertedIds, existingUpsertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
 
-    const deletes = [{ stack: SQLUtil.classToStack(cls), ids: deleteOps.map(x => x.id) }].filter(x => !!x.ids.length);
-    const inserts = (await SQLUtil.getInserts(cls, insertOps)).filter(x => !!x.records.length);
-    const upserts = (await SQLUtil.getInserts(cls, upsertOps)).filter(x => !!x.records.length);
-    const updates = (await SQLUtil.getInserts(cls, updateOps)).filter(x => !!x.records.length);
+    const addedIds = new Map([...insertedIds.entries(), ...upsertedIds.entries()]);
+
+    await this.#checkUpsertedIds(cls,
+      addedIds,
+      new Map([...existingUpsertedIds.entries()].map(([k, v]) => [v, k]))
+    );
+
+    const get = (k: keyof BulkOp<T>) => operations.map(x => x[k]).filter(x => !!x) as T[];
+    const getStatements = async (k: keyof BulkOp<T>) => (await SQLUtil.getInserts(cls, get(k))).filter(x => !!x.records.length);
+
+    const deletes = [{ stack: SQLUtil.classToStack(cls), ids: get('delete').map(x => x.id) }].filter(x => !!x.ids.length);
+
+    const [inserts, upserts, updates] = await Promise.all([
+      getStatements('insert'),
+      getStatements('upsert'),
+      getStatements('update')
+    ]);
 
     const ret = await this.#dialect.bulkProcess(deletes, inserts, upserts, updates);
-    ret.insertedIds = insertedIds;
+    ret.insertedIds = addedIds;
     return ret;
   }
 

@@ -17,7 +17,7 @@ This module provides an <a target="_blank" class="external-link" href="https://f
 
 Supported featrues:
 <ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a></li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11">Indexed</a></li></ul>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12">Indexed</a></li></ul>
 
     Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source 
     or config, you can override and register it with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module.
@@ -40,14 +40,15 @@ Supported featrues:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-firestore/src/config.ts#L4">FirestoreModelConfig</a> is defined by:
+  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-firestore/src/config.ts#L5">FirestoreModelConfig</a> is defined by:
 
   
       <figure class="code">
       <figcaption class="code">Structure of FirestoreModelConfig
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-firestore/src/config.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ResourceManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 
 @<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'model.firestore'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">FirestoreModelConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -58,9 +59,12 @@ Supported featrues:
   <span class="token keyword">namespace</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
 
-  <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>emulator<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">FIRESTORE_EMULATOR_HOST</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>emulator<span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>credential<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>credential <span class="token operator">=</span> <span class="token keyword">await</span> ResourceManager<span class="token punctuation">.</span><span class="token function">findAbsolute</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>credential<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     

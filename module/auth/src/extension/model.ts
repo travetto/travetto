@@ -1,6 +1,6 @@
 // @file-if @travetto/model
 import { AppError, Util, Class } from '@travetto/base';
-import { ModelCrudSupport, ModelType, NotFoundError } from '@travetto/model';
+import { ModelCrudSupport, ModelType, NotFoundError, OptionalId } from '@travetto/model';
 import { EnvUtil } from '@travetto/boot';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 
@@ -86,7 +86,7 @@ export class ModelAuthService<T extends ModelType> implements
    * @param password The password to authenticate against
    */
   async #authenticate(userId: string, password: string) {
-    const ident = await this.#resolvePrincipal({ id: userId });
+    const ident = await this.#resolvePrincipal({ id: userId, details: {} });
 
     const hash = await AuthUtil.generateHash(password, ident.salt!);
     if (hash !== ident.hash) {
@@ -107,8 +107,8 @@ export class ModelAuthService<T extends ModelType> implements
    * Register a user
    * @param user The user to register
    */
-  async register(user: T) {
-    const ident = this.toPrincipal(user);
+  async register(user: OptionalId<T>) {
+    const ident = this.toPrincipal(user as T);
 
     try {
       if (ident.id) {

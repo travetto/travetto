@@ -18,7 +18,7 @@ This module provides an <a target="_blank" class="external-link" href="https://a
 Supported featrues:
 <ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a></li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Expiry</a></li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11">Indexed</a></li></ul>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12">Indexed</a></li></ul>
 
     Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source 
     or config, you can override and register it with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module.
@@ -52,7 +52,7 @@ Supported featrues:
 
 @<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'model.dynamodb'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DynamoDBModelConfig</span> <span class="token punctuation">{{'{'}}</span>
-  config<span class="token operator">:</span> dynamodb<span class="token punctuation">.</span>DynamoDBClientConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+  client<span class="token operator">:</span> dynamodb<span class="token punctuation">.</span>DynamoDBClientConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
     endpoint<span class="token operator">:</span> <span class="token keyword">undefined</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
   autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>

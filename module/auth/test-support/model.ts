@@ -51,7 +51,8 @@ export abstract class AuthModelServiceSuite {
   @Test()
   async register() {
     const pre = User.from({
-      password: 'bob'
+      password: 'bob',
+      details: {}
     });
 
     const user = await this.authService.register(pre);
@@ -63,10 +64,9 @@ export abstract class AuthModelServiceSuite {
   async authenticate() {
     const pre = User.from({
       id: '5',
-      password: 'bob'
+      password: 'bob',
+      details: {}
     });
-
-    console.log(pre);
 
     try {
       await this.authService.authenticate(pre);

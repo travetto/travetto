@@ -39,6 +39,7 @@ import { IndexConfig } from '@travetto/model/src/registry/types';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
+import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
 const IdxFieldsⲐ = Symbol.for('@trv:model-mongo/idx');
 
@@ -315,8 +316,6 @@ export class MongoModelService implements
 
   // Bulk
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {
-    const store = await this.getStore(cls);
-    const bulk = store.initializeUnorderedBulkOp({ w: 1 });
     const out: BulkResponse = {
       errors: [],
       counts: {
@@ -329,59 +328,54 @@ export class MongoModelService implements
       insertedIds: new Map()
     };
 
-    for (let i = 0; i < operations.length; i++) {
-      const op = operations[i];
-      if (op.insert) {
-        const cleaned = await ModelCrudUtil.preStore(cls, op.insert, this);
-        out.insertedIds.set(i, cleaned.id);
-        bulk.insert(MongoUtil.preInsertId(cleaned));
-      } else if (op.upsert) {
-        const newId = !op.upsert.id;
-        const cleaned = await ModelCrudUtil.preStore(cls, op.upsert, this);
-        const id = MongoUtil.uuid(cleaned.id);
-        bulk.find({ _id: id })
-          .upsert()
-          .updateOne({ $set: cleaned });
+    if (operations.length === 0) {
+      return out;
+    }
 
-        if (newId) {
-          out.insertedIds.set(i, cleaned.id);
-        }
+    const store = await this.getStore(cls);
+    const bulk = store.initializeUnorderedBulkOp({ w: 1 });
+    const { upsertedIds, insertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
+
+    out.insertedIds = new Map([...upsertedIds.entries(), ...insertedIds.entries()]);
+
+    for (const op of operations) {
+      if (op.insert) {
+        bulk.insert(MongoUtil.preInsertId(op.insert as T));
+      } else if (op.upsert) {
+        bulk.find({ _id: MongoUtil.uuid(op.upsert.id!) }).upsert().updateOne({ $set: op.upsert });
       } else if (op.update) {
-        op.update = await ModelCrudUtil.preStore(cls, op.update, this);
         bulk.find({ _id: MongoUtil.uuid(op.update.id) }).update({ $set: op.update });
       } else if (op.delete) {
         bulk.find({ _id: MongoUtil.uuid(op.delete.id) }).removeOne();
       }
     }
 
-    if (operations.length > 0) {
-      const res = await bulk.execute({});
+    const res = await bulk.execute({});
 
-      for (const el of operations) {
-        if (el.insert) {
-          MongoUtil.postLoadId(el.insert as T);
-        }
+    for (const op of operations) {
+      if (op.insert) {
+        MongoUtil.postLoadId(op.insert as T);
       }
-      for (const { index, _id } of res.getUpsertedIds() as { index: number, _id: mongo.ObjectID }[]) {
-        out.insertedIds.set(index, MongoUtil.idToString(_id));
-      }
+    }
+    for (const { index, _id } of res.getUpsertedIds() as { index: number, _id: mongo.ObjectID }[]) {
+      out.insertedIds.set(index, MongoUtil.idToString(_id));
+    }
 
-      if (out.counts) {
-        out.counts.delete = res.nRemoved;
-        out.counts.update = operations.filter(x => x.update).length;
-        out.counts.insert = res.nInserted;
-        out.counts.upsert = operations.filter(x => x.upsert).length;
-      }
+    if (out.counts) {
+      out.counts.delete = res.nRemoved;
+      out.counts.update = operations.filter(x => x.update).length;
+      out.counts.insert = res.nInserted;
+      out.counts.upsert = operations.filter(x => x.upsert).length;
+    }
 
-      if (res.hasWriteErrors()) {
-        out.errors = res.getWriteErrors();
-        for (const err of out.errors as { index: number }[]) {
-          const op = operations[err.index];
-          const k = Object.keys(op)[0] as keyof BulkResponse['counts'];
-          out.counts[k] -= 1;
-        }
-        out.counts.error = out.errors.length;
+    if (res.hasWriteErrors()) {
+      out.errors = res.getWriteErrors();
+      for (const err of out.errors as { index: number }[]) {
+        const op = operations[err.index];
+        const k = Object.keys(op)[0] as keyof BulkResponse['counts'];
+        out.counts[k] -= 1;
       }
+      out.counts.error = out.errors.length;
     }
 
     return out;
@@ -424,18 +418,8 @@ export class MongoModelService implements
   }
 
   async upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preStore(cls, body, this);
-    const store = await this.getStore(cls);
-
-    await store.updateOne(
-      this.getWhere<ModelType>(cls, ModelIndexedUtil.projectIndex(cls, idx, body as DeepPartial<T>), false),
-      { $set: cleaned },
-      { upsert: true }
-    );
-
-    return cleaned;
+    return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
-
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>) {
     const store = await this.getStore(cls);

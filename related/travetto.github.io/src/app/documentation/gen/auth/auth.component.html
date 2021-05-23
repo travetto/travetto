@@ -28,7 +28,7 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
       <figcaption class="code">Principal Structure
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Principal<span class="token operator">&lt;</span><span class="token constant">D</span> <span class="token operator">=</span> <span class="token builtin">any</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Principal<span class="token operator">&lt;</span><span class="token constant">D</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">[</span>key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">]</span><span class="token operator">:</span> <span class="token builtin">any</span> <span class="token punctuation">{{'}'}}</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Primary identifier for a user
    */</span>
@@ -52,7 +52,7 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
   <span class="token comment">/**
    * Supplemental details
    */</span>
-  details<span class="token operator">?</span><span class="token operator">:</span> <span class="token constant">D</span><span class="token punctuation">;</span>
+  details<span class="token operator">:</span> <span class="token constant">D</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * List of all provided permissions
    */</span>
@@ -239,11 +239,12 @@ A registered principal extends the base concept of an principal, by adding in ad
       <figcaption class="code">A valid user model
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/doc/model/model.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Model<span class="token punctuation">,</span> BaseModel <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Model <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RegisteredPrincipal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
 
 @<span class="token meta">Model</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token keyword">extends</span> <span class="token class-name">BaseModel</span> <span class="token keyword">implements</span> <span class="token class-name">RegisteredPrincipal</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token keyword">implements</span> <span class="token class-name">RegisteredPrincipal</span> <span class="token punctuation">{{'{'}}</span>
+  id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   source<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   details<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">unknown</span><span class="token operator">></span><span class="token punctuation">;</span>
   password<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>

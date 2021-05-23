@@ -19,7 +19,7 @@ export interface Principal<D = { [key: string]: any }> {
    */
   issuedAt?: Date;
   /**
-   * Max age in seconds a princi`pal is valid
+   * Max age in seconds a principal is valid
    */
   maxAge?: number;
   /**

@@ -22,6 +22,7 @@ import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/servic
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
+import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
 import { ElasticsearchModelConfig } from './config';
 import { EsIdentity, EsBulkError } from './internal/types';
@@ -251,16 +252,7 @@ export class ElasticsearchModelService implements
 
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {
 
-    // Pre store
-    for (const el of operations) {
-      if ('insert' in el && el.insert) {
-        el.insert = await ModelCrudUtil.preStore(cls, el.insert, this);
-      } else if ('update' in el && el.update) {
-        el.update = await ModelCrudUtil.preStore(cls, el.update, this);
-      } else if ('upsert' in el && el.upsert) {
-        el.upsert = await ModelCrudUtil.preStore(cls, el.upsert, this);
-      }
-    }
+    await ModelBulkUtil.preStore(cls, operations, this);
 
     const body = operations.reduce((acc, op) => {
 

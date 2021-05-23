@@ -23,7 +23,7 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
 
 **Code: Principal Structure**
 ```typescript
-export interface Principal<D = any> {
+export interface Principal<D = { [key: string]: any }> {
   /**
    * Primary identifier for a user
    */
@@ -47,7 +47,7 @@ export interface Principal<D = any> {
   /**
    * Supplemental details
    */
-  details?: D;
+  details: D;
   /**
    * List of all provided permissions
    */
@@ -229,11 +229,12 @@ export interface RegisteredPrincipal extends Principal {
 
 **Code: A valid user model**
 ```typescript
-import { Model, BaseModel } from '@travetto/model';
+import { Model } from '@travetto/model';
 import { RegisteredPrincipal } from '@travetto/auth';
 
 @Model()
-export class User extends BaseModel implements RegisteredPrincipal {
+export class User implements RegisteredPrincipal {
+  id: string;
   source: string;
   details: Record<string, unknown>;
   password?: string;

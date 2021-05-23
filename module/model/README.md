@@ -12,7 +12,7 @@ This module provides a set of contracts/interfaces to data model persistence, mo
 
 ## Contracts
 
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L23).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L23).
 
 ### [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9)
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -37,7 +37,7 @@ export interface ModelBasicSupport<C = unknown> {
    * @param item The document to create
    * @throws {ExistsError} When an item with the provdided id already exists
    */
-  create<T extends ModelType>(cls: Class<T>, item: T): Promise<T>;
+  create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
 
   /**
    * Delete an item
@@ -73,7 +73,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
    * @param item The document to upsert
    * @param view The schema view to validate against
    */
-  upsert<T extends ModelType>(cls: Class<T>, item: T): Promise<T>;
+  upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
 
   /**
    * Update Partial
@@ -91,7 +91,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
 }
 ```
 
-### [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11)
+### [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12)
 Additionally, an implementation may support the ability for basic indexed queries. This is not the full featured query support of [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support."), but
 allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.  
 
@@ -104,7 +104,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index name to search against
    * @param body The payload of fields needed to search
    */
-  getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T>;
+  getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T>;
 
   /**
    * Delete entity by index as defined by fields of idx and the body fields
@@ -112,7 +112,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index name to search against
    * @param body The payload of fields needed to search
    */
-  deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<void>;
+  deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void>;
 
   /**
    * List entity by rangeable index as defined by fields of idx and the body fields
@@ -120,7 +120,15 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
    * @param idx The index name to search against
    * @param body The payload of fields needed to search
    */
-  listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>): AsyncIterable<T>;
+  listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T>;
+
+  /**
+   * Upsert by index, allowing the index to act as a primary key
+   * @param cls The type to create for
+   * @param idx The index name to use
+   * @param body The document to potentially store
+   */
+  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T>;
 }
 ```
 
@@ -227,7 +235,7 @@ All fields are optional, but the `id` and `type` are important as those field ty
 |[Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
 |[S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
-|[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L49)|X|X|X|X|X|X|
+|[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L50)|X|X|X|X|X|X|
 |[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L46)|X|X| |X|X|X|
 
 ## Custom Model Service
@@ -238,11 +246,12 @@ repetitive functionality, that is unable to be shared due to not relying upon in
 ```typescript
 import { StreamUtil } from '@travetto/boot';
 import { Util, Class, TimeSpan } from '@travetto/base';
+import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
-import { ModelType } from '../types/model';
+import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
 import { ModelStorageSupport } from '../service/storage';
@@ -266,11 +275,11 @@ function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | str
   return [cls.ᚕid, typeof idx === 'string' ? idx : idx.name, suffix].filter(x => !!x).join(':');
 }
 function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | number) {
-  let id: string;
+  let id: string | undefined;
   if (data instanceof Set) {
     id = data.values().next().value as string;
   } else {
-    id = [...data.entries()].find(([k, v]) => v === value)![0];
+    id = [...data.entries()].find(([k, v]) => value === undefined || v === value)?.[0];
   }
   return id;
 }
@@ -287,9 +296,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   // CRUD Support
   uuid() ;
   async get<T extends ModelType>(cls: Class<T>, id: string) ;
-  async create<T extends ModelType>(cls: Class<T>, item: T) ;
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) ;
   async update<T extends ModelType>(cls: Class<T>, item: T) ;
-  async upsert<T extends ModelType>(cls: Class<T>, item: T) ;
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) ;
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) ;
   async delete<T extends ModelType>(cls: Class<T>, id: string) ;
   async * list<T extends ModelType>(cls: Class<T>) ;
@@ -306,9 +315,10 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async createModel<T extends ModelType>(cls: Class<T>) ;
   async truncateModel<T extends ModelType>(cls: Class<T>) ;
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>): Promise<T> ;
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: Partial<T>) ;
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: Partial<T>): AsyncGenerator<T> ;
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> ;
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) ;
+  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> ;
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncGenerator<T> ;
 }
 ```
 
