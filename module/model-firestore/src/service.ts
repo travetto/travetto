@@ -101,7 +101,6 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
     const cleaned = toSimpleObj(item, FieldValue.delete());
-    console.log(item, cleaned);
     await this.#getCollection(cls).doc(id).set(cleaned, { merge: true });
     return this.get(cls, id);
   }

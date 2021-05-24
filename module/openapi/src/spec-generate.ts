@@ -289,14 +289,12 @@ export class SpecGenerator {
     op.responses[code] = pConf;
 
     const schema = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
-    for (let i = 0; i < ep.params.length; i++) {
-      if (schema[i]) {
-        const res = this.#processEndpointParam(ep, ep.params[i], schema[i]);
-        if (res?.parameters) {
-          (op.parameters ??= []).push(...res.parameters);
-        }
-        op.requestBody ??= res?.requestBody;
+    for (const field of schema) {
+      const res = this.#processEndpointParam(ep, ep.params[field.index!], field);
+      if (res?.parameters) {
+        (op.parameters ??= []).push(...res.parameters);
       }
+      op.requestBody ??= res?.requestBody;
     }
 
     const epPath = (
