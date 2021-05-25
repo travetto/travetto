@@ -107,7 +107,7 @@ export class FsUtil {
    */
   static async copyRecursive(src: string, dest: string, ignore = false) {
     try {
-      await ExecUtil.spawn(...this.#copyCommand(src, dest)).result;
+      await ExecUtil.execSync(...this.#copyCommand(src, dest));
     } catch (err) {
       if (!ignore) {
         throw err;
