@@ -65,7 +65,7 @@ export class SerializeInterceptor implements RestInterceptor {
           res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
         }
       } else {
-        res.status(201);
+        res.status(req.method === 'POST' || req.method === 'PUT' ? 201 : 204);
         res.send('');
       }
     }
