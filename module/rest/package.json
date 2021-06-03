@@ -35,7 +35,7 @@
     "@travetto/registry": "^2.0.0-rc.4",
     "@travetto/transformer": "^2.0.0-rc.4",
     "@types/cookies": "^0.7.6",
-    "@types/express-serve-static-core": "^4.17.19",
+    "@types/express-serve-static-core": "^4.17.21",
     "cookies": "^0.8.0"
   },
   "devDependencies": {

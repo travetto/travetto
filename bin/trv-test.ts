@@ -1,5 +1,6 @@
 import '@arcsine/nodesh';
 import { ExecUtil, FsUtil } from '@travetto/boot';
+import type { TestEvent } from '@travetto/test';
 
 import { Git } from './package/git';
 
@@ -19,7 +20,7 @@ async function run(isolated = false) {
       const args = ['test', '-f', 'exec', ...(isolated ? ['-i'] : ['-c', '3'])];
       const { process: proc, result } = ExecUtil.spawn('trv', args, { cwd: p._.folder, stdio: [0, 'pipe', 2, 'ipc'] });
 
-      proc.on('message', ev => consumer.onEvent(ev));
+      proc.on('message', ev => consumer.onEvent(ev as TestEvent));
       proc.on('error', e => {
         console.error(e);
         proc.kill('SIGTERM');

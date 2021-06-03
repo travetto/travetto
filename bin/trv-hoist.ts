@@ -20,7 +20,7 @@ Packages.getTopLevelPackage()
       )
       .$flatten()
       .$sort(([a], [b]) => a.localeCompare(b))
-      .$reduce((acc, [a, b]) => { acc[a] = b; return acc; }, {} as Record<string, string>)
+      .$reduce((acc, [a, b]) => { acc[a] = b as string; return acc; }, {} as Record<string, string>)
       .$value;
 
     top.devDependencies = deps;
