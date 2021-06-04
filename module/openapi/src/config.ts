@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { Config } from '@travetto/config';
-import { PathUtil, EnvUtil, FsUtil } from '@travetto/boot';
+import { PathUtil, EnvUtil } from '@travetto/boot';
 import { AppManifest } from '@travetto/base';
 
 /**

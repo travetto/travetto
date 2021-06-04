@@ -13,7 +13,7 @@ export class BaseCleanPlugin extends BasePlugin {
 
   name = 'clean';
 
-  async build() { }
+  override async build() { }
 
   getOptions() {
     return { quiet: this.boolOption({ desc: 'Quiet operation' }) };

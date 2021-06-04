@@ -29,7 +29,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     };
   }
 
-  createPendingField(cls: Class, fn: Function) {
+  override createPendingField(cls: Class, fn: Function) {
     return {
       class: cls,
       file: cls.ᚕfile,

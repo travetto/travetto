@@ -93,7 +93,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Trigger initial install, moves pending to finalized (active)
    */
-  initialInstall(): Class[] {
+  override initialInstall(): Class[] {
     return Array.from(this.pending.values()).map(x => x.class as Class).filter(x => !!x);
   }
 
@@ -155,7 +155,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * On an install event, finalize
    */
-  onInstall(cls: Class, e: ChangeEvent<Class>) {
+  override onInstall(cls: Class, e: ChangeEvent<Class>) {
     if (this.pending.has(cls.ᚕid) || this.pendingFields.has(cls.ᚕid)) {
       console.debug('Installing', { service: this.constructor.name, id: cls.ᚕid });
       const result = this.onInstallFinalize(cls);
@@ -170,7 +170,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * On an uninstall event, remove
    */
-  onUninstall(cls: Class, e: ChangeEvent<Class>) {
+  override onUninstall(cls: Class, e: ChangeEvent<Class>) {
     if (this.entries.has(cls.ᚕid)) {
       console.debug('Uninstalling', { service: this.constructor.name, id: cls.ᚕid });
       this.expired.set(cls.ᚕid, this.entries.get(cls.ᚕid)!);
@@ -186,7 +186,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Clear all caches
    */
-  onReset() {
+  override onReset() {
     super.onReset();
     this.entries.clear();
     this.pending.clear();

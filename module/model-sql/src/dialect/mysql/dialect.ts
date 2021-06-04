@@ -66,7 +66,7 @@ export class MySQLDialect extends SQLDialect {
   /**
    * Create table, adding in specific engine options
    */
-  getCreateTableSQL(stack: VisitStack[]) {
+  override getCreateTableSQL(stack: VisitStack[]) {
     return super.getCreateTableSQL(stack).replace(/;$/, ` ${this.tablePostfix};`);
   }
 
@@ -81,7 +81,7 @@ export class MySQLDialect extends SQLDialect {
   /**
    * Add root alias to delete clause
    */
-  getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>) {
+  override getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>) {
     const sql = super.getDeleteSQL(stack, where);
     return sql.replace(/\bDELETE\b/g, `DELETE ${this.rootAlias}`);
   }
@@ -89,7 +89,7 @@ export class MySQLDialect extends SQLDialect {
   /**
    * Suppress foreign key checks
    */
-  getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
+  override getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     return [
       'SET FOREIGN_KEY_CHECKS = 0;',
       ...super.getTruncateAllTablesSQL(cls),

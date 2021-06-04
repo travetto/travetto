@@ -31,7 +31,7 @@ All of the high level configurations can be found in the following structure:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ServerObject<span class="token punctuation">,</span> ContactObject<span class="token punctuation">,</span> LicenseObject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'openapi3-ts/src/model/OpenApi'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PathUtil<span class="token punctuation">,</span> EnvUtil<span class="token punctuation">,</span> FsUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PathUtil<span class="token punctuation">,</span> EnvUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppManifest <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
@@ -133,14 +133,23 @@ The module provides a plugin for the <a class="module-link" routerLink="/docs/cl
       </figcaption>
       <pre><code class="language-bash">$ trv openapi:client --help
 
-Usage:  openapi:client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>format<span class="token punctuation">]</span> <span class="token punctuation">[</span>additional-properties<span class="token punctuation">]</span>
+Usage:  openapi:client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>forma<span class="token punctuation">]</span>
 
 Options:
-  -i, --input <span class="token operator">&lt;</span>input<span class="token operator">></span>                Input <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"@trv:openapi/openapi.yml"</span><span class="token punctuation">)</span>
-  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>              Output folder <span class="token punctuation">(</span>default: <span class="token string">"@trv:openapi/api-client"</span><span class="token punctuation">)</span>
-  -d, --docker-image <span class="token operator">&lt;</span>docker-image<span class="token operator">></span>  Docker Image to use <span class="token punctuation">(</span>default: <span class="token string">"arcsine/openapi-generator:latest"</span><span class="token punctuation">)</span>
-  -w, --watch                        Watch <span class="token keyword">for</span> <span class="token function">file</span> changes
-  -h, --help                         display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -x, --extended-help                                  Show Extended Help
+  -a, --additional-properties <span class="token operator">&lt;</span>additional-properties<span class="token operator">></span>  Additional Properties <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -i, --input <span class="token operator">&lt;</span>input<span class="token operator">></span>                                  Input <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"@trv:openapi/openapi.yml"</span><span class="token punctuation">)</span>
+  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>                                Output folder <span class="token punctuation">(</span>default: <span class="token string">"@trv:openapi/api-client"</span><span class="token punctuation">)</span>
+  -d, --docker-image <span class="token operator">&lt;</span>docker-image<span class="token operator">></span>                    Docker Image to use <span class="token punctuation">(</span>default: <span class="token string">"arcsine/openapi-generator:latest"</span><span class="token punctuation">)</span>
+  -w, --watch                                          Watch <span class="token keyword">for</span> <span class="token function">file</span> changes
+  -h, --help                                           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Available Presets
+----------------------------------
+* @trv/angular10 -- typescript-angular <span class="token assign-left variable">supportsES6</span><span class="token operator">=</span>true,ngVersion<span class="token operator">=</span><span class="token number">10.0</span>
+* @trv/angular11 -- typescript-angular <span class="token assign-left variable">supportsES6</span><span class="token operator">=</span>true,ngVersion<span class="token operator">=</span><span class="token number">11.0</span>
+* @trv/angular12 -- typescript-angular <span class="token assign-left variable">supportsES6</span><span class="token operator">=</span>true,ngVersion<span class="token operator">=</span><span class="token number">11.0</span>
+* @trv/fetch     -- typescript-fetch</code></pre>     
       </figure>
 
 This tool relies upon a custom build of <a target="_blank" class="external-link" href="https://github.com/OpenAPITools/openapi-generator">OpenAPI client generation tools</a>, which supports watching.  This allows for fast responsive client generation as the shape of the API changes.

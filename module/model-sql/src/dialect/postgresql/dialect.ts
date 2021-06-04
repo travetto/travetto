@@ -62,7 +62,7 @@ export class PostgreSQLDialect extends SQLDialect {
   /**
    * Suppress foreign key checks
    */
-  getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
+  override getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     return [`TRUNCATE ${this.table(SQLUtil.classToStack(cls))} CASCADE;`];
   }
 }

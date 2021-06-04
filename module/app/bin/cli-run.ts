@@ -93,7 +93,7 @@ export class AppRunPlugin extends BasePlugin {
    * Tab completion support
    */
 
-  async complete() {
+  override async complete() {
     const apps = await AppListUtil.getList() || [];
 
     const profiles = fs.readdirSync(PathUtil.cwd)

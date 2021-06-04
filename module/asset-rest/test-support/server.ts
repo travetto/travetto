@@ -18,15 +18,15 @@ class TestUploadController {
   @UploadAll()
   async uploadAll({ files }: Request) {
     for (const [, file] of Object.entries(files)) {
-      delete file.stream;
-      return file;
+      const { stream: _, ...meta } = file;
+      return meta;
     }
   }
 
   @Post('/')
   async upload(@Upload() file: Asset) {
-    delete file.stream;
-    return file;
+    const { stream: _, ...meta } = file;
+    return meta;
   }
 
   @Post('/all-named')

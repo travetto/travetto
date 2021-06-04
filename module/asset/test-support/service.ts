@@ -33,7 +33,7 @@ export abstract class AssetServiceSuite {
     const file = await AssetUtil.fileToAsset(pth);
 
     const out = await service.upsert(file);
-    const metadata = await service.describeStream(out);
+    const metadata = await service.describe(out);
     assert(file.filename === metadata.filename);
   }
 
@@ -69,14 +69,14 @@ export abstract class AssetServiceSuite {
     const file = await AssetUtil.fileToAsset(pth);
     const loc = await service.upsert(file);
 
-    const out = await service.describeStream(loc);
+    const out = await service.describe(loc);
 
     assert(out.filename === loc);
 
     await service.delete(loc);
 
     await assert.rejects(async () => {
-      await service.describeStream(loc);
+      await service.describe(loc);
     }, NotFoundError);
   }
 }

@@ -1,0 +1,26 @@
+{
+  "angular12": [
+    "typescript-angular",
+    {
+      "supportsES6": true,
+      "ngVersion": "11.0"
+    }
+  ],
+  "angular11": [
+    "typescript-angular",
+    {
+      "supportsES6": true,
+      "ngVersion": "11.0"
+    }
+  ],
+  "angular10": [
+    "typescript-angular",
+    {
+      "supportsES6": true,
+      "ngVersion": "10.0"
+    }
+  ],
+  "fetch": [
+    "typescript-fetch"
+  ]
+}

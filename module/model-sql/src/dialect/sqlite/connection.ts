@@ -49,7 +49,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
    * Initializes connection and establishes crypto extension for use with hashing
    */
   @WithAsyncContext()
-  async init() {
+  override async init() {
     this.#pool = pool.createPool({
       create: () => this.#withRetries(async () => {
         const db = Db(AppCache.toEntryName('sqlite_db'),

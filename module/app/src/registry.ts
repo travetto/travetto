@@ -53,7 +53,7 @@ class $ApplicationRegistry {
   prepareParams(name: string, args: string[]) {
     const config = this.#applications.get(name)!;
     const cleaned = SchemaRegistry.coereceMethodParams(config.target! as Class, 'run', args);
-    SchemaValidator.validateMethod(config.target!, 'run'!, cleaned);
+    SchemaValidator.validateMethod(config.target!, 'run', cleaned);
     return cleaned;
   }
 

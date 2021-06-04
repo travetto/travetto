@@ -52,19 +52,29 @@ Supported featrues:
 
 @<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'model.firestore'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">FirestoreModelConfig</span> <span class="token punctuation">{{'{'}}</span>
+
   databaseURL<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  credential<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  credentialsFile<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   emulator<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   projectId<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token keyword">namespace</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  credentials<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    client_email<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    project_id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    private_key<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
   <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>emulator<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">FIRESTORE_EMULATOR_HOST</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>emulator<span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>credential<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">this</span><span class="token punctuation">.</span>credential <span class="token operator">=</span> <span class="token keyword">await</span> ResourceManager<span class="token punctuation">.</span><span class="token function">findAbsolute</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>credential<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> <span class="token keyword">this</span><span class="token punctuation">.</span>credentials <span class="token operator">===</span> <span class="token string">'string'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>credentialsFile <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>credentials<span class="token punctuation">;</span>
+      <span class="token keyword">delete</span> <span class="token keyword">this</span><span class="token punctuation">.</span>credentials<span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>credentialsFile <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>credentials<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>credentials <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token keyword">await</span> ResourceManager<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>credentialsFile<span class="token punctuation">,</span> <span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     

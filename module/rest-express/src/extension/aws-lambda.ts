@@ -24,7 +24,7 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
     return this.#handler(event, context);
   }
 
-  init() {
+  override init() {
     const ret = super.init();
     const config = ConfigManager.get('rest.aws');
     this.#handler = serverless.configure({
@@ -34,7 +34,7 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
     return ret;
   }
 
-  async listen() {
+  override async listen() {
     this.listening = true;
     return {} as ServerHandle;
   }

@@ -299,7 +299,7 @@ To customize a REST server, you may need to construct an entry point using the <
 @<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'custom'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token keyword">extends</span> <span class="token class-name">RestApplication</span> <span class="token punctuation">{{'{'}}</span>
 
-  <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  override <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token comment">// Configure server before running</span>
     <span class="token keyword">return</span> <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>

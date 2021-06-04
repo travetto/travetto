@@ -11,7 +11,7 @@ export class BaseBuildPlugin extends BasePlugin {
 
   name = 'build';
 
-  async build() { }
+  override async build() { }
 
   getOptions() {
     return {

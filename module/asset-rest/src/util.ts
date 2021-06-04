@@ -6,7 +6,7 @@ import * as busboy from 'busboy';
 import { Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 import { AppError } from '@travetto/base';
-import { FsUtil, PathUtil, StreamUtil } from '@travetto/boot';
+import { PathUtil, StreamUtil } from '@travetto/boot';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
 
 import { RestAssetConfig } from './config';

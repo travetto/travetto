@@ -64,6 +64,10 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
    * Initialization code for adding options
    */
   init?(cmd: commander.Command): commander.Command | Promise<commander.Command>;
+  /**
+   * Extra help
+   */
+  help?(): Promise<string> | string;
 
   /**
    * Define option
@@ -137,20 +141,13 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   }
 
   /**
-   * Extra help
-   */
-  async help() {
-    return '';
-  }
-
-  /**
    * Render help with additional message or extra text
    */
   async showHelp(err?: string | Error, extra?: string): Promise<never> {
     if (err && typeof err !== 'string') {
       err = err.message;
     }
-    HelpUtil.showHelp(this.#cmd, err, extra || await this.help());
+    HelpUtil.showHelp(this.#cmd, err, extra || (await this.help?.()) || '');
   }
 
   /**

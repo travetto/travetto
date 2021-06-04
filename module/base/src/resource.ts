@@ -114,7 +114,7 @@ class $ResourceManager {
    * @param pth The path to read
    * @param options The options to determine the read behavior
    */
-  async read(pth: string, options?: string | { encoding?: string, flag?: string }) {
+  async read(pth: string, options?: Parameters<typeof fs.promises.readFile>[1]) {
     pth = await this.find(pth);
     return fs.promises.readFile(pth, options);
   }

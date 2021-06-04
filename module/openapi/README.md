@@ -24,7 +24,7 @@ import * as fs from 'fs';
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { Config } from '@travetto/config';
-import { PathUtil, EnvUtil, FsUtil } from '@travetto/boot';
+import { PathUtil, EnvUtil } from '@travetto/boot';
 import { AppManifest } from '@travetto/base';
 
 /**
@@ -122,14 +122,23 @@ The module provides a plugin for the [Command Line Interface](https://github.com
 ```bash
 $ trv openapi:client --help
 
-Usage:  openapi:client [options] [format] [additional-properties]
+Usage:  openapi:client [options] [forma]
 
 Options:
-  -i, --input <input>                Input file (default: "@trv:openapi/openapi.yml")
-  -o, --output <output>              Output folder (default: "@trv:openapi/api-client")
-  -d, --docker-image <docker-image>  Docker Image to use (default: "arcsine/openapi-generator:latest")
-  -w, --watch                        Watch for file changes
-  -h, --help                         display help for command
+  -x, --extended-help                                  Show Extended Help
+  -a, --additional-properties <additional-properties>  Additional Properties (default: [])
+  -i, --input <input>                                  Input file (default: "@trv:openapi/openapi.yml")
+  -o, --output <output>                                Output folder (default: "@trv:openapi/api-client")
+  -d, --docker-image <docker-image>                    Docker Image to use (default: "arcsine/openapi-generator:latest")
+  -w, --watch                                          Watch for file changes
+  -h, --help                                           display help for command
+
+Available Presets
+----------------------------------
+* @trv/angular10 -- typescript-angular supportsES6=true,ngVersion=10.0
+* @trv/angular11 -- typescript-angular supportsES6=true,ngVersion=11.0
+* @trv/angular12 -- typescript-angular supportsES6=true,ngVersion=11.0
+* @trv/fetch     -- typescript-fetch
 ```
 
 This tool relies upon a custom build of [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator), which supports watching.  This allows for fast responsive client generation as the shape of the API changes.

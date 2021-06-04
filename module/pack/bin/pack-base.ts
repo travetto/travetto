@@ -43,7 +43,7 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
     return '[mode]';
   }
 
-  async finalizeOptions() {
+  override async finalizeOptions() {
     const flags = await this.resolveConfigs();
     const opts = await super.finalizeOptions();
     for (const el of opts) {
@@ -68,7 +68,7 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
     return out.join('\n');
   }
 
-  async complete() {
+  override async complete() {
     return { '': (await PackUtil.modeList()).map(x => x.name!) };
   }
 

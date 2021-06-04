@@ -5,7 +5,7 @@ declare let rateLimit: (config: { windowMs: number, max: number }) => ((req: Exp
 
 @Injectable({ primary: true })
 class CustomRestServer extends ExpressRestServer {
-  init() {
+  override init() {
     const app = super.init();
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes

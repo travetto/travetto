@@ -34,7 +34,7 @@ export class SqliteDialect extends SQLDialect {
     });
   }
 
-  resolveDateValue(value: Date) {
+  override resolveDateValue(value: Date) {
     return `${value.getTime()}`;
   }
 
@@ -65,15 +65,15 @@ export class SqliteDialect extends SQLDialect {
   /**
    * Generate truncate SQL
    */
-  getTruncateTableSQL(stack: VisitStack[]) {
+  override getTruncateTableSQL(stack: VisitStack[]) {
     return `DELETE FROM ${this.table(stack)};`;
   }
 
-  getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>): string {
+  override getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>): string {
     return super.getDeleteSQL(stack, where).replace(/_ROOT[.]?/g, '');
   }
 
-  getUpdateSQL(stack: VisitStack[], data: Record<string, unknown>, where?: WhereClause<unknown>): string {
+  override getUpdateSQL(stack: VisitStack[], data: Record<string, unknown>, where?: WhereClause<unknown>): string {
     return super.getUpdateSQL(stack, data, where).replace(/_ROOT[.]?/g, '');
   }
 }

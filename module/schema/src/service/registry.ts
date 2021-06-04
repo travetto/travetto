@@ -319,7 +319,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     return config;
   }
 
-  onInstall(cls: Class, e: ChangeEvent<Class>) {
+  override onInstall(cls: Class, e: ChangeEvent<Class>) {
     super.onInstall(cls, e);
 
     if (this.has(cls)) { // Track dependencies of schemas
@@ -327,7 +327,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     }
   }
 
-  onUninstall<T>(cls: Class<T>, e: ChangeEvent<Class>) {
+  override onUninstall<T>(cls: Class<T>, e: ChangeEvent<Class>) {
     super.onUninstall(cls, e);
     if (e.type === 'removing' && this.hasExpired(cls)) {
       // Recompute subtypes
@@ -342,7 +342,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     }
   }
 
-  emit(ev: ChangeEvent<Class>) {
+  override emit(ev: ChangeEvent<Class>) {
     super.emit(ev);
     if (ev.type === 'changed') {
       SchemaChangeListener.emitFieldChanges({

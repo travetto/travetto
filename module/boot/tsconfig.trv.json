@@ -4,7 +4,7 @@
     "target": "esnext",
     "strict": true,
     "strictPropertyInitialization": false,
-    "noImplicitOverride": true,
+    "noImplicitOverride": false,
     "useDefineForClassFields": true,
     "sourceMap": false,
     "moduleResolution": "node",

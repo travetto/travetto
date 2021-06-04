@@ -2,21 +2,14 @@ import * as mongo from 'mongodb';
 
 import {
   ModelRegistry, ModelType, OptionalId,
-  ModelCrudSupport,
-  ModelStorageSupport,
-  ModelStreamSupport,
-  StreamMeta,
-  IndexField,
-  BulkOp,
-  BulkResponse,
-  ModelBulkSupport,
-  NotFoundError,
-  ExistsError,
-  ModelIndexedSupport
+  ModelCrudSupport, ModelStorageSupport, ModelStreamSupport,
+  ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport,
+  StreamMeta, IndexField, BulkOp, BulkResponse,
+  NotFoundError, ExistsError, IndexConfig
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClause
+  PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
 import { ShutdownManager, Util, Class, AppError } from '@travetto/base';
@@ -31,15 +24,12 @@ import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/servic
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
-import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
-import { IndexConfig } from '@travetto/model/src/registry/types';
+import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
-import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
 const IdxFieldsⲐ = Symbol.for('@trv:model-mongo/idx');
 

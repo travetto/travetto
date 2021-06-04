@@ -3,7 +3,7 @@ import { Class, Util, AppError } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
-import { ModelType, OptionalId } from '@travetto/model/src/types/model';
+import { ModelType } from '@travetto/model/src/types/model';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 
 import { SQLUtil, VisitStack } from '../internal/util';

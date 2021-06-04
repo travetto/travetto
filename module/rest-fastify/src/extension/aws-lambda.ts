@@ -24,14 +24,14 @@ export class AwsLambdaFastifyRestServer extends FastifyRestServer implements Aws
    */
   handle: AwsLambdaRestServer['handle'];
 
-  async init() {
+  override async init() {
     const ret = await super.init();
     const config = ConfigManager.get('rest.aws');
     this.handle = awsLambdaFastify(ret, config.binaryMimeTypes as string[] ?? []);
     return ret;
   }
 
-  async listen() {
+  override async listen() {
     this.listening = true;
     return {
       close: this.raw.close.bind(this.raw),

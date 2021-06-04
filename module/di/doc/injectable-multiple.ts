@@ -11,7 +11,7 @@ const CUSTOM2 = Symbol.for('di-custom2');
 
 @Injectable({ target: CustomService, qualifier: CUSTOM2 })
 class CustomService2 extends CustomService {
-  async coolOperation() {
+  override async coolOperation() {
     await super.coolOperation();
     // Do some additional work
   }

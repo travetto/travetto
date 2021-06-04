@@ -91,7 +91,7 @@ export class FsUtil {
   static async unlinkRecursive(pth: string) {
     checkPath(pth);
     if ('rm' in fs) {
-      await fs.rm(pth, { recursive: true, force: true })
+      await fs.rm(pth, { recursive: true, force: true });
     } else {
       try {
         await ExecUtil.spawn(...this.#unlinkCommand(pth)).result;

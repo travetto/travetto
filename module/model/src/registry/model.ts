@@ -60,7 +60,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     return config;
   }
 
-  onUninstallFinalize(cls: Class) {
+  override onUninstallFinalize(cls: Class) {
     this.stores.delete(cls);
 
     // Force system to recompute on uninstall

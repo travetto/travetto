@@ -222,7 +222,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Handle initial installation for the entire registry
    */
-  initialInstall() {
+  override initialInstall() {
     const finalizing = this.pendingFinalize;
     this.pendingFinalize = [];
 
@@ -362,7 +362,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * On Install event
    */
-  onInstall<T>(cls: Class<T>, e: ChangeEvent<Class<T>>) {
+  override onInstall<T>(cls: Class<T>, e: ChangeEvent<Class<T>>) {
     super.onInstall(cls, e);
 
     // Install factories separate from classes
@@ -486,7 +486,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Handle uninstalling a class
    */
-  onUninstallFinalize(cls: Class) {
+  override onUninstallFinalize(cls: Class) {
     const classId = cls.ᚕid;
 
     if (!this.classToTarget.has(cls.ᚕid)) {
@@ -503,7 +503,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Reset registry
    */
-  onReset() {
+  override onReset() {
     super.onReset();
     this.pendingFinalize = [];
     this.instances.clear();

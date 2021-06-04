@@ -1,4 +1,4 @@
-import { EnvUtil } from '@travetto/boot/src';
+import { EnvUtil } from '@travetto/boot';
 import { StacktraceUtil } from '../stacktrace';
 
 declare global {
@@ -40,8 +40,8 @@ addFn(Error.prototype, 'toJSON', function (this: Error, extra?: Record<string, u
 });
 
 // Add .toArray to async iterables
-const proto = Object.getPrototypeOf(Object.getPrototypeOf((async function* () { })()));
-addFn(proto, 'toArray', async function (this: AsyncGenerator<any>) {
+const AsyncProto = Object.getPrototypeOf(Object.getPrototypeOf((async function* () { })()));
+addFn(AsyncProto, 'toArray', async function (this: AsyncGenerator<unknown>) {
   const out = [];
   for await (const item of this) {
     out.push(item);

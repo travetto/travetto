@@ -54,7 +54,7 @@ export class Service {
 export class ServiceInherit extends Service {
   name = 'bob';
   age = 30;
-  doWork() {
+  override doWork() {
     this.db.query();
   }
 }
@@ -64,7 +64,7 @@ export const SERVICE_INHERIT_3 = Symbol.for('SVC_I_3');
 
 @Injectable(SERVICE_INHERIT_2)
 export class ServiceInherit2 extends ServiceInherit {
-  age = 31;
+  override age = 31;
 }
 
 export const CUSTOM_SERVICE_INHERIT = Symbol.for('Custom');
@@ -140,7 +140,7 @@ class Config {
   @InjectableFactory(LOOSE_SYM)
   static getLoose(): LooseResolutionClass {
     return new class extends LooseResolutionClass {
-      name = 'george';
+      override name = 'george';
     }();
   }
 }

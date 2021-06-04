@@ -7,7 +7,7 @@ declare let rateLimit: (config: { windowMs: number, max: number }) => FastifyPlu
 
 @Injectable({ primary: true })
 class CustomRestServer extends FastifyRestServer {
-  async init() {
+  override async init() {
     const app = await super.init();
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes

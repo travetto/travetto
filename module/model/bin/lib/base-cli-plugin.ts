@@ -20,7 +20,7 @@ export abstract class BaseModelPlugin extends BasePlugin {
     EnvInit.init();
   }
 
-  async build() {
+  override async build() {
     await super.build();
     const { ConsoleManager, PhaseManager } = await import('@travetto/base');
     ConsoleManager.exclude('debug');

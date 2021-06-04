@@ -4,7 +4,7 @@ import { RestApplication } from '@travetto/rest';
 @Application('custom')
 export class SampleApp extends RestApplication {
 
-  run() {
+  override run() {
     // Configure server before running
     return super.run();
   }
