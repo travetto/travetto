@@ -32,7 +32,7 @@
     "trv-scaffold": "./bin/trv-scaffold.js"
   },
   "dependencies": {
-    "@travetto/boot": "^2.0.0-rc.2",
+    "@travetto/boot": "^2.0.0-rc.5",
     "@travetto/cli": "^2.0.0-rc.3",
     "mustache": "^4.2.0",
     "enquirer": "^2.3.6"

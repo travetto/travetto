@@ -28,7 +28,7 @@
     "directory": "module/base"
   },
   "dependencies": {
-    "@travetto/boot": "^2.0.0-rc.2"
+    "@travetto/boot": "^2.0.0-rc.5"
   },
   "optionalPeerDependencies": {
     "@travetto/cli": "^2.0.0-rc.3"
