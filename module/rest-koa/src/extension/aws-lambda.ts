@@ -2,9 +2,8 @@
 import * as serverless from '@vendia/serverless-express';
 import type * as lambda from 'aws-lambda';
 
-import { Injectable } from '@travetto/di';
-import { ConfigManager } from '@travetto/config';
-import { AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ } from '@travetto/rest/src/extension/aws-lambda';
+import { Inject, Injectable } from '@travetto/di';
+import { AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ, RestAwsConfig } from '@travetto/rest/src/extension/aws-lambda';
 import { ServerHandle } from '@travetto/rest/src/types';
 
 import { KoaRestServer } from '../server';
@@ -17,6 +16,9 @@ export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRe
 
   #handler: AwsLambdaHandler['handle'];
 
+  @Inject()
+  awsConfig: RestAwsConfig;
+
   /**
    * Handler method for the proxy
    */
@@ -26,11 +28,7 @@ export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRe
 
   override init() {
     const ret = super.init();
-    const config = ConfigManager.get('rest.aws');
-    this.#handler = serverless.configure({
-      app: ret.callback(),
-      ...(config.binaryMimeTypes ? { binaryMimeTypes: config.binaryMimeTypes as string[] } : {})
-    }) as unknown as AwsLambdaHandler['handle'];
+    this.#handler = serverless.configure({ app: ret.callback(), ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandler['handle'];
     return ret;
   }
 

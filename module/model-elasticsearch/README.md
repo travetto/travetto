@@ -40,13 +40,14 @@ export class Init {
 }
 ```
 
-  where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L10) is defined by:
+  where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L11) is defined by:
 
   
 **Code: Structure of ElasticsearchModelConfig**
 ```typescript
 import { TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
+import { Field } from '@travetto/schema';
 
 import { EsSchemaConfig } from './internal/types';
 
@@ -74,10 +75,11 @@ export class ElasticsearchModelConfig {
   /**
    * Auto-create, disabled in prod by default
    */
-  autoCreate: boolean;
+  autoCreate?: boolean;
   /**
    * Base schema config for elasticsearch
    */
+  @Field(Object)
   schemaConfig: EsSchemaConfig = {
     caseSensitive: false
   };
@@ -85,6 +87,7 @@ export class ElasticsearchModelConfig {
   /**
    * Base index create settings
    */
+  @Field(Object)
   indexCreate = {
     ['number_of_replicas']: 0,
     ['number_of_shards']: 1
@@ -107,5 +110,5 @@ export class ElasticsearchModelConfig {
 }
 ```
 
-  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10) annotation, and so these values can be overridden using the 
+  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9) annotation, and so these values can be overridden using the 
   standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Environment-aware config management using yaml files")resolution paths.

@@ -1,5 +1,6 @@
 import { TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
+import { Field } from '@travetto/schema';
 
 import { EsSchemaConfig } from './internal/types';
 
@@ -27,10 +28,11 @@ export class ElasticsearchModelConfig {
   /**
    * Auto-create, disabled in prod by default
    */
-  autoCreate: boolean;
+  autoCreate?: boolean;
   /**
    * Base schema config for elasticsearch
    */
+  @Field(Object)
   schemaConfig: EsSchemaConfig = {
     caseSensitive: false
   };
@@ -38,6 +40,7 @@ export class ElasticsearchModelConfig {
   /**
    * Base index create settings
    */
+  @Field(Object)
   indexCreate = {
     ['number_of_replicas']: 0,
     ['number_of_shards']: 1

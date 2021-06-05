@@ -1,6 +1,7 @@
 import type * as lambda from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
+import { Config } from '@travetto/config';
 
 import { RestApplication } from '../application/rest';
 import { RestServer } from '../application/server';
@@ -24,6 +25,19 @@ export class AwsLambdaRestServerTarget { }
  * @concrete .:AwsLambdaRestServerTarget
  */
 export interface AwsLambdaRestServer extends RestServer, AwsLambdaHandler { }
+
+@Config('rest.aws')
+export class RestAwsConfig {
+  binaryMimeTypes?: string[];
+
+  toJSON() {
+    const out: Record<string, unknown> = {};
+    if (this.binaryMimeTypes) {
+      out.binarySettings = { contentTypes: this.binaryMimeTypes };
+    }
+    return out;
+  }
+}
 
 @Injectable()
 export class AwsLambdaRestApplication extends RestApplication implements AwsLambdaHandler {

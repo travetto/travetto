@@ -3,6 +3,17 @@ import { EnvUtil } from '../env';
 
 type SourceHandler = (name: string, contents: string) => string;
 
+declare global {
+  // eslint-disable-next-line no-var
+  var ts: unknown;
+}
+
+// Inject into global space as 'ts'
+global.ts = new Proxy({}, {
+  // Load on demand, and replace on first use
+  get: (t, p, r) => (global.ts = require('typescript'))[p]
+});
+
 /**
  * Source Utilities
  */
@@ -11,6 +22,16 @@ export class SourceUtil {
   static #handlers: SourceHandler[] = [];
 
   static readonly EXT = '.ts';
+
+  static init() {
+    // Tag output to indicate it was succefully processed by the framework
+    this.addPreProcessor((__, contents) =>
+      `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`);
+
+    // Drop typescript import, and use global. Great speedup;
+    this.addPreProcessor((_, contents) =>
+      contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript';/mg, x => `// ${x}`));
+  }
 
   /**
    * Build error module source

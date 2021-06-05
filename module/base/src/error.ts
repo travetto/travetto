@@ -34,13 +34,24 @@ export class AppError extends Error {
    * @param extra Extra data to build into the context
    */
   override toJSON(extra: Record<string, unknown> = {}) {
-    return {
-      ...extra,
-      ...(this.payload ?? {}),
-      at: this.at,
+    const out: Record<string, unknown> = {
       message: this.message,
       category: this.category,
-      type: this.type
+      type: this.type,
+      at: this.at,
     };
+    for (const [key, value] of Object.entries(extra)) {
+      if (!(key in out)) {
+        out[key] = value;
+      }
+    }
+    if (this.payload) {
+      for (const [key, value] of Object.entries(this.payload)) {
+        if (!(key in out)) {
+          out[key] = value;
+        }
+      }
+    }
+    return out;
   }
 }

@@ -2,10 +2,9 @@
 import * as serverless from '@vendia/serverless-express';
 import type * as lambda from 'aws-lambda';
 
-import { Injectable } from '@travetto/di';
-import { ConfigManager } from '@travetto/config';
+import { Inject, Injectable } from '@travetto/di';
 import { ServerHandle } from '@travetto/rest/src/types';
-import { AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ } from '@travetto/rest/src/extension/aws-lambda';
+import { AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ, RestAwsConfig } from '@travetto/rest/src/extension/aws-lambda';
 
 import { ExpressRestServer } from '../server';
 
@@ -17,6 +16,9 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
 
   #handler: AwsLambdaHandler['handle'];
 
+  @Inject()
+  awsConfig: RestAwsConfig;
+
   /**
    * Handler method for the proxy
    */
@@ -26,11 +28,7 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
 
   override init() {
     const ret = super.init();
-    const config = ConfigManager.get('rest.aws');
-    this.#handler = serverless.configure({
-      app: ret,
-      ...(config.binaryMimeTypes ? { binaryMimeTypes: config.binaryMimeTypes as string[] } : {})
-    }) as unknown as AwsLambdaHandler['handle'];
+    this.#handler = serverless.configure({ app: ret, ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandler['handle'];
     return ret;
   }
 

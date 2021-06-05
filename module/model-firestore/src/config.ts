@@ -8,12 +8,12 @@ export class FirestoreModelConfig {
   credentialsFile?: string;
   emulator?: string;
   projectId: string;
-  namespace: string;
+  namespace?: string;
   autoCreate?: boolean;
   credentials?: {
     client_email: string;
     project_id: string;
-    private_key?: string;
+    private_key: string;
   };
 
   async postConstruct() {

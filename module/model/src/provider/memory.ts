@@ -25,7 +25,7 @@ const STREAM_META = `${STREAMS}_meta`;
 @Config('model.memory')
 export class MemoryModelConfig {
   autoCreate?: boolean;
-  namespace: string;
+  namespace?: string;
   cullRate?: number | TimeSpan;
 }
 

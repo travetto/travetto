@@ -1,8 +1,8 @@
 import { PathUtil } from '@travetto/boot';
 import { Class, AppManifest, ShutdownManager, ConcreteClass } from '@travetto/base';
-import { ConfigManager } from '@travetto/config';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
+import { ConfigManager } from '@travetto/config';
 
 import { AppClass, ApplicationConfig } from './types';
 
@@ -41,10 +41,8 @@ class $ApplicationRegistry {
       name: config.name,
       filename: config.filename.replace(/^.*node_modules\//, '').replace(PathUtil.cwd, '.')
     });
-    console.log('Configured', {
-      ...AppManifest.toJSON(),
-      config: AppManifest.prod ? ConfigManager.getSecure() : ConfigManager.get()
-    });
+    console.log('Manifest', AppManifest.toJSON());
+    console.log('Config', ConfigManager.toJSON());
   }
 
   /**

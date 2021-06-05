@@ -10,7 +10,11 @@ import { Describe } from './src/decorator/common';
 export const text = d`
 ${d.Header()}
 
-This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
+This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is 
+leveraged in the ${mod.Config}, ${mod.App}, ${mod.Rest}, ${mod.Openapi} and ${mod.Model} modules.  The schema is the backbone of all data transfer, as it helps to
+provide validation on correctness of input, whether it is a rest request, command line inputs, or a configuration file.
+
+This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.
 
 ${d.Section('Registration')}
 The registry's schema information is defined by ${lib.Typescript} AST and only applies to classes registered with the ${Schema} decoration. 
@@ -132,7 +136,7 @@ ${d.List(
 
 In addition to the general types, the code relies upon name matching to provide additional refinement:
 
-${d.Snippet('Supported Mappings', 'src/extension/faker.ts', /NAMES_TO_TYPE/, /\};/)}
+${d.Snippet('Supported Mappings', 'src/extension/faker.ts', /#namesToType/, /\};/)}
 
 An example of this would be:
 

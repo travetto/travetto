@@ -8,7 +8,11 @@
 npm install @travetto/schema
 ```
 
-This module provide a mechanisms for registering classes and field level information as well the ability to apply that information at runtime.
+This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is 
+leveraged in the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Environment-aware config management using yaml files"), [Application](https://github.com/travetto/travetto/tree/main/module/app#readme "Application registration/management and run support."), [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module."), [OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the travetto framework") and [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") modules.  The schema is the backbone of all data transfer, as it helps to
+provide validation on correctness of input, whether it is a rest request, command line inputs, or a configuration file.
+
+This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.
 
 ## Registration
 The registry's schema information is defined by [Typescript](https://typescriptlang.org) AST and only applies to classes registered with the [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12) decoration. 
@@ -198,6 +202,10 @@ would produce an exception similar to following structure
 $ node @travetto/base/bin/main ./doc/person-invalid-output.ts 
 
 Validation Failed {
+  "message": "Validation errors have occurred",
+  "category": "data",
+  "type": "ValidationResultError",
+  "at": "2021-03-14T05:00:00.618Z",
   "errors": [
     {
       "kind": "type",
@@ -211,11 +219,7 @@ Validation Failed {
       "path": "address.street2",
       "message": "address.street2 is required"
     }
-  ],
-  "at": "2021-03-14T05:00:00.618Z",
-  "message": "Validation errors have occurred",
-  "category": "data",
-  "type": "ValidationResultError"
+  ]
 }
 ```
 
@@ -302,30 +306,30 @@ In addition to the general types, the code relies upon name matching to provide 
 
 **Code: Supported Mappings**
 ```typescript
-static NAMES_TO_TYPE = {
+static #namesToType = {
     string: [
-      [/^(image|img).*url$/, faker.image.imageUrl],
-      [/^url$/, faker.internet.url],
-      [/^email(addr(ress)?)?$/, faker.internet.email],
-      [/^(tele)?phone(num|number)?$/, faker.phone.phoneNumber],
-      [/^((postal|zip)code)|zip$/, faker.address.zipCode],
-      [/f(irst)?name/, faker.name.firstName],
-      [/l(ast)?name/, faker.name.lastName],
-      [/^ip(add(ress)?)?$/, faker.internet.ip],
-      [/^ip(add(ress)?)?(v?)6$/, faker.internet.ipv6],
-      [/^username$/, faker.internet.userName],
-      [/^domain(name)?$/, faker.internet.domainName],
-      [/^file(path|name)?$/, faker.system.filePath],
-      [/^street(1)?$/, faker.address.streetAddress],
-      [/^street2$/, faker.address.secondaryAddress],
-      [/^county$/, faker.address.county],
-      [/^country$/, faker.address.country],
-      [/^state$/, faker.address.state],
-      [/^lon(gitude)/, faker.address.longitude],
-      [/^lat(itude)/, faker.address.latitude],
-      [/(profile).*(image|img)/, faker.image.avatar],
-      [/(image|img)/, faker.image.image],
-      [/^company(name)?$/, faker.company.companyName],
+      [/^(image|img).*url$/, () => faker.image.imageUrl()],
+      [/^url$/, () => faker.internet.url()],
+      [/^email(addr(ress)?)?$/, () => faker.internet.email()],
+      [/^(tele)?phone(num|number)?$/, () => faker.phone.phoneNumber()],
+      [/^((postal|zip)code)|zip$/, () => faker.address.zipCode()],
+      [/f(irst)?name/, () => faker.name.firstName()],
+      [/l(ast)?name/, () => faker.name.lastName()],
+      [/^ip(add(ress)?)?$/, () => faker.internet.ip()],
+      [/^ip(add(ress)?)?(v?)6$/, () => faker.internet.ipv6()],
+      [/^username$/, () => faker.internet.userName()],
+      [/^domain(name)?$/, () => faker.internet.domainName()],
+      [/^file(path|name)?$/, () => faker.system.filePath()],
+      [/^street(1)?$/, () => faker.address.streetAddress()],
+      [/^street2$/, () => faker.address.secondaryAddress()],
+      [/^county$/, () => faker.address.county()],
+      [/^country$/, () => faker.address.country()],
+      [/^state$/, () => faker.address.state()],
+      [/^lon(gitude)?$/, () => faker.address.longitude()],
+      [/^lat(itude)?$/, () => faker.address.latitude()],
+      [/(profile).*(image|img)/, () => faker.image.avatar()],
+      [/(image|img)/, () => faker.image.image()],
+      [/^company(name)?$/, () => faker.company.companyName()],
       [/(desc|description)$/, () => faker.lorem.sentences(10)]
     ] as [RegExp, () => string][],
     date: [
@@ -427,6 +431,10 @@ All that happens now, is the type is exported, and the class above is able to pr
 $ node @travetto/base/bin/main ./doc/custom-type-output.ts 
 
 Validation Failed {
+  "message": "Validation errors have occurred",
+  "category": "data",
+  "type": "ValidationResultError",
+  "at": "2021-03-14T05:00:00.837Z",
   "errors": [
     {
       "kind": "type",
@@ -434,11 +442,7 @@ Validation Failed {
       "path": "point",
       "message": "point is not a valid PointImpl"
     }
-  ],
-  "at": "2021-03-14T05:00:00.837Z",
-  "message": "Validation errors have occurred",
-  "category": "data",
-  "type": "ValidationResultError"
+  ]
 }
 ```
 ;

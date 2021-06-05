@@ -113,8 +113,10 @@ export class VisitorFactory<S extends State = State> {
         }
         return state.finalize(ret);
       } catch (e) {
-        console.error('Failed transforming', { error: e });
-        throw e;
+        console.error('Failed transforming', { error: e, file: file.fileName });
+        const out = new Error(`Failed transforming: ${file.fileName}: ${e.message}`);
+        out.stack = e.stack;
+        throw out;
       } finally {
         ConsoleManager.clear(); // Reset logging
       }

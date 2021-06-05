@@ -40,7 +40,7 @@ Supported featrues:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/config.ts#L5">DynamoDBModelConfig</a> is defined by:
+  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/config.ts#L7">DynamoDBModelConfig</a> is defined by:
 
   
       <figure class="code">
@@ -48,18 +48,21 @@ Supported featrues:
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/config.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> dynamodb <span class="token keyword">from</span> <span class="token string">'@aws-sdk/client-dynamodb'</span><span class="token punctuation">;</span>
+
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Field <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
 @<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'model.dynamodb'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DynamoDBModelConfig</span> <span class="token punctuation">{{'{'}}</span>
+  @<span class="token meta">Field</span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
   client<span class="token operator">:</span> dynamodb<span class="token punctuation">.</span>DynamoDBClientConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
     endpoint<span class="token operator">:</span> <span class="token keyword">undefined</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
   autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token keyword">namespace</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token keyword">namespace</span><span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-  Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10">@Config</a> annotation, and so these values can be overridden using the 
+  Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9">@Config</a> annotation, and so these values can be overridden using the 
   standard <a class="module-link" routerLink="/docs/config" title="Environment-aware config management using yaml files">Configuration</a>resolution paths.
 </div>

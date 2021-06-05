@@ -46,7 +46,7 @@ Supported featrues:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L10">ElasticsearchModelConfig</a> is defined by:
+  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/config.ts#L11">ElasticsearchModelConfig</a> is defined by:
 
   
       <figure class="code">
@@ -55,6 +55,7 @@ Supported featrues:
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> TimeSpan <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Field <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> EsSchemaConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./internal/types'</span><span class="token punctuation">;</span>
 
@@ -82,10 +83,11 @@ Supported featrues:
   <span class="token comment">/**
    * Auto-create, disabled in prod by default
    */</span>
-  autoCreate<span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Base schema config for elasticsearch
    */</span>
+  @<span class="token meta">Field</span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
   schemaConfig<span class="token operator">:</span> EsSchemaConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
     caseSensitive<span class="token operator">:</span> <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
@@ -93,6 +95,7 @@ Supported featrues:
   <span class="token comment">/**
    * Base index create settings
    */</span>
+  @<span class="token meta">Field</span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
   indexCreate <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token punctuation">[</span><span class="token string">'number_of_replicas'</span><span class="token punctuation">]</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
     <span class="token punctuation">[</span><span class="token string">'number_of_shards'</span><span class="token punctuation">]</span><span class="token operator">:</span> <span class="token number">1</span>
@@ -115,6 +118,6 @@ Supported featrues:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-  Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10">@Config</a> annotation, and so these values can be overridden using the 
+  Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9">@Config</a> annotation, and so these values can be overridden using the 
   standard <a class="module-link" routerLink="/docs/config" title="Environment-aware config management using yaml files">Configuration</a>resolution paths.
 </div>

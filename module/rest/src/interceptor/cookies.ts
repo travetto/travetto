@@ -14,7 +14,7 @@ import { GetCacheInterceptor } from './get-cache';
  * Rest cookie configuration
  */
 @Config('rest.cookie')
-export class RestCookieConfig implements cookies.SetOption {
+export class RestCookieConfig {
   /**
    * Are cookies supported
    */

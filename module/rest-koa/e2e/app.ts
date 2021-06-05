@@ -6,7 +6,10 @@ export class SampleApp {
   #server: RestApplication;
   #config: RestConfig;
 
-  constructor(server: RestApplication, config: RestConfig) { }
+  constructor(server: RestApplication, config: RestConfig) {
+    this.#server = server;
+    this.#config = config;
+  }
 
   run(port = 3000, ssl = false) {
     this.#config.port = port;

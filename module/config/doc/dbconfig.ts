@@ -4,8 +4,8 @@ import { Config } from '@travetto/config';
 export class DBConfig {
   host: string;
   port: number;
-  creds = {
-    user: '',
-    password: ''
+  creds: {
+    user: string;
+    password: string;
   };
 }

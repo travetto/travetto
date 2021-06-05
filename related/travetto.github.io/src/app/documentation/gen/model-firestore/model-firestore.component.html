@@ -57,12 +57,12 @@ Supported featrues:
   credentialsFile<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   emulator<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   projectId<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token keyword">namespace</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token keyword">namespace</span><span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   credentials<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     client_email<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
     project_id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-    private_key<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    private_key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
   <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -80,6 +80,6 @@ Supported featrues:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-  Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10">@Config</a> annotation, and so these values can be overridden using the 
+  Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9">@Config</a> annotation, and so these values can be overridden using the 
   standard <a class="module-link" routerLink="/docs/config" title="Environment-aware config management using yaml files">Configuration</a>resolution paths.
 </div>

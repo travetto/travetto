@@ -1,9 +1,14 @@
 // @file-if @travetto/rest
 import { GetCacheInterceptor, RestInterceptor, Request, Response, RouteConfig } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
-import { ConfigManager } from '@travetto/config';
+import { Config } from '@travetto/config';
 
 import { AsyncContext } from '../service';
+
+@Config('rest.context')
+class RestAsyncContext {
+  disabled = false;
+}
 
 /**
  * Enables access to contextual data when running in a rest application
@@ -16,8 +21,11 @@ export class AsyncContextInterceptor implements RestInterceptor {
   @Inject()
   context: AsyncContext;
 
+  @Inject()
+  config: RestAsyncContext;
+
   applies(route: RouteConfig): boolean {
-    return !ConfigManager.get('rest.context').disabled;
+    return !this.config.disabled;
   }
 
   intercept(req: Request, res: Response, next: () => Promise<void>) {

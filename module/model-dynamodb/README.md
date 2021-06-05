@@ -34,23 +34,26 @@ export class Init {
 }
 ```
 
-  where the [DynamoDBModelConfig](https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/config.ts#L5) is defined by:
+  where the [DynamoDBModelConfig](https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/config.ts#L7) is defined by:
 
   
 **Code: Structure of DynamoDBModelConfig**
 ```typescript
 import * as dynamodb from '@aws-sdk/client-dynamodb';
+
 import { Config } from '@travetto/config';
+import { Field } from '@travetto/schema';
 
 @Config('model.dynamodb')
 export class DynamoDBModelConfig {
+  @Field(Object)
   client: dynamodb.DynamoDBClientConfig = {
     endpoint: undefined
   };
   autoCreate?: boolean;
-  namespace: string;
+  namespace?: string;
 }
 ```
 
-  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10) annotation, and so these values can be overridden using the 
+  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9) annotation, and so these values can be overridden using the 
   standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Environment-aware config management using yaml files")resolution paths.

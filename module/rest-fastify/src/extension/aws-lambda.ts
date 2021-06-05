@@ -1,9 +1,8 @@
 // @file-if aws-lambda-fastify
 import { FastifyInstance } from 'fastify';
 
-import { Injectable } from '@travetto/di';
-import { ConfigManager } from '@travetto/config';
-import { AwsLambdaRestServer, AwsLambdaⲐ } from '@travetto/rest/src/extension/aws-lambda';
+import { Inject, Injectable } from '@travetto/di';
+import { AwsLambdaRestServer, AwsLambdaⲐ, RestAwsConfig } from '@travetto/rest/src/extension/aws-lambda';
 
 import { FastifyRestServer } from '../server';
 
@@ -19,6 +18,9 @@ const awsLambdaFastify = require('aws-lambda-fastify') as (
 @Injectable(AwsLambdaⲐ)
 export class AwsLambdaFastifyRestServer extends FastifyRestServer implements AwsLambdaRestServer {
 
+  @Inject()
+  awsConfig: RestAwsConfig;
+
   /**
    * Handler method for the proxy, will get initialized on first request
    */
@@ -26,8 +28,7 @@ export class AwsLambdaFastifyRestServer extends FastifyRestServer implements Aws
 
   override async init() {
     const ret = await super.init();
-    const config = ConfigManager.get('rest.aws');
-    this.handle = awsLambdaFastify(ret, config.binaryMimeTypes as string[] ?? []);
+    this.handle = awsLambdaFastify(ret, this.awsConfig.binaryMimeTypes ?? []);
     return ret;
   }
 

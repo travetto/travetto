@@ -121,16 +121,12 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * When an installation event occurs
    */
-  onInstall(cls: Class, e: ChangeEvent<Class>): void {
-
-  }
+  onInstall?(cls: Class, e: ChangeEvent<Class>): void;
 
   /**
    * When an un-installation event occurs
    */
-  onUninstall(cls: Class, e: ChangeEvent<Class>): void {
-
-  }
+  onUninstall?(cls: Class, e: ChangeEvent<Class>): void;
 
   /**
    * Uninstall a class or list of classes
@@ -140,7 +136,7 @@ export abstract class Registry implements ChangeSource<Class> {
       classes = [classes];
     }
     for (const cls of classes) {
-      this.onUninstall(cls, e);
+      this.onUninstall?.(cls, e);
     }
   }
 
@@ -152,7 +148,7 @@ export abstract class Registry implements ChangeSource<Class> {
       classes = [classes];
     }
     for (const cls of classes) {
-      this.onInstall(cls, e);
+      this.onInstall?.(cls, e);
     }
   }
 

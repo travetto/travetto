@@ -13,18 +13,24 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/config</code></pre>     
       </figure>
 
-The config module provides support for loading application config on startup. Configuration values support the common <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> constructs as defined in <a class="module-link" routerLink="/docs/yaml" title="Simple YAML support, provides only clean subset of yaml">YAML</a>.  The configuration information is comprised of:
-
-<ul> <li><a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> files</li>
- <li>environment variables</li></ul>
+The config module provides support for loading application config on startup. Configuration values support the common <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> constructs as defined in <a class="module-link" routerLink="/docs/yaml" title="Simple YAML support, provides only clean subset of yaml">YAML</a>.  Additionally, the configuration is built upon the <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a> module, to enforce type correctness, and allow for validation of configuration as an 
+entrypoint into the application.  Given that all <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9">@Config</a> classes are -based classes, all the standard  and  functionality applies.
 
 <h2 id="resolution">Resolution</h2>
+
+The configuration information is comprised of:
+
+<ul> <li><a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> files</li>
+ <li>environment variables</li>
+ <li>configuration classes</li></ul>
 
 Config loading follows a defined resolution path, below is the order in increasing specificity:
 <ol> <li><code class="item path">resources/application.yml</code> - Load the default <code class="item path">application.yml</code> if available.</li>
  <li><code class="item path">resources/*.yml</code> - Load profile specific configurations as defined by the values in <code class="item field">process.env.TRV_PROFILES</code></li>
  <li><code class="item path">resources/{{'{'}}env{{'}'}}.yml</code> - Load environment specific profile configurations as defined by the values of <code class="item field">process.env.TRV_ENV</code>.</li>
  <li><code class="item field">process.env</code> - Read startup configuration from environment to allow for overriding any values. Because we are overriding a <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as <code class="item input">UPPER_SNAKE_CASE</code>. When reading from <code class="item field">process.env</code> we will map <code class="item input">UPPER_SNAKE_CASE</code> to <code class="item input">upper.snake.case</code>, and will attempt to match by case-insensitive name.</li></ol>
+
+By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class. This is due to the fact that environment data, as well as configuration data can only be interpreted in light of a class structure, as the data binding is what makes the configuration valid.
 
 <h2 id="a-complete-example">A Complete Example</h2>
 
@@ -76,8 +82,8 @@ At runtime the resolved config would be:
 Config <span class="token punctuation">{{'{'}}</span>
   database: <span class="token punctuation">{{'{'}}</span>
     host: <span class="token string">'localhost'</span>,
-    creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'test'</span>, password: <span class="token string">'%secret%'</span> <span class="token punctuation">{{'}'}}</span>,
-    port: <span class="token string">'1234'</span>
+    port: <span class="token number">1234</span>,
+    creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'test'</span>, password: <span class="token string">'**********'</span> <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
@@ -86,7 +92,7 @@ Config <span class="token punctuation">{{'{'}}</span>
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under <code class="item input">config.redacted</code>.
 
 <h2 id="consuming">Consuming</h2>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/manager.ts">ConfigManager</a> service provides direct access to all of the loaded configuration. For simplicity, a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10">@Config</a> allows for classes to automatically be bound with config information on post construction via the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module. The decorator will install a <code class="item method">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/manager.ts">ConfigManager</a> service provides direct access to all of the loaded configuration. For simplicity, a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9">@Config</a> allows for classes to automatically be bound with config information on post construction via the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module. The decorator will install a <code class="item method">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 
@@ -100,14 +106,14 @@ The decorator takes in a namespace, of what part of the resolved configuration y
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DBConfig</span> <span class="token punctuation">{{'{'}}</span>
   host<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   port<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-  creds <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
-    user<span class="token operator">:</span> <span class="token string">''</span><span class="token punctuation">,</span>
-    password<span class="token operator">:</span> <span class="token string">''</span>
+  creds<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    user<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    password<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-Using the above config files, the resultant object would be:
+Using the above config files, you'll notice that the port is not specified (its only specified in the environment variables).  This means when the application attempts to start up, it will fail if the port is not specified via an environment variable:
 
       <figure class="terminal">
       <figcaption class="terminal">Resolved database config
@@ -115,10 +121,40 @@ Using the above config files, the resultant object would be:
       </figcaption>
       <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/dbconfig-run.ts
 
-DBConfig <span class="token punctuation">{{'{'}}</span>
-  host: <span class="token string">'localhost'</span>,
-  port: undefined,
-  creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'test'</span>, password: <span class="token string">'test'</span> <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'{'}}</span>
+  message: <span class="token string">'Failed to construct @trv:config/doc/dbconfig￮DBConfig as validation errors have occurred'</span>,
+  category: <span class="token string">'data'</span>,
+  type: <span class="token string">'ValidationResultError'</span>,
+  at: <span class="token number">2021</span>-03-14T05:00:00.618Z,
+  class: <span class="token string">'@trv:config/doc/dbconfig￮DBConfig'</span>,
+  file: <span class="token string">'@trv:config/doc/dbconfig.ts'</span>,
+  errors: <span class="token punctuation">[</span>
+    <span class="token punctuation">{{'{'}}</span>
+      kind: <span class="token string">'required'</span>,
+      active: true,
+      path: <span class="token string">'port'</span>,
+      message: <span class="token string">'port is required'</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+What you see, is that the configuration structure must be honored and the application will fail to start if the constraints do not hold true.  This helps to ensure that the configuration, as input to the system, is verified and correct.
+
+By passing in the port via the environment variable, the config will construct properly, and the application will startup correctly:
+
+      <figure class="terminal">
+      <figcaption class="terminal">Resolved database config
+      
+      </figcaption>
+      <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/dbconfig-run.ts
+
+Config <span class="token punctuation">{{'{'}}</span>
+  database: <span class="token punctuation">{{'{'}}</span>
+    host: <span class="token string">'localhost'</span>,
+    port: <span class="token number">200</span>,
+    creds: <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'test'</span>, password: <span class="token string">'test'</span> <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 </div>

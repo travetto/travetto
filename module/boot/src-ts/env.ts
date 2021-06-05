@@ -123,7 +123,7 @@ export class EnvUtil {
    * Can use compile
    */
   static isProd() {
-    return /^prod(uction)$/i.test(EnvUtil.get('TRV_ENV', ''));
+    return /^prod(uction)?$/i.test(EnvUtil.get('TRV_ENV', ''));
   }
 
   /**

@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 
 import { TimeSpan, ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
+import { Field } from '@travetto/schema';
 
 /**
  * Mongo model config
@@ -37,9 +38,11 @@ export class MongoModelConfig {
    * Is using the SRV DNS record configuration
    */
   srvRecord = false;
+
   /**
    * Mongo client options
    */
+  @Field(Object)
   options: mongo.MongoClientOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true

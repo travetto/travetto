@@ -21,7 +21,7 @@ declare const global: {
  */
 export class ModuleManager {
   // @ts-expect-error
-  static #objectProto = Object.prototype.__proto__; // Remove to prevent __proto__ pollution in JSON
+  static #objectProto = Object.prototype.__proto__;
 
   static #moduleResolveFilename = Module._resolveFilename.bind(Module);
   static #moduleLoad = Module._load.bind(Module);
@@ -78,7 +78,6 @@ export class ModuleManager {
   static setTranspiler(fn: (file: string) => string) {
     if (EnvUtil.isReadonly()) {
       fn = (tsf: string) => AppCache.readEntry(tsf);
-      console.debug('In readonly mode, refusing to set transpiler');
     }
     // @ts-expect-error
     this.transpile = fn;
@@ -127,6 +126,10 @@ export class ModuleManager {
       return;
     }
 
+    if (EnvUtil.isReadonly()) {
+      console.debug(new Date().toISOString(), 'Running read-only mode, transpilation is disabled');
+    }
+
     this.setTranspiler(f => this.simpleTranspile(f));
 
     // Registering unix conversion to use for filenames
@@ -147,6 +150,7 @@ export class ModuleManager {
     Module._load = (req, p) => this.#onModuleLoad(req, p);
     require.extensions[SourceUtil.EXT] = this.compile.bind(this);
 
+    // Remove to prevent __proto__ pollution in JSON
     Object.defineProperty(Object.prototype, '__proto__', { configurable: false, enumerable: false, get: () => this.#objectProto });
 
     this.#initialized = true;
@@ -157,9 +161,7 @@ export class ModuleManager {
    * @param found
    */
   static transpileAll(found: SimpleEntry[]) {
-    if (EnvUtil.isReadonly()) {
-      console.debug('Skipping transpilation as we are in read-only mode');
-    } else {
+    if (!EnvUtil.isReadonly()) {
       // Ensure we transpile all support files
       for (const el of found) {
         if (!AppCache.hasEntry(el.file)) {

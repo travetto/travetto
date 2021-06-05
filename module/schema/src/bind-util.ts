@@ -10,6 +10,28 @@ import { FieldConfig } from './service/types';
 export class BindUtil {
 
   /**
+   * Coerce a value to match the field config type
+   * @param conf The field config to coerce to
+   * @param val The provided value
+   */
+  static #coerceType<T>(conf: FieldConfig, val: unknown): T | null | undefined {
+    if (conf.type?.bindSchema) {
+      val = conf.type.bindSchema(val);
+    } else {
+      val = Util.coerceType(val, conf.type, false);
+
+      if (conf.type === Number && conf.precision && typeof val === 'number') {
+        if (conf.precision[1]) { // Supports decimal
+          val = +val.toFixed(conf.precision[1]);
+        } else { // 0 digits
+          val = Math.trunc(val);
+        }
+      }
+    }
+    return val as T;
+  }
+
+  /**
    * Register `from` on the Function prototype
    */
   static register() {
@@ -29,7 +51,7 @@ export class BindUtil {
   static expandPaths(obj: Record<string, unknown>) {
     const out: Record<string, unknown> = {};
     for (const k of Object.keys(obj)) {
-      const val = obj[k];
+      const val = Util.isPlainObject(obj[k]) ? this.expandPaths(obj[k] as Record<string, unknown>) : obj[k];
       const parts = k.split('.');
       const last = parts.pop()!;
       let sub = out;
@@ -54,7 +76,11 @@ export class BindUtil {
       }
 
       if (last.indexOf('[') < 0) {
-        sub[last] = val;
+        if (sub[last] && Util.isPlainObject(val)) {
+          sub[last] = Util.deepAssign(sub[last], val, 'coerce');
+        } else {
+          sub[last] = val;
+        }
       } else {
         const arr = last.indexOf('[') > 0;
         const name = last.split(/[^A-Za-z_0-9]/)[0];
@@ -66,7 +92,11 @@ export class BindUtil {
           if (key === undefined) {
             key = sub.length as number;
           }
-          sub[key!] = val;
+          if (sub[key] && Util.isPlainObject(val) && Util.isPlainObject(sub[key])) {
+            sub[key] = Util.deepAssign(sub[key], val, 'coerce');
+          } else {
+            sub[key] = val;
+          }
         }
       }
     }
@@ -74,25 +104,31 @@ export class BindUtil {
   }
 
   /**
-   * Coerce a value to match the field config type
-   * @param conf The field config to coerce to
-   * @param val The provided value
+   * Convert full object with nesting, into flat set of keys
+   * @param conf The object to flatten the paths for
+   * @param val The starting prefix
    */
-  static #coerceType<T>(conf: FieldConfig, val: unknown): T | null | undefined {
-    if (conf.type?.bindSchema) {
-      val = conf.type.bindSchema(val);
-    } else {
-      val = Util.coerceType(val, conf.type, false);
-
-      if (conf.type === Number && conf.precision && typeof val === 'number') {
-        if (conf.precision[1]) { // Supports decimal
-          val = +val.toFixed(conf.precision[1]);
-        } else { // 0 digits
-          val = Math.trunc(val);
+  static flattenPaths(data: Record<string, unknown>, prefix: string = '') {
+    const out: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(data)) {
+      const pre = `${prefix}${key}`;
+      if (Util.isPlainObject(value)) {
+        Object.assign(out, this.flattenPaths(value, `${pre}.`)
+        );
+      } else if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+          const v = value[i];
+          if (Util.isPlainObject(v)) {
+            Object.assign(out, this.flattenPaths(v, `${pre}[${i}].`));
+          } else {
+            out[`${pre}[${i}]`] = v;
+          }
         }
+      } else {
+        out[pre] = value;
       }
     }
-    return val as T;
+    return out;
   }
 
   /**

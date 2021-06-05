@@ -303,7 +303,7 @@ First we must start the application:
 **Terminal: Application Startup**
 ```bash
 2021-03-14T05:00:00.618Z info  [@trv:app/registry:40] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
-2021-03-14T05:00:00.837Z info  [@trv:app/registry:44] Configured {
+2021-03-14T05:00:00.837Z info  [@trv:app/registry:44] Manifest {
   info: {
     framework: '2.0.0',
     name: '@travetto/todo-app',
@@ -357,10 +357,51 @@ First we must start the application:
       '@travetto/worker': '@trv:worker',
       '@travetto/yaml': '@trv:yaml'
     }
-  },
-  config: { rest: { cors: { active: true } }, api: { spec: { output: './openapi.yml' } } }
+  }
 }
-2021-03-14T05:00:01.510Z info  [@trv:rest/application/rest:192] Listening { port: 3000 }
+2021-03-14T05:00:01.510Z info  [@trv:app/registry:45] Config {
+  rest: {
+    serve: true,
+    port: 3000,
+    disableGetCache: true,
+    trustProxy: false,
+    hostname: 'localhost',
+    defaultMessage: true,
+    ssl: { active: false },
+    logRoutes: { allow: [], deny: [ '*' ] },
+    cors: { active: true },
+    cookie: {
+      active: true,
+      signed: true,
+      httpOnly: true,
+      sameSite: 'lax',
+      keys: [ 'default-insecure' ]
+    },
+    session: {
+      autoCommit: true,
+      maxAge: 1800000,
+      renew: true,
+      rolling: false,
+      sign: true,
+      keyName: 'trv_sid',
+      transport: 'cookie'
+    },
+    context: { disabled: false }
+  },
+  model: {
+    mongo: {
+      hosts: [ 'localhost' ],
+      namespace: 'app',
+      username: '',
+      password: '',
+      port: 27017,
+      connectionOptions: {},
+      srvRecord: false,
+      options: { useNewUrlParser: true, useUnifiedTopology: true }
+    }
+  }
+}
+2021-03-14T05:00:02.450Z info  [@trv:rest/application/rest:183] Listening { port: 3000 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:
@@ -388,8 +429,8 @@ $ node @travetto/boot/bin/main ./doc/create-todo.ts
 
 {
   text: 'New Todo',
-  created: '2021-03-14T05:00:02.450Z',
-  id: '422e793aed76ee063d13feec2e5e95b4'
+  created: '2021-03-14T05:00:02.762Z',
+  id: '22e793aed76ee063d13feec2e5e95b45'
 }
 ```
 
@@ -409,9 +450,9 @@ $ node @travetto/boot/bin/main ./doc/list-todo.ts
 
 [
   {
-    id: '422e793aed76ee063d13feec2e5e95b4',
+    id: '22e793aed76ee063d13feec2e5e95b45',
     text: 'New Todo',
-    created: '2021-03-14T05:00:02.819Z'
+    created: '2021-03-14T05:00:03.086Z'
   }
 ]
 ```

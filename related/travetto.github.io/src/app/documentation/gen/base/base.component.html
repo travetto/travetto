@@ -105,8 +105,8 @@ An example would be something like <code class="item path">phase.init.ts</code> 
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">const</span> init <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   key<span class="token operator">:</span> <span class="token string">'@trv:config/init'</span><span class="token punctuation">,</span>
-  after<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'@trv:base/init'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token function-variable function">action</span><span class="token operator">:</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+  before<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'@trv:registry/init'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token keyword">async</span> <span class="token function">action</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> ConfigManager <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'../src/manager'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">await</span> ConfigManager<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>

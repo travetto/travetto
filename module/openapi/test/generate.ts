@@ -59,7 +59,7 @@ export class GenerateSuite {
     const config = new SpecGenerator().generate({});
     assert(config);
     assert(Object.keys(config.paths).length === 7);
-    assert(Object.keys(config.components.schemas).length === 2);
+    assert(Object.keys(config.components.schemas).length >= 2);
   }
 
   @Test()

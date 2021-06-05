@@ -64,7 +64,7 @@ export const SERVICE_INHERIT_3 = Symbol.for('SVC_I_3');
 
 @Injectable(SERVICE_INHERIT_2)
 export class ServiceInherit2 extends ServiceInherit {
-  override age = 31;
+  age = 31;
 }
 
 export const CUSTOM_SERVICE_INHERIT = Symbol.for('Custom');
@@ -140,7 +140,7 @@ class Config {
   @InjectableFactory(LOOSE_SYM)
   static getLoose(): LooseResolutionClass {
     return new class extends LooseResolutionClass {
-      override name = 'george';
+      name = 'george';
     }();
   }
 }

@@ -93,7 +93,7 @@ class Config {
 
 Given the `static` method `initService`, the function will be provided as a valid candidate for `CoolService`.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
 
-**Note**: Other modules are able to provide aliases to [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L30) that also provide additional functionality.  For example, the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10) or the [@Controller](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/controller.ts#L9) decorator registers the associated class as an injectable element.
+**Note**: Other modules are able to provide aliases to [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L30) that also provide additional functionality.  For example, the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9) or the [@Controller](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/controller.ts#L9) decorator registers the associated class as an injectable element.
 
 ## Injection
 

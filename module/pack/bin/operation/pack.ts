@@ -7,6 +7,7 @@ import { Docker, DockerConfig } from './docker';
 import { Zip, ZipConfig } from './zip';
 
 type DeepPartial<T> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [P in keyof T]?: (T[P] extends (number | string | boolean | undefined | any[]) ? (T[P] | undefined) : DeepPartial<T[P]>);
 };
 

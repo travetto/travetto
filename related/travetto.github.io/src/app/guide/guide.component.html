@@ -315,7 +315,7 @@ First we must start the application:
       
       </figcaption>
       <pre><code class="language-bash"><span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:40<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2021</span>-03-14T05:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:44<span class="token punctuation">]</span> Configured <span class="token punctuation">{{'{'}}</span>
+<span class="token number">2021</span>-03-14T05:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:44<span class="token punctuation">]</span> Manifest <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
     framework: <span class="token string">'2.0.0'</span>,
     name: <span class="token string">'@travetto/todo-app'</span>,
@@ -369,10 +369,51 @@ First we must start the application:
       <span class="token string">'@travetto/worker'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:worker'</span>,
       <span class="token string">'@travetto/yaml'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:yaml'</span>
     <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">{{'}'}}</span>,
-  config: <span class="token punctuation">{{'{'}}</span> rest: <span class="token punctuation">{{'{'}}</span> cors: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>, api: <span class="token punctuation">{{'{'}}</span> spec: <span class="token punctuation">{{'{'}}</span> output: <span class="token string">'./openapi.yml'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2021</span>-03-14T05:00:01.510Z info  <span class="token punctuation">[</span>@trv:rest/application/rest:192<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
+<span class="token number">2021</span>-03-14T05:00:01.510Z info  <span class="token punctuation">[</span>@trv:app/registry:45<span class="token punctuation">]</span> Config <span class="token punctuation">{{'{'}}</span>
+  rest: <span class="token punctuation">{{'{'}}</span>
+    serve: true,
+    port: <span class="token number">3000</span>,
+    disableGetCache: true,
+    trustProxy: false,
+    hostname: <span class="token string">'localhost'</span>,
+    defaultMessage: true,
+    ssl: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
+    logRoutes: <span class="token punctuation">{{'{'}}</span> allow: <span class="token punctuation">[</span><span class="token punctuation">]</span>, deny: <span class="token punctuation">[</span> <span class="token string">'*'</span> <span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+    cors: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+    cookie: <span class="token punctuation">{{'{'}}</span>
+      active: true,
+      signed: true,
+      httpOnly: true,
+      sameSite: <span class="token string">'lax'</span>,
+      keys: <span class="token punctuation">[</span> <span class="token string">'default-insecure'</span> <span class="token punctuation">]</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    session: <span class="token punctuation">{{'{'}}</span>
+      autoCommit: true,
+      maxAge: <span class="token number">1800000</span>,
+      renew: true,
+      rolling: false,
+      sign: true,
+      keyName: <span class="token string">'trv_sid'</span>,
+      transport: <span class="token string">'cookie'</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    context: <span class="token punctuation">{{'{'}}</span> disabled: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  model: <span class="token punctuation">{{'{'}}</span>
+    mongo: <span class="token punctuation">{{'{'}}</span>
+      hosts: <span class="token punctuation">[</span> <span class="token string">'localhost'</span> <span class="token punctuation">]</span>,
+      namespace: <span class="token string">'app'</span>,
+      username: <span class="token string">''</span>,
+      password: <span class="token string">''</span>,
+      port: <span class="token number">27017</span>,
+      connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      srvRecord: false,
+      options: <span class="token punctuation">{{'{'}}</span> useNewUrlParser: true, useUnifiedTopology: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+<span class="token number">2021</span>-03-14T05:00:02.450Z info  <span class="token punctuation">[</span>@trv:rest/application/rest:183<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-fetch">fetch</a> requests to interact with the new api:
@@ -404,8 +445,8 @@ next, let's execute <a target="_blank" class="external-link" href="https://www.n
 
 <span class="token punctuation">{{'{'}}</span>
   text: <span class="token string">'New Todo'</span>,
-  created: <span class="token string">'2021-03-14T05:00:02.450Z'</span>,
-  id: <span class="token string">'422e793aed76ee063d13feec2e5e95b4'</span>
+  created: <span class="token string">'2021-03-14T05:00:02.762Z'</span>,
+  id: <span class="token string">'22e793aed76ee063d13feec2e5e95b45'</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -429,9 +470,9 @@ next, let's execute <a target="_blank" class="external-link" href="https://www.n
 
 <span class="token punctuation">[</span>
   <span class="token punctuation">{{'{'}}</span>
-    id: <span class="token string">'422e793aed76ee063d13feec2e5e95b4'</span>,
+    id: <span class="token string">'22e793aed76ee063d13feec2e5e95b45'</span>,
     text: <span class="token string">'New Todo'</span>,
-    created: <span class="token string">'2021-03-14T05:00:02.819Z'</span>
+    created: <span class="token string">'2021-03-14T05:00:03.086Z'</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">]</span></code></pre>     
       </figure>

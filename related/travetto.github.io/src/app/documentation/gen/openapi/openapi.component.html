@@ -37,7 +37,7 @@ All of the high level configurations can be found in the following structure:
 <span class="token comment">/**
  * API Information, infers as much as possible from the package.json
  */</span>
-@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'api.info'</span><span class="token punctuation">)</span>
+@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'api.info'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> internal<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ApiInfoConfig</span> <span class="token punctuation">{{'{'}}</span>
   contact<span class="token operator">:</span> ContactObject <span class="token operator">=</span> AppManifest<span class="token punctuation">.</span>info<span class="token punctuation">.</span>author <span class="token operator">??</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
   description<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> AppManifest<span class="token punctuation">.</span>info<span class="token punctuation">.</span>description<span class="token punctuation">;</span>
@@ -50,7 +50,7 @@ All of the high level configurations can be found in the following structure:
 <span class="token comment">/**
  * The API host, infers from rest host configuration
  */</span>
-@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'api.host'</span><span class="token punctuation">)</span>
+@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'api.host'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> internal<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ApiHostConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * List of servers
@@ -65,7 +65,7 @@ All of the high level configurations can be found in the following structure:
 <span class="token comment">/**
  * The spec file configuration
  */</span>
-@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'api.spec'</span><span class="token punctuation">)</span>
+@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'api.spec'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> internal<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ApiSpecConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Where to output file to

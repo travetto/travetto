@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { AnyType, DeclarationUtil, DocUtil, ParamDocumentation, TransformerState } from '@travetto/transformer';
+import { AnyType, DeclarationUtil, DecoratorUtil, DocUtil, ParamDocumentation, TransformerId, TransformerState } from '@travetto/transformer';
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
 const FIELD_MOD = '@travetto/schema/src/decorator/field';
@@ -99,9 +99,6 @@ export class SchemaTransformUtil {
       }
     }
 
-    const resolved = this.toConcreteType(state, typeExpr, node, config.root);
-    const params: ts.Expression[] = resolved ? [resolved] : [];
-
     if (ts.isParameter(node)) {
       const comments = DocUtil.describeDocs(node.parent);
       const commentConfig = (comments.params ?? []).find(x => x.name === node.name.getText()) || {} as Partial<ParamDocumentation>;
@@ -110,12 +107,24 @@ export class SchemaTransformUtil {
       }
     }
 
+    const params: ts.Expression[] = [];
+
+    const existing = state.findDecorator({ [TransformerId]: '@trv:schema', name: 'util' }, node, 'Field', FIELD_MOD);
+    if (!existing) {
+      const resolved = this.toConcreteType(state, typeExpr, node, config.root);
+      params.push(resolved);
+    } else {
+      params.push(...DecoratorUtil.getArguments(existing) ?? []);
+    }
+
     if (attrs.length) {
       params.push(state.factory.createObjectLiteralExpression(attrs));
     }
 
-    const dec = state.createDecorator(FIELD_MOD, 'Field', ...params);
-    const newDecs = [...(node.decorators ?? []), dec];
+    const newDecs = [
+      ...(node.decorators ?? []).filter(x => x !== existing),
+      state.createDecorator(FIELD_MOD, 'Field', ...params)
+    ];
 
     if (ts.isPropertyDeclaration(node)) {
       const comments = DocUtil.describeDocs(node);

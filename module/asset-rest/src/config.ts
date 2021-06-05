@@ -1,4 +1,5 @@
 import { Config } from '@travetto/config';
+import { Ignore } from '@travetto/schema';
 
 /**
  * Config for assets within @travetto/rest
@@ -18,7 +19,9 @@ export class RestAssetConfig {
    */
   excludedTypes: string = '';
 
+  @Ignore()
   allowedTypesList: string[];
+  @Ignore()
   excludedTypesList: string[];
 
   postConstruct() {

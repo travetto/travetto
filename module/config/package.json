@@ -28,9 +28,12 @@
     "directory": "module/config"
   },
   "dependencies": {
-    "@travetto/base": "^2.0.0-rc.4",
+    "@travetto/schema": "^2.0.0-rc.6",
     "@travetto/transformer": "^2.0.0-rc.4",
     "@travetto/yaml": "^2.0.0-rc.3"
+  },
+  "devDependencies": {
+    "@travetto/di": "^2.0.0-rc.6"
   },
   "publishConfig": {
     "access": "public"

@@ -102,7 +102,7 @@ export class SQLModelConfig {
   /**
    * Auto schema creation
    */
-  autoCreate: boolean;
+  autoCreate?: boolean;
   /**
    * Db version
    */
@@ -114,5 +114,5 @@ export class SQLModelConfig {
 }
 ```
 
-  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10) annotation, and so these values can be overridden using the 
+  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9) annotation, and so these values can be overridden using the 
   standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Environment-aware config management using yaml files")resolution paths.

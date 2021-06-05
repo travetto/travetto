@@ -6,6 +6,7 @@ import { FsUtil, PathUtil, StreamUtil } from '@travetto/boot';
 import { Class, Util, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Required } from '@travetto/schema';
 
 import { ModelCrudSupport } from '../service/crud';
 import { ModelStreamSupport, StreamMeta } from '../service/stream';
@@ -27,6 +28,7 @@ const META = '.meta';
 
 @Config('model.file')
 export class FileModelConfig {
+  @Required(false)
   folder: string;
   namespace: string = '.';
   autoCreate?: boolean;

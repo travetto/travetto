@@ -36,7 +36,7 @@ This module provides an <a target="_blank" class="external-link" href="https://a
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-s3/src/config.ts#L11">S3ModelConfig</a> is defined by:
+  where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-s3/src/config.ts#L12">S3ModelConfig</a> is defined by:
 
   
       <figure class="code">
@@ -48,6 +48,7 @@ This module provides an <a target="_blank" class="external-link" href="https://a
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> EnvUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Field <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * S3 Support as an Asset Source
@@ -61,7 +62,9 @@ This module provides an <a target="_blank" class="external-link" href="https://a
 
   accessKeyId <span class="token operator">=</span> EnvUtil<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'AWS_ACCESS_KEY_ID'</span><span class="token punctuation">,</span> <span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   secretAccessKey <span class="token operator">=</span> EnvUtil<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'AWS_SECRET_ACCESS_KEY'</span><span class="token punctuation">,</span> <span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  config<span class="token operator">:</span> <span class="token constant">S3</span><span class="token punctuation">.</span>S3ClientConfig<span class="token punctuation">;</span> <span class="token comment">// Additional s3 config</span>
+
+  @<span class="token meta">Field</span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
+  config<span class="token operator">?</span><span class="token operator">:</span> <span class="token constant">S3</span><span class="token punctuation">.</span>S3ClientConfig<span class="token punctuation">;</span> <span class="token comment">// Additional s3 config</span>
 
   chunkSize <span class="token operator">=</span> <span class="token number">5</span> <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">**</span> <span class="token number">20</span><span class="token punctuation">;</span> <span class="token comment">// Chunk size in bytes</span>
 
@@ -96,7 +99,7 @@ This module provides an <a target="_blank" class="external-link" href="https://a
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-  Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10">@Config</a> annotation, and so these values can be overridden using the 
+  Additionally, you can see that the class is registered with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9">@Config</a> annotation, and so these values can be overridden using the 
   standard <a class="module-link" routerLink="/docs/config" title="Environment-aware config management using yaml files">Configuration</a>resolution paths. 
   
 

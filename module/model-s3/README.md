@@ -29,7 +29,7 @@ export class Init {
 }
 ```
 
-  where the [S3ModelConfig](https://github.com/travetto/travetto/tree/main/module/model-s3/src/config.ts#L11) is defined by:
+  where the [S3ModelConfig](https://github.com/travetto/travetto/tree/main/module/model-s3/src/config.ts#L12) is defined by:
 
   
 **Code: Structure of S3ModelConfig**
@@ -39,6 +39,7 @@ import * as S3 from '@aws-sdk/client-s3';
 
 import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
+import { Field } from '@travetto/schema';
 
 /**
  * S3 Support as an Asset Source
@@ -52,7 +53,9 @@ export class S3ModelConfig {
 
   accessKeyId = EnvUtil.get('AWS_ACCESS_KEY_ID', '');
   secretAccessKey = EnvUtil.get('AWS_SECRET_ACCESS_KEY', '');
-  config: S3.S3ClientConfig; // Additional s3 config
+
+  @Field(Object)
+  config?: S3.S3ClientConfig; // Additional s3 config
 
   chunkSize = 5 * 2 ** 20; // Chunk size in bytes
 
@@ -87,7 +90,7 @@ export class S3ModelConfig {
 }
 ```
 
-  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10) annotation, and so these values can be overridden using the 
+  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9) annotation, and so these values can be overridden using the 
   standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Environment-aware config management using yaml files")resolution paths. 
   
 

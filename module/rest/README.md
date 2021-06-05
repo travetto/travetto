@@ -8,7 +8,7 @@
 npm install @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L13) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L86) objects). 
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L13) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L86) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding. ") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12) class.
 
 ## Routes: Controller
 
@@ -103,6 +103,8 @@ Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/dec
 **Code: Full-fledged Controller with Routes**
 ```typescript
 import { Get, Controller, Post, Query, Request } from '@travetto/rest';
+import { Integer, Min } from '@travetto/schema';
+
 import { MockService } from './mock';
 
 @Controller('/simple')
@@ -135,7 +137,11 @@ export class Simple {
   }
 
   @Get(/\/img(.*)[.](jpg|png|gif)/)
-  async getImage(req: Request, @Query('w') width?: number, @Query('h') height?: number) {
+  async getImage(
+    req: Request,
+    @Query('w') @Integer() @Min(100) width?: number,
+    @Query('h') @Integer() @Min(100) height?: number
+  ) {
     const img = await this.service.fetchImage(req.path, { width, height });
     return img;
   }
@@ -374,7 +380,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
      
    **Code: Cookies Config**
    ```typescript
-   export class RestCookieConfig implements cookies.SetOption {
+   export class RestCookieConfig {
      /**
       * Are cookies supported
       */
@@ -407,7 +413,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
    ```
    
    1. [GetCacheInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/get-cache.ts#L12) - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting `rest.disableGetCache: true` in your config.
-   1. [LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L61) - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
+   1. [LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L64) - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
    
      
    **Code: Control Logging**
@@ -503,7 +509,7 @@ This is useful for local development where you implicitly trust the cert.
 SSL support can be enabled by setting `rest.ssl.active: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the [ResourceManager](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts).
 
 ## Full Config
-The entire [RestConfig](https://github.com/travetto/travetto/tree/main/module/rest/src/application/config.ts#L13) which will show the full set of valid configuration parameters for the rest module.
+The entire [RestConfig](https://github.com/travetto/travetto/tree/main/module/rest/src/application/config.ts#L14) which will show the full set of valid configuration parameters for the rest module.
 
 ## Serverless
 ### AWS Lambda

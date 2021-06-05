@@ -1,10 +1,10 @@
-import { d, lib, mod } from '@travetto/doc';
-import { Application } from '@travetto/app';
-
 // To ensure module loading
-import '@travetto/schema';
 import '@travetto/model';
 import '@travetto/model-query';
+
+import { d, lib, mod } from '@travetto/doc';
+import { Application } from '@travetto/app';
+import { Field, Schema } from '@travetto/schema';
 
 import { ModelRoutes } from './src/extension/model';
 import { ModelQueryRoutes } from './src/extension/model-query';
@@ -28,7 +28,7 @@ const RestInterceptor = d.SnippetLink('RestInterceptor', 'src/interceptor/types.
 export const text = d`
 ${d.Header()}
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles ${lib.Express} in the ${Request} and ${Response} objects). 
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles ${lib.Express} in the ${Request} and ${Response} objects). This module is built upon the ${mod.Schema} structure, and all controller method parameters follow the same rules/abilities as any ${Field} in a standard ${Schema} class.
 
 ${d.Section('Routes: Controller')}
 

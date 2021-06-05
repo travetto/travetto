@@ -3,6 +3,7 @@ import * as os from 'os';
 import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 import { AppError, ResourceManager } from '@travetto/base';
+import { Required } from '@travetto/schema';
 
 import { RestServerUtil } from './util';
 
@@ -38,6 +39,7 @@ export class RestConfig {
   /**
    * The base url for the application
    */
+  @Required(false)
   baseUrl: string;
 
   /**

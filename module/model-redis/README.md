@@ -35,19 +35,22 @@ export class Init {
 }
 ```
 
-  where the [RedisModelConfig](https://github.com/travetto/travetto/tree/main/module/model-redis/src/config.ts#L5) is defined by:
+  where the [RedisModelConfig](https://github.com/travetto/travetto/tree/main/module/model-redis/src/config.ts#L7) is defined by:
 
   
 **Code: Structure of RedisModelConfig**
 ```typescript
 import * as redis from 'redis';
+
 import { Config } from '@travetto/config';
+import { Field } from '@travetto/schema';
 
 @Config('model.redis')
 export class RedisModelConfig {
 
+  @Field(Object)
   client: redis.ClientOpts = {};
-  namespace: string;
+  namespace?: string;
   autoCreate?: boolean;
 
   postConstruct() {
@@ -55,5 +58,5 @@ export class RedisModelConfig {
 }
 ```
 
-  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10) annotation, and so these values can be overridden using the 
+  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9) annotation, and so these values can be overridden using the 
   standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Environment-aware config management using yaml files")resolution paths.

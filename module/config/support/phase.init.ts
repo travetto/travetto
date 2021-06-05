@@ -3,8 +3,8 @@
  */
 export const init = {
   key: '@trv:config/init',
-  after: ['@trv:base/init'],
-  action: async () => {
+  before: ['@trv:registry/init'],
+  async action() {
     const { ConfigManager } = await import('../src/manager');
     await ConfigManager.init();
   }

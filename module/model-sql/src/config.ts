@@ -32,7 +32,7 @@ export class SQLModelConfig {
   /**
    * Auto schema creation
    */
-  autoCreate: boolean;
+  autoCreate?: boolean;
   /**
    * Db version
    */

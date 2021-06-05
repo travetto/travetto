@@ -3,6 +3,7 @@ import * as S3 from '@aws-sdk/client-s3';
 
 import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
+import { Field } from '@travetto/schema';
 
 /**
  * S3 Support as an Asset Source
@@ -16,7 +17,9 @@ export class S3ModelConfig {
 
   accessKeyId = EnvUtil.get('AWS_ACCESS_KEY_ID', '');
   secretAccessKey = EnvUtil.get('AWS_SECRET_ACCESS_KEY', '');
-  config: S3.S3ClientConfig; // Additional s3 config
+
+  @Field(Object)
+  config?: S3.S3ClientConfig; // Additional s3 config
 
   chunkSize = 5 * 2 ** 20; // Chunk size in bytes
 

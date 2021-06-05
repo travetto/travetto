@@ -30,7 +30,7 @@ import { AppManifest } from '@travetto/base';
 /**
  * API Information, infers as much as possible from the package.json
  */
-@Config('api.info')
+@Config('api.info', { internal: true })
 export class ApiInfoConfig {
   contact: ContactObject = AppManifest.info.author ?? {};
   description?: string = AppManifest.info.description;
@@ -43,7 +43,7 @@ export class ApiInfoConfig {
 /**
  * The API host, infers from rest host configuration
  */
-@Config('api.host')
+@Config('api.host', { internal: true })
 export class ApiHostConfig {
   /**
    * List of servers
@@ -58,7 +58,7 @@ export class ApiHostConfig {
 /**
  * The spec file configuration
  */
-@Config('api.spec')
+@Config('api.spec', { internal: true })
 export class ApiSpecConfig {
   /**
    * Where to output file to

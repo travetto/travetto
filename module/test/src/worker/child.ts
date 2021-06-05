@@ -11,8 +11,7 @@ const FIXED_MODULES = new Set([
   // 'registry'
   'boot', 'base', 'cli',
   'compiler', 'transformer',
-  'config', 'yaml',
-  'worker', 'command',
+  'yaml','worker', 'command',
   'log', 'jwt', 'image',
   'test',
 ].map(x => `@travetto/${x}` as string));

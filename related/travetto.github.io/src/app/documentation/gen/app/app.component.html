@@ -167,7 +167,7 @@ To invoke the <code class="item input">simple</code> application, you need to pa
       <pre><code class="language-bash">$ trv run simple-domain mydomain.biz <span class="token number">4000</span>
 
 Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'simple-domain'</span>, filename: <span class="token string">'./doc/domain.ts'</span> <span class="token punctuation">{{'}'}}</span>
-Configured <span class="token punctuation">{{'{'}}</span>
+Manifest <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
     framework: <span class="token string">'2.0.0'</span>,
     name: <span class="token string">'@travetto/app'</span>,
@@ -209,9 +209,9 @@ Configured <span class="token punctuation">{{'{'}}</span>
       <span class="token string">'@travetto/worker'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:worker'</span>,
       <span class="token string">'@travetto/yaml'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:yaml'</span>
     <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">{{'}'}}</span>,
-  config: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
+Config
 Launching <span class="token punctuation">{{'{'}}</span> domain: <span class="token string">'mydomain.biz'</span>, port: <span class="token number">4000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -225,7 +225,7 @@ The parameters to <code class="item method">run</code> will be type checked, to 
       </figcaption>
       <pre><code class="language-bash">$ trv run simple-domain mydomain.biz orange
 
-Failed to run simple-domain
+Failed to run simple-domain, Validation errors have occurred
 ● port is not a valid number</code></pre>     
       </figure>
 

@@ -41,7 +41,7 @@ export class Init {
 }
 ```
 
-  where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/module/model-mongo/src/config.ts#L11) is defined by:
+  where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/module/model-mongo/src/config.ts#L12) is defined by:
 
   
 **Code: Structure of MongoModelConfig**
@@ -51,6 +51,7 @@ import { promises as fs } from 'fs';
 
 import { TimeSpan, ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
+import { Field } from '@travetto/schema';
 
 /**
  * Mongo model config
@@ -85,9 +86,11 @@ export class MongoModelConfig {
    * Is using the SRV DNS record configuration
    */
   srvRecord = false;
+
   /**
    * Mongo client options
    */
+  @Field(Object)
   options: mongo.MongoClientOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -151,7 +154,7 @@ export class MongoModelConfig {
 }
 ```
 
-  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10) annotation, and so these values can be overridden using the 
+  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9) annotation, and so these values can be overridden using the 
   standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Environment-aware config management using yaml files")resolution paths. 
   
 

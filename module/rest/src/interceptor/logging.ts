@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Ignore } from '@travetto/schema';
 
 import { Request, Response, RouteConfig } from '../types';
 import { RestInterceptor } from './types';
@@ -27,10 +28,12 @@ export class RestLogRoutesConfig {
   /**
    * Allow as a list of route checks
    */
+  @Ignore()
   allowList: RouteCheck[];
   /**
    * Deny as a list of route checks
    */
+  @Ignore()
   denyList: RouteCheck[];
 
   /**

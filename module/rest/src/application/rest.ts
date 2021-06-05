@@ -42,8 +42,21 @@ export class RestApplication<T extends unknown = unknown>  {
     this.globalHandler = this.globalHandler.bind(this);
   }
 
-  postConstruct() {
+  async postConstruct() {
     this.info.restProvider = this.server.constructor.name;
+
+    await this.server.init();
+
+    this.interceptors = await this.getInterceptors();
+
+    // Register all active
+    await Promise.all(ControllerRegistry.getClasses()
+      .map(c => this.registerController(c)));
+
+    this.registerGlobal();
+
+    // Listen for updates
+    ControllerRegistry.on(this.onControllerChange);
   }
 
   /**
@@ -58,27 +71,6 @@ export class RestApplication<T extends unknown = unknown>  {
     } else {
       throw new AppError('Resource not found', 'notfound');
     }
-  }
-
-  /**
-   * Initialize the application
-   */
-  async init() {
-    await ControllerRegistry.init();
-
-    await this.server.init();
-
-    this.interceptors = await this.getInterceptors();
-
-    // Register all active
-    await Promise.all(ControllerRegistry.getClasses()
-      .map(c => this.registerController(c)));
-
-    this.registerGlobal();
-
-    // Listen for updates
-    ControllerRegistry.off(this.onControllerChange); // Ensure only one register
-    ControllerRegistry.on(this.onControllerChange);
   }
 
   /**
@@ -188,7 +180,6 @@ export class RestApplication<T extends unknown = unknown>  {
    * Run the application
    */
   async run(): Promise<ServerHandle> {
-    await this.init();
     console.info('Listening', { port: this.config.port });
     return await this.server.listen();
   }

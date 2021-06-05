@@ -102,9 +102,7 @@ export class ModuleUtil {
    * Initialize module support
    */
   static init() {
-    // Tag output to indicate it was succefully processed by the framework
-    SourceUtil.addPreProcessor((__, contents) =>
-      `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`);
+    SourceUtil.init();
   }
 
   /**

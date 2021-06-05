@@ -1,5 +1,5 @@
 import { Util } from '@travetto/base';
-import { SimpleType } from '@travetto/base/src/internal/types';
+import { SimpleType } from './common';
 
 export interface Node<T extends SimpleType = SimpleType> {
   value: T;

@@ -152,7 +152,7 @@ To invoke the `simple` application, you need to pass `domain` where port is opti
 $ trv run simple-domain mydomain.biz 4000
 
 Running application { name: 'simple-domain', filename: './doc/domain.ts' }
-Configured {
+Manifest {
   info: {
     framework: '2.0.0',
     name: '@travetto/app',
@@ -194,9 +194,9 @@ Configured {
       '@travetto/worker': '@trv:worker',
       '@travetto/yaml': '@trv:yaml'
     }
-  },
-  config: {}
+  }
 }
+Config
 Launching { domain: 'mydomain.biz', port: 4000 }
 ```
 
@@ -208,7 +208,7 @@ The parameters to `run` will be type checked, to ensure proper evaluation.
 ```bash
 $ trv run simple-domain mydomain.biz orange
 
-Failed to run simple-domain
+Failed to run simple-domain, Validation errors have occurred
 ● port is not a valid number
 ```
 

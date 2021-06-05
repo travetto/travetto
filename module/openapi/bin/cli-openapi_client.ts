@@ -85,7 +85,7 @@ ${this.getListOfFormats().map(x => color`* ${{ input: x }}`).join('\n')} `;
       propMap = { ...props, ...propMap };
     }
 
-    const props = this.presetMap(propMap);
+    const propList = this.presetMap(propMap);
 
     const args = [
       'run',
@@ -102,7 +102,7 @@ ${this.getListOfFormats().map(x => color`* ${{ input: x }}`).join('\n')} `;
       '-o', '/workspace',
       '-i', `/input/${path.basename(this.cmd.input)}`,
       ...(this.cmd.watch ? ['-w'] : []),
-      ...(props ? ['--additional-properties', props] : [])
+      ...(propList ? ['--additional-properties', propList] : [])
     ];
 
     const { result } = ExecUtil.spawn('docker', args, { stdio: [0, 1, 2] });

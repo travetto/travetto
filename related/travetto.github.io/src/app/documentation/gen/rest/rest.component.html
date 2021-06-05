@@ -13,7 +13,7 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest</code></pre>     
       </figure>
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L13">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L86">TravettoResponse</a> objects). 
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L13">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L86">TravettoResponse</a> objects). This module is built upon the <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding. ">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38">@Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12">@Schema</a> class.
 
 <h2 id="routes-controller">Routes: Controller</h2>
 
@@ -109,6 +109,8 @@ Each <a target="_blank" class="source-link" href="https://github.com/travetto/tr
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/simple-full.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Get<span class="token punctuation">,</span> Controller<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Query<span class="token punctuation">,</span> Request <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Integer<span class="token punctuation">,</span> Min <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
+
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MockService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./mock'</span><span class="token punctuation">;</span>
 
 @<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
@@ -141,7 +143,11 @@ Each <a target="_blank" class="source-link" href="https://github.com/travetto/tr
   <span class="token punctuation">{{'}'}}</span>
 
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">\/img(.*)[.](jpg|png|gif)</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getImage</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">,</span> @<span class="token meta">Query</span><span class="token punctuation">(</span><span class="token string">'w'</span><span class="token punctuation">)</span> width<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> @<span class="token meta">Query</span><span class="token punctuation">(</span><span class="token string">'h'</span><span class="token punctuation">)</span> height<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">getImage</span><span class="token punctuation">(</span>
+    req<span class="token operator">:</span> Request<span class="token punctuation">,</span>
+    @<span class="token meta">Query</span><span class="token punctuation">(</span><span class="token string">'w'</span><span class="token punctuation">)</span> @<span class="token meta">Integer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> @<span class="token meta">Min</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span> width<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span>
+    @<span class="token meta">Query</span><span class="token punctuation">(</span><span class="token string">'h'</span><span class="token punctuation">)</span> @<span class="token meta">Integer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> @<span class="token meta">Min</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span> height<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span>
+  <span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> img <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">fetchImage</span><span class="token punctuation">(</span>req<span class="token punctuation">.</span>path<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> width<span class="token punctuation">,</span> height <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> img<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -396,7 +402,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
       <figcaption class="code">Cookies Config
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L17">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RestCookieConfig</span> <span class="token keyword">implements</span> <span class="token class-name">cookies</span><span class="token punctuation">.</span>SetOption <span class="token punctuation">{{'{'}}</span>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RestCookieConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Are cookies supported
    */</span>
@@ -428,7 +434,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure></li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/get-cache.ts#L12">GetCacheInterceptor</a> - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting <code class="item input">rest.disableGetCache: true</code> in your config.</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L61">LoggingInterceptor</a> - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L64">LoggingInterceptor</a> - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
 
   
       <figure class="code">
@@ -530,7 +536,7 @@ This is useful for local development where you implicitly trust the cert.
 SSL support can be enabled by setting <code class="item input">rest.ssl.active: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts">ResourceManager</a>.
 
 <h2 id="full-config">Full Config</h2>
-The entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/config.ts#L13">RestConfig</a> which will show the full set of valid configuration parameters for the rest module.
+The entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/config.ts#L14">RestConfig</a> which will show the full set of valid configuration parameters for the rest module.
 
 <h2 id="serverless">Serverless</h2>
 <h3 id="aws-lambda">AWS Lambda</h3>

@@ -1,4 +1,5 @@
 import { Config } from '@travetto/config';
+import { Schema } from '@travetto/schema';
 
 import { Injectable, Inject } from '../src/decorator';
 import { Util } from './util';
@@ -8,6 +9,7 @@ export class Empty {
   age = 10;
 }
 
+@Schema()
 class Basic {
   @Inject()
   empty: Empty;
@@ -15,7 +17,7 @@ class Basic {
 
 @Config('a')
 export class DbConfig<A, B> extends Basic {
-  temp: unknown;
+  temp?: unknown;
 
   constructor() {
     super();

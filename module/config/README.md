@@ -8,13 +8,17 @@
 npm install @travetto/config
 ```
 
-The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [YAML](https://github.com/travetto/travetto/tree/main/module/yaml#readme "Simple YAML support, provides only clean subset of yaml").  The configuration information is comprised of:
+The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [YAML](https://github.com/travetto/travetto/tree/main/module/yaml#readme "Simple YAML support, provides only clean subset of yaml").  Additionally, the configuration is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding. ") module, to enforce type correctness, and allow for validation of configuration as an 
+entrypoint into the application.  Given that all [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9) classes are -based classes, all the standard  and  functionality applies.
+
+## Resolution
+
+The configuration information is comprised of:
 
    
    *  [YAML](https://en.wikipedia.org/wiki/YAML) files
    *  environment variables
-
-## Resolution
+   *  configuration classes
 
 Config loading follows a defined resolution path, below is the order in increasing specificity:
    
@@ -22,6 +26,8 @@ Config loading follows a defined resolution path, below is the order in increasi
    1. `resources/*.yml` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
    1. `resources/{env}.yml` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
    1. `process.env` - Read startup configuration from environment to allow for overriding any values. Because we are overriding a [YAML](https://en.wikipedia.org/wiki/YAML) based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as `UPPER_SNAKE_CASE`. When reading from `process.env` we will map `UPPER_SNAKE_CASE` to `upper.snake.case`, and will attempt to match by case-insensitive name.
+
+By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class. This is due to the fact that environment data, as well as configuration data can only be interpreted in light of a class structure, as the data binding is what makes the configuration valid.
 
 ## A Complete Example
 
@@ -65,8 +71,8 @@ $ node @travetto/boot/bin/main ./doc/resolve.ts
 Config {
   database: {
     host: 'localhost',
-    creds: { user: 'test', password: '%secret%' },
-    port: '1234'
+    port: 1234,
+    creds: { user: 'test', password: '**********' }
   }
 }
 ```
@@ -75,7 +81,7 @@ Config {
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under `config.redacted`.
 
 ## Consuming
-The [ConfigManager](https://github.com/travetto/travetto/tree/main/module/config/src/manager.ts) service provides direct access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L10) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The [ConfigManager](https://github.com/travetto/travetto/tree/main/module/config/src/manager.ts) service provides direct access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 
@@ -87,22 +93,50 @@ import { Config } from '@travetto/config';
 export class DBConfig {
   host: string;
   port: number;
-  creds = {
-    user: '',
-    password: ''
+  creds: {
+    user: string;
+    password: string;
   };
 }
 ```
 
-Using the above config files, the resultant object would be:
+Using the above config files, you'll notice that the port is not specified (its only specified in the environment variables).  This means when the application attempts to start up, it will fail if the port is not specified via an environment variable:
 
 **Terminal: Resolved database config**
 ```bash
 $ node @travetto/boot/bin/main ./doc/dbconfig-run.ts 
 
-DBConfig {
-  host: 'localhost',
-  port: undefined,
-  creds: { user: 'test', password: 'test' }
+{
+  message: 'Failed to construct @trv:config/doc/dbconfig￮DBConfig as validation errors have occurred',
+  category: 'data',
+  type: 'ValidationResultError',
+  at: 2021-03-14T05:00:00.618Z,
+  class: '@trv:config/doc/dbconfig￮DBConfig',
+  file: '@trv:config/doc/dbconfig.ts',
+  errors: [
+    {
+      kind: 'required',
+      active: true,
+      path: 'port',
+      message: 'port is required'
+    }
+  ]
+}
+```
+
+What you see, is that the configuration structure must be honored and the application will fail to start if the constraints do not hold true.  This helps to ensure that the configuration, as input to the system, is verified and correct.
+
+By passing in the port via the environment variable, the config will construct properly, and the application will startup correctly:
+
+**Terminal: Resolved database config**
+```bash
+$ node @travetto/boot/bin/main ./doc/dbconfig-run.ts 
+
+Config {
+  database: {
+    host: 'localhost',
+    port: 200,
+    creds: { user: 'test', password: 'test' }
+  }
 }
 ```

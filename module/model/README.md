@@ -236,7 +236,7 @@ All fields are optional, but the `id` and `type` are important as those field ty
 |[S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
 |[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L50)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L46)|X|X| |X|X|X|
+|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L48)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
@@ -268,7 +268,7 @@ const STREAM_META = `${STREAMS}_meta`;
 @Config('model.memory')
 export class MemoryModelConfig {
   autoCreate?: boolean;
-  namespace: string;
+  namespace?: string;
   cullRate?: number | TimeSpan;
 }
 function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, suffix?: string) {
