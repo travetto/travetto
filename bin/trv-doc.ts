@@ -71,13 +71,15 @@ const markdownPage = (mod: string) =>
           .$read()
           .$collect()
           .$map(contents => {
-            const content = contents.join('\n').replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
+            let content = contents.join('\n').replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
               .replace(/^src="images\//g, `src="/assets/images/${pkg._.mod}/`)
-              .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`)
-              .replace(
-                !['todo-app', 'overview'].includes(pkg._.mod) ? /<h1>([\n\r]|.)*/m : '##',
-                t => `<div class="documentation">\n${t}\n</div>\n`
-              );
+              .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`);
+            if (pkg._.mod === 'overview') {
+              content = content.replace(/<h1>([\n\r]|.)*/m, t => `<div class="documentation">\n${t}\n</div>\n`);
+            } else if (pkg._.mod === 'todo-app') {
+              content = content.replace(/(<h1>(?:[\n\r]|.)*)(\s*<div class="toc">(?:[\r\n]|.)*?<\/div>(?:[\r\n]|.)*?<\/div>\s*)((?:[\r\n]|.)*)/m,
+                (_, h, toc, text) => `${toc.trim()}\n<div class="documentation">\n${h}\n${text}\n</div>\n`);
+            }
             return content;
           })
           .$writeFinal(html)

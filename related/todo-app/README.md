@@ -406,7 +406,7 @@ First we must start the application:
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:
 
-**Code: Creating Todo by curl**
+**Code: Creating Todo by fetch**
 ```typescript
 import * as fetch from 'node-fetch';
 
@@ -434,7 +434,7 @@ $ node @travetto/boot/bin/main ./doc/create-todo.ts
 }
 ```
 
-**Code: Listing Todos by curl**
+**Code: Listing Todos by fetch**
 ```typescript
 import * as fetch from 'node-fetch';
 

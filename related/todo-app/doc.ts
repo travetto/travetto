@@ -110,11 +110,11 @@ ${d.Terminal('Application Startup', startupOutput)}
 
 next, let's execute ${lib.Fetch} requests to interact with the new api:
 
-${d.Code('Creating Todo by curl', 'doc/create-todo.ts')}
+${d.Code('Creating Todo by fetch', 'doc/create-todo.ts')}
 
 ${d.Execute('Create Output', 'doc/create-todo.ts', [], { env: { TRV_LOG_PLAIN: '1' }, module: 'boot' })}
 
-${d.Code('Listing Todos by curl', 'doc/list-todo.ts')}
+${d.Code('Listing Todos by fetch', 'doc/list-todo.ts')}
 
 ${d.Execute('Listing Output', 'doc/list-todo.ts', [], { env: { TRV_LOG_PLAIN: '1' }, module: 'boot' })}
 `;

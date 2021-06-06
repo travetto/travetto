@@ -526,12 +526,11 @@ li {
     margin-bottom: 0;
   }
 
-  ul+h3 {
+  ul+h3, ol+h3 {
     margin-top: 1em;
   }
 
-
-  ul {
+  ul, ol {
     margin: 0;
     padding: 0;
     list-style-position: outside;
@@ -561,7 +560,7 @@ li {
         border-right: 2px solid #aaa;
       }
 
-      ul {
+      ul, ol {
         background-color: #f8f8f8;
 
         li {
