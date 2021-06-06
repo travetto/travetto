@@ -335,8 +335,18 @@ export class SpecGenerator {
    */
   generate(config: Partial<ApiSpecConfig> = {}) {
 
-    for (const cls of SchemaRegistry.getClasses()) {
-      this.#processSchema(cls);
+    for (const cls of ControllerRegistry.getClasses()) {
+      for (const ep of ControllerRegistry.get(cls).endpoints) {
+        if (ep.requestType) {
+          this.#processSchema(ep.requestType.type);
+        }
+        if (ep.responseType) {
+          this.#processSchema(ep.responseType.type);
+        }
+        for (const param of SchemaRegistry.getMethodSchema(cls, ep.handlerName)) {
+          this.#processSchema(param.type);
+        }
+      }
     }
 
     if (!config.skipRoutes) {
