@@ -217,9 +217,9 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 
 #### Schema Overhaul
 
-Now `application` and `rest` utilize the schema transformations and validations for entrypoints.  This enables consistent
-use of schema type information, validators, in both of these modules.  This also means the error messaging is consistent
-and behaves the same way across all of these modules.
+Schema has taken a role as the gatekeeper of all inbound data into the application. Now `application`, `config` and `rest` utilize the schema 
+transformations and validations for entrypoints.  This enables consistent use of schema type information, validators, in all of these modules. 
+This also means the error messaging is consistent and behaves  the same way across all of these modules.  
 
 #### Model Overhaul
 * Asset now relies on Models with Streaming support
@@ -251,11 +251,6 @@ and behaves the same way across all of these modules.
    * Indexing only looks for typescript files
    * Will speedup tools that rely upon full file system scanning
 
-#### Local Dev Overhual
-* Now relies on environment variables (`direnv` makes it easier) for augmenting what would have been embedded in the framework.
-* Using tsconfig paths in lieu of symlinks, general development performance, and refactoring are substantially improved.
-* Removed dependency on symlinks
-
 #### Extension Overhaul (and testing thereof overhaul)
 * Extensions are now tested in isolation allowing for various combinations of extensions to be tested
 * Relies on use of Dynamic Modules to allow for creating a custom cache related to the modules being loaded
@@ -271,7 +266,6 @@ and behaves the same way across all of these modules.
 * `asset-*` for implementations, are now model modules
 * `cache`'s built in extensions have been removed.  `model` with expiry support is all that is needed now.
 * Extensions have been moved to the module which owns the complexity (e.,g. schema rest support dealt more with the internals of rest than schema, and has been moved).
-
 #### Typescript Upgrade
 * Shifted codebase away from use of `any` to `unknown` where applicable (over 750 instances migrated)
 * Migrated all `private var` usages to `#var`, and aligning with class initialization changes.
@@ -302,6 +296,11 @@ and behaves the same way across all of these modules.
 
 #### Generator Simplification
 * Moved away from using yeoman due to dependency bloat, and went with a simple `@travetto/cli` based solution. Can be invoked with `npx @travetto/scaffold`
+
+#### Local Dev Overhual
+* Now relies on environment variables (`direnv` makes it easier) for augmenting what would have been embedded in the framework.
+* Using tsconfig paths in lieu of symlinks, general development performance, and refactoring are substantially improved.
+* Removed dependency on symlinks
 
 ### Non-Breaking Changes
 
