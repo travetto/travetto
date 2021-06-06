@@ -79,4 +79,17 @@ export class Modules {
     pkg.version = final;
     return pkg;
   }
+
+  static async setVersion(pkg: Pkg, version: string) {
+    for await (const dPkg of this.getDependentPackages(pkg)) {
+      for (const key of DEP_GROUPS) {
+        const grp = dPkg[key];
+        if (grp?.[pkg.name] && typeof grp[pkg.name] === 'string') {
+          grp[pkg.name] = (grp[pkg.name] as string).replace(/\d.*/, version);
+        }
+      }
+    }
+    pkg.version = version;
+    return pkg;
+  }
 }

@@ -30,7 +30,6 @@ ${d.List(
   d`${d.Method('get(key: string, def?: string): string;')} - Retrieve an environmental value with a potential default`,
   d`${d.Method('getInt(key: string, def?: number): number;')} - Retrieve an environmental value as a number`,
   d`${d.Method('getList(key: string): string[];')} - Retrieve an environmental value as a list`,
-  d`${d.Method('getTime(key: string, def: number):number')} - Reads an environment variable as milliseconds, with support for ${d.Input('s')}, ${d.Input('m')}, and ${d.Input('h')} suffixes to provide succinct time units.`
 )}
 
 ${d.Section('Cache Support')}
