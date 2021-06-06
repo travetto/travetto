@@ -130,7 +130,7 @@ export class EnvUtil {
    * Can use compile
    */
   static isReadonly() {
-    return this.isProd() || this.isTrue('TRV_READONLY');
+    return this.isProd() ? !this.isFalse('TRV_READONLY') : this.isTrue('TRV_READONLY');
   }
 
   /**

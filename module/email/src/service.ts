@@ -45,7 +45,8 @@ export class MailService {
    * Send a pre compiled email that has a relevant html, subject and optional text file associated
    */
   async sendCompiled(key: string, msg: Omit<MessageOptions, 'html' | 'text' | 'subject'>): Promise<unknown> {
-    if (!EnvUtil.isReadonly() || !this.#compiled.has(key)) {
+    // Bypass cache if in dynamic mode
+    if (EnvUtil.isDynamic() || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         ResourceManager.read(`${key}.compiled.html`, 'utf8'),
         ResourceManager.read(`${key}.compiled.text`, 'utf8').catch(() => ''),

@@ -46,7 +46,7 @@ export class ApiSpecConfig {
   /**
    * Should file be generated at runtime
    */
-  persist: boolean = !EnvUtil.isReadonly();
+  persist: boolean = EnvUtil.isDynamic();
   /**
    * Skip emitting all routes
    */
