@@ -13,11 +13,15 @@ Packages.yieldPublicPackages()
   .$map(([, pkg]) => pkg)
   .$tap(pkg => fs.promises.copyFile('LICENSE', `${pkg!._.folder}/LICENSE`))
   .$map(pkg => {
+    let tag = pkg?.version?.replace(/^.*-([^.]+)[.]\d+$/, (a, b) => b) || 'latest';
     const args = [
       'publish',
-      '--tag', pkg?.version?.replace(/^.*-([^.]+)[.]\d+$/, (a, b) => b) || 'latest',
+      '--tag', tag,
       '--access', 'public'
     ];
+    if (!/^[~^]/.test(tag)) {
+      args.push('--tag', 'latest');
+    }
     return ExecUtil.spawn('npm', args, { cwd: pkg!._.folder, stdio: [0, 1, 2] }).result;
   })
   .$stdout;
