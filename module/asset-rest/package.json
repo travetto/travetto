@@ -1,7 +1,7 @@
 {
   "name": "@travetto/asset-rest",
   "displayName": "Asset Rest Support",
-  "version": "2.0.0-rc.11",
+  "version": "2.0.0",
   "description": "Provides integration between the travetto asset and rest module.",
   "keywords": [
     "rest",
@@ -26,9 +26,9 @@
     "directory": "module/asset-rest"
   },
   "dependencies": {
-    "@travetto/asset": "^2.0.0-rc.8",
-    "@travetto/config": "^2.0.0-rc.5",
-    "@travetto/rest": "^2.0.0-rc.11",
+    "@travetto/asset": "^2.0.0",
+    "@travetto/config": "^2.0.0",
+    "@travetto/rest": "^2.0.0",
     "@types/busboy": "^0.2.3",
     "busboy": "^0.3.1"
   },

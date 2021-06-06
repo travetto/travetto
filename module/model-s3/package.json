@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model-s3",
   "displayName": "S3 Model Support",
-  "version": "2.0.0-rc.9",
+  "version": "2.0.0",
   "description": "S3 backing for the travetto model module.",
   "keywords": [
     "s3",
@@ -27,8 +27,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.17.0",
     "@aws-sdk/credential-provider-ini": "^3.15.0",
-    "@travetto/config": "^2.0.0-rc.5",
-    "@travetto/model": "^2.0.0-rc.8"
+    "@travetto/config": "^2.0.0",
+    "@travetto/model": "^2.0.0"
   },
   "publishConfig": {
     "access": "public"

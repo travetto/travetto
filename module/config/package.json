@@ -1,7 +1,7 @@
 {
   "name": "@travetto/config",
   "displayName": "Configuration",
-  "version": "2.0.0-rc.5",
+  "version": "2.0.0",
   "description": "Environment-aware config management using yaml files",
   "keywords": [
     "yaml",
@@ -28,12 +28,12 @@
     "directory": "module/config"
   },
   "dependencies": {
-    "@travetto/schema": "^2.0.0-rc.7",
-    "@travetto/transformer": "^2.0.0-rc.5",
-    "@travetto/yaml": "^2.0.0-rc.4"
+    "@travetto/schema": "^2.0.0",
+    "@travetto/transformer": "^2.0.0",
+    "@travetto/yaml": "^2.0.0"
   },
   "devDependencies": {
-    "@travetto/di": "^2.0.0-rc.7"
+    "@travetto/di": "^2.0.0"
   },
   "publishConfig": {
     "access": "public"
