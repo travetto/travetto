@@ -1,7 +1,7 @@
 {
   "name": "@travetto/registry",
   "displayName": "Registry",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Patterns and utilities for handling registration of metadata and functionality for run-time use",
   "keywords": [
     "ast-transformations",
@@ -28,8 +28,8 @@
     "directory": "module/registry"
   },
   "dependencies": {
-    "@travetto/compiler": "^2.0.0",
-    "@travetto/transformer": "^2.0.0"
+    "@travetto/compiler": "^2.0.1",
+    "@travetto/transformer": "^2.0.1"
   },
   "docDependencies": {
     "@travetto/di": true
