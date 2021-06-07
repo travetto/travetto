@@ -17,6 +17,7 @@ import { ConsoleCapture } from './console';
 import { TestPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { AssertUtil } from '../assert/util';
+import { TestEvent } from '../model/event';
 
 const TEST_TIMEOUT = Util.getEnvTime('TRV_TEST_TIMEOUT', '5s');
 
@@ -285,7 +286,7 @@ export class TestExecutor {
         TRV_CACHE: `.trv_cache_${SystemUtil.naiveHash(file)}`
       }
     });
-    proc.process.on('message', e => consumer.onEvent(e));
+    proc.process.on('message', e => consumer.onEvent(e as TestEvent));
     await proc.result;
   }
 }
