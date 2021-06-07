@@ -20,10 +20,6 @@ export class FirestoreModelConfig {
     if (this.emulator) {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }
-    if (typeof this.credentials === 'string') {
-      this.credentialsFile = this.credentials;
-      delete this.credentials;
-    }
     if (this.credentialsFile && !this.credentials) {
       this.credentials = JSON.parse(await ResourceManager.read(this.credentialsFile, 'utf8'));
     }
