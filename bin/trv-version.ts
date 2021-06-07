@@ -33,7 +33,7 @@ if (level === 'release') {
       .$map(p => Modules.setVersion(p, prefix))
       .$wrap(upgrade)
       .$console
-  )
+  );
 } else {
   Git.checkWorkspaceDirty('Cannot update versions with uncomitted changes').then(() =>
     Git.yieldChangedPackges()

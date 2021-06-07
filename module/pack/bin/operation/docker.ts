@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 
-import { ExecUtil, PathUtil } from '@travetto/boot';
+import { ExecUtil, Package, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
 import { CommonConfig, PackOperation } from '../lib/types';
@@ -9,9 +9,12 @@ import { PackUtil } from '../lib/util';
 export interface DockerConfig extends CommonConfig {
   image: string;
   tag: string[];
+  name?: string;
   app?: string;
   port?: (string | number)[];
   env: Record<string, string | number | boolean>;
+  registry?: string;
+  push?: boolean;
 }
 
 export const Docker: PackOperation<DockerConfig> = {
@@ -25,15 +28,18 @@ export const Docker: PackOperation<DockerConfig> = {
       ...PackUtil.commonExtend(a, b),
       image: b.image ?? a.image,
       app: b.app ?? a.app,
-      tag: b.tag ?? a.tag ?? ['app'],
-      port: b.port ?? a.port,
-      env: { ...(b.env ?? {}), ...a.env }
+      name: b.name ?? a.name ?? Package.name.replace('@', ''),
+      tag: b.tag ?? a.tag ?? ['latest'],
+      port: b.port ?? a.port ?? [],
+      registry: b.registry ?? a.registry,
+      env: { ...(b.env ?? {}), ...a.env },
+      push: b.push ?? a.push
     };
   },
   /**
   * Dockerize workspace with flags
   */
-  async* exec({ workspace, image, port, tag, env, app = 'rest' }: DockerConfig) {
+  async* exec({ workspace, push, image, port, tag, env, name, registry, app = 'rest' }: DockerConfig) {
     const ws = PathUtil.resolveUnix(workspace);
 
     yield 'Building Dockerfile';
@@ -50,10 +56,15 @@ export const Docker: PackOperation<DockerConfig> = {
     await ExecUtil.spawn('docker', ['pull', image]).result;
 
     yield 'Building Docker Container';
-    const args = ['build', ...tag.flatMap(x => ['-t', x]), '.'];
+    const tags = tag.map(x => registry ? `${registry}/${name}:${x}` : `${name}:${x}`)
+    const args = ['build', ...tags.flatMap(x => ['-t', x]), '.'];
 
-    const { result } = ExecUtil.spawn('docker', args, { cwd: ws, stdio: [0, 'pipe', 2] });
-    await result;
+    await ExecUtil.spawn('docker', args, { cwd: ws, stdio: [0, 'pipe', 2] }).result;
+
+    if (push) {
+      yield `Pushing Tags`
+      await ExecUtil.spawn('docker', ['image', 'push', ...tags]).result;
+    }
 
     yield color`${{ success: 'Successfully' }} containerized project`;
   }

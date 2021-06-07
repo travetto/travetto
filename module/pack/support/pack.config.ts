@@ -58,6 +58,6 @@ export const config: AllConfigPartial = {
   },
   docker: {
     active: false,
-    image: 'node:15.12.0-alpine3.11'
+    image: 'node:16-alpine'
   }
 };

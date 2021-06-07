@@ -8,8 +8,11 @@ export class PackDockerPlugin extends BasePackPlugin<DockerConfig> {
     return {
       ...this.defaultOptions(),
       image: this.option({ desc: 'Docker Image to extend' }),
-      tag: this.option({ desc: 'Image Tag' }),
-      port: this.intOption({ desc: 'Image Port' })
+      name: this.option({ desc: 'Image Name' }),
+      tag: this.listOption({ desc: 'Image Tag' }),
+      port: this.listOption({ desc: 'Image Port' }),
+      push: this.boolOption({ short: 'x', desc: 'Push Tags' }),
+      registry: this.option({ desc: 'Registry' })
     };
   }
 }

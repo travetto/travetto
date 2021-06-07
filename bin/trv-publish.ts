@@ -13,7 +13,7 @@ Packages.yieldPublicPackages()
   .$map(([, pkg]) => pkg)
   .$tap(pkg => fs.promises.copyFile('LICENSE', `${pkg!._.folder}/LICENSE`))
   .$map(pkg => {
-    let tag = pkg?.version?.replace(/^.*-([^.]+)[.]\d+$/, (a, b) => b) || 'latest';
+    const tag = pkg?.version?.replace(/^.*-([^.]+)[.]\d+$/, (a, b) => b) || 'latest';
     const args = [
       'publish',
       '--tag', tag,
