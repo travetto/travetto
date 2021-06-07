@@ -168,7 +168,7 @@ export class BindUtil {
   static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: object, view?: string | typeof AllViewⲐ): T {
     view ??= AllViewⲐ;
 
-    if (!!data) {
+    if (!!data && !Util.isPrimitive(data)) {
       const conf = SchemaRegistry.get(cons);
 
       // If no configuration

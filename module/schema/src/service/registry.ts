@@ -1,4 +1,4 @@
-import { Class, AppError } from '@travetto/base';
+import { Class, AppError, Util } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig } from './types';
@@ -7,7 +7,7 @@ import { BindUtil } from '../bind-util';
 import { AllViewⲐ } from '../internal/types';
 
 function hasType<T>(o: unknown): o is { type: Class<T> | string } {
-  return !!o && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
+  return !!o && !Util.isPrimitive(o) && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
 }
 
 /**

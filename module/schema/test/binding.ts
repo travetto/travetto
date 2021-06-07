@@ -6,6 +6,7 @@ import { RootRegistry } from '@travetto/registry';
 import { BindUtil } from '../src/bind-util';
 import { Address } from './models/address';
 import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple } from './models/binding';
+import { SchemaValidator } from '../src/validate/validator';
 
 @Suite('Data Binding')
 class DataBinding {
@@ -227,5 +228,18 @@ class DataBinding {
         { age: 20 }
       ]
     });
+  }
+
+  @Test('Validate bind')
+  async validatePrimitiveBindToObject() {
+    const person = Person.from({
+      name: 'Test',
+      // @ts-ignore
+      address: 'test'
+    });
+
+    assert(person.address instanceof Address);
+
+    await assert.rejects(() => SchemaValidator.validate(Person, person), 'Validation');
   }
 }
