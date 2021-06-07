@@ -1,3 +1,4 @@
+import { EnvUtil } from '@travetto/boot';
 import { ApplicationConfig } from '../../src/types';
 
 /**
@@ -13,12 +14,16 @@ export class AppRunUtil {
 
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 
-    ConsoleManager.exclude('debug', true);
+    if (!EnvUtil.isFalse('DEBUG')) {
+      ConsoleManager.exclude('debug', true);
+    }
 
     // Init
     await PhaseManager.run('init');
 
-    ConsoleManager.exclude('debug', false);
+    if (!EnvUtil.isFalse('DEBUG')) {
+      ConsoleManager.exclude('debug', false);
+    }
 
     // And run
     const { ApplicationRegistry } = await import('../../src/registry');
