@@ -12,7 +12,7 @@ export interface AssembleConfig extends CommonConfig {
   add: Record<string, string>[];
   exclude: string[];
   excludeCompile: string[];
-  env: Record<string, string | number | boolean | undefined>;
+  env: Record<string, string | undefined>;
 }
 
 /**

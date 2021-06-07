@@ -12,7 +12,7 @@ export const config: AllConfigPartial = {
       'node_modules/node-forge'
     ],
     env: {
-      NO_COLOR: 1
+      NO_COLOR: '1'
     },
     postProcess: [{
       'Lambda Entrypoint': (cfg: AssembleConfig) =>
