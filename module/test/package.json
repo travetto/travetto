@@ -1,7 +1,7 @@
 {
   "name": "@travetto/test",
   "displayName": "Testing",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Declarative test framework",
   "keywords": [
     "unit-testing",
