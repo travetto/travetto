@@ -14,9 +14,6 @@ node_modules/buffer-from/
 node_modules/@types/
 node_modules/**/*.d.ts
 node_modules/**/*.html
-node_modules/@travetto/boot/
-!node_modules/@travetto/boot/src/**/*.js
-!node_modules/@travetto/boot/package.json
 .trv_*/
 images/*.gif
 .eslintignore

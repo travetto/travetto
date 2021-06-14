@@ -29,7 +29,6 @@ export class LogFeature extends BaseFeature {
     }
 
     const url = vscode.Uri.parse(`file://${file}#${line}`);
-    console.log(url);
     await vscode.commands.executeCommand('vscode.open', url);
   }
 

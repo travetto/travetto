@@ -74,7 +74,10 @@ class TestRunnerFeature extends BaseFeature {
     return await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig(
       'Debug Travetto',
       Workspace.binPath(this.module, 'test-direct'),
-      [file.replace(`${Workspace.path}${path.sep}`, ''), `${line}`]
+      [file.replace(`${Workspace.path}${path.sep}`, ''), `${line}`],
+      {
+        TRV_TEST_DELAY: '2s'
+      }
     ));
   }
 

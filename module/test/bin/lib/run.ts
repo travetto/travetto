@@ -5,13 +5,17 @@ import type { RunState } from '../../src/execute/types';
  * @param opts
  */
 export async function runTests(opts: RunState) {
-  const { PhaseManager } = await import('@travetto/base');
+  const { PhaseManager, Util } = await import('@travetto/base');
   await PhaseManager.run('init', '*', ['@trv:registry/init']); // Delay registry
 
   const { RunnerUtil } = await import('../../src/execute/util');
   const { Runner } = await import('../../src/execute/runner');
 
   RunnerUtil.registerCleanup('runner');
+
+  if (process.env.TRV_TEST_DELAY) {
+    await Util.wait(process.env.TRV_TEST_DELAY as '2s');
+  }
 
   try {
     const res = await new Runner(opts).run();

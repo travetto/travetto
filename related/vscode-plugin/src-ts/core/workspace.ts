@@ -126,9 +126,9 @@ export class Workspace {
    * Generate execution launch config
    * @param config
    */
-  static generateLaunchConfig(name: string, main: string, args: string[] = []) {
+  static generateLaunchConfig(name: string, main: string, args: string[] = [], env: Record<string, string> = {}) {
     return {
-      type: 'pwa-node',
+      type: 'node',
       request: 'launch',
       protocol: 'inspector',
       // eslint-disable-next-line no-template-curly-in-string
@@ -138,7 +138,9 @@ export class Workspace {
         '--nolazy'
       ],
       resolveSourceMapLocations: [
-        '!**/node_modules/typescript/**'
+        '!**/node_modules/typescript/**',
+        '!**/node_modules/googleapis/**',
+
       ],
       breakOnLoadStrategy: 'regex',
       skipFiles: [
@@ -158,8 +160,9 @@ export class Workspace {
       // eslint-disable-next-line no-template-curly-in-string
       args: [main.replace(this.path, '${workspaceFolder}'), ...args].map(x => `${x}`),
       env: {
-        FORCE_COLOR: 'true'
-      } as Record<string, string>
+        FORCE_COLOR: 'true',
+        ...env
+      }
     };
   }
 
