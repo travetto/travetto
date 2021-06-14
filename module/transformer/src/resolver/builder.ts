@@ -139,10 +139,14 @@ export const TypeBuilder: {
     build: (checker, type) => {
       const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
       const name = CoreUtil.getSymbol(type)?.getName();
-      return {
-        key: 'external', name, source: source.fileName,
-        tsTypeArguments: checker.getAllTypeArguments(type)
-      };
+      if (source.fileName.endsWith('.d.ts') && !source.fileName.includes('@travetto')) {
+        return TypeBuilder.shape.build(checker, type);
+      } else {
+        return {
+          key: 'external', name, source: source.fileName,
+          tsTypeArguments: checker.getAllTypeArguments(type)
+        };
+      }
     }
   },
   union: {
@@ -178,13 +182,13 @@ export const TypeBuilder: {
       const name = CoreUtil.getSymbol(alias ?? type);
       const source = DeclarationUtil.getPrimaryDeclarationNode(type)?.getSourceFile();
       for (const member of checker.getPropertiesOfType(type)) {
-        const memberType = checker.getType(
-          DeclarationUtil.getPrimaryDeclarationNode(member)
-        );
-        if (memberType.getCallSignatures().length) {
-          continue;
+        const dec = DeclarationUtil.getPrimaryDeclarationNode(member);
+        if (DeclarationUtil.isPublic(dec)) { // If public
+          const memberType = checker.getType(dec);
+          if (!memberType.getCallSignatures().length) { // if not a function
+            fieldNodes[member.getName()] = memberType;
+          }
         }
-        fieldNodes[member.getName()] = memberType;
       }
       return {
         key: 'shape', name: name?.getName(),
