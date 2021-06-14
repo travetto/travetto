@@ -33,13 +33,14 @@ export type PackageType = {
   publishConfig?: { access?: 'restricted' | 'public' };
 };
 
-export const readPackage = (folder: string, hideError = false) => {
+export const readPackage = (folder: string, suppressError = false) => {
   try {
     return JSON.parse(fs.readFileSync(PathUtil.resolveUnix(folder, 'package.json'), 'utf8')) as PackageType;
   } catch (e) {
-    if (!hideError) {
+    if (!suppressError) {
       throw e;
     } else {
+      console.warn(`Unable to locate ${folder}: ${e.message}`);
       return {} as PackageType;
     }
   }

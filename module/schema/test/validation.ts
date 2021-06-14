@@ -8,6 +8,7 @@ import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaz,
   CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque
 } from './models/validation';
+import { Accessors } from './models/binding';
 
 function findError(errors: ValidationError[], path: string, message: string) {
   return errors.find(x => x.path === path && x.message.includes(message));
@@ -365,5 +366,25 @@ class Validation {
         throw err;
       }
     }
+  }
+
+  @Test()
+  async verifyAccessors() {
+    await assert.rejects(() => SchemaValidator.validate(Accessors, {} as unknown),
+      err => {
+        if (err instanceof ValidationResultError) {
+          assert(err.errors.length === 2);
+          assert(err.errors[0].path === 'color');
+          assert(err.errors[0].message === 'color is required');
+          assert(err.errors[1].path === 'area');
+          assert(err.errors[1].message === 'area is required');
+        } else {
+          throw err;
+        }
+      });
+
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(Accessors, { color: 'green', area: '5' } as unknown)
+    );
   }
 }

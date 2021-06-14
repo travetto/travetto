@@ -60,4 +60,29 @@ export class DeclarationUtil {
     // @ts-ignore
     return ts.getObjectFlags(type);
   }
+
+  /**
+   * Get accessor pair based off of passing in one in
+   * 
+   * @param node 
+   * @returns 
+   */
+  static getAccessorPair(node: ts.GetAccessorDeclaration | ts.SetAccessorDeclaration) {
+    const acc = { getter: ts.isGetAccessorDeclaration(node) ? node : undefined, setter: ts.isSetAccessorDeclaration(node) ? node : undefined };
+    if (ts.isClassDeclaration(node.parent)) {
+      for (const el of node.parent.members) {
+        if (el.name && el.name.getText() === node.name.getText()) {
+          if (ts.isGetAccessor(el)) {
+            acc.getter = el;
+          } else if (ts.isSetAccessor(el)) {
+            acc.setter = el;
+          }
+          if (acc.getter && acc.setter) {
+            return acc;
+          }
+        }
+      }
+    }
+    return acc;
+  }
 }

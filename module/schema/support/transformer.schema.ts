@@ -1,14 +1,17 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, TransformerId
+  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, TransformerId, OnGetter, OnSetter
 } from '@travetto/transformer';
 import { SchemaTransformUtil } from './transform-util';
+import { access } from 'fs';
 
 const inSchema = Symbol.for('@trv:schema/schema');
+const accessors = Symbol.for('@trv:schema/schema');
 
 interface AutoState {
   [inSchema]?: boolean;
+  [accessors]?: Set<string>;
 }
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
@@ -27,6 +30,7 @@ export class SchemaTransformer {
   @OnClass('Schema')
   static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta) {
     state[inSchema] = true;
+    state[accessors] = new Set();
     return node;
   }
 
@@ -50,6 +54,7 @@ export class SchemaTransformer {
     }
 
     delete state[inSchema];
+    delete state[accessors];
 
     return state.factory.updateClassDeclaration(
       node,
@@ -70,5 +75,31 @@ export class SchemaTransformer {
     const ignore = state.findDecorator(this, node, 'Ignore');
     return state[inSchema] && !ignore && DeclarationUtil.isPublic(node) ?
       SchemaTransformUtil.computeField(state, node) : node;
+  }
+
+  /**
+   * Handle getters
+   */
+  @OnGetter()
+  static processSchemaGetter(state: TransformerState & AutoState, node: ts.GetAccessorDeclaration) {
+    const ignore = state.findDecorator(this, node, 'Ignore');
+    if (state[inSchema] && !ignore && DeclarationUtil.isPublic(node) && !state[accessors]?.has(node.name.getText())) {
+      state[accessors]?.add(node.name.getText());
+      return SchemaTransformUtil.computeField(state, node);
+    }
+    return node;
+  }
+
+  /**
+   * Handle setters
+   */
+  @OnSetter()
+  static processSchemaSetter(state: TransformerState & AutoState, node: ts.SetAccessorDeclaration) {
+    const ignore = state.findDecorator(this, node, 'Ignore');
+    if (state[inSchema] && !ignore && DeclarationUtil.isPublic(node) && !state[accessors]?.has(node.name.getText())) {
+      state[accessors]?.add(node.name.getText());
+      return SchemaTransformUtil.computeField(state, node);
+    }
+    return node;
   }
 }

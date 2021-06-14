@@ -11,7 +11,8 @@ import {
   SpecificPattern, InterfaceType, BaseTypeTarget, CUSTOM_INTERFACE, UsableMainClass, UsableSubClass,
   UsableSubSubClass,
   LooseResolutionClass,
-  LOOSE_SYM
+  LOOSE_SYM,
+  SetterInject
 } from './deps';
 
 import { DbConfig } from './config';
@@ -214,5 +215,11 @@ class DiTest2 {
     const specLoose = await DependencyRegistry.getInstance(LooseResolutionClass, Symbol.for(''), 'loose');
 
     assert(specLoose.name === inst.name);
+  }
+
+  @Test('Setter')
+  async testSetter() {
+    const inst = await DependencyRegistry.getInstance(SetterInject);
+    assert(inst._prop instanceof LooseResolutionClass);
   }
 }

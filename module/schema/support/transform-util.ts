@@ -65,25 +65,38 @@ export class SchemaTransformUtil {
   /**
    * Compute property information from declaration
    */
-  static computeField<T extends ts.PropertyDeclaration | ts.ParameterDeclaration>(
+  static computeField<T extends ts.PropertyDeclaration | ts.ParameterDeclaration | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration>(
     state: TransformerState, node: T, config: { type?: AnyType, root?: ts.Node, name?: string } = { root: node }
   ): T {
 
-    const typeExpr = config.type ?? state.resolveType(node);
+    const typeExpr = config.type ?? state.resolveType(ts.isSetAccessor(node) ? node.parameters[0] : node);
     const attrs: ts.PropertyAssignment[] = [];
 
-    if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
-      attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
+    if (!ts.isGetAccessorDeclaration(node) && !ts.isSetAccessorDeclaration(node)) {
+      if ((ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Readonly) > 0) {
+        attrs.push(state.factory.createPropertyAssignment('readonly', state.fromLiteral(true)));
+      } else if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
+        attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
+      }
+      if (node.initializer && ts.isLiteralExpression(node.initializer)) {
+        attrs.push(state.factory.createPropertyAssignment('default', node.initializer));
+      }
+    } else {
+      const acc = DeclarationUtil.getAccessorPair(node);
+      if (!acc.setter) {
+        attrs.push(state.factory.createPropertyAssignment('readonly', state.fromLiteral(true)));
+      }
+      if (!acc.getter) {
+        attrs.push(state.factory.createPropertyAssignment('writeonly', state.fromLiteral(true)));
+      } else if (!typeExpr.undefinable) {
+        attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
+      }
     }
 
     if (ts.isParameter(node) || config.name !== undefined) {
       attrs.push(state.factory.createPropertyAssignment('name', state.factory.createStringLiteral(
         config.name !== undefined ? config.name : node.name.getText())
       ));
-    }
-
-    if (node.initializer && ts.isLiteralExpression(node.initializer)) {
-      attrs.push(state.factory.createPropertyAssignment('default', node.initializer));
     }
 
     // If we have a union type
@@ -135,23 +148,16 @@ export class SchemaTransformUtil {
       }
 
       return state.factory.updatePropertyDeclaration(node as Exclude<typeof node, T>,
-        newDecs,
-        node.modifiers,
-        node.name,
-        node.questionToken,
-        node.type,
-        node.initializer
-      ) as T;
-    } else {
+        newDecs, node.modifiers, node.name, node.questionToken, node.type, node.initializer) as T;
+    } else if (ts.isParameter(node)) {
       return state.factory.updateParameterDeclaration(node as Exclude<typeof node, T>,
-        newDecs,
-        node.modifiers,
-        node.dotDotDotToken,
-        node.name,
-        node.questionToken,
-        node.type,
-        node.initializer
-      ) as T;
+        newDecs, node.modifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer) as T;
+    } else if (ts.isGetAccessorDeclaration(node)) {
+      return state.factory.updateGetAccessorDeclaration(node as Exclude<typeof node, T>,
+        newDecs, node.modifiers, node.name, node.parameters, node.type, node.body) as T;
+    } else {
+      return state.factory.updateSetAccessorDeclaration(node as Exclude<typeof node, T>,
+        newDecs, node.modifiers, node.name, node.parameters, node.body) as T;
     }
   }
 

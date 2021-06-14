@@ -5,7 +5,7 @@ import { CommonRegExp } from '../validate/regexp';
 import { ClassList, FieldConfig } from '../service/types';
 
 function prop(obj: Record<string, unknown>) {
-  return (t: ClassInstance, k: string, idx?: number) => {
+  return (t: ClassInstance, k: string, idx?: number | PropertyDescriptor) => {
     if (idx !== undefined && typeof idx === 'number') {
       SchemaRegistry.registerPendingParamFacet(t.constructor, k, idx, obj);
     } else {
@@ -15,19 +15,19 @@ function prop(obj: Record<string, unknown>) {
 }
 
 const stringArrProp = prop as
-  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | unknown[]>>, K extends string>(t: T, k: K, idx?: number) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | unknown[]>>, K extends string>(t: T, k: K, idx?: number | PropertyDescriptor) => void;
 
 const stringArrStringProp = prop as
-  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | string[]>>, K extends string>(t: T, k: K, idx?: number) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | string[]>>, K extends string>(t: T, k: K, idx?: number | PropertyDescriptor) => void;
 
 const numberProp = prop as
-  (obj: Record<string, unknown>) => <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K, idx?: number) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, number>>, K extends string>(t: T, k: K, idx?: number | PropertyDescriptor) => void;
 
 const stringNumberProp = prop as
-  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | number>>, K extends string>(t: T, k: K, idx?: number) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, string | number>>, K extends string>(t: T, k: K, idx?: number | PropertyDescriptor) => void;
 
 const dateNumberProp = prop as
-  (obj: Record<string, unknown>) => <T extends Partial<Record<K, Date | number>>, K extends string>(t: T, k: K, idx?: number) => void;
+  (obj: Record<string, unknown>) => <T extends Partial<Record<K, Date | number>>, K extends string>(t: T, k: K, idx?: number | PropertyDescriptor) => void;
 
 /**
  * Registering a field
@@ -36,7 +36,7 @@ const dateNumberProp = prop as
  * @augments `@trv:schema/Field`
  */
 export function Field(type: ClassList, config?: Partial<FieldConfig>) {
-  return (f: ClassInstance, k: string, idx?: number) => {
+  return (f: ClassInstance, k: string, idx?: number | PropertyDescriptor) => {
     if (idx !== undefined && typeof idx === 'number') {
       SchemaRegistry.registerPendingParamConfig(f.constructor, k, idx, type, config);
     } else {
@@ -51,6 +51,18 @@ export function Field(type: ClassList, config?: Partial<FieldConfig>) {
  * @augments `@trv:schema/Field`
  */
 export function Alias(...aliases: string[]) { return prop({ aliases }); }
+/**
+ * Mark a field as writeonly
+ * @param active This determines if this field is readonly or not.
+ * @augments `@trv:schema/Field`
+ */
+export function Writeonly(active = true) { return prop({ writeonly: active }); }
+/**
+ * Mark a field as readonly
+ * @param active This determines if this field is readonly or not.
+ * @augments `@trv:schema/Field`
+ */
+export function Readonly(active = true) { return prop({ readonly: active }); }
 /**
  * Mark a field as required
  * @param active This determines if this field is required or not.

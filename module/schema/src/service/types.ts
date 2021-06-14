@@ -141,6 +141,14 @@ export interface FieldConfig extends DescribableConfig {
    * Default value
    */
   default?: Primitive;
+  /**
+   * Is the field readonly?, defaults to false
+   */
+  readonly?: boolean;
+  /**
+   * Is the field writeonly?, defaults to false
+   */
+  writeonly?: boolean;
 }
 
 export type ViewFieldsConfig<T> = { with: (keyof T)[] } | { without: (keyof T)[] };

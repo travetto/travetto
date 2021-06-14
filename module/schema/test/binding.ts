@@ -5,7 +5,7 @@ import { RootRegistry } from '@travetto/registry';
 
 import { BindUtil } from '../src/bind-util';
 import { Address } from './models/address';
-import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple } from './models/binding';
+import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple, Accessors } from './models/binding';
 import { SchemaValidator } from '../src/validate/validator';
 
 @Suite('Data Binding')
@@ -241,5 +241,16 @@ class DataBinding {
     assert(person.address instanceof Address);
 
     await assert.rejects(() => SchemaValidator.validate(Person, person), 'Validation');
+  }
+
+  @Test('Validate accessors')
+  async validateAccessors() {
+    const acc = Accessors.from({
+      age: 20,
+      area: 'green'
+    });
+
+    assert(acc.area === 'green');
+    assert(acc.age === 5);
   }
 }

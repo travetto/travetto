@@ -2,7 +2,7 @@ import { d, lib, mod } from '@travetto/doc';
 
 import {
   Field, Required, Enum, Trimmed, Match, MinLength, MaxLength,
-  Min, Max, Email, Telephone, Url, Ignore, Integer, Float, Currency, LongText, Text
+  Min, Max, Email, Telephone, Url, Ignore, Integer, Float, Currency, LongText, Text, Readonly, Writeonly
 } from './src/decorator/field';
 import { Schema } from './src/decorator/schema';
 import { Describe } from './src/decorator/common';
@@ -59,6 +59,9 @@ ${d.List(
   d`${Currency} provides support for standard currency`,
   d`${Text} indicates that a field is expecting natural language input, not just discrete values`,
   d`${LongText} same as text, but expects longer form content`,
+  d`${Readonly} defines a that field should not be bindable external to the class`,
+  d`${Writeonly} defines a that field should not be exported in serialization, but that it can be bound to`,
+
 )}
 
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated.

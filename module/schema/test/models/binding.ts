@@ -1,3 +1,4 @@
+import { Required } from '@travetto/schema/src/decorator/field';
 import { Schema, View, Field, Float, Integer, Alias, Url } from '../..';
 import { Address } from './address';
 
@@ -75,4 +76,37 @@ export class Poly1 extends BasePoly {
 export class Poly2 extends BasePoly {
   names: string[];
   age: string;
+}
+
+@Schema()
+export class Accessors {
+
+  #area: string;
+  #color: string;
+  public readonly myName: string = 'name';
+
+  @Required()
+  set color(val: string) {
+    this.#color = val;
+  }
+
+  get area() {
+    return this.#area;
+  }
+
+  set area(val: string) {
+    this.#area = val;
+  }
+
+  get optional(): string | undefined {
+    return this.#area;
+  }
+
+  set optional(v: string | undefined) {
+
+  }
+
+  get age() {
+    return this.area.length;
+  }
 }

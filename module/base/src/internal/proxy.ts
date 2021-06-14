@@ -1,7 +1,7 @@
 import { ConcreteClass } from '../types';
 import { Util } from '../util';
 
-const IsProxiedⲐ = Symbol.for('@trv:base/proxy');
+const ProxyTargetⲐ = Symbol.for('@trv:base/proxy-target')
 
 /**
  * Handler for for proxying modules while watching
@@ -43,6 +43,9 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   get(target: T, prop: PropertyKey, receiver: unknown) {
+    if (prop === ProxyTargetⲐ) {
+      return this.target;
+    }
     let ret = this.target[prop as keyof T];
     if (Util.isFunction(ret) && !/^class\s/.test(Function.prototype.toString.call(ret))) {
       // Bind class members to class instance instead of proxy propagating
@@ -52,9 +55,6 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   has(target: T, prop: PropertyKey) {
-    if (prop === IsProxiedⲐ) {
-      return true;
-    }
     return (this.target as Object).hasOwnProperty(prop);
   }
 
@@ -87,8 +87,12 @@ interface Proxy<T> { }
  * Generate Retargetting Proxy
  */
 export class RetargettingProxy<T> {
-  static isProxied(o: unknown): o is RetargettingProxy<unknown> {
-    return !!o && IsProxiedⲐ in (o as object);
+
+  /**
+   * Unwrap proxy
+   */
+  static unwrap<T>(el: T) {
+    return (el ? ((el as any)[ProxyTargetⲐ] ?? el) : el) as T;
   }
 
   #handler: RetargettingHandler<T>;

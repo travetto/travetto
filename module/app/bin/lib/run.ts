@@ -14,14 +14,14 @@ export class AppRunUtil {
 
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 
-    if (!EnvUtil.isFalse('DEBUG')) {
+    if (!EnvUtil.isTrue('TRV_DEBUG')) {
       ConsoleManager.exclude('debug', true);
     }
 
     // Init
     await PhaseManager.run('init');
 
-    if (!EnvUtil.isFalse('DEBUG')) {
+    if (!EnvUtil.isTrue('TRV_DEBUG')) {
       ConsoleManager.exclude('debug', false);
     }
 

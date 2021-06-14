@@ -38,7 +38,9 @@ export class SchemaValidator {
     let errors: ValidationError[] = [];
 
     for (const field of Object.keys(schema)) {
-      errors = errors.concat(this.#validateFieldSchema(schema[field], o[field as keyof T], relative));
+      if (!schema[field].readonly) { // Do not validate readonly fields
+        errors = errors.concat(this.#validateFieldSchema(schema[field], o[field as keyof T], relative));
+      }
     }
 
     return errors;

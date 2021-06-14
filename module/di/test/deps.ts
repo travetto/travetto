@@ -144,3 +144,13 @@ class Config {
     }();
   }
 }
+
+@Injectable()
+export class SetterInject {
+  _prop: LooseResolutionClass;
+
+  @Inject()
+  set res(res: LooseResolutionClass) {
+    this._prop = res;
+  }
+}

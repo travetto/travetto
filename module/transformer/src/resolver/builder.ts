@@ -64,6 +64,8 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
     const source = DeclarationUtil.getPrimaryDeclarationNode(resolvedType).getSourceFile();
     if (source?.fileName.includes('@types/node/globals') || source?.fileName.includes('typescript/lib')) {
       return { category: 'literal', type };
+    } else if (!source?.fileName.includes('@travetto') && source?.fileName.endsWith('.d.ts')) {
+      return { category: 'unknown', type };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };
     } else {
@@ -139,14 +141,10 @@ export const TypeBuilder: {
     build: (checker, type) => {
       const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
       const name = CoreUtil.getSymbol(type)?.getName();
-      if (source.fileName.endsWith('.d.ts') && !source.fileName.includes('@travetto')) {
-        return TypeBuilder.shape.build(checker, type);
-      } else {
-        return {
-          key: 'external', name, source: source.fileName,
-          tsTypeArguments: checker.getAllTypeArguments(type)
-        };
-      }
+      return {
+        key: 'external', name, source: source.fileName,
+        tsTypeArguments: checker.getAllTypeArguments(type)
+      };
     }
   },
   union: {

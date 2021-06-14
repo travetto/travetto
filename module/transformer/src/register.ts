@@ -60,6 +60,24 @@ export function OnProperty(...target: string[]) {
 }
 
 /**
+ * Listens for a `ts.GetAccessorDeclaration`, on descent
+ */
+export function OnGetter(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.GetAccessorDeclaration, dm?: DecoratorMeta) => R>
+  ) => storeHandler(inst, d.value!, 'before', 'getter', target);
+}
+
+/**
+ * Listens for a `ts.SetAccessorDeclaration`, on descent
+ */
+export function OnSetter(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.SetAccessorDeclaration, dm?: DecoratorMeta) => R>
+  ) => storeHandler(inst, d.value!, 'before', 'setter', target);
+}
+
+/**
  * Listens for a `ts.MethodDeclaration`, on descent
  */
 export function OnMethod(...target: string[]) {
@@ -120,6 +138,24 @@ export function AfterProperty(...target: string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.PropertyDeclaration, dm?: DecoratorMeta) => R>
   ) => storeHandler(inst, d.value!, 'after', 'property', target);
+}
+
+/**
+ * Listens for a `ts.GetAccessorDeclaration`, on ascent
+ */
+export function AfterGetter(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.GetAccessorDeclaration, dm?: DecoratorMeta) => R>
+  ) => storeHandler(inst, d.value!, 'after', 'getter', target);
+}
+
+/**
+ * Listens for a `ts.SetAccessorDeclaration`, on ascent
+ */
+export function AfterSetter(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.SetAccessorDeclaration, dm?: DecoratorMeta) => R>
+  ) => storeHandler(inst, d.value!, 'after', 'setter', target);
 }
 
 /**

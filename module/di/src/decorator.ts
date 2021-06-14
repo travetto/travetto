@@ -52,7 +52,7 @@ export function InjectArgs(configs?: InjectConfig[][]) {
  * @augments `@trv:di/Inject`
  */
 export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | undefined)[]) {
-  return (target: unknown, propertyKey: string | symbol, idx?: number) => {
+  return (target: unknown, propertyKey: string | symbol, idx?: number | PropertyDescriptor) => {
     if (typeof idx !== 'number') { // Only register if on property
       const config: InjectConfig = collapseConfig(first, ...args);
 

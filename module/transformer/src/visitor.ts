@@ -30,6 +30,10 @@ export class VisitorFactory<S extends State = State> {
       return 'parameter';
     } else if (ts.isFunctionDeclaration(node) || (ts.isFunctionExpression(node) && !ts.isArrowFunction(node))) {
       return 'function';
+    } else if (ts.isGetAccessor(node)) {
+      return 'getter';
+    } else if (ts.isSetAccessor(node)) {
+      return 'setter';
     }
   }
 

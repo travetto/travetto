@@ -4,6 +4,7 @@ import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
 import { EnvUtil } from '@travetto/boot';
 import { Application } from '@travetto/app';
+import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
 
 import { RouteConfig, Request, RouteHandler, ParamConfig, ServerHandle } from '../types';
 import { RestConfig } from './config';
@@ -116,6 +117,10 @@ export class RestApplication<T extends unknown = unknown>  {
 
     const config = ControllerRegistry.get(c);
     config.instance = await DependencyRegistry.getInstance(config.class);
+
+    if (EnvUtil.isDynamic()) {
+      config.instance = RetargettingProxy.unwrap(config.instance);
+    }
 
     for (const ep of config.endpoints) {
       ep.instance = config.instance;

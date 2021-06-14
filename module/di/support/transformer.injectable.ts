@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, TransformerId
+  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, TransformerId, OnSetter
 } from '@travetto/transformer';
 
 const INJECTABLE_MOD = '@travetto/di/src/decorator';
@@ -16,7 +16,7 @@ export class InjectableTransformer {
   /**
    * Handle a specific declaration param/property
    */
-  static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.PropertyDeclaration) {
+  static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.SetAccessorDeclaration | ts.PropertyDeclaration) {
     const existing = state.findDecorator(this, param, 'Inject', INJECTABLE_MOD);
 
     if (!(existing || ts.isParameter(param))) {
@@ -32,7 +32,7 @@ export class InjectableTransformer {
     }
 
     args.unshift(state.fromLiteral({
-      target: state.getOrImport(state.resolveExternalType(param)),
+      target: state.getOrImport(state.resolveExternalType(ts.isSetAccessorDeclaration(param) ? param.parameters[0] : param)),
       optional
     }));
 
@@ -99,6 +99,26 @@ export class InjectableTransformer {
       node.questionToken,
       node.type,
       node.initializer
+    );
+  }
+
+  /**
+  * Handle Inject annotations for fields/args
+  */
+  @OnSetter('Inject')
+  static registerInjectSetter(state: TransformerState, node: ts.SetAccessorDeclaration, dm?: DecoratorMeta) {
+    const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_MOD);
+
+    // Doing decls
+    return state.factory.updateSetAccessorDeclaration(
+      node,
+      DecoratorUtil.spliceDecorators(node, decl, [
+        state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)),
+      ], 0),
+      node.modifiers,
+      node.name,
+      node.parameters,
+      node.body
     );
   }
 
