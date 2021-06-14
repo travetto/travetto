@@ -1,9 +1,6 @@
 import * as vscode from 'vscode';
-
-Object.defineProperty(require('@travetto/boot/src/path').PathUtil,
-  'cwd',
-  { value: vscode.workspace.workspaceFolders![0].uri.path }
-);
+// Force directory to match
+process.chdir(vscode.workspace.workspaceFolders![0].uri.path);
 
 import { Workspace } from './core/workspace';
 import { ActivationManager } from './core/activation';

@@ -75,10 +75,9 @@ export class AppRunFeature extends BaseFeature {
     const config = Workspace.generateLaunchConfig(
       `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
       Workspace.binPath(this.module, 'run'),
-      [choice.name, ...choice.inputs]
+      [choice.name, ...choice.inputs],
+      { TRV_DYNAMIC: '1' }
     );
-
-    config.env.TRV_DYNAMIC = '1';
 
     return config;
   }

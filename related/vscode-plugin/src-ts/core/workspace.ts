@@ -159,10 +159,7 @@ export class Workspace {
       program: this.resolve(`node_modules/${this.binPath('boot', 'main')}`),
       // eslint-disable-next-line no-template-curly-in-string
       args: [main.replace(this.path, '${workspaceFolder}'), ...args].map(x => `${x}`),
-      env: {
-        FORCE_COLOR: 'true',
-        ...env
-      }
+      env: { FORCE_COLOR: 'true', ...env }
     };
   }
 

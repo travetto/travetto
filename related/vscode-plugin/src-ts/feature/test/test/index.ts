@@ -75,9 +75,7 @@ class TestRunnerFeature extends BaseFeature {
       'Debug Travetto',
       Workspace.binPath(this.module, 'test-direct'),
       [file.replace(`${Workspace.path}${path.sep}`, ''), `${line}`],
-      {
-        TRV_TEST_DELAY: '2s'
-      }
+      { TRV_TEST_DELAY: '2s' }
     ));
   }
 
