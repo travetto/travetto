@@ -74,7 +74,7 @@ export class SchemaTransformUtil {
 
     if (!ts.isGetAccessorDeclaration(node) && !ts.isSetAccessorDeclaration(node)) {
       if ((ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Readonly) > 0) {
-        attrs.push(state.factory.createPropertyAssignment('readonly', state.fromLiteral(true)));
+        attrs.push(state.factory.createPropertyAssignment('mode', state.fromLiteral('readonly')));
       } else if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
         attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
       }
@@ -84,10 +84,10 @@ export class SchemaTransformUtil {
     } else {
       const acc = DeclarationUtil.getAccessorPair(node);
       if (!acc.setter) {
-        attrs.push(state.factory.createPropertyAssignment('readonly', state.fromLiteral(true)));
+        attrs.push(state.factory.createPropertyAssignment('access', state.fromLiteral('readonly')));
       }
       if (!acc.getter) {
-        attrs.push(state.factory.createPropertyAssignment('writeonly', state.fromLiteral(true)));
+        attrs.push(state.factory.createPropertyAssignment('mode', state.fromLiteral('writeonly')));
       } else if (!typeExpr.undefinable) {
         attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
       }

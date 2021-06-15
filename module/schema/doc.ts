@@ -1,7 +1,7 @@
 import { d, lib, mod } from '@travetto/doc';
 
 import {
-  Field, Required, Enum, Trimmed, Match, MinLength, MaxLength,
+  Field, Required, Enum, Match, MinLength, MaxLength,
   Min, Max, Email, Telephone, Url, Ignore, Integer, Float, Currency, LongText, Text, Readonly, Writeonly
 } from './src/decorator/field';
 import { Schema } from './src/decorator/schema';
@@ -44,7 +44,6 @@ ${d.List(
   d`${Field} defines a field that will be serialized.`,
   d`${Required} defines a that field should be required`,
   d`${Enum} defines the allowable values that a field can have`,
-  d`${Trimmed} augments binding to remove leading and trailing whitespace from string values`,
   d`${Match} defines a regular expression that the field value should match`,
   d`${MinLength} enforces min length of a string`,
   d`${MaxLength} enforces max length of a string`,

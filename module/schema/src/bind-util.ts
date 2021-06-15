@@ -185,7 +185,7 @@ export class BindUtil {
 
         for (const schemaFieldName of viewConf.fields) {
           let inboundField: string | undefined = undefined;
-          if (viewConf.schema[schemaFieldName].readonly) {
+          if (viewConf.schema[schemaFieldName].access === 'readonly') {
             continue; // Skip trying to write readonly fields
           }
           if (schemaFieldName in data) {

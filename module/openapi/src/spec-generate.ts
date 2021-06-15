@@ -166,10 +166,9 @@ export class SpecGenerator {
     if (field.required && field.required.active) {
       required.push(field.name);
     }
-    if (field.readonly) {
+    if (field.access === 'readonly') {
       prop.readOnly = true;
-    }
-    if (field.writeonly) {
+    } else if (field.access === 'writeonly') {
       prop.writeOnly = true;
     }
     if (field.array) {
