@@ -45,7 +45,7 @@
     "@travetto/app": true
   },
   "engines": {
-    "vscode": "^1.56.0"
+    "vscode": "^1.57.0"
   },
   "publishConfig": {
     "access": "restricted"
