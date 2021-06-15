@@ -47,7 +47,7 @@
     "@travetto/model-query": "2.0.1",
     "@travetto/cli": "^2.0.1",
     "node-forge": "^0.10.0",
-    "@types/node-forge": "^0.9.9"
+    "@types/node-forge": "^0.9.10"
   },
   "publishConfig": {
     "access": "public"

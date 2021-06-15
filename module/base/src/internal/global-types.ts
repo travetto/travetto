@@ -1,4 +1,5 @@
 import { EnvUtil } from '@travetto/boot';
+import { AppManifest } from '../manifest';
 import { StacktraceUtil } from '../stacktrace';
 
 declare global {
@@ -12,7 +13,7 @@ declare global {
 export type Primitive = number | boolean | string | Date | Error;
 
 function addFn(proto: object, name: string, fn: Function) {
-  Object.defineProperty(proto, name, { configurable: EnvUtil.isDynamic(), writable: false, enumerable: false, value: fn });
+  Object.defineProperty(proto, name, { configurable: true, writable: false, enumerable: false, value: fn });
 }
 
 // Enable maps to be serialized as json
