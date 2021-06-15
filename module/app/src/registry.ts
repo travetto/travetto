@@ -32,20 +32,6 @@ class $ApplicationRegistry {
   }
 
   /**
-   * Log app init
-   */
-  logInit(config: ApplicationConfig) {
-
-    // Log startup
-    console.log('Running application', {
-      name: config.name,
-      filename: config.filename.replace(/^.*node_modules\//, '').replace(PathUtil.cwd, '.')
-    });
-    console.log('Manifest', AppManifest.toJSON());
-    console.log('Config', ConfigManager.toJSON());
-  }
-
-  /**
    * Prepare parameters for usage
    */
   prepareParams(name: string, args: string[]) {
@@ -66,12 +52,21 @@ class $ApplicationRegistry {
 
     const cleaned = this.prepareParams(name, args);
 
+    console.log('Running application', {
+      name: config.name,
+      filename: config.filename.replace(/^.*node_modules\//, '').replace(PathUtil.cwd, '.')
+    });
+
+    // Show manifest
+    console.log('Manifest', AppManifest.toJSON());
+
     // Get instance of app class
     const inst = DependencyRegistry.get(config.target!) ?
       await DependencyRegistry.getInstance(config.target!) :
       new (config.target! as ConcreteClass<AppClass>)();
 
-    this.logInit(config);
+    // Show config
+    console.log('Config', ConfigManager.toJSON());
 
     const ret = await inst.run(...cleaned);
 
