@@ -205,6 +205,9 @@ export class SpecGenerator {
         const required: string[] = [];
 
         for (const fieldName of def.fields) {
+          if (SchemaRegistry.has(def.schema[fieldName].type)) {
+            this.#processSchema(def.schema[fieldName].type);
+          }
           properties[fieldName] = this.#processSchemaField(def.schema[fieldName], required);
         }
 
