@@ -17,6 +17,9 @@ export const Zip: PackOperation<ZipConfig> = {
   context(cfg: ZipConfig) {
     return `[output=${cfg.output}]`;
   },
+  overrides: {
+    output: process.env.PACK_ZIP_OUTPUT || undefined
+  },
   extend(a: ZipConfig, b: Partial<ZipConfig>) {
     return {
       ...PackUtil.commonExtend(a, b),

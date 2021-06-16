@@ -1,5 +1,6 @@
 import { FsUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
+import { CliUtil } from '@travetto/cli/src/util';
 
 import { PackUtil } from '../lib/util';
 import { CommonConfig, PackOperation } from '../lib/types';
@@ -23,6 +24,10 @@ export const Assemble: PackOperation<AssembleConfig> = {
   title: 'Assembling',
   context(cfg: AssembleConfig) {
     return `[readonly=${cfg.readonly},cache=${cfg.cacheDir}]`;
+  },
+  overrides: {
+    keepSource: CliUtil.toBool(process.env.PACK_ASSEMBLE_KEEP_SOURCE),
+    readonly: CliUtil.toBool(process.env.PACK_ASSEMBLE_READONLY)
   },
   extend(a: AssembleConfig, b: Partial<AssembleConfig>) {
     return {

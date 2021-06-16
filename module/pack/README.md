@@ -137,7 +137,7 @@ Docker support is an optional step, that can run post assembly.  This allows for
 ```typescript
 docker: {
     active: false,
-    image: 'node:15.12.0-alpine3.11'
+    image: 'node:16-alpine'
   }
 ```
 
@@ -149,9 +149,12 @@ Usage:  pack:docker [options] [mode]
 
 Options:
   -w, --workspace <workspace>  Working directory (default: "/tmp/pack_travetto_pack")
-  -i, --image <image>          Docker Image to extend (default: "node:15.12.0-alpine3.11")
-  -t, --tag <tag>              Image Tag (default: ["app"])
-  -p, --port <port>            Image Port
+  -i, --image <image>          Docker Image to extend (default: "node:16-alpine")
+  -n, --name <name>            Image Name (default: "travetto/pack")
+  -t, --tag <tag>              Image Tag (default: ["latest"])
+  -p, --port <port>            Image Port (default: [])
+  -x, --push <push>            Push Tags (default: true)
+  -r, --registry <registry>    Registry
   -h, --help                   display help for command
 
 Available Pack Modes:
@@ -179,7 +182,7 @@ export const config: AllConfigPartial = {
       'node_modules/node-forge'
     ],
     env: {
-      NO_COLOR: 1
+      NO_COLOR: '1'
     },
     postProcess: [{
       'Lambda Entrypoint': (cfg: AssembleConfig) =>
@@ -201,7 +204,7 @@ export const config: AllConfigPartial = {
 npx trv pack <mode>
 ```
 
-### Configuration
+## Configuration
 
 By default, the configuration consists of two components.
    
@@ -228,4 +231,37 @@ export const config: AllConfigPartial = {
     output: 'dist/build.zip'
   }
 };
+```
+
+### Environment Override
+
+When working with sub operations, passing command-line flags is challenging.  To support a more natural usage, the sub operations 
+allow their key parameters to be overridden via environment variables.
+
+**Code: Assemble Overrides**
+```typescript
+overrides: {
+    keepSource: CliUtil.toBool(process.env.PACK_ASSEMBLE_KEEP_SOURCE),
+    readonly: CliUtil.toBool(process.env.PACK_ASSEMBLE_READONLY)
+  },
+```
+
+**Code: Docker Overrides**
+```typescript
+overrides: {
+    image: process.env.PACK_DOCKER_IMAGE || undefined,
+    name: process.env.PACK_DOCKER_NAME || undefined,
+    app: process.env.PACK_DOCKER_APP || undefined,
+    port: process.env.PACK_DOCKER_PORT ? [process.env.PACK_DOCKER_PORT] : undefined,
+    registry: process.env.PACK_DOCKER_REGISTRY || undefined,
+    push: CliUtil.toBool(process.env.PACK_DOCKER_PUSH),
+    tag: process.env.PACK_DOCKER_TAG ? [process.env.PACK_DOCKER_TAG] : undefined
+  },
+```
+
+**Code: Zip Overrides**
+```typescript
+overrides: {
+    output: process.env.PACK_ZIP_OUTPUT || undefined
+  },
 ```

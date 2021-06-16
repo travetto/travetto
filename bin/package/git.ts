@@ -27,15 +27,18 @@ export class Git {
       .$map(f => PathUtil.resolveUnix(f));
   }
 
-  static async * yieldChangedPackges(hash?: string) {
+  static async * yieldChangedPackges(hash?: string, transitive = process.env.TRV_FLAT !== '1') {
     if (!hash) {
       hash = await this.findLastRelease().$value;
     }
 
     yield* this.findFoldersChanged(hash)
-      .$flatMap(f => Modules.getDependentModules(f).$concat(
-        Packages.yieldByFolder(f)
-      ))
+      .$flatMap(f =>
+        transitive ? Modules.getDependentModules(f).$concat(
+          Packages.yieldByFolder(f)
+        ) :
+          Packages.yieldByFolder(f)
+      )
       .$sort((a, b) => a.name.localeCompare(b.name))
       .$unique();
   }

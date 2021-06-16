@@ -33,7 +33,7 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
   async resolveConfigs(extra: Partial<C> | Record<string, C> = {}): Promise<C> {
     const out: C = [...(await PackUtil.getConfigs()), extra]
       .map(x => this.operation.key && this.operation.key in (x ?? {}) ? ((x as Record<string, C>)[this.operation.key] as C) : x as C)
-      .reduce((acc, l) => this.operation.extend(acc, l ?? {}), {} as C);
+      .reduce((acc, l) => this.operation.extend(acc, l ?? {}), this.operation.extend({} as C, this.operation.overrides ?? {}));
     out.workspace ??= PathUtil.resolveUnix(os.tmpdir(), packName);
     out.active = true;
     return out;

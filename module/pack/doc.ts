@@ -62,7 +62,7 @@ ${d.Code('Rest, pack.lambda.ts', '@travetto/rest/support/pack.aws-lambda.ts')}
 
 ${d.Terminal('Invoking Pack with Mode', 'npx trv pack <mode>')}
 
-${d.SubSection('Configuration')}
+${d.Section('Configuration')}
 
 By default, the configuration consists of two components.
 ${d.List(
@@ -73,4 +73,13 @@ ${d.List(
 These two configurations will be loaded and layered, with the selected config taking precedence.
 
 ${d.Code('Example pack.config.ts', 'doc/support/pack.config.ts')}
+
+${d.SubSection('Environment Override')}
+
+When working with sub operations, passing command-line flags is challenging.  To support a more natural usage, the sub operations 
+allow their key parameters to be overridden via environment variables.
+
+${d.Snippet('Assemble Overrides', './bin/operation/assemble.ts', /^  overrides:/, /^  [}]/)}
+${d.Snippet('Docker Overrides', './bin/operation/docker.ts', /^  overrides:/, /^  [}]/)}
+${d.Snippet('Zip Overrides', './bin/operation/zip.ts', /^  overrides:/, /^  [}]/)}
 `;

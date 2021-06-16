@@ -2,9 +2,9 @@ import { FsUtil, PathUtil } from '@travetto/boot/src';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import * as fs from 'fs';
 
-export class PackDockerFilePlugin extends BasePlugin {
+export class PackDockerExportPlugin extends BasePlugin {
 
-  name = 'pack:docker-file';
+  name = 'pack:docker-export';
 
   getOptions() {
     return {
@@ -12,7 +12,7 @@ export class PackDockerFilePlugin extends BasePlugin {
       image: this.option({ desc: 'Docker image to extend', def: 'node:16-alpine' }),
       port: this.intOption({ desc: 'Expose port', def: 3000 }),
       add: this.listOption({ desc: 'Files to include' }),
-      output: this.option({ desc: 'File output', def: 'Dockerfile' })
+      output: this.option({ desc: 'Docker file name', def: 'Dockerfile' })
     };
   }
 

@@ -34,3 +34,6 @@ The common environment variables throughout the code base:
 * `TRV_DOC_BRANCH` = `master`     - The branch to target the documentation against.
 * `TRV_NODE_VERSION` = DEFAULT    - The node version to compile for, translates into a specific typescript target for compability. Will default to the version of node running.
 * `TRV_CONSOLE_WIDTH`             - An override for controlliing output-width for cli-based operations.
+
+## Build
+* `TRV_FLAT` = `0`                -  Will not follow transitive deps when running operations.  Useful for manual deploys of specific versions

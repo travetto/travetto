@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 
 import { ExecUtil, Package, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
+import { CliUtil } from '@travetto/cli/src/util';
 
 import { CommonConfig, PackOperation } from '../lib/types';
 import { PackUtil } from '../lib/util';
@@ -22,6 +23,15 @@ export const Docker: PackOperation<DockerConfig> = {
   title: 'Docker-izing',
   context(cfg: DockerConfig) {
     return `[image=${cfg.image}, port=${cfg.port}]`;
+  },
+  overrides: {
+    image: process.env.PACK_DOCKER_IMAGE || undefined,
+    name: process.env.PACK_DOCKER_NAME || undefined,
+    app: process.env.PACK_DOCKER_APP || undefined,
+    port: process.env.PACK_DOCKER_PORT ? [process.env.PACK_DOCKER_PORT] : undefined,
+    registry: process.env.PACK_DOCKER_REGISTRY || undefined,
+    push: CliUtil.toBool(process.env.PACK_DOCKER_PUSH),
+    tag: process.env.PACK_DOCKER_TAG ? [process.env.PACK_DOCKER_TAG] : undefined
   },
   extend(a: DockerConfig, b: Partial<DockerConfig>) {
     return {

@@ -12,7 +12,9 @@ export class CliUtil {
     return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);
   }
 
-  static toBool(x: string | boolean, def: boolean) {
+  static toBool(x: string | boolean, def: boolean): boolean;
+  static toBool(x?: string | boolean, def?: boolean): boolean | undefined;
+  static toBool(x?: string | boolean, def?: boolean) {
     return x === undefined ? true :
       (typeof x === 'boolean' ? x :
         (this.isBoolean(x) ? /^(1|yes|on|true)$/i.test(x) :
