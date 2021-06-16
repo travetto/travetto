@@ -1,7 +1,7 @@
 {
   "name": "@travetto/cli",
   "displayName": "Command Line Interface",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "CLI infrastructure for travetto framework",
   "keywords": [
     "cli",

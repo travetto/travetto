@@ -1,7 +1,7 @@
 {
   "name": "@travetto/pack",
   "displayName": "Pack",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Code packing utilities",
   "keywords": [
     "travetto",
@@ -30,7 +30,7 @@
     "picomatch": "^2.3.0"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "^2.0.2"
+    "@travetto/cli": "^2.0.3"
   },
   "docDependencies": {
     "@travetto/rest": true
