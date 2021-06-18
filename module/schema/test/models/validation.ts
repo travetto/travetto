@@ -1,5 +1,5 @@
 import {
-  Schema, Trimmed, Float, MinLength, Match, Max, Min,
+  Schema, Float, MinLength, Match, Max, Min,
   CommonRegExp, View, Url, Required, Validator
 } from '../..';
 
@@ -60,7 +60,6 @@ export class AllAs {
 @Schema()
 export class Response {
 
-  @Trimmed()
   questionId: string;
 
   answer?: unknown;
