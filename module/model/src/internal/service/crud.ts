@@ -40,7 +40,7 @@ export class ModelCrudUtil {
 
     const result = ModelRegistry.getBaseModel(cls).from(input as object) as T;
 
-    if (!(result instanceof cls)) {
+    if (!(result instanceof cls || result.constructor.ᚕid === cls.ᚕid)) {
       if (onTypeMismatch === 'notfound') {
         throw new NotFoundError(cls, result.id);
       } else {

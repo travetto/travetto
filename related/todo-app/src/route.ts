@@ -7,11 +7,11 @@ import { Todo, TodoSearch } from './model';
 @Controller('/todo')
 export class TodoController {
 
-  #svc: TodoService;
+  _svc: TodoService;
 
   @Inject()
   set svc(v: TodoService) {
-    this.#svc = v;
+    this._svc = v;
   }
 
   /**
@@ -19,7 +19,7 @@ export class TodoController {
    */
   @Get('/')
   async getAll(search: TodoSearch) {
-    return await this.#svc.getAll(search);
+    return await this._svc.getAll(search);
   }
 
   /**
@@ -27,7 +27,7 @@ export class TodoController {
    */
   @Delete('/')
   async deleteAllCompleted() {
-    await this.svc.deleteAllCompleted();
+    await this._svc.deleteAllCompleted();
   }
 
   /**
@@ -36,7 +36,7 @@ export class TodoController {
    */
   @Get('/:id')
   async getById(id: string) {
-    return this.#svc.get(id);
+    return this._svc.get(id);
   }
 
   /**
@@ -44,7 +44,7 @@ export class TodoController {
    */
   @Post('/')
   async create(todo: Todo) {
-    return await this.svc.add(todo);
+    return await this._svc.add(todo);
   }
 
   /**
@@ -55,7 +55,7 @@ export class TodoController {
   @Put('/:id')
   async update(id: string, todo: Todo) {
     todo.id = id;
-    return await this.#svc.update(todo);
+    return await this._svc.update(todo);
   }
 
 
@@ -65,7 +65,7 @@ export class TodoController {
    */
   @Put('/:id/complete')
   async complete(id: string, completed: boolean = true) {
-    return await this.#svc.complete(id, completed);
+    return await this._svc.complete(id, completed);
   }
 
   /**
@@ -74,6 +74,6 @@ export class TodoController {
    */
   @Delete('/:id')
   async remove(id: string) {
-    await this.#svc.remove(id);
+    await this._svc.remove(id);
   }
 }

@@ -63,7 +63,7 @@ export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
     Field(cls)({ constructor: target }, 'update', 0);
 
     function create(this: Svc, body: ModelType) {
-      return this.source.create(getCls(), body);
+      return this.source.create(getCls(), body as T);
     }
 
     Object.assign(

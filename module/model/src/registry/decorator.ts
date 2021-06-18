@@ -1,5 +1,4 @@
 import { Class } from '@travetto/base';
-import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelType } from '../types/model';
 import { ModelRegistry } from './model';
@@ -10,37 +9,12 @@ import { IndexConfig, ModelOptions } from './types';
  *
  * @augments `@trv:schema/Schema`
  */
-export function Model(conf: Partial<ModelOptions<ModelType> & { subTypeName?: string }> | string = {}) {
+export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
   return function <T extends ModelType, U extends Class<T>>(target: U): U {
     if (typeof conf === 'string') {
       conf = { store: conf };
     }
-
-    // Force registry first, and update with extra information after computing
     ModelRegistry.register(target, conf);
-
-    const baseModel = ModelRegistry.getBaseModel(target);
-    if (baseModel !== target) { // Subtyping if base isn't self
-      conf.subType = true;
-      SchemaRegistry.registerSubTypes(target, conf.subTypeName);
-    }
-    ModelRegistry.register(target, conf);
-    return target;
-  };
-}
-
-
-/**
- * Base Model decorator, extends `@Schema`
- *
- * @augments `@trv:schema/Schema`
- */
-export function BaseModel(conf: Partial<ModelOptions<ModelType>> | string = {}) {
-  return function <T extends ModelType & { type: string }, U extends Class<T>>(target: U): U {
-    ModelRegistry.register(target, {
-      baseType: true,
-      ...(typeof conf === 'string' ? { store: conf } : conf)
-    });
     return target;
   };
 }

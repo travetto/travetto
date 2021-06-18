@@ -11,6 +11,10 @@ export class Todo {
   who?: string;
   #color?: string;
 
+  set color(c: string | undefined) {
+    this.#color = c;
+  }
+
   get color() {
     return this.#color;
   }

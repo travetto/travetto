@@ -37,3 +37,14 @@ export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
     SchemaRegistry.registerPendingView(target, name, fields);
   };
 }
+
+/**
+ * Register a class as a subtype, with a specific discriminator
+ * @param name 
+ * @returns 
+ */
+export function SubType<T>(name: string) {
+  return (target: Class<Partial<T>>) => {
+    SchemaRegistry.registerSubTypes(target, name);
+  };
+}

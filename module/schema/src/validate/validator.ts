@@ -225,7 +225,7 @@ export class SchemaValidator {
    * @param view The optional view to limit the scope to
    */
   static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
-    if (!Util.isPlainObject(o) && !(o instanceof cls)) {
+    if (!Util.isPlainObject(o) && !(o instanceof cls || cls.ᚕid === (o as ClassInstance<T>).constructor.ᚕid)) {
       throw new TypeMismatchError(cls.name, (o as unknown as ClassInstance).constructor.name);
     }
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);

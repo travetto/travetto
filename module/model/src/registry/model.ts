@@ -8,7 +8,6 @@ import { IndexConfig, IndexType, ModelOptions } from './types';
 import { NotFoundError } from '../error/not-found';
 import { ModelType } from '../types/model';
 import { IndexNotSupported } from '../error/invalid-index';
-import { SubTypeNotSupportedError } from '../error/invalid-sub-type';
 
 /**
  * Registry for all models, built on the Metadata registry
@@ -52,12 +51,20 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
-    return { class: cls, indices: [], autoCreate: true };
+    return { class: cls, indices: [], autoCreate: true, baseType: cls.ᚕabstract };
   }
 
   onInstallFinalize(cls: Class) {
     const config = this.pending.get(cls.ᚕid)! as ModelOptions<ModelType>;
-    delete SchemaRegistry.get(cls).views[AllViewⲐ].schema.id.required; // Allow ids to be optional
+
+    const schema = SchemaRegistry.get(cls);
+    const view = schema.views[AllViewⲐ].schema;
+    delete view.id.required; // Allow ids to be optional
+
+    if ('type' in view && this.getBaseModel(cls) !== cls) {
+      config.subType = schema.subType; // Copy from schema
+      delete view.type.required; // Allow type to be optional
+    }
     return config;
   }
 
@@ -128,7 +135,6 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
       if (config.subType) {
         return this.getStore(this.getBaseModel(cls));
       }
-
 
       const name = config.store ?? cls.name.toLowerCase();
 

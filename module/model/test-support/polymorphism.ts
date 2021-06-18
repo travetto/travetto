@@ -10,9 +10,8 @@ import {
 } from '..';
 import { isIndexedSupported } from '../src/internal/service/common';
 import { ExistsError } from '../src/error/exists';
-import { BaseModel } from '../src/registry/decorator';
 
-@BaseModel()
+@Model({ baseType: true })
 export class Worker {
   id: string;
   type: string;
@@ -41,7 +40,7 @@ export class Engineer extends Worker {
   major: string;
 }
 
-@BaseModel()
+@Model({ baseType: true })
 @Index({
   name: 'worker-name',
   type: 'sorted',
