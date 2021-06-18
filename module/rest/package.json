@@ -1,7 +1,7 @@
 {
   "name": "@travetto/rest",
   "displayName": "RESTful API",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
   "keywords": [
     "rest",
@@ -28,10 +28,10 @@
     "directory": "module/rest"
   },
   "dependencies": {
-    "@travetto/config": "^2.0.2",
-    "@travetto/rest": "^2.0.2",
-    "@travetto/app": "^2.0.3",
-    "@travetto/di": "^2.0.2",
+    "@travetto/config": "^2.0.3",
+    "@travetto/rest": "^2.0.3",
+    "@travetto/app": "^2.0.5",
+    "@travetto/di": "^2.0.3",
     "@travetto/registry": "^2.0.2",
     "@travetto/transformer": "^2.0.3",
     "@types/cookies": "^0.7.6",
@@ -42,9 +42,9 @@
     "node-fetch": "^3.0.0-beta.9"
   },
   "optionalPeerDependencies": {
-    "@travetto/schema": "^2.0.3",
-    "@travetto/model": "^2.0.2",
-    "@travetto/model-query": "2.0.2",
+    "@travetto/schema": "^2.0.5",
+    "@travetto/model": "^2.0.3",
+    "@travetto/model-query": "2.0.3",
     "@travetto/cli": "^2.0.2",
     "node-forge": "^0.10.0",
     "@types/node-forge": "^0.9.10"
