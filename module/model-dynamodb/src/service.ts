@@ -5,7 +5,7 @@ import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
-  ModelIndexedSupport, ModelType, NotFoundError, ExistsError, SubTypeNotSupportedError,
+  ModelIndexedSupport, ModelType, NotFoundError, ExistsError,
   IndexNotSupported, OptionalId
 } from '@travetto/model';
 
@@ -290,9 +290,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     item = await ModelCrudUtil.preStore(cls, item, this);
     if (ModelRegistry.get(cls).expiresAt) {
       await this.get(cls, item.id);
@@ -302,18 +300,14 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
     await this.#putItem(cls, prepped.id, prepped, 'upsert');
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
     await this.#putItem(cls, id, item as T, 'update');
@@ -321,9 +315,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     const res = await this.client.deleteItem({
       TableName: this.#resolveTable(cls),
       ReturnValues: 'ALL_OLD',
@@ -370,9 +362,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   // Indexed
   async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
 
     const idxCfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
 
@@ -417,9 +407,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
 
     const cfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, cfg, body, { emptySortValue: null });

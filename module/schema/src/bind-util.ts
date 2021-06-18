@@ -149,6 +149,8 @@ export class BindUtil {
       return data as T;
     } else {
       const tgt = new (cls as ConcreteClass<T>)();
+      SchemaRegistry.ensureInstanceTypeField(cls, tgt);
+
       for (const [k, v] of Object.entries(tgt)) { // Do not retain undefined fields
         if (v === undefined) {
           delete tgt[k as keyof T];

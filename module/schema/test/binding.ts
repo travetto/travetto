@@ -2,6 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
+import { AppError } from '@travetto/base';
 
 import { BindUtil } from '../src/bind-util';
 import { Address } from './models/address';
@@ -147,10 +148,20 @@ class DataBinding {
     assert(items);
     assert(items.length === 2);
     assert(items[0] instanceof Poly1);
+    assert(items[0].type === 'poly1');
     assert(!('names' in items[0]));
     assert(items[1] instanceof Poly2);
+    assert(items[1].type === 'poly2');
     assert(!('name' in items[1]));
     assert(typeof items[1]['age'] === 'string');
+  }
+
+  @Test('Should handle invalid-polymorphic structure')
+  validateInvalidPolymorphism() {
+    assert.throws(() => Poly2.from({
+      type: 'poly1',
+      names: ['1', '2', '3'],
+    }), AppError);
   }
 
   @Test('should handle regex fields')

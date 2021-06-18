@@ -8,6 +8,7 @@ import { IndexConfig, IndexType, ModelOptions } from './types';
 import { NotFoundError } from '../error/not-found';
 import { ModelType } from '../types/model';
 import { IndexNotSupported } from '../error/invalid-index';
+import { SubTypeNotSupportedError } from '../error/invalid-sub-type';
 
 /**
  * Registry for all models, built on the Metadata registry

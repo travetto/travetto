@@ -35,9 +35,9 @@ export class ModelOptions<T extends ModelType = ModelType> {
    */
   store?: string;
   /**
-   * If a sub type, identifier type
+   * If a sub type
    */
-  subType?: string;
+  subType?: boolean;
   /**
    * Is a base type?
    */

@@ -60,10 +60,7 @@ export class Response {
 
 @Schema()
 export abstract class BasePoly {
-  private type: string;
-  constructor() {
-    this.type = this.constructor.ᚕid;
-  }
+  type?: string;
 }
 
 @Schema()

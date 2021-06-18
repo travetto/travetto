@@ -18,7 +18,6 @@ import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
-import { SubTypeNotSupportedError } from '../error/invalid-sub-type';
 import { StreamModel, STREAMS } from '../internal/service/stream';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
@@ -142,9 +141,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
 
     const file = await this.#resolveName(cls, '.json', item.id);
@@ -154,9 +151,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
     const file = await this.#resolveName(cls, '.json', item.id);

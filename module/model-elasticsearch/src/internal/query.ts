@@ -248,7 +248,7 @@ export class ElasticsearchQueryUtil {
     }
     if (subType) {
       clauses.push({
-        term: { type: { value: subType } }
+        term: { type: { value: SchemaRegistry.getSubTypeName(cls) } }
       });
     }
     return clauses.length === 0 ? {} :

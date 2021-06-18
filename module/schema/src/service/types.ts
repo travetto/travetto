@@ -64,6 +64,10 @@ export interface ClassConfig extends DescribableConfig {
    * Global validators
    */
   validators: ValidatorFn<unknown, unknown>[];
+  /**
+   * Is the class a sub type
+   */
+  subType?: boolean;
 }
 
 /**

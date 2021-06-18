@@ -4,7 +4,7 @@ import { Index, Update, Search, DeleteByQuery } from '@elastic/elasticsearch/api
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
-  SubTypeNotSupportedError, OptionalId
+  OptionalId
 } from '@travetto/model';
 import { Class, Util, ShutdownManager, AppError } from '@travetto/base';
 import { SchemaChange, DeepPartial } from '@travetto/schema';
@@ -119,9 +119,7 @@ export class ElasticsearchModelService implements
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
 
     try {
       const { body: res } = await this.client.delete({
@@ -160,9 +158,7 @@ export class ElasticsearchModelService implements
   }
 
   async update<T extends ModelType>(cls: Class<T>, o: T): Promise<T> {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
 
     o = await ModelCrudUtil.preStore(cls, o, this);
 
@@ -185,9 +181,7 @@ export class ElasticsearchModelService implements
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, o: OptionalId<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
 
     const item = await ModelCrudUtil.preStore(cls, o, this);
 
@@ -205,9 +199,7 @@ export class ElasticsearchModelService implements
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, data: Partial<T> & { id: string }) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
 
     const script = ElasticsearchSchemaUtil.generateUpdateScript(data);
     const id = data.id;

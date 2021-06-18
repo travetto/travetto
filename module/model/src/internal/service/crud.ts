@@ -1,12 +1,13 @@
 import * as crypto from 'crypto';
 
 import { Class, Util } from '@travetto/base';
-import { SchemaValidator } from '@travetto/schema';
+import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
 import { ModelType, OptionalId } from '../../types/model';
 import { NotFoundError } from '../../error/not-found';
 import { ExistsError } from '../../error/exists';
+import { SubTypeNotSupportedError } from '../../error/invalid-sub-type';
 
 /**
  * Crud utilities
@@ -70,7 +71,7 @@ export class ModelCrudUtil {
 
     const config = ModelRegistry.get(item.constructor as Class<T>);
     if (config.subType) { // Subtyping, assign type
-      item.type = config.subType;
+      SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
 
     await SchemaValidator.validate(cls, item);
@@ -96,7 +97,7 @@ export class ModelCrudUtil {
 
     const config = ModelRegistry.get(item.constructor as Class<T>);
     if (config.subType) { // Subtyping, assign type
-      item.type = config.subType;
+      SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
 
     if (view) {
@@ -112,5 +113,14 @@ export class ModelCrudUtil {
     }
 
     return item as T;
+  }
+
+  /**
+   * Ensure subtype is not supported
+   */
+  static ensureNotSubType(cls: Class) {
+    if (ModelRegistry.get(cls).subType) {
+      throw new SubTypeNotSupportedError(cls);
+    }
   }
 }

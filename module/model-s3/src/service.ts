@@ -4,7 +4,7 @@ import type { MetadataBearer } from '@aws-sdk/types';
 import { StreamUtil } from '@travetto/boot';
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
-  ModelType, ModelRegistry, ExistsError, NotFoundError, SubTypeNotSupportedError, OptionalId
+  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, Util } from '@travetto/base';
@@ -213,9 +213,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     if (!(await this.head(cls, item.id))) {
       throw new NotFoundError(cls, item.id);
     }
@@ -223,25 +221,19 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     return this.store(cls, item);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
     return this.store<T>(cls, item as T, false);
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     if (!(await this.head(cls, id))) {
       throw new NotFoundError(cls, id);
     }

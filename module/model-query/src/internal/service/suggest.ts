@@ -1,5 +1,6 @@
 import { ModelRegistry, ModelType } from '@travetto/model';
 import { Class } from '@travetto/base';
+import { SchemaRegistry } from '@travetto/schema';
 
 import { PageableModelQuery, Query } from '../../model/query';
 import { ValidStringFields, WhereClauseRaw } from '../../model/where-clause';
@@ -25,7 +26,7 @@ export class ModelQuerySuggestUtil {
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
 
     if (config.subType) {
-      clauses.push({ type: config.subType });
+      clauses.push({ type: SchemaRegistry.getSubTypeName(cls) });
     }
 
     if (config.expiresAt) {

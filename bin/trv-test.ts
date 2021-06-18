@@ -4,6 +4,7 @@ import { ExecUtil, FsUtil } from '@travetto/boot';
 import type { TestEvent } from '@travetto/test';
 
 import { Git } from './package/git';
+import { Packages } from './package/packages';
 
 async function run(isolated = false) {
   console.error(`Starting tests [isolated=${isolated}]`);
@@ -15,7 +16,7 @@ async function run(isolated = false) {
 
   const consumer = new RunnableTestConsumer(emitter);
 
-  return Git.yieldChangedPackges()
+  return (process.env.TRV_ALL === '1' ? Packages.yieldPublicPackages() : Git.yieldChangedPackges())
     .$filter(async p => !isolated || !!(await FsUtil.exists(`${p._.folder}/test-isolated`)))
     .$parallel(async p => {
       const args = ['test', '-f', 'exec', ...(isolated ? ['-i'] : ['-c', '3'])];

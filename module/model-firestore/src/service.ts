@@ -5,8 +5,7 @@ import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelRegistry, ModelStorageSupport,
-  ModelIndexedSupport, ModelType, NotFoundError, SubTypeNotSupportedError,
-  OptionalId
+  ModelIndexedSupport, ModelType, NotFoundError, OptionalId
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -77,27 +76,21 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     item = await ModelCrudUtil.preStore(cls, item, this);
     await this.#getCollection(cls).doc(item.id).update(clone(item));
     return item;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
     await this.#getCollection(cls).doc(prepped.id).set(clone(prepped));
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
     const cleaned = toSimpleObj(item, FieldValue.delete());
@@ -106,9 +99,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     try {
       await this.#getCollection(cls).doc(id).delete({ exists: true } as unknown as Precondition);
     } catch (err) {
@@ -134,9 +125,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   // Indexed
   async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
 
     const { fields } = ModelIndexedUtil.computeIndexParts(cls, idx, body);
     const query = fields.reduce((q, { path, value }) => q.where(path.join('.'), '==', value),
@@ -164,9 +153,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
 
     const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: null });
     let query = fields.reduce((q, { path, value }) =>

@@ -5,8 +5,7 @@ import { Class, ShutdownManager, Util } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
-  NotFoundError, ExistsError, ModelIndexedSupport, SubTypeNotSupportedError,
-  IndexConfig, OptionalId
+  NotFoundError, ExistsError, ModelIndexedSupport, IndexConfig, OptionalId
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 
@@ -152,9 +151,8 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
+
     const idxCfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
     const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body);
     const fullKey = this.#resolveKey(cls, idxCfg.name, key);
@@ -223,26 +221,20 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     await this.has(cls, item.id, 'notfound');
     return this.upsert(cls, item);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
     await this.#store(cls, prepped, 'write');
     return prepped;
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
     await this.#store(cls, item as T, 'write');
@@ -250,10 +242,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
-
+    ModelCrudUtil.ensureNotSubType(cls);
     await this.#store(cls, { id } as T, 'delete');
   }
 
@@ -320,9 +309,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    if (ModelRegistry.get(cls).subType) {
-      throw new SubTypeNotSupportedError(cls);
-    }
+    ModelCrudUtil.ensureNotSubType(cls);
 
     const idxCfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
 

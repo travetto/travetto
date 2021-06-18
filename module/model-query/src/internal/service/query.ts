@@ -1,6 +1,7 @@
 import { Class, AppError, Util } from '@travetto/base';
 import { ModelRegistry, NotFoundError } from '@travetto/model';
 import { ModelType } from '@travetto/model/src/types/model';
+import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelQuery, Query } from '../../model/query';
 import { WhereClause, WhereClauseRaw } from '../../model/where-clause';
@@ -45,7 +46,7 @@ export class ModelQueryUtil {
 
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
-      clauses.push({ type: conf.subType } as WhereClauseRaw<T>);
+      clauses.push({ type: SchemaRegistry.getSubTypeName(cls) } as WhereClauseRaw<T>);
     }
     if (checkExpiry && conf.expiresAt) {
       clauses.push({

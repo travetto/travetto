@@ -10,7 +10,7 @@ import { IndexConfig, ModelOptions } from './types';
  *
  * @augments `@trv:schema/Schema`
  */
-export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
+export function Model(conf: Partial<ModelOptions<ModelType> & { subTypeName?: string }> | string = {}) {
   return function <T extends ModelType, U extends Class<T>>(target: U): U {
     if (typeof conf === 'string') {
       conf = { store: conf };
@@ -21,11 +21,8 @@ export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
 
     const baseModel = ModelRegistry.getBaseModel(target);
     if (baseModel !== target) { // Subtyping if base isn't self
-      if (conf.subType) {
-        SchemaRegistry.registerSubTypes(target, conf.subType);
-      } else {
-        conf.subType = SchemaRegistry.getSubTypeName(target);
-      }
+      conf.subType = true;
+      SchemaRegistry.registerSubTypes(target, conf.subTypeName);
     }
     ModelRegistry.register(target, conf);
     return target;
