@@ -49,7 +49,7 @@ export class OpenApiClientPlugin extends BasePlugin {
     const presetEntries = Object
       .entries(presets)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([k, [cmd, v]]) => [`@trv/${k}`.padEnd(presetLen + 5), [cmd, this.presetMap(v)]] as const);
+      .map(([k, [cmd, v]]) => [`@trv:${k}`.padEnd(presetLen + 5), [cmd, this.presetMap(v)]] as const);
 
     const presetText = color`
 ${{ subtitle: 'Available Presets' }}
@@ -65,7 +65,7 @@ ${this.getListOfFormats().map(x => color`* ${{ input: x }}`).join('\n')} `;
   }
 
   getArgs() {
-    return '[format or preset]';
+    return '[format-or-preset]';
   }
 
   async action(format: string) {
