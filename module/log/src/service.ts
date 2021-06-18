@@ -52,13 +52,15 @@ class $Logger {
       }
     }
 
-    // Build default formatter
-    let formatter: Formatter;
-    switch (this.#logFormat) {
-      case 'line': formatter = new LineFormatter(); break;
-      case 'json': formatter = new JsonFormatter(); break;
+    if (!this.#listenerMap.get(DefaultLoggerⲐ)) {
+      // Build default formatter
+      let formatter: Formatter;
+      switch (this.#logFormat) {
+        case 'line': formatter = new LineFormatter(); break;
+        case 'json': formatter = new JsonFormatter(); break;
+      }
+      this.listenDefault(formatter);
     }
-    this.listenDefault(formatter);
 
     ConsoleManager.set(this, true); // Make default
   }
