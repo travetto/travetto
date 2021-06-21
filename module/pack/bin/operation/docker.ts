@@ -14,9 +14,19 @@ export interface DockerConfig extends CommonConfig {
   app?: string;
   port?: (string | number)[];
   env: Record<string, string | number | boolean>;
+  builder?: (cfg: DockerConfig) => string;
   registry?: string;
   push?: boolean;
 }
+
+const dockerFileBuilder = ({ image, port, app = 'rest', env }: DockerConfig) => `
+FROM ${image}
+WORKDIR /app
+COPY . .
+${Object.entries(env).map(([k, v]) => `ENV ${k} "${v}"`).join('\n')}
+${(port ?? []).map(x => `EXPOSE ${x}`).join('\n')}
+CMD ["node", "./node_modules/@travetto/cli/bin/trv", "run", "${app}"]
+`;
 
 export const Docker: PackOperation<DockerConfig> = {
   key: 'docker',
@@ -39,6 +49,7 @@ export const Docker: PackOperation<DockerConfig> = {
       image: b.image ?? a.image,
       app: b.app ?? a.app,
       name: b.name ?? a.name ?? Package.name.replace('@', ''),
+      builder: b.builder ?? a.builder ?? dockerFileBuilder,
       tag: b.tag ?? a.tag ?? ['latest'],
       port: b.port ?? a.port ?? [],
       registry: b.registry ?? a.registry,
@@ -49,30 +60,26 @@ export const Docker: PackOperation<DockerConfig> = {
   /**
   * Dockerize workspace with flags
   */
-  async* exec({ workspace, push, image, port, tag, env, name, registry, app = 'rest' }: DockerConfig) {
+  async* exec(cfg: DockerConfig) {
+    const { builder, workspace, push, image, tag, name, registry } = cfg;
+
     const ws = PathUtil.resolveUnix(workspace);
 
     yield 'Building Dockerfile';
-    await fs.writeFile(PathUtil.resolveUnix(ws, 'Dockerfile'), `
-  FROM ${image}
-  WORKDIR /app
-  COPY . .
-  ${Object.entries(env).map(([k, v]) => `ENV ${k} "${v}"`).join('\n')}
-  ${(port ?? []).map(x => `EXPOSE ${x}`).join('\n')}
-  CMD ["node", "./node_modules/@travetto/cli/bin/trv", "run", "${app}"]
-    `, { encoding: 'utf8' });
+
+    await fs.writeFile(PathUtil.resolveUnix(ws, 'Dockerfile'), builder!(cfg), { encoding: 'utf8' });
 
     yield 'Pulling Base Image';
     await ExecUtil.spawn('docker', ['pull', image]).result;
 
     yield 'Building Docker Container';
-    const tags = tag.map(x => registry ? `${registry}/${name}:${x}` : `${name}:${x}`)
+    const tags = tag.map(x => registry ? `${registry}/${name}:${x}` : `${name}:${x}`);
     const args = ['build', ...tags.flatMap(x => ['-t', x]), '.'];
 
     await ExecUtil.spawn('docker', args, { cwd: ws, stdio: [0, 'pipe', 2] }).result;
 
     if (push) {
-      yield `Pushing Tags`
+      yield 'Pushing Tags';
       await ExecUtil.spawn('docker', ['image', 'push', ...tags]).result;
     }
 
