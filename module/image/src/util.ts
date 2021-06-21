@@ -33,8 +33,8 @@ export class ImageUtil {
    * Resize/conversion util
    */
   static CONVERTER = new CommandService({
-    containerImage: 'v4tech/imagemagick',
-    localCheck: ['convert', ['--version']]
+    containerImage: ' jameskyburz/graphicsmagick-alpine:v1.0.0',
+    localCheck: ['gm', ['-version']]
   });
 
   /**
@@ -60,7 +60,7 @@ export class ImageUtil {
   static resize(image: Buffer, options: ImageOptions): Promise<Buffer>;
   static async resize(image: ImageType, options: ImageOptions): Promise<NodeJS.ReadableStream | Buffer> {
     const state = await this.CONVERTER.exec(
-      'convert', '-resize', `${options.w ?? ''}x${options.h ?? ''}`,
+      'gm', 'convert', '-resize', `${options.w ?? ''}x${options.h ?? ''}`,
       '-auto-orient',
       ...(options.optimize ? ['-strip', '-quality', '86'] : []),
       '-', '-');
