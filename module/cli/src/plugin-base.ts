@@ -136,8 +136,18 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
       .BuildUtil.build();
   }
 
+  /**
+   * Expose configuration as constrained typed object
+   */
   get cmd() {
     return this.#cmd.opts() as Shape<ReturnType<Exclude<this['getOptions'], undefined>>>;
+  }
+
+  /**
+   * Expose command line arguments
+   */
+  get args() {
+    return this.#cmd.args;
   }
 
   /**

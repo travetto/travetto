@@ -30,10 +30,20 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
     return { workspace: this.option({ desc: 'Working directory' }) } as const;
   }
 
-  async resolveConfigs(extra: Partial<C> | Record<string, C> = {}): Promise<C> {
-    const out: C = [...(await PackUtil.getConfigs()), extra]
+  async resolveConfigs(): Promise<C> {
+    const extra = this.operation.key ? { [this.operation.key]: this.cmd } : this.cmd;
+    const list = (await PackUtil.modeList());
+    if (!this.args[0]) {
+      this.showHelp('Missing config mode');
+    }
+    const cfg = list.find(c => c.name === this.args[0]);
+    if (!cfg) {
+      this.showHelp(`Unknown config mode: ${this.args[0]}`);
+    }
+    const def = list.find(c => c.name === 'default');
+    const out: C = [def, cfg, extra]
       .map(x => this.operation.key && this.operation.key in (x ?? {}) ? ((x as Record<string, C>)[this.operation.key] as C) : x as C)
-      .reduce((acc, l) => this.operation.extend(acc, l ?? {}), this.operation.extend({} as C, this.operation.overrides ?? {}));
+      .reduce((acc, l) => this.operation.extend(acc, l ?? {}), (this.operation.overrides ?? {}) as C);
     out.workspace ??= PathUtil.resolveUnix(os.tmpdir(), packName);
     out.active = true;
     return out;
@@ -41,17 +51,6 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
 
   getArgs() {
     return '[mode]';
-  }
-
-  override async finalizeOptions() {
-    const flags = await this.resolveConfigs();
-    const opts = await super.finalizeOptions();
-    for (const el of opts) {
-      if (el.key! in flags) {
-        el.def = flags[el.key! as keyof C];
-      }
-    }
-    return opts;
   }
 
   async help() {
@@ -73,7 +72,7 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
   }
 
   async action() {
-    const resolved = await this.resolveConfigs(this.operation.key ? { [this.operation.key]: this.cmd } : this.cmd);
+    const resolved = await this.resolveConfigs();
     if (await FsUtil.exists(PathUtil.resolveUnix(resolved.workspace, '.git'))) {
       throw new Error('Refusing to use workspace with a .git directory');
     }

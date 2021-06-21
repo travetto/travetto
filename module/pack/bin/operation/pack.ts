@@ -34,10 +34,8 @@ export const Pack: PackOperation<AllConfig> = {
     };
     for (const [k, op] of Object.entries(ops) as ['assemble', typeof Assemble][]) {
       // @ts-ignore
-      ret[k] = op.extend(a[k] ?? {}, op.extend(b[k] ?? {}, op.overrides ?? {}));
-      ret[k]!.workspace = ret.workspace!;
+      ret[k] = op.extend(op.overrides ?? {}, op.extend(a[k] ?? {}, b[k] ?? {}));
     }
-
     return ret as AllConfig;
   },
   async context(cfg: AllConfig) {
@@ -50,6 +48,7 @@ export const Pack: PackOperation<AllConfig> = {
     }
     for (const [step, op] of steps) {
       process.stdout.write('\n');
+      cfg[step as 'assemble'].workspace = cfg.workspace;
       await PackUtil.runOperation(op as typeof Assemble, cfg[step as 'assemble'], 2);
     }
     process.stdout.write('\n');

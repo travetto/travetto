@@ -15,7 +15,6 @@ import { CommonConfig, PackOperation } from './types';
  */
 export class PackUtil {
 
-  static #defaultConfigs: Partial<CommonConfig>[];
   static #modes: Partial<CommonConfig>[];
 
   static commonExtend<T extends CommonConfig>(a: T, b: Partial<T>): T {
@@ -44,17 +43,6 @@ export class PackUtil {
     return this.#modes;
   }
 
-  /**
-   * Get Config
-   */
-  static async getConfigs(): Promise<Partial<CommonConfig>[]> {
-    if (!this.#defaultConfigs) {
-      const allModes = await this.modeList();
-      const mode = allModes.find(x => process.argv.find(a => a === x.name))!;
-      this.#defaultConfigs = [allModes.find(x => x.name === 'default')!, mode!];
-    }
-    return this.#defaultConfigs;
-  }
 
   /**
    * Build file include/exclude lists/checker
