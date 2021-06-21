@@ -8,7 +8,8 @@ import { Zip, ZipConfig } from './zip';
 
 type DeepPartial<T> = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [P in keyof T]?: (T[P] extends (number | string | boolean | undefined) ? (T[P] | undefined) : (T[P] extends any[] ? DeepPartial<T[P][number]>[] : DeepPartial<T[P]>));
+  [P in keyof T]?: (T[P] extends (number | string | boolean | undefined | RegExp | ((...args: any[]) => any)) ?
+    (T[P] | undefined) : (T[P] extends any[] ? DeepPartial<T[P][number]>[] : DeepPartial<T[P]>));
 };
 
 const ops = {
