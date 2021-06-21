@@ -45,6 +45,7 @@ export class S3ModelConfig {
 
     this.config = {
       ...(this.config ?? {}),
+      region: this.region,
       endpoint: this.endpoint,
       credentials: {
         accessKeyId: this.accessKeyId,
