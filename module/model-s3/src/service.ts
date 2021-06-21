@@ -23,6 +23,8 @@ function hasContenttype<T>(o: T): o is T & { contenttype?: string } {
   return o && 'contenttype' in o;
 }
 
+const STREAM_SPACE = '@trv:stream';
+
 /**
  * Asset source backed by S3
  */
@@ -34,9 +36,15 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   constructor(public readonly config: S3ModelConfig) { }
 
   #resolveKey(cls: Class | string, id?: string) {
-    let key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
-    if (id) {
-      key = `${key}:${id}`;
+    let key: string;
+    if (cls === STREAM_SPACE) { // If we are streaming, treat as primary use case
+      key = id!; // Store it directly at root
+    } else {
+      key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
+      if (id) {
+        key = `${key}:${id}`;
+      }
+      key = `_data/${key}`; // Separate data
     }
     if (this.config.namespace) {
       key = `${this.config.namespace}/${key}`;
@@ -78,7 +86,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
    * Write multipart file upload, in chunks
    */
   async #writeMultipart(id: string, input: NodeJS.ReadableStream, meta: StreamMeta): Promise<void> {
-    const { UploadId } = await this.client.createMultipartUpload(this.#q('_stream', id, {
+    const { UploadId } = await this.client.createMultipartUpload(this.#q(STREAM_SPACE, id, {
       ContentType: meta.contentType,
       ContentLength: meta.size,
     }));
@@ -89,7 +97,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     let n = 1;
     const flush = async () => {
       if (!total) { return; }
-      const part = await this.client.uploadPart(this.#q('_stream', id, {
+      const part = await this.client.uploadPart(this.#q(STREAM_SPACE, id, {
         Body: Buffer.concat(buffers),
         PartNumber: n,
         UploadId
@@ -109,12 +117,12 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       }
       await flush();
 
-      await this.client.completeMultipartUpload(this.#q('_stream', id, {
+      await this.client.completeMultipartUpload(this.#q(STREAM_SPACE, id, {
         UploadId,
         MultipartUpload: { Parts: parts }
       }));
     } catch (e) {
-      await this.client.abortMultipartUpload(this.#q('_stream', id, { UploadId }));
+      await this.client.abortMultipartUpload(this.#q(STREAM_SPACE, id, { UploadId }));
       throw e;
     }
   }
@@ -262,7 +270,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   async upsertStream(location: string, input: NodeJS.ReadableStream, meta: StreamMeta) {
     if (meta.size < this.config.chunkSize) { // If bigger than 5 mb
       // Upload to s3
-      await this.client.putObject(this.#q('_stream', location, {
+      await this.client.putObject(this.#q(STREAM_SPACE, location, {
         Body: await StreamUtil.toBuffer(input),
         ContentType: meta.contentType,
         ContentLength: meta.size,
@@ -278,7 +286,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async getStream(location: string) {
     // Read from s3
-    const res = await this.client.getObject(this.#q('_stream', location));
+    const res = await this.client.getObject(this.#q(STREAM_SPACE, location));
     if (res.Body instanceof Buffer || // Buffer
       typeof res.Body === 'string' || // string
       res.Body && ('pipe' in res.Body) // Stream
@@ -289,13 +297,13 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async headStream(location: string) {
-    const query = this.#q('_stream', location);
+    const query = this.#q(STREAM_SPACE, location);
     try {
       return await this.client.headObject(query);
     } catch (e) {
       if (isMetadataBearer(e)) {
         if (e.$metadata.httpStatusCode === 404) {
-          e = new NotFoundError('_stream', location);
+          e = new NotFoundError(STREAM_SPACE, location);
         }
       }
       throw e;
@@ -316,7 +324,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       }
       return ret;
     } else {
-      throw new NotFoundError('_stream', location);
+      throw new NotFoundError(STREAM_SPACE, location);
     }
   }
 
@@ -327,7 +335,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async deleteStream(location: string) {
-    await this.client.deleteObject(this.#q('_stream', location));
+    await this.client.deleteObject(this.#q(STREAM_SPACE, location));
   }
 
   async createStorage() {
