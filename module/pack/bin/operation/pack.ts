@@ -34,7 +34,7 @@ export const Pack: PackOperation<AllConfig> = {
     };
     for (const [k, op] of Object.entries(ops) as ['assemble', typeof Assemble][]) {
       // @ts-ignore
-      ret[k] = op.extend(op.overrides ?? {}, op.extend(a[k] ?? {}, b[k] ?? {}));
+      ret[k] = op.extend(a[k] ?? {}, op.extend(b[k] ?? {}, op.overrides ?? {}));
     }
     return ret as AllConfig;
   },
