@@ -28,7 +28,7 @@
     "@travetto/auth-rest": "^2.0.0-alpha.7",
     "@travetto/rest-session": "^2.0.0-alpha.7",
     "@travetto/openapi": "^2.0.0-alpha.7",
-    "vue": "^2.6.13"
+    "vue": "^2.6.14"
   },
   "devDependencies": {
     "@travetto/pack": "^2.0.0-alpha.5",

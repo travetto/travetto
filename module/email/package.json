@@ -26,17 +26,17 @@
   "dependencies": {
     "@travetto/config": "^2.0.3",
     "@travetto/di": "^2.0.3",
-    "@types/mustache": "^4.1.1",
+    "@types/mustache": "^4.1.2",
     "mustache": "^4.2.0"
   },
   "optionalPeerDependencies": {
-    "nodemailer": "^6.6.1",
-    "@types/nodemailer": "^6.4.2"
+    "nodemailer": "^6.6.3",
+    "@types/nodemailer": "^6.4.4"
   },
   "publishConfig": {
     "access": "public"
   },
   "docDependencies": {
-    "@aws-sdk/client-ses": "^3.18.0"
+    "@aws-sdk/client-ses": "^3.25.0"
   }
 }

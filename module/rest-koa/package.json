@@ -26,17 +26,17 @@
   },
   "dependencies": {
     "@travetto/rest": "^2.0.3",
-    "@types/koa": "^2.13.3",
-    "@types/co-body": "^5.1.0",
-    "@types/koa-compress": "^4.0.1",
-    "@types/koa-router": "^7.4.2",
+    "@types/koa": "^2.13.4",
+    "@types/co-body": "^5.1.1",
+    "@types/koa-compress": "^4.0.3",
+    "@types/koa-router": "^7.4.4",
     "koa": "^2.13.1",
     "co-body": "^6.1.0",
     "koa-compress": "^5.0.1",
     "koa-router": "^10.0.0"
   },
   "optionalPeerDependencies": {
-    "@types/aws-lambda": "^8.10.77",
+    "@types/aws-lambda": "^8.10.82",
     "@vendia/serverless-express": "^4.3.9"
   },
   "publishConfig": {

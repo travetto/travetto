@@ -29,8 +29,8 @@
     "@travetto/config": "^2.0.3",
     "@travetto/model": "^2.0.3",
     "@travetto/model-query": "2.0.3",
-    "@types/mongodb": "^3.6.18",
-    "mongodb": "^3.6.9"
+    "@types/mongodb": "^3.6.20",
+    "mongodb": "^3.6.11"
   },
   "publishConfig": {
     "access": "public"
