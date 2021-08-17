@@ -1,7 +1,7 @@
 import { ConcreteClass } from '../types';
 import { Util } from '../util';
 
-const ProxyTargetⲐ = Symbol.for('@trv:base/proxy-target')
+const ProxyTargetⲐ = Symbol.for('@trv:base/proxy-target');
 
 /**
  * Handler for for proxying modules while watching
@@ -91,8 +91,9 @@ export class RetargettingProxy<T> {
   /**
    * Unwrap proxy
    */
-  static unwrap<T>(el: T) {
-    return (el ? ((el as any)[ProxyTargetⲐ] ?? el) : el) as T;
+  static unwrap<U>(el: U) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (el ? ((el as any)[ProxyTargetⲐ] ?? el) : el) as U;
   }
 
   #handler: RetargettingHandler<T>;

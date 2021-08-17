@@ -1,4 +1,4 @@
-// @ts-check
+/* eslint-disable no-regex-spaces */
 import { d, mod } from '@travetto/doc';
 
 export const text = d`

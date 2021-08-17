@@ -44,7 +44,7 @@ export class EnvUtilTest {
     assert(EnvUtil.getInt('age2', -1) === -1);
 
     process.env.age = '-a';
-    assert(EnvUtil.getInt('age', -1) === Number.NaN);
+    assert(isNaN(EnvUtil.getInt('age', -1)));
   }
 
   @Test()

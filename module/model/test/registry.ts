@@ -1,7 +1,9 @@
+import { assert } from 'console';
+
 import { RootRegistry } from '@travetto/registry';
 import { SubType } from '@travetto/schema';
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { assert } from 'console';
+
 import { Model } from '../src/registry/decorator';
 
 @Model()

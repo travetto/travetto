@@ -1,4 +1,5 @@
 import { Required } from '@travetto/schema/src/decorator/field';
+
 import { Schema, View, Field, Float, Integer, Alias, Url } from '../..';
 import { Address } from './address';
 

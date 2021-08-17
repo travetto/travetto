@@ -1,6 +1,7 @@
-import { FsUtil, PathUtil } from '@travetto/boot/src';
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import * as fs from 'fs';
+
+import { FsUtil, PathUtil } from '@travetto/boot';
+import { BasePlugin } from '@travetto/cli/src/plugin-base';
 
 export class PackDockerExportPlugin extends BasePlugin {
 
@@ -16,7 +17,7 @@ export class PackDockerExportPlugin extends BasePlugin {
     };
   }
 
-  async action(...args: any[]) {
+  async action(...args: unknown[]) {
     const files = ['src', 'bin', 'support', 'resources', 'package.json', 'package-lock.json', ...this.cmd.add]
       .filter(x => FsUtil.existsSync(PathUtil.resolveUnix(x)));
 

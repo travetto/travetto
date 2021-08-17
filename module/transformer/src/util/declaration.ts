@@ -63,9 +63,9 @@ export class DeclarationUtil {
 
   /**
    * Get accessor pair based off of passing in one in
-   * 
-   * @param node 
-   * @returns 
+   *
+   * @param node
+   * @returns
    */
   static getAccessorPair(node: ts.GetAccessorDeclaration | ts.SetAccessorDeclaration) {
     const acc = { getter: ts.isGetAccessorDeclaration(node) ? node : undefined, setter: ts.isSetAccessorDeclaration(node) ? node : undefined };

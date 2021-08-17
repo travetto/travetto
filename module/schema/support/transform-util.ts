@@ -73,6 +73,7 @@ export class SchemaTransformUtil {
     const attrs: ts.PropertyAssignment[] = [];
 
     if (!ts.isGetAccessorDeclaration(node) && !ts.isSetAccessorDeclaration(node)) {
+      // eslint-disable-next-line no-bitwise
       if ((ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Readonly) > 0) {
         attrs.push(state.factory.createPropertyAssignment('mode', state.fromLiteral('readonly')));
       } else if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {

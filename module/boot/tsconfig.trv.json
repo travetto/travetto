@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
     "target": "esnext",
     "strict": true,
     "strictPropertyInitialization": false,

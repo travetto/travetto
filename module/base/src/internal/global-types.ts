@@ -1,5 +1,3 @@
-import { EnvUtil } from '@travetto/boot';
-import { AppManifest } from '../manifest';
 import { StacktraceUtil } from '../stacktrace';
 
 declare global {

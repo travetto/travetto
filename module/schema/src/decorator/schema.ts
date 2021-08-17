@@ -40,8 +40,8 @@ export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
 
 /**
  * Register a class as a subtype, with a specific discriminator
- * @param name 
- * @returns 
+ * @param name
+ * @returns
  */
 export function SubType<T>(name: string) {
   return (target: Class<Partial<T>>) => {
