@@ -28,7 +28,7 @@ export class FileUtil {
       file = require.resolve(file);
     }
     const resolved = PathUtil.resolveUnix(file);
-    return { resolved, cleaned: resolved.replace(/^.*node_modules\//, '') };
+    return { resolved, cleaned: PathUtil.simplifyPath(resolved, '') };
   }
 
   /**

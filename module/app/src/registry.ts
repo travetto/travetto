@@ -54,7 +54,7 @@ class $ApplicationRegistry {
 
     console.log('Running application', {
       name: config.name,
-      filename: config.filename.replace(/^.*node_modules\//, '').replace(PathUtil.cwd, '.')
+      filename: PathUtil.simplifyPath(config.filename, '.')
     });
 
     // Show manifest

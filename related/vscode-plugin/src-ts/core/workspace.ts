@@ -65,6 +65,13 @@ export class Workspace {
   }
 
   /**
+   * Resolve worskapce path
+   */
+  static resolveModule(...p: string[]) {
+    return this.resolve('node_modules', ...p);
+  }
+
+  /**
    * Run a main script
    */
   static runMain(main: string, args?: string[], opts?: ExecutionOptions & { format: undefined }): ForkResult;
@@ -72,7 +79,7 @@ export class Workspace {
   static runMain<T>(main: string, args: string[], opts: ExecutionOptions & { format: 'json' }): Promise<T>;
   static runMain(main: string, args: string[], opts: ExecutionOptions & { format: 'text' }): Promise<string>;
   static runMain(main: string, args: string[] = [], opts: ExecutionOptions & { format?: string } = {}): Promise<string | object> | ForkResult {
-    const boot = this.resolve(`node_modules/${this.binPath('boot', 'main')}`);
+    const boot = this.resolveModule(this.binPath('boot', 'main'));
     // Do not run inside of electron
     const exec = ExecUtil.spawn('node', [boot, main, ...args], {
       cwd: Workspace.path,
@@ -119,7 +126,7 @@ export class Workspace {
    * @param module
    */
   static async isInstalled(module: string) {
-    return !!(await FsUtil.exists(this.resolve('node_modules', module)));
+    return !!(await FsUtil.exists(this.resolveModule(module)));
   }
 
   /**
@@ -139,8 +146,6 @@ export class Workspace {
       ],
       resolveSourceMapLocations: [
         '!**/node_modules/typescript/**',
-        '!**/node_modules/googleapis/**',
-
       ],
       breakOnLoadStrategy: 'regex',
       skipFiles: [
@@ -156,7 +161,7 @@ export class Workspace {
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
       name,
-      program: this.resolve(`node_modules/${this.binPath('boot', 'main')}`),
+      program: this.resolveModule(this.binPath('boot', 'main')),
       // eslint-disable-next-line no-template-curly-in-string
       args: [main.replace(this.path, '${workspaceFolder}'), ...args].map(x => `${x}`),
       env: { FORCE_COLOR: 'true', ...env }

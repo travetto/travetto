@@ -1,5 +1,7 @@
 import { AllConfigPartial } from '../bin/operation/pack';
 
+const mod = (f: string) => `node_modules/${f}`;
+
 export const config: AllConfigPartial = {
   name: 'default',
   assemble: {
@@ -11,13 +13,13 @@ export const config: AllConfigPartial = {
       TRV_DYNAMIC: '0'
     },
     add: [
-      { 'node_modules/@travetto/cli/bin/trv.js': 'node_modules/.bin/trv' },
-      { 'node_modules/lodash/lodash.min.js': 'node_modules/lodash/lodash.js' },
+      { [mod('@travetto/cli/bin/trv.js')]: mod('.bin/trv') },
+      { [mod('lodash/lodash.min.js')]: mod('lodash/lodash.js') },
     ],
     excludeCompile: [
-      'node_modules/@travetto/*/doc/',
-      'node_modules/@travetto/*/e2e/',
-      'node_modules/@travetto/*/test/',
+      mod('@travetto/*/doc/'),
+      mod('@travetto/*/e2e/'),
+      mod('@travetto/*/test/'),
     ],
     exclude: [
       'bower.json',
@@ -28,7 +30,7 @@ export const config: AllConfigPartial = {
       '*.lock',
       '*.html',
       '*.mjs',
-      'node_modules/**/*.ts',
+      mod('**/*.ts'),
       '*.d.ts',
       '*.tsbuildinfo',
       '*.java',
@@ -37,17 +39,17 @@ export const config: AllConfigPartial = {
       '.npmignore',
       '.*.yml',
       'cache/compiler.*.log',
-      'node_modules/lodash/lodash.min.js',
-      'node_modules/source-map-support/node_modules/source-map',
-      'node_modules/source-map-support/browser-source-map-support.js',
-      'node_modules/bson/browser_build/',
-      'node_modules/**/tsconfig.json',
-      'node_modules/**/tsconfig.*.json',
-      'node_modules/@travetto/*/doc.ts',
-      'node_modules/typescript/',
-      'node_modules/@types/',
-      '^./node_modules/@travetto/**/*.ts',
-      '^./node_modules/@travetto/boot/tsconfig.trv.json',
+      mod('lodash/lodash.min.js'),
+      mod('source-map-support/node_modules/source-map'),
+      mod('source-map-support/browser-source-map-support.js'),
+      mod('bson/browser_build/'),
+      mod('**/tsconfig.json'),
+      mod('**/tsconfig.*.json'),
+      mod('@travetto/*/doc.ts'),
+      mod('typescript/'),
+      mod('@types/'),
+      `^./${mod('@travetto/**/*.ts')}`,
+      `^./${mod('@travetto/boot/tsconfig.trv.json')}`,
       '^./resources/',
       '^./src/',
     ]

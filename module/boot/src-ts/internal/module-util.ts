@@ -110,10 +110,7 @@ export class ModuleUtil {
    * @param file
    */
   static normalizePath(file: string): string {
-    return PathUtil.normalizeFrameworkPath(file)
-      .replace(/[.][tj]s$/, '')
-      .replace(PathUtil.cwd, '.')
-      .replace(/^.*node_modules\//, '');
+    return PathUtil.simplifyPath(PathUtil.normalizeFrameworkPath(file), '.', true);
   }
 
   /**

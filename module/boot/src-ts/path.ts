@@ -76,4 +76,19 @@ export class PathUtil {
   static resolveFrameworkPath(file: string) {
     return this.#devPath ? file.replace(/.*@travetto/, m => this.#devPath || m) : file;
   }
+
+  /**
+   * Simplifies path name to remove node_modules construct
+   * @param file
+   */
+  static simplifyPath(file: string, localRoot?: string, removeExt = false) {
+    let out = file.replace(/^.*node_modules\//, '');
+    if (localRoot !== undefined) {
+      out = out.replace(PathUtil.cwd, localRoot);
+    }
+    if (removeExt) {
+      out = out.replace(/[.][jt]s$/, '');
+    }
+    return out;
+  }
 }
