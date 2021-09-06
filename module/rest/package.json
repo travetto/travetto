@@ -39,7 +39,7 @@
     "cookies": "^0.8.0"
   },
   "devDependencies": {
-    "node-fetch": "^3.0.0-beta.10"
+    "node-fetch": "^3.0.0"
   },
   "optionalPeerDependencies": {
     "@travetto/schema": "^2.0.5",

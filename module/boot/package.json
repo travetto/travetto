@@ -32,11 +32,11 @@
     "prepack": "npm run build; trv-compress-js -- 'src/**/*.js'"
   },
   "dependencies": {
-    "@types/node": "^12.20.19",
+    "@types/node": "^12.20.23",
     "@types/source-map-support": "^0.5.4",
     "source-map-support": "^0.5.19",
-    "tslib": "^2.3.0",
-    "typescript": "^4.3.5"
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.2"
   },
   "engines": {
     "node": ">=12.17.0"
