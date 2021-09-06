@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { FsUtil, PathUtil } from '@travetto/boot';
+import { FsUtil, Package, PathUtil } from '@travetto/boot';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 
@@ -28,7 +28,7 @@ export class FileUtil {
       file = require.resolve(file);
     }
     const resolved = PathUtil.resolveUnix(file);
-    return { resolved, cleaned: PathUtil.simplifyPath(resolved, '') };
+    return { resolved, cleaned: PathUtil.simplifyPath(resolved, Package.name) };
   }
 
   /**

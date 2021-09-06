@@ -121,4 +121,4 @@ export class JWTUtil {
 
 ## Extension - Auth Rest
 
-The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/jwt/src/extension/auth-rest.ts#L18) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.  This token does not own a session, but allows for encoding the auth state into JWT constructs.
+The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/jwt/src/extension/auth-rest.ts#L31) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.  This token does not own a session, but allows for encoding the auth state into JWT constructs.

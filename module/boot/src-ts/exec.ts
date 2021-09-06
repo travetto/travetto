@@ -195,8 +195,9 @@ export class ExecUtil {
     // Always register for the fork
     const opts = this.getOpts(options);
     file = file.replace(/[.]js$/, '.ts');
-    const p = spawn(process.argv0, [require.resolve('@travetto/boot/bin/main'), file, ...args], opts);
-    const result = this.enhanceProcess(p, options, `@travetto/boot/bin/main ${file} ${args.join(' ')}`);
+    const spawnArgs = [require.resolve('@travetto/boot/bin/main'), file, ...args];
+    const p = spawn(process.argv0, spawnArgs, opts);
+    const result = this.enhanceProcess(p, options, spawnArgs.join(' '));
     return { process: p, result };
   }
 

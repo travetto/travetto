@@ -26,7 +26,6 @@ The functionality we support for testing and retrieving environment information:
    *  `get(key: string, def?: string): string;` - Retrieve an environmental value with a potential default
    *  `getInt(key: string, def?: number): number;` - Retrieve an environmental value as a number
    *  `getList(key: string): string[];` - Retrieve an environmental value as a list
-   *  `getTime(key: string, def: number):number` - Reads an environment variable as milliseconds, with support for `s`, `m`, and `h` suffixes to provide succinct time units.
 
 ## Cache Support
 The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L10).  [FileCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L10) is the generic structure for supporting a file cache that invalidates on modification/creation changes.

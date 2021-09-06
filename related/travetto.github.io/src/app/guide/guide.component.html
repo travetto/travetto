@@ -12,7 +12,7 @@
           
         </h1>
 
-The following tutorial wil walk you through setting up a <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main">Todo App</a>.  Additionally, you can use the <a class="module-link" routerLink="/docs/scaffold" title="App Scaffold for the Travetto framework">App Scaffold</a>.
+The following tutorial wil walk you through setting up a <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at <a target="_blank" class="source-link" routerLink="/docs/todo-app">Todo App</a>.  Additionally, you can use the <a class="module-link" routerLink="/docs/scaffold" title="App Scaffold for the Travetto framework">App Scaffold</a>.
 
 
 <h2 id="prerequisites">Prerequisites</h2>
@@ -51,7 +51,7 @@ Create the file <code class="item path">src/model.ts</code>
 
       <figure class="code">
       <figcaption class="code">Models
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/src/model.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/todo-app/src/model.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Model <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
@@ -64,7 +64,15 @@ Create the file <code class="item path">src/model.ts</code>
   completed<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   priority<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
   who<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  color<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  #color<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">set</span> <span class="token function">color</span><span class="token punctuation">(</span>c<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>#color <span class="token operator">=</span> c<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">get</span> <span class="token function">color</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#color<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 
 @<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -75,7 +83,7 @@ Create the file <code class="item path">src/model.ts</code>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-as you can see, the model structure is simple.  Everything that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> services needs to implement <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L1">ModelType</a>.
+as you can see, the model structure is simple.  Everything that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12">@Model</a> services needs to implement <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L1">ModelType</a>.
 
 <h2 id="building-the-service-layer">Building the Service Layer</h2>
 
@@ -89,7 +97,7 @@ Now we need to create <code class="item path">src/service.ts</code>
 
       <figure class="code">
       <figcaption class="code">Service Definition
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/src/service.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/todo-app/src/service.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MongoModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-mongo'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
@@ -140,7 +148,7 @@ After we have established our service layer, we will now construct some simple t
 
       <figure class="code">
       <figcaption class="code">Test YAML
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/test/resources/application.yml">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/todo-app/test/resources/application.yml">Source</a></cite>
       </figcaption>
       <pre><code class="language-yaml"><span class="token punctuation">---</span>
 <span class="token key atrule">mongo.model.namespace</span><span class="token punctuation">:</span> app<span class="token punctuation">-</span>test</code></pre>     
@@ -150,7 +158,7 @@ Now the tests should be defined at <code class="item path">test/service.ts</code
 
       <figure class="code">
       <figcaption class="code">Test bed
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/test/service.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/todo-app/test/service.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> assert <span class="token keyword">from</span> <span class="token string">'assert'</span><span class="token punctuation">;</span>
 
@@ -229,7 +237,7 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
 
       <figure class="code">
       <figcaption class="code">Controller contents
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/src/route.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/todo-app/src/route.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Put<span class="token punctuation">,</span> Delete <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
@@ -240,15 +248,19 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
 @<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/todo'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TodoController</span> <span class="token punctuation">{{'{'}}</span>
 
+  _svc<span class="token operator">:</span> TodoService<span class="token punctuation">;</span>
+
   @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">private</span> svc<span class="token operator">:</span> TodoService<span class="token punctuation">;</span>
+  <span class="token keyword">set</span> <span class="token function">svc</span><span class="token punctuation">(</span>v<span class="token operator">:</span> TodoService<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>_svc <span class="token operator">=</span> v<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
    * Get all todos
    */</span>
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token operator">:</span> TodoSearch<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>svc<span class="token punctuation">.</span><span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
@@ -256,7 +268,7 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
    */</span>
   @<span class="token meta">Delete</span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">deleteAllCompleted</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>svc<span class="token punctuation">.</span><span class="token function">deleteAllCompleted</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">deleteAllCompleted</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
@@ -265,7 +277,7 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
    */</span>
   @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/:id'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">getById</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>svc<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
@@ -273,7 +285,7 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
    */</span>
   @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">create</span><span class="token punctuation">(</span>todo<span class="token operator">:</span> Todo<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>svc<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>todo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>todo<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
@@ -284,7 +296,7 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
   @<span class="token meta">Put</span><span class="token punctuation">(</span><span class="token string">'/:id'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">update</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> todo<span class="token operator">:</span> Todo<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     todo<span class="token punctuation">.</span>id <span class="token operator">=</span> id<span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>svc<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span>todo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span>todo<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
@@ -293,7 +305,7 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
    */</span>
   @<span class="token meta">Put</span><span class="token punctuation">(</span><span class="token string">'/:id/complete'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">complete</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> completed<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>svc<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span> completed<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span> completed<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
@@ -302,7 +314,7 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
    */</span>
   @<span class="token meta">Delete</span><span class="token punctuation">(</span><span class="token string">'/:id'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">remove</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>svc<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">remove</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
@@ -315,10 +327,10 @@ First we must start the application:
       <figcaption class="terminal">Application Startup
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:40<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2021</span>-03-14T05:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:44<span class="token punctuation">]</span> Manifest <span class="token punctuation">{{'{'}}</span>
+      <pre><code class="language-bash"><span class="token number">2021</span>-03-14T05:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:55<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
+<span class="token number">2021</span>-03-14T05:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:61<span class="token punctuation">]</span> Manifest <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
-    framework: <span class="token string">'2.0.0'</span>,
+    framework: <span class="token string">'2.0.2'</span>,
     name: <span class="token string">'@travetto/todo-app'</span>,
     description: <span class="token string">''</span>,
     version: <span class="token string">'0.0.0'</span>,
@@ -333,7 +345,7 @@ First we must start the application:
     resources: <span class="token punctuation">[</span> <span class="token string">'resources'</span>, <span class="token string">'doc/resources'</span> <span class="token punctuation">]</span>,
     shutdownWait: <span class="token number">2000</span>,
     cache: <span class="token string">'.trv_cache'</span>,
-    node: <span class="token string">'v15.14.0'</span>,
+    node: <span class="token string">'v16.6.2'</span>,
     dynamic: false,
     readonly: <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span>,
@@ -372,7 +384,7 @@ First we must start the application:
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2021</span>-03-14T05:00:01.510Z info  <span class="token punctuation">[</span>@trv:app/registry:45<span class="token punctuation">]</span> Config <span class="token punctuation">{{'{'}}</span>
+<span class="token number">2021</span>-03-14T05:00:01.510Z info  <span class="token punctuation">[</span>@trv:app/registry:69<span class="token punctuation">]</span> Config <span class="token punctuation">{{'{'}}</span>
   rest: <span class="token punctuation">{{'{'}}</span>
     serve: true,
     port: <span class="token number">3000</span>,
@@ -414,14 +426,14 @@ First we must start the application:
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2021</span>-03-14T05:00:02.450Z info  <span class="token punctuation">[</span>@trv:rest/application/rest:183<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
+<span class="token number">2021</span>-03-14T05:00:02.450Z info  <span class="token punctuation">[</span>@trv:rest/application/rest:188<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-fetch">fetch</a> requests to interact with the new api:
 
       <figure class="code">
       <figcaption class="code">Creating Todo by fetch
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/doc/create-todo.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/todo-app/doc/create-todo.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fetch <span class="token keyword">from</span> <span class="token string">'node-fetch'</span><span class="token punctuation">;</span>
 
@@ -453,7 +465,7 @@ next, let's execute <a target="_blank" class="external-link" href="https://www.n
 
       <figure class="code">
       <figcaption class="code">Listing Todos by fetch
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/doc/list-todo.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/todo-app/doc/list-todo.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fetch <span class="token keyword">from</span> <span class="token string">'node-fetch'</span><span class="token punctuation">;</span>
 

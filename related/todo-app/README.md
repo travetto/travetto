@@ -2,7 +2,7 @@
 <!-- Please modify https://github.com/travetto/travetto/tree/main/related/todo-app/doc.ts and execute "npx trv doc" to rebuild -->
 # Getting Started: A Todo App
 
-The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](https://github.com/travetto/travetto/tree/main).  Additionally, you can use the [App Scaffold](https://github.com/travetto/travetto/tree/main/module/scaffold#readme "App Scaffold for the Travetto framework").
+The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](https://github.com/travetto/travetto/tree/main/module/todo-app).  Additionally, you can use the [App Scaffold](https://github.com/travetto/travetto/tree/main/module/scaffold#readme "App Scaffold for the Travetto framework").
 
 ### Overview   
    1. [Prerequisites](#prerequisites})
@@ -60,7 +60,15 @@ export class Todo {
   completed?: boolean;
   priority?: number;
   who?: string;
-  color?: string;
+  #color?: string;
+
+  set color(c: string | undefined) {
+    this.#color = c;
+  }
+
+  get color() {
+    return this.#color;
+  }
 }
 
 @Schema()
@@ -71,7 +79,7 @@ export class TodoSearch {
 }
 ```
 
-as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) services needs to implement [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L1).
+as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12) services needs to implement [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L1).
 
 ## Building the Service Layer
 
@@ -229,15 +237,19 @@ import { Todo, TodoSearch } from './model';
 @Controller('/todo')
 export class TodoController {
 
+  _svc: TodoService;
+
   @Inject()
-  private svc: TodoService;
+  set svc(v: TodoService) {
+    this._svc = v;
+  }
 
   /**
    * Get all todos
    */
   @Get('/')
   async getAll(search: TodoSearch) {
-    return await this.svc.getAll(search);
+    return await this._svc.getAll(search);
   }
 
   /**
@@ -245,7 +257,7 @@ export class TodoController {
    */
   @Delete('/')
   async deleteAllCompleted() {
-    await this.svc.deleteAllCompleted();
+    await this._svc.deleteAllCompleted();
   }
 
   /**
@@ -254,7 +266,7 @@ export class TodoController {
    */
   @Get('/:id')
   async getById(id: string) {
-    return this.svc.get(id);
+    return this._svc.get(id);
   }
 
   /**
@@ -262,7 +274,7 @@ export class TodoController {
    */
   @Post('/')
   async create(todo: Todo) {
-    return await this.svc.add(todo);
+    return await this._svc.add(todo);
   }
 
   /**
@@ -273,7 +285,7 @@ export class TodoController {
   @Put('/:id')
   async update(id: string, todo: Todo) {
     todo.id = id;
-    return await this.svc.update(todo);
+    return await this._svc.update(todo);
   }
 
   /**
@@ -282,7 +294,7 @@ export class TodoController {
    */
   @Put('/:id/complete')
   async complete(id: string, completed: boolean = true) {
-    return await this.svc.complete(id, completed);
+    return await this._svc.complete(id, completed);
   }
 
   /**
@@ -291,7 +303,7 @@ export class TodoController {
    */
   @Delete('/:id')
   async remove(id: string) {
-    await this.svc.remove(id);
+    await this._svc.remove(id);
   }
 }
 ```
@@ -302,10 +314,10 @@ First we must start the application:
 
 **Terminal: Application Startup**
 ```bash
-2021-03-14T05:00:00.618Z info  [@trv:app/registry:40] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
-2021-03-14T05:00:00.837Z info  [@trv:app/registry:44] Manifest {
+2021-03-14T05:00:00.618Z info  [@trv:app/registry:55] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
+2021-03-14T05:00:00.837Z info  [@trv:app/registry:61] Manifest {
   info: {
-    framework: '2.0.0',
+    framework: '2.0.2',
     name: '@travetto/todo-app',
     description: '',
     version: '0.0.0',
@@ -320,7 +332,7 @@ First we must start the application:
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
-    node: 'v15.14.0',
+    node: 'v16.6.2',
     dynamic: false,
     readonly: false
   },
@@ -359,7 +371,7 @@ First we must start the application:
     }
   }
 }
-2021-03-14T05:00:01.510Z info  [@trv:app/registry:45] Config {
+2021-03-14T05:00:01.510Z info  [@trv:app/registry:69] Config {
   rest: {
     serve: true,
     port: 3000,
@@ -401,7 +413,7 @@ First we must start the application:
     }
   }
 }
-2021-03-14T05:00:02.450Z info  [@trv:rest/application/rest:183] Listening { port: 3000 }
+2021-03-14T05:00:02.450Z info  [@trv:rest/application/rest:188] Listening { port: 3000 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:

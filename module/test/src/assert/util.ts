@@ -43,8 +43,7 @@ export class AssertUtil {
       .replace(/[\\]/g, '/')
       .split('\n')
       // Exclude node_modules, target self
-      .filter(x => x.includes(PathUtil.cwd) &&
-        (!x.includes('node_modules') || /node_modules\/@travetto\/[^/]+\/test\//.test(x)));
+      .filter(x => x.includes(PathUtil.cwd) && (!x.includes('node_modules') || x.includes('/test-support/')));
 
     let best = lines.filter(x => x.includes(filename))[0];
 

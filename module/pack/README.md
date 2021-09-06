@@ -17,7 +17,7 @@ $ trv pack --help
 Usage:  pack [options] [mode]
 
 Options:
-  -w, --workspace <workspace>  Working directory (default: "/tmp/pack_travetto_pack")
+  -w, --workspace <workspace>  Working directory
   -h, --help                   display help for command
 
 Available Pack Modes:
@@ -61,13 +61,13 @@ assemble: {
       TRV_DYNAMIC: '0'
     },
     add: [
-      { 'node_modules/@travetto/cli/bin/trv.js': 'node_modules/.bin/trv' },
-      { 'node_modules/lodash/lodash.min.js': 'node_modules/lodash/lodash.js' },
+      { [mod('@travetto/cli/bin/trv.js')]: mod('.bin/trv') },
+      { [mod('lodash/lodash.min.js')]: mod('lodash/lodash.js') },
     ],
     excludeCompile: [
-      'node_modules/@travetto/*/doc/',
-      'node_modules/@travetto/*/e2e/',
-      'node_modules/@travetto/*/test/',
+      mod('@travetto/*/doc/'),
+      mod('@travetto/*/e2e/'),
+      mod('@travetto/*/test/'),
     ],
     exclude: [
       'bower.json',
@@ -78,7 +78,7 @@ assemble: {
       '*.lock',
       '*.html',
       '*.mjs',
-      'node_modules/**/*.ts',
+      mod('**/*.ts'),
       '*.d.ts',
 ```
 
@@ -89,10 +89,10 @@ $ trv pack:assemble --help
 Usage:  pack:assemble [options] [mode]
 
 Options:
-  -w, --workspace <workspace>      Working directory (default: "/tmp/pack_travetto_pack")
-  -k, --keep-source <keep-source>  Should source be preserved (default: true)
-  -r, --readonly <readonly>        Build a readonly deployable (default: true)
-  -h, --help                       display help for command
+  -w, --workspace <workspace>  Working directory
+  -k, --keep-source            Should source be preserved
+  -r, --readonly               Build a readonly deployable
+  -h, --help                   display help for command
 
 Available Pack Modes:
   * default [support/pack.config.ts]
@@ -119,8 +119,8 @@ $ trv pack:zip --help
 Usage:  pack:zip [options] [mode]
 
 Options:
-  -w, --workspace <workspace>  Working directory (default: "/tmp/pack_travetto_pack")
-  -o, --output <output>        Output File (default: "output.zip")
+  -w, --workspace <workspace>  Working directory
+  -o, --output <output>        Output File
   -h, --help                   display help for command
 
 Available Pack Modes:
@@ -148,12 +148,12 @@ $ trv pack:docker --help
 Usage:  pack:docker [options] [mode]
 
 Options:
-  -w, --workspace <workspace>  Working directory (default: "/tmp/pack_travetto_pack")
-  -i, --image <image>          Docker Image to extend (default: "node:16-alpine")
-  -n, --name <name>            Image Name (default: "travetto/pack")
-  -t, --tag <tag>              Image Tag (default: ["latest"])
+  -w, --workspace <workspace>  Working directory
+  -i, --image <image>          Docker Image to extend
+  -n, --name <name>            Image Name
+  -t, --tag <tag>              Image Tag (default: [])
   -p, --port <port>            Image Port (default: [])
-  -x, --push <push>            Push Tags (default: true)
+  -x, --push                   Push Tags
   -r, --registry <registry>    Registry
   -h, --help                   display help for command
 
@@ -171,7 +171,7 @@ Various modules may provide customizations to the default `pack.config.ts` to al
 import * as fs from 'fs';
 
 import { PathUtil } from '@travetto/boot';
-import type { AllConfigPartial, AssembleConfig } from '@travetto/pack';
+import type { AllConfigPartial } from '@travetto/pack';
 
 export const config: AllConfigPartial = {
   name: 'rest/aws-lambda',
@@ -185,7 +185,7 @@ export const config: AllConfigPartial = {
       NO_COLOR: '1'
     },
     postProcess: [{
-      'Lambda Entrypoint': (cfg: AssembleConfig) =>
+      ['Lambda Entrypoint']: cfg =>
         fs.promises.copyFile(
           PathUtil.resolveUnix(__dirname, 'aws-lambda.handler.js'),
           PathUtil.resolveUnix(cfg.workspace, 'index.js')

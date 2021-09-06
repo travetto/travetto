@@ -251,7 +251,7 @@ Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module
 
 ## Running an App
 
-By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) at [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L22) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/main/module/app#readme "Application registration/management and run support.") module to execute.  
+By default, the framework provices a default [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) at [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L23) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/main/module/app#readme "Application registration/management and run support.") module to execute.  
 
 **Install: Installing app support**
 ```bash

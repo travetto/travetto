@@ -108,12 +108,14 @@ Like the [AuthService](https://github.com/travetto/travetto/tree/main/module/aut
 **Code: Using provider with routes**
 ```typescript
 import { Controller, Get, Redirect, Request } from '@travetto/rest';
-import { Authenticate, Authenticated } from '@travetto/auth-rest';
+import { Authenticate, Authenticated, AuthService } from '@travetto/auth-rest';
 
 import { FB_AUTH } from './facebook';
 
 @Controller('/auth')
 export class SampleAuth {
+
+  svc: AuthService;
 
   @Get('/simple')
   @Authenticate(FB_AUTH)
@@ -124,13 +126,13 @@ export class SampleAuth {
   @Get('/self')
   @Authenticated()
   async getSelf(req: Request) {
-    return req.auth?.principal;
+    return req.auth;
   }
 
   @Get('/logout')
   @Authenticated()
   async logout(req: Request) {
-    await req.logout();
+    await this.svc.logout(req);
     return new Redirect('/auth/self', 301);
   }
 }

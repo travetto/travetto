@@ -196,7 +196,7 @@ export interface ModelBulkSupport extends ModelCrudSupport {
 ```
 
 ## Declaration
-Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L4)
+Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12) decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L4)
 
 **Code: ModelType**
 ```typescript
@@ -236,7 +236,7 @@ All fields are optional, but the `id` and `type` are important as those field ty
 |[S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
 |[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L50)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L48)|X|X| |X|X|X|
+|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L47)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
@@ -375,7 +375,7 @@ export class MemoryPolymorphicSuite extends ModelPolymorphismSuite {
 
 ## CLI - model:export
 
-The module provides the ability to generate an export of the model structure from all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13)s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
+The module provides the ability to generate an export of the model structure from all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12)s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
 
 **Terminal: Running model export**
 ```bash
@@ -390,7 +390,7 @@ Options:
 
 ## CLI - model:install
 
-The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13)s within the application given the current configuration being targetted.  This is useful for being able to prepare the datastore manually.
+The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12)s within the application given the current configuration being targetted.  This is useful for being able to prepare the datastore manually.
 
 **Terminal: Running model install**
 ```bash
