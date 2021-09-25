@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@travetto/rest": "^2.0.3",
-    "fastify": "^3.21.0",
+    "fastify": "^3.21.6",
     "fastify-compress": "^3.6.0",
     "fastify-formbody": "^5.1.0"
   },

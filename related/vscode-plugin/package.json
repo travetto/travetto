@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@travetto/boot": "^2.0.1",
-    "source-map-support": "^0.5.19"
+    "source-map-support": "^0.5.20"
   },
   "devDependencies": {
     "@types/node": "^15.14.9",
