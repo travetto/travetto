@@ -30,13 +30,13 @@
     "mustache": "^4.2.0"
   },
   "optionalPeerDependencies": {
-    "nodemailer": "^6.6.5",
+    "nodemailer": "^6.7.2",
     "@types/nodemailer": "^6.4.4"
   },
   "publishConfig": {
     "access": "public"
   },
   "docDependencies": {
-    "@aws-sdk/client-ses": "^3.34.0"
+    "@aws-sdk/client-ses": "^3.45.0"
   }
 }

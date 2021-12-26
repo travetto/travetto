@@ -37,11 +37,11 @@
     "@travetto/app": "^2.0.5"
   },
   "optionalPeerDependencies": {
-    "@types/mysql": "^2.15.19",
+    "@types/mysql": "^2.15.20",
     "@types/pg": "^7.14.11",
     "mysql": "^2.18.1",
     "pg": "^8.7.1",
-    "better-sqlite3": "^7.4.3",
+    "better-sqlite3": "^7.4.5",
     "@types/better-sqlite3": "^5.4.3"
   },
   "publishConfig": {

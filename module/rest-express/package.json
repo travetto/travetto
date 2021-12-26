@@ -26,16 +26,16 @@
   },
   "dependencies": {
     "@travetto/rest": "^2.0.3",
-    "@types/body-parser": "^1.19.1",
+    "@types/body-parser": "^1.19.2",
     "@types/compression": "^1.7.2",
     "@types/express": "^4.17.13",
-    "body-parser": "^1.19.0",
+    "body-parser": "^1.19.1",
     "compression": "^1.7.4",
-    "express": "^4.17.1"
+    "express": "^4.17.2"
   },
   "optionalPeerDependencies": {
-    "@types/aws-lambda": "^8.10.83",
-    "@vendia/serverless-express": "^4.3.11"
+    "@types/aws-lambda": "^8.10.88",
+    "@vendia/serverless-express": "^4.5.2"
   },
   "publishConfig": {
     "access": "public"
