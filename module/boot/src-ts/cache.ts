@@ -99,7 +99,7 @@ export class FileCache {
           fs.unlinkSync(this.toEntryName(local));
         }
       } catch (e) {
-        if (!(e as Error).message.includes('ENOENT')) {
+        if (!(e instanceof Error) || !e.message.includes('ENOENT')) {
           throw e;
         }
       }

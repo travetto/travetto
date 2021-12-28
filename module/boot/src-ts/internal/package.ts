@@ -40,7 +40,9 @@ export const readPackage = (folder: string, suppressError = false) => {
     if (!suppressError) {
       throw e;
     } else {
-      console.warn(`Unable to locate ${folder}: ${(e as Error).message}`);
+      if (e instanceof Error) {
+        console.warn(`Unable to locate ${folder}: ${e.message}`);
+      }
       return {} as PackageType;
     }
   }
