@@ -43,7 +43,7 @@ export class ModuleManager {
       ModuleUtil.checkForCycles(mod, request, parent);
     } catch (e) {
       const name = Module._resolveFilename!(request, parent);
-      mod = Module._compile!(ModuleUtil.handlePhaseError('load', name, e), name);
+      mod = Module._compile!(ModuleUtil.handlePhaseError('load', name, e as Error), name);
     }
     return ModuleUtil.handleModule(mod, request, parent);
   }
@@ -94,7 +94,7 @@ export class ModuleManager {
     try {
       return m._compile(content, jsf);
     } catch (e) {
-      content = ModuleUtil.handlePhaseError('compile', tsf, e);
+      content = ModuleUtil.handlePhaseError('compile', tsf, e as Error);
       return m._compile(content, jsf);
     }
   }
@@ -113,7 +113,7 @@ export class ModuleManager {
         TranspileUtil.checkTranspileErrors(tsf, diags);
         return ret;
       } catch (err) {
-        return TranspileUtil.transpileError(tsf, err);
+        return TranspileUtil.transpileError(tsf, err as Error);
       }
     }, force);
   }
