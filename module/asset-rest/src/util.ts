@@ -84,14 +84,14 @@ export class AssetRestUtil {
       return new Promise<AssetMap>((resolve, reject) => {
         const mapping: AssetMap = {};
         const uploads: Promise<Asset>[] = [];
-        const uploader = new busboy({
+        const uploader = busboy({
           headers: req.headers,
           limits: {
             fileSize: config.maxSize
           }
         });
 
-        uploader.on('file', async (fieldName, stream, filename, encoding, mimeType) => {
+        uploader.on('file', async (fieldName, stream, { filename, encoding, mimeType }) => {
           console.debug('Uploading file', { fieldName, filename, encoding, mimeType });
           uploads.push(
             this.toLocalAsset(stream, filename)
