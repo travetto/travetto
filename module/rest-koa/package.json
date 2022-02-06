@@ -27,7 +27,7 @@
   "dependencies": {
     "@travetto/rest": "^2.0.3",
     "@types/koa": "^2.13.4",
-    "@types/co-body": "^5.1.1",
+    "@types/co-body": "^6.1.0",
     "@types/koa-compress": "^4.0.3",
     "@types/koa-router": "^7.4.4",
     "koa": "^2.13.4",
@@ -36,8 +36,8 @@
     "koa-router": "^10.1.1"
   },
   "optionalPeerDependencies": {
-    "@types/aws-lambda": "^8.10.88",
-    "@vendia/serverless-express": "^4.5.2"
+    "@types/aws-lambda": "^8.10.92",
+    "@vendia/serverless-express": "^4.5.3"
   },
   "publishConfig": {
     "access": "public"

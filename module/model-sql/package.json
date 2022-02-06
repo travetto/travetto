@@ -38,11 +38,11 @@
   },
   "optionalPeerDependencies": {
     "@types/mysql": "^2.15.20",
-    "@types/pg": "^7.14.11",
+    "@types/pg": "^8.6.4",
     "mysql": "^2.18.1",
-    "pg": "^8.7.1",
-    "better-sqlite3": "^7.4.5",
-    "@types/better-sqlite3": "^5.4.3"
+    "pg": "^8.7.3",
+    "better-sqlite3": "^7.5.0",
+    "@types/better-sqlite3": "^7.4.2"
   },
   "publishConfig": {
     "access": "public"

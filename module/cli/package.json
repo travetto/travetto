@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@travetto/base": "^2.0.2",
-    "commander": "^7.2.0"
+    "commander": "^9.0.0"
   },
   "docDependencies": {
     "@travetto/app": true
