@@ -121,8 +121,8 @@ The corresponding output would be
 ```bash
 $ node @travetto/base/bin/main ./doc/output.ts 
 
-2021-03-14T05:00:00.618Z info  [@trv:log/doc/output:2] Hello World
-2021-03-14T05:00:00.837Z info  [@trv:log/doc/output:4] Woah! {
-2021-03-14T05:00:01.510Z info  [@trv:log/doc/output:6] Woah!
-2021-03-14T05:00:02.450Z debug [@trv:log/doc/output:8] Test
+2022-03-14T04:00:00.618Z info  [@trv:log/doc/output:2] Hello World
+2022-03-14T04:00:00.837Z info  [@trv:log/doc/output:4] Woah! {
+2022-03-14T04:00:01.510Z info  [@trv:log/doc/output:6] Woah!
+2022-03-14T04:00:02.450Z debug [@trv:log/doc/output:8] Test
 ```

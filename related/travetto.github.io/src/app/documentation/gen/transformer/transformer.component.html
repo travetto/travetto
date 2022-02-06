@@ -34,7 +34,7 @@ Below is an example of a transformer that uppercases all <code class="item input
 
   <span class="token keyword">static</span> <span class="token punctuation">[</span>TransformerId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'@trv:transformer-test'</span><span class="token punctuation">;</span>
 
-  @<span class="token meta">OnProperty</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">OnProperty</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">handleProperty</span><span class="token punctuation">(</span>state<span class="token operator">:</span> TransformerState<span class="token punctuation">,</span> node<span class="token operator">:</span> ts<span class="token punctuation">.</span>PropertyDeclaration<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>state<span class="token punctuation">.</span>source<span class="token punctuation">.</span>fileName<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'doc/src'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">return</span> node<span class="token punctuation">;</span>
@@ -45,12 +45,12 @@ Below is an example of a transformer that uppercases all <code class="item input
       node<span class="token punctuation">.</span>modifiers<span class="token punctuation">,</span>
       node<span class="token punctuation">.</span>name<span class="token punctuation">.</span><span class="token function">getText</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
       <span class="token keyword">undefined</span><span class="token punctuation">,</span>
-      node<span class="token punctuation">.</span><span class="token keyword">type</span><span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>type<span class="token punctuation">,</span>
       node<span class="token punctuation">.</span>initializer <span class="token operator">??</span> state<span class="token punctuation">.</span><span class="token function">createIdentifier</span><span class="token punctuation">(</span><span class="token string">'undefined'</span><span class="token punctuation">)</span>
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
-  @<span class="token meta">OnClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">OnClass</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">handleClass</span><span class="token punctuation">(</span>state<span class="token operator">:</span> TransformerState<span class="token punctuation">,</span> node<span class="token operator">:</span> ts<span class="token punctuation">.</span>ClassDeclaration<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>state<span class="token punctuation">.</span>source<span class="token punctuation">.</span>fileName<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'doc/src'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">return</span> node<span class="token punctuation">;</span>
@@ -66,7 +66,7 @@ Below is an example of a transformer that uppercases all <code class="item input
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
-  @<span class="token meta">OnMethod</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">OnMethod</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">handleMethod</span><span class="token punctuation">(</span>state<span class="token operator">:</span> TransformerState<span class="token punctuation">,</span> node<span class="token operator">:</span> ts<span class="token punctuation">.</span>MethodDeclaration<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>state<span class="token punctuation">.</span>source<span class="token punctuation">.</span>fileName<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'doc/src'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">return</span> node<span class="token punctuation">;</span>
@@ -80,7 +80,7 @@ Below is an example of a transformer that uppercases all <code class="item input
       <span class="token keyword">undefined</span><span class="token punctuation">,</span>
       node<span class="token punctuation">.</span>typeParameters<span class="token punctuation">,</span>
       node<span class="token punctuation">.</span>parameters<span class="token punctuation">,</span>
-      node<span class="token punctuation">.</span><span class="token keyword">type</span><span class="token punctuation">,</span>
+      node<span class="token punctuation">.</span>type<span class="token punctuation">,</span>
       node<span class="token punctuation">.</span>body
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>

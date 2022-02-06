@@ -92,8 +92,6 @@ export class MongoModelConfig {
    */
   @Field(Object)
   options: mongo.MongoClientOptions = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
   };
 
   /**
@@ -111,7 +109,10 @@ export class MongoModelConfig {
    */
   async fetch(val: string) {
     return ResourceManager.read(val)
-      .catch(e => fs.readFile(val))
+      .then(res => typeof res === 'string' ? res : res.toString('utf8'))
+      .catch(e => fs.readFile(val)
+        .then(res => typeof res === 'string' ? res : res.toString('utf8'))
+      )
       .catch(() => val);
   }
 
@@ -122,16 +123,16 @@ export class MongoModelConfig {
     const opts = this.options;
     if (opts.ssl) {
       if (opts.sslCert) {
-        opts.sslCert = await this.fetch(opts.sslCert as string);
+        opts.tlsCertificateFile = await this.fetch(opts.sslCert);
       }
       if (opts.sslKey) {
-        opts.sslKey = await this.fetch(opts.sslKey as string);
+        opts.sslKey = await this.fetch(opts.sslKey);
       }
       if (opts.sslCA) {
-        opts.sslCA = await Promise.all(opts.sslCA.map(k => this.fetch(k as string)));
+        opts.sslCA = await this.fetch(opts.sslCA);
       }
       if (opts.sslCRL) {
-        opts.sslCRL = await Promise.all(opts.sslCRL.map(k => this.fetch(k as string)));
+        opts.sslCRL = await this.fetch(opts.sslCRL);
       }
     }
   }

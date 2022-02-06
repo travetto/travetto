@@ -26,15 +26,15 @@ A simple example:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Asset <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/asset'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AssetRestUtil<span class="token punctuation">,</span> Upload<span class="token punctuation">,</span> UploadAll <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/asset-rest'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Simple</span> <span class="token punctuation">{{'{'}}</span>
 
-  @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/age'</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/age'</span><span class="token punctuation">)</span>
   <span class="token function">getAge</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> age<span class="token operator">:</span> <span class="token number">50</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
-  @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/age'</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Post</span></span><span class="token punctuation">(</span><span class="token string">'/age'</span><span class="token punctuation">)</span>
   <span class="token function">getPage</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> age<span class="token operator">:</span> <span class="token number">20</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -42,16 +42,16 @@ A simple example:
   <span class="token comment">/**
    * @param file A file to upload
    */</span>
-  @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/file'</span><span class="token punctuation">)</span>
-  <span class="token function">loadFile</span><span class="token punctuation">(</span>@<span class="token meta">Upload</span><span class="token punctuation">(</span><span class="token punctuation">)</span> file<span class="token operator">:</span> Asset<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Post</span></span><span class="token punctuation">(</span><span class="token string">'/file'</span><span class="token punctuation">)</span>
+  <span class="token function">loadFile</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Upload</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> file<span class="token operator">:</span> Asset<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> AssetRestUtil<span class="token punctuation">.</span><span class="token function">downloadable</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
  * @param file A file to upload
  */</span>
-  @<span class="token meta">Post</span><span class="token punctuation">(</span><span class="token string">'/files'</span><span class="token punctuation">)</span>
-  @<span class="token meta">UploadAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Post</span></span><span class="token punctuation">(</span><span class="token string">'/files'</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">UploadAll</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token function">loadFiles</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> files <span class="token punctuation">{{'}'}}</span><span class="token operator">:</span> Request<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token punctuation">[</span><span class="token punctuation">,</span> file<span class="token punctuation">]</span> <span class="token keyword">of</span> Object<span class="token punctuation">.</span><span class="token function">entries</span><span class="token punctuation">(</span>files<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">return</span> AssetRestUtil<span class="token punctuation">.</span><span class="token function">downloadable</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// return the first</span>

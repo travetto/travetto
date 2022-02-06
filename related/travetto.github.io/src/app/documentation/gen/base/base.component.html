@@ -52,7 +52,7 @@ A simple example of finding specific <code class="item path">.config</code> file
   <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> conf <span class="token keyword">of</span> svcConfigs<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token comment">// Do work</span>
 
-    <span class="token keyword">const</span> contents <span class="token operator">=</span> <span class="token keyword">await</span> fs<span class="token punctuation">.</span>promises<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>conf<span class="token punctuation">.</span><span class="token keyword">module</span><span class="token punctuation">,</span> <span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> contents <span class="token operator">=</span> <span class="token keyword">await</span> fs<span class="token punctuation">.</span>promises<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>conf<span class="token punctuation">.</span>module<span class="token punctuation">,</span> <span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
@@ -188,7 +188,7 @@ Will produce the following stack trace:
       <figcaption class="terminal">Stack trace from async errors
       
       </figcaption>
-      <pre><code class="language-bash">$ node @travetto/base/bin/main ./doc/stack-test.ts
+      <pre><code class="language-bash">$ <span class="token function">node</span> @travetto/base/bin/main ./doc/stack-test.ts
 
 Error: Uh oh
     at inner3 <span class="token punctuation">(</span>./doc/stack-test.ts:4:9<span class="token punctuation">)</span>

@@ -30,7 +30,7 @@ Supported featrues:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FirestoreModelConfig<span class="token punctuation">,</span> FirestoreModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-firestore'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Init</span> <span class="token punctuation">{{'{'}}</span>
-  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
     primary<span class="token operator">:</span> <span class="token boolean">true</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getModelSource</span><span class="token punctuation">(</span>conf<span class="token operator">:</span> FirestoreModelConfig<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -49,14 +49,14 @@ Supported featrues:
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ResourceManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'model.firestore'</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.firestore'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">FirestoreModelConfig</span> <span class="token punctuation">{{'{'}}</span>
 
   databaseURL<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   credentialsFile<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   emulator<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   projectId<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token keyword">namespace</span><span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  namespace<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   credentials<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     client_email<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>

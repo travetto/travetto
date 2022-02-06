@@ -110,7 +110,7 @@ $ node @travetto/boot/bin/main ./doc/dbconfig-run.ts
   message: 'Failed to construct @trv:config/doc/dbconfig￮DBConfig as validation errors have occurred',
   category: 'data',
   type: 'ValidationResultError',
-  at: 2021-03-14T05:00:00.618Z,
+  at: 2022-03-14T04:00:00.618Z,
   class: '@trv:config/doc/dbconfig￮DBConfig',
   file: '@trv:config/doc/dbconfig.ts',
   errors: [

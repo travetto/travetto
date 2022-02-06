@@ -97,7 +97,7 @@ Service          Version    Status
 ----------------------------------------------
 
  * dynamodb          1.15.0    Running 93af422e793a
- * elasticsearch     7.13.0    Running ed76ee063d13
+ * elasticsearch     7.17.0    Running ed76ee063d13
  * firestore         latest    Running feec2e5e95b4
  * mongodb              4.4    Running 5513eba6734e
  * mysql                5.6    Running 307bc66d442a
@@ -112,8 +112,9 @@ The services are defined as plain javascript files within the framework and can 
 
 **Code: Sample Service Definition**
 ```typescript
-import { version } from '@elastic/elasticsearch/package.json';
 import type { Service } from '@travetto/command/bin/lib/service';
+
+const { version } = require(require.resolve('@elastic/elasticsearch').replace('index.js', 'package.json'));
 
 const port = 9200;
 

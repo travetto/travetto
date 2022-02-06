@@ -36,7 +36,7 @@ Supported featrues:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ElasticsearchModelConfig<span class="token punctuation">,</span> ElasticsearchModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-elasticsearch'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Init</span> <span class="token punctuation">{{'{'}}</span>
-  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
     primary<span class="token operator">:</span> <span class="token boolean">true</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getModelSource</span><span class="token punctuation">(</span>conf<span class="token operator">:</span> ElasticsearchModelConfig<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -61,7 +61,7 @@ Supported featrues:
 <span class="token comment">/**
  * Elasticsearch model config
  */</span>
-@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'model.elasticsearch'</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.elasticsearch'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ElasticsearchModelConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * List of hosts to support
@@ -78,7 +78,7 @@ Supported featrues:
   <span class="token comment">/**
    * Index prefix
    */</span>
-  <span class="token keyword">namespace</span> <span class="token operator">=</span> <span class="token string">'app'</span><span class="token punctuation">;</span>
+  namespace <span class="token operator">=</span> <span class="token string">'app'</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Auto-create, disabled in prod by default
    */</span>
@@ -86,7 +86,7 @@ Supported featrues:
   <span class="token comment">/**
    * Base schema config for elasticsearch
    */</span>
-  @<span class="token meta">Field</span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Field</span></span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
   schemaConfig<span class="token operator">:</span> EsSchemaConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
     caseSensitive<span class="token operator">:</span> <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
@@ -94,7 +94,7 @@ Supported featrues:
   <span class="token comment">/**
    * Base index create settings
    */</span>
-  @<span class="token meta">Field</span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Field</span></span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
   indexCreate <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token punctuation">[</span><span class="token string">'number_of_replicas'</span><span class="token punctuation">]</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
     <span class="token punctuation">[</span><span class="token string">'number_of_shards'</span><span class="token punctuation">]</span><span class="token operator">:</span> <span class="token number">1</span>

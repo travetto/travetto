@@ -265,31 +265,31 @@ To enforce that these contracts are honored, the module provides shared test sui
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MongoModelConfig<span class="token punctuation">,</span> MongoModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'..'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Suite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Suite</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MongoQuerySuite</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQuerySuite</span> <span class="token punctuation">{{'{'}}</span>
   serviceClass <span class="token operator">=</span> MongoModelService<span class="token punctuation">;</span>
   configClass <span class="token operator">=</span> MongoModelConfig<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-@<span class="token meta">Suite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Suite</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MongoQueryCrudSuite</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQueryCrudSuite</span> <span class="token punctuation">{{'{'}}</span>
   serviceClass <span class="token operator">=</span> MongoModelService<span class="token punctuation">;</span>
   configClass <span class="token operator">=</span> MongoModelConfig<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-@<span class="token meta">Suite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Suite</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MongoQueryFacetSuite</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQueryFacetSuite</span> <span class="token punctuation">{{'{'}}</span>
   serviceClass <span class="token operator">=</span> MongoModelService<span class="token punctuation">;</span>
   configClass <span class="token operator">=</span> MongoModelConfig<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-@<span class="token meta">Suite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Suite</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MongoQueryPolymorphismSuite</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQueryPolymorphismSuite</span> <span class="token punctuation">{{'{'}}</span>
   serviceClass <span class="token operator">=</span> MongoModelService<span class="token punctuation">;</span>
   configClass <span class="token operator">=</span> MongoModelConfig<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-@<span class="token meta">Suite</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Suite</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MongoQuerySuggestSuite</span> <span class="token keyword">extends</span> <span class="token class-name">ModelQuerySuggestSuite</span> <span class="token punctuation">{{'{'}}</span>
   serviceClass <span class="token operator">=</span> MongoModelService<span class="token punctuation">;</span>
   configClass <span class="token operator">=</span> MongoModelConfig<span class="token punctuation">;</span>

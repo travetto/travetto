@@ -36,7 +36,7 @@ The <code class="item input">title</code> will be picked up from the <a target="
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token punctuation">{{'{'}}</span>
   name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   age<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
@@ -111,16 +111,16 @@ Binding is a very simple operation, as it takes in a class registered as as <a t
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema<span class="token punctuation">,</span> Integer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Address</span> <span class="token punctuation">{{'{'}}</span>
   street1<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   street2<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-@<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Person</span> <span class="token punctuation">{{'{'}}</span>
   name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  @<span class="token meta">Integer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> age<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Integer</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> age<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
   address<span class="token operator">:</span> Address<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
@@ -134,7 +134,7 @@ A binding operation could look like:
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Person <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./person'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">Test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">return</span> Person<span class="token punctuation">.</span><span class="token keyword">from</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">return</span> Person<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
     name<span class="token operator">:</span> <span class="token string">'Test'</span><span class="token punctuation">,</span>
     age<span class="token operator">:</span> <span class="token number">19.999978</span><span class="token punctuation">,</span>
     address<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
@@ -151,7 +151,7 @@ and the output would be a <code class="item input">Person</code> instance with t
       <figcaption class="terminal">Sample data output after binding
       
       </figcaption>
-      <pre><code class="language-bash">$ node @travetto/base/bin/main ./doc/person-output.ts
+      <pre><code class="language-bash">$ <span class="token function">node</span> @travetto/base/bin/main ./doc/person-output.ts
 
 Person <span class="token punctuation">{{'{'}}</span>
   name: <span class="token string">'Test'</span>,
@@ -172,16 +172,16 @@ Validation is very similar to binding, but instead of attempting to assign value
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema<span class="token punctuation">,</span> Integer <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Address</span> <span class="token punctuation">{{'{'}}</span>
   street1<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   street2<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-@<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Person</span> <span class="token punctuation">{{'{'}}</span>
   name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  @<span class="token meta">Integer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> age<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Integer</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> age<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
   address<span class="token operator">:</span> Address<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
@@ -198,7 +198,7 @@ But now with an invalid json object
 
 <span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">validate</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
 
-  <span class="token keyword">const</span> person <span class="token operator">=</span> Person<span class="token punctuation">.</span><span class="token keyword">from</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> person <span class="token operator">=</span> Person<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
     name<span class="token operator">:</span> <span class="token string">'Test'</span><span class="token punctuation">,</span>
     <span class="token comment">// @ts-ignore</span>
     age<span class="token operator">:</span> <span class="token string">'abc'</span><span class="token punctuation">,</span>
@@ -217,13 +217,13 @@ would produce an exception similar to following structure
       <figcaption class="terminal">Sample error output
       
       </figcaption>
-      <pre><code class="language-bash">$ node @travetto/base/bin/main ./doc/person-invalid-output.ts
+      <pre><code class="language-bash">$ <span class="token function">node</span> @travetto/base/bin/main ./doc/person-invalid-output.ts
 
 Validation Failed <span class="token punctuation">{{'{'}}</span>
   <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"Validation errors have occurred"</span>,
   <span class="token string">"category"</span><span class="token builtin class-name">:</span> <span class="token string">"data"</span>,
   <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"ValidationResultError"</span>,
-  <span class="token string">"at"</span><span class="token builtin class-name">:</span> <span class="token string">"2021-03-14T05:00:00.618Z"</span>,
+  <span class="token string">"at"</span><span class="token builtin class-name">:</span> <span class="token string">"2022-03-14T04:00:00.618Z"</span>,
   <span class="token string">"errors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
     <span class="token punctuation">{{'{'}}</span>
       <span class="token string">"kind"</span><span class="token builtin class-name">:</span> <span class="token string">"type"</span>,
@@ -265,8 +265,8 @@ Within the schema framework, it is possible to add custom validators class level
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-@<span class="token meta">Validator</span><span class="token punctuation">(</span>passwordValidator<span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Validator</span></span><span class="token punctuation">(</span>passwordValidator<span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token punctuation">{{'{'}}</span>
   password<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
@@ -302,7 +302,7 @@ When the validator is executed, it has access to the entire object, and you can 
   <span class="token comment">/**
    * The type of the field
    */</span>
-  <span class="token keyword">type</span><span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  type<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -370,7 +370,7 @@ An example of this would be:
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema<span class="token punctuation">,</span> SchemaFakerUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">Address</span> <span class="token punctuation">{{'{'}}</span>
   street1<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   street2<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
@@ -379,7 +379,7 @@ An example of this would be:
   country<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
-@<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token punctuation">{{'{'}}</span>
   fName<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   lName<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
@@ -414,7 +414,7 @@ This feature is meant to allow for simple Typescript types to be able to be back
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">Point</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token builtin">number</span><span class="token punctuation">,</span> <span class="token builtin">number</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 
-<span class="token keyword">const</span> <span class="token constant">INVALID</span> <span class="token operator">=</span> Symbol<span class="token punctuation">.</span><span class="token keyword">for</span><span class="token punctuation">(</span><span class="token string">'invalid-point'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token constant">INVALID</span> <span class="token operator">=</span> Symbol<span class="token punctuation">.</span><span class="token function">for</span><span class="token punctuation">(</span><span class="token string">'invalid-point'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">PointImpl</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">static</span> <span class="token function">validateSchema</span><span class="token punctuation">(</span>input<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -444,7 +444,7 @@ What you can see here is that the <code class="item input">Point</code> type is 
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Point <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./custom-type'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Schema</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LocationAware</span> <span class="token punctuation">{{'{'}}</span>
   name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   point<span class="token operator">:</span> Point<span class="token punctuation">;</span>
@@ -457,13 +457,13 @@ All that happens now, is the type is exported, and the class above is able to pr
       <figcaption class="terminal">Custom Type Validation
       
       </figcaption>
-      <pre><code class="language-bash">$ node @travetto/base/bin/main ./doc/custom-type-output.ts
+      <pre><code class="language-bash">$ <span class="token function">node</span> @travetto/base/bin/main ./doc/custom-type-output.ts
 
 Validation Failed <span class="token punctuation">{{'{'}}</span>
   <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"Validation errors have occurred"</span>,
   <span class="token string">"category"</span><span class="token builtin class-name">:</span> <span class="token string">"data"</span>,
   <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"ValidationResultError"</span>,
-  <span class="token string">"at"</span><span class="token builtin class-name">:</span> <span class="token string">"2021-03-14T05:00:00.837Z"</span>,
+  <span class="token string">"at"</span><span class="token builtin class-name">:</span> <span class="token string">"2022-03-14T04:00:00.837Z"</span>,
   <span class="token string">"errors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
     <span class="token punctuation">{{'{'}}</span>
       <span class="token string">"kind"</span><span class="token builtin class-name">:</span> <span class="token string">"type"</span>,

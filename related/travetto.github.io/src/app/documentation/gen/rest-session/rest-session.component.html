@@ -56,7 +56,7 @@ This is a module that adds session support to the <a class="module-link" routerL
   <span class="token comment">/**
    * Create a new Session object given a partial version of itself
    */</span>
-  <span class="token keyword">constructor</span><span class="token punctuation">(</span>data<span class="token operator">:</span> Partial<span class="token operator">&lt;</span>Session<span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span>data<span class="token operator">:</span> Partial<span class="token operator">&lt;</span>Session<span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
   <span class="token comment">/**
    * Get session value
    */</span>
@@ -109,21 +109,21 @@ A session allows for defining the expiration time, what state the session should
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Put<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SessionData<span class="token punctuation">,</span> Session <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest-session'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Controller</span><span class="token punctuation">(</span><span class="token string">'/session'</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/session'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SessionRoutes</span> <span class="token punctuation">{{'{'}}</span>
 
-  @<span class="token meta">Put</span><span class="token punctuation">(</span><span class="token string">'/info'</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Put</span></span><span class="token punctuation">(</span><span class="token string">'/info'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">storeInfo</span><span class="token punctuation">(</span>data<span class="token operator">:</span> SessionData<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     data<span class="token punctuation">.</span>age <span class="token operator">=</span> <span class="token number">20</span><span class="token punctuation">;</span>
     data<span class="token punctuation">.</span>name <span class="token operator">=</span> <span class="token string">'Roger'</span><span class="token punctuation">;</span> <span class="token comment">// Setting data</span>
   <span class="token punctuation">{{'}'}}</span>
 
-  @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/logout'</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/logout'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">logout</span><span class="token punctuation">(</span>session<span class="token operator">:</span> Session<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">await</span> session<span class="token punctuation">.</span><span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
-  @<span class="token meta">Get</span><span class="token punctuation">(</span><span class="token string">'/info/age'</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/info/age'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">getInfo</span><span class="token punctuation">(</span>data<span class="token operator">:</span> SessionData<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> data<span class="token punctuation">.</span>age<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>

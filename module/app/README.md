@@ -169,7 +169,7 @@ Manifest {
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
-    node: 'v16.6.2',
+    node: 'v17.4.0',
     dynamic: false,
     readonly: false
   },

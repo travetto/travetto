@@ -30,7 +30,7 @@ Docker provides a unified way of executing external programs with a high level o
   #port<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
   container<span class="token operator">:</span> DockerContainer<span class="token punctuation">;</span>
 
-  <span class="token keyword">constructor</span><span class="token punctuation">(</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span>
     port <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">trunc</span><span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">40000</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">10000</span>
   <span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>#port <span class="token operator">=</span> port<span class="token punctuation">;</span>
@@ -108,7 +108,7 @@ A sample of all services available to the entire framework:
 ----------------------------------------------
 
  * dynamodb          <span class="token number">1.15</span>.0    Running 93af422e793a
- * elasticsearch     <span class="token number">7.13</span>.0    Running ed76ee063d13
+ * elasticsearch     <span class="token number">7.17</span>.0    Running ed76ee063d13
  * firestore         latest    Running feec2e5e95b4
  * mongodb              <span class="token number">4.4</span>    Running 5513eba6734e
  * mysql                <span class="token number">5.6</span>    Running 307bc66d442a
@@ -125,8 +125,9 @@ The services are defined as plain javascript files within the framework and can 
       <figcaption class="code">Sample Service Definition
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/support/service.elasticsearch.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> version <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@elastic/elasticsearch/package.json'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> Service <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/command/bin/lib/service'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> Service <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/command/bin/lib/service'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> version <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">require</span><span class="token punctuation">(</span><span class="token keyword">require</span><span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token string">'@elastic/elasticsearch'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token string">'index.js'</span><span class="token punctuation">,</span> <span class="token string">'package.json'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token keyword">const</span> port <span class="token operator">=</span> <span class="token number">9200</span><span class="token punctuation">;</span>
 
@@ -135,12 +136,12 @@ The services are defined as plain javascript files within the framework and can 
   version<span class="token punctuation">,</span>
   port<span class="token punctuation">,</span>
   env<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token string">'discovery.type'</span><span class="token operator">:</span> <span class="token string">'single-node'</span><span class="token punctuation">,</span>
-    <span class="token string">'xpack.security.enabled'</span><span class="token operator">:</span> <span class="token string">'false'</span><span class="token punctuation">,</span>
-    <span class="token string">'xpack.monitoring.enabled'</span><span class="token operator">:</span> <span class="token string">'false'</span><span class="token punctuation">,</span>
-    <span class="token string">'xpack.ml.enabled'</span><span class="token operator">:</span> <span class="token string">'false'</span><span class="token punctuation">,</span>
-    <span class="token string">'xpack.graph.enabled'</span><span class="token operator">:</span> <span class="token string">'false'</span><span class="token punctuation">,</span>
-    <span class="token string">'xpack.watcher.enabled'</span><span class="token operator">:</span> <span class="token string">'false'</span><span class="token punctuation">,</span>
+    <span class="token string-property property">'discovery.type'</span><span class="token operator">:</span> <span class="token string">'single-node'</span><span class="token punctuation">,</span>
+    <span class="token string-property property">'xpack.security.enabled'</span><span class="token operator">:</span> <span class="token string">'false'</span><span class="token punctuation">,</span>
+    <span class="token string-property property">'xpack.monitoring.enabled'</span><span class="token operator">:</span> <span class="token string">'false'</span><span class="token punctuation">,</span>
+    <span class="token string-property property">'xpack.ml.enabled'</span><span class="token operator">:</span> <span class="token string">'false'</span><span class="token punctuation">,</span>
+    <span class="token string-property property">'xpack.graph.enabled'</span><span class="token operator">:</span> <span class="token string">'false'</span><span class="token punctuation">,</span>
+    <span class="token string-property property">'xpack.watcher.enabled'</span><span class="token operator">:</span> <span class="token string">'false'</span><span class="token punctuation">,</span>
     <span class="token constant">ES_JAVA_OPTS</span><span class="token operator">:</span> <span class="token string">'-Xms256m -Xmx256m'</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
   ready<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> url<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>port<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">/_cluster/health</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token function-variable function">test</span><span class="token operator">:</span> b <span class="token operator">=></span> b<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'"status":"green"'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>

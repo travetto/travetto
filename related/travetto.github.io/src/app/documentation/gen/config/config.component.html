@@ -76,7 +76,7 @@ At runtime the resolved config would be:
       <figcaption class="terminal">Runtime Resolution
       
       </figcaption>
-      <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/resolve.ts
+      <pre><code class="language-bash">$ <span class="token function">node</span> @travetto/boot/bin/main ./doc/resolve.ts
 
 Config <span class="token punctuation">{{'{'}}</span>
   database: <span class="token punctuation">{{'{'}}</span>
@@ -101,7 +101,7 @@ The decorator takes in a namespace, of what part of the resolved configuration y
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'database'</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'database'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DBConfig</span> <span class="token punctuation">{{'{'}}</span>
   host<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   port<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
@@ -118,13 +118,13 @@ Using the above config files, you'll notice that the port is not specified (its 
       <figcaption class="terminal">Resolved database config
       
       </figcaption>
-      <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/dbconfig-run.ts
+      <pre><code class="language-bash">$ <span class="token function">node</span> @travetto/boot/bin/main ./doc/dbconfig-run.ts
 
 <span class="token punctuation">{{'{'}}</span>
   message: <span class="token string">'Failed to construct @trv:config/doc/dbconfig￮DBConfig as validation errors have occurred'</span>,
   category: <span class="token string">'data'</span>,
   type: <span class="token string">'ValidationResultError'</span>,
-  at: <span class="token number">2021</span>-03-14T05:00:00.618Z,
+  at: <span class="token number">2022</span>-03-14T04:00:00.618Z,
   class: <span class="token string">'@trv:config/doc/dbconfig￮DBConfig'</span>,
   file: <span class="token string">'@trv:config/doc/dbconfig.ts'</span>,
   errors: <span class="token punctuation">[</span>
@@ -146,7 +146,7 @@ By passing in the port via the environment variable, the config will construct p
       <figcaption class="terminal">Resolved database config
       
       </figcaption>
-      <pre><code class="language-bash">$ node @travetto/boot/bin/main ./doc/dbconfig-run.ts
+      <pre><code class="language-bash">$ <span class="token function">node</span> @travetto/boot/bin/main ./doc/dbconfig-run.ts
 
 Config <span class="token punctuation">{{'{'}}</span>
   database: <span class="token punctuation">{{'{'}}</span>

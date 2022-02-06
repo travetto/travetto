@@ -56,7 +56,7 @@ Below is a pool that will convert images on demand, while queuing as needed.
 
   pendingImages <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ManualAsyncIterator<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">new</span> <span class="token class-name">ImageProcessor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
@@ -176,7 +176,7 @@ When creating your work, via process spawning, you will need to provide the scri
       <figcaption class="terminal">Output
       
       </figcaption>
-      <pre><code class="language-bash">$ node @travetto/base/bin/main ./doc/spawner.ts
+      <pre><code class="language-bash">$ <span class="token function">node</span> @travetto/base/bin/main ./doc/spawner.ts
 
 Request complete <span class="token punctuation">{{'{'}}</span> input: <span class="token number">1</span>, output: <span class="token number">2</span> <span class="token punctuation">{{'}'}}</span>
 Request complete <span class="token punctuation">{{'{'}}</span> input: <span class="token number">2</span>, output: <span class="token number">4</span> <span class="token punctuation">{{'}'}}</span>

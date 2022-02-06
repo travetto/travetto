@@ -25,7 +25,7 @@ For example:
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">Server</span> <span class="token punctuation">{{'{'}}</span>
   name <span class="token operator">=</span> <span class="token string">'roger'</span><span class="token punctuation">;</span>
 
@@ -34,10 +34,10 @@ For example:
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 
-@<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'simple-app'</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Application</span></span><span class="token punctuation">(</span><span class="token string">'simple-app'</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">SimpleApp</span> <span class="token punctuation">{{'{'}}</span>
 
-  @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   server<span class="token operator">:</span> Server<span class="token punctuation">;</span>
 
   <span class="token keyword">async</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -58,7 +58,7 @@ The arguments specified in the <code class="item method">run</code> method are e
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'simple-domain'</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Application</span></span><span class="token punctuation">(</span><span class="token string">'simple-domain'</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">SimpleApp</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">async</span> <span class="token function">run</span><span class="token punctuation">(</span>domain<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> port <span class="token operator">=</span> <span class="token number">3000</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Launching'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> domain<span class="token punctuation">,</span> port <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -183,7 +183,7 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     resources: <span class="token punctuation">[</span> <span class="token string">'resources'</span>, <span class="token string">'doc/resources'</span> <span class="token punctuation">]</span>,
     shutdownWait: <span class="token number">2000</span>,
     cache: <span class="token string">'.trv_cache'</span>,
-    node: <span class="token string">'v16.6.2'</span>,
+    node: <span class="token string">'v17.4.0'</span>,
     dynamic: false,
     readonly: <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span>,
@@ -244,7 +244,7 @@ Customizing the types is done by name, and allows for greater control:
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Application</span><span class="token punctuation">(</span><span class="token string">'complex'</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Application</span></span><span class="token punctuation">(</span><span class="token string">'complex'</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">Complex</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">async</span> <span class="token function">run</span><span class="token punctuation">(</span>domain<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> port<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">3000</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Launching'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> domain<span class="token punctuation">,</span> port <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>

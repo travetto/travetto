@@ -24,7 +24,7 @@ To expose the necessary email transport, the following pattern is commonly used:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NullTransport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{'{'}}</span>
-  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NullTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -52,7 +52,7 @@ Given the integration with <a target="_blank" class="external-link" href="https:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NodemailerTransport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{'{'}}</span>
-  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NodemailerTransport</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> sendmail<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -67,7 +67,7 @@ Given the integration with <a target="_blank" class="external-link" href="https:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NodemailerTransport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{'{'}}</span>
-  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NodemailerTransport</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
       service<span class="token operator">:</span> <span class="token string">'smtp'</span>
@@ -86,7 +86,7 @@ Given the integration with <a target="_blank" class="external-link" href="https:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NodemailerTransport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{'{'}}</span>
-  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getTransport</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">NodemailerTransport</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
       <span class="token constant">SES</span><span class="token operator">:</span> SESClient

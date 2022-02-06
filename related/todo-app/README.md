@@ -314,8 +314,8 @@ First we must start the application:
 
 **Terminal: Application Startup**
 ```bash
-2021-03-14T05:00:00.618Z info  [@trv:app/registry:55] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
-2021-03-14T05:00:00.837Z info  [@trv:app/registry:61] Manifest {
+2022-03-14T04:00:00.618Z info  [@trv:app/registry:55] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
+2022-03-14T04:00:00.837Z info  [@trv:app/registry:61] Manifest {
   info: {
     framework: '2.0.2',
     name: '@travetto/todo-app',
@@ -332,7 +332,7 @@ First we must start the application:
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
-    node: 'v16.6.2',
+    node: 'v17.4.0',
     dynamic: false,
     readonly: false
   },
@@ -371,7 +371,7 @@ First we must start the application:
     }
   }
 }
-2021-03-14T05:00:01.510Z info  [@trv:app/registry:69] Config {
+2022-03-14T04:00:01.510Z info  [@trv:app/registry:69] Config {
   rest: {
     serve: true,
     port: 3000,
@@ -409,11 +409,11 @@ First we must start the application:
       port: 27017,
       connectionOptions: {},
       srvRecord: false,
-      options: { useNewUrlParser: true, useUnifiedTopology: true }
+      options: {}
     }
   }
 }
-2021-03-14T05:00:02.450Z info  [@trv:rest/application/rest:188] Listening { port: 3000 }
+2022-03-14T04:00:02.450Z info  [@trv:rest/application/rest:188] Listening { port: 3000 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:
@@ -441,7 +441,7 @@ $ node @travetto/boot/bin/main ./doc/create-todo.ts
 
 {
   text: 'New Todo',
-  created: '2021-03-14T05:00:02.762Z',
+  created: '2022-03-14T04:00:02.762Z',
   id: '22e793aed76ee063d13feec2e5e95b45'
 }
 ```
@@ -464,7 +464,7 @@ $ node @travetto/boot/bin/main ./doc/list-todo.ts
   {
     id: '22e793aed76ee063d13feec2e5e95b45',
     text: 'New Todo',
-    created: '2021-03-14T05:00:03.086Z'
+    created: '2022-03-14T04:00:03.086Z'
   }
 ]
 ```

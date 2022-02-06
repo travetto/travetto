@@ -37,7 +37,7 @@ Supported featrues:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MongoModelService<span class="token punctuation">,</span> MongoModelConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-mongo'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Init</span> <span class="token punctuation">{{'{'}}</span>
-  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
     primary<span class="token operator">:</span> <span class="token boolean">true</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getModelSource</span><span class="token punctuation">(</span>conf<span class="token operator">:</span> MongoModelConfig<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -63,7 +63,7 @@ Supported featrues:
 <span class="token comment">/**
  * Mongo model config
  */</span>
-@<span class="token meta">Config</span><span class="token punctuation">(</span><span class="token string">'model.mongo'</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.mongo'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MongoModelConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Hosts
@@ -72,7 +72,7 @@ Supported featrues:
   <span class="token comment">/**
    * Collection prefix
    */</span>
-  <span class="token keyword">namespace</span> <span class="token operator">=</span> <span class="token string">'app'</span><span class="token punctuation">;</span>
+  namespace <span class="token operator">=</span> <span class="token string">'app'</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Username
    */</span>
@@ -97,10 +97,8 @@ Supported featrues:
   <span class="token comment">/**
    * Mongo client options
    */</span>
-  @<span class="token meta">Field</span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Field</span></span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
   options<span class="token operator">:</span> mongo<span class="token punctuation">.</span>MongoClientOptions <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
-    useNewUrlParser<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
-    useUnifiedTopology<span class="token operator">:</span> <span class="token boolean">true</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
@@ -118,8 +116,11 @@ Supported featrues:
    */</span>
   <span class="token keyword">async</span> <span class="token function">fetch</span><span class="token punctuation">(</span>val<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> ResourceManager<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span>
-      <span class="token punctuation">.</span><span class="token keyword">catch</span><span class="token punctuation">(</span>e <span class="token operator">=></span> fs<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">)</span>
-      <span class="token punctuation">.</span><span class="token keyword">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>res <span class="token operator">=></span> <span class="token keyword">typeof</span> res <span class="token operator">===</span> <span class="token string">'string'</span> <span class="token operator">?</span> res <span class="token operator">:</span> res<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span>e <span class="token operator">=></span> fs<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>res <span class="token operator">=></span> <span class="token keyword">typeof</span> res <span class="token operator">===</span> <span class="token string">'string'</span> <span class="token operator">?</span> res <span class="token operator">:</span> res<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> val<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
@@ -129,16 +130,16 @@ Supported featrues:
     <span class="token keyword">const</span> opts <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>options<span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>opts<span class="token punctuation">.</span>ssl<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslCert<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-        opts<span class="token punctuation">.</span>sslCert <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslCert <span class="token keyword">as</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        opts<span class="token punctuation">.</span>tlsCertificateFile <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslCert<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslKey<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-        opts<span class="token punctuation">.</span>sslKey <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslKey <span class="token keyword">as</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        opts<span class="token punctuation">.</span>sslKey <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslKey<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslCA<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-        opts<span class="token punctuation">.</span>sslCA <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token builtin">Promise</span><span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslCA<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>k <span class="token operator">=></span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>k <span class="token keyword">as</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        opts<span class="token punctuation">.</span>sslCA <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslCA<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslCRL<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-        opts<span class="token punctuation">.</span>sslCRL <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token builtin">Promise</span><span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslCRL<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>k <span class="token operator">=></span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>k <span class="token keyword">as</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        opts<span class="token punctuation">.</span>sslCRL <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslCRL<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>

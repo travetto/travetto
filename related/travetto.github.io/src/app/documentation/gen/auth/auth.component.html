@@ -241,7 +241,7 @@ A registered principal extends the base concept of an principal, by adding in ad
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Model <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RegisteredPrincipal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Model</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Model</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token keyword">implements</span> <span class="token class-name">RegisteredPrincipal</span> <span class="token punctuation">{{'{'}}</span>
   id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   source<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
@@ -270,7 +270,7 @@ Additionally, there exists a common practice of mapping various external securit
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">AuthConfig</span> <span class="token punctuation">{{'{'}}</span>
-  @<span class="token meta">InjectableFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getModelAuthService</span><span class="token punctuation">(</span>svc<span class="token operator">:</span> ModelCrudSupport<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ModelAuthService</span><span class="token punctuation">(</span>
       svc<span class="token punctuation">,</span>
@@ -287,7 +287,7 @@ Additionally, there exists a common practice of mapping various external securit
         password<span class="token operator">:</span> u<span class="token punctuation">.</span>password<span class="token punctuation">,</span>
         details<span class="token operator">:</span> u<span class="token punctuation">,</span>
       <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-      <span class="token punctuation">(</span>u<span class="token operator">:</span> Partial<span class="token operator">&lt;</span>RegisteredPrincipal<span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> User<span class="token punctuation">.</span><span class="token keyword">from</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>   <span class="token comment">// This converts a RegisteredPrincipal to a User</span>
+      <span class="token punctuation">(</span>u<span class="token operator">:</span> Partial<span class="token operator">&lt;</span>RegisteredPrincipal<span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> User<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>   <span class="token comment">// This converts a RegisteredPrincipal to a User</span>
         id<span class="token operator">:</span> u<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
         permissions<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token punctuation">(</span>u<span class="token punctuation">.</span>permissions <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
         hash<span class="token operator">:</span> u<span class="token punctuation">.</span>hash<span class="token punctuation">,</span>
@@ -311,10 +311,10 @@ Additionally, there exists a common practice of mapping various external securit
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model'</span><span class="token punctuation">;</span>
 
-@<span class="token meta">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">UserService</span> <span class="token punctuation">{{'{'}}</span>
 
-  @<span class="token meta">Inject</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token keyword">private</span> auth<span class="token operator">:</span> ModelAuthService<span class="token operator">&lt;</span>User<span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token keyword">async</span> <span class="token function">authenticate</span><span class="token punctuation">(</span>identity<span class="token operator">:</span> User<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
