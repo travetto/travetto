@@ -1,4 +1,4 @@
-@use '~@angular/material' as mat;
+@use '@angular/material' as mat;
 
 $general-typography: mat.define-typography-config($font-family: '"Source Sans Pro", sans-serif',
 $display-3: mat.define-typography-level(40px, 24px, 400),
