@@ -7,10 +7,11 @@ import { Field } from '@travetto/schema';
 export class RedisModelConfig {
 
   @Field(Object)
-  client: redis.ClientOpts = {};
+  client: redis.RedisClientOptions = {};
   namespace?: string;
   autoCreate?: boolean;
 
   postConstruct() {
+
   }
 }
