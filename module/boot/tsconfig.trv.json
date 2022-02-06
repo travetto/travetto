@@ -4,6 +4,7 @@
     "target": "esnext",
     "strict": true,
     "strictPropertyInitialization": false,
+    "useUnknownInCatchVariables": false,
     "noImplicitOverride": false,
     "useDefineForClassFields": true,
     "sourceMap": false,

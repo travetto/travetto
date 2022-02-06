@@ -31,17 +31,18 @@ export class MongoUtil {
       f = f[key as keyof typeof f] as IndexField<T>;
       keys.push(key);
     }
-    return { [keys.join('.')]: (f as boolean) === true ? 1 : f as number } as Record<string, number>;
+    const rf = f as unknown as (number | boolean);
+    return { [keys.join('.')]: rf === true ? 1 : rf } as Record<string, number>;
   }
 
   static uuid(val: string) {
     return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
   }
 
-  static idToString(id: string | mongo.ObjectID | mongo.Binary) {
+  static idToString(id: string | mongo.ObjectId | mongo.Binary) {
     if (typeof id === 'string') {
       return id;
-    } else if (id instanceof mongo.ObjectID) {
+    } else if (id instanceof mongo.ObjectId) {
       return id.toHexString();
     } else {
       return id.buffer.toString('hex');

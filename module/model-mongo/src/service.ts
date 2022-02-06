@@ -33,7 +33,9 @@ import { MongoModelConfig } from './config';
 
 const IdxFieldsⲐ = Symbol.for('@trv:model-mongo/idx');
 
-const asFielded = <T extends ModelType>(cfg: IndexConfig<T>) => (cfg as unknown as { [IdxFieldsⲐ]: mongo.SortOptionObject<T> });
+const asFielded = <T extends ModelType>(cfg: IndexConfig<T>) => (cfg as unknown as { [IdxFieldsⲐ]: mongo.Sort });
+
+type IdxCfg = mongo.CreateIndexesOptions;
 
 /**
  * Mongo-based model source
@@ -53,7 +55,7 @@ export class MongoModelService implements
   constructor(public readonly config: MongoModelConfig) { }
 
   async #describeStreamRaw(location: string) {
-    const files = (await this.#bucket.find({ filename: location }, { limit: 1 }).toArray()) as [{ _id: mongo.ObjectID, metadata: StreamMeta }];
+    const files = (await this.#bucket.find({ filename: location }, { limit: 1 }).toArray()) as (mongo.GridFSFile & { metadata: StreamMeta })[];
 
     if (!files?.length) {
       throw new NotFoundError(STREAMS, location);
@@ -92,11 +94,11 @@ export class MongoModelService implements
     await this.#db.dropDatabase();
   }
 
-  getGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls): Record<string, '2d'>[] {
+  getGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls): mongo.IndexSpecification[] {
     const fields = SchemaRegistry.has(cls) ?
       Object.values(SchemaRegistry.get(cls).views[AllViewⲐ].schema) :
       [];
-    const out: Record<string, '2d'>[] = [];
+    const out: mongo.IndexSpecification[] = [];
     for (const field of fields) {
       if (SchemaRegistry.has(field.type)) {
         // Recurse
@@ -115,7 +117,10 @@ export class MongoModelService implements
     return [
       ...indices.map(idx => {
         const combined = asFielded(idx)[IdxFieldsⲐ] ??= Object.assign({}, ...idx.fields.map(x => MongoUtil.toIndex(x as IndexField<T>)));
-        return [combined, (idx.type === 'unique' ? { unique: true } : {}) as mongo.IndexOptions] as const;
+        return [
+          combined as mongo.IndexSpecification,
+          (idx.type === 'unique' ? { unique: true } : {}) as IdxCfg
+        ] as const;
       }),
       ...this.getGeoIndices(cls).map(x => [x] as const)
     ];
@@ -127,7 +132,7 @@ export class MongoModelService implements
     if (creating.length) {
       console.debug('Creating indexes', { indices: creating });
       for (const el of creating) {
-        await col.createIndex(el[0], el[1]);
+        await col.createIndex(el[0], el[1] ?? {});
       }
     }
   }
@@ -177,7 +182,7 @@ export class MongoModelService implements
 
     const store = await this.getStore(cls);
     const result = await store.insertOne(cleaned);
-    if (result.insertedCount === 0) {
+    if (!result.insertedId) {
       throw new ExistsError(cls, cleaned.id);
     }
     delete (cleaned as { _id?: unknown })._id;
@@ -239,7 +244,11 @@ export class MongoModelService implements
     }, {} as Record<string, unknown>);
 
     const id = item.id;
-    const res = await store.findOneAndUpdate(this.getWhere<ModelType>(cls, { id }), final, { returnOriginal: false });
+    const res = await store.findOneAndUpdate(
+      this.getWhere<ModelType>(cls, { id }),
+      final,
+      { returnDocument: 'after' }
+    );
 
     if (!res.value) {
       new NotFoundError(cls, id);
@@ -258,8 +267,7 @@ export class MongoModelService implements
 
   async * list<T extends ModelType>(cls: Class<T>) {
     const store = await this.getStore(cls);
-    const cursor = store.find(this.getWhere(cls, {})).batchSize(100);
-    cursor.timeout = true;
+    const cursor = store.find(this.getWhere(cls, {}), { timeout: true }).batchSize(100);
     for await (const el of cursor) {
       try {
         yield MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el));
@@ -323,7 +331,7 @@ export class MongoModelService implements
     }
 
     const store = await this.getStore(cls);
-    const bulk = store.initializeUnorderedBulkOp({ w: 1 });
+    const bulk = store.initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
     const { upsertedIds, insertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
 
     out.insertedIds = new Map([...upsertedIds.entries(), ...insertedIds.entries()]);
@@ -336,7 +344,7 @@ export class MongoModelService implements
       } else if (op.update) {
         bulk.find({ _id: MongoUtil.uuid(op.update.id) }).update({ $set: op.update });
       } else if (op.delete) {
-        bulk.find({ _id: MongoUtil.uuid(op.delete.id) }).removeOne();
+        bulk.find({ _id: MongoUtil.uuid(op.delete.id) }).deleteOne();
       }
     }
 
@@ -347,7 +355,7 @@ export class MongoModelService implements
         MongoUtil.postLoadId(op.insert as T);
       }
     }
-    for (const { index, _id } of res.getUpsertedIds() as { index: number, _id: mongo.ObjectID }[]) {
+    for (const { index, _id } of res.getUpsertedIds() as { index: number, _id: mongo.ObjectId }[]) {
       out.insertedIds.set(index, MongoUtil.idToString(_id));
     }
 
@@ -422,10 +430,9 @@ export class MongoModelService implements
     const where = this.getWhere(
       cls,
       ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }) as WhereClause<T>
-    ) as mongo.FilterQuery<T>;
+    ) as mongo.Filter<T>;
 
-    const cursor = store.find(where).batchSize(100).sort(asFielded(idxCfg)[IdxFieldsⲐ]);
-    cursor.timeout = true;
+    const cursor = store.find(where, { timeout: true }).batchSize(100).sort(asFielded(idxCfg)[IdxFieldsⲐ]);
 
     for await (const el of cursor) {
       yield (await MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el))) as T;
@@ -522,10 +529,10 @@ export class MongoModelService implements
 
     pipeline.unshift({ $match: q });
 
-    const result = await col.aggregate(pipeline).toArray();
+    const result = (await col.aggregate(pipeline).toArray()) as { _id: mongo.ObjectId, count: number }[];
 
-    return result.map((val: ({ _id: string, count: number })) => ({
-      key: val._id,
+    return result.map(val => ({
+      key: MongoUtil.idToString(val._id),
       count: val.count
     })).sort((a, b) => b.count - a.count);
   }
