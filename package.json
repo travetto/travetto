@@ -19,11 +19,11 @@
   },
   "dependencies": {
     "@arcsine/nodesh": "^1.8.3",
-    "@types/eslint": "^7.29.0",
-    "@typescript-eslint/eslint-plugin": "^4.33.0",
-    "@typescript-eslint/parser": "^4.33.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-unused-imports": "^1.1.5"
+    "@types/eslint": "^8.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.10.2",
+    "@typescript-eslint/parser": "^5.10.2",
+    "eslint": "^8.8.0",
+    "eslint-plugin-unused-imports": "^2.0.0"
   },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.49.0",
