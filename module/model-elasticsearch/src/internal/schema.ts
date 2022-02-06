@@ -1,11 +1,11 @@
-import { version as VERSION } from '@elastic/elasticsearch/package.json';
-
 import { Class, Util } from '@travetto/base';
 import { ModelRegistry } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types';
+
+const { version: VERSION } = require(require.resolve('@elastic/elasticsearch').replace('index.js', 'package.json'));
 
 
 type FieldType = {
