@@ -1,11 +1,12 @@
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
+import { readFileSync } from 'fs';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { AppCache, ExecUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
-const presets = JSON.parse(fs.readFileSync(PathUtil.resolveUnix(__dirname, '..', 'resources', 'presets.json'), 'utf8')) as Record<string, [string, object] | [string]>;
+const presets = JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', 'resources', 'presets.json'), 'utf8')) as Record<string, [string, object] | [string]>;
 
 /**
  * CLI for generating the cli client
@@ -74,7 +75,7 @@ ${this.getListOfFormats().map(x => color`* ${{ input: x }}`).join('\n')} `;
     }
 
     // Ensure its there
-    await fs.promises.mkdir(this.cmd.output, { recursive: true });
+    await fs.mkdir(this.cmd.output, { recursive: true });
 
     let propMap = Object.fromEntries(this.cmd.props?.map(p => p.split('=')) ?? []);
 

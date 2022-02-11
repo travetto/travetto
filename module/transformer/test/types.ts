@@ -3,14 +3,14 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { PathUtil } from '@travetto/boot';
 
-import { TranformerTestUtil } from '../test-support/util';
+import { TransformerTestUtil } from '../test-support/util';
 
 @Suite()
 export class TypesTransformSuite {
 
   @Test({ timeout: 10000 })
   async transformQuestion() {
-    const output = await TranformerTestUtil.compile(
+    const output = await TransformerTestUtil.compile(
       PathUtil.resolveUnix(__dirname, '../doc'),
       'upper.ts'
     );

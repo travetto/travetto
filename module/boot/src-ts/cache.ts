@@ -1,4 +1,7 @@
-import * as fs from 'fs';
+import {
+  Stats, mkdirSync, constants, accessSync, readdirSync,
+  readFileSync, writeFileSync, unlinkSync, statSync
+} from 'fs';
 
 import { EnvUtil } from './env';
 import { FsUtil } from './fs';
@@ -9,11 +12,11 @@ import { PathUtil } from './path';
  */
 export class FileCache {
 
-  static isOlder(cacheStat: fs.Stats, fullStat: fs.Stats) {
+  static isOlder(cacheStat: Stats, fullStat: Stats) {
     return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
   }
 
-  #cache = new Map<string, fs.Stats>();
+  #cache = new Map<string, Stats>();
 
   /**
    * Directory to cache into
@@ -28,7 +31,7 @@ export class FileCache {
    * Purge all expired data
    */
   #purgeExpired() {
-    for (const f of fs.readdirSync(this.cacheDir)) {
+    for (const f of readdirSync(this.cacheDir)) {
       const full = this.fromEntryName(f);
       try {
         this.removeExpiredEntry(full);
@@ -47,11 +50,11 @@ export class FileCache {
    */
   init(purgeExpired = false) {
     if (!EnvUtil.isReadonly()) {
-      fs.mkdirSync(this.cacheDir, { recursive: true });
+      mkdirSync(this.cacheDir, { recursive: true });
 
       try {
         // Ensure we have access before trying to delete
-        fs.accessSync(this.cacheDir, fs.constants.W_OK);
+        accessSync(this.cacheDir, constants.W_OK);
       } catch (e) {
         throw new Error(`Unable to write to cache directory: ${this.cacheDir}`);
       }
@@ -67,7 +70,7 @@ export class FileCache {
    * @param contents Contents to write
    */
   writeEntry(local: string, contents: string) {
-    fs.writeFileSync(this.toEntryName(local), contents, 'utf8');
+    writeFileSync(this.toEntryName(local), contents, 'utf8');
     this.statEntry(local);
   }
 
@@ -76,7 +79,7 @@ export class FileCache {
    * @param local Read the entry given the local name
    */
   readEntry(local: string): string {
-    return fs.readFileSync(this.toEntryName(local), 'utf8');
+    return readFileSync(this.toEntryName(local), 'utf8');
   }
 
   /**
@@ -95,8 +98,8 @@ export class FileCache {
   removeExpiredEntry(local: string, force = false) {
     if (this.hasEntry(local)) {
       try {
-        if (force || FileCache.isOlder(this.statEntry(local), fs.statSync(local))) {
-          fs.unlinkSync(this.toEntryName(local));
+        if (force || FileCache.isOlder(this.statEntry(local), statSync(local))) {
+          unlinkSync(this.toEntryName(local));
         }
       } catch (e) {
         if (!(e instanceof Error) || !e.message.includes('ENOENT')) {
@@ -129,7 +132,7 @@ export class FileCache {
    */
   statEntry(local: string) {
     if (!this.#cache.has(local)) {
-      const stat = fs.statSync(this.toEntryName(local));
+      const stat = statSync(this.toEntryName(local));
       this.#cache.set(local, stat);
     }
     return this.#cache.get(local)!;

@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { EnvInit } from '@travetto/base/bin/init';
@@ -52,7 +52,7 @@ export class DocPlugin extends BasePlugin {
           const fmt = path.extname(out) ?? this.cmd.format;
           const finalName = await PathUtil.resolveUnix(out);
           const result = await RenderUtil.render(docFile, fmt);
-          await fs.promises.writeFile(finalName, result, 'utf8');
+          await fs.writeFile(finalName, result, 'utf8');
         }
       };
 

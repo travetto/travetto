@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 import { EnvUtil } from '../env';
 
 type SourceHandler = (name: string, contents: string) => string;
@@ -110,7 +110,7 @@ export class SourceUtil {
    * @param contents The file contents to process
    */
   static preProcess(filename: string, contents?: string) {
-    let fileContents = contents ?? fs.readFileSync(filename, 'utf-8');
+    let fileContents = contents ?? readFileSync(filename, 'utf-8');
 
     // Resolve macro
     const { contents: text, errors } = this.resolveMacros(fileContents);

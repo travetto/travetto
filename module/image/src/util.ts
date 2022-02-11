@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { CommandService } from '@travetto/command';
 import { ExecUtil, StreamUtil, AppCache, FsUtil } from '@travetto/boot';
@@ -108,6 +108,6 @@ export class ImageUtil {
       await StreamUtil.writeToFile(stream, out);
     }
 
-    return fs.promises.readFile(out);
+    return fs.readFile(out);
   }
 }

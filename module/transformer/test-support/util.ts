@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 
 import { FsUtil, ScanFs } from '@travetto/boot';
 import { Util } from '@travetto/base';
@@ -7,9 +7,9 @@ import { Util } from '@travetto/base';
 import { VisitorFactory, TransformerState, getAllTransformers } from '..';
 
 /**
- * Utils for testing transformerse
+ * Utils for testing transformers
  */
-export class TranformerTestUtil {
+export class TransformerTestUtil {
   /**
    * Compile a single file from a folder
    */
@@ -47,7 +47,7 @@ export class TranformerTestUtil {
 
     await Util.wait('1s'); // Wait for file buffer to sync
     try {
-      console.info(fs.readFileSync(log, 'utf8'));
+      console.info(readFileSync(log, 'utf8'));
     } catch { }
 
     await FsUtil.unlinkRecursive(log);

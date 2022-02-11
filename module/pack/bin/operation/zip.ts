@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { ExecUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
@@ -34,8 +34,8 @@ export const Zip: PackOperation<ZipConfig> = {
     const zipFile = PathUtil.resolveUnix(output);
 
     yield 'Preparing Target';
-    await fs.promises.mkdir(path.dirname(zipFile), { recursive: true });
-    await new Promise(res => fs.unlink(zipFile, res)); // Unlink
+    await fs.mkdir(path.dirname(zipFile), { recursive: true });
+    await fs.unlink(zipFile); // Unlink
 
     yield 'Compressing';
     if (/win/i.test(process.platform)) {

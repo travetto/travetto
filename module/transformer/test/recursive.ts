@@ -3,14 +3,14 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { PathUtil } from '@travetto/boot';
 
-import { TranformerTestUtil } from '../test-support/util';
+import { TransformerTestUtil } from '../test-support/util';
 
 @Suite()
 export class RecursiveTransformSuite {
 
   @Test({ timeout: '10s' })
   async transformTree() {
-    const output = await TranformerTestUtil.compile(
+    const output = await TransformerTestUtil.compile(
       PathUtil.resolveUnix(__dirname, '../e2e'),
       'tree.ts'
     );
@@ -20,7 +20,7 @@ export class RecursiveTransformSuite {
 
   @Test({ timeout: '10s' })
   async transformTree2() {
-    const output = await TranformerTestUtil.compile(
+    const output = await TransformerTestUtil.compile(
       PathUtil.resolveUnix(__dirname, '../e2e'),
       'tree2.ts'
     );
@@ -30,7 +30,7 @@ export class RecursiveTransformSuite {
 
   @Test({ timeout: '10s' })
   async transformTree3() {
-    const output = await TranformerTestUtil.compile(
+    const output = await TransformerTestUtil.compile(
       PathUtil.resolveUnix(__dirname, '../e2e'),
       'tree3.ts'
     );

@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { createWriteStream } from 'fs';
 import { PassThrough } from 'stream';
 
 type All = Buffer | string | NodeJS.ReadableStream | Uint8Array;
@@ -67,7 +67,7 @@ export class StreamUtil {
    * @param out The location to write to
    */
   static async writeToFile(src: All, out: string): Promise<void> {
-    const write = fs.createWriteStream(out);
+    const write = createWriteStream(out);
     const finalStream = (await this.toStream(src)).pipe(write);
     await new Promise((res, rej) => {
       finalStream.on('finish', res).on('error', rej);

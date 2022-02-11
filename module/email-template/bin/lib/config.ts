@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { FsUtil, PathUtil } from '@travetto/boot';
 import { YamlUtil } from '@travetto/yaml';
@@ -23,13 +23,13 @@ interface ConfigType {
 export class ConfigUtil {
 
   static #configFile = PathUtil.resolveUnix('resources/email/dev.yml');
-  static #defaultConfig = fs.readFileSync(PathUtil.resolveUnix(__dirname, 'default-dev.yml'));
+  static #defaultConfig = fs.readFile(PathUtil.resolveUnix(__dirname, 'default-dev.yml'), 'utf8');
 
   /**
    *
    */
   static async get(): Promise<ConfigType> {
-    return fs.promises.readFile(this.#configFile, 'utf8')
+    return fs.readFile(this.#configFile, 'utf8')
       .then((f: string) => YamlUtil.parse(f) as ConfigType)
       .catch(() => ({} as ConfigType));
   }
@@ -51,8 +51,8 @@ export class ConfigUtil {
   static async ensureConfig() {
     const file = this.#configFile;
     if (!(await FsUtil.exists(file))) {
-      await fs.promises.mkdir(path.dirname(file), { recursive: true });
-      await fs.promises.writeFile(file, this.#defaultConfig, { encoding: 'utf8' });
+      await fs.mkdir(path.dirname(file), { recursive: true });
+      await fs.writeFile(file, await this.#defaultConfig, { encoding: 'utf8' });
     }
     return file;
   }

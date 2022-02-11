@@ -1,5 +1,6 @@
 import * as assert from 'assert';
-import * as fs from 'fs';
+import { mkdirSync } from 'fs';
+import * as fs from 'fs/promises';
 import * as os from 'os';
 
 import { Test, Suite } from '@travetto/test';
@@ -35,7 +36,7 @@ export class FsUtilTest {
     // Default
     const special = PathUtil.resolveUnix(base, 'a', 'b', 'c');
     assert(!(await FsUtil.exists(special)));
-    await fs.promises.mkdir(special, { recursive: true });
+    await fs.mkdir(special, { recursive: true });
     assert(await FsUtil.exists(special));
 
     await FsUtil.unlinkRecursive(base);
@@ -49,7 +50,7 @@ export class FsUtilTest {
     // Default
     const special = PathUtil.resolveUnix(base, 'a', 'b', 'c');
     assert(!FsUtil.existsSync(special));
-    fs.mkdirSync(special, { recursive: true });
+    mkdirSync(special, { recursive: true });
     assert(FsUtil.existsSync(special));
 
     FsUtil.unlinkRecursiveSync(base);
@@ -67,7 +68,7 @@ export class FsUtilTest {
 
     // Default
     assert(!FsUtil.existsSync(base));
-    fs.mkdirSync(base, { recursive: true });
+    mkdirSync(base, { recursive: true });
     assert(FsUtil.existsSync(base));
 
     await FsUtil.copyRecursive(base, target);

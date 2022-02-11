@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
@@ -96,7 +96,7 @@ export class AppRunPlugin extends BasePlugin {
   override async complete() {
     const apps = await AppListUtil.getList() || [];
 
-    const profiles = fs.readdirSync(PathUtil.cwd)
+    const profiles = (await fs.readdir(PathUtil.cwd))
       .filter(x => /[.]ya?ml/.test(x))
       .map(x => x.replace(/[.]ya?ml/, ''));
 

@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { statSync } from 'fs';
 
 import { CliUtil } from '@travetto/cli/src/util';
 import { AppCache, FileCache, ExecUtil, EnvUtil } from '@travetto/boot';
@@ -26,7 +26,7 @@ export class BuildUtil {
     let missing: SimpleEntry | undefined;
     for (const entry of SourceIndex.findByFolders(AppManifest.source)) {
       try {
-        if (FileCache.isOlder(AppCache.statEntry(entry.file), fs.statSync(entry.file))) {
+        if (FileCache.isOlder(AppCache.statEntry(entry.file), statSync(entry.file))) {
           expired = entry;
           break;
         }

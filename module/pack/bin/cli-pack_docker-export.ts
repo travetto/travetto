@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { FsUtil, PathUtil } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
@@ -40,7 +40,7 @@ CMD ["node", "./node_modules/@travetto/cli/bin/trv", "run", "${this.cmd.app}"]
     if (this.cmd.output === '-' || this.cmd.output === '/dev/stdout' || !this.cmd.output) {
       console.log(content);
     } else {
-      await fs.promises.writeFile(this.cmd.output, content, { encoding: 'utf8' });
+      await fs.writeFile(this.cmd.output, content, { encoding: 'utf8' });
     }
   }
 }

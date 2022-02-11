@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 
 import { d } from '@travetto/doc';
 import { AllTypeMap } from '@travetto/doc/src/nodes';
@@ -14,7 +14,7 @@ export const ModelQueryTypes = (file: string | { ᚕfile: string }) => {
   if (typeof file !== 'string') {
     file = file.ᚕfile;
   }
-  const contents = fs.readFileSync(file, 'utf8');
+  const contents = readFileSync(file, 'utf8');
   const found: AllTypeMap['SnippetLink'][] = [];
   const seen = new Set();
   for (const [, key] of contents.matchAll(/Model(Query(Suggest|Facet|Crud)?)Support/g)) {

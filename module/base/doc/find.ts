@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import { PathUtil, ScanFs } from '@travetto/boot';
 
 export async function processServiceConfigs(svc: string) {
@@ -7,6 +7,6 @@ export async function processServiceConfigs(svc: string) {
     // Do work
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const contents = await fs.promises.readFile(conf.module, 'utf8');
+    const contents = await fs.readFile(conf.module, 'utf8');
   }
 }

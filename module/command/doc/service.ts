@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { createWriteStream, createReadStream } from 'fs';
 import { CommandService } from '@travetto/command';
 
 export class ImageCompressor {
@@ -12,9 +12,9 @@ export class ImageCompressor {
     const out = `${img}.compressed`;
 
     // Feed into process
-    fs.createReadStream(img).pipe(state.process.stdin!);
+    createReadStream(img).pipe(state.process.stdin!);
     // Feed from process to file system
-    state.process.stdout!.pipe(fs.createWriteStream(out));
+    state.process.stdout!.pipe(createWriteStream(out));
 
     await state.result;
   }

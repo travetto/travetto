@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 import * as vscode from 'vscode';
 
 import { Decorations } from './decoration';
@@ -135,7 +135,7 @@ export class DocumentResultsManager {
   }
 
   findDocument(file: string) {
-    const content = fs.readFileSync(file, 'utf8');
+    const content = readFileSync(file, 'utf8');
     const self = {
       lines: content.split(/\n/g),
       lineAt(line: number) {

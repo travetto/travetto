@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 import * as path from 'path';
 
 import { FsUtil, Package, PathUtil } from '@travetto/boot';
@@ -45,7 +45,7 @@ export class FileUtil {
 
     let text: string | undefined;
     if (language) {
-      text = fs.readFileSync(resolved, 'utf8')
+      text = readFileSync(resolved, 'utf8')
         .replace(/^\/\/\s*@file-if.*/, '');
 
       text = text.split(/\n/)
@@ -73,7 +73,7 @@ export class FileUtil {
       return this.#decCache[key];
     }
 
-    const text = fs.readFileSync(resolved, 'utf8')
+    const text = readFileSync(resolved, 'utf8')
       .split(/\n/g);
 
     const start = text.findIndex(x => new RegExp(`function ${name}\\b`).test(x));

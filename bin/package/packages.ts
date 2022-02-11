@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { createWriteStream } from 'fs';
 
 import '@arcsine/nodesh';
 
@@ -146,7 +146,7 @@ export class Packages {
   static writeOut({ _: og, ...pkg }: Pkg) {
     return new Promise(res => `${JSON.stringify(pkg, null, 2)}\n`
       .$stream('binary')
-      .pipe(fs.createWriteStream(og.file))
+      .pipe(createWriteStream(og.file))
       .on('close', res));
   }
 

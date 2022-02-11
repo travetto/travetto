@@ -1,4 +1,5 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
+import { createReadStream } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -47,8 +48,8 @@ export class FileModelConfig {
 export class FileModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport {
 
   private static async * scanFolder(folder: string, suffix: string) {
-    for (const sub of await fs.promises.readdir(folder)) {
-      for (const file of await fs.promises.readdir(PathUtil.resolveUnix(folder, sub))) {
+    for (const sub of await fs.readdir(folder)) {
+      for (const file of await fs.readdir(PathUtil.resolveUnix(folder, sub))) {
         if (file.endsWith(suffix)) {
           yield [file.replace(suffix, ''), PathUtil.resolveUnix(folder, sub, file)] as [id: string, file: string];
         }
@@ -79,7 +80,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       dir = path.dirname(resolved);
     }
     if (!await FsUtil.exists(dir)) {
-      await fs.promises.mkdir(dir, { recursive: true });
+      await fs.mkdir(dir, { recursive: true });
     }
     return resolved;
   }
@@ -114,7 +115,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const file = await this.#resolveName(cls, '.json', id);
 
     if (await FsUtil.exists(file)) {
-      const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
+      const content = await StreamUtil.streamToBuffer(createReadStream(file));
       return this.checkExpiry(cls, await ModelCrudUtil.load(cls, content));
     }
 
@@ -129,7 +130,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const file = await this.#resolveName(cls, '.json', item.id);
 
     if (await FsUtil.exists(file)) {
-      throw new ExistsError(cls, item.id);
+      throw new ExistsError(cls, item.id!);
     }
 
     return await this.upsert(cls, item);
@@ -145,7 +146,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
 
     const file = await this.#resolveName(cls, '.json', item.id);
-    await fs.promises.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
+    await fs.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
 
     return prepped;
   }
@@ -155,14 +156,14 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
     const file = await this.#resolveName(cls, '.json', item.id);
-    await fs.promises.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
+    await fs.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
 
     return item as T;
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string) {
     const file = await this.#find(cls, '.json', id);
-    await fs.promises.unlink(file);
+    await fs.unlink(file);
   }
 
   async * list<T extends ModelType>(cls: Class<T>) {
@@ -182,18 +183,18 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
       StreamUtil.writeToFile(input, file),
-      fs.promises.writeFile(file.replace(BIN, META), JSON.stringify(meta), 'utf8')
+      fs.writeFile(file.replace(BIN, META), JSON.stringify(meta), 'utf8')
     ]);
   }
 
   async getStream(location: string) {
     const file = await this.#find(STREAMS, BIN, location);
-    return fs.createReadStream(file);
+    return createReadStream(file);
   }
 
   async describeStream(location: string) {
     const file = await this.#find(STREAMS, META, location);
-    const content = await StreamUtil.streamToBuffer(fs.createReadStream(file));
+    const content = await StreamUtil.streamToBuffer(createReadStream(file));
     const text = JSON.parse(content.toString('utf8'));
     return text as StreamMeta;
   }
@@ -202,8 +203,8 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const file = await this.#resolveName(STREAMS, BIN, location);
     if (await FsUtil.exists(file)) {
       await Promise.all([
-        fs.promises.unlink(file),
-        fs.promises.unlink(file.replace('.bin', META))
+        fs.unlink(file),
+        fs.unlink(file.replace('.bin', META))
       ]);
     } else {
       throw new NotFoundError('Stream', location);
@@ -224,7 +225,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   // Storage mgmt
   async createStorage() {
     const dir = PathUtil.resolveUnix(this.config.folder, this.config.namespace);
-    await fs.promises.mkdir(dir, { recursive: true });
+    await fs.mkdir(dir, { recursive: true });
   }
 
   async deleteStorage() {

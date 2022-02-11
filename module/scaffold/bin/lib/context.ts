@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as mustache from 'mustache';
 
 import { EnvUtil, ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
@@ -97,11 +97,11 @@ export class Context {
   }
 
   async template(file: string, { rename }: ListingEntry) {
-    const contents = await fs.promises.readFile(this.source(file), 'utf-8');
+    const contents = await fs.readFile(this.source(file), 'utf-8');
     const out = this.destination(rename ?? file);
     const rendered = mustache.render(contents, this).replace(/^\s*(\/\/|#)\s*\n/gsm, '');
-    await fs.promises.mkdir(path.dirname(out), { recursive: true });
-    await fs.promises.writeFile(out, rendered, 'utf8');
+    await fs.mkdir(path.dirname(out), { recursive: true });
+    await fs.writeFile(out, rendered, 'utf8');
   }
 
   async templateResolvedFiles() {

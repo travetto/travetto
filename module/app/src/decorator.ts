@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { lstatSync } from 'fs';
 
 import { Class } from '@travetto/base';
 import { FsUtil } from '@travetto/boot';
@@ -26,7 +26,7 @@ export function Application(name: string, config?: AppDecorator) {
       filename: target.ᚕfile,
       targetId: target.ᚕid,
       name: name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-').replace(/([a-z])([A-Z])/g, (_, l, u) => `${l}-${u.toLowerCase()}`),
-      generatedTime: FsUtil.maxTime(fs.lstatSync(target.ᚕfile))
+      generatedTime: FsUtil.maxTime(lstatSync(target.ᚕfile))
     };
     SchemaRegistry.register(target);
     ApplicationRegistry.register(out.name!, out as ApplicationConfig);

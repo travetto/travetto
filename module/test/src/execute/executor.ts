@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { Util } from '@travetto/base';
 import { ExecUtil, PathUtil } from '@travetto/boot';
@@ -271,7 +271,7 @@ export class TestExecutor {
    */
   static async executeIsolated(consumer: TestConsumer, file: string, ...args: string[]) {
     // Read modules for extensions
-    const modules = [...(await fs.promises.readFile(file, 'utf8'))
+    const modules = [...(await fs.readFile(file, 'utf8'))
       .matchAll(/\/\/\s*@file-if\s+(@travetto\/[A-Za-z0-9\-]+)/g)]
       .map(x => x[1]);
 

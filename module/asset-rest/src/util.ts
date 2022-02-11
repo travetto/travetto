@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as busboy from 'busboy';
 
@@ -47,7 +47,7 @@ export class AssetRestUtil {
    */
   static async toLocalAsset(data: NodeJS.ReadableStream | Buffer, filename: string) {
     const uniqueDir = PathUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
-    await fs.promises.mkdir(uniqueDir, { recursive: true }); // TODO: Unique dir for each file? Use random file, and override metadata
+    await fs.mkdir(uniqueDir, { recursive: true }); // TODO: Unique dir for each file? Use random file, and override metadata
     const uniqueLocal = PathUtil.resolveUnix(uniqueDir, path.basename(filename));
 
     await StreamUtil.writeToFile(data, uniqueLocal);

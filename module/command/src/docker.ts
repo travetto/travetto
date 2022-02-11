@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { PathUtil, EnvUtil, ExecUtil, ExecutionState, FsUtil } from '@travetto/boot';
 import { ShutdownManager } from '@travetto/base';
@@ -118,8 +118,8 @@ export class DockerContainer {
   /**
    * Create a tempdir and mount as a volume
    */
-  createTempVolume(volume: string) {
-    const p = fs.mkdtempSync(`/tmp/${this.#image.replace(/[^A-Za-z0-9]/g, '_')}`);
+  async createTempVolume(volume: string) {
+    const p = await fs.mkdtemp(`/tmp/${this.#image.replace(/[^A-Za-z0-9]/g, '_')}`);
     this.#tempVolumes.set(volume, p);
     return this;
   }
@@ -291,7 +291,7 @@ export class DockerContainer {
    */
   async initTemp() {
     await Promise.all( // Make temp dirs
-      Object.keys(this.#tempVolumes).map(x => fs.promises.mkdir(x, { recursive: true })));
+      Object.keys(this.#tempVolumes).map(x => fs.mkdir(x, { recursive: true })));
   }
 
   /**
@@ -424,7 +424,7 @@ export class DockerContainer {
     if (files) {
       await Promise.all(
         files.map(({ name, content }) =>
-          fs.promises.writeFile(PathUtil.joinUnix(dir, name), content, { mode: '755' }))
+          fs.writeFile(PathUtil.joinUnix(dir, name), content, { mode: '755' }))
       );
     }
     return;

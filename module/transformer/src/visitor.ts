@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import * as fs from 'fs';
+import { createWriteStream } from 'fs';
 
 import { ConsoleManager } from '@travetto/base/src/console';
 import { AppCache } from '@travetto/boot';
@@ -85,7 +85,7 @@ export class VisitorFactory<S extends State = State> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
         const c = new console.Console({
-          stdout: fs.createWriteStream(AppCache.toEntryName(this.#logTarget), { flags: 'a' }),
+          stdout: createWriteStream(AppCache.toEntryName(this.#logTarget), { flags: 'a' }),
           inspectOptions: { depth: 4 },
         });
 

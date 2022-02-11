@@ -1,10 +1,6 @@
-import * as fs from 'fs';
-import * as util from 'util';
+import * as fs from 'fs/promises';
 
 import { PathUtil } from '@travetto/boot';
-
-const writeProm = util.promisify(fs.writeFile);
-const readProm = util.promisify(fs.readFile);
 
 type TimeEntry<T> = { key: string, data: T, time: number };
 
@@ -34,9 +30,9 @@ export class ActionStorage<T> {
    */
   async init(): Promise<void> {
     try {
-      await fs.promises.mkdir(this.root, { recursive: true });
+      await fs.mkdir(this.root, { recursive: true });
 
-      this.#storage = JSON.parse(await readProm(this.resolved, 'utf8'));
+      this.#storage = JSON.parse(await fs.readFile(this.resolved, 'utf8'));
     } catch {
       await this.persist();
     }
@@ -48,7 +44,7 @@ export class ActionStorage<T> {
   }
 
   persist() {
-    return writeProm(this.resolved, JSON.stringify(this.#storage), 'utf8');
+    return fs.writeFile(this.resolved, JSON.stringify(this.#storage), 'utf8');
   }
 
   /**

@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { createWriteStream } from 'fs';
 
 import { AppCache } from '@travetto/boot';
 import { EnvInit } from '@travetto/base/bin/init';
@@ -7,7 +7,7 @@ export async function customLogs() {
   const { ConsoleManager } = await import('@travetto/base');
 
   const c = new console.Console({
-    stdout: fs.createWriteStream(AppCache.toEntryName(`test-worker.${process.pid}.log`), { flags: 'a' }),
+    stdout: createWriteStream(AppCache.toEntryName(`test-worker.${process.pid}.log`), { flags: 'a' }),
     inspectOptions: { depth: 4 },
   });
 

@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { color } from '@travetto/cli/src/color';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
@@ -20,8 +20,8 @@ export class BaseCleanPlugin extends BasePlugin {
   }
 
   async action() {
-    for (const el of await fs.promises.readdir(PathUtil.cwd)) {
-      if (el.startsWith('.trv') && (await fs.promises.stat(el)).isDirectory()) {
+    for (const el of await fs.readdir(PathUtil.cwd)) {
+      if (el.startsWith('.trv') && (await fs.stat(el)).isDirectory()) {
         const cache = new FileCache(el);
         try {
           cache.clear(true);

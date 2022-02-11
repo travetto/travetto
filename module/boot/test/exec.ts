@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { createReadStream } from 'fs';
 import * as assert from 'assert';
 import * as path from 'path';
 
@@ -63,7 +63,7 @@ export class ExecUtilTest {
   async pipe() {
     const echo = await ResourceManager.findAbsolute('echo.ts');
     const proc = ExecUtil.forkMain(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
-    const returnedStream = await ExecUtil.pipe(proc, fs.createReadStream(__filename.replace(/[.]js$/, '.ts')));
+    const returnedStream = await ExecUtil.pipe(proc, createReadStream(__filename.replace(/[.]js$/, '.ts')));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('ExecUtil.forkMain(echo'));
   }

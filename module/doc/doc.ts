@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 
 import { d } from './src/doc';
 import { lib } from '.';
@@ -6,7 +6,7 @@ import { lib } from '.';
 type Feature = { text: string, name: string };
 
 function getNodes() {
-  const lines = fs.readFileSync('./src/nodes.ts', 'utf8').split(/\n/g);
+  const lines = readFileSync('./src/nodes.ts', 'utf8').split(/\n/g);
   let feature: Partial<Feature> | undefined;
   const features: Feature[] = [];
   for (const line of lines) {

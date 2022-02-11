@@ -1,5 +1,5 @@
 import * as os from 'os';
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 
 import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
@@ -22,7 +22,7 @@ export class TestPlugin extends BasePlugin {
         PathUtil.resolveUnix(__dirname, '..', 'src/consumer/types/')
       )
         .filter(x => x.stats.isFile())
-        .map(x => fs.readFileSync(x.file, 'utf8').match(/@Consumable[(]'([^']+)/)?.[1] as string);
+        .map(x => readFileSync(x.file, 'utf8').match(/@Consumable[(]'([^']+)/)?.[1] as string);
     }
     return this._types;
   }

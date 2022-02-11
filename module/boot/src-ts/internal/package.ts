@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 import { PathUtil } from '../path';
 
 export type PackageType = {
@@ -35,7 +35,7 @@ export type PackageType = {
 
 export const readPackage = (folder: string, suppressError = false) => {
   try {
-    return JSON.parse(fs.readFileSync(PathUtil.resolveUnix(folder, 'package.json'), 'utf8')) as PackageType;
+    return JSON.parse(readFileSync(PathUtil.resolveUnix(folder, 'package.json'), 'utf8')) as PackageType;
   } catch (e) {
     if (!suppressError) {
       throw e;

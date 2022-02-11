@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 import * as path from 'path';
 
 import { PathUtil, AppCache } from '@travetto/boot';
@@ -21,7 +21,7 @@ export class SourceHost implements ts.CompilerHost {
 
   #trackFile(filename: string, content: string) {
     this.contents.set(filename, content);
-    this.#hashes.set(filename, SystemUtil.naiveHash(fs.readFileSync(filename, 'utf8'))); // Get og content for hashing
+    this.#hashes.set(filename, SystemUtil.naiveHash(readFileSync(filename, 'utf8'))); // Get og content for hashing
   }
 
   getCanonicalFileName = (f: string) => f;
@@ -103,7 +103,7 @@ export class SourceHost implements ts.CompilerHost {
    * See if a file's hash code has changed
    */
   hashChanged(filename: string, content?: string) {
-    content ??= fs.readFileSync(filename, 'utf8');
+    content ??= readFileSync(filename, 'utf8');
     // Let's see if they are really different
     const hash = SystemUtil.naiveHash(content);
     if (hash === this.#hashes.get(filename)) {

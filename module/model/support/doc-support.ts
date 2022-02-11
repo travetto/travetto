@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { readFileSync } from 'fs';
 
 import { d, mod } from '@travetto/doc';
 import { Config } from '@travetto/config';
@@ -17,7 +17,7 @@ export const ModelTypes = (file: string | { ᚕfile: string }) => {
   if (typeof file !== 'string') {
     file = file.ᚕfile;
   }
-  const contents = fs.readFileSync(file, 'utf8');
+  const contents = readFileSync(file, 'utf8');
   const found: AllTypeMap['SnippetLink'][] = [];
   const seen = new Set();
   for (const [, key] of contents.matchAll(/Model(Crud|Expiry|Indexed|Bulk|Stream)Support/g)) {

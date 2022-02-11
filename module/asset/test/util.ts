@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as assert from 'assert';
 
 import { PathUtil } from '@travetto/boot';
@@ -37,7 +37,7 @@ export class UtilTest {
   @Test()
   async resolveFileType() {
     const file = await ResourceManager.findAbsolute('logo.png');
-    await fs.promises.copyFile(file, file.replace(/[.]png$/, ''));
+    await fs.copyFile(file, file.replace(/[.]png$/, ''));
     const png = await ResourceManager.findAbsolute('logo');
     const result = await AssetUtil.resolveFileType(png);
     assert(result === 'image/png');
@@ -46,12 +46,12 @@ export class UtilTest {
   @Test()
   async fileToAsset() {
     const file = await ResourceManager.findAbsolute('logo.png');
-    await fs.promises.copyFile(file, file.replace(/[.]png$/, ''));
+    await fs.copyFile(file, file.replace(/[.]png$/, ''));
 
     const png = await ResourceManager.findAbsolute('logo');
     const asset = await AssetUtil.fileToAsset(png);
     assert(asset.contentType === 'image/png');
     assert(asset.filename === png);
-    assert(asset.size === fs.statSync(png).size);
+    assert(asset.size === (await fs.stat(png)).size);
   }
 }

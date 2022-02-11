@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { lstatSync, readdir, statSync, } from 'fs';
 import * as ts from 'typescript';
 
 import { ScanEntry, ScanFs, PathUtil, ScanHandler } from '@travetto/boot';
@@ -39,7 +39,7 @@ export class Watcher extends WatchEmitter {
     this.suppress = !!this.#options.ignoreInitial;
 
     this.#watch(
-      { file: this.#folder, module: this.#folder, stats: fs.statSync(this.#folder) },
+      { file: this.#folder, module: this.#folder, stats: statSync(this.#folder) },
       ...ScanFs.scanDirSync(this.#options.exclude ?? { testFile: x => true, testDir: x => true }, this.#folder)
     );
 
@@ -53,7 +53,7 @@ export class Watcher extends WatchEmitter {
   #processDirectoryChange(dir: ScanEntry) {
     dir.children = dir.children ?? [];
 
-    fs.readdir(dir.file, (err, current) => {
+    readdir(dir.file, (err, current) => {
       if (err && !this.#handleError(err)) {
         current = [];
       }
@@ -80,7 +80,7 @@ export class Watcher extends WatchEmitter {
 
       // If file was added
       for (const next of current) {
-        const nextStats = fs.lstatSync(next);
+        const nextStats = lstatSync(next);
 
         if (!prevSet.has(next)) {
           const sub = { file: next, module: next, stats: nextStats };
@@ -143,7 +143,7 @@ export class Watcher extends WatchEmitter {
     // });
 
     const poller = (_: unknown, kind: number) => {
-      const stats = fs.lstatSync(entry.file);
+      const stats = lstatSync(entry.file);
       entry.stats = stats;
       try {
         switch (kind) {

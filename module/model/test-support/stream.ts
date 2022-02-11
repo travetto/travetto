@@ -1,5 +1,6 @@
 import * as assert from 'assert';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
+import { createReadStream } from 'fs';
 import * as crypto from 'crypto';
 
 import { PathUtil } from '@travetto/boot';
@@ -25,12 +26,12 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
 
   async getStream(resource: string) {
     const file = await ResourceManager.findAbsolute(resource);
-    const stat = await fs.promises.stat(file);
-    const hash = await this.getHash(fs.createReadStream(file));
+    const stat = await fs.stat(file);
+    const hash = await this.getHash(createReadStream(file));
 
     return [
       { size: stat.size, contentType: '', hash, filename: resource },
-      fs.createReadStream(file)
+      createReadStream(file)
     ] as const;
   }
 

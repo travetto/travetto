@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { createReadStream } from 'fs';
 import * as readline from 'readline';
 
 import { ShutdownManager, Util } from '@travetto/base';
@@ -20,7 +20,7 @@ export class RunnerUtil {
    */
   static isTestFile(file: string) {
     return new Promise<boolean>((resolve) => {
-      const input = fs.createReadStream(file);
+      const input = createReadStream(file);
       const reader = readline.createInterface({ input })
         .on('line', line => {
           if (line.includes('@Suite')) {

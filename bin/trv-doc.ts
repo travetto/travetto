@@ -1,5 +1,5 @@
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import { spawnSync } from 'child_process';
 
 import '@arcsine/nodesh';
@@ -19,9 +19,9 @@ if (target && target.startsWith(root)) {
 
 const copyPluginImages = async () => {
   console.log('Copying Plugin images');
-  await fs.promises.mkdir(page('assets/images/vscode-plugin')).catch(() => { });
+  await fs.mkdir(page('assets/images/vscode-plugin')).catch(() => { });
   await 'related/vscode-plugin/images/**/*.{gif,jpg,png}'.$dir()
-    .$map(img => fs.promises.copyFile(img, page(`assets/images/vscode-plugin/${path.basename(img)}`)).then(x => 1))
+    .$map(img => fs.copyFile(img, page(`assets/images/vscode-plugin/${path.basename(img)}`)).then(x => 1))
     .$collect();
 };
 

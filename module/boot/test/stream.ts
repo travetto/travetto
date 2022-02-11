@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import * as fs from 'fs';
+import { createReadStream } from 'fs';
 import * as os from 'os';
 
 import { ResourceManager } from '@travetto/base';
@@ -23,7 +23,7 @@ export class StreamUtilTest {
 
   @Test()
   async streamToBuffer() {
-    const stream = fs.createReadStream(await ResourceManager.findAbsolute('test.js'));
+    const stream = createReadStream(await ResourceManager.findAbsolute('test.js'));
     const text = (await StreamUtil.streamToBuffer(stream)).toString('utf8');
     assert(text.length > 1);
     assert(text.includes('Hello World'));
@@ -42,7 +42,7 @@ export class StreamUtilTest {
 
     assert((await StreamUtil.toBuffer(unit8)).toString('utf8') === 'abcde');
 
-    const stream = fs.createReadStream(await ResourceManager.findAbsolute('test.js'));
+    const stream = createReadStream(await ResourceManager.findAbsolute('test.js'));
     assert((await StreamUtil.toBuffer(stream)).length > 10);
   }
 
@@ -58,7 +58,7 @@ export class StreamUtilTest {
     const temp = `${os.tmpdir()}/${Date.now()}-${Math.random()}.text`;
     await StreamUtil.writeToFile('Hello World', temp);
 
-    const buff = await StreamUtil.toBuffer(fs.createReadStream(temp));
+    const buff = await StreamUtil.toBuffer(createReadStream(temp));
     assert(buff.toString('utf8') === 'Hello World');
   }
 

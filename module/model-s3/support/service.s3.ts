@@ -1,11 +1,11 @@
-import * as fs from 'fs';
+import { mkdirSync } from 'fs';
 import * as os from 'os';
 
 import type { Service } from '@travetto/command/bin/lib/service';
 
 const temp = `${os.tmpdir()}/local-stack`;
 try {
-  fs.mkdirSync(temp);
+  mkdirSync(temp);
 } catch { }
 
 const version = 'latest';

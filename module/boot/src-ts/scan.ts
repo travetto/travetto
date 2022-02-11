@@ -1,9 +1,8 @@
-import * as fs from 'fs';
+import { lstatSync, readdirSync, realpathSync, Stats } from 'fs';
+import * as fs from 'fs/promises';
 
 import { FsUtil } from './fs';
 import { PathUtil } from './path';
-
-const fsp = fs.promises;
 
 export interface ScanEntry {
   /**
@@ -17,7 +16,7 @@ export interface ScanEntry {
   /**
    * Stats information
    */
-  stats: fs.Stats;
+  stats: Stats;
   /**
    * List of child entries
    */
@@ -93,7 +92,7 @@ export class ScanFs {
 
     while (dirs.length) {
       const dir = dirs.shift()!;
-      inner: for (const file of (await fsp.readdir(dir.file))) {
+      inner: for (const file of (await fs.readdir(dir.file))) {
         if (file === '.' || file === '..' || file === '.bin' || (file.startsWith('.') && !handler.withHidden)) {
           continue inner;
         }
@@ -102,13 +101,13 @@ export class ScanFs {
         if (handler.resolvePath) {
           full = handler.resolvePath(full);
         }
-        const stats = await fsp.lstat(full);
+        const stats = await fs.lstat(full);
         const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
         if (this.isDir(subEntry)) {
           if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
             if (subEntry.stats.isSymbolicLink() || subEntry.stats.isDirectory()) {
-              const p = await fsp.realpath(full);
+              const p = await fs.realpath(full);
               if (!visited.has(p)) {
                 visited.add(p);
               } else {
@@ -143,7 +142,7 @@ export class ScanFs {
 
     while (dirs.length) {
       const dir = dirs.shift()!;
-      inner: for (const file of fs.readdirSync(dir.file)) {
+      inner: for (const file of readdirSync(dir.file)) {
         if (file === '.' || file === '..' || file === '.bin' || (file.startsWith('.') && !handler.withHidden)) {
           continue inner;
         }
@@ -152,13 +151,13 @@ export class ScanFs {
         if (handler.resolvePath) {
           full = handler.resolvePath(full);
         }
-        const stats = fs.lstatSync(full);
+        const stats = lstatSync(full);
         const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
 
         if (this.isDir(subEntry)) {
           if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
             if (subEntry.stats.isSymbolicLink() || subEntry.stats.isDirectory()) {
-              const p = fs.realpathSync(full);
+              const p = realpathSync(full);
               if (!visited.has(p)) {
                 visited.add(p);
               } else {

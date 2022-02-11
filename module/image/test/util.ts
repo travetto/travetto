@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { Test, Suite } from '@travetto/test';
 import { StreamUtil } from '@travetto/boot';
@@ -62,6 +62,6 @@ class ImageUtilTest {
     });
 
     await StreamUtil.writeToFile(out, 'temp.jpg');
-    await fs.promises.unlink('temp.jpg');
+    await fs.unlink('temp.jpg');
   }
 }

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { Activatible } from '../../../core/activation';
 import { Workspace } from '../../../core/workspace';
@@ -22,7 +22,7 @@ export class LogFeature extends BaseFeature {
    */
   async handleTerminalLink({ file, line, cls }: Link) {
     if (cls && !line) {
-      line = (await fs.promises.readFile(file, 'utf8')).split(/\n/).findIndex(x => x.includes(`class ${cls}`));
+      line = (await fs.readFile(file, 'utf8')).split(/\n/).findIndex(x => x.includes(`class ${cls}`));
       if (line >= 0) {
         line += 1;
       }
@@ -37,7 +37,7 @@ export class LogFeature extends BaseFeature {
    */
   async provideTerminalLinks(context: vscode.TerminalLinkContext) {
     const out: Link[] = [];
-    const cwd = await fs.promises.readlink(`/proc/${await context.terminal.processId}/cwd`);
+    const cwd = await fs.readlink(`/proc/${await context.terminal.processId}/cwd`);
     context.line
       // Log reference
       .replace(/(@trv:[^\/]+|(?:[.][/])(?:src|support|bin|test(?:-support|-isolated)?))\/([a-z\/.\-]+)(:\d+|￮[$A-Z][a-zA-Z0-9]+)/g, (_, mod, path, suffix) => {

@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { createWriteStream, WriteStream } from 'fs';
 import { Appender } from '../types';
 
 /**
@@ -12,10 +12,10 @@ export interface FileAppenderOpts {
  * File appender logger
  */
 export class FileAppender implements Appender {
-  stream: fs.WriteStream;
+  stream: WriteStream;
 
   constructor(opts: FileAppenderOpts) {
-    this.stream = fs.createWriteStream(opts.file, {
+    this.stream = createWriteStream(opts.file, {
       autoClose: true,
       flags: 'a'
     });
