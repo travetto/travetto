@@ -129,7 +129,7 @@ export class RestApplication<T extends unknown = unknown>  {
 
     await this.server.registerRoutes(config.class.ᚕid, config.basePath, config.endpoints, this.interceptors);
 
-    if (this.server.listening && this.server.reregisterGlobalOnChange) {
+    if (this.server.listening && this.server.updateGlobalOnChange) {
       await this.unregisterGlobal();
       await this.registerGlobal();
     }

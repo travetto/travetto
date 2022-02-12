@@ -34,7 +34,7 @@ export class AssertCheck {
     };
 
     // Invert check for negative
-    const asrt = positive ? assert : (x: unknown, msg?: string) => assert(!x, msg);
+    const assertFn = positive ? assert : (x: unknown, msg?: string) => assert(!x, msg);
 
     // Check fn to call
     if (fn === 'fail') {
@@ -81,13 +81,13 @@ export class AssertCheck {
 
       // Actually run the assertion
       switch (fn) {
-        case 'instanceof': asrt(actual instanceof (expected as Class), message); break;
-        case 'in': asrt((actual as string) in (expected as object), message); break;
-        case 'lessThan': asrt((actual as number) < (expected as number), message); break;
-        case 'lessThanEqual': asrt((actual as number) <= (expected as number), message); break;
-        case 'greaterThan': asrt((actual as number) > (expected as number), message); break;
-        case 'greaterThanEqual': asrt((actual as number) >= (expected as number), message); break;
-        case 'ok': asrt.apply(null, args as [unknown, string]); break; // eslint-disable-line prefer-spread
+        case 'instanceof': assertFn(actual instanceof (expected as Class), message); break;
+        case 'in': assertFn((actual as string) in (expected as object), message); break;
+        case 'lessThan': assertFn((actual as number) < (expected as number), message); break;
+        case 'lessThanEqual': assertFn((actual as number) <= (expected as number), message); break;
+        case 'greaterThan': assertFn((actual as number) > (expected as number), message); break;
+        case 'greaterThanEqual': assertFn((actual as number) >= (expected as number), message); break;
+        case 'ok': assertFn.apply(null, args as [unknown, string]); break; // eslint-disable-line prefer-spread
         default:
           if (fn && assert[fn as keyof typeof assert]) { // Assert call
             if (/not/i.test(fn)) {
@@ -95,7 +95,7 @@ export class AssertCheck {
             }
             assert[fn as 'ok'].apply(null, args as [boolean, string | undefined]);
           } else if (expected && !!(expected as Record<string, Function>)[fn]) { // Dotted Method call (e.g. assert.rejects)
-            asrt((expected as typeof assert)[fn as 'ok'](actual));
+            assertFn((expected as typeof assert)[fn as 'ok'](actual));
           }
       }
 

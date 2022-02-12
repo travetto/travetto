@@ -26,8 +26,12 @@ export class InterfaceType implements BaseType {
 
 @Injectable()
 export class Database {
-  @Inject() dbConfig: DbConfig<unknown, unknown>;
-  @Inject({ optional: true }) altConfig: AltConfig;
+
+  @Inject()
+  dbConfig: DbConfig<unknown, unknown>;
+
+  @Inject({ optional: true })
+  altConfig: AltConfig;
 
   postConstruct() {
     console.log('Creating database', { url: this.dbConfig.getUrl() });

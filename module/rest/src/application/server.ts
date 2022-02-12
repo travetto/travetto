@@ -17,7 +17,7 @@ export interface RestServer<T = unknown> {
   /**
    * Shoudl global be re-registered on any changes
    */
-  reregisterGlobalOnChange?: boolean;
+  updateGlobalOnChange?: boolean;
 
   /**
    * Initialize the raw application

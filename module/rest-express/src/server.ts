@@ -38,7 +38,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
 
   listening: boolean;
 
-  reregisterGlobalOnChange = true;
+  updateGlobalOnChange = true;
 
   @Inject()
   config: RestConfig;

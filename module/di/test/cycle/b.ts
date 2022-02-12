@@ -3,5 +3,6 @@ import { ABC } from './a';
 
 @Injectable()
 export class BCD {
-  @Inject() a: ABC;
+  @Inject()
+  a: ABC;
 }

@@ -4,5 +4,6 @@ import { BCD } from './b';
 
 @Injectable()
 export class ABC {
-  @Inject() b: BCD;
+  @Inject()
+  b: BCD;
 }

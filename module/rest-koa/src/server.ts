@@ -44,7 +44,7 @@ export class KoaRestServer implements RestServer<koa> {
 
   listening = false;
 
-  reregisterGlobalOnChange = true;
+  updateGlobalOnChange = true;
 
   @Inject()
   cookies: RestCookieConfig;
