@@ -1,7 +1,7 @@
 {
   "name": "@travetto/cache",
   "displayName": "Caching",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Caching functionality with decorators for declarative use.",
   "keywords": [
     "typescript",
@@ -27,9 +27,9 @@
     "directory": "module/cache"
   },
   "dependencies": {
-    "@travetto/transformer": "^2.1.0",
-    "@travetto/di": "^2.1.0",
-    "@travetto/model": "^2.1.0"
+    "@travetto/transformer": "^2.1.1",
+    "@travetto/di": "^2.1.1",
+    "@travetto/model": "^2.1.1"
   },
   "docDependencies": {
     "@travetto/model-dynamodb": true,

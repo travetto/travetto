@@ -1,7 +1,7 @@
 {
   "name": "@travetto/auth",
   "displayName": "Authentication",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Authentication scaffolding for the travetto framework",
   "keywords": [
     "authentication",
@@ -25,10 +25,10 @@
     "directory": "module/auth"
   },
   "dependencies": {
-    "@travetto/base": "^2.1.0"
+    "@travetto/base": "^2.1.1"
   },
   "optionalPeerDependencies": {
-    "@travetto/model": "^2.1.0"
+    "@travetto/model": "^2.1.1"
   },
   "private": false,
   "publishConfig": {
