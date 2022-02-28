@@ -37,7 +37,7 @@
     "@travetto/app": "^2.1.0"
   },
   "optionalPeerDependencies": {
-    "@types/mysql": "^2.15.20",
+    "@types/mysql": "^2.15.21",
     "@types/pg": "^8.6.4",
     "mysql": "^2.18.1",
     "pg": "^8.7.3",
