@@ -14,7 +14,7 @@ export class Serializer {
    * Clean value, escaping as needed
    */
   static clean(key: string) {
-    if (/[#'"@ \-:]/.test(key)) {
+    if (/[#'"@ \-:{}]/.test(key)) {
       return key.includes('"') ?
         `'${key.replace(/[']/g, '\\\'')}'` :
         `"${key.replace(/["]/g, '\\"')}"`;
