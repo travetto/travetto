@@ -91,7 +91,7 @@
     "mustache": "^4.2.0",
     "mysql": "^2.18.1",
     "node-fetch": "^2.6.7",
-    "node-forge": "^1.2.1",
+    "node-forge": "^1.3.0",
     "nodemailer": "^6.7.2",
     "openapi3-ts": "^2.0.2",
     "parse5": "^6.0.1",
