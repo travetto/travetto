@@ -38,6 +38,9 @@ export class TestWatcher {
 
     new MethodSource(RootRegistry).on(e => {
       const [cls, method] = (e.prev ?? e.curr ?? []) as [Class, Function];
+      if (!cls) {
+        return;
+      }
       if (!method) {
         consumer.removeClass(cls.ᚕid);
         return;
