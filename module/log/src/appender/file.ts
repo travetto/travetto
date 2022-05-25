@@ -1,4 +1,5 @@
 import { createWriteStream, WriteStream } from 'fs';
+import { LogLevel } from '@travetto/base';
 import { Appender } from '../types';
 
 /**
@@ -21,7 +22,7 @@ export class FileAppender implements Appender {
     });
   }
 
-  append(msg: string) {
-    this.stream.write(`${msg}\n`);
+  append(level: LogLevel, message: string) {
+    this.stream.write(`${message}\n`);
   }
 }

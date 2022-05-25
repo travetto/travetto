@@ -6,6 +6,7 @@ import { Appender, Formatter, LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
 import { JsonFormatter } from './formatter/json';
 import { ConsoleAppender } from './appender/console';
+import { FileAppender } from './appender/file';
 import { LogUtil } from './util';
 
 const DefaultLoggerⲐ = Symbol.for('@trv:log/default');
@@ -21,6 +22,8 @@ class $Logger {
    * Should we enrich the console by default
    */
   readonly #logFormat: 'line' | 'json' = EnvUtil.get('TRV_LOG_FORMAT', 'line') as 'line';
+
+  readonly #logFile?: string = EnvUtil.get('TRV_LOG_FILE');
 
   /**
    * Listeners for logging events
@@ -59,7 +62,7 @@ class $Logger {
         case 'line': formatter = new LineFormatter(); break;
         case 'json': formatter = new JsonFormatter(); break;
       }
-      this.listenDefault(formatter);
+      this.listenDefault(formatter, this.#logFile ? new FileAppender({ file: this.#logFile }) : undefined);
     }
 
     ConsoleManager.set(this, true); // Make default
