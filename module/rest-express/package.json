@@ -1,7 +1,7 @@
 {
   "name": "@travetto/rest-express",
   "displayName": "Express REST Source",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Express provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -25,7 +25,7 @@
     "directory": "module/rest-express"
   },
   "dependencies": {
-    "@travetto/rest": "^2.1.1",
+    "@travetto/rest": "^2.1.2",
     "@types/body-parser": "^1.19.2",
     "@types/compression": "^1.7.2",
     "@types/express": "^4.17.13",

@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model",
   "displayName": "Data Modeling Support",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Datastore abstraction for core operations.",
   "keywords": [
     "datastore",
@@ -28,13 +28,13 @@
     "directory": "module/model"
   },
   "dependencies": {
-    "@travetto/di": "^2.1.1",
-    "@travetto/config": "^2.1.1",
-    "@travetto/registry": "^2.1.1",
-    "@travetto/schema": "^2.1.1"
+    "@travetto/di": "^2.1.2",
+    "@travetto/config": "^2.1.2",
+    "@travetto/registry": "^2.1.2",
+    "@travetto/schema": "^2.1.2"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "^2.1.1"
+    "@travetto/cli": "^2.1.2"
   },
   "publishConfig": {
     "access": "public"
