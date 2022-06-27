@@ -16,7 +16,7 @@ async function run(isolated = false) {
 
   const consumer = new RunnableTestConsumer(emitter);
 
-  return (process.env.TRV_ALL === '1' ? Packages.yieldPublicPackages() : Git.yieldChangedPackges())
+  return (process.env.TRV_ALL === '1' ? Packages.yieldPublicPackages() : Git.yieldChangedPackages())
     .$filter(async p => !isolated || !!(await FsUtil.exists(`${p._.folder}/test-isolated`)))
     .$parallel(async p => {
       const args = ['test', '-f', 'exec', ...(isolated ? ['-i'] : ['-c', '3'])];
