@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@types/node": "^15.14.9",
-    "@types/vscode": "^1.64.0"
+    "@types/vscode": "^1.68.0"
   },
   "docDependencies": {
     "@travetto/app": true

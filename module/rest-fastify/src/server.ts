@@ -1,6 +1,6 @@
 import * as https from 'https';
-import compress from 'fastify-compress';
-import formBody from 'fastify-formbody';
+import compress from '@fastify/compress';
+import formBody from '@fastify/formbody';
 
 import { FastifyInstance, fastify, FastifyServerOptions, FastifyHttpsOptions } from 'fastify';
 

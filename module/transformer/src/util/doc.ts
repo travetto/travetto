@@ -26,7 +26,7 @@ export class DocUtil {
    * Read JS Docs from a `ts.Declaration`
    */
   static describeDocs(node: ts.Declaration | ts.Type) {
-    if (!('getSourceFile' in node)) {
+    if (node && !('getSourceFile' in node)) {
       node = DeclarationUtil.getPrimaryDeclarationNode(node);
     }
     const out: DeclDocumentation = {

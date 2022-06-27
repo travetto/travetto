@@ -36,10 +36,10 @@
     "@types/inline-css": "^3.0.1",
     "@types/sass": "^1.43.1",
     "@types/parse5": "^6.0.3",
-    "foundation-emails": "^2.3.1",
-    "html-entities": "^2.3.2",
+    "foundation-emails": "^2.4.0",
+    "html-entities": "^2.3.3",
     "inline-css": "^3.0.0",
-    "sass": "^1.49.9",
+    "sass": "^1.53.0",
     "parse5": "^6.0.1"
   },
   "optionalPeerDependencies": {

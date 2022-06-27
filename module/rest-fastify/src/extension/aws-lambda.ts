@@ -1,4 +1,4 @@
-// @file-if aws-lambda-fastify
+// @file-if @fastify/aws-lambda
 import { FastifyInstance } from 'fastify';
 
 import { Inject, Injectable } from '@travetto/di';
@@ -8,7 +8,7 @@ import { FastifyRestServer } from '../server';
 
 // TODO: Get proper typings
 // eslint-disable-next-line travetto/import-order
-const awsLambdaFastify = require('aws-lambda-fastify') as (
+const awsLambdaFastify = require('@fastify/aws-lambda') as (
   (app: FastifyInstance, binaryMimeTypes?: string[]) => AwsLambdaRestServer['handle']  // eslint-disable-line
 );
 

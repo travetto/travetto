@@ -34,7 +34,7 @@ export class AssetUtil {
   static async readChunk(filePath: string, bytes: number) {
     const fd = await fs.open(filePath, 'r');
     const buffer = Buffer.alloc(bytes);
-    await fs.read(fd, buffer, 0, bytes, 0);
+    await fd.read(buffer, 0, bytes, 0);
     return buffer;
   }
 

@@ -35,7 +35,7 @@
     "@travetto/registry": "^2.1.1",
     "@travetto/transformer": "^2.1.1",
     "@types/cookies": "^0.7.7",
-    "@types/express-serve-static-core": "^4.17.28",
+    "@types/express-serve-static-core": "^4.17.29",
     "cookies": "^0.8.0"
   },
   "devDependencies": {
@@ -46,8 +46,8 @@
     "@travetto/model": "^2.1.1",
     "@travetto/model-query": "2.1.1",
     "@travetto/cli": "^2.1.1",
-    "node-forge": "^1.2.1",
-    "@types/node-forge": "^1.0.0"
+    "node-forge": "^1.3.1",
+    "@types/node-forge": "^1.0.2"
   },
   "publishConfig": {
     "access": "public"

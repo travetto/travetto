@@ -88,7 +88,7 @@ export const lib = {
   Busboy: Library('busboy', 'https://github.com/mscdex/busboy'),
   Cookies: Library('cookies', 'https://www.npmjs.com/package/cookies'),
   ServerlessExpress: Library('aws-serverless-express', 'https://github.com/awslabs/aws-serverless-express/blob/master/README.md'),
-  AwsLambdaFastify: Library('aws-lambda-fastify', 'https://github.com/fastify/aws-lambda-fastify/blob/master/README.md'),
+  AwsLambdaFastify: Library('@fastify/aws-lambda', 'https://github.com/fastify/aws-lambda-fastify/blob/master/README.md'),
   Fastify: Library('fastify', 'https://www.fastify.io/'),
   Koa: Library('koa', 'https://koajs.com/'),
 };

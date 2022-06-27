@@ -1,5 +1,5 @@
 // @file-if @travetto/auth-rest
-// @file-if aws-lambda-fastify
+// @file-if @fastify/aws-lambda
 import { AuthRestServerSuite } from '@travetto/auth-rest/test-support/server';
 import { Suite } from '@travetto/test';
 

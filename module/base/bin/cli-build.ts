@@ -15,7 +15,6 @@ export class BaseBuildPlugin extends BasePlugin {
 
   getOptions() {
     return {
-      clean: this.boolOption({ desc: 'Indicates if the cache dir should be cleaned' }),
       output: this.option({ desc: 'Output directory', completion: true }),
       quiet: this.boolOption({ desc: 'Quiet operation' })
     };
@@ -28,11 +27,6 @@ export class BaseBuildPlugin extends BasePlugin {
 
     const { AppCache } = await import('@travetto/boot');
     const path = this.cmd.output ?? AppCache.cacheDir;
-
-    if (this.cmd.clean) {
-      await AppCache.clear(true);
-      console.log(color`${{ success: 'Succesfully' }} deleted ${{ path }} `);
-    }
 
     try {
       await BuildUtil.build(process.env as Record<string, string>);

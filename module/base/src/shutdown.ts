@@ -78,7 +78,7 @@ class $ShutdownManager {
     try {
       // If the err is not an exit code
       if (err && typeof err !== 'number') {
-        console.warn('Error on shutdown', { error: err });
+        console.warn('Error on shutdown', { package: AppManifest.info.name, error: err });
       }
 
       // Get list of all pending listeners
@@ -94,7 +94,7 @@ class $ShutdownManager {
       }
 
     } catch (e) {
-      console.warn('Error on shutdown', { error: e });
+      console.warn('Error on shutdown', { package: AppManifest.info.name, error: e });
     }
 
     if (this.#shutdownCode >= 0) {
