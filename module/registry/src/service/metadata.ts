@@ -37,7 +37,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   abstract onInstallFinalize<T>(cls: Class<T>): C;
 
   /**
-   * Code to call when uninstallation is finalized
+   * Code to call when uninstall is finalized
    */
   onUninstallFinalize<T>(cls: Class<T>) {
 
@@ -63,7 +63,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   }
 
   /**
-   * Retrive the class that is being removed
+   * Retrieve the class that is being removed
    */
   getExpired(cls: string | Class): C {
     return this.expired.get(id(cls))!;
@@ -139,17 +139,17 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Register a pending class, with partial config to overlay
    */
-  register(cls: Class, pconfig: Partial<C> = {}) {
+  register(cls: Class, pConfig: Partial<C> = {}) {
     const conf = this.getOrCreatePending(cls);
-    Util.deepAssign(conf, pconfig);
+    Util.deepAssign(conf, pConfig);
   }
 
   /**
    * Register a pending field, with partial config to overlay
    */
-  registerField(cls: Class, field: F, pconfig: Partial<M>) {
+  registerField(cls: Class, field: F, pConfig: Partial<M>) {
     const conf = this.getOrCreatePendingField(cls, field);
-    Util.deepAssign(conf, pconfig);
+    Util.deepAssign(conf, pConfig);
   }
 
   /**
