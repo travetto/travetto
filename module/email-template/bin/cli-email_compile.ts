@@ -1,3 +1,5 @@
+import { PathUtil } from '@travetto/boot';
+import { EnvInit } from '@travetto/base/bin/init';
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 
@@ -6,6 +8,12 @@ import { color } from '@travetto/cli/src/color';
  */
 export class EmailCompilePlugin extends BasePlugin {
   name = 'email:compile';
+
+  envInit() {
+    EnvInit.init({
+      append: { TRV_RESOURCES: PathUtil.resolveUnix(__dirname, '..', 'resources') }
+    });
+  }
 
   getOptions() {
     return { watch: this.boolOption({ desc: 'Compile in watch mode' }) };

@@ -1,5 +1,3 @@
-import { PhaseManager } from '@travetto/base';
-
 import { SendUtil } from './send';
 import { TemplateUtil } from './util';
 import { ConfigUtil } from './config';
@@ -27,7 +25,9 @@ export class EditorUtil {
    * Initialize context, and listeners
    */
   static async init() {
+    const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
+
     TemplateUtil.watchCompile(f => this.renderFile(f));
 
     process.on('message', async (msg) => {
