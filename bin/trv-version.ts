@@ -27,7 +27,7 @@ if (level === 'release') {
     console.error('You must specify a version to release');
     process.exit(1);
   }
-  Git.checkWorkspaceDirty('Cannot update versions with uncomitted changes').then(() =>
+  Git.checkWorkspaceDirty('Cannot update versions with uncommitted changes').then(() =>
     Packages.yieldPublicPackages()
       .$filter(p => p.name.startsWith('@travetto') && !p.private && p.version.includes('-')) // Only take unreleased versions
       .$map(p => Modules.setVersion(p, prefix))
@@ -35,8 +35,8 @@ if (level === 'release') {
       .$console
   );
 } else {
-  Git.checkWorkspaceDirty('Cannot update versions with uncomitted changes').then(() =>
-    Git.yieldChangedPackges()
+  Git.checkWorkspaceDirty('Cannot update versions with uncommitted changes').then(() =>
+    Git.yieldChangedPackages()
       .$filter(p => p.name.startsWith('@travetto') && !p.private)
       .$map(p => Modules.updateVersion(p, level as 'major', prefix))
       .$wrap(upgrade)
