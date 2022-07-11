@@ -1,13 +1,14 @@
 # https://nodemailer.com/usage/using-gmail/
 
 sender:
-  port: 587,
+  port: 587
   host: smtp.host.email
   auth:
-    user:	email@blah.com
+    user: email@blah.com
     pass: password
 
+from: from-email@gmail.com
 to: my-email@gmail.com
 
-context: 
+context:
   key: value

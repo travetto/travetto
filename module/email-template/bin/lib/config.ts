@@ -6,6 +6,7 @@ import { YamlUtil } from '@travetto/yaml';
 
 interface ConfigType {
   to?: string;
+  from?: string;
   context?: Record<string, unknown>;
   sender?: {
     port?: number;

@@ -1,3 +1,5 @@
+import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
+
 import type { MailService } from '@travetto/email/src/service';
 
 import { TemplateUtil } from './util';
@@ -49,7 +51,7 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
   /**
    * Resolve template
    */
-  static async sendEmail(file: string, to: string, context: Record<string, unknown>) {
+  static async sendEmail(file: string, from: string, to: string, context: Record<string, unknown>) {
     try {
       console.log('Sending email', { to });
       // Let the engine template
@@ -59,7 +61,7 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
       }
 
       const key = file.replace(TemplateUtil.TPL_EXT, '').replace(/^.*?\/resources\//, '/');
-      const info = await svc.sendCompiled(key, { to, context }) as { envelope: { from: string, to: string[] }, messageId: string };
+      const info = await svc.sendCompiled(key, { to, context, from }) as SMTPTransport.SentMessageInfo;
       console.log('Sent email', { to });
 
       const senderConfig = await ConfigUtil.getSenderConfig();

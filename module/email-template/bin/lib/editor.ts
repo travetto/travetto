@@ -38,9 +38,11 @@ export class EditorUtil {
           return this.renderFile(msg.file);
         }
         case 'send': {
-          const to = msg.to || (await ConfigUtil.get()).to;
+          const cfg = await ConfigUtil.get();
+          const to = msg.to || cfg.to;
+          const from = msg.from || cfg.from;
           try {
-            await SendUtil.sendEmail(msg.file, to, await ConfigUtil.getContext());
+            await SendUtil.sendEmail(msg.file, from, to, await ConfigUtil.getContext());
             process.send!({ type: 'sent', to, file: msg.file });
           } catch (err) {
             process.send!({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });
