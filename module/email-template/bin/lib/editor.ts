@@ -2,6 +2,16 @@ import { SendUtil } from './send';
 import { TemplateUtil } from './util';
 import { ConfigUtil } from './config';
 
+type InboundMessage =
+  { type: 'configure' } |
+  { type: 'redraw', file: string } |
+  { type: 'send', file: string, from?: string, to?: string };
+
+type OutboundMessage =
+  { type: 'configured', file: string } |
+  { type: 'sent', to: string, file: string } |
+  { type: 'sent-failed', message: string, stack: Error['stack'], to: string, file: string };
+
 /**
  * Utils for interacting with editors
  */
@@ -21,6 +31,12 @@ export class EditorUtil {
     }
   }
 
+  static response(response: OutboundMessage) {
+    if (process.send) {
+      process.send(response);
+    }
+  }
+
   /**
    * Initialize context, and listeners
    */
@@ -30,9 +46,9 @@ export class EditorUtil {
 
     TemplateUtil.watchCompile(f => this.renderFile(f));
 
-    process.on('message', async (msg) => {
+    process.on('message', async (msg: InboundMessage) => {
       switch (msg.type) {
-        case 'configure': return process.send!({ type: 'configured', file: await ConfigUtil.ensureConfig() });
+        case 'configure': return this.response({ type: 'configured', file: await ConfigUtil.ensureConfig() });
         case 'redraw': {
           await TemplateUtil.compileToDisk(msg.file);
           return this.renderFile(msg.file);
@@ -43,9 +59,9 @@ export class EditorUtil {
           const from = msg.from || cfg.from;
           try {
             await SendUtil.sendEmail(msg.file, from, to, await ConfigUtil.getContext());
-            process.send!({ type: 'sent', to, file: msg.file });
+            this.response({ type: 'sent', to, file: msg.file });
           } catch (err) {
-            process.send!({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });
+            this.response({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });
           }
           break;
         }
