@@ -3,40 +3,46 @@ import { PathUtil } from '@travetto/boot';
 
 export class ImageUtil {
 
+  static sourceHandler(resolver: (src: string) => string, token: string, all: string, prefix: string, src: string) {
+    if (/^['"](.*)['"]$/.test(src)) {
+      src = src.substring(1, src.length - 1); // Trim 
+    }
+    if (!src.startsWith('http')) {
+      return `${prefix}"${token}${resolver(src)}${token}"`;
+    }
+    return all;
+  }
+
   /**
    * Inline image sources
    */
   static async inlineImageSource(html: string, root: string) {
     const { ImageUtil: ImgUtil } = await import('@travetto/image');
 
-    const srcs: string[] = [];
+    const imageSources = new Set<string>();
+    const replacer = this.sourceHandler.bind(null, x => {
+      const resolved = PathUtil.resolveUnix(root, x).replace(/^.*\/resources\//, '/');
+      imageSources.add(resolved);
+      return x;
+    }, '@@');
 
-    html = html.replace(/(<img[^>]src=")([^"]+)/g, (all, pre, src) => {
-      if (!src.startsWith('http')) {
-        const resolved = PathUtil.resolveUnix(root, src).replace(/^.*\/resources\//, '/');
-        srcs.push(resolved);
-        return `${pre}${resolved}`;
-      }
-      return all;
-    });
 
-    const pendingImages = srcs.map(async src => {
+    html = html
+      .replace(/(<img[^>]src=\s*)(["']?[^"]+["']?)/g, replacer)
+      .replace(/(background(?:-image)?:\s*url[(])([^)]+)/g, replacer);
+
+    const pendingImages = [...imageSources].map(async src => {
       const [, ext] = path.extname(src).split('.');
       const data = (await ImgUtil.optimizeResource(src)).toString('base64');
 
-      return { data, ext, src };
+      return [src, { data, ext, src }] as const;
     });
 
-    const images = await Promise.all(pendingImages);
-    const imageMap = new Map(images.map(x => [x.src, x]));
+    const imageMap = new Map(await Promise.all(pendingImages));
 
-    html = html.replace(/(<img[^>]src=")([^"]+)/g, (a, pre, src) => {
-      if (imageMap.has(src)) {
-        const { ext, data } = imageMap.get(src)!; // Inline local images
-        return `${pre}data:image/${ext};base64,${data}`;
-      } else {
-        return a;
-      }
+    html = html.replace(/@@([^@]+)@@/g, (a, src) => {
+      const { ext, data } = imageMap.get(src)!; // Inline local images
+      return `data:image/${ext};base64,${data}`;
     });
 
     return html;

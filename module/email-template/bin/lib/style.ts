@@ -15,7 +15,7 @@ export class StyleUtil {
       sourceMap: false,
       includePaths: roots
     });
-    return result.css.toString();
+    return result!.css.toString();
   }
 
   /**
