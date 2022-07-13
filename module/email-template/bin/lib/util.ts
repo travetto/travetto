@@ -132,7 +132,7 @@ export class TemplateUtil {
             .then(c => [k, c] as const)
         )
       )
-    );
+    ) as Record<(typeof PARTS)[number], string>;
   }
 
   /**
@@ -149,19 +149,23 @@ export class TemplateUtil {
           /[.](html|scss|css|png|jpe?g|gif|ya?ml)$/.test(x)
         )
     }).on('changed', async ({ file }) => {
-      console.log('Contents changed', { file });
-      if (this.TPL_EXT.test(file)) {
-        await this.compileToDisk(file);
-        if (cb) {
-          cb(file);
-        }
-      } else {
-        await this.compileAllToDisk();
-        if (cb) {
-          for (const el of await this.findAllTemplates()) {
-            cb(el.path);
+      try {
+        console.log('Contents changed', { file });
+        if (this.TPL_EXT.test(file)) {
+          await this.compileToDisk(file);
+          if (cb) {
+            cb(file);
+          }
+        } else {
+          await this.compileAllToDisk();
+          if (cb) {
+            for (const el of await this.findAllTemplates()) {
+              cb(el.path);
+            }
           }
         }
+      } catch (err) {
+        console.error(`Error in compiling ${file}`, err.message);
       }
     });
     await Util.wait('1d');

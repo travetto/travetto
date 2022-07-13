@@ -10,7 +10,9 @@ type InboundMessage =
 type OutboundMessage =
   { type: 'configured', file: string } |
   { type: 'sent', to: string, file: string } |
-  { type: 'sent-failed', message: string, stack: Error['stack'], to: string, file: string };
+  { type: 'changed', file: string, content: Record<'html' | 'subject' | 'text', string> } |
+  { type: 'sent-failed', message: string, stack: Error['stack'], to: string, file: string } |
+  { type: 'changed-failed', message: string, stack: Error['stack'], file: string };
 
 /**
  * Utils for interacting with editors
@@ -21,13 +23,18 @@ export class EditorUtil {
   static async renderFile(file: string) {
     file = TemplateUtil.TPL_EXT.test(file) ? file : this.LAST_FILE;
     if (file) {
-      process.send!({
-        type: 'changed',
-        file,
-        content: await TemplateUtil.resolveCompiledTemplate(
+      try {
+        const content = await TemplateUtil.resolveCompiledTemplate(
           file, await ConfigUtil.getContext()
-        )
-      });
+        );
+        this.response({
+          type: 'changed',
+          file,
+          content
+        });
+      } catch (err) {
+        this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file });
+      }
     }
   }
 
@@ -50,7 +57,11 @@ export class EditorUtil {
       switch (msg.type) {
         case 'configure': return this.response({ type: 'configured', file: await ConfigUtil.ensureConfig() });
         case 'redraw': {
-          await TemplateUtil.compileToDisk(msg.file);
+          try {
+            await TemplateUtil.compileToDisk(msg.file);
+          } catch (err) {
+            return this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });
+          }
           return this.renderFile(msg.file);
         }
         case 'send': {

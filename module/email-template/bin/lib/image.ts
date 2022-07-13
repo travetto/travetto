@@ -23,7 +23,7 @@ export class ImageUtil {
     const replacer = this.sourceHandler.bind(null, x => {
       const resolved = PathUtil.resolveUnix(root, x).replace(/^.*\/resources\//, '/');
       imageSources.add(resolved);
-      return x;
+      return resolved;
     }, '@@');
 
 
