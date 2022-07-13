@@ -45,6 +45,11 @@ class $Inky {
       .replace(/<head( [^>]*)?>/, t => `${t}\n${headerTop.join('\n')}`)
       .replace(/<body[^>]*>/, t => `${t}\n${bodyTop.join('\n')}`);
 
+    // Allow tag suffixes/prefixes via comments
+    res = res
+      .replace(/\s*<!--\s*[$]:([^ ]+)\s*-->\s*(<\/[^>]+>)/g, (_, suf, tag) => `${tag}${suf}`)
+      .replace(/(<[^\/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, pre) => `${pre}${tag}`);
+
     return res;
   }
 }

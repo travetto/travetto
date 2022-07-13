@@ -14,7 +14,7 @@ class GridTest {
         <tbody>
           <tr></tr>
         </tbody>
-      </table>
+      </table>&zwj;
     `;
 
     assert(cleanseTemplate(input) === cleanseOutput(expected));
@@ -259,7 +259,7 @@ class GridTest {
                         <tbody>
                           <tr></tr>
                         </tbody>
-                      </table>
+                      </table>&zwj;
                     </th>
                   </tr>
                 </tbody>
@@ -267,7 +267,7 @@ class GridTest {
             </th>
           </tr>
         </tbody>
-      </table>
+      </table>&zwj;
     `;
 
     assert(cleanseTemplate(input) === cleanseOutput(expected));
@@ -292,7 +292,7 @@ class GridTest {
             </th>
           </tr>
         </tbody>
-      </table>
+      </table>&zwj;
     `;
 
     assert(cleanseTemplate(input) === cleanseOutput(expected));

@@ -159,7 +159,7 @@ export class InkyComponentFactory implements ComponentFactory {
       <tbody>
         <tr>${inner}</tr>
       </tbody>
-    </table>`;
+    <!-- $:&zwj; --></table>`;
   }
 
   @Tag()
