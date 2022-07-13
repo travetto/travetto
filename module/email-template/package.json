@@ -1,7 +1,7 @@
 {
   "name": "@travetto/email-template",
   "displayName": "Email Templating",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "Email templating module",
   "keywords": [
     "email",
