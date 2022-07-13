@@ -23,7 +23,7 @@ class ImageUtilTest {
     assert(!output.includes('blue.gif'));
     assert(!output.includes('green.gif'));
     assert(/src="[^"]+"/.test(output));
-    assert(/background:\s*url[(]'[^']+'[)]/.test(output));
-    assert(/background-image:\s*url[(]'[^']+'[)]/.test(output));
+    assert(/background:\s*url[(]'[^')]+'[)]/.test(output));
+    assert(/background-image:\s*url[(]'[^')]+'[)]/.test(output));
   }
 }
