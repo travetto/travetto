@@ -3,12 +3,12 @@ import { PathUtil } from '@travetto/boot';
 
 export class ImageUtil {
 
-  static sourceHandler(resolver: (src: string) => string, token: string, all: string, prefix: string, src: string) {
+  static sourceHandler(resolver: (src: string) => string, [lTok, rTok]: [string, string], all: string, prefix: string, src: string) {
     if (/^['"](.*)['"]$/.test(src)) {
       src = src.substring(1, src.length - 1); // Trim 
     }
     if (!src.startsWith('http')) {
-      return `${prefix}"${token}${resolver(src)}${token}"`;
+      return `${prefix}${lTok}${resolver(src)}${rTok}`;
     }
     return all;
   }
@@ -20,16 +20,15 @@ export class ImageUtil {
     const { ImageUtil: ImgUtil } = await import('@travetto/image');
 
     const imageSources = new Set<string>();
-    const replacer = this.sourceHandler.bind(null, x => {
+    const resolver = (x: string) => {
       const resolved = PathUtil.resolveUnix(root, x).replace(/^.*\/resources\//, '/');
       imageSources.add(resolved);
       return resolved;
-    }, '@@');
-
+    }
 
     html = html
-      .replace(/(<img[^>]src=\s*)(["']?[^"]+["']?)/g, replacer)
-      .replace(/(background(?:-image)?:\s*url[(])([^)]+)/g, replacer);
+      .replace(/(<img[^>]src=\s*["'])([^"]+)/g, (_, pre, src) => this.sourceHandler(resolver, ['@@', '@@'], _, pre, src))
+      .replace(/(background(?:-image)?:\s*url[(])([^)]+)/g, (_, pre, src) => this.sourceHandler(resolver, [`'@@`, `@@'`], _, pre, src));
 
     const pendingImages = [...imageSources].map(async src => {
       const [, ext] = path.extname(src).split('.');
