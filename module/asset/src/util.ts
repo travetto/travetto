@@ -1,7 +1,6 @@
 import * as fs from 'fs/promises';
 import { createReadStream } from 'fs';
 import * as path from 'path';
-import * as fileType from 'file-type';
 import * as crypto from 'crypto';
 import * as mime from 'mime';
 
@@ -42,6 +41,7 @@ export class AssetUtil {
    * Detect file type from location on disk
    */
   static async detectFileType(filePath: string) {
+    const fileType = await import('file-type');
     const buffer = await this.readChunk(filePath, 4100);
     return fileType.fromBuffer(buffer);
   }

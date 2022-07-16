@@ -35,7 +35,7 @@
   },
   "optionalPeerDependencies": {
     "@types/aws-lambda": "^8.10.101",
-    "@vendia/serverless-express": "^4.8.2"
+    "@vendia/serverless-express": "^4.9.0"
   },
   "publishConfig": {
     "access": "public"
