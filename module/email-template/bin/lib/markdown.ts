@@ -1,6 +1,7 @@
-import * as parse5 from 'parse5';
+import { parse } from 'parse5';
 import * as htmlEntities from 'html-entities';
 
+import { Element, Node } from './types';
 import { HtmlUtil, Parse5Adapter } from './html';
 
 const LI_TOKEN = '⇜⇟⇝';
@@ -13,7 +14,7 @@ export class MarkdownUtil {
   /**
    * Get raw text from DOM node
    */
-  static #getRawText(node: parse5.Node) {
+  static #getRawText(node: Element) {
     let txt: string;
     if (Parse5Adapter.isTextNode(node)) {
       txt = Parse5Adapter.getTextNodeContent(node);
@@ -26,7 +27,7 @@ export class MarkdownUtil {
   /**
    * Convert to raw text
    */
-  static #getText(node: parse5.Node) {
+  static #getText(node: Element) {
     return this.#getRawText(node).replace(/ +/g, ' ')
       .replace(/ +[\n]/g, '\n')
       .replace(/^[\n\s]+/, ' ')
@@ -60,7 +61,7 @@ export class MarkdownUtil {
 
     const output: string[] = [];
 
-    const doc = parse5.parse(simple);
+    const doc = parse(simple);
     const listMode: (string | number)[] = [];
 
     HtmlUtil.visit(doc, (node, descend) => {

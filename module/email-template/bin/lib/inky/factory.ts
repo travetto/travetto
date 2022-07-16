@@ -1,7 +1,8 @@
-import { Node, serialize, parse, parseFragment } from 'parse5';
+import { serialize, parse, parseFragment } from 'parse5';
 
 import { HtmlUtil, Parse5Adapter } from '../html';
 import { Tag, TagRegistry, ComponentFactory } from '../factory';
+import { Element, Node } from '../types';
 
 export const SUMMARY_STYLE = Object.entries({
   display: 'none',
@@ -30,7 +31,7 @@ export class InkyComponentFactory implements ComponentFactory {
     return this.#_spacer16;
   }
 
-  #generate(element: Node) {
+  #generate(element: Element) {
     const tag = TagRegistry.getTag(element, this.ns);
     if (TagRegistry.has(this, tag)) {
       return TagRegistry.resolve(this, tag)!.call(this, element).trim();
@@ -42,20 +43,18 @@ export class InkyComponentFactory implements ComponentFactory {
   /**
    * Traverse nodes
    */
-  #traverse(node: Node & { hasColumns?: boolean }) {
-    const children = (Parse5Adapter.getChildNodes(node) ?? []) as Node[];
+  #traverse(node: Node & { hasColumns?: boolean }): Node {
+    const children = (Parse5Adapter.getChildNodes(node) ?? []);
     const out = [];
 
     for (const child of children) {
-      const tagName = Parse5Adapter.getTagName(child);
-      if (!tagName) {
-        out.push(child);
-      } else {
+      if ('tagName' in child) {
+        const tagName = Parse5Adapter.getTagName(child);
         this.#traverse(child);
         if (TagRegistry.has(this, TagRegistry.getTag(tagName, this.ns))) {
           if (tagName === 'columns' && !('hasColumns' in node)) {
             node.hasColumns = true;
-            const all = children.filter(x => Parse5Adapter.isElementNode(x));
+            const all = children.filter(x => Parse5Adapter.isElementNode(x)) as Element[];
             HtmlUtil.setDomAttribute(all[0], 'class', 'first');
             HtmlUtil.setDomAttribute(all[all.length - 1], 'class', 'last');
           }
@@ -66,15 +65,16 @@ export class InkyComponentFactory implements ComponentFactory {
         } else {
           out.push(child);
         }
+      } else {
+        out.push(child);
       }
     }
-    // @ts-expect-error
     node.childNodes = out;
     return node;
   }
 
   @Tag()
-  columns(element: Node) {
+  columns(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -125,20 +125,20 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  title(element: Node) {
+  title(element: Element) {
     const inner = HtmlUtil.getInner(element);
     return `
       <title>${inner}</title>`;
   }
 
   @Tag()
-  summary(element: Node) {
+  summary(element: Element) {
     const inner = HtmlUtil.getInner(element);
     return `<span id="summary" style="${SUMMARY_STYLE}">${inner}</span>`;
   }
 
   @Tag('h-line')
-  hLine(element: Node) {
+  hLine(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
 
     return `
@@ -148,7 +148,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  row(element: Node) {
+  row(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -163,7 +163,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  button(element: Node) {
+  button(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     let inner = HtmlUtil.getInner(element);
 
@@ -205,7 +205,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  container(element: Node) {
+  container(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -222,7 +222,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag('block-grid')
-  blockGrid(element: Node) {
+  blockGrid(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -235,7 +235,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  menu(element: Node) {
+  menu(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     let inner = HtmlUtil.getInner(element);
 
@@ -263,7 +263,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag('item')
-  menuItem(element: Node) {
+  menuItem(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -277,7 +277,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  center(element: Node) {
+  center(element: Element) {
     for (const child of (Parse5Adapter.getChildNodes(element) ?? []) as Node[]) {
       if (Parse5Adapter.isElementNode(child)) {
         HtmlUtil.setDomAttribute(child, 'align', 'center');
@@ -285,7 +285,7 @@ export class InkyComponentFactory implements ComponentFactory {
       }
     }
 
-    HtmlUtil.visit(element, (node: Node, descend: () => void) => {
+    HtmlUtil.visit(element, (node: Element, descend: () => void) => {
       descend();
       if (Parse5Adapter.getTagName(node) === 'item') {
         HtmlUtil.setDomAttribute(node, 'class', 'float-center');
@@ -302,7 +302,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  callout(element: Node) {
+  callout(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -323,7 +323,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  spacer(element: Node) {
+  spacer(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     const html: string[] = [];
 
@@ -368,7 +368,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  wrapper(element: Node) {
+  wrapper(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -388,7 +388,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  hr(element: Node) {
+  hr(element: Element) {
     const attrs = HtmlUtil.getAttrMap(element);
     attrs.class = HtmlUtil.classes('hr', attrs.class);
     return `<table ${HtmlUtil.toStr(attrs)}><th></th></table>`;
