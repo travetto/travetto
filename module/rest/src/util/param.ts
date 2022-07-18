@@ -72,7 +72,7 @@ export class ParamUtil {
     const method = route.handlerName;
     const routed = route.params.map(c => (c.extract ?? this.defaultExtractors[c.location])(c, req, res));
 
-    const params = SchemaRegistry.coereceMethodParams(cls, method, routed, true);
+    const params = SchemaRegistry.coerceMethodParams(cls, method, routed, true);
 
     try {
       SchemaValidator.validateMethod(cls, method, params);

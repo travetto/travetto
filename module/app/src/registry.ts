@@ -36,7 +36,7 @@ class $ApplicationRegistry {
    */
   prepareParams(name: string, args: string[]) {
     const config = this.#applications.get(name)!;
-    const cleaned = SchemaRegistry.coereceMethodParams(config.target! as Class, 'run', args);
+    const cleaned = SchemaRegistry.coerceMethodParams(config.target! as Class, 'run', args);
     SchemaValidator.validateMethod(config.target!, 'run', cleaned);
     return cleaned;
   }

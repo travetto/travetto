@@ -273,7 +273,7 @@ export class BindUtil {
    * @param params
    * @returns
    */
-  static coereceFields(fields: FieldConfig[], params: unknown[], applyDefaults = false): unknown[] {
+  static coerceFields(fields: FieldConfig[], params: unknown[], applyDefaults = false): unknown[] {
     params = [...params];
     // Coerce types
     for (const el of fields) {

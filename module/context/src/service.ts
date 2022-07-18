@@ -14,7 +14,6 @@ type Ctx = Record<string | symbol, unknown>;
 export class AsyncContext {
 
   alStorage = new AsyncLocalStorage<{ value: Ctx }>();
-  active = 0;
 
   constructor() {
     this.run = this.run.bind(this);
@@ -63,43 +62,21 @@ export class AsyncContext {
     }
   }
 
+  #context(ctx: Ctx = {}): { value: Ctx } {
+    return { value: this.alStorage.getStore() ? { ...this.#store(), ...ctx } : ctx };
+  }
+
   /**
    * Run an async function and ensure the context is available during execution
    */
   async run<T = unknown>(fn: () => Promise<T>, init: Ctx = {}): Promise<T> {
-    if (this.alStorage.getStore()) {
-      init = { ...this.#store(), ...init };
-    }
-    this.active += 1;
-    this.alStorage.enterWith({ value: init });
-    try {
-      return await fn();
-    } finally {
-      // @ts-expect-error
-      delete this.alStorage.getStore().value;
-      if ((this.active -= 1) === 0) {
-        this.alStorage.disable();
-      }
-    }
+    return await this.alStorage.run(this.#context(init), fn);
   }
 
   /**
    * Run an async function and ensure the context is available during execution
    */
   async * iterate<T>(fn: () => AsyncGenerator<T>, init: Ctx = {}): AsyncGenerator<T> {
-    if (this.alStorage.getStore()) {
-      init = { ...this.#store(), ...init };
-    }
-    this.active += 1;
-    this.alStorage.enterWith({ value: init });
-    try {
-      return yield* fn();
-    } finally {
-      // @ts-expect-error
-      delete this.alStorage.getStore().value;
-      if ((this.active -= 1) === 0) {
-        this.alStorage.disable();
-      }
-    }
+    return yield* this.alStorage.run(this.#context(init), fn);
   }
 }

@@ -15,7 +15,7 @@ export interface RestServer<T = unknown> {
   listening: boolean;
 
   /**
-   * Shoudl global be re-registered on any changes
+   * Should global be re-registered on any changes
    */
   updateGlobalOnChange?: boolean;
 
