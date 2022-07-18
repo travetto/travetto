@@ -141,7 +141,12 @@ export interface PointerType extends Type<'pointer'> {
   target: Exclude<AnyType, PointerType>;
 }
 
-export type AnyType = TupleType | ShapeType | UnionType | LiteralType | ExternalType | PointerType;
+/**
+ * Unknown type, should default to object
+ */
+export interface UnknownType extends Type<'unknown'> { }
+
+export type AnyType = TupleType | ShapeType | UnionType | LiteralType | ExternalType | PointerType | UnknownType;
 
 /**
  * Simple interface for checked methods

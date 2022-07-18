@@ -43,6 +43,7 @@ export class RestTransformer {
     if (isContext) {
       detectedParamType = 'Context';
       conf = state.extendObjectLiteral(conf, { contextType: state.getOrImport(paramType as ExternalType) });
+      node = SchemaTransformUtil.computeField(state, node, { type: { key: 'unknown' } });
     } else {
       // If not contextual
       const config: { type: AnyType, name?: string } = { type: paramType };

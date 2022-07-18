@@ -58,6 +58,10 @@ export class SchemaTransformUtil {
           return this.toConcreteType(state, type.commonType, node, root);
         }
       }
+      case 'unknown':
+      default: {
+        // Object
+      }
     }
     return state.createIdentifier('Object');
   }
