@@ -5,6 +5,9 @@ import { FsUtil } from '../fs';
 import { SourceUtil } from './source-util';
 import { PathUtil } from '../path';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+const requireTs = (): typeof tsi => require('typescript') as typeof tsi;
+
 type Diag = {
   start?: number;
   messageText: string | { messageText: string, category: 0 | 1 | 2 | 3, code: number };
@@ -14,7 +17,82 @@ type Diag = {
   };
 };
 
-const NODE_VERSION = EnvUtil.get('TRV_NODE_VERSION', process.version).replace(/^.*?(\d+).*?$/, (_, v) => v) as '12';
+type CompilerOptions = {
+  allowJs?: boolean;
+  allowSyntheticDefaultImports?: boolean;
+  allowUmdGlobalAccess?: boolean;
+  allowUnreachableCode?: boolean;
+  allowUnusedLabels?: boolean;
+  alwaysStrict?: boolean;
+  baseUrl?: string;
+  charset?: string;
+  checkJs?: boolean;
+  declaration?: boolean;
+  declarationMap?: boolean;
+  emitDeclarationOnly?: boolean;
+  declarationDir?: string;
+  disableSizeLimit?: boolean;
+  disableSourceOfProjectReferenceRedirect?: boolean;
+  disableSolutionSearching?: boolean;
+  disableReferencedProjectLoad?: boolean;
+  downlevelIteration?: boolean;
+  exactOptionalPropertyTypes?: boolean;
+  experimentalDecorators?: boolean;
+  forceConsistentCasingInFileNames?: boolean;
+  importHelpers?: boolean;
+  inlineSourceMap?: boolean;
+  inlineSources?: boolean;
+  isolatedModules?: boolean;
+  keyofStringsOnly?: boolean;
+  lib?: string[];
+  locale?: string;
+  mapRoot?: string;
+  maxNodeModuleJsDepth?: number;
+  moduleSuffixes?: string[];
+  noEmit?: boolean;
+  noEmitHelpers?: boolean;
+  noEmitOnError?: boolean;
+  noErrorTruncation?: boolean;
+  noFallthroughCasesInSwitch?: boolean;
+  noImplicitAny?: boolean;
+  noImplicitReturns?: boolean;
+  noImplicitThis?: boolean;
+  noStrictGenericChecks?: boolean;
+  noUnusedLocals?: boolean;
+  noUnusedParameters?: boolean;
+  noImplicitUseStrict?: boolean;
+  noPropertyAccessFromIndexSignature?: boolean;
+  noLib?: boolean;
+  noResolve?: boolean;
+  noUncheckedIndexedAccess?: boolean;
+  paths?: Record<string, string[]>;
+  preserveConstEnums?: boolean;
+  noImplicitOverride?: boolean;
+  preserveSymlinks?: boolean;
+  preserveValueImports?: boolean;
+  rootDir?: string;
+  rootDirs?: string[];
+  skipLibCheck?: boolean;
+  skipDefaultLibCheck?: boolean;
+  sourceMap?: boolean;
+  sourceRoot?: string;
+  strict?: boolean;
+  strictFunctionTypes?: boolean;
+  strictBindCallApply?: boolean;
+  strictNullChecks?: boolean;
+  strictPropertyInitialization?: boolean;
+  stripInternal?: boolean;
+  suppressExcessPropertyErrors?: boolean;
+  suppressImplicitAnyIndexErrors?: boolean;
+  useUnknownInCatchVariables?: boolean;
+  resolveJsonModule?: boolean;
+  types?: string[];
+  /** Paths used to compute primary types search locations */
+  typeRoots?: string[];
+};
+
+const NODE_VERSION = EnvUtil.get('TRV_NODE_VERSION', process.version)
+  .replace(/^.*?(\d+).*?$/, (_, v) => v);
 const TS_TARGET = ({
   12: 'ES2019',
   13: 'ES2019',
@@ -30,10 +108,10 @@ const TS_TARGET = ({
 export class TranspileUtil {
   static #options: Record<string, unknown>; // Untyped so that the typescript typings do not make it into the API
 
-  static #optionsExtra?: Record<string, unknown>;
+  static #optionsExtra?: CompilerOptions;
 
-  static #readTsConfigOptions(path: string) {
-    const ts = require('typescript') as typeof tsi;
+  static #readTsConfigOptions(path: string): CompilerOptions {
+    const ts = requireTs();
     return ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(path, ts.sys.readFile), ts.sys, PathUtil.cwd
     ).options;
@@ -43,22 +121,22 @@ export class TranspileUtil {
    * Set extra transpiler options
    * @privates
    */
-  static setExtraOptions(opts: Record<string, unknown>) {
+  static setExtraOptions(opts: CompilerOptions) {
     this.#optionsExtra = { ...this.#optionsExtra ?? {}, ...opts };
   }
 
   /**
    * Get loaded compiler options
    */
-  static get compilerOptions(): Record<string, unknown> {
-    let o = {} as Record<string, unknown>;
+  static get compilerOptions(): CompilerOptions {
+    let o: CompilerOptions = {};
     if (this.#optionsExtra) {
       o = this.#optionsExtra;
     }
     if (!this.#options) {
       const opts = o ?? {};
       const rootDir = opts.rootDir ?? PathUtil.cwd;
-      const ts = require('typescript') as typeof tsi;
+      const ts = requireTs();
       const projTsconfig = PathUtil.resolveUnix('tsconfig.json');
       const baseTsconfig = PathUtil.resolveUnix(__dirname, '..', '..', 'tsconfig.trv.json');
       // Fallback to base tsconfig if not found in local folder
@@ -71,7 +149,7 @@ export class TranspileUtil {
         outDir: rootDir,
         sourceRoot: rootDir,
         ...(o ?? {})
-      } as tsi.CompilerOptions;
+      };
     }
     return this.#options;
   }
@@ -84,7 +162,7 @@ export class TranspileUtil {
   static checkTranspileErrors<T extends Diag>(filename: string, diagnostics: readonly T[]) {
     if (diagnostics && diagnostics.length) {
       const errors: string[] = diagnostics.slice(0, 5).map(diag => {
-        const ts = require('typescript') as typeof tsi;
+        const ts = requireTs();
         const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
           const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
@@ -104,7 +182,7 @@ export class TranspileUtil {
   /**
    * Handle transpilation errors
    */
-  static transpileError(tsf: string, err: Error) {
+  static transpileError(tsf: string, err: Error): string {
     if (EnvUtil.isDynamic() && !tsf.startsWith('test')) {
       console.trace(`Unable to transpile ${tsf}: stubbing out with error proxy.`, err.message);
       return SourceUtil.getErrorModule(err.message);

@@ -115,9 +115,9 @@ export class ModelAuthService<T extends ModelType> implements
         await this.#retrieve(ident.id);
         throw new AppError('That id is already taken.', 'data');
       }
-    } catch (e) {
-      if (!(e instanceof NotFoundError)) {
-        throw e;
+    } catch (err) {
+      if (!(err instanceof NotFoundError)) {
+        throw err;
       }
     }
 

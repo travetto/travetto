@@ -6,7 +6,7 @@ import { EnvUtil } from '@travetto/boot';
 import { Application } from '@travetto/app';
 import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
 
-import { RouteConfig, Request, RouteHandler, ParamConfig, ServerHandle } from '../types';
+import { RouteConfig, Request, ServerHandle } from '../types';
 import { RestConfig } from './config';
 import { RouteUtil } from '../util/route';
 import { RestInterceptor } from '../interceptor/types';
@@ -20,7 +20,7 @@ import { RestServer } from './server';
 @Application('rest', {
   description: 'Default rest application entrypoint'
 })
-export class RestApplication<T extends unknown = unknown>  {
+export class RestApplication<T = unknown>  {
 
   @Inject()
   config: RestConfig;
@@ -160,9 +160,12 @@ export class RestApplication<T extends unknown = unknown>  {
     }
 
     const route: RouteConfig = {
-      params: [{ extract: (c: unknown, r: unknown) => r } as ParamConfig],
+      params: [{
+        extract: (c: unknown, r: unknown) => r,
+        location: 'context'
+      }],
       instance: {},
-      handler: this.globalHandler as RouteHandler,
+      handler: this.globalHandler,
       method: 'all', path: '*'
     };
     route.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, route);

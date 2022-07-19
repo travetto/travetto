@@ -34,14 +34,14 @@ class StackTest {
     try {
       await this.inner6();
       assert(false);
-    } catch (e) {
-      assert(!e.stack.includes('inner6'));
-      assert(!e.stack.includes('inner5'));
-      assert(e.stack.includes('inner4'));
-      assert(e.stack.includes('inner3'));
-      assert(e.stack.includes('inner2'));
-      assert(e.stack.includes('inner1'));
-      console.warn('Error', { error: e });
+    } catch (err) {
+      assert(!err.stack.includes('inner6'));
+      assert(!err.stack.includes('inner5'));
+      assert(err.stack.includes('inner4'));
+      assert(err.stack.includes('inner3'));
+      assert(err.stack.includes('inner2'));
+      assert(err.stack.includes('inner1'));
+      console.warn('Error', { error: err });
     }
   }
 }

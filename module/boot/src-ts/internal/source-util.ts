@@ -11,7 +11,7 @@ declare global {
 // Inject into global space as 'ts'
 global.ts = new Proxy({}, {
   // Load on demand, and replace on first use
-  get: (t, p, r) => (global.ts = require('typescript'))[p]
+  get: (t, prop, r) => (global.ts = require('typescript'))[prop]
 });
 
 /**
@@ -70,8 +70,12 @@ export class SourceUtil {
       try {
         require.resolve(key);
         return { minus, key, valid: !minus };
-      } catch (err) {
-        return { minus, key, valid: minus, err: err as Error };
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          return { minus, key, valid: minus, err };
+        } else {
+          throw err;
+        }
       }
     }
   }

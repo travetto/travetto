@@ -43,7 +43,7 @@ export class LogUtil {
         }
         try {
           out[key] = this.collapseNode(ox[key], cache);
-        } catch (err) {
+        } catch {
           return undefined;
         }
       }

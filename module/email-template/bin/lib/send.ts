@@ -68,9 +68,9 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
       return senderConfig.host?.includes('ethereal') ? {
         url: (await import('nodemailer')).getTestMessageUrl(info)
       } : {};
-    } catch (e) {
-      console.warn('Failed to send email', { to, error: e as Error });
-      throw e;
+    } catch (err) {
+      console.warn('Failed to send email', { to, error: err });
+      throw err;
     }
   }
 }

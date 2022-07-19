@@ -35,11 +35,11 @@ export class FileCache {
       const full = this.fromEntryName(f);
       try {
         this.removeExpiredEntry(full);
-      } catch (e) {
+      } catch (err) {
         // Only care if it's source, otherwise might be dynamically cached data without backing file
         if (full.endsWith('.ts')) {
           // Cannot remove file, source is missing
-          console.warn('Cannot read', { error: e });
+          console.warn('Cannot read', { error: err });
         }
       }
     }
@@ -55,7 +55,7 @@ export class FileCache {
       try {
         // Ensure we have access before trying to delete
         accessSync(this.cacheDir, constants.W_OK);
-      } catch (e) {
+      } catch {
         throw new Error(`Unable to write to cache directory: ${this.cacheDir}`);
       }
       if (purgeExpired) {
@@ -101,9 +101,9 @@ export class FileCache {
         if (force || FileCache.isOlder(this.statEntry(local), statSync(local))) {
           unlinkSync(this.toEntryName(local));
         }
-      } catch (e) {
-        if (!(e instanceof Error) || !e.message.includes('ENOENT')) {
-          throw e;
+      } catch (err) {
+        if (!(err instanceof Error) || !err.message.includes('ENOENT')) {
+          throw err;
         }
       }
       this.removeEntry(local);
@@ -150,7 +150,7 @@ export class FileCache {
           console.debug('Deleted', { cacheDir: this.cacheDir });
         }
         this.#cache.clear(); // Clear it out
-      } catch (e) {
+      } catch {
         console.error('Failed in deleting');
       }
     }

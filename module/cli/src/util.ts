@@ -122,10 +122,10 @@ export class CliUtil {
     let i = -1;
     let done = false;
     let value: T | undefined;
-    let err: Error | undefined;
+    let capturedError: Error | undefined;
     const final = work
       .then(res => value = res)
-      .catch(e => err = e)
+      .catch(err => capturedError = err)
       .finally(() => done = true);
 
     if (delay) {
@@ -140,8 +140,8 @@ export class CliUtil {
     if (i >= 0) {
       await writeLine(completion ? `${message} ${completion}\n` : '', true);
     }
-    if (err) {
-      throw err;
+    if (capturedError) {
+      throw capturedError;
     } else {
       return value!;
     }

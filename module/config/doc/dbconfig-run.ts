@@ -9,7 +9,7 @@ export async function main() {
   try {
     await ConfigManager.install(DBConfig, new DBConfig(), 'database');
     console.log('Config', ConfigManager.toJSON());
-  } catch (err) {
+  } catch (err: any) {
     console.error(err.toJSON());
   }
 }

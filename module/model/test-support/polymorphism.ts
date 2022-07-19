@@ -225,8 +225,8 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
         name: 'rob'
       });
       assert(res2 instanceof IndexedFirefighter); // If service allows for get by subtype
-    } catch (e) {
-      assert(e instanceof SubTypeNotSupportedError || e instanceof NotFoundError); // If it does not
+    } catch (err) {
+      assert(err instanceof SubTypeNotSupportedError || err instanceof NotFoundError); // If it does not
     }
   }
 
@@ -257,8 +257,8 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
         age: now,
         name: 'rob'
       });
-    } catch (e) {
-      assert(e instanceof SubTypeNotSupportedError || e instanceof NotFoundError);
+    } catch (err) {
+      assert(err instanceof SubTypeNotSupportedError || err instanceof NotFoundError);
     }
 
     try {
@@ -266,8 +266,8 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
         age: now,
         name: 'bob'
       });
-    } catch (e) {
-      assert(e instanceof SubTypeNotSupportedError || e instanceof NotFoundError);
+    } catch (err) {
+      assert(err instanceof SubTypeNotSupportedError || err instanceof NotFoundError);
     }
   }
 }

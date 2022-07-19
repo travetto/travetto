@@ -105,7 +105,7 @@ export class Packages {
       ['show', `${dep}@${version}`, 'version', '--json'],
       { cwd: folder, stdio: 'pipe' }
     ).result
-      .catchAsResult()
+      .catchAsResult!()
       .then(res => {
         if (!res.valid && !res.stderr.includes('E404')) {
           throw new Error(res.stderr);

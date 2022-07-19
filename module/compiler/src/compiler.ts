@@ -71,7 +71,7 @@ class $Compiler {
         );
 
         TranspileUtil.checkTranspileErrors(filename, result.diagnostics as []);
-      } catch (err) {
+      } catch (err: any) {
         const errContent = TranspileUtil.transpileError(filename, err);
         this.#host.contents.set(filename, errContent);
       }

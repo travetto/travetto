@@ -30,6 +30,10 @@ const AsyncFunction = Object.getPrototypeOf(async function () { });
 export class Util {
   static #timePattern = new RegExp(`^(-?[0-9.]+)(${Object.keys(TIME_UNITS).join('|')})$`);
 
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  static getKeys = Object.keys.bind(Object) as
+    <K extends string | symbol | number = string, T extends object = object>(o: T) => K[];
+
   static #deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;
@@ -157,7 +161,7 @@ export class Util {
         if (typeof input === 'string') {
           try {
             return this.toRegex(input);
-          } catch (err) {
+          } catch {
             if (strict) {
               throw new Error(`Invalid regex: ${input}`);
             } else {
@@ -235,6 +239,13 @@ export class Util {
    */
   static isSimple(a: unknown) {
     return this.isPrimitive(a) || this.isFunction(a) || this.isClass(a);
+  }
+
+  /**
+   * Is an error object
+   */
+  static isError(a: unknown): a is Error {
+    return !!a && (a instanceof Error || (typeof a === 'object' && 'message' in a && 'stack' in a));
   }
 
   /**

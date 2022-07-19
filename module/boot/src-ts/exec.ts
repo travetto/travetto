@@ -35,7 +35,9 @@ export interface ExecutionResult {
   killed?: boolean;
 }
 
-type CatchableResult = Promise<ExecutionResult> & { catchAsResult(): Promise<ExecutionResult> };
+type CatchableResult = Promise<ExecutionResult> & { catchAsResult?(): Promise<ExecutionResult> };
+
+type ErrorWithMeta = Error & { meta?: ExecutionResult };
 
 /**
  * Execution State
@@ -95,14 +97,14 @@ export class ExecUtil {
    * represents the entire execution.  On successful completion the promise will resolve, and
    * on failed completion the promise will reject.
    *
-   * @param p The process to enhance
-   * @param options The options to use to ehance the process
+   * @param proc The process to enhance
+   * @param options The options to use to enhance the process
    * @param cmd The command being run
    */
-  static enhanceProcess(p: ChildProcess, options: ExecutionOptions, cmd: string): CatchableResult {
+  static enhanceProcess(proc: ChildProcess, options: ExecutionOptions, cmd: string): CatchableResult {
     const timeout = options.timeout;
 
-    const prom = new Promise<ExecutionResult>((resolve, reject) => {
+    const res: CatchableResult = new Promise<ExecutionResult>((resolve, reject) => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let timer: NodeJS.Timeout;
@@ -123,8 +125,8 @@ export class ExecUtil {
         };
 
         if (!final.valid) {
-          const err = new Error(`Error executing ${cmd}: ${final.message || final.stderr || final.stdout || 'failed'}`);
-          (err as unknown as { meta: ExecutionResult }).meta = final;
+          const err: ErrorWithMeta = new Error(`Error executing ${cmd}: ${final.message || final.stderr || final.stdout || 'failed'}`);
+          err.meta = final;
           reject(err);
         } else {
           resolve(final);
@@ -132,43 +134,42 @@ export class ExecUtil {
       };
 
       if (!options.rawOutput) {
-        if (p.stdout) {
-          p.stdout!.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
+        if (proc.stdout) {
+          proc.stdout!.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
         }
-        if (p.stderr) {
-          p.stderr!.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
+        if (proc.stderr) {
+          proc.stderr!.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
         }
       }
 
-      p.on('error', (err: Error) =>
+      proc.on('error', (err: Error) =>
         finish({ code: 1, message: err.message, valid: false }));
 
-      p.on('close', (code: number) =>
+      proc.on('close', (code: number) =>
         finish({ code, valid: code === null || code === 0 || code === 130 || code === 143 })); // Sigint/term
 
       if (timeout) {
         timer = setTimeout(async x => {
-          p.kill('SIGKILL');
+          proc.kill('SIGKILL');
           finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
         }, timeout);
       }
     });
 
-    const res = prom as CatchableResult;
-    res.catchAsResult = () => res.catch(e => (e as { meta: ExecutionResult }).meta);
+    res.catchAsResult = () => res.catch((err: ErrorWithMeta) => err.meta!);
     return res;
   }
 
   /**
    * Run a command directly, as a stand alone operation
    * @param cmd The command to run
-   * @param args The command line argumetns to pass
+   * @param args The command line arguments to pass
    * @param options The enhancement options
    */
   static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
-    const p = spawn(cmd, args, this.getOpts(options));
-    const result = this.enhanceProcess(p, options, `${cmd} ${args.join(' ')}`);
-    return { process: p, result };
+    const proc = spawn(cmd, args, this.getOpts(options));
+    const result = this.enhanceProcess(proc, options, `${cmd} ${args.join(' ')}`);
+    return { process: proc, result };
   }
 
   /**
@@ -180,9 +181,9 @@ export class ExecUtil {
    */
   static fork(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
     // Always register for the fork
-    const p = spawn(process.argv0, [file, ...args], this.getOpts(options));
-    const result = this.enhanceProcess(p, options, `${file} ${args.join(' ')}`);
-    return { process: p, result };
+    const proc = spawn(process.argv0, [file, ...args], this.getOpts(options));
+    const result = this.enhanceProcess(proc, options, `${file} ${args.join(' ')}`);
+    return { process: proc, result };
   }
 
   /**
@@ -244,14 +245,14 @@ export class ExecUtil {
         })
     );
 
-    const message = new Promise<T>((r, rej) => {
+    const message = new Promise<T>((res, rej) => {
       worker.once('message', d => result.then(() => {
         if (d && 'stack' in d && 'message' in d) {
           const err = new Error(d['message']);
           err.stack = d.stack;
           rej(err);
         } else {
-          r(d);
+          res(d);
         }
       }));
       result.catch(rej);
@@ -305,7 +306,7 @@ export class ExecUtil {
   }
 
   /**
-   * Kill a spawned proces
+   * Kill a spawned process
    * @param proc The process to kill
    */
   static kill(proc: { kill(sig?: string | number): void }) {

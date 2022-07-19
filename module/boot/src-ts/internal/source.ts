@@ -43,7 +43,7 @@ export class SourceIndex {
     if (file.includes('node_modules')) {
       const mod = file.match(/^.*node_modules\/((?:@[^/]+\/)?[^/]+)/)?.[1];
       if (mod) { // External module
-        if (entry.stats.isDirectory() || entry.stats.isSymbolicLink()) {
+        if (ScanFs.isDir(entry)) {
           return { mod, sub: '' };
         } else {
           const [sub] = file.split(`${mod}/`)[1].split('/');
@@ -65,30 +65,33 @@ export class SourceIndex {
     const testFile = 'test' in test ? test.test.bind(test) : test;
 
     // Folders to check
-    const folders = [
+    const folders: FrameworkScan[] = [
       {
         testDir: x =>
           /^node_modules[/]?$/.test(x) ||  // Top level node_modules
           (/^node_modules\/@travetto/.test(x) && !/node_modules.*node_modules/.test(x)) || // Module file
           !x.includes('node_modules'), // non module file
         base: PathUtil.cwd,
-        map: e => e
-      } as FrameworkScan,
-      ...Object.entries(EnvUtil.getDynamicModules()).map(([dep, pth]) => (
-        {
+        map: entry => entry
+      },
+      ...Object.entries(EnvUtil.getDynamicModules()).map(([dep, pth]) => {
+        const scan: FrameworkScan = {
           testDir: x => !x.includes('node_modules'),
           base: pth,
-          map: e => {
-            e.module = e.module.includes('node_modules') ? e.module : e.file.replace(pth, `node_modules/${dep}`);
-            return e;
+          map: entry => {
+            entry.module = entry.module.includes('node_modules') ?
+              entry.module :
+              entry.file.replace(pth, `node_modules/${dep}`);
+            return entry;
           }
-        } as FrameworkScan
-      ))
+        };
+        return scan;
+      })
     ];
 
     const out: ScanEntry[][] = [];
     for (const { testDir, base, map } of folders) {
-      out.push(ScanFs.scanDirSync({ testFile, testDir }, base).map(map).filter(x => x.stats.isFile()));
+      out.push(ScanFs.scanDirSync({ testFile, testDir }, base).map(map).filter(x => x.stats?.isFile()));
     }
     return out.flat();
   }
@@ -115,7 +118,7 @@ export class SourceIndex {
           idx.set(mod, { base: el.file, files: new Map() });
         }
 
-        if (el.stats.isDirectory() || el.stats.isSymbolicLink()) {
+        if (ScanFs.isDir(el)) {
           // Do nothing
         } else if (sub === 'index.ts') {
           idx.get(mod)!.index = el;

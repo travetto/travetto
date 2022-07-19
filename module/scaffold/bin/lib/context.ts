@@ -74,6 +74,7 @@ export class Context {
   }
 
   get sourceListing() {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return import(this.source('listing.json')) as Promise<Listing>;
   }
 

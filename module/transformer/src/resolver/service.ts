@@ -111,7 +111,7 @@ export class TypeResolver implements Checker {
 
     try {
       return resolve(this.getType(node));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Unable to resolve type', err.stack);
       return { key: 'literal', ctor: Object, name: 'object' };
     }

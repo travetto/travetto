@@ -18,7 +18,7 @@ export class FsUtil {
 
   /**
    * Command to remove a folder
-   * @param pth Thefolder to delete
+   * @param pth The folder to delete
    */
   static #unlinkCommand(pth: string): [string, string[]] {
     if (process.platform === 'win32') {

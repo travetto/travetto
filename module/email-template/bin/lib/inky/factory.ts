@@ -54,7 +54,7 @@ export class InkyComponentFactory implements ComponentFactory {
         if (TagRegistry.has(this, TagRegistry.getTag(tagName, this.ns))) {
           if (tagName === 'columns' && !('hasColumns' in node)) {
             node.hasColumns = true;
-            const all = children.filter(x => Parse5Adapter.isElementNode(x)) as Element[];
+            const all = children.filter((x): x is Element => Parse5Adapter.isElementNode(x));
             HtmlUtil.setDomAttribute(all[0], 'class', 'first');
             HtmlUtil.setDomAttribute(all[all.length - 1], 'class', 'last');
           }
@@ -278,7 +278,7 @@ export class InkyComponentFactory implements ComponentFactory {
 
   @Tag()
   center(element: Element) {
-    for (const child of (Parse5Adapter.getChildNodes(element) ?? []) as Node[]) {
+    for (const child of Parse5Adapter.getChildNodes(element) ?? []) {
       if (Parse5Adapter.isElementNode(child)) {
         HtmlUtil.setDomAttribute(child, 'align', 'center');
         HtmlUtil.setDomAttribute(child, 'class', 'float-center');

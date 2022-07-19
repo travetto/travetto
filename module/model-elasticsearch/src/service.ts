@@ -113,7 +113,7 @@ export class ElasticsearchModelService implements
     try {
       const res = await this.client.get({ ...this.manager.getIdentity(cls), id });
       return this.postLoad(cls, res.body._source);
-    } catch (err) {
+    } catch {
       throw new NotFoundError(cls, id);
     }
   }
@@ -130,7 +130,7 @@ export class ElasticsearchModelService implements
       if (res.result === 'not_found') {
         throw new NotFoundError(cls, id);
       }
-    } catch (err) {
+    } catch (err: any) {
       if (err.body && err.body.result === 'not_found') {
         throw new NotFoundError(cls, id);
       }
@@ -246,7 +246,7 @@ export class ElasticsearchModelService implements
 
     await ModelBulkUtil.preStore(cls, operations, this);
 
-    const body = operations.reduce((acc, op) => {
+    const body = operations.reduce<(T | Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>> | { doc: T })[]>((acc, op) => {
 
       const esIdent = this.manager.getIdentity((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls }).constructor as Class);
       const ident = (ElasticsearchSchemaUtil.MAJOR_VER < 7 ?
@@ -266,14 +266,14 @@ export class ElasticsearchModelService implements
         delete (op.update as { id?: unknown }).id;
       }
       return acc;
-    }, [] as (T | Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>> | { doc: T })[]);
+    }, []);
 
     const { body: res } = await this.client.bulk({
       body,
       refresh: true
     });
 
-    const out: BulkResponse = {
+    const out: BulkResponse<EsBulkError> = {
       counts: {
         delete: 0,
         insert: 0,
@@ -282,14 +282,14 @@ export class ElasticsearchModelService implements
         error: 0
       },
       insertedIds: new Map(),
-      errors: [] as EsBulkError[]
+      errors: []
     };
 
     type Count = keyof typeof out['counts'];
 
     for (let i = 0; i < res.items.length; i++) {
       const item = res.items[i];
-      const [k] = Object.keys(item) as (Count | 'create' | 'index')[];
+      const [k] = Util.getKeys<Count | 'create' | 'index'>(item);
       const v = item[k]!;
       if (v.error) {
         out.errors.push(v.error);

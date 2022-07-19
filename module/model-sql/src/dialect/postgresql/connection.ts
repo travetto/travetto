@@ -54,7 +54,7 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
     try {
       const out = await conn.query(query);
       return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as T[] };
-    } catch (err) {
+    } catch (err: any) {
       if (err.message.includes('duplicate key value')) {
         throw new ExistsError('query', query);
       } else {

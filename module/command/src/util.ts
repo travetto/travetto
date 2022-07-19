@@ -34,7 +34,7 @@ export class CommandUtil {
               .on('end', () => res((msg.statusCode || 200)))
               .on('close', () => res((msg.statusCode || 200))));
           req.on('error', (err) => res(500));
-        } catch (e) {
+        } catch {
           res(400);
         }
       });
@@ -60,12 +60,12 @@ export class CommandUtil {
               .on('connect', () => sock.destroy())
               .on('timeout', rej)
               .on('error', rej);
-          } catch (e) {
-            rej(e);
+          } catch (err) {
+            rej(err);
           }
         });
         return;
-      } catch (e) {
+      } catch {
         await Util.wait(50);
       }
     }

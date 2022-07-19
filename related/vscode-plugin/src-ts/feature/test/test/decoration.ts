@@ -86,7 +86,7 @@ export class Decorations {
       const getVal = (str: unknown) => {
         try {
           return util.inspect(JSON.parse(str as string), false, 10).replace(/\n/g, '  \n\t');
-        } catch (e) {
+        } catch {
           return str;
         }
       };

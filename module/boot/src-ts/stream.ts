@@ -102,10 +102,10 @@ export class StreamUtil {
    * Pipe a stream and wait for completion
    */
   static async pipe(src: Readable, dest: Writable, opts?: { end?: boolean }) {
-    await new Promise((succ, rej) => {
-      src.on('end', succ)
-        .on('drain', succ)
-        .on('close', succ)
+    await new Promise((res, rej) => {
+      src.on('end', res)
+        .on('drain', res)
+        .on('close', res)
         .on('error', rej);
       src.pipe(dest, opts);
     });

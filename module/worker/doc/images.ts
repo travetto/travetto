@@ -18,8 +18,8 @@ class ImageProcessor implements Worker<string> {
     try {
       this.proc = ExecUtil.spawn('convert images', [path]);
       await this.proc;
-    } catch (e) {
-
+    } catch {
+      // Do nothing
     }
     this.active = false;
   }

@@ -107,7 +107,7 @@ export class ColorUtil {
       } else {
         const out = keys.map((el, i) => {
           if (typeof el !== 'string') {
-            const subKeys = Object.keys(el) as (keyof T)[];
+            const subKeys: (keyof T)[] = Object.keys(el);
             if (subKeys.length !== 1) {
               throw new Error('Invalid template variable, one and only one key should be specified');
             }

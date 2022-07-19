@@ -42,19 +42,19 @@ export class PathUtil {
   }
 
   /**
-   * Resolve path to use / for directory seps
-   * @param pths The paths to resolve
+   * Resolve path to use / for directory separator
+   * @param paths The paths to resolve
    */
-  static resolveUnix(...pths: string[]) {
-    return this.toUnix(path.resolve(this.cwd, ...pths));
+  static resolveUnix(...paths: string[]) {
+    return this.toUnix(path.resolve(this.cwd, ...paths));
   }
 
   /**
    * Path.join, and coercing to unix
-   * @param pths The paths to join
+   * @param paths The paths to join
    */
-  static joinUnix(...pths: string[]) {
-    return this.toUnix(path.join(...pths));
+  static joinUnix(...paths: string[]) {
+    return this.toUnix(path.join(...paths));
   }
 
   /**

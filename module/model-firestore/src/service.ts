@@ -102,7 +102,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     ModelCrudUtil.ensureNotSubType(cls);
     try {
       await this.#getCollection(cls).doc(id).delete({ exists: true } as unknown as Precondition);
-    } catch (err) {
+    } catch (err: any) {
       if (`${err.message}`.includes('NOT_FOUND')) {
         throw new NotFoundError(cls, id);
       }
@@ -115,9 +115,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     for (const el of batch.docs) {
       try {
         yield await this.get(cls, el.id);
-      } catch (e) {
-        if (!(e instanceof NotFoundError)) {
-          throw e;
+      } catch (err) {
+        if (!(err instanceof NotFoundError)) {
+          throw err;
         }
       }
     }

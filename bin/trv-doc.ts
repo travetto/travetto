@@ -84,7 +84,7 @@ const markdownPage = (mod: string) =>
           })
           .$writeFinal(html)
         )
-        .catch((e) => console.log(`${pkg.name}... failed: ${e}`));
+        .catch(err => console.log(`${pkg.name}... failed: ${err}`));
     }, { concurrent: target ? 1 : 4 })
 ]
   .$forEach(() => { });

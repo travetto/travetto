@@ -13,8 +13,8 @@ export class ModelExportPlugin extends BaseModelPlugin {
       await this.validate(provider, models);
       const resolved = await this.resolve(provider, models);
       await ModelExportUtil.run(resolved.provider, resolved.models);
-    } catch (e) {
-      console.error(e.message);
+    } catch (err: any) {
+      console.error(err.message);
     }
   }
 }

@@ -86,9 +86,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
         const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item as DeepPartial<T>);
         this.#indices[idx.type].get(idxName)?.get(key)?.delete(id);
       }
-    } catch (e) {
-      if (!(e instanceof NotFoundError)) {
-        throw e;
+    } catch (err) {
+      if (!(err instanceof NotFoundError)) {
+        throw err;
       }
     }
   }
@@ -226,9 +226,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     for (const id of this.#getStore(cls).keys()) {
       try {
         yield await this.get(cls, id);
-      } catch (e) {
-        if (!(e instanceof NotFoundError)) {
-          throw e;
+      } catch (err) {
+        if (!(err instanceof NotFoundError)) {
+          throw err;
         }
       }
     }

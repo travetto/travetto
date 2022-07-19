@@ -1,8 +1,9 @@
 import * as assert from 'assert';
 
+import { PathUtil } from '@travetto/boot';
 import { Test, Suite } from '@travetto/test';
+
 import { ImageUtil } from '../bin/lib/image';
-import { PathUtil } from '@travetto/boot/src';
 
 @Suite()
 class ImageUtilTest {

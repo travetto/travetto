@@ -209,7 +209,7 @@ export class MongoModelService implements
         { $set: cleaned },
         { upsert: true }
       );
-    } catch (err) {
+    } catch (err: any) {
       if (err.message.includes('duplicate key error')) {
         throw new ExistsError(cls, cleaned.id);
       } else {
@@ -233,16 +233,18 @@ export class MongoModelService implements
     let final: Record<string, unknown> = item;
 
     const items = MongoUtil.extractSimple(final);
-    final = Object.entries(items).reduce((acc, [k, v]) => {
-      if (v === null || v === undefined) {
-        const o = (acc.$unset = acc.$unset ?? {}) as Record<string, unknown>;
-        o[k] = v;
-      } else {
-        const o = (acc.$set = acc.$set ?? {}) as Record<string, unknown>;
-        o[k] = v;
-      }
-      return acc;
-    }, {} as Record<string, unknown>);
+    final = Object
+      .entries(items)
+      .reduce<Record<string, unknown>>((acc, [k, v]) => {
+        if (v === null || v === undefined) {
+          const o = (acc.$unset ??= {}) as Record<string, unknown>;
+          o[k] = v;
+        } else {
+          const o = (acc.$set ??= {}) as Record<string, unknown>;
+          o[k] = v;
+        }
+        return acc;
+      }, {});
 
     const id = item.id;
     const res = await store.findOneAndUpdate(
@@ -272,9 +274,9 @@ export class MongoModelService implements
     for await (const el of cursor) {
       try {
         yield MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el));
-      } catch (e) {
-        if (!(e instanceof NotFoundError)) {
-          throw e;
+      } catch (err) {
+        if (!(err instanceof NotFoundError)) {
+          throw err;
         }
       }
     }
@@ -315,7 +317,7 @@ export class MongoModelService implements
 
   // Bulk
   async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {
-    const out: BulkResponse = {
+    const out: BulkResponse<{ index: number }> = {
       errors: [],
       counts: {
         delete: 0,
@@ -369,7 +371,7 @@ export class MongoModelService implements
 
     if (res.hasWriteErrors()) {
       out.errors = res.getWriteErrors();
-      for (const err of out.errors as { index: number }[]) {
+      for (const err of out.errors) {
         const op = operations[err.index];
         const k = Object.keys(op)[0] as keyof BulkResponse['counts'];
         out.counts[k] -= 1;
@@ -515,7 +517,7 @@ export class MongoModelService implements
     const col = await this.getStore(cls);
     const pipeline: object[] = [{
       $group: {
-        _id: `$${field}`,
+        _id: `$${field as string}`,
         count: {
           $sum: 1
         }

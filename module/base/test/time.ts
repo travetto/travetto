@@ -13,6 +13,7 @@ class TimeSuite {
     assert(Util.timeToMs('1000ms') === 1000);
     assert(Util.timeToMs(1, 's') === 1000);
     assert(Util.timeToMs('1s') === 1000);
+    // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
     assert(Util.timeToMs(.0166666666666666666666, 'm') === 1000);
     assert(Util.timeToMs('.0166666666666666666666m') === 1000);
   }

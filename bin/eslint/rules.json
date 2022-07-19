@@ -39,10 +39,14 @@
       2,
       {
         "ignoredNodes": [
+          "PropertyDefinition[decorators]",
+          "TSUnionType",
+          "TSTypeParameterInstantiation",
           "FunctionExpression > .params[decorators.length > 0]",
           "FunctionExpression > .params > :matches(Decorator, :not(:first-child))",
           "ClassBody.body > PropertyDefinition[decorators.length > 0] > .key"
-        ]
+        ],
+        "SwitchCase": 1
       }
     ],
     "@typescript-eslint/member-delimiter-style": [
@@ -209,6 +213,28 @@
           "PascalCase",
           "camelCase"
         ]
+      },
+      {
+        "selector": "objectLiteralProperty",
+        "modifiers": [
+          "requiresQuotes"
+        ],
+        "format": null,
+        "custom": {
+          "regex": ".*",
+          "match": true
+        }
+      },
+      {
+        "selector": "objectLiteralMethod",
+        "modifiers": [
+          "requiresQuotes"
+        ],
+        "format": null,
+        "custom": {
+          "regex": ".*",
+          "match": true
+        }
       }
     ],
     "curly": "error",
@@ -296,6 +322,12 @@
             "/"
           ]
         }
+      }
+    ],
+    "@typescript-eslint/consistent-type-assertions": [
+      "warn",
+      {
+        "assertionStyle": "never"
       }
     ]
   },

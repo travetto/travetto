@@ -10,8 +10,8 @@ export class DecoratorUtil {
    * Get identifier for a decorator
    */
   static getDecoratorIdent(d: ts.Decorator): ts.Identifier {
-    if (ts.isCallExpression(d.expression)) {
-      return d.expression.expression as ts.Identifier;
+    if (ts.isCallExpression(d.expression) && ts.isIdentifier(d.expression.expression)) {
+      return d.expression.expression;
     } else if (ts.isIdentifier(d.expression)) {
       return d.expression;
     } else {
@@ -46,6 +46,7 @@ export class DecoratorUtil {
    * Find the primary argument of a call expression, or decorator.
    */
   static getArguments<T extends ts.Expression = ts.Expression>(node: ts.Decorator | undefined): T[] | undefined {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return node && ts.isCallExpression(node.expression) ? [...node.expression.arguments] as T[] : undefined;
   }
 }

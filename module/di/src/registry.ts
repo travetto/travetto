@@ -113,12 +113,12 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const promises = deps.map(async x => {
       try {
         return await this.getInstance(x.target, x.qualifier, x.resolution);
-      } catch (e) {
-        if (x.optional && e instanceof InjectionError && e.category === 'notfound') {
+      } catch (err: any) {
+        if (x.optional && err instanceof InjectionError && err.category === 'notfound') {
           return undefined;
         } else {
-          e.message = `${e.message} via=${managed.class.ᚕid}`;
-          throw e;
+          err.message = `${err.message} via=${managed.class.ᚕid}`;
+          throw err;
         }
       }
     });
@@ -197,10 +197,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       const instance = await instancePromise;
       this.instances.get(classId)!.set(qualifier, instance);
       return instance;
-    } catch (e) {
+    } catch (err) {
       // Clear it out, don't save failed constructions
       this.instancePromises.get(classId)!.delete(qualifier);
-      throw e;
+      throw err;
     }
   }
 

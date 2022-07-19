@@ -26,7 +26,7 @@ export class ExecUtilTest {
     const proc = ExecUtil.spawn('ls', ['xxxx'], {
       cwd: __dirname
     });
-    const result = await proc.result.catchAsResult();
+    const result = await proc.result.catchAsResult!();
     assert(result.stderr.includes('xxxx'));
     assert(result.code > 0);
     assert(!result.valid);

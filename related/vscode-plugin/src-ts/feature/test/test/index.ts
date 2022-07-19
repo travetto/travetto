@@ -83,7 +83,7 @@ class TestRunnerFeature extends BaseFeature {
    * Build code lenses for a given document
    * @param doc
    */
-  buildCodeLenses(doc: vscode.TextDocument) {
+  buildCodeLenses(doc: vscode.TextDocument): vscode.CodeLens[] {
     return (this.#consumer.getResults(doc)?.getListOfTests() || [])
       .filter(x => x.start < doc.lineCount && doc.lineAt(x.start - 1).text.includes('@Test'))
       .map(test => ({
@@ -94,7 +94,7 @@ class TestRunnerFeature extends BaseFeature {
           title: 'Debug Test',
           arguments: [doc.fileName, test.code, true]
         }
-      }) as vscode.CodeLens);
+      }));
   }
 
   /**

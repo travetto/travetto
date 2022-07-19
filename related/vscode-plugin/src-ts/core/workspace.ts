@@ -111,7 +111,7 @@ export class Workspace {
 
     try {
       return await Promise.race([result, this.sleep(500).then(() => { throw new Error(); })]);
-    } catch (err) { // Handle timeout
+    } catch { // Handle timeout
       await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         title: 'Building...',

@@ -123,9 +123,9 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         UploadId,
         MultipartUpload: { Parts: parts }
       }));
-    } catch (e) {
+    } catch (err) {
       await this.client.abortMultipartUpload(this.#q(STREAM_SPACE, id, { UploadId }));
-      throw e;
+      throw err;
     }
   }
 
@@ -161,13 +161,13 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         return false;
       }
       return true;
-    } catch (e) {
-      if (isMetadataBearer(e)) {
-        if (e.$metadata.httpStatusCode === 404) {
+    } catch (err) {
+      if (isMetadataBearer(err)) {
+        if (err.$metadata.httpStatusCode === 404) {
           return false;
         }
       }
-      throw e;
+      throw err;
     }
   }
 
@@ -190,13 +190,13 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         }
       }
       throw new NotFoundError(cls, id);
-    } catch (e) {
-      if (isMetadataBearer(e)) {
-        if (e.$metadata.httpStatusCode === 404) {
-          e = new NotFoundError(cls, id);
+    } catch (err) {
+      if (isMetadataBearer(err)) {
+        if (err.$metadata.httpStatusCode === 404) {
+          err = new NotFoundError(cls, id);
         }
       }
-      throw e;
+      throw err;
     }
   }
 
@@ -255,9 +255,9 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       for (const { id } of batch) {
         try {
           yield await this.get(cls, id);
-        } catch (e) {
-          if (!(e instanceof NotFoundError)) {
-            throw e;
+        } catch (err) {
+          if (!(err instanceof NotFoundError)) {
+            throw err;
           }
         }
       }
@@ -302,13 +302,13 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     const query = this.#q(STREAM_SPACE, location);
     try {
       return await this.client.headObject(query);
-    } catch (e) {
-      if (isMetadataBearer(e)) {
-        if (e.$metadata.httpStatusCode === 404) {
-          e = new NotFoundError(STREAM_SPACE, location);
+    } catch (err) {
+      if (isMetadataBearer(err)) {
+        if (err.$metadata.httpStatusCode === 404) {
+          err = new NotFoundError(STREAM_SPACE, location);
         }
       }
-      throw e;
+      throw err;
     }
   }
 
@@ -317,7 +317,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
     if (obj) {
       const ret: StreamMeta = {
-        ...obj.Metadata,
+        ...obj.Metadata as unknown as StreamMeta,
         size: obj.ContentLength!,
       };
       if (hasContenttype(ret)) {
@@ -343,7 +343,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   async createStorage() {
     try {
       await this.client.headBucket({ Bucket: this.config.bucket });
-    } catch (e) {
+    } catch {
       await this.client.createBucket({ Bucket: this.config.bucket });
     }
   }

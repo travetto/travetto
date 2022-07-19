@@ -41,9 +41,12 @@ export class ModuleManager {
     try {
       mod = this.#moduleLoad.apply(null, [request, parent]);
       ModuleUtil.checkForCycles(mod, request, parent);
-    } catch (e) {
+    } catch (err: unknown) {
+      if (!(err instanceof Error)) {
+        throw err;
+      }
       const name = Module._resolveFilename!(request, parent);
-      mod = Module._compile!(ModuleUtil.handlePhaseError('load', name, e as Error), name);
+      mod = Module._compile!(ModuleUtil.handlePhaseError('load', name, err), name);
     }
     return ModuleUtil.handleModule(mod, request, parent);
   }
@@ -93,8 +96,11 @@ export class ModuleManager {
     const jsf = tsf.replace(/[.]ts$/, '.js');
     try {
       return m._compile(content, jsf);
-    } catch (e) {
-      content = ModuleUtil.handlePhaseError('compile', tsf, e as Error);
+    } catch (err: unknown) {
+      if (!(err instanceof Error)) {
+        throw err;
+      }
+      content = ModuleUtil.handlePhaseError('compile', tsf, err);
       return m._compile(content, jsf);
     }
   }
@@ -108,12 +114,16 @@ export class ModuleManager {
     return AppCache.getOrSet(tsf, () => {
       try {
         const diags: tsi.Diagnostic[] = [];
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const ts = require('typescript') as typeof tsi;
-        const ret = ts.transpile(SourceUtil.preProcess(tsf), TranspileUtil.compilerOptions as tsi.CompilerOptions, tsf, diags);
+        const ret = ts.transpile(SourceUtil.preProcess(tsf), TranspileUtil.compilerOptions, tsf, diags);
         TranspileUtil.checkTranspileErrors(tsf, diags);
         return ret;
-      } catch (err) {
-        return TranspileUtil.transpileError(tsf, err as Error);
+      } catch (err: unknown) {
+        if (!(err instanceof Error)) {
+          throw err;
+        }
+        return TranspileUtil.transpileError(tsf, err);
       }
     }, force);
   }

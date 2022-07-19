@@ -20,7 +20,7 @@ class CycleTest {
       const { ABC } = await import('./cycle/a');
       const res = await DependencyRegistry.getInstance(ABC);
       console.log('Loaded dependency', { instance: res.constructor.name });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to load dependency', { error: err });
       throw err;
     }

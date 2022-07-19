@@ -24,7 +24,8 @@ declare global {
 }
 
 
-export const Module = Mod as unknown as NodeModule;
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+export const Module: NodeModule = Mod as unknown as NodeModule;
 
 /**
  * Module utils
@@ -78,7 +79,7 @@ export class ModuleUtil {
           if (p && p.endsWith(SourceUtil.EXT)) {
             throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
           }
-        } catch (err) {
+        } catch {
           // Ignore if we can't resolve
         }
       }

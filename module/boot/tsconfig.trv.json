@@ -2,22 +2,19 @@
   "compilerOptions": {
     "module": "CommonJS",
     "target": "esnext",
-    "strict": true,
-    "strictPropertyInitialization": false,
-    "useUnknownInCatchVariables": false,
-    "noImplicitOverride": false,
-    "useDefineForClassFields": true,
-    "sourceMap": false,
     "moduleResolution": "node",
-    "inlineSourceMap": true,
     "lib": [
       "es2022"
     ],
-    "resolveJsonModule": true,
-    "removeComments": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
     "noEmitOnError": false,
     "noErrorTruncation": true,
-    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "sourceMap": false,
+    "inlineSourceMap": true,
+    "removeComments": true,
     "importHelpers": true,
     "outDir": "build/"
   }

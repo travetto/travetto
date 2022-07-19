@@ -18,12 +18,13 @@ export class PackUtil {
   static #modes: Partial<CommonConfig>[];
 
   static commonExtend<T extends CommonConfig>(a: T, b: Partial<T>): T {
-    return {
+    const out = {
       active: b.active ?? a.active,
       workspace: b.workspace ?? a.workspace,
       preProcess: [...(b.preProcess ?? []), ...(a.preProcess ?? [])],
       postProcess: [...(b.postProcess ?? []), ...(a.postProcess ?? [])],
-    } as T;
+    } as unknown as T;
+    return out;
   }
 
   /**
@@ -34,7 +35,7 @@ export class PackUtil {
       this.#modes = await Promise.all(
         SourceIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
           .map(async (x) => {
-            const req = (await import(x.file)).config as Partial<CommonConfig>;
+            const req: Partial<CommonConfig> = (await import(x.file)).config;
             req.file = x.module.replace(/^node_modules\//, '');
             return req;
           })
@@ -81,7 +82,7 @@ export class PackUtil {
     if (!!(await FsUtil.exists(out))) {
       src = await fs.readFile(out, 'utf8');
     }
-    const lines = Object.entries(env).map(([k, v]) => v ? `process.env['${k}'] = \`${v!.replace(/`/g, '\\`')}\`;` : '');
+    const lines = Object.entries(env).map(([k, v]) => v ? `process.env['${k}'] = \`${v.replace(/`/g, '\\`')}\`;` : '');
     const content = `${src}\n${lines.join('\n')}`;
     await fs.writeFile(PathUtil.resolveUnix(workspace, '.env.js'), content, { encoding: 'utf8' });
   }

@@ -16,7 +16,7 @@ export interface ScanEntry {
   /**
    * Stats information
    */
-  stats: Stats;
+  stats?: Stats;
   /**
    * List of child entries
    */
@@ -62,7 +62,7 @@ export class ScanFs {
    * @param x The entry to check
    */
   static isDir(x: ScanEntry) {
-    return x.stats.isDirectory() || x.stats.isSymbolicLink();
+    return x.stats && (x.stats.isDirectory() || x.stats.isSymbolicLink());
   }
 
   /**
@@ -87,7 +87,7 @@ export class ScanFs {
     const dirs: ScanEntry[] = [];
 
     if (await FsUtil.exists(base)) {
-      dirs.push({ file: base, children: [] as ScanEntry[] } as ScanEntry);
+      dirs.push({ file: base, children: [], module: '' });
     }
 
     while (dirs.length) {
@@ -102,11 +102,11 @@ export class ScanFs {
           full = handler.resolvePath(full);
         }
         const stats = await fs.lstat(full);
-        const subEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
+        const subEntry: ScanEntry & { module: string } = { stats, file: full, module: full.replace(`${base}/`, '') };
 
         if (this.isDir(subEntry)) {
           if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
-            if (subEntry.stats.isSymbolicLink() || subEntry.stats.isDirectory()) {
+            if (this.isDir(subEntry)) {
               const p = await fs.realpath(full);
               if (!visited.has(p)) {
                 visited.add(p);
@@ -137,7 +137,7 @@ export class ScanFs {
     const dirs: ScanEntry[] = [];
 
     if (FsUtil.existsSync(base)) {
-      dirs.push({ file: base, children: [] as ScanEntry[] } as ScanEntry);
+      dirs.push({ file: base, children: [], module: '' });
     }
 
     while (dirs.length) {
@@ -152,11 +152,11 @@ export class ScanFs {
           full = handler.resolvePath(full);
         }
         const stats = lstatSync(full);
-        const subEntry: ScanEntry = { stats, file: full, module: full.replace(`${base}/`, '') };
+        const subEntry: ScanEntry & { module: string } = { stats, file: full, module: full.replace(`${base}/`, '') };
 
         if (this.isDir(subEntry)) {
           if (!handler.testDir || handler.testDir(subEntry.module, subEntry)) {
-            if (subEntry.stats.isSymbolicLink() || subEntry.stats.isDirectory()) {
+            if (this.isDir(subEntry)) {
               const p = realpathSync(full);
               if (!visited.has(p)) {
                 visited.add(p);

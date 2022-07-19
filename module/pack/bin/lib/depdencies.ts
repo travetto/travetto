@@ -15,6 +15,14 @@ const DEP_MAPPING = {
   optPeer: 'optionalPeerDependencies'
 };
 
+type PackageShape = {
+  name: string;
+} & {
+  [key: string]: {
+    [key: string]: string;
+  };
+};
+
 /**
  * Utilities for processing the package.json dependencies
  */
@@ -53,7 +61,7 @@ export class DependenciesUtil {
     types = ['prod'],
     maxDepth = Number.MAX_SAFE_INTEGER
   }: DepResolveConfig) {
-    const pending = [[root, 0]] as [string, number][];
+    const pending: [string, number][] = [[root, 0]];
     const foundSet = new Set<string>();
     const found: ResolvedDep[] = [];
     while (pending.length) {
@@ -61,14 +69,15 @@ export class DependenciesUtil {
       if (depth > maxDepth) { // Ignore if greater than valid max depth
         continue;
       }
-      const p = await import(`${top}/package.json`) as Record<string, Record<string, string>> & { name: string };
-      const deps = [] as (readonly [name: string, type: DepType, version: string])[];
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const p = await import(`${top}/package.json`) as PackageShape;
+      const deps: (readonly [name: string, type: DepType, version: string])[] = [];
       for (const type of types) {
         if (
           type !== 'dev' ||
           maxDepth === 0
         ) {
-          deps.push(...Object.entries(p[DEP_MAPPING[type]] ?? {}).map(([name, version]) => [name, type as DepType, version] as const));
+          deps.push(...Object.entries(p[DEP_MAPPING[type]] ?? {}).map(([name, version]) => [name, type, version] as const));
         }
       }
       for (const [dep, type, version] of deps) {
@@ -80,7 +89,7 @@ export class DependenciesUtil {
             found.push({ file: resolved, type, dep, version });
             pending.push([resolved, depth + 1]);
           }
-        } catch (err) {
+        } catch {
           if (!dep.startsWith('@types') && type !== 'opt' && type !== 'optPeer') {
             console.error('Unable to resolve', { type, dependency: dep });
           }

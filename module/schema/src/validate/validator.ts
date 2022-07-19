@@ -243,7 +243,7 @@ export class SchemaValidator {
         if (res) {
           errors.push(res);
         }
-      } catch (err) {
+      } catch (err: any) {
         errors.push(err);
       }
     }
@@ -276,12 +276,12 @@ export class SchemaValidator {
   static async validatePartial<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
     try {
       await this.validate(cls, o, view);
-    } catch (e) {
-      if (e instanceof ValidationResultError) { // Don't check required fields
-        const errs = e.errors.filter(x => x.kind !== 'required');
+    } catch (err) {
+      if (err instanceof ValidationResultError) { // Don't check required fields
+        const errs = err.errors.filter(x => x.kind !== 'required');
         if (errs.length) {
-          e.errors = errs;
-          throw e;
+          err.errors = errs;
+          throw err;
         }
       }
     }

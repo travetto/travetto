@@ -171,9 +171,9 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     for await (const [id] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json')) {
       try {
         yield await this.get(cls, id);
-      } catch (e) {
-        if (!(e instanceof NotFoundError)) {
-          throw e;
+      } catch (err) {
+        if (!(err instanceof NotFoundError)) {
+          throw err;
         }
       }
     }

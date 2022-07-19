@@ -22,13 +22,14 @@ export class EnvUtil {
    * @param k The environment key to search for
    * @param def The default value if the key isn't found
    */
-  static get(k: string, def: string): string;
-  static get(k: string, def?: string): string | undefined;
-  static get(k: string, def?: string | undefined): string | undefined {
-    return process.env[k] ??
+  static get<K extends string = string>(k: string, def: K): K;
+  static get<K extends string = string>(k: string, def?: K): K | undefined;
+  static get<K extends string = string>(k: string, def?: K | undefined): K | undefined {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return (process.env[k] ??
       process.env[k.toUpperCase()] ??
       process.env[k.toLowerCase()] ??
-      def;
+      def) as K;
   }
 
   /**
@@ -52,7 +53,7 @@ export class EnvUtil {
       .filter(x => !!x)
       .map(x => {
         const [p, v] = x.split(sep);
-        return [p, v || undefined] as [string, string];
+        return [p, v || undefined] as const;
       })
       .filter(([p, v]) => !!p);
   }
@@ -111,9 +112,9 @@ export class EnvUtil {
     if (this.isFalse(key)) {
       return false;
     } else {
-      let val: T[number] | false = this.get(key, def) as T[number];
-      if (!values.includes(val)) {
-        val = def as T[number];
+      let val: T[number] | undefined = this.get<T[number]>(key, def);
+      if (!val || !values.includes(val)) {
+        val = def;
       }
       return val === undefined ? false : val;
     }
