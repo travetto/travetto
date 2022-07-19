@@ -20,7 +20,7 @@ export class TemplateUtil {
   static TPL_EXT = /[.]email[.]html$/;
 
   static getOutputs(file: string) {
-    return PARTS.map(k => [k, file.replace(this.TPL_EXT, `.compiled.${k}`)] as [part: Parts, file: string]);
+    return PARTS.map((k): [part: Parts, file: string] => [k, file.replace(this.TPL_EXT, `.compiled.${k}`)]);
   }
 
   /**

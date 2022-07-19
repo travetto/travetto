@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import { ParameterObject } from 'openapi3-ts/src/model/OpenApi';
+import { Readable } from 'stream';
 
 import { RootRegistry } from '@travetto/registry';
 import { Controller, Delete, Get, Head, Patch, Put } from '@travetto/rest';
@@ -43,7 +44,7 @@ class TestCont {
 
   @Get('/download')
   async download(size?: number) {
-    return (undefined as unknown as NodeJS.ReadableStream);
+    return (undefined as unknown as Readable);
   }
 }
 

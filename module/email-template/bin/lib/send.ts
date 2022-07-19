@@ -26,7 +26,7 @@ export class SendUtil {
       if (senderConfig) {
         const cls = class { };
         DependencyRegistry.registerFactory({
-          fn: () => new NodemailerTransport(senderConfig as ConstructorParameters<typeof NodemailerTransport>[0]),
+          fn: () => new NodemailerTransport(senderConfig),
           target: MailTransportTarget,
           src: cls,
           id: 'nodemailer',

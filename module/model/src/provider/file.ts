@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import { createReadStream } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { Readable } from 'stream';
 
 import { FsUtil, PathUtil, StreamUtil } from '@travetto/boot';
 import { Class, Util, TimeSpan } from '@travetto/base';
@@ -179,7 +180,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   // Stream
-  async upsertStream(location: string, input: NodeJS.ReadableStream, meta: StreamMeta) {
+  async upsertStream(location: string, input: Readable, meta: StreamMeta) {
     const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
       StreamUtil.writeToFile(input, file),

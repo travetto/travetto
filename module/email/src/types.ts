@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 import { Url } from 'url';
 
 /**
@@ -12,7 +13,7 @@ export interface Address {
  * An attachment for the email
  */
 interface AttachmentLike {
-  content?: string | Buffer | NodeJS.ReadableStream;
+  content?: string | Buffer | Readable;
   path?: string | Url;
 }
 
@@ -24,10 +25,10 @@ export interface Attachment extends AttachmentLike {
   cid?: string;
   encoding?: string;
   contentType?: string;
-  contentTransferEncoding?: string;
-  contentDisposition?: string;
+  contentTransferEncoding?: false | '7bit' | 'base64' | 'quoted-printable';
+  contentDisposition?: 'attachment' | 'inline';
   headers?: Record<string, string | string[]>;
-  raw?: string | Buffer | NodeJS.ReadableStream | AttachmentLike;
+  raw?: string | Buffer | Readable | AttachmentLike;
 }
 
 /**

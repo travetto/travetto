@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises';
 import { createReadStream } from 'fs';
+import { Readable } from 'stream';
 
 import { PathUtil, ScanFs, ScanEntry, FsUtil } from '@travetto/boot';
 
@@ -125,7 +126,7 @@ class $ResourceManager {
    * @param pth The path to read
    * @param options The options to determine the read behavior
    */
-  async readStream(pth: string, options?: Parameters<typeof createReadStream>[1]): Promise<NodeJS.ReadableStream> {
+  async readStream(pth: string, options?: Parameters<typeof createReadStream>[1]): Promise<Readable> {
     pth = await this.find(pth);
     return createReadStream(pth, options);
   }

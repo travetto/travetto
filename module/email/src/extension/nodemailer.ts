@@ -21,7 +21,7 @@ export class NodemailerTransport implements MailTransport {
   }
 
   async send(mail: MessageOptions): Promise<SentMessage> {
-    const res = await this.#transport.sendMail(mail as nodemailer.SendMailOptions) as {
+    const res = await this.#transport.sendMail(mail) as {
       messageId?: string;
       envelope?: Record<string, string>;
       accepted?: string[];

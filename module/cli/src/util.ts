@@ -1,4 +1,6 @@
 import * as readline from 'readline';
+import { Writable } from 'stream';
+
 import { CompletionConfig } from './types';
 
 /**
@@ -79,7 +81,7 @@ export class CliUtil {
    * @param text Text, if desired
    * @param clear Should the entire line be cleared?
    */
-  static async rewriteLine(stream: NodeJS.WritableStream, text?: string, clear = false) {
+  static async rewriteLine(stream: Writable, text?: string, clear = false) {
     await new Promise<void>(r => readline.cursorTo(stream, 0, undefined, () => {
       if (clear) {
         readline.clearLine(stream, 0);
@@ -103,7 +105,7 @@ export class CliUtil {
    * @param delay Delay duration
    */
   static async waiting<T>(message: string, work: Promise<T> | (() => Promise<T>),
-    config: { completion?: string, delay?: number, stream?: NodeJS.WritableStream } = {}
+    config: { completion?: string, delay?: number, stream?: Writable } = {}
   ) {
     const { stream, delay, completion } = { delay: 1000, stream: process.stderr, ...config };
 

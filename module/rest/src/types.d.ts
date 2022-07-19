@@ -1,5 +1,6 @@
 import { SetOption, GetOption } from 'cookies';
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'http';
+import { Readable, Writable } from 'stream';
 
 import { HeaderMap } from './types';
 import { HeadersAddedⲐ, NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from './internal/symbol';
@@ -66,7 +67,7 @@ declare global {
      * The stream to pipe the request to.  Useful for file uploads.
      * @param stream
      */
-    pipe(stream: NodeJS.WritableStream): any;
+    pipe(stream: Writable): any;
     /**
      * Get a header as a string or array of strings depending on what was passed
      * @param key
@@ -165,7 +166,7 @@ declare global {
      * Optional internal method for sending streams
      * @param stream
      */
-    [SendStreamⲐ]?(stream: NodeJS.ReadableStream): Promise<void>;
+    [SendStreamⲐ]?(stream: Readable): Promise<void>;
     /**
      * Write content directly to the output stream
      * @param value The value to write

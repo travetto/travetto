@@ -1,3 +1,5 @@
+import { Readable } from 'stream';
+
 import * as s3 from '@aws-sdk/client-s3';
 import type { MetadataBearer } from '@aws-sdk/types';
 
@@ -16,7 +18,7 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { S3ModelConfig } from './config';
 
 function isMetadataBearer(o: unknown): o is MetadataBearer {
-  return !!o && '$metadata' in (o as object);
+  return !!o && typeof o === 'object' && '$metadata' in o;
 }
 
 function hasContenttype<T>(o: T): o is T & { contenttype?: string } {
@@ -85,7 +87,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   /**
    * Write multipart file upload, in chunks
    */
-  async #writeMultipart(id: string, input: NodeJS.ReadableStream, meta: StreamMeta): Promise<void> {
+  async #writeMultipart(id: string, input: Readable, meta: StreamMeta): Promise<void> {
     const { UploadId } = await this.client.createMultipartUpload(this.#q(STREAM_SPACE, id, {
       ContentType: meta.contentType,
       ContentLength: meta.size,
@@ -267,7 +269,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return -1;
   }
 
-  async upsertStream(location: string, input: NodeJS.ReadableStream, meta: StreamMeta) {
+  async upsertStream(location: string, input: Readable, meta: StreamMeta) {
     if (meta.size < this.config.chunkSize) { // If bigger than 5 mb
       // Upload to s3
       await this.client.putObject(this.#q(STREAM_SPACE, location, {
@@ -314,10 +316,10 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     const obj = await this.headStream(location);
 
     if (obj) {
-      const ret = {
+      const ret: StreamMeta = {
         ...obj.Metadata,
         size: obj.ContentLength!,
-      } as StreamMeta;
+      };
       if (hasContenttype(ret)) {
         ret['contentType'] = ret['contenttype']!;
         delete ret['contenttype'];

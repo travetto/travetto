@@ -1,3 +1,5 @@
+import { Readable } from 'stream';
+
 import * as koa from 'koa';
 
 import { RestServerUtil } from '@travetto/rest';
@@ -49,7 +51,7 @@ export class KoaServerUtil {
         }
       },
       send: b => ctx.body = b,
-      [SendStreamⲐ]: async (stream: NodeJS.ReadableStream) => {
+      [SendStreamⲐ]: async (stream: Readable) => {
         ctx.respond = false;
         ctx.response.status = 200;
         await StreamUtil.pipe(stream, ctx.res);

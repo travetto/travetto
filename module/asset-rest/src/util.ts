@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as os from 'os';
+import * as stream from 'stream';
 import * as busboy from 'busboy';
 
 import { Request, Response } from '@travetto/rest';
@@ -45,7 +46,7 @@ export class AssetRestUtil {
   /**
    * Stream file to disk, and verify types in the process.  Produce an asset as the output
    */
-  static async toLocalAsset(data: NodeJS.ReadableStream | Buffer, filename: string) {
+  static async toLocalAsset(data: stream.Readable | Buffer, filename: string) {
     const uniqueDir = PathUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
     await fs.mkdir(uniqueDir, { recursive: true }); // TODO: Unique dir for each file? Use random file, and override metadata
     const uniqueLocal = PathUtil.resolveUnix(uniqueDir, path.basename(filename));
@@ -91,10 +92,10 @@ export class AssetRestUtil {
           }
         });
 
-        uploader.on('file', async (fieldName, stream, { filename, encoding, mimeType }) => {
+        uploader.on('file', async (fieldName, readable, { filename, encoding, mimeType }) => {
           console.debug('Uploading file', { fieldName, filename, encoding, mimeType });
           uploads.push(
-            this.toLocalAsset(stream, filename)
+            this.toLocalAsset(readable, filename)
               .then(validator)
               .then(res => mapping[fieldName] = res)
           );
