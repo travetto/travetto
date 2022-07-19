@@ -39,14 +39,15 @@ export class ScaffoldPlugin extends BasePlugin {
   }
 
   async #chooseFeature(feature: Feature): Promise<Feature | undefined> {
-    const res = await enquirer.prompt<{ choice: string }>({
+    const choice: (Parameters<typeof enquirer['prompt']>[0] & { type: 'select' }) = {
       type: 'select' as const,
       name: 'choice',
       message: 'Please select one',
       initial: feature.default,
-      choices: feature.choices!.map(x => x.title),
-    } as Parameters<typeof enquirer['prompt']>[0]);
+      choices: feature.choices!.map(x => x.title).filter((x?: string): x is string => !!x),
+    };
 
+    const res = await enquirer.prompt<{ choice: string }>(choice);
     return feature.choices?.find(x => x.title === res.choice);
   }
 

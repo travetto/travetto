@@ -283,7 +283,7 @@ export class GenerateSuite {
     assert(config.paths['/test/download'].get.responses['200']);
     assert(config.paths['/test/download'].get.responses['200'] === {
       content: {
-        'application/octect-stream': { type: 'string', format: 'binary' }
+        'application/octet-stream': { type: 'string', format: 'binary' }
       },
       description: ''
     });

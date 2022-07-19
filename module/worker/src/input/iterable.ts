@@ -2,8 +2,8 @@ import { WorkSet } from './types';
 
 type Itr<T> = Iterator<T> | AsyncIterator<T>;
 
-const hasAsyncItr = (o: unknown): o is AsyncIterable<unknown> => !!o && Symbol.asyncIterator in (o as object);
-const hasItr = (o: unknown): o is Iterable<unknown> => !!o && Symbol.iterator in (o as object);
+const hasAsyncItr = (o: unknown): o is AsyncIterable<unknown> => !!o && typeof o === 'object' && Symbol.asyncIterator in o;
+const hasItr = (o: unknown): o is Iterable<unknown> => !!o && typeof o === 'object' && Symbol.iterator in o;
 
 /**
  * Basic input source given an iterable input

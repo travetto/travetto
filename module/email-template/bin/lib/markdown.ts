@@ -1,7 +1,7 @@
 import { parse } from 'parse5';
 import * as htmlEntities from 'html-entities';
 
-import { Element, Node } from './types';
+import { Element } from './types';
 import { HtmlUtil, Parse5Adapter } from './html';
 
 const LI_TOKEN = '⇜⇟⇝';
@@ -174,12 +174,12 @@ export class MarkdownUtil {
 
     //  return finalText;
     return output
-      .reduce((all, v) => {
+      .reduce<string[]>((all, v) => {
         if (!(all[all.length - 1] === '\n' && all[all.length - 2] === '\n' && v === '\n')) {
           all.push(v);
         }
         return all;
-      }, [] as string[])
+      }, [])
       .join('')
       .trim()
       .replace(/ +[\n]/msg, '\n')

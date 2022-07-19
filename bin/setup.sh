@@ -10,6 +10,8 @@ mkdir -p $BIN/@travetto/boot
 
 [[ ! -e "$BOOT/src/fs.js" ]] && npm run boot;
 
+pushd bin/eslint 2>&1 > /dev/null; npx tsc 2> /dev/null; popd 2>&1 > /dev/null
+
 ln -sf $BOOT/bin/ $BIN/@travetto/boot/bin
 ln -sf $CLI/bin/trv.js $BIN/trv
 

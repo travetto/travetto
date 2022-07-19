@@ -172,7 +172,7 @@ export abstract class SQLDialect implements DialectState {
    * @returns
    */
   resolveDateValue(value: Date) {
-    const [day, time] = (value as Date).toISOString().split(/[TZ]/);
+    const [day, time] = value.toISOString().split(/[TZ]/);
     return this.quote(`${day} ${time}`);
   }
 

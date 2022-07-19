@@ -111,8 +111,8 @@ export class DocumentResultsManager {
       this.setStyle(test.styles[test.status], [test.decoration]);
 
       const out: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
-      for (const asrt of test.assertions) {
-        out[asrt.status].push(asrt.decoration);
+      for (const assertion of test.assertions) {
+        out[assertion.status].push(assertion.decoration);
       }
       for (const k of Object.keys(out) as StatusUnknown[]) {
         this.setStyle(test.assertStyles[k], out[k]);
@@ -364,15 +364,15 @@ export class DocumentResultsManager {
    * Get full totals
    */
   getTotals() {
-    const vals = Object.values(this.#results.test);
-    const total = vals.length;
+    const values = Object.values(this.#results.test);
+    const total = values.length;
     let passed = 0;
     let unknown = 0;
     let failed = 0;
     let skipped = 0;
 
-    for (const o of vals) {
-      switch (o.status) {
+    for (const value of values) {
+      switch (value.status) {
         case 'skipped': skipped += 1; break;
         case 'failed': failed++; break;
         case 'passed': passed++; break;

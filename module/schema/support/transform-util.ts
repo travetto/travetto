@@ -57,6 +57,7 @@ export class SchemaTransformUtil {
         if (type.commonType) {
           return this.toConcreteType(state, type.commonType, node, root);
         }
+        break;
       }
       case 'unknown':
       default: {
