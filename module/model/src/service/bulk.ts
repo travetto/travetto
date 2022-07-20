@@ -20,11 +20,11 @@ export type BulkOp<T extends ModelType> =
 /**
  * Bulk response provides a summary of all the operations
  */
-export interface BulkResponse {
+export interface BulkResponse<E = unknown> {
   /**
    * Errors returned
    */
-  errors: unknown[];
+  errors: E[];
   /**
    * Ids that were added
    */

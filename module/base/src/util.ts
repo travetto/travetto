@@ -30,6 +30,10 @@ const AsyncFunction = Object.getPrototypeOf(async function () { });
 export class Util {
   static #timePattern = new RegExp(`^(-?[0-9.]+)(${Object.keys(TIME_UNITS).join('|')})$`);
 
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  static getKeys = Object.keys.bind(Object) as
+    <K extends string | symbol | number = string, T extends object = object>(o: T) => K[];
+
   static #deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;

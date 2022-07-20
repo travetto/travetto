@@ -317,7 +317,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
     if (obj) {
       const ret: StreamMeta = {
-        ...obj.Metadata,
+        ...obj.Metadata as unknown as StreamMeta,
         size: obj.ContentLength!,
       };
       if (hasContenttype(ret)) {

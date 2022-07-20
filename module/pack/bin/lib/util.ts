@@ -18,12 +18,12 @@ export class PackUtil {
   static #modes: Partial<CommonConfig>[];
 
   static commonExtend<T extends CommonConfig>(a: T, b: Partial<T>): T {
-    const out: T = {
+    const out = {
       active: b.active ?? a.active,
       workspace: b.workspace ?? a.workspace,
       preProcess: [...(b.preProcess ?? []), ...(a.preProcess ?? [])],
       postProcess: [...(b.postProcess ?? []), ...(a.postProcess ?? [])],
-    };
+    } as unknown as T;
     return out;
   }
 
