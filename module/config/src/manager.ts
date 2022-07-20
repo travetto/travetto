@@ -107,12 +107,12 @@ class $ConfigManager {
     const out = await this.bindTo(cls, item, namespace);
     try {
       await SchemaValidator.validate(cls, out);
-    } catch (e) {
-      if (e instanceof ValidationResultError) {
-        e.message = `Failed to construct ${cls.ᚕid} as validation errors have occurred`;
-        e.payload = { class: cls.ᚕid, file: cls.ᚕfile, ...(e.payload ?? {}) };
+    } catch (err) {
+      if (err instanceof ValidationResultError) {
+        err.message = `Failed to construct ${cls.ᚕid} as validation errors have occurred`;
+        err.payload = { class: cls.ᚕid, file: cls.ᚕfile, ...(err.payload ?? {}) };
       }
-      throw e;
+      throw err;
     }
     if (out && !internal) {
       Util.deepAssign(ConfigUtil.lookupRoot(this.#active, namespace, true), out, 'coerce');

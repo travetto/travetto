@@ -164,7 +164,7 @@ export class TemplateUtil {
             }
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(`Error in compiling ${file}`, err.message);
       }
     });

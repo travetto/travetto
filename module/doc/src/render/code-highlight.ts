@@ -47,8 +47,8 @@ export function highlight(text: string, lang: string) {
     return Prism.highlight(text, Prism.languages[lang], lang)
       .replace(/(@\s*<span[^>]*)function("\s*>)/g, (a, pre, post) => `${pre}meta${post}`)
       .replace(/[{}]/g, a => `{{'${a}'}}`);
-  } catch (e) {
-    console.error(e.message as string, { error: e });
+  } catch (err: any) {
+    console.error(err.message as string, { error: err });
   }
 }
 

@@ -11,7 +11,7 @@ const FIXED_MODULES = new Set([
   // 'registry'
   'boot', 'base', 'cli',
   'compiler', 'transformer',
-  'yaml','worker', 'command',
+  'yaml', 'worker', 'command',
   'log', 'jwt', 'image',
   'test',
 ].map(x => `@travetto/${x}` as string));
@@ -28,9 +28,9 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     try {
       await op();
       this.send(type); // Respond
-    } catch (e) {
+    } catch (err: any) {
       // Mark as errored out
-      this.send(type, { error: ErrorUtil.serializeError(e) });
+      this.send(type, { error: ErrorUtil.serializeError(err) });
     }
   }
 

@@ -51,19 +51,19 @@ class $ShutdownManager {
           promises.push(res as Promise<unknown>);
           res
             .then(() => console.debug('Completed', { name }))
-            .catch((e: unknown) => console.error('Failed', { error: e, name }));
+            .catch((err: unknown) => console.error('Failed', { error: err, name }));
         } else {
           console.debug('Completed', { name });
         }
-      } catch (e) {
-        console.error('Failed', { name, error: e });
+      } catch (err: any) {
+        console.error('Failed', { name, error: err });
       }
     }
 
     return promises;
   }
 
-  async executeAsync(exitCode: number = 0, err?: unknown) {
+  async executeAsync(exitCode: number = 0, exitErr?: unknown) {
 
     if (this.#shutdownCode > 0) { // Killed twice
       if (exitCode > 0) { // Handle force kill
@@ -77,8 +77,8 @@ class $ShutdownManager {
 
     try {
       // If the err is not an exit code
-      if (err && typeof err !== 'number') {
-        console.warn('Error on shutdown', { package: AppManifest.info.name, error: err });
+      if (exitErr && typeof exitErr !== 'number') {
+        console.warn('Error on shutdown', { package: AppManifest.info.name, error: exitErr });
       }
 
       // Get list of all pending listeners
@@ -93,8 +93,8 @@ class $ShutdownManager {
         await finalRun;
       }
 
-    } catch (e) {
-      console.warn('Error on shutdown', { package: AppManifest.info.name, error: e });
+    } catch (err) {
+      console.warn('Error on shutdown', { package: AppManifest.info.name, error: err });
     }
 
     if (this.#shutdownCode >= 0) {
@@ -117,8 +117,8 @@ class $ShutdownManager {
     process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
     process.on('SIGTERM', this.execute.bind(this, 143));
-    process.on('uncaughtException', (err) => this.#unhandled.find(x => !!x(err as Error)));
-    process.on('unhandledRejection', (err, p) => this.#unhandled.find(x => !!x(err as Error, p)));
+    process.on('uncaughtException', (err: Error) => this.#unhandled.find(x => !!x(err)));
+    process.on('unhandledRejection', (err: Error, p) => this.#unhandled.find(x => !!x(err, p)));
     this.#unhandled.push(this.execute.bind(this, 1));
   }
 

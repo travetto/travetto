@@ -172,8 +172,8 @@ export class TestExecutor {
         await mgr.endPhase('each');
       }
       await mgr.endPhase('all');
-    } catch (e) {
-      await mgr.onError(e);
+    } catch (err: any) {
+      await mgr.onError(err as Error);
     }
   }
 
@@ -216,8 +216,8 @@ export class TestExecutor {
       }
       // Handle after all
       await mgr.endPhase('all');
-    } catch (e) {
-      await mgr.onError(e);
+    } catch (err: any) {
+      await mgr.onError(err as Error);
     }
 
     result.duration = Date.now() - startTime;
@@ -241,8 +241,8 @@ export class TestExecutor {
 
     try {
       await import(PathUtil.toUnix(file)); // Path to module
-    } catch (err) {
-      this.failFile(consumer, file, err);
+    } catch (err: any) {
+      this.failFile(consumer, file, err as Error);
       return;
     }
 

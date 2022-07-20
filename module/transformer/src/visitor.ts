@@ -116,10 +116,10 @@ export class VisitorFactory<S extends State = State> {
           ret = CoreUtil.updateSource(context.factory, ret, statements);
         }
         return state.finalize(ret);
-      } catch (e) {
-        console.error('Failed transforming', { error: e, file: file.fileName });
-        const out = new Error(`Failed transforming: ${file.fileName}: ${e.message}`);
-        out.stack = e.stack;
+      } catch (err: any) {
+        console.error('Failed transforming', { error: err, file: file.fileName });
+        const out = new Error(`Failed transforming: ${file.fileName}: ${err.message}`);
+        out.stack = err.stack;
         throw out;
       } finally {
         ConsoleManager.clear(); // Reset logging

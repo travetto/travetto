@@ -33,7 +33,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
     for (; ;) {
       try {
         return await op();
-      } catch (err) {
+      } catch (err: any) {
         if (retries > 1 && err.message.includes('database is locked')) {
           console.error('Failed, and waiting', retries);
           await Util.wait(delay);
@@ -77,7 +77,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
         } else {
           return { count: out.changes, records: [] };
         }
-      } catch (err) {
+      } catch (err: any) {
         throw err.message.includes('UNIQUE constraint failed') ? new ExistsError('query', query) : err;
       }
     });

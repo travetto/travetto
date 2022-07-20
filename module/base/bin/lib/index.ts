@@ -30,7 +30,7 @@ export class BuildUtil {
           expired = entry;
           break;
         }
-      } catch (e) {
+      } catch {
         missing = entry;
         break;
       }

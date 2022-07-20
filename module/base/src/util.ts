@@ -161,7 +161,7 @@ export class Util {
         if (typeof input === 'string') {
           try {
             return this.toRegex(input);
-          } catch (err) {
+          } catch {
             if (strict) {
               throw new Error(`Invalid regex: ${input}`);
             } else {
@@ -239,6 +239,13 @@ export class Util {
    */
   static isSimple(a: unknown) {
     return this.isPrimitive(a) || this.isFunction(a) || this.isClass(a);
+  }
+
+  /**
+   * Is an error object
+   */
+  static isError(a: unknown): a is Error {
+    return !!a && (a instanceof Error || (typeof a === 'object' && 'message' in a && 'stack' in a));
   }
 
   /**

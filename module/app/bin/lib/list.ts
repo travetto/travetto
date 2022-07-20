@@ -41,16 +41,16 @@ export class AppListUtil {
   static async #verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
     try {
       for (const el of items) {
-        const elStat = (await fs.lstat(el.filename).catch(e => { delete el.generatedTime; }));
+        const elStat = (await fs.lstat(el.filename).catch(() => { delete el.generatedTime; }));
         // invalidate cache if changed
         if (elStat && (!el.generatedTime || FsUtil.maxTime(elStat) > el.generatedTime)) {
           throw new Error('Expired entry, data is stale');
         }
       }
       return items;
-    } catch (e) {
+    } catch (err) {
       AppCache.removeExpiredEntry(this.#cacheConfig, true);
-      throw e;
+      throw err;
     }
   }
 
@@ -94,11 +94,11 @@ export class AppListUtil {
     if (items && !EnvUtil.isReadonly()) {
       try {
         await this.#verifyList(items);
-      } catch (e) {
-        if (e.message.includes('Expired')) {
+      } catch (err: any) {
+        if (err.message.includes('Expired')) {
           return await this.getList();
         } else {
-          throw e;
+          throw err;
         }
       }
     }

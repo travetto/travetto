@@ -112,7 +112,7 @@ export class ImportManager {
         ...importStmts,
         ...file.statements.filter((x: ts.Statement & { remove?: boolean }) => !x.remove) // Exclude culled imports
       ]);
-    } catch (err) { // Missing import
+    } catch (err: any) { // Missing import
       const out = new Error(`${err.message} in ${file.fileName.replace(PathUtil.cwd, '.')}`);
       out.stack = err.stack;
       throw out;

@@ -39,7 +39,7 @@ export abstract class BaseRestSuite {
   async getOutput<T>(t: Buffer): Promise<T | string> {
     try {
       return JSON.parse(t.toString('utf8')) as T;
-    } catch (e) {
+    } catch {
       return t.toString('utf8');
     }
   }

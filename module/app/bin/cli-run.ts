@@ -69,7 +69,7 @@ export class AppRunPlugin extends BasePlugin {
         try {
           await AppRunUtil.run(selected, ...args);
           process.exit(0);
-        } catch (err) {
+        } catch (err: any) {
           const { StacktraceUtil } = await import('@travetto/base');
           console.error(color`${{ failure: 'Failed to run' }} ${{ title: selected.name }}, ${err.message.replace(/via=.*$/, '')}`);
           if ('errors' in err) {
@@ -84,8 +84,8 @@ export class AppRunPlugin extends BasePlugin {
           process.exit(1);
         }
       }
-    } catch (err) {
-      await this.showHelp(err, `\nUsage: ${HelpUtil.getAppUsage((await AppListUtil.findByName(app))!)}`);
+    } catch (outerErr: any) {
+      await this.showHelp(outerErr, `\nUsage: ${HelpUtil.getAppUsage((await AppListUtil.findByName(app))!)}`);
     }
   }
 

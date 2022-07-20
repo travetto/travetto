@@ -79,11 +79,11 @@ export class SerializeInterceptor implements RestInterceptor {
     try {
       const output = await next();
       await SerializeInterceptor.sendOutput(req, res, output);
-    } catch (error) {
-      if (!(error instanceof Error)) {  // Ensure we always throw "Errors"
-        error = new AppError(error.message || 'Unexpected error', 'general', error);
+    } catch (err: any) {
+      if (!(err instanceof Error)) {  // Ensure we always throw "Errors"
+        err = new AppError(err.message || 'Unexpected error', 'general', err);
       }
-      await SerializeInterceptor.sendOutput(req, res, error);
+      await SerializeInterceptor.sendOutput(req, res, err);
     }
   }
 }

@@ -93,7 +93,7 @@ class VerifyExpirationSuite {
     const options = { key: this.key, alg: 'HS256' } as const;
     try {
       await JWTUtil.verify(this.token, options);
-    } catch (err) {
+    } catch (err: unknown) {
       assert(err instanceof JWTError);
       assert(err.message === 'Token is expired');
       assert(!!err.payload);

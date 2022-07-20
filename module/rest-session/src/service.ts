@@ -81,9 +81,9 @@ export class SessionService {
       } else {
         return session;
       }
-    } catch (e) {
-      if (!(e instanceof NotFoundError)) {
-        throw e; // If not a not found error, throw
+    } catch (err) {
+      if (!(err instanceof NotFoundError)) {
+        throw err; // If not a not found error, throw
       }
     }
   }

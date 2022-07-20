@@ -45,9 +45,9 @@ class ViewsTest {
     try {
       await SchemaValidator.validate(User, r);
       assert.fail('Validation should have failed');
-    } catch (e) {
-      console.warn('Validation Failed', { error: e });
-      assert(findError(e.errors, 'address', 'is required'));
+    } catch (err) {
+      console.warn('Validation Failed', { error: err });
+      assert(findError(err.errors, 'address', 'is required'));
     }
 
     r = User.from({ address: {} });
@@ -55,9 +55,9 @@ class ViewsTest {
     try {
       await SchemaValidator.validate(User, r);
       assert.fail('Validation should have failed');
-    } catch (e) {
-      console.warn('Validation Failed', { error: e });
-      assert(findError(e.errors, 'address.street1', 'is required'));
+    } catch (err) {
+      console.warn('Validation Failed', { error: err });
+      assert(findError(err.errors, 'address.street1', 'is required'));
     }
 
     // @ts-expect-error
@@ -65,9 +65,9 @@ class ViewsTest {
     try {
       await SchemaValidator.validate(User, r);
       assert.fail('Validation should have failed');
-    } catch (e) {
-      console.warn('Validation Failed', { error: e });
-      assert(findError(e.errors, 'address.mode', 'is only allowed to be'));
+    } catch (err) {
+      console.warn('Validation Failed', { error: err });
+      assert(findError(err.errors, 'address.mode', 'is only allowed to be'));
     }
   }
 }

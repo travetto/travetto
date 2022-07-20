@@ -1,4 +1,4 @@
-import * as commander from 'commander';
+import { program as commander } from 'commander';
 
 import { CliUtil } from './util';
 import { CompletionConfig } from './types';
@@ -34,7 +34,7 @@ export class ExecutionManager {
       // Load a single plugin
       plugin = await PluginManager.loadPlugin(cmd);
       await plugin.setup(commander);
-    } catch (err) {
+    } catch (err: any) {
       return HelpUtil.showHelp(commander, `Unknown command ${cmd}`);
     }
 
@@ -44,7 +44,7 @@ export class ExecutionManager {
       } else {
         commander.parse(args);
       }
-    } catch (err) {
+    } catch (err: any) {
       return plugin.showHelp(err);
     }
   }

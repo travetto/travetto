@@ -113,7 +113,7 @@ export class ElasticsearchModelService implements
     try {
       const res = await this.client.get({ ...this.manager.getIdentity(cls), id });
       return this.postLoad(cls, res.body._source);
-    } catch (err) {
+    } catch {
       throw new NotFoundError(cls, id);
     }
   }
@@ -130,7 +130,7 @@ export class ElasticsearchModelService implements
       if (res.result === 'not_found') {
         throw new NotFoundError(cls, id);
       }
-    } catch (err) {
+    } catch (err: any) {
       if (err.body && err.body.result === 'not_found') {
         throw new NotFoundError(cls, id);
       }

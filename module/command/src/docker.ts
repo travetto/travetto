@@ -73,12 +73,12 @@ export class DockerContainer {
    * Watch execution for any failed state and evict as needed
    */
   #watchForEviction(state: ExecutionState, all = false): ExecutionState {
-    state.result = state.result.catch(e => {
-      if (all || e.killed) {
+    state.result = state.result.catch(err => {
+      if (all || err.killed) {
         this.#evict = true;
         this.#pendingExecutions.clear();
       }
-      throw e;
+      throw err;
     });
     return state;
   }
@@ -377,13 +377,13 @@ export class DockerContainer {
 
     try {
       await ExecUtil.spawn(this.#dockerCmd, ['kill', this.#container]).result;
-    } catch (e) { /* ignore */ }
+    } catch { }
 
     console.debug('Removing', { image: this.#image, container: this.#container });
 
     try {
       await ExecUtil.spawn(this.#dockerCmd, ['rm', '-fv', this.#container]).result;
-    } catch (e) { /* ignore */ }
+    } catch { }
 
     if (this.#pendingExecutions.size) {
       const results = [...this.#pendingExecutions.values()].map(x => x.result);
@@ -400,13 +400,13 @@ export class DockerContainer {
   forceDestroy() { // Cannot be async as it's used on exit, that's why it's all sync
     try {
       ExecUtil.execSync(`${this.#dockerCmd} kill ${this.#container}`);
-    } catch (e) { /* ignore */ }
+    } catch { }
 
     console.debug('Removing', { image: this.#image, container: this.#container });
 
     try {
       ExecUtil.execSync(`${this.#dockerCmd} rm -fv ${this.#container}`);
-    } catch (e) { /* ignore */ }
+    } catch { }
 
     this.cleanupSync();
 
@@ -463,8 +463,8 @@ export class DockerContainer {
       if (ids) {
         await ExecUtil.spawn(this.#dockerCmd, ['volume', 'rm', ...ids.split('\n')]).result;
       }
-    } catch (e) {
-      // error
+    } catch {
+      // ignore
     }
   }
 }

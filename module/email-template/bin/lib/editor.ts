@@ -32,7 +32,7 @@ export class EditorUtil {
           file,
           content
         });
-      } catch (err) {
+      } catch (err: any) {
         this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file });
       }
     }
@@ -59,7 +59,7 @@ export class EditorUtil {
         case 'redraw': {
           try {
             await TemplateUtil.compileToDisk(msg.file);
-          } catch (err) {
+          } catch (err: any) {
             return this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });
           }
           return this.renderFile(msg.file);
@@ -71,7 +71,7 @@ export class EditorUtil {
           try {
             await SendUtil.sendEmail(msg.file, from, to, await ConfigUtil.getContext());
             this.response({ type: 'sent', to, file: msg.file });
-          } catch (err) {
+          } catch (err: any) {
             this.response({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });
           }
           break;

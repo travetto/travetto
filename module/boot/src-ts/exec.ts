@@ -155,7 +155,7 @@ export class ExecUtil {
     });
 
     const res = prom as CatchableResult;
-    res.catchAsResult = () => res.catch(e => (e as { meta: ExecutionResult }).meta);
+    res.catchAsResult = () => res.catch(err => (err as { meta: ExecutionResult }).meta);
     return res;
   }
 
@@ -244,14 +244,14 @@ export class ExecUtil {
         })
     );
 
-    const message = new Promise<T>((r, rej) => {
+    const message = new Promise<T>((res, rej) => {
       worker.once('message', d => result.then(() => {
         if (d && 'stack' in d && 'message' in d) {
           const err = new Error(d['message']);
           err.stack = d.stack;
           rej(err);
         } else {
-          r(d);
+          res(d);
         }
       }));
       result.catch(rej);

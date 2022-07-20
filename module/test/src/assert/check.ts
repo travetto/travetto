@@ -101,20 +101,20 @@ export class AssertCheck {
 
       // Pushing on not error
       AssertCapture.add(assertion);
-    } catch (e) {
+    } catch (err) {
       // On error, produce the appropriate error message
-      if (e instanceof assert.AssertionError) {
+      if (err instanceof assert.AssertionError) {
         if (!assertion.message) {
           assertion.message = (OP_MAPPING[fn] ?? '{state} be {expected}');
         }
         assertion.message = assertion.message
           .replace(/[{]([A-Za-z]+)[}]/g, (a, k) => common[k] || assertion[k as keyof typeof assertion] as string)
           .replace(/not not/g, ''); // Handle double negatives
-        assertion.error = e;
-        e.message = assertion.message;
+        assertion.error = err;
+        err.message = assertion.message;
         AssertCapture.add(assertion);
       }
-      throw e;
+      throw err;
     }
   }
 
@@ -177,16 +177,16 @@ export class AssertCheck {
         }
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'}`));
       }
-    } catch (e) {
+    } catch (err: any) {
       if (positive) {
         missed = new AppError('Error thrown, but expected no errors');
-        missed.stack = e.stack;
+        missed.stack = err.stack;
       }
 
-      e = (missed && e) || this.checkError(shouldThrow, e);
-      if (e) {
-        assertion.message = message || missed?.message || e.message;
-        throw (assertion.error = e);
+      err = (missed && err) || this.checkError(shouldThrow, err);
+      if (err) {
+        assertion.message = message || missed?.message || err.message;
+        throw (assertion.error = err);
       }
     } finally {
       AssertCapture.add(assertion);
@@ -216,15 +216,15 @@ export class AssertCheck {
         }
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'} `));
       }
-    } catch (e) {
+    } catch (err: any) {
       if (positive) {
         missed = new AppError('Error thrown, but expected no errors');
       }
 
-      e = (missed && e) || this.checkError(shouldThrow, e);
-      if (e) {
-        assertion.message = message || missed?.message || e.message;
-        throw (assertion.error = e);
+      err = (missed && err) || this.checkError(shouldThrow, err);
+      if (err) {
+        assertion.message = message || missed?.message || err.message;
+        throw (assertion.error = err);
       }
     } finally {
       AssertCapture.add(assertion);

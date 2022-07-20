@@ -83,7 +83,7 @@ export class ScaffoldPlugin extends BasePlugin {
   async action(name?: string) {
     try {
       name = await this.#getName(name);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to provide correct input', err.message);
       process.exit(1);
     }
@@ -100,7 +100,7 @@ export class ScaffoldPlugin extends BasePlugin {
       for await (const dep of this.#resolveFeatures(FEATURES)) {
         await ctx.addDependency(dep);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to provide correct input', err.message);
       process.exit(1);
     }

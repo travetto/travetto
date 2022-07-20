@@ -101,8 +101,8 @@ export class AppRunFeature extends BaseFeature {
       await launchConfig.update('configurations', configurations, false);
 
       vscode.window.showInformationMessage('Added new configuration to launch.json!');
-    } catch (e) {
-      vscode.window.showErrorMessage(e.message);
+    } catch (err: any) {
+      vscode.window.showErrorMessage(err.message);
     }
   }
 
@@ -128,8 +128,8 @@ export class AppRunFeature extends BaseFeature {
       }
 
       await vscode.debug.startDebugging(Workspace.folder, this.getLaunchConfig(choice));
-    } catch (e) {
-      vscode.window.showErrorMessage(e.message);
+    } catch (err: any) {
+      vscode.window.showErrorMessage(err.message);
     }
   }
 

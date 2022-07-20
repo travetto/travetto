@@ -62,7 +62,7 @@ export class MongoModelConfig {
   async fetch(val: string) {
     return ResourceManager.read(val)
       .then(res => typeof res === 'string' ? res : res.toString('utf8'))
-      .catch(e => fs.readFile(val)
+      .catch(() => fs.readFile(val)
         .then(res => typeof res === 'string' ? res : res.toString('utf8'))
       )
       .catch(() => val);

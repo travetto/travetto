@@ -78,7 +78,7 @@ export class ModuleUtil {
           if (p && p.endsWith(SourceUtil.EXT)) {
             throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
           }
-        } catch (err) {
+        } catch {
           // Ignore if we can't resolve
         }
       }

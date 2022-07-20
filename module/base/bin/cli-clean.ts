@@ -28,7 +28,7 @@ export class BaseCleanPlugin extends BasePlugin {
           if (!this.cmd.quiet) {
             console!.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: cache.cacheDir }}`);
           }
-        } catch (e) {
+        } catch {
           console!.error(color`${{ failure: 'Failed' }} to delete temp dir ${{ path: cache.cacheDir }}`);
         }
       }

@@ -80,7 +80,7 @@ export class DependenciesUtil {
             found.push({ file: resolved, type, dep, version });
             pending.push([resolved, depth + 1]);
           }
-        } catch (err) {
+        } catch {
           if (!dep.startsWith('@types') && type !== 'opt' && type !== 'optPeer') {
             console.error('Unable to resolve', { type, dependency: dep });
           }

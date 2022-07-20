@@ -40,7 +40,7 @@ export class JWTUtil {
 
     try {
       return jws.sign(opts);
-    } catch (err) {
+    } catch (err: any) {
       throw new JWTError(err.message);
     }
   }
@@ -68,7 +68,7 @@ export class JWTUtil {
     if (typeof decoded.payload === 'string' && /^[{\[]/.test(decoded.payload)) {
       try {
         decoded.payload = JSON.parse(decoded.payload as 'string');
-      } catch (e) { }
+      } catch { }
     }
 
     return decoded;

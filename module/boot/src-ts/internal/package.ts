@@ -36,12 +36,12 @@ export type PackageType = {
 export const readPackage = (folder: string, suppressError = false) => {
   try {
     return JSON.parse(readFileSync(PathUtil.resolveUnix(folder, 'package.json'), 'utf8')) as PackageType;
-  } catch (e) {
+  } catch (err) {
     if (!suppressError) {
-      throw e;
+      throw err;
     } else {
-      if (e instanceof Error) {
-        console.warn(`Unable to locate ${folder}: ${e.message}`);
+      if (err instanceof Error) {
+        console.warn(`Unable to locate ${folder}: ${err.message}`);
       }
       return {} as PackageType;
     }

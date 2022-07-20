@@ -21,11 +21,11 @@ class StackTest {
     try {
       await this.inner1();
       assert(false);
-    } catch (e) {
-      assert(e.stack.includes('inner1'));
-      assert(e.stack.includes('inner2'));
-      assert(e.stack.includes('inner3'));
-      console.error('Error', { error: e });
+    } catch (err) {
+      assert(err.stack.includes('inner1'));
+      assert(err.stack.includes('inner2'));
+      assert(err.stack.includes('inner3'));
+      console.error('Error', { error: err });
     }
   }
 }

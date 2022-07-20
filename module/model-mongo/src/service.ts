@@ -209,7 +209,7 @@ export class MongoModelService implements
         { $set: cleaned },
         { upsert: true }
       );
-    } catch (err) {
+    } catch (err: any) {
       if (err.message.includes('duplicate key error')) {
         throw new ExistsError(cls, cleaned.id);
       } else {
@@ -274,9 +274,9 @@ export class MongoModelService implements
     for await (const el of cursor) {
       try {
         yield MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el));
-      } catch (e) {
-        if (!(e instanceof NotFoundError)) {
-          throw e;
+      } catch (err) {
+        if (!(err instanceof NotFoundError)) {
+          throw err;
         }
       }
     }

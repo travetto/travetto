@@ -86,7 +86,7 @@ export class TestPhaseManager {
     for (const ph of this.#progress) {
       try {
         await this.runPhase(ph === 'all' ? 'afterAll' : 'afterEach');
-      } catch (e) { /* Do nothing */ }
+      } catch { /* Do nothing */ }
     }
 
     this.#progress = [];

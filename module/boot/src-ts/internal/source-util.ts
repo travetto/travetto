@@ -70,7 +70,7 @@ export class SourceUtil {
       try {
         require.resolve(key);
         return { minus, key, valid: !minus };
-      } catch (err) {
+      } catch (err: any) {
         return { minus, key, valid: minus, err: err as Error };
       }
     }

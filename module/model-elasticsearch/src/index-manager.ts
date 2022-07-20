@@ -93,8 +93,8 @@ export class IndexManager implements ModelStorageSupport {
         mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
         settings: this.config.indexCreate
       });
-    } catch (e) {
-      console.warn('Index already created', { index: ident.index, error: e });
+    } catch (err) {
+      console.warn('Index already created', { index: ident.index, error: err });
     }
     return concreteIndex;
   }
@@ -108,7 +108,7 @@ export class IndexManager implements ModelStorageSupport {
     try {
       await this.#client.search(ident);
       console.debug('Index already exists, not creating', ident);
-    } catch (err) {
+    } catch {
       await this.createIndex(cls);
     }
   }

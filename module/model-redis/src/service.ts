@@ -255,14 +255,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       }
 
       const bodies = (await this.client.mGet(ids))
-        .filter(x => !!x) as string[];
+        .filter((x): x is string => !!x);
 
       for (const body of bodies) {
         try {
           yield await ModelCrudUtil.load(cls, body);
-        } catch (e) {
-          if (!(e instanceof NotFoundError)) {
-            throw e;
+        } catch (err) {
+          if (!(err instanceof NotFoundError)) {
+            throw err;
           }
         }
       }
@@ -337,14 +337,14 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       const bodies = (await this.client.mGet(
         ids.map(x => this.#resolveKey(cls, x))
       ))
-        .filter(x => !!x) as string[];
+        .filter((x): x is string => !!x);
 
       for (const full of bodies) {
         try {
           yield await ModelCrudUtil.load(cls, full);
-        } catch (e) {
-          if (!(e instanceof NotFoundError)) {
-            throw e;
+        } catch (err) {
+          if (!(err instanceof NotFoundError)) {
+            throw err;
           }
         }
       }

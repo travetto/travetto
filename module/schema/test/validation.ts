@@ -30,10 +30,10 @@ class Validation {
     try {
       await SchemaValidator.validate(Response, r);
       assert.fail('Validation should have failed');
-    } catch (e) {
-      console.warn('Validation Failed', { error: e });
-      assert(findError(e.errors, 'url', 'not a valid url'));
-      assert(findError(e.errors, 'timestamp', 'is required'));
+    } catch (err) {
+      console.warn('Validation Failed', { error: err });
+      assert(findError(err.errors, 'url', 'not a valid url'));
+      assert(findError(err.errors, 'timestamp', 'is required'));
     }
   }
 
@@ -50,14 +50,14 @@ class Validation {
     try {
       await SchemaValidator.validate(Parent, res);
       assert.fail('Validation should have failed');
-    } catch (e) {
-      if (e instanceof ValidationResultError) {
-        assert(findError(e.errors, 'responses', 'required'));
-        assert(findError(e.errors, 'response.pandaState', 'TIRED'));
-        assert(findError(e.errors, 'response.url', 'not a valid url'));
-        assert(findError(e.errors, 'response.timestamp', 'is required'));
+    } catch (err) {
+      if (err instanceof ValidationResultError) {
+        assert(findError(err.errors, 'responses', 'required'));
+        assert(findError(err.errors, 'response.pandaState', 'TIRED'));
+        assert(findError(err.errors, 'response.url', 'not a valid url'));
+        assert(findError(err.errors, 'response.timestamp', 'is required'));
       } else {
-        throw e;
+        throw err;
       }
     }
   }
@@ -113,13 +113,13 @@ class Validation {
     try {
       await SchemaValidator.validate(CustomValidated, obj);
       assert(false);
-    } catch (e) {
-      if (e instanceof ValidationResultError) {
-        assert(e.errors[0].path === 'age1');
-        assert(e.errors[0].kind === 'custom');
-        assert(e.errors[0].message === 'age1 + age2 cannot be even');
+    } catch (err) {
+      if (err instanceof ValidationResultError) {
+        assert(err.errors[0].path === 'age1');
+        assert(err.errors[0].kind === 'custom');
+        assert(err.errors[0].message === 'age1 + age2 cannot be even');
       } else {
-        throw e;
+        throw err;
       }
     }
   }

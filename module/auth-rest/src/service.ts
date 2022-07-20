@@ -45,8 +45,8 @@ export class AuthService {
         }
         req.auth = this.authorizer ? await this.authorizer.authorize(principal) : principal;
         return req.auth;
-      } catch (e) {
-        lastError = e;
+      } catch (err: any) {
+        lastError = err;
       }
     }
 
@@ -55,9 +55,9 @@ export class AuthService {
     }
 
     // Take the last error and return
-    const err = new AppError('Unable to authenticate', 'authentication');
-    err.stack = lastError?.stack ?? err.stack;
-    throw err;
+    const finalError = new AppError('Unable to authenticate', 'authentication');
+    finalError.stack = lastError?.stack ?? finalError.stack;
+    throw finalError;
   }
 
   /**

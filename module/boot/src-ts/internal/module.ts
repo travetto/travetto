@@ -41,9 +41,9 @@ export class ModuleManager {
     try {
       mod = this.#moduleLoad.apply(null, [request, parent]);
       ModuleUtil.checkForCycles(mod, request, parent);
-    } catch (e) {
+    } catch (err: any) {
       const name = Module._resolveFilename!(request, parent);
-      mod = Module._compile!(ModuleUtil.handlePhaseError('load', name, e as Error), name);
+      mod = Module._compile!(ModuleUtil.handlePhaseError('load', name, err as Error), name);
     }
     return ModuleUtil.handleModule(mod, request, parent);
   }
@@ -93,8 +93,8 @@ export class ModuleManager {
     const jsf = tsf.replace(/[.]ts$/, '.js');
     try {
       return m._compile(content, jsf);
-    } catch (e) {
-      content = ModuleUtil.handlePhaseError('compile', tsf, e as Error);
+    } catch (err: any) {
+      content = ModuleUtil.handlePhaseError('compile', tsf, err as Error);
       return m._compile(content, jsf);
     }
   }
@@ -112,7 +112,7 @@ export class ModuleManager {
         const ret = ts.transpile(SourceUtil.preProcess(tsf), TranspileUtil.compilerOptions as tsi.CompilerOptions, tsf, diags);
         TranspileUtil.checkTranspileErrors(tsf, diags);
         return ret;
-      } catch (err) {
+      } catch (err: any) {
         return TranspileUtil.transpileError(tsf, err as Error);
       }
     }, force);

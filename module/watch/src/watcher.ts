@@ -111,7 +111,7 @@ export class Watcher extends WatchEmitter {
 
       this.#processDirectoryChange(entry);
 
-    } catch (err) {
+    } catch (err: any) {
       return this.#handleError(err);
     }
   }
@@ -135,9 +135,9 @@ export class Watcher extends WatchEmitter {
     //     entry.stats = stats;
 
     //     this.emit('changed', entry);
-    //   } catch (e) {
-    //     if (this.handleError(e)) {
-    //       throw e;
+    //   } catch (err: any) {
+    //     if (this.handleError(err)) {
+    //       throw err;
     //     }
     //   }
     // });
@@ -151,7 +151,7 @@ export class Watcher extends WatchEmitter {
           case ts.FileWatcherEventKind.Changed: this.emit('changed', entry); break;
           case ts.FileWatcherEventKind.Deleted: this.emit('removed', entry); break;
         }
-      } catch (err) {
+      } catch {
         console.warn('Error in watching', { file: entry.file });
       }
     };

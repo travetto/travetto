@@ -109,7 +109,7 @@ export class DocRunUtil {
         throw res.error;
       }
       final = res.stdout.toString() || res.stderr.toString();
-    } catch (err) {
+    } catch (err: any) {
       console.log('Found!', cmd, args, '\n', err);
       final = err.message;
     }

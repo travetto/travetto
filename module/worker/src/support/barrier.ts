@@ -63,11 +63,11 @@ export class Barrier {
    * Wait for all barriers to clear out
    */
   async wait(): Promise<Error | undefined> {
-    let err: Error | undefined;
+    let capturedError: Error | undefined;
     // Wait for all barriers to be satisfied
     while (this.#barriers.size) {
-      await Promise.race(this.#barriers.values()).catch(e => err ??= e);
+      await Promise.race(this.#barriers.values()).catch(err => capturedError ??= err);
     }
-    return err;
+    return capturedError;
   }
 }

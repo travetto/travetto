@@ -41,9 +41,9 @@ export class TableManager {
       for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {
           await this.#exec(op);
-        } catch (e) {
-          if (!/\bexists|duplicate\b/i.test(e.message)) {
-            throw e;
+        } catch (err: any) {
+          if (!/\bexists|duplicate\b/i.test(err.message)) {
+            throw err;
           }
         }
       }
@@ -103,9 +103,9 @@ export class TableManager {
       await Promise.all(changes.added.map(v => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(v))));
       await Promise.all(changes.changed.map(v => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(v))));
       await Promise.all(changes.removing.map(v => this.#dialect.executeSQL(this.#dialect.getDropColumnSQL(v))));
-    } catch (e) {
+    } catch (err) {
       // Failed to change
-      console.error('Unable to change field', { error: e });
+      console.error('Unable to change field', { error: err });
     }
   }
 }
