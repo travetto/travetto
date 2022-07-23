@@ -4,7 +4,7 @@ import {
   TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, TransformerId, DecoratorMeta, LiteralUtil
 } from '@travetto/transformer';
 import { SchemaTransformUtil } from '@travetto/schema/support/transform-util';
-import { AnyType, ExternalType } from '@travetto/transformer/src/resolver/types';
+import { AnyType } from '@travetto/transformer/src/resolver/types';
 
 const PARAM_DEC_FILE = '@travetto/rest/src/decorator/param';
 const COMMON_DEC_FILE = '@travetto/rest/src/decorator/common';
@@ -42,8 +42,12 @@ export class RestTransformer {
     // Detect default behavior
     if (isContext) {
       detectedParamType = 'Context';
-      conf = state.extendObjectLiteral(conf, { contextType: state.getOrImport(paramType as ExternalType) });
-      node = SchemaTransformUtil.computeField(state, node, { type: { key: 'unknown' } });
+      if (paramType.key === 'external') {
+        conf = state.extendObjectLiteral(conf, { contextType: state.getOrImport(paramType) });
+        node = SchemaTransformUtil.computeField(state, node, { type: { key: 'unknown' } });
+      } else {
+        throw new Error(`Unexpected parameter type, should be an external type but got: ${paramType.key}`);
+      }
     } else {
       // If not contextual
       const config: { type: AnyType, name?: string } = { type: paramType };
@@ -54,9 +58,12 @@ export class RestTransformer {
         const arg = DecoratorUtil.getPrimaryArgument(epDec.dec);
         // If non-regex
         if (arg && ts.isStringLiteral(arg)) {
-          const path = LiteralUtil.toLiteral(arg) as string;
+          const literal = LiteralUtil.toLiteral(arg);
+          if (typeof literal !== 'string') {
+            throw new Error(`Unexpected literal type: ${literal}`);
+          }
           // If param name matches path param, default to @Path
-          detectedParamType = new RegExp(`:${name}\\b`).test(path) ? 'Path' : 'Query';
+          detectedParamType = new RegExp(`:${name}\\b`).test(literal) ? 'Path' : 'Query';
         } else {
           // Default to query for empty or regex endpoints
           detectedParamType = 'Query';

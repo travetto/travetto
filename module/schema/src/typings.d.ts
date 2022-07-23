@@ -18,3 +18,10 @@ declare global {
     interface ReadableStream { }
   }
 }
+
+declare module 'stream' {
+  /**
+   * @concrete stream:Readable:node
+   */
+  interface Readable { }
+}

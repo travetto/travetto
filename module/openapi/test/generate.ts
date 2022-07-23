@@ -43,8 +43,8 @@ class TestCont {
   }
 
   @Get('/download')
-  async download(size?: number) {
-    return (undefined as unknown as Readable);
+  async download(size?: number): Promise<Readable> {
+    return new Readable({});
   }
 }
 
@@ -152,13 +152,13 @@ export class GenerateSuite {
       content: {
         'application/json': {
           schema: {
-            $ref: '#/components/schemas/who_27_31'
+            $ref: '#/components/schemas/who_28_31'
           }
         }
       },
       description: '__type'
     });
-    assert(config.components.schemas['who_27_31'] === {
+    assert(config.components.schemas['who_28_31'] === {
       description: '__type',
       example: undefined,
       properties: {

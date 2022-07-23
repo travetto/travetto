@@ -231,13 +231,13 @@ export class SpecGenerator {
     } else if (body.type === Readable || body.type === Buffer) {
       return {
         content: {
-          [mime ?? 'application/octect-stream']: { type: 'string', format: 'binary' }
+          [mime ?? 'application/octet-stream']: { type: 'string', format: 'binary' }
         },
         description: ''
       };
     } else {
       const typeId = this.#getTypeId(body.type);
-      const typeRef = SchemaRegistry.has(body.type) ? this.#getType(body.type) : { type: body.type.name.toLowerCase() as 'string' };
+      const typeRef = SchemaRegistry.has(body.type) ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {
         content: {
           [mime ?? 'application/json']: {
