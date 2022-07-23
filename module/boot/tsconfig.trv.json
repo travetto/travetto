@@ -4,7 +4,6 @@
     "target": "esnext",
     "strict": true,
     "strictPropertyInitialization": false,
-    "noImplicitOverride": false,
     "sourceMap": false,
     "moduleResolution": "node",
     "inlineSourceMap": true,
