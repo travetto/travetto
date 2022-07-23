@@ -15,7 +15,7 @@ export class AppSelectorUtil {
    * Build application details for quick pick
    * @param app
    */
-  static buildAppDetail(app: AppChoice) {
+  static buildAppDetail(app: AppChoice): string {
     const detail = [app.description];
     const out = detail.filter(x => !!x).join(' ').trim();
     return out ? `${'\u00A0'.repeat(4)}${out}` : out;
@@ -25,7 +25,7 @@ export class AppSelectorUtil {
    * Build application parameters for quick pick
    * @param choice
    */
-  static buildAppParams(choice: AppChoice) {
+  static buildAppParams(choice: AppChoice): string {
     const out = choice.params
       .map((x, i) => {
         let val = choice.inputs[i] !== undefined ? choice.inputs[i] : (x.enum?.values?.join(',') ?? x.default);
@@ -59,14 +59,14 @@ export class AppSelectorUtil {
    * @param title
    * @param choices
    */
-  static async resolveApp(title: string, choices: AppChoice[]) {
+  static async resolveApp(title: string, choices: AppChoice[]): Promise<AppChoice | undefined> {
     const items = choices
       .map(x => {
         x.params ??= [];
         return x;
       })
       .map(x => this.buildQuickPickItem(x))
-      .filter(x => !!x) as PickItem[];
+      .filter((x): x is PickItem => !!x);
 
     const res = await ParameterSelector.getObjectQuickPickList(title, items);
     return res?.target;
@@ -114,7 +114,7 @@ export class AppSelectorUtil {
    * @param title
    * @param choices
    */
-  static async resolveChoices(title: string, choices: AppChoice[] | AppChoice) {
+  static async resolveChoices(title: string, choices: AppChoice[] | AppChoice): Promise<AppChoice | undefined> {
     const choice = Array.isArray(choices) ? (await this.resolveApp(title, choices)) : choices;
 
     if (!choice) {

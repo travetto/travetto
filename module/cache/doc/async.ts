@@ -1,10 +1,10 @@
 import { MemoryModelService } from '@travetto/model';
 import { Cache, CacheService } from '@travetto/cache';
 
-async function request(url: string) {
-  let value;
+async function request(url: string): Promise<string> {
+  let value: string;
   // ...fetch content
-  return value;
+  return value!;
 }
 
 export class Worker {
@@ -14,7 +14,7 @@ export class Worker {
   );
 
   @Cache('myCache', '1s')
-  async calculateExpensiveResult(expression: string) {
+  async calculateExpensiveResult(expression: string): Promise<string> {
     const value = await request(`https://google.com?q=${expression}`);
     return value;
   }

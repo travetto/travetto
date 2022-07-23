@@ -4,7 +4,7 @@ import * as os from 'os';
 import * as stream from 'stream';
 import * as busboy from 'busboy';
 
-import { Request, Response } from '@travetto/rest';
+import { Renderable, Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 import { AppError } from '@travetto/base';
 import { PathUtil, StreamUtil } from '@travetto/boot';
@@ -22,7 +22,7 @@ export class AssetRestUtil {
   /**
    * Create a mime type validator
    */
-  static mimeValidator(allowedTypes: string[] = [], excludedTypes: string[] = []) {
+  static mimeValidator(allowedTypes: string[] = [], excludedTypes: string[] = []): <T extends { contentType: string }>(asset: T) => T {
 
     const cached = Object.fromEntries(
       [...allowedTypes, ...excludedTypes].map(mime =>
@@ -46,7 +46,7 @@ export class AssetRestUtil {
   /**
    * Stream file to disk, and verify types in the process.  Produce an asset as the output
    */
-  static async toLocalAsset(data: stream.Readable | Buffer, filename: string) {
+  static async toLocalAsset(data: stream.Readable | Buffer, filename: string): Promise<Asset> {
     const uniqueDir = PathUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
     await fs.mkdir(uniqueDir, { recursive: true }); // TODO: Unique dir for each file? Use random file, and override metadata
     const uniqueLocal = PathUtil.resolveUnix(uniqueDir, path.basename(filename));
@@ -59,7 +59,7 @@ export class AssetRestUtil {
   /**
    * Parse filename from the request headers
    */
-  static getFileName(req: Request) {
+  static getFileName(req: Request): string {
     const filenameExtract = /filename[*]?=["]?([^";]*)["]?/;
     const matches = (req.header('content-disposition') ?? '').match(filenameExtract);
     if (matches && matches.length) {
@@ -73,7 +73,7 @@ export class AssetRestUtil {
   /**
    * Actually process upload
    */
-  static upload(req: Request, config: Partial<RestAssetConfig>) {
+  static upload(req: Request, config: Partial<RestAssetConfig>): Promise<AssetMap> {
     const validator = this.mimeValidator(config.allowedTypesList, config.excludedTypesList);
 
     if (!/multipart|urlencoded/i.test(req.header('content-type') ?? '')) {
@@ -121,9 +121,9 @@ export class AssetRestUtil {
   /**
    * Make any asset downloadable
    */
-  static downloadable(asset: Asset) {
+  static downloadable(asset: Asset): Renderable {
     return {
-      render(res: Response) {
+      render(res: Response): stream.Readable {
         res.status(200);
         res.setHeader('Content-Type', asset.contentType);
         res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);

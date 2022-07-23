@@ -1,6 +1,6 @@
 import { AllType, node } from './nodes';
 
-export function doc(values: TemplateStringsArray, ...keys: (AllType | { ᚕfile: string, name: string } | string)[]) {
+export function doc(values: TemplateStringsArray, ...keys: (AllType | { ᚕfile: string, name: string } | string)[]): AllType {
   const out: AllType[] = [];
 
   keys.forEach((el, i) =>
@@ -20,4 +20,5 @@ export function doc(values: TemplateStringsArray, ...keys: (AllType | { ᚕfile:
 
 Object.assign(doc, node);
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export const d = doc as (typeof doc) & (typeof node);

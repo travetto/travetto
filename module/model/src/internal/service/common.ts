@@ -18,6 +18,7 @@ export class ModelIndexedSupportTarget { }
  * @param o
  */
 export function isBasicSupported(o: unknown): o is ModelBulkSupport {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !!(o as Record<string, unknown>)['create'];
 }
 
@@ -26,6 +27,7 @@ export function isBasicSupported(o: unknown): o is ModelBulkSupport {
  * @param o
  */
 export function isCrudSupported(o: unknown): o is ModelCrudSupport {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !!(o as Record<string, unknown>)['upsert'];
 }
 
@@ -34,6 +36,7 @@ export function isCrudSupported(o: unknown): o is ModelCrudSupport {
  * @param o
  */
 export function isExpirySupported(o: unknown): o is ModelExpirySupport {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !!(o as Record<string, unknown>)['deleteExpired'];
 }
 
@@ -42,6 +45,7 @@ export function isExpirySupported(o: unknown): o is ModelExpirySupport {
  * @param o
  */
 export function isStorageSupported(o: unknown): o is ModelStorageSupport {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !!(o as Record<string, unknown>)['createStorage'];
 }
 
@@ -50,6 +54,7 @@ export function isStorageSupported(o: unknown): o is ModelStorageSupport {
  * @param o
  */
 export function isStreamSupported(o: unknown): o is ModelStreamSupport {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !!(o as Record<string, unknown>)['getStream'];
 }
 
@@ -58,6 +63,7 @@ export function isStreamSupported(o: unknown): o is ModelStreamSupport {
  * @param o
  */
 export function isBulkSupported(o: unknown): o is ModelBulkSupport {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !!(o as Record<string, unknown>)['processBulk'];
 }
 
@@ -66,6 +72,7 @@ export function isBulkSupported(o: unknown): o is ModelBulkSupport {
  * @param o
  */
 export function isIndexedSupported(o: unknown): o is ModelIndexedSupport {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !!(o as Record<string, unknown>)['getByIndex'];
 }
 

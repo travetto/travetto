@@ -112,7 +112,7 @@ export interface FieldConfig extends DescribableConfig {
   /**
    * The numeric precision
    */
-  precision?: [number, number] | [number, undefined];
+  precision?: [number, number | undefined];
   /**
    * Is the field required
    */
@@ -151,4 +151,4 @@ export interface FieldConfig extends DescribableConfig {
   access?: 'readonly' | 'writeonly';
 }
 
-export type ViewFieldsConfig<T> = { with: (keyof T)[] } | { without: (keyof T)[] };
+export type ViewFieldsConfig<T> = { with: Extract<(keyof T), string>[] } | { without: Extract<(keyof T), string>[] };

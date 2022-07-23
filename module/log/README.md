@@ -48,8 +48,8 @@ export function work() {
 
   try {
     1 / 0;
-  } catch (e) {
-    console.error('Divide by zero', { error: e });
+  } catch (err) {
+    console.error('Divide by zero', { error: err });
   }
   console.debug('End Work');
 }
@@ -65,8 +65,8 @@ function work() {
     try {
         1 / 0;
     }
-    catch (e) {
-        ᚕlg("error", { file: ᚕsrc(__filename), line: 7, scope: "work" }, 'Divide by zero', { error: e });
+    catch (err) {
+        ᚕlg("error", { file: ᚕsrc(__filename), line: 7, scope: "work" }, 'Divide by zero', { error: err });
     }
     ᚕlg("debug", { file: ᚕsrc(__filename), line: 9, scope: "work" }, 'End Work');
 }
@@ -85,8 +85,8 @@ function work() {
     try {
         1 / 0;
     }
-    catch (e) {
-        ᚕlg("error", { file: ᚕsrc(__filename), line: 5, scope: "work" }, 'Divide by Zero', { error: e });
+    catch (err) {
+        ᚕlg("error", { file: ᚕsrc(__filename), line: 5, scope: "work" }, 'Divide by Zero', { error: err });
     }
 }
 exports.work = work;

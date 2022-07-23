@@ -16,9 +16,9 @@ export class JSONEmitter implements TestConsumer {
     this.#stream = stream;
   }
 
-  onEvent(event: TestEvent) { }
+  onEvent(event: TestEvent): void { }
 
-  onSummary(summary: SuitesSummary) {
+  onSummary(summary: SuitesSummary): void {
     this.#stream.write(JSON.stringify(summary, undefined, 2));
   }
 }

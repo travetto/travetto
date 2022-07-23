@@ -17,7 +17,7 @@ export class SessionPrincipalEncoder implements PrincipalEncoder {
   @Inject()
   service: SessionService;
 
-  encode(req: Request, res: Response, p: Principal) {
+  encode(req: Request, res: Response, p: Principal): void {
     if (p) {
       p.expiresAt = req.session.expiresAt; // Let principal live as long as the session
       req.session.setValue(this.#key, p);
@@ -26,7 +26,7 @@ export class SessionPrincipalEncoder implements PrincipalEncoder {
     }
   }
 
-  async decode(req: Request) {
+  async decode(req: Request): Promise<Principal | undefined> {
     await this.service.readRequest(req); // Preload session if not already loaded
     return req.session.getValue<Principal>(this.#key);
   }

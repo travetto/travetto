@@ -15,7 +15,7 @@ export class SendUtil {
   /**
    * Get mail service
    */
-  static async getMailService() {
+  static async getMailService(): Promise<MailService> {
     if (!this.#svc) {
       const { MailService: M, NodemailerTransport } = await import('@travetto/email');
       const { MailTransportTarget } = await import('@travetto/email/src/internal/types');
@@ -51,7 +51,9 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
   /**
    * Resolve template
    */
-  static async sendEmail(file: string, from: string, to: string, context: Record<string, unknown>) {
+  static async sendEmail(file: string, from: string, to: string, context: Record<string, unknown>): Promise<{
+    url?: string | false;
+  }> {
     try {
       console.log('Sending email', { to });
       // Let the engine template
@@ -61,7 +63,7 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
       }
 
       const key = file.replace(TemplateUtil.TPL_EXT, '').replace(/^.*?\/resources\//, '/');
-      const info = await svc.sendCompiled(key, { to, context, from }) as SMTPTransport.SentMessageInfo;
+      const info = await svc.sendCompiled<SMTPTransport.SentMessageInfo>(key, { to, context, from });
       console.log('Sent email', { to });
 
       const senderConfig = await ConfigUtil.getSenderConfig();

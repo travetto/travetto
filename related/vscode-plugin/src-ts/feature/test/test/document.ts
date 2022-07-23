@@ -6,7 +6,6 @@ import {
   AllState, TestState, ResultState,
   TestEvent, SuiteResult, TestResult, Assertion,
   SuiteConfig, SuiteState, Level,
-  ErrorHoverAssertion,
   StatusUnknown,
   RemoveEvent
 } from './types';
@@ -37,7 +36,7 @@ export class DocumentResultsManager {
   /**
    * Get list of known tests
    */
-  getListOfTests() {
+  getListOfTests(): { name: string, start: number, code: number }[] {
     return Object.values(this.#results.test)
       .map(v => ({
         name: v.src.methodName,
@@ -50,7 +49,7 @@ export class DocumentResultsManager {
    * Support a new editor for results updating
    * @param e
    */
-  addEditor(e: vscode.TextEditor) {
+  addEditor(e: vscode.TextEditor): void {
     if (!this.#editors.has(e)) {
       this.#editors.add(e);
       this.#document = e.document;
@@ -66,7 +65,7 @@ export class DocumentResultsManager {
    * Remove an editor
    * @param e
    */
-  removeEditor(e: vscode.TextEditor) {
+  removeEditor(e: vscode.TextEditor): void {
     if (!this.#editors.has(e)) {
       this.#editors.delete(e);
     }
@@ -77,7 +76,7 @@ export class DocumentResultsManager {
    * @param type
    * @param decs
    */
-  setStyle(type: vscode.TextEditorDecorationType, decs: vscode.DecorationOptions[]) {
+  setStyle(type: vscode.TextEditorDecorationType, decs: vscode.DecorationOptions[]): void {
     if (type) {
       for (const ed of this.#editors) {
         ed.setDecorations(type, decs);
@@ -88,7 +87,7 @@ export class DocumentResultsManager {
   /**
    * Shutdown results manager
    */
-  dispose() {
+  dispose(): void {
     this.#editors.clear();
 
     for (const suite of Object.values(this.#results.suite)) {
@@ -100,7 +99,7 @@ export class DocumentResultsManager {
     }
   }
 
-  refreshTest(test: TestState | string) {
+  refreshTest(test: TestState | string): void {
     if (typeof test === 'string') {
       test = this.#results.test[test];
     }
@@ -111,6 +110,7 @@ export class DocumentResultsManager {
       for (const assertion of test.assertions) {
         out[assertion.status].push(assertion.decoration);
       }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       for (const k of Object.keys(out) as StatusUnknown[]) {
         this.setStyle(test.assertStyles[k], out[k]);
       }
@@ -120,7 +120,7 @@ export class DocumentResultsManager {
   /**
    * Refresh all results
    */
-  refresh() {
+  refresh(): void {
     for (const suite of Object.values(this.#results.suite)) {
       if (suite.decoration && suite.status) {
         this.setStyle(suite.styles[suite.status], [suite.decoration]);
@@ -131,34 +131,34 @@ export class DocumentResultsManager {
     }
   }
 
-  findDocument(file: string) {
+  findDocument(file: string): vscode.TextDocument {
     const content = readFileSync(file, 'utf8');
     const self = {
       lines: content.split(/\n/g),
-      lineAt(line: number) {
+      lineAt(line: number): { firstNonWhitespaceCharacterIndex: number } {
         return {
           firstNonWhitespaceCharacterIndex: (self.lines[line].length - self.lines[line].trimLeft().length)
         };
       }
     };
-    // @ts-ignore
-    return self as vscode.TextDocument;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return self as unknown as vscode.TextDocument;
   }
 
   /**
    * Refresh global diagnostics
    */
-  refreshDiagnostics() {
+  refreshDiagnostics(): void {
     let document = this.#document;
 
     this.#diagnostics = Object.values(this.#results.test)
       .filter(x => x.status === 'failed')
-      .reduce((acc, ts) => {
+      .reduce<vscode.Diagnostic[]>((acc, ts) => {
         for (const as of ts.assertions) {
           if (as.status !== 'failed' || as.src.classId === 'unknown') {
             continue;
           }
-          const { bodyFirst } = Decorations.buildErrorHover(as.src as unknown as ErrorHoverAssertion);
+          const { bodyFirst } = Decorations.buildErrorHover(as.src);
           const rng = as.decoration!.range;
 
           document ??= this.findDocument(this.#file);
@@ -182,13 +182,14 @@ export class DocumentResultsManager {
             ),
             rng.end
           );
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const err = (ts.src as TestResult).error!.message.split(/\n/).shift();
           const diag = new vscode.Diagnostic(diagRng, `${ts.src.classId.split(/[^a-z-/]+/i).pop()}.${ts.src.methodName} - ${err}`, vscode.DiagnosticSeverity.Error);
           diag.source = '@travetto/test';
           acc.push(diag);
         }
         return acc;
-      }, [] as vscode.Diagnostic[]);
+      }, []);
     diagColl.set(vscode.Uri.file(this.#file), this.#diagnostics);
   }
 
@@ -200,13 +201,20 @@ export class DocumentResultsManager {
    * @param decoration UI Decoration
    * @param src
    */
-  store(level: Level, key: string, status: StatusUnknown, decoration: vscode.DecorationOptions, src?: Assertion | SuiteResult | SuiteConfig | TestResult | TestEvent) {
+  store(
+    level: Level,
+    key: string,
+    status: StatusUnknown,
+    decoration: vscode.DecorationOptions,
+    src?: Assertion | SuiteResult | SuiteConfig | TestResult | TestEvent
+  ): void {
     switch (level) {
       case 'assertion': {
         const el = this.#results.test[key];
         const groups: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
-
-        el.assertions.push({ status, decoration, src: src as Assertion });
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const assertedSrc: Assertion = src as Assertion;
+        el.assertions.push({ status, decoration, src: assertedSrc });
 
         for (const a of el.assertions) {
           groups[a.status].push(a.decoration);
@@ -219,6 +227,7 @@ export class DocumentResultsManager {
       }
       case 'suite': {
         const el = this.#results.suite[key];
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         el.src = src as SuiteResult;
         el.status = status;
         el.decoration = decoration;
@@ -230,6 +239,7 @@ export class DocumentResultsManager {
       }
       case 'test': {
         const el = this.#results.test[key];
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         el.src = src as TestResult;
         el.status = status;
         el.decoration = decoration;
@@ -242,7 +252,7 @@ export class DocumentResultsManager {
    * Create all level styles
    * @param level
    */
-  genStyles(level: Level) {
+  genStyles(level: Level): Record<'failed' | 'passed' | 'unknown', vscode.TextEditorDecorationType> {
     return {
       failed: Decorations.buildStyle(level, 'failed'),
       passed: Decorations.buildStyle(level, 'passed'),
@@ -255,7 +265,7 @@ export class DocumentResultsManager {
    * @param level Level to reset
    * @param key The file to reset
    */
-  reset(level: Exclude<Level, 'assertion'>, key: string) {
+  reset(level: Exclude<Level, 'assertion'>, key: string): void {
     const existing = this.#results[level][key];
     const base: ResultState<unknown> = {
       status: 'unknown',
@@ -266,11 +276,13 @@ export class DocumentResultsManager {
     if (existing) {
       Object.values(existing.styles).forEach(x => x.dispose());
       if (level === 'test') {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         Object.values((existing as TestState).assertStyles).forEach(x => x.dispose());
       }
     }
     switch (level) {
       case 'test': {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const testBase = (base as TestState);
         testBase.assertions = [];
         testBase.assertStyles = this.genStyles('assertion');
@@ -278,6 +290,7 @@ export class DocumentResultsManager {
         break;
       }
       case 'suite': {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const suiteBase = (base as SuiteState);
         this.#results[level][key] = suiteBase;
         break;
@@ -289,7 +302,7 @@ export class DocumentResultsManager {
    * On suite results
    * @param suite
    */
-  onSuite(suite: SuiteResult) {
+  onSuite(suite: SuiteResult): void {
     const status = suite.skipped ? 'unknown' : (suite.failed ? 'failed' : 'passed');
     this.reset('suite', suite.classId);
     this.store('suite', suite.classId, status, Decorations.buildSuite(suite), suite);
@@ -299,7 +312,7 @@ export class DocumentResultsManager {
    * On test results
    * @param test
    */
-  onTest(test: TestResult) {
+  onTest(test: TestResult): void {
     const dec = Decorations.buildTest(test);
     const status = test.status === 'skipped' ? 'unknown' : test.status;
     this.store('test', `${test.classId}:${test.methodName}`, status, dec, test);
@@ -312,7 +325,7 @@ export class DocumentResultsManager {
    * On test assertion
    * @param assertion
    */
-  onAssertion(assertion: Assertion) {
+  onAssertion(assertion: Assertion): void {
     const status = assertion.error ? 'failed' : 'passed';
     const key = `${assertion.classId}:${assertion.methodName}`;
     const dec = Decorations.buildAssertion(assertion);
@@ -325,14 +338,14 @@ export class DocumentResultsManager {
   /**
    * On a test event, update internal state
    */
-  onEvent(e: TestEvent | RemoveEvent) {
+  onEvent(e: TestEvent | RemoveEvent): void {
     if (e.type === 'removeTest') {
       this.reset('test', `${e.classId}:${e.method}`);
     } else if (e.phase === 'before') {
       switch (e.type) {
         case 'suite': {
           this.reset('suite', e.suite.classId);
-          this.store('suite', e.suite.classId, 'unknown', Decorations.buildSuite(e.suite), e.suite as SuiteResult);
+          this.store('suite', e.suite.classId, 'unknown', Decorations.buildSuite(e.suite), e.suite);
 
           for (const test of Object.values(this.#results.test).filter(x => x.src.classId === e.suite.classId)) {
             this.reset('test', `${test.src.classId}:${test.src.methodName}`);
@@ -344,7 +357,7 @@ export class DocumentResultsManager {
           const key = `${e.test.classId}:${e.test.methodName}`;
           this.reset('test', key);
           const dec = Decorations.buildTest(e.test);
-          this.store('test', key, 'unknown', dec, e.test as TestResult);
+          this.store('test', key, 'unknown', dec, e.test);
           break;
         }
       }
@@ -360,7 +373,7 @@ export class DocumentResultsManager {
   /**
    * Get full totals
    */
-  getTotals() {
+  getTotals(): { skipped: number, failed: number, passed: number, unknown: number, total: number } {
     const values = Object.values(this.#results.test);
     const total = values.length;
     let passed = 0;

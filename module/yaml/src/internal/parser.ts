@@ -14,7 +14,7 @@ export class Parser {
   /**
    * Start an Array
    */
-  static #startList(state: State, indent: number) {
+  static #startList(state: State, indent: number): void {
     if (indent === state.top.indent) { // If at the same level
       if (!(state.top instanceof ListBlock) && !(state.top instanceof MapBlock)) { // If not a map or a list, as maps can have lists at same level
         throw new Error('Invalid mixing of elements');
@@ -29,7 +29,7 @@ export class Parser {
   /**
    * Start a map object
    */
-  static #startMap(state: State, field: string, indent: number) {
+  static #startMap(state: State, field: string, indent: number): void {
     state.nestField(new TextNode(field).value, indent);
 
     if (indent === state.top.indent) { // If at the same level
@@ -68,7 +68,7 @@ export class Parser {
   /**
    * Parse via `State`
    */
-  static parse(input: string | State) {
+  static parse<T = unknown>(input: string | State): T {
     const state = typeof input === 'string' ? new State(input) : input;
 
     let pos = 0;
@@ -127,6 +127,7 @@ export class Parser {
       pos = nextLineStart;
     }
 
-    return state.popToTop()!.value!;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return state.popToTop()!.value! as T;
   }
 }

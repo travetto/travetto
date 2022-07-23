@@ -4,7 +4,7 @@ import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, ParamConfig, RouteConfig } from '@travetto/rest';
+import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
 import { NodeEntityⲐ, TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { ServerHandle } from '@travetto/rest/src/types';
@@ -34,7 +34,7 @@ declare global {
 @Injectable()
 export class ExpressRestServer implements RestServer<express.Application> {
 
-  #raw: express.Application;
+  raw: express.Application;
 
   listening: boolean;
 
@@ -56,23 +56,25 @@ export class ExpressRestServer implements RestServer<express.Application> {
       app.enable('trust proxy');
     }
 
-    this.#raw = app;
+    this.raw = app;
 
     return app;
   }
 
-  async unregisterRoutes(key: string | symbol) {
-    const routes = (this.#raw._router.stack as RouteStack[]);
+  async unregisterRoutes(key: string | symbol): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const routes = (this.raw._router.stack as RouteStack[]);
     const pos = routes.findIndex(x => x.handle.key === key);
     if (pos >= 0) {
       routes.splice(pos, 1);
     }
   }
 
-  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[], interceptors: RestInterceptor[]) {
+  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[], interceptors: RestInterceptor[]): Promise<void> {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       router[route.method as 'get'](route.path!, (req, res) => {
         route.handlerFinalized!(
           req[TravettoEntityⲐ] ??= ExpressServerUtil.getRequest(req),
@@ -89,7 +91,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
           method: 'options',
           path: '*',
           handler: (__req: Request) => '',
-          params: [{ extract: (__, r: unknown) => r } as ParamConfig]
+          params: [{ extract: (__, r: unknown) => r, location: 'context' }]
         }
       );
 
@@ -98,16 +100,16 @@ export class ExpressRestServer implements RestServer<express.Application> {
     }
 
     router.key = key;
-    this.#raw.use(path, router);
+    this.raw.use(path, router);
   }
 
   async listen(): Promise<ServerHandle> {
-    let raw: express.Application | https.Server = this.#raw;
+    let raw: express.Application | https.Server = this.raw;
     if (this.config.ssl.active) {
       const keys = await this.config.getKeys();
-      raw = (await import('https')).createServer(keys!, this.#raw);
+      raw = (await import('https')).createServer(keys!, this.raw);
     }
     this.listening = true;
-    return raw.listen(this.config.port, this.config.bindAddress!) as ServerHandle;
+    return raw.listen(this.config.port, this.config.bindAddress!);
   }
 }

@@ -28,7 +28,7 @@ export class SchemaTransformer {
    * Track schema on start
    */
   @OnClass('Schema')
-  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta) {
+  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta): ts.ClassDeclaration {
     state[inSchema] = true;
     state[accessors] = new Set();
     return node;
@@ -38,7 +38,7 @@ export class SchemaTransformer {
    * Mark the end of the schema, document
    */
   @AfterClass('Schema')
-  static finalizeSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration) {
+  static finalizeSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     const decls = [...(node.decorators ?? [])];
 
     const comments = DocUtil.describeDocs(node);
@@ -71,7 +71,7 @@ export class SchemaTransformer {
    * Handle all properties, while in schema
    */
   @OnProperty()
-  static processSchemaField(state: TransformerState & AutoState, node: ts.PropertyDeclaration) {
+  static processSchemaField(state: TransformerState & AutoState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
     const ignore = state.findDecorator(this, node, 'Ignore');
     return state[inSchema] && !ignore && DeclarationUtil.isPublic(node) ?
       SchemaTransformUtil.computeField(state, node) : node;
@@ -81,7 +81,7 @@ export class SchemaTransformer {
    * Handle getters
    */
   @OnGetter()
-  static processSchemaGetter(state: TransformerState & AutoState, node: ts.GetAccessorDeclaration) {
+  static processSchemaGetter(state: TransformerState & AutoState, node: ts.GetAccessorDeclaration): ts.GetAccessorDeclaration {
     const ignore = state.findDecorator(this, node, 'Ignore');
     if (state[inSchema] && !ignore && DeclarationUtil.isPublic(node) && !state[accessors]?.has(node.name.getText())) {
       state[accessors]?.add(node.name.getText());
@@ -94,7 +94,7 @@ export class SchemaTransformer {
    * Handle setters
    */
   @OnSetter()
-  static processSchemaSetter(state: TransformerState & AutoState, node: ts.SetAccessorDeclaration) {
+  static processSchemaSetter(state: TransformerState & AutoState, node: ts.SetAccessorDeclaration): ts.SetAccessorDeclaration {
     const ignore = state.findDecorator(this, node, 'Ignore');
     if (state[inSchema] && !ignore && DeclarationUtil.isPublic(node) && !state[accessors]?.has(node.name.getText())) {
       state[accessors]?.add(node.name.getText());

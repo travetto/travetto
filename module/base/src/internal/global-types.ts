@@ -10,13 +10,13 @@ declare global {
 
 export type Primitive = number | boolean | string | Date | Error;
 
-function addFn(proto: object, name: string, fn: Function) {
+function addFn(proto: object, name: string, fn: Function): void {
   Object.defineProperty(proto, name, { configurable: true, writable: false, enumerable: false, value: fn });
 }
 
 // Enable maps to be serialized as json
 addFn(Map.prototype, 'toJSON', function (this: Map<unknown, unknown>) {
-  const out = {} as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
   for (const [k, v] of this.entries()) {
     out[typeof k === 'string' ? k : `${k}`] = v;
   }
@@ -39,7 +39,7 @@ addFn(Error.prototype, 'toJSON', function (this: Error, extra?: Record<string, u
 });
 
 // Add .toArray to async iterables
-const AsyncProto = Object.getPrototypeOf(Object.getPrototypeOf((async function* () { })()));
+const AsyncProto = Object.getPrototypeOf(Object.getPrototypeOf((async function* (): AsyncIterable<void> { })()));
 addFn(AsyncProto, 'toArray', async function (this: AsyncGenerator<unknown>) {
   const out = [];
   for await (const item of this) {

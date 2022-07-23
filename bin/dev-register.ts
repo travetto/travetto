@@ -20,7 +20,7 @@ class DevRegister {
   /**
    * Resolve filename for dev mode
    */
-  static resolveFilename(p: string) {
+  static resolveFilename(p: string): string {
     if (p.includes('@travetto')) {
       const [, key, sub] = p.match(/^.*(@travetto\/[^/]+)(\/?.*)?$/) ?? [];
       const match = EnvUtil.getDynamicModules()[key!];
@@ -68,19 +68,19 @@ class DevRegister {
     };
   }
 
-  static getMods(envMods: string) {
+  static getMods(envMods: string): Set<string> {
     const mods = new Set(this.#defaultMods);
     envMods.replace(this.#trvMod, (_, m) => mods.add(m) && '');
     return mods;
   }
 
-  static getContent(envMods: string) {
+  static getContent(envMods: string): string {
     return AppCache.getOrSet(`isolated-modules.${SystemUtil.naiveHash(envMods)}.json`,
       () => JSON.stringify(this.readDeps(this.getMods(envMods)), null, 2)
     );
   }
 
-  static run() {
+  static run(): void {
     const envMods = process.env.TRV_MODULES ?? '';
     if (envMods && !process.env.TRV_CACHE) { // Is specifying modules, build out
       // @ts-expect-error
@@ -88,7 +88,7 @@ class DevRegister {
     }
 
     AppCache.init(true);
-    const { entries } = JSON.parse(this.getContent(envMods)) as DevConfig;
+    const { entries }: DevConfig = JSON.parse(this.getContent(envMods));
     process.env.TRV_MODULES = `${envMods.replace(this.#trvMod, '')},${Object.entries(entries).map(([k, v]) => `${k}=${v ?? ''}`).join(',')}`
       .replace(/,=/g, '');
 

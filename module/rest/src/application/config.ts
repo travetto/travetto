@@ -67,7 +67,7 @@ export class RestConfig {
   /**
    * Redefine base url to be the full URL if not specified
    */
-  postConstruct() {
+  postConstruct(): void {
     if (!this.bindAddress) {
       const useIPv4 = !![...Object.values(os.networkInterfaces())]
         .find(nics => nics?.find(nic => nic.family === 'IPv4'));
@@ -82,7 +82,10 @@ export class RestConfig {
   /**
    * Get SSL keys, will generate if missing, and in dev
    */
-  async getKeys() {
+  async getKeys(): Promise<{
+    key: string;
+    cert: string;
+  } | undefined> {
     if (this.ssl.active) {
       if (!this.ssl.keys) {
         if (EnvUtil.isProd()) {

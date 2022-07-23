@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { FsUtil, PathUtil, ExecUtil, ExecutionOptions } from '@travetto/boot';
+import { FsUtil, PathUtil, ExecUtil, ExecutionOptions, ExecutionResult } from '@travetto/boot';
 
 type ForkResult = ReturnType<(typeof ExecUtil)['forkMain']>;
 
@@ -14,7 +14,7 @@ export class Workspace {
   /**
    * Get workspace path
    */
-  static get path() {
+  static get path(): string {
     return this.folder.uri.fsPath;
   }
 
@@ -22,7 +22,7 @@ export class Workspace {
    * Read default environment data for executions
    * @param extra Additional env vars to add
    */
-  static getDefaultEnv(extra: Record<string, string> = {}) {
+  static getDefaultEnv(extra: Record<string, string> = {}): Record<string, string> {
     return {
       FORCE_COLOR: 'true',
       ...extra
@@ -33,7 +33,7 @@ export class Workspace {
    * Initialize extension context
    * @param context
    */
-  static init(context: vscode.ExtensionContext) {
+  static init(context: vscode.ExtensionContext): void {
     // @ts-expect-error
     this.context = context;
     // @ts-expect-error
@@ -45,7 +45,7 @@ export class Workspace {
    * Sleep
    * @param ms
    */
-  static sleep(ms: number) {
+  static sleep(ms: number): Promise<void> {
     return new Promise(r => setTimeout(r, ms));
   }
 
@@ -53,21 +53,21 @@ export class Workspace {
    * Find full path for a resource
    * @param rel
    */
-  static getAbsoluteResource(rel: string) {
+  static getAbsoluteResource(rel: string): string {
     return this.context.asAbsolutePath(rel);
   }
 
   /**
-   * Resolve worskapce path
+   * Resolve workspace path
    */
-  static resolve(...p: string[]) {
+  static resolve(...p: string[]): string {
     return PathUtil.resolveFrameworkPath(PathUtil.resolveUnix(this.path, ...p));
   }
 
   /**
-   * Resolve worskapce path
+   * Resolve workspace path
    */
-  static resolveModule(...p: string[]) {
+  static resolveModule(...p: string[]): string {
     return this.resolve('node_modules', ...p);
   }
 
@@ -99,14 +99,14 @@ export class Workspace {
   /**
    * Get a bin path for a module
    */
-  static binPath(module: string, script: string) {
+  static binPath(module: string, script: string): string {
     return `@travetto/${module}/bin/${script}`;
   }
 
   /**
    * Build workspace code
    */
-  static async buildCode() {
+  static async buildCode(): Promise<ExecutionResult | string> {
     const { result } = await this.runMain(this.binPath('base', 'build'));
 
     try {
@@ -125,7 +125,7 @@ export class Workspace {
    * See if module is installed
    * @param module
    */
-  static async isInstalled(module: string) {
+  static async isInstalled(module: string): Promise<boolean> {
     return !!(await FsUtil.exists(this.resolveModule(module)));
   }
 
@@ -133,6 +133,7 @@ export class Workspace {
    * Generate execution launch config
    * @param config
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   static generateLaunchConfig(name: string, main: string, args: string[] = [], env: Record<string, string> = {}) {
     return {
       type: 'node',
@@ -165,7 +166,7 @@ export class Workspace {
       // eslint-disable-next-line no-template-curly-in-string
       args: [main.replace(this.path, '${workspaceFolder}'), ...args].map(x => `${x}`),
       env: { FORCE_COLOR: 'true', ...env }
-    };
+    } as const;
   }
 
   /**
@@ -173,6 +174,7 @@ export class Workspace {
    * @param o
    */
   static isEditor(o: unknown): o is vscode.TextEditor {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return !!o && 'document' in (o as object);
   }
 
@@ -180,7 +182,7 @@ export class Workspace {
    * Get the editor for a doc
    * @param doc
    */
-  static getEditor(doc: vscode.TextDocument) {
+  static getEditor(doc: vscode.TextDocument): vscode.TextEditor | undefined {
     for (const e of vscode.window.visibleTextEditors) {
       if (e.document === doc) {
         return e;
@@ -188,14 +190,14 @@ export class Workspace {
     }
   }
 
-  static getDocumentEditor(editor?: vscode.TextEditor | vscode.TextDocument) {
+  static getDocumentEditor(editor?: vscode.TextEditor | vscode.TextDocument): vscode.TextEditor | undefined {
     editor = editor && !this.isEditor(editor) ? this.getEditor(editor) : editor;
     if (editor && editor.document) {
       return editor;
     }
   }
 
-  static addBreakpoint(editor: vscode.TextEditor, line: number) {
+  static addBreakpoint(editor: vscode.TextEditor, line: number): void {
     const uri = editor.document.uri;
     const pos = new vscode.Position(line - 1, 0);
     const loc = new vscode.Location(uri, pos);

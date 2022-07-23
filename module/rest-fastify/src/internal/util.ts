@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { RestServerUtil, Request } from '@travetto/rest';
+import { RestServerUtil, Request, Response } from '@travetto/rest';
 import { NodeEntityⲐ, ProviderEntityⲐ } from '@travetto/rest/src/internal/symbol';
 
 /**
@@ -10,33 +10,36 @@ export class FastifyServerUtil {
   /**
    * Build a Travetto Request from a Fastify Request
    */
-  static getRequest(reqs: FastifyRequest & { session?: TravettoRequest['session'] }) {
+  static getRequest(req: FastifyRequest & { session?: TravettoRequest['session'] }): Request {
     return RestServerUtil.decorateRequest({
-      [ProviderEntityⲐ]: reqs,
-      [NodeEntityⲐ]: reqs.raw,
-      protocol: (reqs.raw.socket && 'encrypted' in reqs.raw.socket) ? 'https' : 'http',
-      method: reqs.raw.method as Request['method'],
-      url: reqs.raw!.url,
-      query: reqs.query as Record<string, string>,
-      params: reqs.params as Record<string, string>,
-      body: reqs.body,
-      session: reqs.session,
-      headers: reqs.headers,
+      [ProviderEntityⲐ]: req,
+      [NodeEntityⲐ]: req.raw,
+      protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      method: req.raw.method as Request['method'],
+      url: req.raw!.url,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      query: req.query as Record<string, string>,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      params: req.params as Record<string, string>,
+      body: req.body,
+      session: req.session,
+      headers: req.headers,
       files: undefined,
       auth: undefined,
-      pipe: reqs.raw.pipe.bind(reqs.raw),
-      on: reqs.raw.on.bind(reqs.raw)
+      pipe: req.raw.pipe.bind(req.raw),
+      on: req.raw.on.bind(req.raw)
     });
   }
 
   /**
    * Build a Travetto Response from a Fastify Reply
    */
-  static getResponse(reply: FastifyReply) {
+  static getResponse(reply: FastifyReply): Response {
     return RestServerUtil.decorateResponse({
       [ProviderEntityⲐ]: reply,
       [NodeEntityⲐ]: reply.raw,
-      get headersSent() {
+      get headersSent(): boolean {
         return reply.sent;
       },
       status(val?: number): number | undefined {
@@ -47,20 +50,21 @@ export class FastifyServerUtil {
           return reply.raw.statusCode;
         }
       },
-      send(data) {
+      send(data): void {
         if ((reply.getHeader('Content-Type') ?? '').includes('json') && typeof data === 'string') {
           data = Buffer.from(data);
         }
         reply.send(data);
       },
       on: reply.raw.on.bind(reply.raw),
-      end: (val?: unknown) => {
+      end: (val?: unknown): void => {
         if (val) {
           reply.send(val);
         }
         reply.raw.end();
       },
       setHeader: reply.raw.setHeader.bind(reply.raw),
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       getHeader: reply.raw.getHeader.bind(reply.raw) as (key: string) => string, // NOTE: Forcing type, may be incorrect
       removeHeader: reply.raw.removeHeader.bind(reply.raw),
       write: reply.raw.write.bind(reply.raw)

@@ -14,7 +14,7 @@ export class MarkdownUtil {
   /**
    * Get raw text from DOM node
    */
-  static #getRawText(node: Element) {
+  static #getRawText(node: Element): string {
     let txt: string;
     if (Parse5Adapter.isTextNode(node)) {
       txt = Parse5Adapter.getTextNodeContent(node);
@@ -27,7 +27,7 @@ export class MarkdownUtil {
   /**
    * Convert to raw text
    */
-  static #getText(node: Element) {
+  static #getText(node: Element): string {
     return this.#getRawText(node).replace(/ +/g, ' ')
       .replace(/ +[\n]/g, '\n')
       .replace(/^[\n\s]+/, ' ')
@@ -44,14 +44,14 @@ export class MarkdownUtil {
   /**
    * Get attribute as string
    */
-  static #getAttr(attrs: Record<string, string>, name: string) {
+  static #getAttr(attrs: Record<string, string>, name: string): string {
     return (attrs[name] ?? '').trim();
   }
 
   /**
    * Convert HTML to a markdown blob
    */
-  static async htmlToMarkdown(html: string) {
+  static async htmlToMarkdown(html: string): Promise<string> {
 
     // Cleanup html from templating
     let simple = html.replace(/&#xA0;/g, ' '); // Remove entities
@@ -124,6 +124,7 @@ export class MarkdownUtil {
           const top = listMode[listMode.length - 1];
           if (typeof top === 'number') {
             output.push(`${top}. `);
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             (listMode[listMode.length - 1] as number)++;
           } else {
             output.push(top, ' ');

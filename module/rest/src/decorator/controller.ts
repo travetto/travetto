@@ -7,7 +7,7 @@ import { ControllerRegistry } from '../registry/controller';
  * @augments `@trv:rest/Controller`
  */
 export function Controller(path = '') {
-  return function <T>(target: Class<T>) {
+  return function <T>(target: Class<T>): void {
     ControllerRegistry.registerPending(target, {
       basePath: path,
       class: target,

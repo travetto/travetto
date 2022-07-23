@@ -12,6 +12,7 @@ import { Feature, FEATURES } from './lib/features';
 export class ScaffoldPlugin extends BasePlugin {
   name = 'scaffold';
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return {
       template: this.option({ def: 'todo', desc: 'Template' }),
@@ -20,11 +21,11 @@ export class ScaffoldPlugin extends BasePlugin {
     };
   }
 
-  getArgs() {
+  getArgs(): string {
     return '[name]';
   }
 
-  async #getName(name?: string) {
+  async #getName(name?: string): Promise<string> {
     if (!name) {
       const res = await enquirer.prompt<{ name: string }>([
         {
@@ -80,11 +81,13 @@ export class ScaffoldPlugin extends BasePlugin {
     }
   }
 
-  async action(name?: string) {
+  async action(name?: string): Promise<void> {
     try {
       name = await this.#getName(name);
-    } catch (err: any) {
-      console.error('Failed to provide correct input', err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error('Failed to provide correct input', err.message);
+      }
       process.exit(1);
     }
 
@@ -100,8 +103,10 @@ export class ScaffoldPlugin extends BasePlugin {
       for await (const dep of this.#resolveFeatures(FEATURES)) {
         await ctx.addDependency(dep);
       }
-    } catch (err: any) {
-      console.error('Failed to provide correct input', err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error('Failed to provide correct input', err.message);
+      }
       process.exit(1);
     }
 

@@ -14,7 +14,7 @@ export class PathUtil {
    *
    * @private
    */
-  static setDevPath(pth?: string) {
+  static setDevPath(pth?: string): void {
     this.#devPath = pth ?? process.env.TRV_DEV;
   }
 
@@ -22,14 +22,14 @@ export class PathUtil {
    * Convert file to a unix format
    * @param pth The path to convert
    */
-  static toUnix(pth: string) {
+  static toUnix(pth: string): string {
     return pth.replace(/[\\\/]+/g, '/');
   }
 
   /**
    * Convert a given path to a source path
    */
-  static toUnixTs(file: string) {
+  static toUnixTs(file: string): string {
     return file.replace(/[\\\/]+/g, '/').replace(/[.]js$/, '.ts');
   }
 
@@ -37,7 +37,7 @@ export class PathUtil {
    * Convert file to the native format
    * @param pth The path to convert
    */
-  static toNative(pth: string) {
+  static toNative(pth: string): string {
     return pth.replace(/[\\\/]+/g, path.sep);
   }
 
@@ -45,7 +45,7 @@ export class PathUtil {
    * Resolve path to use / for directory separator
    * @param paths The paths to resolve
    */
-  static resolveUnix(...paths: string[]) {
+  static resolveUnix(...paths: string[]): string {
     return this.toUnix(path.resolve(this.cwd, ...paths));
   }
 
@@ -53,7 +53,7 @@ export class PathUtil {
    * Path.join, and coercing to unix
    * @param paths The paths to join
    */
-  static joinUnix(...paths: string[]) {
+  static joinUnix(...paths: string[]): string {
     return this.toUnix(path.join(...paths));
   }
 
@@ -63,7 +63,7 @@ export class PathUtil {
    * @param file
    * @returns
    */
-  static normalizeFrameworkPath(file: string, prefix = '') {
+  static normalizeFrameworkPath(file: string, prefix = ''): string {
     return this.#devPath ? file.replace(this.#devPath, `${prefix}@travetto`) : file;
   }
 
@@ -73,7 +73,7 @@ export class PathUtil {
    * @param file
    * @returns
    */
-  static resolveFrameworkPath(file: string) {
+  static resolveFrameworkPath(file: string): string {
     return this.#devPath ? file.replace(/.*@travetto/, m => this.#devPath || m) : file;
   }
 
@@ -81,7 +81,7 @@ export class PathUtil {
    * Simplifies path name to remove node_modules construct
    * @param file
    */
-  static simplifyPath(file: string, localRoot?: string, removeExt = false) {
+  static simplifyPath(file: string, localRoot?: string, removeExt = false): string {
     let out = file.replace(/^.*node_modules\//, '');
     if (localRoot !== undefined) {
       out = out.replace(PathUtil.cwd, localRoot);

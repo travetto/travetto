@@ -22,7 +22,7 @@ export class FileAppender implements Appender {
     });
   }
 
-  append(level: LogLevel, message: string) {
+  append(level: LogLevel, message: string): void {
     this.stream.write(`${message}\n`);
   }
 }

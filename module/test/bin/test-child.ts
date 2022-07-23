@@ -3,7 +3,7 @@ import { createWriteStream } from 'fs';
 import { AppCache } from '@travetto/boot';
 import { EnvInit } from '@travetto/base/bin/init';
 
-export async function customLogs() {
+export async function customLogs(): Promise<void> {
   const { ConsoleManager } = await import('@travetto/base');
 
   const c = new console.Console({
@@ -16,7 +16,7 @@ export async function customLogs() {
   });
 }
 
-export async function main() {
+export async function main(): Promise<void> {
   EnvInit.init({
     debug: '0',
     set: { TRV_LOG_TIME: '0' },

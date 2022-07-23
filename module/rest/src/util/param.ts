@@ -31,7 +31,7 @@ export class ParamUtil {
   static provider(type: Class, fn: ExtractFn): Function;
   static provider(fnOrType: ExtractFn): Function;
   static provider(fnOrType: ExtractFn | Class, fn?: ExtractFn) {
-    return (target: Class) => this.registerContext(target, fnOrType, fn);
+    return (target: Class): void => this.registerContext(target, fnOrType, fn);
   }
 
   /**
@@ -40,20 +40,21 @@ export class ParamUtil {
    * @param fnOrTypeOverride The Extraction class ofr type
    * @param fn Optional extraction function
    */
-  static registerContext(finalType: Class, fnOrTypeOverride: ExtractFn | Class, fn?: ExtractFn) {
+  static registerContext(finalType: Class, fnOrTypeOverride: ExtractFn | Class, fn?: ExtractFn): void {
     if (fn) {
-      finalType = fnOrTypeOverride as Class;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      this.#typeExtractors.set(fnOrTypeOverride as Class, fn);
     } else {
-      fn = fnOrTypeOverride as ExtractFn;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      this.#typeExtractors.set(finalType, fnOrTypeOverride as ExtractFn);
     }
-    this.#typeExtractors.set(finalType, fn);
   }
 
   /**
    * Get extractor for type
    * @param cls
    */
-  static getExtractor(cls: Class) {
+  static getExtractor(cls: Class): ExtractFn {
     const fn = this.#typeExtractors.get(cls);
     if (!fn) {
       throw new AppError(`Unknown context type: ${cls.name}`, 'data');
@@ -67,7 +68,7 @@ export class ParamUtil {
    * @param req The request
    * @param res The response
    */
-  static extractParams(route: EndpointConfig, req: Request, res: Response) {
+  static extractParams(route: EndpointConfig, req: Request, res: Response): unknown[] {
     const cls = route.class;
     const method = route.handlerName;
     const routed = route.params.map(c => (c.extract ?? this.defaultExtractors[c.location])(c, req, res));

@@ -13,7 +13,9 @@ import { CacheAware, CacheConfigⲐ, EvictConfigⲐ } from './internal/types';
  */
 export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, maxAge: number | TimeSpan, config?: Omit<CacheConfig, 'maxAge'>): MethodDecorator;
 export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, cfg?: CacheConfig): MethodDecorator;
-export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, cfg?: number | TimeSpan | CacheConfig, config: Exclude<CacheConfig, 'maxAge'> = {}) {
+export function Cache<F extends string, U extends Record<F, CacheService>>(
+  field: F, cfg?: number | TimeSpan | CacheConfig, config: Exclude<CacheConfig, 'maxAge'> = {}
+): MethodDecorator {
   if (cfg !== undefined) {
     if (typeof cfg === 'string' || typeof cfg === 'number') {
       config.maxAge = Util.timeToMs(cfg);
@@ -21,10 +23,12 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(field
       config = cfg;
     }
   }
-  return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>) {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const dec = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
-    (target[CacheConfigⲐ] ??= {})[propertyKey] = config as CacheConfig;
-  };
+    (target[CacheConfigⲐ] ??= {})[propertyKey] = config;
+  } as MethodDecorator;
+  return dec;
 }
 
 /**
@@ -35,7 +39,7 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(field
  * @augments `@trv:cache/Evict`
  */
 export function EvictCache<F extends string, U extends Record<F, CacheService>>(field: F, config: CoreCacheConfig = {}) {
-  return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>) {
+  return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[EvictConfigⲐ] ??= {})[propertyKey] = config;
   };

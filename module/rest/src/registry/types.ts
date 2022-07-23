@@ -1,5 +1,13 @@
 import { Class } from '@travetto/base';
-import { Filter, HeaderMap, RouteConfig } from '../types';
+import { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
+
+/**
+ * Filter decorator for composition of routing logic
+ */
+export type FilterDecorator = (
+  (<T extends Class>(target: T) => void) &
+  (<U>(target: U, prop: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) => void)
+);
 
 /**
  * Endpoint type

@@ -16,7 +16,7 @@ export class AuthInterceptor implements RestInterceptor {
   @Inject()
   encoder: PrincipalEncoder;
 
-  async intercept(req: Request, res: Response, next: () => Promise<unknown>) {
+  async intercept(req: Request, res: Response, next: () => Promise<unknown>): Promise<unknown> {
     let og: Principal | undefined;
     try {
       og = req.auth = await this.encoder.decode(req);

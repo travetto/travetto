@@ -22,7 +22,7 @@ export class WorkspaceResultsManager {
   /**
    * Get totals from the runner
    */
-  getTotals() {
+  getTotals(): Record<StatusUnknown, number> {
     const totals: Record<StatusUnknown, number> = {
       skipped: 0,
       failed: 0,
@@ -44,7 +44,7 @@ export class WorkspaceResultsManager {
    * @param message
    * @param color
    */
-  setStatus(message: string, color?: string) {
+  setStatus(message: string, color?: string): void {
     if (!message) {
       this.#status.hide();
     } else {
@@ -58,7 +58,7 @@ export class WorkspaceResultsManager {
    * Get test results
    * @param target
    */
-  getLocation(target: vscode.TextDocument | RemoveEvent | TestEvent) {
+  getLocation(target: vscode.TextDocument | RemoveEvent | TestEvent): string | undefined {
     let file: string | undefined;
     if ('fileName' in target) {
       file = target.fileName;
@@ -81,7 +81,7 @@ export class WorkspaceResultsManager {
    * Get test results
    * @param target
    */
-  getResults(target: vscode.TextDocument | RemoveEvent | TestEvent) {
+  getResults(target: vscode.TextDocument | RemoveEvent | TestEvent): DocumentResultsManager | undefined {
     const file = this.getLocation(target);
     if (file) {
       if (!this.#results.has(file)) {
@@ -97,7 +97,7 @@ export class WorkspaceResultsManager {
    * On test event
    * @param ev
    */
-  onEvent(ev: TestEvent | RemoveEvent | CompleteEvent) {
+  onEvent(ev: TestEvent | RemoveEvent | CompleteEvent): void {
     if (ev.type === 'runComplete') {
       if (ev.error) {
         console.error(ev.error.name, ev.error.stack);
@@ -117,7 +117,7 @@ export class WorkspaceResultsManager {
   /**
    * Stop runner
    */
-  async dispose() {
+  async dispose(): Promise<void> {
     // Remove all state
     this.setStatus('');
     const entries = [...this.#results.entries()];
@@ -130,7 +130,7 @@ export class WorkspaceResultsManager {
   /**
    * Start tracking an editor
    */
-  trackEditor(editor: vscode.TextEditor | vscode.TextDocument | undefined) {
+  trackEditor(editor: vscode.TextEditor | vscode.TextDocument | undefined): void {
     editor = Workspace.getDocumentEditor(editor);
     if (editor && editor.document) {
       this.getResults(editor.document)?.addEditor(editor);
@@ -140,7 +140,7 @@ export class WorkspaceResultsManager {
   /**
    * Stop tracking
    */
-  async untrackEditor(editor: vscode.TextEditor | vscode.TextDocument | undefined) {
+  untrackEditor(editor: vscode.TextEditor | vscode.TextDocument | undefined): void {
     editor = Workspace.getDocumentEditor(editor);
     if (editor) {
       if (this.#results.has(editor.document.fileName)) {

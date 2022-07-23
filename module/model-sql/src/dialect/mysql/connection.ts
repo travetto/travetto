@@ -24,7 +24,7 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
     this.#config = config;
   }
 
-  async init() {
+  async init(): Promise<void> {
     this.#pool = mysql.createPool({
       user: this.#config.user,
       password: this.#config.password,
@@ -43,7 +43,7 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
   /**
    * Support some basic type support for JSON data
    */
-  typeCast(field: Parameters<Exclude<mysql.TypeCast, boolean>>[0], next: () => unknown) {
+  typeCast(field: Parameters<Exclude<mysql.TypeCast, boolean>>[0], next: () => unknown): unknown {
     const res = next();
     if (typeof res === 'string' && (field.type === 'JSON' || field.type === 'BLOB')) {
       if (res.charAt(0) === '{' && res.charAt(res.length - 1) === '}') {
@@ -67,19 +67,19 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
             rej(err);
           }
         } else {
-          const records = Array.isArray(results) ? [...results].map(v => ({ ...v })) : [{ ...results }] as T[];
+          const records: T[] = Array.isArray(results) ? [...results].map(v => ({ ...v })) : [{ ...results }];
           res({ records, count: results.affectedRows });
         }
       });
     });
   }
 
-  acquire() {
+  acquire(): Promise<mysql.PoolConnection> {
     return new Promise<mysql.PoolConnection>((res, rej) =>
       this.#pool.getConnection((err, conn) => err ? rej(err) : res(conn)));
   }
 
-  release(conn: mysql.PoolConnection) {
+  release(conn: mysql.PoolConnection): void {
     conn.release();
   }
 }

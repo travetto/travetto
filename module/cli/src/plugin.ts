@@ -12,7 +12,7 @@ const PLUGIN_PACKAGE = [
   [/^openapi:(spec|client)$/, 'openapi', true],
   [/^email:(compile|dev)$/, 'email-template', false],
   [/^pack(:assemble|:zip|:docker)?$/, 'pack', false],
-] as [patt: RegExp, pkg: string, prod: boolean][];
+] as const;
 
 /**
  * Manages loading and finding all plugins
@@ -22,7 +22,7 @@ export class PluginManager {
   /**
    * Get list of all plugins available
    */
-  static getPluginMapping() {
+  static getPluginMapping(): Map<string, string> {
     const all = new Map<string, string>();
     for (const { file } of SourceIndex.find({ folder: 'bin', filter: /bin\/cli-/ })) {
       all.set(file.replace(/^.*\/bin\/.+?-(.*?)[.][^.]*$/, (_, f) => f), file);
@@ -47,7 +47,8 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
       }
       throw new Error(`Unknown command: ${cmd}`);
     }
-    for (const v of Object.values(await import(f)) as { new(...args: unknown[]): unknown }[]) {
+    const values = Object.values<{ new(...args: unknown[]): unknown }>(await import(f));
+    for (const v of values) {
       try {
         const inst = new v();
         if (inst instanceof BasePlugin) {
@@ -64,7 +65,7 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
   /**
    * Load all available plugins
    */
-  static async loadAllPlugins(op?: (p: BasePlugin) => unknown | Promise<unknown>) {
+  static async loadAllPlugins(op?: (p: BasePlugin) => unknown | Promise<unknown>): Promise<BasePlugin[]> {
     return Promise.all(
       [...this.getPluginMapping().keys()]
         .sort((a, b) => a.localeCompare(b))

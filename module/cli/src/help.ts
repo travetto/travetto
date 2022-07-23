@@ -11,7 +11,7 @@ export class HelpUtil {
    * @param text Source text
    * @param key
    */
-  static extractValue(text: string, key: string) {
+  static extractValue(text: string, key: string): readonly [string, string] {
     let sub = '';
     if (text.includes(key)) {
       const start = text.indexOf(key);
@@ -28,7 +28,7 @@ export class HelpUtil {
   /**
    * Colorize Usage
    */
-  static colorizeOptions(option: string) {
+  static colorizeOptions(option: string): string {
     return option.replace(/(\s*)(-[^, ]+)(,?\s*)(--\S+)?((\s+)?((?:\[[^\]]+\])|(?:\<[^>]+>)))?((\s+)(.*))?/g, (
       p: string, spacing: string,
       simpleParam: string, pSep: string,
@@ -59,7 +59,7 @@ export class HelpUtil {
   /**
    * Colorize command section
    */
-  static colorizeCommands(commands: string) {
+  static colorizeCommands(commands: string): string {
     return commands
       .replace(/\s([^\[\]]\S+)/g, param => color`${{ param }}`)
       .replace(/(\s*[^\x1b]\[[^\]]+\])/g, input => color`${{ input }}`) // eslint-disable-line no-control-regex
@@ -69,14 +69,14 @@ export class HelpUtil {
   /**
    * Colorize usage
    */
-  static colorizeUsage(usage: string) {
+  static colorizeUsage(usage: string): string {
     return usage.replace(/Usage:/, title => color`${{ title }}`);
   }
 
   /**
    * Get full help text
    */
-  static getHelpText(text: string, extraText?: string) {
+  static getHelpText(text: string, extraText?: string): string {
     const [usage, text2] = this.extractValue(text, 'Usage:');
     const [options, text3] = this.extractValue(text2, 'Options:');
     const [commands, textFinal] = this.extractValue(text3, 'Commands:');

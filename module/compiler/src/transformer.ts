@@ -6,18 +6,21 @@ import {
   NodeTransformer, VisitorFactory, TransformerState, getAllTransformers
 } from '@travetto/transformer'; // Narrow import to minimize scope
 
+type TransformerList = { before: ts.TransformerFactory<ts.SourceFile>[] };
+
+
 /**
  * Manages the typescript transformers
  */
 export class TransformerManager {
 
-  #cached: { before: ts.TransformerFactory<ts.SourceFile>[] } | undefined;
+  #cached: TransformerList | undefined;
   #transformers: NodeTransformer<TransformerState>[] = [];
 
   /**
    * Read all transformers from disk under the pattern support/transformer.*
    */
-  async init() {
+  async init(): Promise<void> {
     if (this.#cached) {
       return;
     }
@@ -43,7 +46,7 @@ export class TransformerManager {
     // Prepare a new visitor factory with a given type checker
   }
 
-  build(checker: ts.TypeChecker) {
+  build(checker: ts.TypeChecker): void {
     const visitor = new VisitorFactory(
       (ctx, src) => new TransformerState(src, ctx.factory, checker),
       this.#transformers
@@ -58,14 +61,14 @@ export class TransformerManager {
   /**
    * Get typescript transformer object
    */
-  getTransformers() {
+  getTransformers(): TransformerList | undefined {
     return this.#cached!;
   }
 
   /**
    * Reset state
    */
-  reset() {
+  reset(): void {
     this.#transformers = [];
     this.#cached = undefined;
   }

@@ -10,10 +10,10 @@ npm install @travetto/model-mongo
 
 This module provides an [mongodb](https://mongodb.com)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [mongodb](https://mongodb.com).. Given the dynamic nature of [mongodb](https://mongodb.com), during development when models are modified, nothing needs to be done to adapt to the latest schema.
 
-Supported featrues:
+Supported features:
    
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
-   *  [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1)
+   *  [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11)
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L23)
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12)
@@ -95,22 +95,22 @@ export class MongoModelConfig {
   };
 
   /**
-   * Should we autocreate the db
+   * Should we auto create the db
    */
   autoCreate?: boolean;
 
   /**
-   * Frequency of culling for expirable content
+   * Frequency of culling for cullable content
    */
   cullRate?: number | TimeSpan;
 
   /**
    * Load a resource
    */
-  async fetch(val: string) {
+  async fetch(val: string): Promise<string> {
     return ResourceManager.read(val)
       .then(res => typeof res === 'string' ? res : res.toString('utf8'))
-      .catch(e => fs.readFile(val)
+      .catch(() => fs.readFile(val)
         .then(res => typeof res === 'string' ? res : res.toString('utf8'))
       )
       .catch(() => val);
@@ -119,7 +119,7 @@ export class MongoModelConfig {
   /**
    * Load all the ssl certs as needed
    */
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     const opts = this.options;
     if (opts.ssl) {
       if (opts.sslCert) {
@@ -140,7 +140,7 @@ export class MongoModelConfig {
   /**
    * Build connection URLs
    */
-  get url() {
+  get url(): string {
     const hosts = this.hosts
       .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port}`)
       .join(',');
@@ -159,4 +159,4 @@ export class MongoModelConfig {
   standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Environment-aware config management using yaml files")resolution paths. 
   
 
-The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L14) path or just a standard file path.
+The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceManager](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L16) path or just a standard file path.

@@ -12,7 +12,7 @@ ${d.Header()}
 
 This module provides an ${lib.MongoDB}-based implementation for the ${mod.Model}.  This source allows the ${mod.Model} module to read, write and query against ${lib.MongoDB}.. Given the dynamic nature of ${lib.MongoDB}, during development when models are modified, nothing needs to be done to adapt to the latest schema.
 
-Supported featrues:
+Supported features:
 ${d.List(
   ...ModelTypes(MongoModelService),
   ...ModelQueryTypes(MongoModelService)

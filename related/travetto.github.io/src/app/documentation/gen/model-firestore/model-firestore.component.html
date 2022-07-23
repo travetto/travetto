@@ -14,7 +14,7 @@
 
 This module provides an <a target="_blank" class="external-link" href="https://firebase.google.com/docs/firestore">Firestore</a>-based implementation of the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>.  This source allows the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and query against <a target="_blank" class="external-link" href="https://firebase.google.com/docs/firestore">Firestore</a>.
 
-Supported featrues:
+Supported features:
 <ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a></li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12">Indexed</a></li></ul>
 
@@ -64,7 +64,7 @@ Supported featrues:
     private_key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
-  <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>emulator<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">FIRESTORE_EMULATOR_HOST</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>emulator<span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>

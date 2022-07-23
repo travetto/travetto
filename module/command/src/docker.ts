@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 
-import { PathUtil, EnvUtil, ExecUtil, ExecutionState, FsUtil } from '@travetto/boot';
+import { PathUtil, EnvUtil, ExecUtil, ExecutionState, FsUtil, ExecutionResult } from '@travetto/boot';
 import { ShutdownManager } from '@travetto/base';
 
 /**
@@ -8,11 +8,11 @@ import { ShutdownManager } from '@travetto/base';
  */
 export class DockerContainer {
 
-  static #getNamespace(image: string) {
+  static #getNamespace(image: string): string {
     return EnvUtil.isTrue('TRV_DOCKER') ? image : EnvUtil.get('TRV_DOCKER', image);
   }
 
-  static #getContainerName(image: string, container?: string) {
+  static #getContainerName(image: string, container?: string): string {
     return container ?? `${this.#getNamespace(image)}-${Date.now()}-${Math.random()}`.replace(/[^A-Z0-9a-z\-]/g, '');
   }
 
@@ -86,7 +86,7 @@ export class DockerContainer {
   /**
    * Run a a docker command
    */
-  #runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: string[]) {
+  #runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: string[]): ExecutionState {
     const state = ExecUtil.spawn(this.#dockerCmd, [op, ...(args ?? [])], { shell: this.#tty });
     return (op !== 'run' && op !== 'exec') ? this.#watchForEviction(state, true) : state;
   }
@@ -94,7 +94,7 @@ export class DockerContainer {
   /**
    * Get unique identifier for the current execution
    */
-  get id() {
+  get id(): string {
     const first = this.#pendingExecutions.size > 0 ? this.#pendingExecutions.values().next().value : undefined;
     return first && !first.process.killed ? first.process.pid : -1;
   }
@@ -102,7 +102,7 @@ export class DockerContainer {
   /**
    * Force destroy of container when the app shuts down
    */
-  forceDestroyOnShutdown() {
+  forceDestroyOnShutdown(): this {
     ShutdownManager.onShutdown(this.#container, () => this.forceDestroy());
     return this;
   }
@@ -110,15 +110,15 @@ export class DockerContainer {
   /**
    * Mark delete on finish
    */
-  setDeleteOnFinish(yes: boolean) {
+  setDeleteOnFinish(yes: boolean): this {
     this.#deleteOnFinish = yes;
     return this;
   }
 
   /**
-   * Create a tempdir and mount as a volume
+   * Create a temp dir and mount as a volume
    */
-  async createTempVolume(volume: string) {
+  async createTempVolume(volume: string): Promise<this> {
     const p = await fs.mkdtemp(`/tmp/${this.#image.replace(/[^A-Za-z0-9]/g, '_')}`);
     this.#tempVolumes.set(volume, p);
     return this;
@@ -127,14 +127,14 @@ export class DockerContainer {
   /**
    * Get temp directory location
    */
-  getTempVolumePath(volume: string) {
+  getTempVolumePath(volume: string): string | undefined {
     return this.#tempVolumes.get(volume);
   }
 
   /**
    * Expose a port
    */
-  exposePort(port: number, internalPort = port) {
+  exposePort(port: number, internalPort = port): this {
     this.#ports.set(port, internalPort);
     return this;
   }
@@ -143,7 +143,7 @@ export class DockerContainer {
    * Add label
    * @param label
    */
-  addLabel(label: string) {
+  addLabel(label: string): this {
     this.#labels.push(label);
     return this;
   }
@@ -151,7 +151,7 @@ export class DockerContainer {
   /**
    * Add an environment variable
    */
-  addEnvVar(key: string, value: string = '') {
+  addEnvVar(key: string, value: string = ''): this {
     this.#env.set(key, value);
     return this;
   }
@@ -159,7 +159,7 @@ export class DockerContainer {
   /**
    * Add many environment variables
    */
-  addEnvVars(vars: Record<string, string>) {
+  addEnvVars(vars: Record<string, string>): this {
     for (const [k, v] of Object.entries(vars)) {
       this.#env.set(k, v);
     }
@@ -169,7 +169,7 @@ export class DockerContainer {
   /**
    * Add a volume into the container
    */
-  addVolume(local: string, container: string) {
+  addVolume(local: string, container: string): this {
     this.#volumes.set(local, container);
     return this;
   }
@@ -177,7 +177,7 @@ export class DockerContainer {
   /**
    * Set working directory
    */
-  setWorkingDir(container: string) {
+  setWorkingDir(container: string): this {
     this.#workingDir = container;
     return this;
   }
@@ -185,7 +185,7 @@ export class DockerContainer {
   /**
    * Set interactive mode
    */
-  setInteractive(on: boolean) {
+  setInteractive(on: boolean): this {
     this.#interactive = on;
     return this;
   }
@@ -193,7 +193,7 @@ export class DockerContainer {
   /**
    * Allocate tty
    */
-  setTTY(on: boolean) {
+  setTTY(on: boolean): this {
     this.#tty = on;
     return this;
   }
@@ -201,7 +201,7 @@ export class DockerContainer {
   /**
    * Set the entry point for the container
    */
-  setEntryPoint(point: string) {
+  setEntryPoint(point: string): this {
     this.#entryPoint = point;
     return this;
   }
@@ -209,7 +209,7 @@ export class DockerContainer {
   /**
    * Mark execution as daemon
    */
-  setDaemon(on: boolean) {
+  setDaemon(on: boolean): this {
     this.#daemon = on;
     return this;
   }
@@ -217,7 +217,7 @@ export class DockerContainer {
   /**
    * Mark execution as privileged
    */
-  setPrivileged(on?: boolean) {
+  setPrivileged(on?: boolean): this {
     this.#privileged = !!on;
     return this;
   }
@@ -226,7 +226,7 @@ export class DockerContainer {
    * Set unref status
    * @param on
    */
-  setUnref(on: boolean) {
+  setUnref(on: boolean): this {
     this.#unref = on;
     return this;
   }
@@ -234,8 +234,8 @@ export class DockerContainer {
   /**
    * Get flags for running a container
    */
-  getRuntimeFlags(extra?: string[]) {
-    const flags = [];
+  getRuntimeFlags(extra?: string[]): string[] {
+    const flags: string[] = [];
     if (this.#interactive) {
       flags.push('-i');
     }
@@ -252,8 +252,8 @@ export class DockerContainer {
   /**
    * Get flags for launching a container
    */
-  getLaunchFlags(extra?: string[]) {
-    const flags = [];
+  getLaunchFlags(extra?: string[]): string[] {
+    const flags: string[] = [];
     if (this.#workingDir) {
       flags.push('-w', this.#workingDir);
     }
@@ -289,7 +289,7 @@ export class DockerContainer {
   /**
    * Create all temp dirs
    */
-  async initTemp() {
+  async initTemp(): Promise<void> {
     await Promise.all( // Make temp dirs
       Object.keys(this.#tempVolumes).map(x => fs.mkdir(x, { recursive: true })));
   }
@@ -297,7 +297,7 @@ export class DockerContainer {
   /**
    * Create a docker container
    */
-  async create(args?: string[], flags?: string[]) {
+  async create(args?: string[], flags?: string[]): Promise<ExecutionResult> {
     const allFlags = this.getLaunchFlags(flags);
     return this.#runCmd('create', '--name', this.#container, ...allFlags, this.#image, ...(args ?? [])).result;
   }
@@ -305,7 +305,7 @@ export class DockerContainer {
   /**
    * Start a docker container
    */
-  async start(args?: string[], flags?: string[]) {
+  async start(args?: string[], flags?: string[]): Promise<ExecutionResult> {
     await this.initTemp();
     return this.#runCmd('start', ...(flags ?? []), this.#container, ...(args ?? [])).result;
   }
@@ -313,13 +313,13 @@ export class DockerContainer {
   /**
    * Stop a container
    */
-  async stop(args?: string[], flags?: string[]) {
+  async stop(args?: string[], flags?: string[]): Promise<ExecutionResult> {
     const toStop = this.#runCmd('stop', ...(flags ?? []), this.#container, ...(args ?? [])).result;
     let prom = toStop;
     if (this.#pendingExecutions) {
       const pendingResults = [...this.#pendingExecutions.values()].map(e => e.result);
       this.#pendingExecutions.clear();
-      prom = Promise.all([toStop, ...pendingResults]).then(([first]) => first) as (typeof prom);
+      prom = Promise.all([toStop, ...pendingResults]).then(([first]) => first);
     }
     return prom;
   }
@@ -327,7 +327,7 @@ export class DockerContainer {
   /**
    * Exec a docker container
    */
-  exec(args?: string[], extraFlags?: string[]) {
+  exec(args?: string[], extraFlags?: string[]): ExecutionState {
     const flags = this.getRuntimeFlags(extraFlags);
     const execState = this.#runCmd('exec', ...flags, this.#container, ...(args ?? []));
     this.#pendingExecutions.add(execState);
@@ -340,7 +340,7 @@ export class DockerContainer {
   /**
    * Run a container
    */
-  async run(args?: string[], flags?: string[]) {
+  async run(args?: string[], flags?: string[]): Promise<ExecutionResult> {
 
     if (!this.#deleteOnFinish) {
       // Kill existing
@@ -364,14 +364,14 @@ export class DockerContainer {
   /**
    * Determine if container is still viable
    */
-  async validate() {
+  async validate(): Promise<boolean> {
     return !this.#runAway;
   }
 
   /**
    * Destroy container, mark as runaway if needed
    */
-  async destroy(runAway: boolean = false) {
+  async destroy(runAway: boolean = false): Promise<void> {
     console.debug('Destroying', { image: this.#image, container: this.#container });
     this.#runAway = this.#runAway || runAway;
 
@@ -397,7 +397,7 @@ export class DockerContainer {
   /**
    * Force destruction, immediately
    */
-  forceDestroy() { // Cannot be async as it's used on exit, that's why it's all sync
+  forceDestroy(): void { // Cannot be async as it's used on exit, that's why it's all sync
     try {
       ExecUtil.execSync(`${this.#dockerCmd} kill ${this.#container}`);
     } catch { }
@@ -419,7 +419,7 @@ export class DockerContainer {
   /**
    * Write files to folder for mapping into execution
    */
-  async writeFiles(dir: string, files?: { name: string, content: string }[]) {
+  async writeFiles(dir: string, files?: { name: string, content: string }[]): Promise<void> {
     await this.cleanup();
     if (files) {
       await Promise.all(
@@ -433,7 +433,7 @@ export class DockerContainer {
   /**
    * Cleanup a container, delete all temp volumes
    */
-  async cleanup() {
+  async cleanup(): Promise<void> {
     console.debug('Cleaning', { image: this.#image, container: this.#container });
 
     await Promise.all(
@@ -445,7 +445,7 @@ export class DockerContainer {
   /**
    * Cleanup synchronously, for shutdown
    */
-  cleanupSync() {
+  cleanupSync(): void {
     console.debug('Cleaning', { image: this.#image, container: this.#container });
 
     for (const vol of Object.keys(this.#tempVolumes)) {
@@ -456,7 +456,7 @@ export class DockerContainer {
   /**
    * Remove all volumes form docker that aren't in use
    */
-  async removeDanglingVolumes() {
+  async removeDanglingVolumes(): Promise<void> {
     try {
       const { result } = ExecUtil.spawn(this.#dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
       const ids = (await result).stdout.trim();

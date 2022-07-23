@@ -16,7 +16,7 @@ In the desire to provide a minimal footprint, the framework provides a minimal [
 ```typescript
 import { YamlUtil } from '@travetto/yaml';
 
-export function main() {
+export function main(): void {
   const obj = YamlUtil.parse(`
   name: Source
   age: 20
@@ -63,7 +63,7 @@ $ node @travetto/boot/bin/main ./doc/parse.ts
 ```typescript
 import { YamlUtil } from '@travetto/yaml';
 
-export function main() {
+export function main(): void {
   const text = YamlUtil.serialize({
     name: 'Source',
     age: 20,

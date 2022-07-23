@@ -1,16 +1,16 @@
 // @file-if @fastify/aws-lambda
-import { FastifyInstance } from 'fastify';
+import type lambdaFastify from '@fastify/aws-lambda';
+// eslint-disable-next-line no-duplicate-imports
+import * as alf from '@fastify/aws-lambda';
+// @ts-ignore
+const awsLambdaFastify: typeof lambdaFastify = alf;
 
 import { Inject, Injectable } from '@travetto/di';
+import { ServerHandle } from '@travetto/rest/src/types';
 import { AwsLambdaRestServer, AwsLambdaⲐ, RestAwsConfig } from '@travetto/rest/src/extension/aws-lambda';
 
 import { FastifyRestServer } from '../server';
 
-// TODO: Get proper typings
-// eslint-disable-next-line travetto/import-order
-const awsLambdaFastify = require('@fastify/aws-lambda') as (
-  (app: FastifyInstance, binaryMimeTypes?: string[]) => AwsLambdaRestServer['handle']  // eslint-disable-line
-);
 
 /**
  * Aws Lambda Rest Server
@@ -26,13 +26,13 @@ export class AwsLambdaFastifyRestServer extends FastifyRestServer implements Aws
    */
   handle: AwsLambdaRestServer['handle'];
 
-  override async init() {
+  override async init(): Promise<this['raw']> {
     const ret = await super.init();
-    this.handle = awsLambdaFastify(ret, this.awsConfig.binaryMimeTypes ?? []);
+    this.handle = awsLambdaFastify(ret, this.awsConfig);
     return ret;
   }
 
-  override async listen() {
+  override async listen(): Promise<ServerHandle> {
     this.listening = true;
     return {
       close: this.raw.close.bind(this.raw),

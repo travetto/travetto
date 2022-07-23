@@ -15,7 +15,7 @@ type Content = { html: string, text: string, subject: string };
 @Activatible('email-template', 'develop')
 export class EmailTemplateFeature extends BaseFeature {
 
-  static isTemplate(f?: string) {
+  static isTemplate(f?: string): boolean {
     return /resources\/email\/.*[.]email[.]html$/.test(f ?? '');
   }
 
@@ -41,7 +41,7 @@ export class EmailTemplateFeature extends BaseFeature {
     });
   }
 
-  getPanel() {
+  getPanel(): vscode.WebviewPanel {
     if (!this.#panel) {
       this.#panel = vscode.window.createWebviewPanel(`${this.commandBase}.content`, 'Email Preview', {
         viewColumn: vscode.ViewColumn.Beside,
@@ -57,7 +57,7 @@ export class EmailTemplateFeature extends BaseFeature {
     return this.#panel!;
   }
 
-  setActiveFile(file: string | undefined, force = false) {
+  setActiveFile(file: string | undefined, force = false): void {
     if (!EmailTemplateFeature.isTemplate(file)) {
       return;
     }
@@ -70,7 +70,7 @@ export class EmailTemplateFeature extends BaseFeature {
     }
   }
 
-  setActiveContent(content?: Content) {
+  setActiveContent(content?: Content): void {
     this.#activeContent = content;
     if (this.#panel) {
       this.#panel.webview.html = !content ? '' : this.#format === 'text' ? `<pre>${content.text ?? ''}</pre>` : (content.html ?? '');
@@ -78,7 +78,7 @@ export class EmailTemplateFeature extends BaseFeature {
     }
   }
 
-  trackFile(file: vscode.TextDocument, open: boolean) {
+  trackFile(file: vscode.TextDocument, open: boolean): void {
     if (!EmailTemplateFeature.isTemplate(file.fileName)) {
       return;
     }
@@ -95,7 +95,7 @@ export class EmailTemplateFeature extends BaseFeature {
     }
   }
 
-  async openPreview(format: 'html' | 'text') {
+  async openPreview(format: 'html' | 'text'): Promise<void> {
     const active = vscode.window.activeTextEditor;
     const file = active?.document.fileName;
     if (!EmailTemplateFeature.isTemplate(file ?? '')) {
@@ -115,13 +115,13 @@ export class EmailTemplateFeature extends BaseFeature {
     }
   }
 
-  async openPreviewContext() {
+  async openPreviewContext(): Promise<void> {
     const { file } = await this.#server.sendMessageAndWaitFor<{ file: string }>('configure', {}, 'configured');
     const doc = await vscode.workspace.openTextDocument(file);
     await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
   }
 
-  async sendEmail() {
+  async sendEmail(): Promise<void> {
     if (this.#server.running && this.#activeFile) {
       await vscode.window.withProgress(
         {
@@ -140,7 +140,7 @@ export class EmailTemplateFeature extends BaseFeature {
   /**
    * On initial activation
    */
-  activate(context: vscode.ExtensionContext) {
+  activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidOpenTextDocument(x => this.trackFile(x, true), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(x => this.trackFile(x, false), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.setActiveFile(vscode.window.activeTextEditor?.document.fileName), null, context.subscriptions);

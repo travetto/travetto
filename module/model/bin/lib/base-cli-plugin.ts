@@ -16,11 +16,11 @@ export abstract class BaseModelPlugin extends BasePlugin {
 
   resolve = ModelCandidateUtil.resolve.bind(ModelCandidateUtil);
 
-  envInit() {
+  envInit(): void {
     EnvInit.init();
   }
 
-  override async build() {
+  override async build(): Promise<void> {
     await super.build();
     const { ConsoleManager, PhaseManager } = await import('@travetto/base');
     ConsoleManager.exclude('debug');
@@ -28,17 +28,18 @@ export abstract class BaseModelPlugin extends BasePlugin {
     await PhaseManager.run('init');
   }
 
-  getArgs() {
+  getArgs(): string {
     return '[provider] [models...]';
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return { env: this.option({ desc: 'Application environment' }) };
   }
 
-  async usage({ providers, models }: { providers: string[], models: string[] }, err = '') {
+  async usage({ providers, models }: { providers: string[], models: string[] }, err = ''): Promise<void> {
     await this.showHelp(err, color`   
-${{ title: 'Proivders' }}:
+${{ title: 'Providers' }}:
 ${providers.map(p => color`  * ${{ type: p }}`).join('\n')}
 
 ${{ title: 'Models' }}:
@@ -46,7 +47,7 @@ ${models.map(p => color`  * ${{ param: p }}`).join('\n')}
 `);
   }
 
-  async validate(provider: string, models: string[]) {
+  async validate(provider: string, models: string[]): Promise<void> {
     const candidates = await ModelCandidateUtil.getCandidates(this.op);
     if (!provider) {
       return await this.usage(candidates);

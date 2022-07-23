@@ -2,7 +2,7 @@ import { ResourceManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { EnvUtil } from '@travetto/boot';
 
-import { MessageOptions } from './types';
+import { MessageOptions, SentMessage } from './types';
 import { MailTransport } from './transport';
 import { MailTemplateEngine } from './template';
 import { MailUtil } from './util';
@@ -28,8 +28,8 @@ export class MailService {
   /**
    * Send multiple messages.
    */
-  async sendAll(messages: MessageOptions[], base: Partial<MessageOptions> = {}) {
-    return Promise.all(messages.map(msg => this.send({
+  async sendAll<S extends SentMessage = SentMessage>(messages: MessageOptions[], base: Partial<MessageOptions> = {}): Promise<S[]> {
+    return Promise.all(messages.map(msg => this.send<S>({
       ...base,
       ...msg,
       ...(msg.context || base.context ? {
@@ -44,7 +44,7 @@ export class MailService {
   /**
    * Send a pre compiled email that has a relevant html, subject and optional text file associated
    */
-  async sendCompiled(key: string, msg: Omit<MessageOptions, 'html' | 'text' | 'subject'>): Promise<unknown> {
+  async sendCompiled<S extends SentMessage = SentMessage>(key: string, msg: Omit<MessageOptions, 'html' | 'text' | 'subject'>): Promise<S> {
     // Bypass cache if in dynamic mode
     if (EnvUtil.isDynamic() || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
@@ -55,13 +55,13 @@ export class MailService {
 
       this.#compiled.set(key, { html, text, subject });
     }
-    return this.send({ ...msg, ...this.#compiled.get(key)! });
+    return this.send<S>({ ...msg, ...this.#compiled.get(key)! });
   }
 
   /**
    * Send a single message
    */
-  async send(msg: MessageOptions): Promise<unknown> {
+  async send<S extends SentMessage>(msg: MessageOptions): Promise<S> {
     // Template if context is provided
     if (msg.context) {
       const [html, text, subject] = await Promise.all([
@@ -92,6 +92,6 @@ export class MailService {
       delete msg.html; // This is a hack to fix nodemailer
     }
 
-    return this.#transport.send(msg);
+    return this.#transport.send<S>(msg);
   }
 }

@@ -1,4 +1,4 @@
-import { ControllerRegistry } from '@travetto/rest';
+import { ControllerRegistry, FilterDecorator } from '@travetto/rest';
 import { AppError } from '@travetto/base';
 import { AuthUtil } from '@travetto/auth';
 import { DependencyRegistry } from '@travetto/di';
@@ -10,7 +10,7 @@ import { AuthService } from './service';
  * @param source The symbol to target the specific authenticator
  * @param sources Additional providers to support
  */
-export function Authenticate(source: symbol, ...sources: symbol[]) {
+export function Authenticate(source: symbol, ...sources: symbol[]): FilterDecorator {
   const computed = [source, ...sources];
   return ControllerRegistry.createFilterDecorator(async (req, res) => {
     const svc = await DependencyRegistry.getInstance(AuthService);
@@ -24,7 +24,7 @@ export function Authenticate(source: symbol, ...sources: symbol[]) {
  * @param exclude Set of invalid permissions
  * @augments `@trv:auth/Authenticated`
  */
-export function Authenticated(include: string[] = [], exclude: string[] = []) {
+export function Authenticated(include: string[] = [], exclude: string[] = []): FilterDecorator {
   const { check } = AuthUtil.permissionChecker(include, exclude);
 
   return ControllerRegistry.createFilterDecorator((req, res) => {
@@ -40,7 +40,7 @@ export function Authenticated(include: string[] = [], exclude: string[] = []) {
  * Require the controller/route to be unauthenticated
  * @augments `@trv:auth/Unauthenticated`
  */
-export function Unauthenticated() {
+export function Unauthenticated(): FilterDecorator {
   return ControllerRegistry.createFilterDecorator(req => {
     if (req.auth) {
       throw new AppError('User is authenticated', 'authentication');

@@ -43,7 +43,7 @@ export class LineFormatter implements Formatter {
     };
   }
 
-  pretty(ev: LogEvent, o: unknown) {
+  pretty(ev: LogEvent, o: unknown): string {
     return util.inspect(o, {
       showHidden: ev.level === 'debug',
       depth: 4,
@@ -55,7 +55,7 @@ export class LineFormatter implements Formatter {
   /**
    * Format an event into a single line
    */
-  format(ev: LogEvent) {
+  format(ev: LogEvent): string {
     const opts = this.#opts;
     const out = [];
 

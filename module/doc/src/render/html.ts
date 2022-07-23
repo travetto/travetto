@@ -9,7 +9,8 @@ const ENTITY_RE = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm')
 export const Html: Renderer = {
   ext: 'html',
   render(c: AllChildren, context: RenderContext, root = c) {
-    const recurse = (s: AllChildren | DocNode) => this.render(s as AllChildren, context, root);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const recurse = (s: AllChildren | DocNode): string => this.render(s as AllChildren, context, root);
     switch (c._type) {
       case 'toc': {
         const content = recurse(n.Group([n.SubSection(c.title), context.toc(root)]));

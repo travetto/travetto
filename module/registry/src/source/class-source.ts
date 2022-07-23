@@ -25,7 +25,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Flush classes
    */
-  #flush() {
+  #flush(): void {
     for (const [file, classes] of PendingRegister.flush()) {
       if (!classes || !classes.length) {
         continue;
@@ -41,8 +41,8 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Listen for a single file, and process all the classes within
    */
-  async #handleFileChanges(file: string, classes: Class[] = []) {
-    const next = new Map(classes.map(cls => [cls.ᚕid, cls] as [string, Class]));
+  async #handleFileChanges(file: string, classes: Class[] = []): Promise<void> {
+    const next = new Map<string, Class>(classes.map(cls => [cls.ᚕid, cls] as const));
 
     let prev = new Map<string, Class>();
     if (this.#classes.has(file)) {
@@ -76,7 +76,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Flush all pending classes
    */
-  processFiles() {
+  processFiles(): void {
     console.debug('Pending changes', { changes: PendingRegister.ordered.map(([, x]) => x.map(y => y.ᚕid)) });
     for (const [file, classes] of PendingRegister.flush()) {
       this.#handleFileChanges(file, classes);
@@ -86,7 +86,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Emit a change event
    */
-  emit(e: ChangeEvent<Class>) {
+  emit(e: ChangeEvent<Class>): void {
     console.debug('Emitting change', { type: e.type, curr: e.curr?.ᚕid, prev: e.prev?.ᚕid });
     this.#emitter.emit('change', e);
   }
@@ -94,14 +94,14 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Clear all classes
    */
-  reset() {
+  reset(): void {
     this.#classes.clear();
   }
 
   /**
    * Initialize
    */
-  async init() {
+  async init(): Promise<void> {
     this.#flush();
   }
 

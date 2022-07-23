@@ -1,4 +1,5 @@
-export type ValidationKind = 'required' | 'match' | 'min' | 'max' | 'minlength' | 'maxlength' | 'enum' | 'type' | string;
+export type ValidationKindCore = 'required' | 'match' | 'min' | 'max' | 'minlength' | 'maxlength' | 'enum' | 'type';
+export type ValidationKind = ValidationKindCore | string;
 
 /**
  * Individual Validation Error

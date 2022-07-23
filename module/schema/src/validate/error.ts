@@ -21,3 +21,7 @@ export class TypeMismatchError extends AppError {
     super(`Expected ${typeof cls === 'string' ? cls : cls.name} but found ${type}`, 'data');
   }
 }
+
+export function isValidationError(err: unknown): err is ValidationError {
+  return !!err && err instanceof Error && 'path' in err;
+}

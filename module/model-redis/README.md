@@ -10,7 +10,7 @@ npm install @travetto/model-redis
 
 This module provides an [redis](https://redis.io)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [redis](https://redis.io).
 
-Supported featrues:
+Supported features:
    
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11)
@@ -53,7 +53,7 @@ export class RedisModelConfig {
   namespace?: string;
   autoCreate?: boolean;
 
-  postConstruct() {
+  postConstruct(): void {
 
   }
 }

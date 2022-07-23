@@ -136,7 +136,7 @@ class $AppManifest {
   /**
    * Generate to JSON
    */
-  toJSON() {
+  toJSON(): Record<string, unknown> {
     const out: Record<string, unknown> = this.env.prod ?
       { info: this.info } :
       {
@@ -159,14 +159,14 @@ class $AppManifest {
   /**
    * Is in prod mode
    */
-  get prod() {
+  get prod(): boolean {
     return this.env.prod;
   }
 
   /**
    * Will return true if a profile is active
    */
-  hasProfile(name: string) {
+  hasProfile(name: string): boolean {
     return this.#profileSet.has(name);
   }
 }

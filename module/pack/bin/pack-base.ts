@@ -22,10 +22,11 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
    */
   abstract get operation(): PackOperation<C>;
 
-  get name() {
+  get name(): string {
     return this.operation.key ? `pack:${this.operation.key}` : 'pack';
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   defaultOptions() {
     return { workspace: this.option({ desc: 'Working directory' }) } as const;
   }
@@ -41,19 +42,21 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
       this.showHelp(`Unknown config mode: ${this.args[0]}`);
     }
     const def = list.find(c => c.name === 'default');
-    const out: C = [def, cfg, extra]
+    const out = [def, cfg, extra]
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       .map(x => this.operation.key && this.operation.key in (x ?? {}) ? ((x as Record<string, C>)[this.operation.key] as C) : x as C)
-      .reduce((acc, l) => this.operation.extend(acc, l ?? {}), (this.operation.overrides ?? {}) as C);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      .reduce<C>((acc, l) => this.operation.extend(acc, l ?? {}), (this.operation.overrides ?? {}) as C);
     out.workspace ??= PathUtil.resolveUnix(os.tmpdir(), packName);
     out.active = true;
     return out;
   }
 
-  getArgs() {
+  getArgs(): string {
     return '[mode]';
   }
 
-  async help() {
+  async help(): Promise<string> {
     const lines = await PackUtil.modeList();
 
     const out = [];
@@ -67,15 +70,15 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
     return out.join('\n');
   }
 
-  override async complete() {
+  override async complete(): Promise<Record<string, string[]>> {
     return { '': (await PackUtil.modeList()).map(x => x.name!) };
   }
 
-  async action() {
-    const resolved = await this.resolveConfigs();
+  async action(): Promise<void> {
+    const resolved: C = await this.resolveConfigs();
     if (await FsUtil.exists(PathUtil.resolveUnix(resolved.workspace, '.git'))) {
       throw new Error('Refusing to use workspace with a .git directory');
     }
-    return PackUtil.runOperation(this.operation, resolved as C);
+    return PackUtil.runOperation(this.operation, resolved);
   }
 }

@@ -17,7 +17,7 @@ export class RestJWTConfig {
   headerPrefix = 'Bearer ';
   defaultAge = Util.timeToMs('1y');
 
-  postConstruct() {
+  postConstruct(): void {
     if (EnvUtil.isProd() && this.signingKey === 'dummy') {
       throw new AppError('The default signing key is not valid for production use, please specify a config value at rest.jwt.signingKey');
     }
@@ -33,7 +33,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   @Inject()
   config: RestJWTConfig;
 
-  toJwtPayload(p: Principal) {
+  toJwtPayload(p: Principal): Payload {
     const exp = Math.trunc((p.expiresAt?.getTime() ?? (Date.now() + this.config.defaultAge)) / 1000);
     const iat = Math.trunc((p.issuedAt?.getTime() ?? Date.now()) / 1000);
     return {
@@ -42,13 +42,13 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
       iat,
       iss: p.issuer,
       sub: p.id,
-    } as Payload;
+    };
   }
 
   /**
    * Get token for principal
    */
-  async getToken(p: Principal) {
+  async getToken(p: Principal): Promise<string> {
     return await JWTUtil.create(this.toJwtPayload(p), { key: this.config.signingKey });
   }
 
@@ -56,14 +56,14 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
    * Verify token to principal
    * @param token
    */
-  async verifyToken(token: string) {
+  async verifyToken(token: string): Promise<Principal> {
     return (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.config.signingKey })).auth;
   }
 
   /**
    * Write context
    */
-  async encode(req: Request, res: Response, p: Principal | undefined) {
+  async encode(req: Request, res: Response, p: Principal | undefined): Promise<void> {
     if (p) {
       res.setHeader(this.config.header, `${this.config.headerPrefix}${await this.getToken(p)}`);
     }
@@ -72,7 +72,8 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   /**
    * Read JWT from request
    */
-  async decode(req: Request) {
+  async decode(req: Request): Promise<Principal | undefined> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const token = (req.header(this.config.header) as string)?.replace(this.config.headerPrefix, '');
     if (token) {
       return this.verifyToken(token);

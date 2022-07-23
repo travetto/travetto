@@ -5,7 +5,7 @@ import { lib } from '.';
 
 type Feature = { text: string, name: string };
 
-function getNodes() {
+function getNodes(): ReturnType<(typeof d)['List']> {
   const lines = readFileSync('./src/nodes.ts', 'utf8').split(/\n/g);
   let feature: Partial<Feature> | undefined;
   const features: Feature[] = [];
@@ -16,6 +16,7 @@ function getNodes() {
       feature.text = `${feature.text ?? ''} ${line.replace(/^\s+[*] /, '')}`.trim();
     } else if (feature && /^\s+[A-Z]/.test(line)) {
       feature.name = line.match(/((?:[A-Z][a-z]+)+)/)?.[0];
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       features.push(feature as Feature);
       feature = undefined;
     }

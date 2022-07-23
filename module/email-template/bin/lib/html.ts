@@ -14,8 +14,9 @@ export class HtmlUtil {
   /**
    * Visit the tree
    */
-  static visit(root: Document | Element, visitor: (node: Element, descend: () => void) => void) {
-    function traverse(node: Document | Element) {
+  static visit(root: Document | Element, visitor: (node: Element, descend: () => void) => void): void {
+    function traverse(node: Document | Element): void {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const children = (Parse5Adapter.getChildNodes(node) ?? []) as Element[];
       for (const child of children) {
         if (child) {
@@ -29,22 +30,22 @@ export class HtmlUtil {
   /**
    * Get hashmap of all attributes on the node
    */
-  static getAttrMap(el: Element) {
-    const attrs = Parse5Adapter.getAttrList(el) as AttrList;
+  static getAttrMap(el: Element): Record<string, string> {
+    const attrs = Parse5Adapter.getAttrList(el);
     if (!attrs) {
-      return {} as Record<string, string>;
+      return {};
     } else {
-      return attrs.reduce((acc: Record<string, string>, val) => {
+      return attrs.reduce<Record<string, string>>((acc, val) => {
         acc[val.name] = val.value;
         return acc;
-      }, {} as Record<string, string>);
+      }, {});
     }
   }
 
   /**
    * Convert property map to html
    */
-  static toStr(o: string[] | Record<string, string>) {
+  static toStr(o: string[] | Record<string, string>): string {
     if (Array.isArray(o)) {
       return o.join(' ');
     } else {
@@ -55,22 +56,22 @@ export class HtmlUtil {
   /**
    * Process all CSS classes
    */
-  static classes(...args: string[]) {
-    return args.reduce((acc, v) => {
+  static classes(...args: string[]): string {
+    return args.reduce<string[]>((acc, v) => {
       if (v) {
         acc.push(...v.split(' '));
       }
       return acc;
-    }, [] as string[]).join(' ');
+    }, []).join(' ');
   }
 
   /**
    * Set DOM Attribute to value
    */
-  static setDomAttribute(node: Element, attrName: string, value: string) {
-    let attrList = Parse5Adapter.getAttrList(node) as AttrList;
+  static setDomAttribute(node: Element, attrName: string, value: string): void {
+    let attrList = Parse5Adapter.getAttrList(node);
     if (!attrList) {
-      attrList = (node as { attrs: AttrList }).attrs = [];
+      attrList = node.attrs = [];
     }
     const attr = attrList.find(x => x.name === attrName);
 
@@ -87,14 +88,14 @@ export class HtmlUtil {
   /**
    * Get inner content
    */
-  static getInner(node: Node) {
+  static getInner(node: Node): string {
     return serialize(node);
   }
 
   /**
    * Get inner text
    */
-  static getInnerText(node: Node) {
+  static getInnerText(node: Node): string {
     return serialize(node).replace(/<\/?[^>]+>/g, '');
   }
 }

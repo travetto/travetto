@@ -32,7 +32,7 @@ export class OpenApiService {
   /**
    * Reset specification
    */
-  async resetSpec() {
+  async resetSpec(): Promise<void> {
     delete this._spec;
     if (this.apiSpecConfig.persist) {
       await this.persist();
@@ -42,7 +42,7 @@ export class OpenApiService {
   /**
    * Initialize after schemas are readied
    */
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     ControllerRegistry.on(() => this.resetSpec());
     SchemaRegistry.on(() => this.resetSpec());
 
@@ -62,7 +62,7 @@ export class OpenApiService {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
         ...new SpecGenerator().generate(this.apiSpecConfig)
-      } as OpenAPIObject;
+      };
     }
     return this._spec;
   }
@@ -70,7 +70,7 @@ export class OpenApiService {
   /**
    * Persist to local file
    */
-  async persist() {
+  async persist(): Promise<void> {
     console.debug('Generating OpenAPI Spec', { output: this.apiSpecConfig.output });
 
     const output = this.apiSpecConfig.output.endsWith('.json') ?

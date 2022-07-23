@@ -10,7 +10,7 @@ export const Links = {
   Query: d.SnippetLink('Query', '@travetto/model-query/src/service/query', /export interface/),
 };
 
-export const ModelQueryTypes = (file: string | { ᚕfile: string }) => {
+export const ModelQueryTypes = (file: string | { ᚕfile: string }): AllTypeMap['SnippetLink'][] => {
   if (typeof file !== 'string') {
     file = file.ᚕfile;
   }
@@ -20,6 +20,7 @@ export const ModelQueryTypes = (file: string | { ᚕfile: string }) => {
   for (const [, key] of contents.matchAll(/Model(Query(Suggest|Facet|Crud)?)Support/g)) {
     if (!seen.has(key)) {
       seen.add(key);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       found.push(Links[key as keyof typeof Links]);
     }
   }

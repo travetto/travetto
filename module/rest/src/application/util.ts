@@ -8,7 +8,7 @@ class ResponseCore implements Partial<Response> {
   /**
    * Produce JSON as the output
    */
-  json(this: Response, val: unknown) {
+  json(this: Response, val: unknown): void {
     this.setHeader('Content-Type', 'application/json');
     this.send(val);
   }
@@ -17,7 +17,7 @@ class ResponseCore implements Partial<Response> {
    */
   // @ts-ignore
   get statusCode(this: Response): number {
-    return this.status!() as number;
+    return this.status()!;
   }
   /**
    * Set the status code
@@ -30,7 +30,7 @@ class ResponseCore implements Partial<Response> {
   /**
    * Send the request to a new location, given a path
    */
-  location(this: Response, path: string) {
+  location(this: Response, path: string): void {
 
     if (!this.statusCode) {
       this.status(302);
@@ -46,11 +46,13 @@ class ResponseCore implements Partial<Response> {
    */
   redirect(this: Response & ResponseCore, code: number, path: string): void;
   redirect(this: Response & ResponseCore, path: string): void;
-  redirect(this: Response & ResponseCore, pathOrCode: number | string, path?: string) {
+  redirect(this: Response & ResponseCore, pathOrCode: number | string, path?: string): void {
     let code = 302;
     if (path) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       code = pathOrCode as number;
     } else {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       path = pathOrCode as string;
     }
     this.status(code);
@@ -68,7 +70,8 @@ class RequestCore implements Partial<Request> {
    * Get the outbound response header
    * @param key The header to get
    */
-  header<K extends keyof IncomingHttpHeaders>(this: Request, key: K) {
+  header<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | string[] | undefined {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.headers[(key as string).toLowerCase() as K];
   }
 }
@@ -87,6 +90,7 @@ export class RestServerUtil {
     req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
     // @ts-ignore
     req.connection = {};
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return req as T;
   }
 
@@ -96,6 +100,7 @@ export class RestServerUtil {
    */
   static decorateResponse<T extends Response>(res: Partial<T> & Record<string, unknown>): T {
     Object.setPrototypeOf(res, ResponseCore.prototype);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return res as T;
   }
 
@@ -103,7 +108,7 @@ export class RestServerUtil {
    * Generate SSL key pair on demand
    * @param subj The subject for the app
    */
-  static async generateSslKeyPair(subj = { C: 'US', ST: 'CA', O: 'TRAVETTO', OU: 'REST', CN: 'DEV' }) {
+  static async generateSslKeyPair(subj = { C: 'US', ST: 'CA', O: 'TRAVETTO', OU: 'REST', CN: 'DEV' }): Promise<{ cert: string, key: string }> {
     let forge;
 
     try {

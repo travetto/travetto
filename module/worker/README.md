@@ -26,21 +26,21 @@ class ImageProcessor implements Worker<string> {
   active = false;
   proc: ExecutionState;
 
-  get id() {
+  get id(): number | undefined {
     return this.proc.process.pid;
   }
 
-  async destroy() {
+  async destroy(): Promise<void> {
     this.proc.process.kill();
   }
 
-  async execute(path: string) {
+  async execute(path: string): Promise<void> {
     this.active = true;
     try {
       this.proc = ExecUtil.spawn('convert images', [path]);
       await this.proc;
-    } catch (e) {
-
+    } catch {
+      // Do nothing
     }
     this.active = false;
   }
@@ -54,11 +54,11 @@ export class ImageCompressor extends WorkPool<string, ImageProcessor> {
     super(async () => new ImageProcessor());
   }
 
-  begin() {
+  begin(): void {
     this.process(new IterableWorkSet(this.pendingImages));
   }
 
-  convert(...images: string[]) {
+  convert(...images: string[]): void {
     this.pendingImages.add(images);
   }
 }
@@ -83,7 +83,7 @@ import { Worker } from './pool';
 type Simple<V> = (ch: ParentCommChannel<V>) => Promise<unknown | void>;
 type Param<V, X> = (ch: ParentCommChannel<V>, input: X) => Promise<unknown | void>;
 
-const empty = async () => { };
+const empty = async (): Promise<void> => { };
 
 /**
  * Spawned worker
@@ -99,11 +99,11 @@ export class WorkUtil {
     destroy: Simple<V> = empty): Worker<X> {
     const channel = new ParentCommChannel<V>(worker());
     return {
-      get id() { return channel.id; },
-      get active() { return channel.active; },
+      get id(): number | undefined { return channel.id; },
+      get active(): boolean { return channel.active; },
       init: () => init(channel),
       execute: inp => execute(channel, inp),
-      async destroy() {
+      async destroy(): Promise<void> {
         await destroy(channel);
         await channel.destroy();
       },
@@ -119,7 +119,7 @@ When creating your work, via process spawning, you will need to provide the scri
 import { WorkPool, WorkUtil, IterableWorkSet } from '@travetto/worker';
 import { ExecUtil, PathUtil } from '@travetto/boot';
 
-export function main() {
+export async function main(): Promise<void> {
   const pool = new WorkPool(() =>
     WorkUtil.spawnedWorker<{ data: string }, string>(
       () => ExecUtil.forkMain(PathUtil.resolveUnix(__dirname, 'spawned.ts')),
@@ -139,7 +139,7 @@ export function main() {
     )
   );
 
-  return pool.process(new IterableWorkSet([1, 2, 3, 4, 5])).then(x => pool.shutdown());
+  await pool.process(new IterableWorkSet([1, 2, 3, 4, 5])).then(x => pool.shutdown());
 }
 ```
 
@@ -147,7 +147,7 @@ export function main() {
 ```typescript
 import { ChildCommChannel } from '@travetto/worker';
 
-export async function main() {
+export async function main(): Promise<void> {
   const exec = new ChildCommChannel<{ data: string }>();
 
   exec.on('request', data =>
@@ -155,7 +155,7 @@ export async function main() {
 
   exec.send('ready'); // Indicate the child is ready to receive requests
 
-  const heartbeat = () => setTimeout(heartbeat, 5000); // Keep-alive
+  const heartbeat = (): void => { setTimeout(heartbeat, 5000); }; // Keep-alive
   heartbeat();
 }
 ```

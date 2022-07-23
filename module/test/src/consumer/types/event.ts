@@ -6,7 +6,7 @@ import { ConsumerUtil } from '../util';
 import { Consumable } from '../registry';
 
 /**
- * Streams all test events a JSON payload, in an ndjson format
+ * Streams all test events a JSON payload, in an nd-json format
  */
 @Consumable('event')
 export class EventStreamer implements TestConsumer {
@@ -16,7 +16,7 @@ export class EventStreamer implements TestConsumer {
     this.#stream = stream;
   }
 
-  onEvent(event: TestEvent) {
+  onEvent(event: TestEvent): void {
     const out = { ...event };
     ConsumerUtil.serializeErrors(out);
     this.#stream.write(`${JSON.stringify(out)}\n`);

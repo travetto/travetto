@@ -23,7 +23,7 @@ export class FileUtil {
    * @param file
    * @returns
    */
-  static resolveFile(file: string) {
+  static resolveFile(file: string): { resolved: string, cleaned: string } {
     if (!FsUtil.existsSync(PathUtil.resolveUnix(file))) {
       file = require.resolve(file);
     }
@@ -37,7 +37,7 @@ export class FileUtil {
    * @param file
    * @returns
    */
-  static read(file: string) {
+  static read(file: string): { content: string, language: string, file: string } {
     const { resolved, cleaned } = this.resolveFile(file);
 
     const ext = path.extname(resolved).replace(/^[.]/, '');
@@ -65,7 +65,7 @@ export class FileUtil {
   /**
    * Determine if a file is a decorator
    */
-  static isDecorator(name: string, file: string) {
+  static isDecorator(name: string, file: string): boolean {
     const { resolved } = this.resolveFile(file);
 
     const key = `${name}:${resolved}`;
@@ -94,7 +94,7 @@ export class FileUtil {
    * Clean code snippet
    * @returns
    */
-  static buildOutline(code: string) {
+  static buildOutline(code: string): string {
     let methodPrefix = '';
     code = code.split(/\n/).map((x) => {
       if (!methodPrefix) {

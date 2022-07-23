@@ -9,7 +9,7 @@ export class Semver {
     return { major: +major, minor: +minor, patch: +patch, prerelease: (pre ? [pre[0], +pre[1]] : undefined) };
   }
 
-  static increment(ver: SemverType, level: SemverLevel, prefix?: string) {
+  static increment(ver: SemverType, level: SemverLevel, prefix?: string): SemverType {
     // Set
     switch (level) {
       case 'major': ver.minor = ver.patch = 0; break;
@@ -33,7 +33,7 @@ export class Semver {
     return ver;
   }
 
-  static format(ver: SemverType) {
+  static format(ver: SemverType): string {
     let main = `${ver.major}.${ver.minor}.${ver.patch}`;
     if (ver.prerelease) {
       main = `${main}-${ver.prerelease[0]}.${ver.prerelease[1]}`;

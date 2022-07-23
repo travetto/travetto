@@ -1,6 +1,6 @@
 import { Person } from './person';
 
-export function Test() {
+export function Test(): Person {
   return Person.from({
     name: 'Test',
     age: 19.999978,

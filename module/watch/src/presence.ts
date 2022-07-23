@@ -28,7 +28,7 @@ export class FilePresenceManager extends WatchEmitter {
   /**
    * Callback handle for the watcher
    */
-  #watcherListener({ event, entry }: AllEvent) {
+  #watcherListener({ event, entry }: AllEvent): void {
     switch (event) {
       case 'added':
       case 'changed':
@@ -44,7 +44,7 @@ export class FilePresenceManager extends WatchEmitter {
   /**
    * Add a folder
    */
-  addFolder(...folders: string[]) {
+  addFolder(...folders: string[]): void {
     for (const folder of folders.filter(x => !this.#watchers.has(x))) {
       this.#watchers.set(folder, new Watcher(folder, this.#config)
         .on('all', this.#watcherListener.bind(this)));
@@ -55,7 +55,7 @@ export class FilePresenceManager extends WatchEmitter {
    * Remove a folder
    * @param folder
    */
-  removeFolder(...folders: string[]) {
+  removeFolder(...folders: string[]): void {
     for (const folder of folders.filter(x => this.#watchers.has(x))) {
       this.#watchers.get(folder)!.close();
       this.#watchers.delete(folder);
@@ -65,7 +65,7 @@ export class FilePresenceManager extends WatchEmitter {
   /**
    * Close manager, freeing all watchers
    */
-  close() {
+  close(): void {
     this.removeFolder(...this.#watchers.keys());
   }
 }

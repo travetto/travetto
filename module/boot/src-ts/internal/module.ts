@@ -55,7 +55,7 @@ export class ModuleManager {
    * Set filename resolver
    * @private
    */
-  static setFilenameResolver(fn: (filename: string) => string) {
+  static setFilenameResolver(fn: (filename: string) => string): void {
     this.#resolveFilename = fn;
   }
 
@@ -63,7 +63,7 @@ export class ModuleManager {
    * Listen for when files are unloaded
    * @param handler
    */
-  static onUnload(handler: UnloadHandler) {
+  static onUnload(handler: UnloadHandler): void {
     this.#unloadHandlers.push(handler);
   }
 
@@ -71,16 +71,16 @@ export class ModuleManager {
    * Clear all unload handlers
    * @private
    */
-  static clearUnloadHandlers() {
+  static clearUnloadHandlers(): void {
     this.#unloadHandlers = [];
   }
 
   /**
    * Set transpiler triggered on require
    */
-  static setTranspiler(fn: (file: string) => string) {
+  static setTranspiler(fn: (file: string) => string): void {
     if (EnvUtil.isReadonly()) {
-      fn = (tsf: string) => AppCache.readEntry(tsf);
+      fn = (tsf: string): string => AppCache.readEntry(tsf);
     }
     // @ts-expect-error
     this.transpile = fn;
@@ -91,7 +91,7 @@ export class ModuleManager {
    * @param m node module
    * @param tsf filename
    */
-  static compile(m: NodeJS.Module, tsf: string) {
+  static compile(m: NodeJS.Module, tsf: string): unknown {
     let content = this.transpile(tsf);
     const jsf = tsf.replace(/[.]ts$/, '.js');
     try {
@@ -110,7 +110,7 @@ export class ModuleManager {
    * @param tsf The typescript file to transpile
    * @param force Force transpilation, even if cached
    */
-  static simpleTranspile(tsf: string, force = false) {
+  static simpleTranspile(tsf: string, force = false): string {
     return AppCache.getOrSet(tsf, () => {
       try {
         const diags: tsi.Diagnostic[] = [];
@@ -131,7 +131,7 @@ export class ModuleManager {
   /**
    * Enable compile support
    */
-  static init() {
+  static init(): void {
     if (this.#initialized) {
       return;
     }
@@ -155,9 +155,9 @@ export class ModuleManager {
 
     // Supports bootstrapping with framework resolution
     if (this.#resolveFilename) {
-      Module._resolveFilename = (req, p) => this.#moduleResolveFilename(this.#resolveFilename!(req), p);
+      Module._resolveFilename = (req, p): string => this.#moduleResolveFilename(this.#resolveFilename!(req), p);
     }
-    Module._load = (req, p) => this.#onModuleLoad(req, p);
+    Module._load = (req, p): unknown => this.#onModuleLoad(req, p);
     require.extensions[SourceUtil.EXT] = this.compile.bind(this);
 
     // Remove to prevent __proto__ pollution in JSON
@@ -170,7 +170,7 @@ export class ModuleManager {
    * Transpile all found
    * @param found
    */
-  static transpileAll(found: SimpleEntry[]) {
+  static transpileAll(found: SimpleEntry[]): SimpleEntry[] {
     if (!EnvUtil.isReadonly()) {
       // Ensure we transpile all support files
       for (const el of found) {
@@ -186,7 +186,7 @@ export class ModuleManager {
   /**
    * Remove file from require.cache, and possible the file system
    */
-  static unload(filename: string, unlink = false) {
+  static unload(filename: string, unlink = false): true | undefined {
     const native = PathUtil.toNative(filename);
     for (const el of this.#unloadHandlers) {
       el(filename, unlink);
@@ -200,7 +200,7 @@ export class ModuleManager {
   /**
    * Turn off compile support
    */
-  static reset() {
+  static reset(): void {
     if (!this.#initialized) {
       return;
     }

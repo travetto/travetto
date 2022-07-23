@@ -27,7 +27,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
   deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void>;
 
   /**
-   * List entity by rangeable index as defined by fields of idx and the body fields
+   * List entity by ranged index as defined by fields of idx and the body fields
    * @param cls The type to search by
    * @param idx The index name to search against
    * @param body The payload of fields needed to search

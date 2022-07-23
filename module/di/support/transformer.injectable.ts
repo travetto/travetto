@@ -16,13 +16,14 @@ export class InjectableTransformer {
   /**
    * Handle a specific declaration param/property
    */
-  static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.SetAccessorDeclaration | ts.PropertyDeclaration) {
+  static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.SetAccessorDeclaration | ts.PropertyDeclaration): ts.Expression[] {
     const existing = state.findDecorator(this, param, 'Inject', INJECTABLE_MOD);
 
     if (!(existing || ts.isParameter(param))) {
       return [];
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const callExpr = existing?.expression as ts.CallExpression;
     const args: ts.Expression[] = [...(callExpr?.arguments ?? [])];
 
@@ -43,8 +44,8 @@ export class InjectableTransformer {
    * Mark class as Injectable
    */
   @OnClass('Injectable')
-  static registerInjectable(state: TransformerState, node: ts.ClassDeclaration) {
-    const cons = node.members.find(x => ts.isConstructorDeclaration(x)) as ts.ConstructorDeclaration;
+  static registerInjectable(state: TransformerState, node: ts.ClassDeclaration): typeof node {
+    const cons = node.members.find((x): x is ts.ConstructorDeclaration => ts.isConstructorDeclaration(x));
     const injectArgs = cons &&
       state.fromLiteral(cons.parameters.map(x => this.processDeclaration(state, x)));
 
@@ -85,7 +86,7 @@ export class InjectableTransformer {
    * Handle Inject annotations for fields/args
    */
   @OnProperty('Inject')
-  static registerInjectProperty(state: TransformerState, node: ts.PropertyDeclaration, dm?: DecoratorMeta) {
+  static registerInjectProperty(state: TransformerState, node: ts.PropertyDeclaration, dm?: DecoratorMeta): typeof node {
     const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_MOD);
 
     // Doing decls
@@ -106,7 +107,7 @@ export class InjectableTransformer {
   * Handle Inject annotations for fields/args
   */
   @OnSetter('Inject')
-  static registerInjectSetter(state: TransformerState, node: ts.SetAccessorDeclaration, dm?: DecoratorMeta) {
+  static registerInjectSetter(state: TransformerState, node: ts.SetAccessorDeclaration, dm?: DecoratorMeta): typeof node {
     const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_MOD);
 
     // Doing decls
@@ -126,7 +127,7 @@ export class InjectableTransformer {
    * Handle InjectableFactory creation
    */
   @OnStaticMethod('InjectableFactory')
-  static registerFactory(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
+  static registerFactory(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta): typeof node {
     if (!dm?.dec) {
       return node;
     }
@@ -148,6 +149,7 @@ export class InjectableTransformer {
 
     args.unshift(state.extendObjectLiteral({
       dependencies,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       src: (node.parent as ts.ClassDeclaration).name,
       target
     }));

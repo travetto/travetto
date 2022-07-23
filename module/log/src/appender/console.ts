@@ -13,7 +13,7 @@ export interface ConsoleAppenderOpts {
 export class ConsoleAppender implements Appender {
   constructor(opts: ConsoleAppenderOpts = {}) { }
 
-  append(level: LogLevel, message: string) {
+  append(level: LogLevel, message: string): void {
     console![level](message);
   }
 }

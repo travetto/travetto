@@ -22,7 +22,7 @@ export class XunitEmitter implements TestConsumer {
   /**
    * Process metadata information (e.g. logs)
    */
-  buildMeta(obj: Record<string, unknown>) {
+  buildMeta(obj: Record<string, unknown>): string {
     if (!obj) {
       return '';
     }
@@ -44,7 +44,7 @@ export class XunitEmitter implements TestConsumer {
   /**
    * Handle each test event
    */
-  onEvent(e: TestEvent) {
+  onEvent(e: TestEvent): void {
     if (e.type === 'test' && e.phase === 'after') {
 
       const { test } = e;
@@ -97,7 +97,7 @@ export class XunitEmitter implements TestConsumer {
   /**
    * Summarize all results
    */
-  onSummary(summary: SuitesSummary) {
+  onSummary(summary: SuitesSummary): void {
     this.#stream.write(`
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites

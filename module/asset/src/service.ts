@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { ModelStreamSupport, ExistsError, NotFoundError } from '@travetto/model';
+import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta } from '@travetto/model';
 
 import { Asset } from './types';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
@@ -28,7 +28,7 @@ export class AssetService {
    * Delete a given location
    * @param location The location to an asset
    */
-  delete(location: string) {
+  delete(location: string): Promise<void> {
     return this.#store.deleteStream(location);
   }
 
@@ -36,7 +36,7 @@ export class AssetService {
    * Get the asset info
    * @param location The location to get metadata for
    */
-  describe(location: string) {
+  describe(location: string): Promise<StreamMeta> {
     return this.#store.describeStream(location);
   }
 

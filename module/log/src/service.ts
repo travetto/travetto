@@ -21,6 +21,7 @@ class $Logger {
   /**
    * Should we enrich the console by default
    */
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   readonly #logFormat: 'line' | 'json' = EnvUtil.get('TRV_LOG_FORMAT', 'line') as 'line';
 
   readonly #logFile?: string = EnvUtil.get('TRV_LOG_FILE');
@@ -46,7 +47,7 @@ class $Logger {
   /**
    * Initialize
    */
-  init() {
+  init(): void {
     if (AppManifest.env.debug.status !== false) {
       delete this.#exclude.debug;
       const filter = LogUtil.buildFilter(AppManifest.env.debug.value ?? '@app');
@@ -71,7 +72,7 @@ class $Logger {
   /**
    * Add log event listener
    */
-  listen(key: string | symbol, handler: (ev: LogEvent) => void) {
+  listen(key: string | symbol, handler: (ev: LogEvent) => void): void {
     this.removeListener(key);
     this.#listenerMap.set(key, handler);
     this.#listeners.push(handler);
@@ -82,14 +83,14 @@ class $Logger {
    * @param formatter
    * @param appender Defaults to console appender unless specified
    */
-  listenDefault(formatter: Formatter, appender?: Appender) {
+  listenDefault(formatter: Formatter, appender?: Appender): void {
     this.listen(DefaultLoggerⲐ, LogUtil.buildListener(formatter, appender ?? new ConsoleAppender()));
   }
 
   /**
    * Clear all listeners
    */
-  removeAll() {
+  removeAll(): void {
     this.#listenerMap.clear();
     this.#listeners = [];
   }
@@ -97,7 +98,7 @@ class $Logger {
   /**
    * Remove specific listener
    */
-  removeListener(key: string | symbol) {
+  removeListener(key: string | symbol): void {
     const handler = this.#listenerMap.get(key);
     if (handler) {
       this.#listenerMap.delete(key);

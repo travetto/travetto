@@ -6,7 +6,7 @@ import { Worker } from './pool';
 type Simple<V> = (ch: ParentCommChannel<V>) => Promise<unknown | void>;
 type Param<V, X> = (ch: ParentCommChannel<V>, input: X) => Promise<unknown | void>;
 
-const empty = async () => { };
+const empty = async (): Promise<void> => { };
 
 /**
  * Spawned worker
@@ -22,11 +22,11 @@ export class WorkUtil {
     destroy: Simple<V> = empty): Worker<X> {
     const channel = new ParentCommChannel<V>(worker());
     return {
-      get id() { return channel.id; },
-      get active() { return channel.active; },
+      get id(): number | undefined { return channel.id; },
+      get active(): boolean { return channel.active; },
       init: () => init(channel),
       execute: inp => execute(channel, inp),
-      async destroy() {
+      async destroy(): Promise<void> {
         await destroy(channel);
         await channel.destroy();
       },

@@ -1,6 +1,6 @@
 import { ExecUtil } from '@travetto/boot';
 
-export async function main() {
+export async function main(): Promise<void> {
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init');
 

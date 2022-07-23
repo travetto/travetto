@@ -26,7 +26,7 @@ class User implements RegisteredPrincipal {
 
 class TestConfig {
   @InjectableFactory()
-  static getauthService(@Inject(TestModelSvcⲐ) svc: ModelCrudSupport): ModelAuthService<User> {
+  static getAuthService(@Inject(TestModelSvcⲐ) svc: ModelCrudSupport): ModelAuthService<User> {
     const src = new ModelAuthService<User>(
       svc,
       User,

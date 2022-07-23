@@ -38,7 +38,7 @@ export class SourceIndex {
    * Compute index for a scan entry
    * @param entry
    */
-  static #compute(entry: ScanEntry) {
+  static #compute(entry: ScanEntry): { mod: string, sub: string } | undefined {
     const file = entry.module;
     if (file.includes('node_modules')) {
       const mod = file.match(/^.*node_modules\/((?:@[^/]+\/)?[^/]+)/)?.[1];
@@ -61,7 +61,7 @@ export class SourceIndex {
    * Scan the framework for folder/files only the framework should care about
    * @param testFile The test to determine if a file is desired
    */
-  static #scanFramework(test: ScanTest) {
+  static #scanFramework(test: ScanTest): ScanEntry[] {
     const testFile = 'test' in test ? test.test.bind(test) : test;
 
     // Folders to check
@@ -100,7 +100,7 @@ export class SourceIndex {
   /**
    * Get index of all source files
    */
-  static get #index() {
+  static get #index(): Map<string, IndexRecord> {
     if (this.#cache.size === 0) {
       const idx = new Map<string, IndexRecord>();
       idx.set('.', { base: PathUtil.cwd, files: new Map() });
@@ -137,14 +137,14 @@ export class SourceIndex {
   /**
    * Clears the app scanning cache
    */
-  static reset() {
+  static reset(): void {
     this.#cache.clear();
   }
 
   /**
    * Get paths from index
    */
-  static getPaths() {
+  static getPaths(): string[] {
     return [...this.#index.keys()];
   }
 
@@ -154,7 +154,7 @@ export class SourceIndex {
    * @param folder The sub-folder to check into
    * @param filter The filter to determine if this is a valid support file
    */
-  static find(config: FindConfig) {
+  static find(config: FindConfig): ScanEntry[] {
     const { filter: f, folder, paths = this.getPaths() } = config;
     const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
 
@@ -194,9 +194,9 @@ export class SourceIndex {
    * Find all source files registered
    * @param mode Should all sources files be returned, including optional.
    */
-  static findByFolders(config: SourceConfig, mode: 'all' | 'required' = 'all') {
+  static findByFolders(config: SourceConfig, mode: 'all' | 'required' = 'all'): ScanEntry[] {
     const all: SimpleEntry[][] = [];
-    const getAll = (src: string[], cmd: (c: FindConfig) => SimpleEntry[]) => {
+    const getAll = (src: string[], cmd: (c: FindConfig) => SimpleEntry[]): void => {
       for (const folder of src.filter(x => mode === 'all' || !x.startsWith('^'))) {
         all.push(cmd({ folder: folder.replace('^', '') })
           .filter(x => mode === 'all' || !x.module.includes('.opt'))

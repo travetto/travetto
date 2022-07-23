@@ -43,7 +43,7 @@ export class RestApplication<T = unknown>  {
     this.globalHandler = this.globalHandler.bind(this);
   }
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     this.info.restProvider = this.server.constructor.name;
 
     await this.server.init();
@@ -64,7 +64,7 @@ export class RestApplication<T = unknown>  {
    * Handle the global request
    * @param req The http request
    */
-  async globalHandler(req: Request) {
+  async globalHandler(req: Request): Promise<string | Record<string, unknown>> {
     if (req.method === 'OPTIONS') {
       return '';
     } else if (req.path === '/' && this.config.defaultMessage) {
@@ -77,7 +77,7 @@ export class RestApplication<T = unknown>  {
   /**
    * Get the list of installed interceptors
    */
-  async getInterceptors() {
+  async getInterceptors(): Promise<RestInterceptor[]> {
     const interceptors = DependencyRegistry.getCandidateTypes(RestInterceptorTarget);
     const instances: RestInterceptor[] = [];
     for (const op of interceptors) {
@@ -95,7 +95,7 @@ export class RestApplication<T = unknown>  {
    * When a controller changes, unregister and re-register the class
    * @param e The change event
    */
-  async onControllerChange(e: ChangeEvent<Class>) {
+  async onControllerChange(e: ChangeEvent<Class>): Promise<void> {
     console.debug('Registry event', { type: e.type, target: (e.curr ?? e.prev)?.ᚕid });
     if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
       await this.unregisterController(e.prev);
@@ -109,7 +109,7 @@ export class RestApplication<T = unknown>  {
    * Register a controller
    * @param c The class to register
    */
-  async registerController(c: Class) {
+  async registerController(c: Class): Promise<void> {
     if (this.server.listening && !EnvUtil.isDynamic()) {
       console.warn('Reloading only supported in dynamic mode');
       return;
@@ -141,7 +141,7 @@ export class RestApplication<T = unknown>  {
    * Unregister a controller
    * @param c The class to unregister
    */
-  async unregisterController(c: Class) {
+  async unregisterController(c: Class): Promise<void> {
     if (!EnvUtil.isDynamic()) {
       console.warn('Unloading only supported in dynamic mode');
       return;
@@ -153,7 +153,7 @@ export class RestApplication<T = unknown>  {
   /**
    * Register the global listener as a hardcoded path
    */
-  async registerGlobal() {
+  async registerGlobal(): Promise<void> {
     if (this.server.listening && !EnvUtil.isDynamic()) {
       console.warn('Reloading only supported in dynamic mode');
       return;
@@ -175,7 +175,7 @@ export class RestApplication<T = unknown>  {
   /**
    * Remove the global listener
    */
-  async unregisterGlobal() {
+  async unregisterGlobal(): Promise<void> {
     if (!EnvUtil.isDynamic()) {
       console.warn('Unloading only supported in dynamic mode');
       return;

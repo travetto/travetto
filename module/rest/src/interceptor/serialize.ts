@@ -11,7 +11,9 @@ import { Response, Request } from '../types';
 import { Renderable } from '../response/renderable';
 import { HeadersAddedⲐ, NodeEntityⲐ, SendStreamⲐ } from '../internal/symbol';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const isRenderable = (o: unknown): o is Renderable => !!o && !Util.isPrimitive(o) && 'render' in (o as object);
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const isStream = (o: unknown): o is Readable => !!o && 'pipe' in (o as object) && 'on' in (o as object);
 
 /**
@@ -25,7 +27,7 @@ export class SerializeInterceptor implements RestInterceptor {
    * @param res Response
    * @param type mime type
    */
-  static setContentTypeIfUndefined(res: Response, type: string) {
+  static setContentTypeIfUndefined(res: Response, type: string): void {
     if (!res.getHeader('Content-Type')) {
       res.setHeader('Content-Type', type);
     }
@@ -37,7 +39,7 @@ export class SerializeInterceptor implements RestInterceptor {
    * @param res Outbound response
    * @param output The value to output
    */
-  static async sendOutput(req: Request, res: Response, output: unknown) {
+  static async sendOutput(req: Request, res: Response, output: unknown): Promise<void> {
     if (!res.headersSent) {
       if (output) {
         if (res[HeadersAddedⲐ]) {
@@ -75,13 +77,14 @@ export class SerializeInterceptor implements RestInterceptor {
 
   after = [LoggingInterceptor];
 
-  async intercept(req: Request, res: Response, next: () => Promise<void | unknown>) {
+  async intercept(req: Request, res: Response, next: () => Promise<void | unknown>): Promise<void> {
     try {
       const output = await next();
       await SerializeInterceptor.sendOutput(req, res, output);
-    } catch (err: any) {
-      if (!(err instanceof Error)) {  // Ensure we always throw "Errors"
-        err = new AppError(err.message || 'Unexpected error', 'general', err);
+    } catch (err) {
+      if (!(err instanceof Error) && Util.isError(err)) {  // Ensure we always throw "Errors"
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        err = new AppError(err.message || 'Unexpected error', 'general', err as {});
       }
       await SerializeInterceptor.sendOutput(req, res, err);
     }

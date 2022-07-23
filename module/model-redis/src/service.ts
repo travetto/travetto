@@ -4,7 +4,7 @@ import { Class, ShutdownManager, Util } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
-  NotFoundError, ExistsError, ModelIndexedSupport, IndexConfig, OptionalId
+  NotFoundError, ExistsError, ModelIndexedSupport, OptionalId
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 
@@ -29,7 +29,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   constructor(public readonly config: RedisModelConfig) { }
 
-  #resolveKey(cls: Class | string, id?: string, extra?: string) {
+  #resolveKey(cls: Class | string, id?: string, extra?: string): string {
     let key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
     if (id) {
       key = `${key}:${id}`;
@@ -73,7 +73,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return this.#streamValues('scan', { match: `${this.#resolveKey(prefix)}*` });
   }
 
-  #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti) {
+  #removeIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
     for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
       const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
       const fullKey = this.#resolveKey(cls, idx.name, key);
@@ -84,7 +84,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  #addIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti) {
+  #addIndices<T extends ModelType>(cls: Class, item: T, multi: RedisMulti): void {
     for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
       const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item);
       const fullKey = this.#resolveKey(cls, idx.name, key);
@@ -96,7 +96,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async #store<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'delete') {
+  async #store<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'delete'): Promise<void> {
     const key = this.#resolveKey(cls, item.id);
     const config = ModelRegistry.get(cls);
     const existing = await this.get(cls, item.id).catch(() => undefined);
@@ -150,7 +150,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
+  async #getIdByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<string> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const idxCfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
@@ -171,7 +171,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     throw new NotFoundError(`${cls.name}: ${idx}`, key);
   }
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     this.client = redis.createClient(this.config.client);
     await this.client.connect();
     await ModelStorageUtil.registerModelChangeListener(this);
@@ -188,11 +188,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  uuid() {
+  uuid(): string {
     return Util.uuid(32);
   }
 
-  async has<T extends ModelType>(cls: Class<T>, id: string, error?: 'notfound' | 'data') {
+  async has<T extends ModelType>(cls: Class<T>, id: string, error?: 'notfound' | 'data'): Promise<void> {
     const res = await this.client.exists(this.#resolveKey(cls, id));
     if (res === 0 && error === 'notfound') {
       throw new NotFoundError(cls, id);
@@ -201,7 +201,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async get<T extends ModelType>(cls: Class<T>, id: string) {
+  async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const payload = await this.client.get(this.#resolveKey(cls, id));
     if (payload) {
       const item = await ModelCrudUtil.load(cls, payload);
@@ -212,7 +212,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     if (item.id) {
       await this.has(cls, item.id, 'data');
     }
@@ -221,30 +221,31 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     return prepped;
   }
 
-  async update<T extends ModelType>(cls: Class<T>, item: T) {
+  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     await this.has(cls, item.id, 'notfound');
     return this.upsert(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
     await this.#store(cls, prepped, 'write');
     return prepped;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
-    await this.#store(cls, item as T, 'write');
-    return item as T;
+    const updated = await ModelCrudUtil.naivePartialUpdate(cls, item, view, (): Promise<T> => this.get(cls, id));
+    await this.#store(cls, updated, 'write');
+    return updated;
   }
 
-  async delete<T extends ModelType>(cls: Class<T>, id: string) {
+  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(cls);
-    await this.#store(cls, { id } as T, 'delete');
+    const where: ModelType = { id };
+    await this.#store(cls, where, 'delete');
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
@@ -270,17 +271,17 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   // Expiry
-  async deleteExpired<T extends ModelType>(cls: Class<T>) {
+  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
     // Automatic
     return -1;
   }
 
   // Storage
-  async createStorage() {
+  async createStorage(): Promise<void> {
     // Do nothing
   }
 
-  async deleteStorage() {
+  async deleteStorage(): Promise<void> {
     if (!this.config.namespace) {
       await this.client.flushDb();
     } else {
@@ -292,7 +293,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async truncateModel<T extends ModelType>(model: Class<T>) {
+  async truncateModel<T extends ModelType>(model: Class<T>): Promise<void> {
     for await (const ids of this.#iterate(model)) {
       if (ids.length) {
         await this.client.del(ids);
@@ -301,11 +302,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
     return this.get(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
     return this.delete(cls, await this.#getIdByIndex(cls, idx, body));
   }
 
@@ -320,7 +321,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
     let stream: AsyncIterable<string[]>;
 
-    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxCfg as IndexConfig<T>, body, { emptySortValue: null });
+    const { key } = ModelIndexedUtil.computeIndexKey(cls, idxCfg, body, { emptySortValue: null });
     const fullKey = this.#resolveKey(cls, idx, key);
 
     if (idxCfg.type === 'unsorted') {

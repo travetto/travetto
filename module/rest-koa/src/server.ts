@@ -17,7 +17,7 @@ type Router = kRouter<{}, TrvCtx>;
 type Routes = ReturnType<Router['routes']>;
 
 function kCustomBody() {
-  return async (ctx: koa.Context, next: koa.Next) => {
+  return async (ctx: koa.Context, next: koa.Next): Promise<void> => {
     const contentType = ctx.headers['content-type'];
     if (contentType) {
       if (/json$/.test(contentType)) {
@@ -69,15 +69,16 @@ export class KoaRestServer implements RestServer<koa> {
     return app;
   }
 
-  async unregisterRoutes(key: string | symbol) {
+  async unregisterRoutes(key: string | symbol): Promise<void> {
     // Delete previous
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const pos = this.raw.middleware.findIndex(x => (x as Keyed).key === key);
     if (pos >= 0) {
       this.raw.middleware.splice(pos, 1);
     }
   }
 
-  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
+  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]): Promise<void> {
     const router = new kRouter<unknown, TrvCtx>(path !== '/' ? { prefix: path } : {});
 
     // Register all routes to extract the proper request/response for the framework
@@ -85,6 +86,7 @@ export class KoaRestServer implements RestServer<koa> {
       if (route.path === '*') { // Wildcard is no longer supported directly
         route.path = /.*/;
       }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       router[route.method as 'get'](route.path!, async (ctx) => {
         const [req, res] = ctx[TravettoEntityⲐ] ??= [
           KoaServerUtil.getRequest(ctx),
@@ -108,6 +110,6 @@ export class KoaRestServer implements RestServer<koa> {
         .listen(this.config.port, this.config.bindAddress);
     }
     this.listening = true;
-    return raw.listen(this.config.port, this.config.bindAddress) as ServerHandle;
+    return raw.listen(this.config.port, this.config.bindAddress);
   }
 }

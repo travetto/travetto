@@ -20,7 +20,7 @@ type OutboundMessage =
 export class EditorUtil {
   static LAST_FILE = '';
 
-  static async renderFile(file: string) {
+  static async renderFile(file: string): Promise<void> {
     file = TemplateUtil.TPL_EXT.test(file) ? file : this.LAST_FILE;
     if (file) {
       try {
@@ -32,13 +32,17 @@ export class EditorUtil {
           file,
           content
         });
-      } catch (err: any) {
-        this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file });
+      } catch (err) {
+        if (err && err instanceof Error) {
+          this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file });
+        } else {
+          console.error(err);
+        }
       }
     }
   }
 
-  static response(response: OutboundMessage) {
+  static response(response: OutboundMessage): void {
     if (process.send) {
       process.send(response);
     }
@@ -47,7 +51,7 @@ export class EditorUtil {
   /**
    * Initialize context, and listeners
    */
-  static async init() {
+  static async init(): Promise<void> {
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
 
@@ -59,8 +63,12 @@ export class EditorUtil {
         case 'redraw': {
           try {
             await TemplateUtil.compileToDisk(msg.file);
-          } catch (err: any) {
-            return this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });
+          } catch (err) {
+            if (err && err instanceof Error) {
+              this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });
+            } else {
+              console.error(err);
+            }
           }
           return this.renderFile(msg.file);
         }
@@ -71,8 +79,12 @@ export class EditorUtil {
           try {
             await SendUtil.sendEmail(msg.file, from, to, await ConfigUtil.getContext());
             this.response({ type: 'sent', to, file: msg.file });
-          } catch (err: any) {
-            this.response({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });
+          } catch (err) {
+            if (err && err instanceof Error) {
+              this.response({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });
+            } else {
+              console.error(err);
+            }
           }
           break;
         }

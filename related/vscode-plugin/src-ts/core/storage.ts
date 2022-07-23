@@ -10,7 +10,7 @@ type TimeEntry<T> = { key: string, data: T, time: number };
 export class ActionStorage<T> {
 
   /**
-   * Local stroage
+   * Local storage
    */
   #storage: Record<string, TimeEntry<T>> = {};
 
@@ -21,7 +21,7 @@ export class ActionStorage<T> {
   /**
    * Load configuration
    */
-  get resolved() {
+  get resolved(): string {
     return PathUtil.resolveUnix(this.root, `.trv.${this.scope}.json`);
   }
 
@@ -38,13 +38,13 @@ export class ActionStorage<T> {
     }
   }
 
-  reset() {
+  reset(): Promise<void> {
     this.#storage = {};
     return this.persist();
   }
 
-  persist() {
-    return fs.writeFile(this.resolved, JSON.stringify(this.#storage), 'utf8');
+  async persist(): Promise<void> {
+    await fs.writeFile(this.resolved, JSON.stringify(this.#storage), 'utf8');
   }
 
   /**
@@ -65,7 +65,7 @@ export class ActionStorage<T> {
    * Check value
    * @param key
    */
-  has(key: string) {
+  has(key: string): boolean {
     return key in this.#storage;
   }
 
@@ -93,7 +93,7 @@ export class ActionStorage<T> {
    * @param size
    * @param remove
    */
-  getRecentAndFilterState(size: number, remove: (x: T) => boolean) {
+  getRecentAndFilterState(size: number, remove: (x: T) => boolean): TimeEntry<T>[] {
     return this.getRecent(size)
       .filter(x => {
         if (remove(x.data)) {

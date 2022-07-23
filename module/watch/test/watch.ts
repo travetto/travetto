@@ -15,7 +15,7 @@ export class WatchTest {
     const w = new Watcher(__dirname);
     w
       .on('all', ({ event, entry }) => {
-        console.log('Recevied event', { type: event, file: entry.file });
+        console.log('Received event', { type: event, file: entry.file });
         found.push([event, entry.file]);
       });
 
@@ -23,7 +23,7 @@ export class WatchTest {
 
     w.close();
 
-    const expected = (await ScanFs.scanDir({}, __dirname)).filter(x => !x.stats.isDirectory());
+    const expected = (await ScanFs.scanDir({}, __dirname)).filter(x => ScanFs.isNotDir(x));
     assert(found.filter(x => x[0] === 'added').length === expected.length);
     assert(found.filter(x => expected.find(y => y.file === x[1])).length === expected.length);
   }

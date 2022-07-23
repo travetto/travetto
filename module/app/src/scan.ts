@@ -17,7 +17,7 @@ export class AppScanUtil {
    * Sort list of cached items
    * @param items
    */
-  static sortList(items: ApplicationConfig[]) {
+  static sortList(items: ApplicationConfig[]): ApplicationConfig[] {
     return items.sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -36,10 +36,17 @@ export class AppScanUtil {
     const res = await ApplicationRegistry.getAll();
     await SchemaRegistry.init();
     const resolved = this.sortList(res);
-    return resolved.map(({ target, ...app }) => ({
-      ...app,
-      params: SchemaRegistry.getMethodSchema(target!, 'run')
-        .map(({ owner, type, match, ...x }) => ({ ...x, ...(match ? { match: { re: match.re.source } } : {}), type: type.name }))
-    }) as unknown as ApplicationConfig);
+    const config = resolved
+      .map(({ target, ...app }) => ({
+        ...app,
+        params: SchemaRegistry.getMethodSchema(target!, 'run')
+          .map(({ owner, type, match, ...x }) => ({
+            ...x,
+            ...(match ? { match: { re: match.re.source } } : {}),
+            type: type.name,
+          }))
+      }));
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return config as ApplicationConfig[];
   }
 }

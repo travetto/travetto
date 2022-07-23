@@ -8,13 +8,15 @@ import { AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ, RestAwsConfig } fr
 
 import { ExpressRestServer } from '../server';
 
+type AwsLambdaHandle = AwsLambdaHandler['handle'];
+
 /**
  * Aws Lambda Rest Server
  */
 @Injectable(AwsLambdaⲐ)
 export class AwsLambdaExpressRestServer extends ExpressRestServer implements AwsLambdaRestServer {
 
-  #handler: AwsLambdaHandler['handle'];
+  #handler: AwsLambdaHandle;
 
   @Inject()
   awsConfig: RestAwsConfig;
@@ -22,18 +24,20 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
   /**
    * Handler method for the proxy
    */
-  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
+  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): ReturnType<AwsLambdaHandle> {
     return this.#handler(event, context);
   }
 
-  override init() {
+  override init(): this['raw'] {
     const ret = super.init();
-    this.#handler = serverless.configure({ app: ret, ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandler['handle'];
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    this.#handler = serverless.configure({ app: ret, ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandle;
     return ret;
   }
 
-  override async listen() {
+  override async listen(): Promise<ServerHandle> {
     this.listening = true;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return {} as ServerHandle;
   }
 }

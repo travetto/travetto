@@ -19,7 +19,7 @@ export class ManualAsyncIterator<X> implements AsyncIterator<X> {
   /**
    * Wait for next event to fire
    */
-  async next() {
+  async next(): Promise<IteratorResult<X>> {
     if (!this.#done && !this.#queue.length) {
       await this.#ready;
       this.#ready = Util.resolvablePromise();
@@ -31,7 +31,7 @@ export class ManualAsyncIterator<X> implements AsyncIterator<X> {
    * Queue next event to fire
    * @param {boolean} immediate Determines if item(s) should be append or prepended to the queue
    */
-  add(item: X | X[], immediate = false) {
+  add(item: X | X[], immediate = false): void {
     item = Array.isArray(item) ? item : [item];
     if (!immediate) {
       this.#queue.push(...item);
@@ -44,7 +44,7 @@ export class ManualAsyncIterator<X> implements AsyncIterator<X> {
   /**
    * Close the iterator
    */
-  close() {
+  close(): void {
     this.#done = true;
     this.#ready.resolve();
   }

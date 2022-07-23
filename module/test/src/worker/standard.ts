@@ -1,16 +1,15 @@
 import { ErrorUtil } from '@travetto/base/src/internal/error';
-import { ParentCommChannel, WorkUtil } from '@travetto/worker';
+import { ParentCommChannel, Worker, WorkUtil } from '@travetto/worker';
 import { AppCache, ExecUtil } from '@travetto/boot';
 
 import { Events, RunEvent } from './types';
 import { TestConsumer } from '../consumer/types';
 import { TestEvent } from '../model/event';
-import { TestResult } from '../model/test';
 
 /**
  *  Produce a handler for the child worker
  */
-export function buildStandardTestManager(consumer: TestConsumer) {
+export function buildStandardTestManager(consumer: TestConsumer): () => Worker<string> {
   /**
    * Spawn a child
    */
@@ -21,7 +20,7 @@ export function buildStandardTestManager(consumer: TestConsumer) {
     /**
      * Child initialization
      */
-    async (channel: ParentCommChannel<TestEvent>) => {
+    async (channel: ParentCommChannel<TestEvent>): Promise<void> => {
       await channel.once(Events.READY); // Wait for the child to be ready
       await channel.send(Events.INIT); // Initialize
       await channel.once(Events.INIT_COMPLETE); // Wait for complete
@@ -36,7 +35,7 @@ export function buildStandardTestManager(consumer: TestConsumer) {
     /**
      * Send child command to run tests
      */
-    async (channel: ParentCommChannel<TestEvent>, event: string | RunEvent) => {
+    async (channel: ParentCommChannel<TestEvent & { error?: Error }>, event: string | RunEvent): Promise<void> => {
       // Listen for child to complete
       const complete = channel.once(Events.RUN_COMPLETE);
       // Start test
@@ -44,7 +43,7 @@ export function buildStandardTestManager(consumer: TestConsumer) {
       channel.send(Events.RUN, event);
 
       // Wait for complete
-      const { error } = await (complete as unknown as TestResult);
+      const { error } = await complete;
 
       // If we received an error, throw it
       if (error) {

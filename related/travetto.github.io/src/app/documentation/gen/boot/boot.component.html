@@ -30,7 +30,7 @@ The functionality we support for testing and retrieving environment information:
  <li><code class="item method">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li></ul>
 
 <h2 id="cache-support">Cache Support</h2>
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts">AppCache</a> is the cache that is used specific to the framework, and is an instance of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L10">FileCache</a>.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L10">FileCache</a> is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts">AppCache</a> is the cache that is used specific to the framework, and is an instance of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L13">FileCache</a>.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L13">FileCache</a> is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
 
@@ -39,13 +39,13 @@ The class organization looks like:
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/boot/src/cache.d.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token comment">/// &lt;reference types="node" /></span>
-<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Stats <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
 <span class="token comment">/**
  * Standard file cache, with output file name normalization and truncation
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">declare</span> <span class="token keyword">class</span> <span class="token class-name">FileCache</span> <span class="token punctuation">{{'{'}}</span>
     #<span class="token keyword">private</span><span class="token punctuation">;</span>
-    <span class="token keyword">static</span> <span class="token function">isOlder</span><span class="token punctuation">(</span>cacheStat<span class="token operator">:</span> fs<span class="token punctuation">.</span>Stats<span class="token punctuation">,</span> fullStat<span class="token operator">:</span> fs<span class="token punctuation">.</span>Stats<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+    <span class="token keyword">static</span> <span class="token function">isOlder</span><span class="token punctuation">(</span>cacheStat<span class="token operator">:</span> Stats<span class="token punctuation">,</span> fullStat<span class="token operator">:</span> Stats<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
     <span class="token comment">/**
      * Directory to cache into
      */</span>
@@ -86,12 +86,12 @@ The class organization looks like:
      * Checks to see if a file has been loaded or if it's available on disk
      * @param local The location to verify
      */</span>
-    <span class="token function">hasEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token operator">|</span> fs<span class="token punctuation">.</span>Stats <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+    <span class="token function">hasEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
     <span class="token comment">/**
      * Retrieve fs.Stats of the associated path
      * @param local The location to stat
      */</span>
-    <span class="token function">statEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> fs<span class="token punctuation">.</span>Stats<span class="token punctuation">;</span>
+    <span class="token function">statEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> Stats<span class="token punctuation">;</span>
     <span class="token comment">/**
      * Clear cache
      * @param quiet Should the clear produce output
@@ -124,7 +124,7 @@ Everything is based on absolute paths being passed in, and translated into cache
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/fs.ts#L17">FsUtil</a> provides some high level functionality (like recursive directory delete).
 
 <h3 id="file-system-scanning">File System Scanning</h3>
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/scan.ts#L59">ScanFs</a> provides a breadth-first search through the file system with the ability to track and collect files via patterns.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/scan.ts#L58">ScanFs</a> provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 <h2 id="typescript-bootstrapping">Typescript Bootstrapping</h2>
 
@@ -135,7 +135,7 @@ The bootstrap process will also requires an index of all source files, which all
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 <h2 id="process-execution">Process Execution</h2>
-Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/exec.ts#L72">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
+Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/exec.ts#L81">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

@@ -61,7 +61,10 @@ export class TodoTest {
 
     try {
       await this.svc.get(saved.id);
-    } catch (err: any) {
+    } catch (err) {
+      if (!(err instanceof Error)) {
+        throw err;
+      }
       assert(err.message);
     }
   }

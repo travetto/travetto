@@ -7,7 +7,7 @@ export class MakeUpper {
   static [TransformerId] = '@trv:transformer-test';
 
   @OnProperty()
-  static handleProperty(state: TransformerState, node: ts.PropertyDeclaration) {
+  static handleProperty(state: TransformerState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
     if (!state.source.fileName.includes('doc/src')) {
       return node;
     }
@@ -23,7 +23,7 @@ export class MakeUpper {
   }
 
   @OnClass()
-  static handleClass(state: TransformerState, node: ts.ClassDeclaration) {
+  static handleClass(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     if (!state.source.fileName.includes('doc/src')) {
       return node;
     }
@@ -39,7 +39,7 @@ export class MakeUpper {
   }
 
   @OnMethod()
-  static handleMethod(state: TransformerState, node: ts.MethodDeclaration) {
+  static handleMethod(state: TransformerState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (!state.source.fileName.includes('doc/src')) {
       return node;
     }

@@ -6,7 +6,9 @@ import { CliUtil } from './util';
 
 type Completion = Record<string, string[]>;
 
-type ParamConfig<K> = {
+type ParamPrimitive = string | number | boolean | string[] | number[];
+
+type ParamConfig<K extends ParamPrimitive = ParamPrimitive> = {
   type?: Function;
   key?: string;
   short?: string | false;
@@ -14,12 +16,12 @@ type ParamConfig<K> = {
   desc: string;
   completion?: boolean;
   def?: K;
-  choices?: K[];
+  choices?: K[] | readonly K[];
   combine?: (v: string, curr: K) => K;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ParamMap<T = any> = { [key in keyof T]: ParamConfig<T[key]> };
+type ParamMap<T = any> = { [key in keyof T]: T[key] extends ParamPrimitive ? ParamConfig<T[key]> : never };
 
 type Shape<M extends ParamMap> = { [k in keyof M]: Exclude<M[k]['def'], undefined> };
 
@@ -82,14 +84,16 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Define option
    */
-  choiceOption<K>({ choices, ...cfg }: ParamConfig<string> & { choices: K[] | readonly K[] }): ParamConfig<K> {
-    return {
+  choiceOption<K extends string | number>({ choices, ...cfg }: ParamConfig<K> & { choices: K[] | readonly K[] }): ParamConfig<K> {
+    const config: ParamConfig<K> = {
       type: String,
-      combine: (v, acc) => choices.includes(v as unknown as K) ? v as unknown as K : acc,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      combine: (v: string, acc: K): K => choices.includes(v as K) ? v as K : acc,
       choices,
       completion: true,
       ...cfg
-    } as ParamConfig<K>;
+    };
+    return config;
   }
 
   /**
@@ -131,7 +135,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Pre-compile on every cli execution
    */
-  async build() {
+  async build(): Promise<void> {
     await (await import('@travetto/base/bin/lib/'))
       .BuildUtil.build();
   }
@@ -139,14 +143,15 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Expose configuration as constrained typed object
    */
-  get cmd() {
+  get cmd(): Shape<ReturnType<Exclude<this['getOptions'], undefined>>> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.#cmd.opts() as Shape<ReturnType<Exclude<this['getOptions'], undefined>>>;
   }
 
   /**
    * Expose command line arguments
    */
-  get args() {
+  get args(): string[] {
     return this.#cmd.args;
   }
 
@@ -164,11 +169,11 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
    * Process all options into final set before registering with commander
    * @returns
    */
-  async finalizeOptions() {
-    const opts = this.getOptions?.() ?? {};
+  async finalizeOptions(): Promise<ParamConfig[]> {
+    const opts = this.getOptions?.();
     const used = new Set();
 
-    return Object.entries(opts as ParamMap).map(([k, cfg]) => {
+    return (opts ? Object.entries(opts) : []).map(([k, cfg]) => {
       cfg.key = k;
       cfg.name ??= k.replace(/([a-z])([A-Z])/g, (_, l, r: string) => `${l}-${r.toLowerCase()}`);
       if (cfg.short === undefined) {
@@ -185,7 +190,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Receive the commander object, and process
    */
-  async setup(cmd: commander.Command) {
+  async setup(cmd: commander.Command): Promise<commander.Command> {
     cmd = cmd.command(this.name);
     if (this.allowUnknownOptions) {
       cmd = cmd.allowUnknownOption(true);
@@ -201,7 +206,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
       if (cfg.type !== Boolean || cfg.def) {
         key = `${key} <${cfg.name}>`;
       }
-      cmd = cfg.combine ? cmd.option(key, cfg.desc, cfg.combine, cfg.def) : cmd.option(key, cfg.desc, cfg.def);
+      cmd = cfg.combine ? cmd.option(key, cfg.desc, cfg.combine, cfg.def) : cmd.option(key, cfg.desc, (cur, acc) => cur, cfg.def);
     }
 
     cmd = cmd.action(this.runAction.bind(this));
@@ -211,7 +216,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Runs the action at execution time
    */
-  async runAction(...args: unknown[]) {
+  async runAction(...args: unknown[]): Promise<void> {
     await this.envInit?.();
     await this.build();
     return await this.action(...args);
@@ -220,7 +225,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Collection tab completion information
    */
-  async setupCompletion(config: CompletionConfig) {
+  async setupCompletion(config: CompletionConfig): Promise<void> {
     const task = await this.complete();
     config.all = [...config.all, this.name];
     if (task) {
@@ -232,16 +237,14 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
    * Return tab completion information
    */
   async complete(): Promise<Completion | void> {
-    const out: Completion = {
-      '': [] as string[]
-    };
+    const out: Completion = { '': [] };
     for (const el of await this.finalizeOptions()) {
       if (el.completion) {
         out[''] = [...out['']!, `--${el.name} `];
         if (el.choices) {
-          out[`--${el.name} `] = el.choices;
+          out[`--${el.name} `] = el.choices.map(x => `${x}`);
           if (el.short) {
-            out[`- ${el.short} `] = el.choices;
+            out[`- ${el.short} `] = el.choices.map(x => `${x}`);
           }
         }
       }

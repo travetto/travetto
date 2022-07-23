@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 import * as mongo from 'mongodb';
 import { Readable } from 'stream';
 
@@ -5,7 +6,7 @@ import {
   ModelRegistry, ModelType, OptionalId,
   ModelCrudSupport, ModelStorageSupport, ModelStreamSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport,
-  StreamMeta, IndexField, BulkOp, BulkResponse,
+  StreamMeta, BulkOp, BulkResponse,
   NotFoundError, ExistsError, IndexConfig
 } from '@travetto/model';
 import {
@@ -34,9 +35,12 @@ import { MongoModelConfig } from './config';
 
 const IdxFieldsⲐ = Symbol.for('@trv:model-mongo/idx');
 
-const asFielded = <T extends ModelType>(cfg: IndexConfig<T>) => (cfg as unknown as { [IdxFieldsⲐ]: mongo.Sort });
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+const asFielded = <T extends ModelType>(cfg: IndexConfig<T>): { [IdxFieldsⲐ]: mongo.Sort } => (cfg as unknown as { [IdxFieldsⲐ]: mongo.Sort });
 
 type IdxCfg = mongo.CreateIndexesOptions;
+
+type StreamRaw = mongo.GridFSFile & { metadata: StreamMeta };
 
 /**
  * Mongo-based model source
@@ -55,8 +59,9 @@ export class MongoModelService implements
 
   constructor(public readonly config: MongoModelConfig) { }
 
-  async #describeStreamRaw(location: string) {
-    const files = (await this.#bucket.find({ filename: location }, { limit: 1 }).toArray()) as (mongo.GridFSFile & { metadata: StreamMeta })[];
+  async #describeStreamRaw(location: string): Promise<StreamRaw> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const files: StreamRaw[] = (await this.#bucket.find({ filename: location }, { limit: 1 }).toArray()) as StreamRaw[];
 
     if (!files?.length) {
       throw new NotFoundError(STREAMS, location);
@@ -65,7 +70,7 @@ export class MongoModelService implements
     return files[0];
   }
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     this.client = await mongo.MongoClient.connect(this.config.url, this.config.options);
     this.#db = this.client.db(this.config.namespace);
     this.#bucket = new mongo.GridFSBucket(this.#db, {
@@ -77,21 +82,21 @@ export class MongoModelService implements
     ModelExpiryUtil.registerCull(this);
   }
 
-  getWhere<T extends ModelType>(cls: Class<T>, where: WhereClause<T>, checkExpiry = true) {
+  getWhere<T extends ModelType>(cls: Class<T>, where: WhereClause<T>, checkExpiry = true): Record<string, unknown> {
     return MongoUtil.prepareQuery(cls, { where }, checkExpiry).filter;
   }
 
   /**
    * Build a mongo identifier
    */
-  uuid() {
+  uuid(): string {
     return Util.uuid();
   }
 
   // Storage
-  async createStorage() { }
+  async createStorage(): Promise<void> { }
 
-  async deleteStorage() {
+  async deleteStorage(): Promise<void> {
     await this.#db.dropDatabase();
   }
 
@@ -113,21 +118,22 @@ export class MongoModelService implements
     return out;
   }
 
-  getIndicies<T extends ModelType>(cls: Class<T>) {
+  getIndicies<T extends ModelType>(cls: Class<T>): ([mongo.IndexSpecification] | [mongo.IndexSpecification, IdxCfg])[] {
     const indices = ModelRegistry.get(cls).indices ?? [];
     return [
-      ...indices.map(idx => {
-        const combined = asFielded(idx)[IdxFieldsⲐ] ??= Object.assign({}, ...idx.fields.map(x => MongoUtil.toIndex(x as IndexField<T>)));
+      ...indices.map((idx): [mongo.IndexSpecification, IdxCfg] => {
+        const combined = asFielded(idx)[IdxFieldsⲐ] ??= Object.assign({}, ...idx.fields.map(x => MongoUtil.toIndex(x)));
         return [
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           combined as mongo.IndexSpecification,
-          (idx.type === 'unique' ? { unique: true } : {}) as IdxCfg
-        ] as const;
+          (idx.type === 'unique' ? { unique: true } : {})
+        ];
       }),
-      ...this.getGeoIndices(cls).map(x => [x] as const)
+      ...this.getGeoIndices(cls).map((x): [mongo.IndexSpecification] => [x])
     ];
   }
 
-  async establishIndices<T extends ModelType>(cls: Class<T>) {
+  async establishIndices<T extends ModelType>(cls: Class<T>): Promise<void> {
     const col = await this.getStore(cls);
     const creating = this.getIndicies(cls);
     if (creating.length) {
@@ -138,15 +144,15 @@ export class MongoModelService implements
     }
   }
 
-  async createModel(cls: Class) {
+  async createModel(cls: Class): Promise<void> {
     await this.establishIndices(cls);
   }
 
-  async changeModel(cls: Class) {
+  async changeModel(cls: Class): Promise<void> {
     await this.establishIndices(cls);
   }
 
-  async truncateModel<T extends ModelType>(cls: Class<T>) {
+  async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
     if (cls === StreamModel) {
       try {
         await this.#bucket.drop();
@@ -165,7 +171,7 @@ export class MongoModelService implements
   }
 
   // Crud
-  async get<T extends ModelType>(cls: Class<T>, id: string) {
+  async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const store = await this.getStore(cls);
     const result = await store.findOne(this.getWhere<ModelType>(cls, { id }), {});
     if (result) {
@@ -177,8 +183,9 @@ export class MongoModelService implements
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const cleaned = await ModelCrudUtil.preStore(cls, item, this);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     (cleaned as WithId<T>)._id = MongoUtil.uuid(cleaned.id);
 
     const store = await this.getStore(cls);
@@ -190,7 +197,7 @@ export class MongoModelService implements
     return cleaned;
   }
 
-  async update<T extends ModelType>(cls: Class<T>, item: T) {
+  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     item = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
     const res = await store.replaceOne(this.getWhere<ModelType>(cls, { id: item.id }), item);
@@ -200,7 +207,7 @@ export class MongoModelService implements
     return item;
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const cleaned = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
     try {
@@ -209,8 +216,8 @@ export class MongoModelService implements
         { $set: cleaned },
         { upsert: true }
       );
-    } catch (err: any) {
-      if (err.message.includes('duplicate key error')) {
+    } catch (err) {
+      if (err instanceof Error && err.message.includes('duplicate key error')) {
         throw new ExistsError(cls, cleaned.id);
       } else {
         throw err;
@@ -219,7 +226,7 @@ export class MongoModelService implements
     return cleaned;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     const store = await this.getStore(cls);
 
     if (view) {
@@ -260,7 +267,7 @@ export class MongoModelService implements
     return this.get(cls, id);
   }
 
-  async delete<T extends ModelType>(cls: Class<T>, id: string) {
+  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     const store = await this.getStore(cls);
     const result = await store.deleteOne(this.getWhere<ModelType>(cls, { id }, false));
     if (result.deletedCount === 0) {
@@ -268,7 +275,7 @@ export class MongoModelService implements
     }
   }
 
-  async * list<T extends ModelType>(cls: Class<T>) {
+  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     const store = await this.getStore(cls);
     const cursor = store.find(this.getWhere(cls, {}), { timeout: true }).batchSize(100);
     for await (const el of cursor) {
@@ -283,7 +290,7 @@ export class MongoModelService implements
   }
 
   // Stream
-  async upsertStream(location: string, input: Readable, meta: StreamMeta) {
+  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
     const writeStream = this.#bucket.openUploadStream(location, {
       contentType: meta.contentType,
       metadata: meta
@@ -296,7 +303,7 @@ export class MongoModelService implements
     });
   }
 
-  async getStream(location: string) {
+  async getStream(location: string): Promise<Readable> {
     await this.describeStream(location);
 
     const res = await this.#bucket.openDownloadStreamByName(location);
@@ -306,17 +313,17 @@ export class MongoModelService implements
     return res;
   }
 
-  async describeStream(location: string) {
+  async describeStream(location: string): Promise<StreamMeta> {
     return (await this.#describeStreamRaw(location)).metadata;
   }
 
-  async deleteStream(location: string) {
+  async deleteStream(location: string): Promise<void> {
     const fileId = (await this.#describeStreamRaw(location))._id;
     await this.#bucket.delete(fileId);
   }
 
   // Bulk
-  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]) {
+  async processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse<{ index: number }>> {
     const out: BulkResponse<{ index: number }> = {
       errors: [],
       counts: {
@@ -383,12 +390,12 @@ export class MongoModelService implements
   }
 
   // Expiry
-  deleteExpired<T extends ModelType>(cls: Class<T>) {
+  deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
     return ModelQueryExpiryUtil.deleteExpired(this, cls);
   }
 
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const store = await this.getStore(cls);
     const result = await store.findOne(
@@ -403,7 +410,7 @@ export class MongoModelService implements
     return await ModelCrudUtil.load(cls, result);
   }
 
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>) {
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const store = await this.getStore(cls);
     const result = await store.deleteOne(
@@ -422,7 +429,7 @@ export class MongoModelService implements
     return ModelIndexedUtil.naiveUpsert(this, cls, idx, body);
   }
 
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>) {
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     const store = await this.getStore(cls);
     const idxCfg = ModelRegistry.getIndex(cls, idx);
 
@@ -492,11 +499,11 @@ export class MongoModelService implements
     return res.deletedCount ?? 0;
   }
 
-  async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>) {
+  async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     const col = await this.getStore(cls);
 
     const items = MongoUtil.extractSimple(data);
-    const final = Object.entries(items).reduce((acc, [k, v]) => {
+    const final = Object.entries(items).reduce<Record<string, unknown>>((acc, [k, v]) => {
       if (v === null || v === undefined) {
         const o = (acc.$unset = acc.$unset ?? {}) as Record<string, unknown>;
         o[k] = v;
@@ -505,7 +512,7 @@ export class MongoModelService implements
         o[k] = v;
       }
       return acc;
-    }, {} as Record<string, unknown>);
+    }, {});
 
     const { filter } = MongoUtil.prepareQuery(cls, query);
     const res = await col.updateMany(filter, final);
@@ -544,7 +551,7 @@ export class MongoModelService implements
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
     const results = await this.query(cls, q);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field as 'type', prefix, results, (a) => a, query && query.limit);
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a) => a, query && query.limit);
   }
 
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {

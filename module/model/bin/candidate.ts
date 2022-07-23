@@ -7,7 +7,7 @@ import { ModelCandidateUtil } from './lib/candidate';
 /**
  * Handles direct invocation
  */
-export async function main(op: keyof ModelStorageSupport) {
+export async function main(op: keyof ModelStorageSupport): Promise<void> {
   try {
     EnvInit.init();
     const { PhaseManager } = await import('@travetto/base');

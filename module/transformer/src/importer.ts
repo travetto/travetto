@@ -26,7 +26,7 @@ export class ImportManager {
   /**
    * Produces a unique ID for a given file, importing if needed
    */
-  getId(file: string) {
+  getId(file: string): string {
     if (!this.#ids.has(file)) {
       const key = basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
       this.#ids.set(file, `ᚕ_${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
@@ -37,7 +37,7 @@ export class ImportManager {
   /**
    * Import a file if needed, and record it's identifier
    */
-  importFile(file: string, base?: string) {
+  importFile(file: string, base?: string): Import {
     file = ModuleUtil.normalizePath(file);
 
     // Allow for node classes to be imported directly
@@ -75,7 +75,7 @@ export class ImportManager {
   /**
    * Import given an external type
    */
-  importFromResolved(...types: AnyType[]) {
+  importFromResolved(...types: AnyType[]): void {
     for (const type of types) {
       if (type.key === 'external' && type.source && type.source !== this.source.fileName) {
         this.importFile(type.source, this.source.fileName);
@@ -93,7 +93,7 @@ export class ImportManager {
   /**
    * Add imports to a source file
    */
-  finalizeNewImports(file: ts.SourceFile) {
+  finalizeNewImports(file: ts.SourceFile): ts.SourceFile | undefined {
     if (!this.#newImports.size) {
       return;
     }
@@ -112,7 +112,10 @@ export class ImportManager {
         ...importStmts,
         ...file.statements.filter((x: ts.Statement & { remove?: boolean }) => !x.remove) // Exclude culled imports
       ]);
-    } catch (err: any) { // Missing import
+    } catch (err) { // Missing import
+      if (!(err instanceof Error)) {
+        throw err;
+      }
       const out = new Error(`${err.message} in ${file.fileName.replace(PathUtil.cwd, '.')}`);
       out.stack = err.stack;
       throw out;
@@ -122,14 +125,14 @@ export class ImportManager {
   /**
    * Reset the imports into the source file
    */
-  finalize(ret: ts.SourceFile) {
+  finalize(ret: ts.SourceFile): ts.SourceFile {
     return this.finalizeNewImports(ret) ?? ret;
   }
 
   /**
    * Get the identifier and import if needed
    */
-  getOrImport(factory: ts.NodeFactory, type: ExternalType) {
+  getOrImport(factory: ts.NodeFactory, type: ExternalType): ts.Identifier | ts.PropertyAccessExpression {
     if (type.source === this.source.fileName) {
       return factory.createIdentifier(type.name!);
     } else {

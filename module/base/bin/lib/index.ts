@@ -12,7 +12,7 @@ export class BuildUtil {
   /**
    * Trigger a compile
    */
-  static async build(env?: Record<string, string>) {
+  static async build(env?: Record<string, string | undefined>): Promise<number | undefined> {
     if (EnvUtil.isReadonly()) {
       return; // Do not run the compiler
     }

@@ -18,6 +18,7 @@ export const CommonRegExp = {
 };
 
 // Rebind regexes
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 for (const k of Object.keys(CommonRegExp) as (keyof typeof CommonRegExp)[]) {
   CommonRegExp[k].name = `[[:${k}:]]`;
   Messages.set(CommonRegExp[k].name!, Messages.get(k)!);

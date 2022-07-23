@@ -1,7 +1,9 @@
 import type * as lambda from 'aws-lambda';
 import type { AwsLambdaHandler } from './aws-lambda';
 
-async function buildApp() {
+async function buildApp(): Promise<{
+  handle(event: lambda.APIGatewayEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult>;
+}> {
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init');
 
@@ -16,7 +18,7 @@ async function buildApp() {
 }
 
 let inst: AwsLambdaHandler;
-export async function handler(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
+export async function handler(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
   context.callbackWaitsForEmptyEventLoop = false;
   return (inst ??= await buildApp()).handle(event, context);
 }

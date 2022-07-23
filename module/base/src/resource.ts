@@ -7,7 +7,7 @@ import { PathUtil, ScanFs, ScanEntry, FsUtil } from '@travetto/boot';
 import { AppError } from './error';
 import { AppManifest } from './manifest';
 
-const cleanPath = (p: string) => p.charAt(0) === '/' ? p.substring(1) : p;
+const cleanPath = (p: string): string => p.charAt(0) === '/' ? p.substring(1) : p;
 
 /**
  * Standard resource management interface allowing for look up by resource name
@@ -24,7 +24,7 @@ class $ResourceManager {
     this.#init();
   }
 
-  #init() {
+  #init(): void {
     this.#paths.push(...this.#rootPaths);
 
     this.#paths = this.#paths
@@ -35,8 +35,8 @@ class $ResourceManager {
   /**
    * Consume Scan entry into indexing all resources available
    */
-  #scanEntry(base: string, found: Set<string>, out: string[], r: ScanEntry) {
-    if (r.stats.isDirectory()) {
+  #scanEntry(base: string, found: Set<string>, out: string[], r: ScanEntry): void {
+    if (ScanFs.isDir(r)) {
       if (r.children) {
         for (const el of r.children!) {
           this.#scanEntry(base, found, out, el);
@@ -57,21 +57,21 @@ class $ResourceManager {
    * @param searchPath Path to look through
    * @param full Is the path fully qualified or should it be relative to the cwd
    */
-  addPath(searchPath: string) {
+  addPath(searchPath: string): void {
     this.#paths.push(PathUtil.resolveUnix(searchPath));
   }
 
   /**
    * List all paths
    */
-  getPaths() {
+  getPaths(): string[] {
     return this.#paths.slice(0);
   }
 
   /**
    * List all paths as relative to the cwd
    */
-  getRelativePaths() {
+  getRelativePaths(): string[] {
     return this.#paths.slice(0).map(x => x.replace(`${PathUtil.cwd}/`, ''));
   }
 
@@ -79,7 +79,7 @@ class $ResourceManager {
    * Provide an absolute path for a resource identifier
    * @param rel The relative path of a resource
    */
-  async findAbsolute(rel: string) {
+  async findAbsolute(rel: string): Promise<string> {
     rel = cleanPath(rel);
     await this.find(rel);
     return this.#cache.get(rel)!;
@@ -89,7 +89,7 @@ class $ResourceManager {
    * Find a given resource and return it's location
    * @param pth The relative path of a resource to find
    */
-  async find(pth: string) {
+  async find(pth: string): Promise<string> {
     pth = cleanPath(pth);
     if (this.#cache.has(pth)) {
       return this.#cache.get(pth)!;
@@ -116,7 +116,7 @@ class $ResourceManager {
    * @param pth The path to read
    * @param options The options to determine the read behavior
    */
-  async read(pth: string, options?: Parameters<typeof fs.readFile>[1]) {
+  async read(pth: string, options?: Parameters<typeof fs.readFile>[1]): Promise<string | Buffer> {
     pth = await this.find(pth);
     return fs.readFile(pth, options);
   }
@@ -136,7 +136,7 @@ class $ResourceManager {
    * @param pattern Pattern to search against
    * @param base The base folder to start searching from
    */
-  async findAll(pattern: RegExp, base: string = '') {
+  async findAll(pattern: RegExp, base: string = ''): Promise<string[]> {
     const out: string[] = [];
     const found = new Set<string>();
 

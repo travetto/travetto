@@ -24,7 +24,7 @@ export class DecoratorUtil {
   /**
    * Replace or add a decorator to a list of decorators
    */
-  static spliceDecorators(node: ts.Node, target: ts.Decorator | undefined, replacements: ts.Decorator[], idx = -1) {
+  static spliceDecorators(node: ts.Node, target: ts.Decorator | undefined, replacements: ts.Decorator[], idx = -1): ts.Decorator[] {
     if (idx < 0 && target) {
       idx = node.decorators?.indexOf(target) ?? -1;
     }

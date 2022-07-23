@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as util from 'util';
 
-import { TestResult, ErrorHoverAssertion, StatusUnknown } from './types';
+import { TestResult, ErrorHoverAssertion, StatusUnknown, TestConfig, Assertion } from './types';
 import { Workspace } from '../../../core/workspace';
 
 /**
@@ -11,17 +11,31 @@ import { Workspace } from '../../../core/workspace';
  * @param b
  * @param a
  */
-const rgba = (r = 0, g = 0, b = 0, a = 1) => `rgba(${r},${g},${b},${a})`;
+const rgba = (r = 0, g = 0, b = 0, a = 1): string => `rgba(${r},${g},${b},${a})`;
 
 /**
  * Italicizes
  */
 const ITALIC = 'font-style: italic;';
 
+type DecorationConfig = {
+  suffix: string;
+  title: string;
+  bodyFirst: string;
+  body: string;
+  markdown: vscode.MarkdownString;
+};
+
 /**
  * Various styles
  */
-const Style = {
+const Style: {
+  SMALL_IMAGE: string;
+  FULL_IMAGE: string;
+  COLORS: Record<TestResult['status'] | 'unknown', string>;
+  IMAGE: Partial<vscode.DecorationRenderOptions>;
+  ASSERT: Partial<vscode.DecorationRenderOptions>;
+} = {
   SMALL_IMAGE: '40%',
   FULL_IMAGE: 'auto',
   COLORS: {
@@ -33,7 +47,7 @@ const Style = {
   IMAGE: {
     isWholeLine: false,
     rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-  } as Partial<vscode.DecorationRenderOptions>,
+  },
   ASSERT: {
     isWholeLine: false,
     rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
@@ -43,8 +57,12 @@ const Style = {
     after: { textDecoration: `none; ${ITALIC}` },
     light: { after: { color: 'darkgrey' } },
     dark: { after: { color: 'grey' } }
-  } as Partial<vscode.DecorationRenderOptions>
-} as const;
+  }
+};
+
+function isBatchError(o?: Error): o is Error & { errors: (Error | string)[] } {
+  return !!o && o instanceof Error && 'errors' in o;
+}
 
 /**
  * Decoration utils
@@ -53,17 +71,18 @@ export class Decorations {
 
   /**
    * Build an error hover tooltip
-   * @param asrt
+   * @param assertion
    */
-  static buildErrorHover(asrt: ErrorHoverAssertion) {
+  static buildErrorHover(assertion: Assertion | ErrorHoverAssertion): DecorationConfig {
     let title: string;
     let body: string;
     let bodyFirst: string;
-    let suffix = asrt.message;
+    let suffix = assertion.message;
+    const error = assertion.error!;
 
-    if ('errors' in asrt.error) {
-      title = (asrt.error as { message: string }).message;
-      const messages = (asrt.error as unknown as { errors: (Error | string)[] }).errors
+    if (isBatchError(error)) {
+      title = error.message;
+      const messages = error.errors
         .map(x => typeof x === 'string' ? x : x.message);
 
       suffix = `(${title}) ${messages.join(', ')}`;
@@ -72,8 +91,8 @@ export class Decorations {
       }
       body = `\t${messages.join('  \n\t')}  `;
       bodyFirst = `${title} - ${messages.join(', ')}`;
-    } else if (asrt.expected !== undefined && asrt.actual !== undefined) {
-      title = asrt.message
+    } else if (assertion.expected !== undefined && assertion.actual !== undefined) {
+      title = assertion.message
         .replace(/^.*should/, 'Should');
 
       const extra = title.split(/^Should(?:\s+[a-z]+)+/)[1];
@@ -83,25 +102,25 @@ export class Decorations {
         suffix = title;
       }
 
-      const getVal = (str: unknown) => {
+      const getVal = (val: unknown): string => {
         try {
-          return util.inspect(JSON.parse(str as string), false, 10).replace(/\n/g, '  \n\t');
+          return util.inspect(JSON.parse(`${val}`), false, 10).replace(/\n/g, '  \n\t');
         } catch {
-          return str;
+          return `${val}`;
         }
       };
 
-      if (/equal/i.test(asrt.operator!)) {
-        body = `\tExpected: \n\t${getVal(asrt.expected)} \n\tActual: \n\t${getVal(asrt.actual)} \n`;
+      if (/equal/i.test(assertion.operator!)) {
+        body = `\tExpected: \n\t${getVal(assertion.expected)} \n\tActual: \n\t${getVal(assertion.actual)} \n`;
       } else {
-        body = `\t${asrt.message}`;
+        body = `\t${assertion.message}`;
       }
-      bodyFirst = asrt.message;
+      bodyFirst = assertion.message;
     } else {
-      title = asrt.error.message;
-      suffix = asrt.error.message;
+      title = error.message;
+      suffix = error.message;
 
-      body = asrt.error.stack!;
+      body = error.stack!;
       bodyFirst = body.split('\n')[0];
     }
     return { suffix, title, bodyFirst, body, markdown: new vscode.MarkdownString(`**${title}** \n\n${body}`) };
@@ -120,7 +139,7 @@ export class Decorations {
    * Build assertion
    * @param state
    */
-  static buildAssertStyle(state: StatusUnknown) {
+  static buildAssertStyle(state: StatusUnknown): vscode.TextEditorDecorationType {
     const color = Style.COLORS[state];
     return vscode.window.createTextEditorDecorationType({
       ...Style.ASSERT,
@@ -134,7 +153,7 @@ export class Decorations {
    * @param state
    * @param size
    */
-  static buildImage(state: StatusUnknown, size: string = Style.FULL_IMAGE) {
+  static buildImage(state: StatusUnknown, size: string = Style.FULL_IMAGE): vscode.TextEditorDecorationType {
     const img = Workspace.getAbsoluteResource(`images/${state}.png`);
     return vscode.window.createTextEditorDecorationType({
       ...Style.IMAGE,
@@ -150,6 +169,7 @@ export class Decorations {
   static buildAssertion(assertion: { error?: Error, line: number, lineEnd?: number, message: string }): vscode.DecorationOptions {
     let out = this.line(assertion.line, assertion.lineEnd);
     if (assertion.error) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const { suffix, markdown } = this.buildErrorHover(assertion as ErrorHoverAssertion);
 
       out = {
@@ -170,7 +190,7 @@ export class Decorations {
    * Build suite config
    * @param suite
    */
-  static buildSuite(suite: { lines: { start: number } }) {
+  static buildSuite(suite: { lines: { start: number } }): vscode.DecorationOptions {
     return { ...this.line(suite.lines.start) };
   }
 
@@ -178,16 +198,17 @@ export class Decorations {
    * Build test config
    * @param test
    */
-  static buildTest(test: { lines: { start: number } }) {
+  static buildTest(test: TestResult | TestConfig): vscode.DecorationOptions {
     let err: ErrorHoverAssertion | undefined;
     if ('error' in test) {
-      const tt = test as TestResult;
+      const tt = test;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       err = ((tt.assertions || []).find(x => x.status === 'failed') as ErrorHoverAssertion) ||
         (tt.error && { error: tt.error, message: tt.error.message });
     }
     if (err) {
       const hover = this.buildErrorHover(err);
-      const tt = test as TestResult;
+      const tt = test;
       return {
         ...this.line(tt.lines.start),
         hoverMessage: hover.markdown
@@ -202,7 +223,7 @@ export class Decorations {
    * @param entity
    * @param state
    */
-  static buildStyle(entity: 'assertion' | 'test' | 'suite', state: StatusUnknown) {
+  static buildStyle(entity: 'assertion' | 'test' | 'suite', state: StatusUnknown): vscode.TextEditorDecorationType {
     return (entity === 'assertion') ?
       this.buildAssertStyle(state) :
       this.buildImage(state, entity === 'test' ? Style.SMALL_IMAGE : Style.FULL_IMAGE);

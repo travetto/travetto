@@ -31,25 +31,26 @@ export class ConfigUtil {
    */
   static async get(): Promise<ConfigType> {
     return fs.readFile(this.#configFile, 'utf8')
-      .then((f: string) => YamlUtil.parse(f) as ConfigType)
+      .then((f: string) => YamlUtil.parse<ConfigType>(f))
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       .catch(() => ({} as ConfigType));
   }
 
-  static async getContext() {
+  static async getContext(): Promise<Exclude<ConfigType['context'], undefined>> {
     const conf = await this.get();
     return conf.context ?? {};
   }
 
-  static async getSenderConfig() {
+  static async getSenderConfig(): Promise<Exclude<ConfigType['sender'], undefined>> {
     const conf = await this.get();
     return conf.sender ?? {};
   }
 
-  static getDefaultConfig() {
+  static getDefaultConfig(): Promise<string> {
     return this.#defaultConfig;
   }
 
-  static async ensureConfig() {
+  static async ensureConfig(): Promise<string> {
     const file = this.#configFile;
     if (!(await FsUtil.exists(file))) {
       await fs.mkdir(path.dirname(file), { recursive: true });

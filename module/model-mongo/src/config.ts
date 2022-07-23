@@ -47,19 +47,19 @@ export class MongoModelConfig {
   };
 
   /**
-   * Should we autocreate the db
+   * Should we auto create the db
    */
   autoCreate?: boolean;
 
   /**
-   * Frequency of culling for expirable content
+   * Frequency of culling for cullable content
    */
   cullRate?: number | TimeSpan;
 
   /**
    * Load a resource
    */
-  async fetch(val: string) {
+  async fetch(val: string): Promise<string> {
     return ResourceManager.read(val)
       .then(res => typeof res === 'string' ? res : res.toString('utf8'))
       .catch(() => fs.readFile(val)
@@ -71,7 +71,7 @@ export class MongoModelConfig {
   /**
    * Load all the ssl certs as needed
    */
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     const opts = this.options;
     if (opts.ssl) {
       if (opts.sslCert) {
@@ -92,7 +92,7 @@ export class MongoModelConfig {
   /**
    * Build connection URLs
    */
-  get url() {
+  get url(): string {
     const hosts = this.hosts
       .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port}`)
       .join(',');

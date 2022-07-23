@@ -10,20 +10,20 @@ export class CliUtil {
 
   static #waitState = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
-  static isBoolean(x: string) {
+  static isBoolean(x: string): boolean {
     return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);
   }
 
   static toBool(x: string | boolean, def: boolean): boolean;
   static toBool(x?: string | boolean, def?: boolean): boolean | undefined;
-  static toBool(x?: string | boolean, def?: boolean) {
+  static toBool(x?: string | boolean, def?: boolean): boolean | undefined {
     return x === undefined ? true :
       (typeof x === 'boolean' ? x :
         (this.isBoolean(x) ? /^(1|yes|on|true)$/i.test(x) :
           def));
   }
 
-  static toInt(l: number | undefined, u: number | undefined, v: string, d: number) {
+  static toInt(l: number | undefined, u: number | undefined, v: string, d: number): number {
     let n = +v;
     if (l === undefined && u === undefined) {
       return n;
@@ -40,7 +40,7 @@ export class CliUtil {
   /**
    * Get code completion values
    */
-  static async getCompletion(compl: CompletionConfig, args: string[]) {
+  static async getCompletion(compl: CompletionConfig, args: string[]): Promise<string[]> {
     args = args.slice(0); // Copy as we mutate
 
     const cmd = args.shift()!;
@@ -81,7 +81,7 @@ export class CliUtil {
    * @param text Text, if desired
    * @param clear Should the entire line be cleared?
    */
-  static async rewriteLine(stream: Writable, text?: string, clear = false) {
+  static async rewriteLine(stream: Writable, text?: string, clear = false): Promise<void> {
     await new Promise<void>(r => readline.cursorTo(stream, 0, undefined, () => {
       if (clear) {
         readline.clearLine(stream, 0);
@@ -94,7 +94,7 @@ export class CliUtil {
     }));
   }
 
-  static sleep(ms: number) {
+  static sleep(ms: number): Promise<void> {
     return new Promise(r => setTimeout(r, ms));
   }
 
@@ -106,7 +106,7 @@ export class CliUtil {
    */
   static async waiting<T>(message: string, work: Promise<T> | (() => Promise<T>),
     config: { completion?: string, delay?: number, stream?: Writable } = {}
-  ) {
+  ): Promise<T> {
     const { stream, delay, completion } = { delay: 1000, stream: process.stderr, ...config };
 
     const writeLine = this.rewriteLine.bind(this, stream);

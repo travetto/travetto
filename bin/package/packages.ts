@@ -1,6 +1,7 @@
-import { createWriteStream } from 'fs';
-
 import '@arcsine/nodesh';
+import { $AsyncIterable } from '@arcsine/nodesh/dist/types';
+
+import { createWriteStream } from 'fs';
 
 import { ExecUtil, PathUtil } from '@travetto/boot';
 import { PackageType, readPackage } from '@travetto/boot/src/internal/package';
@@ -27,7 +28,7 @@ export class Packages {
   static #cache: Pkg[];
   static #byFolder: Record<string, Pkg>;
 
-  static #combine(a: string[], ...b: string[]) {
+  static #combine(a: string[], ...b: string[]): string[] {
     return [...new Set([...(a || []), ...(b || [])])];
   }
 
@@ -47,7 +48,7 @@ export class Packages {
     };
   }
 
-  static async #init() {
+  static async #init(): Promise<void> {
     if (this.#cache) {
       return;
     }
@@ -70,7 +71,7 @@ export class Packages {
       displayName,
       version,
       description,
-      keywords: this.#combine(keywords as string[], 'travetto', 'typescript'),
+      keywords: this.#combine(keywords!, 'travetto', 'typescript'),
       homepage: 'https://travetto.io',
       license: 'MIT',
       author: {
@@ -100,7 +101,7 @@ export class Packages {
     };
   }
 
-  static findPublishedVersion(folder: string, dep: string, version: string) {
+  static findPublishedVersion(folder: string, dep: string, version: string): Promise<string | undefined> {
     return ExecUtil.spawn('npm',
       ['show', `${dep}@${version}`, 'version', '--json'],
       { cwd: folder, stdio: 'pipe' }
@@ -115,20 +116,21 @@ export class Packages {
       });
   }
 
-  static findPublishedPackageVersion(pkg: Pkg) {
+  static findPublishedPackageVersion(pkg: Pkg): Promise<string | undefined> {
     return this.findPublishedVersion(pkg._.folder, pkg.name, pkg.version);
   }
 
-  static upgrade(pkg: Pkg, groups: DepGroup[]) {
+  static upgrade(pkg: Pkg, groups: DepGroup[]): $AsyncIterable<string[]> {
     return groups
       .$flatMap(type =>
         Object.entries<string | true>(pkg[type] || {})
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           .$map(([name, version]) => ({ name, type, version: version as string }))
       )
       .$filter(x => !x.name.startsWith('@travetto'))
-      .$filter(x => /^[\^~<>]/.test(x.version)) // Rangeable
+      .$filter(x => /^[\^~<>]/.test(x.version)) // Is a range
       .$parallel(d => this.findPublishedVersion(pkg._.folder, d.name, d.version)
-        .then(top => {
+        .then((top): string => {
           if (top) {
             const curr = pkg[d.type]![d.name];
             const next = d.version.replace(/\d.*$/, top);
@@ -137,38 +139,39 @@ export class Packages {
               return `${d.name}@(${curr} -> ${next})`;
             }
           }
+          return '';
         })
       )
       .$notEmpty()
       .$collect();
   }
 
-  static writeOut({ _: og, ...pkg }: Pkg) {
+  static writeOut({ _: og, ...pkg }: Pkg): Promise<void> {
     return new Promise(res => `${JSON.stringify(pkg, null, 2)}\n`
       .$stream('binary')
       .pipe(createWriteStream(og.file))
       .on('close', res));
   }
 
-  static async * getTopLevelPackage() {
+  static async * getTopLevelPackage(): $AsyncIterable<Pkg> {
     yield this.#readPackage(PathUtil.cwd);
   }
 
-  static async getByFolder(folder: string) {
+  static async getByFolder(folder: string): Promise<Pkg> {
     await this.#init();
     return this.#byFolder[PathUtil.resolveUnix(folder)];
   }
 
-  static async * yieldByFolder(folder: string) {
+  static async * yieldByFolder(folder: string): $AsyncIterable<Pkg> {
     yield this.getByFolder(folder);
   }
 
-  static async * yieldPackages() {
+  static async * yieldPackages(): $AsyncIterable<Pkg> {
     await this.#init();
     yield* this.#cache;
   }
 
-  static yieldPublicPackages() {
+  static yieldPublicPackages(): $AsyncIterable<Pkg> {
     return this.yieldPackages().$filter(pkg => !pkg.private);
   }
 }

@@ -30,7 +30,7 @@ export interface AwsLambdaRestServer extends RestServer, AwsLambdaHandler { }
 export class RestAwsConfig {
   binaryMimeTypes?: string[];
 
-  toJSON() {
+  toJSON(): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     if (this.binaryMimeTypes) {
       out.binarySettings = { contentTypes: this.binaryMimeTypes };
@@ -49,7 +49,7 @@ export class AwsLambdaRestApplication extends RestApplication implements AwsLamb
     this.#lambdaServer = lambdaServer;
   }
 
-  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
+  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
     return this.#lambdaServer.handle(event, context);
   }
 }

@@ -11,7 +11,7 @@ import { Compiler } from '../src/compiler';
 /**
  * Wraps the compiler supporting real-time changes to files
  */
-export function init($Compiler: Class<typeof Compiler>) {
+export function init($Compiler: Class<typeof Compiler>): typeof $Compiler {
   /**
    * Extending the $Compiler class to add some functionality
    */
@@ -62,7 +62,7 @@ export function init($Compiler: Class<typeof Compiler>) {
       });
     }
 
-    reset() {
+    reset(): void {
       super.reset();
       this.#modules.clear();
     }

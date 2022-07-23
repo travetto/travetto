@@ -10,7 +10,7 @@ export class EnvUtil {
   /**
    * Get all relevant environment values
    */
-  static getAll() {
+  static getAll(): Record<string, unknown> {
     return Object.fromEntries(Object.entries(process.env)
       .filter(([k]) => /^(TRV_.*|NODE_(PATH|OPTIONS)|PATH)$/.test(k))
       .sort((a, b) => a[0].localeCompare(b[0]))
@@ -36,7 +36,7 @@ export class EnvUtil {
    * Read value as a comma-separated list
    * @param k The environment key to search for
    */
-  static getList(k: string, append?: string[]) {
+  static getList(k: string, append?: string[]): string[] {
     return [...(this.get(k) ?? '').split(/[, ]+/g), ...(append ?? [])]
       .map(x => x.trim())
       .filter(x => !!x);
@@ -46,7 +46,7 @@ export class EnvUtil {
    * Read value as a comma-separated list of pairs separated by '='
    * @param k The environment key to search for
    */
-  static getEntries(k: string, sep = '=') {
+  static getEntries(k: string, sep = '='): (readonly [string, string | undefined])[] {
     return (this.get(k) ?? '')
       .split(/[, ]+/g)
       .map(x => x.trim())
@@ -63,7 +63,7 @@ export class EnvUtil {
    * @param k The environment key to search for
    * @param def The default value if the key isn't found
    */
-  static getInt(k: string, def: number | string) {
+  static getInt(k: string, def: number | string): number {
     return parseInt(this.get(k, `${def}`) ?? '', 10);
   }
 
@@ -79,7 +79,7 @@ export class EnvUtil {
    * Determine if value is set explicitly
    * @param k The environment key to search for
    */
-  static isSet(k: string) {
+  static isSet(k: string): boolean {
     const val = this.get(k);
     return val !== undefined && val !== '';
   }
@@ -88,7 +88,7 @@ export class EnvUtil {
    * Read value as true
    * @param k The environment key to search for
    */
-  static isTrue(k: string) {
+  static isTrue(k: string): boolean {
     const val = this.get(k);
     return val !== undefined && val !== '' && /^(1|true|on|yes)$/i.test(val);
   }
@@ -97,7 +97,7 @@ export class EnvUtil {
    * Read value as false
    * @param k The environment key to search for
    */
-  static isFalse(k: string) {
+  static isFalse(k: string): boolean {
     const val = this.get(k);
     return val !== undefined && val !== '' && /^(0|false|off|no)$/i.test(val);
   }
@@ -123,28 +123,28 @@ export class EnvUtil {
   /**
    * Can use compile
    */
-  static isProd() {
+  static isProd(): boolean {
     return /^prod(uction)?$/i.test(EnvUtil.get('TRV_ENV', ''));
   }
 
   /**
    * Can use compile
    */
-  static isReadonly() {
+  static isReadonly(): boolean {
     return this.isProd() ? !this.isFalse('TRV_READONLY') : this.isTrue('TRV_READONLY');
   }
 
   /**
    * Is the app in dynamic mode?
    */
-  static isDynamic() {
+  static isDynamic(): boolean {
     return !this.isProd() && this.isTrue('TRV_DYNAMIC');
   }
 
   /**
    * Get dynamic modules
    */
-  static getDynamicModules() {
+  static getDynamicModules(): Record<string, string> {
     if (this.#dynamicModules === undefined) {
       this.#dynamicModules = Object.fromEntries(
         this.getEntries('TRV_MODULES')

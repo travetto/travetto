@@ -41,20 +41,21 @@ export class PostgreSQLDialect extends SQLDialect {
   /**
    * How to hash
    */
-  hash(value: string) {
+  hash(value: string): string {
     return `encode(digest('${value}', 'sha1'), 'hex')`;
   }
 
-  ident(field: FieldConfig | string) {
+  ident(field: FieldConfig | string): string {
     return `"${typeof field === 'string' ? field : field.name}"`;
   }
 
   /**
    * Define column modification
    */
-  getModifyColumnSQL(stack: VisitStack[]) {
-    const field = stack[stack.length - 1];
-    const type = this.getColumnType(field as FieldConfig);
+  getModifyColumnSQL(stack: VisitStack[]): string {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const field = stack[stack.length - 1] as FieldConfig;
+    const type = this.getColumnType(field);
     const ident = this.ident(field.name);
     return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${ident}  TYPE ${type} USING (${ident}::${type});`;
   }

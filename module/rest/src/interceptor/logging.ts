@@ -40,7 +40,7 @@ export class RestLogRoutesConfig {
    * Clean a list of routes into route checks
    * @param arr The list of routes as strings
    */
-  clean(arr: string[]) {
+  clean(arr: string[]): RouteCheck[] {
     return arr.map(x => x.split(':')).map(([base, sub]) => {
       let final: string | RegExp = sub || '*';
       base = base.replace(/^\/+/, '');
@@ -51,7 +51,7 @@ export class RestLogRoutesConfig {
     });
   }
 
-  postConstruct() {
+  postConstruct(): void {
     this.allowList = this.clean(this.allow);
     this.denyList = this.clean(this.deny);
   }
@@ -63,7 +63,7 @@ export class RestLogRoutesConfig {
 @Injectable()
 export class LoggingInterceptor implements RestInterceptor {
 
-  static matchRoute(controller: Partial<ControllerConfig>, route: RouteConfig, paths: RouteCheck[]) {
+  static matchRoute(controller: Partial<ControllerConfig>, route: RouteConfig, paths: RouteCheck[]): boolean {
     return paths.some(({ base, sub }) => {
       if (base === (controller.basePath ?? '').replace(/^\/+/, '') || base === '*') {
         if (!sub || sub === '*') {
@@ -82,7 +82,7 @@ export class LoggingInterceptor implements RestInterceptor {
   @Inject()
   logConfig: RestLogRoutesConfig;
 
-  applies(route: RouteConfig, controller: Partial<ControllerConfig>) {
+  applies(route: RouteConfig, controller: Partial<ControllerConfig>): boolean {
     const check = this.logConfig.deny.length ?
       !LoggingInterceptor.matchRoute(controller, route, this.logConfig.denyList) :
       (this.logConfig.allow.length ?
@@ -91,7 +91,7 @@ export class LoggingInterceptor implements RestInterceptor {
     return check;
   }
 
-  async intercept(req: Request, res: Response, next: () => Promise<void | unknown>) {
+  async intercept(req: Request, res: Response, next: () => Promise<void | unknown>): Promise<unknown> {
     const start = Date.now();
 
     try {
@@ -102,8 +102,8 @@ export class LoggingInterceptor implements RestInterceptor {
       const reqLog = {
         method: req.method,
         path: req.path,
-        query: { ...req.query } as Record<string, string>,
-        params: req.params as Record<string, string>,
+        query: { ...req.query },
+        params: req.params,
         statusCode: res.statusCode,
         duration
       };

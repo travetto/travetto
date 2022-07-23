@@ -14,11 +14,11 @@ import { ServiceUtil } from './lib/service';
 export class CliServicePlugin extends BasePlugin {
   name = 'command:service';
 
-  getArgs() {
+  getArgs(): string {
     return '[start|stop|restart|status] [...services]';
   }
 
-  async action(mode: 'start' | 'stop' | 'status' | 'restart', services: string[]) {
+  async action(mode: 'start' | 'stop' | 'status' | 'restart', services: string[]): Promise<void> {
     const all = (await ServiceUtil.findAll())
       .filter(x => services && services.length && !services.includes('all') ? services.includes(x.name) : true)
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -79,7 +79,11 @@ export class CliServicePlugin extends BasePlugin {
       process.stdout.write('\x1B[?25h\n');
     } else {
       for (const res of resolved) {
-        console.log((res as unknown as { value: string }).value);
+        if (res.status === 'fulfilled') {
+          console.log(res.value);
+        } else {
+          console.log(res.reason);
+        }
       }
     }
   }

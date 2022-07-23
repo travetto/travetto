@@ -12,7 +12,7 @@ export class TextBlock implements Block<string> {
 
   constructor(public subtype: 'inline' | 'full') { }
 
-  readLine(tokens: string[]) {
+  readLine(tokens: string[]): void {
     if (tokens.length === 0) { // New line
       if (this.subtype === 'inline') {
         if (this.value.endsWith(' ')) {
@@ -32,7 +32,7 @@ export class TextBlock implements Block<string> {
 export class ListBlock implements Block<SimpleType[]> {
   constructor(public indent: number, public value: SimpleType[] = []) { }
 
-  consume(node: Node) {
+  consume(node: Node): void {
     this.value.push(node.value);
   }
 }
@@ -40,7 +40,7 @@ export class ListBlock implements Block<SimpleType[]> {
 export class MapBlock implements Block<SimpleObject> {
   constructor(public indent: number, public value: SimpleObject = {}) { }
 
-  consume(node: Node, key: string) {
+  consume(node: Node, key: string): void {
     this.value[key] = node.value;
   }
 }

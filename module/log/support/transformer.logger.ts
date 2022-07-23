@@ -18,25 +18,25 @@ export class LoggerTransformer {
 
   static [TransformerId] = '@trv:log';
 
-  static initState(state: CustomState) {
+  static initState(state: CustomState): void {
     state.scope = state.scope ?? [];
   }
 
   @OnClass()
-  static onClass(state: CustomState, node: ts.ClassDeclaration) {
+  static onClass(state: CustomState, node: ts.ClassDeclaration): typeof node {
     this.initState(state);
     state.scope.push({ type: 'class', name: node.name?.text ?? 'unknown' });
     return node;
   }
 
   @AfterClass()
-  static afterClass(state: CustomState, node: ts.ClassDeclaration) {
+  static afterClass(state: CustomState, node: ts.ClassDeclaration): typeof node {
     state.scope.pop();
     return node;
   }
 
   @OnMethod()
-  static onMethod(state: CustomState, node: ts.MethodDeclaration) {
+  static onMethod(state: CustomState, node: ts.MethodDeclaration): typeof node {
     this.initState(state);
     let name = 'unknown';
     if (ts.isIdentifier(node.name)) {
@@ -47,33 +47,37 @@ export class LoggerTransformer {
   }
 
   @AfterMethod()
-  static afterMethod(state: CustomState, node: ts.MethodDeclaration) {
+  static afterMethod(state: CustomState, node: ts.MethodDeclaration): typeof node {
     state.scope.pop();
     return node;
   }
 
   @OnFunction()
-  static onFunction(state: CustomState, node: ts.FunctionDeclaration | ts.FunctionExpression) {
+  static onFunction(state: CustomState, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     this.initState(state);
     state.scope.push({ type: 'function', name: node.name?.text ?? 'unknown' });
     return node;
   }
 
   @AfterFunction()
-  static afterFunction(state: CustomState, node: ts.FunctionDeclaration | ts.FunctionExpression) {
+  static afterFunction(state: CustomState, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     state.scope.pop();
     return node;
   }
 
   @OnCall()
-  static onDebugCall(state: CustomState, node: ts.CallExpression) {
+  static onDebugCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
     if (!ts.isIdentifier(node.expression) || node.expression.text !== ConsoleManager.key) {
       return node;
     }
     const arg = CoreUtil.getArgument(node);
     if (arg) {
       // Okay since we create the object ourselves in ConsoleManager
-      const level = LiteralUtil.toLiteral(arg, false) as string;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      if (!ts.isStringLiteral(arg)) {
+        return node;
+      }
+      const level = LiteralUtil.toLiteral(arg, false);
       if (AppManifest.prod && level === 'debug') {
         return state.createIdentifier('undefined'); // Lose debug logging if in prod
       } else {

@@ -14,7 +14,7 @@ const FIXED_MODULES = new Set([
   'yaml', 'worker', 'command',
   'log', 'jwt', 'image',
   'test',
-].map(x => `@travetto/${x}` as string));
+].map(x => `@travetto/${x}`));
 
 /**
  * Child Worker for the Test Runner.  Receives events as commands
@@ -24,11 +24,14 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
   #runs = 0;
 
-  async #exec(op: () => Promise<unknown>, type: string) {
+  async #exec(op: () => Promise<unknown>, type: string): Promise<void> {
     try {
       await op();
       this.send(type); // Respond
-    } catch (err: any) {
+    } catch (err) {
+      if (!(err instanceof Error)) {
+        throw err;
+      }
       // Mark as errored out
       this.send(type, { error: ErrorUtil.serializeError(err) });
     }
@@ -37,7 +40,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   /**
    * Start the worker
    */
-  async activate() {
+  async activate(): Promise<void> {
     const { RunnerUtil } = await import('../execute/util');
     RunnerUtil.registerCleanup('worker');
 
@@ -51,7 +54,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   /**
    * When we receive a command from the parent
    */
-  async onCommand(event: RunEvent & { type: string }) {
+  async onCommand(event: RunEvent & { type: string }): Promise<boolean> {
     console.debug('on message', { ...event });
 
     if (event.type === Events.INIT) { // On request to init, start initialization
@@ -66,12 +69,12 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   /**
    * In response to the initialization command
    */
-  async onInitCommand() { }
+  async onInitCommand(): Promise<void> { }
 
   /**
    * Reset the state to prepare for the next run
    */
-  async resetForRun() {
+  async resetForRun(): Promise<void> {
     // Clear require cache of all data loaded minus base framework pieces
     console.debug('Resetting', { fileCount: Object.keys(require.cache).length });
 
@@ -95,7 +98,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   /**
    * Run a specific test/suite
    */
-  async onRunCommand(event: RunEvent) {
+  async onRunCommand(event: RunEvent): Promise<void> {
     this.#runs += 1;
     console.debug('Run');
 

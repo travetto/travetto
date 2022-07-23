@@ -3,7 +3,7 @@ export class Test {
   age: number;
   dob: Date;
 
-  computeAge() {
+  computeAge(): void {
     this['age'] = (Date.now() - this.dob.getTime());
   }
 }

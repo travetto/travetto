@@ -14,13 +14,14 @@ type Ctx = Record<string | symbol, unknown>;
 export class AsyncContext {
 
   alStorage = new AsyncLocalStorage<{ value: Ctx }>();
+  active = 0;
 
   constructor() {
     this.run = this.run.bind(this);
     this.iterate = this.iterate.bind(this);
   }
 
-  #store(setAs?: Ctx | null) {
+  #store(setAs?: Ctx | null): Ctx {
     const val = this.alStorage.getStore();
     if (!val) {
       throw new AppError('Context is not initialized', 'general');
@@ -39,13 +40,14 @@ export class AsyncContext {
    * Get entire context or a portion by key
    */
   get<T = unknown>(key: string | symbol): T;
-  get(): Record<string | symbol, unknown>;
-  get<T>(key?: string | symbol) {
+  get(): Ctx;
+  get<T>(key?: string | symbol): Ctx | T {
     const root = this.#store();
     if (key) {
-      return root[key as string];
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return root[key as string] as T;
     } else {
-      return root as T;
+      return root;
     }
   }
 
@@ -54,29 +56,51 @@ export class AsyncContext {
    */
   set(key: string | symbol, val: unknown): void;
   set(val: Ctx): void;
-  set(keyOrVal: string | symbol | Ctx, valWithKey?: unknown) {
+  set(keyOrVal: string | symbol | Ctx, valWithKey?: unknown): void {
     if (typeof keyOrVal === 'string' || typeof keyOrVal === 'symbol') {
-      this.get()[keyOrVal as string] = valWithKey;
+      this.get()[keyOrVal] = valWithKey;
     } else {
-      this.#store(keyOrVal as Ctx);
+      this.#store(keyOrVal);
     }
-  }
-
-  #context(ctx: Ctx = {}): { value: Ctx } {
-    return { value: this.alStorage.getStore() ? { ...this.#store(), ...ctx } : ctx };
   }
 
   /**
    * Run an async function and ensure the context is available during execution
    */
   async run<T = unknown>(fn: () => Promise<T>, init: Ctx = {}): Promise<T> {
-    return await this.alStorage.run(this.#context(init), fn);
+    if (this.alStorage.getStore()) {
+      init = { ...this.#store(), ...init };
+    }
+    this.active += 1;
+    this.alStorage.enterWith({ value: init });
+    try {
+      return await fn();
+    } finally {
+      // @ts-expect-error
+      delete this.alStorage.getStore().value;
+      if ((this.active -= 1) === 0) {
+        this.alStorage.disable();
+      }
+    }
   }
 
   /**
    * Run an async function and ensure the context is available during execution
    */
   async * iterate<T>(fn: () => AsyncGenerator<T>, init: Ctx = {}): AsyncGenerator<T> {
-    return yield* this.alStorage.run(this.#context(init), fn);
+    if (this.alStorage.getStore()) {
+      init = { ...this.#store(), ...init };
+    }
+    this.active += 1;
+    this.alStorage.enterWith({ value: init });
+    try {
+      return yield* fn();
+    } finally {
+      // @ts-expect-error
+      delete this.alStorage.getStore().value;
+      if ((this.active -= 1) === 0) {
+        this.alStorage.disable();
+      }
+    }
   }
 }

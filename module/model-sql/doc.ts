@@ -29,7 +29,7 @@ ${d.List(
 
 ${d.Note('Wider client support will roll out as usage increases.')}
 
-Supported featrues:
+Supported features:
 ${d.List(
   ...ModelTypes(SQLModelService),
   ...ModelQueryTypes(SQLModelService)

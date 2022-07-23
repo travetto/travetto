@@ -7,6 +7,7 @@ import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
 
 function isCleanable(o: unknown): o is { toClean(): unknown } {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !!(o as { toClean: unknown }).toClean;
 }
 
@@ -17,7 +18,7 @@ export class AssertUtil {
   /**
    * Clean a value for displaying in the output
    */
-  static cleanValue(val: unknown) {
+  static cleanValue(val: unknown): unknown {
     if (isCleanable(val)) {
       return val.toClean();
     } else if (val === null || val === undefined
@@ -26,6 +27,7 @@ export class AssertUtil {
     ) {
       return JSON.stringify(val);
     } else {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const subV = val as (Class | ClassInstance);
       if (subV.ᚕid || !subV.constructor || (!subV.constructor.ᚕid && Util.isFunction(subV))) { // If a function, show name
         return subV.name;
@@ -38,7 +40,7 @@ export class AssertUtil {
   /**
    * Determine file location for a given error and the stack trace
    */
-  static getPositionOfError(err: Error, filename: string) {
+  static getPositionOfError(err: Error, filename: string): { file: string, line: number } {
     const lines = (err.stack ?? new Error().stack!)
       .replace(/[\\]/g, '/')
       .split('\n')
@@ -82,7 +84,7 @@ export class AssertUtil {
   /**
    * Generate a suite error given a suite config, and an error
    */
-  static generateSuiteError(suite: SuiteConfig, methodName: string, error: Error) {
+  static generateSuiteError(suite: SuiteConfig, methodName: string, error: Error): { assert: Assertion, testResult: TestResult, testConfig: TestConfig } {
     const { file, ...pos } = this.getPositionOfError(error, suite.file);
     let line = pos.line;
 

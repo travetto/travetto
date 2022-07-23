@@ -15,8 +15,8 @@ export class S3ModelConfig {
   bucket = ''; // S3 bucket
   endpoint = ''; // Endpoint url
 
-  accessKeyId = EnvUtil.get('AWS_ACCESS_KEY_ID', '');
-  secretAccessKey = EnvUtil.get('AWS_SECRET_ACCESS_KEY', '');
+  accessKeyId: string = EnvUtil.get('AWS_ACCESS_KEY_ID', '');
+  secretAccessKey: string = EnvUtil.get('AWS_SECRET_ACCESS_KEY', '');
 
   @Field(Object)
   @Required(false)
@@ -29,14 +29,14 @@ export class S3ModelConfig {
   /**
    * Provide host to bucket
    */
-  get hostName() {
+  get hostName(): string {
     return `${this.bucket}.s3.amazonaws.com`;
   }
 
   /**
    * Produces the s3 config from the provide details, post construction
    */
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     if (!this.accessKeyId && !this.secretAccessKey) {
       const creds = await fromIni({ profile: EnvUtil.get('AWS_PROFILE') })();
       this.accessKeyId = creds.accessKeyId;

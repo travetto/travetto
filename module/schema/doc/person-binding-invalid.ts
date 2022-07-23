@@ -2,7 +2,7 @@ import { SchemaValidator } from '@travetto/schema';
 
 import { Person } from './person';
 
-export async function validate() {
+export async function validate(): Promise<void> {
 
   const person = Person.from({
     name: 'Test',

@@ -24,7 +24,7 @@ export class RestAssetConfig {
   @Ignore()
   excludedTypesList: string[];
 
-  postConstruct() {
+  postConstruct(): void {
     this.allowedTypesList = (typeof this.allowedTypes === 'string' ?
       this.allowedTypes.trim().split(/\s*,\s*/).filter(x => !!x) : this.allowedTypes) ?? [];
     this.excludedTypesList = (typeof this.excludedTypes === 'string' ?

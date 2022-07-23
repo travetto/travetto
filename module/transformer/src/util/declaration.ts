@@ -10,7 +10,7 @@ export class DeclarationUtil {
    * Searches upward from the node until it finds the variable declaration list,
    * and then checks the toString for `const `
    */
-  static isConstantDeclaration(node: ts.Node) {
+  static isConstantDeclaration(node: ts.Node): boolean {
     let s: ts.Node = node;
     while (s && !ts.isVariableDeclarationList(s)) {
       s = s.parent;
@@ -21,7 +21,7 @@ export class DeclarationUtil {
   /**
    * See if a declaration is public
    */
-  static isPublic(node: ts.Declaration) {
+  static isPublic(node: ts.Declaration): boolean {
     // eslint-disable-next-line no-bitwise
     return !(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.NonPublicAccessibilityModifier);
   }
@@ -67,7 +67,9 @@ export class DeclarationUtil {
    * @param node
    * @returns
    */
-  static getAccessorPair(node: ts.GetAccessorDeclaration | ts.SetAccessorDeclaration) {
+  static getAccessorPair(
+    node: ts.GetAccessorDeclaration | ts.SetAccessorDeclaration
+  ): { getter?: ts.GetAccessorDeclaration, setter?: ts.SetAccessorDeclaration } {
     const acc = { getter: ts.isGetAccessorDeclaration(node) ? node : undefined, setter: ts.isSetAccessorDeclaration(node) ? node : undefined };
     if (ts.isClassDeclaration(node.parent)) {
       for (const el of node.parent.members) {

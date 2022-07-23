@@ -9,12 +9,12 @@ export class ConsoleCapture {
 
   static out: Record<string, string[]>;
 
-  static start() {
+  static start(): void {
     this.out = {};
     ConsoleManager.set(this);
   }
 
-  static onLog(level: LogLevel, ctx: { file: string, line: number }, args: unknown[]) {
+  static onLog(level: LogLevel, ctx: { file: string, line: number }, args: unknown[]): void {
     (this.out[level] = this.out[level] ?? []).push(
       args
         .map((x => typeof x === 'string' ? x : util.inspect(x, false, 4)))
@@ -22,7 +22,7 @@ export class ConsoleCapture {
     );
   }
 
-  static end() {
+  static end(): Record<string, string> {
     const ret = this.out ?? {};
     this.out = {};
     ConsoleManager.clear();

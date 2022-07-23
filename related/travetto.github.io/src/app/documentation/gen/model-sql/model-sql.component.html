@@ -28,7 +28,7 @@ or
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> pg</code></pre>     
       </figure>
 
-This module provides a <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a>-based implementation for the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module.  This source allows the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and query against <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> databases. In development mode, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L36">SQLModelService</a> will also modify the database schema in real time to minimize impact to development.
+This module provides a <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a>-based implementation for the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module.  This source allows the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and query against <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> databases. In development mode, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L38">SQLModelService</a> will also modify the database schema in real time to minimize impact to development.
 
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of
 a <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> database.  Every table generated will have a <code class="item input">path_id</code> which determines it's location in the document hierarchy as well as sub tables will have a <code class="item input">parent_path_id</code> to associate records with the parent values.
@@ -41,7 +41,7 @@ The current SQL client support stands at:
 
 <p class="note"><strong>Note</strong> Wider client support will roll out as usage increases.</p>
 
-Supported featrues:
+Supported features:
 <ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a></li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L23">Bulk</a></li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/service/crud.ts#L11">Query Crud</a></li>

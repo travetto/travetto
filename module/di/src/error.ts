@@ -1,7 +1,7 @@
 import { AppError } from '@travetto/base';
 import { ClassTarget } from './types';
 
-function getName(symbol: symbol) {
+function getName(symbol: symbol): string {
   return symbol.toString().split(/[()]/g)[1];
 }
 

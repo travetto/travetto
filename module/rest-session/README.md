@@ -20,7 +20,7 @@ export class Session<T extends SessionData = SessionData>  {
    * The hash of the session at load
    */
   /**
-   * The session identifer
+   * The session identifier
    */
   readonly id: string;
   /**
@@ -62,39 +62,39 @@ export class Session<T extends SessionData = SessionData>  {
   /**
    * Determine if session has changed
    */
-  isChanged() ;
+  isChanged(): boolean ;
   /**
    * Determine if the expiry time has changed
    */
-  isTimeChanged() ;
+  isTimeChanged(): boolean ;
   /**
    * See if the session is nearly expired
    */
-  isAlmostExpired() ;
+  isAlmostExpired(): boolean ;
   /**
    * See if the session is truly expired
    */
-  isExpired() ;
+  isExpired(): boolean ;
   /**
    * See if session is empty, has any data been written
    */
-  isEmpty() ;
+  isEmpty(): boolean ;
   /**
    * Refresh the session expiration time
    */
-  refresh() ;
+  refresh(): void ;
   /**
    * Mark the session for destruction, delete the data
    */
-  destroy() ;
+  destroy(): void ;
   /**
    * Serialize the session
    */
-  toJSON() ;
+  toJSON(): unknown ;
 }
 ```
 
-A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) parameter as [Session](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L18) and [SessionData](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L8) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest-session/src/types.d.ts#L7) as a session property.
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L39) parameter as [Session](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L18) and [SessionData](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L8) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest-session/src/types.d.ts#L7) as a session property.
 
 **Code: Sample Session Usage**
 ```typescript

@@ -22,7 +22,7 @@ export class ParentCommChannel<U = unknown> extends ProcessCommChannel<ChildProc
   /**
    * Kill self and child
    */
-  override async destroy() {
+  override async destroy(): Promise<void> {
     const res = super.destroy();
     await this.#complete;
     return await res;

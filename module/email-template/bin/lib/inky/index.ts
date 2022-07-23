@@ -11,7 +11,7 @@ class $Inky {
    * @param text Text to convert
    * @param factory Optional component factory, default is the inky set
    */
-  render(text: string, factory?: InkyComponentFactory) {
+  render(text: string, factory?: InkyComponentFactory): string {
     factory = factory ?? this.defaultFactory;
     // Extract raws
     const raws: string[] = [];

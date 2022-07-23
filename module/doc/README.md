@@ -142,7 +142,7 @@ Sample documentation for fictional module.  This module fictitiously relies upon
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/doc/docs/test.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">TestFile</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">static</span> <span class="token function">method</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+  <span class="token keyword">static</span> <span class="token function">method</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 

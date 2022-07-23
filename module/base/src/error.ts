@@ -33,7 +33,7 @@ export class AppError extends Error {
    * The format of the JSON output
    * @param extra Extra data to build into the context
    */
-  override toJSON(extra: Record<string, unknown> = {}) {
+  override toJSON(extra: Record<string, unknown> = {}): unknown {
     const out: Record<string, unknown> = {
       message: this.message,
       category: this.category,

@@ -17,7 +17,7 @@ export class TestResultsSummarizer implements TestConsumer {
     errors: []
   };
 
-  #merge(src: SuiteResult) {
+  #merge(src: SuiteResult): void {
     this.summary.suites.push(src);
     this.summary.failed += src.failed;
     this.summary.passed += src.passed;
@@ -29,7 +29,7 @@ export class TestResultsSummarizer implements TestConsumer {
   /**
    * Merge all test results into a single Suite Result
    */
-  onEvent(e: TestEvent) {
+  onEvent(e: TestEvent): void {
     if (e.phase === 'after' && e.type === 'suite') {
       this.#merge(e.suite);
     }

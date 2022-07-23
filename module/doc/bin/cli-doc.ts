@@ -11,6 +11,7 @@ import { PathUtil } from '@travetto/boot';
 export class DocPlugin extends BasePlugin {
   name = 'doc';
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return {
       input: this.option({ desc: 'Input File', def: 'doc.ts' }),
@@ -20,7 +21,7 @@ export class DocPlugin extends BasePlugin {
     };
   }
 
-  async envInit() {
+  async envInit(): Promise<void> {
     EnvInit.init({
       debug: '0',
       append: {
@@ -35,7 +36,7 @@ export class DocPlugin extends BasePlugin {
     });
   }
 
-  async action() {
+  async action(): Promise<void> {
     const { PhaseManager } = await import('@travetto/base');
     // Standard compile
     await PhaseManager.run('init');
@@ -46,7 +47,7 @@ export class DocPlugin extends BasePlugin {
 
     // If specifying output
     if (this.cmd.output.length) {
-      const write = async () => {
+      const write = async (): Promise<void> => {
         RenderUtil.purge(docFile);
         for (const out of this.cmd.output) {
           const fmt = path.extname(out) ?? this.cmd.format;

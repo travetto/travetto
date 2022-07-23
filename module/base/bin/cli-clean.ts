@@ -13,13 +13,14 @@ export class BaseCleanPlugin extends BasePlugin {
 
   name = 'clean';
 
-  override async build() { }
+  override async build(): Promise<void> { }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return { quiet: this.boolOption({ desc: 'Quiet operation' }) };
   }
 
-  async action() {
+  async action(): Promise<void> {
     for (const el of await fs.readdir(PathUtil.cwd)) {
       if (el.startsWith('.trv') && (await fs.stat(el)).isDirectory()) {
         const cache = new FileCache(el);

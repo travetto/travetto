@@ -4,8 +4,9 @@ import { Util } from '@travetto/base';
 import { TestConsumer } from '../consumer/types';
 import { SuiteConfig, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
+import { TestResult } from '../model/test';
 
-export const TestBreakoutⲐ = Symbol.for('@trv:test/breakout');
+class TestBreakout extends Error { }
 
 const TEST_PHASE_TIMEOUT = Util.getEnvTime('TRV_TEST_PHASE_TIMEOUT', '15s');
 
@@ -29,7 +30,7 @@ export class TestPhaseManager {
   /**
    * Create the appropriate events when a suite has an error
    */
-  async triggerSuiteError(methodName: string, error: Error) {
+  async triggerSuiteError(methodName: string, error: Error): Promise<TestResult> {
     const bad = AssertUtil.generateSuiteError(this.#suite, methodName, error);
 
     this.#consumer.onEvent({ type: 'test', phase: 'before', test: bad.testConfig });
@@ -42,7 +43,7 @@ export class TestPhaseManager {
   /**
    * Run a distinct phase of the test execution
    */
-  async runPhase(phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach') {
+  async runPhase(phase: 'beforeAll' | 'afterAll' | 'beforeEach' | 'afterEach'): Promise<void> {
     let error: Error | undefined;
     for (const fn of this.#suite[phase]) {
 
@@ -59,14 +60,14 @@ export class TestPhaseManager {
       const res = await this.triggerSuiteError(`[[${phase}]]`, error);
       this.#result.tests.push(res);
       this.#result.failed++;
-      throw TestBreakoutⲐ;
+      throw new TestBreakout();
     }
   }
 
   /**
    * Start a new phase
    */
-  async startPhase(phase: 'all' | 'each') {
+  async startPhase(phase: 'all' | 'each'): Promise<void> {
     this.#progress.unshift(phase);
     return this.runPhase(phase === 'all' ? 'beforeAll' : 'beforeEach');
   }
@@ -74,7 +75,7 @@ export class TestPhaseManager {
   /**
    * End a phase
    */
-  async endPhase(phase: 'all' | 'each') {
+  async endPhase(phase: 'all' | 'each'): Promise<void> {
     this.#progress.shift();
     return this.runPhase(phase === 'all' ? 'afterAll' : 'afterEach');
   }
@@ -82,7 +83,11 @@ export class TestPhaseManager {
   /**
    * On error, handle stubbing out error for the phases in progress
    */
-  async onError(err: Error | typeof TestBreakoutⲐ) {
+  async onError(err: Error | unknown): Promise<void> {
+    if (!(err instanceof Error)) {
+      throw err;
+    }
+
     for (const ph of this.#progress) {
       try {
         await this.runPhase(ph === 'all' ? 'afterAll' : 'afterEach');
@@ -91,7 +96,7 @@ export class TestPhaseManager {
 
     this.#progress = [];
 
-    if (err !== TestBreakoutⲐ) {
+    if (!(err instanceof TestBreakout)) {
       const res = await this.triggerSuiteError('all', err);
       this.#result.tests.push(res);
       this.#result.failed++;

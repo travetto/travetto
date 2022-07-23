@@ -48,20 +48,20 @@ export class CorsInterceptor implements RestInterceptor {
 
   after = [SerializeInterceptor];
 
-  postConstruct() {
+  postConstruct(): void {
     this.origins = new Set(this.corsConfig.origins ?? []);
     this.methods = (this.corsConfig.methods ?? ['PUT', 'POST', 'GET', 'DELETE', 'PATCH', 'HEAD', 'TRACE']).join(',');
     this.headers = (this.corsConfig.headers ?? []).join(',');
     this.credentials = !!this.corsConfig.credentials;
   }
 
-  applies(route: RouteConfig) {
+  applies(route: RouteConfig): boolean {
     return this.corsConfig && this.corsConfig.active;
   }
 
-  intercept(req: Request, res: Response) {
-    const origin = req.header('origin') as string;
-    if (!this.origins.size || this.origins.has(origin)) {
+  intercept(req: Request, res: Response): void {
+    const origin = req.header('origin');
+    if (!this.origins.size || (origin && this.origins.has(origin))) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');
       res.setHeader('Access-Control-Allow-Credentials', `${this.credentials}`);
       res.setHeader('Access-Control-Allow-Methods', this.methods.toUpperCase());

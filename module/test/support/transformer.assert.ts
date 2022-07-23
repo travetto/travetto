@@ -47,7 +47,7 @@ const METHODS: Record<string, Function[]> = {
   test: [RegExp]
 };
 
-const OP_TOKEN_TO_NAME = new Map<number, string>();
+const OP_TOKEN_TO_NAME = new Map<number, keyof typeof OPTOKEN_ASSERT>();
 
 const AssertⲐ = Symbol.for('@trv:test/assert');
 const IsTestⲐ = Symbol.for('@trv:test/valid');
@@ -96,19 +96,18 @@ export class AssertTransformer {
   /**
    * Resolves optoken to syntax kind.  Relies on `ts`
    */
-  static lookupOpToken(key: number) {
+  static lookupOpToken(key: number): string {
     if (OP_TOKEN_TO_NAME.size === 0) {
       Object.keys(ts.SyntaxKind)
         .filter(x => !/^\d+$/.test(x))
-        .filter(x => !/^(Last|First)/.test(x))
+        .filter((x): x is keyof typeof OPTOKEN_ASSERT => !/^(Last|First)/.test(x))
         .forEach(x =>
-          OP_TOKEN_TO_NAME.set(
-            ts.SyntaxKind[x as 'Unknown'], x));
+          OP_TOKEN_TO_NAME.set(ts.SyntaxKind[x], x));
     }
 
     const name = OP_TOKEN_TO_NAME.get(key)!;
     if (name in OPTOKEN_ASSERT) {
-      return OPTOKEN_ASSERT[name as keyof typeof OPTOKEN_ASSERT];
+      return OPTOKEN_ASSERT[name];
     } else {
       throw new Error(`Unknown optoken: ${name}:${key}`);
     }
@@ -117,7 +116,7 @@ export class AssertTransformer {
   /**
    * Determine if element is a deep literal (should use deep comparison)
    */
-  static isDeepLiteral(state: TransformerState, node: ts.Expression) {
+  static isDeepLiteral(state: TransformerState, node: ts.Expression): boolean {
     let found = ts.isArrayLiteralExpression(node) ||
       ts.isObjectLiteralExpression(node) ||
       (
@@ -139,7 +138,7 @@ export class AssertTransformer {
   /**
    * Initialize transformer state
    */
-  static initState(state: TransformerState & AssertState) {
+  static initState(state: TransformerState & AssertState): void {
     if (!state[AssertⲐ]) {
       const assrt = state.importFile('@travetto/test/src/assert/check').ident;
       state[AssertⲐ] = {
@@ -154,7 +153,7 @@ export class AssertTransformer {
   /**
    * Convert the assert to call the framework `AssertUtil.check` call
    */
-  static doAssert<T extends ts.CallExpression>(state: TransformerState & AssertState, node: T, cmd: Command): T {
+  static doAssert(state: TransformerState & AssertState, node: ts.CallExpression, cmd: Command): ts.CallExpression {
     this.initState(state);
 
     const first = CoreUtil.getArgument<ts.CallExpression>(node);
@@ -172,13 +171,13 @@ export class AssertTransformer {
       ...cmd.args
     ]));
 
-    return check as T;
+    return check;
   }
 
   /**
    * Convert `assert.(throws|rejects|doesNotThrow|doesNotReject)` to the appropriate structure
    */
-  static doThrows(state: TransformerState & AssertState, node: ts.CallExpression, key: string, args: ts.Expression[]): ts.Node {
+  static doThrows(state: TransformerState & AssertState, node: ts.CallExpression, key: string, args: ts.Expression[]): ts.CallExpression {
     const first = CoreUtil.getArgument<ts.CallExpression>(node);
     const firstText = first!.getText();
 
@@ -201,7 +200,7 @@ export class AssertTransformer {
   /**
    * Check a binary expression (left and right) to see how we should communicate the assert
    */
-  static doBinaryCheck(state: TransformerState, comp: ts.BinaryExpression, message: Message, args: Args) {
+  static doBinaryCheck(state: TransformerState, comp: ts.BinaryExpression, message: Message, args: Args): Command {
     let opFn = this.lookupOpToken(comp.operatorToken.kind);
 
     if (opFn) {
@@ -218,7 +217,7 @@ export class AssertTransformer {
   /**
    * Check unary operator
    */
-  static doUnaryCheck(state: TransformerState, comp: ts.PrefixUnaryExpression, message: Message, args: Args) {
+  static doUnaryCheck(state: TransformerState, comp: ts.PrefixUnaryExpression, message: Message, args: Args): Command {
     if (ts.isPrefixUnaryExpression(comp.operand)) {
       const inner = comp.operand.operand;
       return { fn: 'ok', args: [inner, message!] };
@@ -231,7 +230,7 @@ export class AssertTransformer {
   /**
    * Check various `assert.*` method calls
    */
-  static doMethodCall(state: TransformerState, comp: ts.Expression, args: Args) {
+  static doMethodCall(state: TransformerState, comp: ts.Expression, args: Args): Command {
 
     if (ts.isCallExpression(comp) && ts.isPropertyAccessExpression(comp.expression)) {
       const root = comp.expression.expression;
@@ -275,7 +274,7 @@ export class AssertTransformer {
    * Listen for all call expression
    */
   @OnCall()
-  static onAssertCall(state: TransformerState & AssertState, node: ts.CallExpression) {
+  static onAssertCall(state: TransformerState & AssertState, node: ts.CallExpression): ts.CallExpression {
     // If not in test mode, see if file is valid
     if (state[IsTestⲐ] === undefined) {
       const name = PathUtil.toUnix(state.source.fileName);
@@ -303,7 +302,7 @@ export class AssertTransformer {
       if (ident.escapedText === ASSERT_CMD) {
         // Look for reject/throw
         if (/^(doesNot)?(Throw|Reject)s?$/i.test(fn)) {
-          node = this.doThrows(state, node, fn, [...node.arguments]) as ts.CallExpression;
+          node = this.doThrows(state, node, fn, [...node.arguments]);
         } else {
           const sub = { ...this.getCommand(state, node.arguments)!, fn };
           node = this.doAssert(state, node, sub);

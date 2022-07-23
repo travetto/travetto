@@ -4,6 +4,7 @@ import { Docker, DockerConfig } from './operation/docker';
 export class PackDockerPlugin extends BasePackPlugin<DockerConfig> {
   operation = Docker;
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return {
       ...this.defaultOptions(),

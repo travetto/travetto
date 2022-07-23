@@ -8,13 +8,15 @@ import { ServerHandle } from '@travetto/rest/src/types';
 
 import { KoaRestServer } from '../server';
 
+type AwsLambdaHandle = AwsLambdaHandler['handle'];
+
 /**
  * Aws Lambda Rest Server
  */
 @Injectable(AwsLambdaⲐ)
 export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRestServer {
 
-  #handler: AwsLambdaHandler['handle'];
+  #handler: AwsLambdaHandle;
 
   @Inject()
   awsConfig: RestAwsConfig;
@@ -22,18 +24,20 @@ export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRe
   /**
    * Handler method for the proxy
    */
-  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context) {
+  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): ReturnType<AwsLambdaHandle> {
     return this.#handler(event, context);
   }
 
-  override init() {
+  override init(): this['raw'] {
     const ret = super.init();
-    this.#handler = serverless.configure({ app: ret.callback(), ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandler['handle'];
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    this.#handler = serverless.configure({ app: ret.callback(), ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandle;
     return ret;
   }
 
-  override async listen() {
+  override async listen(): Promise<ServerHandle> {
     this.listening = true;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return {} as ServerHandle;
   }
 }

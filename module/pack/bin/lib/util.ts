@@ -18,6 +18,7 @@ export class PackUtil {
   static #modes: Partial<CommonConfig>[];
 
   static commonExtend<T extends CommonConfig>(a: T, b: Partial<T>): T {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const out = {
       active: b.active ?? a.active,
       workspace: b.workspace ?? a.workspace,
@@ -30,7 +31,7 @@ export class PackUtil {
   /**
    * Find pack modes with associated metadata
    */
-  static async modeList() {
+  static async modeList(): Promise<Partial<CommonConfig>[]> {
     if (!this.#modes) {
       this.#modes = await Promise.all(
         SourceIndex.find({ folder: 'support', filter: f => /\/pack[.].*[.]ts/.test(f) })
@@ -48,7 +49,7 @@ export class PackUtil {
   /**
    * Build file include/exclude lists/checker
    */
-  static excludeChecker(files: string[], base: string) {
+  static excludeChecker(files: string[], base: string): (file: string) => boolean {
     const all = files.map(x => {
       const negate = x.startsWith('!') || x.startsWith('^');
       x = negate ? x.substring(1) : x;
@@ -58,7 +59,7 @@ export class PackUtil {
       return [match, negate] as const;
     });
 
-    return (f: string) => {
+    return (f: string): boolean => {
       let exclude = undefined;
       f = PathUtil.resolveUnix(base, f);
       for (const [match, n] of all) {
@@ -76,7 +77,7 @@ export class PackUtil {
   /**
    * Update .env.js with new env data
    */
-  static async writeEnvJs(workspace: string, env: Record<string, string | undefined>) {
+  static async writeEnvJs(workspace: string, env: Record<string, string | undefined>): Promise<void> {
     const out = `${workspace}/.env.js`;
     let src = '';
     if (!!(await FsUtil.exists(out))) {
@@ -90,7 +91,7 @@ export class PackUtil {
   /**
    * Delete all empty folders
    */
-  static async removeEmptyFolders(root: string) {
+  static async removeEmptyFolders(root: string): Promise<void> {
     for (const el of await ScanFs.scanDir({ testDir: x => true, testFile: x => false, withHidden: true }, root)) {
       let dir = el.file;
       while ((await fs.readdir(dir)).length === 0) { // empty
@@ -103,14 +104,14 @@ export class PackUtil {
   /**
    * Run operation with logging
    */
-  static async runOperation<T extends CommonConfig>(op: PackOperation<T>, cfg: T, indent = 0) {
+  static async runOperation<T extends CommonConfig>(op: PackOperation<T>, cfg: T, indent = 0): Promise<void> {
     const spacer = ' '.repeat(indent);
     const ctx = await op.context(cfg);
     const title = color`${{ title: op.title }} ${ctx}`;
     const width = Math.max(title.replace(/\x1b\[\d+m/g, '').length, 50); // eslint-disable-line
 
     let i = 0;
-    function stdout(msg?: string) {
+    function stdout(msg?: string): void {
       if (i++ > 0) {
         process.stdout.write(color`${spacer}${{ param: 'done' }}\n`);
       }
@@ -119,7 +120,7 @@ export class PackUtil {
       }
     }
 
-    async function runPhase(phase: 'preProcess' | 'postProcess') {
+    async function runPhase(phase: 'preProcess' | 'postProcess'): Promise<void> {
       for (const el of cfg[phase] ?? []) {
         const [name, fn] = Object.entries(el)[0];
         await stdout(name);

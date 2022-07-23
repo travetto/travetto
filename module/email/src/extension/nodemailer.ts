@@ -20,7 +20,8 @@ export class NodemailerTransport implements MailTransport {
     this.#transport = nodemailer.createTransport(transportFactory);
   }
 
-  async send(mail: MessageOptions): Promise<SentMessage> {
+  async send<S extends SentMessage = SentMessage>(mail: MessageOptions): Promise<S> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const res = await this.#transport.sendMail(mail) as {
       messageId?: string;
       envelope?: Record<string, string>;
@@ -34,6 +35,7 @@ export class NodemailerTransport implements MailTransport {
       console.error('Unable to send emails', { recipientCount: res.rejected?.length });
     }
 
-    return res;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return res as S;
   }
 }

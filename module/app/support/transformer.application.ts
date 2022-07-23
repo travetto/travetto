@@ -16,7 +16,7 @@ export class ApplicationTransformer {
    * On presence of `@Application`
    */
   @AfterClass('Application')
-  static registerAppMethod(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
+  static registerAppMethod(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta): typeof node {
     const dec = dm?.dec;
 
     if (!dec || !ts.isCallExpression(dec.expression)) { // If not valid
@@ -25,9 +25,9 @@ export class ApplicationTransformer {
 
     // Find runnable method
     const runMethod = node.members
-      .find(x =>
+      .find((x): x is ts.MethodDeclaration =>
         ts.isMethodDeclaration(x) && x.name!.getText() === 'run'
-      ) as ts.MethodDeclaration;
+      );
 
     if (!runMethod) {
       return node;

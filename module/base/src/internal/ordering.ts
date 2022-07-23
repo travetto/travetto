@@ -19,16 +19,17 @@ export class OrderingUtil {
       key: T;
       target: U;
     }
-  >(items: U[]) {
+  >(items: U[]): U[] {
 
     // Turn items into a map by .key value, pointing to a mapping of type V
-    const allMap = new Map(items.map(x => [
+    const allMap = new Map<T, V>(items.map((x: U): [T, V] => [
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       x.key, {
         key: x.key,
         target: x,
         after: new Set(x.after || [])
-      }
-    ] as [T, V]));
+      } as V
+    ]));
 
     const all = new Set<V>(allMap.values());
 

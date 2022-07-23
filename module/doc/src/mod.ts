@@ -47,8 +47,12 @@ const MAPPING = {
   Yaml: '@travetto/yaml'
 };
 
-export const mod = new Proxy({}, {
-  get(tgt, p: keyof typeof MAPPING) {
-    return node.Mod(MAPPING[p]);
+export const mod = new Proxy<Record<keyof typeof MAPPING, AllTypeMap['Mod']>>(
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  {} as Record<keyof typeof MAPPING, AllTypeMap['Mod']>,
+  {
+    get(tgt, p: keyof typeof MAPPING): AllTypeMap['Mod'] {
+      return node.Mod(MAPPING[p]);
+    }
   }
-}) as Record<keyof typeof MAPPING, AllTypeMap['Mod']>;
+);

@@ -22,6 +22,12 @@ type SchemaType = {
   dynamic: boolean;
 };
 
+type UpdateScript = {
+  params: Record<string, unknown>;
+  lang: 'painless';
+  source: string;
+};
+
 /**
  * Utils for ES Schema management
  */
@@ -32,10 +38,10 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build the update script for a given object
    */
-  static generateUpdateScript(o: Record<string, unknown>, path: string = '', arr = false) {
+  static generateUpdateScript(o: Record<string, unknown>, path: string = '', arr = false): UpdateScript {
     const ops: string[] = [];
-    const out = {
-      params: {} as Record<string, unknown>,
+    const out: UpdateScript = {
+      params: {},
       lang: 'painless',
       source: ''
     };
@@ -52,6 +58,7 @@ export class ElasticsearchSchemaUtil {
         out.params[param] = o[x];
       } else {
         ops.push(`ctx._source.${prop} = ctx._source.${prop} == null ? [:] : ctx._source.${prop}`);
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const sub = this.generateUpdateScript(o[x] as Record<string, unknown>, prop);
         ops.push(sub.source);
         Object.assign(out.params, sub.params);
@@ -65,7 +72,7 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build one or more schemas depending on the polymorphic state
    */
-  static generateSourceSchema(cls: Class, config?: EsSchemaConfig) {
+  static generateSourceSchema(cls: Class, config?: EsSchemaConfig): SchemaType {
     return ModelRegistry.get(cls).baseType ?
       this.generateAllSourceSchema(cls, config) :
       this.generateSingleSourceSchema(cls, config);
@@ -74,12 +81,12 @@ export class ElasticsearchSchemaUtil {
   /**
    * Generate all schemas
    */
-  static generateAllSourceSchema(cls: Class, config?: EsSchemaConfig) {
+  static generateAllSourceSchema(cls: Class, config?: EsSchemaConfig): SchemaType {
     const allTypes = ModelRegistry.getClassesByBaseType(cls);
-    return allTypes.reduce((acc, scls) => {
-      Util.deepAssign(acc, this.generateSingleSourceSchema(scls, config));
+    return allTypes.reduce<SchemaType>((acc, schemaCls) => {
+      Util.deepAssign(acc, this.generateSingleSourceSchema(schemaCls, config));
       return acc;
-    }, {} as SchemaType);
+    }, { properties: {}, dynamic: false });
   }
 
   /**

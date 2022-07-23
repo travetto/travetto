@@ -26,6 +26,8 @@ import { Connected, ConnectedIterator, Transactional } from './connection/decora
 import { SQLUtil } from './internal/util';
 import { SQLDialect } from './dialect/base';
 import { TableManager } from './table-manager';
+import { Connection } from './connection/base';
+import { InsertWrapper } from './internal/types';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,
@@ -45,7 +47,7 @@ export class SQLModelService implements
 
   readonly config: SQLModelConfig;
 
-  get client() {
+  get client(): SQLDialect {
     return this.#dialect;
   }
 
@@ -66,7 +68,7 @@ export class SQLModelService implements
     cls: Class<T>,
     addedIds: Map<number, string>,
     toCheck: Map<string, number>
-  ) {
+  ): Promise<Map<number, string>> {
     // Get all upsert ids
     const all = toCheck.size ?
       (await this.#exec<ModelType>(
@@ -86,20 +88,21 @@ export class SQLModelService implements
     return addedIds;
   }
 
-  #exec<T = unknown>(sql: string) {
+  #exec<T = unknown>(sql: string): Promise<{ records: T[], count: number }> {
     return this.#dialect.executeSQL<T>(sql);
   }
 
-  async #deleteRaw<T extends ModelType>(cls: Class<T>, id: string, checkExpiry = true) {
+  async #deleteRaw<T extends ModelType>(cls: Class<T>, id: string, checkExpiry = true): Promise<void> {
+    const where: WhereClauseRaw<ModelType> = { id };
     const count = await this.#dialect.deleteAndGetCount<ModelType>(cls, {
-      where: ModelQueryUtil.getWhereClause(cls, { id } as WhereClauseRaw<T>, checkExpiry)
+      where: ModelQueryUtil.getWhereClause(cls, where, checkExpiry)
     });
     if (count === 0) {
       throw new NotFoundError(cls, id);
     }
   }
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     if (this.#dialect) {
       if (this.#dialect.conn.init) {
         await this.#dialect.conn.init();
@@ -110,32 +113,32 @@ export class SQLModelService implements
     }
   }
 
-  get conn() {
+  get conn(): Connection {
     return this.#dialect.conn;
   }
 
-  uuid() {
+  uuid(): string {
     return this.#dialect.generateId();
   }
 
-  async changeSchema(cls: Class, change: SchemaChange) {
+  async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
     await this.#manager.changeSchema(cls, change);
   }
 
-  async createModel(cls: Class) {
+  async createModel(cls: Class): Promise<void> {
     await this.#manager.createTables(cls);
   }
 
-  async deleteModel(cls: Class) {
+  async deleteModel(cls: Class): Promise<void> {
     await this.#manager.dropTables(cls);
   }
 
-  async truncateModel(cls: Class) {
+  async truncateModel(cls: Class): Promise<void> {
     await this.#manager.truncateTables(cls);
   }
 
-  async createStorage() { }
-  async deleteStorage() { }
+  async createStorage(): Promise<void> { }
+  async deleteStorage(): Promise<void> { }
 
   @Transactional()
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
@@ -183,7 +186,8 @@ export class SQLModelService implements
 
   @Connected()
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
-    const res = await this.query(cls, { where: { id } as WhereClauseRaw<T> });
+    const where: WhereClauseRaw<ModelType> = { id };
+    const res = await this.query(cls, { where });
     if (res.length === 1) {
       return await ModelCrudUtil.load(cls, res[0]);
     }
@@ -191,14 +195,14 @@ export class SQLModelService implements
   }
 
   @ConnectedIterator()
-  async * list<T extends ModelType>(cls: Class<T>) {
+  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     for (const item of await this.query(cls, {})) {
       yield await ModelCrudUtil.load(cls, item);
     }
   }
 
   @Transactional()
-  async delete<T extends ModelType>(cls: Class<T>, id: string) {
+  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     await this.#deleteRaw(cls, id, false);
   }
 
@@ -214,8 +218,10 @@ export class SQLModelService implements
       new Map([...existingUpsertedIds.entries()].map(([k, v]) => [v, k]))
     );
 
-    const get = (k: keyof BulkOp<T>) => operations.map(x => x[k]).filter(x => !!x) as T[];
-    const getStatements = async (k: keyof BulkOp<T>) => (await SQLUtil.getInserts(cls, get(k))).filter(x => !!x.records.length);
+    const get = (k: keyof BulkOp<T>): T[] =>
+      operations.map(x => x[k]).filter((x): x is T => !!x);
+    const getStatements = async (k: keyof BulkOp<T>): Promise<InsertWrapper[]> =>
+      (await SQLUtil.getInserts(cls, get(k))).filter(x => !!x.records.length);
 
     const deletes = [{ stack: SQLUtil.classToStack(cls), ids: get('delete').map(x => x.id) }].filter(x => !!x.ids.length);
 
@@ -232,7 +238,7 @@ export class SQLModelService implements
 
   // Expiry
   @Transactional()
-  async deleteExpired<T extends ModelType>(cls: Class<T>) {
+  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
     return ModelQueryExpiryUtil.deleteExpired(this, cls);
   }
 
@@ -284,12 +290,15 @@ export class SQLModelService implements
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
     const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
     const results = await this.query(cls, q);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field as 'type', prefix, results, x => x, query?.limit);
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const modelTypeField = field as ValidStringFields<ModelType>;
+    return ModelQuerySuggestUtil.combineSuggestResults(cls, modelTypeField, prefix, results, x => x, query?.limit);
   }
 
   @Connected()
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
-    const col = this.#dialect.ident(field as string);
+    const col = this.#dialect.ident(field);
     const ttl = this.#dialect.ident('count');
     const key = this.#dialect.ident('key');
     const q = [

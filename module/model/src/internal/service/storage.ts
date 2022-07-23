@@ -13,15 +13,16 @@ export class ModelStorageUtil {
   /**
    * Register change listener on startup
    */
-  static async registerModelChangeListener(storage: ModelStorageSupport, target?: Class) {
+  static async registerModelChangeListener(storage: ModelStorageSupport, target?: Class): Promise<void> {
     if (!EnvUtil.isDynamic() || !(storage?.config?.autoCreate ?? !AppManifest.prod)) {
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     target = target ?? storage.constructor as Class<ModelStorageSupport>;
 
 
-    const checkType = (cls: Class, enforceBase = true) => {
+    const checkType = (cls: Class, enforceBase = true): boolean => {
       if (enforceBase && ModelRegistry.getBaseModel(cls) !== cls) {
         return false;
       }

@@ -9,9 +9,9 @@ class $TestConsumerRegistry {
   #primary: Class<TestConsumer>;
 
   /**
-   * Manual initialization when running oustide of the bootstrap process
+   * Manual initialization when running outside of the bootstrap process
    */
-  async manualInit() {
+  async manualInit(): Promise<void> {
     await import('./types/index');
   }
 
@@ -21,7 +21,7 @@ class $TestConsumerRegistry {
    * @param cls The consumer class
    * @param isDefault Set as the default consumer
    */
-  add(type: string, cls: Class<TestConsumer>, isDefault = false) {
+  add(type: string, cls: Class<TestConsumer>, isDefault = false): void {
     if (isDefault) {
       this.#primary = cls;
     }
@@ -32,8 +32,8 @@ class $TestConsumerRegistry {
    * Retrieve a registered consumer
    * @param type The unique identifier
    */
-  get(type: string) {
-    return this.#registered.get(type);
+  get(type: string): Class<TestConsumer> {
+    return this.#registered.get(type)!;
   }
 
   /**
@@ -42,6 +42,7 @@ class $TestConsumerRegistry {
    */
   getInstance(consumer: string | TestConsumer): TestConsumer {
     return typeof consumer === 'string' ?
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       new ((this.get(consumer) ?? this.#primary) as ConcreteClass)() :
       consumer;
   }
@@ -54,8 +55,9 @@ export const TestConsumerRegistry = new $TestConsumerRegistry();
  * @param type The unique identifier for the consumer
  * @param isDefault Is this the default consumer.  Last one wins
  */
-export function Consumable(type: string, isDefault = false) {
+export function Consumable(type: string, isDefault = false): ClassDecorator {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return function (cls: Class<TestConsumer>) {
     TestConsumerRegistry.add(type, cls, isDefault);
-  };
+  } as ClassDecorator;
 }

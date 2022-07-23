@@ -1,7 +1,7 @@
 import { WorkPool, WorkUtil, IterableWorkSet } from '@travetto/worker';
 import { ExecUtil, PathUtil } from '@travetto/boot';
 
-export function main() {
+export async function main(): Promise<void> {
   const pool = new WorkPool(() =>
     WorkUtil.spawnedWorker<{ data: string }, string>(
       () => ExecUtil.forkMain(PathUtil.resolveUnix(__dirname, 'spawned.ts')),
@@ -21,5 +21,5 @@ export function main() {
     )
   );
 
-  return pool.process(new IterableWorkSet([1, 2, 3, 4, 5])).then(x => pool.shutdown());
+  await pool.process(new IterableWorkSet([1, 2, 3, 4, 5])).then(x => pool.shutdown());
 }

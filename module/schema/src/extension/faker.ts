@@ -1,5 +1,5 @@
 // @file-if faker
-import type * as fakerType from 'faker';
+import * as fakerType from 'faker';
 
 import { Class } from '@travetto/base';
 
@@ -9,13 +9,16 @@ import { SchemaRegistry } from '../service/registry';
 import { BindUtil } from '../bind-util';
 
 // Load faker on demand, as its very heavy in loading
-let faker = new Proxy({}, {
-  get: (t, p, r) => (faker = require('faker'))[p]
-}) as typeof fakerType;
+let faker: typeof fakerType = new Proxy(
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  {} as typeof fakerType,
+  {
+    get: (t, prop, r) => (faker = require('faker'))[prop]
+  });
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-const between = (fromDays: number, toDays: number) =>
+const between = (fromDays: number, toDays: number): Date =>
   faker.date.between(
     new Date(Date.now() + fromDays * DAY_IN_MS),
     new Date(Date.now() + toDays * DAY_IN_MS)
@@ -27,53 +30,56 @@ const between = (fromDays: number, toDays: number) =>
 export class SchemaFakerUtil {
 
   static #stringToReType: [RegExp, () => string][] = [
-    [CommonRegExp.email, () => faker.internet.email()],
-    [CommonRegExp.url, () => faker.internet.url()],
-    [CommonRegExp.telephone, () => faker.phone.phoneNumber()],
-    [CommonRegExp.postalCode, () => faker.address.zipCode()]
+    [CommonRegExp.email, (): string => faker.internet.email()],
+    [CommonRegExp.url, (): string => faker.internet.url()],
+    [CommonRegExp.telephone, (): string => faker.phone.phoneNumber()],
+    [CommonRegExp.postalCode, (): string => faker.address.zipCode()]
   ];
 
   /**
    * Mapping of field types to faker utils
    */
-  static #namesToType = {
-    string: [
-      [/^(image|img).*url$/, () => faker.image.imageUrl()],
-      [/^url$/, () => faker.internet.url()],
-      [/^email(addr(ress)?)?$/, () => faker.internet.email()],
-      [/^(tele)?phone(num|number)?$/, () => faker.phone.phoneNumber()],
-      [/^((postal|zip)code)|zip$/, () => faker.address.zipCode()],
-      [/f(irst)?name/, () => faker.name.firstName()],
-      [/l(ast)?name/, () => faker.name.lastName()],
-      [/^ip(add(ress)?)?$/, () => faker.internet.ip()],
-      [/^ip(add(ress)?)?(v?)6$/, () => faker.internet.ipv6()],
-      [/^username$/, () => faker.internet.userName()],
-      [/^domain(name)?$/, () => faker.internet.domainName()],
-      [/^file(path|name)?$/, () => faker.system.filePath()],
-      [/^street(1)?$/, () => faker.address.streetAddress()],
-      [/^street2$/, () => faker.address.secondaryAddress()],
-      [/^county$/, () => faker.address.county()],
-      [/^country$/, () => faker.address.country()],
-      [/^state$/, () => faker.address.state()],
-      [/^lon(gitude)?$/, () => faker.address.longitude()],
-      [/^lat(itude)?$/, () => faker.address.latitude()],
-      [/(profile).*(image|img)/, () => faker.image.avatar()],
-      [/(image|img)/, () => faker.image.image()],
-      [/^company(name)?$/, () => faker.company.companyName()],
-      [/(desc|description)$/, () => faker.lorem.sentences(10)]
-    ] as [RegExp, () => string][],
-    date: [
-      [/dob|birth/, () => faker.date.past(60)],
-      [/creat(e|ion)/, () => between(-200, -100)],
-      [/(update|modif(y|ied))/, () => between(-100, -50)]
-    ] as [RegExp, () => Date][],
-  };
+  static #namesToType: {
+    string: [RegExp, () => string][];
+    date: [RegExp, () => Date][];
+  } = {
+      string: [
+        [/^(image|img).*url$/, (): string => faker.image.imageUrl()],
+        [/^url$/, (): string => faker.internet.url()],
+        [/^email(addr(ress)?)?$/, (): string => faker.internet.email()],
+        [/^(tele)?phone(num|number)?$/, (): string => faker.phone.phoneNumber()],
+        [/^((postal|zip)code)|zip$/, (): string => faker.address.zipCode()],
+        [/f(irst)?name/, (): string => faker.name.firstName()],
+        [/l(ast)?name/, (): string => faker.name.lastName()],
+        [/^ip(add(ress)?)?$/, (): string => faker.internet.ip()],
+        [/^ip(add(ress)?)?(v?)6$/, (): string => faker.internet.ipv6()],
+        [/^username$/, (): string => faker.internet.userName()],
+        [/^domain(name)?$/, (): string => faker.internet.domainName()],
+        [/^file(path|name)?$/, (): string => faker.system.filePath()],
+        [/^street(1)?$/, (): string => faker.address.streetAddress()],
+        [/^street2$/, (): string => faker.address.secondaryAddress()],
+        [/^county$/, (): string => faker.address.county()],
+        [/^country$/, (): string => faker.address.country()],
+        [/^state$/, (): string => faker.address.state()],
+        [/^lon(gitude)?$/, (): string => faker.address.longitude()],
+        [/^lat(itude)?$/, (): string => faker.address.latitude()],
+        [/(profile).*(image|img)/, (): string => faker.image.avatar()],
+        [/(image|img)/, (): string => faker.image.image()],
+        [/^company(name)?$/, (): string => faker.company.companyName()],
+        [/(desc|description)$/, (): string => faker.lorem.sentences(10)]
+      ],
+      date: [
+        [/dob|birth/, (): Date => faker.date.past(60)],
+        [/creat(e|ion)/, (): Date => between(-200, -100)],
+        [/(update|modif(y|ied))/, (): Date => between(-100, -50)]
+      ],
+    };
 
   /**
    * Get an array of values
    * @param cfg Field configuration
    */
-  static getArrayValue(cfg: FieldConfig) {
+  static getArrayValue(cfg: FieldConfig): unknown[] {
     const min = cfg.minlength ? cfg.minlength.n : 0;
     const max = cfg.maxlength ? cfg.maxlength.n : 10;
     const size = faker.datatype.number({ min, max });
@@ -88,9 +94,9 @@ export class SchemaFakerUtil {
    * Get a new number value
    * @param cfg Number config
    */
-  static getNumberValue(cfg: FieldConfig) {
-    let min = cfg.min ? cfg.min.n as number : undefined;
-    let max = cfg.max ? cfg.max.n as number : undefined;
+  static getNumberValue(cfg: FieldConfig): number {
+    let min = cfg.min && typeof cfg.min.n === 'number' ? cfg.min.n : undefined;
+    let max = cfg.max && typeof cfg.max.n === 'number' ? cfg.max.n : undefined;
     let precision = cfg.precision;
 
     const name = cfg.name.toUpperCase();
@@ -123,10 +129,10 @@ export class SchemaFakerUtil {
    * Get a date value
    * @param cfg Field config
    */
-  static getDateValue(cfg: FieldConfig) {
+  static getDateValue(cfg: FieldConfig): Date {
     const name = cfg.name.toUpperCase();
-    const min = cfg.min ? cfg.min.n as Date : undefined;
-    const max = cfg.max ? cfg.max.n as Date : undefined;
+    const min = cfg.min && typeof cfg.min.n !== 'number' ? cfg.min.n : undefined;
+    const max = cfg.max && typeof cfg.max.n !== 'number' ? cfg.max.n : undefined;
 
     if (min !== undefined || max !== undefined) {
       return faker.date.between(min || new Date(Date.now() - (50 * DAY_IN_MS)), max || new Date());
@@ -144,7 +150,7 @@ export class SchemaFakerUtil {
    * Get a string value
    * @param cfg Field config
    */
-  static getStringValue(cfg: FieldConfig) {
+  static getStringValue(cfg: FieldConfig): string {
     const name = cfg.name.toLowerCase();
 
     if (cfg.match) {
@@ -197,7 +203,7 @@ export class SchemaFakerUtil {
    * @param cls The class to get an instance of
    * @param view The view to define specifically
    */
-  static generate<T>(cls: Class<T>, view?: string) {
+  static generate<T>(cls: Class<T>, view?: string): T {
     const cfg = SchemaRegistry.getViewSchema(cls, view);
     const out: Record<string, unknown> = {};
 

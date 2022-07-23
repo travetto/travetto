@@ -6,7 +6,7 @@ import { ChangeEvent } from '@travetto/registry';
 import { FieldConfig, ClassConfig } from './types';
 import { AllViewⲐ } from '../internal/types';
 
-const id = (c: Class | string) => typeof c === 'string' ? c : c.ᚕid;
+const id = (c: Class | string): string => typeof c === 'string' ? c : c.ᚕid;
 
 interface FieldMapping {
   path: FieldConfig[];
@@ -45,7 +45,7 @@ class $SchemaChangeListener {
    * On schema change, emit the change event for the whole schema
    * @param cb The function to call on schema change
    */
-  onSchemaChange(handler: (e: SchemaChangeEvent) => void) {
+  onSchemaChange(handler: (e: SchemaChangeEvent) => void): void {
     this.#emitter.on('schema', handler);
   }
 
@@ -53,21 +53,21 @@ class $SchemaChangeListener {
    * On schema field change, emit the change event for the whole schema
    * @param cb The function to call on schema field change
    */
-  onFieldChange(handler: (e: FieldChangeEvent) => void) {
+  onFieldChange(handler: (e: FieldChangeEvent) => void): void {
     this.#emitter.on('field', handler);
   }
 
   /**
    * Reset the listener
    */
-  reset() {
+  reset(): void {
     this.#mapping.clear();
   }
 
   /**
    * Clear dependency mappings for a given class
    */
-  clearSchemaDependency(cls: Class) {
+  clearSchemaDependency(cls: Class): void {
     this.#mapping.delete(id(cls));
   }
 
@@ -78,7 +78,7 @@ class $SchemaChangeListener {
    * @param path The path within the object hierarchy to arrive at the class
    * @param config The configuration or the class
    */
-  trackSchemaDependency(src: Class, parent: Class, path: FieldConfig[], config: ClassConfig) {
+  trackSchemaDependency(src: Class, parent: Class, path: FieldConfig[], config: ClassConfig): void {
     const idValue = id(src);
     if (!this.#mapping.has(idValue)) {
       this.#mapping.set(idValue, new Map());
@@ -91,7 +91,7 @@ class $SchemaChangeListener {
    * @param cls The class of the event
    * @param changes The changes to send
    */
-  emitSchemaChanges({ cls, changes }: FieldChangeEvent) {
+  emitSchemaChanges({ cls, changes }: FieldChangeEvent): void {
     const updates = new Map<string, SchemaChange>();
     const clsId = id(cls);
 
@@ -116,7 +116,7 @@ class $SchemaChangeListener {
    * @param prev The previous class config
    * @param curr The current class config
    */
-  emitFieldChanges({ prev, curr }: ChangeEvent<ClassConfig>) {
+  emitFieldChanges({ prev, curr }: ChangeEvent<ClassConfig>): void {
 
     const prevView = prev?.views[AllViewⲐ] || { fields: [], schema: {} };
     const currView = curr!.views[AllViewⲐ];
@@ -139,7 +139,7 @@ class $SchemaChangeListener {
     }
 
     // Handle class references changing, but keeping same id
-    const compareTypes = (a: Class, b: Class) => 'ᚕid' in a ? a.ᚕid === b.ᚕid : a === b;
+    const compareTypes = (a: Class, b: Class): boolean => 'ᚕid' in a ? a.ᚕid === b.ᚕid : a === b;
 
     for (const c of currFields) {
       if (prevFields.has(c)) {

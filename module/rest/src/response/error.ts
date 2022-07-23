@@ -16,7 +16,7 @@ declare global {
 /**
  * Render the error to the response object
  */
-Error.prototype.render = function (this: Error & { status?: number, statusCode?: number }, res: Response) {
+Error.prototype.render = function (this: Error & { status?: number, statusCode?: number }, res: Response): void {
   const status = this.status ??
     this.statusCode ??
     (this instanceof AppError ? ErrorUtil.codeFromCategory(this.category) : 500);

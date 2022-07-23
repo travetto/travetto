@@ -17,17 +17,17 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unk
     this.#proc.on('message', this.#handleMessage.bind(this));
   }
 
-  get #parentId() {
+  get #parentId(): number {
     return process.pid;
   }
 
-  #handleMessage(ev: { type: string }) {
+  #handleMessage(ev: { type: string }): void {
     console.debug('Received', { pid: this.#parentId, id: this.id, type: ev.type });
     this.#emitter.emit(ev.type, ev);
     this.#emitter.emit('*', ev);
   }
 
-  get proc() {
+  get proc(): T | undefined {
     return this.#proc;
   }
 
@@ -38,21 +38,21 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unk
   /**
    * Gets channel unique identifier
    */
-  get id() {
+  get id(): number | undefined {
     return this.#proc && this.#proc.pid;
   }
 
   /**
    * Determines if channel is active
    */
-  get active() {
+  get active(): boolean {
     return !!this.#proc;
   }
 
   /**
    * Send data to the parent
    */
-  send(eventType: string, data?: Record<string, unknown>) {
+  send(eventType: string, data?: Record<string, unknown>): void {
     console.debug('Sending', { pid: this.#parentId, id: this.id, eventType });
     if (!this.#proc) {
       throw new Error('this.proc was not defined');
@@ -66,7 +66,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unk
   /**
    * Listen for a specific message type
    */
-  on(eventType: string, callback: (e: U) => unknown | void) {
+  on(eventType: string, callback: (e: U) => unknown | void): () => void {
     this.#emitter.on(eventType, callback);
     return () => this.off(eventType, callback);
   }
@@ -74,21 +74,21 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unk
   /**
    * Remove event listener
    */
-  off(eventType: string, callback: (e: U) => unknown | void) {
+  off(eventType: string, callback: (e: U) => unknown | void): void {
     this.#emitter.off(eventType, callback);
   }
 
   /**
    * Listen for a specific message type, once
    */
-  once(eventType: string) {
+  once(eventType: string): Promise<U> {
     return new Promise<U>(res => this.#emitter.once(eventType, res));
   }
 
   /**
    * Destroy self
    */
-  async destroy() {
+  async destroy(): Promise<void> {
     if (this.#proc) {
       console.debug('Killing', { pid: this.#parentId, id: this.id });
       if (this.#proc !== process) {
@@ -102,7 +102,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unk
   /**
    * Remove all listeners, but do not destroy
    */
-  release() {
+  release(): void {
     console.debug('Released', { pid: this.#parentId, id: this.id });
     this.#emitter.removeAllListeners();
   }

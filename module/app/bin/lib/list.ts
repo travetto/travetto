@@ -22,7 +22,7 @@ export class AppListUtil {
    */
   static async #readList(): Promise<ApplicationConfig[] | undefined> {
     if (AppCache.hasEntry(this.#cacheConfig)) {
-      return JSON.parse(AppCache.readEntry(this.#cacheConfig)) as ApplicationConfig[];
+      return JSON.parse(AppCache.readEntry(this.#cacheConfig));
     }
   }
 
@@ -30,7 +30,7 @@ export class AppListUtil {
    * Store list of cached items
    * @param items
    */
-  static #storeList(items: ApplicationConfig[]) {
+  static #storeList(items: ApplicationConfig[]): void {
     const toStore = items.map(x => ({ ...x, target: undefined }));
     AppCache.writeEntry(this.#cacheConfig, JSON.stringify(toStore));
   }
@@ -57,7 +57,7 @@ export class AppListUtil {
   /**
    * Compile code, and look for `@Application` annotations
    */
-  static async buildList() {
+  static async buildList(): Promise<ApplicationConfig[]> {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Collecting', () =>
         ExecUtil.workerMain<ApplicationConfig[]>(require.resolve('../list-build')).message
@@ -75,7 +75,7 @@ export class AppListUtil {
    * Find application by given name
    * @param name
    */
-  static async findByName(name: string) {
+  static async findByName(name: string): Promise<ApplicationConfig | undefined> {
     return (await this.getList())?.find(x => x.name === name);
   }
 
@@ -94,8 +94,8 @@ export class AppListUtil {
     if (items && !EnvUtil.isReadonly()) {
       try {
         await this.#verifyList(items);
-      } catch (err: any) {
-        if (err.message.includes('Expired')) {
+      } catch (err) {
+        if (err && err instanceof Error && err.message.includes('Expired')) {
           return await this.getList();
         } else {
           throw err;

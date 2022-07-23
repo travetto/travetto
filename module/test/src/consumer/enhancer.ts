@@ -20,5 +20,8 @@ export type TestResultsEnhancer = typeof COLOR_ENHANCER;
 /**
  * Dummy enhancer does nothing
  */
-export const DUMMY_ENHANCER = (Object.keys(COLOR_ENHANCER) as (keyof typeof COLOR_ENHANCER)[])
-  .reduce((acc, k) => (acc[k] = (x: unknown) => `${x}`) && acc, {} as TestResultsEnhancer);
+export const DUMMY_ENHANCER: TestResultsEnhancer = [
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  (Object.keys(COLOR_ENHANCER) as (keyof typeof COLOR_ENHANCER)[])
+    .reduce<Partial<TestResultsEnhancer>>((acc, k) => (acc[k] = (x: unknown): string => `${x}`) && acc, {})
+].filter((x): x is TestResultsEnhancer => !!x)[0];

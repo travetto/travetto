@@ -12,7 +12,7 @@ import { PathUtil } from './path';
  */
 export class FileCache {
 
-  static isOlder(cacheStat: Stats, fullStat: Stats) {
+  static isOlder(cacheStat: Stats, fullStat: Stats): boolean {
     return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
   }
 
@@ -30,7 +30,7 @@ export class FileCache {
   /**
    * Purge all expired data
    */
-  #purgeExpired() {
+  #purgeExpired(): void {
     for (const f of readdirSync(this.cacheDir)) {
       const full = this.fromEntryName(f);
       try {
@@ -48,7 +48,7 @@ export class FileCache {
   /**
    * Initialize the cache behavior
    */
-  init(purgeExpired = false) {
+  init(purgeExpired = false): void {
     if (!EnvUtil.isReadonly()) {
       mkdirSync(this.cacheDir, { recursive: true });
 
@@ -69,7 +69,7 @@ export class FileCache {
    * @param local Local location
    * @param contents Contents to write
    */
-  writeEntry(local: string, contents: string) {
+  writeEntry(local: string, contents: string): void {
     writeFileSync(this.toEntryName(local), contents, 'utf8');
     this.statEntry(local);
   }
@@ -95,7 +95,7 @@ export class FileCache {
    * @param full The local location
    * @param force Should deletion be force
    */
-  removeExpiredEntry(local: string, force = false) {
+  removeExpiredEntry(local: string, force = false): void {
     if (this.hasEntry(local)) {
       try {
         if (force || FileCache.isOlder(this.statEntry(local), statSync(local))) {
@@ -114,7 +114,7 @@ export class FileCache {
    * Delete entry
    * @param local The location to delete
    */
-  removeEntry(local: string) {
+  removeEntry(local: string): void {
     this.#cache.delete(local);
   }
 
@@ -122,15 +122,15 @@ export class FileCache {
    * Checks to see if a file has been loaded or if it's available on disk
    * @param local The location to verify
    */
-  hasEntry(local: string) {
-    return this.#cache.has(local) || FsUtil.existsSync(this.toEntryName(local));
+  hasEntry(local: string): boolean {
+    return this.#cache.has(local) || !!FsUtil.existsSync(this.toEntryName(local));
   }
 
   /**
    * Retrieve fs.Stats of the associated path
    * @param local The location to stat
    */
-  statEntry(local: string) {
+  statEntry(local: string): Stats {
     if (!this.#cache.has(local)) {
       const stat = statSync(this.toEntryName(local));
       this.#cache.set(local, stat);
@@ -142,7 +142,7 @@ export class FileCache {
    * Clear cache
    * @param quiet Should the clear produce output
    */
-  clear(quiet = false) {
+  clear(quiet = false): void {
     if (this.cacheDir) {
       try {
         FsUtil.unlinkRecursiveSync(this.cacheDir);
@@ -160,7 +160,7 @@ export class FileCache {
    * Map entry file name to the original source
    * @param entry The entry path
    */
-  fromEntryName(entry: string) {
+  fromEntryName(entry: string): string {
     return PathUtil.resolveUnix(PathUtil.resolveFrameworkPath(PathUtil.toUnix(entry)
       .replace(this.cacheDir, '')
       .replace(/^\//, '')
@@ -173,7 +173,7 @@ export class FileCache {
    * Map the original file name to the cache file space
    * @param local Local path
    */
-  toEntryName(local: string) {
+  toEntryName(local: string): string {
     local = PathUtil.toUnix(local).replace(PathUtil.cwd, '');
     return PathUtil.joinUnix(this.cacheDir, PathUtil.normalizeFrameworkPath(local)
       .replace(/.*@travetto\//, '.')
@@ -188,7 +188,7 @@ export class FileCache {
    * @param create The method to execute if the entry is not found
    * @param force Should create be executed always
    */
-  getOrSet(local: string, create: () => string, force = false) {
+  getOrSet(local: string, create: () => string, force = false): string {
     const name = PathUtil.toUnix(local);
     let content: string;
     if (force || !this.hasEntry(name)) {

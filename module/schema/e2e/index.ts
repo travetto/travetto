@@ -1,6 +1,6 @@
 import { PhaseManager } from '@travetto/base';
 
-export async function main() {
+export async function main(): Promise<void> {
   await PhaseManager.run('init');
 
   await import('./watch');

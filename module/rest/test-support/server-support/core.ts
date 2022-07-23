@@ -1,5 +1,5 @@
 import * as qs from 'querystring';
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 
 import { DependencyRegistry } from '@travetto/di';
 import { Util } from '@travetto/base';

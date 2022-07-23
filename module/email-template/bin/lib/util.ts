@@ -12,6 +12,8 @@ import { ImageUtil } from './image';
 const PARTS = ['html', 'subject', 'text'] as const;
 type Parts = (typeof PARTS)[number];
 
+type Compilation = { html: string, text: string, subject?: string };
+
 /**
  * Utilities for templating
  */
@@ -19,14 +21,14 @@ export class TemplateUtil {
 
   static TPL_EXT = /[.]email[.]html$/;
 
-  static getOutputs(file: string) {
+  static getOutputs(file: string): [Parts, string][] {
     return PARTS.map((k): [part: Parts, file: string] => [k, file.replace(this.TPL_EXT, `.compiled.${k}`)]);
   }
 
   /**
-   * Grab list of all avaliable templates
+   * Grab list of all available templates
    */
-  static async findAllTemplates() {
+  static async findAllTemplates(): Promise<{ path: string, key: string }[]> {
     const { ResourceManager } = await import('@travetto/base');
 
     return Promise.all((await ResourceManager.findAll(this.TPL_EXT))
@@ -40,7 +42,7 @@ export class TemplateUtil {
   /**
    * Compile all to disk
    */
-  static async compileAllToDisk() {
+  static async compileAllToDisk(): Promise<Compilation[]> {
     const keys = await this.findAllTemplates();
     return Promise.all(keys.map(tpl => this.compileToDisk(tpl.path)));
   }
@@ -48,14 +50,14 @@ export class TemplateUtil {
   /**
    * Compile templates to disk
    */
-  static async compileToDisk(file: string) {
+  static async compileToDisk(file: string): Promise<Compilation> {
     const resolved = await fs.readFile(file, 'utf8');
     const compiled = await this.compile(resolved, dirname(file));
 
     await Promise.all(this.getOutputs(file)
       .map(([k, f]) => {
         if (compiled[k]) {
-          return fs.writeFile(f, compiled[k], { encoding: 'utf8' });
+          return fs.writeFile(f, compiled[k]!, { encoding: 'utf8' });
         } else {
           return fs.unlink(f).catch(() => { }); // Remove file if data not provided
         }
@@ -67,7 +69,7 @@ export class TemplateUtil {
   /**
    * Compile template
    */
-  static async compile(tpl: string, root: string) {
+  static async compile(tpl: string, root: string): Promise<Compilation> {
     const { ResourceManager } = await import('@travetto/base');
     const { DependencyRegistry } = await import('@travetto/di');
     const { MailTemplateEngineTarget } = await import('@travetto/email/src/internal/types');
@@ -101,7 +103,7 @@ export class TemplateUtil {
   /**
    * Resolve template
    */
-  static async resolveTemplate(file: string, format: Parts, context: Record<string, unknown>) {
+  static async resolveTemplate(file: string, format: Parts, context: Record<string, unknown>): Promise<string> {
 
     const files = this.getOutputs(file);
     const missing = await Promise.all(files.map(x => FsUtil.exists(x[1])));
@@ -124,21 +126,23 @@ export class TemplateUtil {
    * Render
    * @param file
    */
-  static async resolveCompiledTemplate(file: string, context: Record<string, unknown>) {
-    return Object.fromEntries(
+  static async resolveCompiledTemplate(file: string, context: Record<string, unknown>): Promise<Record<Parts, string>> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const resolved = Object.fromEntries(
       await Promise.all(
         PARTS.map(k =>
           this.resolveTemplate(file, k, context)
             .then(c => [k, c] as const)
         )
       )
-    ) as Record<(typeof PARTS)[number], string>;
+    ) as Record<Parts, string>;
+    return resolved;
   }
 
   /**
    * Watch compilation
    */
-  static async watchCompile(cb?: (file: string) => void) {
+  static async watchCompile(cb?: (file: string) => void): Promise<void> {
     const { ResourceManager, Util } = await import('@travetto/base');
     const { FilePresenceManager } = await import('@travetto/watch');
 
@@ -164,8 +168,8 @@ export class TemplateUtil {
             }
           }
         }
-      } catch (err: any) {
-        console.error(`Error in compiling ${file}`, err.message);
+      } catch (err) {
+        console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
       }
     });
     await Util.wait('1d');

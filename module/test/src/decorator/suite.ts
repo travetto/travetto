@@ -15,28 +15,29 @@ export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;
 export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Partial<SuiteConfig>[]): ClassDecorator {
   const extra: Partial<SuiteConfig> = {};
-
-  if (description && typeof description !== 'string') {
-    Object.assign(extra, description);
-    description = extra.description;
-  }
+  const descriptionString = description && typeof description !== 'string' ?
+    Object.assign(extra, description).description :
+    description;
 
   for (const r of rest) {
     Object.assign(extra, r);
   }
 
-  return ((target: Class) => {
-    const cfg = { description: (description as string), ...extra };
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const decorator = ((target: Class) => {
+    const cfg = { description: descriptionString, ...extra };
     if (target.ᚕabstract) {
       cfg.skip = true;
     }
     SuiteRegistry.register(target, cfg);
     return target;
   }) as ClassDecorator;
+
+  return decorator;
 }
 
 function listener(phase: SuitePhase) {
-  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor) => {
+  return (inst: ClassInstance, prop: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
     SuiteRegistry.registerPendingListener(inst.constructor, descriptor.value, phase);
     return descriptor;
   };

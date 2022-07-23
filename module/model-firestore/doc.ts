@@ -9,7 +9,7 @@ ${d.Header()}
 
 This module provides an ${lib.Firestore}-based implementation of the ${mod.Model}.  This source allows the ${mod.Model} module to read, write and query against ${lib.Firestore}.
 
-Supported featrues:
+Supported features:
 ${d.List(
   ...ModelTypes(FirestoreModelService)
 )}

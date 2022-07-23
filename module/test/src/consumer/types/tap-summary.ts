@@ -25,18 +25,18 @@ export class SummaryEmitter implements TestConsumer {
     this.#enhancer = enhancer;
   }
 
-  protected log(message: string) {
+  protected log(message: string): void {
     this.#stream.write(`${message}\n`);
   }
 
-  onEvent(e: TestEvent) {
+  onEvent(e: TestEvent): void {
     // Do nothing
   }
 
   /**
    * Summarize all results
    */
-  onSummary(summary: SuitesSummary) {
+  onSummary(summary: SuitesSummary): void {
     this.log(`${this.#enhancer.testNumber(1)}..${this.#enhancer.testNumber(summary.total)}`);
 
     if (summary.errors.length) {

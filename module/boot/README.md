@@ -28,20 +28,20 @@ The functionality we support for testing and retrieving environment information:
    *  `getList(key: string): string[];` - Retrieve an environmental value as a list
 
 ## Cache Support
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L10).  [FileCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L10) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L13).  [FileCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L13) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
 
 **Code: File Cache Structure**
 ```typescript
 /// <reference types="node" />
-import * as fs from 'fs';
+import { Stats } from 'fs';
 /**
  * Standard file cache, with output file name normalization and truncation
  */
 export declare class FileCache {
     #private;
-    static isOlder(cacheStat: fs.Stats, fullStat: fs.Stats): boolean;
+    static isOlder(cacheStat: Stats, fullStat: Stats): boolean;
     /**
      * Directory to cache into
      */
@@ -82,12 +82,12 @@ export declare class FileCache {
      * Checks to see if a file has been loaded or if it's available on disk
      * @param local The location to verify
      */
-    hasEntry(local: string): true | fs.Stats | undefined;
+    hasEntry(local: string): boolean;
     /**
      * Retrieve fs.Stats of the associated path
      * @param local The location to stat
      */
-    statEntry(local: string): fs.Stats;
+    statEntry(local: string): Stats;
     /**
      * Clear cache
      * @param quiet Should the clear produce output
@@ -120,7 +120,7 @@ Everything is based on absolute paths being passed in, and translated into cache
 [FsUtil](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/fs.ts#L17) provides some high level functionality (like recursive directory delete).
 
 ### File System Scanning
-[ScanFs](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/scan.ts#L59) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
+[ScanFs](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/scan.ts#L58) provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 ## Typescript Bootstrapping
 
@@ -131,7 +131,7 @@ The bootstrap process will also requires an index of all source files, which all
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/exec.ts#L72) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/exec.ts#L81) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

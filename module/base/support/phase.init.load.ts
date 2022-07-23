@@ -4,7 +4,7 @@
 export const init = {
   key: '@trv:base/load',
   after: ['@trv:base/transpile'],
-  action: async () => {
+  action: async (): Promise<void> => {
     const { SourceIndex } = await import('@travetto/boot/src/internal/source');
     const { AppManifest } = await import('@travetto/base');
 

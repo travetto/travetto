@@ -52,36 +52,37 @@ export class MySQLDialect extends SQLDialect {
   /**
    * Compute hash
    */
-  hash(value: string) {
+  hash(value: string): string {
     return `SHA2('${value}', ${this.KEY_LEN * 4})`;
   }
 
   /**
    * Build identifier
    */
-  ident(field: FieldConfig | string) {
+  ident(field: FieldConfig | string): string {
     return `\`${typeof field === 'string' ? field : field.name}\``;
   }
 
   /**
    * Create table, adding in specific engine options
    */
-  override getCreateTableSQL(stack: VisitStack[]) {
+  override getCreateTableSQL(stack: VisitStack[]): string {
     return super.getCreateTableSQL(stack).replace(/;$/, ` ${this.tablePostfix};`);
   }
 
   /**
    * Define column modification
    */
-  getModifyColumnSQL(stack: VisitStack[]) {
-    const field = stack[stack.length - 1];
-    return `ALTER TABLE ${this.parentTable(stack)} MODIFY COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
+  getModifyColumnSQL(stack: VisitStack[]): string {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const field = stack[stack.length - 1] as FieldConfig;
+    return `ALTER TABLE ${this.parentTable(stack)} MODIFY COLUMN ${this.getColumnDefinition(field)};`;
   }
 
   /**
    * Add root alias to delete clause
    */
-  override getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>) {
+  override getDeleteSQL(stack: VisitStack[], where?: WhereClause<unknown>): string {
     const sql = super.getDeleteSQL(stack, where);
     return sql.replace(/\bDELETE\b/g, `DELETE ${this.rootAlias}`);
   }

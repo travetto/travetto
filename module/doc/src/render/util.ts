@@ -13,7 +13,7 @@ export class RenderUtil {
 
   static #imported = new Map<string, { root: AllType, wrap?: Wrapper }>();
 
-  static purge(file: string) {
+  static purge(file: string): void {
     this.#imported.delete(file);
   }
 
@@ -23,17 +23,19 @@ export class RenderUtil {
    * @param fmt
    * @returns
    */
-  static async render(file: string, fmt: string = Markdown.ext) {
+  static async render(file: string, fmt: string = Markdown.ext): Promise<string> {
     fmt = fmt.replace(/^[.]/, ''); // Strip leading .
     if (!renderers[fmt]) {
       throw new Error(`Unknown renderer with format: ${fmt}`);
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const res = (await import(file)) as DocumentShape;
 
     if (!this.#imported.has(file)) {
       this.#imported.set(file, {
         wrap: res.wrap,
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         root: ('_type' in res.text ? res.text : await res.text()) as AllType
       });
     }
@@ -41,7 +43,7 @@ export class RenderUtil {
     const { wrap, root } = this.#imported.get(file)!;
 
     const ctx = new RenderContext(file);
-    const content = renderers[fmt].render(root as AllType, ctx).replace(/\n{3,100}/msg, '\n\n').trim();
+    const content = renderers[fmt].render(root, ctx).replace(/\n{3,100}/msg, '\n\n').trim();
     const preamble = renderers[fmt].render(ctx.preamble, ctx);
     return `${preamble}\n${wrap?.[fmt]?.(content) ?? content}\n`;
   }

@@ -13,29 +13,30 @@ import { AppClass, ApplicationConfig } from './types';
 class $ApplicationRegistry {
   #applications = new Map<string, ApplicationConfig>();
 
-  register(app: string, config: ApplicationConfig) {
+  register(app: string, config: ApplicationConfig): void {
     this.#applications.set(app, config);
   }
 
   /**
    * Get application by name
    */
-  getByName(name: string) {
+  getByName(name: string): ApplicationConfig | undefined {
     return this.#applications.get(name);
   }
 
   /**
    * Get all applications
    */
-  getAll() {
+  getAll(): ApplicationConfig[] {
     return Array.from(this.#applications.values());
   }
 
   /**
    * Prepare parameters for usage
    */
-  prepareParams(name: string, args: string[]) {
+  prepareParams(name: string, args: string[]): unknown[] {
     const config = this.#applications.get(name)!;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const cleaned = SchemaRegistry.coerceMethodParams(config.target! as Class, 'run', args);
     SchemaValidator.validateMethod(config.target!, 'run', cleaned);
     return cleaned;
@@ -44,9 +45,10 @@ class $ApplicationRegistry {
   /**
    * Runs the application, by name
    */
-  async run(name: string, args: string[]) {
+  async run(name: string, args: string[]): Promise<void> {
     const config = this.#applications.get(name);
     if (!config) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       throw new InjectionError('Application not found', { ᚕid: name } as Class);
     }
 
@@ -63,6 +65,7 @@ class $ApplicationRegistry {
     // Get instance of app class
     const inst = DependencyRegistry.get(config.target!) ?
       await DependencyRegistry.getInstance(config.target!) :
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       new (config.target! as ConcreteClass<AppClass>)();
 
     // Show config
@@ -87,7 +90,7 @@ class $ApplicationRegistry {
   /**
    * Clear all apps on reset
    */
-  onReset() {
+  onReset(): void {
     this.#applications.clear();
   }
 }

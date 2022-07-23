@@ -14,7 +14,7 @@ const CONSOLE_RE = /(\bconsole[.](debug|info|warn|log|error)[(])|\n/g;
 
 function wrap(target: Console): ConsoleListener {
   return {
-    onLog(level: LogLevel, ctx: LineContext, args: unknown[]) {
+    onLog(level: LogLevel, ctx: LineContext, args: unknown[]): void {
       return target[level](...args);
     }
   };
@@ -62,7 +62,7 @@ class $ConsoleManager {
   /**
    * Modify typescript file to point to the Console Manager
    */
-  #instrument(filename: string, fileContents: string) {
+  #instrument(filename: string, fileContents: string): string {
     // Insert filename into all log statements for all components
     let line = 1;
     fileContents = fileContents.replace(CONSOLE_RE, (a, cmd, lvl) => {
@@ -81,7 +81,7 @@ class $ConsoleManager {
    * Add exclusion
    * @private
    */
-  exclude(val: string, add = true) {
+  exclude(val: string, add = true): void {
     if (add) {
       this.#exclude.add(val);
     } else {
@@ -92,7 +92,7 @@ class $ConsoleManager {
   /**
    * Handle direct call in lieu of the console.* commands
    */
-  invoke(level: LogLevel, ctx: LineContext, ...args: unknown[]) {
+  invoke(level: LogLevel, ctx: LineContext, ...args: unknown[]): void {
     if (this.#exclude.has(level)) {
       return; // Do nothing
     }
@@ -103,7 +103,7 @@ class $ConsoleManager {
   /**
    * Set a new console appender, works as a stack to allow for nesting
    */
-  set(cons: ConsoleListener | Console, replace = false) {
+  set(cons: ConsoleListener | Console, replace = false): void {
     cons = ('onLog' in cons) ? cons : wrap(cons);
     if (!replace) {
       this.#stack.unshift(cons);
@@ -116,7 +116,7 @@ class $ConsoleManager {
   /**
    * Pop off the logging stack
    */
-  clear() {
+  clear(): void {
     if (this.#stack.length > 1) {
       this.#stack.shift();
       this.#appender = this.#stack[0];

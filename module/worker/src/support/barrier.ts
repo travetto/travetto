@@ -2,6 +2,7 @@ import { Util, ShutdownManager, TimeSpan } from '@travetto/base';
 import { Timeout } from './timeout';
 
 function canCancel(o: unknown): o is { cancel(): unknown } {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && 'cancel' in (o as object);
 }
 
@@ -9,7 +10,7 @@ function canCancel(o: unknown): o is { cancel(): unknown } {
  * Build an execution barrier to handle various limitations
  */
 export class Barrier {
-  #support = [] as string[];
+  #support: string[] = [];
   #barriers = new Map<string, Promise<unknown>>([]);
 
   constructor(
@@ -27,7 +28,7 @@ export class Barrier {
   /**
    * Add a new barrier
    */
-  add(p: (() => Promise<unknown>) | Promise<unknown>, support = false) {
+  add(p: (() => Promise<unknown>) | Promise<unknown>, support = false): this {
     if (!('then' in p)) {
       p = p();
     }
@@ -49,7 +50,7 @@ export class Barrier {
   /**
    * Clean up, and cancel all cancellable barriers
    */
-  cleanup() {
+  cleanup(): void {
     for (const k of this.#support) {
       const el = this.#barriers.get(k);
       if (canCancel(el)) {

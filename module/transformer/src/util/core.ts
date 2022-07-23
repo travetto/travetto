@@ -8,6 +8,7 @@ export class CoreUtil {
    * See if inbound node has an original property
    */
   static hasOriginal(o: ts.Node): o is (ts.Node & { original: ts.Node }) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return 'original' in o && !!(o as { original?: ts.Node }).original;
   }
 
@@ -15,6 +16,7 @@ export class CoreUtil {
    * See if type has target
    */
   static hasTarget(o: ts.Type): o is (ts.Type & { target: ts.Type }) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return 'target' in o && !!(o as { target?: ts.Type }).target;
   }
 
@@ -22,7 +24,7 @@ export class CoreUtil {
    * Get first line of method body
    * @param m
    */
-  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, o: T | undefined) {
+  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, o: T | undefined): { start: number, end: number } | undefined {
     if (o) {
       const start = ts.getLineAndCharacterOfPosition(source, o.getStart(source));
       const end = ts.getLineAndCharacterOfPosition(source, o.getEnd());
@@ -38,6 +40,7 @@ export class CoreUtil {
    */
   static getArgument<T extends ts.Expression = ts.Expression>(node: ts.CallExpression | undefined, position = 0): T | undefined {
     if (node && node!.arguments && node!.arguments.length >= position + 1) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return node.arguments[position] as T;
     }
     return;
@@ -57,11 +60,13 @@ export class CoreUtil {
   /**
    * Get `ts.Symbol` from a `ts.Type`
    */
-  static getSymbol(type: ts.Type | ts.Symbol) {
+  static getSymbol(type: ts.Type | ts.Symbol | ts.TypeReference): ts.Symbol {
     if ('valueDeclaration' in type || 'escapedName' in type) {
       return type;
+    } else if ('aliasSymbol' in type && type.aliasSymbol) {
+      return type.aliasSymbol;
     } else {
-      return (type as ts.TypeReference).aliasSymbol ?? (type as ts.Type).symbol;
+      return type.symbol;
     }
   }
 
@@ -70,7 +75,7 @@ export class CoreUtil {
    * @param src
    * @param statements
    */
-  static updateSource(factory: ts.NodeFactory, src: ts.SourceFile, statements: ts.NodeArray<ts.Statement> | ts.Statement[]) {
+  static updateSource(factory: ts.NodeFactory, src: ts.SourceFile, statements: ts.NodeArray<ts.Statement> | ts.Statement[]): ts.SourceFile {
     return factory.updateSourceFile(
       src, statements, src.isDeclarationFile, src.referencedFiles, src.typeReferenceDirectives, src.hasNoDefaultLib
     );
@@ -79,7 +84,12 @@ export class CoreUtil {
   /**
    * Create property access
    */
-  static createAccess(factory: ts.NodeFactory, first: string | ts.Expression, second: string | ts.Identifier, ...items: (string | ts.Identifier)[]) {
+  static createAccess(
+    factory: ts.NodeFactory,
+    first: string | ts.Expression,
+    second: string | ts.Identifier,
+    ...items: (string | ts.Identifier)[]
+  ): ts.PropertyAccessExpression {
     if (typeof first === 'string') {
       first = factory.createIdentifier(first);
     }
@@ -92,7 +102,7 @@ export class CoreUtil {
   /**
    * Create a decorator with a given name, and arguments
    */
-  static createDecorator(factory: ts.NodeFactory, name: ts.Expression, ...contents: (ts.Expression | undefined)[]) {
+  static createDecorator(factory: ts.NodeFactory, name: ts.Expression, ...contents: (ts.Expression | undefined)[]): ts.Decorator {
     return factory.createDecorator(
       factory.createCallExpression(
         name,
@@ -105,7 +115,7 @@ export class CoreUtil {
   /**
    * Is declaration abstract?
    */
-  static isAbstract(node: ts.Declaration) {
+  static isAbstract(node: ts.Declaration): boolean {
     // eslint-disable-next-line no-bitwise
     return !!(ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Abstract);
   }

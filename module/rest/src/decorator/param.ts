@@ -5,16 +5,17 @@ import { ControllerRegistry } from '../registry/controller';
 import { ParamUtil } from '../util/param';
 import { querySchemaParamConfig } from '../internal/param';
 
+type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx: number) => void;
+
 /**
  * Get the param configuration
  * @param location The location of the parameter
  * @param extra Any additional configuration for the param config
  */
-export const paramConfig = (location: ParamConfig['location'], extra: string | Partial<ParamConfig>) => ({
-  location, ...(
-    (typeof extra === 'string' ? { name: extra } : extra)
-  )
-}) as ParamConfig;
+export const paramConfig = (location: ParamConfig['location'], extra: string | Partial<ParamConfig>): ParamConfig => ({
+  location,
+  ...((typeof extra === 'string' ? { name: extra } : extra))
+});
 
 /**
  * Define a parameter
@@ -22,9 +23,9 @@ export const paramConfig = (location: ParamConfig['location'], extra: string | P
  * @param extra Any extra configuration for the param
  * @augments `@trv:rest/Param`
  */
-export function Param(location: ParamConfig['location'], extra: string | Partial<ParamConfig>) {
+export function Param(location: ParamConfig['location'], extra: string | Partial<ParamConfig>): ParamDecorator {
   const param = paramConfig(location, extra);
-  return (target: ClassInstance, propertyKey: string | symbol, idx: number) => {
+  return (target: ClassInstance, propertyKey: string | symbol, idx: number): void => {
     const handler = target.constructor.prototype[propertyKey];
     ControllerRegistry.registerEndpointParameter(target.constructor, handler, param, idx);
   };
@@ -35,38 +36,38 @@ export function Param(location: ParamConfig['location'], extra: string | Partial
  * @param param The parma configuration or name
  * @augments `@trv:rest/Param`
  */
-export function Context(param: string | Partial<ParamConfig> = {}) { return Param('context', param); }
+export function Context(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('context', param); }
 /**
  * Define a Path param
  * @param param The parma configuration or name
  * @augments `@trv:rest/Param`
  */
-export function Path(param: string | Partial<ParamConfig> = {}) { return Param('path', param); }
+export function Path(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('path', param); }
 /**
  * Define a Query param
  * @param param The parma configuration or name
  * @augments `@trv:rest/Param`
  */
-export function Query(param: string | Partial<ParamConfig> = {}) { return Param('query', param); }
+export function Query(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('query', param); }
 /**
  * Define a Header param
  * @param param The parma configuration or name
  * @augments `@trv:rest/Param`
  */
-export function Header(param: string | Partial<ParamConfig> = {}) { return Param('header', param); }
+export function Header(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('header', param); }
 /**
  * Define a body param as an input
  * @param param The parma configuration
  * @augments `@trv:rest/Param`
  */
-export function Body(param: Partial<ParamConfig> = {}) { return Param('body', param); }
+export function Body(param: Partial<ParamConfig> = {}): ParamDecorator { return Param('body', param); }
 
 /**
  * Define the query parameters as a schema class
  * @param config The schema configuration
  * @augments `@trv:rest/Param`
  */
-export function QuerySchema(config: Partial<ParamConfig> & { view?: string, key?: string } = {}) {
+export function QuerySchema(config: Partial<ParamConfig> & { view?: string, key?: string } = {}): ParamDecorator {
   return Param('query', querySchemaParamConfig(config));
 }
 

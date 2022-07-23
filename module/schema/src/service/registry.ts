@@ -1,12 +1,13 @@
-import { Class, AppError, Util } from '@travetto/base';
+import { Class, AppError, Util, ClassInstance } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig } from './types';
+import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig } from './types';
 import { SchemaChangeListener } from './changes';
 import { BindUtil } from '../bind-util';
 import { AllViewⲐ } from '../internal/types';
 
 function hasType<T>(o: unknown): o is { type: Class<T> | string } {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !Util.isPrimitive(o) && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
 }
 
@@ -24,31 +25,31 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     super(RootRegistry);
   }
 
-  #computeSubTypeName(cls: Class) {
+  #computeSubTypeName(cls: Class): string {
     if (!this.#typeKeys.has(cls)) {
       this.#typeKeys.set(cls, cls.name
         .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
         .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
         .toLowerCase());
     }
-    return this.#typeKeys.get(cls);
+    return this.#typeKeys.get(cls)!;
   }
 
   /**
    * Get subtype name for a class
    * @param cls Base class
    */
-  getSubTypeName(cls: Class) {
+  getSubTypeName(cls: Class): string | undefined {
     if (this.get(cls).subType) {
       return this.#computeSubTypeName(cls);
     }
   }
 
   /**
-   * Ensure type is set properl
+   * Ensure type is set properly
    */
-  ensureInstanceTypeField<T>(cls: Class, o: T) {
-    const withType = (o as { type?: string });
+  ensureInstanceTypeField<T>(cls: Class, o: T): void {
+    const withType: { type?: string } = o;
     if (this.get(cls)?.subType && 'type' in this.get(cls).views[AllViewⲐ].schema && !withType.type) {  // Do we have a type field defined
       withType.type = this.#computeSubTypeName(cls); // Assign if missing
     }
@@ -59,8 +60,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param cls Class for instance
    * @param o Actual instance
    */
-  resolveSubTypeForInstance<T>(cls: Class<T>, o: T) {
-    return this.resolveSubType(cls, hasType<T>(o) ? o.type : (o as unknown as { constructor: Class<T> }).constructor);
+  resolveSubTypeForInstance<T>(cls: Class<T>, o: T): Class {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return this.resolveSubType(cls, hasType<T>(o) ? o.type : (o as unknown as ClassInstance<T>).constructor);
   }
 
   /**
@@ -88,7 +90,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param cls The class to register against
    * @param type The subtype name
    */
-  registerSubTypes(cls: Class, type?: string) {
+  registerSubTypes(cls: Class, type?: string): string {
     // Mark as subtype
     (this.get(cls) ?? this.getOrCreatePending(cls)).subType = true;
 
@@ -118,7 +120,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param curr The new class
    * @param path The path within the object hierarchy
    */
-  trackSchemaDependencies(cls: Class, curr: Class = cls, path: FieldConfig[] = []) {
+  trackSchemaDependencies(cls: Class, curr: Class = cls, path: FieldConfig[] = []): void {
     const config = this.get(curr);
 
     SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.get(cls));
@@ -132,7 +134,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     }
   }
 
-  createPending(cls: Class) {
+  createPending(cls: Class): ClassConfig {
     return {
       class: cls,
       validators: [],
@@ -149,9 +151,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   /**
    * Get schema for a given view
    * @param cls The class to retrieve the schema for
-   * @param view Thee view name
+   * @param view The view name
    */
-  getViewSchema<T>(cls: Class<T>, view?: string | typeof AllViewⲐ) {
+  getViewSchema<T>(cls: Class<T>, view?: string | typeof AllViewⲐ): ViewConfig {
     view = view ?? AllViewⲐ;
 
     const schm = this.get(cls)!;
@@ -206,11 +208,13 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param view View name
    * @param fields Fields to register
    */
-  registerPendingView<T>(target: Class<T>, view: string, fields: ViewFieldsConfig<T>) {
+  registerPendingView<T>(target: Class<T>, view: string, fields: ViewFieldsConfig<T>): void {
     if (!this.#pendingViews.has(target)) {
       this.#pendingViews.set(target, new Map());
     }
-    this.#pendingViews.get(target)!.set(view, fields as ViewFieldsConfig<unknown>);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const generalConfig = fields as unknown as ViewFieldsConfig<unknown>;
+    this.#pendingViews.get(target)!.set(view, generalConfig);
   }
 
   /**
@@ -220,7 +224,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param idx The param index
    * @param config The config to register
    */
-  registerPendingParamFacet(target: Class, prop: string, idx: number, config: Partial<FieldConfig>) {
+  registerPendingParamFacet(target: Class, prop: string, idx: number, config: Partial<FieldConfig>): Class {
     config.index = idx;
     return this.registerPendingFieldFacet(target, `${prop}.${idx}`, config);
   }
@@ -231,11 +235,13 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param prop The property name
    * @param config The config to register
    */
-  registerPendingFieldFacet(target: Class, prop: string, config: Partial<FieldConfig>) {
+  registerPendingFieldFacet(target: Class, prop: string, config: Partial<FieldConfig>): Class {
     const allViewConf = this.getOrCreatePending(target).views![AllViewⲐ];
 
     if (!allViewConf.schema[prop]) {
       allViewConf.fields.push(prop);
+      // Partial config while building
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       allViewConf.schema[prop] = {} as FieldConfig;
     }
 
@@ -252,7 +258,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param type List of types
    * @param conf Extra config
    */
-  registerPendingParamConfig(target: Class, method: string, idx: number, type: ClassList, conf?: Partial<FieldConfig>) {
+  registerPendingParamConfig(target: Class, method: string, idx: number, type: ClassList, conf?: Partial<FieldConfig>): Class {
     conf ??= {};
     conf.index = idx;
     return this.registerPendingFieldConfig(target, `${method}.${idx}`, type, conf);
@@ -265,7 +271,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param type List of types
    * @param conf Extra config
    */
-  registerPendingFieldConfig(target: Class, prop: string, type: ClassList, conf?: Partial<FieldConfig>) {
+  registerPendingFieldConfig(target: Class, prop: string, type: ClassList, conf?: Partial<FieldConfig>): Class {
     const fieldConf: FieldConfig = {
       owner: target,
       name: prop,
@@ -282,14 +288,14 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param dest Target config
    * @param src Source config
    */
-  mergeConfigs(dest: ClassConfig, src: ClassConfig) {
+  mergeConfigs(dest: ClassConfig, src: Partial<ClassConfig>): ClassConfig {
     dest.views[AllViewⲐ] = {
-      schema: { ...dest.views[AllViewⲐ].schema, ...src.views[AllViewⲐ].schema },
-      fields: [...dest.views[AllViewⲐ].fields, ...src.views[AllViewⲐ].fields]
+      schema: { ...dest.views[AllViewⲐ].schema, ...src.views?.[AllViewⲐ].schema },
+      fields: [...dest.views[AllViewⲐ].fields, ...src.views?.[AllViewⲐ].fields ?? []]
     };
     dest.subType = src.subType || dest.subType;
     dest.title = src.title || dest.title;
-    dest.validators = [...src.validators, ...dest.validators];
+    dest.validators = [...src.validators ?? [], ...dest.validators];
     return dest;
   }
 
@@ -298,32 +304,32 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param target The target class
    * @param conf The class config
    */
-  finalizeViews<T>(target: Class<T>, conf: ClassConfig) {
+  finalizeViews<T>(target: Class<T>, conf: ClassConfig): ClassConfig {
     const allViewConf = conf.views![AllViewⲐ];
-    const pending = this.#pendingViews.get(target) ?? new Map<string, ViewFieldsConfig<unknown>>();
+    const pending = this.#pendingViews.get(target) ?? new Map<string, ViewFieldsConfig<string>>();
     this.#pendingViews.delete(target);
 
     for (const [view, fields] of pending.entries()) {
-      const withoutSet = 'without' in fields ? new Set(fields.without as string[]) : undefined;
+      const withoutSet = 'without' in fields ? new Set<string>(fields.without) : undefined;
       const fieldList = withoutSet ?
         allViewConf.fields.filter(x => !withoutSet.has(x)) :
-        ('with' in fields ? fields.with as string[] : []);
+        ('with' in fields ? fields.with : []);
 
       conf.views![view] = {
-        fields: fieldList as string[],
-        schema: fieldList.reduce((acc, v) => {
+        fields: fieldList,
+        schema: fieldList.reduce<SchemaConfig>((acc, v) => {
           acc[v] = allViewConf.schema[v];
           return acc;
-        }, {} as SchemaConfig)
+        }, {})
       };
     }
 
     return conf;
   }
 
-  onInstallFinalize(cls: Class) {
+  onInstallFinalize(cls: Class): ClassConfig {
 
-    let config: ClassConfig = this.createPending(cls) as ClassConfig;
+    let config: ClassConfig = this.createPending(cls);
 
     // Merge parent
     const parent = this.getParentClass(cls);
@@ -339,7 +345,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     // Merge pending, back on top, to allow child to have higher precedence
     const pending = this.getOrCreatePending(cls);
     if (pending) {
-      config = this.mergeConfigs(config, pending as ClassConfig);
+      config = this.mergeConfigs(config, pending);
     }
 
     // Write views out
@@ -348,7 +354,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     return config;
   }
 
-  override onInstall(cls: Class, e: ChangeEvent<Class>) {
+  override onInstall(cls: Class, e: ChangeEvent<Class>): void {
     super.onInstall(cls, e);
 
     if (this.has(cls)) { // Track dependencies of schemas
@@ -356,7 +362,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     }
   }
 
-  override onUninstall<T>(cls: Class<T>, e: ChangeEvent<Class>) {
+  override onUninstall<T>(cls: Class<T>, e: ChangeEvent<Class>): void {
     super.onUninstall(cls, e);
     if (e.type === 'removing' && this.hasExpired(cls)) {
       // Recompute subtypes
@@ -374,7 +380,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     }
   }
 
-  override emit(ev: ChangeEvent<Class>) {
+  override emit(ev: ChangeEvent<Class>): void {
     super.emit(ev);
     if (ev.type === 'changed') {
       SchemaChangeListener.emitFieldChanges({

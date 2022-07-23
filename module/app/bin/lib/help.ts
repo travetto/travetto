@@ -8,7 +8,7 @@ export class HelpUtil {
   /**
    * Convert single ApplicationConfig into a stylized entry
    */
-  static getAppUsage(app: ApplicationConfig) {
+  static getAppUsage(app: ApplicationConfig): string {
     let usage = app.name;
 
     if (app.params) {
@@ -19,6 +19,7 @@ export class HelpUtil {
         }
         return !p.required ?
           (p.default !== undefined ?
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             color`[${{ param: p.name }}:${{ type }}=${{ input: p.default as string }}]` :
             color`[${{ param: p.name }}:${{ type }}]`
           ) : color`${{ param: p.name }}:${{ type }}`;
@@ -31,12 +32,12 @@ export class HelpUtil {
   /**
    * Generate list of all help entries
    */
-  static generateAppHelpList(confs: ApplicationConfig[] | undefined) {
+  static generateAppHelpList(configs: ApplicationConfig[] | undefined): string {
     const choices = [];
-    if (!confs || !confs.length) {
+    if (!configs || !configs.length) {
       return color`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
     }
-    for (const conf of confs) {
+    for (const conf of configs) {
       const lines = [];
 
       const usage = this.getAppUsage(conf);

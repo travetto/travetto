@@ -16,17 +16,19 @@ export type VisitStack = {
   index?: number;
 };
 
+type FieldCacheEntry = {
+  local: FieldConfig[];
+  localMap: Record<string, FieldConfig>;
+  foreign: FieldConfig[];
+  foreignMap: Record<string, FieldConfig>;
+};
+
 /**
  * Utilities for dealing with SQL operations
  */
 export class SQLUtil {
 
-  static SCHEMA_FIELDS_CACHE = new Map<Class, {
-    local: FieldConfig[];
-    localMap: Record<string, FieldConfig>;
-    foreign: FieldConfig[];
-    foreignMap: Record<string, FieldConfig>;
-  }>();
+  static SCHEMA_FIELDS_CACHE = new Map<Class, FieldCacheEntry>();
 
   /**
    * Creates a new visitation stack with the class as the root
@@ -44,6 +46,7 @@ export class SQLUtil {
     if (Array.isArray(o)) {
       return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x));
     } else if (!Util.isSimple(o)) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       for (const k of Object.keys(o) as (keyof T)[]) {
         if (o[k] === null || o[k] === undefined || k === dct.parentPathField.name || k === dct.pathField.name || k === dct.idxField.name) {
           delete o[k];
@@ -51,8 +54,10 @@ export class SQLUtil {
           o[k] = this.cleanResults(dct, o[k]);
         }
       }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return { ...o } as unknown as U[];
     } else {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return o as unknown as U;
     }
   }
@@ -60,7 +65,7 @@ export class SQLUtil {
   /**
    * Get all available fields at current stack path
    */
-  static getFieldsByLocation(stack: VisitStack[]) {
+  static getFieldsByLocation(stack: VisitStack[]): FieldCacheEntry {
     const top = stack[stack.length - 1];
     const cls = SchemaRegistry.get(top.type);
 
@@ -69,6 +74,7 @@ export class SQLUtil {
     }
 
     if (!cls) { // If a simple type, it is it's own field
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const field = { ...top } as FieldConfig;
       return {
         local: [field], localMap: { [field.name]: field },
@@ -94,9 +100,9 @@ export class SQLUtil {
       }
     }
 
-    const ret = {
-      localMap: {} as Record<string, FieldConfig>,
-      foreignMap: {} as Record<string, FieldConfig>,
+    const ret: FieldCacheEntry = {
+      localMap: {},
+      foreignMap: {},
       local: fields.filter(x => !SchemaRegistry.has(x.type) && !x.array),
       foreign: fields.filter(x => SchemaRegistry.has(x.type) || x.array)
     };
@@ -112,11 +118,11 @@ export class SQLUtil {
   /**
    * Process a schema structure, synchronously
    */
-  static visitSchemaSync(config: ClassConfig | FieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }) {
+  static visitSchemaSync(config: ClassConfig | FieldConfig, handler: VisitHandler<void>, state: VisitState = { path: [] }): void {
     const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
-    const descend = () => {
+    const descend = (): void => {
       for (const field of foreign) {
         if (SchemaRegistry.has(field.type)) {
           this.visitSchemaSync(field, handler, { path });
@@ -140,11 +146,11 @@ export class SQLUtil {
   /**
    * Visit a Schema structure
    */
-  static async visitSchema(config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }) {
+  static async visitSchema(config: ClassConfig | FieldConfig, handler: VisitHandler<Promise<void>>, state: VisitState = { path: [] }): Promise<void> {
     const path = 'class' in config ? this.classToStack(config.class) : [...state.path, config];
     const { local: fields, foreign } = this.getFieldsByLocation(path);
 
-    const descend = async () => {
+    const descend = async (): Promise<void> => {
       for (const field of foreign) {
         if (SchemaRegistry.has(field.type)) {
           await this.visitSchema(field, handler, { path });
@@ -168,7 +174,7 @@ export class SQLUtil {
   /**
    * Process a schema instance by visiting it synchronously.  This is synchronous to prevent concurrent calls from breaking
    */
-  static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T, handler: VisitHandler<unknown, VisitInstanceNode<unknown>>) {
+  static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T, handler: VisitHandler<unknown, VisitInstanceNode<unknown>>): void {
     const pathObj: unknown[] = [instance];
     this.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: (config) => {
@@ -179,6 +185,7 @@ export class SQLUtil {
       },
       onSub: (config) => {
         const { config: field } = config;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const topObj = pathObj[pathObj.length - 1] as Record<string, unknown>;
         const top = config.path[config.path.length - 1];
 
@@ -202,6 +209,7 @@ export class SQLUtil {
       },
       onSimple: (config) => {
         const { config: field } = config;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const topObj = pathObj[pathObj.length - 1] as Record<string, unknown>;
         const value = topObj[field.name];
         return handler.onSimple({ ...config, value });
@@ -214,7 +222,7 @@ export class SQLUtil {
    */
   static select<T>(cls: Class<T>, select?: SelectClause<T>): FieldConfig[] {
     if (!select || Object.keys(select).length === 0) {
-      return [{ type: cls, name: '*' } as FieldConfig];
+      return [{ type: cls, name: '*', owner: cls, array: false }];
     }
 
     const { localMap } = this.getFieldsByLocation(this.classToStack(cls));
@@ -222,7 +230,9 @@ export class SQLUtil {
     let toGet = new Set<string>();
 
     for (const [k, v] of Object.entries(select)) {
-      if (!Util.isPlainObject(select[k as keyof typeof select]) && localMap[k]) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const typedKey = k as keyof typeof select;
+      if (!Util.isPlainObject(select[typedKey]) && localMap[k]) {
         if (!v) {
           if (toGet.size === 0) {
             toGet = new Set(SchemaRegistry.get(cls).views[AllViewⲐ].fields);
@@ -254,6 +264,7 @@ export class SQLUtil {
         } else {
           stack.push(field);
           schema = SchemaRegistry.get(field.type);
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           cl = val as Record<string, unknown>;
         }
       }
@@ -264,18 +275,24 @@ export class SQLUtil {
   /**
    * Find all dependent fields via child tables
    */
-  static collectDependents<T>(dct: DialectState, parent: unknown, v: T[], field?: FieldConfig) {
+  static collectDependents<T>(dct: DialectState, parent: unknown, v: T[], field?: FieldConfig): Record<string, T> {
     if (field) {
       const isSimple = SchemaRegistry.has(field.type);
       for (const el of v) {
-        const root = (parent as { [k: string]: unknown })[el[dct.parentPathField.name as keyof T] as unknown as string] as unknown as Record<string, unknown>;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const parentKey = el[dct.parentPathField.name as keyof T] as unknown as string;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const root = (parent as Record<string, Record<string, unknown>>)[parentKey];
         if (field.array) {
           if (!root[field.name]) {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             root[field.name] = [isSimple ? el : el[field.name as keyof T]];
           } else {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             (root[field.name] as unknown[]).push(isSimple ? el : el[field.name as keyof T]);
           }
         } else {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           root[field.name] = isSimple ? el : el[field.name as keyof T];
         }
       }
@@ -283,6 +300,7 @@ export class SQLUtil {
 
     const mapping: Record<string, T> = {};
     for (const el of v) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const key = el[dct.pathField.name as keyof T];
       if (typeof key === 'string') {
         mapping[key] = el;
@@ -294,7 +312,7 @@ export class SQLUtil {
   /**
    * Build table name via stack path
    */
-  static buildTable(list: VisitStack[]) {
+  static buildTable(list: VisitStack[]): string {
     const top = list[list.length - 1];
     if (!top[TableⲐ]) {
       top[TableⲐ] = list.map((el, i) => i === 0 ? ModelRegistry.getStore(el.type) : el.name).join('_');
@@ -305,7 +323,7 @@ export class SQLUtil {
   /**
    * Build property path for a table/field given the current stack
    */
-  static buildPath(list: VisitStack[]) {
+  static buildPath(list: VisitStack[]): string {
     return list.map((el, i) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
   }
 
@@ -313,9 +331,9 @@ export class SQLUtil {
    * Get insert statements for a given class, and its child tables
    */
   static async getInserts<T extends ModelType>(cls: Class<T>, els: T[]): Promise<InsertWrapper[]> {
-    const ins = {} as Record<string, InsertWrapper>;
+    const ins: Record<string, InsertWrapper> = {};
 
-    const track = (stack: VisitStack[], value: unknown) => {
+    const track = (stack: VisitStack[], value: unknown): void => {
       const key = this.buildTable(stack);
       (ins[key] = ins[key] ?? { stack, records: [] }).records.push({ stack, value });
     };

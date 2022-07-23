@@ -15,6 +15,7 @@ export class JWTUtil {
       ...options.header
     };
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     payload = { ...(payload as object) } as T;
 
     const now = Math.trunc(Date.now() / 1000);
@@ -32,6 +33,7 @@ export class JWTUtil {
     }
 
     const opts = {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       header: header as jws.Header,
       privateKey,
       payload: JSON.stringify(payload),
@@ -40,8 +42,8 @@ export class JWTUtil {
 
     try {
       return jws.sign(opts);
-    } catch (err: any) {
-      throw new JWTError(err.message);
+    } catch (err) {
+      throw new JWTError(err instanceof Error ? err.message : `${err}`);
     }
   }
 
@@ -59,7 +61,7 @@ export class JWTUtil {
       throw new JWTError('malformed token');
     }
 
-    const decoded = jws.decode(jwt) as TypedSig<T>;
+    const decoded: TypedSig<T> = jws.decode(jwt);
 
     if (!decoded) {
       throw new JWTError('invalid token', { token: jwt });
@@ -67,6 +69,7 @@ export class JWTUtil {
 
     if (typeof decoded.payload === 'string' && /^[{\[]/.test(decoded.payload)) {
       try {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         decoded.payload = JSON.parse(decoded.payload as 'string');
       } catch { }
     }

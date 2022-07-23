@@ -8,7 +8,7 @@ export type Point = [number, number];
 const INVALID = Symbol.for('invalid-point');
 
 export class PointImpl {
-  static validateSchema(input: unknown) {
+  static validateSchema(input: unknown): 'type' | undefined {
     const ret = this.bindSchema(input);
     return ret !== INVALID && ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
   }

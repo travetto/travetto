@@ -2,12 +2,13 @@ import { AllType, node as n } from '../nodes';
 import { DocNode, Renderer } from '../types';
 import { AllChildren, RenderContext } from './context';
 
-const titleCase = (a: string) => a.replace(/^[a-z]/, v => v.toUpperCase());
+const titleCase = (a: string): string => a.replace(/^[a-z]/, v => v.toUpperCase());
 
 export const Markdown: Renderer = {
   ext: 'md',
   render(c: AllChildren, context: RenderContext, root: AllType = c) {
-    const recurse = (s: AllChildren | DocNode) => this.render(s as AllChildren, context, root);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const recurse = (s: AllChildren | DocNode): string => this.render(s as AllChildren, context, root);
     switch (c._type) {
       case 'toc': return recurse(n.Group([n.SubSection(c.title), context.toc(root)]));
       case 'strong': return `**${recurse(c.content)}**`;

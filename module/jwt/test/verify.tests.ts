@@ -76,7 +76,7 @@ class VerifySuite {
     assert.deepEqual(p2, payload);
 
     await assert.rejects(
-      () => JWTUtil.verify(token, { ...options, key: Promise.reject('key not found') }),
+      () => JWTUtil.verify(token, { ...options, key: Promise.reject(new Error('key not found')) }),
       'key not found');
   }
 }

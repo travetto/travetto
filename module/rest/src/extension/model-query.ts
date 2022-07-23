@@ -28,7 +28,8 @@ export class RestModelSuggestQuery {
   offset?: number;
 }
 
-const convert = <T>(k?: string) => k && typeof k === 'string' && /^[\{\[]/.test(k) ? JSON.parse(k) as T : k;
+const convert = <T>(k?: string): T | undefined =>
+  k && typeof k === 'string' && /^[\{\[]/.test(k) ? JSON.parse(k) : undefined;
 
 /**
  * Provides a basic query controller for a given model:
@@ -36,20 +37,21 @@ const convert = <T>(k?: string) => k && typeof k === 'string' && /^[\{\[]/.test(
  * - query for all
  * - suggest a field
  */
-export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
-  function getCls() {
+export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>): (target: Class<Svc>) => void {
+  function getCls(): Class<T> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return ModelRegistry.get(cls).class as Class<T>;
   }
 
   return (target: Class<Svc>) => {
     const inst = { constructor: target };
 
-    function getAll(this: Svc, full: RestModelQuery) {
+    function getAll(this: Svc, full: RestModelQuery): Promise<T[]> {
       if (isQuerySupported(this.source)) {
         return this.source.query(getCls(), {
           limit: full.limit,
           offset: full.offset,
-          sort: convert(full.sort) as SortClause<T>[],
+          sort: convert<SortClause<T>[]>(full.sort),
           where: convert(full.where)
         });
       } else {
@@ -73,7 +75,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>) {
     ControllerRegistry.registerEndpointParameter(target, getAll, querySchemaParamConfig(), 0);
     Field(RestModelQuery)(inst, 'getAll', 0);
 
-    function suggestField(this: Svc, field: ValidStringFields<T>, suggest: RestModelSuggestQuery) {
+    function suggestField(this: Svc, field: ValidStringFields<T>, suggest: RestModelSuggestQuery): Promise<T[]> {
       if (isQuerySuggestSupported(this.source)) {
         return this.source.suggest<T>(getCls(), field, suggest.q, suggest);
       } else {

@@ -1,6 +1,6 @@
 import { AllConfigPartial } from '../bin/operation/pack';
 
-const mod = (f: string) => `node_modules/${f}`;
+const mod = (f: string): string => `node_modules/${f}`;
 
 export const config: AllConfigPartial = {
   name: 'default',

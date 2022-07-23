@@ -17,7 +17,7 @@ export class AppRunFeature extends BaseFeature {
   #storage = new ActionStorage<AppChoice>('app.run', Workspace.path);
 
   #runner(title: string, choices: () => Promise<AppChoice[] | AppChoice | undefined>, line?: number) {
-    return async () => {
+    return async (): Promise<void> => {
       const choice = await choices();
       if (choice) {
         await this.runApplication(title, choice, line);
@@ -28,7 +28,7 @@ export class AppRunFeature extends BaseFeature {
   /**
    * Get list of applications
    */
-  async getAppList() {
+  async getAppList(): Promise<AppChoice[]> {
     await Workspace.buildCode();
     const choices = await Workspace.runMain<AppChoice[]>(Workspace.binPath(this.module, 'list-get'), [], { format: 'json' });
     return choices.map(x => {
@@ -56,7 +56,7 @@ export class AppRunFeature extends BaseFeature {
    * @param title
    * @param choices
    */
-  async resolveChoices(title: string, choices: AppChoice[] | AppChoice) {
+  async resolveChoices(title: string, choices: AppChoice[] | AppChoice): Promise<AppChoice | undefined> {
     const choice = await AppSelectorUtil.resolveChoices(title, choices);
     if (choice) {
       const key = `${choice.targetId}#${choice.name}:${choice.inputs.join(',')}`;
@@ -69,7 +69,7 @@ export class AppRunFeature extends BaseFeature {
    * Get full launch config
    * @param choice
    */
-  getLaunchConfig(choice: AppChoice) {
+  getLaunchConfig(choice: AppChoice): ReturnType<(typeof Workspace)['generateLaunchConfig']> {
     const args = choice.inputs.map(x => `${x}`.replace(Workspace.path, '.')).join(', ');
 
     const config = Workspace.generateLaunchConfig(
@@ -85,7 +85,7 @@ export class AppRunFeature extends BaseFeature {
   /**
    * Persist config
    */
-  async exportLaunchConfig() {
+  async exportLaunchConfig(): Promise<void> {
     try {
       const choice = await this.resolveChoices('Export Application Launch', await this.getValidRecent(10));
 
@@ -101,8 +101,8 @@ export class AppRunFeature extends BaseFeature {
       await launchConfig.update('configurations', configurations, false);
 
       vscode.window.showInformationMessage('Added new configuration to launch.json!');
-    } catch (err: any) {
-      vscode.window.showErrorMessage(err.message);
+    } catch (err) {
+      vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
     }
   }
 
@@ -111,7 +111,7 @@ export class AppRunFeature extends BaseFeature {
    * @param title
    * @param apps
    */
-  async runApplication(title: string, apps: AppChoice[] | AppChoice, line?: number) {
+  async runApplication(title: string, apps: AppChoice[] | AppChoice, line?: number): Promise<void> {
     try {
       const choice = await this.resolveChoices(title, apps);
 
@@ -128,8 +128,8 @@ export class AppRunFeature extends BaseFeature {
       }
 
       await vscode.debug.startDebugging(Workspace.folder, this.getLaunchConfig(choice));
-    } catch (err: any) {
-      vscode.window.showErrorMessage(err.message);
+    } catch (err) {
+      vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
     }
   }
 
@@ -137,7 +137,7 @@ export class AppRunFeature extends BaseFeature {
    * Build code lenses for a given document
    * @param doc
    */
-  async buildCodeLenses(doc: vscode.TextDocument) {
+  async buildCodeLenses(doc: vscode.TextDocument): Promise<vscode.CodeLens[] | undefined> {
     const hasApp = ' '.repeat(doc.lineCount).split('').some((x, i) => /@Application/.test(doc.lineAt(i).text));
 
     if (!hasApp) {
@@ -160,7 +160,7 @@ export class AppRunFeature extends BaseFeature {
   /**
    * Register command handlers
    */
-  activate() {
+  activate(): void {
     this.register('new', (name?: string, line?: number) =>
       this.#runner('Run New Application', async () => {
         const list = await this.getAppList();

@@ -48,7 +48,7 @@ export class SchemaTransformUtil {
               ), { type: v, root })
             )
           );
-          cls.getText = () => '';
+          cls.getText = (): string => '';
           state.addStatement(cls, root || node);
         }
         return id;
@@ -120,7 +120,7 @@ export class SchemaTransformUtil {
 
     if (ts.isParameter(node)) {
       const comments = DocUtil.describeDocs(node.parent);
-      const commentConfig = (comments.params ?? []).find(x => x.name === node.name.getText()) || {} as Partial<ParamDocumentation>;
+      const commentConfig: Partial<ParamDocumentation> = (comments.params ?? []).find(x => x.name === node.name.getText()) || {};
       if (commentConfig.description) {
         attrs.push(state.factory.createPropertyAssignment('description', state.fromLiteral(commentConfig.description)));
       }
@@ -153,15 +153,19 @@ export class SchemaTransformUtil {
         })));
       }
 
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return state.factory.updatePropertyDeclaration(node as Exclude<typeof node, T>,
         newDecs, node.modifiers, node.name, node.questionToken, node.type, node.initializer) as T;
     } else if (ts.isParameter(node)) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return state.factory.updateParameterDeclaration(node as Exclude<typeof node, T>,
         newDecs, node.modifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer) as T;
     } else if (ts.isGetAccessorDeclaration(node)) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return state.factory.updateGetAccessorDeclaration(node as Exclude<typeof node, T>,
         newDecs, node.modifiers, node.name, node.parameters, node.type, node.body) as T;
     } else {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return state.factory.updateSetAccessorDeclaration(node as Exclude<typeof node, T>,
         newDecs, node.modifiers, node.name, node.parameters, node.body) as T;
     }
@@ -170,7 +174,7 @@ export class SchemaTransformUtil {
   /**
    * Unwrap type
    */
-  static unwrapType(type: AnyType) {
+  static unwrapType(type: AnyType): { out: Record<string, unknown>, type: AnyType } {
     const out: Record<string, unknown> = {};
 
     while (type?.key === 'literal' && type.typeArguments?.length) {
@@ -210,7 +214,7 @@ export class SchemaTransformUtil {
    * @param methodName
    * @returns
    */
-  static findInnerReturnMethod(state: TransformerState, node: ts.MethodDeclaration, methodName: string) {
+  static findInnerReturnMethod(state: TransformerState, node: ts.MethodDeclaration, methodName: string): ts.MethodDeclaration | undefined {
     // Process returnType
     const { type } = this.unwrapType(state.resolveReturnType(node));
     let cls;

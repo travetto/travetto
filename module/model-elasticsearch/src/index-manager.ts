@@ -24,7 +24,7 @@ export class IndexManager implements ModelStorageSupport {
     this.#client = client;
   }
 
-  getStore(cls: Class) {
+  getStore(cls: Class): string {
     return ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');
   }
 
@@ -32,7 +32,7 @@ export class IndexManager implements ModelStorageSupport {
    * Get namespaced index
    * @param idx
    */
-  getNamespacedIndex(idx: string) {
+  getNamespacedIndex(idx: string): string {
     if (this.config.namespace) {
       return `${this.config.namespace}_${idx}`;
     } else {
@@ -55,8 +55,9 @@ export class IndexManager implements ModelStorageSupport {
   /**
    * Build alias mappings from the current state in the database
    */
-  async computeAliasMappings(force = false) {
+  async computeAliasMappings(force = false): Promise<void> {
     if (force || !this.#indexToAlias.size) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const { body: aliases } = (await this.#client.cat.aliases({
         format: 'json'
       })) as { body: { index: string, alias: string }[] };
@@ -75,7 +76,7 @@ export class IndexManager implements ModelStorageSupport {
    * @param cls
    * @param alias
    */
-  async createIndex(cls: Class, alias = true) {
+  async createIndex(cls: Class, alias = true): Promise<string> {
     const schema = ElasticsearchSchemaUtil.generateSourceSchema(cls, this.config.schemaConfig);
     const ident = this.getIdentity(cls); // Already namespaced
     const concreteIndex = `${ident.index}_${Date.now()}`;
@@ -102,7 +103,7 @@ export class IndexManager implements ModelStorageSupport {
   /**
    * Build an index if missing
    */
-  async createIndexIfMissing(cls: Class) {
+  async createIndexIfMissing(cls: Class): Promise<void> {
     cls = ModelRegistry.getBaseModel(cls);
     const ident = this.getIdentity(cls);
     try {
@@ -113,12 +114,12 @@ export class IndexManager implements ModelStorageSupport {
     }
   }
 
-  async createModel(cls: Class<ModelType>) {
+  async createModel(cls: Class<ModelType>): Promise<void> {
     await this.createIndexIfMissing(cls);
     await this.computeAliasMappings(true);
   }
 
-  async exportModel(cls: Class<ModelType>) {
+  async exportModel(cls: Class<ModelType>): Promise<string> {
     const schema = ElasticsearchSchemaUtil.generateSourceSchema(cls, this.config.schemaConfig);
     const ident = this.getIdentity(cls); // Already namespaced
     return `curl -XPOST $ES_HOST/${ident.index} -d '${JSON.stringify({
@@ -127,7 +128,7 @@ export class IndexManager implements ModelStorageSupport {
     })}'`;
   }
 
-  async deleteModel(cls: Class<ModelType>) {
+  async deleteModel(cls: Class<ModelType>): Promise<void> {
     const alias = this.getNamespacedIndex(this.getStore(cls));
     if (this.#aliasToIndex.get(alias)) {
       await this.#client.indices.delete({
@@ -140,23 +141,23 @@ export class IndexManager implements ModelStorageSupport {
   /**
    * When the schema changes
    */
-  async changeSchema(cls: Class, change: SchemaChange) {
+  async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
     // Find which fields are gone
-    const removes = change.subs.reduce((acc, v) => {
+    const removes = change.subs.reduce<string[]>((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'removing')
         .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
       return acc;
-    }, [] as string[]);
+    }, []);
 
     // Find which types have changed
-    const fieldChanges = change.subs.reduce((acc, v) => {
+    const fieldChanges = change.subs.reduce<string[]>((acc, v) => {
       acc.push(...v.fields
         .filter(ev => ev.type === 'changed')
         .filter(ev => ev.prev?.type !== ev.curr?.type)
         .map(ev => [...v.path.map(f => f.name), ev.prev!.name].join('.')));
       return acc;
-    }, [] as string[]);
+    }, []);
 
     const { index, type } = this.getIdentity(cls);
 
@@ -169,8 +170,7 @@ export class IndexManager implements ModelStorageSupport {
 
       const allChange = removes.concat(fieldChanges);
 
-      // Reindex
-      await this.#client.reindex({
+      const reindexBody: Reindex = {
         body: {
           source: { index: curr },
           dest: { index: next },
@@ -179,8 +179,11 @@ export class IndexManager implements ModelStorageSupport {
             source: allChange.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
           }
         },
-        waitForCompletion: true
-      } as Reindex);
+        wait_for_completion: true
+      };
+
+      // Reindex
+      await this.#client.reindex(reindexBody);
 
       await Promise.all(Object.keys(aliases)
         .map(x => this.#client.indices.delete({ index: x })));
@@ -197,13 +200,13 @@ export class IndexManager implements ModelStorageSupport {
     }
   }
 
-  async createStorage() {
-    // PreCreate indexes if missing
+  async createStorage(): Promise<void> {
+    // Pre-create indexes if missing
     console.debug('Create Storage', { idx: this.getNamespacedIndex('*') });
     await this.computeAliasMappings(true);
   }
 
-  async deleteStorage() {
+  async deleteStorage(): Promise<void> {
     console.debug('Deleting storage', { idx: this.getNamespacedIndex('*') });
     await this.#client.indices.delete({
       index: this.getNamespacedIndex('*')

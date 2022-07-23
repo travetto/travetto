@@ -28,29 +28,29 @@ export class Tokenizer {
   /**
    * Test to see if identifier is starting
    */
-  static isIdentifierStart = (c: number) => c >= 65 && c <= 91 || c >= 97 && c <= 123 || c === 36 || c === 95;
+  static isIdentifierStart = (c: number): boolean => c >= 65 && c <= 91 || c >= 97 && c <= 123 || c === 36 || c === 95;
   /**
    * Test to see if identifier is complete
    */
-  static isIdentifierFull = (c: number) => Tokenizer.isIdentifierStart(c) || c >= 48 && c <= 57;
+  static isIdentifierFull = (c: number): boolean => Tokenizer.isIdentifierStart(c) || c >= 48 && c <= 57;
 
   /**
    * Test for comment
    */
-  static isComment = (ch: string, pos: number) => {
+  static isComment = (ch: string, pos: number): boolean => {
     const c = ch.charCodeAt(pos);
     return c === HASH || (c === DASH && ch.charCodeAt(pos + 1) === c && ch.charCodeAt(pos + 2) === c);
   };
   /**
    * Test for whitespace
    */
-  static isWhitespace = (c: number) => c === SPC || c === TAB || c === NEWLINE || c === CR;
-  static isWhitespaceStr = (c: string) => Tokenizer.isWhitespace(c.charCodeAt(0));
+  static isWhitespace = (c: number): boolean => c === SPC || c === TAB || c === NEWLINE || c === CR;
+  static isWhitespaceStr = (c: string): boolean => Tokenizer.isWhitespace(c.charCodeAt(0));
 
   /**
    * Handle replacing key pieces within text
    */
-  static handleReplacements(text: string, replacements: [string, number, number][]) {
+  static handleReplacements(text: string, replacements: [string, number, number][]): string {
     const out: string[] = [];
     let replPos = 0;
     for (const [o, s, l] of replacements) {
@@ -64,7 +64,7 @@ export class Tokenizer {
   /**
    * Read quote from the text
    */
-  static readQuote(text: string, pos: number, end: number) {
+  static readQuote(text: string, pos: number, end: number): [number, string] {
     const start = pos;
     const ch = text.charCodeAt(pos++);
     while (text.charCodeAt(pos) !== ch && pos < end) {
@@ -73,24 +73,24 @@ export class Tokenizer {
     if (pos === end) {
       throw new Error('Unterminated string literal');
     }
-    return [pos, text.substring(start, pos + 1)] as [number, string];
+    return [pos, text.substring(start, pos + 1)];
   }
 
   /**
    * Read identifier from the text
    */
-  static readIdentifier(text: string, pos: number, end: number) {
+  static readIdentifier(text: string, pos: number, end: number): [number, string] {
     const start = pos++;
     while (this.isIdentifierFull(text.charCodeAt(pos)) && pos < end) {
       pos += 1;
     }
-    return [pos, text.substring(start, pos)] as [number, string];
+    return [pos, text.substring(start, pos)];
   }
 
   /**
    * Parse JSON sub-document as it is valid YAML
    */
-  static readJSON(text: string, pos: number = 0, end: number = text.length) {
+  static readJSON(text: string, pos: number = 0, end: number = text.length): [number, string] {
     const start = pos;
     const stack: number[] = [];
     const replacements: [string, number, number][] = [];
@@ -130,20 +130,20 @@ export class Tokenizer {
       final = this.handleReplacements(final, replacements);
     }
 
-    return [pos, final] as [number, string];
+    return [pos, final];
   }
 
   /**
    * Get total indentation from the tokens
    */
-  static getIndent(tokens: string[]) {
+  static getIndent(tokens: string[]): number {
     return this.isWhitespaceStr(tokens[0]) ? tokens[0].length : 0;
   }
 
   /**
    * Clean token list, removing unneeded pieces
    */
-  static cleanTokens(tokens: string[]) {
+  static cleanTokens(tokens: string[]): string[] {
     let start = 0;
     let end = tokens.length;
     if (this.isWhitespaceStr(tokens[0])) {
@@ -166,7 +166,7 @@ export class Tokenizer {
   /**
    * Tokenize a piece of text, starting at pos, and running until end
    */
-  static tokenize(text: string, pos: number = 0, end: number = text.length) {
+  static tokenize(text: string, pos: number = 0, end: number = text.length): string[] {
     const tokens: string[] = [];
     let token = '';
 

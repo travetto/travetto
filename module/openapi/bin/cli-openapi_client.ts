@@ -6,7 +6,7 @@ import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { AppCache, ExecUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
-const presets = JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', 'resources', 'presets.json'), 'utf8')) as Record<string, [string, object] | [string]>;
+const presets: Record<string, [string, object] | [string]> = JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', 'resources', 'presets.json'), 'utf8'));
 
 /**
  * CLI for generating the cli client
@@ -14,11 +14,11 @@ const presets = JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', 'r
 export class OpenApiClientPlugin extends BasePlugin {
   name = 'openapi:client';
 
-  presetMap(prop?: object) {
+  presetMap(prop?: object): string {
     return !prop || Object.keys(prop).length === 0 ? '' : Object.entries(prop).map(([k, v]) => `${k}=${v}`).join(',');
   }
 
-  getListOfFormats() {
+  getListOfFormats(): string[] {
     const json = AppCache.getOrSet('openapi-formats.json', () => {
       const stdout = ExecUtil.execSync('docker', ['run', '--rm', this.cmd.dockerImage, 'list']);
       const lines = stdout
@@ -31,9 +31,11 @@ export class OpenApiClientPlugin extends BasePlugin {
         ...lines.sort(),
       ]);
     });
-    return JSON.parse(json) as string[];
+    const list: string[] = JSON.parse(json);
+    return list;
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return {
       extendedHelp: this.boolOption({ name: 'extended-help', short: 'x', desc: 'Show Extended Help' }),
@@ -45,7 +47,7 @@ export class OpenApiClientPlugin extends BasePlugin {
     };
   }
 
-  help() {
+  help(): string {
     const presetLen = Math.max(...Object.keys(presets).map(x => x.length));
     const presetEntries = Object
       .entries(presets)
@@ -65,11 +67,11 @@ ${this.getListOfFormats().map(x => color`* ${{ input: x }}`).join('\n')} `;
     return this.cmd.extendedHelp ? `${presetText}\n${formatText}` : presetText;
   }
 
-  getArgs() {
+  getArgs(): string {
     return '[format-or-preset]';
   }
 
-  async action(format: string) {
+  async action(format: string): Promise<void> {
     if (!format) {
       this.showHelp(new Error('Format is required'));
     }
@@ -90,7 +92,7 @@ ${this.getListOfFormats().map(x => color`* ${{ input: x }}`).join('\n')} `;
 
     const args = [
       'run',
-      '--user', `${process.geteuid()}:${process.getgid()}`,
+      '--user', `${process.geteuid?.()}:${process.getgid?.()}`,
       '-v', `${this.cmd.output}:/workspace`,
       '-v', `${path.dirname(this.cmd.input)}:/input`,
       '-it',

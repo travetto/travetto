@@ -18,8 +18,9 @@ export class ModelQueryUtil {
    * @param val
    * @returns
    */
-  static resolveComparator(val: unknown) {
+  static resolveComparator(val: unknown): unknown {
     if (typeof val === 'string') {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return Util.timeFromNow(val as '1m');
     } else {
       return val;
@@ -29,10 +30,10 @@ export class ModelQueryUtil {
   /**
    * Verify result set is singular, and decide if failing on many should happen
    */
-  static verifyGetSingleCounts<T>(cls: Class<T>, res?: T[], failOnMany = true) {
+  static verifyGetSingleCounts<T>(cls: Class<T>, res?: T[], failOnMany = true): T {
     res = res ?? [];
     if (res.length === 1 || res.length > 1 && !failOnMany) {
-      return res[0] as T;
+      return res[0]!;
     }
     throw res.length === 0 ? new NotFoundError(cls, 'none') : new AppError(`Invalid number of results for find by id: ${res.length}`, 'data');
   }
@@ -41,14 +42,16 @@ export class ModelQueryUtil {
    * Get a where clause with type
    */
   static getWhereClause<T extends ModelType>(cls: Class<T>, o: WhereClause<T> | string | undefined, checkExpiry = true): WhereClause<T> {
-    let q = o ? (typeof o === 'string' ? QueryLanguageParser.parseToQuery(o) as WhereClause<T> : o) : undefined;
-    const clauses = (q ? [q] : []) as WhereClauseRaw<T>[];
+    let q: WhereClause<T> | undefined = o ? (typeof o === 'string' ? QueryLanguageParser.parseToQuery(o) : o) : undefined;
+    const clauses: WhereClauseRaw<T>[] = (q ? [q] : []);
 
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       clauses.push({ type: SchemaRegistry.getSubTypeName(cls) } as WhereClauseRaw<T>);
     }
     if (checkExpiry && conf.expiresAt) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       clauses.push({
         $or: [
           { [conf.expiresAt]: { $exists: false } },
@@ -67,9 +70,12 @@ export class ModelQueryUtil {
   /**
    * Enrich query where clause, and verify query is correct
    */
-  static getQueryAndVerify<T extends ModelType, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U, checkExpiry = true) {
+  static getQueryAndVerify<T extends ModelType, U extends Query<T> | ModelQuery<T>>(
+    cls: Class<T>, query: U, checkExpiry = true
+  ): U & { where: WhereClause<T> } {
     query.where = this.getWhereClause(cls, query.where, checkExpiry);
     QueryVerifier.verify(cls, query);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return query as U & { where: WhereClause<T> };
   }
 }

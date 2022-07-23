@@ -10,7 +10,7 @@ npm install @travetto/app
 
 The [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Application phase management, environment config and common utilities for travetto applications.") module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) who's job is to register entry points into the application, along with the associated  metadata. 
 
-With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), the [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) is a synonym for [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L30), and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
+With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), the [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) is a synonym for [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L32), and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
 
 For example:
 
@@ -154,12 +154,15 @@ $ trv run simple-domain mydomain.biz 4000
 Running application { name: 'simple-domain', filename: './doc/domain.ts' }
 Manifest {
   info: {
-    framework: '2.0.2',
+    framework: '2.1.3',
     name: '@travetto/app',
     description: 'Application registration/management and run support.',
-    version: '2.0.5',
+    version: '2.1.5',
     license: 'MIT',
-    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' }
+    author: {
+      email: 'travetto.framework@gmail.com',
+      name: 'Travetto Framework'
+    }
   },
   env: {
     name: 'dev',
@@ -169,7 +172,7 @@ Manifest {
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
-    node: 'v17.4.0',
+    node: 'v18.1.0',
     dynamic: false,
     readonly: false
   },
@@ -185,7 +188,6 @@ Manifest {
       '@travetto/config': '@trv:config',
       '@travetto/di': '@trv:di',
       '@travetto/doc': '@trv:doc',
-      '@travetto/log': '@trv:log',
       '@travetto/registry': '@trv:registry',
       '@travetto/schema': '@trv:schema',
       '@travetto/test': '@trv:test',
@@ -196,7 +198,7 @@ Manifest {
     }
   }
 }
-Config
+Config {}
 Launching { domain: 'mydomain.biz', port: 4000 }
 ```
 

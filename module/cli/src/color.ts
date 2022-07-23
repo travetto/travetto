@@ -1,14 +1,6 @@
 import { ColorUtil } from '@travetto/boot/src/color';
 
-/**
- * Colorize a string, as a string interpolation
- *
- * @example
- * ```
- * color`${{title: 'Main Title'}} is ${{subtitle: 'Sub Title}}`
- * ```
- */
-export const color = ColorUtil.makeTemplate({
+const colorSet = {
   input: ColorUtil.makeColorer('yellow'),
   output: ColorUtil.makeColorer('magenta'),
   path: ColorUtil.makeColorer('cyan'),
@@ -21,4 +13,17 @@ export const color = ColorUtil.makeTemplate({
   identifier: ColorUtil.makeColorer('blue', 'bold'),
   subtitle: ColorUtil.makeColorer('white'),
   subsubtitle: ColorUtil.makeColorer('white', 'faint')
-});
+} as const;
+
+/**
+ * Colorize a string, as a string interpolation
+ *
+ * @example
+ * ```
+ * color`${{title: 'Main Title'}} is ${{subtitle: 'Sub Title}}`
+ * ```
+ */
+export const color = ColorUtil.makeTemplate(colorSet);
+
+
+export type ColoredElement = keyof typeof colorSet;

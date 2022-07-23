@@ -24,7 +24,7 @@ export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Index<T>(...indices: IndexConfig<any>[]) {
-  return function (target: Class<T>) {
+  return function (target: Class<T>): void {
     ModelRegistry.getOrCreatePending(target).indices!.push(...indices);
   };
 }
@@ -34,7 +34,8 @@ export function Index<T>(...indices: IndexConfig<any>[]) {
  * @augments `@trv:schema/Field`
  */
 export function ExpiresAt() {
-  return <K extends string, T extends Partial<Record<K, Date>>>(tgt: T, prop: K) => {
+  return <K extends string, T extends Partial<Record<K, Date>>>(tgt: T, prop: K): void => {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     ModelRegistry.register(tgt.constructor as Class<T>, { expiresAt: prop });
   };
 }

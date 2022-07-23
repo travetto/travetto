@@ -16,7 +16,7 @@ export class AssetUtil {
   /**
    * Compute hash from a file location on disk
    */
-  static async hashFile(pth: string) {
+  static async hashFile(pth: string): Promise<string> {
     const hasher = crypto.createHash('sha256').setEncoding('hex');
     const str = createReadStream(pth);
     const hashStream = str.pipe(hasher);
@@ -24,13 +24,13 @@ export class AssetUtil {
     await new Promise<void>((res, rej) => {
       hashStream.on('finish', e => e ? rej(e) : res());
     });
-    return hasher.read().toString() as string;
+    return hasher.read().toString();
   }
 
   /**
    * Read a chunk from a file, primarily used for mime detection
    */
-  static async readChunk(filePath: string, bytes: number) {
+  static async readChunk(filePath: string, bytes: number): Promise<Buffer> {
     const fd = await fs.open(filePath, 'r');
     const buffer = Buffer.alloc(bytes);
     await fd.read(buffer, 0, bytes, 0);
@@ -40,7 +40,7 @@ export class AssetUtil {
   /**
    * Detect file type from location on disk
    */
-  static async detectFileType(filePath: string) {
+  static async detectFileType(filePath: string): Promise<{ ext: string, mime: string } | undefined> {
     const fileType = await import('file-type');
     const buffer = await this.readChunk(filePath, 4100);
     return fileType.fromBuffer(buffer);
@@ -50,7 +50,7 @@ export class AssetUtil {
    * Convert file name to have proper extension if missing.
    * Extension is determined via mime type if missing.
    */
-  static async ensureFileExtension(filePath: string) {
+  static async ensureFileExtension(filePath: string): Promise<string> {
     const type = await this.resolveFileType(filePath);
     const ext = mime.getExtension(type);
     const newFile = filePath.replace(/[.][^.]+$/, ext!);
@@ -66,7 +66,7 @@ export class AssetUtil {
   /**
    * Read content type from location on disk
    */
-  static async resolveFileType(pth: string) {
+  static async resolveFileType(pth: string): Promise<string> {
     let contentType: string = path.extname(pth);
     const detected = await this.detectFileType(pth);
 

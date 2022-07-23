@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as net from 'net';
 
 import { Util } from '@travetto/base';
-import { ExecUtil } from '@travetto/boot';
+import { ExecUtil, ExecutionResult } from '@travetto/boot';
 
 /**
  * Utilities to support command execution
@@ -16,7 +16,7 @@ export class CommandUtil {
    * @param url URL to check
    * @param ms Maximum time to wait in milliseconds
    */
-  static async waitForHttp(url: string, ms = 5000) {
+  static async waitForHttp(url: string, ms = 5000): Promise<string> {
     const start = Date.now();
     const port = /:\d+/.test(url) ? parseInt(url.replace(/.*:(\d+).*/, (all, p) => p), 10) : (url.startsWith('https') ? 443 : 80);
     await this.waitForPort(port, ms);
@@ -24,7 +24,7 @@ export class CommandUtil {
     while ((Date.now() - start) < ms) {
       const [status, body] = await new Promise<[number, string]>((resolve) => {
         const data: Buffer[] = [];
-        const res = (s: number) => resolve([s, Buffer.concat(data).toString('utf8')]);
+        const res = (s: number): void => resolve([s, Buffer.concat(data).toString('utf8')]);
         try {
           const client = url.startsWith('https') ? https : http;
           const req = client.get(url, (msg) =>
@@ -49,7 +49,7 @@ export class CommandUtil {
   /**
    * Wait for a TCP port to become available
    */
-  static async waitForPort(port: number, ms = 5000) {
+  static async waitForPort(port: number, ms = 5000): Promise<void> {
     const start = Date.now();
     while ((Date.now() - start) < ms) {
       try {
@@ -76,7 +76,7 @@ export class CommandUtil {
    * Find container id by label
    * @param label
    */
-  static async findContainerByLabel(label: string) {
+  static async findContainerByLabel(label: string): Promise<string> {
     return (await ExecUtil.spawn('docker', ['ps', '-q', '--filter', `label=${label}`]).result).stdout.trim();
   }
 
@@ -84,7 +84,7 @@ export class CommandUtil {
    * Kill container by id
    * @param cid
    */
-  static async killContainerById(cid: string) {
+  static async killContainerById(cid: string): Promise<ExecutionResult> {
     return await ExecUtil.spawn('docker', ['kill', cid]).result;
   }
 }

@@ -9,6 +9,10 @@ import { AppListUtil } from './lib/list';
 import { AppRunUtil } from './lib/run';
 import { HelpUtil } from './lib/help';
 
+function hasChildren(e: Error): e is Error & { errors: Error[] } {
+  return !!e && ('errors' in e);
+}
+
 /**
  * The main entry point for the application cli
  */
@@ -19,7 +23,7 @@ export class AppRunPlugin extends BasePlugin {
   /**
    * Add help output
    */
-  async help() {
+  async help(): Promise<string> {
     return [
       '',
       color`${{ title: 'Available Applications:' }}`,
@@ -29,6 +33,7 @@ export class AppRunPlugin extends BasePlugin {
     ].join('\n');
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return {
       env: this.option({ desc: 'Application environment' }),
@@ -37,11 +42,11 @@ export class AppRunPlugin extends BasePlugin {
     };
   }
 
-  getArgs() {
+  getArgs(): string {
     return '[application] [args...]';
   }
 
-  envInit() {
+  envInit(): void {
     EnvInit.init({
       env: this.cmd.env,
       dynamic: !EnvUtil.isFalse('TRV_DYNAMIC'),
@@ -55,7 +60,7 @@ export class AppRunPlugin extends BasePlugin {
   /**
    * Main action
    */
-  async action(app: string, args: string[]) {
+  async action(app: string, args: string[]): Promise<void> {
     try {
       // Find app
       const selected = await AppListUtil.findByName(app);
@@ -69,10 +74,13 @@ export class AppRunPlugin extends BasePlugin {
         try {
           await AppRunUtil.run(selected, ...args);
           process.exit(0);
-        } catch (err: any) {
+        } catch (err) {
+          if (!err || !(err instanceof Error)) {
+            throw err;
+          }
           const { StacktraceUtil } = await import('@travetto/base');
           console.error(color`${{ failure: 'Failed to run' }} ${{ title: selected.name }}, ${err.message.replace(/via=.*$/, '')}`);
-          if ('errors' in err) {
+          if (hasChildren(err)) {
             console.error(err.errors.map((x: { message: string }) => color`● ${{ output: x.message }}`).join('\n'));
           } else {
             const stack = StacktraceUtil.simplifyStack(err);
@@ -84,7 +92,10 @@ export class AppRunPlugin extends BasePlugin {
           process.exit(1);
         }
       }
-    } catch (outerErr: any) {
+    } catch (outerErr) {
+      if (!outerErr || !(outerErr instanceof Error)) {
+        throw outerErr;
+      }
       await this.showHelp(outerErr, `\nUsage: ${HelpUtil.getAppUsage((await AppListUtil.findByName(app))!)}`);
     }
   }
@@ -92,8 +103,7 @@ export class AppRunPlugin extends BasePlugin {
   /**
    * Tab completion support
    */
-
-  override async complete() {
+  override async complete(): Promise<Record<string, string[]>> {
     const apps = await AppListUtil.getList() || [];
 
     const profiles = (await fs.readdir(PathUtil.cwd))

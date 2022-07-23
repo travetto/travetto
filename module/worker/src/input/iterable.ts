@@ -31,7 +31,7 @@ export class IterableWorkSet<X> implements WorkSet<X> {
   /**
    * Fetch next item from the iterable
    */
-  async #primeNext() {
+  async #primeNext(): Promise<void> {
     const res = await this.#src.next();
     this.#done = !!res.done;
     this.#ondeck = res.value;
@@ -40,7 +40,7 @@ export class IterableWorkSet<X> implements WorkSet<X> {
   /**
    * Determine if the iterable has more data
    */
-  async hasNext() {
+  async hasNext(): Promise<boolean> {
     if (this.#ondeck === undefined) {
       await this.#primeNext();
     }
@@ -50,7 +50,7 @@ export class IterableWorkSet<X> implements WorkSet<X> {
   /**
    * Fetch next item
    */
-  async next() {
+  async next(): Promise<X> {
     await this.hasNext();
 
     const out = this.#ondeck!;

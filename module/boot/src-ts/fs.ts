@@ -5,7 +5,7 @@ import { PathUtil } from './path';
 
 const fs = fss.promises;
 
-const checkPath = (pth: string) => {
+const checkPath = (pth: string): void => {
   if (!pth || pth === '/') {
     throw new Error('Path has not been defined');
   }
@@ -44,7 +44,7 @@ export class FsUtil {
    * See if file exists
    * @param f The file to check
    */
-  static existsSync(f: string) {
+  static existsSync(f: string): fss.Stats | undefined {
     try {
       return fss.statSync(f);
     } catch {
@@ -56,14 +56,14 @@ export class FsUtil {
    * See if file exists
    * @param f The file to check
    */
-  static exists(f: string) {
+  static exists(f: string): Promise<fss.Stats | undefined> {
     return fs.stat(f).catch(() => undefined);
   }
 
   /**
    * Find latest timestamp between creation and modification
    */
-  static maxTime(stat: fss.Stats) {
+  static maxTime(stat: fss.Stats): number {
     return Math.max(stat.ctimeMs, stat.mtimeMs); // Do not include atime
   }
 
@@ -72,13 +72,13 @@ export class FsUtil {
    * @param pth The folder to delete
    * @param ignore Should errors be ignored
    */
-  static unlinkRecursiveSync(pth: string) {
+  static unlinkRecursiveSync(pth: string): void {
     checkPath(pth);
     if ('rmSync' in fss) {
       fss.rmSync(pth, { recursive: true, force: true });
     } else {
       try {
-        return ExecUtil.execSync(...this.#unlinkCommand(pth));
+        ExecUtil.execSync(...this.#unlinkCommand(pth));
       } catch { }
     }
   }
@@ -88,7 +88,7 @@ export class FsUtil {
    * @param pth The folder to delete
    * @param ignore Should errors be ignored
    */
-  static async unlinkRecursive(pth: string) {
+  static async unlinkRecursive(pth: string): Promise<void> {
     checkPath(pth);
     if ('rm' in fs) {
       await fs.rm(pth, { recursive: true, force: true });
@@ -105,7 +105,7 @@ export class FsUtil {
    * @param dest The folder to copy to
    * @param ignore Should errors be ignored
    */
-  static async copyRecursive(src: string, dest: string, ignore = false) {
+  static async copyRecursive(src: string, dest: string, ignore = false): Promise<void> {
     try {
       await ExecUtil.execSync(...this.#copyCommand(src, dest));
     } catch (err) {
@@ -118,7 +118,7 @@ export class FsUtil {
   /**
    * OS aware file opening
    */
-  static nativeOpen(pth: string) {
+  static nativeOpen(pth: string): void {
     const op = process.platform === 'darwin' ? ['open', pth] :
       process.platform === 'win32' ? ['cmd', '/c', 'start', pth] :
         ['xdg-open', pth];

@@ -17,7 +17,7 @@ export class JsonFormatter implements Formatter {
     this.#opts = opts;
   }
 
-  format(ev: LogEvent) {
+  format(ev: LogEvent): string {
     return JSON.stringify(ev, null, this.#opts.depth);
   }
 }

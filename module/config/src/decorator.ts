@@ -7,10 +7,10 @@ import { ConfigManager } from './manager';
  * @augments `@trv:di/Injectable`
  */
 export function Config(ns: string, params?: { internal?: boolean }) {
-  return <T extends Class>(target: T) => {
+  return <T extends Class>(target: T): T => {
     const og = target.prototype.postConstruct;
 
-    target.prototype.postConstruct = async function () {
+    target.prototype.postConstruct = async function (): Promise<void> {
       // Apply config
       await ConfigManager.install(target, this, ns, params?.internal);
       if (og) {

@@ -7,6 +7,7 @@ import { SchemaChange } from '@travetto/schema';
 import { Connected, Transactional } from './connection/decorator';
 import { SQLDialect } from './dialect/base';
 import { SQLUtil, VisitStack } from './internal/util';
+import { Connection } from './connection/base';
 
 /**
  * Manage creation/updating of all tables
@@ -22,7 +23,7 @@ export class TableManager {
     this.#dialect = dialect;
   }
 
-  #exec<T = unknown>(sql: string) {
+  #exec<T = unknown>(sql: string): Promise<{ records: T[], count: number }> {
     return this.#dialect.executeSQL<T>(sql);
   }
 
@@ -41,7 +42,10 @@ export class TableManager {
       for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
         try {
           await this.#exec(op);
-        } catch (err: any) {
+        } catch (err) {
+          if (!(err instanceof Error)) {
+            throw err;
+          }
           if (!/\bexists|duplicate\b/i.test(err.message)) {
             throw err;
           }
@@ -78,7 +82,7 @@ export class TableManager {
   /**
    * Get a valid connection
    */
-  get conn() {
+  get conn(): Connection {
     return this.#dialect.conn;
   }
 
@@ -88,17 +92,17 @@ export class TableManager {
   @WithAsyncContext({})
   @Transactional()
   @Connected()
-  async changeSchema(cls: Class, change: SchemaChange) {
+  async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
     try {
       const rootStack = SQLUtil.classToStack(cls);
 
-      const changes = change.subs.reduce((acc, v) => {
+      const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((acc, v) => {
         const path = v.path.map(f => ({ ...f }));
         for (const ev of v.fields) {
           acc[ev.type].push([...rootStack, ...path, { ...(ev.type === 'removing' ? ev.prev : ev.curr)! }]);
         }
         return acc;
-      }, { added: [], changed: [], removing: [] } as Record<ChangeEvent<unknown>['type'], VisitStack[][]>);
+      }, { added: [], changed: [], removing: [] });
 
       await Promise.all(changes.added.map(v => this.#dialect.executeSQL(this.#dialect.getAddColumnSQL(v))));
       await Promise.all(changes.changed.map(v => this.#dialect.executeSQL(this.#dialect.getModifyColumnSQL(v))));

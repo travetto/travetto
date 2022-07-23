@@ -88,12 +88,12 @@ let SimpleTest = class SimpleTest {
         ᚕ_check_1.AssertCheck.check({ file: ᚕsrc(__filename), line: 11, text: "{ size: 20, address: { state: 'VA' } } === {}", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
     }
 };
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     (0, test_1.Test)({ lines: { start: 8, end: 12, codeStart: 11 } })
 ], SimpleTest.prototype, "test", null);
-SimpleTest = (0, tslib_1.__decorate)([
+SimpleTest = tslib_1.__decorate([
     ᚕ_decorator_1.Register(),
-    (0, test_1.Suite)({ lines: { start: 5, end: 13 } })
+    (0, test_1.Suite)({ lines: {} })
 ], SimpleTest);
 Object.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });
 ```

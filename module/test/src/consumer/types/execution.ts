@@ -11,7 +11,7 @@ import { Consumable } from '../registry';
 @Consumable('exec')
 export class ExecutionEmitter extends ChildCommChannel<TestEvent> implements TestConsumer {
 
-  onEvent(event: TestEvent) {
+  onEvent(event: TestEvent): void {
     const out = { ...event };
     ConsumerUtil.serializeErrors(out);
     this.send(event.type, out);

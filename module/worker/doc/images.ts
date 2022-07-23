@@ -5,15 +5,15 @@ class ImageProcessor implements Worker<string> {
   active = false;
   proc: ExecutionState;
 
-  get id() {
+  get id(): number | undefined {
     return this.proc.process.pid;
   }
 
-  async destroy() {
+  async destroy(): Promise<void> {
     this.proc.process.kill();
   }
 
-  async execute(path: string) {
+  async execute(path: string): Promise<void> {
     this.active = true;
     try {
       this.proc = ExecUtil.spawn('convert images', [path]);
@@ -33,11 +33,11 @@ export class ImageCompressor extends WorkPool<string, ImageProcessor> {
     super(async () => new ImageProcessor());
   }
 
-  begin() {
+  begin(): void {
     this.process(new IterableWorkSet(this.pendingImages));
   }
 
-  convert(...images: string[]) {
+  convert(...images: string[]): void {
     this.pendingImages.add(images);
   }
 }

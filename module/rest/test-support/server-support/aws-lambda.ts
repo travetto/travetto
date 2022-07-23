@@ -3,9 +3,9 @@ import type * as lambda from 'aws-lambda';
 import { DependencyRegistry } from '@travetto/di';
 import { Util } from '@travetto/base';
 
-import type { Request } from '../../src/types';
+import type { Request, ServerHandle } from '../../src/types';
 import type { AwsLambdaRestApplication } from '../../src/extension/aws-lambda';
-import type { RestServerSupport, MakeRequestConfig } from './base';
+import type { RestServerSupport, MakeRequestConfig, MakeRequestResponse } from './base';
 
 const toMultiValue = (o: Record<string, string> | undefined) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, [v]]));
 
@@ -28,7 +28,7 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
 
   #lambda: AwsLambdaRestApplication;
 
-  async init() {
+  async init(): Promise<ServerHandle> {
     const rest = await import('../..');
 
     Object.assign(
@@ -41,7 +41,7 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
     return await this.#lambda.run();
   }
 
-  async execute(method: Request['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}) {
+  async execute(method: Request['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {
 
     const res = (await this.#lambda.handle({
       ...baseLambdaEvent,

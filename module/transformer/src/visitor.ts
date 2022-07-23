@@ -54,7 +54,7 @@ export class VisitorFactory<S extends State = State> {
   /**
    * Initialize internal mapping given a list of transformers
    */
-  #init(transformers: NodeTransformer<S, TransformerType, ts.Node>[]) {
+  #init(transformers: NodeTransformer<S, TransformerType, ts.Node>[]): void {
     for (const trn of transformers) {
       if (!this.#transformers.has(trn.type)) {
         this.#transformers.set(trn.type, {});
@@ -116,7 +116,10 @@ export class VisitorFactory<S extends State = State> {
           ret = CoreUtil.updateSource(context.factory, ret, statements);
         }
         return state.finalize(ret);
-      } catch (err: any) {
+      } catch (err) {
+        if (!(err instanceof Error)) {
+          throw err;
+        }
         console.error('Failed transforming', { error: err, file: file.fileName });
         const out = new Error(`Failed transforming: ${file.fileName}: ${err.message}`);
         out.stack = err.stack;
@@ -130,12 +133,13 @@ export class VisitorFactory<S extends State = State> {
   /**
    * Handle transformer that target both ascent and descent
    */
-  executePhaseAlways<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T) {
+  executePhaseAlways<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T): T | undefined {
     if (!set[phase]?.size) {
       return;
     }
 
     for (const all of set[phase]!.get('ALL') ?? []) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       node = (all[phase]!(state, node) as T) ?? node;
     }
     return node;
@@ -144,7 +148,7 @@ export class VisitorFactory<S extends State = State> {
   /**
    * Handle a single phase of transformation
    */
-  executePhase<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T) {
+  executePhase<T extends ts.Node>(state: S, set: TransformerSet<S>, phase: TransformPhase, node: T): T | undefined {
     if (!set[phase]?.size) {
       return;
     }
@@ -169,6 +173,7 @@ export class VisitorFactory<S extends State = State> {
 
       // For all matching handlers, execute
       for (const item of values) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         node = (item[phase]!(state, node, dec) as T) ?? node;
       }
     }

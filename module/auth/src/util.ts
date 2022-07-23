@@ -12,6 +12,12 @@ type PermissionChecker = {
   any: (perms: PermSet) => boolean;
 };
 
+type PermissionCheckerSet = {
+  includes: (perms: PermSet) => boolean;
+  excludes: (perms: PermSet) => boolean;
+  check: (value: PermSet) => boolean;
+};
+
 /**
  * Standard auth utilities
  */
@@ -28,11 +34,11 @@ export class AuthUtil {
    */
   static #buildChecker(perms: Iterable<string>, defaultIfEmpty: boolean): PermissionChecker {
     const permArr = [...perms].map(x => x.toLowerCase());
-    let all = (_: PermSet) => defaultIfEmpty;
-    let any = (_: PermSet) => defaultIfEmpty;
+    let all = (_: PermSet): boolean => defaultIfEmpty;
+    let any = (_: PermSet): boolean => defaultIfEmpty;
     if (permArr.length) {
-      all = (uPerms: PermSet) => permArr.every(x => uPerms.has(x));
-      any = (uPerms: PermSet) => permArr.some(x => uPerms.has(x));
+      all = (uPerms: PermSet): boolean => permArr.every(x => uPerms.has(x));
+      any = (uPerms: PermSet): boolean => permArr.some(x => uPerms.has(x));
     }
     return { all, any };
   }
@@ -44,7 +50,7 @@ export class AuthUtil {
    * @param exclude Which permissions to exclude
    * @param matchAll Whether not all permissions should be matched
    */
-  static permissionChecker(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') {
+  static permissionChecker(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any'): PermissionCheckerSet {
     const incKey = [...include].sort().join(',');
     const excKey = [...exclude].sort().join(',');
 
@@ -70,7 +76,7 @@ export class AuthUtil {
    * @param exclude Which permissions to exclude
    * @param matchAll Whether not all permissions should be matched
    */
-  static checkPermissions(permissions: Iterable<string>, include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') {
+  static checkPermissions(permissions: Iterable<string>, include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any'): void {
     const { check } = this.permissionChecker(include, exclude, mode);
     if (!check(!(permissions instanceof Set) ? new Set(permissions) : permissions)) {
       throw new AppError('Insufficient permissions', 'permissions');
@@ -87,7 +93,7 @@ export class AuthUtil {
    * @param keylen Length of hash
    * @param digest Digest method
    */
-  static generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256') {
+  static generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256'): Promise<string> {
     const half = Math.trunc(Math.ceil(keylen / 2));
     return pbkdf2(value, salt, iterations, half, digest).then(x => x.toString('hex').substring(0, keylen));
   }
@@ -99,7 +105,7 @@ export class AuthUtil {
    * @param salt Salt value, or if a number, length of salt
    * @param validator Optional function to validate your password
    */
-  static async generatePassword(password: string, salt: number | string = 32) {
+  static async generatePassword(password: string, salt: number | string = 32): Promise<{ salt: string, hash: string }> {
     if (!password) {
       throw new AppError('Password is required', 'data');
     }

@@ -117,6 +117,7 @@ export const TypeBuilder: {
 
       if (name in GLOBAL_SIMPLE) {
         const cons = GLOBAL_SIMPLE[name];
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const ret = LiteralUtil.isLiteralType(type) ? Util.coerceType(type.value, cons as typeof String, false) :
           undefined;
 
@@ -148,8 +149,7 @@ export const TypeBuilder: {
     }
   },
   union: {
-    build: (checker, type) => {
-      const uType = type as ts.UnionType;
+    build: (checker, uType: ts.UnionType) => {
       let undefinable = false;
       let nullable = false;
       const remainder = uType.types.filter(ut => {
@@ -159,7 +159,7 @@ export const TypeBuilder: {
         nullable = nullable || n;
         return !(u || n);
       });
-      const name = CoreUtil.getSymbol(type)?.getName();
+      const name = CoreUtil.getSymbol(uType)?.getName();
       return { key: 'union', name, undefinable, nullable, tsSubTypes: remainder, subTypes: [] };
     },
     finalize: (type: UnionType) => {
@@ -208,9 +208,9 @@ export const TypeBuilder: {
           source = '.';
         }
 
-        const sourceFile = DeclarationUtil.getDeclarations(type)
+        const sourceFile: string = DeclarationUtil.getDeclarations(type)
           ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
-          ?.getSourceFile().fileName as string;
+          ?.getSourceFile().fileName ?? '';
 
         if (source === '.') {
           source = sourceFile;

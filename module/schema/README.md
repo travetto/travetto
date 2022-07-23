@@ -25,7 +25,7 @@ The module utilizes AST transformations to collect schema information, and facil
    *  `description` - detailed description of the schema
    *  `examples` - A set of examples as [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML)
 
-The `title` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L11) decorator.
+The `title` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L15) decorator.
 
 **Code: Sample User Schema**
 ```typescript
@@ -69,16 +69,16 @@ This schema provides a powerful base for data binding and validation at runtime.
    *  [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L79) defines the allowable values that a field can have
    *  [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L100) defines a regular expression that the field value should match
    *  [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L108) enforces min length of a string
-   *  [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L116) enforces max length of a string
+   *  [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L118) enforces max length of a string
    *  [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L108) enforces min value for a date or a number
-   *  [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L116) enforces max value for a date or a number
-   *  [@Email](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L139) ensures string field matches basic email regex
-   *  [@Telephone](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L146) ensures string field matches basic telephone regex
-   *  [@Url](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L153) ensures string field matches basic url regex
-   *  [@Ignore](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L192) exclude from auto schema registration
-   *  [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L167) ensures number passed in is only a whole number
-   *  [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L173) ensures number passed in allows fractional values
-   *  [@Currency](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L185) provides support for standard currency
+   *  [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L118) enforces max value for a date or a number
+   *  [@Email](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L145) ensures string field matches basic email regex
+   *  [@Telephone](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L152) ensures string field matches basic telephone regex
+   *  [@Url](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L159) ensures string field matches basic url regex
+   *  [@Ignore](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L198) exclude from auto schema registration
+   *  [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L173) ensures number passed in is only a whole number
+   *  [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L179) ensures number passed in allows fractional values
+   *  [@Currency](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L191) provides support for standard currency
    *  [@Text](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L87) indicates that a field is expecting natural language input, not just discrete values
    *  [@LongText](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L92) same as text, but expects longer form content
    *  [@Readonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L65) defines a that field should not be bindable external to the class
@@ -92,7 +92,7 @@ Just like the class, all fields can be defined with
    *  `description` - detailed description of the schema
    *  `examples` - A set of examples as [JSON](https://www.json.org) or [YAML](https://en.wikipedia.org/wiki/YAML)
 
-And similarly, the `description` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L11) decorator.
+And similarly, the `description` will be picked up from the [JSDoc](http://usejsdoc.org/about-getting-started.html) comments, and additionally all fields can be set using the [@Describe](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L15) decorator.
 
 ## Binding/Validation
 At runtime, once a schema is registered, a programmer can utilize this structure to perform specific operations. Specifically binding and validation.
@@ -124,7 +124,7 @@ A binding operation could look like:
 ```typescript
 import { Person } from './person';
 
-export function Test() {
+export function Test(): Person {
   return Person.from({
     name: 'Test',
     age: 19.999978,
@@ -181,7 +181,7 @@ import { SchemaValidator } from '@travetto/schema';
 
 import { Person } from './person';
 
-export async function validate() {
+export async function validate(): Promise<void> {
 
   const person = Person.from({
     name: 'Test',
@@ -210,15 +210,14 @@ Validation Failed {
   "errors": [
     {
       "kind": "type",
-      "type": "number",
+      "message": "age is not a valid number",
       "path": "age",
-      "message": "age is not a valid number"
+      "type": "number"
     },
     {
       "kind": "required",
-      "active": true,
-      "path": "address.street2",
-      "message": "address.street2 is required"
+      "message": "address.street2 is required",
+      "path": "address.street2"
     }
   ]
 }
@@ -230,9 +229,9 @@ Within the schema framework, it is possible to add custom validators class level
 
 **Code: Password Validator**
 ```typescript
-import { Schema, Validator } from '@travetto/schema';
+import { Schema, Validator, ValidationError } from '@travetto/schema';
 
-const passwordValidator = (user: User) => {
+const passwordValidator = (user: User): ValidationError | undefined => {
   const p = user.password;
   const hasNum = /\d/.test(p);
   const hasSpecial = /[!@#$%%^&*()<>?/,.;':"']/.test(p);
@@ -307,38 +306,41 @@ In addition to the general types, the code relies upon name matching to provide 
 
 **Code: Supported Mappings**
 ```typescript
-static #namesToType = {
-    string: [
-      [/^(image|img).*url$/, () => faker.image.imageUrl()],
-      [/^url$/, () => faker.internet.url()],
-      [/^email(addr(ress)?)?$/, () => faker.internet.email()],
-      [/^(tele)?phone(num|number)?$/, () => faker.phone.phoneNumber()],
-      [/^((postal|zip)code)|zip$/, () => faker.address.zipCode()],
-      [/f(irst)?name/, () => faker.name.firstName()],
-      [/l(ast)?name/, () => faker.name.lastName()],
-      [/^ip(add(ress)?)?$/, () => faker.internet.ip()],
-      [/^ip(add(ress)?)?(v?)6$/, () => faker.internet.ipv6()],
-      [/^username$/, () => faker.internet.userName()],
-      [/^domain(name)?$/, () => faker.internet.domainName()],
-      [/^file(path|name)?$/, () => faker.system.filePath()],
-      [/^street(1)?$/, () => faker.address.streetAddress()],
-      [/^street2$/, () => faker.address.secondaryAddress()],
-      [/^county$/, () => faker.address.county()],
-      [/^country$/, () => faker.address.country()],
-      [/^state$/, () => faker.address.state()],
-      [/^lon(gitude)?$/, () => faker.address.longitude()],
-      [/^lat(itude)?$/, () => faker.address.latitude()],
-      [/(profile).*(image|img)/, () => faker.image.avatar()],
-      [/(image|img)/, () => faker.image.image()],
-      [/^company(name)?$/, () => faker.company.companyName()],
-      [/(desc|description)$/, () => faker.lorem.sentences(10)]
-    ] as [RegExp, () => string][],
-    date: [
-      [/dob|birth/, () => faker.date.past(60)],
-      [/creat(e|ion)/, () => between(-200, -100)],
-      [/(update|modif(y|ied))/, () => between(-100, -50)]
-    ] as [RegExp, () => Date][],
-  };
+static #namesToType: {
+    string: [RegExp, () => string][];
+    date: [RegExp, () => Date][];
+  } = {
+      string: [
+        [/^(image|img).*url$/, (): string => faker.image.imageUrl()],
+        [/^url$/, (): string => faker.internet.url()],
+        [/^email(addr(ress)?)?$/, (): string => faker.internet.email()],
+        [/^(tele)?phone(num|number)?$/, (): string => faker.phone.phoneNumber()],
+        [/^((postal|zip)code)|zip$/, (): string => faker.address.zipCode()],
+        [/f(irst)?name/, (): string => faker.name.firstName()],
+        [/l(ast)?name/, (): string => faker.name.lastName()],
+        [/^ip(add(ress)?)?$/, (): string => faker.internet.ip()],
+        [/^ip(add(ress)?)?(v?)6$/, (): string => faker.internet.ipv6()],
+        [/^username$/, (): string => faker.internet.userName()],
+        [/^domain(name)?$/, (): string => faker.internet.domainName()],
+        [/^file(path|name)?$/, (): string => faker.system.filePath()],
+        [/^street(1)?$/, (): string => faker.address.streetAddress()],
+        [/^street2$/, (): string => faker.address.secondaryAddress()],
+        [/^county$/, (): string => faker.address.county()],
+        [/^country$/, (): string => faker.address.country()],
+        [/^state$/, (): string => faker.address.state()],
+        [/^lon(gitude)?$/, (): string => faker.address.longitude()],
+        [/^lat(itude)?$/, (): string => faker.address.latitude()],
+        [/(profile).*(image|img)/, (): string => faker.image.avatar()],
+        [/(image|img)/, (): string => faker.image.image()],
+        [/^company(name)?$/, (): string => faker.company.companyName()],
+        [/(desc|description)$/, (): string => faker.lorem.sentences(10)]
+      ],
+      date: [
+        [/dob|birth/, (): Date => faker.date.past(60)],
+        [/creat(e|ion)/, (): Date => between(-200, -100)],
+        [/(update|modif(y|ied))/, (): Date => between(-100, -50)]
+      ],
+    };
 ```
 
 An example of this would be:
@@ -366,7 +368,7 @@ class User {
   address: Address;
 }
 
-export function generate() {
+export function generate(): User {
   const user = SchemaFakerUtil.generate(User);
   return user;
 }
@@ -392,7 +394,7 @@ export type Point = [number, number];
 const INVALID = Symbol.for('invalid-point');
 
 export class PointImpl {
-  static validateSchema(input: unknown) {
+  static validateSchema(input: unknown): 'type' | undefined {
     const ret = this.bindSchema(input);
     return ret !== INVALID && ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
   }
@@ -439,9 +441,9 @@ Validation Failed {
   "errors": [
     {
       "kind": "type",
-      "type": "PointImpl",
+      "message": "point is not a valid PointImpl",
       "path": "point",
-      "message": "point is not a valid PointImpl"
+      "type": "PointImpl"
     }
   ]
 }

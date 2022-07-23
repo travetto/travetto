@@ -1,11 +1,12 @@
 import { WhereClauseRaw } from '../../model/where-clause';
 import { QueryLanguageTokenizer } from './tokenizer';
-import { Node, Token, ClauseNode, UnaryNode, Literal, GroupNode, OP_TRANSLATION, ArrayNode } from './types';
+import { Token, Literal, GroupNode, OP_TRANSLATION, ArrayNode, AllNode } from './types';
 
 /**
  * Determine if a token is boolean
  */
 function isBoolean(o: unknown): o is Token & { type: 'boolean' } {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && (o as { type: string }).type === 'boolean';
 }
 
@@ -17,9 +18,12 @@ export class QueryLanguageParser {
   /**
    * Handle all clauses
    */
-  static handleClause(nodes: (Node | Token)[]) {
+  static handleClause(nodes: (AllNode | Token)[]): void {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const val = nodes.pop()! as Token | ArrayNode;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const op = nodes.pop()! as Token;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const ident = nodes.pop()! as Token;
 
     // value isn't a literal or a list, bail
@@ -33,6 +37,7 @@ export class QueryLanguageParser {
     }
 
     // If operator is not known, bail
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const finalOp = OP_TRANSLATION[op.value as string];
     if (!finalOp) {
       throw new Error(`Unexpected operator: ${op.value}`);
@@ -40,10 +45,11 @@ export class QueryLanguageParser {
 
     nodes.push({
       type: 'clause',
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       field: ident.value as string,
       op: finalOp,
       value: val.value
-    } as ClauseNode);
+    });
 
     // Handle unary support
     this.unary(nodes);
@@ -55,13 +61,16 @@ export class QueryLanguageParser {
    * Condense nodes to remove unnecessary groupings
    * (a AND (b AND (c AND d))) => (a AND b AND c)
    */
-  static condense(nodes: (Node | Token)[], op: string) {
+  static condense(nodes: (AllNode | Token)[], op: 'and' | 'or'): void {
     let second = nodes[nodes.length - 2];
 
     while (isBoolean(second) && second.value === op) {
-      const right = nodes.pop()!;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const right = nodes.pop()! as AllNode;
       nodes.pop()!;
-      const left = nodes.pop()!;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const left = nodes.pop()! as AllNode;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const rg = right as GroupNode;
       if (rg.type === 'group' && rg.op === op) {
         rg.value.unshift(left);
@@ -71,7 +80,7 @@ export class QueryLanguageParser {
           type: 'group',
           op,
           value: [left, right]
-        } as GroupNode);
+        });
       }
       second = nodes[nodes.length - 2];
     }
@@ -81,25 +90,27 @@ export class QueryLanguageParser {
    * Remove unnecessary unary nodes
    * (((5))) => 5
    */
-  static unary(nodes: (Node | Token)[]) {
+  static unary(nodes: (AllNode | Token)[]): void {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const second = nodes[nodes.length - 2] as Token;
     if (second && second.type === 'unary' && second.value === 'not') {
-      const node = nodes.pop()!;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const node = nodes.pop()! as AllNode;
       nodes.pop();
       nodes.push({
         type: 'unary',
         op: 'not',
         value: node
-      } as UnaryNode);
+      });
     }
   }
 
   /**
    * Parse all tokens
    */
-  static parse(tokens: Token[], pos: number = 0): Node {
+  static parse(tokens: Token[], pos: number = 0): AllNode {
 
-    let top: (Node | Token)[] = [];
+    let top: (AllNode | Token)[] = [];
     const stack: (typeof top)[] = [top];
     let arr: Literal[] | undefined;
 
@@ -122,7 +133,8 @@ export class QueryLanguageParser {
           if (token.value === 'start') {
             arr = [];
           } else {
-            top.push({ type: 'list', value: arr! } as ArrayNode);
+            const arrNode: ArrayNode = { type: 'list', value: arr! };
+            top.push(arrNode);
             arr = undefined;
             this.handleClause(top);
           }
@@ -148,38 +160,38 @@ export class QueryLanguageParser {
 
     this.condense(top, 'or');
 
-    return top[0];
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return top[0] as AllNode;
   }
 
   /**
    * Convert Query AST to output
    */
-  static convert<T = unknown>(node: Node): WhereClauseRaw<T> {
+  static convert<T = unknown>(node: AllNode): WhereClauseRaw<T> {
     switch (node.type) {
       case 'unary': {
-        const un = node as UnaryNode;
-        return { [`$${un.op!}`]: this.convert(un.value) } as WhereClauseRaw<T>;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        return { [`$${node.op!}`]: this.convert(node.value) } as WhereClauseRaw<T>;
       }
       case 'group': {
-        const gn = node as GroupNode;
-        return { [`$${gn.op!}`]: gn.value.map(x => this.convert(x)) } as WhereClauseRaw<T>;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        return { [`$${node.op!}`]: node.value.map(x => this.convert(x)) } as WhereClauseRaw<T>;
       }
       case 'clause': {
-        const cn = node as ClauseNode;
-        const parts = cn.field!.split('.');
+        const parts = node.field!.split('.');
         const top: WhereClauseRaw<T> = {};
-        let sub = top as Record<string, unknown>;
+        let sub: Record<string, unknown> = top;
         for (const p of parts) {
           sub = sub[p] = {};
         }
-        if (cn.op === '$regex' && typeof cn.value === 'string') {
-          sub[cn.op!] = new RegExp(`^${cn.value}`);
-        } else if ((cn.op === '$eq' || cn.op === '$ne') && cn.value === null) {
-          sub.$exists = cn.op !== '$eq';
-        } else if ((cn.op === '$in' || cn.op === '$nin') && !Array.isArray(cn.value)) {
-          throw new Error(`Expected array literal for ${cn.op}`);
+        if (node.op === '$regex' && typeof node.value === 'string') {
+          sub[node.op!] = new RegExp(`^${node.value}`);
+        } else if ((node.op === '$eq' || node.op === '$ne') && node.value === null) {
+          sub.$exists = node.op !== '$eq';
+        } else if ((node.op === '$in' || node.op === '$nin') && !Array.isArray(node.value)) {
+          throw new Error(`Expected array literal for ${node.op}`);
         } else {
-          sub[cn.op!] = cn.value;
+          sub[node.op!] = node.value;
         }
         return top;
       }

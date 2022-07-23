@@ -49,19 +49,19 @@ export class PassportAuthenticator<U> implements Authenticator<U, Principal, { r
    * @param err A possible error from authentication
    * @param user The authenticated user
    */
-  async #authHandler(err: Error | undefined, user: U) {
+  async #authHandler(err: Error | undefined, user: U): Promise<Principal> {
     if (err) {
       throw err;
     } else {
       // Remove profile fields from passport
-      const du = user as U & { _json: unknown, _raw: unknown, source: unknown };
+      const du: U & { _json?: unknown, _raw?: unknown, source?: unknown } = user;
       delete du._json;
       delete du._raw;
       delete du.source;
 
       const p = this.#toPrincipal(user);
       p.issuer ??= this.#strategyName;
-      return p as Principal;
+      return p;
     }
   }
 
@@ -70,7 +70,7 @@ export class PassportAuthenticator<U> implements Authenticator<U, Principal, { r
    * @param req The travetto request
    * @param res The travetto response
    */
-  authenticate(user: U, { req, res }: { req: Request, res: Response }) {
+  authenticate(user: U, { req, res }: { req: Request, res: Response }): Promise<Principal | undefined> {
     return new Promise<Principal | undefined>((resolve, reject) => {
 
       // Get the login context

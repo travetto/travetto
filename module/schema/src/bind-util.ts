@@ -28,15 +28,16 @@ export class BindUtil {
         }
       }
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return val as T;
   }
 
   /**
    * Register `from` on the Function prototype
    */
-  static register() {
+  static register(): void {
     const proto = Object.getPrototypeOf(Function);
-    proto.from = function (data: object | ClassInstance, view?: string) {
+    proto.from = function (data: object | ClassInstance, view?: string): unknown {
       return BindUtil.bindSchema(this, data, view);
     };
   }
@@ -48,10 +49,11 @@ export class BindUtil {
    *
    * @param obj The object to convert
    */
-  static expandPaths(obj: Record<string, unknown>) {
+  static expandPaths(obj: Record<string, unknown>): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     for (const k of Object.keys(obj)) {
-      const val = Util.isPlainObject(obj[k]) ? this.expandPaths(obj[k] as Record<string, unknown>) : obj[k];
+      const objK = obj[k];
+      const val = Util.isPlainObject(objK) ? this.expandPaths(objK) : objK;
       const parts = k.split('.');
       const last = parts.pop()!;
       let sub = out;
@@ -65,12 +67,14 @@ export class BindUtil {
         if (!(name in sub)) {
           sub[name] = typeof key === 'number' ? [] : {};
         }
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         sub = sub[name] as Record<string, unknown>;
 
         if (idx && key !== undefined) {
           if (sub[key] === undefined) {
             sub[key] = {};
           }
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           sub = sub[key] as Record<string, unknown>;
         }
       }
@@ -88,8 +92,10 @@ export class BindUtil {
         let key = arr ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
         if (sub[name] === undefined) {
           sub[name] = (typeof key === 'string') ? {} : [];
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           sub = sub[name] as Record<string, unknown>;
           if (key === undefined) {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             key = sub.length as number;
           }
           if (sub[key] && Util.isPlainObject(val) && Util.isPlainObject(sub[key])) {
@@ -108,7 +114,7 @@ export class BindUtil {
    * @param conf The object to flatten the paths for
    * @param val The starting prefix
    */
-  static flattenPaths(data: Record<string, unknown>, prefix: string = '') {
+  static flattenPaths(data: Record<string, unknown>, prefix: string = ''): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;
@@ -144,18 +150,23 @@ export class BindUtil {
     if (data === null || data === undefined) {
       return data;
     }
-    const cls = SchemaRegistry.resolveSubTypeForInstance(cons, data) as Class<T>;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const cls = SchemaRegistry.resolveSubTypeForInstance<T>(cons, data as T);
     if (data instanceof cls) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return data as T;
     } else {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const tgt = new (cls as ConcreteClass<T>)();
       SchemaRegistry.ensureInstanceTypeField(cls, tgt);
 
       for (const [k, v] of Object.entries(tgt)) { // Do not retain undefined fields
         if (v === undefined) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           delete tgt[k as keyof T];
         }
       }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return this.bindSchemaToObject(cls, tgt, data as object, view);
     }
   }
@@ -175,7 +186,9 @@ export class BindUtil {
 
       // If no configuration
       if (!conf) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         for (const k of Object.keys(data) as (keyof typeof obj)[]) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           obj[k] = data[k as keyof typeof data];
         }
       } else {
@@ -205,7 +218,8 @@ export class BindUtil {
             continue;
           }
 
-          let v = data[inboundField as keyof typeof data] as unknown;
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          let v: unknown = data[inboundField as keyof typeof data];
 
           if (v !== undefined && v !== null) {
             const config = viewConf.schema[schemaFieldName];
@@ -228,6 +242,7 @@ export class BindUtil {
             }
           }
 
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           obj[schemaFieldName as keyof typeof obj] = v as (typeof obj)[keyof typeof obj];
         }
       }
@@ -243,23 +258,21 @@ export class BindUtil {
    * @param applyDefaults
    * @returns
    */
-  static coerceField(field: FieldConfig, val: unknown, applyDefaults = false) {
+  static coerceField(field: FieldConfig, val: unknown, applyDefaults = false): unknown {
     if ((val === undefined || val === null) && applyDefaults) {
       val = field.default;
     }
     const complex = SchemaRegistry.has(field.type);
     if (field.array) {
-      if (!Array.isArray(val)) {
-        val = [val];
-      }
+      const valArr = !Array.isArray(val) ? [val] : val;
       if (complex) {
-        val = (val as unknown[]).map(x => this.bindSchema(field.type, x as object, field.view));
+        val = valArr.map(x => this.bindSchema(field.type, x, field.view));
       } else {
-        val = (val as unknown[]).map(x => Util.coerceType(x, field.type, false));
+        val = valArr.map(x => Util.coerceType(x, field.type, false));
       }
     } else {
       if (complex) {
-        val = this.bindSchema(field.type, val as object, field.view);
+        val = this.bindSchema(field.type, val, field.view);
       } else {
         val = Util.coerceType(val, field.type, false);
       }

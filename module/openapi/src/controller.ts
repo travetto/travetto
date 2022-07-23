@@ -14,13 +14,13 @@ export class OpenApiController {
   service: OpenApiService;
 
   @Get('openapi.json')
-  async getSpec() {
-    return this.service.spec as object; // Force output to be simple
+  async getSpec(): Promise<object> {
+    return this.service.spec; // Force output to be simple
   }
 
   @Get(/openapi[.]ya?ml$/)
   @SetHeaders({ 'Content-Type': 'text/vnd.yaml' })
-  async getYmlSpec() {
+  async getYmlSpec(): Promise<string> {
     return YamlUtil.serialize(this.service.spec); // Force output to be simple
   }
 }

@@ -19,7 +19,7 @@ class User {
   address: Address;
 }
 
-export function generate() {
+export function generate(): User {
   const user = SchemaFakerUtil.generate(User);
   return user;
 }

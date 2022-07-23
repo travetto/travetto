@@ -30,7 +30,7 @@ class $ShutdownManager {
   #shutdownCode = -1;
   #unhandled: UnhandledHandler[] = [];
 
-  async #getAvailableListeners(exitCode: number) {
+  async #getAvailableListeners(exitCode: number): Promise<unknown[]> {
     const promises: Promise<unknown>[] = [];
 
     // Get valid listeners depending on lifecycle
@@ -46,16 +46,16 @@ class $ShutdownManager {
       try {
         console.debug('Starting', { name });
         const res = handler();
-        if (res && res.then) {
+        if (Util.isPromise(res)) {
           // If a promise, queue for handling
-          promises.push(res as Promise<unknown>);
+          promises.push(res);
           res
             .then(() => console.debug('Completed', { name }))
             .catch((err: unknown) => console.error('Failed', { error: err, name }));
         } else {
           console.debug('Completed', { name });
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error('Failed', { name, error: err });
       }
     }
@@ -63,7 +63,7 @@ class $ShutdownManager {
     return promises;
   }
 
-  async executeAsync(exitCode: number = 0, exitErr?: unknown) {
+  async executeAsync(exitCode: number = 0, exitErr?: unknown): Promise<void> {
 
     if (this.#shutdownCode > 0) { // Killed twice
       if (exitCode > 0) { // Handle force kill
@@ -105,14 +105,15 @@ class $ShutdownManager {
   /**
    * Begin shutdown process with a given exit code and possible error
    */
-  execute(exitCode: number = 0, err?: unknown) {
+  execute(exitCode: number = 0, err?: unknown): void {
     this.executeAsync(exitCode, err); // Fire and forget
   }
 
   /**
    * Hook into the process to override the shutdown behavior
    */
-  register() {
+  register(): void {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     process.exit = this.execute.bind(this) as (() => never); // NOTE: We do not actually throw an error the first time, to allow for graceful shutdown
     process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
@@ -134,7 +135,7 @@ class $ShutdownManager {
    * @param final If this should be run an attempt to shutdown or only on the final shutdown
    */
   onShutdown(name: string, handler: Function, final?: boolean): void;
-  onShutdown(nameOrCloseable: string | Closeable, handler?: Function, final = false) {
+  onShutdown(nameOrCloseable: string | Closeable, handler?: Function, final = false): void {
     let name: string;
     if (typeof nameOrCloseable !== 'string') {
       name = nameOrCloseable.name ?? nameOrCloseable.constructor.name;
@@ -154,7 +155,7 @@ class $ShutdownManager {
    * @param handler Listener for all uncaught exceptions if valid
    * @param position Handler list priority
    */
-  onUnhandled(handler: UnhandledHandler, position = -1) {
+  onUnhandled(handler: UnhandledHandler, position = -1): () => void {
     if (position < 0) {
       this.#unhandled.push(handler);
     } else {
@@ -167,7 +168,7 @@ class $ShutdownManager {
    * Remove handler for unhandled exceptions
    * @param handler The handler to remove
    */
-  removeUnhandledHandler(handler: UnhandledHandler) {
+  removeUnhandledHandler(handler: UnhandledHandler): void {
     const index = this.#unhandled.indexOf(handler);
     if (index >= 0) {
       this.#unhandled.splice(index, 1);
@@ -177,14 +178,18 @@ class $ShutdownManager {
   /**
    * Listen for an unhandled event, as a promise
    */
-  listenForUnhandled(): Promise<void> & { cancel: () => void } {
-    const uncaught = Util.resolvablePromise() as ReturnType<(typeof Util)['resolvablePromise']> & { cancel?: () => void };
+  listenForUnhandled(): Promise<never> & { cancel: () => void } {
+    const uncaught = Util.resolvablePromise<never>();
+    const uncaughtWithCancel: typeof uncaught & { cancel?: () => void } = uncaught;
     const cancel = this.onUnhandled(err => { uncaught.reject(err); return true; }, 0);
-    uncaught.cancel = () => {
+    uncaughtWithCancel.cancel = (): void => {
       cancel(); // Remove the handler
-      uncaught.resolve(); // Close the promise
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      uncaughtWithCancel.resolve(undefined as never); // Close the promise
     };
-    return uncaught as Promise<void> & { cancel: () => void };
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return uncaughtWithCancel as (Promise<never> & { cancel: () => void });
   }
 
   /**
@@ -192,10 +197,10 @@ class $ShutdownManager {
    * Converts uncaught exception to a thrown error
    * @param fn The function to wrap
    */
-  async captureUnhandled<U>(fn: Function): Promise<U> {
+  async captureUnhandled<U>(fn: () => U): Promise<U> {
     const uncaught = this.listenForUnhandled();
     try {
-      return (await Promise.race([uncaught, fn()])) as U;
+      return (await Promise.race([uncaught, fn()]));
     } finally {
       uncaught.cancel();
     }

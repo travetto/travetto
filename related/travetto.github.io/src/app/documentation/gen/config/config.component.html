@@ -64,10 +64,10 @@ with environment variables
       <figcaption class="config">Environment variables
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/config/doc/resources/env.properties">Source</a></cite>
       </figcaption>
-      <pre><code class="language-properties"><span class="token attr-name">TRV_ENV</span> <span class="token punctuation">=</span> <span class="token attr-value">prod</span>
-<span class="token attr-name">TRV_PROFILES</span> <span class="token punctuation">=</span> <span class="token attr-value">prod</span>
-<span class="token attr-name">DATABASE_PORT</span> <span class="token punctuation">=</span> <span class="token attr-value">1234</span>
-<span class="token attr-name">DATABASE_CREDS_PASSWORD</span> <span class="token punctuation">=</span> <span class="token attr-value">%secret%</span></code></pre>     
+      <pre><code class="language-properties"><span class="token key attr-name">TRV_ENV</span> <span class="token punctuation">=</span> <span class="token value attr-value">prod</span>
+<span class="token key attr-name">TRV_PROFILES</span> <span class="token punctuation">=</span> <span class="token value attr-value">prod</span>
+<span class="token key attr-name">DATABASE_PORT</span> <span class="token punctuation">=</span> <span class="token value attr-value">1234</span>
+<span class="token key attr-name">DATABASE_CREDS_PASSWORD</span> <span class="token punctuation">=</span> <span class="token value attr-value">%secret%</span></code></pre>     
       </figure>
 
 At runtime the resolved config would be:
@@ -130,9 +130,10 @@ Using the above config files, you'll notice that the port is not specified (its 
   errors: <span class="token punctuation">[</span>
     <span class="token punctuation">{{'{'}}</span>
       kind: <span class="token string">'required'</span>,
-      active: true,
+      value: undefined,
+      message: <span class="token string">'port is required'</span>,
       path: <span class="token string">'port'</span>,
-      message: <span class="token string">'port is required'</span>
+      type: undefined
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">]</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     

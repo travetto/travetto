@@ -20,14 +20,14 @@ export class AuthContextService {
    * Set principal
    * @param p The auth principal
    */
-  set = (p: Principal | undefined) => this.context.set(PrincipalⲐ, p);
+  set = (p: Principal | undefined): void => this.context.set(PrincipalⲐ, p);
 
   /**
    * Get the principal from the context
    * @returns principal if authenticated
    * @returns undefined if not authenticated
    */
-  get = () => this.context.get<Principal>(PrincipalⲐ);
+  get = (): (Principal | undefined) => this.context.get<Principal>(PrincipalⲐ);
 }
 
 /**
@@ -43,7 +43,7 @@ export class AuthContextInterceptor implements RestInterceptor {
   @Inject()
   svc: AuthContextService;
 
-  intercept(req: Request, res: Response) {
+  intercept(req: Request, res: Response): void {
     Object.defineProperty(req, 'auth', { get: this.svc.get, set: this.svc.set });
   }
 }

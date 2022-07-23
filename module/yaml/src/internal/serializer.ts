@@ -13,7 +13,7 @@ export class Serializer {
   /**
    * Clean value, escaping as needed
    */
-  static clean(key: string) {
+  static clean(key: string): string {
     if (/[#'"@ \-:{}]/.test(key)) {
       return key.includes('"') ?
         `'${key.replace(/[']/g, '\\\'')}'` :
@@ -28,19 +28,19 @@ export class Serializer {
   /**
    * Perform word wrap on text, with a given width
    */
-  static wordWrap(text: string, width: number = 120) {
+  static wordWrap(text: string, width: number = 120): string[] {
     const lines: string[] = [];
     let line: string[] = [];
-    let subl: number = 0;
+    let runningLength: number = 0;
 
-    const push = (x: string) => { subl += x.length; line.push(x); };
+    const push = (x: string): void => { runningLength += x.length; line.push(x); };
 
-    const flushLine = () => {
+    const flushLine = (): void => {
       if (line.length > 0) {
-        lines.push(line.join('').trimRight());
+        lines.push(line.join('').trimEnd());
       }
       line = [];
-      subl = 0;
+      runningLength = 0;
     };
 
     for (const sub of text.split(/\n/)) {
@@ -51,7 +51,7 @@ export class Serializer {
         push(offset);
 
         sub.trim().replace(/\S+(\s+|$)/g, part => {
-          if (subl + part.length > width) {
+          if (runningLength + part.length > width) {
             flushLine();
             push(offset);
           }
@@ -69,7 +69,7 @@ export class Serializer {
   /**
    * Serialize object with indentation and wordwrap support
    */
-  static serialize(o: SerializableType, config: Partial<SerializeConfig> = {}, indentLevel = 0) {
+  static serialize(o: SerializableType, config: Partial<SerializeConfig> = {}, indentLevel = 0): string {
     const cfg = { indent: 2, wordwrap: 120, ...config };
     let out = '';
     const prefix = ' '.repeat(indentLevel);
@@ -79,6 +79,7 @@ export class Serializer {
       out = `${this.serialize(o.stack, cfg, indentLevel + cfg.indent)}\n`;
     } else if (typeof o === 'function' || o instanceof RegExp || o instanceof Set || o instanceof Map) {
       if (Util.hasToJSON(o)) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         out = this.serialize(o.toJSON() as object, cfg, indentLevel);
       } else if (o instanceof Function) {
         out = this.serialize(o.ᚕid ?? o.name, cfg, indentLevel);
@@ -106,6 +107,7 @@ export class Serializer {
       }
     } else if (o !== undefined) {
       const fin = o;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const keys = Object.keys(fin) as (keyof typeof fin)[];
       if (keys.length) {
         out = keys

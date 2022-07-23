@@ -9,7 +9,7 @@ export class ImageUtil {
     all: string,
     prefix: string,
     src: string
-  ) {
+  ): string {
     if (/^['"](.*)['"]$/.test(src)) {
       src = src.substring(1, src.length - 1); // Trim
     }
@@ -22,11 +22,11 @@ export class ImageUtil {
   /**
    * Inline image sources
    */
-  static async inlineImageSource(html: string, root: string) {
+  static async inlineImageSource(html: string, root: string): Promise<string> {
     const { ImageUtil: ImgUtil } = await import('@travetto/image');
 
     const imageSources = new Set<string>();
-    const resolver = (x: string) => {
+    const resolver = (x: string): string => {
       const resolved = PathUtil.resolveUnix(root, x).replace(/^.*\/resources\//, '/');
       imageSources.add(resolved);
       return resolved;

@@ -223,8 +223,11 @@ Now the tests should be defined at <code class="item path">test/service.ts</code
 
     <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>svc<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>saved<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>e<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token function">assert</span><span class="token punctuation">(</span>e<span class="token punctuation">.</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span>err <span class="token keyword">instanceof</span> <span class="token class-name">Error</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">throw</span> err<span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span>
+      <span class="token function">assert</span><span class="token punctuation">(</span>err<span class="token punctuation">.</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
@@ -327,10 +330,10 @@ First we must start the application:
       <figcaption class="terminal">Application Startup
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token number">2022</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:55<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2022</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:61<span class="token punctuation">]</span> Manifest <span class="token punctuation">{{'{'}}</span>
+      <pre><code class="language-bash"><span class="token number">2022</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:57<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
+<span class="token number">2022</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:63<span class="token punctuation">]</span> Manifest <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
-    framework: <span class="token string">'2.0.2'</span>,
+    framework: <span class="token string">'2.1.3'</span>,
     name: <span class="token string">'@travetto/todo-app'</span>,
     description: <span class="token string">''</span>,
     version: <span class="token string">'0.0.0'</span>,
@@ -345,7 +348,7 @@ First we must start the application:
     resources: <span class="token punctuation">[</span> <span class="token string">'resources'</span>, <span class="token string">'doc/resources'</span> <span class="token punctuation">]</span>,
     shutdownWait: <span class="token number">2000</span>,
     cache: <span class="token string">'.trv_cache'</span>,
-    node: <span class="token string">'v17.4.0'</span>,
+    node: <span class="token string">'v18.1.0'</span>,
     dynamic: false,
     readonly: <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span>,
@@ -384,7 +387,7 @@ First we must start the application:
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2022</span>-03-14T04:00:01.510Z info  <span class="token punctuation">[</span>@trv:app/registry:69<span class="token punctuation">]</span> Config <span class="token punctuation">{{'{'}}</span>
+<span class="token number">2022</span>-03-14T04:00:01.510Z info  <span class="token punctuation">[</span>@trv:app/registry:72<span class="token punctuation">]</span> Config <span class="token punctuation">{{'{'}}</span>
   rest: <span class="token punctuation">{{'{'}}</span>
     serve: true,
     port: <span class="token number">3000</span>,
@@ -426,7 +429,7 @@ First we must start the application:
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2022</span>-03-14T04:00:02.450Z info  <span class="token punctuation">[</span>@trv:rest/application/rest:188<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
+<span class="token number">2022</span>-03-14T04:00:02.450Z info  <span class="token punctuation">[</span>@trv:rest/application/rest:191<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-fetch">fetch</a> requests to interact with the new api:

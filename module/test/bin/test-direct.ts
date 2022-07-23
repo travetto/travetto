@@ -2,7 +2,7 @@ import { EnvInit } from '@travetto/base/bin/init';
 import { runTests } from './lib/run';
 
 // Direct entry point
-export function main(...args: string[]) {
+export function main(...args: string[]): Promise<void> {
   EnvInit.init({
     debug: '0',
     set: { TRV_LOG_TIME: '0' },

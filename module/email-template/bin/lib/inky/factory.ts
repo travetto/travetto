@@ -24,14 +24,14 @@ export class InkyComponentFactory implements ComponentFactory {
 
   constructor(public columnCount: number = 12, public ns: string = '') { }
 
-  get spacer16() {
+  get spacer16(): string {
     if (!this.#_spacer16) {
       this.#_spacer16 = this.render(`<${this.ns}spacer size="16"></${this.ns}spacer>`);
     }
     return this.#_spacer16;
   }
 
-  #generate(element: Element) {
+  #generate(element: Element): string {
     const tag = TagRegistry.getTag(element, this.ns);
     if (TagRegistry.has(this, tag)) {
       return TagRegistry.resolve(this, tag)!.call(this, element).trim();
@@ -74,7 +74,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  columns(element: Element) {
+  columns(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -125,20 +125,20 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  title(element: Element) {
+  title(element: Element): string {
     const inner = HtmlUtil.getInner(element);
     return `
       <title>${inner}</title>`;
   }
 
   @Tag()
-  summary(element: Element) {
+  summary(element: Element): string {
     const inner = HtmlUtil.getInner(element);
     return `<span id="summary" style="${SUMMARY_STYLE}">${inner}</span>`;
   }
 
   @Tag('h-line')
-  hLine(element: Element) {
+  hLine(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
 
     return `
@@ -148,7 +148,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  row(element: Element) {
+  row(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -163,7 +163,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  button(element: Element) {
+  button(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     let inner = HtmlUtil.getInner(element);
 
@@ -205,7 +205,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  container(element: Element) {
+  container(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -222,7 +222,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag('block-grid')
-  blockGrid(element: Element) {
+  blockGrid(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -235,7 +235,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  menu(element: Element) {
+  menu(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     let inner = HtmlUtil.getInner(element);
 
@@ -263,7 +263,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag('item')
-  menuItem(element: Element) {
+  menuItem(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -277,7 +277,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  center(element: Element) {
+  center(element: Element): string {
     for (const child of Parse5Adapter.getChildNodes(element) ?? []) {
       if (Parse5Adapter.isElementNode(child)) {
         HtmlUtil.setDomAttribute(child, 'align', 'center');
@@ -302,7 +302,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  callout(element: Element) {
+  callout(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -323,7 +323,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  spacer(element: Element) {
+  spacer(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     const html: string[] = [];
 
@@ -334,7 +334,7 @@ export class InkyComponentFactory implements ComponentFactory {
     const sm = smAttr ? parseInt(smAttr, 10) : undefined;
     const lg = lgAttr ? parseInt(lgAttr, 10) : undefined;
 
-    const buildSpacer = (size: number | string, extraClass: string = '') => {
+    const buildSpacer = (size: number | string, extraClass: string = ''): string => {
       const newAttrs = { ...attrs };
       delete newAttrs['size-sm'];
       delete newAttrs['size-lg'];
@@ -368,7 +368,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  wrapper(element: Element) {
+  wrapper(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     const inner = HtmlUtil.getInner(element);
 
@@ -388,7 +388,7 @@ export class InkyComponentFactory implements ComponentFactory {
   }
 
   @Tag()
-  hr(element: Element) {
+  hr(element: Element): string {
     const attrs = HtmlUtil.getAttrMap(element);
     attrs.class = HtmlUtil.classes('hr', attrs.class);
     return `<table ${HtmlUtil.toStr(attrs)}><th></th></table>`;

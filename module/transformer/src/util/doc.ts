@@ -18,14 +18,14 @@ export class DocUtil {
   /**
    * Read doc comment for node
    */
-  static getDocComment(o: ts.JSDoc | ts.JSDocTag, def?: string) {
+  static getDocComment(o: ts.JSDoc | ts.JSDocTag, def?: string): string | undefined {
     return (typeof o.comment === 'string' ? o.comment : undefined) ?? def;
   }
 
   /**
    * Read JS Docs from a `ts.Declaration`
    */
-  static describeDocs(node: ts.Declaration | ts.Type) {
+  static describeDocs(node: ts.Declaration | ts.Type): DeclDocumentation {
     if (node && !('getSourceFile' in node)) {
       node = DeclarationUtil.getPrimaryDeclarationNode(node);
     }
@@ -38,6 +38,7 @@ export class DocUtil {
     if (node) {
       const tags = ts.getJSDocTags(node);
       while (!this.hasJSDoc(node) && CoreUtil.hasOriginal(node)) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         node = node.original as ts.Declaration;
       }
 
@@ -80,7 +81,7 @@ export class DocUtil {
    * Read augments information
    * @param type
    */
-  static readAugments(type: ts.Type | ts.Symbol) {
+  static readAugments(type: ts.Type | ts.Symbol): string[] {
     return this.readDocTag(type, 'augments').map(x => x.replace(/^.*?([^` ]+).*?$/, (_, b) => b));
   }
 }

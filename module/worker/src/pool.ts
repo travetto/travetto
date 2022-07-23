@@ -68,7 +68,7 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Creates and tracks new worker
    */
-  async #createAndTrack(getWorker: () => Promise<T> | T, opts: gp.Options) {
+  async #createAndTrack(getWorker: () => Promise<T> | T, opts: gp.Options): Promise<T> {
     try {
       this.#pendingAcquires += 1;
       const res = await getWorker();
@@ -94,7 +94,7 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Destroy the worker
    */
-  async destroy(worker: T) {
+  async destroy(worker: T): Promise<void> {
     console.debug('Destroying', { pid: process.pid, worker: worker.id });
     return worker.destroy();
   }
@@ -102,7 +102,7 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Free worker on completion
    */
-  async release(worker: T) {
+  async release(worker: T): Promise<void> {
     console.debug('Releasing', { pid: process.pid, worker: worker.id });
     try {
       if (worker.active) {
@@ -121,7 +121,7 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Process a given input source
    */
-  async process(src: WorkSet<X>) {
+  async process(src: WorkSet<X>): Promise<void> {
     const pending = new Set<Promise<unknown>>();
 
     while (await src.hasNext()) {
@@ -148,7 +148,7 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Shutdown pool
    */
-  async shutdown() {
+  async shutdown(): Promise<void> {
     while (this.#pendingAcquires) {
       await Util.wait(10);
     }

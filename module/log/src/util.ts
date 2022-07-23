@@ -9,7 +9,7 @@ export class LogUtil {
   /**
    * Produce an event listener
    */
-  static buildListener(formatter: Formatter, appender: Appender, filter?: (ev: LogEvent) => boolean) {
+  static buildListener(formatter: Formatter, appender: Appender, filter?: (ev: LogEvent) => boolean): (ev: LogEvent) => void {
     if (filter) {
       return (ev: LogEvent) => {
         if (filter(ev)) {
@@ -24,7 +24,7 @@ export class LogUtil {
   /**
    * Build a filter element
    */
-  static buildFilterPart(p: string) {
+  static buildFilterPart(p: string): { key: 'exc' | 'inc', filter: string[] } {
     const [, neg, prop] = p.match(/(-|[+])?(.*)/)!;
     const cleaned = (/^.*:[^\/]*[^*]$/.test(prop) ? `${prop}/*` : prop).replace(/([\/.])/g, a => `\\${a}`);
     const key: 'exc' | 'inc' = neg ? 'exc' : 'inc';
@@ -46,8 +46,8 @@ export class LogUtil {
   /**
    * Convert filter into test function for filtering
    */
-  static buildFilter(v: string) {
-    const config = { inc: [] as string[], exc: [] as string[] };
+  static buildFilter(v: string): ((file: string) => boolean) | undefined {
+    const config: { inc: string[], exc: string[] } = { inc: [], exc: [] };
     const { inc, exc } = config;
 
     for (const p of v.split(/\s*,\s*/)) {

@@ -60,7 +60,7 @@ export class CookiesInterceptor implements RestInterceptor {
   @Inject()
   restConfig: RestConfig;
 
-  postConstruct() {
+  postConstruct(): void {
     const self = this.cookieConfig;
 
     if (this.cookieConfig.secure === undefined) {
@@ -74,10 +74,10 @@ export class CookiesInterceptor implements RestInterceptor {
     // Patch all cookies to default to the cookie values
     const set = cookies.prototype.set;
     const get = cookies.prototype.get;
-    cookies.prototype.set = function (key: string, value?: string, opts: cookies.SetOption = {}) {
+    cookies.prototype.set = function (key: string, value?: string, opts: cookies.SetOption = {}): cookies.Cookie {
       return set.call(this, key, value, { ...self, ...opts });
     };
-    cookies.prototype.get = function (key: string, opts: Partial<cookies.GetOption> & { secure?: boolean } = {}) {
+    cookies.prototype.get = function (key: string, opts: Partial<cookies.GetOption> & { secure?: boolean } = {}): string | undefined {
       if (key.endsWith('.sig')) {
         opts.secure = false;
         opts.signed = false;
@@ -86,17 +86,17 @@ export class CookiesInterceptor implements RestInterceptor {
     };
   }
 
-  applies(route: RouteConfig) {
+  applies(route: RouteConfig): boolean {
     return this.cookieConfig.active;
   }
 
-  intercept(req: Request, res: Response) {
+  intercept(req: Request, res: Response): void {
     // Enforce this is set
     req.cookies = res.cookies = new cookies(
-      // @ts-ignore
-      req as IncomingMessage,
-      // @ts-ignore
-      res as ServerResponse,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      req as unknown as IncomingMessage,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      res as unknown as ServerResponse,
       this.cookieConfig
     );
   }

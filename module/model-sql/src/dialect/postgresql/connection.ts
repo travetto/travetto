@@ -28,7 +28,7 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
    * Initializes connection and establishes crypto extension for use with hashing
    */
   @WithAsyncContext()
-  async init() {
+  async init(): Promise<void> {
     this.#pool = new pg.Pool({
       user: this.#config.user,
       password: this.#config.password,
@@ -53,9 +53,10 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
     console.debug('Executing query', { query });
     try {
       const out = await conn.query(query);
-      return { count: out.rowCount, records: [...out.rows].map(v => ({ ...v })) as T[] };
-    } catch (err: any) {
-      if (err.message.includes('duplicate key value')) {
+      const records: T[] = [...out.rows].map(v => ({ ...v }));
+      return { count: out.rowCount, records };
+    } catch (err) {
+      if (err instanceof Error && err.message.includes('duplicate key value')) {
         throw new ExistsError('query', query);
       } else {
         throw err;
@@ -63,11 +64,11 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
     }
   }
 
-  acquire() {
+  acquire(): Promise<pg.PoolClient> {
     return this.#pool.connect();
   }
 
-  release(conn: pg.PoolClient) {
+  release(conn: pg.PoolClient): void {
     conn.release();
   }
 }

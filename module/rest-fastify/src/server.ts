@@ -37,9 +37,10 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
   /**
    * Build the fastify server
    */
-  async init() {
+  async init(): Promise<FastifyInstance> {
     const fastConf: FastifyServerOptions = {};
     if (this.config.ssl.active) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       (fastConf as FastifyHttpsOptions<https.Server>).https = (await this.config.getKeys())!;
     }
     if (this.config.trustProxy) {
@@ -58,11 +59,11 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
     return app;
   }
 
-  async unregisterRoutes(key: string | symbol) {
+  async unregisterRoutes(key: string | symbol): Promise<void> {
     console.debug('Fastify does not allow for route reloading');
   }
 
-  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]) {
+  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]): Promise<void> {
     if (this.listening) { // Does not support live reload
       return;
     }
@@ -74,9 +75,10 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
         sub = `${path}/${route.path.source}`;
       }
       sub = sub.replace(/\/+/g, '/').replace(/\/+$/, '');
-      this.raw[route.method as 'get'](sub, async (reqs, reply) => {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      this.raw[route.method as 'get'](sub, async (req, reply) => {
         await route.handlerFinalized!(
-          reqs[TravettoEntityⲐ] ??= FastifyServerUtil.getRequest(reqs),
+          req[TravettoEntityⲐ] ??= FastifyServerUtil.getRequest(req),
           reply[TravettoEntityⲐ] ??= FastifyServerUtil.getResponse(reply)
         );
       });
@@ -89,6 +91,6 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
     return {
       on: this.raw.server.on.bind(this.raw),
       close: this.raw.close.bind(this.raw)
-    } as ServerHandle;
+    };
   }
 }

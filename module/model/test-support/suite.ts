@@ -11,7 +11,7 @@ import { ModelRegistry } from '../src/registry/model';
 const Loaded = Symbol();
 
 export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean, namespace?: string }>, serviceClass: Class }>(qualifier?: symbol) {
-  return (target: Class<T>) => {
+  return (target: Class<T>): void => {
     SuiteRegistry.registerPendingListener(
       target,
       async function (this: T & { [Loaded]?: boolean }) {

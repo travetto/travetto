@@ -2,6 +2,8 @@ import { EnvUtil } from './env';
 
 type Prim = string | number | boolean | Date;
 
+type TemplateType<T> = (values: TemplateStringsArray, ...keys: (Partial<Record<keyof T, Prim>> | string)[]) => string;
+
 /**
  * Utilities for dealing with coloring console text
  */
@@ -19,7 +21,7 @@ export class ColorUtil {
   /**
    * Get colorization status
    */
-  static get colorize() {
+  static get colorize(): boolean {
     if (this.#colorize === undefined) {
       if (EnvUtil.isSet('TRV_COLOR')) {
         this.#colorize = EnvUtil.isTrue('TRV_COLOR');
@@ -85,7 +87,7 @@ export class ColorUtil {
    * @param textColor Text color
    * @param styles Text styles to apply
    */
-  static makeColorer(textColor: keyof typeof ColorUtil.COLORS, ...styles: (keyof typeof ColorUtil.STYLES)[]) {
+  static makeColorer(textColor: keyof typeof ColorUtil.COLORS, ...styles: (keyof typeof ColorUtil.STYLES)[]): (text: Prim) => string {
     return this.color.bind(this, textColor, styles);
   }
 
@@ -94,7 +96,7 @@ export class ColorUtil {
    *
    * @param palette The list of supported keys for the string template
    */
-  static makeTemplate<T extends Record<string, (text: Prim) => ReturnType<(typeof ColorUtil)['color']>>>(palette: T) {
+  static makeTemplate<T extends Record<string, (text: Prim) => ReturnType<(typeof ColorUtil)['color']>>>(palette: T): TemplateType<T> {
     /**
      * @example
      * ```

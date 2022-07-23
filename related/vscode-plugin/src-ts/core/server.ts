@@ -24,16 +24,16 @@ export class ProcessServer {
     process.on('exit', this.stop.bind(this));
   }
 
-  #emit(type: EventType, ...args: unknown[]) {
+  #emit(type: EventType, ...args: unknown[]): void {
     this.#emitter.emit(type, ...args);
   }
 
-  on(type: EventType, handler: (event: unknown) => void) {
+  on(type: EventType, handler: (event: unknown) => void): this {
     this.#emitter.on(type, handler);
     return this;
   }
 
-  start() {
+  start(): void {
     if (!this.running) {
       console.log('Starting', { path: this.#path, args: this.#args });
       this.#emit('pre-start');
@@ -53,7 +53,7 @@ export class ProcessServer {
     }
   }
 
-  restart() {
+  restart(): void {
     if (!this.running) {
       this.start();
     } else {
@@ -62,7 +62,7 @@ export class ProcessServer {
     }
   }
 
-  stop() {
+  stop(): void {
     if (this.running) {
       console.log('Stopping', { path: this.#path, args: this.#args });
       this.#respawn = false;
@@ -72,11 +72,11 @@ export class ProcessServer {
     }
   }
 
-  get running() {
+  get running(): boolean {
     return this.#state && this.#state.process && !this.#state.process.killed;
   }
 
-  sendMessage(type: string, payload: Record<string, unknown> = {}) {
+  sendMessage(type: string, payload: Record<string, unknown> = {}): void {
     if (!this.running) {
       throw new Error('Server is not running');
     }
@@ -84,16 +84,17 @@ export class ProcessServer {
     this.#state.process.send({ type, ...payload });
   }
 
-  onMessage(types: string | (string | undefined)[], callback: (type: string, payload: Record<string, unknown>) => void) {
+  onMessage<U = unknown>(types: string | (string | undefined)[], callback: (type: string, payload: U) => void): () => void {
     if (!this.running) {
       throw new Error('Server is not running');
     }
 
     types = (Array.isArray(types) ? types : [types]).filter(x => !!x);
 
-    const handler = async (msg: { type: string } & Record<string, unknown>) => {
+    const handler = async (msg: { type: string } & Record<string, unknown>): Promise<void> => {
       if (types.includes(msg.type) || types.includes('*')) {
-        callback(msg.type, msg);
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        callback(msg.type, msg as U);
 
       }
     };
@@ -102,8 +103,8 @@ export class ProcessServer {
     return this.#state.process.off.bind(this.#state.process, 'message', handler);
   }
 
-  onceMessage(types: string | (string | undefined)[], callback: (type: string, payload: Record<string, unknown>) => void) {
-    const handler = this.onMessage(types, (type: string, payload) => {
+  onceMessage<U = unknown>(types: string | (string | undefined)[], callback: (type: string, payload: U) => void): void {
+    const handler = this.onMessage(types, (type: string, payload: U) => {
       handler();
       callback(type, payload);
     });
@@ -111,10 +112,10 @@ export class ProcessServer {
 
   sendMessageAndWaitFor<U>(type: string, payload: Record<string, unknown>, waitType: string, errType?: string): Promise<U> {
     const prom = new Promise<U>((resolve, reject) => {
-      const remove = this.onMessage([waitType, errType], (resType, msg) => {
+      const remove = this.onMessage([waitType, errType], (resType, msg: U) => {
         remove();
         switch (resType) {
-          case waitType: return resolve(msg as U);
+          case waitType: return resolve(msg);
           case errType: return reject(msg);
         }
       });

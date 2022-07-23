@@ -4,6 +4,8 @@ import * as passport from 'passport';
 import { Util } from '@travetto/base';
 import { Request } from '@travetto/rest';
 
+import { LoginContext } from '../../types';
+
 export interface PassportAuthOptions {
   state?: ((req: Request) => Record<string, unknown>) | Record<string, unknown>;
 }
@@ -31,7 +33,7 @@ export class PassportUtil {
    * Process request read state from query
    * @param req The travetto request
    */
-  static getLoginContext(req: Request) {
+  static getLoginContext(req: Request): LoginContext | undefined {
     if (req.query.state) {
       if (typeof req.query.state === 'string' && req.query.state) {
         try {

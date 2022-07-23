@@ -11,14 +11,14 @@ export class RunnerUtil {
   /**
    * Add 50 ms to the shutdown to allow for buffers to output properly
    */
-  static registerCleanup(scope: string) {
+  static registerCleanup(scope: string): void {
     ShutdownManager.onShutdown(`test.${scope}.bufferOutput`, () => Util.wait(50));
   }
 
   /**
    * Determine if a given file path is a valid test file
    */
-  static isTestFile(file: string) {
+  static isTestFile(file: string): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       const input = createReadStream(file);
       const reader = readline.createInterface({ input })
@@ -36,7 +36,7 @@ export class RunnerUtil {
   /**
    * Find all valid test files given the globs
    */
-  static async getTestFiles(globs: RegExp[], root = 'test') {
+  static async getTestFiles(globs: RegExp[], root = 'test'): Promise<string[]> {
     const files = SourceIndex.find({ folder: root, paths: ['.'] })
       .filter(f => globs.some(g => g.test(f.module)));
 

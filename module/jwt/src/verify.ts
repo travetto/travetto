@@ -7,15 +7,16 @@ const RSA: AlgType[] = ['RS256', 'RS384', 'RS512'];
 const ES: AlgType[] = ['ES256', 'ES384', 'ES512'];
 const HS: AlgType[] = ['HS256', 'HS384', 'HS512'];
 
-const toArr = <T>(v: T | T[]) => Array.isArray(v) ? v : [v];
+const toArr = <T>(v: T | T[]): T[] => Array.isArray(v) ? v : [v];
 
 export class JWTVerifier {
 
   /**
    * Verify signature types
    */
-  static verifyTypes(o: unknown) {
-    const p = o as Payload;
+  static verifyTypes<T = unknown>(o: T): T {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const p = o as unknown as Payload;
 
     for (const [t, f] of [
       ['string', ['iss', 'sub', 'jti', 'kid']],
@@ -36,14 +37,14 @@ export class JWTVerifier {
   /**
    * Verify payload time properties
    */
-  static verifyTimes(payload: Payload, options: VerifyOptions) {
-    const oct = options.clock?.timestamp;
-    const octn = typeof oct === 'number' ? oct : Math.trunc((oct ?? new Date()).getTime() / 1000);
+  static verifyTimes(payload: Payload, options: VerifyOptions): void {
+    const timestamp = options.clock?.timestamp;
+    const timestampSeconds = typeof timestamp === 'number' ? timestamp : Math.trunc((timestamp ?? new Date()).getTime() / 1000);
 
     const clock = {
       tolerance: 0,
       ...(options.clock ?? {}),
-      timestamp: octn,
+      timestamp: timestampSeconds,
     };
 
     const ignore = {
@@ -81,7 +82,7 @@ export class JWTVerifier {
   /**
    * Verify contextual data
    */
-  static verifyContext(payload: Payload, options: VerifyOptions) {
+  static verifyContext(payload: Payload, options: VerifyOptions): void {
     const verifyPayload = { ...(options.payload ?? {}) };
 
     if (verifyPayload.aud) {
@@ -117,9 +118,9 @@ export class JWTVerifier {
   /**
    * Verify header and signature
    */
-  static verifyHeader(header: jws.Header, signature: string, key: string | Buffer | undefined, options: VerifyOptions) {
+  static verifyHeader(header: jws.Header, signature: string, key: string | Buffer | undefined, options: VerifyOptions): void {
     // clone this object since we are going to mutate it.
-    const headerVerify = { ...(options.header ?? {}), alg: undefined! as (string | string[]), typ: 'JWT' };
+    const headerVerify: { typ: 'JWT', alg?: jws.Algorithm | jws.Algorithm[] } = { ...(options.header ?? {}), typ: 'JWT' };
 
     if (header.typ && header.typ !== 'JWT') {
       throw new JWTError('Token is not a valid JWT');

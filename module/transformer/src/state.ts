@@ -12,12 +12,15 @@ import { DocUtil } from './util/doc';
 import { DecoratorUtil } from './util/decorator';
 import { DeclarationUtil } from './util/declaration';
 import { CoreUtil, LiteralUtil } from './util';
+import { Import } from './types/shared';
 
 function hasOriginal(n: unknown): n is { original: ts.Node } {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!n && !(n as { parent?: unknown }).parent && !!(n as { original: unknown }).original;
 }
 
 function hasEscapedName(n: unknown): n is { name: { escapedText: string } } {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!n && !!(n as { name?: { escapedText?: string } }).name?.escapedText;
 }
 
@@ -45,28 +48,28 @@ export class TransformerState implements State {
    * Allow access to resolver
    * @private
    */
-  getResolver() {
+  getResolver(): TypeResolver {
     return this.#resolver;
   }
 
   /**
    * Get or import the node or external type
    */
-  getOrImport(type: ExternalType) {
+  getOrImport(type: ExternalType): ts.Identifier | ts.PropertyAccessExpression {
     return this.#imports.getOrImport(this.factory, type);
   }
 
   /**
    * Import a given file
    */
-  importFile(file: string) {
+  importFile(file: string): Import {
     return this.#imports.importFile(file);
   }
 
   /**
    * Resolve an `AnyType` from a `ts.Type` or `ts.Node`
    */
-  resolveType(node: ts.Type | ts.Node) {
+  resolveType(node: ts.Type | ts.Node): AnyType {
     const resolved = this.#resolver.resolveType(node);
     this.#imports.importFromResolved(resolved);
     return resolved;
@@ -75,7 +78,7 @@ export class TransformerState implements State {
   /**
    * Resolve external type
    */
-  resolveExternalType(node: ts.Node) {
+  resolveExternalType(node: ts.Node): ExternalType {
     const resolved = this.resolveType(node);
     if (resolved.key !== 'external') {
       throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${node.getSourceFile().fileName}`);
@@ -86,7 +89,7 @@ export class TransformerState implements State {
   /**
    * Convert a type to it's identifier, will return undefined if none match
    */
-  typeToIdentifier(node: ts.Type | AnyType) {
+  typeToIdentifier(node: ts.Type | AnyType): ts.Identifier | ts.PropertyAccessExpression | undefined {
     const type = 'flags' in node ? this.resolveType(node) : node;
     switch (type.key) {
       case 'literal': return this.factory.createIdentifier(type.ctor!.name);
@@ -98,7 +101,7 @@ export class TransformerState implements State {
   /**
    * Resolve the return type
    */
-  resolveReturnType(node: ts.MethodDeclaration) {
+  resolveReturnType(node: ts.MethodDeclaration): AnyType {
     const typeNode = ts.getJSDocReturnType(node);
     if (typeNode) {
       const resolved = this.#resolver.getChecker().getTypeFromTypeNode(typeNode);
@@ -111,14 +114,14 @@ export class TransformerState implements State {
   /**
    * Read all JSDoc tags
    */
-  readDocTag(node: ts.Declaration, name: string) {
+  readDocTag(node: ts.Declaration, name: string): string[] {
     return DocUtil.readDocTag(this.#resolver.getType(node), name);
   }
 
   /**
    * Import a decorator, generally to handle erasure
    */
-  importDecorator(pth: string, name: string) {
+  importDecorator(pth: string, name: string): ts.PropertyAccessExpression | undefined {
     if (!this.#decorators.has(`${pth}:${name}`)) {
       const ref = this.#imports.importFile(pth);
       const ident = this.factory.createIdentifier(name);
@@ -130,7 +133,7 @@ export class TransformerState implements State {
   /**
    * Create a decorator to add functionality to a declaration
    */
-  createDecorator(pth: string, name: string, ...contents: (ts.Expression | undefined)[]) {
+  createDecorator(pth: string, name: string, ...contents: (ts.Expression | undefined)[]): ts.Decorator {
     this.importDecorator(pth, name);
     return CoreUtil.createDecorator(this.factory, this.#decorators.get(name)!, ...contents);
   }
@@ -151,6 +154,7 @@ export class TransformerState implements State {
       module: decl ? ModuleUtil.normalizePath(decl.getSourceFile().fileName) : undefined, // All #decorators will be absolute
       targets: DocUtil.readAugments(this.#resolver.getType(ident)),
       name: ident ?
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         ident.escapedText! as string :
         undefined
     };
@@ -160,7 +164,7 @@ export class TransformerState implements State {
    * Get list of all #decorators for a node
    */
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
-    return ((node.decorators ?? []) as ts.Decorator[])
+    return (node.decorators ?? [])
       .map(dec => this.getDecoratorMeta(dec))
       .filter(x => !!x.ident);
   }
@@ -177,7 +181,7 @@ export class TransformerState implements State {
    * @param stmt
    * @param before
    */
-  addStatement(stmt: ts.Statement, before?: ts.Node) {
+  addStatement(stmt: ts.Statement, before?: ts.Node): void {
     const stmts = this.source.statements.slice(0);
     let idx = stmts.length;
     let n = before;
@@ -187,8 +191,10 @@ export class TransformerState implements State {
     while (n && !ts.isSourceFile(n.parent)) {
       n = n.parent;
     }
-    if (n && ts.isSourceFile(n.parent) && stmts.indexOf(n as ts.Statement) >= 0) {
-      idx = stmts.indexOf(n as ts.Statement) - 1;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const nStmt: ts.Statement = n as ts.Statement;
+    if (n && ts.isSourceFile(n.parent) && stmts.indexOf(nStmt) >= 0) {
+      idx = stmts.indexOf(nStmt) - 1;
     }
     if (!this.added.has(idx)) {
       this.added.set(idx, []);
@@ -199,7 +205,7 @@ export class TransformerState implements State {
   /**
    * Finalize the source file for emission
    */
-  finalize(ret: ts.SourceFile) {
+  finalize(ret: ts.SourceFile): ts.SourceFile {
     ret = this.#imports.finalize(ret);
     return ret;
   }
@@ -207,9 +213,9 @@ export class TransformerState implements State {
   /**
    * Get Filename as ᚕsrc
    */
-  getFilenameAsSrc() {
+  getFilenameAsSrc(): ts.CallExpression {
     const ident = this.factory.createIdentifier('ᚕsrc');
-    ident.getSourceFile = () => this.source;
+    ident.getSourceFile = (): ts.SourceFile => this.source;
     return this.factory.createCallExpression(ident, [], [this.createIdentifier('__filename')]);
   }
 
@@ -223,20 +229,21 @@ export class TransformerState implements State {
   fromLiteral(val: unknown[]): ts.ArrayLiteralExpression;
   fromLiteral(val: string | boolean | number): ts.LiteralExpression;
   fromLiteral(val: unknown): ts.Node {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return LiteralUtil.fromLiteral(this.factory, val as object);
   }
 
   /**
    * Extend
    */
-  extendObjectLiteral(src: object | ts.Expression, ...rest: (object | ts.Expression)[]) {
+  extendObjectLiteral(src: object | ts.Expression, ...rest: (object | ts.Expression)[]): ts.ObjectLiteralExpression {
     return LiteralUtil.extendObjectLiteral(this.factory, src, ...rest);
   }
 
   /**
    * Create property access
    */
-  createAccess(first: string | ts.Expression, second: string | ts.Identifier, ...items: (string | ts.Identifier)[]) {
+  createAccess(first: string | ts.Expression, second: string | ts.Identifier, ...items: (string | ts.Identifier)[]): ts.PropertyAccessExpression {
     return CoreUtil.createAccess(this.factory, first, second, ...items);
   }
 
@@ -251,7 +258,7 @@ export class TransformerState implements State {
    * Ceate identifier from node or text
    * @param name
    */
-  createIdentifier(name: string | { getText(): string }) {
+  createIdentifier(name: string | { getText(): string }): ts.Identifier {
     return this.factory.createIdentifier(typeof name === 'string' ? name : name.getText());
   }
 
@@ -262,7 +269,7 @@ export class TransformerState implements State {
    * @param name
    * @param module
    */
-  findDecorator(cls: Transformer, node: ts.Node, name: string, module?: string) {
+  findDecorator(cls: Transformer, node: ts.Node, name: string, module?: string): ts.Decorator | undefined {
     const target = `${cls[TransformerId]}/${name}`;
     return this.getDecoratorList(node)
       .find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.dec;
@@ -273,7 +280,7 @@ export class TransformerState implements State {
    * @param node
    * @param type
    */
-  generateUniqueIdentifier(node: ts.Node, type: AnyType) {
+  generateUniqueIdentifier(node: ts.Node, type: AnyType): string {
     let unique: string;
     try {
       // Tie to source location if possible
@@ -297,14 +304,14 @@ export class TransformerState implements State {
   /**
    * Register synthetic idetnifier
    */
-  createSyntheticIdentifier(id: string) {
+  createSyntheticIdentifier(id: string): [identifier: ts.Identifier, exists: boolean] {
     id = `${id}${TransformerState.SYNTHETIC_EXT}`;
     let exists = true;
     if (!this.#syntheticIdentifiers.has(id)) {
       this.#syntheticIdentifiers.set(id, this.factory.createIdentifier(id));
       exists = false;
     }
-    return [this.#syntheticIdentifiers.get(id), exists] as [id: ts.Identifier, exists: boolean];
+    return [this.#syntheticIdentifiers.get(id)!, exists];
   }
 
   /**
@@ -315,8 +322,8 @@ export class TransformerState implements State {
   findMethodByName(cls: ts.ClassLikeDeclaration | ts.Type, method: string): ts.MethodDeclaration | undefined {
     if ('getSourceFile' in cls) {
       return cls.members.find(
-        m => ts.isMethodDeclaration(m) && ts.isIdentifier(m.name) && m.name.escapedText === method
-      ) as ts.MethodDeclaration;
+        (m): m is ts.MethodDeclaration => ts.isMethodDeclaration(m) && ts.isIdentifier(m.name) && m.name.escapedText === method
+      );
     } else {
       const props = this.getResolver().getPropertiesOfType(cls);
       for (const prop of props) {

@@ -13,7 +13,7 @@ export class WatchUtil {
    * @param file
    * @param cb
    */
-  static async watchFile(file: string, cb: (ev: unknown) => void, unload = false) {
+  static async watchFile(file: string, cb: (ev: unknown) => void, unload = false): Promise<void> {
     new Watcher(__dirname, { interval: 250, exclude: { testDir: () => false, testFile: f => f === file } })
       .on('all', e => {
         if (unload) {

@@ -67,7 +67,7 @@ export class ModelAuthService<T extends ModelType> implements
    * Retrieve user by id
    * @param userId The user id to retrieve
    */
-  async #retrieve(userId: string) {
+  async #retrieve(userId: string): Promise<T> {
     return await this.#modelService.get<T>(this.#cls, userId);
   }
 
@@ -75,7 +75,7 @@ export class ModelAuthService<T extends ModelType> implements
    * Convert identity to a principal
    * @param ident The registered identity to resolve
    */
-  async #resolvePrincipal(ident: RegisteredPrincipal) {
+  async #resolvePrincipal(ident: RegisteredPrincipal): Promise<RegisteredPrincipal> {
     const user = await this.#retrieve(ident.id);
     return this.toPrincipal(user);
   }
@@ -85,7 +85,7 @@ export class ModelAuthService<T extends ModelType> implements
    * @param userId The user id to authenticate against
    * @param password The password to authenticate against
    */
-  async #authenticate(userId: string, password: string) {
+  async #authenticate(userId: string, password: string): Promise<RegisteredPrincipal> {
     const ident = await this.#resolvePrincipal({ id: userId, details: {} });
 
     const hash = await AuthUtil.generateHash(password, ident.salt!);
@@ -97,7 +97,7 @@ export class ModelAuthService<T extends ModelType> implements
     }
   }
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     if (isStorageSupported(this.#modelService) && EnvUtil.isDynamic()) {
       await this.#modelService.createModel?.(this.#cls);
     }
@@ -107,7 +107,8 @@ export class ModelAuthService<T extends ModelType> implements
    * Register a user
    * @param user The user to register
    */
-  async register(user: OptionalId<T>) {
+  async register(user: OptionalId<T>): Promise<T> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const ident = this.toPrincipal(user as T);
 
     try {
@@ -133,11 +134,11 @@ export class ModelAuthService<T extends ModelType> implements
 
   /**
    * Change a password
-   * @param userId The user id to affet
+   * @param userId The user id to affect
    * @param password The new password
    * @param oldPassword The old password
    */
-  async changePassword(userId: string, password: string, oldPassword?: string) {
+  async changePassword(userId: string, password: string, oldPassword?: string): Promise<T> {
     const user = await this.#retrieve(userId);
     const ident = this.toPrincipal(user);
 
@@ -182,7 +183,7 @@ export class ModelAuthService<T extends ModelType> implements
    * @param principal
    * @returns Authorized principal
    */
-  authorize(principal: RegisteredPrincipal) {
+  authorize(principal: RegisteredPrincipal): Promise<RegisteredPrincipal> {
     return this.#resolvePrincipal(principal);
   }
 
@@ -191,7 +192,7 @@ export class ModelAuthService<T extends ModelType> implements
    * @param payload
    * @returns Authenticated principal
    */
-  authenticate(payload: T) {
+  authenticate(payload: T): Promise<RegisteredPrincipal> {
     const { id, password } = this.toPrincipal(payload);
     return this.#authenticate(id, password!);
   }

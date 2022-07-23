@@ -16,7 +16,7 @@ export class FirestoreModelConfig {
     private_key: string;
   };
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     if (this.emulator) {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }

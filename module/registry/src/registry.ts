@@ -53,7 +53,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Reset parents
    */
-  protected resetParents() {
+  protected resetParents(): void {
     for (const parent of this.#parents) {
       parent.reset();
     }
@@ -86,7 +86,7 @@ export abstract class Registry implements ChangeSource<Class> {
     }
   }
 
-  get resolved() {
+  get resolved(): boolean {
     return this.#resolved;
   }
 
@@ -100,7 +100,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Verify initialized state
    */
-  verifyInitialized() {
+  verifyInitialized(): void {
     if (!this.#resolved) {
       throw new Error(`${this.constructor.name} has not been initialized, you probably need to call RootRegistry.init()`);
     }
@@ -131,7 +131,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Uninstall a class or list of classes
    */
-  uninstall(classes: Class | Class[], e: ChangeEvent<Class>) {
+  uninstall(classes: Class | Class[], e: ChangeEvent<Class>): void {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -143,7 +143,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Install a class or a list of classes
    */
-  install(classes: Class | Class[], e: ChangeEvent<Class>) {
+  install(classes: Class | Class[], e: ChangeEvent<Class>): void {
     if (!Array.isArray(classes)) {
       classes = [classes];
     }
@@ -155,7 +155,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Listen for events from the parent
    */
-  onEvent(event: ChangeEvent<Class>) {
+  onEvent(event: ChangeEvent<Class>): void {
     console.debug('Received', { id: this.constructor.ᚕid, type: event.type, targetId: (event.curr ?? event.prev)!.ᚕid });
 
     switch (event.type) {
@@ -177,7 +177,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Emit a new event
    */
-  emit(e: ChangeEvent<Class>) {
+  emit(e: ChangeEvent<Class>): void {
     this.#emitter.emit('change', e);
   }
 
@@ -191,28 +191,28 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Remove listeners
    */
-  off<T>(callback: ChangeHandler<Class<T>>) {
+  off<T>(callback: ChangeHandler<Class<T>>): void {
     this.#emitter.off('change', callback);
   }
 
   /**
    * Connect changes sources
    */
-  listen(source: ChangeSource<Class>) {
+  listen(source: ChangeSource<Class>): void {
     source.on(e => this.onEvent(e));
   }
 
   /**
    * On registry reset
    */
-  onReset() {
+  onReset(): void {
     this.#resolved = false;
   }
 
   /**
    * Reset entire registry
    */
-  reset() {
+  reset(): void {
     this.onReset();
     for (const des of this.#dependents) {
       des.reset();

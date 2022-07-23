@@ -214,8 +214,11 @@ export class TodoTest {
 
     try {
       await this.svc.get(saved.id);
-    } catch (e) {
-      assert(e.message);
+    } catch (err) {
+      if (!(err instanceof Error)) {
+        throw err;
+      }
+      assert(err.message);
     }
   }
 }
@@ -314,10 +317,10 @@ First we must start the application:
 
 **Terminal: Application Startup**
 ```bash
-2022-03-14T04:00:00.618Z info  [@trv:app/registry:55] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
-2022-03-14T04:00:00.837Z info  [@trv:app/registry:61] Manifest {
+2022-03-14T04:00:00.618Z info  [@trv:app/registry:57] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
+2022-03-14T04:00:00.837Z info  [@trv:app/registry:63] Manifest {
   info: {
-    framework: '2.0.2',
+    framework: '2.1.3',
     name: '@travetto/todo-app',
     description: '',
     version: '0.0.0',
@@ -332,7 +335,7 @@ First we must start the application:
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
-    node: 'v17.4.0',
+    node: 'v18.1.0',
     dynamic: false,
     readonly: false
   },
@@ -371,7 +374,7 @@ First we must start the application:
     }
   }
 }
-2022-03-14T04:00:01.510Z info  [@trv:app/registry:69] Config {
+2022-03-14T04:00:01.510Z info  [@trv:app/registry:72] Config {
   rest: {
     serve: true,
     port: 3000,
@@ -413,7 +416,7 @@ First we must start the application:
     }
   }
 }
-2022-03-14T04:00:02.450Z info  [@trv:rest/application/rest:188] Listening { port: 3000 }
+2022-03-14T04:00:02.450Z info  [@trv:rest/application/rest:191] Listening { port: 3000 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:

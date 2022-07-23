@@ -23,7 +23,7 @@ export class WatchEmitter {
   emit(type: 'all', payload: AllEvent): void;
   emit(type: StandardEventType, payload: ScanEntry): void;
   emit(type: 'error', payload: Error): void;
-  emit(type: StandardEventType | 'all' | 'error', payload: unknown) {
+  emit(type: StandardEventType | 'all' | 'error', payload: unknown): void {
     if (!this.suppress) {
       if (type !== 'all' && type !== 'error') {
         this.#emitter.emit('all', { event: type, entry: payload });
@@ -40,7 +40,7 @@ export class WatchEmitter {
     return this;
   }
 
-  removeAllListeners() {
+  removeAllListeners(): void {
     this.#emitter.removeAllListeners();
   }
 }

@@ -177,13 +177,11 @@ $ node @travetto/base/bin/main ./doc/render.ts
         </table>
       </th>
   </tr>
-      </tbody>
-    </table><a href="{{salesLink}}">Sales Link</a><table class="row">
+      </tbody></table>‍<a href="{{salesLink}}">Sales Link</a><table class="row">
       <tbody>
         <tr>
 </tr>
-      </tbody>
-    </table>
+      </tbody></table>‍
 
       </td>
     </tr>

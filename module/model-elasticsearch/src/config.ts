@@ -47,14 +47,14 @@ export class ElasticsearchModelConfig {
   };
 
   /**
-   * Frequency of culling for expirable content
+   * Frequency of culling for cullable content
    */
   cullRate?: number | TimeSpan;
 
   /**
    * Build final hosts
    */
-  postConstruct() {
+  postConstruct(): void {
     console.debug('Constructed', { config: this });
     this.hosts = this.hosts
       .map(x => x.includes(':') ? x : `${x}:${this.port}`)

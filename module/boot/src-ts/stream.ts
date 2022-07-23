@@ -80,15 +80,15 @@ export class StreamUtil {
    * @param stream The stream to wait for
    * @param waitUntil The function to track completion before the stream is done
    */
-  static async waitForCompletion(stream: Readable, waitUntil: () => Promise<unknown>) {
+  static async waitForCompletion(stream: Readable, waitUntil: () => Promise<unknown>): Promise<Readable> {
     const ogListen = stream.addListener;
 
     // Allow for process to end before calling end handler
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    stream.on = stream.addListener = function (this: Readable, type: string, handler: (...params: any[]) => void) {
+    stream.on = stream.addListener = function (this: Readable, type: string, handler: (...params: any[]) => void): Readable {
       let outHandler = handler;
       if (type === 'end') {
-        outHandler = async (...params: unknown[]) => {
+        outHandler = async (...params: unknown[]): Promise<void> => {
           await waitUntil();
           handler(...params);
         };
@@ -101,7 +101,7 @@ export class StreamUtil {
   /**
    * Pipe a stream and wait for completion
    */
-  static async pipe(src: Readable, dest: Writable, opts?: { end?: boolean }) {
+  static async pipe(src: Readable, dest: Writable, opts?: { end?: boolean }): Promise<void> {
     await new Promise((res, rej) => {
       src.on('end', res)
         .on('drain', res)

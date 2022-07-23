@@ -55,7 +55,7 @@ export class SessionService {
   /**
    * Initialize service if none defined
    */
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     if (isStorageSupported(this.#modelService) && EnvUtil.isDynamic()) {
       await this.#modelService.createModel?.(SessionEntry);
     }
@@ -124,7 +124,7 @@ export class SessionService {
   /**
    * Get or recreate session
    */
-  ensureCreated(req: Request) {
+  ensureCreated(req: Request): Session {
     if (req[SessionⲐ]?.action === 'destroy') {
       // @ts-expect-error
       req[SessionⲐ] = undefined;
@@ -135,8 +135,9 @@ export class SessionService {
   /**
    * Load from request
    */
-  async readRequest(req: Request, id?: string) {
+  async readRequest(req: Request, id?: string): Promise<void> {
     if (!req[SessionⲐ]) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       id = this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.header(this.config.keyName) as string;
       if (id) {
         req[SessionⲐ] = (await this.#load(id))!;
@@ -147,7 +148,7 @@ export class SessionService {
   /**
    * Store to response
    */
-  async writeResponse(req: Request, res: Response) {
+  async writeResponse(req: Request, res: Response): Promise<void> {
     const value = await this.#store(req[SessionⲐ]);
 
     if (value === undefined) {

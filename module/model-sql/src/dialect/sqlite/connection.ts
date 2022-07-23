@@ -29,12 +29,12 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
     this.#config = config;
   }
 
-  async #withRetries<T>(op: () => Promise<T>, retries = 10, delay = 250) {
+  async #withRetries<T>(op: () => Promise<T>, retries = 10, delay = 250): Promise<T> {
     for (; ;) {
       try {
         return await op();
-      } catch (err: any) {
-        if (retries > 1 && err.message.includes('database is locked')) {
+      } catch (err) {
+        if (err instanceof Error && retries > 1 && err.message.includes('database is locked')) {
           console.error('Failed, and waiting', retries);
           await Util.wait(delay);
           retries -= 1;
@@ -49,11 +49,11 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
    * Initializes connection and establishes crypto extension for use with hashing
    */
   @WithAsyncContext()
-  override async init() {
+  override async init(): Promise<void> {
     this.#pool = pool.createPool({
       create: () => this.#withRetries(async () => {
         const db = Db(AppCache.toEntryName('sqlite_db'),
-          this.#config.options as sqlite3.Options
+          this.#config.options
         );
         await db.pragma('foreign_keys = ON');
         await db.pragma('journal_mode = WAL');
@@ -73,21 +73,26 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
       try {
         const out = await conn.prepare(query)[query.trim().startsWith('SELECT') ? 'all' : 'run']();
         if (Array.isArray(out)) {
-          return { count: out.length, records: [...out].map(v => ({ ...v })) as T[] };
+          const records: T[] = [...out].map(v => ({ ...v }));
+          return { count: out.length, records };
         } else {
           return { count: out.changes, records: [] };
         }
-      } catch (err: any) {
-        throw err.message.includes('UNIQUE constraint failed') ? new ExistsError('query', query) : err;
+      } catch (err) {
+        if (err instanceof Error && err.message.includes('UNIQUE constraint failed')) {
+          throw new ExistsError('query', query);
+        } else {
+          throw err;
+        }
       }
     });
   }
 
-  async acquire() {
+  async acquire(): Promise<Db.Database> {
     return this.#pool.acquire();
   }
 
-  async release(db: sqlite3.Database) {
+  async release(db: sqlite3.Database): Promise<void> {
     return this.#pool.release(db);
   }
 }

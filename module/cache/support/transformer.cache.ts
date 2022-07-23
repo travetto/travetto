@@ -13,7 +13,7 @@ export class CacheTransformer {
    * When `@Cache` and `@Evict` are present
    */
   @OnMethod('Cache', 'Evict')
-  static instrumentCache(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
+  static instrumentCache(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta): ts.MethodDeclaration {
 
     const isCache = !!state.findDecorator(this, node, 'Cache');
     const dec = dm?.dec;
@@ -21,7 +21,7 @@ export class CacheTransformer {
     // If valid function
     if (dec && ts.isCallExpression(dec.expression)) {
       const params = dec.expression.arguments;
-      const id = params[0] as ts.Identifier;
+      const mainExpression = params[0];
 
       const op = isCache ? 'cache' : 'evict';
 
@@ -50,7 +50,7 @@ export class CacheTransformer {
           state.factory.createReturnStatement(
             state.factory.createCallExpression(
               state.factory.createPropertyAccessExpression(
-                state.factory.createElementAccessExpression(state.factory.createThis(), id), op
+                state.factory.createElementAccessExpression(state.factory.createThis(), mainExpression), op
               ),
               undefined,
               [
@@ -60,7 +60,8 @@ export class CacheTransformer {
                 state.factory.createArrayLiteralExpression([
                   state.factory.createSpreadElement(state.createIdentifier('arguments'))
                 ])
-              ] as (readonly ts.Expression[]))
+              ]
+            )
           )
         ])
       );

@@ -12,7 +12,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   /**
    * Find all valid tests (ignoring abstract)
    */
-  getValidClasses() {
+  getValidClasses(): Class[] {
     return this.getClasses().filter(c => !c.ᚕabstract);
   }
 
@@ -29,7 +29,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     };
   }
 
-  override createPendingField(cls: Class, fn: Function) {
+  override createPendingField(cls: Class, fn: Function): Partial<TestConfig> {
     return {
       class: cls,
       file: cls.ᚕfile,
@@ -40,9 +40,9 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   /**
    * Add a new phase listeners
    */
-  registerPendingListener<T>(cls: Class<T>, listener: Function, phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach') {
-    const suiteConfig = this.getOrCreatePending(cls)! as SuiteConfig;
-    suiteConfig[phase].push(listener);
+  registerPendingListener<T>(cls: Class<T>, listener: Function, phase: 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach'): void {
+    const suiteConfig = this.getOrCreatePending(cls);
+    suiteConfig[phase]!.push(listener);
   }
 
   /**
@@ -50,6 +50,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    * a full projection of all listeners and tests.
    */
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const config = this.getOrCreatePending(cls) as SuiteConfig;
     const tests = [...this.pendingFields.get(cls.ᚕid)!.values()];
 
@@ -67,7 +68,9 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       })));
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     config.instance = new (config.class as ConcreteClass)();
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     config.tests = tests as TestConfig[];
 
     if (!config.description) {
@@ -116,7 +119,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   /**
    * Find a test configuration given class and optionally a method
    */
-  getByClassAndMethod(cls: Class, method: Function) {
+  getByClassAndMethod(cls: Class, method: Function): TestConfig | undefined {
     if (this.has(cls)) {
       const conf = this.get(cls);
       return conf.tests.find(x => x.methodName === method.name);

@@ -14,9 +14,9 @@
 
 This module provides an <a target="_blank" class="external-link" href="https://mongodb.com">mongodb</a>-based implementation for the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>.  This source allows the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> module to read, write and query against <a target="_blank" class="external-link" href="https://mongodb.com">mongodb</a>.. Given the dynamic nature of <a target="_blank" class="external-link" href="https://mongodb.com">mongodb</a>, during development when models are modified, nothing needs to be done to adapt to the latest schema.
 
-Supported featrues:
+Supported features:
 <ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a></li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1">Streaming</a></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3">Streaming</a></li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Expiry</a></li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L23">Bulk</a></li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12">Indexed</a></li>
@@ -102,22 +102,22 @@ Supported featrues:
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
-   * Should we autocreate the db
+   * Should we auto create the db
    */</span>
   autoCreate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
-   * Frequency of culling for expirable content
+   * Frequency of culling for cullable content
    */</span>
   cullRate<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Load a resource
    */</span>
-  <span class="token keyword">async</span> <span class="token function">fetch</span><span class="token punctuation">(</span>val<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">fetch</span><span class="token punctuation">(</span>val<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> ResourceManager<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span>
       <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>res <span class="token operator">=></span> <span class="token keyword">typeof</span> res <span class="token operator">===</span> <span class="token string">'string'</span> <span class="token operator">?</span> res <span class="token operator">:</span> res<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-      <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span>e <span class="token operator">=></span> fs<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> fs<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span>
         <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>res <span class="token operator">=></span> <span class="token keyword">typeof</span> res <span class="token operator">===</span> <span class="token string">'string'</span> <span class="token operator">?</span> res <span class="token operator">:</span> res<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
       <span class="token punctuation">)</span>
       <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> val<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -126,7 +126,7 @@ Supported featrues:
   <span class="token comment">/**
    * Load all the ssl certs as needed
    */</span>
-  <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> opts <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>options<span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>opts<span class="token punctuation">.</span>ssl<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span>opts<span class="token punctuation">.</span>sslCert<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -147,7 +147,7 @@ Supported featrues:
   <span class="token comment">/**
    * Build connection URLs
    */</span>
-  <span class="token keyword">get</span> <span class="token function">url</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">get</span> <span class="token function">url</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> hosts <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>hosts
       <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>h <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>srvRecord <span class="token operator">||</span> h<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">':'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">?</span> h <span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>h<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span>
       <span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">','</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -166,4 +166,4 @@ Supported featrues:
   standard <a class="module-link" routerLink="/docs/config" title="Environment-aware config management using yaml files">Configuration</a>resolution paths. 
   
 
-The SSL file options in <code class="item input">clientOptions</code> will automatically be resolved to files when given a path.  This path can be a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L14">ResourceManager</a> path or just a standard file path.
+The SSL file options in <code class="item input">clientOptions</code> will automatically be resolved to files when given a path.  This path can be a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L16">ResourceManager</a> path or just a standard file path.

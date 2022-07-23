@@ -41,6 +41,7 @@ export class TestExecutor {
       .add(async () => {
         try {
           PromiseCapture.start(); // Listen for all promises to detect any unfinished, only start once method is invoked
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           await (suite.instance as Record<string, Function>)[test.methodName](); // Run
         } finally {
           PromiseCapture.stop().then(() => setTimeout(promCleanup.resolve, 1), promCleanup.reject);
@@ -54,7 +55,7 @@ export class TestExecutor {
   /**
    * Determining if we should skip
    */
-  static async #skip(cfg: TestConfig | SuiteConfig, inst: unknown) {
+  static async #skip(cfg: TestConfig | SuiteConfig, inst: unknown): Promise<boolean | undefined> {
     if (cfg.skip !== undefined) {
       if (typeof cfg.skip === 'boolean' ? cfg.skip : await cfg.skip(inst)) {
         return true;
@@ -65,9 +66,10 @@ export class TestExecutor {
   /**
    * Fail an entire file, marking the whole file as failed
    */
-  static failFile(consumer: TestConsumer, file: string, err: Error) {
+  static failFile(consumer: TestConsumer, file: string, err: Error): void {
     const name = path.basename(file);
     const classId = ModuleUtil.getId(file, name);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const suite = { class: { name }, classId, duration: 0, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
     err.message = err.message.replace(PathUtil.cwd, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
@@ -81,7 +83,7 @@ export class TestExecutor {
   /**
    * An empty suite result based on a suite config
    */
-  static createSuiteResult(suite: SuiteConfig) {
+  static createSuiteResult(suite: SuiteConfig): SuiteResult {
     return {
       passed: 0,
       failed: 0,
@@ -98,24 +100,28 @@ export class TestExecutor {
   /**
    * Execute the test, capture output, assertions and promises
    */
-  static async executeTest(consumer: TestConsumer, test: TestConfig, suite: SuiteConfig) {
+  static async executeTest(consumer: TestConsumer, test: TestConfig, suite: SuiteConfig): Promise<TestResult> {
 
     // Mark test start
     consumer.onEvent({ type: 'test', phase: 'before', test });
 
     const startTime = Date.now();
 
-    const result: Partial<TestResult> = {
+    const result: TestResult = {
       methodName: test.methodName,
       description: test.description,
       classId: test.classId,
       lines: { ...test.lines },
       file: test.file,
-      status: 'skipped'
+      status: 'skipped',
+      assertions: [],
+      duration: 0,
+      durationTotal: 0,
+      output: {},
     };
 
     if (await this.#skip(test, suite.instance)) {
-      return result as TestResult;
+      return result;
     }
 
     // Emit every assertion as it occurs
@@ -135,7 +141,7 @@ export class TestExecutor {
       if (error instanceof ExecutionError) { // Errors that are not expected
         AssertCheck.checkUnhandled(test, error);
       } else if (test.shouldThrow) { // Errors that are
-        error = AssertCheck.checkError(test.shouldThrow!, error)!; // Rewrite error
+        error = AssertCheck.checkError(test.shouldThrow!, error); // Rewrite error
       }
     }
 
@@ -148,15 +154,15 @@ export class TestExecutor {
     });
 
     // Mark completion
-    consumer.onEvent({ type: 'test', phase: 'after', test: result as TestResult });
+    consumer.onEvent({ type: 'test', phase: 'after', test: result });
 
-    return result as TestResult;
+    return result;
   }
 
   /**
    * Execute a single test within a suite
    */
-  static async executeSuiteTest(consumer: TestConsumer, suite: SuiteConfig, test: TestConfig) {
+  static async executeSuiteTest(consumer: TestConsumer, suite: SuiteConfig, test: TestConfig): Promise<void> {
     const result: SuiteResult = this.createSuiteResult(suite);
 
     const mgr = new TestPhaseManager(consumer, suite, result);
@@ -172,15 +178,15 @@ export class TestExecutor {
         await mgr.endPhase('each');
       }
       await mgr.endPhase('all');
-    } catch (err: any) {
-      await mgr.onError(err as Error);
+    } catch (err) {
+      await mgr.onError(err);
     }
   }
 
   /**
    * Execute an entire suite
    */
-  static async executeSuite(consumer: TestConsumer, suite: SuiteConfig) {
+  static async executeSuite(consumer: TestConsumer, suite: SuiteConfig): Promise<SuiteResult> {
     const result: SuiteResult = this.createSuiteResult(suite);
 
     const startTime = Date.now();
@@ -216,8 +222,8 @@ export class TestExecutor {
       }
       // Handle after all
       await mgr.endPhase('all');
-    } catch (err: any) {
-      await mgr.onError(err as Error);
+    } catch (err) {
+      await mgr.onError(err);
     }
 
     result.duration = Date.now() - startTime;
@@ -227,13 +233,13 @@ export class TestExecutor {
 
     result.total = result.passed + result.failed;
 
-    return result as SuiteResult;
+    return result;
   }
 
   /**
    * Handle executing a suite's test/tests based on command line inputs
    */
-  static async execute(consumer: TestConsumer, file: string, ...args: string[]) {
+  static async execute(consumer: TestConsumer, file: string, ...args: string[]): Promise<void> {
 
     if (!file.startsWith(PathUtil.cwd)) {
       file = PathUtil.joinUnix(PathUtil.cwd, file);
@@ -241,8 +247,11 @@ export class TestExecutor {
 
     try {
       await import(PathUtil.toUnix(file)); // Path to module
-    } catch (err: any) {
-      this.failFile(consumer, file, err as Error);
+    } catch (err) {
+      if (!(err instanceof Error)) {
+        throw err;
+      }
+      this.failFile(consumer, file, err);
       return;
     }
 
@@ -269,7 +278,7 @@ export class TestExecutor {
   /**
    * Execute isolated
    */
-  static async executeIsolated(consumer: TestConsumer, file: string, ...args: string[]) {
+  static async executeIsolated(consumer: TestConsumer, file: string, ...args: string[]): Promise<void> {
     // Read modules for extensions
     const modules = [...(await fs.readFile(file, 'utf8'))
       .matchAll(/\/\/\s*@file-if\s+(@travetto\/[A-Za-z0-9\-]+)/g)]
@@ -286,7 +295,7 @@ export class TestExecutor {
         TRV_CACHE: `.trv_cache_${SystemUtil.naiveHash(file)}`
       }
     });
-    proc.process.on('message', e => consumer.onEvent(e as TestEvent));
+    proc.process.on('message', (e: TestEvent) => consumer.onEvent(e));
     await proc.result;
   }
 }

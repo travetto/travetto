@@ -8,7 +8,7 @@ export class StyleUtil {
   /**
    * Compile SCSS content with roots as search paths for additional assets
    */
-  static async compileSass(file: string, roots: string[]) {
+  static async compileSass(file: string, roots: string[]): Promise<string> {
     const sass = await import('sass');
     const result = await util.promisify(sass.render)({
       file,
@@ -21,7 +21,7 @@ export class StyleUtil {
   /**
    * Get compiled styles
    */
-  static async getStyles() {
+  static async getStyles(): Promise<string> {
     const { ResourceManager } = await import('@travetto/base');
 
     const file = await ResourceManager.find('email/main.scss');
@@ -37,7 +37,7 @@ export class StyleUtil {
    * Apply styling to html
    * @param html
    */
-  static async applyStyling(html: string) {
+  static async applyStyling(html: string): Promise<string> {
     // Inline css
     const inlineCss = await import('inline-css');
     html = (await inlineCss(html, {

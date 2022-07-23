@@ -43,7 +43,7 @@ class $Compiler {
       }
       this.#program = ts.createProgram({
         rootNames: [...rootFiles],
-        options: TranspileUtil.compilerOptions as ts.CompilerOptions,
+        options: TranspileUtil.compilerOptions,
         host: this.#host,
         oldProgram: this.#program
       });
@@ -55,7 +55,7 @@ class $Compiler {
   /**
    * Perform actual transpilation
    */
-  #transpile(filename: string, force = false) {
+  #transpile(filename: string, force = false): string {
     if (force || !AppCache.hasEntry(filename)) {
       console.debug('Emitting', { filename: filename.replace(PathUtil.cwd, '.') });
 
@@ -70,8 +70,11 @@ class $Compiler {
           this.#transformerManager.getTransformers()
         );
 
-        TranspileUtil.checkTranspileErrors(filename, result.diagnostics as []);
-      } catch (err: any) {
+        TranspileUtil.checkTranspileErrors(filename, result.diagnostics);
+      } catch (err) {
+        if (!(err instanceof Error)) {
+          throw err;
+        }
         const errContent = TranspileUtil.transpileError(filename, err);
         this.#host.contents.set(filename, errContent);
       }
@@ -87,14 +90,14 @@ class $Compiler {
    * Get program
    * @private
    */
-  getProgram() {
+  getProgram(): ts.Program {
     return this.#getProgram();
   }
 
   /**
    * Initialize the compiler
    */
-  async init() {
+  async init(): Promise<void> {
     if (this.active) {
       return;
     }
@@ -110,7 +113,7 @@ class $Compiler {
 
     ModuleManager.onUnload((f, unlink) => this.#host.unload(f, unlink)); // Remove source
 
-    // Update source map support to read from tranpsiler cache
+    // Update source map support to read from transpiler cache
     sourceMapSupport.install({
       retrieveFile: p => this.#host.contents.get(PathUtil.toUnixTs(p))!
     });
@@ -121,7 +124,7 @@ class $Compiler {
   /**
    * Reset the compiler
    */
-  reset() {
+  reset(): void {
     if (!EnvUtil.isReadonly()) {
       this.#transformerManager.reset();
       this.#host.reset();
@@ -135,7 +138,7 @@ class $Compiler {
   /**
    * Notify of an add/remove/change event
    */
-  notify(type: EventType, filename: string) {
+  notify(type: EventType, filename: string): void {
     console.debug('File Event', { type, filename: filename.replace(PathUtil.cwd, '.') });
     this.#emitter.emit(type, filename);
   }
@@ -143,7 +146,7 @@ class $Compiler {
   /**
    * Listen for events
    */
-  on(type: EventType, handler: FileListener) {
+  on(type: EventType, handler: FileListener): this {
     this.#emitter.on(type, handler);
     return this;
   }
@@ -151,7 +154,7 @@ class $Compiler {
   /**
    * Unload if file is known
    */
-  added(filename: string) {
+  added(filename: string): void {
     if (filename in require.cache) { // if already loaded
       ModuleManager.unload(filename);
     }
@@ -163,7 +166,7 @@ class $Compiler {
   /**
    * Handle when a file is removed during watch
    */
-  removed(filename: string) {
+  removed(filename: string): void {
     ModuleManager.unload(filename, true);
     this.notify('removed', filename);
   }
@@ -171,7 +174,7 @@ class $Compiler {
   /**
    * When a file changes during watch
    */
-  changed(filename: string) {
+  changed(filename: string): void {
     if (this.#host.hashChanged(filename)) {
       ModuleManager.unload(filename);
       // Load Synchronously

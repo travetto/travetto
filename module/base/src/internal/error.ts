@@ -26,8 +26,8 @@ const { fromCode, fromCategory } = ERROR_CATEGORIES_WITH_CODES.reduce(
     return acc;
   },
   {
-    fromCode: new Map<ErrorStatusCode, ErrorCategory>(),
-    fromCategory: new Map<ErrorCategory, ErrorStatusCode>()
+    fromCode: new Map<number, ErrorCategory>(),
+    fromCategory: new Map<string, ErrorStatusCode>()
   }
 );
 
@@ -39,7 +39,7 @@ export class ErrorUtil {
   /**
    * Get category from status code
    */
-  static categoryFromCode(...codes: (ErrorStatusCode | undefined)[]) {
+  static categoryFromCode(...codes: (ErrorStatusCode | undefined)[]): ErrorCategory {
     for (const el of codes) {
       if (el === undefined || !fromCode.has(el)) {
         continue;
@@ -52,12 +52,12 @@ export class ErrorUtil {
   /**
  * Get category from status code
  */
-  static codeFromCategory(...cateogires: (string | undefined)[]) {
-    for (const el of cateogires) {
-      if (el === undefined || !fromCategory.has(el as ErrorCategory)) {
+  static codeFromCategory(...categories: (string | undefined)[]): number {
+    for (const el of categories) {
+      if (el === undefined || !fromCategory.has(el)) {
         continue;
       }
-      return fromCategory.get(el as ErrorCategory)!;
+      return fromCategory.get(el)!;
     }
     return 500;
   }
@@ -67,15 +67,15 @@ export class ErrorUtil {
    */
   static serializeError(e: Error | SerializedError): SerializedError;
   static serializeError(e: undefined): undefined;
-  static serializeError(e: Error | SerializedError | undefined) {
+  static serializeError(e: Error | SerializedError | undefined): SerializedError | undefined {
     let error: SerializedError | undefined;
 
     if (e) {
-      error = {} as SerializedError;
+      error = { $: true, name: e.name, message: '' };
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       for (const k of Object.keys(e) as ['name' | 'message']) {
         error[k] = e[k];
       }
-      error.$ = true;
       error.name = e.name;
       if (e instanceof Error) {
         Object.assign(error, e.toJSON());
@@ -92,10 +92,13 @@ export class ErrorUtil {
    */
   static deserializeError(e: Error | SerializedError): Error;
   static deserializeError(e: undefined): undefined;
-  static deserializeError(e: Error | SerializedError | undefined) {
+  static deserializeError(e: Error | SerializedError | undefined): Error | undefined {
     if (e && '$' in e) {
       const err = new Error();
-      for (const k of Object.keys(e) as ['name' | 'message']) {
+
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const keys = Object.keys(e) as ('name' | 'message')[];
+      for (const k of keys) {
         err[k] = e[k];
       }
       err.message = e.message;
@@ -103,7 +106,8 @@ export class ErrorUtil {
       err.name = e.name;
       return err;
     } else if (e) {
-      return e;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return e as Error;
     }
   }
 }

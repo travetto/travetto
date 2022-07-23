@@ -24,14 +24,14 @@ class $ConfigManager {
     'pw',
   ];
 
-  protected getStorage() {
+  protected getStorage(): Record<string, unknown> {
     return this.#storage;
   }
 
   /**
    * Load all config files
    */
-  async #load() {
+  async #load(): Promise<void> {
     const profileIndex = Object.fromEntries(Object.entries(AppManifest.env.profiles).map(([k, v]) => [v, +k] as const));
 
     const files = (await ResourceManager.findAll(/[.]ya?ml$/))
@@ -51,9 +51,9 @@ class $ConfigManager {
 
   /**
    * Get a sub tree of the config, or everything if namespace is not passed
-   * @param ns The namespace of the config to search for, can be dotted for accesing sub namespaces
+   * @param ns The namespace of the config to search for, can be dotted for accessing sub namespaces
    */
-  #get(ns?: string) {
+  #get(ns?: string): Record<string, unknown> {
     return ConfigUtil.lookupRoot(this.#storage, ns);
   }
 
@@ -64,7 +64,7 @@ class $ConfigManager {
    *   - Resource {env}.yml
    *   - Environment vars -> Overrides everything (happens at bind time)
    */
-  async init() {
+  async init(): Promise<void> {
     if (!this.#initialized) {
       this.#initialized = true;
       await this.#load();
@@ -76,11 +76,12 @@ class $ConfigManager {
    * @param namespace If only a portion of the config should be exported
    * @param secure Determines if secrets should be redacted, defaults to true in prod, false otherwise
    */
-  toJSON(secure: boolean = EnvUtil.isProd()) {
+  toJSON(secure: boolean = EnvUtil.isProd()): Record<string, unknown> {
     const copy = JSON.parse(JSON.stringify(this.#active));
     return secure ?
       ConfigUtil.sanitizeValuesByKey(copy, [
         ...this.#redactedKeys,
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         ...(this.#get('config')?.redacted ?? []) as string[]
       ]) :
       copy;
@@ -92,7 +93,7 @@ class $ConfigManager {
    * @param item
    * @param namespace
    */
-  bindTo<T>(cls: Class<T>, item: T, namespace: string) {
+  bindTo<T>(cls: Class<T>, item: T, namespace: string): T {
     if (!SchemaRegistry.has(cls)) {
       throw new AppError(`${cls.ᚕid} is not a valid schema class, config is not supported`);
     }
@@ -103,7 +104,7 @@ class $ConfigManager {
     return BindUtil.bindSchemaToObject(cls, item, cfg);
   }
 
-  async install<T>(cls: Class<T>, item: T, namespace: string, internal?: boolean) {
+  async install<T>(cls: Class<T>, item: T, namespace: string, internal?: boolean): Promise<T> {
     const out = await this.bindTo(cls, item, namespace);
     try {
       await SchemaValidator.validate(cls, out);
@@ -123,7 +124,7 @@ class $ConfigManager {
   /**
    * Reset
    */
-  reset() {
+  reset(): void {
     this.#storage = {};
     this.#initialized = false;
   }

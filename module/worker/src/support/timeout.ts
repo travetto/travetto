@@ -18,7 +18,7 @@ export class Timeout extends ExecutionError {
   /**
    * Stop timeout from firing
    */
-  cancel() {
+  cancel(): void {
     if (this.#id) {
       clearTimeout(this.#id);
       this.#promise.resolve();
@@ -29,7 +29,7 @@ export class Timeout extends ExecutionError {
   /**
    * Wait for timeout as a promise
    */
-  wait() {
+  wait(): Promise<void> {
     if (!this.#id) {
       this.#id = setTimeout(() => this.#promise.reject(this), this.#duration);
       this.#id.unref();

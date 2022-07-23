@@ -20,7 +20,7 @@ All of the high level configurations can be found in the following structure:
 **Code: Config: OpenAPI Configuration**
 ```typescript
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { Config } from '@travetto/config';
@@ -37,7 +37,7 @@ export class ApiInfoConfig {
   license: LicenseObject = { name: AppManifest.info.license! };
   termsOfService?: string;
   title: string = AppManifest.info.name;
-  version?: string = AppManifest.info.version;
+  version: string = AppManifest.info.version ?? '0.0.0';
 }
 
 /**
@@ -77,7 +77,7 @@ export class ApiSpecConfig {
    */
   exposeAllSchemas: boolean = false;
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     this.output = PathUtil.toUnix(this.output);
     if (!this.output || this.output === '-') {
       this.persist = false;
@@ -86,7 +86,7 @@ export class ApiSpecConfig {
       if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder
         this.output = PathUtil.resolveUnix(this.output, 'openapi.yml');
       }
-      await fs.promises.mkdir(path.dirname(this.output), { recursive: true });
+      await fs.mkdir(path.dirname(this.output), { recursive: true });
     }
   }
 }

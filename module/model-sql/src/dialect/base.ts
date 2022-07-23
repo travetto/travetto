@@ -10,8 +10,11 @@ import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
 import { Connection } from '../connection/base';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$not' in (o as object);
 
 interface Alias {
@@ -24,15 +27,16 @@ class Total {
   total: number;
 }
 
-function makeField(name: string, type: Class, required: boolean, extra: Partial<FieldConfig>) {
+function makeField(name: string, type: Class, required: boolean, extra: Partial<FieldConfig>): FieldConfig {
   return {
     name,
-    owner: null,
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    owner: null as unknown as Class,
     type,
     array: false,
     ...(required ? { required: { active: true } } : {}),
     ...extra
-  } as FieldConfig;
+  };
 }
 
 /**
@@ -153,7 +157,7 @@ export abstract class SQLDialect implements DialectState {
    */
   abstract hash(inp: string): string;
 
-  executeSQL<T>(sql: string) {
+  executeSQL<T>(sql: string): Promise<{ records: T[], count: number }> {
     return this.conn.execute<T>(this.conn.active, sql);
   }
 
@@ -171,7 +175,7 @@ export abstract class SQLDialect implements DialectState {
    * @param value
    * @returns
    */
-  resolveDateValue(value: Date) {
+  resolveDateValue(value: Date): string {
     const [day, time] = value.toISOString().split(/[TZ]/);
     return this.quote(`${day} ${time}`);
   }
@@ -179,7 +183,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Convert value to SQL valid representation
    */
-  resolveValue(conf: FieldConfig, value: unknown) {
+  resolveValue(conf: FieldConfig, value: unknown): string {
     if (value === undefined || value === null) {
       return 'NULL';
     } else if (conf.type === String) {
@@ -187,6 +191,7 @@ export abstract class SQLDialect implements DialectState {
         const src = Util.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
         return this.quote(src);
       } else {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         return this.quote(value as string);
       }
     } else if (conf.type === Boolean) {
@@ -194,6 +199,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Number) {
       return `${value}`;
     } else if (conf.type === Date) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return this.resolveDateValue(ModelQueryUtil.resolveComparator(value) as Date);
     } else if (conf.type === PointImpl && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;
@@ -206,7 +212,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Get column type from field config
    */
-  getColumnType(conf: FieldConfig) {
+  getColumnType(conf: FieldConfig): string {
     let type: string = '';
 
     if (conf.type === Number) {
@@ -253,7 +259,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * FieldConfig to Column definition
    */
-  getColumnDefinition(conf: FieldConfig) {
+  getColumnDefinition(conf: FieldConfig): string | undefined {
     const type = this.getColumnType(conf);
     if (!type) {
       return;
@@ -264,7 +270,8 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Delete query and return count removed
    */
-  async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>) {
+  async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>): Promise<number> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const { count } = await this.executeSQL(this.getDeleteSQL(SQLUtil.classToStack(cls), query.where as WhereClause<T>));
     return count;
   }
@@ -272,7 +279,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Get the count for a given query
    */
-  async getCountForQuery<T>(cls: Class<T>, query: Query<T>) {
+  async getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number> {
     const { records } = await this.executeSQL<{ total: number }>(this.getQueryCountSQL(cls, query));
     const [record] = records;
     return Total.from(record).total;
@@ -281,7 +288,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Remove a sql column
    */
-  getDropColumnSQL(stack: VisitStack[]) {
+  getDropColumnSQL(stack: VisitStack[]): string {
     const field = stack[stack.length - 1];
     return `ALTER TABLE ${this.parentTable(stack)} DROP COLUMN ${this.ident(field.name)};`;
   }
@@ -289,8 +296,9 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Add a sql column
    */
-  getAddColumnSQL(stack: VisitStack[]) {
+  getAddColumnSQL(stack: VisitStack[]): string {
     const field = stack[stack.length - 1];
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return `ALTER TABLE ${this.parentTable(stack)} ADD COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
   }
 
@@ -309,49 +317,49 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Determine table/field namespace for a given stack location
    */
-  namespace(stack: VisitStack[]) {
+  namespace(stack: VisitStack[]): string {
     return `${this.ns}${SQLUtil.buildTable(stack)}`;
   }
 
   /**
    * Determine  namespace for a given stack location - 1
    */
-  namespaceParent(stack: VisitStack[]) {
+  namespaceParent(stack: VisitStack[]): string {
     return this.namespace(stack.slice(0, stack.length - 1));
   }
 
   /**
    * Determine table name for a given stack location
    */
-  table(stack: VisitStack[]) {
+  table(stack: VisitStack[]): string {
     return this.ident(this.namespace(stack));
   }
 
   /**
    * Determine parent table name for a given stack location
    */
-  parentTable(stack: VisitStack[]) {
+  parentTable(stack: VisitStack[]): string {
     return this.table(stack.slice(0, stack.length - 1));
   }
 
   /**
    * Get lookup key for cls and name
    */
-  getKey(cls: Class, name: string) {
+  getKey(cls: Class, name: string): string {
     return `${cls.name}:${name}`;
   }
 
   /**
    * Alias a field for usage
    */
-  alias(field: string | FieldConfig, alias: string = this.rootAlias) {
+  alias(field: string | FieldConfig, alias: string = this.rootAlias): string {
     return `${alias}.${this.ident(field)}`;
   }
 
   /**
    * Get alias cache for the stack
    */
-  getAliasCache(stack: VisitStack[], resolve: (path: VisitStack[]) => string) {
+  getAliasCache(stack: VisitStack[], resolve: (path: VisitStack[]) => string): Map<string, Alias> {
     const cls = stack[0].type;
 
     if (this.aliasCache.has(cls)) {
@@ -402,6 +410,7 @@ export abstract class SQLDialect implements DialectState {
     const { foreignMap, localMap } = SQLUtil.getFieldsByLocation(stack);
     const SQL_OPS = this.SQL_OPS;
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
       const top = o[key];
       const field = localMap[key] ?? foreignMap[key];
@@ -449,6 +458,7 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$regex': {
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
               const re = Util.toRegex(v as string);
               const src = re.source;
               const ins = re.flags && re.flags.includes('i');
@@ -482,6 +492,7 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$lt': case '$gt': case '$gte': case '$lte': {
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
               const subItems = (Object.keys(top) as (keyof typeof SQL_OPS)[])
                 .map(ssk => `${sPath} ${SQL_OPS[ssk]} ${resolve(top[ssk])}`);
               items.push(subItems.length > 1 ? `(${subItems.join(` ${SQL_OPS.$and} `)})` : subItems[0]);
@@ -529,6 +540,7 @@ export abstract class SQLDialect implements DialectState {
   getWhereSQL<T>(cls: Class<T>, where?: WhereClause<T>): string {
     return !where || !Object.keys(where).length ?
       '' :
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       `WHERE ${this.getWhereGroupingSQL(cls, where as WhereClause<T>)}`;
   }
 
@@ -598,16 +610,19 @@ LEFT OUTER JOIN ${from} ON
   /**
    * Generate full query
    */
-  getQuerySQL<T>(cls: Class<T>, query: Query<T>) {
+  getQuerySQL<T>(cls: Class<T>, query: Query<T>): string {
     const sortFields = !query.sort ?
       '' :
       SQLUtil.orderBy(cls, query.sort)
         .map(x => this.resolveName(x.stack))
         .join(', ');
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const where = query.where as WhereClause<T>;
     return `
 ${this.getSelectSQL(cls, query.select)}
 ${this.getFromSQL(cls)}
-${this.getWhereSQL(cls, query.where as WhereClause<T>)}
+${this.getWhereSQL(cls, where)}
 ${this.getGroupBySQL(cls, query)}${sortFields ? `, ${sortFields}` : ''}
 ${this.getOrderBySQL(cls, query.sort)}
 ${this.getLimitSQL(cls, query)}`;
@@ -624,6 +639,7 @@ ${this.getLimitSQL(cls, query)}`;
 
     const fields = SchemaRegistry.has(config.type) ?
       [...SQLUtil.getFieldsByLocation(stack).local] :
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       (array ? [config as FieldConfig] : []);
 
     if (!parent) {
@@ -660,14 +676,14 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   /**
    * Generate drop SQL
    */
-  getDropTableSQL(stack: VisitStack[]) {
+  getDropTableSQL(stack: VisitStack[]): string {
     return `DROP TABLE IF EXISTS ${this.table(stack)}; `;
   }
 
   /**
    * Generate truncate SQL
    */
-  getTruncateTableSQL(stack: VisitStack[]) {
+  getTruncateTableSQL(stack: VisitStack[]): string {
     return `TRUNCATE ${this.table(stack)}; `;
   }
 
@@ -697,11 +713,13 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
     const table = this.namespace(SQLUtil.classToStack(cls));
     const fields: [string, boolean][] = idx.fields.map(x => {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const key = Object.keys(x)[0] as keyof typeof x;
       const val = x[key];
       if (Util.isPlainObject(val)) {
         throw new Error('Unable to supported nested fields for indices');
       }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return [key as string, typeof val === 'number' ? val === 1 : (!!val)];
     });
     const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
@@ -751,7 +769,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     const isArray = !!config.array;
 
     if (isArray) {
-      const newInstances = [] as InsertWrapper['records'];
+      const newInstances: typeof instances = [];
       for (const el of instances) {
         if (el.value === null || el.value === undefined) {
           continue;
@@ -776,6 +794,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, (inst.value as Record<string, string>)[c.name])));
 
     columnNames.push(this.pathField.name);
@@ -812,7 +831,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
    */
   getAllInsertSQL<T extends ModelType>(cls: Class<T>, instance: T): string[] {
     const out: string[] = [];
-    const add = (text?: string) => text && out.push(text);
+    const add = (text?: string): void => { text && out.push(text); };
     SQLUtil.visitSchemaInstance(cls, instance, {
       onRoot: ({ value, path }) => add(this.getInsertSQL(path, [{ stack: path, value }])),
       onSub: ({ value, path }) => add(this.getInsertSQL(path, [{ stack: path, value }])),
@@ -824,7 +843,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
   /**
    * Simple data base updates
    */
-  getUpdateSQL(stack: VisitStack[], data: Record<string, unknown>, where?: WhereClause<unknown>) {
+  getUpdateSQL(stack: VisitStack[], data: Record<string, unknown>, where?: WhereClause<unknown>): string {
     const { type } = stack[stack.length - 1];
     const { localMap } = SQLUtil.getFieldsByLocation(stack);
     return `
@@ -866,18 +885,21 @@ ${orderBy};`;
   /**
    * Get COUNT(1) query
    */
-  getQueryCountSQL<T>(cls: Class<T>, query: Query<T>) {
+  getQueryCountSQL<T>(cls: Class<T>, query: Query<T>): string {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const where = query.where as WhereClause<T>;
     return `
 SELECT COUNT(DISTINCT ${this.rootAlias}.id) as total
 ${this.getFromSQL(cls)}
-${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
+${this.getWhereSQL(cls, where)}`;
   }
 
   async fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]> {
     const stack: Record<string, unknown>[] = [];
     const selectStack: (SelectClause<T> | undefined)[] = [];
 
-    const buildSet = (children: unknown[], field?: FieldConfig) => SQLUtil.collectDependents(this, stack[stack.length - 1], children, field);
+    const buildSet = (children: unknown[], field?: FieldConfig): Record<string, unknown> =>
+      SQLUtil.collectDependents(this, stack[stack.length - 1], children, field);
 
     await SQLUtil.visitSchema(SchemaRegistry.get(cls), {
       onRoot: async (config) => {
@@ -895,6 +917,7 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
 
         // See if a selection exists at all
         const sel: FieldConfig[] = subSelectTop ? fields
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           .filter(f => subSelectTop[f.name as keyof SelectClause<T>] === 1)
           : [];
 
@@ -924,7 +947,7 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
           }
         }
       },
-      onSimple: async ({ config, path }) => {
+      onSimple: async ({ config, path }): Promise<void> => {
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
         if (ids.length) {
@@ -943,7 +966,7 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
   /**
    * Delete all ids
    */
-  async deleteByIds(stack: VisitStack[], ids: string[]) {
+  async deleteByIds(stack: VisitStack[], ids: string[]): Promise<number> {
     return this.deleteAndGetCount<ModelType>(stack[stack.length - 1].type, {
       where: {
         [stack.length === 1 ? this.idField.name : this.pathField.name]: {
@@ -956,10 +979,10 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
   /**
    * Do bulk process
    */
-  async bulkProcess(dels: DeleteWrapper[], inserts: InsertWrapper[], upserts: InsertWrapper[], updates: InsertWrapper[]): Promise<BulkResponse> {
+  async bulkProcess(deletes: DeleteWrapper[], inserts: InsertWrapper[], upserts: InsertWrapper[], updates: InsertWrapper[]): Promise<BulkResponse> {
     const out = {
       counts: {
-        delete: dels.reduce((acc, el) => acc + el.ids.length, 0),
+        delete: deletes.reduce((acc, el) => acc + el.ids.length, 0),
         error: 0,
         insert: inserts.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0),
         update: updates.filter(x => x.stack.length === 1).reduce((acc, el) => acc + el.records.length, 0),
@@ -970,7 +993,7 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
     };
 
     // Full removals
-    await Promise.all(dels.map(el => this.deleteByIds(el.stack, el.ids)));
+    await Promise.all(deletes.map(el => this.deleteByIds(el.stack, el.ids)));
 
     // Adding deletes
     if (upserts.length || updates.length) {
@@ -978,9 +1001,11 @@ ${this.getWhereSQL(cls, query.where as WhereClause<T>)}`;
 
       await Promise.all([
         ...upserts.filter(x => x.stack.length === 1).map(i =>
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           this.deleteByIds(i.stack, i.records.map(v => (v.value as Record<string, string>)[idx]))
         ),
         ...updates.filter(x => x.stack.length === 1).map(i =>
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           this.deleteByIds(i.stack, i.records.map(v => (v.value as Record<string, string>)[idx]))
         ),
       ]);

@@ -18,7 +18,7 @@ export class ValueAccessor {
    * @param res
    * @param token
    */
-  writeValue(res: Response, token: string | null, cookieArgs: SetOption = {}) {
+  writeValue(res: Response, token: string | null, cookieArgs: SetOption = {}): void {
     if (this.#location === 'cookie') {
       res.cookies.set(this.#name, token, {
         ...cookieArgs,
@@ -33,7 +33,8 @@ export class ValueAccessor {
    * Read form request
    * @param req
    */
-  readValue(req: Request) {
+  readValue(req: Request): string | undefined {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.#location === 'cookie' ? req.cookies.get(this.#name) : req.header(this.#name) as string;
   }
 }

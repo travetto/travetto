@@ -13,10 +13,10 @@ export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description: string, ...rest: Partial<TestConfig>[]): MethodDecorator;
 export function Test(description?: string | Partial<TestConfig>, ...rest: Partial<TestConfig>[]): MethodDecorator {
   const extra: Partial<TestConfig> = {};
-  if (description && typeof description !== 'string') {
-    Object.assign(extra, description);
-    description = extra.description || undefined;
-  }
+  const descriptionString = (description && typeof description !== 'string') ?
+    Object.assign(extra, description).description :
+    description;
+
   for (const r of rest) {
     Object.assign(extra, r);
   }
@@ -24,7 +24,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
     SuiteRegistry.registerField(inst.constructor, descriptor.value, {
       ...extra,
       file: inst.constructor.ᚕfile,
-      description: description as string
+      description: descriptionString
     });
     return descriptor;
   };

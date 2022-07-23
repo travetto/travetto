@@ -7,6 +7,7 @@ export class PackDockerExportPlugin extends BasePlugin {
 
   name = 'pack:docker-export';
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return {
       app: this.option({ desc: 'The application target to run', def: 'rest' }),
@@ -17,7 +18,7 @@ export class PackDockerExportPlugin extends BasePlugin {
     };
   }
 
-  async action(...args: unknown[]) {
+  async action(...args: unknown[]): Promise<void> {
     const files = ['src', 'bin', 'support', 'resources', 'package.json', 'package-lock.json', ...this.cmd.add]
       .filter(x => FsUtil.existsSync(PathUtil.resolveUnix(x)));
 

@@ -9,7 +9,7 @@ export class MailUtil {
    *
    * @param html
    */
-  static async extractImageAttachments(html: string) {
+  static async extractImageAttachments(html: string): Promise<{ html: string, attachments: Attachment[] }> {
     let idx = 0;
     const attachments: Attachment[] = [];
     const contentMap = new Map<string, string>();

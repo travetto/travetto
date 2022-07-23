@@ -1,6 +1,6 @@
 import { EnvInit } from '@travetto/base/bin/init';
 
-export async function main(format: string = 'tap') {
+export async function main(format: string = 'tap'): Promise<void> {
   EnvInit.init({
     debug: '0',
     set: { TRV_LOG_TIME: '0' },

@@ -16,11 +16,11 @@ export class GetCacheInterceptor implements RestInterceptor {
   @Inject()
   config: RestConfig;
 
-  applies(route: RouteConfig) {
+  applies(route: RouteConfig): boolean {
     return route.method === 'get' && this.config.disableGetCache;
   }
 
-  async intercept(req: Request, res: Response, next: () => Promise<void | unknown>) {
+  async intercept(req: Request, res: Response, next: () => Promise<void | unknown>): Promise<unknown> {
     const result = await next();
     // Only apply on the way out, and on success
     if (res.getHeader('Expires') === undefined && res.getHeader('Cache-Control') === undefined) {

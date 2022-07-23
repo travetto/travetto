@@ -33,15 +33,14 @@ export interface Token {
 /**
  * Base AST Node
  */
-export interface Node {
-  type: string;
+export interface Node<T extends string = string> {
+  type: T;
 }
 
 /**
  * Simple clause
  */
-export interface ClauseNode extends Node {
-  type: 'clause';
+export interface ClauseNode extends Node<'clause'> {
   field?: string;
   op?: string;
   value?: Literal | Literal[];
@@ -50,29 +49,28 @@ export interface ClauseNode extends Node {
 /**
  * Grouping
  */
-export interface GroupNode extends Node {
-  type: 'group';
+export interface GroupNode extends Node<'group'> {
   op?: 'and' | 'or';
-  value: Node[];
+  value: AllNode[];
 }
 
 /**
  * Unary node
  */
-export interface UnaryNode extends Node {
-  type: 'unary';
+export interface UnaryNode extends Node<'unary'> {
   op?: 'not';
-  value: Node;
+  value: AllNode;
 }
 
 /**
  * Array node
  */
-export interface ArrayNode extends Node {
-  type: 'list';
+export interface ArrayNode extends Node<'list'> {
   op?: 'not';
   value: Literal[];
 }
+
+export type AllNode = ArrayNode | UnaryNode | GroupNode | ClauseNode;
 
 /**
  * Translation of operators to model query keys

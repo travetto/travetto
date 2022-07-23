@@ -1,7 +1,7 @@
 /**
  * Trigger direct build
  */
-export async function main() {
+export async function main(): Promise<void> {
   const { PhaseManager } = await import('@travetto/base');
   // Standard transpile
   await PhaseManager.run('init', '@trv:base/transpile');

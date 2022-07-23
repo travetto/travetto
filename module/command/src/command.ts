@@ -1,4 +1,4 @@
-import { EnvUtil, ExecUtil } from '@travetto/boot';
+import { EnvUtil, ExecUtil, ExecutionResult, ExecutionState } from '@travetto/boot';
 
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';
@@ -15,7 +15,7 @@ export class CommandService {
   /**
    * Check to see if docker is available
    */
-  static async dockerAvailable() {
+  static async dockerAvailable(): Promise<boolean> {
     if (this.#hasDocker === undefined && !EnvUtil.isFalse('TRV_DOCKER')) { // Check for docker existence
       const { result: prom } = ExecUtil.spawn('docker', ['ps']);
       this.#hasDocker = (await prom).valid;
@@ -27,14 +27,14 @@ export class CommandService {
   execContainer: Promise<DockerContainer | undefined>;
   config: CommandConfig;
 
-  constructor(config: Partial<CommandConfig>) {
+  constructor(config: Partial<CommandConfig> & { containerImage: string }) {
     this.config = {
-      localCommand: x => x,
-      containerCommand: x => x,
-      localCheck: async () => false,
+      localCommand: (x): string[] => x,
+      containerCommand: (x): string[] => x,
+      localCheck: async (): Promise<boolean> => false,
       allowDocker: true, containerEntry: '/bin/sh',
       ...config
-    } as CommandConfig;
+    };
   }
 
   /**
@@ -59,16 +59,16 @@ export class CommandService {
   /**
    * Get the container to support the `docker run` command
    */
-  getRunContainer() {
-    return this.runContainer = this.runContainer || this.getContainer();
+  getRunContainer(): Promise<DockerContainer | undefined> {
+    return this.runContainer ||= this.getContainer();
   }
 
   /**
    * Get a version of the container using `docker exec`. This is meant to be used in
    * scenarios where multiple executions are desired.
    */
-  getExecContainer() {
-    return this.execContainer = this.execContainer || this.getContainer().then(async c => {
+  getExecContainer(): Promise<DockerContainer | undefined> {
+    return this.execContainer ||= this.getContainer().then(async c => {
       if (c) {
         await c.create([this.config.containerEntry].filter(x => !!x));
         await c.start();
@@ -81,7 +81,7 @@ export class CommandService {
   /**
    * Execute a command, either via a docker exec or the locally installed program
    */
-  async exec(...args: string[]) {
+  async exec(...args: string[]): Promise<ExecutionState> {
     const container = await this.getExecContainer();
     args = (container ? this.config.containerCommand : this.config.localCommand)(args);
 
@@ -95,7 +95,7 @@ export class CommandService {
   /**
    * Run a single command, if using docker, run once and terminate.
    */
-  async run(...args: string[]) {
+  async run(...args: string[]): Promise<ExecutionResult> {
     const container = await this.getRunContainer();
     const [cmd, ...rest] = (container ? this.config.containerCommand : this.config.localCommand)(args);
     console.debug('Running command', { cmd, rest, container: !!container });

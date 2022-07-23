@@ -14,10 +14,12 @@ export type ResolutionType = 'strict' | 'loose' | 'any';
 const PrimaryCandidateⲐ = Symbol.for('@trv:di/primary');
 
 function hasPostConstruct(o: unknown): o is { postConstruct: () => Promise<unknown> } {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !!(o as Record<string, unknown>)['postConstruct'];
 }
 
 function hasPreDestroy(o: unknown): o is { preDestroy: () => unknown } {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !!(o as Record<string, unknown>)['preDestroy'];
 }
 
@@ -67,7 +69,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
             qualifier = filtered[0];
           } else if (filtered.length > 1) {
             // If dealing with sub types, prioritize exact matches
-            const exact = this.getCandidateTypes(target as Class).filter(x => x.class === target);
+            const exact = this
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              .getCandidateTypes(target as Class)
+              .filter(x => x.class === target);
             if (exact.length === 1) {
               qualifier = exact[0].qualifier;
             } else {
@@ -94,6 +99,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const config = this.get(cls!) as InjectableConfig<T>;
     return {
       qualifier,
@@ -105,7 +111,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Retrieve all dependencies
    */
-  protected async fetchDependencies(managed: InjectableConfig, deps?: Dependency[]) {
+  protected async fetchDependencies(managed: InjectableConfig, deps?: Dependency[]): Promise<unknown[]> {
     if (!deps || !deps.length) {
       return [];
     }
@@ -113,7 +119,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     const promises = deps.map(async x => {
       try {
         return await this.getInstance(x.target, x.qualifier, x.resolution);
-      } catch (err: any) {
+      } catch (err) {
+        if (!err || !(err instanceof Error)) {
+          throw err;
+        }
         if (x.optional && err instanceof InjectionError && err.category === 'notfound') {
           return undefined;
         } else {
@@ -129,14 +138,16 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Resolve all field dependencies
    */
-  protected async resolveFieldDependencies<T>(config: InjectableConfig<T>, instance: T) {
+  protected async resolveFieldDependencies<T>(config: InjectableConfig<T>, instance: T): Promise<void> {
     const keys = Object.keys(config.dependencies.fields ?? {})
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       .filter(k => instance[k as keyof T] === undefined); // Filter out already set ones
 
     // And auto-wire
     if (keys.length) {
       const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]));
       for (let i = 0; i < keys.length; i++) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         instance[keys[i] as keyof T] = deps[i] as T[keyof T];
       }
     }
@@ -154,6 +165,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // Create instance
     const inst = managed.factory ?
       managed.factory(...consValues) :
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       new (managed.class as ConcreteClass<T>)(...consValues);
 
     // And auto-wire fields
@@ -161,6 +173,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // If factory with field properties on the sub class
     if (managed.factory) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const resolved = this.get((inst as ClassInstance<T>).constructor);
 
       if (resolved) {
@@ -179,7 +192,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Create the instance
    */
-  protected async createInstance<T>(target: ClassTarget<T>, qualifier: symbol) {
+  protected async createInstance<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
     const classId = this.resolveTarget(target, qualifier).id;
 
     if (!this.instances.has(classId)) {
@@ -188,7 +201,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     if (this.instancePromises.get(classId)!.has(qualifier)) {
-      return this.instancePromises.get(classId)!.get(qualifier);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return this.instancePromises.get(classId)!.get(qualifier) as unknown as T;
     }
 
     const instancePromise = this.construct(target, qualifier);
@@ -207,7 +221,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Destroy an instance
    */
-  protected destroyInstance(cls: Class, qualifier: symbol) {
+  protected destroyInstance(cls: Class, qualifier: symbol): void {
     const classId = cls.ᚕid;
 
     const activeInstance = this.instances.get(classId)!.get(qualifier);
@@ -225,7 +239,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Handle initial installation for the entire registry
    */
-  override initialInstall() {
+  override initialInstall(): Class[] {
     const finalizing = this.pendingFinalize;
     this.pendingFinalize = [];
 
@@ -233,13 +247,13 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.install(cls, { type: 'added', curr: cls });
     }
 
-    return [] as Class[];
+    return [];
   }
 
   /**
    * Register a cls as pending
    */
-  createPending(cls: Class) {
+  createPending(cls: Class): Partial<InjectableConfig> {
     if (!this.resolved) {
       this.pendingFinalize.push(cls);
     }
@@ -265,23 +279,25 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     if (!this.instances.has(classId) || !this.instances.get(classId)!.has(qualifier)) {
       await this.createInstance(target, qualifier); // Wait for proxy
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.instances.get(classId)!.get(qualifier)! as T;
   }
 
   /**
    * Get all available candidate types for the target
    */
-  getCandidateTypes<T>(target: Class<T>) {
+  getCandidateTypes<T>(target: Class<T>): InjectableConfig[] {
     const targetId = target.ᚕid;
     const qualifiers = this.targetToClass.get(targetId)!;
     const uniqueQualifiers = qualifiers ? Array.from(new Set(qualifiers.values())) : [];
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return uniqueQualifiers.map(id => this.get(id)! as InjectableConfig<T>);
   }
 
   /**
    * Register a constructor with dependencies
    */
-  registerConstructor<T>(cls: Class<T>, dependencies?: Dependency[]) {
+  registerConstructor<T>(cls: Class<T>, dependencies?: Dependency[]): void {
     const conf = this.getOrCreatePending(cls);
     conf.dependencies!.cons = dependencies;
   }
@@ -289,7 +305,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Register a property as a dependency
    */
-  registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency) {
+  registerProperty<T>(cls: Class<T>, field: string, dependency: Dependency): void {
     const conf = this.getOrCreatePending(cls);
     conf.dependencies!.fields[field] = dependency;
   }
@@ -297,7 +313,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Register a class
    */
-  registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>> = {}) {
+  registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>> = {}): void {
     const config = this.getOrCreatePending(pconfig.class ?? cls);
 
     config.class = cls;
@@ -317,6 +333,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     if (pconfig.dependencies) {
       config.dependencies = {
         fields: {},
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         ...pconfig.dependencies as Omit<InjectableConfig['dependencies'], 'fields'>
       };
     }
@@ -329,7 +346,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     id: string;
     qualifier?: undefined | symbol;
     fn: (...args: unknown[]) => unknown;
-  }) {
+  }): void {
     const finalConfig: Partial<InjectableConfig> = {};
 
     finalConfig.factory = config.fn;
@@ -349,6 +366,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Create mock cls for DI purposes
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const cls = { ᚕid: config.id } as Class;
 
     finalConfig.class = cls;
@@ -359,13 +377,14 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.factories.set(config.src.ᚕid, new Map());
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     this.factories.get(config.src.ᚕid)!.set(cls, finalConfig as InjectableConfig);
   }
 
   /**
    * On Install event
    */
-  override onInstall<T>(cls: Class<T>, e: ChangeEvent<Class<T>>) {
+  override onInstall<T>(cls: Class<T>, e: ChangeEvent<Class<T>>): void {
     super.onInstall(cls, e);
 
     // Install factories separate from classes
@@ -379,9 +398,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Handle installing a class
    */
-  onInstallFinalize<T>(cls: Class<T>) {
+  onInstallFinalize<T>(cls: Class<T>): InjectableConfig<T> {
     const classId = cls.ᚕid;
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const config = this.getOrCreatePending(cls) as InjectableConfig<T>;
 
     // Allow for the factory to fulfill the target
@@ -489,7 +509,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Handle uninstalling a class
    */
-  override onUninstallFinalize(cls: Class) {
+  override onUninstallFinalize(cls: Class): void {
     const classId = cls.ᚕid;
 
     if (!this.classToTarget.has(cls.ᚕid)) {
@@ -506,7 +526,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Reset registry
    */
-  override onReset() {
+  override onReset(): void {
     super.onReset();
     this.pendingFinalize = [];
     this.instances.clear();
@@ -519,7 +539,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Inject fields into instance
    */
-  async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor as Class<T>) {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor as Class<T>): Promise<void> {
     this.verifyInitialized();
     // Compute fields to be auto-wired
     return await this.resolveFieldDependencies(this.get(cls), o);

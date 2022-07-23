@@ -4,6 +4,14 @@ import { BulkOp } from '../../service/bulk';
 import { ModelType } from '../../types/model';
 import { ModelCrudUtil } from './crud';
 
+export type BulkPreStore<T extends ModelType> = {
+  insertedIds: Map<number, string>;
+  upsertedIds: Map<number, string>;
+  updatedIds: Map<number, string>;
+  existingUpsertedIds: Map<number, string>;
+  operations: BulkOp<T>[];
+};
+
 export class ModelBulkUtil {
   /**
    * Prepares bulk ops for storage
@@ -11,7 +19,7 @@ export class ModelBulkUtil {
    * @param operations
    * @param idSource
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[], idSource: { uuid(): string }) {
+  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[], idSource: { uuid(): string }): Promise<BulkPreStore<T>> {
     const insertedIds = new Map<number, string>();
     const upsertedIds = new Map<number, string>();
     const updatedIds = new Map<number, string>();

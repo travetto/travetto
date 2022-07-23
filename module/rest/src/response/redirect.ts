@@ -23,7 +23,7 @@ export class Redirect implements Renderable {
    * Render the response
    * @returns {void}
    */
-  render(res: Response) {
+  render(res: Response): void {
     res.redirect(this.#status, this.#location);
   }
 }

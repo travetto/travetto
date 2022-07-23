@@ -1,11 +1,13 @@
+import { $AsyncIterable } from '@arcsine/nodesh/dist/types';
+
 import { PathUtil } from '@travetto/boot';
 
 import { Modules } from './modules';
-import { Packages } from './packages';
+import { Packages, Pkg } from './packages';
 
 export class Git {
 
-  static findLastRelease() {
+  static findLastRelease(): $AsyncIterable<string> {
     return $exec('git', ['log', '--pretty=oneline'])
       .$filter(x => /Publish /.test(x))
       .$first(1)
@@ -13,7 +15,7 @@ export class Git {
       .$map(([hash]) => hash);
   }
 
-  static async * findFoldersChanged(hash: string) {
+  static async * findFoldersChanged(hash: string): $AsyncIterable<string> {
     const byFolder = await Packages.yieldPublicPackages()
       .$map(p => p._.folderRelative);
     const patt = new RegExp(`(${byFolder.join('|')})\/`);
@@ -27,7 +29,7 @@ export class Git {
       .$map(f => PathUtil.resolveUnix(f));
   }
 
-  static async * yieldChangedPackages(hash?: string, transitive = process.env.TRV_FLAT !== '1') {
+  static async * yieldChangedPackages(hash?: string, transitive = process.env.TRV_FLAT !== '1'): $AsyncIterable<Pkg> {
     if (!hash) {
       hash = await this.findLastRelease().$value;
     }
@@ -43,11 +45,11 @@ export class Git {
       .$unique();
   }
 
-  static publishCommit(tag: string) {
+  static publishCommit(tag: string): $AsyncIterable<string> {
     return $exec('git', { args: ['commit', '.', '-m', `Publish ${tag}`] });
   }
 
-  static checkWorkspaceDirty(errorMessage: string) {
+  static checkWorkspaceDirty(errorMessage: string): $AsyncIterable<string> {
     return $exec('git', ['diff', '--quiet', '--exit-code'])
       .$concat($exec('git', ['diff', '--quiet', '--exit-code', '--cached']))
       .$onError(() => {

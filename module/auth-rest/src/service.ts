@@ -14,9 +14,10 @@ export class AuthService {
   @Inject()
   authorizer?: Authorizer;
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     // Find all identity sources
     for (const source of DependencyRegistry.getCandidateTypes<Authenticator>(
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       AuthenticatorTarget as unknown as Class<Authenticator>
     )) {
       const dep = await DependencyRegistry.getInstance<Authenticator>(AuthenticatorTarget, source.qualifier);
@@ -45,7 +46,10 @@ export class AuthService {
         }
         req.auth = this.authorizer ? await this.authorizer.authorize(principal) : principal;
         return req.auth;
-      } catch (err: any) {
+      } catch (err) {
+        if (!(err instanceof Error)) {
+          throw err;
+        }
         lastError = err;
       }
     }
@@ -63,7 +67,7 @@ export class AuthService {
   /**
    * Log user out
    */
-  async logout(req: Request) {
+  async logout(req: Request): Promise<void> {
     req.auth = undefined;
   }
 }

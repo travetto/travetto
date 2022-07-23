@@ -8,9 +8,9 @@
 npm install @travetto/model-elasticsearch
 ```
 
-This module provides an [elasticsearch](https://elastic.co)-based implementation of the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [elasticsearch](https://elastic.co). In development mode, [ElasticsearchModelService](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/service.ts#L40) will also modify the [elasticsearch](https://elastic.co) schema in real time to minimize impact to development.
+This module provides an [elasticsearch](https://elastic.co)-based implementation of the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [elasticsearch](https://elastic.co). In development mode, [ElasticsearchModelService](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/service.ts#L42) will also modify the [elasticsearch](https://elastic.co) schema in real time to minimize impact to development.
 
-Supported featrues:
+Supported features:
    
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L23)
@@ -94,14 +94,14 @@ export class ElasticsearchModelConfig {
   };
 
   /**
-   * Frequency of culling for expirable content
+   * Frequency of culling for cullable content
    */
   cullRate?: number | TimeSpan;
 
   /**
    * Build final hosts
    */
-  postConstruct() {
+  postConstruct(): void {
     console.debug('Constructed', { config: this });
     this.hosts = this.hosts
       .map(x => x.includes(':') ? x : `${x}:${this.port}`)

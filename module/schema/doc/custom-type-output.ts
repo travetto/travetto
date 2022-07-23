@@ -1,7 +1,7 @@
 import { SchemaValidator } from '@travetto/schema';
 import { LocationAware } from './custom-type-usage';
 
-export async function main() {
+export async function main(): Promise<void> {
   const la = LocationAware.from({
     name: 'bob',
     // @ts-ignore

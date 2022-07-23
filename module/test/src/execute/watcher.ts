@@ -1,6 +1,5 @@
 import * as os from 'os';
 
-import { Class } from '@travetto/base';
 import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
 
@@ -20,7 +19,7 @@ export class TestWatcher {
   /**
    * Start watching all test files
    */
-  static async watch(format: string) {
+  static async watch(format: string): Promise<void> {
     console.debug('Listening for changes');
 
     const itr = new ManualAsyncIterator<RunEvent>();
@@ -37,7 +36,7 @@ export class TestWatcher {
     });
 
     new MethodSource(RootRegistry).on(e => {
-      const [cls, method] = (e.prev ?? e.curr ?? []) as [Class, Function];
+      const [cls, method] = (e.prev ?? e.curr ?? []);
       if (!cls) {
         return;
       }

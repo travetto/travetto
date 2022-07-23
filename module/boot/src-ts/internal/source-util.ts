@@ -11,7 +11,7 @@ declare global {
 // Inject into global space as 'ts'
 global.ts = new Proxy({}, {
   // Load on demand, and replace on first use
-  get: (t, prop, r) => (global.ts = require('typescript'))[prop]
+  get: (t, prop, r): unknown => (global.ts = require('typescript'))[prop]
 });
 
 /**
@@ -23,7 +23,7 @@ export class SourceUtil {
 
   static readonly EXT = '.ts';
 
-  static init() {
+  static init(): void {
     // Tag output to indicate it was succefully processed by the framework
     this.addPreProcessor((__, contents) =>
       `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`);
@@ -39,8 +39,8 @@ export class SourceUtil {
    * @param isModule Is the error a module that should have been loaded
    * @param base The base set of properties to support
    */
-  static getErrorModule(message: string, isModule?: string | boolean, base?: Record<string, string | boolean>) {
-    const f = ([k, v]: string[]) => `${k}: (t,k) => ${v}`;
+  static getErrorModule(message: string, isModule?: string | boolean, base?: Record<string, string | boolean>): string {
+    const f = ([k, v]: string[]): string => `${k}: (t,k) => ${v}`;
     const e = '{ throw new Error(msg); }';
     const map: { [P in keyof ProxyHandler<object>]?: string } = {
       getOwnPropertyDescriptor: base ? '({})' : e,
@@ -85,7 +85,7 @@ export class SourceUtil {
    * @param name The name of the file to resolve macros for
    * @param contents The file contents
    */
-  static resolveMacros(contents: string) {
+  static resolveMacros(contents: string): { errors: string[], contents: string } {
     const errors: string[] = [];
 
     // Handle line queries
@@ -113,7 +113,7 @@ export class SourceUtil {
    * @param filename The file to preprocess
    * @param contents The file contents to process
    */
-  static preProcess(filename: string, contents?: string) {
+  static preProcess(filename: string, contents?: string): string {
     let fileContents = contents ?? readFileSync(filename, 'utf-8');
 
     // Resolve macro
@@ -137,14 +137,14 @@ export class SourceUtil {
    * Add support for source preprocessor
    * @param fn The preprocessor to add
    */
-  static addPreProcessor(fn: SourceHandler) {
+  static addPreProcessor(fn: SourceHandler): void {
     this.#handlers.unshift(fn);
   }
 
   /**
    * Clear out on cleanup
    */
-  static reset() {
+  static reset(): void {
     this.#handlers = [];
   }
 }

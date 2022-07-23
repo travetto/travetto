@@ -20,7 +20,8 @@ Packages.getTopLevelPackage()
       )
       .$flatten()
       .$sort(([a], [b]) => a.localeCompare(b))
-      .$reduce((acc, [a, b]) => { acc[a] = b as string; return acc; }, {} as Record<string, string>)
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      .$reduce((acc: Record<string, string>, [a, b]) => { acc[a] = b as string; return acc; }, {})
       .$value;
 
     top.devDependencies = deps;

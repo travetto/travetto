@@ -24,7 +24,7 @@ export class ParameterSelector {
    * @param provider Input Parameter provider
    * @param config The configuration for the parameter
    */
-  static buildQuick<T extends Complex>(config: ParamWithMeta, provider: () => T) {
+  static buildQuick<T extends Complex>(config: ParamWithMeta, provider: () => T): T {
     const qp = provider();
     qp.ignoreFocusOut = true;
     qp.step = config.step;
@@ -39,7 +39,7 @@ export class ParameterSelector {
    * Build quick input
    * @param conf
    */
-  static buildQuickInput(conf: ParamWithMeta) {
+  static buildQuickInput(conf: ParamWithMeta): vscode.InputBox {
     return this.buildQuick(conf, vscode.window.createInputBox);
   }
 
@@ -48,7 +48,7 @@ export class ParameterSelector {
    * @param conf The parameter to pick for
    * @param choices List of choices
    */
-  static buildQuickPickList(conf: ParamWithMeta, choices: string[]) {
+  static buildQuickPickList(conf: ParamWithMeta, choices: string[]): vscode.QuickPick<vscode.QuickPickItem> {
     const qp = this.buildQuick(conf, vscode.window.createQuickPick);
     qp.title = `Select ${conf.param.title || conf.param.name}`;
     // @ts-ignore
@@ -63,6 +63,7 @@ export class ParameterSelector {
       qp.activeItems = qp.items.filter(x => x.label === qp.value);
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     qp.value = undefined as unknown as string;
 
     return qp;
@@ -78,8 +79,8 @@ export class ParameterSelector {
       input.onDidAccept(() =>
         resolve(transform ?
           transform(input!) :
-          // @ts-ignore
-          input.value as U
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          input.value as unknown as U
         )
       );
     }).finally(() => {
@@ -107,7 +108,7 @@ export class ParameterSelector {
    * Get quick pick input
    * @param conf
    */
-  static getQuickInput(conf: ParamWithMeta) {
+  static getQuickInput(conf: ParamWithMeta): Promise<string> {
     return this.getInput(this.buildQuickInput(conf));
   }
 
@@ -117,7 +118,7 @@ export class ParameterSelector {
    * @param conf
    * @param choices
    */
-  static getQuickPickList(conf: ParamWithMeta, choices: string[]) {
+  static getQuickPickList(conf: ParamWithMeta, choices: string[]): Promise<string> {
     return this.getInput(
       this.buildQuickPickList(conf, choices),
       x => x.value ?? x.selectedItems[0].label);
@@ -142,13 +143,14 @@ export class ParameterSelector {
    * Build input depending on provided configuration
    * @param conf Parameter configuration
    */
-  static async getParameter(conf: ParamWithMeta) {
+  static async getParameter(conf: ParamWithMeta): Promise<string | undefined> {
     switch (conf.param.type) {
       case 'number': return this.getQuickInput(conf);
       case 'boolean': return this.getQuickPickList(conf, ['yes', 'no']).then(x => `${x === 'yes'}`);
       case 'string':
       default: {
         if (conf.param.enum) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           return this.getQuickPickList(conf, conf.param.enum?.values as string[] ?? []);
         } else if (conf.param.specifier === 'file') {
           return this.getFile(conf);

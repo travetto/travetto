@@ -25,7 +25,7 @@ export class Session<T extends SessionData = SessionData>  {
    */
   #hash: number;
   /**
-   * The session identifer
+   * The session identifier
    */
   readonly id: string;
   /**
@@ -80,6 +80,7 @@ export class Session<T extends SessionData = SessionData>  {
    * Get session value
    */
   getValue<V>(key: string): V | undefined {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.data && key in this.data ? this.data[key] as V : undefined;
   }
 
@@ -87,49 +88,50 @@ export class Session<T extends SessionData = SessionData>  {
    * Set session value
    */
   setValue<V>(key: string, value: V): void {
-    this.data ??= {} as T;
-    (this.data as Record<string, unknown>)[key] = value;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const data = (this.data as Record<string, unknown>) ??= {};
+    data[key] = value;
   }
 
   /**
    * Determine if session has changed
    */
-  isChanged() {
+  isChanged(): boolean {
     return this.isTimeChanged() || this.#hash !== SystemUtil.naiveHash(JSON.stringify(this));
   }
 
   /**
    * Determine if the expiry time has changed
    */
-  isTimeChanged() {
+  isTimeChanged(): boolean {
     return this.expiresAt !== undefined && this.expiresAt !== this.#expiresAtLoaded;
   }
 
   /**
    * See if the session is nearly expired
    */
-  isAlmostExpired() {
+  isAlmostExpired(): boolean {
     return (!!this.maxAge && (this.expiresAt!.getTime() - Date.now()) < this.maxAge / 2);
   }
 
   /**
    * See if the session is truly expired
    */
-  isExpired() {
-    return this.expiresAt && this.expiresAt.getTime() < Date.now();
+  isExpired(): boolean {
+    return !!this.expiresAt && this.expiresAt.getTime() < Date.now();
   }
 
   /**
    * See if session is empty, has any data been written
    */
-  isEmpty() {
+  isEmpty(): boolean {
     return !Object.keys(this.data ?? {}).length;
   }
 
   /**
    * Refresh the session expiration time
    */
-  refresh() {
+  refresh(): void {
     if (this.maxAge) {
       this.expiresAt = new Date(this.maxAge + Date.now());
     }
@@ -138,7 +140,7 @@ export class Session<T extends SessionData = SessionData>  {
   /**
    * Mark the session for destruction, delete the data
    */
-  destroy() {
+  destroy(): void {
     this.action = 'destroy';
     delete this.data;
   }
@@ -146,7 +148,7 @@ export class Session<T extends SessionData = SessionData>  {
   /**
    * Serialize the session
    */
-  toJSON() {
+  toJSON(): unknown {
     return {
       id: this.id,
       signature: this.signature,

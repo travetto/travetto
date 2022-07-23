@@ -19,7 +19,7 @@ export type AppDecorator = { description?: string };
  * @augments `@trv:di/Injectable`
  */
 export function Application(name: string, config?: AppDecorator) {
-  return <T extends Class<AppClass>>(target: T) => {
+  return <T extends Class<AppClass>>(target: T): void => {
     const out: Partial<ApplicationConfig> = {
       ...config ?? {},
       target,
@@ -29,6 +29,7 @@ export function Application(name: string, config?: AppDecorator) {
       generatedTime: FsUtil.maxTime(lstatSync(target.ᚕfile))
     };
     SchemaRegistry.register(target);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     ApplicationRegistry.register(out.name!, out as ApplicationConfig);
   };
 }

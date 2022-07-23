@@ -11,7 +11,7 @@ export class RedisModelConfig {
   namespace?: string;
   autoCreate?: boolean;
 
-  postConstruct() {
+  postConstruct(): void {
 
   }
 }

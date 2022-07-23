@@ -1,11 +1,11 @@
 type Lang = {};
 
 // TODO: Get proper typings
-const Prism = require('prismjs') as {
+const Prism: {
   plugins: { NormalizeWhitespace: Record<string, Function> };
   languages: Record<string, Lang>;
   highlight(text: string, grammar: Lang, language: string): string;
-};
+} = require('prismjs');
 
 import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace';
 import 'prismjs/components/prism-typescript';
@@ -34,7 +34,7 @@ const tokenMapping: { [key: string]: string } = {
   apos: "'"
 };
 
-export function highlight(text: string, lang: string) {
+export function highlight(text: string, lang: string): string | undefined {
   text = nw.normalize(text, {
     indent: 0
   });
@@ -47,8 +47,12 @@ export function highlight(text: string, lang: string) {
     return Prism.highlight(text, Prism.languages[lang], lang)
       .replace(/(@\s*<span[^>]*)function("\s*>)/g, (a, pre, post) => `${pre}meta${post}`)
       .replace(/[{}]/g, a => `{{'${a}'}}`);
-  } catch (err: any) {
-    console.error(err.message as string, { error: err });
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err.message, { error: err });
+    } else {
+      throw err;
+    }
   }
 }
 

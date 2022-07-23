@@ -17,15 +17,16 @@ export interface ComponentFactory {
 class $TagRegistry {
   #data: Map<Class, Record<string, (node: Element) => string>> = new Map();
 
-  id(cls: unknown) {
+  id(cls: unknown): Class {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return cls && (cls as object).constructor !== Function ? (cls as object).constructor as Class : cls as Class;
   }
 
-  getTag(tag: string | Element, ns: string) {
+  getTag(tag: string | Element, ns: string): string {
     return (typeof tag === 'string' ? tag : Parse5Adapter.getTagName(tag)).replace(new RegExp(`^${ns}`), '');
   }
 
-  register(cls: ClassInstance, name: string, fn: (node: Element) => string) {
+  register(cls: ClassInstance, name: string, fn: (node: Element) => string): void {
     cls = this.id(cls);
     if (!this.#data.has(cls)) {
       this.#data.set(cls, {});
@@ -33,12 +34,12 @@ class $TagRegistry {
     this.#data.get(cls)![name] = fn;
   }
 
-  resolve(cls: ClassInstance, tag: string) {
+  resolve(cls: ClassInstance, tag: string): ((node: Element) => string) | undefined {
     cls = this.id(cls);
     return this.#data.get(cls)?.[tag];
   }
 
-  has(cls: ClassInstance, tag: string) {
+  has(cls: ClassInstance, tag: string): boolean {
     cls = this.id(cls);
     return !!this.#data.get(cls)?.[tag];
   }
@@ -52,7 +53,7 @@ export const TagRegistry = new $TagRegistry();
 export function Tag(name?: string) {
   return <T extends ClassInstance, U extends string = string>(
     target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(node: Element) => U>
-  ) => {
+  ): void => {
     TagRegistry.register(target, name || desc.value!.name, desc.value!);
   };
 }

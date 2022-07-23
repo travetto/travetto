@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 
 import * as koa from 'koa';
 
-import { RestServerUtil } from '@travetto/rest';
+import { RestServerUtil, Request, Response } from '@travetto/rest';
 import { NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from '@travetto/rest/src/internal/symbol';
 import { StreamUtil } from '@travetto/boot';
 
@@ -13,11 +13,13 @@ export class KoaServerUtil {
   /**
    * Build a Travetto Request from a koa context
    */
-  static getRequest(ctx: koa.ParameterizedContext<unknown>) {
+  static getRequest(ctx: koa.ParameterizedContext<unknown>): Request {
     return RestServerUtil.decorateRequest({
       [ProviderEntityⲐ]: ctx,
       [NodeEntityⲐ]: ctx.req,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       protocol: ctx.protocol as 'http',
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       method: ctx.request.method as 'GET',
       query: ctx.request.query,
       url: ctx.url,
@@ -36,14 +38,14 @@ export class KoaServerUtil {
   /**
    * Build a Travetto Response from a koa context
    */
-  static getResponse(ctx: koa.ParameterizedContext<unknown>) {
+  static getResponse(ctx: koa.ParameterizedContext<unknown>): Response {
     return RestServerUtil.decorateResponse({
       [ProviderEntityⲐ]: ctx,
       [NodeEntityⲐ]: ctx.res,
-      get headersSent() {
+      get headersSent(): boolean {
         return ctx.headerSent;
       },
-      status(value?: number) {
+      status(value?: number): number | undefined {
         if (value) {
           ctx.status = value;
         } else {
@@ -51,13 +53,13 @@ export class KoaServerUtil {
         }
       },
       send: b => ctx.body = b,
-      [SendStreamⲐ]: async (stream: Readable) => {
+      [SendStreamⲐ]: async (stream: Readable): Promise<void> => {
         ctx.respond = false;
         ctx.response.status = 200;
         await StreamUtil.pipe(stream, ctx.res);
       },
       on: ctx.res.on.bind(ctx.res),
-      end: (val?: unknown) => {
+      end: (val?: unknown): void => {
         if (val) {
           ctx.body = val;
         }

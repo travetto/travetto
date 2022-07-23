@@ -13,14 +13,14 @@ export class TransformerTestUtil {
   /**
    * Compile a single file from a folder
    */
-  static async compile(folder: string, file?: string) {
+  static async compile(folder: string, file?: string): Promise<string> {
 
     const tsconfigObj = await import('@travetto/boot/tsconfig.trv.json');
 
     const prog = ts.createProgram({
       options: ts.convertCompilerOptionsFromJson(tsconfigObj, '').options,
       rootNames: (await ScanFs.scanDir({ testFile: f => f.startsWith('src/') && f.endsWith('.ts') }, folder))
-        .filter(x => x.stats.isFile())
+        .filter(x => x.stats?.isFile())
         .filter(x => !file || x.file.endsWith(file))
         .map(x => x.file),
     });
@@ -30,7 +30,7 @@ export class TransformerTestUtil {
 
     const transformers =
       (await ScanFs.scanDir({ testFile: f => f.startsWith('support/transformer') }, folder))
-        .filter(x => x.stats.isFile())
+        .filter(x => x.stats?.isFile())
         .map(x => import(x.file).then(getAllTransformers));
 
     const visitor = new VisitorFactory(

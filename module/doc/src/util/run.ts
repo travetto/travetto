@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process';
 
-import { PathUtil, ExecUtil, EnvUtil } from '@travetto/boot';
+import { PathUtil, ExecUtil, EnvUtil, ExecutionOptions, ExecutionState } from '@travetto/boot';
 
 export type RunConfig = {
   filter?: (line: string) => boolean;
@@ -9,22 +9,28 @@ export type RunConfig = {
   cwd?: string;
 };
 
+type RunState = {
+  cmd: string;
+  args: string[];
+  opts: ExecutionOptions;
+};
+
 class DocState {
   baseline = new Date(`${new Date().getFullYear()}-03-14T00:00:00.000`).getTime();
   _s = 37;
   ids: Record<string, string> = {};
 
-  rng() {
+  rng(): number {
     this._s = Math.sin(this._s) * 10000;
     return this._s - Math.floor(this._s);
   }
 
-  getDate(d: string) {
+  getDate(d: string): string {
     this.baseline += this.rng() * 1000;
     return new Date(this.baseline).toISOString();
   }
 
-  getId(id: string) {
+  getId(id: string): string {
     if (!this.ids[id]) {
       this.ids[id] = ' '.repeat(id.length).split('').map(x => Math.trunc(this.rng() * 16).toString(16)).join('');
     }
@@ -38,7 +44,7 @@ class DocState {
 export class DocRunUtil {
   static #docState = new DocState();
 
-  static runState(cmd: string, args: string[], config: RunConfig = {}) {
+  static runState(cmd: string, args: string[], config: RunConfig = {}): RunState {
     args = [...args];
     if (cmd.endsWith('.ts')) {
       const mod = config.module ?? 'base';
@@ -64,7 +70,7 @@ export class DocRunUtil {
   /**
    * Clean run output
    */
-  static cleanRunOutput(text: string, cfg: RunConfig) {
+  static cleanRunOutput(text: string, cfg: RunConfig): string {
     text = text.trim()
       // eslint-disable-next-line no-control-regex
       .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
@@ -83,7 +89,7 @@ export class DocRunUtil {
   /**
    * Run process in the background
    */
-  static runBackground(cmd: string, args: string[], config: RunConfig = {}) {
+  static runBackground(cmd: string, args: string[], config: RunConfig = {}): ExecutionState {
     const state = this.runState(cmd, args, config);
     return ExecUtil.spawn(state.cmd, state.args, {
       ...state.opts,
@@ -94,7 +100,7 @@ export class DocRunUtil {
   /**
    * Run command synchronously and return output
    */
-  static run(cmd: string, args: string[], config: RunConfig = {}) {
+  static run(cmd: string, args: string[], config: RunConfig = {}): string {
     let final: string;
     try {
       const state = this.runState(cmd, args, config);
@@ -109,9 +115,13 @@ export class DocRunUtil {
         throw res.error;
       }
       final = res.stdout.toString() || res.stderr.toString();
-    } catch (err: any) {
-      console.log('Found!', cmd, args, '\n', err);
-      final = err.message;
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log('Found!', cmd, args, '\n', err);
+        final = err.message;
+      } else {
+        throw err;
+      }
     }
 
     return this.cleanRunOutput(final, config);

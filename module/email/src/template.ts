@@ -42,7 +42,7 @@ export class MustacheTemplateEngine implements MailTemplateEngine {
   /**
    * Interpolate text with data
    */
-  template(text: string, data: Record<string, unknown>) {
+  template(text: string, data: Record<string, unknown>): string {
     return Mustache.render(text, data);
   }
 }

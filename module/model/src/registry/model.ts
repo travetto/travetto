@@ -30,31 +30,32 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
    * by requested store name.  This is the state at the
    * start of the application.
    */
-  intialModelNameMapping = new Map<string, Class[]>();
+  initialModelNameMapping = new Map<string, Class[]>();
 
   constructor() {
     // Listen to schema and dependency
     super(SchemaRegistry, DependencyRegistry);
   }
 
-  getInitialNameMapping() {
-    if (this.intialModelNameMapping.size === 0) {
+  getInitialNameMapping(): Map<string, Class[]> {
+    if (this.initialModelNameMapping.size === 0) {
       for (const cls of this.getClasses()) {
         const store = this.get(cls).store ?? cls.name;
-        if (!this.intialModelNameMapping.has(store)) {
-          this.intialModelNameMapping.set(store, []);
+        if (!this.initialModelNameMapping.has(store)) {
+          this.initialModelNameMapping.set(store, []);
         }
-        this.intialModelNameMapping.get(store)!.push(cls);
+        this.initialModelNameMapping.get(store)!.push(cls);
       }
     }
-    return this.intialModelNameMapping;
+    return this.initialModelNameMapping;
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
     return { class: cls, indices: [], autoCreate: true, baseType: cls.ᚕabstract };
   }
 
-  onInstallFinalize(cls: Class) {
+  onInstallFinalize(cls: Class): ModelOptions<ModelType> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const config = this.pending.get(cls.ᚕid)! as ModelOptions<ModelType>;
 
     const schema = SchemaRegistry.get(cls);
@@ -68,7 +69,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     return config;
   }
 
-  override onUninstallFinalize(cls: Class) {
+  override onUninstallFinalize(cls: Class): void {
     this.stores.delete(cls);
 
     // Force system to recompute on uninstall
@@ -97,7 +98,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   /**
    * Find all classes by their base types
    */
-  getAllClassesByBaseType() {
+  getAllClassesByBaseType(): Map<Class, Class[]> {
     if (!this.baseModelGrouped.size) {
       const out = new Map<Class, Class[]>();
       for (const el of this.entries.keys()) {
@@ -122,7 +123,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   /**
    * Get all classes for a given base type
    */
-  getClassesByBaseType(base: Class) {
+  getClassesByBaseType(base: Class): Class[] {
     return this.getAllClassesByBaseType().get(base) ?? [];
   }
 
@@ -162,7 +163,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
    * Get Index
    */
   getIndex<T extends ModelType, K extends IndexType[]>(cls: Class<T>, name: string, supportedTypes?: K): IndexConfig<T> & { type: K[number] } {
-    const cfg = this.get(cls).indices?.find(x => x.name === name) as IndexConfig<T>;
+    const cfg = this.get(cls).indices?.find((x): x is IndexConfig<T> => x.name === name);
     if (!cfg) {
       throw new NotFoundError(`${cls.name} Index`, `${name}`);
     }
@@ -176,14 +177,14 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
    * Get Indices
    */
   getIndices<T extends ModelType, K extends IndexType[]>(cls: Class<T>, supportedTypes?: K): (IndexConfig<T> & { type: K[number] })[] {
-    return (this.get(cls).indices ?? []).filter(x => !supportedTypes || supportedTypes.includes(x.type)) as IndexConfig<T>[];
+    return (this.get(cls).indices ?? []).filter((x): x is IndexConfig<T> => !supportedTypes || supportedTypes.includes(x.type));
   }
 
   /**
    * Get expiry field
    * @param cls
    */
-  getExpiry(cls: Class) {
+  getExpiry(cls: Class): string {
     const expiry = this.get(cls).expiresAt;
     if (!expiry) {
       throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`, 'general');

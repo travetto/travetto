@@ -10,7 +10,7 @@ export class RunnableTestConsumer implements TestConsumer {
   /**
    * Build a runnable test consumer given a format or a full consumer
    */
-  static get(consumer: string | TestConsumer) {
+  static get(consumer: string | TestConsumer): RunnableTestConsumer {
     return new RunnableTestConsumer(TestConsumerRegistry.getInstance(consumer));
   }
 
@@ -27,7 +27,7 @@ export class RunnableTestConsumer implements TestConsumer {
     }
   }
 
-  onStart() {
+  onStart(): void {
     for (const c of this.#consumers) {
       if (c.onStart) {
         c.onStart();
@@ -35,7 +35,7 @@ export class RunnableTestConsumer implements TestConsumer {
     }
   }
 
-  onEvent(e: TestEvent) {
+  onEvent(e: TestEvent): void {
     if (this.#results) {
       this.#results.onEvent(e);
     }
@@ -44,7 +44,7 @@ export class RunnableTestConsumer implements TestConsumer {
     }
   }
 
-  summarize() {
+  summarize(): TestResultsSummarizer | undefined {
     if (this.#results) {
       for (const c of this.#consumers) {
         if (c.onSummary) {
@@ -55,7 +55,7 @@ export class RunnableTestConsumer implements TestConsumer {
     }
   }
 
-  summarizeAsBoolean() {
+  summarizeAsBoolean(): boolean {
     const result = this.summarize();
     if (result) {
       return result.summary.failed <= 0;

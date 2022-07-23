@@ -34,18 +34,18 @@ export class CacheService {
     this.#modelService = modelService;
   }
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     if (isStorageSupported(this.#modelService) && EnvUtil.isDynamic()) {
       await this.#modelService.createModel?.(CacheRecord);
     }
   }
 
   /**
-   * Get an item thowing an error if missing or expired.  Allows for extending expiry based on access
+   * Get an item throwing an error if missing or expired.  Allows for extending expiry based on access
    * @param id Record identifier
-   * @param extendOnAccess should the expiry be extended on acces
+   * @param extendOnAccess should the expiry be extended on access
    */
-  async get(id: string, extendOnAccess = true) {
+  async get(id: string, extendOnAccess = true): Promise<unknown> {
     const { expiresAt, issuedAt } = await this.#modelService.get(CacheRecord, id);
 
     const delta = expiresAt.getTime() - Date.now();
@@ -77,7 +77,7 @@ export class CacheService {
    * @param maxAge Max age in ms
    * @returns
    */
-  async set(id: string, entry: unknown, maxAge?: number) {
+  async set(id: string, entry: unknown, maxAge?: number): Promise<unknown> {
     const entryText = CacheUtil.toSafeJSON(entry);
 
     const store = await this.#modelService.upsert(CacheRecord,
@@ -96,14 +96,14 @@ export class CacheService {
    * Remove an item by id
    * @param id
    */
-  async delete(id: string) {
+  async delete(id: string): Promise<void> {
     await this.#modelService.delete(CacheRecord, id);
   }
 
   /**
    * Purge the cache store of all data, if supported
    */
-  async purge() {
+  async purge(): Promise<void> {
     if (isStorageSupported(this.#modelService) && this.#modelService.truncateModel) {
       await this.#modelService.truncateModel(CacheRecord);
     } else {
@@ -116,7 +116,7 @@ export class CacheService {
    * @param id Record identifier
    * @param extendOnAccess should the expiry be extended on acces
    */
-  async getOptional(id: string, extendOnAccess = true) {
+  async getOptional(id: string, extendOnAccess = true): Promise<unknown | undefined> {
     let res: unknown;
 
     try {
@@ -137,7 +137,7 @@ export class CacheService {
    * @param fn Function to execute
    * @param params input parameters
    */
-  async cache(target: CacheAware, method: string, fn: Function, params: unknown[]) {
+  async cache(target: CacheAware, method: string, fn: Function, params: unknown[]): Promise<unknown | undefined> {
     const config = target[CacheConfigⲐ]![method];
 
     const id = CacheUtil.generateKey(config, params);
@@ -164,7 +164,7 @@ export class CacheService {
    * @param fn Function to execute
    * @param params Input params to the function
    */
-  async evict(target: CacheAware, method: string, fn: Function, params: unknown[]) {
+  async evict(target: CacheAware, method: string, fn: Function, params: unknown[]): Promise<unknown> {
     const config = target[EvictConfigⲐ]![method];
     const id = CacheUtil.generateKey(config, params);
     const val = await fn.apply(target, params);

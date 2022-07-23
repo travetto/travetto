@@ -21,14 +21,14 @@ export class Runner {
     this.#state = state;
   }
 
-  get patterns() {
+  get patterns(): RegExp[] {
     return this.#state.args.map(x => new RegExp(PathUtil.toUnix(x)));
   }
 
   /**
    * Run all files
    */
-  async runFiles() {
+  async runFiles(): Promise<boolean> {
     const consumer = RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
 
     const files = (await RunnerUtil.getTestFiles(this.patterns, this.#state.isolated ? 'test-isolated' : 'test'));
@@ -59,7 +59,7 @@ export class Runner {
   /**
    * Run a single file
    */
-  async runSingle() {
+  async runSingle(): Promise<boolean> {
     const consumer = RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
     consumer.onStart();
 
@@ -78,7 +78,7 @@ export class Runner {
   /**
    * Run the runner, based on the inputs passed to the constructor
    */
-  async run() {
+  async run(): Promise<boolean | undefined> {
     switch (this.#state.mode) {
       case 'single': return await this.runSingle();
       case 'standard': return await this.runFiles();

@@ -10,14 +10,14 @@ export class ModelInstallPlugin extends BaseModelPlugin {
   name = 'model:install';
   op = 'createModel' as const;
 
-  async action(provider: string, models: string[]) {
+  async action(provider: string, models: string[]): Promise<void> {
     try {
       await this.validate(provider, models);
       const resolved = await this.resolve(provider, models);
       await ModelInstallUtil.run(resolved.provider, resolved.models);
       console.log(color`${{ success: 'Successfully' }} installed ${{ param: models.length.toString() }} model(s)`);
-    } catch (err: any) {
-      console.error(err.message);
+    } catch (err) {
+      console.error((err && err instanceof Error) ? err.message : err);
     }
   }
 }

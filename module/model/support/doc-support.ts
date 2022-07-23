@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 
 import { d, mod } from '@travetto/doc';
 import { Config } from '@travetto/config';
-import { AllTypeMap } from '@travetto/doc/src/nodes';
+import { AllType, AllTypeMap } from '@travetto/doc/src/nodes';
 
 export const Links = {
   Basic: d.SnippetLink('Basic', '@travetto/model/src/service/basic', /export interface/),
@@ -13,7 +13,7 @@ export const Links = {
   Stream: d.SnippetLink('Streaming', '@travetto/model/src/service/stream', /export interface/),
 };
 
-export const ModelTypes = (file: string | { ᚕfile: string }) => {
+export const ModelTypes = (file: string | { ᚕfile: string }): AllTypeMap['SnippetLink'][] => {
   if (typeof file !== 'string') {
     file = file.ᚕfile;
   }
@@ -23,13 +23,14 @@ export const ModelTypes = (file: string | { ᚕfile: string }) => {
   for (const [, key] of contents.matchAll(/Model(Crud|Expiry|Indexed|Bulk|Stream)Support/g)) {
     if (!seen.has(key)) {
       seen.add(key);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       found.push(Links[key as keyof typeof Links]);
     }
   }
   return found;
 };
 
-export const ModelCustomConfig = (cfg: { name: string, ᚕfile: string }) =>
+export const ModelCustomConfig = (cfg: { name: string, ᚕfile: string }): AllType =>
   d`
     Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source 
     or config, you can override and register it with the ${mod.Di} module.

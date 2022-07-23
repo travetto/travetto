@@ -22,7 +22,7 @@ export interface AssetNamingStrategy {
 export class SimpleNamingStrategy implements AssetNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 
-  resolve(asset: StreamMeta) {
+  resolve(asset: StreamMeta): string {
     return `${this.prefix}${asset.filename}`;
   }
 }
@@ -34,7 +34,7 @@ export class SimpleNamingStrategy implements AssetNamingStrategy {
 export class HashNamingStrategy implements AssetNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 
-  resolve(asset: StreamMeta) {
+  resolve(asset: StreamMeta): string {
     let ext = '';
 
     if (asset.contentType) {

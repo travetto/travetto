@@ -1,7 +1,10 @@
 import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ColoredElement } from '@travetto/cli/src/color';
 
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
+
+type StreamingStatus = AsyncIterable<Partial<Record<ColoredElement, string | number>>>;
 
 export type Service = {
   name: string;
@@ -25,7 +28,7 @@ export class ServiceUtil {
   /**
    * Determine if service is running
    */
-  static async * isRunning(svc: Service, mode: 'running' | 'startup', timeout = 100,) {
+  static async * isRunning(svc: Service, mode: 'running' | 'startup', timeout = 100): StreamingStatus {
     const port = svc.ports ? +Object.keys(svc.ports)[0] : (svc.port ?? 0);
     if (port > 0) {
       const checkPort = CommandUtil.waitForPort(port, timeout).then(x => true, x => false);
@@ -53,14 +56,14 @@ export class ServiceUtil {
   /**
    * Get container id from docker
    */
-  static async getContainerId(svc: Service) {
+  static async getContainerId(svc: Service): Promise<string> {
     return CommandUtil.findContainerByLabel(`trv-${svc.name}`);
   }
 
   /**
    * Stop a service
    */
-  static async * stop(svc: Service) {
+  static async * stop(svc: Service): StreamingStatus {
     const running = yield* this.isRunning(svc, 'running');
     if (running) {
       const pid = await this.getContainerId(svc);
@@ -79,12 +82,12 @@ export class ServiceUtil {
   /**
    * Start a service
    */
-  static async * start(svc: Service) {
+  static async * start(svc: Service): StreamingStatus {
     const preRun = yield* this.isRunning(svc, 'running');
     if (!preRun) {
       yield { subtitle: 'Starting' };
       try {
-        const conatiner = new DockerContainer(svc.image)
+        const container = new DockerContainer(svc.image)
           .setInteractive(true)
           .setDeleteOnFinish(true)
           .setDaemon(true)
@@ -94,19 +97,19 @@ export class ServiceUtil {
 
         if (svc.ports) {
           for (const [pub, pri] of Object.entries(svc.ports)) {
-            conatiner.exposePort(+pub, +pri);
+            container.exposePort(+pub, +pri);
           }
         } else if (svc.port) {
-          conatiner.exposePort(svc.port);
+          container.exposePort(svc.port);
         }
 
         if (svc.volumes) {
           for (const [src, target] of Object.entries(svc.volumes)) {
-            conatiner.addVolume(src, target);
+            container.addVolume(src, target);
           }
         }
 
-        const promise = await conatiner.setUnref(false).run(svc.args ?? []);
+        const promise = await container.setUnref(false).run(svc.args ?? []);
 
         const out = (await promise).stdout;
         const running = yield* this.isRunning(svc, 'startup', 15000);
@@ -127,7 +130,7 @@ export class ServiceUtil {
    * Restart service
    * @param svc
    */
-  static async * restart(svc: Service) {
+  static async * restart(svc: Service): StreamingStatus {
     if (await this.isRunning(svc, 'running')) {
       yield* this.stop(svc);
     }
@@ -137,7 +140,7 @@ export class ServiceUtil {
   /**
    * Get status of a service
    */
-  static async * status(svc: Service) {
+  static async * status(svc: Service): StreamingStatus {
     if (!await this.isRunning(svc, 'running')) {
       yield { subsubtitle: 'Not running' };
     } else {
@@ -149,10 +152,11 @@ export class ServiceUtil {
   /**
    * Find all services
    */
-  static async findAll() {
+  static async findAll(): Promise<Service[]> {
     return (await Promise.all(
       SourceIndex
         .find({ folder: 'support', filter: x => /\/service[.]/.test(x) })
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         .map(async x => (await import(x.file)).service as Service)
     ))
       .filter(x => !!x)

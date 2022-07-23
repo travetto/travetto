@@ -15,17 +15,18 @@ type Svc = { source: ModelCrudSupport };
  * - Update
  * - Delete
  */
-export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
-  function getCls() {
+export function ModelRoutes<T extends ModelType>(cls: Class<T>): (target: Class<Svc>) => void {
+  function getCls(): Class<T> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return ModelRegistry.get(cls).class as Class<T>;
   }
 
-  return (target: Class<Svc>) => {
+  return (target: Class<Svc>): void => {
     SchemaRegistry.register(target);
     const inst = { constructor: target };
 
-    function get(this: Svc, id: string) {
-      return this.source.get<ModelType>(getCls(), id);
+    function get(this: Svc, id: string): Promise<T> {
+      return this.source.get<T>(getCls(), id);
     }
 
     Object.assign(
@@ -44,7 +45,7 @@ export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
     ControllerRegistry.registerEndpointParameter(target, get, { name: 'id', location: 'path' }, 0);
     Field(String, { required: { active: true } })(inst, 'get', 0);
 
-    function update(this: Svc, body: ModelType) {
+    function update(this: Svc, body: T): Promise<T> {
       return this.source.update(getCls(), body);
     }
 
@@ -62,8 +63,8 @@ export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
     ControllerRegistry.registerEndpointParameter(target, update, { name: 'body', location: 'body' }, 0);
     Field(cls)({ constructor: target }, 'update', 0);
 
-    function create(this: Svc, body: ModelType) {
-      return this.source.create(getCls(), body as T);
+    function create(this: Svc, body: T): Promise<T> {
+      return this.source.create(getCls(), body);
     }
 
     Object.assign(
@@ -80,7 +81,7 @@ export function ModelRoutes<T extends ModelType>(cls: Class<T>) {
     ControllerRegistry.registerEndpointParameter(target, create, { name: 'body', location: 'body' }, 0);
     Field(cls)(inst, 'create', 0);
 
-    function remove(this: Svc, id: string) {
+    function remove(this: Svc, id: string): Promise<void> {
       return this.source.delete(getCls(), id);
     }
 

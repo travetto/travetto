@@ -5,7 +5,7 @@ export class SystemUtil {
   /**
    * Naive hashing
    */
-  static naiveHash(text: string) {
+  static naiveHash(text: string): number {
     let hash = 5381;
 
     for (let i = 0; i < text.length; i++) {

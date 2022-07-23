@@ -51,7 +51,7 @@ export class ImageUtil {
    */
   static JPEG_COMPRESSOR = new CommandService({
     containerImage: 'shomatan/jpegoptim:1.4.4',
-    localCheck: ['jpegotim', ['-h']]
+    localCheck: ['jpegoptim', ['-h']]
   });
 
   /**
@@ -66,6 +66,7 @@ export class ImageUtil {
       ...(options.optimize ? ['-strip', '-quality', '86'] : []),
       '-', '-');
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return await ExecUtil.pipe(state, image as Buffer);
   }
 
@@ -87,13 +88,14 @@ export class ImageUtil {
         break;
       }
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return await ExecUtil.pipe(stream, image as Buffer);
   }
 
   /**
    * Fetch image, compress and return as buffer
    */
-  static async optimizeResource(rel: string) {
+  static async optimizeResource(rel: string): Promise<Buffer> {
     const { ResourceManager } = await import('@travetto/base');
 
     const pth = await ResourceManager.find(rel);

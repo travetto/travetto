@@ -35,7 +35,7 @@ export class FileModelConfig {
   autoCreate?: boolean;
   cullRate?: number | TimeSpan;
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     if (!this.folder) {
       this.folder = PathUtil.resolveUnix(os.tmpdir(), Util.uuid().substring(0, 10));
     }
@@ -48,17 +48,17 @@ export class FileModelConfig {
 @Injectable()
 export class FileModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport {
 
-  private static async * scanFolder(folder: string, suffix: string) {
+  private static async * scanFolder(folder: string, suffix: string): AsyncGenerator<[id: string, field: string]> {
     for (const sub of await fs.readdir(folder)) {
       for (const file of await fs.readdir(PathUtil.resolveUnix(folder, sub))) {
         if (file.endsWith(suffix)) {
-          yield [file.replace(suffix, ''), PathUtil.resolveUnix(folder, sub, file)] as [id: string, file: string];
+          yield [file.replace(suffix, ''), PathUtil.resolveUnix(folder, sub, file)];
         }
       }
     }
   }
 
-  get client() {
+  get client(): string {
     return this.config.folder;
   }
 
@@ -69,7 +69,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
    */
   constructor(public readonly config: FileModelConfig) { }
 
-  async #resolveName<T extends ModelType>(cls: Class<T> | string, suffix?: Suffix, id?: string) {
+  async #resolveName<T extends ModelType>(cls: Class<T> | string, suffix?: Suffix, id?: string): Promise<string> {
     const name = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
     let resolved = PathUtil.resolveUnix(this.config.folder, this.config.namespace, name);
     if (id) {
@@ -86,7 +86,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     return resolved;
   }
 
-  async #find<T extends ModelType>(cls: Class<T> | string, suffix: Suffix, id?: string) {
+  async #find<T extends ModelType>(cls: Class<T> | string, suffix: Suffix, id?: string): Promise<string> {
     const file = await this.#resolveName(cls, suffix, id);
     if (id && !(await FsUtil.exists(file))) {
       throw new NotFoundError(cls, id);
@@ -94,11 +94,11 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     return file;
   }
 
-  postConstruct() {
+  postConstruct(): void {
     ModelExpiryUtil.registerCull(this);
   }
 
-  checkExpiry<T extends ModelType>(cls: Class<T>, item: T) {
+  checkExpiry<T extends ModelType>(cls: Class<T>, item: T): T {
     const { expiresAt } = ModelRegistry.get(cls);
     if (expiresAt && ModelExpiryUtil.getExpiryState(cls, item).expired) {
       throw new NotFoundError(cls, item.id);
@@ -106,11 +106,11 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     return item;
   }
 
-  uuid() {
+  uuid(): string {
     return Util.uuid(32);
   }
 
-  async get<T extends ModelType>(cls: Class<T>, id: string) {
+  async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     await this.#find(cls, '.json', id);
 
     const file = await this.#resolveName(cls, '.json', id);
@@ -123,7 +123,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     throw new NotFoundError(cls, id);
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     if (!item.id) {
       item.id = this.uuid();
     }
@@ -137,12 +137,12 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     return await this.upsert(cls, item);
   }
 
-  async update<T extends ModelType>(cls: Class<T>, item: T) {
+  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     await this.get(cls, item.id);
     return await this.upsert(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
 
@@ -152,22 +152,23 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     return prepped;
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
     const file = await this.#resolveName(cls, '.json', item.id);
     await fs.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return item as T;
   }
 
-  async delete<T extends ModelType>(cls: Class<T>, id: string) {
+  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     const file = await this.#find(cls, '.json', id);
     await fs.unlink(file);
   }
 
-  async * list<T extends ModelType>(cls: Class<T>) {
+  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     for await (const [id] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json')) {
       try {
         yield await this.get(cls, id);
@@ -180,7 +181,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   // Stream
-  async upsertStream(location: string, input: Readable, meta: StreamMeta) {
+  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
     const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
       StreamUtil.writeToFile(input, file),
@@ -188,19 +189,19 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     ]);
   }
 
-  async getStream(location: string) {
+  async getStream(location: string): Promise<Readable> {
     const file = await this.#find(STREAMS, BIN, location);
     return createReadStream(file);
   }
 
-  async describeStream(location: string) {
+  async describeStream(location: string): Promise<StreamMeta> {
     const file = await this.#find(STREAMS, META, location);
     const content = await StreamUtil.streamToBuffer(createReadStream(file));
-    const text = JSON.parse(content.toString('utf8'));
-    return text as StreamMeta;
+    const text: StreamMeta = JSON.parse(content.toString('utf8'));
+    return text;
   }
 
-  async deleteStream(location: string) {
+  async deleteStream(location: string): Promise<void> {
     const file = await this.#resolveName(STREAMS, BIN, location);
     if (await FsUtil.exists(file)) {
       await Promise.all([
@@ -213,7 +214,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   // Expiry
-  async deleteExpired<T extends ModelType>(cls: Class<T>) {
+  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
     const deleted = [];
     for await (const el of this.list(cls)) {
       if (ModelExpiryUtil.getExpiryState(cls, el).expired) {
@@ -223,17 +224,17 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     return (await Promise.all(deleted)).length;
   }
 
-  // Storage mgmt
-  async createStorage() {
+  // Storage management
+  async createStorage(): Promise<void> {
     const dir = PathUtil.resolveUnix(this.config.folder, this.config.namespace);
     await fs.mkdir(dir, { recursive: true });
   }
 
-  async deleteStorage() {
+  async deleteStorage(): Promise<void> {
     await FsUtil.unlinkRecursive(PathUtil.resolveUnix(this.config.folder, this.config.namespace));
   }
 
-  async truncateModel(cls: Class<ModelType>) {
+  async truncateModel(cls: Class<ModelType>): Promise<void> {
     await FsUtil.unlinkRecursive(await this.#resolveName(cls === StreamModel ? STREAMS : cls));
   }
 }

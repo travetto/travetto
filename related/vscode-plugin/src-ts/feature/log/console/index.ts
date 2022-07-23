@@ -20,7 +20,7 @@ export class LogFeature extends BaseFeature {
   /**
    * Handle a terminal link being clicked
    */
-  async handleTerminalLink({ file, line, cls }: Link) {
+  async handleTerminalLink({ file, line, cls }: Link): Promise<void> {
     if (cls && !line) {
       line = (await fs.readFile(file, 'utf8')).split(/\n/).findIndex(x => x.includes(`class ${cls}`));
       if (line >= 0) {
@@ -35,7 +35,7 @@ export class LogFeature extends BaseFeature {
   /**
    * Determine terminal links on demand
    */
-  async provideTerminalLinks(context: vscode.TerminalLinkContext) {
+  async provideTerminalLinks(context: vscode.TerminalLinkContext): Promise<Link[]> {
     const out: Link[] = [];
     const cwd = await fs.readlink(`/proc/${await context.terminal.processId}/cwd`);
     context.line
@@ -73,7 +73,7 @@ export class LogFeature extends BaseFeature {
   /**
    * On initial activation
    */
-  activate(context: vscode.ExtensionContext) {
+  activate(context: vscode.ExtensionContext): void {
     context.subscriptions.push(
       vscode.window.registerTerminalLinkProvider(this)
     );

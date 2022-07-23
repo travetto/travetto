@@ -10,7 +10,7 @@ export class AppRunUtil {
    * Execute running of an application, by name.  Setting important environment variables before
    * loading framework and compiling
    */
-  static async run(app: ApplicationConfig | string, ...sub: string[]) {
+  static async run(app: ApplicationConfig | string, ...sub: string[]): Promise<void> {
 
     const { PhaseManager, ConsoleManager } = await import('@travetto/base');
 

@@ -10,7 +10,7 @@ npm install @travetto/model-firestore
 
 This module provides an [Firestore](https://firebase.google.com/docs/firestore)-based implementation of the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [Firestore](https://firebase.google.com/docs/firestore).
 
-Supported featrues:
+Supported features:
    
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12)
@@ -57,7 +57,7 @@ export class FirestoreModelConfig {
     private_key: string;
   };
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     if (this.emulator) {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }

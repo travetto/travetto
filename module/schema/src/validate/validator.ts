@@ -2,18 +2,19 @@ import { Class, ClassInstance, Util } from '@travetto/base';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
-import { ValidationError, ValidationKind, ValidationResult } from './types';
+import { ValidationError, ValidationKindCore, ValidationResult } from './types';
 import { Messages } from './messages';
-import { TypeMismatchError, ValidationResultError } from './error';
+import { isValidationError, TypeMismatchError, ValidationResultError } from './error';
 
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
  * @param base The starting type or config
  * @param o The value to use for the polymorphic check
  */
-function resolveSchema<T>(base: Class<T>, o: T, view?: string) {
+function resolveSchema<T>(base: Class<T>, o: T, view?: string): SchemaConfig {
   return SchemaRegistry.getViewSchema(
-    SchemaRegistry.resolveSubTypeForInstance(base, o), view).schema;
+    SchemaRegistry.resolveSubTypeForInstance(base, o), view
+  ).schema;
 }
 
 declare global {
@@ -34,11 +35,13 @@ export class SchemaValidator {
    * @param o The object to validate
    * @param relative The relative path as the validation recurses
    */
-  static #validateSchema<T>(schema: SchemaConfig, o: T, relative: string) {
+  static #validateSchema<T>(schema: SchemaConfig, o: T, relative: string): ValidationError[] {
     let errors: ValidationError[] = [];
 
-    for (const field of Object.keys(schema)) {
+    const fields: (keyof SchemaConfig)[] = Object.keys(schema);
+    for (const field of fields) {
       if (schema[field].access !== 'readonly') { // Do not validate readonly fields
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         errors = errors.concat(this.#validateFieldSchema(schema[field], o[field as keyof T], relative));
       }
     }
@@ -52,7 +55,7 @@ export class SchemaValidator {
    * @param val The raw value, could be an array or not
    * @param relative The relative path of object traversal
    */
-  static #validateFieldSchema(fieldSchema: FieldConfig, val: unknown, relative: string = '') {
+  static #validateFieldSchema(fieldSchema: FieldConfig, val: unknown, relative: string = ''): ValidationError[] {
     const path = `${relative}${relative && '.'}${fieldSchema.name}`;
 
     const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
@@ -101,11 +104,15 @@ export class SchemaValidator {
    * @param key The bounds to check
    * @param value The value to validate
    */
-  static #validateRange(field: FieldConfig, key: 'min' | 'max', value: string | number | Date) {
+  static #validateRange(field: FieldConfig, key: 'min' | 'max', rawValue: string | number | Date | unknown): boolean {
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    let value = rawValue as string | number | Date;
+
     const f = field[key]!;
     if (typeof f.n === 'number') {
-      if (typeof value !== 'number') {
-        value = parseInt(value as string, 10);
+      if (typeof value === 'string') {
+        value = parseInt(value, 10);
       }
       if (field.type === Date) {
         value = new Date(value);
@@ -132,7 +139,7 @@ export class SchemaValidator {
    * @param value The actual value
    */
   static #validateField(field: FieldConfig, value: unknown): ValidationResult[] {
-    const criteria: ValidationKind[] = [];
+    const criteria: ([string, FieldConfig[ValidationKindCore]] | [string])[] = [];
 
     if (
       (field.type === String && (typeof value !== 'string')) ||
@@ -140,7 +147,7 @@ export class SchemaValidator {
       (field.type === Date && (!(value instanceof Date) || Number.isNaN(value.getTime()))) ||
       (field.type === Boolean && typeof value !== 'boolean')
     ) {
-      criteria.push('type');
+      criteria.push(['type']);
       return [{ kind: 'type', type: field.type.name.toLowerCase() }];
     }
 
@@ -150,38 +157,37 @@ export class SchemaValidator {
         case undefined: break;
         case 'type': return [{ kind, type: field.type.name }];
         default:
-          criteria.push(kind as 'type');
+          criteria.push([kind]);
       }
     }
 
     if (field.match && !field.match.re.test(`${value}`)) {
-      criteria.push('match');
+      criteria.push(['match', field.match]);
     }
 
     if (field.minlength && `${value}`.length < field.minlength.n) {
-      criteria.push('minlength');
+      criteria.push(['minlength', field.minlength]);
     }
 
     if (field.maxlength && `${value}`.length > field.maxlength.n) {
-      criteria.push('maxlength');
+      criteria.push(['maxlength', field.maxlength]);
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     if (field.enum && !field.enum.values.includes(value as string)) {
-      criteria.push('enum');
+      criteria.push(['enum', field.enum]);
     }
 
-    if (field.min && this.#validateRange(field, 'min', value as number)) {
-      criteria.push('min');
+    if (field.min && this.#validateRange(field, 'min', value)) {
+      criteria.push(['min', field.min]);
     }
 
-    if (field.max && this.#validateRange(field, 'max', value as number)) {
-      criteria.push('max');
+    if (field.max && this.#validateRange(field, 'max', value)) {
+      criteria.push(['max', field.max]);
     }
 
     const errors: ValidationResult[] = [];
-    for (const key of criteria) {
-      const block = field[key as keyof FieldConfig];
-      // @ts-expect-error
+    for (const [key, block] of criteria) {
       errors.push({ ...block, kind: key, value });
     }
 
@@ -196,24 +202,29 @@ export class SchemaValidator {
   static #prepareErrors(path: string, results: ValidationResult[]): ValidationError[] {
     const out: ValidationError[] = [];
     for (const res of results) {
-      const err: Partial<ValidationError> = {
-        ...(res as ValidationError),
-        path
+      const err: ValidationError = {
+        kind: res.kind,
+        value: res.value,
+        message: '',
+        re: res.re?.name ?? res.re?.source ?? '',
+        path,
+        type: (typeof res.type === 'function' ? res.type.name : res.type)
       };
 
-      const msg = res.message ??
-        Messages.get(res.re?.name ?? res.re?.source ?? '') ??
-        Messages.get(res.kind) ??
-        Messages.get('default')!;
-
-      if (res.re) {
-        err.re = res.re?.name ?? res.re?.source ?? '';
+      if (!err.re) {
+        delete err.re;
       }
 
-      err.message = msg
-        .replace(/\{([^}]+)\}/g, (a: string, k: string) => `${err[k as (keyof ValidationError)]}`);
+      const msg = res.message ?? (
+        Messages.get(err.re ?? '') ??
+        Messages.get(err.kind) ??
+        Messages.get('default')!
+      );
 
-      out.push(err as ValidationError);
+      err.message = msg
+        .replace(/\{([^}]+)\}/g, (_, k: (keyof ValidationError)) => `${err[k]}`);
+
+      out.push(err);
     }
     return out;
   }
@@ -225,8 +236,10 @@ export class SchemaValidator {
    * @param view The optional view to limit the scope to
    */
   static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     if (!Util.isPlainObject(o) && !(o instanceof cls || cls.ᚕid === (o as ClassInstance<T>).constructor.ᚕid)) {
-      throw new TypeMismatchError(cls.name, (o as unknown as ClassInstance).constructor.name);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      throw new TypeMismatchError(cls.name, (o as ClassInstance).constructor.name);
     }
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
 
@@ -243,8 +256,12 @@ export class SchemaValidator {
         if (res) {
           errors.push(res);
         }
-      } catch (err: any) {
-        errors.push(err);
+      } catch (err: unknown) {
+        if (isValidationError(err)) {
+          errors.push(err);
+        } else {
+          throw err;
+        }
       }
     }
 
@@ -295,7 +312,7 @@ export class SchemaValidator {
    * @param method The method being invoked
    * @param params The params to validate
    */
-  static validateMethod<T>(cls: Class<T>, method: string, params: unknown[]) {
+  static validateMethod<T>(cls: Class<T>, method: string, params: unknown[]): void {
     const errors: ValidationError[] = [];
     for (const field of SchemaRegistry.getMethodSchema(cls, method)) {
       errors.push(...this.#validateFieldSchema(field, params[field.index!]));

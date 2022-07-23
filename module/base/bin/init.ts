@@ -15,14 +15,14 @@ export class EnvInit {
   /**
    * Add item to environment variable list, not persistent
    */
-  static addToList(k: string, ...items: string[]) {
+  static addToList(k: string, ...items: string[]): void {
     process.env[k] = [...new Set(EnvUtil.getList(k, items))].join(',');
   }
 
   /**
    * Initialize the app environment
    */
-  static init({ env, dynamic, debug, set, append }: InitConfig = {}) {
+  static init({ env, dynamic, debug, set, append }: InitConfig = {}): void {
     process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
     const prod = /^prod(uction)$/i.test(process.env.TRV_ENV);
     dynamic ??= EnvUtil.isTrue('TRV_DYNAMIC');

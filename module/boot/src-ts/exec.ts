@@ -35,6 +35,12 @@ export interface ExecutionResult {
   killed?: boolean;
 }
 
+interface WorkerResult<T> {
+  worker: Worker;
+  message: Promise<T>;
+  result: Promise<number>;
+}
+
 type CatchableResult = Promise<ExecutionResult> & { catchAsResult?(): Promise<ExecutionResult> };
 
 type ErrorWithMeta = Error & { meta?: ExecutionResult };
@@ -109,7 +115,7 @@ export class ExecUtil {
       const stderr: Buffer[] = [];
       let timer: NodeJS.Timeout;
       let done = false;
-      const finish = function (result: Omit<ExecutionResult, 'stderr' | 'stdout'>) {
+      const finish = function (result: Omit<ExecutionResult, 'stderr' | 'stdout'>): void {
         if (done) {
           return;
         }
@@ -156,7 +162,7 @@ export class ExecUtil {
       }
     });
 
-    res.catchAsResult = () => res.catch((err: ErrorWithMeta) => err.meta!);
+    res.catchAsResult = (): Promise<ExecutionResult> => res.catch((err: ErrorWithMeta) => err.meta!);
     return res;
   }
 
@@ -209,7 +215,7 @@ export class ExecUtil {
    * @param args The arguments to pass in
    * @param options The worker options
    */
-  static worker<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
+  static worker<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
     const worker = new Worker(file, {
       stderr: true,
       stdout: true,
@@ -267,7 +273,7 @@ export class ExecUtil {
    * @param args The arguments to pass in
    * @param options The worker options
    */
-  static workerMain<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}) {
+  static workerMain<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
     file = file.replace(/[.]js$/, '.ts');
     return this.worker<T>(require.resolve('@travetto/boot/bin/main'), [file, ...args], options);
   }
@@ -277,7 +283,7 @@ export class ExecUtil {
    * @param cmd The cmd to run
    * @param args The arguments to pass
    */
-  static execSync(cmd: string, args?: string[]) {
+  static execSync(cmd: string, args?: string[]): string {
     if (args) {
       cmd = `${cmd} ${args.join(' ')}`;
     }
@@ -309,7 +315,7 @@ export class ExecUtil {
    * Kill a spawned process
    * @param proc The process to kill
    */
-  static kill(proc: { kill(sig?: string | number): void }) {
+  static kill(proc: { kill(sig?: string | number): void }): void {
     if (process.platform === 'win32') {
       proc.kill();
     } else {
@@ -320,7 +326,7 @@ export class ExecUtil {
   /**
    * Return plugin data depending on how it has been called
    */
-  static mainResponse(obj: unknown) {
+  static mainResponse<T = unknown>(obj: T): T {
     parentPort ? parentPort.postMessage(obj) : console.log(JSON.stringify(obj));
     return obj;
   }

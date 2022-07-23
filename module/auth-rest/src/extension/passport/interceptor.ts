@@ -8,6 +8,7 @@ import { AuthInterceptor } from '../../interceptor';
 
 type Handler = (req: Request, res: Response, next: Function) => unknown;
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const authenticator = (passport as unknown as passport.Authenticator<Handler>);
 
 /**
@@ -20,7 +21,7 @@ export class PassportInterceptor implements RestInterceptor {
 
   after = [AuthInterceptor];
 
-  async intercept(req: Request, res: Response) {
+  async intercept(req: Request, res: Response): Promise<void> {
     await new Promise<void>((resolve) => this.#init(req, res, resolve));
   }
 }

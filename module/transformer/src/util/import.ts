@@ -12,7 +12,7 @@ export class ImportUtil {
   /*
    * useful for handling failed imports, but still transpiling
    */
-  static optionalResolve(file: string, base?: string) {
+  static optionalResolve(file: string, base?: string): string {
     file = base ? pathResolve(base, file) : file;
     try {
       return require.resolve(file);
@@ -24,7 +24,7 @@ export class ImportUtil {
   /**
    * Collect all imports for a source file, as a hash map
    */
-  static collectImports(src: ts.SourceFile) {
+  static collectImports(src: ts.SourceFile): Map<string, Import> {
     const pth = require.resolve(src.fileName);
     const base = PathUtil.toUnix(pth);
 

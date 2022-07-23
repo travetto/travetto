@@ -24,14 +24,14 @@ export abstract class Connection<C = unknown> {
    * Get active connection
    */
   get active(): C {
-    return this.context.get(ContextActiveⲐ) as C;
+    return this.context.get<C>(ContextActiveⲐ);
   }
 
   /**
    * Get active tx state
    */
-  get activeTx() {
-    return !!this.context.get(TxActiveⲐ) as boolean;
+  get activeTx(): boolean {
+    return !!this.context.get<boolean>(TxActiveⲐ);
   }
 
   /**
@@ -85,7 +85,7 @@ export abstract class Connection<C = unknown> {
    * @param op
    * @param args
    */
-  async * iterateWithActive<R>(op: () => AsyncGenerator<R>) {
+  async * iterateWithActive<R>(op: () => AsyncGenerator<R>): AsyncIterable<R> {
     if (this.active) {
       yield* op();
     }
@@ -134,7 +134,7 @@ export abstract class Connection<C = unknown> {
   /**
    * Start a transaction
    */
-  async startTx(conn: C, transactionId?: string) {
+  async startTx(conn: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
         await this.execute(conn, `SAVEPOINT ${transactionId};`);
@@ -150,7 +150,7 @@ export abstract class Connection<C = unknown> {
   /**
    * Commit active transaction
    */
-  async commitTx(conn: C, transactionId?: string) {
+  async commitTx(conn: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
         await this.execute(conn, `RELEASE SAVEPOINT ${transactionId};`);
@@ -163,7 +163,7 @@ export abstract class Connection<C = unknown> {
   /**
    * Rollback active transaction
    */
-  async rollbackTx(conn: C, transactionId?: string) {
+  async rollbackTx(conn: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.isolatedTransactions) {
         await this.execute(conn, `ROLLBACK TO ${transactionId};`);

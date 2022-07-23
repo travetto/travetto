@@ -29,7 +29,7 @@ export class RegisterTransformer {
    * Hash each class
    */
   @OnClass()
-  static preprocessClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
+  static preprocessClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
     state[cls] = SystemUtil.naiveHash(node.getText());
     return node;
   }
@@ -38,7 +38,7 @@ export class RegisterTransformer {
    * Hash each method
    */
   @OnMethod()
-  static processMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration) {
+  static processMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
       const hash = SystemUtil.naiveHash(node.getText());
       const conf = { hash };
@@ -52,7 +52,7 @@ export class RegisterTransformer {
    * After visiting each class, register all the collected metadata
    */
   @AfterClass()
-  static registerClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration) {
+  static registerClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
     if (state.module === REGISTER_MOD) {  // Cannot process self
       return node;
     }
@@ -96,7 +96,7 @@ export class RegisterTransformer {
    * Give proper functions a file name
    */
   @AfterFunction()
-  static registerFunction(state: TransformerState & RegisterInfo, node: ts.FunctionDeclaration | ts.FunctionExpression) {
+  static registerFunction(state: TransformerState & RegisterInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     if (!ts.isFunctionDeclaration(node)) {
       return node;
     }

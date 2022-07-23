@@ -2,7 +2,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { Class, ClassInstance } from '@travetto/base';
 import { MetadataRegistry } from '@travetto/registry';
 
-import { EndpointConfig, ControllerConfig } from './types';
+import { EndpointConfig, ControllerConfig, FilterDecorator } from './types';
 import { Filter, RouteHandler, ParamConfig } from '../types';
 
 /**
@@ -14,7 +14,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     super(DependencyRegistry);
   }
 
-  createPending(cls: Class) {
+  createPending(cls: Class): ControllerConfig {
     return {
       class: cls,
       filters: [],
@@ -24,10 +24,10 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     };
   }
 
-  createPendingField(cls: Class, handler: RouteHandler) {
+  createPendingField(cls: Class, handler: RouteHandler): EndpointConfig {
     const controllerConf = this.getOrCreatePending(cls);
 
-    const fieldConf = {
+    const fieldConf: EndpointConfig = {
       id: '',
       path: '/',
       method: 'all',
@@ -38,7 +38,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       params: [],
       handlerName: handler.name,
       handler
-    } as EndpointConfig;
+    };
 
     controllerConf.endpoints!.push(fieldConf);
 
@@ -50,9 +50,10 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param cls Controller class
    * @param handler Route handler
    */
-  getOrCreateEndpointConfig<T>(cls: Class<T>, handler: RouteHandler) {
-    const fieldConf = this.getOrCreatePendingField(cls, handler) as EndpointConfig;
-    return fieldConf;
+  getOrCreateEndpointConfig<T>(cls: Class<T>, handler: RouteHandler): EndpointConfig {
+    const fieldConf = this.getOrCreatePendingField(cls, handler);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return fieldConf as EndpointConfig;
   }
 
   /**
@@ -60,7 +61,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param cls Controller class
    * @param fn The filter to call
    */
-  registerControllerFilter(target: Class, fn: Filter) {
+  registerControllerFilter(target: Class, fn: Filter): void {
     const config = this.getOrCreatePending(target);
     config.filters!.push(fn);
   }
@@ -71,7 +72,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param handler Route handler
    * @param fn The filter to call
    */
-  registerEndpointFilter(target: Class, handler: RouteHandler, fn: Filter) {
+  registerEndpointFilter(target: Class, handler: RouteHandler, fn: Filter): void {
     const config = this.getOrCreateEndpointConfig(target, handler);
     config.filters!.unshift(fn);
   }
@@ -83,7 +84,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param param The param config
    * @param index The parameter index
    */
-  registerEndpointParameter(target: Class, handler: RouteHandler, param: ParamConfig, index: number) {
+  registerEndpointParameter(target: Class, handler: RouteHandler, param: ParamConfig, index: number): void {
     const config = this.getOrCreateEndpointConfig(target, handler);
     if (index >= config.params.length) {
       config.params.length = index + 1;
@@ -95,18 +96,16 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * Create a filter decorator
    * @param fn The filter to call
    */
-  createFilterDecorator(fn: Filter) {
-    return ((target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>) => {
+  createFilterDecorator(fn: Filter): FilterDecorator {
+    return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>): void => {
       if (prop) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         this.registerEndpointFilter((target as unknown as ClassInstance).constructor, descriptor!.value!, fn);
       } else {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         this.registerControllerFilter(target as Class, fn);
       }
-    }) as
-      (
-        (<T extends Class>(target: T) => void) &
-        (<U>(target: U, prop: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) => void)
-      );
+    };
   }
 
   /**
@@ -114,7 +113,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param src Root describable (controller, endpoint)
    * @param dest Target (controller, endpoint)
    */
-  mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>) {
+  mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>): void {
     // Coerce to lower case
     const headers = Object.fromEntries(Object.entries(src.headers ?? {}).map(([k, v]) => [k.toLowerCase(), v]));
     dest.headers = { ...(dest.headers ?? {}), ...headers };
@@ -129,7 +128,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param descriptor Prop descriptor
    * @param config The endpoint config
    */
-  registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<RouteHandler>, config: Partial<EndpointConfig>) {
+  registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<RouteHandler>, config: Partial<EndpointConfig>): typeof descriptor {
     const srcConf = this.getOrCreateEndpointConfig(target, descriptor.value!);
     srcConf.method = config.method ?? srcConf.method;
     srcConf.path = config.path || srcConf.path;
@@ -155,7 +154,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param target The target class
    * @param config The controller configuration
    */
-  registerPending(target: Class, config: Partial<ControllerConfig>) {
+  registerPending(target: Class, config: Partial<ControllerConfig>): void {
     const srcConf = this.getOrCreatePending(target);
     srcConf.basePath = config.basePath || srcConf.basePath;
 
@@ -169,7 +168,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   /**
    * Finalize routes, removing duplicates based on ids
    */
-  onInstallFinalize(cls: Class) {
+  onInstallFinalize(cls: Class): ControllerConfig {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const final = this.getOrCreatePending(cls) as ControllerConfig;
 
     // Handle duplicates, take latest

@@ -6,7 +6,7 @@ import type { TestEvent } from '@travetto/test';
 import { Git } from './package/git';
 import { Packages } from './package/packages';
 
-async function run(isolated = false) {
+async function run(isolated = false): Promise<boolean> {
   console.error(`Starting tests [isolated=${isolated}]`);
   const { TestConsumerRegistry } = await import('@travetto/test/src/consumer/registry');
   await TestConsumerRegistry.manualInit();
@@ -22,7 +22,7 @@ async function run(isolated = false) {
       const args = ['test', '-f', 'exec', ...(isolated ? ['-i'] : ['-c', '3'])];
       const { process: proc, result } = ExecUtil.spawn('trv', args, { cwd: p._.folder, stdio: [0, 'pipe', 2, 'ipc'] });
 
-      proc.on('message', ev => consumer.onEvent(ev as TestEvent));
+      proc.on('message', (ev: TestEvent) => consumer.onEvent(ev));
       proc.on('error', e => {
         console.error(e);
         proc.kill('SIGTERM');

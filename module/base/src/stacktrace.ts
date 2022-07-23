@@ -13,10 +13,10 @@ export class StacktraceUtil {
   /**
    * Initialize
    */
-  static init() {
+  static init(): void {
     this.addStackFilters(
       '@travetto/(?:watch|context)',
-      'src/stracktrace',
+      'src/stacktrace',
       '(?:boot|base|[.])/bin/(?:main|register)[.]js',
       'internal',
       '(?:Array.*?<anonymous>)',
@@ -36,7 +36,7 @@ export class StacktraceUtil {
    * Add a filter to hide certain stack frames
    * @param names List files to exclude from the stack traces
    */
-  static addStackFilters(...names: string[]) {
+  static addStackFilters(...names: string[]): void {
     if (this.#filters) {
       this.#filters.push(...names);
       this.#filterRegex = new RegExp(`(${this.#filters.join('|')})`);
@@ -46,7 +46,7 @@ export class StacktraceUtil {
   /**
    * Unset all filters
    */
-  static clearStackFilters() {
+  static clearStackFilters(): void {
     this.#filters = [];
     this.#filterRegex = /##/;
   }
@@ -60,7 +60,7 @@ export class StacktraceUtil {
     let lastLocation: string = '';
     const body = (typeof err === 'string' ? err : err.stack!).replace(/\\/g, '/').split('\n')
       .filter(x => !filter || !this.#filters.length || !this.#filterRegex.test(x)) // Exclude framework boilerplate
-      .reduce((acc, line) => {
+      .reduce<string[]>((acc, line) => {
         const [, location] = line.split(PathUtil.cwd);
 
         if (location === lastLocation) {
@@ -72,7 +72,7 @@ export class StacktraceUtil {
           acc.push(line);
         }
         return acc;
-      }, [] as string[])
+      }, [])
       .map(x => x
         .replace(`${PathUtil.cwd}/`, './')
         .replace(/^[\/]+/, '')

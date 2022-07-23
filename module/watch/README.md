@@ -18,7 +18,7 @@ This module  is the base file system watching support for [Travetto](https://tra
 ```typescript
 import { Watcher } from '@travetto/watch';
 
-export function main() {
+export function main(): void {
   const watcher = new Watcher('base/path/to/...')
     .on('all', ({ event, entry }) => {
       if (entry.file.endsWith('.config') || entry.file.endsWith('.config.json')) {

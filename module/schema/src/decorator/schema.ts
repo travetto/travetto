@@ -22,7 +22,8 @@ export function Schema() { // Auto is used during compilation
  * @param fn The validator function
  */
 export function Validator<T>(fn: ValidatorFn<T, string>) {
-  return (target: Class<T>) => {
+  return (target: Class<T>): void => {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     SchemaRegistry.getOrCreatePending(target).validators!.push(fn as ValidatorFn<unknown, unknown>);
   };
 }
@@ -33,7 +34,7 @@ export function Validator<T>(fn: ValidatorFn<T, string>) {
  * @param fields The specific fields to add as part of a view
  */
 export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
-  return (target: Class<Partial<T>>) => {
+  return (target: Class<Partial<T>>): void => {
     SchemaRegistry.registerPendingView(target, name, fields);
   };
 }
@@ -44,7 +45,7 @@ export function View<T>(name: string, fields: ViewFieldsConfig<Partial<T>>) {
  * @returns
  */
 export function SubType<T>(name: string) {
-  return (target: Class<Partial<T>>) => {
+  return (target: Class<Partial<T>>): void => {
     SchemaRegistry.registerSubTypes(target, name);
   };
 }

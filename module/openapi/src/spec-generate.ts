@@ -1,11 +1,11 @@
 import { Readable } from 'stream';
 import {
   SchemaObject, SchemasObject, ParameterObject, OperationObject,
-  RequestBodyObject, TagObject, PathItemObject
+  RequestBodyObject, TagObject, PathItemObject, OpenAPIObject
 } from 'openapi3-ts/src/model/OpenApi';
 
 import { ControllerRegistry, EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType } from '@travetto/rest';
-import { Class, Util } from '@travetto/base';
+import { Class } from '@travetto/base';
 import { SchemaRegistry, FieldConfig } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
@@ -13,6 +13,10 @@ import { ApiSpecConfig } from './config';
 import { OpenApiController } from './controller';
 
 const DEFINITION = '#/components/schemas';
+
+function isFieldConfig(val: object): val is FieldConfig {
+  return !!val && 'owner' in val && 'type' in val;
+}
 
 /**
  * Spec generation utilities
@@ -27,7 +31,7 @@ export class SpecGenerator {
    * Get type id
    * @param cls
    */
-  #getTypeId(cls: Class) {
+  #getTypeId(cls: Class): string {
     return cls.name?.replace('ᚕsyn', '');
   }
 
@@ -35,7 +39,7 @@ export class SpecGenerator {
    * Get tag name
    * @param cls
    */
-  #getTypeTag(cls: Class) {
+  #getTypeTag(cls: Class): string {
     return cls.name.replace(/(Rest|Controller)$/, '');
   }
 
@@ -84,11 +88,13 @@ export class SpecGenerator {
   /**
    * Get the type for a given class
    */
-  #getType(field: FieldConfig | Class) {
-    if (!Util.isPlainObject(field)) {
-      field = { type: field } as FieldConfig;
+  #getType(fieldOrClass: FieldConfig | Class): Record<string, unknown> {
+    let field: { type: Class<unknown>, precision?: [number, number | undefined] };
+    if (!isFieldConfig(fieldOrClass)) {
+      field = { type: fieldOrClass };
+    } else {
+      field = fieldOrClass;
     }
-    field = field as FieldConfig;
     const out: Record<string, unknown> = {};
     // Handle nested types
     if (SchemaRegistry.has(field.type)) {
@@ -138,7 +144,7 @@ export class SpecGenerator {
   /**
    * Process schema field
    */
-  #processSchemaField(field: FieldConfig, required: string[]) {
+  #processSchemaField(field: FieldConfig, required: string[]): SchemaObject {
     let prop: SchemaObject = this.#getType(field);
 
     if (field.examples) {
@@ -155,10 +161,10 @@ export class SpecGenerator {
       prop.minLength = field.minlength.n;
     }
     if (field.min) {
-      prop.minimum = field.min.n as number;
+      prop.minimum = typeof field.min.n === 'number' ? field.min.n : field.min.n.getTime();
     }
     if (field.max) {
-      prop.maximum = field.max.n as number;
+      prop.maximum = typeof field.max.n === 'number' ? field.max.n : field.max.n.getTime();
     }
     if (field.enum) {
       prop.enum = field.enum.values;
@@ -184,7 +190,7 @@ export class SpecGenerator {
   /**
    * Process schema class
    */
-  #processSchema(type?: string | Class) {
+  #processSchema(type?: string | Class): string | undefined {
     if (type === undefined || typeof type === 'string') {
       return undefined;
     }
@@ -252,7 +258,11 @@ export class SpecGenerator {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(ep: EndpointConfig, param: ParamConfig, field: FieldConfig) {
+  #processEndpointParam(ep: EndpointConfig, param: ParamConfig, field: FieldConfig): (
+    { requestBody: RequestBodyObject } |
+    { parameters: ParameterObject[] } |
+    undefined
+  ) {
     if (param.location) {
       if (param.location === 'body') {
         return {
@@ -262,7 +272,7 @@ export class SpecGenerator {
         return { parameters: this.#schemaToDotParams(param.location, field) };
       } else if (param.location !== 'context') {
         const epParam: ParameterObject = {
-          in: param.location as 'path',
+          in: param.location,
           name: param.name || param.location,
           description: field.description,
           required: !!field.required?.active || false,
@@ -278,7 +288,7 @@ export class SpecGenerator {
   /**
    * Process controller endpoint
    */
-  processEndpoint(ctrl: ControllerConfig, ep: EndpointConfig) {
+  processEndpoint(ctrl: ControllerConfig, ep: EndpointConfig): void {
 
     const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '');
 
@@ -298,14 +308,17 @@ export class SpecGenerator {
     const schema = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
     for (const field of schema) {
       const res = this.#processEndpointParam(ep, ep.params[field.index!], field);
-      if (res?.parameters) {
-        (op.parameters ??= []).push(...res.parameters);
+      if (res) {
+        if ('parameters' in res) {
+          (op.parameters ??= []).push(...res.parameters);
+        } else {
+          op.requestBody ??= res.requestBody;
+        }
       }
-      op.requestBody ??= res?.requestBody;
     }
 
     const epPath = (
-      !ep.path ? '/' : typeof ep.path === 'string' ? (ep.path as string) : (ep.path as RegExp).source
+      !ep.path ? '/' : typeof ep.path === 'string' ? ep.path : ep.path.source
     ).replace(/:([A-Za-z0-9_]+)\b/g, (__, param) => `{${param}}`);
 
     const key = `${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/');
@@ -324,7 +337,7 @@ export class SpecGenerator {
   /**
    * Process each controller
    */
-  processController(cls: Class) {
+  processController(cls: Class): void {
     const ctrl = ControllerRegistry.get(cls);
 
     this.#tags.push({
@@ -340,7 +353,7 @@ export class SpecGenerator {
   /**
    * Generate full specification
    */
-  generate(config: Partial<ApiSpecConfig> = {}) {
+  generate(config: Partial<ApiSpecConfig> = {}): Pick<OpenAPIObject, 'tags' | 'paths' | 'components'> {
 
     for (const cls of ControllerRegistry.getClasses()) {
       for (const ep of ControllerRegistry.get(cls).endpoints) {

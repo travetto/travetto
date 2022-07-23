@@ -31,7 +31,7 @@ export class PhaseManager {
    * @param upto An optional upper bound on the stages to run, inclusive
    * @param after An optional lower bound on the stages to run, exclusive
    */
-  static run(scope: Scope, upto: string = '*', skip: string[] = []) {
+  static run(scope: Scope, upto: string = '*', skip: string[] = []): Promise<void> {
     return new PhaseManager(scope).load(upto).then(m => m.run(skip));
   }
 
@@ -52,7 +52,7 @@ export class PhaseManager {
    * @param upto Stopping point, inclusive
    * @param after Starting point, exclusive
    */
-  async load(upto?: string, after?: string) {
+  async load(upto?: string, after?: string): Promise<this> {
 
     const found = ModuleManager.transpileAll(SourceIndex.find({ folder: 'support' }));
 
@@ -87,7 +87,7 @@ export class PhaseManager {
   /**
    * Run the phase
    */
-  async run(skip: string[] = []) {
+  async run(skip: string[] = []): Promise<void> {
     for (const i of this.#initializers) {
       if (skip.includes(i.key)) {
         continue;

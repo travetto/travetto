@@ -34,8 +34,8 @@ class TestRunnerFeature extends BaseFeature {
       .on('stop', () => this.clean())
       .on('pre-start', () => this.clean(true))
       .on('start', () => {
-        this.#server.onMessage('*', (type, ev) => {
-          this.#consumer.onEvent(ev as TestEvent);
+        this.#server.onMessage('*', (type, ev: TestEvent) => {
+          this.#consumer.onEvent(ev);
           this.#codeLensUpdated?.();
         });
 
@@ -45,7 +45,7 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   /** Clean up */
-  async clean(recopy = false) {
+  async clean(recopy = false): Promise<void> {
     this.#consumer.dispose();
     await FsUtil.unlinkRecursive(this.#cacheDir);
     if (recopy) {
@@ -56,7 +56,7 @@ class TestRunnerFeature extends BaseFeature {
   /**
    * Launch a test from the current location
    */
-  async launchTestDebugger(file?: string, line?: number, breakpoint: boolean = true) {
+  async launchTestDebugger(file?: string, line?: number, breakpoint: boolean = true): Promise<void> {
     const editor = Workspace.getDocumentEditor(vscode.window.activeTextEditor);
     if (editor) {
       line = line ?? editor.selection.start.line + 1;
@@ -71,7 +71,7 @@ class TestRunnerFeature extends BaseFeature {
       Workspace.addBreakpoint(editor, line);
     }
 
-    return await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig(
+    await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig(
       'Debug Travetto',
       Workspace.binPath(this.module, 'test-direct'),
       [file.replace(`${Workspace.path}${path.sep}`, ''), `${line}`],
@@ -100,7 +100,7 @@ class TestRunnerFeature extends BaseFeature {
   /**
    * On feature activate
    */
-  async activate(context: vscode.ExtensionContext) {
+  async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', this.launchTestDebugger.bind(this));
     this.register('reload', () => this.#server.restart());
     this.register('rerun', () => this.#consumer.trackEditor(vscode.window.activeTextEditor));
@@ -121,7 +121,7 @@ class TestRunnerFeature extends BaseFeature {
       provideCodeLenses: this.buildCodeLenses.bind(this),
       onDidChangeCodeLenses: l => {
         this.#codeLensUpdated = l;
-        return { dispose: () => { } };
+        return { dispose: (): void => { } };
       }
     });
 

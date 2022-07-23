@@ -1,6 +1,6 @@
 import { validate } from './person-binding-invalid';
 
-export async function main() {
+export async function main(): Promise<void> {
   try {
     await validate();
   } catch (err) {

@@ -51,7 +51,7 @@ class $QueryVerifier {
   /**
    * Handle generic clauses
    */
-  processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler) {
+  processGenericClause<T>(state: State, cls: Class<T>, val: object, handler: ProcessingHandler): void {
     const view = SchemaRegistry.getViewSchema(cls);
 
     if (val === undefined || val === null) {
@@ -102,14 +102,14 @@ class $QueryVerifier {
   /**
    * Ensure types match
    */
-  typesMatch(declared: string, actual: string | undefined) {
+  typesMatch(declared: string, actual: string | undefined): boolean {
     return declared === actual;
   }
 
   /**
    * Check operator clause
    */
-  checkOperatorClause(state: State, declaredType: SimpleType, value: unknown, allowed: Record<string, Set<string>>, isArray: boolean) {
+  checkOperatorClause(state: State, declaredType: SimpleType, value: unknown, allowed: Record<string, Set<string>>, isArray: boolean): void {
     if (isArray) {
       if (Array.isArray(value)) {
         // Handle array literal
@@ -173,7 +173,7 @@ class $QueryVerifier {
   /**
    * Process where clause
    */
-  processWhereClause<T>(st: State, cls: Class<T>, passed: object) {
+  processWhereClause<T>(st: State, cls: Class<T>, passed: object): void {
     return this.processGenericClause(st, cls, passed, {
       preMember: (state: State, value: Record<string, unknown>) => {
         const keys = Object.keys(value);
@@ -215,14 +215,14 @@ class $QueryVerifier {
   /**
    * Handle group by clause
    */
-  processGroupByClause(state: State, value: object) {
+  processGroupByClause(state: State, value: object): void {
 
   }
 
   /**
    * Handle sort clause
    */
-  processSortClause<T>(st: State, cls: Class<T>, passed: object) {
+  processSortClause<T>(st: State, cls: Class<T>, passed: object): void {
     return this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
         if (value === 1 || value === -1 || typeof value === 'boolean') {
@@ -236,7 +236,7 @@ class $QueryVerifier {
   /**
    * Handle select clause
    */
-  processSelectClause<T>(st: State, cls: Class<T>, passed: object) {
+  processSelectClause<T>(st: State, cls: Class<T>, passed: object): void {
     return this.processGenericClause(st, cls, passed, {
       onSimpleType: (state, type, value) => {
         const actual = TypeUtil.getActualType(value);
@@ -269,32 +269,35 @@ class $QueryVerifier {
   /**
    * Verify the query
    */
-  verify<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>) {
+  verify<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>): void {
     const errors: ValidationError[] = [];
 
     const state = {
       path: '',
-      collect(path: string, message: string) {
+      collect(path: string, message: string): void {
         errors.push({ message: `${path}: ${message}`, path, kind: 'model' });
       },
-      log(err: string) {
+      log(err: string): void {
         this.collect(this.path, err);
       },
-      extend(sub: string) {
+      extend<S extends { path: string }>(this: S, sub: string): S {
         return { ...this, path: !this.path ? sub : `${this.path}.${sub}` };
       }
     };
 
     // Check all the clauses
     for (const [key, fn] of this.#mapping) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const queryKey = key as keyof typeof query;
+
       if (!(key in query)
-        || query[key as keyof typeof query] === undefined
-        || query[key as keyof typeof query] === null
+        || query[queryKey] === undefined
+        || query[queryKey] === null
       ) {
         continue;
       }
 
-      const val = (query as Query<unknown>)[key];
+      const val = query[queryKey];
       const subState = state.extend(key);
 
       if (Array.isArray(val)) {
@@ -302,6 +305,7 @@ class $QueryVerifier {
           this[fn](subState, cls, el);
         }
       } else {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         this[fn](subState, cls, val as object);
       }
     }

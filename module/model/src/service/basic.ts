@@ -22,7 +22,7 @@ export interface ModelBasicSupport<C = unknown> {
   /**
    * Create new item
    * @param item The document to create
-   * @throws {ExistsError} When an item with the provdided id already exists
+   * @throws {ExistsError} When an item with the provided id already exists
    */
   create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
 

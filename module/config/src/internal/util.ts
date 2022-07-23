@@ -10,7 +10,7 @@ export class ConfigUtil {
   /**
    * Find the key using case insensitive search
    */
-  static #getKeyName(key: string, fields: string[]) {
+  static #getKeyName(key: string, fields: string[]): string | undefined {
     key = key.trim();
     const match = new RegExp(key, 'i');
     const next = fields.find(x => match.test(x));
@@ -20,7 +20,7 @@ export class ConfigUtil {
   /**
    * Takes a env var, and produces a partial object against a schema definition.  Does not support arrays, only objects.
    */
-  static #expandEnvEntry(cls: Class, key: string, value: unknown) {
+  static #expandEnvEntry(cls: Class, key: string, value: unknown): Record<string, unknown> | undefined {
     const parts = key.split('_');
 
     const lastPart = parts.pop()!;
@@ -49,6 +49,7 @@ export class ConfigUtil {
           break;
         }
       }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       data = ((data[part!] ??= {}) as Record<string, unknown>); // Recurse
     }
 
@@ -65,11 +66,11 @@ export class ConfigUtil {
    * Bind the environment variables onto an object structure when they match by name.
    * Will split on _ to handle nesting appropriately
    */
-  static getEnvOverlay(cls: Class, ns: string) {
+  static getEnvOverlay(cls: Class, ns: string): Record<string, unknown> {
     // Handle process.env on bind as the structure we need may not
     // fully exist until the config has been created
     const nsRe = new RegExp(`^${ns.replace(/[.]/g, '_')}`, 'i'); // Check is case insensitive
-    const data = {};
+    const data: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(process.env)) { // Find all keys that match ns
       if (k.includes('_') && nsRe.test(k)) { // Require at least one level (nothing should be at the top level as all configs are namespaced)
         Util.deepAssign(data, this.#expandEnvEntry(cls, ns ? k.substring(ns.length + 1) : k, v), 'coerce');
@@ -83,7 +84,7 @@ export class ConfigUtil {
    */
   static async getConfigFileAsData(file: string, ns: string = ''): Promise<Record<string, unknown>> {
     const data = await ResourceManager.read(file, 'utf8');
-    const doc = YamlUtil.parse(data) as Record<string, unknown>;
+    const doc = YamlUtil.parse<Record<string, unknown>>(data);
     return ns ? { [ns]: doc } : doc;
   }
 
@@ -93,7 +94,7 @@ export class ConfigUtil {
    * @param ns
    * @returns
    */
-  static lookupRoot(src: Record<string, unknown>, ns?: string, createIfMissing = false) {
+  static lookupRoot(src: Record<string, unknown>, ns?: string, createIfMissing = false): Record<string, unknown> {
     const parts = (ns ? ns.split('.') : []);
     let sub: Record<string, unknown> = src;
 
@@ -102,6 +103,7 @@ export class ConfigUtil {
       if (createIfMissing && !sub[next]) {
         sub[next] = {};
       }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       sub = sub[next] as Record<string, unknown>;
     }
 
@@ -121,6 +123,7 @@ export class ConfigUtil {
         full[k] = '*'.repeat(10);
       }
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return BindUtil.expandPaths(full) as T;
   }
 }

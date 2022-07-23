@@ -10,14 +10,14 @@ type ServiceClass = { serviceClass: { new(): unknown } };
 @ModelSuite()
 export abstract class BaseModelSuite<T> {
 
-  static ifNot(pred: (svc: unknown) => boolean) {
+  static ifNot(pred: (svc: unknown) => boolean): (x: unknown) => Promise<boolean> {
     return async (x: unknown) => !pred(new (x as ServiceClass).serviceClass());
   }
 
   serviceClass: Class<T>;
   configClass: Class;
 
-  async getSize<U extends ModelType>(cls: Class<U>) {
+  async getSize<U extends ModelType>(cls: Class<U>): Promise<number> {
     const svc = (await this.service);
     if (isCrudSupported(svc)) {
       let i = 0;
@@ -30,7 +30,7 @@ export abstract class BaseModelSuite<T> {
     }
   }
 
-  async saveAll<M extends ModelType>(cls: Class<M>, items: M[]) {
+  async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
     const svc = await this.service;
     if (isBulkSupported(svc)) {
       const res = await svc.processBulk(cls, items.map(x => ({ insert: x })));
@@ -47,7 +47,7 @@ export abstract class BaseModelSuite<T> {
     }
   }
 
-  get service() {
-    return DependencyRegistry.getInstance(this.serviceClass) as Promise<T>;
+  get service(): Promise<T> {
+    return DependencyRegistry.getInstance(this.serviceClass);
   }
 }

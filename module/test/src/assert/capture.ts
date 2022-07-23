@@ -20,11 +20,11 @@ class $AssertCapture {
    * @param test Test to capture for
    * @param listener optional listener for events
    */
-  collector(test: TestConfig, listener?: (a: Assertion) => void) {
+  collector(test: TestConfig, listener?: (a: Assertion) => void): () => Assertion[] {
     const assertions: Assertion[] = [];
 
     // Emit and collect, every assertion as it occurs
-    const handler = (a: CaptureAssert) => {
+    const handler = (a: CaptureAssert): void => {
       const assrt = {
         ...a,
         classId: test.classId,
@@ -44,7 +44,7 @@ class $AssertCapture {
     };
   }
 
-  add(a: CaptureAssert) {
+  add(a: CaptureAssert): void {
     this.#emitter.emit('assert', a);
   }
 }

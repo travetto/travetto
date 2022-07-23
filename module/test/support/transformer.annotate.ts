@@ -17,16 +17,17 @@ export class AnnotationTransformer {
    * @param node
    * @param dec
   */
-  static buildAnnotation(state: TransformerState, node: ts.Node, dec: ts.Decorator & { expression: ts.CallExpression }) {
-    const n = (CoreUtil.hasOriginal(node) ? node.original : node) as ts.MethodDeclaration;
+  static buildAnnotation(state: TransformerState, node: ts.Node, dec: ts.Decorator, expression: ts.CallExpression): ts.Decorator {
+    const ogN = (CoreUtil.hasOriginal(node) ? node.original : node);
+    const n = ts.isMethodDeclaration(ogN) ? ogN : undefined;
 
     const newDec = state.factory.updateDecorator(
       dec,
       state.factory.createCallExpression(
-        dec.expression.expression,
-        dec.expression.typeArguments,
+        expression.expression,
+        expression.typeArguments,
         [
-          ...(dec.expression.arguments ?? []),
+          ...(expression.arguments ?? []),
           state.fromLiteral({
             lines: {
               ...CoreUtil.getRangeOf(state.source, n),
@@ -40,11 +41,11 @@ export class AnnotationTransformer {
   }
 
   @OnClass('Suite')
-  static annotateSuiteDetails(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta) {
+  static annotateSuiteDetails(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta): ts.ClassDeclaration {
     const dec = dm?.dec;
 
     if (dec && ts.isCallExpression(dec.expression)) {
-      const newDec = this.buildAnnotation(state, node, dec as ts.Decorator & { expression: ts.CallExpression });
+      const newDec = this.buildAnnotation(state, node, dec, dec.expression);
       return state.factory.updateClassDeclaration(node,
         DecoratorUtil.spliceDecorators(node, dec, [newDec]),
         node.modifiers,
@@ -58,11 +59,11 @@ export class AnnotationTransformer {
   }
 
   @OnMethod('Test')
-  static annotateTestDetails(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta) {
+  static annotateTestDetails(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta): ts.MethodDeclaration {
     const dec = dm?.dec;
 
     if (dec && ts.isCallExpression(dec.expression)) {
-      const newDec = this.buildAnnotation(state, node, dec as ts.Decorator & { expression: ts.CallExpression });
+      const newDec = this.buildAnnotation(state, node, dec, dec.expression);
       return state.factory.updateMethodDeclaration(node,
         DecoratorUtil.spliceDecorators(node, dec, [newDec]),
         node.modifiers,

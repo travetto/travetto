@@ -10,7 +10,7 @@ import { BaseFeature } from '../../base';
 @Activatible('base', 'clean')
 export class CleanFeature extends BaseFeature {
 
-  async clean() {
+  async clean(): Promise<void> {
     await Workspace.runMain(Workspace.binPath(this.module, 'clean'), []).result;
     vscode.window.showInformationMessage('Successfully deleted');
   }
@@ -18,7 +18,7 @@ export class CleanFeature extends BaseFeature {
   /**
    * On initial activation
    */
-  activate() {
+  activate(): void {
     this.register('run', () => this.clean());
   }
 }

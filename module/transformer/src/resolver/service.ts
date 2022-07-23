@@ -19,7 +19,7 @@ export class TypeResolver implements Checker {
    * Get type checker
    * @private
    */
-  getChecker() {
+  getChecker(): ts.TypeChecker {
     return this.#tsChecker;
   }
 
@@ -27,21 +27,22 @@ export class TypeResolver implements Checker {
    * Get type from element
    * @param el
    */
-  getType(el: ts.Type | ts.Node) {
-    return 'getSourceFile' in el ? this.#tsChecker.getTypeAtLocation(el as ts.Node) : el;
+  getType(el: ts.Type | ts.Node): ts.Type {
+    return 'getSourceFile' in el ? this.#tsChecker.getTypeAtLocation(el) : el;
   }
 
   /**
    * Fetch all type arguments for a give type
    */
   getAllTypeArguments(ref: ts.Type): ts.Type[] {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.#tsChecker.getTypeArguments(ref as ts.TypeReference) as ts.Type[];
   }
 
   /**
    * Resolve the return type for a method
    */
-  getReturnType(node: ts.MethodDeclaration) {
+  getReturnType(node: ts.MethodDeclaration): ts.Type {
     const type = this.getType(node);
     const [sig] = type.getCallSignatures();
     return this.#tsChecker.getReturnTypeOfSignature(sig);
@@ -50,14 +51,14 @@ export class TypeResolver implements Checker {
   /**
    * Get type as a string representation
    */
-  getTypeAsString(type: ts.Type) {
+  getTypeAsString(type: ts.Type): string | undefined {
     return this.#tsChecker.typeToString(this.#tsChecker.getApparentType(type)) || undefined;
   }
 
   /**
    * Get list of properties
    */
-  getPropertiesOfType(type: ts.Type) {
+  getPropertiesOfType(type: ts.Type): ts.Symbol[] {
     return this.#tsChecker.getPropertiesOfType(type);
   }
 
@@ -102,6 +103,7 @@ export class TypeResolver implements Checker {
           delete result.tsSubTypes;
         }
         if (finalize) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           result = finalize(result as never);
         }
       }
@@ -111,7 +113,10 @@ export class TypeResolver implements Checker {
 
     try {
       return resolve(this.getType(node));
-    } catch (err: any) {
+    } catch (err) {
+      if (!(err instanceof Error)) {
+        throw err;
+      }
       console.error('Unable to resolve type', err.stack);
       return { key: 'literal', ctor: Object, name: 'object' };
     }

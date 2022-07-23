@@ -21,7 +21,7 @@ function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && typeof o === 'object' && '$metadata' in o;
 }
 
-function hasContenttype<T>(o: T): o is T & { contenttype?: string } {
+function hasContentType<T>(o: T): o is T & { contenttype?: string } {
   return o && 'contenttype' in o;
 }
 
@@ -37,7 +37,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   constructor(public readonly config: S3ModelConfig) { }
 
-  #resolveKey(cls: Class | string, id?: string) {
+  #resolveKey(cls: Class | string, id?: string): string {
     let key: string;
     if (cls === STREAM_SPACE) { // If we are streaming, treat as primary use case
       key = id!; // Store it directly at root
@@ -54,14 +54,15 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return key;
   }
 
-  #q<U extends object>(cls: string | Class, id: string, extra: U = {} as U) {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  #q<U extends object>(cls: string | Class, id: string, extra: U = {} as U): (U & { Key: string, Bucket: string }) {
     const key = this.#resolveKey(cls, id);
-    return { Key: key, Bucket: this.config.bucket, ...extra } as (U & { Key: string, Bucket: string });
+    return { Key: key, Bucket: this.config.bucket, ...extra };
   }
 
-  #getExpiryConfig<T extends ModelType>(cls: Class<T>, item: T) {
+  #getExpiryConfig<T extends ModelType>(cls: Class<T>, item: T): { Expires?: Date } {
     if (ModelRegistry.get(cls).expiresAt) {
-      const { expiresAt } = ModelExpiryUtil.getExpiryState(cls, item as T);
+      const { expiresAt } = ModelExpiryUtil.getExpiryState(cls, item);
       if (expiresAt) {
         return { Expires: expiresAt };
       }
@@ -69,7 +70,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return {};
   }
 
-  async * #iterateBucket(cls?: string | Class) {
+  async * #iterateBucket(cls?: string | Class): AsyncIterable<{ Key: string, id: string }[]> {
     let Marker: string | undefined;
     for (; ;) {
       const obs = await this.client.listObjects({ Bucket: this.config.bucket, Prefix: cls ? this.#resolveKey(cls) : undefined, Marker });
@@ -97,7 +98,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     let buffers: Buffer[] = [];
     let total = 0;
     let n = 1;
-    const flush = async () => {
+    const flush = async (): Promise<void> => {
       if (!total) { return; }
       const part = await this.client.uploadPart(this.#q(STREAM_SPACE, id, {
         Body: Buffer.concat(buffers),
@@ -129,7 +130,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async #deleteKeys(items: { Key: string }[]) {
+  async #deleteKeys(items: { Key: string }[]): Promise<void> {
     if (this.config.endpoint.includes('localhost')) {
       await Promise.all(items.map(item => this.client.deleteObject({
         Bucket: this.config.bucket,
@@ -145,15 +146,15 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  uuid() {
+  uuid(): string {
     return Util.uuid(32);
   }
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     this.client = new s3.S3(this.config.config);
   }
 
-  async head<T extends ModelType>(cls: Class<T>, id: string) {
+  async head<T extends ModelType>(cls: Class<T>, id: string): Promise<boolean> {
     try {
       const res = await this.client.headObject(this.#q(cls, id));
       const { expiresAt } = ModelRegistry.get(cls);
@@ -171,7 +172,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async get<T extends ModelType>(cls: Class<T>, id: string) {
+  async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     try {
       const result = await this.client.getObject(this.#q(cls, id));
       if (result.Body) {
@@ -200,7 +201,8 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore = true) {
+  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore = true): Promise<T> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     let prepped: T = item as T;
     if (preStore) {
       prepped = await ModelCrudUtil.preStore(cls, item, this);
@@ -213,7 +215,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return prepped;
   }
 
-  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     if (item.id) {
       if (await this.head(cls, item.id)) {
         throw new ExistsError(cls, item.id);
@@ -222,7 +224,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return this.store(cls, item);
   }
 
-  async update<T extends ModelType>(cls: Class<T>, item: T) {
+  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     if (!(await this.head(cls, item.id))) {
       throw new NotFoundError(cls, item.id);
@@ -230,19 +232,19 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return this.store(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>) {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     return this.store(cls, item);
   }
 
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string) {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id)) as T;
-    return this.store<T>(cls, item as T, false);
+    const prepped = await ModelCrudUtil.naivePartialUpdate(cls, item, view, (): Promise<T> => this.get(cls, id));
+    return this.store<T>(cls, prepped, false);
   }
 
-  async delete<T extends ModelType>(cls: Class<T>, id: string) {
+  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(cls);
     if (!(await this.head(cls, id))) {
       throw new NotFoundError(cls, id);
@@ -250,7 +252,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     await this.client.deleteObject(this.#q(cls, id));
   }
 
-  async * list<T extends ModelType>(cls: Class<T>) {
+  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     for await (const batch of this.#iterateBucket(cls)) {
       for (const { id } of batch) {
         try {
@@ -269,7 +271,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return -1;
   }
 
-  async upsertStream(location: string, input: Readable, meta: StreamMeta) {
+  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
     if (meta.size < this.config.chunkSize) { // If bigger than 5 mb
       // Upload to s3
       await this.client.putObject(this.#q(STREAM_SPACE, location, {
@@ -286,7 +288,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async getStream(location: string) {
+  async getStream(location: string): Promise<Readable> {
     // Read from s3
     const res = await this.client.getObject(this.#q(STREAM_SPACE, location));
     if (res.Body instanceof Buffer || // Buffer
@@ -298,10 +300,10 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }
 
-  async headStream(location: string) {
+  async headStream(location: string): Promise<{ Metadata?: Partial<StreamMeta>, ContentLength?: number }> {
     const query = this.#q(STREAM_SPACE, location);
     try {
-      return await this.client.headObject(query);
+      return (await this.client.headObject(query));
     } catch (err) {
       if (isMetadataBearer(err)) {
         if (err.$metadata.httpStatusCode === 404) {
@@ -312,15 +314,16 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async describeStream(location: string) {
+  async describeStream(location: string): Promise<StreamMeta> {
     const obj = await this.headStream(location);
 
     if (obj) {
       const ret: StreamMeta = {
-        ...obj.Metadata as unknown as StreamMeta,
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        ...obj.Metadata as StreamMeta,
         size: obj.ContentLength!,
       };
-      if (hasContenttype(ret)) {
+      if (hasContentType(ret)) {
         ret['contentType'] = ret['contenttype']!;
         delete ret['contenttype'];
       }
@@ -330,17 +333,17 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async truncateModel<T extends ModelType>(model: Class<T>) {
+  async truncateModel<T extends ModelType>(model: Class<T>): Promise<void> {
     for await (const items of this.#iterateBucket(model)) {
       await this.#deleteKeys(items);
     }
   }
 
-  async deleteStream(location: string) {
+  async deleteStream(location: string): Promise<void> {
     await this.client.deleteObject(this.#q(STREAM_SPACE, location));
   }
 
-  async createStorage() {
+  async createStorage(): Promise<void> {
     try {
       await this.client.headBucket({ Bucket: this.config.bucket });
     } catch {
@@ -348,7 +351,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async deleteStorage() {
+  async deleteStorage(): Promise<void> {
     if (this.config.namespace) {
       for await (const items of this.#iterateBucket('')) {
         await this.#deleteKeys(items);

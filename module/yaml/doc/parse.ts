@@ -1,6 +1,6 @@
 import { YamlUtil } from '@travetto/yaml';
 
-export function main() {
+export function main(): void {
   const obj = YamlUtil.parse(`
   name: Source
   age: 20

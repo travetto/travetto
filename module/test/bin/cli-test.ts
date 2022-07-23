@@ -16,27 +16,29 @@ export class TestPlugin extends BasePlugin {
   name = 'test';
   _types: string[];
 
-  getTypes() {
+  getTypes(): string[] {
     if (!this._types) {
       this._types = ScanFs.scanDirSync({},
         PathUtil.resolveUnix(__dirname, '..', 'src/consumer/types/')
       )
-        .filter(x => x.stats.isFile())
-        .map(x => readFileSync(x.file, 'utf8').match(/@Consumable[(]'([^']+)/)?.[1] as string);
+        .filter(x => x.stats?.isFile())
+        .map(x => readFileSync(x.file, 'utf8').match(/@Consumable[(]'([^']+)/)?.[1])
+        .filter((x?: string): x is string => !!x);
     }
     return this._types;
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return {
       format: this.choiceOption({ desc: 'Output format for test results', def: 'tap', choices: this.getTypes() }),
       concurrency: this.intOption({ desc: 'Number of tests to run concurrently', lower: 1, upper: 32, def: Math.min(4, os.cpus().length - 1) }),
       isolated: this.boolOption({ desc: 'Isolated mode' }),
       mode: this.choiceOption({ desc: 'Test run mode', def: 'standard', choices: [...modes] })
-    };
+    } as const;
   }
 
-  envInit() {
+  envInit(): void {
     EnvInit.init({
       debug: '0',
       set: { TRV_LOG_TIME: '0' },
@@ -49,11 +51,11 @@ export class TestPlugin extends BasePlugin {
     });
   }
 
-  getArgs() {
+  getArgs(): string {
     return '[regexes...]';
   }
 
-  async isFile(file: string, errorIfNot?: string) {
+  async isFile(file: string, errorIfNot?: string): Promise<true | undefined> {
     try {
       const stat = await FsUtil.exists(file);
       const res = stat?.isFile();
@@ -67,12 +69,12 @@ export class TestPlugin extends BasePlugin {
     }
   }
 
-  async onSingle(state: Partial<RunState>, file: string) {
+  async onSingle(state: Partial<RunState>, file: string): Promise<void> {
     await this.isFile(file, 'You must specify a proper test file to run in single mode');
     state.mode = 'single';
   }
 
-  async onStandard(state: Partial<RunState>, first: string) {
+  async onStandard(state: Partial<RunState>, first: string): Promise<void> {
     const isFile = await this.isFile(first);
 
     if (!first) {
@@ -95,7 +97,7 @@ export class TestPlugin extends BasePlugin {
 
     const [first] = regexes;
 
-    const state: Partial<RunState> = {
+    const state: RunState = {
       args: regexes,
       mode: this.cmd.mode,
       concurrency: +this.cmd.concurrency,
@@ -108,6 +110,6 @@ export class TestPlugin extends BasePlugin {
       case 'standard': await this.onStandard(state, first); break;
     }
 
-    await runTests(state as RunState);
+    await runTests(state);
   }
 }

@@ -1,7 +1,7 @@
 /**
  * Entry point for template editing
  */
-export async function main() {
+export async function main(): Promise<void> {
   const { PathUtil } = await import('@travetto/boot');
   const { EnvInit } = await import('@travetto/base/bin/init');
   EnvInit.init({

@@ -11,8 +11,9 @@ export class BaseBuildPlugin extends BasePlugin {
 
   name = 'build';
 
-  override async build() { }
+  override async build(): Promise<void> { }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return {
       output: this.option({ desc: 'Output directory', completion: true }),
@@ -20,7 +21,7 @@ export class BaseBuildPlugin extends BasePlugin {
     };
   }
 
-  async action() {
+  async action(): Promise<void> {
     if (this.cmd.output) {
       process.env.TRV_CACHE = this.cmd.output;
     }
@@ -29,7 +30,7 @@ export class BaseBuildPlugin extends BasePlugin {
     const path = this.cmd.output ?? AppCache.cacheDir;
 
     try {
-      await BuildUtil.build(process.env as Record<string, string>);
+      await BuildUtil.build(process.env);
 
       if (!this.cmd.quiet) {
         console!.log(color`${{ success: 'Successfully' }} wrote to ${{ path }}`);

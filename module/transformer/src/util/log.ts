@@ -14,7 +14,7 @@ export class LogUtil {
   /**
    * Clean up `ts.Node` contents for logging
    */
-  static collapseNodes(all: unknown[]) {
+  static collapseNodes(all: unknown[]): unknown[] {
     return all.map(x => this.collapseNode(x));
   }
 
@@ -35,8 +35,10 @@ export class LogUtil {
     if (Array.isArray(x)) {
       return x.map(v => this.collapseNode(v, cache));
     } else {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const ox = x as object;
       const out: Record<string, unknown> = {};
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       for (const key of Object.keys(ox) as (keyof typeof x)[]) {
         if (Util.isFunction(ox[key]) || exclude.has(key) || ox[key] === undefined) {
           continue;

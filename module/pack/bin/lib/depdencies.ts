@@ -33,7 +33,7 @@ export class DependenciesUtil {
    * @param dep
    * @param root
    */
-  static resolveDependencyPackageJson(dep: string, root: string) {
+  static resolveDependencyPackageJson(dep: string, root: string): string {
     const paths = [root, ...(require.resolve.paths(root) || [])];
     let folder: string;
     try {
@@ -60,7 +60,7 @@ export class DependenciesUtil {
     root = PathUtil.cwd,
     types = ['prod'],
     maxDepth = Number.MAX_SAFE_INTEGER
-  }: DepResolveConfig) {
+  }: DepResolveConfig): Promise<ResolvedDep[]> {
     const pending: [string, number][] = [[root, 0]];
     const foundSet = new Set<string>();
     const found: ResolvedDep[] = [];

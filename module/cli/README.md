@@ -21,17 +21,16 @@ $ trv --help
 Usage:  [options] [command]
 
 Options:
-  -V, --version                          output the version number
-  -h, --help                             display help for command
+  -V, --version                output the version number
+  -h, --help                   display help for command
 
 Commands:
   build [options]
   clean [options]
   doc [options]
   echo [options] [args...]
-  run [options] [application] [args...]
   test [options] [regexes...]
-  help [command]                         display help for command
+  help [command]               display help for command
 ```
 
 This will show all the available options/choices that are exposed given the currently installed modules.

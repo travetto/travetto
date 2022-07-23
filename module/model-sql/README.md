@@ -20,7 +20,7 @@ or
 npm install pg
 ```
 
-This module provides a [SQL](https://en.wikipedia.org/wiki/SQL)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L36) will also modify the database schema in real time to minimize impact to development.
+This module provides a [SQL](https://en.wikipedia.org/wiki/SQL)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L38) will also modify the database schema in real time to minimize impact to development.
 
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of
 a [SQL](https://en.wikipedia.org/wiki/SQL) database.  Every table generated will have a `path_id` which determines it's location in the document hierarchy as well as sub tables will have a `parent_path_id` to associate records with the parent values.
@@ -34,7 +34,7 @@ The current SQL client support stands at:
 
 **Note**: Wider client support will roll out as usage increases.
 
-Supported featrues:
+Supported features:
    
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L23)

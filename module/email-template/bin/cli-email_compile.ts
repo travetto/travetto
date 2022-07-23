@@ -9,17 +9,18 @@ import { color } from '@travetto/cli/src/color';
 export class EmailCompilePlugin extends BasePlugin {
   name = 'email:compile';
 
-  envInit() {
+  envInit(): void {
     EnvInit.init({
       append: { TRV_RESOURCES: PathUtil.resolveUnix(__dirname, '..', 'resources') }
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return { watch: this.boolOption({ desc: 'Compile in watch mode' }) };
   }
 
-  async action() {
+  async action(): Promise<void> {
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
 

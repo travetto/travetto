@@ -1,4 +1,5 @@
 import '@arcsine/nodesh';
+import { $AsyncIterable } from '@arcsine/nodesh/dist/types';
 
 import { Modules } from './package/modules';
 import { Git } from './package/git';
@@ -6,7 +7,7 @@ import { Packages, Pkg } from './package/packages';
 
 const [level, prefix] = process.argv.slice(2);
 
-function upgrade(itr: AsyncIterable<Pkg>) {
+function upgrade(itr: AsyncIterable<Pkg>): $AsyncIterable<string[] | undefined> {
   return itr
     .$tap(p => console.log(`Upgrading ${p.name} from ${p._.version} to ${p.version}`))
     .$collect()
@@ -38,6 +39,7 @@ if (level === 'release') {
   Git.checkWorkspaceDirty('Cannot update versions with uncommitted changes').then(() =>
     Git.yieldChangedPackages()
       .$filter(p => p.name.startsWith('@travetto') && !p.private)
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       .$map(p => Modules.updateVersion(p, level as 'major', prefix))
       .$wrap(upgrade)
       .$console

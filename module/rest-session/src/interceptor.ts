@@ -23,7 +23,7 @@ export class SessionReadInterceptor implements RestInterceptor {
   @Inject()
   service: SessionService;
 
-  async intercept(req: Request, res: Response, next: () => Promise<unknown>) {
+  async intercept(req: Request, res: Response, next: () => Promise<unknown>): Promise<unknown> {
     // Use auth id if found, but auth is not required
     await this.service.readRequest(req, req.auth?.details?.sessionId ?? req.auth?.id);
     return await next();
@@ -46,7 +46,7 @@ export class SessionWriteInterceptor implements RestInterceptor {
   @Inject()
   service: SessionService;
 
-  async intercept(req: Request, res: Response, next: () => Promise<unknown>) {
+  async intercept(req: Request, res: Response, next: () => Promise<unknown>): Promise<unknown> {
     try {
       Object.defineProperty(req, 'session', { get: () => this.service.ensureCreated(req) });
       return await next();

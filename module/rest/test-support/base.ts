@@ -13,6 +13,8 @@ import { CoreRestServerSupport } from './server-support/core';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
+type FullRequest = MakeRequestConfig<Buffer | string | { stream: Readable } | Record<string, unknown>> & { throwOnError?: boolean };
+
 /**
  * Base Rest Suite
  */
@@ -24,7 +26,7 @@ export abstract class BaseRestSuite {
   type: string | RestServerSupport = 'core';
 
   @BeforeAll()
-  async initServer() {
+  async initServer(): Promise<void> {
     if (this.type === 'core') {
       this.#support = new CoreRestServerSupport((SystemUtil.naiveHash(this.constructor.ᚕid) % 60000) + 1000);
     } else if (this.type === 'lambda') {
@@ -45,14 +47,14 @@ export abstract class BaseRestSuite {
   }
 
   @AfterAll()
-  async destroySever() {
+  async destroySever(): Promise<void> {
     if (this.#handle) {
       await this.#handle.close?.();
       this.#handle = undefined;
     }
   }
 
-  getMultipartRequest(chunks: Multipart[]) {
+  getMultipartRequest(chunks: Multipart[]): FullRequest {
     const boundary = `-------------------------multipart-${Util.uuid()}`;
 
     const nl = '\r\n';
@@ -85,7 +87,7 @@ export abstract class BaseRestSuite {
   async request<T>(
     method: Request['method'] | Exclude<MethodOrAll, 'all'>,
     path: string,
-    cfg: MakeRequestConfig<Buffer | string | { stream: Readable } | Record<string, unknown>> & { throwOnError?: boolean } = {}
+    cfg: FullRequest = {}
   ): Promise<MakeRequestResponse<T>> {
 
     method = method.toUpperCase() as Request['method'];

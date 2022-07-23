@@ -26,6 +26,8 @@ export type AllConfig = CommonConfig &
 
 export type AllConfigPartial = DeepPartial<AllConfig>;
 
+type DefaultOpType = ['assemble', typeof Assemble];
+
 export const Pack: PackOperation<AllConfig> = {
   key: '',
   title: 'Packing',
@@ -33,23 +35,33 @@ export const Pack: PackOperation<AllConfig> = {
     const ret: Partial<AllConfig> = {
       workspace: b.workspace ?? a.workspace,
     };
-    for (const [k, op] of Object.entries(ops) as ['assemble', typeof Assemble][]) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    for (const [k, op] of (Object.entries(ops) as DefaultOpType[])) {
       ret[k] = op.extend(op.extend(a[k] ?? {}, b[k] ?? {}), op.overrides ?? {});
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return ret as AllConfig;
   },
   async context(cfg: AllConfig) {
-    return `[ ${Object.entries(ops).filter(x => cfg[x[0] as 'assemble'].active).map(x => x[0]).join(', ')} ]`;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return `[ ${(Object.entries(ops) as DefaultOpType[])
+      .filter(x => cfg[x[0]].active)
+      .map(x => x[0])
+      .join(', ')} ]`;
   },
   async * exec(cfg: AllConfig) {
-    const steps = Object.entries(ops).filter(x => cfg[x[0] as 'assemble'].active);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const steps = (Object.entries(ops) as DefaultOpType[])
+      .filter(x => cfg[x[0]].active);
+
     if (!steps.length) {
       throw new Error('Pack operation has zero active steps');
     }
-    for (const [step, op] of steps) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    for (const [step, op] of steps as DefaultOpType[]) {
       process.stdout.write('\n');
-      cfg[step as 'assemble'].workspace = cfg.workspace;
-      await PackUtil.runOperation(op as typeof Assemble, cfg[step as 'assemble'], 2);
+      cfg[step].workspace = cfg.workspace;
+      await PackUtil.runOperation(op, cfg[step], 2);
     }
     process.stdout.write('\n');
     yield color`${{ success: 'Successfully' }} packed project`;

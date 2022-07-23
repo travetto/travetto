@@ -121,7 +121,7 @@ export class TranspileUtil {
    * Set extra transpiler options
    * @privates
    */
-  static setExtraOptions(opts: CompilerOptions) {
+  static setExtraOptions(opts: CompilerOptions): void {
     this.#optionsExtra = { ...this.#optionsExtra ?? {}, ...opts };
   }
 
@@ -159,7 +159,7 @@ export class TranspileUtil {
    * @param filename The name of the file
    * @param diagnostics The diagnostic errors
    */
-  static checkTranspileErrors<T extends Diag>(filename: string, diagnostics: readonly T[]) {
+  static checkTranspileErrors<T extends Diag>(filename: string, diagnostics: readonly T[]): void {
     if (diagnostics && diagnostics.length) {
       const errors: string[] = diagnostics.slice(0, 5).map(diag => {
         const ts = requireTs();

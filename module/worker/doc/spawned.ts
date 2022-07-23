@@ -1,6 +1,6 @@
 import { ChildCommChannel } from '@travetto/worker';
 
-export async function main() {
+export async function main(): Promise<void> {
   const exec = new ChildCommChannel<{ data: string }>();
 
   exec.on('request', data =>
@@ -8,6 +8,6 @@ export async function main() {
 
   exec.send('ready'); // Indicate the child is ready to receive requests
 
-  const heartbeat = () => setTimeout(heartbeat, 5000); // Keep-alive
+  const heartbeat = (): void => { setTimeout(heartbeat, 5000); }; // Keep-alive
   heartbeat();
 }

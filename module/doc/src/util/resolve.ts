@@ -6,7 +6,7 @@ import { FileUtil } from './file';
  */
 export class ResolveUtil {
 
-  static resolveRef<T>(title: string | T, file: string) {
+  static resolveRef<T>(title: string | T, file: string): { title: string | T, file: string, line: number } {
 
     let line = 0;
     const { resolved } = FileUtil.resolveFile(file);
@@ -35,7 +35,7 @@ export class ResolveUtil {
     return { title, file, line };
   }
 
-  static resolveCode<T>(content: string | T, language: string, outline = false) {
+  static resolveCode<T>(content: string | T, language: string, outline = false): { content: string | T, language: string, file?: string } {
     let file: string | undefined;
     if (typeof content === 'string') {
       if (/^[@:A-Za-z0-9\/\\\-_.]+[.]([a-z]{2,4})$/.test(content)) {
@@ -52,7 +52,7 @@ export class ResolveUtil {
     return { content, language, file };
   }
 
-  static resolveConfig<T>(content: string | T, language: string) {
+  static resolveConfig<T>(content: string | T, language: string): { content: string | T, language: string, file?: string } {
     let file: string | undefined;
     if (typeof content === 'string') {
       if (/^[@:A-Za-z0-9\/\\\-_.]+[.](ya?ml|properties)$/.test(content)) {
@@ -65,7 +65,7 @@ export class ResolveUtil {
     return { content, language, file };
   }
 
-  static resolveSnippet(file: string, startPattern: RegExp, endPattern?: RegExp, outline = false) {
+  static resolveSnippet(file: string, startPattern: RegExp, endPattern?: RegExp, outline = false): { text: string, language: string, file: string, line: number } {
     const res = FileUtil.read(file);
     const language = res.language;
     file = res.file;
@@ -85,7 +85,7 @@ export class ResolveUtil {
     return { text, language, line: startIdx + 1, file };
   }
 
-  static resolveSnippetLink(file: string, startPattern: RegExp) {
+  static resolveSnippetLink(file: string, startPattern: RegExp): { file: string, line: number } {
     const res = FileUtil.read(file);
     const line = res.content.split(/\n/g).findIndex(l => startPattern.test(l));
     if (line < 0) {

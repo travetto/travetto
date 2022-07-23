@@ -6,7 +6,7 @@ Packages.yieldPackages()
   .$map(pkg => ({ pkg, groups: [...DEP_GROUPS] }))
   .$concat(
     Packages.getTopLevelPackage()
-      .$map(p => ({ pkg: p, groups: ['dependencies'] as DepGroup[] }))
+      .$map((p): { pkg: Pkg, groups: DepGroup[] } => ({ pkg: p, groups: ['dependencies'] }))
   )
   .$parallel(({ pkg, groups }: { pkg: Pkg, groups: DepGroup[] }) =>
     Packages.upgrade(pkg, groups)

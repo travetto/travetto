@@ -3,6 +3,7 @@ import { Assemble, AssembleConfig } from './operation/assemble';
 
 export class PackAssemblePlugin extends BasePackPlugin<AssembleConfig> {
   operation = Assemble;
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   getOptions() {
     return {
       ...this.defaultOptions(),

@@ -12,7 +12,7 @@ export class ModelQueryExpiryUtil {
   /**
    * Delete all expired
    */
-  static async deleteExpired<T extends ModelType>(svc: ModelQueryCrudSupport & ModelCrudSupport, cls: Class<T>) {
+  static async deleteExpired<T extends ModelType>(svc: ModelQueryCrudSupport & ModelCrudSupport, cls: Class<T>): Promise<number> {
     const expiry = await ModelRegistry.getExpiry(cls);
     const res = await svc.deleteByQuery<ModelType>(cls, {
       where: {

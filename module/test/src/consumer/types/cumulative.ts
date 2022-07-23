@@ -26,7 +26,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    */
   summarizeSuite(test: TestResult): SuiteResult {
     try {
-      // TODO: Load asyncronously
+      // TODO: Load asynchronously
       require(test.file);
       this.#state[test.classId] = this.#state[test.classId] ?? {};
       this.#state[test.classId][test.methodName] = test.status;
@@ -42,7 +42,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
   /**
    * Remove a class
    */
-  removeClass(clsId: string) {
+  removeClass(clsId: string): SuiteResult {
     this.#state[clsId] = {};
     return {
       classId: clsId, passed: 0, failed: 0, skipped: 0, total: 0, tests: [], duration: 0, file: '', lines: { start: 0, end: 0 }
@@ -52,7 +52,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
   /**
    * Compute totals
    */
-  computeTotal(cls: Class) {
+  computeTotal(cls: Class): SuiteResult {
     const suite = SuiteRegistry.get(cls);
     const total = suite.tests.reduce((acc, x) => {
       const status = this.#state[x.classId][x.methodName] ?? 'unknown';
@@ -77,7 +77,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    * Listen for event, process the full event, and if the event is an after test,
    * send a full suite summary
    */
-  onEvent(e: TestEvent) {
+  onEvent(e: TestEvent): void {
     this.#target.onEvent(e);
     try {
       if (e.type === 'test' && e.phase === 'after') {

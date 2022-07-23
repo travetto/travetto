@@ -18,13 +18,13 @@ Every module within the framework follows the overarching philosophy.  For the m
 `;
 
 export const wrap = {
-  html: (content: string) => `
+  html: (content: string): string => `
 <div class="documentation">
   <h1>The Travetto Framework</h1>
   ${content}
 </div>
 <app-module-chart></app-module-chart>`,
-  md: (content: string) => `
+  md: (content: string): string => `
 <h1>   
   <sub><img src="./docs/images/logo.png" height="40"></sub>
   The Travetto Framework

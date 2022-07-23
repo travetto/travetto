@@ -116,9 +116,10 @@ $ node @travetto/boot/bin/main ./doc/dbconfig-run.ts
   errors: [
     {
       kind: 'required',
-      active: true,
+      value: undefined,
+      message: 'port is required',
       path: 'port',
-      message: 'port is required'
+      type: undefined
     }
   ]
 }

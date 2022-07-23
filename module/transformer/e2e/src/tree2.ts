@@ -5,7 +5,7 @@ type TreeNode2<T> = {
 };
 
 class Service2 {
-  getTree() {
+  getTree(): Promise<TreeNode2<number>> {
     return Promise.resolve({ value: 5 } as TreeNode2<number>);
   }
 }

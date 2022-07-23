@@ -17,29 +17,35 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
   rad: 1
 };
 
-export type WithId<T> = T & { _id: mongo.Binary };
+export type WithId<T> = T & { _id?: mongo.Binary };
+const isWithId = <T extends ModelType>(o: T): o is WithId<T> => o && '_id' in o;
+
 
 /**
  * Basic mongo utils for conforming to the model module
  */
 export class MongoUtil {
 
-  static toIndex<T extends ModelType>(f: IndexField<T>) {
+  static toIndex<T extends ModelType>(f: IndexField<T>): Record<string, number> {
     const keys = [];
     while (typeof f !== 'number' && typeof f !== 'boolean' && Object.keys(f)) {
       const key = Object.keys(f)[0];
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       f = f[key as keyof typeof f] as IndexField<T>;
       keys.push(key);
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const rf = f as unknown as (number | boolean);
-    return { [keys.join('.')]: rf === true ? 1 : rf } as Record<string, number>;
+    return {
+      [keys.join('.')]: typeof rf === 'boolean' ? (rf ? 1 : 0) : rf
+    };
   }
 
-  static uuid(val: string) {
+  static uuid(val: string): mongo.Binary {
     return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
   }
 
-  static idToString(id: string | mongo.ObjectId | mongo.Binary) {
+  static idToString(id: string | mongo.ObjectId | mongo.Binary): string {
     if (typeof id === 'string') {
       return id;
     } else if (id instanceof mongo.ObjectId) {
@@ -49,32 +55,41 @@ export class MongoUtil {
     }
   }
 
-  static async postLoadId<T extends ModelType>(item: T) {
-    if (item && '_id' in item) {
-      item.id = this.idToString((item as WithId<T>)._id);
-      delete (item as { _id?: unknown })._id;
+  static async postLoadId<T extends ModelType>(item: T): Promise<T> {
+    if (isWithId(item)) {
+      item.id = this.idToString(item._id!);
+      delete item._id;
     }
     return item;
   }
 
-  static preInsertId<T extends ModelType>(item: T) {
+  static preInsertId<T extends ModelType>(item: T): T {
     if (item && item.id) {
-      (item as WithId<T>)._id = this.uuid(item.id);
-      delete (item as { id?: unknown }).id;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const itemWithId = item as WithId<T>;
+      itemWithId._id = this.uuid(item.id);
+      // @ts-expect-error
+      delete item.id;
     }
     return item;
   }
 
-  static prepareQuery<T extends ModelType, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U, checkExpiry = true) {
+  static prepareQuery<T extends ModelType, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U, checkExpiry = true): {
+    query: U & { where: WhereClause<T> };
+    filter: Record<string, unknown>;
+  } {
     const q = ModelQueryUtil.getQueryAndVerify(cls, query, checkExpiry);
     return {
       query: q,
       filter: q.where ? this.extractWhereClause(q.where) : {}
-    } as const;
+    };
   }
 
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   static has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   static has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$not' in (o as object);
 
   /**
@@ -99,7 +114,7 @@ export class MongoUtil {
   static replaceId(v: string[]): mongo.Binary[];
   static replaceId(v: string): mongo.Binary;
   static replaceId(v: unknown): undefined;
-  static replaceId(v: string | string[] | Record<string, unknown> | unknown) {
+  static replaceId(v: string | string[] | Record<string, unknown> | unknown): unknown {
     if (typeof v === 'string') {
       return this.uuid(v);
     } else if (Array.isArray(v)) {
@@ -123,10 +138,12 @@ export class MongoUtil {
    */
   static extractSimple<T>(o: T, path: string = ''): Record<string, unknown> {
     const out: Record<string, unknown> = {};
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const sub = o as Record<string, unknown>;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subpath = `${path}${key}`;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const v = sub[key] as Record<string, unknown>;
 
       if (subpath === 'id') { // Handle ids directly
@@ -142,13 +159,17 @@ export class MongoUtil {
               v[sk] = ModelQueryUtil.resolveComparator(sv);
             }
           } else if (firstKey === '$regex') {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             v.$regex = Util.toRegex(v.$regex as string | RegExp);
           } else if (firstKey && '$near' in v) {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             const dist = v.$maxDistance as number;
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             const distance = dist / RADIANS_TO[(v.$unit as DistanceUnit ?? 'km')];
             v.$maxDistance = distance;
             delete v.$unit;
           } else if (firstKey && '$geoWithin' in v) {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             const coords = v.$geoWithin as [number, number][];
             const first = coords[0];
             const last = coords[coords.length - 1];

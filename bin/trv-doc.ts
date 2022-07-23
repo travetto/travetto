@@ -7,7 +7,7 @@ import '@arcsine/nodesh';
 import { PathUtil } from '@travetto/boot';
 import { Packages } from './package/packages';
 
-const page = (f: string) =>
+const page = (f: string): string =>
   PathUtil.resolveUnix('related/travetto.github.io/src', f);
 
 let [, , target] = process.argv;
@@ -17,7 +17,7 @@ if (target && target.startsWith(root)) {
   target = target.replace(root, '').split('/').pop()!;
 }
 
-const copyPluginImages = async () => {
+const copyPluginImages = async (): Promise<void> => {
   console.log('Copying Plugin images');
   await fs.mkdir(page('assets/images/vscode-plugin')).catch(() => { });
   await 'related/vscode-plugin/images/**/*.{gif,jpg,png}'.$dir()
@@ -25,14 +25,14 @@ const copyPluginImages = async () => {
     .$collect();
 };
 
-const htmlPage = (mod: string) =>
+const htmlPage = (mod: string): string =>
   page(({
     overview: 'app/documentation/overview/overview.component.html',
     'todo-app': 'app/guide/guide.component.html',
     'vscode-plugin': 'app/documentation/vscode-plugin/vscode-plugin.component.html'
   })[mod] ?? `app/documentation/gen/${mod}/${mod}.component.html`);
 
-const markdownPage = (mod: string) =>
+const markdownPage = (mod: string): string =>
   ({ overview: PathUtil.resolveUnix('README.md') })[mod] ?? './README.md';
 
 [

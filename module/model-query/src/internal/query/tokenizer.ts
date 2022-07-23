@@ -45,7 +45,7 @@ export class QueryLanguageTokenizer {
   /**
    * Process the next token.  Can specify expected type as needed
    */
-  static #processToken(state: TokenizeState, mode?: TokenType) {
+  static #processToken(state: TokenizeState, mode?: TokenType): Token {
     const text = state.text.substring(state.start, state.pos);
     const res = TOKEN_MAPPING[text.toLowerCase()];
     let value: unknown = text;
@@ -73,7 +73,7 @@ export class QueryLanguageTokenizer {
   /**
    * Flush state to output
    */
-  static #flush(state: TokenizeState, mode?: TokenType) {
+  static #flush(state: TokenizeState, mode?: TokenType): void {
     if ((!mode || !state.mode || mode !== state.mode) && state.start !== state.pos) {
       if (state.mode !== 'whitespace') {
         state.out.push(this.#processToken(state, mode));
@@ -86,14 +86,14 @@ export class QueryLanguageTokenizer {
   /**
    * Determine if valid regex flag
    */
-  static #isValidRegexFlag(ch: number) {
+  static #isValidRegexFlag(ch: number): boolean {
     return ch === LOWER_I || ch === LOWER_G || ch === LOWER_M || ch === LOWER_S;
   }
 
   /**
    * Determine if valid token identifier
    */
-  static #isValidIdentToken(ch: number) {
+  static #isValidIdentToken(ch: number): boolean {
     return (ch >= ZERO && ch <= NINE) ||
       (ch >= UPPER_A && ch <= UPPER_Z) ||
       (ch >= LOWER_A && ch <= LOWER_Z) ||
@@ -106,7 +106,7 @@ export class QueryLanguageTokenizer {
   /**
    * Read string until quote
    */
-  static readString(text: string, pos: number) {
+  static readString(text: string, pos: number): number {
     const len = text.length;
     const ch = text.charCodeAt(pos);
     const q = ch;
@@ -130,10 +130,11 @@ export class QueryLanguageTokenizer {
    */
   static tokenize(text: string): Token[] {
     const state: TokenizeState = {
-      out: [] as Token[],
+      out: [],
       pos: 0,
       start: 0,
       text,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       mode: undefined! as TokenType
     };
     const len = text.length;

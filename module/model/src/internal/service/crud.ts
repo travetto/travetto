@@ -19,7 +19,7 @@ export class ModelCrudUtil {
    * @param value Input value
    * @param length Number of characters to produce
    */
-  static hashValue(value: string, length = 32) {
+  static hashValue(value: string, length = 32): string {
     if (value.length < 32) {
       value = value.padEnd(32, ' ');
     }
@@ -38,6 +38,7 @@ export class ModelCrudUtil {
       input = JSON.parse(input.toString('utf8'));
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const result = ModelRegistry.getBaseModel(cls).from(input as object) as T;
 
     if (!(result instanceof cls || result.constructor.ᚕid === cls.ᚕid)) {
@@ -55,7 +56,7 @@ export class ModelCrudUtil {
   }
 
   /**
-   * Prepares item for storge
+   * Prepares item for storage
    *
    * @param cls Type to store for
    * @param item Item to store
@@ -66,11 +67,13 @@ export class ModelCrudUtil {
     }
 
     if (Util.isPlainObject(item)) {
-      item = cls.from(item as {});
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      item = cls.from(item as object);
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const config = ModelRegistry.get(item.constructor as Class<T>);
-    if (config.subType) { // Subtyping, assign type
+    if (config.subType) { // Sub-typing, assign type
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
 
@@ -80,6 +83,7 @@ export class ModelCrudUtil {
       await item.prePersist();
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return item as T;
   }
 
@@ -92,11 +96,13 @@ export class ModelCrudUtil {
    */
   static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, view: undefined | string, getExisting: () => Promise<T>): Promise<T> {
     if (Util.isPlainObject(item)) {
-      item = cls.from(item as {});
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      item = cls.from(item as object);
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const config = ModelRegistry.get(item.constructor as Class<T>);
-    if (config.subType) { // Subtyping, assign type
+    if (config.subType) { // Sub-typing, assign type
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
 
@@ -112,13 +118,14 @@ export class ModelCrudUtil {
       await item.prePersist();
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return item as T;
   }
 
   /**
    * Ensure subtype is not supported
    */
-  static ensureNotSubType(cls: Class) {
+  static ensureNotSubType(cls: Class): void {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }

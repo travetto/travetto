@@ -39,7 +39,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Code to call when uninstall is finalized
    */
-  onUninstallFinalize<T>(cls: Class<T>) {
+  onUninstallFinalize<T>(cls: Class<T>): void {
 
   }
 
@@ -51,7 +51,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Is class found by id or by Class
    */
-  has(cls: string | Class) {
+  has(cls: string | Class): boolean {
     return this.entries.has(id(cls));
   }
 
@@ -72,21 +72,21 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Is there a class that is expiring
    */
-  hasExpired(cls: string | Class) {
+  hasExpired(cls: string | Class): boolean {
     return this.expired.has(id(cls));
   }
 
   /**
    * Is there a pending state for the class
    */
-  hasPending(cls: string | Class) {
+  hasPending(cls: string | Class): boolean {
     return this.pending.has(id(cls));
   }
 
   /**
    * Get list of all classes that have been registered
    */
-  getClasses() {
+  getClasses(): Class[] {
     return Array.from(this.entries.values()).map(x => x.class);
   }
 
@@ -94,7 +94,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * Trigger initial install, moves pending to finalized (active)
    */
   override initialInstall(): Class[] {
-    return Array.from(this.pending.values()).map(x => x.class as Class).filter(x => !!x);
+    return Array.from(this.pending.values()).map(x => x.class).filter((x): x is Class => !!x);
   }
 
   /**
@@ -108,6 +108,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * Find parent class for a given class object
    */
   getParentClass(cls: Class): Class | null {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const parent = Object.getPrototypeOf(cls) as Class;
     return parent.name && parent !== Object ? parent : null;
   }
@@ -139,7 +140,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Register a pending class, with partial config to overlay
    */
-  register(cls: Class, pConfig: Partial<C> = {}) {
+  register(cls: Class, pConfig: Partial<C> = {}): void {
     const conf = this.getOrCreatePending(cls);
     Util.deepAssign(conf, pConfig);
   }
@@ -147,7 +148,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Register a pending field, with partial config to overlay
    */
-  registerField(cls: Class, field: F, pConfig: Partial<M>) {
+  registerField(cls: Class, field: F, pConfig: Partial<M>): void {
     const conf = this.getOrCreatePendingField(cls, field);
     Util.deepAssign(conf, pConfig);
   }
@@ -155,7 +156,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * On an install event, finalize
    */
-  onInstall(cls: Class, e: ChangeEvent<Class>) {
+  onInstall(cls: Class, e: ChangeEvent<Class>): void {
     if (this.pending.has(cls.ᚕid) || this.pendingFields.has(cls.ᚕid)) {
       console.debug('Installing', { service: this.constructor.name, id: cls.ᚕid });
       const result = this.onInstallFinalize(cls);
@@ -170,7 +171,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * On an uninstall event, remove
    */
-  onUninstall(cls: Class, e: ChangeEvent<Class>) {
+  onUninstall(cls: Class, e: ChangeEvent<Class>): void {
     if (this.entries.has(cls.ᚕid)) {
       console.debug('Uninstalling', { service: this.constructor.name, id: cls.ᚕid });
       this.expired.set(cls.ᚕid, this.entries.get(cls.ᚕid)!);
@@ -186,7 +187,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Clear all caches
    */
-  override onReset() {
+  override onReset(): void {
     super.onReset();
     this.entries.clear();
     this.pending.clear();

@@ -43,7 +43,7 @@ export class ModuleUtil {
    * @param err The error produced
    * @param filename The relative filename
    */
-  static handlePhaseError(phase: 'load' | 'compile', tsf: string, err: Error, filename = tsf.replace(PathUtil.cwd, '.')) {
+  static handlePhaseError(phase: 'load' | 'compile', tsf: string, err: Error, filename = tsf.replace(PathUtil.cwd, '.')): string {
     if (phase === 'compile' &&
       (err.message.startsWith('Cannot find module') || err.message.startsWith('Unable to load'))
     ) {
@@ -63,14 +63,14 @@ export class ModuleUtil {
    *
    * @param handler The code to run on post module load
    */
-  static addHandler(handler: ModuleHandler) {
+  static addHandler(handler: ModuleHandler): void {
     this.#handlers.push(handler);
   }
 
   /**
    * Check for module cycles
    */
-  static checkForCycles(mod: unknown, request: string, parent: NodeJS.Module) {
+  static checkForCycles(mod: unknown, request: string, parent: NodeJS.Module): void {
     if (parent && !parent.loaded) { // Standard ts compiler output
       const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
       if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
@@ -89,11 +89,12 @@ export class ModuleUtil {
   /**
    * Handle module post processing
    */
-  static handleModule(mod: unknown, request: string, parent: NodeJS.Module) {
+  static handleModule<T = unknown>(mod: T, request: string, parent: NodeJS.Module): T {
     if (this.#handlers) {
       const name = Module._resolveFilename!(request, parent);
       for (const handler of this.#handlers) {
-        mod = handler(name, mod);
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        mod = handler(name, mod) as T;
       }
     }
     return mod;
@@ -102,7 +103,7 @@ export class ModuleUtil {
   /**
    * Initialize module support
    */
-  static init() {
+  static init(): void {
     SourceUtil.init();
   }
 
@@ -155,7 +156,7 @@ export class ModuleUtil {
   /**
    * Clear out on cleanup
    */
-  static reset() {
+  static reset(): void {
     this.#modCache.clear();
     this.#handlers = [];
   }

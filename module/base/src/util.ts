@@ -20,6 +20,8 @@ const TIME_UNITS = {
 export type TimeSpan = `${number}${keyof typeof TIME_UNITS}`;
 export type TimeUnit = keyof typeof TIME_UNITS;
 
+type PromiseResolver<T> = { resolve: (v: T) => void, reject: (err?: unknown) => void };
+
 const AsyncGeneratorFunction = Object.getPrototypeOf(async function* () { });
 const GeneratorFunction = Object.getPrototypeOf(function* () { });
 const AsyncFunction = Object.getPrototypeOf(async function () { });
@@ -34,7 +36,7 @@ export class Util {
   static getKeys = Object.keys.bind(Object) as
     <K extends string | symbol | number = string, T extends object = object>(o: T) => K[];
 
-  static #deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose') {
+  static #deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): unknown {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;
     const isArrA = Array.isArray(a);
@@ -61,7 +63,9 @@ export class Util {
         if (mode === 'replace') {
           ret = b;
         } else {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const retArr = ret as unknown[];
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const bArr = b as unknown[];
           for (let i = 0; i < bArr.length; i++) {
             retArr[i] = this.#deepAssignRaw(retArr[i], bArr[i], mode);
@@ -75,12 +79,15 @@ export class Util {
           if (mode === 'strict') { // Bail on strict
             throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
           } else if (mode === 'coerce') { // Force on coerce
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             ret = this.coerceType(b, (a as ClassInstance).constructor, false);
           }
         }
       } else { // Object merge
         ret = a;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const bObj = b as Record<string, unknown>;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const retObj = ret as Record<string, unknown>;
 
         for (const key of Object.keys(bObj)) {
@@ -95,13 +102,15 @@ export class Util {
    * Has to JSON
    * @param o Object to check
    */
-  static hasToJSON = (o: unknown): o is { toJSON(): unknown } => !!o && 'toJSON' in (o as object);
+  static hasToJSON = (o: unknown): o is { toJSON(): unknown } =>
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    !!o && 'toJSON' in (o as object);
 
   /**
    * Create regex from string, including flags
    * @param input Convert input to a regex
    */
-  static toRegex(input: string | RegExp) {
+  static toRegex(input: string | RegExp): RegExp {
     if (input instanceof RegExp) {
       return input;
     } else if (REGEX_PAT.test(input)) {
@@ -124,7 +133,7 @@ export class Util {
   static coerceType(input: unknown, type: typeof Date, strict?: boolean): Date;
   static coerceType(input: unknown, type: typeof RegExp, strict?: boolean): RegExp;
   static coerceType<T>(input: unknown, type: Class<T>, strict?: boolean): T;
-  static coerceType(input: unknown, type: Class<unknown>, strict = true) {
+  static coerceType(input: unknown, type: Class<unknown>, strict = true): unknown {
     // Do nothing
     if (input === null || input === undefined) {
       return input;
@@ -137,6 +146,7 @@ export class Util {
     switch (type) {
       case Date: {
         const res = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           new Date(parseInt(input as string, 10)) : new Date(input as Date);
         if (strict && Number.isNaN(res.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
@@ -191,8 +201,9 @@ export class Util {
    * Clone top level properties to a new object
    * @param o Object to clone
    */
-  static shallowClone(a: unknown) {
-    return Array.isArray(a) ? a.slice(0) : (this.isSimple(a) ? a : { ...(a as {}) });
+  static shallowClone<T = unknown>(a: T): T {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return (Array.isArray(a) ? a.slice(0) : (this.isSimple(a) ? a : { ...(a as {}) })) as T;
   }
 
   /**
@@ -229,15 +240,17 @@ export class Util {
    * Is a value a class
    * @param o Object to check
    */
-  static isClass(o: unknown) {
+  static isClass(o: unknown): o is Class {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return !!(o as object) && !!(o as { prototype: unknown }).prototype &&
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       (o as { prototype: { constructor: unknown } }).prototype.constructor !== Object.getPrototypeOf(Function);
   }
 
   /**
    * Is simple, as a primitive, function or class
    */
-  static isSimple(a: unknown) {
+  static isSimple(a: unknown): a is Function | Class | string | number | RegExp | Date {
     return this.isPrimitive(a) || this.isFunction(a) || this.isClass(a);
   }
 
@@ -246,6 +259,13 @@ export class Util {
    */
   static isError(a: unknown): a is Error {
     return !!a && (a instanceof Error || (typeof a === 'object' && 'message' in a && 'stack' in a));
+  }
+
+  /**
+   * Is a promise object
+   */
+  static isPromise(a: unknown): a is Promise<unknown> {
+    return !!a && (a instanceof Promise || (typeof a === 'object') && 'then' in a);
   }
 
   /**
@@ -258,6 +278,7 @@ export class Util {
     if (!a || this.isSimple(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.#deepAssignRaw(a, b, mode) as T & U;
   }
 
@@ -265,7 +286,7 @@ export class Util {
    * Generate a random UUID
    * @param len The length of the uuid to generate
    */
-  static uuid(len: number = 32) {
+  static uuid(len: number = 32): string {
     const bytes = crypto.randomBytes(Math.ceil(len / 2));
     // eslint-disable-next-line no-bitwise
     bytes[6] = (bytes[6] & 0x0f) | 0x40;
@@ -277,11 +298,10 @@ export class Util {
   /**
    * Produce a promise that is externally resolvable
    */
-  static resolvablePromise<T = void>() {
-    let ops: { resolve: (v?: T) => void, reject: (err?: unknown) => void };
-    const prom = new Promise((resolve, reject) => ops = { resolve, reject });
-    Object.assign(prom, ops!);
-    return prom as Promise<T> & (typeof ops);
+  static resolvablePromise<T = void>(): Promise<T> & PromiseResolver<T> {
+    let ops: PromiseResolver<T>;
+    const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
+    return Object.assign(prom, ops!);
   }
 
   /**
@@ -297,8 +317,9 @@ export class Util {
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static timeToMs(amount: number | TimeSpan, unit?: TimeUnit) {
+  static timeToMs(amount: number | TimeSpan, unit?: TimeUnit): number {
     if (typeof amount === 'string') {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       [, amount, unit] = amount.match(this.#timePattern) as [undefined, '1m', 'm'] ?? [undefined, amount, unit];
       if (!TIME_UNITS[unit]) {
         return NaN;
@@ -313,14 +334,14 @@ export class Util {
    * @param age Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static timeFromNow(age: number | TimeSpan, unit?: TimeUnit) {
+  static timeFromNow(age: number | TimeSpan, unit?: TimeUnit): Date {
     return new Date(Date.now() + this.timeToMs(age, unit));
   }
 
   /**
    * Wait for n units of time
    */
-  static wait(n: number | TimeSpan, unit?: TimeUnit) {
+  static wait(n: number | TimeSpan, unit?: TimeUnit): Promise<void> {
     return new Promise(res => setTimeout(res, this.timeToMs(n, unit)));
   }
 
@@ -329,7 +350,7 @@ export class Util {
    * @param key env key
    * @param def backup value if not valid or found
    */
-  static getEnvTime(key: string, def?: number | TimeSpan) {
+  static getEnvTime(key: string, def?: number | TimeSpan): number {
     const val = EnvUtil.get(key);
     let ms: number | undefined;
     if (val) {

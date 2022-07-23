@@ -17,16 +17,16 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
     classSource.on(e => this.onClassEvent(e));
   }
 
-  async init() { }
+  async init(): Promise<void> { }
 
-  emit(ev: ChangeEvent<[Class, Function]>) {
+  emit(ev: ChangeEvent<[Class, Function]>): void {
     this.#emitter.emit('change', ev);
   }
 
   /**
    * On a class being emitted, check methods
    */
-  onClassEvent(e: ChangeEvent<Class>) {
+  onClassEvent(e: ChangeEvent<Class>): void {
     const next = e.curr?.ᚕmethods ?? {};
     const prev = e.prev?.ᚕmethods ?? {};
 

@@ -18,12 +18,13 @@ export class RouteUtil {
     const max = filters.length - 1;
     return function filterChain(req: Request, res: Response, idx: number = 0): Promise<unknown | void> | unknown {
       const it = filters[idx]!;
-      const next = idx === max ? (x?: unknown) => x : filterChain.bind(null, req, res, idx + 1);
+      const next = idx === max ? (x?: unknown): unknown => x : filterChain.bind(null, req, res, idx + 1);
       if (it.length === 3) {
         return it(req, res, next);
       } else {
-        const out = (it as Filter)(req, res);
-        return (out as Promise<unknown>)?.then(next) ?? next();
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const out: Promise<unknown> | undefined = (it as Filter)(req, res);
+        return out?.then(next) ?? next();
       }
     };
   }
@@ -39,7 +40,7 @@ export class RouteUtil {
     route: RouteConfig | EndpointConfig,
     router: Partial<ControllerConfig> = {}): Filter {
 
-    const handlerBound = async (req: Request, res: Response) => {
+    const handlerBound = async (req: Request, res: Response): Promise<unknown> => {
       if ('class' in route) {
         const params = ParamUtil.extractParams(route, req, res);
         return route.handler.apply(route.instance, params);

@@ -16,7 +16,7 @@ class $PendingRegister {
    * @param `ᚕmethods` Methods and their hashes
    * @param `ᚕabstract` Is the class abstract
    */
-  initMeta(cls: Class, ᚕfile: string, ᚕhash: number, ᚕmethods: Record<string, { hash: number }>, ᚕabstract: boolean, ᚕsynthetic: boolean) {
+  initMeta(cls: Class, ᚕfile: string, ᚕhash: number, ᚕmethods: Record<string, { hash: number }>, ᚕabstract: boolean, ᚕsynthetic: boolean): boolean {
     const meta = {
       ᚕid: ModuleUtil.getId(ᚕfile, cls.name),
       ᚕfile,
@@ -26,8 +26,9 @@ class $PendingRegister {
       ᚕsynthetic,
     };
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const keys = [...Object.keys(meta)] as (keyof typeof meta)[];
-    Object.defineProperties(cls, keys.reduce((all, k) => {
+    Object.defineProperties(cls, keys.reduce<Partial<Record<keyof typeof meta, PropertyDescriptor>>>((all, k) => {
       all[k] = {
         value: meta[k],
         enumerable: false,
@@ -35,7 +36,7 @@ class $PendingRegister {
         writable: false
       };
       return all;
-    }, {} as { [K in keyof typeof meta]: PropertyDescriptor }));
+    }, {}));
 
     return true;
   }
@@ -43,7 +44,7 @@ class $PendingRegister {
   /**
    * Register class as pending
    */
-  add(cls: Class) {
+  add(cls: Class): void {
     if (!this.map.has(cls.ᚕfile)) {
       const sub: Class[] = [];
       this.map.set(cls.ᚕfile, sub);
@@ -55,7 +56,7 @@ class $PendingRegister {
   /**
    * Clear pending classes
    */
-  flush() {
+  flush(): [string, Class[]][] {
     const out = this.ordered.slice(0);
     this.map.clear();
     this.ordered = [];
@@ -69,7 +70,7 @@ export const PendingRegister = new $PendingRegister();
  * Decorator to track class as pending
  */
 export function Register() {
-  return (target: Class) => PendingRegister.add(target);
+  return (target: Class): void => PendingRegister.add(target);
 }
 
 Register.initMeta = PendingRegister.initMeta;

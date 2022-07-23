@@ -7,9 +7,8 @@ const groupTypeMap = {
 };
 
 export const ImportOrder = {
-  create(context: eslint.Rule.RuleContext) {
-
-    function Program({ body }: eslint.AST.Program) {
+  create(context: eslint.Rule.RuleContext): { Program: (ast: eslint.AST.Program) => void } {
+    function Program({ body }: eslint.AST.Program): void {
 
       if (context.getFilename().endsWith('.js')) {
         return;

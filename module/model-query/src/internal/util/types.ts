@@ -3,14 +3,14 @@ import { Class } from '@travetto/base';
 
 import { PointImpl } from '../model/point';
 
-const st = (t: string | string[], arr: boolean = false) =>
+const st = (t: string | string[], arr: boolean = false): Set<string> =>
   new Set((Array.isArray(t) ? t : [t]).map(v => arr ? `${v}[]` : v));
 
-const basic = (types: Set<string>) => ({ $ne: types, $eq: types, $exists: st('boolean') });
-const scalar = (types: Set<string>) => ({ $in: types, $nin: types });
-const str = () => ({ $regex: st(['RegExp', 'string']) });
-const comp = (types: Set<string>) => ({ $lt: types, $lte: types, $gt: types, $gte: types });
-const geo = (type: string) => ({
+const basic = (types: Set<string>): Record<string, Set<string>> => ({ $ne: types, $eq: types, $exists: st('boolean') });
+const scalar = (types: Set<string>): Record<string, Set<string>> => ({ $in: types, $nin: types });
+const str = (): Record<string, Set<string>> => ({ $regex: st(['RegExp', 'string']) });
+const comp = (types: Set<string>): Record<string, Set<string>> => ({ $lt: types, $lte: types, $gt: types, $gte: types });
+const geo = (type: string): Record<string, Set<string>> => ({
   $near: st(type),
   $maxDistance: st('number'),
   $unit: st('string'),
@@ -26,11 +26,11 @@ export class TypeUtil {
    * Mapping types to various operators
    */
   static OPERATORS = {
-    string: { ...basic(st('string')), ...scalar(st('string', true)), ...str() } as Record<string, Set<string>>,
-    number: { ...basic(st('number')), ...scalar(st('number', true)), ...comp(st('number')) } as Record<string, Set<string>>,
-    boolean: { ...basic(st('boolean')), ...scalar(st('boolean', true)) } as Record<string, Set<string>>,
-    Date: { ...basic(st('Date')), ...scalar(st('Date', true)), ...comp(st(['string', 'Date'])) } as Record<string, Set<string>>,
-    Point: { ...basic(st('Point')), ...geo('Point') } as Record<string, Set<string>>,
+    string: { ...basic(st('string')), ...scalar(st('string', true)), ...str() },
+    number: { ...basic(st('number')), ...scalar(st('number', true)), ...comp(st('number')) },
+    boolean: { ...basic(st('boolean')), ...scalar(st('boolean', true)) },
+    Date: { ...basic(st('Date')), ...scalar(st('Date', true)), ...comp(st(['string', 'Date'])) },
+    Point: { ...basic(st('Point')), ...geo('Point') }
   };
 
   /**

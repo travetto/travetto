@@ -10,15 +10,20 @@ function $c(val: string): TextType;
 function $c(val: DocNode | string): DocNode;
 function $c(val: DocNode | string | undefined): DocNode | undefined;
 function $c(val: string | DocNode | undefined): DocNode | undefined {
-  return val === undefined ? undefined : typeof val === 'string' ? { _type: 'text' as const, content: val } as TextType : val;
+  return val === undefined ? undefined : typeof val === 'string' ?
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    { _type: 'text' as const, content: val } as TextType : val;
 }
-const $n = <T extends string, U extends Record<string, unknown>>(t: T, vals: U) => ({ _type: t, ...vals } as { _type: T } & U);
+const $n = <T extends string, U extends Record<string, unknown>>(t: T, vals: U): { _type: T } & U =>
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  ({ _type: t, ...vals } as { _type: T } & U);
+
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 
 /**
  * All Node Types
  */
 export const node = {
-
   buildList(items: Content[], ordered = false) {
     return $n('list', {
       items: items.map(x => {

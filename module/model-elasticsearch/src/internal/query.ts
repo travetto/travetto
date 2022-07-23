@@ -13,8 +13,11 @@ import { SchemaRegistry } from '@travetto/schema';
 import { SearchResponse } from '../types';
 import { EsSchemaConfig } from './types';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$not' in (o as object);
 
 /**
@@ -27,10 +30,12 @@ export class ElasticsearchQueryUtil {
    */
   static extractSimple<T>(o: T, path: string = ''): Record<string, unknown> {
     const out: Record<string, unknown> = {};
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const sub = o as Record<string, unknown>;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subPath = `${path}${key}`;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key] as object)[0].startsWith('$')) {
         Object.assign(out, this.extractSimple(sub[key], `${subPath}.`));
       } else {
@@ -43,12 +48,13 @@ export class ElasticsearchQueryUtil {
   /**
    * Build include/exclude from the select clause
    */
-  static getSelect<T>(clause: SelectClause<T>) {
+  static getSelect<T>(clause: SelectClause<T>): [string[], string[]] {
     const simp = this.extractSimple(clause);
     const include: string[] = [];
     const exclude: string[] = [];
     for (const k of Object.keys(simp)) {
       const nk = k === 'id' ? '_id' : k;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const v = simp[k] as (1 | 0 | boolean);
       if (v === 0 || v === false) {
         exclude.push(nk);
@@ -62,10 +68,11 @@ export class ElasticsearchQueryUtil {
   /**
    * Build sort mechanism
    */
-  static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']) {
+  static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']): string[] {
     return sort.map(x => {
       const o = this.extractSimple(x);
       const k = Object.keys(o)[0];
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const v = o[k] as (boolean | -1 | 1);
       if (v === 1 || v === true) {
         return k;
@@ -82,6 +89,7 @@ export class ElasticsearchQueryUtil {
     const items = [];
     const schema = SchemaRegistry.getViewSchema(cls).schema;
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     for (const key of Object.keys(o) as (keyof typeof o)[]) {
       const top = o[key];
       const declaredSchema = schema[key];
@@ -154,6 +162,7 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$regex': {
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
               const pattern = Util.toRegex(v as string);
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
@@ -180,6 +189,7 @@ export class ElasticsearchQueryUtil {
               let dist = top.$maxDistance;
               let unit = top.$unit ?? 'm';
               if (unit === 'rad') {
+                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
                 dist = 6378.1 * (dist as number);
                 unit = 'km';
               }
@@ -229,7 +239,7 @@ export class ElasticsearchQueryUtil {
    * @param cls
    * @param search
    */
-  static getSearchBody<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true) {
+  static getSearchBody<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): { query?: Record<string, unknown> } {
     const clauses = [];
     if (search && Object.keys(search).length) {
       clauses.push(search);
@@ -264,6 +274,7 @@ export class ElasticsearchQueryUtil {
     QueryVerifier.verify(cls, query); // Verify
 
     const search: Search = {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       body: this.getSearchBody(cls, this.extractWhereQuery(cls, query.where as WhereClause<T>, config), checkExpiry)
     };
 
@@ -301,7 +312,7 @@ export class ElasticsearchQueryUtil {
   static cleanIdRemoval<T>(req: Search, results: SearchResponse<T>): T[] {
     const out: T[] = [];
 
-    const toArr = <V>(x: V | V[] | undefined) => (x ? (Array.isArray(x) ? x : [x]) : []);
+    const toArr = <V>(x: V | V[] | undefined): V[] => (x ? (Array.isArray(x) ? x : [x]) : []);
 
     // determine if id
     const select = [

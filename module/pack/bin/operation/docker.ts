@@ -19,7 +19,7 @@ export interface DockerConfig extends CommonConfig {
   push?: boolean;
 }
 
-const dockerFileBuilder = ({ image, port, app = 'rest', env }: DockerConfig) => `
+const dockerFileBuilder = ({ image, port, app = 'rest', env }: DockerConfig): string => `
 FROM ${image}
 WORKDIR /app
 COPY . .

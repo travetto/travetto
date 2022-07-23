@@ -9,7 +9,7 @@ import { AssetRestUtil } from './util';
 import { RestAssetConfig } from './config';
 
 const doUpload = (config: Partial<RestAssetConfig>) =>
-  async (req: Request) => {
+  async (req: Request): Promise<void> => {
     if (!req.files) { // Prevent duplication if given multiple decorators
       const assetConfig = await DependencyRegistry.getInstance(RestAssetConfig);
       req.files = await AssetRestUtil.upload(req, { ...assetConfig, ...config });
@@ -22,7 +22,9 @@ const doUpload = (config: Partial<RestAssetConfig>) =>
  * @augments `@trv:asset-rest/Upload`
  * @augments `@trv:rest/Param`
  */
-export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetConfig> = {}) {
+export function Upload(
+  param: string | Partial<ParamConfig> & Partial<RestAssetConfig> = {}
+): (inst: ClassInstance, prop: string, idx: number) => void {
 
   if (typeof param === 'string') {
     param = { name: param };
@@ -34,7 +36,7 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
     throw new AppError('Cannot use upload decorator with anything but an Asset', 'general');
   }
 
-  return (inst: ClassInstance, prop: string, idx: number) => {
+  return (inst: ClassInstance, prop: string, idx: number): void => {
 
     // Register field
     SchemaRegistry.registerPendingParamConfig(inst.constructor, prop, idx, Object, { specifier: 'file' });
@@ -54,9 +56,12 @@ export function Upload(param: string | Partial<ParamConfig> & Partial<RestAssetC
  * @augments `@trv:rest/Endpoint`
  */
 export function UploadAll(config: Partial<ParamConfig> & Partial<RestAssetConfig> = {}) {
-  return function (target: ClassInstance, propertyKey: string) {
+  return function (target: ClassInstance, propertyKey: string): void {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const targetClass = target.constructor as Class;
+
     // Assuming first param is a file
-    const { params } = ControllerRegistry.getOrCreatePendingField(target.constructor as Class, target[propertyKey]);
+    const { params } = ControllerRegistry.getOrCreatePendingField(targetClass, target[propertyKey]);
 
     // Find the request object, and mark it as a file param
     params?.some((el, i) => {
@@ -67,7 +72,7 @@ export function UploadAll(config: Partial<ParamConfig> & Partial<RestAssetConfig
     });
 
     ControllerRegistry.registerEndpointFilter(
-      target.constructor as Class,
+      targetClass,
       target[propertyKey],
       doUpload(config)
     );

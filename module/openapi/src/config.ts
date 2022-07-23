@@ -16,7 +16,7 @@ export class ApiInfoConfig {
   license: LicenseObject = { name: AppManifest.info.license! };
   termsOfService?: string;
   title: string = AppManifest.info.name;
-  version?: string = AppManifest.info.version;
+  version: string = AppManifest.info.version ?? '0.0.0';
 }
 
 /**
@@ -56,7 +56,7 @@ export class ApiSpecConfig {
    */
   exposeAllSchemas: boolean = false;
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     this.output = PathUtil.toUnix(this.output);
     if (!this.output || this.output === '-') {
       this.persist = false;

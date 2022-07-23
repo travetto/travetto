@@ -18,15 +18,15 @@ export abstract class BaseFeature implements ActivationTarget {
     this.command = command!;
   }
 
-  get commandBase() {
+  get commandBase(): string {
     return `travetto.${this.module}.${this.command}`;
   }
 
-  commandName(task: string) {
+  commandName(task: string): string {
     return `${this.commandBase}:${task}`;
   }
 
-  register(task: string, handler: () => unknown) {
+  register(task: string, handler: () => unknown): void {
     vscode.commands.registerCommand(this.commandName(task), handler);
   }
 }

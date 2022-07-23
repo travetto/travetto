@@ -26,21 +26,21 @@ export class TapEmitter implements TestConsumer {
     this.#enhancer = enhancer;
   }
 
-  protected log(message: string) {
+  protected log(message: string): void {
     this.#stream.write(`${message}\n`);
   }
 
   /**
    * Preamble
    */
-  onStart() {
+  onStart(): void {
     this.log(this.#enhancer.suiteName('TAP version 13')!);
   }
 
   /**
    * Output supplemental data (e.g. logs)
    */
-  logMeta(obj: Record<string, unknown>) {
+  logMeta(obj: Record<string, unknown>): void {
     let body = YamlUtil.serialize(obj, { wordwrap: +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 80) - 5 });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
@@ -49,7 +49,7 @@ export class TapEmitter implements TestConsumer {
   /**
    * Listen for each event
    */
-  onEvent(e: TestEvent) {
+  onEvent(e: TestEvent): void {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
       const suiteId = this.#enhancer.suiteName(test.classId);
@@ -118,13 +118,14 @@ export class TapEmitter implements TestConsumer {
   /**
    * Summarize all results
    */
-  onSummary(summary: SuitesSummary) {
+  onSummary(summary: SuitesSummary): void {
     this.log(`${this.#enhancer.testNumber(1)}..${this.#enhancer.testNumber(summary.total)}`);
 
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.#enhancer.failure(err instanceof Error ? err.toJSON() as string : `${err}`) as string);
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        this.log(this.#enhancer.failure(err instanceof Error ? err.toJSON() as string : `${err}`));
       }
     }
 
