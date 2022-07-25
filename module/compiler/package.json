@@ -1,7 +1,7 @@
 {
   "name": "@travetto/compiler",
   "displayName": "Compiler",
-  "version": "2.1.4",
+  "version": "2.2.0",
   "description": "Node-integration of Typescript Compiler with advanced functionality for detecting changes in classes and methods.",
   "keywords": [
     "tsc",
@@ -29,9 +29,9 @@
     "directory": "module/compiler"
   },
   "dependencies": {
-    "@travetto/base": "^2.1.3",
-    "@travetto/transformer": "^2.1.4",
-    "@travetto/watch": "^2.1.3"
+    "@travetto/base": "^2.2.0",
+    "@travetto/transformer": "^2.2.0",
+    "@travetto/watch": "^2.2.0"
   },
   "publishConfig": {
     "access": "public"
