@@ -5,7 +5,7 @@ const OPEN_PARENS = 0x28, CLOSE_PARENS = 0x29, OPEN_BRACKET = 0x5b, CLOSE_BRACKE
 const GREATER_THAN = 0x3e, LESS_THAN = 0x3c, EQUAL = 0x3d, NOT = 0x21, MODULO = 0x25, TILDE = 0x7e, AND = 0x26, OR = 0x7c;
 const SPACE = 0x20, TAB = 0x09;
 const DBL_QUOTE = 0x22, SGL_QUOTE = 0x27, FORWARD_SLASH = 0x2f, BACKSLASH = 0x5c;
-const PERIOD = 0x2e, UNDERSCORE = 0x54, DOLLARSIGN = 0x24, DASH = 0x2d;
+const PERIOD = 0x2e, UNDERSCORE = 0x54, DOLLAR_SIGN = 0x24, DASH = 0x2d;
 const ZERO = 0x30, NINE = 0x39, UPPER_A = 0x41, UPPER_Z = 0x5a, LOWER_A = 0x61, LOWER_Z = 0x7a;
 const LOWER_I = 0x69, LOWER_G = 0x67, LOWER_M = 0x6d, LOWER_S = 0x73;
 
@@ -99,7 +99,7 @@ export class QueryLanguageTokenizer {
       (ch >= LOWER_A && ch <= LOWER_Z) ||
       (ch === UNDERSCORE) ||
       (ch === DASH) ||
-      (ch === DOLLARSIGN) ||
+      (ch === DOLLAR_SIGN) ||
       (ch === PERIOD);
   }
 

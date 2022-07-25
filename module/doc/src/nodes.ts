@@ -14,9 +14,9 @@ function $c(val: string | DocNode | undefined): DocNode | undefined {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     { _type: 'text' as const, content: val } as TextType : val;
 }
-const $n = <T extends string, U extends Record<string, unknown>>(t: T, vals: U): { _type: T } & U =>
+const $n = <T extends string, U extends Record<string, unknown>>(t: T, values: U): { _type: T } & U =>
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  ({ _type: t, ...vals } as { _type: T } & U);
+  ({ _type: t, ...values } as { _type: T } & U);
 
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 

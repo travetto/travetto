@@ -2,7 +2,7 @@
   "name": "@travetto/worker",
   "displayName": "Worker",
   "version": "2.1.3",
-  "description": "Process management utilties, with a focus on inter-process communication",
+  "description": "Process management utilities, with a focus on inter-process communication",
   "keywords": [
     "exec",
     "child-process",

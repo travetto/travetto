@@ -31,7 +31,7 @@ export interface LogEvent {
    */
   line: number;
   /**
-   * Categorization of file into a readible name
+   * Categorization of file into a readable name
    */
   category: string;
   /**

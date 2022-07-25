@@ -56,7 +56,7 @@ export const Assemble: PackOperation<AssembleConfig> = {
     yield 'Excluding Post-Compile Files'; await AssembleUtil.excludeFiles(ws, exclude);
     yield 'Copying Added Content'; await AssembleUtil.copyAddedContent(ws, add);
     yield 'Removing Empty Folders'; await PackUtil.removeEmptyFolders(ws);
-    yield 'Writng Env.js'; await PackUtil.writeEnvJs(ws, {
+    yield 'Writing Env.js'; await PackUtil.writeEnvJs(ws, {
       ...env,
       TRV_CACHE: `\${__dirname}/${cacheDir}`,
       ...(readonly ? { TRV_READONLY: '1' } : {})

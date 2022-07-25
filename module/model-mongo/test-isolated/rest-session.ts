@@ -19,7 +19,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class MongoRestSesisonServerSuite extends RestSessionServerSuite {
+export class MongoRestSessionServerSuite extends RestSessionServerSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }

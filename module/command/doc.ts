@@ -27,7 +27,7 @@ ${d.Code('Command Service example, using pngquant', 'doc/service.ts')}
 
 ${d.Section('CLI - command:service')}
 
-The module provides the ability to start/stop/restart services as ${lib.Docker} containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targetted individually or handled as a group.
+The module provides the ability to start/stop/restart services as ${lib.Docker} containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
 ${d.Execute('Command Service', 'trv', ['command:service', '--help'])}
 

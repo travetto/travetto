@@ -33,8 +33,8 @@ export class EnvInit {
       TRV_DEBUG: EnvUtil.get('TRV_DEBUG', EnvUtil.get('DEBUG', debug ?? (prod ? '0' : '')))
     }, set ?? {});
 
-    for (const [key, vals] of Object.entries(append ?? {})) {
-      this.addToList(key, ...((typeof vals === 'string' ? [vals] : vals) ?? []));
+    for (const [key, values] of Object.entries(append ?? {})) {
+      this.addToList(key, ...((typeof values === 'string' ? [values] : values) ?? []));
     }
   }
 }

@@ -12,7 +12,7 @@ export class Weird {
 
   @Get('/name')
   async doIt() {
-    return 'bobs-kdvd';
+    return 'bobs-dvd';
   }
 
   @Get('/age')

@@ -40,7 +40,7 @@ export class CliUtil {
   /**
    * Get code completion values
    */
-  static async getCompletion(compl: CompletionConfig, args: string[]): Promise<string[]> {
+  static async getCompletion(cfg: CompletionConfig, args: string[]): Promise<string[]> {
     args = args.slice(0); // Copy as we mutate
 
     const cmd = args.shift()!;
@@ -49,27 +49,27 @@ export class CliUtil {
     let opts: string[] = [];
 
     // List all commands
-    if (!compl.task[cmd]) {
-      opts = compl.all;
+    if (!cfg.task[cmd]) {
+      opts = cfg.all;
     } else {
       // Look available sub commands
       last = args.pop() ?? '';
       const second = args.pop() ?? '';
       let flag = '';
 
-      if (last in compl.task[cmd]) {
+      if (last in cfg.task[cmd]) {
         flag = last;
         last = '';
-      } else if (second in compl.task[cmd]) {
+      } else if (second in cfg.task[cmd]) {
         // Look for available flags
-        if (compl.task[cmd][second].includes(last)) {
+        if (cfg.task[cmd][second].includes(last)) {
           flag = '';
           last = '';
         } else {
           flag = second;
         }
       }
-      opts = compl.task[cmd][flag];
+      opts = cfg.task[cmd][flag];
     }
 
     return last ? opts.filter(x => x.startsWith(last)) : opts.filter(x => !x.startsWith('-'));

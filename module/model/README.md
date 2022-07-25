@@ -392,7 +392,7 @@ Options:
 
 ## CLI - model:install
 
-The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12)s within the application given the current configuration being targetted.  This is useful for being able to prepare the datastore manually.
+The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12)s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
 
 **Terminal: Running model install**
 ```bash

@@ -72,7 +72,7 @@ export function Readonly(active = true): ReturnType<typeof prop> { return prop({
 export function Required(active = true, message?: string): ReturnType<typeof prop> { return prop({ required: { active, message } }); }
 /**
  * Define a field as a set of enumerated values
- * @param vals The list of values allowed for the enumeration
+ * @param values The list of values allowed for the enumeration
  * @param message The error message to show when the constraint fails
  * @augments `@trv:schema/Field`
  */

@@ -6,7 +6,7 @@ class Element {
   name = 'roger';
 }
 
-@Application('test-eptest')
+@Application('test-epTest')
 class EpTest {
 
   @Inject()

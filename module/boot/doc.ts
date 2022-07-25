@@ -50,7 +50,7 @@ ${ScanFsLink} provides a breadth-first search through the file system with the a
 ${d.Section('Typescript Bootstrapping')}
 
 ${d.SubSection('Source Indexing')}
-The bootstrap process will also requires an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatica discovery that is used within the framework (and transpiling).
+The bootstrap process will also requires an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatic discovery that is used within the framework (and transpiling).
 
 ${d.SubSection('Registration')}
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.

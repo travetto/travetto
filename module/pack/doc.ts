@@ -22,14 +22,14 @@ Assemble is the operation that stages the project's code for deployment.  The as
 
 ${d.Ordered(
   'Cleaning Workspace - Cleans workspace to start with an empty workspace',
-  'Copying Dependencies - Computes the prod depedencies and copies them into the new workspace',
+  'Copying Dependencies - Computes the prod dependencies and copies them into the new workspace',
   'Copying App Content - Copies over application content (src/resources/support/bin)',
   'Excluding Pre-Compile Files - Any files that should be excluded pre-compilation, are removed',
   'Compiling - Compiles the code in the new workspace, isolating it from your local development',
   'Excluding Post-Compile Files - Removes any files that should be excluded, post compilation',
   'Copying Added Content - Adds in any additional content that is not in the standard locations',
   'Removing Empty Folders - Purge all empty folders, recursively',
-  'Writng Env.js - Write out the .env.js file with computed any env vars that should be set for the deployed app',
+  'Writing Env.js - Write out the .env.js file with computed any env vars that should be set for the deployed app',
   'Remove Source Maps - If keep source is false, all source maps are purged from your app\'s code',
   'Emptying .ts Files - If keep source is false, all .ts files are emptied, as compilation will not occur at runtime',
 )}

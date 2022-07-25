@@ -19,7 +19,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class DynamoDBRestSesisonServerSuite extends RestSessionServerSuite {
+export class DynamoDBRestSessionServerSuite extends RestSessionServerSuite {
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
 }

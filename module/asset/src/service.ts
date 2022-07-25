@@ -45,7 +45,7 @@ export class AssetService {
    * overwriting and file exists, an error will be thrown.
    *
    * @param asset The asset to store
-   * @param overwriteIfFound Overwite the asset if found
+   * @param overwriteIfFound Overwrite the asset if found
    * @param strategy The naming strategy to use, defaults to the service's strategy if not provided
    */
   async upsert({ stream, ...asset }: Asset, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {

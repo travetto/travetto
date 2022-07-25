@@ -43,14 +43,14 @@ This command line operation will compile your project, and produce a ready to us
 Assemble is the operation that stages the project's code for deployment.  The assembly process goes through the following operations:
 
 <ol> <li>Cleaning Workspace - Cleans workspace to start with an empty workspace</li>
- <li>Copying Dependencies - Computes the prod depedencies and copies them into the new workspace</li>
+ <li>Copying Dependencies - Computes the prod dependencies and copies them into the new workspace</li>
  <li>Copying App Content - Copies over application content (src/resources/support/bin)</li>
  <li>Excluding Pre-Compile Files - Any files that should be excluded pre-compilation, are removed</li>
  <li>Compiling - Compiles the code in the new workspace, isolating it from your local development</li>
  <li>Excluding Post-Compile Files - Removes any files that should be excluded, post compilation</li>
  <li>Copying Added Content - Adds in any additional content that is not in the standard locations</li>
  <li>Removing Empty Folders - Purge all empty folders, recursively</li>
- <li>Writng Env.js - Write out the .env.js file with computed any env vars that should be set for the deployed app</li>
+ <li>Writing Env.js - Write out the .env.js file with computed any env vars that should be set for the deployed app</li>
  <li>Remove Source Maps - If keep source is false, all source maps are purged from your app's code</li>
  <li>Emptying .ts Files - If keep source is false, all .ts files are emptied, as compilation will not occur at runtime</li></ol>
 
@@ -186,7 +186,7 @@ Various modules may provide customizations to the default <code class="item path
       <figcaption class="code">Rest, pack.lambda.ts
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/support/pack.aws-lambda.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs/promises'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PathUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> AllConfigPartial <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/pack'</span><span class="token punctuation">;</span>
@@ -204,7 +204,7 @@ Various modules may provide customizations to the default <code class="item path
     <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
     postProcess<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{{'{'}}</span>
       <span class="token punctuation">[</span><span class="token string">'Lambda Entrypoint'</span><span class="token punctuation">]</span><span class="token operator">:</span> cfg <span class="token operator">=></span>
-        fs<span class="token punctuation">.</span>promises<span class="token punctuation">.</span><span class="token function">copyFile</span><span class="token punctuation">(</span>
+        fs<span class="token punctuation">.</span><span class="token function">copyFile</span><span class="token punctuation">(</span>
           PathUtil<span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>__dirname<span class="token punctuation">,</span> <span class="token string">'aws-lambda.handler.js'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
           PathUtil<span class="token punctuation">.</span><span class="token function">resolveUnix</span><span class="token punctuation">(</span>cfg<span class="token punctuation">.</span>workspace<span class="token punctuation">,</span> <span class="token string">'index.js'</span><span class="token punctuation">)</span>
         <span class="token punctuation">)</span>

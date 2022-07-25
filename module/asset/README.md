@@ -8,20 +8,20 @@
 npm install @travetto/asset
 ```
 
-The asset module requires an [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1), or you can roll your own.
+The asset module requires an [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3), or you can roll your own.
 
 **Install: provider**
 ```bash
 npm install @travetto/model-{provider}
 ```
 
-Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1) support:
+Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) support:
    
-   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L47), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L50)
+   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L49), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)
    *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.")
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")
 
-If you are using more than one [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1) service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
+If you are using more than one [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
 
 **Code: Configuration Methods**
 ```typescript
@@ -29,7 +29,7 @@ import { InjectableFactory } from '@travetto/di';
 import { S3ModelService } from '@travetto/model-s3';
 import { AssetModelⲐ, AssetService } from '@travetto/asset';
 
-class SymoblBasedConfiguration {
+class SymbolBasedConfiguration {
   @InjectableFactory(AssetModelⲐ)
   static getAssetModelService(service: S3ModelService) {
     return service;
@@ -78,7 +78,7 @@ export class UserProfileService {
 
 ## Naming Strategies
 
-By default, the assets are stored by path, as specified in the [Asset](https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts#L8) object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
+By default, the assets are stored by path, as specified in the [Asset](https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts#L10) object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
 
 The underlying contract for a [AssetNamingStrategy](https://github.com/travetto/travetto/tree/main/module/asset/src/naming.ts#L9) looks like:
 
@@ -95,11 +95,11 @@ export interface AssetNamingStrategy {
 }
 ```
 
-By extending this, and making it [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L30), the naming strategy will become the default for the system.  
+By extending this, and making it [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L32), the naming strategy will become the default for the system.  
 
 ## Advanced Usage
 
-In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the [Asset](https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts#L8) looks like:
+In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the [Asset](https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts#L10) looks like:
 
 **Code: Asset Structure**
 ```typescript

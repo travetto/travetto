@@ -24,7 +24,7 @@ export class SourceUtil {
   static readonly EXT = '.ts';
 
   static init(): void {
-    // Tag output to indicate it was succefully processed by the framework
+    // Tag output to indicate it was successfully processed by the framework
     this.addPreProcessor((__, contents) =>
       `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`);
 

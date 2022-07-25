@@ -30,7 +30,7 @@ as well. The information that is available is:
  <li><code class="item field">env.name</code> - The environment name.  Will usually be one of <code class="item input">dev</code>, <code class="item input">test</code>, or <code class="item input">prod</code>.  Can be anything that is passed in.</li>
  <li><code class="item field">env.profiles: Set&lt;string&gt;</code> - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.</li>
  <li><code class="item field">env.debug</code> - Simple logging flag.  This <code class="item input">boolean</code> flag will enable or disable logging at various levels. By default <code class="item input">debug</code> is on in non-<code class="item input">prod</code>.</li>
- <li><code class="item field">env.resources: string[]</code> - Redource folders.  Search paths for resolving resouce requests via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts">ResourceManager</a></li>
+ <li><code class="item field">env.resources: string[]</code> - Resource folders.  Search paths for resolving resource requests via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts">ResourceManager</a></li>
  <li><code class="item field">source.local: string[]</code> - Local source folders for transpiling.  Does not extend to installed modules.</li>
  <li><code class="item field">source.common: string[]</code> - Common source folders for transpiling. Includes installed modules.</li>
  <li><code class="item method">hasProfile(p: string): boolean;</code> - Test whether or not a profile is active.</li></ul>
@@ -44,7 +44,7 @@ A simple example of finding specific <code class="item path">.config</code> file
       <figcaption class="code">Looking for all .config files with the prefix defined by svc
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/doc/find.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs/promises'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PathUtil<span class="token punctuation">,</span> ScanFs <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/boot'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">processServiceConfigs</span><span class="token punctuation">(</span>svc<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -52,14 +52,14 @@ A simple example of finding specific <code class="item path">.config</code> file
   <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> conf <span class="token keyword">of</span> svcConfigs<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token comment">// Do work</span>
 
-    <span class="token keyword">const</span> contents <span class="token operator">=</span> <span class="token keyword">await</span> fs<span class="token punctuation">.</span>promises<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>conf<span class="token punctuation">.</span>module<span class="token punctuation">,</span> <span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> contents <span class="token operator">=</span> <span class="token keyword">await</span> fs<span class="token punctuation">.</span><span class="token function">readFile</span><span class="token punctuation">(</span>conf<span class="token punctuation">.</span>module<span class="token punctuation">,</span> <span class="token string">'utf8'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <h2 id="resource-management">Resource Management</h2>
 
-Resource management, loading of files, and other assets at runtime is a common pattern that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts">ResourceManager</a> encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
+Resource management, loading of files, and other assets at runtime is a common pattern that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts">ResourceManager</a> encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registered paths.
 
       <figure class="code">
       <figcaption class="code">Finding Images
@@ -76,7 +76,7 @@ Resource management, loading of files, and other assets at runtime is a common p
 <span class="token punctuation">{{'}'}}</span>
 
 <span class="token comment">/**
- * Find all .gif files under the imsages folder
+ * Find all .gif files under the images folder
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">findAllImages</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">const</span> imagePaths <span class="token operator">=</span> <span class="token keyword">await</span> ResourceManager<span class="token punctuation">.</span><span class="token function">findAll</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">[.]gif$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> <span class="token string">'images/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -105,7 +105,7 @@ An example would be something like <code class="item path">phase.init.ts</code> 
 <span class="token keyword">export</span> <span class="token keyword">const</span> init <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   key<span class="token operator">:</span> <span class="token string">'@trv:config/init'</span><span class="token punctuation">,</span>
   before<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'@trv:registry/init'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token keyword">async</span> <span class="token function">action</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">action</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> ConfigManager <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'../src/manager'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">await</span> ConfigManager<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -201,7 +201,7 @@ Error: Uh oh
 The needed functionality cannot be loaded until <code class="item method">init.action</code> executes, and so must be required only at that time.
 
 <h2 id="general-utilities">General Utilities</h2>
-Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L30">Util</a> includes:
+Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L32">Util</a> includes:
 
 <ul> <li><code class="item method">isPrimitive(el)</code> determines if <code class="item input">el</code> is a <code class="item input">string</code>, <code class="item input">boolean</code>, <code class="item input">number</code> or <code class="item input">RegExp</code></li>
  <li><code class="item method">isPlainObject(obj)</code> determines if the obj is a simple object</li>
@@ -224,7 +224,6 @@ Simple functions for providing a minimal facsimile to <a target="_blank" class="
 Usage:  build <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -c, --clean            Indicates <span class="token keyword">if</span> the cache <span class="token function">dir</span> should be cleaned
   -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>  Output directory
   -q, --quiet            Quiet operation
   -h, --help             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     

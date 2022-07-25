@@ -23,7 +23,7 @@ ${d.List(
 )}
 With ${d.Input('.html')} being the only required field.  The ${mod.EmailTemplate} module supports this format, and will generate files accordingly. Also, note that ${d.Input('<key>')} can include slashes, allowing for nesting folders.
 
-${d.Section('Nodmailer - Extension')}
+${d.Section('Nodemailer - Extension')}
 
 Given the integration with ${lib.NodeMailer}, all extensions should be usable out of the box. The primary ${lib.NodeMailer} modules are provided (assuming dependencies are installed):
 

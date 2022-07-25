@@ -28,13 +28,13 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
 
 ${Principal}
 
-As referenced above, a ${Principal.link} is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authenticatino).
+As referenced above, a ${Principal.link} is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
 
 ${d.Section('Authentication')}
 
 ${Authenticator}
 
-The ${Authenticator.link} only requires one method to be defined, and that is ${d.Method('authenticate')}. This method receives a generic payload, and a supplemental context as an input. The interface is respon for converting that to an authenticated principal.
+The ${Authenticator.link} only requires one method to be defined, and that is ${d.Method('authenticate')}. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
 ${d.SubSection('Example')}
 The ${mod.Jwt} module is a good example of an authenticator. This is a common use case for simple internal auth.
@@ -106,7 +106,7 @@ ${d.Code('A valid user model', 'doc/model/model.ts')}
 
 ${d.Section('Configuration')}
 
-Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogeonized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
+Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogenized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
 
 ${d.Code('Principal Source configuration', 'doc/model/config.ts')}
 

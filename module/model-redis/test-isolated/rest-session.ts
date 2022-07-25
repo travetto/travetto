@@ -19,7 +19,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class RedisRestSesisonServerSuite extends RestSessionServerSuite {
+export class RedisRestSessionServerSuite extends RestSessionServerSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }

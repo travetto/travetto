@@ -12,7 +12,7 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/asset</code></pre>     
       </figure>
 
-The asset module requires an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1">Streaming</a> to provide functionality for reading and writing streams. You can use any existing providers to serve as your <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1">Streaming</a>, or you can roll your own.
+The asset module requires an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3">Streaming</a> to provide functionality for reading and writing streams. You can use any existing providers to serve as your <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3">Streaming</a>, or you can roll your own.
 
       <figure class="install">
       <figcaption class="install">provider
@@ -21,12 +21,12 @@ The asset module requires an <a target="_blank" class="source-link" href="https:
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-<span class="token punctuation">{{'{'}}</span>provider<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-Currently, the following are packages that provide <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1">Streaming</a> support:
-<ul> <li><a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L47">FileModelService</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L50">MemoryModelService</a></li>
+Currently, the following are packages that provide <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3">Streaming</a> support:
+<ul> <li><a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> - <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L49">FileModelService</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54">MemoryModelService</a></li>
  <li><a class="module-link" routerLink="/docs/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a></li>
  <li><a class="module-link" routerLink="/docs/model-s3" title="S3 backing for the travetto model module.">S3 Model Support</a></li></ul>
 
-If you are using more than one <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L1">Streaming</a> service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
+If you are using more than one <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3">Streaming</a> service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
 
       <figure class="code">
       <figcaption class="code">Configuration Methods
@@ -36,7 +36,7 @@ If you are using more than one <a target="_blank" class="source-link" href="http
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> S3ModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-s3'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AssetModelⲐ<span class="token punctuation">,</span> AssetService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/asset'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">class</span> <span class="token class-name">SymoblBasedConfiguration</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">class</span> <span class="token class-name">SymbolBasedConfiguration</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span>AssetModelⲐ<span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getAssetModelService</span><span class="token punctuation">(</span>service<span class="token operator">:</span> S3ModelService<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> service<span class="token punctuation">;</span>
@@ -87,7 +87,7 @@ Reading of and writing assets uses the <a target="_blank" class="source-link" hr
 
 <h2 id="naming-strategies">Naming Strategies</h2>
 
-By default, the assets are stored by path, as specified in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts#L8">Asset</a> object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
+By default, the assets are stored by path, as specified in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts#L10">Asset</a> object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content.
 
 The underlying contract for a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/asset/src/naming.ts#L9">AssetNamingStrategy</a> looks like:
 
@@ -106,17 +106,19 @@ The underlying contract for a <a target="_blank" class="source-link" href="https
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-By extending this, and making it <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L30">@Injectable</a>, the naming strategy will become the default for the system.  
+By extending this, and making it <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L32">@Injectable</a>, the naming strategy will become the default for the system.  
 
 <h2 id="advanced-usage">Advanced Usage</h2>
 
-In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts#L8">Asset</a> looks like:
+In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts#L10">Asset</a> looks like:
 
       <figure class="code">
       <figcaption class="code">Asset Structure
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> StreamMeta <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Readable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'stream'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> StreamMeta <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * A retrieval/storable asset
@@ -124,7 +126,7 @@ In addition to reading and writing, you can also retrieve information on the sav
  * @concrete ./internal/types:AssetImpl
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Asset</span> <span class="token keyword">extends</span> <span class="token class-name">StreamMeta</span> <span class="token punctuation">{{'{'}}</span>
-  stream<span class="token operator">:</span> NodeJS<span class="token punctuation">.</span>ReadableStream<span class="token punctuation">;</span>
+  stream<span class="token operator">:</span> Readable<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 

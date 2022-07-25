@@ -156,11 +156,11 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   getViewSchema<T>(cls: Class<T>, view?: string | typeof AllViewⲐ): ViewConfig {
     view = view ?? AllViewⲐ;
 
-    const schm = this.get(cls)!;
-    if (!schm) {
+    const schema = this.get(cls)!;
+    if (!schema) {
       throw new Error(`Unknown schema class ${cls.name}`);
     }
-    const res = schm.views[view];
+    const res = schema.views[view];
     if (!res) {
       throw new Error(`Unknown view ${view.toString()} for ${cls.name}`);
     }

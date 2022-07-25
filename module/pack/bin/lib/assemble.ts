@@ -3,7 +3,7 @@ import { promises as fs } from 'fs';
 
 import { ExecUtil, PathUtil, ScanFs, FsUtil } from '@travetto/boot';
 
-import { DependenciesUtil, DepType } from './depdencies';
+import { DependenciesUtil, DepType } from './dependencies';
 import { PackUtil } from './util';
 
 const MODULE_DIRS = ['src', 'bin', 'support', 'resources', 'index.ts', 'package.json', 'tsconfig.trv.json'];

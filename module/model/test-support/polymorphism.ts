@@ -153,7 +153,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     await assert.rejects(
       () =>
         service.upsert(Doctor, Doctor.from({
-          id: fire.id, name: 'drob', specialty: 'eyes'
+          id: fire.id, name: 'gob', specialty: 'eyes'
         })),
       e => (e instanceof SubTypeNotSupportedError || e instanceof ExistsError) ? undefined : e
     );
@@ -165,7 +165,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
 
     try {
       const res = await service.upsert(Doctor, Doctor.from({
-        id: doc.id, name: 'drob', specialty: 'eyes'
+        id: doc.id, name: 'gob', specialty: 'eyes'
       }));
 
       assert(res.updatedDate!.getTime() > update.getTime());
@@ -174,7 +174,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     }
 
     const resAlt = await service.upsert(Worker, Doctor.from({
-      id: doc.id, name: 'drob', specialty: 'eyes'
+      id: doc.id, name: 'gob', specialty: 'eyes'
     }));
 
     assert(resAlt.updatedDate!.getTime() > update.getTime());

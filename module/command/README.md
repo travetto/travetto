@@ -52,7 +52,7 @@ While docker containers provide a high level of flexibility, performance can be 
 
 **Code: Command Service example, using pngquant**
 ```typescript
-import * as fs from 'fs';
+import { createWriteStream, createReadStream } from 'fs';
 import { CommandService } from '@travetto/command';
 
 export class ImageCompressor {
@@ -66,9 +66,9 @@ export class ImageCompressor {
     const out = `${img}.compressed`;
 
     // Feed into process
-    fs.createReadStream(img).pipe(state.process.stdin!);
+    createReadStream(img).pipe(state.process.stdin!);
     // Feed from process to file system
-    state.process.stdout!.pipe(fs.createWriteStream(out));
+    state.process.stdout!.pipe(createWriteStream(out));
 
     await state.result;
   }
@@ -77,7 +77,7 @@ export class ImageCompressor {
 
 ## CLI - command:service
 
-The module provides the ability to start/stop/restart services as [docker](https://www.docker.com/community-edition) containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targetted individually or handled as a group.
+The module provides the ability to start/stop/restart services as [docker](https://www.docker.com/community-edition) containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
 **Terminal: Command Service**
 ```bash

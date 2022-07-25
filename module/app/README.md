@@ -96,9 +96,9 @@ Available Applications:
      usage: simple-domain domain:string [port:number=3000]
      file:  doc/domain.ts
 
-   ● test-eptest 
-     --------------------------------------------------------
-     usage: test-eptest [age:number=5] [format:html|pdf=html]
+   ● test-ep-test 
+     ---------------------------------------------------------
+     usage: test-ep-test [age:number=5] [format:html|pdf=html]
      file:  doc/entry.ts
 ```
 
@@ -138,9 +138,9 @@ Available Applications:
      usage: simple-domain domain:string [port:number=3000]
      file:  doc/domain.ts
 
-   ● test-eptest 
-     --------------------------------------------------------
-     usage: test-eptest [age:number=5] [format:html|pdf=html]
+   ● test-ep-test 
+     ---------------------------------------------------------
+     usage: test-ep-test [age:number=5] [format:html|pdf=html]
      file:  doc/entry.ts
 ```
 
@@ -149,7 +149,7 @@ To invoke the `simple` application, you need to pass `domain` where port is opti
 
 **Terminal: Invoke Simple**
 ```bash
-$ trv run simple-domain mydomain.biz 4000
+$ trv run simple-domain my-domain.biz 4000
 
 Running application { name: 'simple-domain', filename: './doc/domain.ts' }
 Manifest {
@@ -159,10 +159,7 @@ Manifest {
     description: 'Application registration/management and run support.',
     version: '2.1.5',
     license: 'MIT',
-    author: {
-      email: 'travetto.framework@gmail.com',
-      name: 'Travetto Framework'
-    }
+    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' }
   },
   env: {
     name: 'dev',
@@ -188,6 +185,7 @@ Manifest {
       '@travetto/config': '@trv:config',
       '@travetto/di': '@trv:di',
       '@travetto/doc': '@trv:doc',
+      '@travetto/log': '@trv:log',
       '@travetto/registry': '@trv:registry',
       '@travetto/schema': '@trv:schema',
       '@travetto/test': '@trv:test',
@@ -198,8 +196,8 @@ Manifest {
     }
   }
 }
-Config {}
-Launching { domain: 'mydomain.biz', port: 4000 }
+Config
+Launching { domain: 'my-domain.biz', port: 4000 }
 ```
 
 ## Type Checking
@@ -208,7 +206,7 @@ The parameters to `run` will be type checked, to ensure proper evaluation.
 
 **Terminal: Invoke Simple with bad port**
 ```bash
-$ trv run simple-domain mydomain.biz orange
+$ trv run simple-domain my-domain.biz orange
 
 Failed to run simple-domain, Validation errors have occurred
 ● port is not a valid number

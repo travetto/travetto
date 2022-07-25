@@ -81,7 +81,7 @@ class DevRegister {
   }
 
   static run(): void {
-    const envMods = process.env.TRV_MODULES ?? '';
+    const envMods = process.env.TRV_MODULES || '';
     if (envMods && !process.env.TRV_CACHE) { // Is specifying modules, build out
       // @ts-expect-error
       AppCache.cacheDir = `.trv_cache_${SystemUtil.naiveHash(process.env.TRV_MODULES)}`;

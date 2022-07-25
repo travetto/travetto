@@ -9,7 +9,7 @@ import { Preferences } from './model';
 class PreferenceService {
   private context: AsyncContext;
 
-  async update(prefs: Preferences) {
+  async update(preferences: Preferences) {
     // Get user id from an authenticated request
     const userId = this.context.get().userId;
     // Update user
@@ -23,8 +23,8 @@ class PrefRoutes {
   service: PreferenceService;
 
   @Post('/preferences')
-  async save(@Body() prefs: Preferences) {
-    await this.service.update(prefs);
+  async save(@Body() preferences: Preferences) {
+    await this.service.update(preferences);
     return { success: true };
   }
 }

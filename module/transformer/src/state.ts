@@ -255,7 +255,7 @@ export class TransformerState implements State {
   }
 
   /**
-   * Ceate identifier from node or text
+   * Create identifier from node or text
    * @param name
    */
   createIdentifier(name: string | { getText(): string }): ts.Identifier {
@@ -302,7 +302,7 @@ export class TransformerState implements State {
   }
 
   /**
-   * Register synthetic idetnifier
+   * Register synthetic identifier
    */
   createSyntheticIdentifier(id: string): [identifier: ts.Identifier, exists: boolean] {
     id = `${id}${TransformerState.SYNTHETIC_EXT}`;

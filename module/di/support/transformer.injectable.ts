@@ -51,10 +51,10 @@ export class InjectableTransformer {
 
     // Extract all interfaces
     const interfaces: ts.Node[] = [];
-    for (const impls of node.heritageClauses ?? []) {
-      if (impls.token === ts.SyntaxKind.ImplementsKeyword) {
-        for (const intType of impls.types) {
-          const resolvedType = state.resolveType(intType);
+    for (const clause of node.heritageClauses ?? []) {
+      if (clause.token === ts.SyntaxKind.ImplementsKeyword) {
+        for (const typeExpression of clause.types) {
+          const resolvedType = state.resolveType(typeExpression);
           if (resolvedType.key === 'external') {
             const resolved = state.getOrImport(resolvedType);
             interfaces.push(resolved);

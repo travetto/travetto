@@ -2,7 +2,7 @@ import { InjectableFactory } from '@travetto/di';
 import { S3ModelService } from '@travetto/model-s3';
 import { AssetModelⲐ, AssetService } from '@travetto/asset';
 
-class SymoblBasedConfiguration {
+class SymbolBasedConfiguration {
   @InjectableFactory(AssetModelⲐ)
   static getAssetModelService(service: S3ModelService) {
     return service;

@@ -59,7 +59,7 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-As referenced above, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal Structure</a> is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authenticatino).
+As referenced above, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal Structure</a> is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
 
 <h2 id="authentication">Authentication</h2>
 
@@ -78,7 +78,7 @@ As referenced above, a <a target="_blank" class="source-link" href="https://gith
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8">Authenticator</a> only requires one method to be defined, and that is <code class="item method">authenticate</code>. This method receives a generic payload, and a supplemental context as an input. The interface is respon for converting that to an authenticated principal.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8">Authenticator</a> only requires one method to be defined, and that is <code class="item method">authenticate</code>. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
 <h3 id="example">Example</h3>
 The <a class="module-link" routerLink="/docs/jwt" title="JSON Web Token implementation">JWT</a> module is a good example of an authenticator. This is a common use case for simple internal auth.
@@ -111,7 +111,7 @@ Overall, the structure is simple, but drives home the primary use cases of the f
  <li>To have access to the principal</li></ul>
 
 <h2 id="common-utilities">Common Utilities</h2>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts#L18">AuthUtil</a> provides the following functionality:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts#L24">AuthUtil</a> provides the following functionality:
 
       <figure class="code">
       <figcaption class="code">Auth util structure
@@ -125,6 +125,11 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token keyword">type</span> <span class="token class-name">PermissionChecker</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token function-variable function">all</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> PermSet<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token function-variable function">any</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> PermSet<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token class-name">PermissionCheckerSet</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function-variable function">includes</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> PermSet<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token function-variable function">excludes</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> PermSet<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token function-variable function">check</span><span class="token operator">:</span> <span class="token punctuation">(</span>value<span class="token operator">:</span> PermSet<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 <span class="token comment">/**
  * Standard auth utilities
@@ -143,7 +148,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
    * @param exclude Which permissions to exclude
    * @param matchAll Whether not all permissions should be matched
    */</span>
-  <span class="token keyword">static</span> <span class="token function">permissionChecker</span><span class="token punctuation">(</span>include<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> exclude<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> mode<span class="token operator">:</span> <span class="token string">'all'</span> <span class="token operator">|</span> <span class="token string">'any'</span> <span class="token operator">=</span> <span class="token string">'any'</span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">permissionChecker</span><span class="token punctuation">(</span>include<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> exclude<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> mode<span class="token operator">:</span> <span class="token string">'all'</span> <span class="token operator">|</span> <span class="token string">'any'</span> <span class="token operator">=</span> <span class="token string">'any'</span><span class="token punctuation">)</span><span class="token operator">:</span> PermissionCheckerSet <span class="token punctuation">;</span>
   <span class="token comment">/**
    * Build a permission checker off of an include, and exclude set
    *
@@ -151,7 +156,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
    * @param exclude Which permissions to exclude
    * @param matchAll Whether not all permissions should be matched
    */</span>
-  <span class="token keyword">static</span> <span class="token function">checkPermissions</span><span class="token punctuation">(</span>permissions<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> include<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> exclude<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> mode<span class="token operator">:</span> <span class="token string">'all'</span> <span class="token operator">|</span> <span class="token string">'any'</span> <span class="token operator">=</span> <span class="token string">'any'</span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">checkPermissions</span><span class="token punctuation">(</span>permissions<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> include<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> exclude<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> mode<span class="token operator">:</span> <span class="token string">'all'</span> <span class="token operator">|</span> <span class="token string">'any'</span> <span class="token operator">=</span> <span class="token string">'any'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">;</span>
   <span class="token comment">/**
    * Generate a hash for a given value
    *
@@ -161,7 +166,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
    * @param keylen Length of hash
    * @param digest Digest method
    */</span>
-  <span class="token keyword">static</span> <span class="token function">generateHash</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> iterations <span class="token operator">=</span> <span class="token number">25000</span><span class="token punctuation">,</span> keylen <span class="token operator">=</span> <span class="token number">256</span><span class="token punctuation">,</span> digest <span class="token operator">=</span> <span class="token string">'sha256'</span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">generateHash</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> iterations <span class="token operator">=</span> <span class="token number">25000</span><span class="token punctuation">,</span> keylen <span class="token operator">=</span> <span class="token number">256</span><span class="token punctuation">,</span> digest <span class="token operator">=</span> <span class="token string">'sha256'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">;</span>
   <span class="token comment">/**
    * Generate a salted password, with the ability to validate the password
    *
@@ -169,7 +174,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
    * @param salt Salt value, or if a number, length of salt
    * @param validator Optional function to validate your password
    */</span>
-  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token function">generatePassword</span><span class="token punctuation">(</span>password<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token number">32</span><span class="token punctuation">)</span> <span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token function">generatePassword</span><span class="token punctuation">(</span>password<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token number">32</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token punctuation">{{'{'}}</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> hash<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'}'}}</span><span class="token operator">></span> <span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -257,7 +262,7 @@ A registered principal extends the base concept of an principal, by adding in ad
 
 <h2 id="configuration">Configuration</h2>
 
-Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogeonized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
+Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogenized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
 
       <figure class="code">
       <figcaption class="code">Principal Source configuration

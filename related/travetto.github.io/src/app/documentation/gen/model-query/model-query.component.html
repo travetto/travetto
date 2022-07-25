@@ -12,7 +12,7 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-query</code></pre>     
       </figure>
 
-This module provides an enhanced query contract for <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations.  This contract has been externalized due to it being more complex than many implemenations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
+This module provides an enhanced query contract for <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
 
 <h2 id="contracts">Contracts</h2>
 
@@ -47,7 +47,7 @@ This contract provides the ability to apply the query support to return one or m
       </figure>
 
 <h3 id="query-crud"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/service/crud.ts#L11">Query Crud</a></h3>
-Reinforcing the complexity provided in these contracts, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/service/crud.ts#L11">Query Crud</a> contract allows for bulk update/deletion by query.  This requires the underlying implentation to support these operations.
+Reinforcing the complexity provided in these contracts, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/service/crud.ts#L11">Query Crud</a> contract allows for bulk update/deletion by query.  This requires the underlying implementation to support these operations.
 
       <figure class="code">
       <figcaption class="code">Query Crud
@@ -89,7 +89,7 @@ With the complex nature of the query support, the ability to find counts by grou
       </figure>
 
 <h3 id="suggest"><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-query/src/service/suggest.ts#L12">Suggest</a></h3>
-Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
+Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and type-ahead functionalities.
 
       <figure class="code">
       <figcaption class="code">Suggest
@@ -144,7 +144,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 <ul> <li><code class="item input">field: {{'{'}} $in: T[] {{'}'}}</code> to see if a record's value appears in the array provided to <code class="item input">$in</code></li>
  <li><code class="item input">field: {{'{'}} $nin: T[] {{'}'}}</code> to see if a record's value does not appear in the array provided to <code class="item input">$in</code></li></ul>
 
-<h3 id="ordered-numberic-fields">Ordered Numberic Fields</h3>
+<h3 id="ordered-numeric-fields">Ordered Numeric Fields</h3>
 <ul> <li><code class="item input">field: {{'{'}} $lt: number {{'}'}}</code> checks if value is less than</li>
  <li><code class="item input">field: {{'{'}} $lte: number {{'}'}}</code> checks if value is less than or equal to</li>
  <li><code class="item input">field: {{'{'}} $gt: number {{'}'}}</code> checks if value is greater than</li>
@@ -155,7 +155,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
  <li><code class="item input">field: {{'{'}} $gt: Date | RelativeTime {{'}'}}</code> checks if value is greater than</li>
  <li><code class="item input">field: {{'{'}} $gte: Date | RelativeTime {{'}'}}</code> checks if value is greater than or equal to</li></ul>
 
-<p class="note"><strong>Note</strong> Relative times are strings consisting of a number and a unit.  e.g. -1w or 30d.  These times are always relative to Date.now, but should make building  quieries more natural.</p>
+<p class="note"><strong>Note</strong> Relative times are strings consisting of a number and a unit.  e.g. -1w or 30d.  These times are always relative to Date.now, but should make building queries more natural.</p>
 
 <h3 id="array-fields">Array Fields</h3>
 <ul> <li><code class="item input">field: {{'{'}} $all: T[]] {{'}'}}</code> checks to see if the records value contains everything within <code class="item input">$all</code></li></ul>

@@ -65,9 +65,9 @@ export class ImportManager {
       }
 
       const ident = this.factory.createIdentifier(id);
-      const imprt = { path: file, ident };
-      this.#imports.set(ident.escapedText.toString(), imprt);
-      this.#newImports.set(file, imprt);
+      const newImport = { path: file, ident };
+      this.#imports.set(ident.escapedText.toString(), newImport);
+      this.#newImports.set(file, newImport);
     }
     return this.#newImports.get(file)!;
   }
@@ -100,12 +100,12 @@ export class ImportManager {
 
     try {
       const importStmts = [...this.#newImports.values()].map(({ path, ident }) => {
-        const imptStmt = this.factory.createImportDeclaration(
+        const importStmt = this.factory.createImportDeclaration(
           undefined, undefined,
           this.factory.createImportClause(false, undefined, this.factory.createNamespaceImport(ident)),
           this.factory.createStringLiteral(path)
         );
-        return imptStmt;
+        return importStmt;
       });
 
       return CoreUtil.updateSource(this.factory, file, [

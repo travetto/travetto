@@ -85,7 +85,7 @@ export abstract class SQLDialect implements DialectState {
     BOOLEAN: 'BOOLEAN',
     TINYINT: 'TINYINT',
     SMALLINT: 'SMALLINT',
-    MEDIUMINIT: 'MEDIUMINT',
+    MEDIUMINT: 'MEDIUMINT',
     INT: 'INT',
     BIGINT: 'BIGINT',
     TIMESTAMP: 'TIMESTAMP',
@@ -95,7 +95,7 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Column types with inputs
    */
-  PARAMETERIZED_COLUMN_TYPES: Record<'VARCHAR' | 'DECIMAL', (...nums: number[]) => string> = {
+  PARAMETERIZED_COLUMN_TYPES: Record<'VARCHAR' | 'DECIMAL', (...values: number[]) => string> = {
     VARCHAR: n => `VARCHAR(${n})`,
     DECIMAL: (d, p) => `DECIMAL(${d},${p})`
   };
@@ -227,7 +227,7 @@ export abstract class SQLDialect implements DialectState {
           } else if (digits < 5) {
             type = this.COLUMN_TYPES.SMALLINT;
           } else if (digits < 7) {
-            type = this.COLUMN_TYPES.MEDIUMINIT;
+            type = this.COLUMN_TYPES.MEDIUMINT;
           } else if (digits < 10) {
             type = this.COLUMN_TYPES.INT;
           } else {
@@ -446,13 +446,13 @@ export abstract class SQLDialect implements DialectState {
               const arr = [...new Set(Array.isArray(v) ? v : [v])].map(el => resolve(el));
               const valueTable = this.parentTable(sStack);
               const alias = `_all_${sStack.length}`;
-              const ppath = this.ident(this.parentPathField.name);
-              const rppath = this.resolveName([...sStack, field, this.parentPathField]);
+              const pPath = this.ident(this.parentPathField.name);
+              const rpPath = this.resolveName([...sStack, field, this.parentPathField]);
 
               items.push(`${arr.length} = (
                 SELECT COUNT(DISTINCT ${alias}.${this.ident(field.name)}) 
                 FROM ${valueTable} ${alias} 
-                WHERE ${alias}.${ppath} = ${rppath}
+                WHERE ${alias}.${pPath} = ${rpPath}
                 AND ${alias}.${this.ident(field.name)} IN (${arr.join(',')})
               )`);
               break;
@@ -688,7 +688,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   }
 
   /**
-   * Get all table creat queries for a class
+   * Get all table create queries for a class
    */
   getCreateAllTablesSQL(cls: Class): string[] {
     const out: string[] = [];

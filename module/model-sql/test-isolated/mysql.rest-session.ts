@@ -26,7 +26,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class MysqlRestSesisonServerSuite extends RestSessionServerSuite {
+export class MysqlRestSessionServerSuite extends RestSessionServerSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

@@ -33,7 +33,7 @@ ${d.Execute('Sample CLI Output', 'trv', ['run'])}
 
 To invoke the ${d.Input('simple')} application, you need to pass ${d.Input('domain')} where port is optional with a default.
   
-${d.Execute('Invoke Simple', 'trv', ['run', 'simple-domain', 'mydomain.biz', '4000'], {
+${d.Execute('Invoke Simple', 'trv', ['run', 'simple-domain', 'my-domain.biz', '4000'], {
   env: { TRV_SRC_LOCAL: 'doc' }
 })}
 
@@ -41,7 +41,7 @@ ${d.Section('Type Checking')}
 
 The parameters to ${d.Method('run')} will be type checked, to ensure proper evaluation.
 
-${d.Execute('Invoke Simple with bad port', 'trv', ['run', 'simple-domain', 'mydomain.biz', 'orange'], {
+${d.Execute('Invoke Simple with bad port', 'trv', ['run', 'simple-domain', 'my-domain.biz', 'orange'], {
   env: { TRV_SRC_LOCAL: 'doc' }
 })}
 

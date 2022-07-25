@@ -203,12 +203,16 @@ After that, the provider is no different than any other, and can be used accordi
 **Code: Sample routes using Facebook/passport provider**
 ```typescript
 import { Controller, Get, Redirect, Post, Request } from '@travetto/rest';
-import { Authenticate, Authenticated, Unauthenticated } from '@travetto/auth-rest';
+import { AuthService, Authenticate, Authenticated, Unauthenticated } from '@travetto/auth-rest';
+import { Inject } from '@travetto/di';
 
 import { FB_AUTH } from './conf';
 
 @Controller('/auth')
 export class SampleAuth {
+
+  @Inject()
+  auth: AuthService;
 
   @Get('/name')
   async getName() {
@@ -236,7 +240,7 @@ export class SampleAuth {
   @Post('/logout')
   @Unauthenticated()
   async logout(req: Request) {
-    await req.logout();
+    await this.auth.logout(req);
   }
 
   /**

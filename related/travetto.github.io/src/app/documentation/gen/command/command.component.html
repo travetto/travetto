@@ -59,7 +59,7 @@ While docker containers provide a high level of flexibility, performance can be 
       <figcaption class="code">Command Service example, using pngquant
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/command/doc/service.ts">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> createWriteStream<span class="token punctuation">,</span> createReadStream <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CommandService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/command'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ImageCompressor</span> <span class="token punctuation">{{'{'}}</span>
@@ -73,9 +73,9 @@ While docker containers provide a high level of flexibility, performance can be 
     <span class="token keyword">const</span> out <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>img<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">.compressed</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
 
     <span class="token comment">// Feed into process</span>
-    fs<span class="token punctuation">.</span><span class="token function">createReadStream</span><span class="token punctuation">(</span>img<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>state<span class="token punctuation">.</span>process<span class="token punctuation">.</span>stdin<span class="token operator">!</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">createReadStream</span><span class="token punctuation">(</span>img<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>state<span class="token punctuation">.</span>process<span class="token punctuation">.</span>stdin<span class="token operator">!</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token comment">// Feed from process to file system</span>
-    state<span class="token punctuation">.</span>process<span class="token punctuation">.</span>stdout<span class="token operator">!</span><span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>fs<span class="token punctuation">.</span><span class="token function">createWriteStream</span><span class="token punctuation">(</span>out<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    state<span class="token punctuation">.</span>process<span class="token punctuation">.</span>stdout<span class="token operator">!</span><span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">createWriteStream</span><span class="token punctuation">(</span>out<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token keyword">await</span> state<span class="token punctuation">.</span>result<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -84,7 +84,7 @@ While docker containers provide a high level of flexibility, performance can be 
 
 <h2 id="cli-command-service">CLI - command:service</h2>
 
-The module provides the ability to start/stop/restart services as <a target="_blank" class="external-link" href="https://www.docker.com/community-edition">docker</a> containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targetted individually or handled as a group.
+The module provides the ability to start/stop/restart services as <a target="_blank" class="external-link" href="https://www.docker.com/community-edition">docker</a> containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
       <figure class="terminal">
       <figcaption class="terminal">Command Service

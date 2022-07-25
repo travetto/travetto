@@ -39,13 +39,13 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
   @Inject()
   config: SessionConfig;
 
-  initConifg(opt: Partial<SessionConfig>) {
+  initConfig(opt: Partial<SessionConfig>) {
     return Object.assign(this.config, opt);
   }
 
   @Test()
   async cookiePersistence() {
-    this.initConifg({
+    this.initConfig({
       transport: 'cookie',
       maxAge: 10000
     });
@@ -68,7 +68,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async cookieComplex() {
-    this.initConifg({
+    this.initConfig({
       transport: 'cookie',
       maxAge: 3000
     });
@@ -83,7 +83,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async cookieNoSession() {
-    this.initConifg({
+    this.initConfig({
       transport: 'cookie',
       maxAge: 3000
     });
@@ -96,7 +96,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async headerPersistence() {
-    const { keyName: key } = this.initConifg({
+    const { keyName: key } = this.initConfig({
       transport: 'header',
       renew: true,
       maxAge: 3000
@@ -127,7 +127,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async headerComplex() {
-    const { keyName: key } = this.initConifg({
+    const { keyName: key } = this.initConfig({
       transport: 'header',
       maxAge: 3000
     });
@@ -142,7 +142,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async headerNoSession() {
-    const { keyName: key } = this.initConifg({
+    const { keyName: key } = this.initConfig({
       transport: 'header',
       maxAge: 100
     });
@@ -156,7 +156,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryHeader() {
-    const { keyName: key } = this.initConifg({
+    const { keyName: key } = this.initConfig({
       transport: 'header',
       maxAge: 100
     });
@@ -182,7 +182,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryCookie() {
-    this.initConifg({
+    this.initConfig({
       transport: 'cookie',
       maxAge: 100
     });
@@ -204,7 +204,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryWithExtend() {
-    const { keyName: key } = this.initConifg({
+    const { keyName: key } = this.initConfig({
       transport: 'header',
       maxAge: 300
     });

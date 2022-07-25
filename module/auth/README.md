@@ -55,7 +55,7 @@ export interface Principal<D = { [key: string]: any }> {
 }
 ```
 
-As referenced above, a [Principal Structure](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authenticatino).
+As referenced above, a [Principal Structure](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
 
 ## Authentication
 
@@ -72,7 +72,7 @@ export interface Authenticator<T = unknown, P extends Principal = Principal, C =
 }
 ```
 
-The [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is respon for converting that to an authenticated principal.
+The [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
 ### Example
 The [JWT](https://github.com/travetto/travetto/tree/main/module/jwt#readme "JSON Web Token implementation") module is a good example of an authenticator. This is a common use case for simple internal auth.
@@ -105,7 +105,7 @@ Overall, the structure is simple, but drives home the primary use cases of the f
    *  To have access to the principal
 
 ## Common Utilities
-The [AuthUtil](https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts#L18) provides the following functionality:
+The [AuthUtil](https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts#L24) provides the following functionality:
 
 **Code: Auth util structure**
 ```typescript
@@ -117,6 +117,11 @@ type PermSet = Set<string> | ReadonlySet<string>;
 type PermissionChecker = {
   all: (perms: PermSet) => boolean;
   any: (perms: PermSet) => boolean;
+};
+type PermissionCheckerSet = {
+  includes: (perms: PermSet) => boolean;
+  excludes: (perms: PermSet) => boolean;
+  check: (value: PermSet) => boolean;
 };
 /**
  * Standard auth utilities
@@ -135,7 +140,7 @@ export class AuthUtil {
    * @param exclude Which permissions to exclude
    * @param matchAll Whether not all permissions should be matched
    */
-  static permissionChecker(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') ;
+  static permissionChecker(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any'): PermissionCheckerSet ;
   /**
    * Build a permission checker off of an include, and exclude set
    *
@@ -143,7 +148,7 @@ export class AuthUtil {
    * @param exclude Which permissions to exclude
    * @param matchAll Whether not all permissions should be matched
    */
-  static checkPermissions(permissions: Iterable<string>, include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any') ;
+  static checkPermissions(permissions: Iterable<string>, include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any'): void ;
   /**
    * Generate a hash for a given value
    *
@@ -153,7 +158,7 @@ export class AuthUtil {
    * @param keylen Length of hash
    * @param digest Digest method
    */
-  static generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256') ;
+  static generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256'): Promise<string> ;
   /**
    * Generate a salted password, with the ability to validate the password
    *
@@ -161,7 +166,7 @@ export class AuthUtil {
    * @param salt Salt value, or if a number, length of salt
    * @param validator Optional function to validate your password
    */
-  static async generatePassword(password: string, salt: number | string = 32) ;
+  static async generatePassword(password: string, salt: number | string = 32): Promise<{ salt: string, hash: string }> ;
 }
 ```
 
@@ -248,7 +253,7 @@ export class User implements RegisteredPrincipal {
 
 ## Configuration
 
-Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogeonized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
+Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogenized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
 
 **Code: Principal Source configuration**
 ```typescript

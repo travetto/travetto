@@ -13,7 +13,7 @@ export class Test6 {
   weight() {
     return 34;
   }
-  namered() {
+  named() {
     return 'hi';
   }
 }

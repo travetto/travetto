@@ -25,7 +25,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class SqliteRestSesisonServerSuite extends RestSessionServerSuite {
+export class SqliteRestSessionServerSuite extends RestSessionServerSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

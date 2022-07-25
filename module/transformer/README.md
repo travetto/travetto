@@ -16,7 +16,7 @@ Because working with the [Typescript](https://typescriptlang.org) API can be del
 
 ## Custom Transformer
 
-Below is an example of a transformer that uppercases all `class`, `method` and `param` declarations.  This will break any code that depends upon it as we are redefining all the identifiers at compile time.  
+Below is an example of a transformer that upper cases all `class`, `method` and `param` declarations.  This will break any code that depends upon it as we are redefining all the identifiers at compile time.  
 
 **Code: Sample Transformer - Upper case all declarations**
 ```typescript

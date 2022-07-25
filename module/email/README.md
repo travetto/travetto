@@ -35,7 +35,7 @@ By design, sending an email requires the sender to specify the html, text option
    *  `resources/<key>.compiled.subject`
 With `.html` being the only required field.  The [Email Templating](https://github.com/travetto/travetto/tree/main/module/email-template#readme "Email templating module") module supports this format, and will generate files accordingly. Also, note that `<key>` can include slashes, allowing for nesting folders.
 
-## Nodmailer - Extension
+## Nodemailer - Extension
 
 Given the integration with [nodemailer](https://nodemailer.com/about/), all extensions should be usable out of the box. The primary [nodemailer](https://nodemailer.com/about/) modules are provided (assuming dependencies are installed):
 

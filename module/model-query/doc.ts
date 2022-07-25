@@ -5,7 +5,7 @@ import { Links } from './support/doc-support';
 export const text = d`
 ${d.Header()}
 
-This module provides an enhanced query contract for ${mod.Model} implementations.  This contract has been externalized due to it being more complex than many implemenations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
+This module provides an enhanced query contract for ${mod.Model} implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
 
 ${d.Section('Contracts')}
 
@@ -15,7 +15,7 @@ This contract provides the ability to apply the query support to return one or m
 ${d.Snippet(Links.Query.title, './src/service/query.ts', /export interface/, /^}/)}
 
 ${d.SubSection(Links.QueryCrud)}
-Reinforcing the complexity provided in these contracts, the ${Links.QueryCrud} contract allows for bulk update/deletion by query.  This requires the underlying implentation to support these operations.
+Reinforcing the complexity provided in these contracts, the ${Links.QueryCrud} contract allows for bulk update/deletion by query.  This requires the underlying implementation to support these operations.
 
 ${d.Snippet(Links.QueryCrud.title, './src/service/crud.ts', /export interface/, /^}/)}
 
@@ -26,7 +26,7 @@ With the complex nature of the query support, the ability to find counts by grou
 ${d.Snippet(Links.QueryFacet.title, './src/service/facet.ts', /export interface/, /^}/)}
 
 ${d.SubSection(Links.QuerySuggest)}
-Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
+Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and type-ahead functionalities.
 
 ${d.Snippet(Links.QuerySuggest.title, './src/service/suggest.ts', /export interface/, /^}/)}
 
@@ -57,7 +57,7 @@ ${d.List(
   d`${d.Input('field: { $nin: T[] }')} to see if a record's value does not appear in the array provided to ${d.Input('$in')}`,
 )}
 
-${d.SubSection('Ordered Numberic Fields')}
+${d.SubSection('Ordered Numeric Fields')}
 ${d.List(
   d`${d.Input('field: { $lt: number }')} checks if value is less than`,
   d`${d.Input('field: { $lte: number }')} checks if value is less than or equal to`,
@@ -72,7 +72,7 @@ ${d.List(
   d`${d.Input('field: { $gte: Date | RelativeTime }')} checks if value is greater than or equal to`,
 )}
 
-${d.Note('Relative times are strings consisting of a number and a unit.  e.g. -1w or 30d.  These times are always relative to Date.now, but should make building  quieries more natural.')}
+${d.Note('Relative times are strings consisting of a number and a unit.  e.g. -1w or 30d.  These times are always relative to Date.now, but should make building queries more natural.')}
 
 ${d.SubSection('Array Fields')}
 ${d.List(

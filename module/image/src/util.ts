@@ -55,7 +55,7 @@ export class ImageUtil {
   });
 
   /**
-   * Resize image using image magick
+   * Resize image using imagemagick
    */
   static resize(image: Readable, options: ImageOptions): Promise<Readable>;
   static resize(image: Buffer, options: ImageOptions): Promise<Buffer>;
@@ -71,7 +71,7 @@ export class ImageUtil {
   }
 
   /**
-   * Optimize png usng pngquant
+   * Optimize png using pngquant
    */
   static optimize(format: 'png' | 'jpeg', image: Readable): Promise<Readable>;
   static optimize(format: 'png' | 'jpeg', image: Buffer): Promise<Buffer>;

@@ -22,5 +22,5 @@ ${d.Code('Usage of context within a service', 'doc/usage-primed.ts')}
 
 ${d.Section('Extension - Rest')}
 
-Within the ${mod.Rest} module, it can be challenging to share context across the various layers that may be touched by a request.  This module provides ${AsyncContextInterceptor} to create a data store that will be private to an individual request. This is used by ${mod.AuthRest} to store authentiated user information for built-in authorization and permission validation.
+Within the ${mod.Rest} module, it can be challenging to share context across the various layers that may be touched by a request.  This module provides ${AsyncContextInterceptor} to create a data store that will be private to an individual request. This is used by ${mod.AuthRest} to store authenticated user information for built-in authorization and permission validation.
 `;

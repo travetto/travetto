@@ -57,12 +57,12 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     const parent = this.getParentClass(cls);
 
     if (parent && this.has(parent)) {
-      const pconf = this.get(parent);
-      config.afterAll.push(...pconf.afterAll);
-      config.beforeAll.push(...pconf.beforeAll);
-      config.afterEach.push(...pconf.afterEach);
-      config.beforeEach.push(...pconf.beforeEach);
-      tests.push(...[...pconf.tests.values()].map(t => ({
+      const pConf = this.get(parent);
+      config.afterAll.push(...pConf.afterAll);
+      config.beforeAll.push(...pConf.beforeAll);
+      config.afterEach.push(...pConf.afterEach);
+      config.beforeEach.push(...pConf.beforeEach);
+      tests.push(...[...pConf.tests.values()].map(t => ({
         ...t,
         class: cls
       })));

@@ -11,7 +11,7 @@ export interface WatcherOptions {
   cwd?: string; // The relative cwd
   maxListeners?: number; // Max number of file listeners
   interval?: number; // Polling interval for watching
-  ignoreInitial?: boolean; // Ignore intial load
+  ignoreInitial?: boolean; // Ignore initial load
   exclude?: ScanHandler;
 }
 

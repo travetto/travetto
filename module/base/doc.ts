@@ -31,7 +31,7 @@ ${d.List(
   d`${d.Field('env.name')} - The environment name.  Will usually be one of ${d.Input('dev')}, ${d.Input('test')}, or ${d.Input('prod')}.  Can be anything that is passed in.`,
   d`${d.Field('env.profiles: Set<string>')} - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.`,
   d`${d.Field('env.debug')} - Simple logging flag.  This ${d.Input('boolean')} flag will enable or disable logging at various levels. By default ${d.Input('debug')} is on in non-${d.Input('prod')}.`,
-  d`${d.Field('env.resources: string[]')} - Redource folders.  Search paths for resolving resouce requests via ${ResourceManagerLink}`,
+  d`${d.Field('env.resources: string[]')} - Resource folders.  Search paths for resolving resource requests via ${ResourceManagerLink}`,
   d`${d.Field('source.local: string[]')} - Local source folders for transpiling.  Does not extend to installed modules.`,
   d`${d.Field('source.common: string[]')} - Common source folders for transpiling. Includes installed modules.`,
   d`${d.Method('hasProfile(p: string): boolean;')} - Test whether or not a profile is active.`,
@@ -46,7 +46,7 @@ ${d.Code('Looking for all .config files with the prefix defined by svc', 'doc/fi
 
 ${d.Section('Resource Management')}
 
-Resource management, loading of files, and other assets at runtime is a common pattern that the ${ResourceManagerLink} encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
+Resource management, loading of files, and other assets at runtime is a common pattern that the ${ResourceManagerLink} encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registered paths.
 
 ${d.Code('Finding Images', 'doc/image.ts')}
 

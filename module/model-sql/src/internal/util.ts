@@ -191,10 +191,10 @@ export class SQLUtil {
 
         if (field.name in topObj) {
           const value = topObj[field.name];
-          const vals = Array.isArray(value) ? value : [value];
+          const values = Array.isArray(value) ? value : [value];
 
           let i = 0;
-          for (const val of vals) {
+          for (const val of values) {
             try {
               pathObj.push(val);
               config.path[config.path.length - 1] = { ...top, index: i++ };

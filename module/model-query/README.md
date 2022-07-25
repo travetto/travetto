@@ -8,7 +8,7 @@
 npm install @travetto/model-query
 ```
 
-This module provides an enhanced query contract for [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations.  This contract has been externalized due to it being more complex than many implemenations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
+This module provides an enhanced query contract for [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
 
 ## Contracts
 
@@ -41,7 +41,7 @@ export interface ModelQuerySupport {
 ```
 
 ### [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/crud.ts#L11)
-Reinforcing the complexity provided in these contracts, the [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/crud.ts#L11) contract allows for bulk update/deletion by query.  This requires the underlying implentation to support these operations.
+Reinforcing the complexity provided in these contracts, the [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/crud.ts#L11) contract allows for bulk update/deletion by query.  This requires the underlying implementation to support these operations.
 
 **Code: Query Crud**
 ```typescript
@@ -79,7 +79,7 @@ export interface ModelQueryFacetSupport extends ModelQuerySupport {
 ```
 
 ### [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/suggest.ts#L12)
-Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and typeahead functionalities.
+Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and type-ahead functionalities.
 
 **Code: Suggest**
 ```typescript
@@ -129,7 +129,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
    *  `field: { $in: T[] }` to see if a record's value appears in the array provided to `$in`
    *  `field: { $nin: T[] }` to see if a record's value does not appear in the array provided to `$in`
 
-### Ordered Numberic Fields
+### Ordered Numeric Fields
    
    *  `field: { $lt: number }` checks if value is less than
    *  `field: { $lte: number }` checks if value is less than or equal to
@@ -142,7 +142,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
    *  `field: { $gt: Date | RelativeTime }` checks if value is greater than
    *  `field: { $gte: Date | RelativeTime }` checks if value is greater than or equal to
 
-**Note**: Relative times are strings consisting of a number and a unit.  e.g. -1w or 30d.  These times are always relative to Date.now, but should make building  quieries more natural.
+**Note**: Relative times are strings consisting of a number and a unit.  e.g. -1w or 30d.  These times are always relative to Date.now, but should make building queries more natural.
 
 ### Array Fields
    

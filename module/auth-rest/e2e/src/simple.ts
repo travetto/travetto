@@ -1,10 +1,14 @@
+import { Inject } from '@travetto/di';
 import { Controller, Get, Redirect, Request } from '@travetto/rest';
 
-import { Authenticate, Authenticated } from '../..';
+import { AuthService, Authenticate, Authenticated } from '../..';
 import { SIMPLE_AUTH } from './conf';
 
 @Controller('/auth')
 export class SampleAuth {
+
+  @Inject()
+  auth: AuthService;
 
   @Get('/name')
   async getName() {
@@ -26,7 +30,7 @@ export class SampleAuth {
   @Get('/logout')
   @Authenticated()
   async logout(req: Request) {
-    await req.logout();
+    await this.auth.logout(req);
     return new Redirect('/auth/self', 301);
   }
 }

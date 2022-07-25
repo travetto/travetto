@@ -25,7 +25,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class PostgreSQLRestSesisonServerSuite extends RestSessionServerSuite {
+export class PostgreSQLRestSessionServerSuite extends RestSessionServerSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

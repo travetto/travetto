@@ -106,9 +106,9 @@ Available Applications:
      usage: simple-domain domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  doc/domain.ts
 
-   ● test-eptest
-     --------------------------------------------------------
-     usage: test-eptest <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
+   ● test-ep-test
+     ---------------------------------------------------------
+     usage: test-ep-test <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
      file:  doc/entry.ts</code></pre>     
       </figure>
 
@@ -150,9 +150,9 @@ Available Applications:
      usage: simple-domain domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  doc/domain.ts
 
-   ● test-eptest
-     --------------------------------------------------------
-     usage: test-eptest <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
+   ● test-ep-test
+     ---------------------------------------------------------
+     usage: test-ep-test <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
      file:  doc/entry.ts</code></pre>     
       </figure>
 
@@ -163,7 +163,7 @@ To invoke the <code class="item input">simple</code> application, you need to pa
       <figcaption class="terminal">Invoke Simple
       
       </figcaption>
-      <pre><code class="language-bash">$ trv run simple-domain mydomain.biz <span class="token number">4000</span>
+      <pre><code class="language-bash">$ trv run simple-domain my-domain.biz <span class="token number">4000</span>
 
 Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'simple-domain'</span>, filename: <span class="token string">'./doc/domain.ts'</span> <span class="token punctuation">{{'}'}}</span>
 Manifest <span class="token punctuation">{{'{'}}</span>
@@ -173,10 +173,7 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     description: <span class="token string">'Application registration/management and run support.'</span>,
     version: <span class="token string">'2.1.5'</span>,
     license: <span class="token string">'MIT'</span>,
-    author: <span class="token punctuation">{{'{'}}</span>
-      email: <span class="token string">'travetto.framework@gmail.com'</span>,
-      name: <span class="token string">'Travetto Framework'</span>
-    <span class="token punctuation">{{'}'}}</span>
+    author: <span class="token punctuation">{{'{'}}</span> email: <span class="token string">'travetto.framework@gmail.com'</span>, name: <span class="token string">'Travetto Framework'</span> <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'dev'</span>,
@@ -202,6 +199,7 @@ Manifest <span class="token punctuation">{{'{'}}</span>
       <span class="token string">'@travetto/config'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:config'</span>,
       <span class="token string">'@travetto/di'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:di'</span>,
       <span class="token string">'@travetto/doc'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:doc'</span>,
+      <span class="token string">'@travetto/log'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:log'</span>,
       <span class="token string">'@travetto/registry'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:registry'</span>,
       <span class="token string">'@travetto/schema'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:schema'</span>,
       <span class="token string">'@travetto/test'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:test'</span>,
@@ -212,8 +210,8 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-Config <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
-Launching <span class="token punctuation">{{'{'}}</span> domain: <span class="token string">'mydomain.biz'</span>, port: <span class="token number">4000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
+Config
+Launching <span class="token punctuation">{{'{'}}</span> domain: <span class="token string">'my-domain.biz'</span>, port: <span class="token number">4000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <h2 id="type-checking">Type Checking</h2>
@@ -224,7 +222,7 @@ The parameters to <code class="item method">run</code> will be type checked, to 
       <figcaption class="terminal">Invoke Simple with bad port
       
       </figcaption>
-      <pre><code class="language-bash">$ trv run simple-domain mydomain.biz orange
+      <pre><code class="language-bash">$ trv run simple-domain my-domain.biz orange
 
 Failed to run simple-domain, Validation errors have occurred
 ● port is not a valid number</code></pre>     

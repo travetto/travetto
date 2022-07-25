@@ -28,7 +28,7 @@ as well. The information that is available is:
    *  `env.name` - The environment name.  Will usually be one of `dev`, `test`, or `prod`.  Can be anything that is passed in.
    *  `env.profiles: Set<string>` - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.
    *  `env.debug` - Simple logging flag.  This `boolean` flag will enable or disable logging at various levels. By default `debug` is on in non-`prod`.
-   *  `env.resources: string[]` - Redource folders.  Search paths for resolving resouce requests via [ResourceManager](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts)
+   *  `env.resources: string[]` - Resource folders.  Search paths for resolving resource requests via [ResourceManager](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts)
    *  `source.local: string[]` - Local source folders for transpiling.  Does not extend to installed modules.
    *  `source.common: string[]` - Common source folders for transpiling. Includes installed modules.
    *  `hasProfile(p: string): boolean;` - Test whether or not a profile is active.
@@ -40,7 +40,7 @@ A simple example of finding specific `.config` files in your codebase:
 
 **Code: Looking for all .config files with the prefix defined by svc**
 ```typescript
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import { PathUtil, ScanFs } from '@travetto/boot';
 
 export async function processServiceConfigs(svc: string) {
@@ -48,14 +48,14 @@ export async function processServiceConfigs(svc: string) {
   for (const conf of svcConfigs) {
     // Do work
 
-    const contents = await fs.promises.readFile(conf.module, 'utf8');
+    const contents = await fs.readFile(conf.module, 'utf8');
   }
 }
 ```
 
 ## Resource Management
 
-Resource management, loading of files, and other assets at runtime is a common pattern that the [ResourceManager](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts) encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registerd paths.
+Resource management, loading of files, and other assets at runtime is a common pattern that the [ResourceManager](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts) encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registered paths.
 
 **Code: Finding Images**
 ```typescript
@@ -70,7 +70,7 @@ export async function findSingleImage() {
 }
 
 /**
- * Find all .gif files under the imsages folder
+ * Find all .gif files under the images folder
  */
 export async function findAllImages() {
   const imagePaths = await ResourceManager.findAll(/[.]gif$/, 'images/');
@@ -99,7 +99,7 @@ An example would be something like `phase.init.ts` in the [Configuration](https:
 export const init = {
   key: '@trv:config/init',
   before: ['@trv:registry/init'],
-  async action() {
+  async action(): Promise<void> {
     const { ConfigManager } = await import('../src/manager');
     await ConfigManager.init();
   }
@@ -190,7 +190,7 @@ Error: Uh oh
 The needed functionality cannot be loaded until `init.action` executes, and so must be required only at that time.
 
 ## General Utilities
-Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L30) includes:
+Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L32) includes:
 
    
    *  `isPrimitive(el)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
@@ -213,7 +213,6 @@ $ trv build --help
 Usage:  build [options]
 
 Options:
-  -c, --clean            Indicates if the cache dir should be cleaned
   -o, --output <output>  Output directory
   -q, --quiet            Quiet operation
   -h, --help             display help for command

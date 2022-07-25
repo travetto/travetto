@@ -19,7 +19,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class ElasticsearchRestSesisonServerSuite extends RestSessionServerSuite {
+export class ElasticsearchRestSessionServerSuite extends RestSessionServerSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }

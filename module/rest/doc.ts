@@ -115,7 +115,7 @@ ${QuerySchema} provides the ability to convert the inbound request query into a 
 
 ${d.Code(d`Using ${QuerySchema.name} for GET requests`, 'doc/schema-query.ts')}
 
-Addtionally, ${QuerySchema} and ${Body} can also be used with ${d.Input('interface')}s and ${d.Input('type')} literals in lieu of classes. This is best suited for simple types:
+Additionally, ${QuerySchema} and ${Body} can also be used with ${d.Input('interface')}s and ${d.Input('type')} literals in lieu of classes. This is best suited for simple types:
 
 ${d.Code(d`Using ${QuerySchema.name} with a type literal`, 'doc/schema-query-type.ts')}
 
@@ -140,7 +140,7 @@ Additionally, the ${mod.Schema} module supports typing requests and request bodi
 
 ${d.Section('Running an App')}
 
-By default, the framework provices a default ${Application} at ${RestApplication} that will follow default behaviors, and spin up the REST server.  You will need to install the ${mod.App} module to execute.  
+By default, the framework provides a default ${Application} at ${RestApplication} that will follow default behaviors, and spin up the REST server.  You will need to install the ${mod.App} module to execute.  
 
 ${d.Install('Installing app support', '@travetto/app')}
 
@@ -159,9 +159,9 @@ ${d.Section('Interceptors')}
 
 ${RestInterceptor}s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
-${d.Code('A Trivial Intereptor', 'doc/interceptor-hello-world.ts')}
+${d.Code('A Trivial Interceptor', 'doc/interceptor-hello-world.ts')}
 
-${d.Note('The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after reuirements to ensure the appropriate order of execution.')}
+${d.Note('The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after requirements to ensure the appropriate order of execution.')}
 
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 ${d.Ordered(
@@ -230,7 +230,7 @@ ${d.Code('Comparable UserController, built manually', 'doc/controller-without-mo
 
 ${d.Section('Extension - Model Query')}
 
-Additionally, ${mod.ModelQuery} support can also be added support in the form of ${ModelQueryRoutes}. This provides listing by query as well as an endpoint to facillitate suggestion behaviors.
+Additionally, ${mod.ModelQuery} support can also be added support in the form of ${ModelQueryRoutes}. This provides listing by query as well as an endpoint to facilitate suggestion behaviors.
 
 ${d.Code('ModelQueryRoutes example', 'doc/controller-with-model-query.ts')}
 

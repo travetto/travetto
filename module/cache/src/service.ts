@@ -114,7 +114,7 @@ export class CacheService {
   /**
    * Get an item optionally, returning undefined if missing.  Allows for extending expiry based on access
    * @param id Record identifier
-   * @param extendOnAccess should the expiry be extended on acces
+   * @param extendOnAccess should the expiry be extended on access
    */
   async getOptional(id: string, extendOnAccess = true): Promise<unknown | undefined> {
     let res: unknown;

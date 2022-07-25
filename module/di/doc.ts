@@ -7,7 +7,7 @@ import { DependencyRegistry } from './src/registry';
 export const text = d`
 ${d.Header()}
 
-${lib.DependencyInjection} is a framework primitive.  When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of ${lib.Typescript} and type erasure of interfaces, dependency injection only supports ${d.Input('class')}es as type signafiers. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.
+${lib.DependencyInjection} is a framework primitive.  When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of ${lib.Typescript} and type erasure of interfaces, dependency injection only supports ${d.Input('class')}es as a type signifier. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.
 
 ${d.Section('Declaration')}
 The ${Injectable} and ${InjectableFactory} decorators provide the registration of dependencies.   Dependency declaration revolves around exposing ${d.Input('class')}es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various implementations (e.g. ${d.Ref('MongoModelService', '@travetto/model-mongo/src/service.ts')} provides itself as an injectable candidate for ${d.Ref('ModelCrudSupport', '@travetto/model/src/service/crud.ts')}.
@@ -56,11 +56,11 @@ ${d.SubSection('Multiple Candidates for the Same Type')}
 
 If you are building modules for others to consume, often times it is possible to end up with multiple implementations for the same class.  
 
-${d.Code(d`Example Multiple Candiate Types`, 'doc/injectable-multiple-default.ts')}
+${d.Code(d`Example Multiple Candidate Types`, 'doc/injectable-multiple-default.ts')}
 
 By default, if there is only one candidate without qualification, then that candidate will be used.  If multiple candidates are found, then the injection system will bail.  To overcome this the end user will need to specify which candidate type should be considered ${d.Input('primary')}:
 
-${d.Code(d`Example Multiple Candiate Types`, 'doc/injectable-multiple-primary.ts')}
+${d.Code(d`Example Multiple Candidate Types`, 'doc/injectable-multiple-primary.ts')}
 
 ${d.Section('Manual Invocation')}
 

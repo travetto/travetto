@@ -19,7 +19,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class S3RestSesisonServerSuite extends RestSessionServerSuite {
+export class S3RestSessionServerSuite extends RestSessionServerSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 }

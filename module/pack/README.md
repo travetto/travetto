@@ -39,14 +39,14 @@ Assemble is the operation that stages the project's code for deployment.  The as
 
    
    1. Cleaning Workspace - Cleans workspace to start with an empty workspace
-   1. Copying Dependencies - Computes the prod depedencies and copies them into the new workspace
+   1. Copying Dependencies - Computes the prod dependencies and copies them into the new workspace
    1. Copying App Content - Copies over application content (src/resources/support/bin)
    1. Excluding Pre-Compile Files - Any files that should be excluded pre-compilation, are removed
    1. Compiling - Compiles the code in the new workspace, isolating it from your local development
    1. Excluding Post-Compile Files - Removes any files that should be excluded, post compilation
    1. Copying Added Content - Adds in any additional content that is not in the standard locations
    1. Removing Empty Folders - Purge all empty folders, recursively
-   1. Writng Env.js - Write out the .env.js file with computed any env vars that should be set for the deployed app
+   1. Writing Env.js - Write out the .env.js file with computed any env vars that should be set for the deployed app
    1. Remove Source Maps - If keep source is false, all source maps are purged from your app's code
    1. Emptying .ts Files - If keep source is false, all .ts files are emptied, as compilation will not occur at runtime
 
@@ -168,7 +168,7 @@ Various modules may provide customizations to the default `pack.config.ts` to al
 
 **Code: Rest, pack.lambda.ts**
 ```typescript
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { PathUtil } from '@travetto/boot';
 import type { AllConfigPartial } from '@travetto/pack';
@@ -186,7 +186,7 @@ export const config: AllConfigPartial = {
     },
     postProcess: [{
       ['Lambda Entrypoint']: cfg =>
-        fs.promises.copyFile(
+        fs.copyFile(
           PathUtil.resolveUnix(__dirname, 'aws-lambda.handler.js'),
           PathUtil.resolveUnix(cfg.workspace, 'index.js')
         )

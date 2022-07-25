@@ -313,28 +313,28 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Register a class
    */
-  registerClass<T>(cls: Class<T>, pconfig: Partial<InjectableConfig<T>> = {}): void {
-    const config = this.getOrCreatePending(pconfig.class ?? cls);
+  registerClass<T>(cls: Class<T>, pConfig: Partial<InjectableConfig<T>> = {}): void {
+    const config = this.getOrCreatePending(pConfig.class ?? cls);
 
     config.class = cls;
-    config.qualifier = pconfig.qualifier ?? config.qualifier ?? Symbol.for(cls.ᚕid);
-    if (pconfig.interfaces) {
-      config.interfaces?.push(...pconfig.interfaces);
+    config.qualifier = pConfig.qualifier ?? config.qualifier ?? Symbol.for(cls.ᚕid);
+    if (pConfig.interfaces) {
+      config.interfaces?.push(...pConfig.interfaces);
     }
-    if (pconfig.primary !== undefined) {
-      config.primary = pconfig.primary;
+    if (pConfig.primary !== undefined) {
+      config.primary = pConfig.primary;
     }
-    if (pconfig.factory) {
-      config.factory = pconfig.factory ?? config.factory;
+    if (pConfig.factory) {
+      config.factory = pConfig.factory ?? config.factory;
     }
-    if (pconfig.target) {
-      config.target = pconfig.target;
+    if (pConfig.target) {
+      config.target = pConfig.target;
     }
-    if (pconfig.dependencies) {
+    if (pConfig.dependencies) {
       config.dependencies = {
         fields: {},
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        ...pconfig.dependencies as Omit<InjectableConfig['dependencies'], 'fields'>
+        ...pConfig.dependencies as Omit<InjectableConfig['dependencies'], 'fields'>
       };
     }
   }
@@ -495,11 +495,11 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
       // Register primary if only one interface provided and no parent config
       if (config.interfaces.length === 1 && !parentConfig) {
-        const [intf] = config.interfaces;
-        if (!this.targetToClass.has(intf.ᚕid)) {
-          this.targetToClass.set(intf.ᚕid, new Map());
+        const [primaryInterface] = config.interfaces;
+        if (!this.targetToClass.has(primaryInterface.ᚕid)) {
+          this.targetToClass.set(primaryInterface.ᚕid, new Map());
         }
-        this.targetToClass.get(intf.ᚕid)!.set(PrimaryCandidateⲐ, classId);
+        this.targetToClass.get(primaryInterface.ᚕid)!.set(PrimaryCandidateⲐ, classId);
       }
     }
 
