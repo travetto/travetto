@@ -80,7 +80,7 @@ export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
     const dct = await this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
       const field = stack[stack.length - 1] as FieldConfig;
-      return `${field.owner.name}.${field.name}`;
+      return `${field.owner?.name}.${field.name}`;
     };
 
     const out = dct.getWhereGroupingSQL(User, {

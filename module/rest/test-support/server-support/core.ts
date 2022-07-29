@@ -6,7 +6,7 @@ import { Util } from '@travetto/base';
 
 import type { RestApplication } from '../../src/application/rest';
 import type { Request } from '../../src/types';
-import type { RestServerSupport, MakeRequestConfig } from './base';
+import { RestServerSupport, MakeRequestConfig, headerToShape } from './base';
 
 /**
  * Support for invoking http requests against the server
@@ -57,11 +57,11 @@ export class CoreRestServerSupport implements RestServerSupport {
     }
     const res = await fetch(`${this.url}${path}${q}`, {
       method,
-      headers: headers as Record<string, string>,
+      headers: headerToShape.single(headers),
       body
     });
 
-    return { status: res.status, body: Buffer.from(await res.text()), headers: Object.fromEntries([...res.headers]) };
+    return { status: res.status, body: Buffer.from(await res.text()), headers: headerToShape.multi(res.headers) };
   }
 
   get url() {

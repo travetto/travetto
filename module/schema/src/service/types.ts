@@ -77,7 +77,7 @@ export interface FieldConfig extends DescribableConfig {
   /**
    * Owner class
    */
-  owner: Class;
+  owner?: Class;
   /**
    * Field name
    */

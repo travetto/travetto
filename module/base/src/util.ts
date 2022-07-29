@@ -1,4 +1,6 @@
 import * as crypto from 'crypto';
+import * as timers from 'timers/promises';
+
 import { EnvUtil } from '@travetto/boot';
 import { Class, ClassInstance } from './types';
 
@@ -31,10 +33,6 @@ const AsyncFunction = Object.getPrototypeOf(async function () { });
  */
 export class Util {
   static #timePattern = new RegExp(`^(-?[0-9.]+)(${Object.keys(TIME_UNITS).join('|')})$`);
-
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  static getKeys = Object.keys.bind(Object) as
-    <K extends string | symbol | number = string, T extends object = object>(o: T) => K[];
 
   static #deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): unknown {
     const isEmptyA = a === undefined || a === null;
@@ -342,7 +340,7 @@ export class Util {
    * Wait for n units of time
    */
   static wait(n: number | TimeSpan, unit?: TimeUnit): Promise<void> {
-    return new Promise(res => setTimeout(res, this.timeToMs(n, unit)));
+    return timers.setTimeout(this.timeToMs(n, unit));
   }
 
   /**

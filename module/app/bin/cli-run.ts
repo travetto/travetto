@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
 import { EnvUtil, PathUtil } from '@travetto/boot';
@@ -13,10 +13,16 @@ function hasChildren(e: Error): e is Error & { errors: Error[] } {
   return !!e && ('errors' in e);
 }
 
+type Options = {
+  env: OptionConfig<string>;
+  profile: OptionConfig<string[]>;
+  resource: OptionConfig<string[]>;
+};
+
 /**
  * The main entry point for the application cli
  */
-export class AppRunPlugin extends BasePlugin {
+export class AppRunPlugin extends BasePlugin<Options> {
   name = 'run';
   allowUnknownOptions = true;
 
@@ -33,8 +39,7 @@ export class AppRunPlugin extends BasePlugin {
     ].join('\n');
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return {
       env: this.option({ desc: 'Application environment' }),
       profile: this.listOption({ desc: 'Additional application profiles' }),

@@ -1,14 +1,18 @@
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 
 import { ModelCandidateUtil } from './candidate';
 
+type Options = {
+  env: OptionConfig<string>;
+};
+
 /**
  * CLI Entry point for exporting model schemas
  */
-export abstract class BaseModelPlugin extends BasePlugin {
+export abstract class BaseModelPlugin extends BasePlugin<Options> {
 
   restoreEnv?: (err: Error) => unknown;
 
@@ -32,8 +36,7 @@ export abstract class BaseModelPlugin extends BasePlugin {
     return '[provider] [models...]';
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return { env: this.option({ desc: 'Application environment' }) };
   }
 

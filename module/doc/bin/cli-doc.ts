@@ -1,18 +1,24 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 import { EnvInit } from '@travetto/base/bin/init';
 import { PathUtil } from '@travetto/boot';
+
+type Options = {
+  input: OptionConfig<string>;
+  output: OptionConfig<string[]>;
+  format: OptionConfig<string>;
+  watch: OptionConfig<boolean>;
+};
 
 /**
  * Command line support for generating module docs.
  */
-export class DocPlugin extends BasePlugin {
+export class DocPlugin extends BasePlugin<Options> {
   name = 'doc';
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return {
       input: this.option({ desc: 'Input File', def: 'doc.ts' }),
       output: this.listOption({ desc: 'Output files' }),

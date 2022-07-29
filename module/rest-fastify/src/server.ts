@@ -52,8 +52,7 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
     app.register(formBody);
 
     // Allow everything else to be treated as a stream
-    // @ts-expect-error
-    app.addContentTypeParser(['*'], (_r, _p, done) => done());
+    app.addContentTypeParser(['*'], (_r, _p, done) => done(null));
 
     this.raw = app;
     return app;

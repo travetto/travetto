@@ -76,6 +76,13 @@ class TestController {
       path: req.path
     };
   }
+
+  @Get('/headerFirst')
+  getHeaderFirst(req: Request) {
+    return {
+      header: req.headerFirst('age')
+    };
+  }
 }
 
 @Suite()
@@ -127,7 +134,8 @@ export abstract class RestServerSuite extends BaseRestSuite {
       }
     });
     console.log('Headers', { headers });
-    assert(/flavor.*oreo/.test(headers['set-cookie'] ?? ''));
+    const cookie = Array.isArray(headers['set-cookie']) ? headers['set-cookie'][0] : headers['set-cookie'];
+    assert(/flavor.*oreo/.test(cookie ?? ''));
     assert(ret === { cookie: 'yummy' });
   }
 
@@ -164,5 +172,15 @@ export abstract class RestServerSuite extends BaseRestSuite {
   async testFullUrl() {
     const { body: ret } = await this.request('get', '/test/fullUrl');
     assert(ret === { url: '/test/fullUrl', path: '/test/fullUrl' });
+  }
+
+  @Test()
+  async testHeaderFirst() {
+    const { body: ret } = await this.request('get', '/test/headerFirst', {
+      headers: {
+        age: ['1', '2', '3']
+      }
+    });
+    assert(ret === { value: '1' });
   }
 }

@@ -1,10 +1,23 @@
 import type * as eslint from 'eslint';
+import { BaseExpression, Expression } from 'estree';
 
 const groupTypeMap = {
   node: ['node', 'travetto', 'local'],
   travetto: ['travetto', 'local'],
   local: ['local'],
 };
+
+interface TSAsExpression extends BaseExpression {
+  type: 'TSAsExpression';
+  expression: Expression;
+}
+
+declare module 'estree' {
+  interface ExpressionMap {
+    TSAsExpression: TSAsExpression;
+  }
+}
+
 
 export const ImportOrder = {
   create(context: eslint.Rule.RuleContext): { Program: (ast: eslint.AST.Program) => void } {
@@ -27,16 +40,14 @@ export const ImportOrder = {
           from = node.source?.value;
         } else if (node.type === 'VariableDeclaration' && node.kind === 'const') {
           const [decl] = node.declarations;
-          let call;
+          let call: Expression | undefined;
           const initType = decl?.init?.type;
           if (initType === 'CallExpression') {
             call = decl.init;
-            // @ts-expect-error
           } else if (initType === 'TSAsExpression') { // tslint support
-            // @ts-expect-error
             call = decl.init.expression;
           }
-          if (call?.type === 'CallExpression' && call.callee.name === 'require') {
+          if (call?.type === 'CallExpression' && call.callee.type === 'Identifier' && call.callee.name === 'require' && call.arguments[0].type === 'Literal') {
             from = call.arguments[0].value;
           }
         }

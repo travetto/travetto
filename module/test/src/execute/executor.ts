@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as timers from 'timers/promises';
 import * as fs from 'fs/promises';
 
 import { Util } from '@travetto/base';
@@ -44,7 +45,7 @@ export class TestExecutor {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           await (suite.instance as Record<string, Function>)[test.methodName](); // Run
         } finally {
-          PromiseCapture.stop().then(() => setTimeout(promCleanup.resolve, 1), promCleanup.reject);
+          PromiseCapture.stop().then(() => timers.setTimeout(1).then(promCleanup.resolve), promCleanup.reject);
         }
       });
 

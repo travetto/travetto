@@ -133,8 +133,7 @@ export class Workspace {
    * Generate execution launch config
    * @param config
    */
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  static generateLaunchConfig(name: string, main: string, args: string[] = [], env: Record<string, string> = {}) {
+  static generateLaunchConfig(name: string, main: string, args: string[] = [], env: Record<string, string> = {}): vscode.DebugConfiguration {
     return {
       type: 'node',
       request: 'launch',

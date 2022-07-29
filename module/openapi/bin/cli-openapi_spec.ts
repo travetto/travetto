@@ -1,15 +1,18 @@
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 import { ExecUtil } from '@travetto/boot';
 import { EnvInit } from '@travetto/base/bin/init';
+
+type Options = {
+  output: OptionConfig<string>;
+};
 
 /**
  * CLI for outputting the open api spec to a local file
  */
-export class OpenApiSpecPlugin extends BasePlugin {
+export class OpenApiSpecPlugin extends BasePlugin<Options> {
   name = 'openapi:spec';
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return { output: this.option({ desc: 'Output files', def: './openapi.yml' }) };
   }
 

@@ -2,7 +2,7 @@
 import type lambdaFastify from '@fastify/aws-lambda';
 // eslint-disable-next-line no-duplicate-imports
 import * as alf from '@fastify/aws-lambda';
-// @ts-ignore
+// @ts-expect-error
 const awsLambdaFastify: typeof lambdaFastify = alf;
 
 import { Inject, Injectable } from '@travetto/di';

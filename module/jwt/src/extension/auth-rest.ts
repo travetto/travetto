@@ -73,8 +73,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
    * Read JWT from request
    */
   async decode(req: Request): Promise<Principal | undefined> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const token = (req.header(this.config.header) as string)?.replace(this.config.headerPrefix, '');
+    const token = (req.headerFirst(this.config.header))?.replace(this.config.headerPrefix, '');
     if (token) {
       return this.verifyToken(token);
     }

@@ -62,8 +62,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
   }
 
   async unregisterRoutes(key: string | symbol): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const routes = (this.raw._router.stack as RouteStack[]);
+    const routes: RouteStack[] = this.raw._router.stack;
     const pos = routes.findIndex(x => x.handle.key === key);
     if (pos >= 0) {
       routes.splice(pos, 1);
@@ -74,8 +73,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      router[route.method as 'get'](route.path!, (req, res) => {
+      router[route.method](route.path!, (req, res) => {
         route.handlerFinalized!(
           req[TravettoEntityⲐ] ??= ExpressServerUtil.getRequest(req),
           res[TravettoEntityⲐ] ??= ExpressServerUtil.getResponse(res)
@@ -95,8 +93,12 @@ export class ExpressRestServer implements RestServer<express.Application> {
         }
       );
 
-      // @ts-ignore
-      router.options('*', optionHandler);
+      router.options('*', (req, res) => {
+        optionHandler(
+          req[TravettoEntityⲐ] ??= ExpressServerUtil.getRequest(req),
+          res[TravettoEntityⲐ] ??= ExpressServerUtil.getResponse(res)
+        );
+      });
     }
 
     router.key = key;

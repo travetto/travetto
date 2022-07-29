@@ -7,6 +7,7 @@ import { ServerHandle } from '@travetto/rest/src/types';
 import { AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ, RestAwsConfig } from '@travetto/rest/src/extension/aws-lambda';
 
 import { ExpressRestServer } from '../server';
+import e = require('express');
 
 type AwsLambdaHandle = AwsLambdaHandler['handle'];
 

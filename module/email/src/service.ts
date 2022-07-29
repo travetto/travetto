@@ -88,7 +88,7 @@ export class MailService {
         // NOTE: The leading space on the content type is to force node mailer to not do anything fancy with
         content: html, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: ' text/html; charset=utf-8'
       });
-      // @ts-ignore
+      // @ts-expect-error
       delete msg.html; // This is a hack to fix nodemailer
     }
 

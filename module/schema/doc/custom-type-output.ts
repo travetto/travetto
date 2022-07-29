@@ -4,7 +4,7 @@ import { LocationAware } from './custom-type-usage';
 export async function main(): Promise<void> {
   const la = LocationAware.from({
     name: 'bob',
-    // @ts-ignore
+    // @ts-expect-error
     point: 'red'
   });
 

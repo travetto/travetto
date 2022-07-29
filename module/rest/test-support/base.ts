@@ -129,8 +129,7 @@ export abstract class BaseRestSuite {
     return {
       status: resp.status,
       body: out as T,
-      headers: Object.fromEntries(Object.entries(resp.headers).map(([k, v]) =>
-        [k.toLowerCase(), Array.isArray(v) ? v[0] : v]))
+      headers: Object.fromEntries(Object.entries(resp.headers).map(([k, v]) => [k.toLowerCase(), v]))
     };
   }
 }

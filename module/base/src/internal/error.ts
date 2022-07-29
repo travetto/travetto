@@ -1,5 +1,9 @@
 export type SerializedError = { $?: boolean, message: string, stack?: string, name: string };
 
+function isSerialized(e: unknown): e is SerializedError {
+  return !!e && (typeof e === 'object') && '$' in e;
+}
+
 /**
  * Mapping from error category to standard http error codes
  */
@@ -72,8 +76,7 @@ export class ErrorUtil {
 
     if (e) {
       error = { $: true, name: e.name, message: '' };
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      for (const k of Object.keys(e) as ['name' | 'message']) {
+      for (const k of Object.keys<{ name: string }>(e)) {
         error[k] = e[k];
       }
       error.name = e.name;
@@ -93,12 +96,10 @@ export class ErrorUtil {
   static deserializeError(e: Error | SerializedError): Error;
   static deserializeError(e: undefined): undefined;
   static deserializeError(e: Error | SerializedError | undefined): Error | undefined {
-    if (e && '$' in e) {
+    if (isSerialized(e)) {
       const err = new Error();
 
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const keys = Object.keys(e) as ('name' | 'message')[];
-      for (const k of keys) {
+      for (const k of Object.keys<{ name: string }>(e)) {
         err[k] = e[k];
       }
       err.message = e.message;
@@ -106,8 +107,7 @@ export class ErrorUtil {
       err.name = e.name;
       return err;
     } else if (e) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return e as Error;
+      return e;
     }
   }
 }

@@ -1,19 +1,24 @@
 import * as enquirer from 'enquirer';
 
 import { PathUtil, EnvUtil } from '@travetto/boot';
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 
 import { Context } from './lib/context';
 import { Feature, FEATURES } from './lib/features';
 
+type Options = {
+  template: OptionConfig<string>;
+  dir: OptionConfig<string>;
+  force: OptionConfig<boolean>;
+};
+
 /**
  * Plugin to run scaffolding
  */
-export class ScaffoldPlugin extends BasePlugin {
+export class ScaffoldPlugin extends BasePlugin<Options> {
   name = 'scaffold';
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return {
       template: this.option({ def: 'todo', desc: 'Template' }),
       dir: this.option({ desc: 'Target Directory' }),

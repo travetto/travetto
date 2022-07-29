@@ -186,8 +186,7 @@ export class BindUtil {
 
       // If no configuration
       if (!conf) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        for (const k of Object.keys(data) as (keyof typeof obj)[]) {
+        for (const k of Object.keys(data)) {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           obj[k] = data[k as keyof typeof data];
         }

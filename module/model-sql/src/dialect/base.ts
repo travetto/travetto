@@ -1,6 +1,6 @@
 import { SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
 import { Class, Util, AppError } from '@travetto/base';
-import { SelectClause, Query, SortClause, WhereClause } from '@travetto/model-query';
+import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelType } from '@travetto/model/src/types/model';
@@ -30,8 +30,6 @@ class Total {
 function makeField(name: string, type: Class, required: boolean, extra: Partial<FieldConfig>): FieldConfig {
   return {
     name,
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    owner: null as unknown as Class,
     type,
     array: false,
     ...(required ? { required: { active: true } } : {}),
@@ -410,8 +408,7 @@ export abstract class SQLDialect implements DialectState {
     const { foreignMap, localMap } = SQLUtil.getFieldsByLocation(stack);
     const SQL_OPS = this.SQL_OPS;
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    for (const key of Object.keys(o) as ((keyof (typeof o)))[]) {
+    for (const key of Object.keys(o)) {
       const top = o[key];
       const field = localMap[key] ?? foreignMap[key];
       if (!field) {
@@ -493,7 +490,7 @@ export abstract class SQLDialect implements DialectState {
             }
             case '$lt': case '$gt': case '$gte': case '$lte': {
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              const subItems = (Object.keys(top) as (keyof typeof SQL_OPS)[])
+              const subItems = Object.keys(top as typeof SQL_OPS)
                 .map(ssk => `${sPath} ${SQL_OPS[ssk]} ${resolve(top[ssk])}`);
               items.push(subItems.length > 1 ? `(${subItems.join(` ${SQL_OPS.$and} `)})` : subItems[0]);
               break;
@@ -713,8 +710,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
     const table = this.namespace(SQLUtil.classToStack(cls));
     const fields: [string, boolean][] = idx.fields.map(x => {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const key = Object.keys(x)[0] as keyof typeof x;
+      const key = Object.keys(x)[0];
       const val = x[key];
       if (Util.isPlainObject(val)) {
         throw new Error('Unable to supported nested fields for indices');
@@ -912,13 +908,15 @@ ${this.getWhereSQL(cls, where)}`;
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
         const selectTop = selectStack[selectStack.length - 1];
-        // @ts-ignore
-        const subSelectTop: SelectClause<T> | undefined = selectTop?.[config.name];
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const fieldKey = config.name as keyof RetainFields<T>;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const subSelectTop: SelectClause<T> | undefined = selectTop?.[fieldKey] as SelectClause<T> | undefined;
 
         // See if a selection exists at all
         const sel: FieldConfig[] = subSelectTop ? fields
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          .filter(f => subSelectTop[f.name as keyof SelectClause<T>] === 1)
+          .filter(f => typeof subSelectTop === 'object' && subSelectTop[f.name as typeof fieldKey] === 1)
           : [];
 
         if (sel.length) {

@@ -15,14 +15,14 @@ class ResponseCore implements Partial<Response> {
   /**
    * Get the status code
    */
-  // @ts-ignore
+  // @ts-expect-error
   get statusCode(this: Response): number {
     return this.status()!;
   }
   /**
    * Set the status code
    */
-  // @ts-ignore
+  // @ts-expect-error
   set statusCode(this: Response, val: number) {
     this.status(val);
   }
@@ -74,6 +74,14 @@ class RequestCore implements Partial<Request> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.headers[(key as string).toLowerCase() as K];
   }
+  /**
+   * Get the outbound response header
+   * @param key The header to get
+   */
+  headerFirst<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | undefined {
+    const res = this.header(key);
+    return res ? typeof res === 'string' ? res : res[0] : res;
+  }
 }
 
 /**
@@ -88,7 +96,7 @@ export class RestServerUtil {
     delete req.redirect;
     Object.setPrototypeOf(req, RequestCore.prototype);
     req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
-    // @ts-ignore
+    // @ts-expect-error
     req.connection = {};
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return req as T;

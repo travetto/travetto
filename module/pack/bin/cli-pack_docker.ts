@@ -1,11 +1,21 @@
-import { BasePackPlugin } from './pack-base';
+import { OptionConfig } from '@travetto/cli/src/plugin-base';
+
+import { BaseOptions, BasePackPlugin } from './pack-base';
 import { Docker, DockerConfig } from './operation/docker';
 
-export class PackDockerPlugin extends BasePackPlugin<DockerConfig> {
+type Options = BaseOptions & {
+  image: OptionConfig<string>;
+  name: OptionConfig<string>;
+  tag: OptionConfig<string[]>;
+  port: OptionConfig<string[]>;
+  push: OptionConfig<boolean>;
+  registry: OptionConfig<string>;
+};
+
+export class PackDockerPlugin extends BasePackPlugin<Options, DockerConfig> {
   operation = Docker;
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return {
       ...this.defaultOptions(),
       image: this.option({ desc: 'Docker Image to extend' }),

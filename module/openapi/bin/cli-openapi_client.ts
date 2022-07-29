@@ -2,16 +2,24 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { readFileSync } from 'fs';
 
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 import { AppCache, ExecUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
 const presets: Record<string, [string, object] | [string]> = JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', 'resources', 'presets.json'), 'utf8'));
 
+type Options = {
+  extendedHelp: OptionConfig<boolean>;
+  props: OptionConfig<string[]>;
+  input: OptionConfig<string>;
+  output: OptionConfig<string>;
+  dockerImage: OptionConfig<string>;
+  watch: OptionConfig<boolean>;
+};
 /**
  * CLI for generating the cli client
  */
-export class OpenApiClientPlugin extends BasePlugin {
+export class OpenApiClientPlugin extends BasePlugin<Options> {
   name = 'openapi:client';
 
   presetMap(prop?: object): string {
@@ -35,8 +43,7 @@ export class OpenApiClientPlugin extends BasePlugin {
     return list;
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return {
       extendedHelp: this.boolOption({ name: 'extended-help', short: 'x', desc: 'Show Extended Help' }),
       props: this.listOption({ name: 'additional-properties', short: 'a', desc: 'Additional Properties' }),

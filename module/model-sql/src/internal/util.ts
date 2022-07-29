@@ -46,8 +46,7 @@ export class SQLUtil {
     if (Array.isArray(o)) {
       return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x));
     } else if (!Util.isSimple(o)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      for (const k of Object.keys(o) as (keyof T)[]) {
+      for (const k of Object.keys(o)) {
         if (o[k] === null || o[k] === undefined || k === dct.parentPathField.name || k === dct.pathField.name || k === dct.idxField.name) {
           delete o[k];
         } else {

@@ -324,8 +324,8 @@ export class ElasticsearchQueryUtil {
     for (const r of results.body.hits.hits) {
       const obj = r._source;
       if (includeId) {
-        // @ts-ignore
-        obj._id = r._id;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        (obj as unknown as { _id: string })._id = r._id;
       }
       out.push(obj);
     }

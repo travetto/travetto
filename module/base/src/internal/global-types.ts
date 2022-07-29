@@ -6,6 +6,9 @@ declare global {
   interface Set<T> { toJSON(): unknown }
   interface AsyncGenerator<T> { toArray(): Promise<T[]> }
   interface AsyncIterable<T> { toArray(): Promise<T[]> }
+  interface ObjectConstructor {
+    keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
+  }
 }
 
 export type Primitive = number | boolean | string | Date | Error;

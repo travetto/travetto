@@ -1,11 +1,10 @@
-import { BasePackPlugin } from './pack-base';
+import { BaseOptions, BasePackPlugin } from './pack-base';
 import { Pack, AllConfig } from './operation/pack';
 
-export class PackPlugin extends BasePackPlugin<AllConfig> {
+export class PackPlugin extends BasePackPlugin<BaseOptions, AllConfig> {
   operation = Pack;
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): BaseOptions {
     return this.defaultOptions();
   }
 }

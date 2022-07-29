@@ -2,17 +2,24 @@ import * as os from 'os';
 import { readFileSync } from 'fs';
 
 import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 import { EnvInit } from '@travetto/base/bin/init';
 
 import type { RunState } from '../src/execute/types';
 
 const modes = ['single', 'standard'] as const;
 
+type Options = {
+  format: OptionConfig<string>;
+  concurrency: OptionConfig<number>;
+  isolated: OptionConfig<boolean>;
+  mode: OptionConfig<'single' | 'standard'>;
+};
+
 /**
  * Launch test framework and execute tests
  */
-export class TestPlugin extends BasePlugin {
+export class TestPlugin extends BasePlugin<Options> {
   name = 'test';
   _types: string[];
 
@@ -28,14 +35,13 @@ export class TestPlugin extends BasePlugin {
     return this._types;
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return {
       format: this.choiceOption({ desc: 'Output format for test results', def: 'tap', choices: this.getTypes() }),
       concurrency: this.intOption({ desc: 'Number of tests to run concurrently', lower: 1, upper: 32, def: Math.min(4, os.cpus().length - 1) }),
       isolated: this.boolOption({ desc: 'Isolated mode' }),
       mode: this.choiceOption({ desc: 'Test run mode', def: 'standard', choices: [...modes] })
-    } as const;
+    };
   }
 
   envInit(): void {

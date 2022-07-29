@@ -1,6 +1,6 @@
 import * as os from 'os';
 
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
 import { PathUtil, Package, FsUtil } from '@travetto/boot';
 
@@ -12,10 +12,14 @@ const packName = `pack_${Package.name}`
   .replace(/[^a-z]+/g, '_')
   .replace(/_+/g, '_');
 
+export type BaseOptions = {
+  workspace: OptionConfig<string>;
+};
+
 /**
  * Supports packing a project into a directory, ready for archiving
  */
-export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin {
+export abstract class BasePackPlugin<V extends BaseOptions, C extends CommonConfig> extends BasePlugin<V> {
 
   /**
    * Package stage name
@@ -26,8 +30,7 @@ export abstract class BasePackPlugin<C extends CommonConfig> extends BasePlugin 
     return this.operation.key ? `pack:${this.operation.key}` : 'pack';
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  defaultOptions() {
+  defaultOptions(): BaseOptions {
     return { workspace: this.option({ desc: 'Working directory' }) } as const;
   }
 

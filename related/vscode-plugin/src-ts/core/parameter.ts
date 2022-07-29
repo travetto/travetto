@@ -51,7 +51,6 @@ export class ParameterSelector {
   static buildQuickPickList(conf: ParamWithMeta, choices: string[]): vscode.QuickPick<vscode.QuickPickItem> {
     const qp = this.buildQuick(conf, vscode.window.createQuickPick);
     qp.title = `Select ${conf.param.title || conf.param.name}`;
-    // @ts-ignore
     qp.items = choices.map(x => ({ label: x }));
     qp.canSelectMany = false;
 

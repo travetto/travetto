@@ -10,6 +10,10 @@ interface ConsoleListener {
   onLog<T extends LineContext>(context: LogLevel, ctx: T, args: unknown[]): void;
 }
 
+function setGlobal<K extends string | symbol>(ctx: Partial<Record<K, unknown>>, key: K, val: unknown): void {
+  ctx[key] = val;
+}
+
 const CONSOLE_RE = /(\bconsole[.](debug|info|warn|log|error)[(])|\n/g;
 
 function wrap(target: Console): ConsoleListener {
@@ -47,8 +51,8 @@ class $ConsoleManager {
    * Unique key to use as a logger function
    */
   constructor(public readonly key: string) {
-    // @ts-expect-error
-    global[this.key] = this.invoke.bind(this);
+    setGlobal(globalThis, this.key, this.invoke.bind(this));
+
     this.#exclude = new Set();
 
     if (AppManifest.env.debug.status === false) {

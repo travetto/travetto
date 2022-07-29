@@ -16,11 +16,17 @@ declare const global: {
   ᚕsrc: (f: string) => string;
 };
 
+declare global {
+  interface Object {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    __proto__: unknown;
+  }
+}
+
 /**
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
 export class ModuleManager {
-  // @ts-expect-error
   static #objectProto = Object.prototype.__proto__;
 
   static #moduleResolveFilename = Module._resolveFilename.bind(Module);

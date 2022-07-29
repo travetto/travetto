@@ -1,8 +1,8 @@
 import * as rl from 'readline';
+import * as timers from 'timers/promises';
 
 import { BasePlugin } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
-import { CliUtil } from '@travetto/cli/src/util';
 
 import { ServiceUtil } from './lib/service';
 
@@ -11,7 +11,7 @@ import { ServiceUtil } from './lib/service';
  *
  * Allows for running services
  */
-export class CliServicePlugin extends BasePlugin {
+export class CliServicePlugin extends BasePlugin<{}> {
   name = 'command:service';
 
   getArgs(): string {
@@ -60,7 +60,7 @@ export class CliServicePlugin extends BasePlugin {
         for await (const line of (await message)) {
           if (process.stdout.isTTY) {
             if (c > 0) {
-              await CliUtil.sleep(500);
+              await timers.setTimeout(500);
             }
             c += 1;
             rl.moveCursor(process.stdout, 0, i - y);

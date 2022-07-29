@@ -51,7 +51,8 @@ export class ExpressServerUtil {
       },
       send(data): void {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        if ((res.getHeader('Content-Type') as string ?? '').includes('json') && typeof data === 'string') {
+        const contentType: string = (res.getHeader('Content-Type') as string) ?? '';
+        if (contentType.includes('json') && typeof data === 'string') {
           data = Buffer.from(data);
         }
         res.send(data);
@@ -65,7 +66,7 @@ export class ExpressServerUtil {
       },
       setHeader: res.setHeader.bind(res),
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      getHeader: res.getHeader.bind(res) as (key: string) => string, // NOTE: Forcing type, may be incorrect
+      getHeader: res.getHeader.bind(res) as (key: string) => string | string[] | undefined, // NOTE: Forcing type, may be incorrect
       removeHeader: res.removeHeader.bind(res),
       write: res.write.bind(res)
     });

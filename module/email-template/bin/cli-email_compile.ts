@@ -1,12 +1,16 @@
 import { PathUtil } from '@travetto/boot';
 import { EnvInit } from '@travetto/base/bin/init';
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 import { color } from '@travetto/cli/src/color';
+
+type Options = {
+  watch: OptionConfig<boolean>;
+};
 
 /**
  * CLI Entry point for running the email server
  */
-export class EmailCompilePlugin extends BasePlugin {
+export class EmailCompilePlugin extends BasePlugin<Options> {
   name = 'email:compile';
 
   envInit(): void {
@@ -15,8 +19,7 @@ export class EmailCompilePlugin extends BasePlugin {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return { watch: this.boolOption({ desc: 'Compile in watch mode' }) };
   }
 

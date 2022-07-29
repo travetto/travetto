@@ -7,6 +7,12 @@ import { HeadersAddedⲐ, NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from
 
 declare global {
   /**
+   * Extension point for supporting new request headers
+   */
+  interface TravettoRequestHeaders extends IncomingHttpHeaders {
+  }
+
+  /**
    * Travetto request
    * @concrete ./internal/types:RequestTarget
    * @augments `@trv:rest/Context`
@@ -47,7 +53,7 @@ declare global {
     /**
      * The request headers
      */
-    headers: IncomingHttpHeaders;
+    headers: TravettoRequestHeaders;
     /**
      * The cookie support
      */
@@ -67,16 +73,21 @@ declare global {
      * The stream to pipe the request to.  Useful for file uploads.
      * @param stream
      */
-    pipe(stream: Writable): any;
+    pipe(stream: Writable): unknown;
     /**
      * Get a header as a string or array of strings depending on what was passed
      * @param key
      */
-    header<K extends keyof IncomingHttpHeaders>(key: K): IncomingHttpHeaders[K] | undefined;
+    header<K extends keyof TravettoRequestHeaders>(key: K): TravettoRequestHeaders[K] | undefined;
+    /**
+     * Get a single header
+     * @param key 
+     */
+    headerFirst<K extends keyof TravettoRequestHeaders>(key: K): string | undefined;
     /**
      * Listen for request events
      */
-    on(ev: 'end' | 'close' | 'error', cb: Function): any;
+    on(ev: 'end' | 'close' | 'error', cb: Function): unknown;
   }
 
   /**
@@ -109,12 +120,12 @@ declare global {
     /**
      * Indicates if headers have already been sent
      */
-    headersSent: boolean;
+    readonly headersSent: boolean;
     /**
      * Get the headers that have been marked for sending
      * @param key Header name
      */
-    getHeader(key: string): string;
+    getHeader(key: string): string | string[] | undefined;
     /**
      * Set a header to be sent.  Fails if headers have already been sent.
      * @param key The header to set
@@ -131,26 +142,26 @@ declare global {
      * @param ev Name of the event
      * @param cb The callback for the event
      */
-    on(ev: 'close' | 'finish', cb: Function): any;
+    on(ev: 'close' | 'finish', cb: Function): unknown;
 
     /**
      * Redirect the request to a new location
      * @param path The new location
      */
-    redirect(path: string): any;
+    redirect(path: string): unknown;
     /**
      * Redirect the request to a new location
      * @param code The status code for redirect
      * @param path The new location
      */
-    redirect(code: number, path: string): any;
-    redirect(code: number | string, path?: string): any;
+    redirect(code: number, path: string): unknown;
+    redirect(code: number | string, path?: string): unknown;
 
     /**
      * Set the request's location
      * @param path The location to point to
      */
-    location(path: string): any;
+    location(path: string): unknown;
 
     /**
      * Return a value as JSON
@@ -161,7 +172,7 @@ declare global {
      * Send a value to the client
      * @param value Value to send
      */
-    send(value: any): any;
+    send(value: any): unknown;
     /**
      * Optional internal method for sending streams
      * @param stream
@@ -171,12 +182,12 @@ declare global {
      * Write content directly to the output stream
      * @param value The value to write
      */
-    write(value: any): any;
+    write(value: unknown): unknown;
     /**
      * End the response, with a final optional value
      * @param val
      */
-    end(val?: any): any;
+    end(val?: unknown): unknown;
     /**
      * Cookie support for sending to the client
      */

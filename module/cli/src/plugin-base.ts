@@ -6,9 +6,9 @@ import { CliUtil } from './util';
 
 type Completion = Record<string, string[]>;
 
-type ParamPrimitive = string | number | boolean | string[] | number[];
+type OptionPrimitive = string | number | boolean | string[] | number[];
 
-type ParamConfig<K extends ParamPrimitive = ParamPrimitive> = {
+export type OptionConfig<K extends OptionPrimitive = OptionPrimitive> = {
   type?: Function;
   key?: string;
   short?: string | false;
@@ -21,14 +21,14 @@ type ParamConfig<K extends ParamPrimitive = ParamPrimitive> = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ParamMap<T = any> = { [key in keyof T]: T[key] extends ParamPrimitive ? ParamConfig<T[key]> : never };
+type OptionMap<T = any> = { [key in keyof T]: T[key] extends OptionPrimitive ? OptionConfig<T[key]> : never };
 
-type Shape<M extends ParamMap> = { [k in keyof M]: Exclude<M[k]['def'], undefined> };
+type Shape<M extends OptionMap> = { [k in keyof M]: Exclude<M[k]['def'], undefined> };
 
 /**
  * Base plugin
  */
-export abstract class BasePlugin<V extends ParamMap = ParamMap> {
+export abstract class BasePlugin<V extends OptionMap> {
   /**
    * Command object
    */
@@ -74,7 +74,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Define option
    */
-  option(cfg: ParamConfig<string>): ParamConfig<string> {
+  option(cfg: OptionConfig<string>): OptionConfig<string> {
     if (cfg.combine && cfg.def) {
       cfg.def = cfg.combine(cfg.def, cfg.def);
     }
@@ -84,8 +84,8 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Define option
    */
-  choiceOption<K extends string | number>({ choices, ...cfg }: ParamConfig<K> & { choices: K[] | readonly K[] }): ParamConfig<K> {
-    const config: ParamConfig<K> = {
+  choiceOption<K extends string | number>({ choices, ...cfg }: OptionConfig<K> & { choices: K[] | readonly K[] }): OptionConfig<K> {
+    const config: OptionConfig<K> = {
       type: String,
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       combine: (v: string, acc: K): K => choices.includes(v as K) ? v as K : acc,
@@ -99,7 +99,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Define list option
    */
-  listOption(cfg: ParamConfig<string[]>): ParamConfig<string[]> {
+  listOption(cfg: OptionConfig<string[]>): OptionConfig<string[]> {
     return {
       type: String,
       def: [],
@@ -112,7 +112,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Define bool option
    */
-  boolOption(cfg: ParamConfig<boolean>): ParamConfig<boolean> {
+  boolOption(cfg: OptionConfig<boolean>): OptionConfig<boolean> {
     return {
       type: Boolean,
       combine: CliUtil.toBool.bind(CliUtil),
@@ -124,7 +124,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Define int option
    */
-  intOption({ lower, upper, ...cfg }: ParamConfig<number> & { lower?: number, upper?: number }): ParamConfig<number> {
+  intOption({ lower, upper, ...cfg }: OptionConfig<number> & { lower?: number, upper?: number }): OptionConfig<number> {
     return {
       type: Number,
       combine: CliUtil.toInt.bind(CliUtil, lower, upper),
@@ -143,9 +143,8 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
   /**
    * Expose configuration as constrained typed object
    */
-  get cmd(): Shape<ReturnType<Exclude<this['getOptions'], undefined>>> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.#cmd.opts() as Shape<ReturnType<Exclude<this['getOptions'], undefined>>>;
+  get cmd(): Shape<V> {
+    return this.#cmd.opts();
   }
 
   /**
@@ -169,7 +168,7 @@ export abstract class BasePlugin<V extends ParamMap = ParamMap> {
    * Process all options into final set before registering with commander
    * @returns
    */
-  async finalizeOptions(): Promise<ParamConfig[]> {
+  async finalizeOptions(): Promise<OptionConfig[]> {
     const opts = this.getOptions?.();
     const used = new Set();
 

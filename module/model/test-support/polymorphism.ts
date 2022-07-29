@@ -159,8 +159,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     );
 
     await assert.rejects(
-      // @ts-expect-error
-      () => service.update(Engineer, Doctor.from({ ...doc })),
+      () => service.update(Engineer, Doctor.from({ ...doc }) as unknown as Engineer),
       (e: Error) => (e instanceof NotFoundError || e instanceof SubTypeNotSupportedError || e instanceof TypeMismatchError) ? undefined : e);
 
     try {

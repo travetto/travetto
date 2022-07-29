@@ -1,5 +1,14 @@
 import type { RunState } from '../../src/execute/types';
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace NodeJS {
+    interface ProcessEnv {
+      TRV_TEST_DELAY?: '2s';
+    }
+  }
+}
+
 /**
  * Run tests given the input state
  * @param opts
@@ -14,8 +23,7 @@ export async function runTests(opts: RunState): Promise<void> {
   RunnerUtil.registerCleanup('runner');
 
   if (process.env.TRV_TEST_DELAY) {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    await Util.wait(process.env.TRV_TEST_DELAY as '2s');
+    await Util.wait(process.env.TRV_TEST_DELAY);
   }
 
   try {

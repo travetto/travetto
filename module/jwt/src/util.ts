@@ -15,8 +15,7 @@ export class JWTUtil {
       ...options.header
     };
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    payload = { ...(payload as object) } as T;
+    payload = { ...payload };
 
     const now = Math.trunc(Date.now() / 1000);
 

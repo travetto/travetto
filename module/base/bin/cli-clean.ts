@@ -1,22 +1,25 @@
 import * as fs from 'fs/promises';
 
 import { color } from '@travetto/cli/src/color';
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 import { FileCache, PathUtil } from '@travetto/boot';
+
+type Options = {
+  quiet: OptionConfig<boolean>;
+};
 
 /**
  * `npx trv clean`
  *
  * Allows for cleaning of the cache dire
  */
-export class BaseCleanPlugin extends BasePlugin {
+export class BaseCleanPlugin extends BasePlugin<Options> {
 
   name = 'clean';
 
   override async build(): Promise<void> { }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return { quiet: this.boolOption({ desc: 'Quiet operation' }) };
   }
 

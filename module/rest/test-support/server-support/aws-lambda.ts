@@ -1,15 +1,17 @@
-import type * as lambda from 'aws-lambda';
+import * as lambda from 'aws-lambda';
 
 import { DependencyRegistry } from '@travetto/di';
 import { Util } from '@travetto/base';
 
 import type { Request, ServerHandle } from '../../src/types';
 import type { AwsLambdaRestApplication } from '../../src/extension/aws-lambda';
-import type { RestServerSupport, MakeRequestConfig, MakeRequestResponse } from './base';
+import { RestServerSupport, MakeRequestConfig, MakeRequestResponse, headerToShape as valuesToShape } from './base';
 
-const toMultiValue = (o: Record<string, string> | undefined) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, [v]]));
-
-const baseLambdaEvent = { resource: '/{proxy+}' };
+const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {
+  resource: '/{proxy+}',
+  pathParameters: {},
+  stageVariables: {},
+};
 
 const baseLambdaContext = {
   accountId: Util.uuid(),
@@ -18,7 +20,35 @@ const baseLambdaContext = {
   apiId: Util.uuid(),
   requestTimeEpoch: 1428582896000,
   resourcePath: '/{proxy+}',
-  protocol: 'HTTP/1.1'
+  protocol: 'HTTP/1.1',
+  authorizer: {},
+  identity: {
+    accessKey: '', apiKeyId: '', accountId: '', caller: '', clientCert: {
+      clientCertPem: '', issuerDN: '', serialNumber: '', subjectDN: '',
+      validity: { notAfter: '', notBefore: '' }
+    }, apiKey: '',
+    cognitoAuthenticationProvider: '', cognitoAuthenticationType: '', cognitoIdentityId: '',
+    cognitoIdentityPoolId: '', principalOrgId: '', sourceIp: '', user: '',
+    userAgent: '', userArn: ''
+  },
+  stage: '',
+} as lambda.APIGatewayProxyEvent['requestContext'];
+
+const baseContext: lambda.Context = {
+  awsRequestId: baseLambdaContext.requestId,
+  logStreamName: '',
+  logGroupName: '',
+  memoryLimitInMB: '100',
+  invokedFunctionArn: '',
+  functionVersion: '1',
+  functionName: '',
+  callbackWaitsForEmptyEventLoop: false,
+  getRemainingTimeInMillis() {
+    return 100;
+  },
+  done(error?: Error, result?: unknown) { },
+  fail(error: Error | string) { },
+  succeed(...args: unknown[]) { }
 };
 
 /**
@@ -43,26 +73,28 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
 
   async execute(method: Request['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {
 
+    const multiValueHeaders = valuesToShape.multi(headers);
+
     const res = (await this.#lambda.handle({
       ...baseLambdaEvent,
       path,
       httpMethod: method,
       queryStringParameters: query ?? {},
-      headers: headers as Record<string, string>,
+      headers: valuesToShape.single(headers ?? {}),
       isBase64Encoded: true,
       body: body ? body.toString('base64') : body ?? null,
-      multiValueQueryStringParameters: toMultiValue(query),
-      multiValueHeaders: toMultiValue(headers as Record<string, string>),
-      requestContext: { ...baseLambdaContext, path, httpMethod: method }
-    } as lambda.APIGatewayProxyEvent, {} as lambda.Context))!;
+      multiValueQueryStringParameters: valuesToShape.multi(query),
+      multiValueHeaders,
+      requestContext: { ...baseLambdaContext, path, httpMethod: method },
+    }, { ...baseContext }));
 
     return {
       status: res.statusCode,
       body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
-      headers: Object.fromEntries([
-        ...Object.entries(res.headers as Record<string, string> ?? {}),
-        ...Object.entries((res.multiValueHeaders ?? {}) as Record<string, string[]>)
-      ])
+      headers: valuesToShape.multi({
+        ...(res.headers ?? {}) as Record<string, string>,
+        ...(res.multiValueHeaders ?? {}) as Record<string, string | string[]>
+      })
     };
   }
 }

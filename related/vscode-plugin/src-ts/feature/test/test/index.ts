@@ -109,7 +109,9 @@ class TestRunnerFeature extends BaseFeature {
     vscode.workspace.onDidCloseTextDocument(x => this.#consumer.untrackEditor(x), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.#consumer.trackEditor(x), null, context.subscriptions);
 
-    setTimeout(() => vscode.window.visibleTextEditors.forEach(x => this.#consumer.trackEditor(x)), 1000);
+    Workspace.sleep(1000).then(() => {
+      vscode.window.visibleTextEditors.forEach(x => this.#consumer.trackEditor(x));
+    });
 
     vscode.languages.registerCodeLensProvider({
       language: 'typescript',

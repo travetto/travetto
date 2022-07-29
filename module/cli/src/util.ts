@@ -1,3 +1,4 @@
+import * as timers from 'timers/promises';
 import * as readline from 'readline';
 import { Writable } from 'stream';
 
@@ -94,10 +95,6 @@ export class CliUtil {
     }));
   }
 
-  static sleep(ms: number): Promise<void> {
-    return new Promise(r => setTimeout(r, ms));
-  }
-
   /**
    * Waiting message with a callback to end
    *
@@ -129,12 +126,12 @@ export class CliUtil {
       .finally(() => done = true);
 
     if (delay) {
-      await Promise.race([this.sleep(delay), final]);
+      await Promise.race([timers.setTimeout(delay), final]);
     }
 
     while (!done) {
       await writeLine(`${this.#waitState[i = (i + 1) % this.#waitState.length]} ${message}`);
-      await this.sleep(50);
+      await timers.setTimeout(50);
     }
 
     if (i >= 0) {

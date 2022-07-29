@@ -26,8 +26,7 @@ class $PendingRegister {
       ᚕsynthetic,
     };
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const keys = [...Object.keys(meta)] as (keyof typeof meta)[];
+    const keys = [...Object.keys(meta)];
     Object.defineProperties(cls, keys.reduce<Partial<Record<keyof typeof meta, PropertyDescriptor>>>((all, k) => {
       all[k] = {
         value: meta[k],

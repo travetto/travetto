@@ -11,7 +11,7 @@ import { SchemaChange, DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
-  ModelQuerySupport, PageableModelQuery, Query, ValidStringFields
+  ModelQuerySupport, PageableModelQuery, Query, SelectClause, ValidStringFields
 } from '@travetto/model-query';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -298,7 +298,7 @@ export class ElasticsearchModelService implements
 
     for (let i = 0; i < res.items.length; i++) {
       const item = res.items[i];
-      const [k] = Util.getKeys<Count | 'create' | 'index'>(item);
+      const [k] = Object.keys<Record<Count | 'create' | 'index', unknown>>(item);
       const v = item[k]!;
       if (v.error) {
         out.errors.push(v.error);
@@ -456,9 +456,11 @@ export class ElasticsearchModelService implements
   }
 
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const select: SelectClause<T> = { [field]: 1 } as SelectClause<T>;
+
     const q = ModelQuerySuggestUtil.getSuggestQuery(cls, field, prefix, {
-      // @ts-ignore
-      select: { [field]: 1 },
+      select,
       ...query
     });
     const search = ElasticsearchQueryUtil.getSearchObject(cls, q);

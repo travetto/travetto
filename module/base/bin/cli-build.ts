@@ -1,20 +1,24 @@
 import { color } from '@travetto/cli/src/color';
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 
 import { BuildUtil } from './lib';
+
+type Options = {
+  output: OptionConfig<string>;
+  quiet: OptionConfig<boolean>;
+};
 
 /**
  * Command line support for building the code with the ability to
  * control the output target.
  */
-export class BaseBuildPlugin extends BasePlugin {
+export class BaseBuildPlugin extends BasePlugin<Options> {
 
   name = 'build';
 
   override async build(): Promise<void> { }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return {
       output: this.option({ desc: 'Output directory', completion: true }),
       quiet: this.boolOption({ desc: 'Quiet operation' })

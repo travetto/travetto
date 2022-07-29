@@ -34,7 +34,6 @@ export class ValueAccessor {
    * @param req
    */
   readValue(req: Request): string | undefined {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.#location === 'cookie' ? req.cookies.get(this.#name) : req.header(this.#name) as string;
+    return this.#location === 'cookie' ? req.cookies.get(this.#name) : req.headerFirst(this.#name);
   }
 }

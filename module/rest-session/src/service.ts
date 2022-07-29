@@ -137,8 +137,7 @@ export class SessionService {
    */
   async readRequest(req: Request, id?: string): Promise<void> {
     if (!req[SessionⲐ]) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      id = this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.header(this.config.keyName) as string;
+      id = this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.headerFirst(this.config.keyName);
       if (id) {
         req[SessionⲐ] = (await this.#load(id))!;
       }

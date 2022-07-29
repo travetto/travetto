@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import * as timers from 'timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { DockerContainer, CommandUtil } from '@travetto/command';
@@ -14,7 +15,7 @@ export class DockerTest {
       .forceDestroyOnShutdown();
     try {
       container.run();
-      await new Promise(r => setTimeout(r, 3000));
+      await timers.setTimeout(3000);
       await assert.doesNotReject(() => CommandUtil.waitForPort(port));
     } finally {
       await container.stop();

@@ -1,3 +1,5 @@
+import * as timers from 'timers/promises';
+
 import { d, lib, mod } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';
@@ -18,10 +20,10 @@ export const text = async () => {
     startupBuffer.push(Buffer.from(v)));
 
   while (startupBuffer.length === 0) {
-    await new Promise(r => setTimeout(r, 100));
+    await timers.setTimeout(100);
   }
 
-  await new Promise(r => setTimeout(r, 1000));
+  await timers.setTimeout(1000);
 
   const startupOutput = DocRunUtil.cleanRunOutput(Buffer.concat(startupBuffer).toString('utf8'), {});
 

@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+
 import { Test, Suite } from '@travetto/test';
 
 @Suite()
@@ -35,12 +36,14 @@ class StackTest {
       await this.inner6();
       assert(false);
     } catch (err) {
-      assert(!err.stack.includes('inner6'));
-      assert(!err.stack.includes('inner5'));
-      assert(err.stack.includes('inner4'));
-      assert(err.stack.includes('inner3'));
-      assert(err.stack.includes('inner2'));
-      assert(err.stack.includes('inner1'));
+      assert(err);
+      assert(err instanceof Error);
+      assert(!err.stack?.includes('inner6'));
+      assert(!err.stack?.includes('inner5'));
+      assert(err.stack?.includes('inner4'));
+      assert(err.stack?.includes('inner3'));
+      assert(err.stack?.includes('inner2'));
+      assert(err.stack?.includes('inner1'));
       console.warn('Error', { error: err });
     }
   }

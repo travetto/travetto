@@ -1,14 +1,21 @@
 import * as fs from 'fs/promises';
 
 import { FsUtil, PathUtil } from '@travetto/boot';
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
 
-export class PackDockerExportPlugin extends BasePlugin {
+type Options = {
+  app: OptionConfig<string>;
+  image: OptionConfig<string>;
+  port: OptionConfig<number>;
+  add: OptionConfig<string[]>;
+  output: OptionConfig<string>;
+};
+
+export class PackDockerExportPlugin extends BasePlugin<Options> {
 
   name = 'pack:docker-export';
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  getOptions() {
+  getOptions(): Options {
     return {
       app: this.option({ desc: 'The application target to run', def: 'rest' }),
       image: this.option({ desc: 'Docker image to extend', def: 'node:16-alpine' }),
