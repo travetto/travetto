@@ -50,4 +50,12 @@ export abstract class BaseModelSuite<T> {
   get service(): Promise<T> {
     return DependencyRegistry.getInstance(this.serviceClass);
   }
+
+  async toArray<U>(src: AsyncIterable<U> | AsyncGenerator<U>): Promise<U[]> {
+    const out: U[] = [];
+    for await (const el of src) {
+      out.push(el);
+    }
+    return out;
+  }
 }

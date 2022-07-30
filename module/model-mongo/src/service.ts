@@ -455,7 +455,8 @@ export class MongoModelService implements
     const { filter } = MongoUtil.prepareQuery(cls, query);
     let cursor = col.find<T>(filter, {});
     if (query.select) {
-      const select = Object.keys(query.select)[0].startsWith('$') ? query.select : MongoUtil.extractSimple(query.select);
+      const selectKey = Object.keys(query.select)[0];
+      const select = typeof selectKey === 'string' && selectKey.startsWith('$') ? query.select : MongoUtil.extractSimple(query.select);
       // Remove id if not explicitly defined, and selecting fields directly
       if (!select['_id']) {
         const values = new Set([...Object.values(select)]);

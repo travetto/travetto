@@ -4,10 +4,10 @@ declare global {
   interface Error { toJSON(sub?: unknown): unknown }
   interface Map<K, V> { toJSON(): unknown }
   interface Set<T> { toJSON(): unknown }
-  interface AsyncGenerator<T> { toArray(): Promise<T[]> }
-  interface AsyncIterable<T> { toArray(): Promise<T[]> }
   interface ObjectConstructor {
     keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
+    fromEntries<K extends string | symbol, V>(items: [K, V][]): Record<K, V>;
+    entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
   }
 }
 
@@ -39,14 +39,4 @@ addFn(Error.prototype, 'toJSON', function (this: Error, extra?: Record<string, u
     ...extra,
     stack: stack.substring(stack.indexOf('\n') + 1)
   };
-});
-
-// Add .toArray to async iterables
-const AsyncProto = Object.getPrototypeOf(Object.getPrototypeOf((async function* (): AsyncIterable<void> { })()));
-addFn(AsyncProto, 'toArray', async function (this: AsyncGenerator<unknown>) {
-  const out = [];
-  for await (const item of this) {
-    out.push(item);
-  }
-  return out;
 });
