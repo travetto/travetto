@@ -32,6 +32,6 @@ export const headerToShape = {
     Object.fromEntries<string>(
       Object.entries(o)
         .filter((p): p is [string, string[] | string] => p[1] !== undefined && (typeof p[1] === 'string' ? true : p[1].length > 0))
-        .map(([k, v]): [string, string] => [k, Array.isArray(v) ? v.join(', ') : v])
+        .map(([k, v]): [string, string] => [k, Array.isArray(v) ? v.join(/set-cookie/i.test(k) ? '; ' : ', ') : v])
     )
 };

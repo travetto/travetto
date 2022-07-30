@@ -80,6 +80,11 @@ declare global {
      */
     header<K extends keyof TravettoRequestHeaders>(key: K): TravettoRequestHeaders[K] | undefined;
     /**
+     * Get a header as a list of values
+     * @param key 
+     */
+    headerList<K extends keyof TravettoRequestHeaders>(key: K): string[] | undefined;
+    /**
      * Get a single header
      * @param key 
      */

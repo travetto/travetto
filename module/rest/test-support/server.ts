@@ -181,6 +181,6 @@ export abstract class RestServerSuite extends BaseRestSuite {
         age: ['1', '2', '3']
       }
     });
-    assert(ret === { value: '1' });
+    assert(ret === { header: '1' });
   }
 }

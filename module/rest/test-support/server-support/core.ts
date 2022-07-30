@@ -1,4 +1,3 @@
-import * as qs from 'querystring';
 import fetch from 'node-fetch';
 
 import { DependencyRegistry } from '@travetto/di';
@@ -53,7 +52,7 @@ export class CoreRestServerSupport implements RestServerSupport {
 
     let q = '';
     if (query && Object.keys(query).length) {
-      q = `?${qs.stringify(query)}`;
+      q = `?${new URLSearchParams(query).toString()}`;
     }
     const res = await fetch(`${this.url}${path}${q}`, {
       method,
@@ -61,7 +60,7 @@ export class CoreRestServerSupport implements RestServerSupport {
       body
     });
 
-    return { status: res.status, body: Buffer.from(await res.text()), headers: headerToShape.multi(res.headers) };
+    return { status: res.status, body: Buffer.from(await res.text()), headers: Object.fromEntries(res.headers.entries()) };
   }
 
   get url() {

@@ -67,20 +67,35 @@ class ResponseCore implements Partial<Response> {
  */
 class RequestCore implements Partial<Request> {
   /**
-   * Get the outbound response header
+   * Get the inbound request header as a string
    * @param key The header to get
    */
-  header<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | string[] | undefined {
+  header<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | undefined {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.headers[(key as string).toLowerCase() as K];
+    return this.headers[(key as string).toLowerCase() as K] as string | undefined;
   }
   /**
-   * Get the outbound response header
+   * Get the inbound request header as a string[]
+   * @param key The header to get
+   */
+  headerList<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string[] | undefined {
+    const res = this.header(key);
+    if (res === undefined) {
+      return res;
+    }
+    return typeof res === 'string' ?
+      res.split(
+        /set-cookie/i.test(key.toString()) ?
+          /\s*;\s*/ : /\s*,\s*/
+      ) : res;
+  }
+
+  /**
+   * Get the inbound request header first value
    * @param key The header to get
    */
   headerFirst<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | undefined {
-    const res = this.header(key);
-    return res ? typeof res === 'string' ? res : res[0] : res;
+    return this.headerList(key)?.[0];
   }
 }
 
