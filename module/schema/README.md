@@ -185,7 +185,7 @@ export async function validate(): Promise<void> {
 
   const person = Person.from({
     name: 'Test',
-    // @ts-ignore
+    // @ts-expect-error
     age: 'abc',
     address: {
       street1: '1234 Fun'
