@@ -6,9 +6,9 @@ import { CliUtil } from './util';
 
 type Completion = Record<string, string[]>;
 
-type OptionPrimitive = string | number | boolean | string[] | number[];
+type OptionPrimitive = string | number | boolean;
 
-export type OptionConfig<K extends OptionPrimitive = OptionPrimitive> = {
+type CoreOptionConfig<K> = {
   type?: Function;
   key?: string;
   short?: string | false;
@@ -16,19 +16,26 @@ export type OptionConfig<K extends OptionPrimitive = OptionPrimitive> = {
   desc: string;
   completion?: boolean;
   def?: K;
-  choices?: K[] | readonly K[];
   combine?: (v: string, curr: K) => K;
 };
 
+export type OptionConfig<K extends OptionPrimitive = OptionPrimitive> = CoreOptionConfig<K> & {
+  choices?: K[] | readonly K[];
+};
+
+export type ListOptionConfig<K extends OptionPrimitive = OptionPrimitive> = CoreOptionConfig<K[]>;
+
+type AllOptionConfig<K extends OptionPrimitive = OptionPrimitive> = OptionConfig<K> | ListOptionConfig<K>;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type OptionMap<T = any> = { [key in keyof T]: T[key] extends OptionPrimitive ? OptionConfig<T[key]> : never };
+type OptionMap<T = any> = { [key in keyof T]: T[key] extends OptionPrimitive ? AllOptionConfig<T[key]> : never };
 
 type Shape<M extends OptionMap> = { [k in keyof M]: Exclude<M[k]['def'], undefined> };
 
 /**
- * Base plugin
+ * Base command
  */
-export abstract class BasePlugin<V extends OptionMap> {
+export abstract class CliCommand<V extends OptionMap = OptionMap> {
   /**
    * Command object
    */
@@ -51,7 +58,7 @@ export abstract class BasePlugin<V extends OptionMap> {
   abstract action(...args: unknown[]): void | Promise<void>;
 
   /**
-   * Setup environment before plugin runs
+   * Setup environment before command runs
    */
   envInit?(): Promise<void> | void;
   /**
@@ -74,9 +81,9 @@ export abstract class BasePlugin<V extends OptionMap> {
   /**
    * Define option
    */
-  option(cfg: OptionConfig<string>): OptionConfig<string> {
-    if (cfg.combine && cfg.def) {
-      cfg.def = cfg.combine(cfg.def, cfg.def);
+  option<K extends OptionPrimitive, T extends OptionConfig<K>>(cfg: T): T {
+    if ('combine' in cfg && cfg.combine && cfg.def && !Array.isArray(cfg.def)) {
+      cfg.def = cfg.combine(`${cfg.def}`, cfg.def);
     }
     return { type: String, ...cfg };
   }
@@ -84,11 +91,11 @@ export abstract class BasePlugin<V extends OptionMap> {
   /**
    * Define option
    */
-  choiceOption<K extends string | number>({ choices, ...cfg }: OptionConfig<K> & { choices: K[] | readonly K[] }): OptionConfig<K> {
-    const config: OptionConfig<K> = {
+  choiceOption<K extends string, T extends (OptionConfig<K> & { choices: K[] | readonly K[] })>({ choices, ...cfg }: T): T {
+    // @ts-expect-error
+    const config: T = {
       type: String,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      combine: (v: string, acc: K): K => choices.includes(v as K) ? v as K : acc,
+      combine: (v: K, acc) => choices.includes(v) ? v : acc,
       choices,
       completion: true,
       ...cfg
@@ -99,7 +106,7 @@ export abstract class BasePlugin<V extends OptionMap> {
   /**
    * Define list option
    */
-  listOption(cfg: OptionConfig<string[]>): OptionConfig<string[]> {
+  listOption<T extends ListOptionConfig<string>>(cfg: T): T {
     return {
       type: String,
       def: [],
@@ -168,11 +175,11 @@ export abstract class BasePlugin<V extends OptionMap> {
    * Process all options into final set before registering with commander
    * @returns
    */
-  async finalizeOptions(): Promise<OptionConfig[]> {
+  async finalizeOptions(): Promise<AllOptionConfig[]> {
     const opts = this.getOptions?.();
     const used = new Set();
 
-    return (opts ? Object.entries(opts) : []).map(([k, cfg]) => {
+    return (opts ? Object.entries<AllOptionConfig>(opts) : []).map(([k, cfg]) => {
       cfg.key = k;
       cfg.name ??= k.replace(/([a-z])([A-Z])/g, (_, l, r: string) => `${l}-${r.toLowerCase()}`);
       if (cfg.short === undefined) {
@@ -205,6 +212,7 @@ export abstract class BasePlugin<V extends OptionMap> {
       if (cfg.type !== Boolean || cfg.def) {
         key = `${key} <${cfg.name}>`;
       }
+      // @ts-expect-error
       cmd = cfg.combine ? cmd.option(key, cfg.desc, cfg.combine, cfg.def) : cmd.option(key, cfg.desc, (cur, acc) => cur, cfg.def);
     }
 
@@ -240,7 +248,7 @@ export abstract class BasePlugin<V extends OptionMap> {
     for (const el of await this.finalizeOptions()) {
       if (el.completion) {
         out[''] = [...out['']!, `--${el.name} `];
-        if (el.choices) {
+        if ('choices' in el && el.choices) {
           out[`--${el.name} `] = el.choices.map(x => `${x}`);
           if (el.short) {
             out[`- ${el.short} `] = el.choices.map(x => `${x}`);

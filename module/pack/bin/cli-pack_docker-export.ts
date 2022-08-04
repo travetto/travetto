@@ -1,17 +1,17 @@
 import * as fs from 'fs/promises';
 
 import { FsUtil, PathUtil } from '@travetto/boot';
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
 
 type Options = {
   app: OptionConfig<string>;
   image: OptionConfig<string>;
   port: OptionConfig<number>;
-  add: OptionConfig<string[]>;
+  add: ListOptionConfig<string>;
   output: OptionConfig<string>;
 };
 
-export class PackDockerExportPlugin extends BasePlugin<Options> {
+export class PackDockerExportCommand extends CliCommand<Options> {
 
   name = 'pack:docker-export';
 

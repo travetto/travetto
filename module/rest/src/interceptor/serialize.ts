@@ -16,6 +16,8 @@ const isRenderable = (o: unknown): o is Renderable => !!o && !Util.isPrimitive(o
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const isStream = (o: unknown): o is Readable => !!o && 'pipe' in (o as object) && 'on' in (o as object);
 
+const isUnknownError = (o: unknown): o is Record<string, unknown> & { message?: string } => !(o instanceof Error);
+
 /**
  * Serialization interceptor
  */
@@ -82,9 +84,8 @@ export class SerializeInterceptor implements RestInterceptor {
       const output = await next();
       await SerializeInterceptor.sendOutput(req, res, output);
     } catch (err) {
-      if (!(err instanceof Error) && Util.isError(err)) {  // Ensure we always throw "Errors"
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        err = new AppError(err.message || 'Unexpected error', 'general', err as {});
+      if (isUnknownError(err)) {  // Ensure we always throw "Errors"
+        err = new AppError(err.message || 'Unexpected error', 'general', err);
       }
       await SerializeInterceptor.sendOutput(req, res, err);
     }

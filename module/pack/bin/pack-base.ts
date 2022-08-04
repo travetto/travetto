@@ -1,6 +1,6 @@
 import * as os from 'os';
 
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 import { color } from '@travetto/cli/src/color';
 import { PathUtil, Package, FsUtil } from '@travetto/boot';
 
@@ -19,7 +19,7 @@ export type BaseOptions = {
 /**
  * Supports packing a project into a directory, ready for archiving
  */
-export abstract class BasePackPlugin<V extends BaseOptions, C extends CommonConfig> extends BasePlugin<V> {
+export abstract class BasePackCommand<V extends BaseOptions, C extends CommonConfig> extends CliCommand<V> {
 
   /**
    * Package stage name

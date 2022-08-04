@@ -1,18 +1,18 @@
-import { OptionConfig } from '@travetto/cli/src/plugin-base';
+import { OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
 
-import { BaseOptions, BasePackPlugin } from './pack-base';
+import { BaseOptions, BasePackCommand } from './pack-base';
 import { Docker, DockerConfig } from './operation/docker';
 
 type Options = BaseOptions & {
   image: OptionConfig<string>;
   name: OptionConfig<string>;
-  tag: OptionConfig<string[]>;
-  port: OptionConfig<string[]>;
+  tag: ListOptionConfig<string>;
+  port: ListOptionConfig<string>;
   push: OptionConfig<boolean>;
   registry: OptionConfig<string>;
 };
 
-export class PackDockerPlugin extends BasePackPlugin<Options, DockerConfig> {
+export class PackDockerCommand extends BasePackCommand<Options, DockerConfig> {
   operation = Docker;
 
   getOptions(): Options {

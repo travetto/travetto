@@ -1,10 +1,10 @@
-import { BaseModelPlugin } from './lib/base-cli-plugin';
+import { BaseModelCommand } from './lib/base-command';
 import { ModelExportUtil } from './lib/export';
 
 /**
  * CLI Entry point for exporting model schemas
  */
-export class ModelExportPlugin extends BaseModelPlugin {
+export class ModelExportCommand extends BaseModelCommand {
   name = 'model:export';
   op = 'exportModel' as const;
 

@@ -44,21 +44,21 @@ This will show all the available options/choices that are exposed given the curr
 
 <h2 id="extending">Extending</h2>
 
-Extending the <code class="item input">cli</code> is fairly straightforward.  It is built upon <a target="_blank" class="external-link" href="https://www.npmjs.com/package/commander">commander</a>, with a plugin model that is extensible:
+Extending the <code class="item input">cli</code> is fairly straightforward.  It is built upon <a target="_blank" class="external-link" href="https://www.npmjs.com/package/commander">commander</a>, with a model that is extensible:
 
       <figure class="code">
-      <figcaption class="code">Echo Plugin
+      <figcaption class="code">Echo Command
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/bin/cli-echo.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BasePlugin <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli/src/plugin-base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli/src/command'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * `npx trv echo`
  *
  * Allows for cleaning of the cache dire
  */</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CliEchoPlugin</span> <span class="token keyword">extends</span> <span class="token class-name">BasePlugin</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CliEchoCommand</span> <span class="token keyword">extends</span> <span class="token class-name">CliCommand</span> <span class="token punctuation">{{'{'}}</span>
   name <span class="token operator">=</span> <span class="token string">'echo'</span><span class="token punctuation">;</span>
 
   <span class="token function">getOptions</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -81,7 +81,7 @@ Extending the <code class="item input">cli</code> is fairly straightforward.  It
 With the corresponding output:
 
       <figure class="terminal">
-      <figcaption class="terminal">Echo Plugin Help
+      <figcaption class="terminal">Echo Command Help
       
       </figcaption>
       <pre><code class="language-bash">$ trv <span class="token builtin class-name">echo</span> --help
@@ -96,7 +96,7 @@ Options:
 And actually using it:
 
       <figure class="terminal">
-      <figcaption class="terminal">Echo Plugin Run
+      <figcaption class="terminal">Echo Command Run
       
       </figcaption>
       <pre><code class="language-bash">$ trv <span class="token builtin class-name">echo</span> -u bOb rOb DRoP

@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 
 import { color } from '@travetto/cli/src/color';
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 import { FileCache, PathUtil } from '@travetto/boot';
 
 type Options = {
@@ -13,7 +13,7 @@ type Options = {
  *
  * Allows for cleaning of the cache dire
  */
-export class BaseCleanPlugin extends BasePlugin<Options> {
+export class BaseCleanCommand extends CliCommand<Options> {
 
   name = 'clean';
 

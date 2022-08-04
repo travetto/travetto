@@ -1,7 +1,7 @@
 import * as enquirer from 'enquirer';
 
 import { PathUtil, EnvUtil } from '@travetto/boot';
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 
 import { Context } from './lib/context';
 import { Feature, FEATURES } from './lib/features';
@@ -13,9 +13,9 @@ type Options = {
 };
 
 /**
- * Plugin to run scaffolding
+ * Command to run scaffolding
  */
-export class ScaffoldPlugin extends BasePlugin<Options> {
+export class ScaffoldCommand extends CliCommand<Options> {
   name = 'scaffold';
 
   getOptions(): Options {

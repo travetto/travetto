@@ -38,19 +38,19 @@ This will show all the available options/choices that are exposed given the curr
 
 ## Extending
 
-Extending the `cli` is fairly straightforward.  It is built upon [commander](https://www.npmjs.com/package/commander), with a plugin model that is extensible:
+Extending the `cli` is fairly straightforward.  It is built upon [commander](https://www.npmjs.com/package/commander), with a model that is extensible:
 
-**Code: Echo Plugin**
+**Code: Echo Command**
 ```typescript
 import '@travetto/base';
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { CliCommand } from '@travetto/cli/src/command';
 
 /**
  * `npx trv echo`
  *
  * Allows for cleaning of the cache dire
  */
-export class CliEchoPlugin extends BasePlugin {
+export class CliEchoCommand extends CliCommand {
   name = 'echo';
 
   getOptions() {
@@ -72,7 +72,7 @@ export class CliEchoPlugin extends BasePlugin {
 
 With the corresponding output:
 
-**Terminal: Echo Plugin Help**
+**Terminal: Echo Command Help**
 ```bash
 $ trv echo --help
 
@@ -85,7 +85,7 @@ Options:
 
 And actually using it:
 
-**Terminal: Echo Plugin Run**
+**Terminal: Echo Command Run**
 ```bash
 $ trv echo -u bOb rOb DRoP
 

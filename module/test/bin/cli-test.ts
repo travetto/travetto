@@ -2,7 +2,7 @@ import * as os from 'os';
 import { readFileSync } from 'fs';
 
 import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 import { EnvInit } from '@travetto/base/bin/init';
 
 import type { RunState } from '../src/execute/types';
@@ -19,7 +19,7 @@ type Options = {
 /**
  * Launch test framework and execute tests
  */
-export class TestPlugin extends BasePlugin<Options> {
+export class TestCommand extends CliCommand<Options> {
   name = 'test';
   _types: string[];
 

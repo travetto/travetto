@@ -15,16 +15,16 @@ This will show all the available options/choices that are exposed given the curr
 
 ${d.Section('Extending')}
 
-Extending the ${d.Input('cli')} is fairly straightforward.  It is built upon ${lib.Commander}, with a plugin model that is extensible:
+Extending the ${d.Input('cli')} is fairly straightforward.  It is built upon ${lib.Commander}, with a model that is extensible:
 
-${d.Code('Echo Plugin', 'doc/bin/cli-echo.ts')}
+${d.Code('Echo Command', 'doc/bin/cli-echo.ts')}
 
 With the corresponding output:
 
-${d.Execute('Echo Plugin Help', 'trv', ['echo', '--help'])}
+${d.Execute('Echo Command Help', 'trv', ['echo', '--help'])}
 
 And actually using it:
 
-${d.Execute('Echo Plugin Run', 'trv', ['echo', '-u', 'bOb', 'rOb', 'DRoP'])}
+${d.Execute('Echo Command Run', 'trv', ['echo', '-u', 'bOb', 'rOb', 'DRoP'])}
 
 `;

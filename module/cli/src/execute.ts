@@ -2,7 +2,7 @@ import { program as commander } from 'commander';
 
 import { CliUtil } from './util';
 import { CompletionConfig } from './types';
-import { PluginManager } from './plugin';
+import { CliCommandManager } from './command-manager';
 import { HelpUtil } from './help';
 import { version } from '../package.json';
 
@@ -16,31 +16,31 @@ export class ExecutionManager {
    */
   static async runCompletion(args: string[]): Promise<void> {
     const cfg: CompletionConfig = { all: [], task: {} };
-    await PluginManager.loadAllPlugins(x => x.setupCompletion(cfg));
+    await CliCommandManager.loadAllCommands(x => x.setupCompletion(cfg));
     const res = await CliUtil.getCompletion(cfg, args.slice(3));
     console.log(res.join(' '));
     return;
   }
 
   /**
-   * Run plugin
+   * Run command
    */
-  static async runPlugin(args: string[]): Promise<void> {
+  static async runCommand(args: string[]): Promise<void> {
     const cmd = args[2];
 
-    let plugin;
+    let command;
 
     try {
-      // Load a single plugin
-      plugin = await PluginManager.loadPlugin(cmd);
-      await plugin.setup(commander);
+      // Load a single command
+      command = await CliCommandManager.loadCommand(cmd);
+      await command.setup(commander);
     } catch (err) {
       return HelpUtil.showHelp(commander, `Unknown command ${cmd}`);
     }
 
     try {
       if (args.includes('-h') || args.includes('--help')) {
-        return plugin.showHelp();
+        return command.showHelp();
       } else {
         commander.parse(args);
       }
@@ -48,13 +48,13 @@ export class ExecutionManager {
       if (!(err instanceof Error)) {
         throw err;
       }
-      return plugin.showHelp(err);
+      return command.showHelp(err);
     }
   }
 
   /**
    * Execute the command line
-   * @param args argv
+   * @param args
    */
   static async run(args: string[]): Promise<void> {
     const width = +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 120);
@@ -68,10 +68,10 @@ export class ExecutionManager {
       await this.runCompletion(args);
     } else {
       if (cmd && !cmd.startsWith('-')) {
-        await this.runPlugin(args);
+        await this.runCommand(args);
       } else {
-        // Load all plugins
-        await PluginManager.loadAllPlugins(x => x.setup(commander));
+        // Load all commands
+        await CliCommandManager.loadAllCommands(x => x.setup(commander));
         HelpUtil.showHelp(commander);
       }
     }

@@ -1,13 +1,13 @@
-import { OptionConfig } from '@travetto/cli/src/plugin-base';
+import { OptionConfig } from '@travetto/cli/src/command';
 
-import { BaseOptions, BasePackPlugin } from './pack-base';
+import { BaseOptions, BasePackCommand } from './pack-base';
 import { Zip, ZipConfig } from './operation/zip';
 
 type Options = BaseOptions & {
   output: OptionConfig<string>;
 };
 
-export class PackZipPlugin extends BasePackPlugin<Options, ZipConfig> {
+export class PackZipCommand extends BasePackCommand<Options, ZipConfig> {
   operation = Zip;
 
   getOptions(): Options {

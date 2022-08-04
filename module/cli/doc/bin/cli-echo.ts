@@ -1,12 +1,12 @@
 import '@travetto/base';
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { CliCommand } from '@travetto/cli/src/command';
 
 /**
  * `npx trv echo`
  *
  * Allows for cleaning of the cache dire
  */
-export class CliEchoPlugin extends BasePlugin {
+export class CliEchoCommand extends CliCommand {
   name = 'echo';
 
   getOptions() {

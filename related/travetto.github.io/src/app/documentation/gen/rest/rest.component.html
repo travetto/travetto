@@ -365,7 +365,7 @@ Available Applications:
 <p class="note"><strong>Note</strong> The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after requirements to ensure the appropriate order of execution.</p>
 
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
-<ol> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L23">SerializeInterceptor</a> - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.</li>
+<ol> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L25">SerializeInterceptor</a> - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.</li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cors.ts#L39">CorsInterceptor</a> - This interceptor allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, <code class="item input">rest.cors.active: true</code>
   
       <figure class="code">

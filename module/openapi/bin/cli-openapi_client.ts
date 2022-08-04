@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { readFileSync } from 'fs';
 
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
 import { AppCache, ExecUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
@@ -10,7 +10,7 @@ const presets: Record<string, [string, object] | [string]> = JSON.parse(readFile
 
 type Options = {
   extendedHelp: OptionConfig<boolean>;
-  props: OptionConfig<string[]>;
+  props: ListOptionConfig<string>;
   input: OptionConfig<string>;
   output: OptionConfig<string>;
   dockerImage: OptionConfig<string>;
@@ -19,7 +19,7 @@ type Options = {
 /**
  * CLI for generating the cli client
  */
-export class OpenApiClientPlugin extends BasePlugin<Options> {
+export class OpenApiClientCommand extends CliCommand<Options> {
   name = 'openapi:client';
 
   presetMap(prop?: object): string {

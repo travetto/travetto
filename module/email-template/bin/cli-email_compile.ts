@@ -1,6 +1,6 @@
 import { PathUtil } from '@travetto/boot';
 import { EnvInit } from '@travetto/base/bin/init';
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 import { color } from '@travetto/cli/src/color';
 
 type Options = {
@@ -10,7 +10,7 @@ type Options = {
 /**
  * CLI Entry point for running the email server
  */
-export class EmailCompilePlugin extends BasePlugin<Options> {
+export class EmailCompileCommand extends CliCommand<Options> {
   name = 'email:compile';
 
   envInit(): void {

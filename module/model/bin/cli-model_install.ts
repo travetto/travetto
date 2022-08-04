@@ -1,12 +1,12 @@
 import { color } from '@travetto/cli/src/color';
 
-import { BaseModelPlugin } from './lib/base-cli-plugin';
+import { BaseModelCommand } from './lib/base-command';
 import { ModelInstallUtil } from './lib/install';
 
 /**
  * CLI Entry point for installing models
  */
-export class ModelInstallPlugin extends BaseModelPlugin {
+export class ModelInstallCommand extends BaseModelCommand {
   name = 'model:install';
   op = 'createModel' as const;
 

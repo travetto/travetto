@@ -97,7 +97,7 @@ The framework, when in watch mode, will generate the [OpenAPI](https://github.co
 
 ## CLI - openapi:spec
 
-The module provides a plugin for the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") to allow scripting file generation.
+The module provides a command for the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") to allow scripting file generation.
 
 **Terminal: OpenAPI usage**
 ```bash
@@ -116,7 +116,7 @@ The command will run your application, in non-server mode, to collect all the ro
 
 ## CLI - openapi:client
 
-The module provides a plugin for the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") to allow client generation from the API structure.
+The module provides a command for the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") to allow client generation from the API structure.
 
 **Terminal: OpenAPI usage**
 ```bash

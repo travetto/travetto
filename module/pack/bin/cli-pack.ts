@@ -1,7 +1,7 @@
-import { BaseOptions, BasePackPlugin } from './pack-base';
+import { BaseOptions, BasePackCommand } from './pack-base';
 import { Pack, AllConfig } from './operation/pack';
 
-export class PackPlugin extends BasePackPlugin<BaseOptions, AllConfig> {
+export class PackCommand extends BasePackCommand<BaseOptions, AllConfig> {
   operation = Pack;
 
   getOptions(): BaseOptions {

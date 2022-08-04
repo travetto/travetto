@@ -1,7 +1,7 @@
 import * as rl from 'readline';
 import * as timers from 'timers/promises';
 
-import { BasePlugin } from '@travetto/cli/src/plugin-base';
+import { CliCommand } from '@travetto/cli/src/command';
 import { color } from '@travetto/cli/src/color';
 
 import { ServiceUtil } from './lib/service';
@@ -11,7 +11,7 @@ import { ServiceUtil } from './lib/service';
  *
  * Allows for running services
  */
-export class CliServicePlugin extends BasePlugin<{}> {
+export class CliServiceCommand extends CliCommand<{}> {
   name = 'command:service';
 
   getArgs(): string {

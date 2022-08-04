@@ -377,7 +377,7 @@ First we must start the application:
 2022-03-14T04:00:01.510Z info  [@trv:app/registry:72] Config {
   rest: {
     serve: true,
-    port: 3000,
+    port: 12555,
     disableGetCache: true,
     trustProxy: false,
     hostname: 'localhost',
@@ -416,7 +416,7 @@ First we must start the application:
     }
   }
 }
-2022-03-14T04:00:02.450Z info  [@trv:rest/application/rest:191] Listening { port: 3000 }
+2022-03-14T04:00:02.450Z info  [@trv:rest/application/rest:191] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:
@@ -442,11 +442,17 @@ export async function main() {
 ```bash
 $ node @travetto/boot/bin/main ./doc/create-todo.ts 
 
-{
-  text: 'New Todo',
-  created: '2022-03-14T04:00:02.762Z',
-  id: '22e793aed76ee063d13feec2e5e95b45'
-}
+/home/tim/Code/travetto/node_modules/node-fetch/lib/index.js:1491
+			reject(new FetchError(`request to ${request.url} failed, reason: ${err.message}`, 'system', err));
+          ^
+FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNREFUSED 127.0.0.1:3000
+    at ClientRequest.<anonymous> (/home/tim/Code/travetto/node_modules/node-fetch/lib/index.js:1491:11)
+    at ClientRequest.emit (node:events:527:28)
+    at Socket.socketErrorListener (node:_http_client:454:9)
+    at Socket.emit (node:events:527:28)
+    at emitErrorNT (node:internal/streams/destroy:151:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+    at processTicksAndRejections (node:internal/process/task_queues:82:21)
 ```
 
 **Code: Listing Todos by fetch**
@@ -463,11 +469,15 @@ export async function main() {
 ```bash
 $ node @travetto/boot/bin/main ./doc/list-todo.ts 
 
-[
-  {
-    id: '22e793aed76ee063d13feec2e5e95b45',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:03.086Z'
-  }
-]
+/home/tim/Code/travetto/node_modules/node-fetch/lib/index.js:1491
+			reject(new FetchError(`request to ${request.url} failed, reason: ${err.message}`, 'system', err));
+          ^
+FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNREFUSED 127.0.0.1:3000
+    at ClientRequest.<anonymous> (/home/tim/Code/travetto/node_modules/node-fetch/lib/index.js:1491:11)
+    at ClientRequest.emit (node:events:527:28)
+    at Socket.socketErrorListener (node:_http_client:454:9)
+    at Socket.emit (node:events:527:28)
+    at emitErrorNT (node:internal/streams/destroy:151:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+    at processTicksAndRejections (node:internal/process/task_queues:82:21)
 ```

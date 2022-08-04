@@ -1,9 +1,9 @@
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 
 import { color } from './color';
-import { BasePlugin } from './plugin-base';
+import { CliCommand } from './command';
 
-const PLUGIN_PACKAGE = [
+const COMMAND_PACKAGE = [
   [/^run$/, 'app', true],
   [/^compile$/, 'compiler', true],
   [/^test$/, 'test', false],
@@ -15,14 +15,14 @@ const PLUGIN_PACKAGE = [
 ] as const;
 
 /**
- * Manages loading and finding all plugins
+ * Manages loading and finding all commands
  */
-export class PluginManager {
+export class CliCommandManager {
 
   /**
-   * Get list of all plugins available
+   * Get list of all commands available
    */
-  static getPluginMapping(): Map<string, string> {
+  static getCommandMapping(): Map<string, string> {
     const all = new Map<string, string>();
     for (const { file } of SourceIndex.find({ folder: 'bin', filter: /bin\/cli-/ })) {
       all.set(file.replace(/^.*\/bin\/.+?-(.*?)[.][^.]*$/, (_, f) => f), file);
@@ -31,13 +31,13 @@ export class PluginManager {
   }
 
   /**
-   * Load plugin module
+   * Load command
    */
-  static async loadPlugin(cmd: string, op?: (p: BasePlugin) => unknown): Promise<BasePlugin> {
+  static async loadCommand(cmd: string, op?: (p: CliCommand) => unknown): Promise<CliCommand> {
     const command = cmd.replace(/:/g, '_');
-    const f = this.getPluginMapping().get(command)!;
+    const f = this.getCommandMapping().get(command)!;
     if (!f) {
-      const cfg = PLUGIN_PACKAGE.find(([re]) => re.test(cmd));
+      const cfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
       if (cfg) {
         const [, pkg, prod] = cfg;
         console.error(color`
@@ -51,7 +51,7 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
     for (const v of values) {
       try {
         const inst = new v();
-        if (inst instanceof BasePlugin) {
+        if (inst instanceof CliCommand) {
           if (op) {
             await op(inst);
           }
@@ -59,17 +59,17 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
         }
       } catch { }
     }
-    throw new Error(`Not a valid plugin: ${cmd}`);
+    throw new Error(`Not a valid command: ${cmd}`);
   }
 
   /**
-   * Load all available plugins
+   * Load all available commands
    */
-  static async loadAllPlugins(op?: (p: BasePlugin) => unknown | Promise<unknown>): Promise<BasePlugin[]> {
+  static async loadAllCommands(op?: (p: CliCommand) => unknown | Promise<unknown>): Promise<CliCommand[]> {
     return Promise.all(
-      [...this.getPluginMapping().keys()]
+      [...this.getCommandMapping().keys()]
         .sort((a, b) => a.localeCompare(b))
-        .map(k => this.loadPlugin(k, op))
+        .map(k => this.loadCommand(k, op))
     );
   }
 }

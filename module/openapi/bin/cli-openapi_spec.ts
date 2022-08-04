@@ -1,4 +1,4 @@
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 import { ExecUtil } from '@travetto/boot';
 import { EnvInit } from '@travetto/base/bin/init';
 
@@ -9,7 +9,7 @@ type Options = {
 /**
  * CLI for outputting the open api spec to a local file
  */
-export class OpenApiSpecPlugin extends BasePlugin<Options> {
+export class OpenApiSpecCommand extends CliCommand<Options> {
   name = 'openapi:spec';
 
   getOptions(): Options {

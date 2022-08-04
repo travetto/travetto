@@ -347,7 +347,7 @@ export class HelloWorldInterceptor implements RestInterceptor {
 
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
    
-   1. [SerializeInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L23) - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+   1. [SerializeInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L25) - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
    1. [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cors.ts#L39) - This interceptor allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, `rest.cors.active: true`
      
    **Code: Cors Config**

@@ -19,7 +19,7 @@ The framework, when in watch mode, will generate the ${lib.OpenAPI} specificatio
 
 ${d.Section('CLI - openapi:spec')}
 
-The module provides a plugin for the ${mod.Cli} to allow scripting file generation.
+The module provides a command for the ${mod.Cli} to allow scripting file generation.
 
 ${d.Execute('OpenAPI usage', 'trv', ['openapi:spec', '--help'])}
 
@@ -29,7 +29,7 @@ ${d.Note(d`The module supports generating the OpenAPI spec in real-time while li
 
 ${d.Section('CLI - openapi:client')}
 
-The module provides a plugin for the ${mod.Cli} to allow client generation from the API structure.
+The module provides a command for the ${mod.Cli} to allow client generation from the API structure.
 
 ${d.Execute('OpenAPI usage', 'trv', ['openapi:client', '--help'])}
 

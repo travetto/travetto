@@ -1,13 +1,13 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
 import { EnvInit } from '@travetto/base/bin/init';
 import { PathUtil } from '@travetto/boot';
 
 type Options = {
   input: OptionConfig<string>;
-  output: OptionConfig<string[]>;
+  output: ListOptionConfig<string>;
   format: OptionConfig<string>;
   watch: OptionConfig<boolean>;
 };
@@ -15,7 +15,7 @@ type Options = {
 /**
  * Command line support for generating module docs.
  */
-export class DocPlugin extends BasePlugin<Options> {
+export class DocCommand extends CliCommand<Options> {
   name = 'doc';
 
   getOptions(): Options {

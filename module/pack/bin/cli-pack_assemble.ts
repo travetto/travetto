@@ -1,6 +1,6 @@
-import { OptionConfig } from '@travetto/cli/src/plugin-base';
+import { OptionConfig } from '@travetto/cli/src/command';
 
-import { BaseOptions, BasePackPlugin } from './pack-base';
+import { BaseOptions, BasePackCommand } from './pack-base';
 import { Assemble, AssembleConfig } from './operation/assemble';
 
 type Options = BaseOptions & {
@@ -8,7 +8,7 @@ type Options = BaseOptions & {
   readonly: OptionConfig<boolean>;
 };
 
-export class PackAssemblePlugin extends BasePackPlugin<Options, AssembleConfig> {
+export class PackAssembleCommand extends BasePackCommand<Options, AssembleConfig> {
   operation = Assemble;
 
   getOptions(): Options {

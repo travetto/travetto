@@ -1,5 +1,5 @@
 import { color } from '@travetto/cli/src/color';
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 
 import { BuildUtil } from './lib';
 
@@ -12,7 +12,7 @@ type Options = {
  * Command line support for building the code with the ability to
  * control the output target.
  */
-export class BaseBuildPlugin extends BasePlugin<Options> {
+export class BaseBuildCommand extends CliCommand<Options> {
 
   name = 'build';
 

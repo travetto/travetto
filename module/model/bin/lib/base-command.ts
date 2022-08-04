@@ -1,4 +1,4 @@
-import { BasePlugin, OptionConfig } from '@travetto/cli/src/plugin-base';
+import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
@@ -12,7 +12,7 @@ type Options = {
 /**
  * CLI Entry point for exporting model schemas
  */
-export abstract class BaseModelPlugin extends BasePlugin<Options> {
+export abstract class BaseModelCommand extends CliCommand<Options> {
 
   restoreEnv?: (err: Error) => unknown;
 
