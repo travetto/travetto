@@ -7,6 +7,7 @@ import { ActionStorage } from '../../../core/storage';
 import { AppChoice } from './types';
 import { AppSelectorUtil } from './util';
 import { BaseFeature } from '../../base';
+import { TargetEvent } from '../../../core/types';
 
 /**
  * App run feature
@@ -170,5 +171,14 @@ export class AppRunFeature extends BaseFeature {
     this.register('recent', this.#runner('Run Recent Application', () => this.getValidRecent(10)));
     this.register('mostRecent', this.#runner('Run Most Recent Application', () => this.getValidRecent(1).then(([x]) => x)));
     this.register('export', async () => this.exportLaunchConfig());
+  }
+
+  async onEvent(ev: TargetEvent<{ name: string, args: string[] }>): Promise<void> {
+    const { name, args } = ev.data;
+    const app = (await this.getAppList()).find(a => a.name === name);
+
+    if (app) {
+      await this.runApplication(name, { ...app, inputs: args });
+    }
   }
 }

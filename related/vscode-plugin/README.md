@@ -106,6 +106,10 @@ Currently the supported commands are:
 
 ## Release Notes
 
+### 2.0.x
+   * Upgraded dependencies/versions
+   * Added support for cli/extension communication
+
 ### 1.1.x
    
    *  Introduced the email template functionality

@@ -105,6 +105,14 @@ export class AppRunCommand extends CliCommand<Options> {
     }
   }
 
+  async jsonIpc(app: string, args: string[]): Promise<unknown | undefined> {
+    if (!app) {
+      return;
+    } else {
+      return { name: app, args };
+    }
+  }
+
   /**
    * Tab completion support
    */

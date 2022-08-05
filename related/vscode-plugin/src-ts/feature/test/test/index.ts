@@ -116,6 +116,7 @@ class TestRunnerFeature extends BaseFeature {
     vscode.languages.registerCodeLensProvider({
       language: 'typescript',
       pattern: {
+        baseUri: Workspace.uri,
         base: Workspace.path,
         pattern: 'test/**'
       }

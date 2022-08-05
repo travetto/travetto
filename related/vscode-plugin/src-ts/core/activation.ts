@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
-import { ActivationTarget } from './types';
+import { IpcSupport } from './ipc';
+import { ActivationTarget, TargetEvent } from './types';
 import { Workspace } from './workspace';
 
 interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {
@@ -15,9 +16,14 @@ type ActivationConfig = { module: string, command?: string | true, cls: Activati
 export class ActivationManager {
 
   static #registry = new Set<ActivationConfig>();
+  static #commandRegistry = new Map<string, ActivationConfig>();
+  static #ipcSupport = new IpcSupport(e => this.onTargetEvent(e));
 
   static add(config: ActivationConfig): void {
     this.#registry.add(config);
+    if (config.command && typeof config.command === 'string') {
+      this.#commandRegistry.set(config.command, config);
+    }
   }
 
   static async init(): Promise<void> {
@@ -27,6 +33,7 @@ export class ActivationManager {
         entry.instance = new cls(module, command === true ? undefined : command);
         vscode.commands.executeCommand('setContext', `travetto.${module}`, true);
         if (typeof command === 'string') {
+          this.#commandRegistry.get(command)!.instance = entry.instance;
           vscode.commands.executeCommand('setContext', `travetto.${module}.${command}`, true);
         }
       }
@@ -37,11 +44,22 @@ export class ActivationManager {
     for (const { instance } of this.#registry.values()) {
       instance?.activate?.(ctx);
     }
+    this.#ipcSupport.activate(ctx);
   }
 
   static async deactivate(): Promise<void> {
+    this.#ipcSupport.deactivate();
     for (const { instance } of this.#registry.values()) {
       instance?.deactivate?.();
+    }
+  }
+
+  static async onTargetEvent(event: TargetEvent): Promise<void> {
+    try {
+      await this.#commandRegistry.get(event.type)?.instance?.onEvent?.(event);
+      await vscode.window.activeTerminal?.show();
+    } catch (e) {
+      console.error('Unknown error', e);
     }
   }
 }

@@ -1,3 +1,4 @@
+import { appendFile } from 'fs/promises';
 import * as commander from 'commander';
 
 import { CompletionConfig } from './types';
@@ -77,6 +78,10 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
    * Extra help
    */
   help?(): Promise<string> | string;
+  /**
+   * Supports JSON IPC?
+   */
+  jsonIpc?(...args: unknown[]): Promise<unknown>;
 
   /**
    * Define option
@@ -226,6 +231,14 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
   async runAction(...args: unknown[]): Promise<void> {
     await this.envInit?.();
     await this.build();
+    if (process.env.TRV_CLI_JSON_IPC && this.jsonIpc) {
+      const data = await this.jsonIpc(...args);
+      if (data !== undefined) {
+        const payload = JSON.stringify({ type: this.name, data });
+        await appendFile(process.env.TRV_CLI_JSON_IPC, `${payload}\n`);
+        return;
+      }
+    }
     return await this.action(...args);
   }
 

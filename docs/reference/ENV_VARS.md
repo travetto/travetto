@@ -22,6 +22,9 @@ The common environment variables throughout the code base:
 * `TRV_TEST_TIMEOUT` = 5s         - The default time for a single test to finish, default `5s`
 * `TRV_TEST_DELAY` = 0s           - An additional wait for triggering test runs, useful for code that takes time to warm up
 
+## Cli
+* `TRV_CLI_JSON_IPC`              - Provides an IPC file location for the CLI to write supported commands to.  This facilitates cli-based invocation for external usage.
+
 ## Command
 * `TRV_DOCKER` = 0|ns             - Docker support, if non-zero, acts as the docker namespace.  If `0`, disables running if docker should even be considered when running a command service, defaults to `undefined`
 
@@ -33,7 +36,7 @@ The common environment variables throughout the code base:
 * `TRV_SRC_LOCAL` = []            - The folder local only to the application that is searched for source files.  Useful for loading in optional sub-applications.
 * `TRV_DOC_BRANCH` = `master`     - The branch to target the documentation against.
 * `TRV_NODE_VERSION` = DEFAULT    - The node version to compile for, translates into a specific typescript target for compability. Will default to the version of node running.
-* `TRV_CONSOLE_WIDTH`             - An override for controlliing output-width for cli-based operations.
+* `TRV_CONSOLE_WIDTH`             - An override for controlling output-width for cli-based operations.
 
 ## Build
 * `TRV_FLAT` = `0`                -  Will not follow transitive deps when running operations.  Useful for manual deploys of specific versions

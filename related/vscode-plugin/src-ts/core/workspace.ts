@@ -19,6 +19,13 @@ export class Workspace {
   }
 
   /**
+   * Get workspace uri
+   */
+  static get uri(): vscode.Uri {
+    return this.folder.uri;
+  }
+
+  /**
    * Read default environment data for executions
    * @param extra Additional env vars to add
    */
@@ -61,7 +68,7 @@ export class Workspace {
    * Resolve workspace path
    */
   static resolve(...p: string[]): string {
-    return PathUtil.resolveFrameworkPath(PathUtil.resolveUnix(this.path, ...p));
+    return PathUtil.resolveUnix(PathUtil.resolveFrameworkPath(PathUtil.resolveUnix(this.path, ...p)));
   }
 
   /**
