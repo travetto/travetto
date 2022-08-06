@@ -1,7 +1,7 @@
-::ng-deep * {
+:host ::ng-deep * {
   user-select: none;
 }
 
-::ng-deep code {
+:host ::ng-deep code {
   cursor: pointer;
 }
