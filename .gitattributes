@@ -1,0 +1,5 @@
+related/travetto.github.io/src/app/documentation/gen/** linguist-generated
+related/travetto.github.io/src/app/documentation/**/*.html linguist-generated
+related/travetto.github.io/src/app/guide/**/*.html linguist-generated
+
+*.ts eol=lf
