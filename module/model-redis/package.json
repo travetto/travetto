@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model-redis",
   "displayName": "Redis Model Support",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Redis backing for the travetto model module.",
   "keywords": [
     "typescript",
@@ -26,8 +26,8 @@
     "directory": "module/model-redis"
   },
   "dependencies": {
-    "@travetto/config": "^2.2.2",
-    "@travetto/model": "^2.2.2",
+    "@travetto/config": "^2.2.3",
+    "@travetto/model": "^2.2.3",
     "redis": "^4.2.0"
   },
   "publishConfig": {

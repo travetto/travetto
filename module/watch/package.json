@@ -1,7 +1,7 @@
 {
   "name": "@travetto/watch",
   "displayName": "Watch",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Support for making files watchable during runtime",
   "keywords": [
     "file-watching",
@@ -24,7 +24,7 @@
     "directory": "module/watch"
   },
   "dependencies": {
-    "@travetto/base": "^2.2.2"
+    "@travetto/base": "^2.2.3"
   },
   "publishConfig": {
     "access": "public"

@@ -1,7 +1,7 @@
 {
   "name": "@travetto/command",
   "displayName": "Command",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Support for executing complex commands at runtime.",
   "keywords": [
     "command",
@@ -26,10 +26,10 @@
     "directory": "module/command"
   },
   "dependencies": {
-    "@travetto/base": "^2.2.2"
+    "@travetto/base": "^2.2.3"
   },
   "optionalPeerDependencies": {
-    "@travetto/cli": "^2.2.2"
+    "@travetto/cli": "^2.2.3"
   },
   "docDependencies": {
     "@travetto/model-elasticsearch": true
