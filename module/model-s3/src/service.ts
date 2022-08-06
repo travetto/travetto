@@ -319,6 +319,8 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
     if (obj) {
       const ret: StreamMeta = {
+        // @ts-expect-error
+        contentType: '',
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         ...obj.Metadata as StreamMeta,
         size: obj.ContentLength!,
