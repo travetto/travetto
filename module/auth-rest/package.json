@@ -1,7 +1,7 @@
 {
   "name": "@travetto/auth-rest",
   "displayName": "Rest Auth",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Rest authentication integration support for the travetto framework",
   "keywords": [
     "authentication",
@@ -29,8 +29,8 @@
   "dependencies": {
     "@travetto/auth": "^2.2.3",
     "@travetto/config": "^2.2.3",
-    "@travetto/context": "^2.2.3",
-    "@travetto/rest": "^2.2.3"
+    "@travetto/context": "^2.2.4",
+    "@travetto/rest": "^2.2.4"
   },
   "optionalPeerDependencies": {
     "@types/passport": "^1.0.9",

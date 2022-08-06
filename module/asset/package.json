@@ -1,7 +1,7 @@
 {
   "name": "@travetto/asset",
   "displayName": "Asset",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Modular library for storing and retrieving binary assets",
   "keywords": [
     "assets",
