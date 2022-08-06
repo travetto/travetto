@@ -34,7 +34,7 @@
   },
   "optionalPeerDependencies": {
     "@types/passport": "^1.0.9",
-    "passport": "^0.5.3"
+    "passport": "^0.6.0"
   },
   "docDependencies": {
     "@types/passport-facebook": "^2.1.11",

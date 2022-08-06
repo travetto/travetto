@@ -31,7 +31,7 @@
     "@fastify/formbody": "^6.0.1"
   },
   "optionalPeerDependencies": {
-    "@fastify/aws-lambda": "^3.0.0"
+    "@fastify/aws-lambda": "^3.1.0"
   },
   "publishConfig": {
     "access": "public"
