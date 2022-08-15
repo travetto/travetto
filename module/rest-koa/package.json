@@ -36,7 +36,7 @@
     "koa-router": "^10.1.1"
   },
   "optionalPeerDependencies": {
-    "@types/aws-lambda": "^8.10.101",
+    "@types/aws-lambda": "^8.10.102",
     "@vendia/serverless-express": "^4.10.1"
   },
   "publishConfig": {
