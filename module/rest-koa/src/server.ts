@@ -18,7 +18,7 @@ type Routes = ReturnType<Router['routes']>;
 
 function kCustomBody() {
   return async (ctx: koa.Context, next: koa.Next): Promise<void> => {
-    const contentType = ctx.headers['content-type'];
+    const contentType = ctx.headers['content-type']?.split(/\s*;\s*/)[0];
     if (contentType) {
       if (/json$/.test(contentType)) {
         ctx.body = (await coBody.json(ctx));
