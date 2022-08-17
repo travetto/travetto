@@ -1,7 +1,7 @@
 {
   "name": "@travetto/rest-session",
   "displayName": "REST Session",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "Session provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -31,7 +31,7 @@
     "@travetto/rest": "^2.2.4"
   },
   "optionalPeerDependencies": {
-    "@travetto/auth-rest": "2.2.4"
+    "@travetto/auth-rest": "2.2.5"
   },
   "publishConfig": {
     "access": "public"

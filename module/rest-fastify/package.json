@@ -1,7 +1,7 @@
 {
   "name": "@travetto/rest-fastify",
   "displayName": "Fastify REST Source",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "Fastify provider for the travetto rest module.",
   "keywords": [
     "rest",
