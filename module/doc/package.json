@@ -1,7 +1,7 @@
 {
   "name": "@travetto/doc",
   "displayName": "Documentation",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Documentation support for the travetto framework",
   "keywords": [
     "docs",

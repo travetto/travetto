@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model-mongo",
   "displayName": "MongoDB Model Support",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "Mongo backing for the travetto model module.",
   "keywords": [
     "mongo",

@@ -1,7 +1,7 @@
 {
   "name": "@travetto/app",
   "displayName": "Application",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Application registration/management and run support.",
   "keywords": [
     "ast-transformations",
