@@ -2,36 +2,23 @@ import type * as https from 'https';
 import * as koa from 'koa';
 import * as kCompress from 'koa-compress';
 import * as kRouter from 'koa-router';
-import * as coBody from 'co-body';
 
 import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
+
 import { TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
-import { Request, Response, ServerHandle } from '@travetto/rest/src/types';
+import { ServerHandle } from '@travetto/rest/src/types';
 
 import { KoaServerUtil } from './internal/util';
 
-type TrvCtx = { [TravettoEntityⲐ]: [Request, Response] };
 type Keyed = { key?: symbol | string };
-type Router = kRouter<{}, TrvCtx>;
-type Routes = ReturnType<Router['routes']>;
+type Routes = ReturnType<kRouter<unknown, koa.Context>['routes']>;
 
-function kCustomBody() {
-  return async (ctx: koa.Context, next: koa.Next): Promise<void> => {
-    const contentType = ctx.headers['content-type']?.split(/\s*;\s*/)[0];
-    if (contentType) {
-      if (/json$/.test(contentType)) {
-        ctx.body = (await coBody.json(ctx));
-      } else if (/urlencoded$/.test(contentType)) {
-        ctx.body = (await coBody.form(ctx));
-      } else if (/^text\//.test(contentType)) {
-        ctx.body = (await coBody.text(ctx));
-      } else {
-        ctx.body = ctx.req;
-      }
-    }
-    await next();
-  };
+// Support typings
+declare module 'koa' {
+  interface Context {
+    [TravettoEntityⲐ]?: [TravettoRequest, TravettoResponse];
+  }
 }
 
 /**
@@ -55,7 +42,6 @@ export class KoaRestServer implements RestServer<koa> {
   init(): koa {
     const app = new koa();
     app.use(kCompress());
-    app.use(kCustomBody());
 
     app.keys = this.cookies.keys;
 
@@ -79,7 +65,7 @@ export class KoaRestServer implements RestServer<koa> {
   }
 
   async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]): Promise<void> {
-    const router = new kRouter<unknown, TrvCtx>(path !== '/' ? { prefix: path } : {});
+    const router = new kRouter<unknown, koa.Context>(path !== '/' ? { prefix: path } : {});
 
     // Register all routes to extract the proper request/response for the framework
     for (const route of routes) {

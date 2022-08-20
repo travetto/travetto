@@ -37,7 +37,7 @@ export class RestTransformer {
       (paramType.key === 'external' &&
         DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@trv:rest/Context')
       ) ||
-      (pDec && !/(Path|Header|Query|Body|Param|SchemaQuery)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
+      (pDec && !/(Path|Header|Query|Body|Param|QuerySchema)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
 
     // Detect default behavior
     if (isContext) {

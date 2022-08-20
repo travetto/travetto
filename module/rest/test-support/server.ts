@@ -83,6 +83,13 @@ class TestController {
       header: req.headerFirst('age')
     };
   }
+
+  @Post('/rawBody')
+  postRawBody(req: Request) {
+    return {
+      size: req.raw?.length
+    };
+  }
 }
 
 @Suite()
@@ -183,4 +190,16 @@ export abstract class RestServerSuite extends BaseRestSuite {
     });
     assert(ret === { header: '1' });
   }
+
+  @Test()
+  async testRawBody() {
+    const { body: ret } = await this.request('post', '/test/rawBody', {
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: `[${' '.repeat(18)}]`
+    });
+    assert(ret === { size: 20 });
+  }
+
 }

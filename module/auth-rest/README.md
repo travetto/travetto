@@ -47,7 +47,7 @@ Every external framework integration relies upon the [Authenticator](https://git
 [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8)
 ```
 
-The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L103), and is responsible for:
+The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107), and is responsible for:
 
    
    *  Returning an [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) if authentication was successful

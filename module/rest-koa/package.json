@@ -27,11 +27,9 @@
   "dependencies": {
     "@travetto/rest": "^2.2.4",
     "@types/koa": "^2.13.5",
-    "@types/co-body": "^6.1.0",
     "@types/koa-compress": "^4.0.3",
     "@types/koa-router": "^7.4.4",
     "koa": "^2.13.4",
-    "co-body": "^6.1.0",
     "koa-compress": "^5.1.0",
     "koa-router": "^10.1.1"
   },

@@ -49,14 +49,12 @@ When working with an <a target="_blank" class="external-link" href="https://www.
 
       <figure class="code">
       <figcaption class="code">Configured Middleware
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest-fastify/src/server.ts#L50">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest-fastify/src/server.ts#L53">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token function">fastify</span><span class="token punctuation">(</span>fastConf<span class="token punctuation">)</span><span class="token punctuation">;</span>
 app<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span>compress<span class="token punctuation">)</span><span class="token punctuation">;</span>
-app<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span>formBody<span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token comment">// Allow everything else to be treated as a stream</span>
-app<span class="token punctuation">.</span><span class="token function">addContentTypeParser</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'*'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>_r<span class="token punctuation">,</span> _p<span class="token punctuation">,</span> done<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">done</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>     
+app<span class="token punctuation">.</span><span class="token function">removeAllContentTypeParsers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+app<span class="token punctuation">.</span><span class="token function">addContentTypeParser</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">.*</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> <span class="token punctuation">(</span>req<span class="token punctuation">,</span> body<span class="token punctuation">,</span> done<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">done</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> body<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>     
       </figure>
 
 <h2 id="extension-aws-lambda">Extension - AWS Lambda</h2>

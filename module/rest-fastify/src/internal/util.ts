@@ -22,11 +22,8 @@ export class FastifyServerUtil {
       query: req.query as Record<string, string>,
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       params: req.params as Record<string, string>,
-      body: req.body,
       session: req.session,
       headers: req.headers,
-      files: undefined,
-      auth: undefined,
       pipe: req.raw.pipe.bind(req.raw),
       on: req.raw.on.bind(req.raw)
     });

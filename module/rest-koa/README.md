@@ -43,9 +43,7 @@ When working with an [koa](https://koajs.com/) applications, the module provides
 
 **Code: Configured Middleware**
 ```typescript
-const app = new koa();
-    app.use(kCompress());
-    app.use(kCustomBody());
+
 ```
 
 ## Extension - AWS Lambda

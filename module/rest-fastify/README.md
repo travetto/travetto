@@ -45,10 +45,8 @@ When working with an [fastify](https://www.fastify.io/) applications, the module
 ```typescript
 const app = fastify(fastConf);
     app.register(compress);
-    app.register(formBody);
-
-    // Allow everything else to be treated as a stream
-    app.addContentTypeParser(['*'], (_r, _p, done) => done(null));
+    app.removeAllContentTypeParsers();
+    app.addContentTypeParser(/.*/, (req, body, done) => done(null, body));
 ```
 
 ## Extension - AWS Lambda

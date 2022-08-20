@@ -8,7 +8,7 @@
 npm install @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L103) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding. ") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12) class.
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding. ") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12) class.
 
 ## Routes: Controller
 
@@ -89,7 +89,7 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
    *  [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L63) - Request body (in it's entirety), with support for validation
    *   - Allows for mapping the query parameters to a full object
    *  [@Header](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L57) - Header values
-   *  [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L39) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12), [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L103), etc.)
+   *  [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L39) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12), [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107), etc.)
 
 Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L26) can be configured to indicate:
    
@@ -427,7 +427,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
    
 
 ### Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by extending the [RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L11) class.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L103) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by extending the [RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L11) class.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
@@ -473,7 +473,7 @@ export class LoggingInterceptor implements RestInterceptor {
 Currently [Asset Rest Support](https://github.com/travetto/travetto/tree/main/module/asset-rest#readme "Provides integration between the travetto asset and rest module.") is implemented in this fashion, as well as [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the travetto framework").
 
 ## Cookie Support
-[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12)/[TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L103) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12)/[TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 **Code: Sample Cookie Usage**
 ```typescript

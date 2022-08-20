@@ -13,6 +13,7 @@ export * from './src/registry/types';
 export * from './src/response/redirect';
 export * from './src/response/renderable';
 export * from './src/response/error';
+export * from './src/interceptor/body-parse';
 export * from './src/interceptor/cors';
 export * from './src/interceptor/cookies';
 export * from './src/interceptor/get-cache';

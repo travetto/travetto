@@ -154,10 +154,10 @@ $ trv run simple-domain my-domain.biz 4000
 Running application { name: 'simple-domain', filename: './doc/domain.ts' }
 Manifest {
   info: {
-    framework: '2.2.2',
+    framework: '2.2.3',
     name: '@travetto/app',
     description: 'Application registration/management and run support.',
-    version: '2.2.2',
+    version: '2.2.3',
     license: 'MIT',
     author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' }
   },
@@ -169,7 +169,7 @@ Manifest {
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
-    node: 'v18.1.0',
+    node: 'v17.9.1',
     dynamic: false,
     readonly: false
   },

@@ -1,6 +1,5 @@
 import type * as https from 'https';
 import * as express from 'express';
-import * as bodyParser from 'body-parser';
 import * as compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
@@ -48,9 +47,6 @@ export class ExpressRestServer implements RestServer<express.Application> {
     app.set('query parser', 'simple');
     app.disable('x-powered-by');
     app.use(compression());
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: false }));
-    app.use(bodyParser.raw({ type: 'image/*' }));
 
     if (this.config.trustProxy) {
       app.enable('trust proxy');

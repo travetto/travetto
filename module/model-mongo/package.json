@@ -29,7 +29,7 @@
     "@travetto/config": "^2.2.3",
     "@travetto/model": "^2.2.3",
     "@travetto/model-query": "2.2.3",
-    "mongodb": "^4.8.1"
+    "mongodb": "^4.9.0"
   },
   "publishConfig": {
     "access": "public"

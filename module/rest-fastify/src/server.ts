@@ -1,11 +1,11 @@
 import * as https from 'https';
 import compress from '@fastify/compress';
-import formBody from '@fastify/formbody';
 
 import { FastifyInstance, fastify, FastifyServerOptions, FastifyHttpsOptions } from 'fastify';
 
 import { Request, Response, RestConfig, RouteConfig, RestServer } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
+
 import { TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { ServerHandle } from '@travetto/rest/src/types';
 
@@ -19,6 +19,10 @@ declare module 'fastify' {
   interface FastifyReply {
     [TravettoEntityⲐ]?: Response;
   }
+}
+
+function isHttps(ssl: boolean | undefined, cfg: FastifyServerOptions): cfg is FastifyHttpsOptions<https.Server> {
+  return !!ssl;
 }
 
 /**
@@ -39,9 +43,8 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
    */
   async init(): Promise<FastifyInstance> {
     const fastConf: FastifyServerOptions = {};
-    if (this.config.ssl.active) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      (fastConf as FastifyHttpsOptions<https.Server>).https = (await this.config.getKeys())!;
+    if (isHttps(this.config.ssl.active, fastConf)) {
+      fastConf.https = (await this.config.getKeys())!;
     }
     if (this.config.trustProxy) {
       fastConf.trustProxy = true;
@@ -49,10 +52,8 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
 
     const app = fastify(fastConf);
     app.register(compress);
-    app.register(formBody);
-
-    // Allow everything else to be treated as a stream
-    app.addContentTypeParser(['*'], (_r, _p, done) => done(null));
+    app.removeAllContentTypeParsers();
+    app.addContentTypeParser(/.*/, (req, body, done) => done(null, body));
 
     this.raw = app;
     return app;

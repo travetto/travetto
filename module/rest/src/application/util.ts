@@ -6,13 +6,6 @@ import { Response, Request } from '../types';
  */
 class ResponseCore implements Partial<Response> {
   /**
-   * Produce JSON as the output
-   */
-  json(this: Response, val: unknown): void {
-    this.setHeader('Content-Type', 'application/json');
-    this.send(val);
-  }
-  /**
    * Get the status code
    */
   // @ts-expect-error
@@ -111,8 +104,14 @@ export class RestServerUtil {
     delete req.redirect;
     Object.setPrototypeOf(req, RequestCore.prototype);
     req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    req.method = req.method?.toUpperCase() as 'GET';
     // @ts-expect-error
     req.connection = {};
+
+    if (!('files' in req)) { req.files = undefined; }
+    if (!('auth' in req)) { req.auth = undefined; }
+
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return req as T;
   }

@@ -333,7 +333,7 @@ First we must start the application:
       <pre><code class="language-bash"><span class="token number">2022</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:57<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
 <span class="token number">2022</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:63<span class="token punctuation">]</span> Manifest <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
-    framework: <span class="token string">'2.2.2'</span>,
+    framework: <span class="token string">'2.2.3'</span>,
     name: <span class="token string">'@travetto/todo-app'</span>,
     description: <span class="token string">''</span>,
     version: <span class="token string">'0.0.0'</span>,
@@ -348,7 +348,7 @@ First we must start the application:
     resources: <span class="token punctuation">[</span> <span class="token string">'resources'</span>, <span class="token string">'doc/resources'</span> <span class="token punctuation">]</span>,
     shutdownWait: <span class="token number">2000</span>,
     cache: <span class="token string">'.trv_cache'</span>,
-    node: <span class="token string">'v18.1.0'</span>,
+    node: <span class="token string">'v17.9.1'</span>,
     dynamic: false,
     readonly: <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span>,
@@ -397,6 +397,7 @@ First we must start the application:
     defaultMessage: true,
     ssl: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
     logRoutes: <span class="token punctuation">{{'{'}}</span> allow: <span class="token punctuation">[</span><span class="token punctuation">]</span>, deny: <span class="token punctuation">[</span> <span class="token string">'*'</span> <span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+    bodyParse: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, routeLimits: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>, ignoreRoutes: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
     cors: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
     cookie: <span class="token punctuation">{{'{'}}</span>
       active: true,
@@ -467,9 +468,9 @@ FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNR
     at ClientRequest.emit <span class="token punctuation">(</span>node:events:527:28<span class="token punctuation">)</span>
     at Socket.socketErrorListener <span class="token punctuation">(</span>node:_http_client:454:9<span class="token punctuation">)</span>
     at Socket.emit <span class="token punctuation">(</span>node:events:527:28<span class="token punctuation">)</span>
-    at emitErrorNT <span class="token punctuation">(</span>node:internal/streams/destroy:151:8<span class="token punctuation">)</span>
-    at emitErrorCloseNT <span class="token punctuation">(</span>node:internal/streams/destroy:116:3<span class="token punctuation">)</span>
-    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:82:21<span class="token punctuation">)</span></code></pre>     
+    at emitErrorNT <span class="token punctuation">(</span>node:internal/streams/destroy:164:8<span class="token punctuation">)</span>
+    at emitErrorCloseNT <span class="token punctuation">(</span>node:internal/streams/destroy:129:3<span class="token punctuation">)</span>
+    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:83:21<span class="token punctuation">)</span></code></pre>     
       </figure>
 
       <figure class="code">
@@ -498,8 +499,8 @@ FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNR
     at ClientRequest.emit <span class="token punctuation">(</span>node:events:527:28<span class="token punctuation">)</span>
     at Socket.socketErrorListener <span class="token punctuation">(</span>node:_http_client:454:9<span class="token punctuation">)</span>
     at Socket.emit <span class="token punctuation">(</span>node:events:527:28<span class="token punctuation">)</span>
-    at emitErrorNT <span class="token punctuation">(</span>node:internal/streams/destroy:151:8<span class="token punctuation">)</span>
-    at emitErrorCloseNT <span class="token punctuation">(</span>node:internal/streams/destroy:116:3<span class="token punctuation">)</span>
-    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:82:21<span class="token punctuation">)</span></code></pre>     
+    at emitErrorNT <span class="token punctuation">(</span>node:internal/streams/destroy:164:8<span class="token punctuation">)</span>
+    at emitErrorCloseNT <span class="token punctuation">(</span>node:internal/streams/destroy:129:3<span class="token punctuation">)</span>
+    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:83:21<span class="token punctuation">)</span></code></pre>     
       </figure>
 </div>

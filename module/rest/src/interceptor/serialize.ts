@@ -42,38 +42,40 @@ export class SerializeInterceptor implements RestInterceptor {
    * @param output The value to output
    */
   static async sendOutput(req: Request, res: Response, output: unknown): Promise<void> {
-    if (!res.headersSent) {
-      if (output) {
-        if (res[HeadersAddedⲐ]) {
-          for (const [k, v] of Object.entries(res[HeadersAddedⲐ]!)) {
-            res.setHeader(k, typeof v === 'string' ? v : v());
-          }
-        }
-        if (isRenderable(output)) {
-          output = await output.render(res);
-          if (output === undefined) { // If render didn't return a result, consider us done
-            return;
-          }
-        }
-
-        if (typeof output === 'string') {
-          this.setContentTypeIfUndefined(res, 'text/plain');
-          res.send(output);
-        } else if (Buffer.isBuffer(output)) {
-          this.setContentTypeIfUndefined(res, 'application/octet-stream');
-          res.send(output);
-        } else if (isStream(output)) {
-          this.setContentTypeIfUndefined(res, 'application/octet-stream');
-          await res[SendStreamⲐ] ? res[SendStreamⲐ]!(output) : StreamUtil.pipe(output, res[NodeEntityⲐ]);
-        } else {
-          const payload = Util.hasToJSON(output) ? output.toJSON() : output;
-          this.setContentTypeIfUndefined(res, 'application/json');
-          res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
-        }
-      } else {
-        res.status(req.method === 'POST' || req.method === 'PUT' ? 201 : 204);
-        res.send('');
+    if (res.headersSent) {
+      return;
+    } else if (res[HeadersAddedⲐ]) {
+      for (const [k, v] of Object.entries(res[HeadersAddedⲐ]!)) {
+        res.setHeader(k, typeof v === 'string' ? v : v());
       }
+    }
+
+    if (!output) {
+      res.status(req.method === 'POST' || req.method === 'PUT' ? 201 : 204);
+      res.send('');
+      return;
+    }
+
+    if (isRenderable(output)) {
+      output = await output.render(res);
+      if (output === undefined) { // If render didn't return a result, consider us done
+        return;
+      }
+    }
+
+    if (typeof output === 'string') {
+      this.setContentTypeIfUndefined(res, 'text/plain');
+      res.send(output);
+    } else if (Buffer.isBuffer(output)) {
+      this.setContentTypeIfUndefined(res, 'application/octet-stream');
+      res.send(output);
+    } else if (isStream(output)) {
+      this.setContentTypeIfUndefined(res, 'application/octet-stream');
+      await (res[SendStreamⲐ] ? res[SendStreamⲐ](output) : StreamUtil.pipe(output, res[NodeEntityⲐ]));
+    } else {
+      const payload = Util.hasToJSON(output) ? output.toJSON() : output;
+      this.setContentTypeIfUndefined(res, 'application/json');
+      res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
     }
   }
 

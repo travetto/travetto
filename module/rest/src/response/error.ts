@@ -27,5 +27,6 @@ Error.prototype.render = function (this: Error & { status?: number, statusCode?:
     console.error(this.message, { error: this });
   }
 
-  res.json(this.toJSON({ status }));
+  res.setHeader('Content-Type', 'application/json');
+  res.send(this.toJSON({ status }));
 };

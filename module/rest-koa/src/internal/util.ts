@@ -13,7 +13,7 @@ export class KoaServerUtil {
   /**
    * Build a Travetto Request from a koa context
    */
-  static getRequest(ctx: koa.ParameterizedContext<unknown>): Request {
+  static getRequest(ctx: koa.Context): Request {
     return RestServerUtil.decorateRequest({
       [ProviderEntityⲐ]: ctx,
       [NodeEntityⲐ]: ctx.req,
@@ -22,14 +22,11 @@ export class KoaServerUtil {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       method: ctx.request.method as 'GET',
       query: ctx.request.query,
-      url: ctx.url,
+      url: ctx.originalUrl,
       params: ctx.params,
-      body: ctx.body,
       session: ctx.session,
       headers: ctx.request.headers,
       cookies: ctx.cookies,
-      files: undefined,
-      auth: undefined,
       pipe: ctx.req.pipe.bind(ctx.req),
       on: ctx.req.on.bind(ctx.req)
     });
@@ -38,7 +35,7 @@ export class KoaServerUtil {
   /**
    * Build a Travetto Response from a koa context
    */
-  static getResponse(ctx: koa.ParameterizedContext<unknown>): Response {
+  static getResponse(ctx: koa.Context): Response {
     return RestServerUtil.decorateResponse({
       [ProviderEntityⲐ]: ctx,
       [NodeEntityⲐ]: ctx.res,

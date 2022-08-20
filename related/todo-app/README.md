@@ -320,7 +320,7 @@ First we must start the application:
 2022-03-14T04:00:00.618Z info  [@trv:app/registry:57] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
 2022-03-14T04:00:00.837Z info  [@trv:app/registry:63] Manifest {
   info: {
-    framework: '2.2.2',
+    framework: '2.2.3',
     name: '@travetto/todo-app',
     description: '',
     version: '0.0.0',
@@ -335,7 +335,7 @@ First we must start the application:
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
-    node: 'v18.1.0',
+    node: 'v17.9.1',
     dynamic: false,
     readonly: false
   },
@@ -384,6 +384,7 @@ First we must start the application:
     defaultMessage: true,
     ssl: { active: false },
     logRoutes: { allow: [], deny: [ '*' ] },
+    bodyParse: { limit: '100kb', routeLimits: {}, parsingTypes: {}, ignoreRoutes: [] },
     cors: { active: true },
     cookie: {
       active: true,
@@ -450,9 +451,9 @@ FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNR
     at ClientRequest.emit (node:events:527:28)
     at Socket.socketErrorListener (node:_http_client:454:9)
     at Socket.emit (node:events:527:28)
-    at emitErrorNT (node:internal/streams/destroy:151:8)
-    at emitErrorCloseNT (node:internal/streams/destroy:116:3)
-    at processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at emitErrorNT (node:internal/streams/destroy:164:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at processTicksAndRejections (node:internal/process/task_queues:83:21)
 ```
 
 **Code: Listing Todos by fetch**
@@ -477,7 +478,7 @@ FetchError: request to http://localhost:3000/todo failed, reason: connect ECONNR
     at ClientRequest.emit (node:events:527:28)
     at Socket.socketErrorListener (node:_http_client:454:9)
     at Socket.emit (node:events:527:28)
-    at emitErrorNT (node:internal/streams/destroy:151:8)
-    at emitErrorCloseNT (node:internal/streams/destroy:116:3)
-    at processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at emitErrorNT (node:internal/streams/destroy:164:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at processTicksAndRejections (node:internal/process/task_queues:83:21)
 ```

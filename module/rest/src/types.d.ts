@@ -70,6 +70,10 @@ declare global {
      */
     body: any;
     /**
+     * Raw body as a buffer, if applicable
+     */
+    raw?: Buffer;
+    /**
      * The stream to pipe the request to.  Useful for file uploads.
      * @param stream
      */
@@ -167,12 +171,6 @@ declare global {
      * @param path The location to point to
      */
     location(path: string): unknown;
-
-    /**
-     * Return a value as JSON
-     * @param value Value to serialize as JSON
-     */
-    json(value: any): any;
     /**
      * Send a value to the client
      * @param value Value to send

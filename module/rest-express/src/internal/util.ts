@@ -21,11 +21,8 @@ export class ExpressServerUtil {
       url: req.originalUrl,
       query: req.query,
       params: req.params,
-      body: req.body,
       session: req.session,
       headers: req.headers,
-      files: undefined,
-      auth: undefined,
       pipe: req.pipe.bind(req),
       on: req.on.bind(req)
     });
