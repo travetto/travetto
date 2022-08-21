@@ -10,8 +10,10 @@ export type CommonConfig = {
 export type PackOperation<T extends CommonConfig> = {
   key: string;
   title: string;
+  defaults?: Partial<T>;
   overrides?: Partial<T>;
-  extend(a: T, b: Partial<T>): T;
+  extend?(src: Partial<T>, dest: Partial<T>): Partial<T>;
   context(cfg: T): Promise<string> | string;
   exec(cfg: T): AsyncGenerator<string>;
+  buildConfig(configs: Partial<T>[]): T;
 };

@@ -34,6 +34,12 @@ export const Docker: PackOperation<DockerConfig> = {
   context(cfg: DockerConfig) {
     return `[image=${cfg.image}, port=${cfg.port}]`;
   },
+  defaults: {
+    name: Package.name.replace('@', ''),
+    builder: dockerFileBuilder,
+    port: [],
+    tag: ['latest']
+  },
   overrides: {
     image: process.env.PACK_DOCKER_IMAGE || undefined,
     name: process.env.PACK_DOCKER_NAME || undefined,
@@ -43,19 +49,21 @@ export const Docker: PackOperation<DockerConfig> = {
     push: CliUtil.toBool(process.env.PACK_DOCKER_PUSH),
     tag: process.env.PACK_DOCKER_TAG ? [process.env.PACK_DOCKER_TAG] : undefined
   },
-  extend(a: DockerConfig, b: Partial<DockerConfig>) {
+  extend(src: Partial<DockerConfig>, dest: Partial<DockerConfig>): Partial<DockerConfig> {
     return {
-      ...PackUtil.commonExtend(a, b),
-      image: b.image ?? a.image,
-      app: b.app ?? a.app,
-      name: b.name ?? a.name ?? Package.name.replace('@', ''),
-      builder: b.builder ?? a.builder ?? dockerFileBuilder,
-      tag: b.tag ?? a.tag ?? ['latest'],
-      port: b.port ?? a.port ?? [],
-      registry: b.registry ?? a.registry,
-      env: { ...(b.env ?? {}), ...a.env },
-      push: b.push ?? a.push
+      image: src.image ?? dest.image,
+      app: src.app ?? dest.app,
+      name: src.name ?? dest.name,
+      builder: src.builder ?? dest.builder,
+      tag: src.tag ?? dest.tag,
+      port: src.port ?? dest.port,
+      registry: src.registry ?? dest.registry,
+      env: { ...(src.env ?? {}), ...(dest.env ?? {}) },
+      push: src.push ?? dest.push
     };
+  },
+  buildConfig(configs: Partial<DockerConfig>[]): DockerConfig {
+    return PackUtil.buildConfig(this, configs);
   },
   /**
   * Dockerize workspace with flags

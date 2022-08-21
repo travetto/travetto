@@ -17,7 +17,7 @@ export class PackDockerCommand extends BasePackCommand<Options, DockerConfig> {
 
   getOptions(): Options {
     return {
-      ...this.defaultOptions(),
+      ...this.commonOptions(),
       image: this.option({ desc: 'Docker Image to extend' }),
       name: this.option({ desc: 'Image Name' }),
       tag: this.listOption({ desc: 'Image Tag' }),

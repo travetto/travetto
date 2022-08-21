@@ -48,6 +48,9 @@ export abstract class AuthModelServiceSuite {
   @Inject()
   authService: ModelAuthService<User>;
 
+  @Inject(TestModelSvcⲐ)
+  svc: ModelCrudSupport;
+
   @Test()
   async register() {
     const pre = User.from({
@@ -63,7 +66,7 @@ export abstract class AuthModelServiceSuite {
   @Test()
   async authenticate() {
     const pre = User.from({
-      id: '5',
+      id: this.svc.uuid(),
       password: 'bob',
       details: {}
     });

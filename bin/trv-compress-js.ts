@@ -1,31 +1,11 @@
 import '@arcsine/nodesh';
 
 process.argv[2]
-  .$dir()
+  .$dir({ type: 'file' })
   .$forEach(file => {
+    if (!file.endsWith('.js')) {
+      return;
+    }
     console.log('Writing file', file);
-    let inComment = false;
-
-    return file
-      .$readLines({ mode: 'object' })
-      .$map(({ text: x }) => {
-        if (!inComment) {
-          if (x.includes('/*')) {
-            inComment = true;
-            return x.replace(/\/[*].*$/, '');
-          }
-        }
-        if (inComment) {
-          if (x.includes('*/')) {
-            inComment = false;
-            return x.replace(/^.*[*]\//, '');
-          } else {
-            return '';
-          }
-        }
-        return x.replace(/(([ ]\/\/)|(\/\/#))[^*`\n]+/, '');
-      })
-      .$trim()
-      .$notEmpty()
-      .$writeFinal(file);
+    return $exec('npx', ['uglify-js', file, '-cmo', file, '--source-map', 'content=inline,includeSources,url=inline']);
   });

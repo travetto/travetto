@@ -5,6 +5,6 @@ export class PackCommand extends BasePackCommand<BaseOptions, AllConfig> {
   operation = Pack;
 
   getOptions(): BaseOptions {
-    return this.defaultOptions();
+    return this.commonOptions();
   }
 }

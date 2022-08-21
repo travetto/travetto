@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { ExecUtil, PathUtil } from '@travetto/boot';
+import { ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
 import { color } from '@travetto/cli/src/color';
 
 import { CommonConfig, PackOperation } from '../lib/types';
@@ -20,22 +20,24 @@ export const Zip: PackOperation<ZipConfig> = {
   overrides: {
     output: process.env.PACK_ZIP_OUTPUT || undefined
   },
-  extend(a: ZipConfig, b: Partial<ZipConfig>) {
-    return {
-      ...PackUtil.commonExtend(a, b),
-      output: b.output ?? a.output
-    };
+  extend(src: Partial<ZipConfig>, dest: Partial<ZipConfig>): Partial<ZipConfig> {
+    return { output: src.output ?? dest.output };
+  },
+  buildConfig(configs: Partial<ZipConfig>[]): ZipConfig {
+    return PackUtil.buildConfig(this, configs);
   },
   /**
   * Zip workspace with flags
   */
-  async* exec({ workspace, output }: ZipConfig) {
+  async * exec({ workspace, output }: ZipConfig) {
     const ws = PathUtil.resolveUnix(workspace);
     const zipFile = PathUtil.resolveUnix(output);
 
     yield 'Preparing Target';
     await fs.mkdir(path.dirname(zipFile), { recursive: true });
-    await fs.unlink(zipFile); // Unlink
+    if (await FsUtil.exists(zipFile)) {
+      await fs.unlink(zipFile); // Unlink
+    }
 
     yield 'Compressing';
     if (/win/i.test(process.platform)) {

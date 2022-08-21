@@ -23,28 +23,30 @@ export const Assemble: PackOperation<AssembleConfig> = {
   key: 'assemble',
   title: 'Assembling',
   context(cfg: AssembleConfig) {
-    return `[readonly=${cfg.readonly},cache=${cfg.cacheDir}]`;
+    return `[readonly=${cfg.readonly},cache=${cfg.cacheDir},source=${cfg.keepSource}]`;
   },
   overrides: {
     keepSource: CliUtil.toBool(process.env.PACK_ASSEMBLE_KEEP_SOURCE),
     readonly: CliUtil.toBool(process.env.PACK_ASSEMBLE_READONLY)
   },
-  extend(a: AssembleConfig, b: Partial<AssembleConfig>) {
+  extend(src: Partial<AssembleConfig>, dest: Partial<AssembleConfig>): Partial<AssembleConfig> {
     return {
-      ...PackUtil.commonExtend(a, b),
-      keepSource: b.keepSource ?? a.keepSource,
-      readonly: b.readonly ?? a.readonly,
-      cacheDir: b.cacheDir ?? a.cacheDir,
-      add: [...(b.add ?? []), ...(a.add ?? [])],
-      exclude: [...(b.exclude ?? []), ...(a.exclude ?? [])],
-      excludeCompile: [...(b.excludeCompile ?? []), ...(a.excludeCompile ?? [])],
-      env: { ...(b.env ?? {}), ...(a.env ?? {}) },
+      keepSource: src.keepSource ?? dest.keepSource,
+      readonly: src.readonly ?? dest.readonly,
+      cacheDir: src.cacheDir ?? dest.cacheDir,
+      add: [...(src.add ?? []), ...(dest.add ?? [])],
+      exclude: [...(src.exclude ?? []), ...(dest.exclude ?? [])],
+      excludeCompile: [...(src.excludeCompile ?? []), ...(dest.excludeCompile ?? [])],
+      env: { ...(src.env ?? {}), ...(dest.env ?? {}) },
     };
+  },
+  buildConfig(configs: Partial<AssembleConfig>[]): AssembleConfig {
+    return PackUtil.buildConfig(this, configs);
   },
   /**
    * Assemble the project into a workspace directory, optimized for space and runtime
    */
-  async* exec({ workspace, cacheDir, add, exclude, excludeCompile, env, keepSource, readonly }: AssembleConfig) {
+  async * exec({ workspace, cacheDir, add, exclude, excludeCompile, env, keepSource, readonly }: AssembleConfig) {
     const fullCacheDir = PathUtil.resolveUnix(workspace!, cacheDir);
     const ws = PathUtil.resolveUnix(workspace!);
 
@@ -63,6 +65,7 @@ export const Assemble: PackOperation<AssembleConfig> = {
     });
 
     if (!keepSource) {
+      yield 'Clean Boot'; await AssembleUtil.cleanBoot(ws);
       yield 'Remove Source Maps'; await AssembleUtil.cleanCache(fullCacheDir);
       yield 'Emptying .ts Files'; await AssembleUtil.purgeSource([`${ws}/node_modules/@travetto`, `${ws}/src`]);
     }

@@ -13,7 +13,7 @@ export class PackAssembleCommand extends BasePackCommand<Options, AssembleConfig
 
   getOptions(): Options {
     return {
-      ...this.defaultOptions(),
+      ...this.commonOptions(),
       keepSource: this.boolOption({ desc: 'Should source be preserved' }),
       readonly: this.boolOption({ desc: 'Build a readonly deployable' })
     };

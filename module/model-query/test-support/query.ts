@@ -216,12 +216,14 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async verifyNestedQuery() {
     const service = await this.service;
 
+    const id = service.uuid();
+
     await service.create(Note, Note.from({
-      id: '10',
+      id,
       entities: [
         {
           label: 'hi',
-          id: '10'
+          id
         }
       ]
     }));
@@ -229,7 +231,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const out = await service.queryCount(Note, {
       where: {
         entities: {
-          id: '10'
+          id
         }
       }
     });
@@ -239,7 +241,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const out2 = await service.query(Note, {
       where: {
         entities: {
-          id: '10'
+          id
         }
       }
     });

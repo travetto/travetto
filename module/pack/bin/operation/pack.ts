@@ -31,13 +31,13 @@ type DefaultOpType = ['assemble', typeof Assemble];
 export const Pack: PackOperation<AllConfig> = {
   key: '',
   title: 'Packing',
-  extend(a: AllConfig, b: Partial<AllConfig>) {
+  buildConfig(configs: Partial<AllConfig>[]): AllConfig {
     const ret: Partial<AllConfig> = {
-      workspace: b.workspace ?? a.workspace,
+      workspace: configs[0].workspace,
     };
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     for (const [k, op] of (Object.entries(ops) as DefaultOpType[])) {
-      ret[k] = op.extend(op.extend(a[k] ?? {}, b[k] ?? {}), op.overrides ?? {});
+      ret[k] = op.buildConfig(configs.map(config => config[k] ?? {}));
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return ret as AllConfig;

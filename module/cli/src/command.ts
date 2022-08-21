@@ -87,7 +87,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
    * Define option
    */
   option<K extends OptionPrimitive, T extends OptionConfig<K>>(cfg: T): T {
-    if ('combine' in cfg && cfg.combine && cfg.def && !Array.isArray(cfg.def)) {
+    if ('combine' in cfg && cfg.combine && cfg.def !== undefined && !Array.isArray(cfg.def)) {
       cfg.def = cfg.combine(`${cfg.def}`, cfg.def);
     }
     return { type: String, ...cfg };

@@ -39,6 +39,7 @@ export const config: AllConfigPartial = {
       '.npmignore',
       '.*.yml',
       'cache/compiler.*.log',
+      mod('faker'),
       mod('lodash/lodash.min.js'),
       mod('source-map-support/node_modules/source-map'),
       mod('source-map-support/browser-source-map-support.js'),

@@ -12,7 +12,7 @@ export class PackZipCommand extends BasePackCommand<Options, ZipConfig> {
 
   getOptions(): Options {
     return {
-      ...this.defaultOptions(),
+      ...this.commonOptions(),
       output: this.option({ desc: 'Output File' })
     };
   }

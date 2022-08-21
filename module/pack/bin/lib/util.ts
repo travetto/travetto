@@ -17,15 +17,34 @@ export class PackUtil {
 
   static #modes: Partial<CommonConfig>[];
 
-  static commonExtend<T extends CommonConfig>(a: T, b: Partial<T>): T {
+  /**
+   * Build configuration object for an operation with a set of configs
+   */
+  static buildConfig<T extends CommonConfig>(
+    op: { defaults?: Partial<T>, overrides?: Partial<T>, extend?(src: Partial<T>, dest: Partial<T>): Partial<T> },
+    configs: Partial<T>[]
+  ): T {
+    const inputs = [
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      op.defaults ?? {} as Partial<T>,
+      ...configs,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      op.overrides ?? {} as Partial<T>
+    ].filter(x => Object.keys(x).length > 0);
+
+    const res = inputs.reduce((out: Partial<T>, config: Partial<T>): Partial<T> => {
+      const final = {
+        active: config.active ?? out.active,
+        workspace: config.workspace ?? out.workspace,
+        preProcess: [...(config.preProcess ?? []), ...(out.preProcess ?? [])],
+        postProcess: [...(config.postProcess ?? []), ...(out.postProcess ?? [])],
+        ...op.extend?.(config, out)
+      };
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return final as Partial<T>;
+    }, {});
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const out = {
-      active: b.active ?? a.active,
-      workspace: b.workspace ?? a.workspace,
-      preProcess: [...(b.preProcess ?? []), ...(a.preProcess ?? [])],
-      postProcess: [...(b.postProcess ?? []), ...(a.postProcess ?? [])],
-    } as unknown as T;
-    return out;
+    return res as T;
   }
 
   /**
@@ -123,7 +142,8 @@ export class PackUtil {
     async function runPhase(phase: 'preProcess' | 'postProcess'): Promise<void> {
       for (const el of cfg[phase] ?? []) {
         const [name, fn] = Object.entries(el)[0];
-        await stdout(name);
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        await stdout(name as string);
         await fn(cfg);
       }
     }
