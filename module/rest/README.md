@@ -347,6 +347,18 @@ export class HelloWorldInterceptor implements RestInterceptor {
 
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
    
+   1. [BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/body-parse.ts#L34) - This handles the inbound request, and converting the body payload into an appropriate format.  Additionally it exposes the original request as the raw property on the request.
+     
+   **Code: Cors Config**
+   ```typescript
+   export class RestBodyParseConfig {
+     limit: string = '100kb';
+     routeLimits: Record<string, string> = {};
+     parsingTypes: Record<string, ParserType> = {};
+     paths: string[] = [];
+   }
+   ```
+   
    1. [SerializeInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L25) - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
    1. [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cors.ts#L39) - This interceptor allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, `rest.cors.active: true`
      
@@ -413,16 +425,16 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
    ```
    
    1. [GetCacheInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/get-cache.ts#L12) - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting `rest.disableGetCache: true` in your config.
-   1. [LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L64) - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
+   1. [LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L25) - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
    
      
    **Code: Control Logging**
    ```yaml
-   rest.logRoutes.{deny|allow}:
+   rest.logRoutes:
    - '/controller1'
-   - '/controller1:*'
+   - '!/controller1:*'
    - '/controller2:/path'
-   - '/controller3:/path/*`
+   - '!/controller3:/path/*'
    ```
    
 

@@ -13,7 +13,7 @@ export const text = async () => {
   const startupBuffer: Buffer[] = [];
 
   const cmd = DocRunUtil.runBackground('trv', ['run', 'rest'], {
-    env: { REST_LOGROUTES_DENY: '*', REST_PORT: '12555' }
+    env: { REST_LOGROUTES_PATHS: '!*', REST_PORT: '12555' }
   });
 
   cmd.process.stdout?.on('data', v =>

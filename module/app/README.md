@@ -157,7 +157,7 @@ Manifest {
     framework: '2.2.3',
     name: '@travetto/app',
     description: 'Application registration/management and run support.',
-    version: '2.2.3',
+    version: '2.2.4',
     license: 'MIT',
     author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' }
   },

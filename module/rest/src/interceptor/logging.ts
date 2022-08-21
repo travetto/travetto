@@ -1,15 +1,11 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { Ignore } from '@travetto/schema';
 
 import { Request, Response, RouteConfig } from '../types';
-import { RestInterceptor } from './types';
 import { ControllerConfig } from '../registry/types';
+import { InterceptorUtil } from '../util/interceptor';
 
-interface RouteCheck {
-  sub: string | RegExp;
-  base: string;
-}
+import { RestInterceptor } from './types';
 
 /**
  * Rest logging configuration
@@ -17,44 +13,9 @@ interface RouteCheck {
 @Config('rest.logRoutes')
 export class RestLogRoutesConfig {
   /**
-   * List of routes to allow
+   * List of routes to enforce
    */
-  allow: string[] = [];
-  /**
-   * List of routes to deny
-   */
-  deny: string[] = [];
-
-  /**
-   * Allow as a list of route checks
-   */
-  @Ignore()
-  allowList: RouteCheck[];
-  /**
-   * Deny as a list of route checks
-   */
-  @Ignore()
-  denyList: RouteCheck[];
-
-  /**
-   * Clean a list of routes into route checks
-   * @param arr The list of routes as strings
-   */
-  clean(arr: string[]): RouteCheck[] {
-    return arr.map(x => x.split(':')).map(([base, sub]) => {
-      let final: string | RegExp = sub || '*';
-      base = base.replace(/^\/+/, '');
-      if (final.includes('*')) {
-        final = new RegExp(`^${final.replace(/[*]/g, '.*')}`);
-      }
-      return { base, sub: final };
-    });
-  }
-
-  postConstruct(): void {
-    this.allowList = this.clean(this.allow);
-    this.denyList = this.clean(this.deny);
-  }
+  paths: string[] = [];
 }
 
 /**
@@ -63,32 +24,18 @@ export class RestLogRoutesConfig {
 @Injectable()
 export class LoggingInterceptor implements RestInterceptor {
 
-  static matchRoute(controller: Partial<ControllerConfig>, route: RouteConfig, paths: RouteCheck[]): boolean {
-    return paths.some(({ base, sub }) => {
-      if (base === (controller.basePath ?? '').replace(/^\/+/, '') || base === '*') {
-        if (!sub || sub === '*') {
-          return true;
-        } else if (typeof route.path === 'string') {
-          if (typeof sub === 'string') {
-            return route.path === sub;
-          } else {
-            return sub.test(route.path);
-          }
-        }
-      }
-    });
-  }
-
   @Inject()
   logConfig: RestLogRoutesConfig;
 
-  applies(route: RouteConfig, controller: Partial<ControllerConfig>): boolean {
-    const check = this.logConfig.deny.length ?
-      !LoggingInterceptor.matchRoute(controller, route, this.logConfig.denyList) :
-      (this.logConfig.allow.length ?
-        LoggingInterceptor.matchRoute(controller, route, this.logConfig.allowList) : true);
 
-    return check;
+  check: (route: RouteConfig, controller: Partial<ControllerConfig>) => boolean;
+
+  postConstruct(): void {
+    this.check = InterceptorUtil.buildRouteChecker(this.logConfig.paths);
+  }
+
+  applies(route: RouteConfig, controller: Partial<ControllerConfig>): boolean {
+    return this.check(route, controller);
   }
 
   async intercept(req: Request, res: Response, next: () => Promise<void | unknown>): Promise<unknown> {

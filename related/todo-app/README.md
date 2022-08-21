@@ -383,8 +383,8 @@ First we must start the application:
     hostname: 'localhost',
     defaultMessage: true,
     ssl: { active: false },
-    logRoutes: { allow: [], deny: [ '*' ] },
-    bodyParse: { limit: '100kb', routeLimits: {}, parsingTypes: {}, ignoreRoutes: [] },
+    logRoutes: { paths: [ '!*' ] },
+    bodyParse: { limit: '100kb', routeLimits: {}, parsingTypes: {}, paths: [] },
     cors: { active: true },
     cookie: {
       active: true,

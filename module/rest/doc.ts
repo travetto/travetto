@@ -12,6 +12,7 @@ import { RestApplication } from './src/application/rest';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
 import { Path, Query, QuerySchema, Body, Context, Param, Header } from './src/decorator/param';
+import { BodyParseInterceptor, RestBodyParseConfig } from './src/interceptor/body-parse';
 import { CorsInterceptor, RestCorsConfig } from './src/interceptor/cors';
 import { GetCacheInterceptor } from './src/interceptor/get-cache';
 import { LoggingInterceptor } from './src/interceptor/logging';
@@ -165,6 +166,8 @@ ${d.Note('The example above defines the interceptor to run after another interce
 
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 ${d.Ordered(
+  d`${BodyParseInterceptor} - This handles the inbound request, and converting the body payload into an appropriate format.  Additionally it exposes the original request as the raw property on the request.
+  ${d.Snippet('Cors Config', RestBodyParseConfig.ᚕfile, /class.*Config/, /^\}/)}`,
   d`${SerializeInterceptor} - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.`,
   d`${CorsInterceptor} - This interceptor allows cors functionality to be configured out of the box, by setting properties in your ${d.Path('application.yml')}, specifically, ${d.Input('rest.cors.active: true')}
   ${d.Snippet('Cors Config', RestCorsConfig.ᚕfile, /class.*Config/, /^\}/)}`,

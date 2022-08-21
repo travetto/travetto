@@ -365,7 +365,20 @@ Available Applications:
 <p class="note"><strong>Note</strong> The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after requirements to ensure the appropriate order of execution.</p>
 
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
-<ol> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L25">SerializeInterceptor</a> - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.</li>
+<ol> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/body-parse.ts#L34">BodyParseInterceptor</a> - This handles the inbound request, and converting the body payload into an appropriate format.  Additionally it exposes the original request as the raw property on the request.
+  
+      <figure class="code">
+      <figcaption class="code">Cors Config
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/body-parse.ts#L23">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RestBodyParseConfig</span> <span class="token punctuation">{{'{'}}</span>
+  limit<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">'100kb'</span><span class="token punctuation">;</span>
+  routeLimits<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  parsingTypes<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> ParserType<span class="token operator">></span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  paths<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L25">SerializeInterceptor</a> - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.</li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cors.ts#L39">CorsInterceptor</a> - This interceptor allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, <code class="item input">rest.cors.active: true</code>
   
       <figure class="code">
@@ -433,18 +446,18 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure></li>
  <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/get-cache.ts#L12">GetCacheInterceptor</a> - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting <code class="item input">rest.disableGetCache: true</code> in your config.</li>
- <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L64">LoggingInterceptor</a> - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L25">LoggingInterceptor</a> - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
 
   
       <figure class="code">
       <figcaption class="code">Control Logging
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/resources/log.yml">Source</a></cite>
       </figcaption>
-      <pre><code class="language-yaml">rest.logRoutes.<span class="token punctuation">{{'{'}}</span>deny<span class="token punctuation">|</span>allow<span class="token punctuation">{{'}'}}</span><span class="token punctuation">:</span>
+      <pre><code class="language-yaml"><span class="token key atrule">rest.logRoutes</span><span class="token punctuation">:</span>
 <span class="token punctuation">-</span> <span class="token string">'/controller1'</span>
-<span class="token punctuation">-</span> <span class="token string">'/controller1:*'</span>
+<span class="token punctuation">-</span> <span class="token string">'!/controller1:*'</span>
 <span class="token punctuation">-</span> <span class="token string">'/controller2:/path'</span>
-<span class="token punctuation">-</span> '/controller3<span class="token punctuation">:</span>/path/<span class="token important">*`</span></code></pre>     
+<span class="token punctuation">-</span> <span class="token string">'!/controller3:/path/*'</span></code></pre>     
       </figure></li></ol>
 
 <h3 id="custom-interceptors">Custom Interceptors</h3>

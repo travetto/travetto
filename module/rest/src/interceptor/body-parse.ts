@@ -9,6 +9,8 @@ import { RestInterceptor } from './types';
 import { LoggingInterceptor } from './logging';
 
 import { NodeEntityⲐ } from '../internal/symbol';
+import { ControllerConfig } from '../registry/types';
+import { InterceptorUtil } from '../util/interceptor';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
@@ -22,7 +24,7 @@ export class RestBodyParseConfig {
   limit: string = '100kb';
   routeLimits: Record<string, string> = {};
   parsingTypes: Record<string, ParserType> = {};
-  ignoreRoutes: string[] = [];
+  paths: string[] = [];
 }
 
 /**
@@ -36,33 +38,33 @@ export class BodyParseInterceptor implements RestInterceptor {
   @Inject()
   config: RestBodyParseConfig;
 
-  applies(route: RouteConfig): boolean {
-    return (route.method === 'all' || METHODS_WITH_BODIES.has(route.method)) &&
-      !(typeof route.path === 'string' && this.config.ignoreRoutes.includes(route.path));
+  check: (route: RouteConfig, controller: ControllerConfig) => boolean;
+
+  postConstruct(): void {
+    this.check = InterceptorUtil.buildRouteChecker(this.config.paths);
   }
 
   async read(req: Request): Promise<{ text: string, raw: Buffer }> {
-    const [_, ...overrides] = req.header('content-type')?.split(/\s*;\s*/) ?? [];
-    const options = Object.fromEntries(overrides.map(v => v.split('=')).map(([k, v]) => [k.toLowerCase(), v]));
+    const cfg = InterceptorUtil.getContentType(req);
 
     const text = await rawBody(inflation(req[NodeEntityⲐ]), {
       limit: this.config.routeLimits[req.path] ?? this.config.limit,
-      encoding: options.charset ?? 'utf8'
+      encoding: cfg?.parameters.charset ?? 'utf8'
     });
     return { text, raw: Buffer.from(text) };
   }
 
   detectParserType(req: Request): ParserType | undefined {
-    const simpleType = req.header('content-type')?.split(/\s*;\s*/)[0];
-    if (!simpleType) {
+    const full = InterceptorUtil.getContentType(req)?.full ?? '';
+    if (!full) {
       return;
-    } else if (simpleType in this.config.parsingTypes) {
-      return this.config.parsingTypes[simpleType];
-    } else if (/\bjson\b/.test(simpleType)) {
+    } else if (full in this.config.parsingTypes) {
+      return this.config.parsingTypes[full];
+    } else if (/\bjson\b/.test(full)) {
       return 'json';
-    } else if (simpleType === 'application/x-www-form-urlencoded') {
+    } else if (full === 'application/x-www-form-urlencoded') {
       return 'form';
-    } else if (/^text\//.test(simpleType)) {
+    } else if (/^text\//.test(full)) {
       return 'text';
     }
   }
@@ -73,6 +75,10 @@ export class BodyParseInterceptor implements RestInterceptor {
       case 'text': return text;
       case 'form': return Object.fromEntries(new URLSearchParams(text));
     }
+  }
+
+  applies(route: RouteConfig, controller: ControllerConfig): boolean {
+    return (route.method === 'all' || METHODS_WITH_BODIES.has(route.method)) && this.check(route, controller);
   }
 
   async intercept(req: Request, res: Response): Promise<unknown> {

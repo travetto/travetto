@@ -396,8 +396,8 @@ First we must start the application:
     hostname: <span class="token string">'localhost'</span>,
     defaultMessage: true,
     ssl: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
-    logRoutes: <span class="token punctuation">{{'{'}}</span> allow: <span class="token punctuation">[</span><span class="token punctuation">]</span>, deny: <span class="token punctuation">[</span> <span class="token string">'*'</span> <span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-    bodyParse: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, routeLimits: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>, ignoreRoutes: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+    logRoutes: <span class="token punctuation">{{'{'}}</span> paths: <span class="token punctuation">[</span> <span class="token string">'!*'</span> <span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+    bodyParse: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, routeLimits: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>, paths: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
     cors: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
     cookie: <span class="token punctuation">{{'{'}}</span>
       active: true,
