@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
-import {
+import type {
   SchemaObject, SchemasObject, ParameterObject, OperationObject,
-  RequestBodyObject, TagObject, PathItemObject, OpenAPIObject
+  RequestBodyObject, TagObject, PathsObject
 } from 'openapi3-ts/src/model/OpenApi';
 
 import { ControllerRegistry, EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType } from '@travetto/rest';
@@ -18,6 +18,14 @@ function isFieldConfig(val: object): val is FieldConfig {
   return !!val && 'owner' in val && 'type' in val;
 }
 
+type GeneratedSpec = {
+  tags: TagObject[];
+  paths: PathsObject;
+  components: {
+    schemas: SchemasObject;
+  };
+};
+
 /**
  * Spec generation utilities
  */
@@ -25,7 +33,7 @@ export class SpecGenerator {
   #tags: TagObject[] = [];
   #allSchemas: SchemasObject = {};
   #schemas: SchemasObject = {};
-  #paths: { [key: string]: PathItemObject } = {};
+  #paths: PathsObject = {};
 
   /**
    * Get type id
@@ -353,7 +361,7 @@ export class SpecGenerator {
   /**
    * Generate full specification
    */
-  generate(config: Partial<ApiSpecConfig> = {}): Pick<OpenAPIObject, 'tags' | 'paths' | 'components'> {
+  generate(config: Partial<ApiSpecConfig> = {}): GeneratedSpec {
 
     for (const cls of ControllerRegistry.getClasses()) {
       for (const ep of ControllerRegistry.get(cls).endpoints) {
