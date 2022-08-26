@@ -12,6 +12,28 @@ import {
 
 const diagColl = vscode.languages.createDiagnosticCollection('Travetto');
 
+function isTestState(level: string, state: ResultState<unknown>): state is TestState {
+  return level === 'test';
+}
+
+function isSuiteState(level: string, state: ResultState<unknown>): state is SuiteState {
+  return level === 'suite';
+}
+
+function isAssertion(level: string, state?: Assertion | TestResult | SuiteResult | TestEvent | SuiteConfig): state is Assertion {
+  return level === 'assertion';
+}
+
+function isTestResult(level: string, state?: Assertion | TestResult | SuiteResult | TestEvent | SuiteConfig): state is TestResult {
+  return level === 'test';
+}
+
+function isSuiteResult(level: string, state?: Assertion | TestResult | SuiteResult | TestEvent | SuiteConfig): state is SuiteResult {
+  return level === 'suite';
+}
+
+type LineAtDoc = Pick<vscode.TextDocument, 'lineAt'>;
+
 /**
  * Test results manager
  */
@@ -110,8 +132,7 @@ export class DocumentResultsManager {
       for (const assertion of test.assertions) {
         out[assertion.status].push(assertion.decoration);
       }
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      for (const k of Object.keys(out) as StatusUnknown[]) {
+      for (const k of Object.keys<Record<StatusUnknown, unknown>>(out)) {
         this.setStyle(test.assertStyles[k], out[k]);
       }
     }
@@ -131,25 +152,33 @@ export class DocumentResultsManager {
     }
   }
 
-  findDocument(file: string): vscode.TextDocument {
+  findDocument(file: string): LineAtDoc {
     const content = readFileSync(file, 'utf8');
-    const self = {
-      lines: content.split(/\n/g),
-      lineAt(line: number): { firstNonWhitespaceCharacterIndex: number } {
+    const lines = content.split(/\n/g);
+    const self: LineAtDoc = {
+      lineAt(line: number | vscode.Position) {
+        if (typeof line !== 'number') {
+          line = line.line;
+        }
+        const offset = (lines[line].length - lines[line].trimStart().length);
         return {
-          firstNonWhitespaceCharacterIndex: (self.lines[line].length - self.lines[line].trimLeft().length)
+          text: lines[line],
+          rangeIncludingLineBreak: new vscode.Range(line, offset, line, lines[line].length + 1),
+          lineNumber: line,
+          range: new vscode.Range(line, offset, line, lines[line].length),
+          isEmptyOrWhitespace: false,
+          firstNonWhitespaceCharacterIndex: offset
         };
       }
     };
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return self as unknown as vscode.TextDocument;
+    return self;
   }
 
   /**
    * Refresh global diagnostics
    */
   refreshDiagnostics(): void {
-    let document = this.#document;
+    let document: LineAtDoc = this.#document;
 
     this.#diagnostics = Object.values(this.#results.test)
       .filter(x => x.status === 'failed')
@@ -182,11 +211,12 @@ export class DocumentResultsManager {
             ),
             rng.end
           );
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const err = (ts.src as TestResult).error!.message.split(/\n/).shift();
-          const diag = new vscode.Diagnostic(diagRng, `${ts.src.classId.split(/[^a-z-/]+/i).pop()}.${ts.src.methodName} - ${err}`, vscode.DiagnosticSeverity.Error);
-          diag.source = '@travetto/test';
-          acc.push(diag);
+          if ('error' in ts.src && ts.src.error) {
+            const err = ts.src.error.message.split(/\n/).shift();
+            const diag = new vscode.Diagnostic(diagRng, `${ts.src.classId.split(/[^a-z-/]+/i).pop()}.${ts.src.methodName} - ${err}`, vscode.DiagnosticSeverity.Error);
+            diag.source = '@travetto/test';
+            acc.push(diag);
+          }
         }
         return acc;
       }, []);
@@ -208,43 +238,33 @@ export class DocumentResultsManager {
     decoration: vscode.DecorationOptions,
     src?: Assertion | SuiteResult | SuiteConfig | TestResult | TestEvent
   ): void {
-    switch (level) {
-      case 'assertion': {
-        const el = this.#results.test[key];
-        const groups: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const assertedSrc: Assertion = src as Assertion;
-        el.assertions.push({ status, decoration, src: assertedSrc });
+    if (isAssertion(level, src)) {
+      const el = this.#results.test[key];
+      const groups: Record<StatusUnknown, vscode.DecorationOptions[]> = { passed: [], failed: [], unknown: [], skipped: [] };
+      el.assertions.push({ status, decoration, src });
 
-        for (const a of el.assertions) {
-          groups[a.status].push(a.decoration);
-        }
+      for (const a of el.assertions) {
+        groups[a.status].push(a.decoration);
+      }
 
-        for (const s of ['passed', 'failed', 'unknown'] as const) {
-          this.setStyle(el.assertStyles[s], groups[s]);
-        }
-        break;
+      for (const s of ['passed', 'failed', 'unknown'] as const) {
+        this.setStyle(el.assertStyles[s], groups[s]);
       }
-      case 'suite': {
-        const el = this.#results.suite[key];
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        el.src = src as SuiteResult;
-        el.status = status;
-        el.decoration = decoration;
+    } else if (isSuiteResult(level, src)) {
+      const el = this.#results.suite[key];
+      el.src = src;
+      el.status = status;
+      el.decoration = decoration;
 
-        Object.keys(el.styles).forEach(x => {
-          this.setStyle(el.styles[x], x === status ? [decoration] : []);
-        });
-        break;
-      }
-      case 'test': {
-        const el = this.#results.test[key];
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        el.src = src as TestResult;
-        el.status = status;
-        el.decoration = decoration;
-        this.setStyle(el.styles[status], [decoration]);
-      }
+      Object.keys(el.styles).forEach(x => {
+        this.setStyle(el.styles[x], x === status ? [decoration] : []);
+      });
+    } else if (isTestResult(level, src)) {
+      const el = this.#results.test[key];
+      el.src = src;
+      el.status = status;
+      el.decoration = decoration;
+      this.setStyle(el.styles[status], [decoration]);
     }
   }
 
@@ -275,26 +295,16 @@ export class DocumentResultsManager {
 
     if (existing) {
       Object.values(existing.styles).forEach(x => x.dispose());
-      if (level === 'test') {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        Object.values((existing as TestState).assertStyles).forEach(x => x.dispose());
+      if (isTestState(level, existing)) {
+        Object.values(existing.assertStyles).forEach(x => x.dispose());
       }
     }
-    switch (level) {
-      case 'test': {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const testBase = (base as TestState);
-        testBase.assertions = [];
-        testBase.assertStyles = this.genStyles('assertion');
-        this.#results[level][key] = testBase;
-        break;
-      }
-      case 'suite': {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const suiteBase = (base as SuiteState);
-        this.#results[level][key] = suiteBase;
-        break;
-      }
+    if (isTestState(level, base)) {
+      base.assertions = [];
+      base.assertStyles = this.genStyles('assertion');
+      this.#results[level][key] = base;
+    } else if (isSuiteState(level, base)) {
+      this.#results[level][key] = base;
     }
   }
 

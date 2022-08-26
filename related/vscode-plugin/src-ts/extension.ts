@@ -5,6 +5,7 @@ process.chdir(vscode.workspace.workspaceFolders![0].uri.path);
 import { Workspace } from './core/workspace';
 import { ActivationManager } from './core/activation';
 import './feature';
+import './types';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   Workspace.init(context);

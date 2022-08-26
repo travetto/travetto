@@ -25,19 +25,17 @@ export class PackUtil {
     configs: Partial<T>[]
   ): T {
     const inputs = [
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      op.defaults ?? {} as Partial<T>,
+      op.defaults! ?? {},
       ...configs,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      op.overrides ?? {} as Partial<T>
+      op.overrides! ?? {}
     ].filter(x => Object.keys(x).length > 0);
 
     const res = inputs.reduce((out: Partial<T>, config: Partial<T>): Partial<T> => {
       const final = {
         active: config.active ?? out.active,
         workspace: config.workspace ?? out.workspace,
-        preProcess: [...(config.preProcess ?? []), ...(out.preProcess ?? [])],
-        postProcess: [...(config.postProcess ?? []), ...(out.postProcess ?? [])],
+        preProcess: [...(config.preProcess! ?? []), ...(out.preProcess ?? [])],
+        postProcess: [...(config.postProcess! ?? []), ...(out.postProcess ?? [])],
         ...op.extend?.(config, out)
       };
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -123,7 +121,7 @@ export class PackUtil {
   /**
    * Run operation with logging
    */
-  static async runOperation<T extends CommonConfig>(op: PackOperation<T>, cfg: T, indent = 0): Promise<void> {
+  static async runOperation<T extends CommonConfig>(op: PackOperation<T, string>, cfg: T, indent = 0): Promise<void> {
     const spacer = ' '.repeat(indent);
     const ctx = await op.context(cfg);
     const title = color`${{ title: op.title }} ${ctx}`;

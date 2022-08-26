@@ -230,15 +230,15 @@ export class SQLUtil {
 
     for (const [k, v] of Object.entries(select)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const typedKey = k as keyof typeof select;
-      if (!Util.isPlainObject(select[typedKey]) && localMap[k]) {
+      const sk = k as string;
+      if (!Util.isPlainObject(select[k]) && localMap[sk]) {
         if (!v) {
           if (toGet.size === 0) {
             toGet = new Set(SchemaRegistry.get(cls).views[AllViewⲐ].fields);
           }
-          toGet.delete(k);
+          toGet.delete(sk);
         } else {
-          toGet.add(k);
+          toGet.add(sk);
         }
       }
     }

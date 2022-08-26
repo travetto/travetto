@@ -108,7 +108,8 @@ export class RetargettingProxy<T> {
 
   constructor(initial: T) {
     this.#handler = new RetargettingHandler(initial);
-    this.#instance = new Proxy({}, this.#handler);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    this.#instance = new Proxy({}, this.#handler as ProxyHandler<object>);
   }
 
   setTarget(next: T): void {

@@ -7,8 +7,8 @@ export type CommonConfig = {
   preProcess?: { [key: string]: (<T extends CommonConfig>(cfg: T) => Promise<void>) }[];
 };
 
-export type PackOperation<T extends CommonConfig> = {
-  key: string;
+export type PackOperation<T extends CommonConfig, K extends string> = {
+  key: K;
   title: string;
   defaults?: Partial<T>;
   overrides?: Partial<T>;

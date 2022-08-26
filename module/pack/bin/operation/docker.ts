@@ -28,7 +28,7 @@ ${(port ?? []).map(x => `EXPOSE ${x}`).join('\n')}
 CMD ["node", "./node_modules/@travetto/cli/bin/trv", "run", "${app}"]
 `;
 
-export const Docker: PackOperation<DockerConfig> = {
+export const Docker: PackOperation<DockerConfig, 'docker'> = {
   key: 'docker',
   title: 'Docker-izing',
   context(cfg: DockerConfig) {

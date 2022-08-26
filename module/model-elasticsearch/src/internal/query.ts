@@ -36,7 +36,7 @@ export class ElasticsearchQueryUtil {
     for (const key of keys) {
       const subPath = `${path}${key}`;
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key] as object)[0].startsWith('$')) {
+      if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key] as Record<string, unknown>)[0].startsWith('$')) {
         Object.assign(out, this.extractSimple(sub[key], `${subPath}.`));
       } else {
         out[subPath] = sub[key];

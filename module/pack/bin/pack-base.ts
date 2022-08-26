@@ -16,15 +16,25 @@ export type BaseOptions = {
   workspace: OptionConfig<string>;
 };
 
+function getConfigFromOperationOrGlobal<C extends CommonConfig, K extends string>(key: K, config: Partial<C> | Record<K, Partial<C>> | undefined): Partial<C> | undefined {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return !config ? config : (key && key in config ? (config as Record<K, C>)[key] : config) as C;
+}
+
 /**
  * Supports packing a project into a directory, ready for archiving
  */
-export abstract class BasePackCommand<V extends BaseOptions, C extends CommonConfig> extends CliCommand<V> {
+export abstract class BasePackCommand<V extends BaseOptions, C extends CommonConfig, K extends string> extends CliCommand<V> {
 
   /**
    * Package stage name
    */
-  abstract get operation(): PackOperation<C>;
+  abstract get operation(): PackOperation<C, K>;
+
+  get cmdOptions(): Partial<C> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return this.cmd as Partial<C>;
+  }
 
   get name(): string {
     return this.operation.key ? `pack:${this.operation.key}` : 'pack';
@@ -35,7 +45,6 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
   }
 
   async resolveConfigs(): Promise<C> {
-    const extra = this.operation.key ? { [this.operation.key]: this.cmd } : this.cmd;
     const list = (await PackUtil.modeList());
     if (!this.args[0]) {
       this.showHelp('Missing config mode');
@@ -45,17 +54,18 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
       this.showHelp(`Unknown config mode: ${this.args[0]}`);
     }
     const def = list.find(c => c.name === 'default');
-    const configs = [def, cfg, extra]
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      .map(x => this.operation.key && this.operation.key in (x ?? {}) ? ((x as Record<string, C>)[this.operation.key] as C) : x as C);
 
-    return this.operation.buildConfig([
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      { workspace: PathUtil.resolveUnix(os.tmpdir(), packName) } as C,
-      ...configs,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      { active: true } as C
-    ]);
+    const configs = [
+      { workspace: PathUtil.resolveUnix(os.tmpdir(), packName) },
+      def,
+      cfg,
+      this.cmdOptions,
+      { active: true }
+    ]
+      .map(x => getConfigFromOperationOrGlobal(this.operation.key, x))
+      .filter((x): x is C => x !== undefined);
+
+    return this.operation.buildConfig(configs);
   }
 
   getArgs(): string {

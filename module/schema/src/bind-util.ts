@@ -157,13 +157,13 @@ export class BindUtil {
       return data as T;
     } else {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const tgt = new (cls as ConcreteClass<T>)();
-      SchemaRegistry.ensureInstanceTypeField(cls, tgt);
+      const tgt = new (cls as ConcreteClass<T>)() as T;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      SchemaRegistry.ensureInstanceTypeField(cls, tgt as T & { type?: string });
 
-      for (const [k, v] of Object.entries(tgt)) { // Do not retain undefined fields
-        if (v === undefined) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          delete tgt[k as keyof T];
+      for (const k of Object.keys(tgt)) { // Do not retain undefined fields
+        if (tgt[k] === undefined) {
+          delete tgt[k];
         }
       }
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

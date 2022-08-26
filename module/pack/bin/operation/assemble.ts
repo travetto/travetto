@@ -19,7 +19,7 @@ export interface AssembleConfig extends CommonConfig {
 /**
  * Utils for packing source code and minimizing space usage
  */
-export const Assemble: PackOperation<AssembleConfig> = {
+export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
   key: 'assemble',
   title: 'Assembling',
   context(cfg: AssembleConfig) {

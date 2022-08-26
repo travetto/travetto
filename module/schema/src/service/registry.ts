@@ -1,4 +1,4 @@
-import { Class, AppError, Util, ClassInstance } from '@travetto/base';
+import { Class, AppError, Util, ClassInstance, ConcreteClass } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig } from './types';
@@ -10,6 +10,16 @@ function hasType<T>(o: unknown): o is { type: Class<T> | string } {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return !!o && !Util.isPrimitive(o) && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
 }
+
+function isWithType<T>(o: T, cfg: ClassConfig | undefined): o is T & { type?: string } {
+  return !!cfg && !!cfg.subType && 'type' in cfg.views[AllViewⲐ].schema;
+}
+
+function getConstructor<T>(o: T): ConcreteClass<T> {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return (o as unknown as ClassInstance<T>).constructor;
+}
+
 
 /**
  * Schema registry for listening to changes
@@ -49,9 +59,8 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * Ensure type is set properly
    */
   ensureInstanceTypeField<T>(cls: Class, o: T): void {
-    const withType: { type?: string } = o;
-    if (this.get(cls)?.subType && 'type' in this.get(cls).views[AllViewⲐ].schema && !withType.type) {  // Do we have a type field defined
-      withType.type = this.#computeSubTypeName(cls); // Assign if missing
+    if (isWithType(o, this.get(cls)) && !o.type) {  // Do we have a type field defined
+      o.type = this.#computeSubTypeName(cls); // Assign if missing
     }
   }
 
@@ -61,8 +70,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param o Actual instance
    */
   resolveSubTypeForInstance<T>(cls: Class<T>, o: T): Class {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.resolveSubType(cls, hasType<T>(o) ? o.type : (o as unknown as ClassInstance<T>).constructor);
+    return this.resolveSubType(cls, hasType<T>(o) ? o.type : getConstructor(o));
   }
 
   /**

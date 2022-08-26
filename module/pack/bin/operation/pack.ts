@@ -28,7 +28,7 @@ export type AllConfigPartial = DeepPartial<AllConfig>;
 
 type DefaultOpType = ['assemble', typeof Assemble];
 
-export const Pack: PackOperation<AllConfig> = {
+export const Pack: PackOperation<AllConfig, ''> = {
   key: '',
   title: 'Packing',
   buildConfig(configs: Partial<AllConfig>[]): AllConfig {

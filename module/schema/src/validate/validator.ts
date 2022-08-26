@@ -38,7 +38,7 @@ export class SchemaValidator {
   static #validateSchema<T>(schema: SchemaConfig, o: T, relative: string): ValidationError[] {
     let errors: ValidationError[] = [];
 
-    const fields: (keyof SchemaConfig)[] = Object.keys(schema);
+    const fields = Object.keys<SchemaConfig>(schema);
     for (const field of fields) {
       if (schema[field].access !== 'readonly') { // Do not validate readonly fields
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -104,10 +104,7 @@ export class SchemaValidator {
    * @param key The bounds to check
    * @param value The value to validate
    */
-  static #validateRange(field: FieldConfig, key: 'min' | 'max', rawValue: string | number | Date | unknown): boolean {
-
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    let value = rawValue as string | number | Date;
+  static #validateRange(field: FieldConfig, key: 'min' | 'max', value: string | number | Date): boolean {
 
     const f = field[key]!;
     if (typeof f.n === 'number') {
@@ -178,11 +175,13 @@ export class SchemaValidator {
       criteria.push(['enum', field.enum]);
     }
 
-    if (field.min && this.#validateRange(field, 'min', value)) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    if (field.min && this.#validateRange(field, 'min', value as number)) {
       criteria.push(['min', field.min]);
     }
 
-    if (field.max && this.#validateRange(field, 'max', value)) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    if (field.max && this.#validateRange(field, 'max', value as number)) {
       criteria.push(['max', field.max]);
     }
 
