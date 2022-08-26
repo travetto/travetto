@@ -2,9 +2,11 @@
 export * from './src/interceptor';
 export * from './src/decorator';
 export * from './src/service';
-export * from './src/extension/context/interceptor';
 export * from './src/encoder';
 export * from './src/types';
+
+// Named export needed for proxying
+export * from './src/extension/context/interceptor';
 
 // Named export needed for proxying
 export { PassportAuthenticator } from './src/extension/passport/authenticator';

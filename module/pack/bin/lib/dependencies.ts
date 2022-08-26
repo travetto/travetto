@@ -13,7 +13,7 @@ const DEP_MAPPING = {
   opt: 'optionalDependencies',
   peer: 'peerDependencies',
   optPeer: 'optionalPeerDependencies'
-};
+} as const;
 
 type PackageShape = {
   name: string;
@@ -77,7 +77,10 @@ export class DependenciesUtil {
           type !== 'dev' ||
           maxDepth === 0
         ) {
-          deps.push(...Object.entries(p[DEP_MAPPING[type]] ?? {}).map(([name, version]) => [name, type, version] as const));
+          deps.push(...Object
+            .entries<Record<string, string>>(p[DEP_MAPPING[type]] ?? {})
+            .map(([name, version]) => [name, type, version] as const)
+          );
         }
       }
       for (const [dep, type, version] of deps) {

@@ -28,7 +28,7 @@
   "dependencies": {
     "@travetto/config": "^2.2.4",
     "@travetto/model": "^2.2.4",
-    "redis": "^4.2.0"
+    "redis": "^4.3.0"
   },
   "publishConfig": {
     "access": "public"

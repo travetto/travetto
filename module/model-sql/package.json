@@ -40,7 +40,7 @@
     "@types/mysql": "^2.15.21",
     "@types/pg": "^8.6.5",
     "mysql": "^2.18.1",
-    "pg": "^8.7.3",
+    "pg": "^8.8.0",
     "better-sqlite3": "^7.6.2",
     "@types/better-sqlite3": "^7.6.0"
   },
