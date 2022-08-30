@@ -1,4 +1,4 @@
-// @file-if @travetto/context
+// @with-module @travetto/context
 import { WithAsyncContext, AsyncContext } from '@travetto/context';
 
 import { Controller, Get } from '..';

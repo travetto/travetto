@@ -1,5 +1,5 @@
-// @file-if @travetto/auth-rest
-// @file-if @vendia/serverless-express
+// @with-module @travetto/auth-rest
+// @with-module @vendia/serverless-express
 
 import { AuthRestServerSuite } from '@travetto/auth-rest/test-support/server';
 import { Suite } from '@travetto/test';

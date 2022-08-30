@@ -282,7 +282,7 @@ export class TestExecutor {
   static async executeIsolated(consumer: TestConsumer, file: string, ...args: string[]): Promise<void> {
     // Read modules for extensions
     const modules = [...(await fs.readFile(file, 'utf8'))
-      .matchAll(/\/\/\s*@file-if\s+(@travetto\/[A-Za-z0-9\-]+)/g)]
+      .matchAll(/\/\/\s*@with-module\s+(@travetto\/[A-Za-z0-9\-]+)/g)]
       .map(x => x[1]);
 
     const proc = ExecUtil.forkMain(require.resolve('../../bin/test-direct'), [file, ...args], {

@@ -1,4 +1,4 @@
-// @file-if @travetto/model
+// @with-module @travetto/model
 import { ModelCrudSupport } from '@travetto/model';
 import { AssetService, Asset } from '@travetto/asset';
 

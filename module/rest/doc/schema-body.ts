@@ -1,4 +1,4 @@
-// @file-if @travetto/schema
+// @with-module @travetto/schema
 import { Schema } from '@travetto/schema';
 import { Controller, Post, Body } from '@travetto/rest';
 

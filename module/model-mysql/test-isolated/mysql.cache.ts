@@ -1,4 +1,4 @@
-// @file-if @travetto/cache
+// @with-module @travetto/cache
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { CacheModelⲐ } from '@travetto/cache';

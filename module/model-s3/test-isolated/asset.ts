@@ -1,4 +1,4 @@
-// @file-if @travetto/asset
+// @with-module @travetto/asset
 
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';

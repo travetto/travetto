@@ -1,4 +1,4 @@
-// @file-if @travetto/model
+// @with-module @travetto/model
 import { UserProfileService } from './user-profile';
 import { User } from './user';
 

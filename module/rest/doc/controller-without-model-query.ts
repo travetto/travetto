@@ -1,4 +1,4 @@
-// @file-if @travetto/model-query
+// @with-module @travetto/model-query
 import { Inject } from '@travetto/di';
 import { ModelQuerySupport, SortClause, ValidStringFields } from '@travetto/model-query';
 import { isQuerySuggestSupported } from '@travetto/model-query/src/internal/service/common';
