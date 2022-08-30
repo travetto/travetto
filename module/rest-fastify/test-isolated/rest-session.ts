@@ -1,5 +1,5 @@
-// @file-if @travetto/rest-session
-// @file-if @fastify/aws-lambda
+// @with-module @travetto/rest-session
+// @with-module @fastify/aws-lambda
 
 import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model';

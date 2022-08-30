@@ -1,4 +1,4 @@
-// @file-if @travetto/model
+// @with-module @travetto/model
 import { Application } from '@travetto/app';
 import { RestApplication, Controller, Get } from '@travetto/rest';
 import { Inject, InjectableFactory } from '@travetto/di';

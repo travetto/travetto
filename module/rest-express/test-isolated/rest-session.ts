@@ -1,5 +1,5 @@
-// @file-if @travetto/rest-session
-// @file-if @vendia/serverless-express
+// @with-module @travetto/rest-session
+// @with-module @vendia/serverless-express
 
 import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model';

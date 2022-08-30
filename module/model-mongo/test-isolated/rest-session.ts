@@ -1,5 +1,5 @@
-// @file-if @travetto/rest-session
-// @file-if @travetto/rest-express
+// @with-module @travetto/rest-session
+// @with-module @travetto/rest-express
 
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';

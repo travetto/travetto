@@ -1,4 +1,4 @@
-// @file-if @travetto/rest
+// @with-module @travetto/rest
 import { Inject } from '@travetto/di';
 
 import { Controller, Post, Body } from '@travetto/rest';
