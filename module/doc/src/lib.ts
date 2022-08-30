@@ -81,6 +81,8 @@ export const lib = {
   Postgres: Library('Postgres', 'https://postgresql.org'),
   DynamoDB: Library('DynamoDB', 'https://aws.amazon.com/dynamodb/'),
   Firestore: Library('Firestore', 'https://firebase.google.com/docs/firestore'),
+  SQLite: Library('SQLite', 'https://www.sqlite.org/'),
+
 
   // Rest
   Express: Library('express', 'https://expressjs.com'),
