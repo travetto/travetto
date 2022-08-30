@@ -8,8 +8,8 @@ import { PackageType, readPackage } from '@travetto/boot/src/internal/package';
 
 export const DEP_GROUPS = [
   'dependencies', 'devDependencies',
-  'optionalPeerDependencies', 'peerDependencies',
-  'optionalDependencies', 'docDependencies'
+  'peerDependencies', 'optionalDependencies',
+  'docDependencies'
 ] as const;
 
 export type DepGroup = (typeof DEP_GROUPS[number]);
@@ -61,7 +61,7 @@ export class Packages {
     name, displayName, version, description,
     files, main, bin, scripts, keywords,
     dependencies, devDependencies, peerDependencies,
-    optionalDependencies, optionalPeerDependencies,
+    optionalDependencies, peerDependenciesMeta,
     docDependencies,
     engines, private: priv, repository, author,
     publishConfig, ...rest
@@ -89,8 +89,8 @@ export class Packages {
       dependencies,
       devDependencies,
       peerDependencies,
+      peerDependenciesMeta,
       optionalDependencies,
-      optionalPeerDependencies,
       docDependencies,
       engines,
       private: !!priv,

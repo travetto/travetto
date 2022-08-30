@@ -39,11 +39,16 @@
     "foundation-emails": "^2.4.0",
     "html-entities": "^2.3.3",
     "inline-css": "^4.0.1",
-    "sass": "^1.54.5",
-    "parse5": "^7.0.0"
+    "sass": "^1.54.6"
   },
-  "optionalPeerDependencies": {
+  "peerDependencies": {
+    "parse5": "^7.0.0",
     "@travetto/cli": "^2.2.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

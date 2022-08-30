@@ -43,7 +43,7 @@ class DevRegister {
       ...Object.keys(Package.devDependencies || {}),
       ...(process.argv[2] === 'doc' ? [
         ...Object.keys(Package.docDependencies ?? {}),
-        ...Object.keys(Package.optionalPeerDependencies ?? {})
+        ...Object.keys(Package.peerDependencies ?? {})
       ] : [])
     ]
       .filter(x => x.startsWith('@travetto'));

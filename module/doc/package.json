@@ -28,8 +28,13 @@
     "@travetto/base": "^2.2.4",
     "prismjs": "^1.29.0"
   },
-  "optionalPeerDependencies": {
+  "peerDependencies": {
     "@travetto/cli": "^2.2.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "private": false,
   "publishConfig": {

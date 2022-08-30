@@ -34,8 +34,13 @@
     "@travetto/yaml": "^2.2.4",
     "openapi3-ts": "^2.0.2"
   },
-  "optionalPeerDependencies": {
+  "peerDependencies": {
     "@travetto/cli": "^2.2.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

@@ -27,8 +27,13 @@
   "dependencies": {
     "@travetto/base": "^2.2.4"
   },
-  "optionalPeerDependencies": {
+  "peerDependencies": {
     "@travetto/model": "^2.2.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/model": {
+      "optional": true
+    }
   },
   "private": false,
   "publishConfig": {

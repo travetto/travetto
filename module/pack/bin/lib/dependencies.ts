@@ -3,7 +3,7 @@ import * as path from 'path';
 import { FsUtil, PathUtil } from '@travetto/boot';
 
 export type ResolvedDep = { file: string, type: DepType, dep: string, version: string };
-export type DepType = 'prod' | 'dev' | 'opt' | 'peer' | 'optPeer';
+export type DepType = 'prod' | 'dev' | 'opt' | 'peer';
 
 type DepResolveConfig = { root?: string, types?: DepType[] | (readonly DepType[]), maxDepth?: number };
 
@@ -12,7 +12,6 @@ const DEP_MAPPING = {
   dev: 'devDependencies',
   opt: 'optionalDependencies',
   peer: 'peerDependencies',
-  optPeer: 'optionalPeerDependencies'
 } as const;
 
 type PackageShape = {
@@ -93,7 +92,7 @@ export class DependenciesUtil {
             pending.push([resolved, depth + 1]);
           }
         } catch {
-          if (!dep.startsWith('@types') && type !== 'opt' && type !== 'optPeer') {
+          if (!dep.startsWith('@types') && type !== 'opt' && type !== 'peer') {
             console.error('Unable to resolve', { type, dependency: dep });
           }
         }
