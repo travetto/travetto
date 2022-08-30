@@ -1,8 +1,8 @@
 {
-  "name": "@travetto/model-sql",
-  "displayName": "SQL Model Service",
+  "name": "@travetto/model-postgres",
+  "displayName": "PostgreSQL Model Service",
   "version": "2.2.6",
-  "description": "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
+  "description": "PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "keywords": [
     "sql",
     "data-modeling",
@@ -20,19 +20,21 @@
   "files": [
     "index.ts",
     "src",
-    "support",
-    "test-support"
+    "support"
   ],
   "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/model-sql"
+    "directory": "module/model-postgres"
   },
   "dependencies": {
     "@travetto/config": "^2.2.4",
     "@travetto/context": "^2.2.6",
     "@travetto/model": "^2.2.4",
-    "@travetto/model-query": "2.2.4"
+    "@travetto/model-sql": "^2.2.6",
+    "@travetto/model-query": "2.2.4",
+    "@types/pg": "^8.6.5",
+    "pg": "^8.8.0"
   },
   "devDependencies": {
     "@travetto/app": "^2.2.5"

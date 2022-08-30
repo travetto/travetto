@@ -1,0 +1,4 @@
+model.sql:
+  database: app
+  user: root
+  password: password
