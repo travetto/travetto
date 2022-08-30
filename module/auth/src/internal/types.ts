@@ -1,6 +1,3 @@
-import { Schema } from '@travetto/schema'; // @line-if @travetto/schema
-
-@Schema() // @line-if @travetto/schema
 export class PrincipalTarget {
   id: string;
   expiresAt?: Date;
