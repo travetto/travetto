@@ -30,8 +30,13 @@
     "@travetto/model": "^2.2.4",
     "@travetto/rest": "^2.2.6"
   },
-  "optionalPeerDependencies": {
+  "peerDependencies": {
     "@travetto/auth-rest": "2.2.7"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/auth-rest": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

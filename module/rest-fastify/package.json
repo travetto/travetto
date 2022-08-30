@@ -26,11 +26,16 @@
   },
   "dependencies": {
     "@travetto/rest": "^2.2.6",
-    "fastify": "^3.29.1",
+    "fastify": "^3.29.2",
     "@fastify/compress": "^5.0.0"
   },
-  "optionalPeerDependencies": {
+  "peerDependencies": {
     "@fastify/aws-lambda": "^3.1.1"
+  },
+  "peerDependenciesMeta": {
+    "@fastify/aws-lambda": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

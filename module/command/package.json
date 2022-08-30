@@ -28,8 +28,13 @@
   "dependencies": {
     "@travetto/base": "^2.2.4"
   },
-  "optionalPeerDependencies": {
+  "peerDependencies": {
     "@travetto/cli": "^2.2.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "docDependencies": {
     "@travetto/model-elasticsearch": true

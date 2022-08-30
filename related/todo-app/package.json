@@ -31,8 +31,8 @@
     "vue": "^2.7.10"
   },
   "devDependencies": {
-    "@travetto/pack": "^2.0.0-alpha.5",
-    "@travetto/test": "^2.0.0-alpha.6"
+    "@travetto/pack": "^2.2.2",
+    "@travetto/test": "^2.2.2"
   },
   "private": true,
   "publishConfig": {

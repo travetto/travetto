@@ -33,9 +33,17 @@
     "koa-compress": "^5.1.0",
     "koa-router": "^10.1.1"
   },
-  "optionalPeerDependencies": {
+  "peerDependencies": {
     "@types/aws-lambda": "^8.10.102",
     "@vendia/serverless-express": "^4.10.1"
+  },
+  "peerDependenciesMeta": {
+    "@types/aws-lambda": {
+      "optional": true
+    },
+    "@vendia/serverless-express": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

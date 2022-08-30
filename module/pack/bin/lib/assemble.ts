@@ -90,7 +90,7 @@ export class AssembleUtil {
   /**
    * Copy over all prod dependencies
    */
-  static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'optPeer']): Promise<void> {
+  static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'peer']): Promise<void> {
 
     for (const el of await DependenciesUtil.resolveDependencies({ types })) {
       const sub = PathUtil.normalizeFrameworkPath(el.file, 'node_modules/')
