@@ -1,4 +1,4 @@
-import { AuthInterceptor } from '@travetto/auth-rest'; // @line-if @travetto/auth-rest
+import { Class } from '@travetto/base';
 import { Injectable, Inject } from '@travetto/di';
 import { Request, Response, CookiesInterceptor, RestInterceptor } from '@travetto/rest';
 
@@ -15,13 +15,19 @@ import { SessionService } from './service';
 @Injectable()
 export class SessionReadInterceptor implements RestInterceptor {
 
-  after = [
+  after: Class<RestInterceptor>[] = [
     CookiesInterceptor,
-    AuthInterceptor // @line-if @travetto/auth-rest
   ];
 
   @Inject()
   service: SessionService;
+
+  async postConstruct(): Promise<void> {
+    try {
+      const { AuthInterceptor } = await import('@travetto/auth-rest');
+      this.after.push(AuthInterceptor);
+    } catch { }
+  }
 
   async intercept(req: Request, res: Response, next: () => Promise<unknown>): Promise<unknown> {
     // Use auth id if found, but auth is not required
@@ -41,10 +47,17 @@ export class SessionReadInterceptor implements RestInterceptor {
 export class SessionWriteInterceptor implements RestInterceptor {
 
   after = [CookiesInterceptor];
-  before = [AuthInterceptor]; // @line-if @travetto/auth-rest
+  before: Class<RestInterceptor>[] = [];
 
   @Inject()
   service: SessionService;
+
+  async postConstruct(): Promise<void> {
+    try {
+      const { AuthInterceptor } = await import('@travetto/auth-rest');
+      this.before.push(AuthInterceptor);
+    } catch { }
+  }
 
   async intercept(req: Request, res: Response, next: () => Promise<unknown>): Promise<unknown> {
     try {

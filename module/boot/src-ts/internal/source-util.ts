@@ -61,18 +61,17 @@ export class SourceUtil {
    * Process token
    * @param token The token to process
    */
-  static resolveToken(token: string): { minus: boolean, key: string, valid: boolean, err?: Error } {
-    const [, sign, env, key] = token.match(/(-|\+)?([$])?(.*)/)!;
-    const minus = sign === '-';
+  static resolveToken(token: string): { key: string, valid: boolean, err?: Error } {
+    const [, env, key] = token.match(/([$])?(.*)/)!;
     if (env) {
-      return { minus, key, valid: minus ? EnvUtil.isFalse(key) : (EnvUtil.isSet(key) && !EnvUtil.isFalse(key)) };
+      return { key, valid: (EnvUtil.isSet(key) && !EnvUtil.isFalse(key)) };
     } else {
       try {
         require.resolve(key);
-        return { minus, key, valid: !minus };
+        return { key, valid: true };
       } catch (err: unknown) {
         if (err instanceof Error) {
-          return { minus, key, valid: minus, err };
+          return { key, valid: false, err };
         } else {
           throw err;
         }
@@ -89,18 +88,16 @@ export class SourceUtil {
     const errors: string[] = [];
 
     // Handle line queries
-    contents = contents.replace(/^.*[/][/]\s*@(line|file)-if\s+(.*?)\s*$/mg, (all, mode, token: string) => {
+    contents = contents.replace(/^.*[/][/]\s*@file-if\s+(.*?)\s*$/mg, (all, token: string) => {
       if (errors.length) {
         return ''; // Short circuit
       }
-      const { valid, key, minus } = this.resolveToken(token);
+      const { valid, key } = this.resolveToken(token);
       if (valid) {
         return all;
       } else {
-        if (mode === 'file') {
-          errors.push(`Dependency ${key} should${minus ? ' not' : ''} be installed`);
-        }
-        return `// @removed ${token} was not satisfied`;
+        errors.push(`Dependency ${key} should be installed`);
+        return '';
       }
     });
 

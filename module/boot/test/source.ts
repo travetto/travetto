@@ -3,8 +3,6 @@ import * as assert from 'assert';
 import { Test, Suite } from '@travetto/test';
 import { SourceUtil } from '../src/internal/source-util';
 
-const FILE_IF = '@file-if';
-
 @Suite()
 export class SourceUtilTest {
 
@@ -16,11 +14,13 @@ export class SourceUtilTest {
   @Test()
   resolveEnvToken() {
     process.env.NAME = '0';
+    // @ts-expect-error
     assert(SourceUtil.resolveToken('-$NAME') === {
       minus: true,
       key: 'NAME',
       valid: true
     });
+    // @ts-expect-error
     assert(SourceUtil.resolveToken('$NAME') === {
       minus: false,
       key: 'NAME',
@@ -28,11 +28,13 @@ export class SourceUtilTest {
     });
 
     process.env.NAME = '1';
+    // @ts-expect-error
     assert(SourceUtil.resolveToken('-$NAME') === {
       minus: true,
       key: 'NAME',
       valid: false
     });
+    // @ts-expect-error
     assert(SourceUtil.resolveToken('$NAME') === {
       minus: false,
       key: 'NAME',
@@ -43,6 +45,7 @@ export class SourceUtilTest {
   @Test()
   resolveModToken() {
     const { err: __err1, ...rest } = SourceUtil.resolveToken('-fsa');
+    // @ts-expect-error
     assert(rest === {
       minus: true,
       key: 'fsa',
@@ -50,6 +53,7 @@ export class SourceUtilTest {
     });
 
     const { err: __err2, ...rest2 } = SourceUtil.resolveToken('fsa');
+    // @ts-expect-error
     assert(rest2 === {
       minus: false,
       key: 'fsa',
@@ -57,6 +61,7 @@ export class SourceUtilTest {
     });
 
     const { err: __err3, ...rest3 } = SourceUtil.resolveToken('-fs');
+    // @ts-expect-error
     assert(rest3 === {
       minus: true,
       key: 'fs',
@@ -64,45 +69,12 @@ export class SourceUtilTest {
     });
 
     const { err: __err4, ...rest4 } = SourceUtil.resolveToken('fs');
+    // @ts-expect-error
     assert(rest4 === {
       minus: false,
       key: 'fs',
       valid: true
     });
-  }
-
-  @Test()
-  resolveMacros() {
-    const { contents: resolved } = SourceUtil.resolveMacros(`
-let fs   = 'test'; // @line-if fs 
-let fsn  = 'test'; // @line-if -fs 
-let fsa  = 'test'; // @line-if fsa
-let fsan = 'test'; // @line-if -fsa
-    `);
-
-    assert(resolved.includes('let fs '));
-    assert(!resolved.includes('let fsn '));
-    assert(!resolved.includes('let fsa '));
-    assert(resolved.includes('let fsan '));
-
-    const { contents: resolvedFile } = SourceUtil.resolveMacros(`
-// ${FILE_IF} fs
-// ${FILE_IF} -fsa    
-let fs   = 'test'; // @line-if fs 
-let fsan = 'test'; // @line-if -fsa
-    `);
-
-    assert(resolvedFile.includes('let fs '));
-    assert(resolvedFile.includes('let fsan '));
-
-    const { contents: resolvedFileNeg } = SourceUtil.resolveMacros(`
-// ${FILE_IF} -fs
-let fs   = 'test'; // @line-if fs 
-let fsan = 'test'; // @line-if -fsa
-        `);
-
-    assert(!resolvedFileNeg.includes('let fs '));
-    assert(!resolvedFileNeg.includes('let fsan '));
   }
 
   @Test()

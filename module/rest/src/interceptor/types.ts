@@ -9,6 +9,7 @@ import { ControllerConfig } from '../registry/types';
  * @concrete ../internal/types:RestInterceptorTarget
  */
 export interface RestInterceptor {
+
   /**
    * This interceptor must run after these
    */
