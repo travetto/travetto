@@ -50,7 +50,7 @@ export class ExecUtilTest {
   async worker() {
     const { message } = ExecUtil.workerMain(await ResourceManager.findAbsolute('worker.ts'));
     const result = await message;
-    assert(result === { a: 1, b: 2, c: new Set([1, 2, 3]) });
+    assert.deepStrictEqual(result, { a: 1, b: 2, c: new Set([1, 2, 3]) });
   }
 
   @Test()

@@ -51,24 +51,24 @@ export class EnvUtilTest {
   verifyGetList() {
     process.env.names = 'a,b,c,d,e';
 
-    assert(EnvUtil.getList('names') === ['a', 'b', 'c', 'd', 'e']);
+    assert.deepStrictEqual(EnvUtil.getList('names'), ['a', 'b', 'c', 'd', 'e']);
 
     process.env.names = '  a , b ,  c ,,, d ,,e';
 
-    assert(EnvUtil.getList('names') === ['a', 'b', 'c', 'd', 'e']);
+    assert.deepStrictEqual(EnvUtil.getList('names'), ['a', 'b', 'c', 'd', 'e']);
 
     process.env.names = '  a  b   c  d e';
 
-    assert(EnvUtil.getList('names') === ['a', 'b', 'c', 'd', 'e']);
+    assert.deepStrictEqual(EnvUtil.getList('names'), ['a', 'b', 'c', 'd', 'e']);
   }
 
   @Test()
   verifyGetMap() {
     process.env.mapped = 'a=1,b=2,c=3,d=';
-    assert(EnvUtil.getEntries('mapped') === [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
+    assert.deepStrictEqual(EnvUtil.getEntries('mapped'), [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
 
     process.env.mapped = 'a#1,b#2,c#3,d#';
-    assert(EnvUtil.getEntries('mapped', '#') === [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
+    assert.deepStrictEqual(EnvUtil.getEntries('mapped', '#'), [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
   }
 
   @Test()

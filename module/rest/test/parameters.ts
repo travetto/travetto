@@ -162,8 +162,8 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/alias', 'post');
     const params = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
     assert(params[0].description === 'User name');
-    assert(ParamUtil.extractParams(ep, { query: { nm: 'blue' } } as unknown as Request, {} as Response) === ['green']);
-    assert(ParamUtil.extractParams(ep, { query: { name: 'blue' } } as unknown as Request, {} as Response) === ['blue']);
+    assert.deepStrictEqual(ParamUtil.extractParams(ep, { query: { nm: 'blue' } } as unknown as Request, {} as Response), ['green']);
+    assert.deepStrictEqual(ParamUtil.extractParams(ep, { query: { name: 'blue' } } as unknown as Request, {} as Response), ['blue']);
 
     const ep2 = ParameterTest.getEndpoint('/alias2', 'post');
     const params2 = SchemaRegistry.getMethodSchema(ep2.class, ep2.handlerName);
@@ -181,11 +181,11 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/array', 'post');
     const ep2 = ParameterTest.getEndpoint('/array2', 'post');
 
-    assert(ParamUtil.extractParams(ep2, { query: { values: 'no' } } as unknown as Request, {} as Response) === [[false]]);
-    assert(ParamUtil.extractParams(ep2, { query: { values: ['no', 'yes'] } } as unknown as Request, {} as Response) === [[false, true]]);
+    assert.deepStrictEqual(ParamUtil.extractParams(ep2, { query: { values: 'no' } } as unknown as Request, {} as Response), [[false]]);
+    assert.deepStrictEqual(ParamUtil.extractParams(ep2, { query: { values: ['no', 'yes'] } } as unknown as Request, {} as Response), [[false, true]]);
 
-    assert(ParamUtil.extractParams(ep, { query: { values: '0' } } as unknown as Request, {} as Response) === [[0]]);
-    assert(ParamUtil.extractParams(ep, { query: { values: ['5', '3'] } } as unknown as Request, {} as Response) === [[5, 3]]);
+    assert.deepStrictEqual(ParamUtil.extractParams(ep, { query: { values: '0' } } as unknown as Request, {} as Response), [[0]]);
+    assert.deepStrictEqual(ParamUtil.extractParams(ep, { query: { values: ['5', '3'] } } as unknown as Request, {} as Response), [[5, 3]]);
   }
 
   @Test()

@@ -9,6 +9,7 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 import { SpecGenerator } from '../src/spec-generate';
 import { TestUser } from './model';
 
+
 @Controller('/test')
 class TestCont {
   @Get('/user')
@@ -75,7 +76,7 @@ export class GenerateSuite {
     assert(param.in === 'query');
 
     assert(config.paths['/test/user'].get.responses['200']);
-    assert(config.paths['/test/user'].get.responses['200'] === {
+    assert.deepStrictEqual(config.paths['/test/user'].get.responses['200'], {
       content: {
         'application/json': {
           schema: { $ref: '#/components/schemas/TestUser' }
@@ -97,7 +98,7 @@ export class GenerateSuite {
     assert(param.in === 'query');
 
     assert(config.paths['/test/users'].get.responses['200']);
-    assert(config.paths['/test/users'].get.responses['200'] === {
+    assert.deepStrictEqual(config.paths['/test/users'].get.responses['200'], {
       content: {
         'application/json': {
           schema: { type: 'array', items: { $ref: '#/components/schemas/TestUser' } }
@@ -114,7 +115,7 @@ export class GenerateSuite {
     assert(config.paths['/test/names'].put.parameters?.length === 1);
 
     assert(config.paths['/test/names'].put.responses['200']);
-    assert(config.paths['/test/names'].put.responses['200'] === {
+    assert.deepStrictEqual(config.paths['/test/names'].put.responses['200'], {
       content: {
         'application/json': {
           schema: { type: 'array', items: { type: 'string' } }
@@ -128,7 +129,7 @@ export class GenerateSuite {
     assert(param.in === 'query');
     assert(param.name === 'names');
 
-    assert(param.schema === { type: 'array', items: { type: 'string' } });
+    assert.deepStrictEqual(param.schema, { type: 'array', items: { type: 'string' } });
   }
 
   @Test()
@@ -136,7 +137,7 @@ export class GenerateSuite {
     const config = new SpecGenerator().generate({});
     assert(config.paths['/test/who'].patch);
     assert(config.paths['/test/who'].patch.responses['200']);
-    assert(config.paths['/test/who'].patch.responses['200'] === {
+    assert.deepStrictEqual(config.paths['/test/who'].patch.responses['200'], {
       content: {
         'application/json': {
           schema: { type: 'array', items: { type: 'string' } }
@@ -148,7 +149,7 @@ export class GenerateSuite {
     assert(config.paths['/test/who'].patch.parameters?.length === 0);
     assert(config.paths['/test/who'].patch.requestBody);
 
-    assert(config.paths['/test/who'].patch.requestBody === {
+    assert.deepStrictEqual(config.paths['/test/who'].patch.requestBody, {
       content: {
         'application/json': {
           schema: {
@@ -158,7 +159,7 @@ export class GenerateSuite {
       },
       description: '__type'
     });
-    assert(config.components.schemas['who_28_31'] === {
+    assert.deepStrictEqual(config.components.schemas['who_28_31'], {
       description: '__type',
       example: undefined,
       properties: {
@@ -184,7 +185,7 @@ export class GenerateSuite {
     const config = new SpecGenerator().generate({});
     assert(config.paths['/test/{id}'].delete);
     assert(config.paths['/test/{id}'].delete.responses['201']);
-    assert(config.paths['/test/{id}'].delete.responses['201'] === {
+    assert.deepStrictEqual(config.paths['/test/{id}'].delete.responses['201'], {
       content: {},
       description: ''
     });
@@ -196,7 +197,7 @@ export class GenerateSuite {
     assert(param.required);
     assert(param.in === 'path');
     assert(param.name === 'id');
-    assert(param.schema === { type: 'string' });
+    assert.deepStrictEqual(param.schema, { type: 'string' });
   }
 
   @Test()
@@ -204,7 +205,7 @@ export class GenerateSuite {
     const config = new SpecGenerator().generate({});
     assert(config.paths['/test/all/{id}'].delete);
     assert(config.paths['/test/all/{id}'].delete.responses['201']);
-    assert(config.paths['/test/all/{id}'].delete.responses['201'] === {
+    assert.deepStrictEqual(config.paths['/test/all/{id}'].delete.responses['201'], {
       content: {},
       description: ''
     });
@@ -216,25 +217,25 @@ export class GenerateSuite {
     assert(param.required);
     assert(param.in === 'path');
     assert(param.name === 'id');
-    assert(param.schema === { type: 'string' });
+    assert.deepStrictEqual(param.schema, { type: 'string' });
 
     const param2 = (config.paths['/test/all/{id}'].delete.parameters?.[1] as ParameterObject);
     assert(param2.required);
     assert(param2.in === 'query');
     assert(param2.name === 'age');
-    assert(param2.schema === { type: 'number' });
+    assert.deepStrictEqual(param2.schema, { type: 'number' });
 
     const param3 = (config.paths['/test/all/{id}'].delete.parameters?.[2] as ParameterObject);
     assert(param3.required);
     assert(param3.in === 'query');
     assert(param3.name === 'name');
-    assert(param3.schema === { type: 'string' });
+    assert.deepStrictEqual(param3.schema, { type: 'string' });
 
     const param4 = (config.paths['/test/all/{id}'].delete.parameters?.[3] as ParameterObject);
     assert(param4.required);
     assert(param4.in === 'query');
     assert(param4.name === 'salary');
-    assert(param4.schema === { type: 'number' });
+    assert.deepStrictEqual(param4.schema, { type: 'number' });
   }
 
 
@@ -243,7 +244,7 @@ export class GenerateSuite {
     const config = new SpecGenerator().generate({});
     assert(config.paths['/test/all/{id}'].head);
     assert(config.paths['/test/all/{id}'].head.responses['201']);
-    assert(config.paths['/test/all/{id}'].head.responses['201'] === {
+    assert.deepStrictEqual(config.paths['/test/all/{id}'].head.responses['201'], {
       content: {},
       description: ''
     });
@@ -255,25 +256,25 @@ export class GenerateSuite {
     assert(param.required);
     assert(param.in === 'path');
     assert(param.name === 'id');
-    assert(param.schema === { type: 'string' });
+    assert.deepStrictEqual(param.schema, { type: 'string' });
 
     const param2 = (config.paths['/test/all/{id}'].head.parameters?.[1] as ParameterObject);
     assert(!param2.required);
     assert(param2.in === 'query');
     assert(param2.name === 'age');
-    assert(param2.schema === { type: 'number' });
+    assert.deepStrictEqual(param2.schema, { type: 'number' });
 
     const param3 = (config.paths['/test/all/{id}'].head.parameters?.[2] as ParameterObject);
     assert(!param3.required);
     assert(param3.in === 'query');
     assert(param3.name === 'name');
-    assert(param3.schema === { type: 'string' });
+    assert.deepStrictEqual(param3.schema, { type: 'string' });
 
     const param4 = (config.paths['/test/all/{id}'].head.parameters?.[3] as ParameterObject);
     assert(!param4.required);
     assert(param4.in === 'query');
     assert(param4.name === 'salary');
-    assert(param4.schema === { type: 'number' });
+    assert.deepStrictEqual(param4.schema, { type: 'number' });
   }
 
   @Test()
@@ -281,7 +282,7 @@ export class GenerateSuite {
     const config = new SpecGenerator().generate({});
     assert(config.paths['/test/download'].get);
     assert(config.paths['/test/download'].get.responses['200']);
-    assert(config.paths['/test/download'].get.responses['200'] === {
+    assert.deepStrictEqual(config.paths['/test/download'].get.responses['200'], {
       content: {
         'application/octet-stream': { type: 'string', format: 'binary' }
       },
@@ -292,6 +293,6 @@ export class GenerateSuite {
     assert(!param.required);
     assert(param.in === 'query');
     assert(param.name === 'size');
-    assert(param.schema === { type: 'number' });
+    assert.deepStrictEqual(param.schema, { type: 'number' });
   }
 }

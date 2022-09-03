@@ -68,7 +68,7 @@ class VerifyContext {
       }, { age: 20, name: 'bob' });
     }));
 
-    assert(contexts[0] === { age: 20, name: 'test-0', color: 'green' });
-    assert(contexts[1] === { age: 30, name: 'test-1', color: 'green' });
+    assert.deepStrictEqual(contexts[0], { age: 20, name: 'test-0', color: 'green' });
+    assert.deepStrictEqual(contexts[1], { age: 30, name: 'test-1', color: 'green' });
   }
 }

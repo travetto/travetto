@@ -72,7 +72,7 @@ class DataBinding {
     });
     assert(res.questionId === '20');
     assert(!!res.answer);
-    assert(res.answer === ['a', 'd']);
+    assert.deepStrictEqual(res.answer, ['a', 'd']);
   }
 
   @Test('Should handle inheritance')
@@ -102,8 +102,8 @@ class DataBinding {
 
   @Test('Should handle aliases')
   validateExpand() {
-    assert(BindUtil.expandPaths({ 'a.b.c[]': 20 }) === { a: { b: { c: [20] } } });
-    assert(BindUtil.expandPaths({ 'a.d[0].c': 20 }) === { a: { d: [{ c: 20 }] } });
+    assert.deepStrictEqual(BindUtil.expandPaths({ 'a.b.c[]': 20 }), { a: { b: { c: [20] } } });
+    assert.deepStrictEqual(BindUtil.expandPaths({ 'a.d[0].c': 20 }), { a: { d: [{ c: 20 }] } });
   }
 
   @Test('Should handle nulls in arrays')
@@ -232,9 +232,9 @@ class DataBinding {
 
   @Test()
   async validateRealworld() {
-    assert(BindUtil.expandPaths({
+    assert.deepStrictEqual(BindUtil.expandPaths({
       'children[0].age': 20
-    }) === {
+    }), {
       children: [
         { age: 20 }
       ]

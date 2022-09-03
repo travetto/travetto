@@ -8,7 +8,7 @@ export class SerializeTest {
   @Test()
   testWordWrap() {
     const wrap = Serializer.wordWrap('lorem ipsum whadya think about them apples, huh?', 20);
-    assert(wrap === ['lorem ipsum whadya', 'think about them', 'apples, huh?']);
+    assert.deepStrictEqual(wrap, ['lorem ipsum whadya', 'think about them', 'apples, huh?']);
   }
 
   @Test()

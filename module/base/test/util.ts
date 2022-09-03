@@ -128,14 +128,14 @@ class UtilTests {
 
   @Test()
   testReplace() {
-    assert(Util.deepAssign({ a: [1, 2, 3] }, { a: [1, 2] }, 'replace').a === [1, 2]);
+    assert.deepStrictEqual(Util.deepAssign({ a: [1, 2, 3] }, { a: [1, 2] }, 'replace').a, [1, 2]);
     // @ts-expect-error
-    assert(Util.deepAssign({ a: [1, 2, 3] }, { a: undefined }, 'replace').a === undefined);
-    assert(Util.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { c: [1, 2] } }, 'replace').a === { b: 5, c: [1, 2] });
+    assert.deepStrictEqual(Util.deepAssign({ a: [1, 2, 3] }, { a: undefined }, 'replace').a, undefined);
+    assert.deepStrictEqual(Util.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { c: [1, 2] } }, 'replace').a, { b: 5, c: [1, 2] });
     // @ts-expect-error
-    assert(Util.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.c === [1, 2]);
+    assert.deepStrictEqual(Util.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.c, [1, 2]);
     // @ts-expect-error
-    assert(Util.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.b === undefined);
+    assert.deepStrictEqual(Util.deepAssign({ a: { b: 5, c: [1, 2, 3] } }, { a: { b: undefined, c: [1, 2] } }, 'replace').a.b, undefined);
   }
 
   @Test()
